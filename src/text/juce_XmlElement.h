@@ -190,11 +190,11 @@ public:
                                 determines how lists of attributes get broken up
         @see writeToStream, writeToFile
     */
-    const String createDocument (const String& dtdToUse,
-                                 bool allOnOneLine = false,
-                                 bool includeXmlHeader = true,
-                                 const String& encodingType = "UTF-8",
-                                 int lineWrapLength = 60) const;
+    String createDocument (const String& dtdToUse,
+                           bool allOnOneLine = false,
+                           bool includeXmlHeader = true,
+                           const String& encodingType = "UTF-8",
+                           int lineWrapLength = 60) const;
 
     /** Writes the document to a stream as UTF-8.
 
@@ -304,8 +304,8 @@ public:
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
     */
-    const String getStringAttribute (const String& attributeName,
-                                     const String& defaultReturnValue) const;
+    String getStringAttribute (const String& attributeName,
+                               const String& defaultReturnValue) const;
 
     /** Compares the value of a named attribute with a value passed-in.
 
@@ -656,7 +656,7 @@ public:
 
         @see isTextElement, getChildElementAllSubText, getText, addTextElement
     */
-    const String getAllSubText() const;
+    String getAllSubText() const;
 
     /** Returns all the sub-text of a named child element.
 
@@ -666,8 +666,8 @@ public:
 
         @see getAllSubText
     */
-    const String getChildElementAllSubText (const String& childTagName,
-                                            const String& defaultReturnValue) const;
+    String getChildElementAllSubText (const String& childTagName,
+                                      const String& defaultReturnValue) const;
 
     /** Appends a section of text to this element.
 

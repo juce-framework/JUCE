@@ -733,7 +733,7 @@ const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     return new MacTypeface (font);
 }
 
-const StringArray Font::findAllTypefaceNames()
+StringArray Font::findAllTypefaceNames()
 {
     StringArray names;
 

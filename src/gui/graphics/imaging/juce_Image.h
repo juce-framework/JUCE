@@ -186,8 +186,8 @@ public:
         Note that if the new size is identical to the existing image, this will just return
         a reference to the original image, and won't actually create a duplicate.
     */
-    const Image rescaled (int newWidth, int newHeight,
-                          Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
+    Image rescaled (int newWidth, int newHeight,
+                    Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
 
     /** Returns a version of this image with a different image format.
 
@@ -196,7 +196,7 @@ public:
         Note that if the new format is no different to the current one, this will just return
         a reference to the original image, and won't actually create a copy.
     */
-    const Image convertedToFormat (PixelFormat newFormat) const;
+    Image convertedToFormat (PixelFormat newFormat) const;
 
     /** Makes sure that no other Image objects share the same underlying data as this one.
 
@@ -222,7 +222,7 @@ public:
         The area passed-in will be clipped to the bounds of this image, so this may return a smaller
         image than the area you asked for, or even a null image if the area was out-of-bounds.
     */
-    const Image getClippedImage (const Rectangle<int>& area) const;
+    Image getClippedImage (const Rectangle<int>& area) const;
 
     //==============================================================================
     /** Returns the colour of one of the pixels in the image.

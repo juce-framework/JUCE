@@ -29,7 +29,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_MD5.h"
 #include "../io/files/juce_FileInputStream.h"
-#include "../memory/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -111,10 +110,10 @@ MD5::MD5 (InputStream& input, int64 numBytesToRead)
 
 MD5::MD5 (const File& file)
 {
-    const ScopedPointer <FileInputStream> fin (file.createInputStream());
+    FileInputStream fin (file);
 
-    if (fin != nullptr)
-        processStream (*fin, -1);
+    if (fin.getStatus().wasOk())
+        processStream (fin, -1);
     else
         zerostruct (result);
 }
@@ -288,12 +287,12 @@ void MD5::ProcessContext::transform (const void* const bufferToTransform)
 }
 
 //==============================================================================
-const MemoryBlock MD5::getRawChecksumData() const
+MemoryBlock MD5::getRawChecksumData() const
 {
     return MemoryBlock (result, sizeof (result));
 }
 
-const String MD5::toHexString() const
+String MD5::toHexString() const
 {
     return String::toHexString (result, sizeof (result), 0);
 }

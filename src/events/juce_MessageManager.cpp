@@ -31,8 +31,9 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_ActionBroadcaster.h"
 #include "../application/juce_Application.h"
 #include "../gui/components/juce_Component.h"
-#include "../threads/juce_Thread.h"
+#include "../threads/juce_ThreadPool.h"
 #include "../core/juce_Time.h"
+
 
 //==============================================================================
 MessageManager* MessageManager::instance = nullptr;

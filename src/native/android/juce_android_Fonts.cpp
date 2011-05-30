@@ -29,7 +29,7 @@
 
 
 //==============================================================================
-const StringArray Font::findAllTypefaceNames()
+StringArray Font::findAllTypefaceNames()
 {
     StringArray results;
 

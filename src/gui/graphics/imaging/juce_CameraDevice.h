@@ -66,7 +66,7 @@ public:
 
     //==============================================================================
     /** Returns the name of this device */
-    const String getName() const                { return name; }
+    String getName() const                { return name; }
 
     /** Creates a component that can be used to display a preview of the
         video from this camera.

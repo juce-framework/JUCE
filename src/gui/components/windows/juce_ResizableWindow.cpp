@@ -509,7 +509,7 @@ void ResizableWindow::parentSizeChanged()
 }
 
 //==============================================================================
-const String ResizableWindow::getWindowStateAsString()
+String ResizableWindow::getWindowStateAsString()
 {
     updateLastPos();
     return (isFullScreen() ? "fs " : "") + lastNonFullScreenPos.toString();

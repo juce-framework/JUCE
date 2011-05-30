@@ -63,7 +63,7 @@ public:
 
         This can be reloaded using the constructor that takes a string.
     */
-    const String toString() const;
+    String toString() const;
 
     //==============================================================================
     /** Encodes or decodes a value.
@@ -108,7 +108,7 @@ protected:
 
 private:
     //==============================================================================
-    static const BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
+    static BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
 
     JUCE_LEAK_DETECTOR (RSAKey);
 };

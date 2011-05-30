@@ -98,7 +98,7 @@ public:
 
         @returns a random value in the range 0 to (maximumValue - 1).
     */
-    const BigInteger nextLargeNumber (const BigInteger& maximumValue);
+    BigInteger nextLargeNumber (const BigInteger& maximumValue);
 
     /** Sets a range of bits in a BigInteger to random values. */
     void fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numBits);

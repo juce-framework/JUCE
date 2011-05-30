@@ -28,8 +28,10 @@
 
 #include "../../text/juce_String.h"
 #include "../../text/juce_NewLine.h"
-#include "juce_InputStream.h"
+class InputStream;
+class MemoryBlock;
 class File;
+
 
 //==============================================================================
 /**

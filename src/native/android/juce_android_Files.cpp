@@ -80,7 +80,7 @@ bool File::isHidden() const
 //==============================================================================
 namespace
 {
-    const File juce_readlink (const String& file, const File& defaultFile)
+    File juce_readlink (const String& file, const File& defaultFile)
     {
         const int size = 8192;
         HeapBlock<char> buffer;
@@ -95,13 +95,13 @@ namespace
     }
 }
 
-const File File::getLinkedTarget() const
+File File::getLinkedTarget() const
 {
     return juce_readlink (getFullPathName().toUTF8(), *this);
 }
 
 //==============================================================================
-const File File::getSpecialLocation (const SpecialLocationType type)
+File File::getSpecialLocation (const SpecialLocationType type)
 {
     switch (type)
     {
@@ -138,7 +138,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 }
 
 //==============================================================================
-const String File::getVersion() const
+String File::getVersion() const
 {
     return String::empty;
 }

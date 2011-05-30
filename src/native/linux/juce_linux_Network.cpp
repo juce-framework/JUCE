@@ -339,11 +339,11 @@ private:
         return String::empty;
     }
 
-    static const MemoryBlock createRequestHeader (const String& hostName, const int hostPort,
-                                                  const String& proxyName, const int proxyPort,
-                                                  const String& hostPath, const String& originalURL,
-                                                  const String& headers, const MemoryBlock& postData,
-                                                  const bool isPost)
+    static MemoryBlock createRequestHeader (const String& hostName, const int hostPort,
+                                            const String& proxyName, const int proxyPort,
+                                            const String& hostPath, const String& originalURL,
+                                            const String& headers, const MemoryBlock& postData,
+                                            const bool isPost)
     {
         String header (isPost ? "POST " : "GET ");
 

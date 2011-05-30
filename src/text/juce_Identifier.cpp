@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Identifier.h"
+#include "../text/juce_StringPool.h"
 
 
 //==============================================================================

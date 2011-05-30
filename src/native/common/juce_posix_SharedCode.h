@@ -199,7 +199,7 @@ const juce_wchar File::separator = '/';
 const String File::separatorString ("/");
 
 //==============================================================================
-const File File::getCurrentWorkingDirectory()
+File File::getCurrentWorkingDirectory()
 {
     HeapBlock<char> heapBuffer;
 
@@ -273,12 +273,12 @@ namespace
             *isReadOnly = access (path.toUTF8(), W_OK) != 0;
     }
 
-    const Result getResultForErrno()
+    Result getResultForErrno()
     {
         return Result::fail (String (strerror (errno)));
     }
 
-    const Result getResultForReturnValue (int value)
+    Result getResultForReturnValue (int value)
     {
         return value == -1 ? getResultForErrno() : Result::ok();
     }
@@ -402,7 +402,7 @@ bool File::moveInternal (const File& dest) const
     return false;
 }
 
-const Result File::createDirectoryInternal (const String& fileName) const
+Result File::createDirectoryInternal (const String& fileName) const
 {
     return getResultForReturnValue (mkdir (fileName.toUTF8(), 0777));
 }
@@ -560,7 +560,7 @@ MemoryMappedFile::~MemoryMappedFile()
 }
 
 //==============================================================================
-const File juce_getExecutableFile()
+File juce_getExecutableFile()
 {
    #if JUCE_ANDROID
     return File (android.appFile);
@@ -590,7 +590,7 @@ int64 File::getVolumeTotalSize() const
     return 0;
 }
 
-const String File::getVolumeLabel() const
+String File::getVolumeLabel() const
 {
    #if JUCE_MAC
     struct VolAttrBuf

@@ -175,7 +175,7 @@ public:
                         return value will be File::nonexistent
         @see getNumFiles, getFileInfo
     */
-    const File getFile (int index) const;
+    File getFile (int index) const;
 
     /** Returns the file filter being used.
 

@@ -61,7 +61,7 @@ MouseEvent::~MouseEvent() noexcept
 }
 
 //==============================================================================
-const MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) const noexcept
+MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) const noexcept
 {
     if (otherComponent == nullptr)
     {
@@ -75,7 +75,7 @@ const MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent
                        mouseDownTime, numberOfClicks, wasMovedSinceMouseDown);
 }
 
-const MouseEvent MouseEvent::withNewPosition (const Point<int>& newPosition) const noexcept
+MouseEvent MouseEvent::withNewPosition (const Point<int>& newPosition) const noexcept
 {
     return MouseEvent (source, newPosition, mods, eventComponent, originalComponent,
                        eventTime, mouseDownPos, mouseDownTime,

@@ -31,9 +31,10 @@
 #include "juce_Rectangle.h"
 #include "../contexts/juce_Justification.h"
 #include "../../../containers/juce_ArrayAllocationBase.h"
-#include "../../../io/streams/juce_InputStream.h"
-#include "../../../io/streams/juce_OutputStream.h"
 class Image;
+class InputStream;
+class OutputStream;
+
 
 //==============================================================================
 /**
@@ -93,12 +94,12 @@ public:
 
     /** Returns the smallest rectangle that contains all points within the path.
     */
-    const Rectangle<float> getBounds() const noexcept;
+    Rectangle<float> getBounds() const noexcept;
 
     /** Returns the smallest rectangle that contains all points within the path
         after it's been transformed with the given tranasform matrix.
     */
-    const Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const noexcept;
+    Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const noexcept;
 
     /** Checks whether a point lies within the path.
 
@@ -157,7 +158,7 @@ public:
                                         that will be kept; if false its the section inside
                                         the path
     */
-    const Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
+    Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
 
     /** Returns the length of the path.
         @see getPointAlongPath
@@ -169,8 +170,8 @@ public:
         end point.
         @see getLength
     */
-    const Point<float> getPointAlongPath (float distanceFromStart,
-                                          const AffineTransform& transform = AffineTransform::identity) const;
+    Point<float> getPointAlongPath (float distanceFromStart,
+                                    const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Finds the point along the path which is nearest to a given position.
         This sets pointOnPath to the nearest point, and returns the distance of this point from the start
@@ -303,7 +304,7 @@ public:
 
     /** Returns the last point that was added to the path by one of the drawing methods.
     */
-    const Point<float> getCurrentPosition() const;
+    Point<float> getCurrentPosition() const;
 
     //==============================================================================
     /** Adds a rectangle to the path.
@@ -604,16 +605,16 @@ public:
         @see applyTransform, scaleToFit
 
     */
-    const AffineTransform getTransformToScaleToFit (float x, float y, float width, float height,
-                                                    bool preserveProportions,
-                                                    const Justification& justificationType = Justification::centred) const;
+    AffineTransform getTransformToScaleToFit (float x, float y, float width, float height,
+                                              bool preserveProportions,
+                                              const Justification& justificationType = Justification::centred) const;
 
     /** Creates a version of this path where all sharp corners have been replaced by curves.
 
         Wherever two lines meet at an angle, this will replace the corner with a curve
         of the given radius.
     */
-    const Path createPathWithRoundedCorners (float cornerRadius) const;
+    Path createPathWithRoundedCorners (float cornerRadius) const;
 
     //==============================================================================
     /** Changes the winding-rule to be used when filling the path.
@@ -719,7 +720,7 @@ public:
     /** Creates a string containing a textual representation of this path.
         @see restoreFromString
     */
-    const String toString() const;
+    String toString() const;
 
     /** Restores this path from a string that was created with the toString() method.
         @see toString()

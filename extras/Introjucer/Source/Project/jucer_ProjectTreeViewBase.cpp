@@ -360,7 +360,7 @@ void ProjectTreeViewBase::itemDropped (const DragAndDropTarget::SourceDetails& d
         moveSelectedItemsTo (selectedNodes, insertIndex);
 
         if (oldOpenness != nullptr)
-            tree->restoreOpennessState (*oldOpenness);
+            tree->restoreOpennessState (*oldOpenness, false);
     }
 }
 

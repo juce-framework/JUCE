@@ -667,7 +667,7 @@ JUCE_JNI_CALLBACK (JuceAppActivity, setScreenSize, void, (JNIEnv* env, jobject a
 }
 
 //==============================================================================
-const Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File& file)
 {
     return Image::null;
 }

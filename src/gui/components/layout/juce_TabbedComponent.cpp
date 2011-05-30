@@ -188,7 +188,7 @@ int TabbedComponent::getNumTabs() const
     return tabs->getNumTabs();
 }
 
-const StringArray TabbedComponent::getTabNames() const
+StringArray TabbedComponent::getTabNames() const
 {
     return tabs->getTabNames();
 }

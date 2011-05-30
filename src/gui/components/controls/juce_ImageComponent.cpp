@@ -69,7 +69,7 @@ void ImageComponent::setImagePlacement (const RectanglePlacement& newPlacement)
     }
 }
 
-const Image ImageComponent::getImage() const
+const Image& ImageComponent::getImage() const
 {
     return image;
 }

@@ -80,7 +80,7 @@ public:
         coordinates, see the RelativeCoordinate constructor notes.
         The string that is returned can be passed to the RelativePoint constructor to recreate the point.
     */
-    const String toString() const;
+    String toString() const;
 
     /** Returns true if this point depends on any other coordinates for its position. */
     bool isDynamic() const;

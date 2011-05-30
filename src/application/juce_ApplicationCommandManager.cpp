@@ -154,7 +154,7 @@ const String ApplicationCommandManager::getDescriptionOfCommand (const CommandID
                          : String::empty;
 }
 
-const StringArray ApplicationCommandManager::getCommandCategories() const
+StringArray ApplicationCommandManager::getCommandCategories() const
 {
     StringArray s;
 

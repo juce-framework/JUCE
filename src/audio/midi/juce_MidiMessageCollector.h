@@ -29,6 +29,7 @@
 #include "juce_MidiInput.h"
 #include "juce_MidiKeyboardState.h"
 
+
 //==============================================================================
 /**
     Collects incoming realtime MIDI messages and turns them into blocks suitable for

@@ -86,7 +86,7 @@ public:
 
     //==============================================================================
     void setFont (const Font& newFont);
-    const Font getFont();
+    Font getFont();
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 

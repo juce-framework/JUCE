@@ -455,7 +455,7 @@ public:
         item and all its parents, so these must all be correctly implemented for it to work.
         @see TreeView::findItemFromIdentifierString, getUniqueName
     */
-    const String getItemIdentifierString() const;
+    String getItemIdentifierString() const;
 
     //==============================================================================
     /**
@@ -510,8 +510,8 @@ private:
 
     void updatePositions (int newY);
     int getIndentX() const noexcept;
-    void setOwnerView (TreeView* newOwner) noexcept;
-    void paintRecursively (Graphics& g, int width);
+    void setOwnerView (TreeView*) noexcept;
+    void paintRecursively (Graphics&, int width);
     TreeViewItem* getTopLevelItem() noexcept;
     TreeViewItem* findItemRecursively (int y) noexcept;
     TreeViewItem* getDeepestOpenParentItem() noexcept;
@@ -521,7 +521,7 @@ private:
     int countSelectedItemsRecursively (int depth) const noexcept;
     TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
     TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
-    TreeViewItem* findItemFromIdentifierString (const String& identifierString);
+    TreeViewItem* findItemFromIdentifierString (const String&);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // The parameters for these methods have changed - please update your code!
@@ -734,9 +734,13 @@ public:
         the getOpennessState() method. If any of the nodes named in the original
         XML aren't present in this tree, they will be ignored.
 
+        If restoreStoredSelection is true, it will also try to re-select any items that
+        were selected in the stored state.
+
         @see getOpennessState
     */
-    void restoreOpennessState (const XmlElement& newState);
+    void restoreOpennessState (const XmlElement& newState,
+                               bool restoreStoredSelection);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the treeview.

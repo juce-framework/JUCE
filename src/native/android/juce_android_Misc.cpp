@@ -76,7 +76,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
     android.activity.callVoidMethod (android.setClipboardContent, t.get());
 }
 
-const String SystemClipboard::getTextFromClipboard()
+String SystemClipboard::getTextFromClipboard()
 {
     const LocalRef<jstring> text ((jstring) android.activity.callObjectMethod (android.getClipboardContent));
     return juceString (text);

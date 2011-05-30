@@ -73,7 +73,7 @@ const String& StringPairArray::operator[] (const String& key) const
     return values [keys.indexOf (key, ignoreCase)];
 }
 
-const String StringPairArray::getValue (const String& key, const String& defaultReturnValue) const
+String StringPairArray::getValue (const String& key, const String& defaultReturnValue) const
 {
     const int i = keys.indexOf (key, ignoreCase);
 
@@ -126,7 +126,7 @@ void StringPairArray::setIgnoresCase (const bool shouldIgnoreCase)
     ignoreCase = shouldIgnoreCase;
 }
 
-const String StringPairArray::getDescription() const
+String StringPairArray::getDescription() const
 {
     String s;
 

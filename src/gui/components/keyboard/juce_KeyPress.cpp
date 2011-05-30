@@ -227,7 +227,7 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
     return KeyPress (key, ModifierKeys (modifiers), 0);
 }
 
-const String KeyPress::getTextDescription() const
+String KeyPress::getTextDescription() const
 {
     String desc;
 
@@ -277,7 +277,7 @@ const String KeyPress::getTextDescription() const
     return desc;
 }
 
-const String KeyPress::getTextDescriptionWithIcons() const
+String KeyPress::getTextDescriptionWithIcons() const
 {
    #if JUCE_MAC
     return getTextDescription().replace ("shift + ", String::charToString (0x21e7))

@@ -26,15 +26,15 @@
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
 #define __JUCE_MESSAGEMANAGER_JUCEHEADER__
 
-#include "../utilities/juce_DeletedAtShutdown.h"
 #include "../containers/juce_SortedSet.h"
 #include "../memory/juce_ScopedPointer.h"
 #include "../threads/juce_Thread.h"
-#include "../threads/juce_ThreadPool.h"
-#include "juce_ActionBroadcaster.h"
 #include "juce_CallbackMessage.h"
 class Component;
 class MessageManagerLock;
+class ThreadPoolJob;
+class ActionListener;
+class ActionBroadcaster;
 
 
 //==============================================================================

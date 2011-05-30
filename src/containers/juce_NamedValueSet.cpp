@@ -121,7 +121,7 @@ const var& NamedValueSet::operator[] (const Identifier& name) const
     return var::null;
 }
 
-const var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultReturnValue) const
+var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultReturnValue) const
 {
     const var* const v = getVarPointer (name);
     return v != nullptr ? *v : defaultReturnValue;
@@ -195,7 +195,7 @@ const Identifier NamedValueSet::getName (const int index) const
     return v->name;
 }
 
-const var NamedValueSet::getValueAt (const int index) const
+var NamedValueSet::getValueAt (const int index) const
 {
     const NamedValue* const v = values[index];
     jassert (v != nullptr);

@@ -103,7 +103,7 @@ bool Uuid::isNull() const noexcept
 }
 
 //==============================================================================
-const String Uuid::toString() const
+String Uuid::toString() const
 {
     return String::toHexString (value.asBytes, sizeof (value.asBytes), 0);
 }

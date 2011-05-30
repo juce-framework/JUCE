@@ -260,19 +260,19 @@ void Font::dupeInternalIfShared()
 }
 
 //==============================================================================
-const String Font::getDefaultSansSerifFontName()
+const String& Font::getDefaultSansSerifFontName()
 {
     static const String name ("<Sans-Serif>");
     return name;
 }
 
-const String Font::getDefaultSerifFontName()
+const String& Font::getDefaultSerifFontName()
 {
     static const String name ("<Serif>");
     return name;
 }
 
-const String Font::getDefaultMonospacedFontName()
+const String& Font::getDefaultMonospacedFontName()
 {
     static const String name ("<Monospaced>");
     return name;
@@ -290,7 +290,7 @@ void Font::setTypefaceName (const String& faceName)
 }
 
 //==============================================================================
-const String Font::getFallbackFontName()
+const String& Font::getFallbackFontName()
 {
     return FontValues::fallbackFont;
 }
@@ -373,7 +373,7 @@ void Font::setBold (const bool shouldBeBold)
                                 : (font->styleFlags & ~bold));
 }
 
-const Font Font::boldened() const
+Font Font::boldened() const
 {
     Font f (*this);
     f.setBold (true);
@@ -391,7 +391,7 @@ void Font::setItalic (const bool shouldBeItalic)
                                   : (font->styleFlags & ~italic));
 }
 
-const Font Font::italicised() const
+Font Font::italicised() const
 {
     Font f (*this);
     f.setItalic (true);
@@ -475,7 +475,7 @@ void Font::findFonts (Array<Font>& destArray)
 }
 
 //==============================================================================
-const String Font::toString() const
+String Font::toString() const
 {
     String s (getTypefaceName());
 
@@ -495,7 +495,7 @@ const String Font::toString() const
     return s;
 }
 
-const Font Font::fromString (const String& fontDescription)
+Font Font::fromString (const String& fontDescription)
 {
     String name;
 

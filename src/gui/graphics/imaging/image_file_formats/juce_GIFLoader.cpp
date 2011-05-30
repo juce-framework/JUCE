@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 #if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
- const Image juce_loadWithCoreImage (InputStream& input);
+ Image juce_loadWithCoreImage (InputStream& input);
 #else
 
 //==============================================================================
@@ -80,8 +80,8 @@ public:
 
             if (input.read (buf, 9) == 9)
             {
-                imageWidth  = makeWord (buf[4], buf[5]);
-                imageHeight = makeWord (buf[6], buf[7]);
+                imageWidth  = (int) ByteOrder::littleEndianShort (buf + 4);
+                imageHeight = (int) ByteOrder::littleEndianShort (buf + 6);
 
                 numColours = 2 << (buf[8] & 7);
 
@@ -128,8 +128,8 @@ private:
         {
             if (input.read (b, 4) == 4)
             {
-                w = makeWord (b[0], b[1]);
-                h = makeWord (b[2], b[3]);
+                w = (int) ByteOrder::littleEndianShort (b);
+                h = (int) ByteOrder::littleEndianShort (b + 2);
                 return w > 0 && h > 0;
             }
         }
@@ -420,8 +420,6 @@ private:
         return true;
     }
 
-    static inline int makeWord (const int a, const int b)    { return (b << 8) | a; }
-
     JUCE_DECLARE_NON_COPYABLE (GIFLoader);
 };
 
@@ -431,7 +429,7 @@ private:
 GIFImageFormat::GIFImageFormat() {}
 GIFImageFormat::~GIFImageFormat() {}
 
-const String GIFImageFormat::getFormatName()    { return "GIF"; }
+String GIFImageFormat::getFormatName()    { return "GIF"; }
 
 bool GIFImageFormat::canUnderstand (InputStream& in)
 {
@@ -443,7 +441,7 @@ bool GIFImageFormat::canUnderstand (InputStream& in)
              && header[2] == 'F';
 }
 
-const Image GIFImageFormat::decodeImage (InputStream& in)
+Image GIFImageFormat::decodeImage (InputStream& in)
 {
   #if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);

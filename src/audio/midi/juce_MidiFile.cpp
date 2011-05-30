@@ -168,14 +168,10 @@ namespace MidiFileHelpers
         {
             const double diff = (first->message.getTimeStamp() - second->message.getTimeStamp());
 
-            if (diff > 0)
-                return 1;
-            else if (diff < 0)
-                return -1;
-            else if (first->message.isNoteOff() && second->message.isNoteOn())
-                return -1;
-            else if (first->message.isNoteOn() && second->message.isNoteOff())
-                return 1;
+            if (diff > 0) return 1;
+            if (diff < 0) return -1;
+            if (first->message.isNoteOff() && second->message.isNoteOn())   return -1;
+            if (first->message.isNoteOn()  && second->message.isNoteOff())  return 1;
 
             return 0;
         }
@@ -397,7 +393,6 @@ bool MidiFile::writeTo (OutputStream& out)
         writeTrack (out, i);
 
     out.flush();
-
     return true;
 }
 
@@ -443,7 +438,7 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
 
     mainOut.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MTrk"));
     mainOut.writeIntBigEndian ((int) out.getDataSize());
-    mainOut.write (out.getData(), (int) out.getDataSize());
+    mainOut << out;
 }
 
 END_JUCE_NAMESPACE

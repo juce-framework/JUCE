@@ -58,7 +58,7 @@ public:
 
         E.g. "JPEG", "PNG"
     */
-    virtual const String getFormatName() = 0;
+    virtual String getFormatName() = 0;
 
     /** Returns true if the given stream seems to contain data that this format
         understands.
@@ -81,7 +81,7 @@ public:
         @returns        the image that was decoded, or an invalid image if it fails.
         @see loadFrom
     */
-    virtual const Image decodeImage (InputStream& input) = 0;
+    virtual Image decodeImage (InputStream& input) = 0;
 
     //==============================================================================
     /** Attempts to write an image to a stream.
@@ -113,7 +113,7 @@ public:
 
         @returns        the image that was decoded, or an invalid image if it fails.
     */
-    static const Image loadFrom (InputStream& input);
+    static Image loadFrom (InputStream& input);
 
     /** Tries to load an image from a file.
 
@@ -122,7 +122,7 @@ public:
 
         @returns        the image that was decoded, or an invalid image if it fails.
     */
-    static const Image loadFrom (const File& file);
+    static Image loadFrom (const File& file);
 
     /** Tries to load an image from a block of raw image data.
 
@@ -131,8 +131,8 @@ public:
 
         @returns        the image that was decoded, or an invalid image if it fails.
     */
-    static const Image loadFrom (const void* rawData,
-                                 const int numBytesOfData);
+    static Image loadFrom (const void* rawData,
+                           const int numBytesOfData);
 
 };
 
@@ -150,9 +150,9 @@ public:
     ~PNGImageFormat();
 
     //==============================================================================
-    const String getFormatName();
+    String getFormatName();
     bool canUnderstand (InputStream& input);
-    const Image decodeImage (InputStream& input);
+    Image decodeImage (InputStream& input);
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
 
@@ -179,9 +179,9 @@ public:
     void setQuality (float newQuality);
 
     //==============================================================================
-    const String getFormatName();
+    String getFormatName();
     bool canUnderstand (InputStream& input);
-    const Image decodeImage (InputStream& input);
+    Image decodeImage (InputStream& input);
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 
 private:
@@ -202,9 +202,9 @@ public:
     ~GIFImageFormat();
 
     //==============================================================================
-    const String getFormatName();
+    String getFormatName();
     bool canUnderstand (InputStream& input);
-    const Image decodeImage (InputStream& input);
+    Image decodeImage (InputStream& input);
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
 

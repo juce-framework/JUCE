@@ -49,7 +49,7 @@ public:
     /** Returns the default new-line sequence that the library uses.
         @see getDefault()
     */
-    operator const String() const                   { return getDefault(); }
+    operator String() const                         { return getDefault(); }
 };
 
 //==============================================================================

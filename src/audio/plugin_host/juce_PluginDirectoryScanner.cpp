@@ -111,7 +111,7 @@ bool PluginDirectoryScanner::skipNextFile()
     return nextIndex < filesOrIdentifiersToScan.size();
 }
 
-const StringArray PluginDirectoryScanner::getDeadMansPedalFile()
+StringArray PluginDirectoryScanner::getDeadMansPedalFile()
 {
     StringArray lines;
 

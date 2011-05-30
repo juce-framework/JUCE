@@ -233,7 +233,7 @@ void Graphics::setFont (const float newFontHeight, const int newFontStyleFlags)
     context->setFont (f);
 }
 
-const Font Graphics::getCurrentFont() const
+Font Graphics::getCurrentFont() const
 {
     return context->getFont();
 }

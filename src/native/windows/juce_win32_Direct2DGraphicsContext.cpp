@@ -301,7 +301,7 @@ public:
         currentState->setFont (newFont);
     }
 
-    const Font getFont()
+    Font getFont()
     {
         return currentState->font;
     }

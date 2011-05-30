@@ -134,7 +134,7 @@ public:
 
         @see inMilliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
     */
-    const String getDescription (const String& returnValueForZeroTime = "0") const;
+    String getDescription (const String& returnValueForZeroTime = "0") const;
 
 
     //==============================================================================
@@ -169,9 +169,9 @@ bool operator<= (const RelativeTime& t1, const RelativeTime& t2) noexcept;
 
 //==============================================================================
 /** Adds two RelativeTimes together. */
-const RelativeTime  operator+  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
+RelativeTime  operator+  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
 /** Subtracts two RelativeTimes. */
-const RelativeTime  operator-  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
+RelativeTime  operator-  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
 
 
 

@@ -67,7 +67,7 @@ public:
     //==============================================================================
     void logMessage (const String& message);
 
-    const File getLogFile() const               { return logFile; }
+    File getLogFile() const               { return logFile; }
 
     //==============================================================================
     /** Helper function to create a log file in the correct place for this platform.

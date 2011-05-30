@@ -110,7 +110,7 @@ private:
     bool resizeFont;
     Justification justification;
 
-    const Font getFontToUse() const;
+    Font getFontToUse() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HyperlinkButton);
 };

@@ -80,7 +80,7 @@ public:
     virtual ~UnitTest();
 
     /** Returns the name of the test. */
-    const String getName() const noexcept       { return name; }
+    const String& getName() const noexcept       { return name; }
 
     /** Runs the test, using the specified UnitTestRunner.
         You shouldn't need to call this method directly - use

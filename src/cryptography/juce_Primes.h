@@ -50,10 +50,10 @@ public:
         which to seed the random number generation, improving the security of the
         keys generated.
     */
-    static const BigInteger createProbablePrime (int bitLength,
-                                                 int certainty,
-                                                 const int* randomSeeds = 0,
-                                                 int numRandomSeeds = 0);
+    static BigInteger createProbablePrime (int bitLength,
+                                           int certainty,
+                                           const int* randomSeeds = 0,
+                                           int numRandomSeeds = 0);
 
     /** Tests a number to see if it's prime.
 

@@ -156,7 +156,7 @@ double InputStream::readDoubleBigEndian()
     return n.asDouble;
 }
 
-const String InputStream::readString()
+String InputStream::readString()
 {
     MemoryBlock buffer (256);
     char* data = static_cast<char*> (buffer.getData());
@@ -174,7 +174,7 @@ const String InputStream::readString()
     return String::fromUTF8 (data, (int) i);
 }
 
-const String InputStream::readNextLine()
+String InputStream::readNextLine()
 {
     MemoryBlock buffer (256);
     char* data = static_cast<char*> (buffer.getData());
@@ -211,7 +211,7 @@ int InputStream::readIntoMemoryBlock (MemoryBlock& block, int numBytes)
     return mo.writeFromInputStream (*this, numBytes);
 }
 
-const String InputStream::readEntireStreamAsString()
+String InputStream::readEntireStreamAsString()
 {
     MemoryOutputStream mo;
     mo.writeFromInputStream (*this, -1);

@@ -86,10 +86,10 @@ public:
 
     //==============================================================================
     /** Returns the checksum as a 16-byte block of data. */
-    const MemoryBlock getRawChecksumData() const;
+    MemoryBlock getRawChecksumData() const;
 
     /** Returns the checksum as a 32-digit hex string. */
-    const String toHexString() const;
+    String toHexString() const;
 
 
     //==============================================================================
@@ -117,7 +117,7 @@ private:
         void finish (void* result);
     };
 
-    void processStream (InputStream& input, int64 numBytesToRead);
+    void processStream (InputStream&, int64 numBytesToRead);
 
     JUCE_LEAK_DETECTOR (MD5);
 };

@@ -320,16 +320,16 @@ int64 Time::secondsToHighResolutionTicks (const double seconds) noexcept
 
 
 //==============================================================================
-const Time JUCE_CALLTYPE Time::getCurrentTime() noexcept
+Time JUCE_CALLTYPE Time::getCurrentTime() noexcept
 {
     return Time (currentTimeMillis());
 }
 
 //==============================================================================
-const String Time::toString (const bool includeDate,
-                             const bool includeTime,
-                             const bool includeSeconds,
-                             const bool use24HourClock) const noexcept
+String Time::toString (const bool includeDate,
+                       const bool includeTime,
+                       const bool includeSeconds,
+                       const bool use24HourClock) const noexcept
 {
     String result;
 
@@ -363,7 +363,7 @@ const String Time::toString (const bool includeDate,
     return result.trimEnd();
 }
 
-const String Time::formatted (const String& format) const
+String Time::formatted (const String& format) const
 {
     int bufferSize = 128;
     HeapBlock<juce_wchar> buffer (128);
@@ -411,7 +411,7 @@ bool Time::isDaylightSavingTime() const noexcept
     return TimeHelpers::millisToLocal (millisSinceEpoch).tm_isdst != 0;
 }
 
-const String Time::getTimeZone() const noexcept
+String Time::getTimeZone() const noexcept
 {
     String zone[2];
 
@@ -451,17 +451,17 @@ const String Time::getTimeZone() const noexcept
     return zone[0].substring (0, 3);
 }
 
-const String Time::getMonthName (const bool threeLetterVersion) const
+String Time::getMonthName (const bool threeLetterVersion) const
 {
     return getMonthName (getMonth(), threeLetterVersion);
 }
 
-const String Time::getWeekdayName (const bool threeLetterVersion) const
+String Time::getWeekdayName (const bool threeLetterVersion) const
 {
     return getWeekdayName (getDayOfWeek(), threeLetterVersion);
 }
 
-const String Time::getMonthName (int monthNumber, const bool threeLetterVersion)
+String Time::getMonthName (int monthNumber, const bool threeLetterVersion)
 {
     const char* const shortMonthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
     const char* const longMonthNames[]  = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
@@ -472,7 +472,7 @@ const String Time::getMonthName (int monthNumber, const bool threeLetterVersion)
                                      : longMonthNames [monthNumber]);
 }
 
-const String Time::getWeekdayName (int day, const bool threeLetterVersion)
+String Time::getWeekdayName (int day, const bool threeLetterVersion)
 {
     const char* const shortDayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
     const char* const longDayNames[]  = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
@@ -487,9 +487,9 @@ const String Time::getWeekdayName (int day, const bool threeLetterVersion)
 Time& Time::operator+= (const RelativeTime& delta)        { millisSinceEpoch += delta.inMilliseconds(); return *this; }
 Time& Time::operator-= (const RelativeTime& delta)        { millisSinceEpoch -= delta.inMilliseconds(); return *this; }
 
-const Time operator+ (const Time& time, const RelativeTime& delta)  { Time t (time); return t += delta; }
-const Time operator- (const Time& time, const RelativeTime& delta)  { Time t (time); return t -= delta; }
-const Time operator+ (const RelativeTime& delta, const Time& time)  { Time t (time); return t += delta; }
+Time operator+ (const Time& time, const RelativeTime& delta)        { Time t (time); return t += delta; }
+Time operator- (const Time& time, const RelativeTime& delta)        { Time t (time); return t -= delta; }
+Time operator+ (const RelativeTime& delta, const Time& time)        { Time t (time); return t += delta; }
 const RelativeTime operator- (const Time& time1, const Time& time2) { return RelativeTime::milliseconds (time1.toMilliseconds() - time2.toMilliseconds()); }
 
 bool operator== (const Time& time1, const Time& time2)      { return time1.toMilliseconds() == time2.toMilliseconds(); }

@@ -58,7 +58,7 @@ bool NamedPipe::isOpen() const
     return internal != nullptr;
 }
 
-const String NamedPipe::getName() const
+String NamedPipe::getName() const
 {
     return currentPipeName;
 }

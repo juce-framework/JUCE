@@ -64,7 +64,7 @@ bool RSAKey::operator!= (const RSAKey& other) const noexcept
     return ! operator== (other);
 }
 
-const String RSAKey::toString() const
+String RSAKey::toString() const
 {
     return part1.toString (16) + "," + part2.toString (16);
 }
@@ -96,7 +96,7 @@ bool RSAKey::applyToValue (BigInteger& value) const
     return true;
 }
 
-const BigInteger RSAKey::findBestCommonDivisor (const BigInteger& p, const BigInteger& q)
+BigInteger RSAKey::findBestCommonDivisor (const BigInteger& p, const BigInteger& q)
 {
     // try 3, 5, 9, 17, etc first because these only contain 2 bits and so
     // are fast to divide + multiply

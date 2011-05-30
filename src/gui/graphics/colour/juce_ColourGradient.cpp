@@ -33,9 +33,9 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 ColourGradient::ColourGradient() noexcept
 {
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     point1.setX (987654.0f);
-#endif
+   #endif
 }
 
 ColourGradient::ColourGradient (const Colour& colour1, const float x1_, const float y1_,
@@ -130,7 +130,7 @@ void ColourGradient::setColour (int index, const Colour& newColour) noexcept
         colours.getReference (index).colour = newColour;
 }
 
-const Colour ColourGradient::getColourAtPosition (const double position) const noexcept
+Colour ColourGradient::getColourAtPosition (const double position) const noexcept
 {
     jassert (colours.getReference(0).position == 0); // the first colour specified has to go at position 0
 
@@ -154,11 +154,11 @@ const Colour ColourGradient::getColourAtPosition (const double position) const n
 //==============================================================================
 int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& lookupTable) const
 {
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // trying to use the object without setting its co-ordinates? Have a careful read of
     // the comments for the constructors.
     jassert (point1.getX() != 987654.0f);
-#endif
+   #endif
 
     const int numEntries = jlimit (1, jmax (1, (colours.size() - 1) << 8),
                                    3 * (int) point1.transformedBy (transform)

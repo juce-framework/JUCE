@@ -71,14 +71,14 @@ public:
     }
 
     /** Returns the range that lies between two positions (in either order). */
-    static const Range between (const ValueType position1, const ValueType position2) noexcept
+    static Range between (const ValueType position1, const ValueType position2) noexcept
     {
         return (position1 < position2) ? Range (position1, position2)
                                        : Range (position2, position1);
     }
 
     /** Returns a range with the specified start position and a length of zero. */
-    static const Range emptyRange (const ValueType start) noexcept
+    static Range emptyRange (const ValueType start) noexcept
     {
         return Range (start, start);
     }
@@ -112,13 +112,13 @@ public:
         If the new start position is higher than the current end of the range, the end point
         will be pushed along to equal it, returning an empty range at the new position.
     */
-    const Range withStart (const ValueType newStart) const noexcept
+    Range withStart (const ValueType newStart) const noexcept
     {
         return Range (newStart, jmax (newStart, end));
     }
 
     /** Returns a range with the same length as this one, but moved to have the given start position. */
-    const Range movedToStartAt (const ValueType newStart) const noexcept
+    Range movedToStartAt (const ValueType newStart) const noexcept
     {
         return Range (newStart, end + (newStart - start));
     }
@@ -138,13 +138,13 @@ public:
         If the new end position is below the current start of the range, the start point
         will be pushed back to equal the new end point.
     */
-    const Range withEnd (const ValueType newEnd) const noexcept
+    Range withEnd (const ValueType newEnd) const noexcept
     {
         return Range (jmin (start, newEnd), newEnd);
     }
 
     /** Returns a range with the same length as this one, but moved to have the given start position. */
-    const Range movedToEndAt (const ValueType newEnd) const noexcept
+    Range movedToEndAt (const ValueType newEnd) const noexcept
     {
         return Range (start + (newEnd - end), newEnd);
     }
@@ -160,7 +160,7 @@ public:
     /** Returns a range with the same start as this one, but a different length.
         Lengths less than zero are treated as zero.
     */
-    const Range withLength (const ValueType newLength) const noexcept
+    Range withLength (const ValueType newLength) const noexcept
     {
         return Range (start, start + newLength);
     }
@@ -185,14 +185,14 @@ public:
     /** Returns a range that is equal to this one with an amount added to its
         start and end.
     */
-    const Range operator+ (const ValueType amountToAdd) const noexcept
+    Range operator+ (const ValueType amountToAdd) const noexcept
     {
         return Range (start + amountToAdd, end + amountToAdd);
     }
 
     /** Returns a range that is equal to this one with the specified amount
         subtracted from its start and end. */
-    const Range operator- (const ValueType amountToSubtract) const noexcept
+    Range operator- (const ValueType amountToSubtract) const noexcept
     {
         return Range (start - amountToSubtract, end - amountToSubtract);
     }
@@ -227,14 +227,14 @@ public:
 
     /** Returns the range that is the intersection of the two ranges, or an empty range
         with an undefined start position if they don't overlap. */
-    const Range getIntersectionWith (const Range& other) const noexcept
+    Range getIntersectionWith (const Range& other) const noexcept
     {
         return Range (jmax (start, other.start),
                       jmin (end, other.end));
     }
 
     /** Returns the smallest range that contains both this one and the other one. */
-    const Range getUnionWith (const Range& other) const noexcept
+    Range getUnionWith (const Range& other) const noexcept
     {
         return Range (jmin (start, other.start),
                       jmax (end, other.end));
@@ -250,7 +250,7 @@ public:
         will be the new range, shifted forwards or backwards so that it doesn't extend
         beyond this one, but keeping its original length.
     */
-    const Range constrainRange (const Range& rangeToConstrain) const noexcept
+    Range constrainRange (const Range& rangeToConstrain) const noexcept
     {
         const ValueType otherLen = rangeToConstrain.getLength();
         return getLength() <= otherLen

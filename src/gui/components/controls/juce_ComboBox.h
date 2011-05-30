@@ -156,12 +156,10 @@ public:
     int getNumItems() const noexcept;
 
     /** Returns the text for one of the items in the list.
-
         Note that this doesn't include headers or separators.
-
         @param index    the item's index from 0 to (getNumItems() - 1)
     */
-    const String getItemText (int index) const;
+    String getItemText (int index) const;
 
     /** Returns the ID for one of the items in the list.
 
@@ -238,7 +236,7 @@ public:
 
         @see setText, getSelectedId, getSelectedItemIndex
     */
-    const String getText() const;
+    String getText() const;
 
     /** Sets the contents of the combo-box's text field.
 
@@ -300,7 +298,7 @@ public:
 
         @see setTextWhenNothingSelected
     */
-    const String getTextWhenNothingSelected() const;
+    String getTextWhenNothingSelected() const;
 
 
     /** Sets the message to show when there are no items in the list, and the user clicks
@@ -314,7 +312,7 @@ public:
     /** Returns the text shown when no items have been added to the list.
         @see setTextWhenNoChoicesAvailable
     */
-    const String getTextWhenNoChoicesAvailable() const;
+    String getTextWhenNoChoicesAvailable() const;
 
     //==============================================================================
     /** Gives the ComboBox a tooltip. */

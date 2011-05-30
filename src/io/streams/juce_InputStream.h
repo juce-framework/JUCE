@@ -27,7 +27,7 @@
 #define __JUCE_INPUTSTREAM_JUCEHEADER__
 
 #include "../../text/juce_String.h"
-#include "../../memory/juce_MemoryBlock.h"
+class MemoryBlock;
 
 
 //==============================================================================
@@ -218,7 +218,7 @@ public:
         following the line-feed, but the linefeeds aren't included in the string that
         is returned.
     */
-    virtual const String readNextLine();
+    virtual String readNextLine();
 
     /** Reads a zero-terminated UTF8 string from the stream.
 
@@ -227,14 +227,14 @@ public:
 
         @see OutputStream::writeString, readEntireStreamAsString
     */
-    virtual const String readString();
+    virtual String readString();
 
     /** Tries to read the whole stream and turn it into a string.
 
         This will read from the stream's current position until the end-of-stream, and
         will try to make an educated guess about whether it's unicode or an 8-bit encoding.
     */
-    virtual const String readEntireStreamAsString();
+    virtual String readEntireStreamAsString();
 
     /** Reads from the stream and appends the data to a MemoryBlock.
 

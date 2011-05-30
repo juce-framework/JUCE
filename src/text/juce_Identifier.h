@@ -26,7 +26,7 @@
 #ifndef __JUCE_IDENTIFIER_JUCEHEADER__
 #define __JUCE_IDENTIFIER_JUCEHEADER__
 
-#include "../text/juce_StringPool.h"
+class StringPool;
 
 
 //==============================================================================
@@ -73,7 +73,7 @@ public:
     inline bool operator!= (const Identifier& other) const noexcept     { return name != other.name; }
 
     /** Returns this identifier as a string. */
-    const String toString() const                                       { return name; }
+    String toString() const                                             { return name; }
 
     /** Returns this identifier's raw string pointer. */
     operator const String::CharPointerType() const noexcept             { return name; }

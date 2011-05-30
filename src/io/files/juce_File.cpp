@@ -33,6 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_File.h"
 #include "juce_FileInputStream.h"
+#include "juce_FileOutputStream.h"
 #include "juce_DirectoryIterator.h"
 #include "juce_TemporaryFile.h"
 #include "../../core/juce_SystemStats.h"
@@ -52,7 +53,7 @@ File::File (const String& path, int)
 {
 }
 
-const File File::createFileWithoutCheckingPath (const String& path)
+File File::createFileWithoutCheckingPath (const String& path)
 {
     return File (path, 0);
 }
@@ -78,7 +79,7 @@ const File File::nonexistent;
 
 
 //==============================================================================
-const String File::parseAbsolutePath (const String& p)
+String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
         return String::empty;
@@ -165,7 +166,7 @@ const String File::parseAbsolutePath (const String& p)
     return path;
 }
 
-const String File::addTrailingSeparator (const String& path)
+String File::addTrailingSeparator (const String& path)
 {
     return path.endsWithChar (File::separator) ? path
                                                : path + File::separator;
@@ -297,7 +298,7 @@ bool File::copyDirectoryTo (const File& newDirectory) const
 }
 
 //==============================================================================
-const String File::getPathUpToLastSlash() const
+String File::getPathUpToLastSlash() const
 {
     const int lastSlash = fullPath.lastIndexOfChar (separator);
 
@@ -309,13 +310,13 @@ const String File::getPathUpToLastSlash() const
         return fullPath;
 }
 
-const File File::getParentDirectory() const
+File File::getParentDirectory() const
 {
     return File (getPathUpToLastSlash(), (int) 0);
 }
 
 //==============================================================================
-const String File::getFileName() const
+String File::getFileName() const
 {
     return fullPath.substring (fullPath.lastIndexOfChar (separator) + 1);
 }
@@ -330,7 +331,7 @@ int64 File::hashCode64() const
     return fullPath.hashCode64();
 }
 
-const String File::getFileNameWithoutExtension() const
+String File::getFileNameWithoutExtension() const
 {
     const int lastSlash = fullPath.lastIndexOfChar (separator) + 1;
     const int lastDot = fullPath.lastIndexOfChar ('.');
@@ -377,7 +378,7 @@ bool File::isAbsolutePath (const String& path)
            #endif
 }
 
-const File File::getChildFile (String relativePath) const
+File File::getChildFile (String relativePath) const
 {
     if (isAbsolutePath (relativePath))
         return File (relativePath);
@@ -424,13 +425,13 @@ const File File::getChildFile (String relativePath) const
     return File (addTrailingSeparator (path) + relativePath);
 }
 
-const File File::getSiblingFile (const String& fileName) const
+File File::getSiblingFile (const String& fileName) const
 {
     return getParentDirectory().getChildFile (fileName);
 }
 
 //==============================================================================
-const String File::descriptionOfSizeInBytes (const int64 bytes)
+String File::descriptionOfSizeInBytes (const int64 bytes)
 {
     if (bytes == 1)                       return "1 byte";
     else if (bytes < 1024)                return String (bytes) + " bytes";
@@ -440,7 +441,7 @@ const String File::descriptionOfSizeInBytes (const int64 bytes)
 }
 
 //==============================================================================
-const Result File::create() const
+Result File::create() const
 {
     if (exists())
         return Result::ok();
@@ -462,7 +463,7 @@ const Result File::create() const
     return r;
 }
 
-const Result File::createDirectory() const
+Result File::createDirectory() const
 {
     if (isDirectory())
         return Result::ok();
@@ -499,7 +500,7 @@ bool File::loadFileAsData (MemoryBlock& destBlock) const
     return getSize() == in.readIntoMemoryBlock (destBlock);
 }
 
-const String File::loadFileAsString() const
+String File::loadFileAsString() const
 {
     if (! existsAsFile())
         return String::empty;
@@ -549,9 +550,9 @@ bool File::containsSubDirectories() const
 }
 
 //==============================================================================
-const File File::getNonexistentChildFile (const String& prefix_,
-                                          const String& suffix,
-                                          bool putNumbersInBrackets) const
+File File::getNonexistentChildFile (const String& prefix_,
+                                    const String& suffix,
+                                    bool putNumbersInBrackets) const
 {
     File f (getChildFile (prefix_ + suffix));
 
@@ -598,7 +599,7 @@ const File File::getNonexistentChildFile (const String& prefix_,
     return f;
 }
 
-const File File::getNonexistentSibling (const bool putNumbersInBrackets) const
+File File::getNonexistentSibling (const bool putNumbersInBrackets) const
 {
     if (exists())
         return getParentDirectory()
@@ -609,7 +610,7 @@ const File File::getNonexistentSibling (const bool putNumbersInBrackets) const
 }
 
 //==============================================================================
-const String File::getFileExtension() const
+String File::getFileExtension() const
 {
     const int indexOfDot = fullPath.lastIndexOfChar ('.');
 
@@ -648,7 +649,7 @@ bool File::hasFileExtension (const String& possibleSuffix) const
     return false;
 }
 
-const File File::withFileExtension (const String& newExtension) const
+File File::withFileExtension (const String& newExtension) const
 {
     if (fullPath.isEmpty())
         return File::nonexistent;
@@ -776,7 +777,7 @@ bool File::hasIdenticalContentTo (const File& other) const
 }
 
 //==============================================================================
-const String File::createLegalPathName (const String& original)
+String File::createLegalPathName (const String& original)
 {
     String s (original);
     String start;
@@ -791,7 +792,7 @@ const String File::createLegalPathName (const String& original)
                     .substring (0, 1024);
 }
 
-const String File::createLegalFileName (const String& original)
+String File::createLegalFileName (const String& original)
 {
     String s (original.removeCharacters ("\"#@,;:<>*^|?\\/"));
 
@@ -817,7 +818,7 @@ const String File::createLegalFileName (const String& original)
 }
 
 //==============================================================================
-const String File::getRelativePathFrom (const File& dir)  const
+String File::getRelativePathFrom (const File& dir)  const
 {
     String thisPath (fullPath);
 
@@ -881,7 +882,7 @@ const String File::getRelativePathFrom (const File& dir)  const
 }
 
 //==============================================================================
-const File File::createTempFile (const String& fileNameEnding)
+File File::createTempFile (const String& fileNameEnding)
 {
     const File tempFile (getSpecialLocation (tempDirectory)
                             .getChildFile ("temp_" + String (Random::getSystemRandom().nextInt()))

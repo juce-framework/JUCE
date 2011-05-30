@@ -215,7 +215,7 @@ TextEditor* AlertWindow::getTextEditor (const String& nameOfTextEditor) const
     return nullptr;
 }
 
-const String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
+String AlertWindow::getTextEditorContents (const String& nameOfTextEditor) const
 {
     TextEditor* const t = getTextEditor (nameOfTextEditor);
     return t != nullptr ? t->getText() : String::empty;

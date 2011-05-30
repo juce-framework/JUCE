@@ -158,7 +158,7 @@ int FileBrowserComponent::getNumSelectedFiles() const noexcept
     return chosenFiles.size();
 }
 
-const File FileBrowserComponent::getSelectedFile (int index) const noexcept
+File FileBrowserComponent::getSelectedFile (int index) const noexcept
 {
     if ((flags & canSelectDirectories) != 0 && filenameBox.getText().isEmpty())
         return currentRoot;
@@ -177,7 +177,7 @@ bool FileBrowserComponent::currentFileIsValid() const
         return getSelectedFile (0).exists();
 }
 
-const File FileBrowserComponent::getHighlightedFile() const noexcept
+File FileBrowserComponent::getHighlightedFile() const noexcept
 {
     return fileListComponent->getSelectedFile (0);
 }
@@ -209,7 +209,7 @@ bool FileBrowserComponent::isFileOrDirSuitable (const File& f) const
 }
 
 //==============================================================================
-const File FileBrowserComponent::getRoot() const
+const File& FileBrowserComponent::getRoot() const
 {
     return currentRoot;
 }

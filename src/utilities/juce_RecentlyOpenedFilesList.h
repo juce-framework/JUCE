@@ -76,7 +76,7 @@ public:
 
         The most recently added file is always at index 0.
     */
-    const File getFile (int index) const;
+    File getFile (int index) const;
 
     /** Returns an array of all the absolute pathnames in the list.
     */
@@ -138,7 +138,7 @@ public:
 
         @see restoreFromString
     */
-    const String toString() const;
+    String toString() const;
 
     /** Restores the list from a previously stringified version of the list.
 

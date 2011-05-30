@@ -111,21 +111,21 @@ public:
                     float hitTestAlphaThreshold = 0.0f);
 
     /** Returns the currently set 'normal' image. */
-    const Image getNormalImage() const;
+    Image getNormalImage() const;
 
     /** Returns the image that's drawn when the mouse is over the button.
 
         If a valid 'over' image has been set, this will return it; otherwise it'll
         just return the normal image.
     */
-    const Image getOverImage() const;
+    Image getOverImage() const;
 
     /** Returns the image that's drawn when the button is held down.
 
         If a valid 'down' image has been set, this will return it; otherwise it'll
         return the 'over' image or normal image, depending on what's available.
     */
-    const Image getDownImage() const;
+    Image getDownImage() const;
 
 protected:
     //==============================================================================
@@ -145,7 +145,7 @@ private:
     float normalOpacity, overOpacity, downOpacity;
     Colour normalOverlay, overOverlay, downOverlay;
 
-    const Image getCurrentImage() const;
+    Image getCurrentImage() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageButton);
 };

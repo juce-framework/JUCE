@@ -50,7 +50,7 @@ public:
         clearSingletonInstance();
     }
 
-    const Image getFromHashCode (const int64 hashCode)
+    Image getFromHashCode (const int64 hashCode)
     {
         const ScopedLock sl (lock);
 
@@ -129,7 +129,7 @@ juce_ImplementSingleton_SingleThreaded (ImageCache::Pimpl);
 
 
 //==============================================================================
-const Image ImageCache::getFromHashCode (const int64 hashCode)
+Image ImageCache::getFromHashCode (const int64 hashCode)
 {
     if (Pimpl::getInstanceWithoutCreating() != nullptr)
         return Pimpl::getInstanceWithoutCreating()->getFromHashCode (hashCode);
@@ -142,7 +142,7 @@ void ImageCache::addImageToCache (const Image& image, const int64 hashCode)
     Pimpl::getInstance()->addImageToCache (image, hashCode);
 }
 
-const Image ImageCache::getFromFile (const File& file)
+Image ImageCache::getFromFile (const File& file)
 {
     const int64 hashCode = file.hashCode64();
     Image image (getFromHashCode (hashCode));
@@ -156,7 +156,7 @@ const Image ImageCache::getFromFile (const File& file)
     return image;
 }
 
-const Image ImageCache::getFromMemory (const void* imageData, const int dataSize)
+Image ImageCache::getFromMemory (const void* imageData, const int dataSize)
 {
     const int64 hashCode = (int64) (pointer_sized_int) imageData;
     Image image (getFromHashCode (hashCode));

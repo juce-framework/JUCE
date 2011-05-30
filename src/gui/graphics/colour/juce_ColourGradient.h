@@ -124,7 +124,7 @@ public:
     /** Returns the an interpolated colour at any position along the gradient.
         @param position     the position along the gradient, between 0 and 1
     */
-    const Colour getColourAtPosition (double position) const noexcept;
+    Colour getColourAtPosition (double position) const noexcept;
 
     //==============================================================================
     /** Creates a set of interpolated premultiplied ARGB values.

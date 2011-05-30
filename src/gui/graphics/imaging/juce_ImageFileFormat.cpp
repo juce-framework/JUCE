@@ -63,7 +63,7 @@ ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
 }
 
 //==============================================================================
-const Image ImageFileFormat::loadFrom (InputStream& input)
+Image ImageFileFormat::loadFrom (InputStream& input)
 {
     ImageFileFormat* const format = findImageFormatForStream (input);
 
@@ -73,7 +73,7 @@ const Image ImageFileFormat::loadFrom (InputStream& input)
     return Image::null;
 }
 
-const Image ImageFileFormat::loadFrom (const File& file)
+Image ImageFileFormat::loadFrom (const File& file)
 {
     InputStream* const in = file.createInputStream();
 
@@ -86,7 +86,7 @@ const Image ImageFileFormat::loadFrom (const File& file)
     return Image::null;
 }
 
-const Image ImageFileFormat::loadFrom (const void* rawData, const int numBytes)
+Image ImageFileFormat::loadFrom (const void* rawData, const int numBytes)
 {
     if (rawData != nullptr && numBytes > 4)
     {

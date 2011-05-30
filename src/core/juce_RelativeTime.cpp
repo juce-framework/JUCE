@@ -62,7 +62,7 @@ double RelativeTime::inDays() const noexcept        { return seconds / (60.0 * 6
 double RelativeTime::inWeeks() const noexcept       { return seconds / (60.0 * 60.0 * 24.0 * 7.0); }
 
 //==============================================================================
-const String RelativeTime::getDescription (const String& returnValueForZeroTime) const
+String RelativeTime::getDescription (const String& returnValueForZeroTime) const
 {
     if (seconds < 0.001 && seconds > -0.001)
         return returnValueForZeroTime;
@@ -172,8 +172,8 @@ bool operator<  (const RelativeTime& t1, const RelativeTime& t2) noexcept { retu
 bool operator>= (const RelativeTime& t1, const RelativeTime& t2) noexcept { return t1.inSeconds() >= t2.inSeconds(); }
 bool operator<= (const RelativeTime& t1, const RelativeTime& t2) noexcept { return t1.inSeconds() <= t2.inSeconds(); }
 
-const RelativeTime operator+ (const RelativeTime&  t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t += t2; }
-const RelativeTime operator- (const RelativeTime&  t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t -= t2; }
+RelativeTime operator+ (const RelativeTime&  t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t += t2; }
+RelativeTime operator- (const RelativeTime&  t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t -= t2; }
 
 
 END_JUCE_NAMESPACE

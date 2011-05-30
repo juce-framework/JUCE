@@ -109,7 +109,7 @@ private:
     void mouseEnter (const MouseEvent& e);
     void timerCallback();
 
-    static const String getTipFor (Component* c);
+    static String getTipFor (Component* c);
     void showFor (const String& tip);
     void hide();
 

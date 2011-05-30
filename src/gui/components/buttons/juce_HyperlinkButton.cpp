@@ -64,7 +64,7 @@ void HyperlinkButton::setURL (const URL& newURL) noexcept
     setTooltip (newURL.toString (false));
 }
 
-const Font HyperlinkButton::getFontToUse() const
+Font HyperlinkButton::getFontToUse() const
 {
     Font f (font);
 

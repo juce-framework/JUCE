@@ -302,7 +302,7 @@ void StringArray::move (const int currentIndex, int newIndex) noexcept
 
 
 //==============================================================================
-const String StringArray::joinIntoString (const String& separator, int start, int numberToJoin) const
+String StringArray::joinIntoString (const String& separator, int start, int numberToJoin) const
 {
     const int last = (numberToJoin < 0) ? size()
                                         : jmin (size(), start + numberToJoin);

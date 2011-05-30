@@ -135,7 +135,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubsectionSharedImage);
 };
 
-const Image Image::getClippedImage (const Rectangle<int>& area) const
+Image Image::getClippedImage (const Rectangle<int>& area) const
 {
     if (area.contains (getBounds()))
         return *this;
@@ -194,7 +194,7 @@ void Image::duplicateIfShared()
         image = image->clone();
 }
 
-const Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::ResamplingQuality quality) const
+Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::ResamplingQuality quality) const
 {
     if (image == nullptr || (image->width == newWidth && image->height == newHeight))
         return *this;
@@ -208,7 +208,7 @@ const Image Image::rescaled (const int newWidth, const int newHeight, const Grap
     return newImage;
 }
 
-const Image Image::convertedToFormat (PixelFormat newFormat) const
+Image Image::convertedToFormat (PixelFormat newFormat) const
 {
     if (image == nullptr || newFormat == image->format)
         return *this;

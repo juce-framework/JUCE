@@ -102,7 +102,7 @@ public:
     /** Returns a string which represents this coordinate.
         For details of the string syntax, see the constructor notes.
     */
-    const String toString() const;
+    String toString() const;
 
     //==============================================================================
     /** A set of static strings that are commonly used by the RelativeCoordinate class.

@@ -520,7 +520,7 @@ const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 }
 
 //==============================================================================
-const StringArray Font::findAllTypefaceNames()
+StringArray Font::findAllTypefaceNames()
 {
     StringArray s;
     FreeTypeInterface::getInstance()->getFamilyNames (s);

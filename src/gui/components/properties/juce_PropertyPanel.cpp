@@ -275,7 +275,7 @@ void PropertyPanel::refreshAll() const
 }
 
 //==============================================================================
-const StringArray PropertyPanel::getSectionNames() const
+StringArray PropertyPanel::getSectionNames() const
 {
     StringArray s;
 

@@ -56,7 +56,7 @@ public:
                    const RectanglePlacement& placementToUse);
 
     /** Returns the current image. */
-    const Image getImage() const;
+    const Image& getImage() const;
 
     /** Sets the method of positioning that will be used to fit the image within the component's bounds.
         By default the positioning is centred, and will fit the image inside the component's bounds

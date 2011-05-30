@@ -151,7 +151,7 @@ public:
 
         @see undo
     */
-    const String getUndoDescription() const;
+    String getUndoDescription() const;
 
     /** Tries to roll-back the last transaction.
 
@@ -205,7 +205,7 @@ public:
 
         @see redo
     */
-    const String getRedoDescription() const;
+    String getRedoDescription() const;
 
     /** Tries to redo the last transaction that was undone.
 

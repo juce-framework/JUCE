@@ -157,7 +157,7 @@ public:
 
         @see getResults
     */
-    const File getResult() const;
+    File getResult() const;
 
     /** Returns a list of all the files that were chosen during the last call to a
         browse method.

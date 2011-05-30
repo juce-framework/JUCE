@@ -84,7 +84,7 @@ namespace WindowsFileHelpers
         return GetDriveType (getDriveFromPath (path).toWideCharPointer());
     }
 
-    const File getSpecialFolderPath (int type)
+    File getSpecialFolderPath (int type)
     {
         WCHAR path [MAX_PATH + 256];
 
@@ -94,7 +94,7 @@ namespace WindowsFileHelpers
         return File::nonexistent;
     }
 
-    const Result getResultForLastError()
+    Result getResultForLastError()
     {
         TCHAR messageBuffer [256] = { 0 };
 
@@ -203,7 +203,7 @@ bool File::moveInternal (const File& dest) const
     return MoveFile (fullPath.toWideCharPointer(), dest.getFullPathName().toWideCharPointer()) != 0;
 }
 
-const Result File::createDirectoryInternal (const String& fileName) const
+Result File::createDirectoryInternal (const String& fileName) const
 {
     return CreateDirectory (fileName.toWideCharPointer(), 0) ? Result::ok()
                                                              : WindowsFileHelpers::getResultForLastError();
@@ -426,7 +426,7 @@ void File::findFileSystemRoots (Array<File>& destArray)
 }
 
 //==============================================================================
-const String File::getVolumeLabel() const
+String File::getVolumeLabel() const
 {
     TCHAR dest[64];
     if (! GetVolumeInformation (WindowsFileHelpers::getDriveFromPath (getFullPathName()).toWideCharPointer(), dest,
@@ -491,7 +491,7 @@ bool File::isOnRemovableDrive() const
 }
 
 //==============================================================================
-const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
+File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
 {
     int csidlType = 0;
 
@@ -543,7 +543,7 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
 }
 
 //==============================================================================
-const File File::getCurrentWorkingDirectory()
+File File::getCurrentWorkingDirectory()
 {
     WCHAR dest [MAX_PATH + 256];
     dest[0] = 0;
@@ -557,7 +557,7 @@ bool File::setAsCurrentWorkingDirectory() const
 }
 
 //==============================================================================
-const String File::getVersion() const
+String File::getVersion() const
 {
     String result;
 
@@ -584,7 +584,7 @@ const String File::getVersion() const
 }
 
 //==============================================================================
-const File File::getLinkedTarget() const
+File File::getLinkedTarget() const
 {
     File result (*this);
     String p (getFullPathName());

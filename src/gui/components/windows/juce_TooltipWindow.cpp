@@ -128,7 +128,7 @@ void TooltipWindow::showFor (const String& tip)
     toFront (false);
 }
 
-const String TooltipWindow::getTipFor (Component* const c)
+String TooltipWindow::getTipFor (Component* const c)
 {
     if (c != nullptr
          && Process::isForegroundProcess()

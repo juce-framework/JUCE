@@ -198,7 +198,7 @@ void SystemClipboard::copyTextToClipboard (const String& clipText)
     XSetSelectionOwner (display, ClipboardHelpers::atom_CLIPBOARD, juce_messageWindowHandle, CurrentTime);
 }
 
-const String SystemClipboard::getTextFromClipboard()
+String SystemClipboard::getTextFromClipboard()
 {
     ClipboardHelpers::initSelectionAtoms();
 

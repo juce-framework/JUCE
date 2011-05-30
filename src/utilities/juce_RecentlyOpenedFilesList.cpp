@@ -53,7 +53,7 @@ int RecentlyOpenedFilesList::getNumFiles() const
     return files.size();
 }
 
-const File RecentlyOpenedFilesList::getFile (const int index) const
+File RecentlyOpenedFilesList::getFile (const int index) const
 {
     return File (files [index]);
 }
@@ -126,7 +126,7 @@ int RecentlyOpenedFilesList::createPopupMenuItems (PopupMenu& menuToAddTo,
 }
 
 //==============================================================================
-const String RecentlyOpenedFilesList::toString() const
+String RecentlyOpenedFilesList::toString() const
 {
     return files.joinIntoString ("\n");
 }

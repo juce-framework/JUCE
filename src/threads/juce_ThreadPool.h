@@ -65,7 +65,7 @@ public:
     /** Returns the name of this job.
         @see setJobName
     */
-    const String getJobName() const;
+    String getJobName() const;
 
     /** Changes the job's name.
         @see getJobName
@@ -280,7 +280,7 @@ public:
 
         If onlyReturnActiveJobs is true, only the ones currently running are returned.
     */
-    const StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
+    StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
 
     /** Changes the priority of all the threads.
 

@@ -643,7 +643,7 @@ bool ValueTree::hasType (const Identifier& typeName) const
     return object != nullptr && object->type == typeName;
 }
 
-const Identifier ValueTree::getType() const
+Identifier ValueTree::getType() const
 {
     return object != nullptr ? object->type : Identifier();
 }
@@ -672,7 +672,7 @@ const var& ValueTree::getProperty (const Identifier& name) const
     return object == nullptr ? var::null : object->getProperty (name);
 }
 
-const var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValue) const
+var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValue) const
 {
     return object == nullptr ? defaultReturnValue : object->getProperty (name, defaultReturnValue);
 }
@@ -707,7 +707,7 @@ int ValueTree::getNumProperties() const
     return object == nullptr ? 0 : object->properties.size();
 }
 
-const Identifier ValueTree::getPropertyName (const int index) const
+Identifier ValueTree::getPropertyName (const int index) const
 {
     return object == nullptr ? Identifier()
                              : object->properties.getName (index);

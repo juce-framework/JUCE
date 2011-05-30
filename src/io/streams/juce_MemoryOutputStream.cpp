@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MemoryOutputStream.h"
+#include "juce_InputStream.h"
 
 
 //==============================================================================
@@ -134,13 +135,13 @@ int MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNumB
     return OutputStream::writeFromInputStream (source, maxNumBytesToWrite);
 }
 
-const String MemoryOutputStream::toUTF8() const
+String MemoryOutputStream::toUTF8() const
 {
     const char* const d = static_cast <const char*> (getData());
     return String (CharPointer_UTF8 (d), CharPointer_UTF8 (d + getDataSize()));
 }
 
-const String MemoryOutputStream::toString() const
+String MemoryOutputStream::toString() const
 {
     return String::createStringFromData (getData(), (int) getDataSize());
 }

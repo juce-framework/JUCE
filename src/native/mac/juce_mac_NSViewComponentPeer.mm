@@ -1698,7 +1698,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 }
 
 //==============================================================================
-const Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File& file)
 {
     JUCE_AUTORELEASEPOOL
 

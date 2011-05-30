@@ -107,24 +107,24 @@ public:
     public:
         ValueTreeWrapper (const ValueTree& state);
 
-        const String getText() const;
+        String getText() const;
         void setText (const String& newText, UndoManager* undoManager);
         Value getTextValue (UndoManager* undoManager);
 
-        const Colour getColour() const;
+        Colour getColour() const;
         void setColour (const Colour& newColour, UndoManager* undoManager);
 
-        const Justification getJustification() const;
+        Justification getJustification() const;
         void setJustification (const Justification& newJustification, UndoManager* undoManager);
 
-        const Font getFont() const;
+        Font getFont() const;
         void setFont (const Font& newFont, UndoManager* undoManager);
         Value getFontValue (UndoManager* undoManager);
 
-        const RelativeParallelogram getBoundingBox() const;
+        RelativeParallelogram getBoundingBox() const;
         void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
-        const RelativePoint getFontSizeControlPoint() const;
+        RelativePoint getFontSizeControlPoint() const;
         void setFontSizeControlPoint (const RelativePoint& p, UndoManager* undoManager);
 
         static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontSizeAnchor;

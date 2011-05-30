@@ -111,7 +111,7 @@ public:
         to get - see getNumSelectedFiles() to find out how many files were chosen.
         @see getHighlightedFile
     */
-    const File getSelectedFile (int index) const noexcept;
+    File getSelectedFile (int index) const noexcept;
 
     /** Deselects any files that are currently selected.
     */
@@ -132,11 +132,11 @@ public:
         this will only return one of them.
         @see getSelectedFile
     */
-    const File getHighlightedFile() const noexcept;
+    File getHighlightedFile() const noexcept;
 
     //==============================================================================
     /** Returns the directory whose contents are currently being shown in the listbox. */
-    const File getRoot() const;
+    const File& getRoot() const;
 
     /** Changes the directory that's being shown in the listbox. */
     void setRoot (const File& newRootDirectory);

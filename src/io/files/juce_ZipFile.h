@@ -27,7 +27,6 @@
 #define __JUCE_ZIPFILE_JUCEHEADER__
 
 #include "juce_File.h"
-#include "../streams/juce_InputStream.h"
 #include "../streams/juce_InputSource.h"
 #include "../../threads/juce_CriticalSection.h"
 #include "../../containers/juce_OwnedArray.h"
@@ -219,9 +218,9 @@ private:
     ScopedPointer <InputStream> streamToDelete;
     ScopedPointer <InputSource> inputSource;
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     int numOpenStreams;
-#endif
+   #endif
 
     void init();
     int findEndOfZipEntryTable (InputStream& input, int& numEntries);

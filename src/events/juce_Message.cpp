@@ -36,7 +36,7 @@ Message::Message() noexcept
       intParameter2 (0),
       intParameter3 (0),
       pointerParameter (nullptr),
-      messageRecipient (0)
+      messageRecipient (nullptr)
 {
 }
 
@@ -48,7 +48,7 @@ Message::Message (const int intParameter1_,
       intParameter2 (intParameter2_),
       intParameter3 (intParameter3_),
       pointerParameter (pointerParameter_),
-      messageRecipient (0)
+      messageRecipient (nullptr)
 {
 }
 

@@ -935,25 +935,25 @@ int Component::getParentHeight() const noexcept
 int Component::getScreenX() const   { return getScreenPosition().getX(); }
 int Component::getScreenY() const   { return getScreenPosition().getY(); }
 
-const Point<int> Component::getScreenPosition() const       { return localPointToGlobal (Point<int>()); }
-const Rectangle<int> Component::getScreenBounds() const     { return localAreaToGlobal (getLocalBounds()); }
+Point<int> Component::getScreenPosition() const       { return localPointToGlobal (Point<int>()); }
+Rectangle<int> Component::getScreenBounds() const     { return localAreaToGlobal (getLocalBounds()); }
 
-const Point<int> Component::getLocalPoint (const Component* source, const Point<int>& point) const
+Point<int> Component::getLocalPoint (const Component* source, const Point<int>& point) const
 {
     return ComponentHelpers::convertCoordinate (this, source, point);
 }
 
-const Rectangle<int> Component::getLocalArea (const Component* source, const Rectangle<int>& area) const
+Rectangle<int> Component::getLocalArea (const Component* source, const Rectangle<int>& area) const
 {
     return ComponentHelpers::convertCoordinate (this, source, area);
 }
 
-const Point<int> Component::localPointToGlobal (const Point<int>& point) const
+Point<int> Component::localPointToGlobal (const Point<int>& point) const
 {
     return ComponentHelpers::convertCoordinate (nullptr, this, point);
 }
 
-const Rectangle<int> Component::localAreaToGlobal (const Rectangle<int>& area) const
+Rectangle<int> Component::localAreaToGlobal (const Rectangle<int>& area) const
 {
     return ComponentHelpers::convertCoordinate (nullptr, this, area);
 }
@@ -1225,7 +1225,7 @@ void Component::setTransform (const AffineTransform& newTransform)
     }
 }
 
-const AffineTransform Component::getTransform() const
+AffineTransform Component::getTransform() const
 {
     return affineTransform != nullptr ? *affineTransform : AffineTransform::identity;
 }
@@ -1954,8 +1954,8 @@ void Component::setPaintingIsUnclipped (const bool shouldPaintWithoutClipping) n
 }
 
 //==============================================================================
-const Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
-                                                const bool clipImageToComponentBounds)
+Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
+                                          const bool clipImageToComponentBounds)
 {
     Rectangle<int> r (areaToGrab);
 
@@ -2113,12 +2113,12 @@ void Component::setPositioner (Positioner* newPositioner)
 }
 
 //==============================================================================
-const Rectangle<int> Component::getLocalBounds() const noexcept
+Rectangle<int> Component::getLocalBounds() const noexcept
 {
     return Rectangle<int> (getWidth(), getHeight());
 }
 
-const Rectangle<int> Component::getBoundsInParent() const noexcept
+Rectangle<int> Component::getBoundsInParent() const noexcept
 {
     return affineTransform == nullptr ? bounds
                                       : bounds.toFloat().transformed (*affineTransform).getSmallestIntegerContainer();
@@ -2969,13 +2969,13 @@ bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() noexcept
     return ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
 }
 
-const Point<int> Component::getMouseXYRelative() const
+Point<int> Component::getMouseXYRelative() const
 {
     return getLocalPoint (nullptr, Desktop::getMousePosition());
 }
 
 //==============================================================================
-const Rectangle<int> Component::getParentMonitorArea() const
+Rectangle<int> Component::getParentMonitorArea() const
 {
     return Desktop::getInstance().getMonitorAreaContaining (getScreenBounds().getCentre());
 }

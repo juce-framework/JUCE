@@ -88,7 +88,7 @@ public:
 
         @see operator[]
     */
-    const String getValue (const String& key, const String& defaultReturnValue) const;
+    String getValue (const String& key, const String& defaultReturnValue) const;
 
 
     /** Returns a list of all keys in the array. */
@@ -138,10 +138,9 @@ public:
 
     //==============================================================================
     /** Returns a descriptive string containing the items.
-
         This is handy for dumping the contents of an array.
     */
-    const String getDescription() const;
+    String getDescription() const;
 
     //==============================================================================
     /** Reduces the amount of storage being used by the array.

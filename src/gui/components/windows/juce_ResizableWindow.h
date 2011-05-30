@@ -211,7 +211,7 @@ public:
 
         @see restoreWindowStateFromString
     */
-    const String getWindowStateAsString();
+    String getWindowStateAsString();
 
     /** Restores the window to a previously-saved size and position.
 

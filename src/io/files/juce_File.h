@@ -134,7 +134,7 @@ public:
         So for example 100 would return "100 bytes", 2000 would return "2 KB",
         2000000 would produce "2 MB", etc.
     */
-    static const String descriptionOfSizeInBytes (int64 bytes);
+    static String descriptionOfSizeInBytes (int64 bytes);
 
     //==============================================================================
     /** Returns the complete, absolute path of this file.
@@ -163,7 +163,7 @@ public:
 
         @see getFullPathName, getFileNameWithoutExtension
     */
-    const String getFileName() const;
+    String getFileName() const;
 
     /** Creates a relative path that refers to a file relatively to a given directory.
 
@@ -180,7 +180,7 @@ public:
                                         If it doesn't exist, it's assumed to be a directory.
         @see getChildFile, isAbsolutePath
     */
-    const String getRelativePathFrom (const File& directoryToBeRelativeTo) const;
+    String getRelativePathFrom (const File& directoryToBeRelativeTo) const;
 
     //==============================================================================
     /** Returns the file's extension.
@@ -191,7 +191,7 @@ public:
 
         @see hasFileExtension, withFileExtension, getFileNameWithoutExtension
     */
-    const String getFileExtension() const;
+    String getFileExtension() const;
 
     /** Checks whether the file has a given extension.
 
@@ -217,7 +217,7 @@ public:
 
         @see getFileName, getFileExtension, hasFileExtension, getFileNameWithoutExtension
     */
-    const File withFileExtension (const String& newExtension) const;
+    File withFileExtension (const String& newExtension) const;
 
     /** Returns the last part of the filename, without its file extension.
 
@@ -225,7 +225,7 @@ public:
 
         @see getFileName, getFileExtension, hasFileExtension, withFileExtension
     */
-    const String getFileNameWithoutExtension() const;
+    String getFileNameWithoutExtension() const;
 
     //==============================================================================
     /** Returns a 32-bit hash-code that identifies this file.
@@ -256,7 +256,7 @@ public:
 
         @see getSiblingFile, getParentDirectory, getRelativePathFrom, isAChildOf
     */
-    const File getChildFile (String relativePath) const;
+    File getChildFile (String relativePath) const;
 
     /** Returns a file which is in the same directory as this one.
 
@@ -264,14 +264,14 @@ public:
 
         @see getChildFile, getParentDirectory
     */
-    const File getSiblingFile (const String& siblingFileName) const;
+    File getSiblingFile (const String& siblingFileName) const;
 
     //==============================================================================
     /** Returns the directory that contains this file or directory.
 
         e.g. for "/moose/fish/foo.txt" this will return "/moose/fish".
     */
-    const File getParentDirectory() const;
+    File getParentDirectory() const;
 
     /** Checks whether a file is somewhere inside a directory.
 
@@ -302,9 +302,9 @@ public:
                                         format "prefix(number)suffix", if false, it will leave the
                                         brackets out.
     */
-    const File getNonexistentChildFile (const String& prefix,
-                                        const String& suffix,
-                                        bool putNumbersInBrackets = true) const;
+    File getNonexistentChildFile (const String& prefix,
+                                  const String& suffix,
+                                  bool putNumbersInBrackets = true) const;
 
     /** Chooses a filename for a sibling file to this one that doesn't already exist.
 
@@ -315,7 +315,7 @@ public:
         @param putNumbersInBrackets     whether to add brackets around the numbers that
                                         get appended to the new filename.
     */
-    const File getNonexistentSibling (bool putNumbersInBrackets = true) const;
+    File getNonexistentSibling (bool putNumbersInBrackets = true) const;
 
     //==============================================================================
     /** Compares the pathnames for two files. */
@@ -359,7 +359,7 @@ public:
 
         If this file isn't actually link, it'll just return itself.
     */
-    const File getLinkedTarget() const;
+    File getLinkedTarget() const;
 
     //==============================================================================
     /** Returns the last modification time of this file.
@@ -413,7 +413,7 @@ public:
         executables, bundles, dlls, etc. If no version is available, this will
         return an empty string.
     */
-    const String getVersion() const;
+    String getVersion() const;
 
     //==============================================================================
     /** Creates an empty file if it doesn't already exist.
@@ -426,7 +426,7 @@ public:
         @returns    true if the file has been created (or if it already existed).
         @see createDirectory
     */
-    const Result create() const;
+    Result create() const;
 
     /** Creates a new directory for this filename.
 
@@ -437,7 +437,7 @@ public:
                     an error message if it failed.
         @see create
     */
-    const Result createDirectory() const;
+    Result createDirectory() const;
 
     /** Deletes a file.
 
@@ -605,7 +605,7 @@ public:
         This makes use of InputStream::readEntireStreamAsString, which should
         automatically cope with unicode/acsii file formats.
     */
-    const String loadFileAsString() const;
+    String loadFileAsString() const;
 
     //==============================================================================
     /** Appends a block of binary data to the end of the file.
@@ -688,7 +688,7 @@ public:
 
         @returns the volume label of the drive, or an empty string if this isn't possible
     */
-    const String getVolumeLabel() const;
+    String getVolumeLabel() const;
 
     /** Returns the serial number of the volume on which this file lives.
 
@@ -839,7 +839,7 @@ public:
 
         @see SpecialLocationType
     */
-    static const File JUCE_CALLTYPE getSpecialLocation (const SpecialLocationType type);
+    static File JUCE_CALLTYPE getSpecialLocation (const SpecialLocationType type);
 
     //==============================================================================
     /** Returns a temporary file in the system's temp directory.
@@ -848,7 +848,7 @@ public:
 
         To get the temp folder, you can use getSpecialLocation (File::tempDirectory).
     */
-    static const File createTempFile (const String& fileNameEnding);
+    static File createTempFile (const String& fileNameEnding);
 
 
     //==============================================================================
@@ -856,7 +856,7 @@ public:
 
         @see setAsCurrentWorkingDirectory
     */
-    static const File getCurrentWorkingDirectory();
+    static File getCurrentWorkingDirectory();
 
     /** Sets the current working directory to be this file.
 
@@ -891,7 +891,7 @@ public:
 
         @see createLegalPathName
     */
-    static const String createLegalFileName (const String& fileNameToFix);
+    static String createLegalFileName (const String& fileNameToFix);
 
     /** Removes illegal characters from a pathname.
 
@@ -900,7 +900,7 @@ public:
 
         @see createLegalFileName
     */
-    static const String createLegalPathName (const String& pathNameToFix);
+    static String createLegalPathName (const String& pathNameToFix);
 
     /** Indicates whether filenames are case-sensitive on the current operating system.
     */
@@ -915,10 +915,10 @@ public:
 
         Best to avoid this unless you really know what you're doing.
     */
-    static const File createFileWithoutCheckingPath (const String& path);
+    static File createFileWithoutCheckingPath (const String& path);
 
     /** Adds a separator character to the end of a path if it doesn't already have one. */
-    static const String addTrailingSeparator (const String& path);
+    static String addTrailingSeparator (const String& path);
 
 private:
     //==============================================================================
@@ -927,16 +927,16 @@ private:
     // internal way of contructing a file without checking the path
     friend class DirectoryIterator;
     File (const String&, int);
-    const String getPathUpToLastSlash() const;
+    String getPathUpToLastSlash() const;
 
-    const Result createDirectoryInternal (const String& fileName) const;
+    Result createDirectoryInternal (const String& fileName) const;
     bool copyInternal (const File& dest) const;
     bool moveInternal (const File& dest) const;
     bool setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const;
     void getFileTimesInternal (int64& modificationTime, int64& accessTime, int64& creationTime) const;
     bool setFileReadOnlyInternal (bool shouldBeReadOnly) const;
 
-    static const String parseAbsolutePath (const String& path);
+    static String parseAbsolutePath (const String& path);
 
     JUCE_LEAK_DETECTOR (File);
 };

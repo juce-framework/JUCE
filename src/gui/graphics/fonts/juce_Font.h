@@ -143,7 +143,7 @@ public:
 
         @see setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSansSerifFontName();
+    static const String& getDefaultSansSerifFontName();
 
     /** Returns a typeface name that represents the default sans-serif font.
 
@@ -153,7 +153,7 @@ public:
 
         @see setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSerifFontName();
+    static const String& getDefaultSerifFontName();
 
     /** Returns a typeface name that represents the default sans-serif font.
 
@@ -163,7 +163,7 @@ public:
 
         @see setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
     */
-    static const String getDefaultMonospacedFontName();
+    static const String& getDefaultMonospacedFontName();
 
     /** Returns the typeface names of the default fonts on the current platform. */
     static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& defaultFallback);
@@ -228,14 +228,14 @@ public:
     /** Makes the font bold or non-bold. */
     void setBold (bool shouldBeBold);
     /** Returns a copy of this font with the bold attribute set. */
-    const Font boldened() const;
+    Font boldened() const;
     /** Returns true if the font is bold. */
     bool isBold() const noexcept;
 
     /** Makes the font italic or non-italic. */
     void setItalic (bool shouldBeItalic);
     /** Returns a copy of this font with the italic attribute set. */
-    const Font italicised() const;
+    Font italicised() const;
     /** Returns true if the font is italic. */
     bool isItalic() const noexcept;
 
@@ -332,13 +332,13 @@ public:
         You can use this instead of findFonts() if you only need their names, and not
         font objects.
     */
-    static const StringArray findAllTypefaceNames();
+    static StringArray findAllTypefaceNames();
 
     //==============================================================================
     /** Returns the name of the typeface to be used for rendering glyphs that aren't found
         in the requested typeface.
     */
-    static const String getFallbackFontName();
+    static const String& getFallbackFontName();
 
     /** Sets the (platform-specific) name of the typeface to use to find glyphs that aren't
         available in whatever font you're trying to use.
@@ -350,13 +350,13 @@ public:
         The string will contain information to describe the font's typeface, size, and
         style. To recreate the font from this string, use fromString().
     */
-    const String toString() const;
+    String toString() const;
 
     /** Recreates a font from its stringified encoding.
         This method takes a string that was created by toString(), and recreates the
         original font.
     */
-    static const Font fromString (const String& fontDescription);
+    static Font fromString (const String& fontDescription);
 
 
 private:

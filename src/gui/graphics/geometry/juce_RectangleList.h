@@ -71,7 +71,7 @@ public:
         @returns    the rectangle at the index, or an empty rectangle if the
                     index is out-of-range.
     */
-    const Rectangle<int> getRectangle (int index) const noexcept;
+    Rectangle<int> getRectangle (int index) const noexcept;
 
 
     //==============================================================================
@@ -194,7 +194,7 @@ public:
 
     //==============================================================================
     /** Returns the smallest rectangle that can enclose the whole of this region. */
-    const Rectangle<int> getBounds() const noexcept;
+    Rectangle<int> getBounds() const noexcept;
 
     /** Optimises the list into a minimum number of constituent rectangles.
 
@@ -209,7 +209,7 @@ public:
 
     //==============================================================================
     /** Creates a Path object to represent this region. */
-    const Path toPath() const;
+    Path toPath() const;
 
 
     //==============================================================================

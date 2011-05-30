@@ -63,7 +63,7 @@ public:
         @returns        the image, or null if it there was an error loading it
         @see getFromMemory, getFromCache, ImageFileFormat::loadFrom
     */
-    static const Image getFromFile (const File& file);
+    static Image getFromFile (const File& file);
 
     /** Loads an image from an in-memory image file, (or just returns the image if it's already cached).
 
@@ -80,7 +80,7 @@ public:
         @returns            the image, or an invalid image if it there was an error loading it
         @see getFromMemory, getFromCache, ImageFileFormat::loadFrom
     */
-    static const Image getFromMemory (const void* imageData, int dataSize);
+    static Image getFromMemory (const void* imageData, int dataSize);
 
     //==============================================================================
     /** Checks the cache for an image with a particular hashcode.
@@ -91,7 +91,7 @@ public:
         @param hashCode the hash code that was associated with the image by addImageToCache()
         @see addImageToCache
     */
-    static const Image getFromHashCode (int64 hashCode);
+    static Image getFromHashCode (int64 hashCode);
 
     /** Adds an image to the cache with a user-defined hash-code.
 

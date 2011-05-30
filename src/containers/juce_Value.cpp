@@ -133,12 +133,12 @@ Value::~Value()
 }
 
 //==============================================================================
-const var Value::getValue() const
+var Value::getValue() const
 {
     return value->getValue();
 }
 
-Value::operator const var() const
+Value::operator var() const
 {
     return getValue();
 }
@@ -148,7 +148,7 @@ void Value::setValue (const var& newValue)
     value->setValue (newValue);
 }
 
-const String Value::toString() const
+String Value::toString() const
 {
     return value->getValue().toString();
 }

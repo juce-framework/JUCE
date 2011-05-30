@@ -51,7 +51,7 @@ struct TextAtom
     bool isWhitespace() const       { return CharacterFunctions::isWhitespace (atomText[0]); }
     bool isNewLine() const          { return atomText[0] == '\r' || atomText[0] == '\n'; }
 
-    const String getText (const juce_wchar passwordCharacter) const
+    String getText (const juce_wchar passwordCharacter) const
     {
         if (passwordCharacter == 0)
             return atomText;
@@ -60,7 +60,7 @@ struct TextAtom
                                            atomText.length());
     }
 
-    const String getTrimmedText (const juce_wchar passwordCharacter) const
+    String getTrimmedText (const juce_wchar passwordCharacter) const
     {
         if (passwordCharacter == 0)
             return atomText.substring (0, numChars);
@@ -1128,7 +1128,7 @@ void TextEditor::setSelectAllWhenFocused (const bool b)
 }
 
 //==============================================================================
-const Font TextEditor::getFont() const
+const Font& TextEditor::getFont() const
 {
     return currentFont;
 }
@@ -2458,7 +2458,7 @@ void TextEditor::remove (const Range<int>& range,
 }
 
 //==============================================================================
-const String TextEditor::getText() const
+String TextEditor::getText() const
 {
     MemoryOutputStream mo;
     mo.preallocate (getTotalNumChars());
@@ -2498,7 +2498,7 @@ const String TextEditor::getTextInRange (const Range<int>& range) const
     return mo.toString();
 }
 
-const String TextEditor::getHighlightedText() const
+String TextEditor::getHighlightedText() const
 {
     return getTextInRange (selection);
 }

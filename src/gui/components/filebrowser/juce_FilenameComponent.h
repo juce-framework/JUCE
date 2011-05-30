@@ -109,7 +109,7 @@ public:
 
     //==============================================================================
     /** Returns the currently displayed filename. */
-    const File getCurrentFile() const;
+    File getCurrentFile() const;
 
     /** Changes the current filename.
 
@@ -140,7 +140,7 @@ public:
 
         @see setRecentlyUsedFilenames
     */
-    const StringArray getRecentlyUsedFilenames() const;
+    StringArray getRecentlyUsedFilenames() const;
 
     /** Sets all the entries on the recent files list.
 

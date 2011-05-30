@@ -28,7 +28,7 @@
 
 #include "juce_AudioIODevice.h"
 class AudioDeviceManager;
-class Component;
+
 
 //==============================================================================
 /**

@@ -90,12 +90,12 @@ public:
     void preallocate (size_t bytesToPreallocate);
 
     /** Returns a String created from the (UTF8) data that has been written to the stream. */
-    const String toUTF8() const;
+    String toUTF8() const;
 
     /** Attempts to detect the encoding of the data and convert it to a string.
         @see String::createStringFromData
     */
-    const String toString() const;
+    String toString() const;
 
     //==============================================================================
     /** If the stream is writing to a user-supplied MemoryBlock, this will trim any excess

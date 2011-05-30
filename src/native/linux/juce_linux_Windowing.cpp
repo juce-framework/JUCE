@@ -646,11 +646,11 @@ public:
         }
 
         // blit results to screen.
-#if JUCE_USE_XSHM
+       #if JUCE_USE_XSHM
         if (usingXShm)
             XShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, True);
         else
-#endif
+       #endif
             XPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
     }
 
@@ -662,13 +662,12 @@ private:
     HeapBlock <char> imageData16Bit;
     int pixelStride, lineStride;
     uint8* imageData;
-
     GC gc;
 
-#if JUCE_USE_XSHM
+   #if JUCE_USE_XSHM
     XShmSegmentInfo segmentInfo;
     bool usingXShm;
-#endif
+   #endif
 
     static int getShiftNeeded (const uint32 mask) noexcept
     {
@@ -3066,7 +3065,7 @@ void MouseCursor::showInAllWindows() const
 }
 
 //==============================================================================
-const Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File& file)
 {
     return Image::null;
 }

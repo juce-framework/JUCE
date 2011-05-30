@@ -48,12 +48,12 @@ const char* const WavAudioFormat::bwavOriginationTime  = "bwav origination time"
 const char* const WavAudioFormat::bwavTimeReference    = "bwav time reference";
 const char* const WavAudioFormat::bwavCodingHistory    = "bwav coding history";
 
-const StringPairArray WavAudioFormat::createBWAVMetadata (const String& description,
-                                                          const String& originator,
-                                                          const String& originatorRef,
-                                                          const Time& date,
-                                                          const int64 timeReferenceSamples,
-                                                          const String& codingHistory)
+StringPairArray WavAudioFormat::createBWAVMetadata (const String& description,
+                                                    const String& originator,
+                                                    const String& originatorRef,
+                                                    const Time& date,
+                                                    const int64 timeReferenceSamples,
+                                                    const String& codingHistory)
 {
     StringPairArray m;
 

@@ -100,7 +100,7 @@ public:
 
         @see currentTimeMillis
     */
-    static const Time JUCE_CALLTYPE getCurrentTime() noexcept;
+    static Time JUCE_CALLTYPE getCurrentTime() noexcept;
 
     /** Returns the time as a number of milliseconds.
 
@@ -129,7 +129,7 @@ public:
                                     it'll return the long form, e.g. "January"
         @see getMonth
     */
-    const String getMonthName (bool threeLetterVersion) const;
+    String getMonthName (bool threeLetterVersion) const;
 
     /** Returns the day of the month.
 
@@ -148,7 +148,7 @@ public:
         @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
                                     false, it'll return the full version, e.g. "Tuesday".
     */
-    const String getWeekdayName (bool threeLetterVersion) const;
+    String getWeekdayName (bool threeLetterVersion) const;
 
     /** Returns the number of hours since midnight.
 
@@ -194,7 +194,7 @@ public:
     bool isDaylightSavingTime() const noexcept;
 
     /** Returns a 3-character string to indicate the local timezone. */
-    const String getTimeZone() const noexcept;
+    String getTimeZone() const noexcept;
 
     //==============================================================================
     /** Quick way of getting a string version of a date and time.
@@ -209,10 +209,10 @@ public:
                                 hour notation.
         @see formatted
     */
-    const String toString (bool includeDate,
-                           bool includeTime,
-                           bool includeSeconds = true,
-                           bool use24HourClock = false) const noexcept;
+    String toString (bool includeDate,
+                     bool includeTime,
+                     bool includeSeconds = true,
+                     bool use24HourClock = false) const noexcept;
 
     /** Converts this date/time to a string with a user-defined format.
 
@@ -245,7 +245,7 @@ public:
 
         @see toString
     */
-    const String formatted (const String& format) const;
+    String formatted (const String& format) const;
 
     //==============================================================================
     /** Adds a RelativeTime to this time. */
@@ -268,8 +268,8 @@ public:
         @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
                                     false, it'll return the full version, e.g. "Tuesday".
     */
-    static const String getWeekdayName (int dayNumber,
-                                        bool threeLetterVersion);
+    static String getWeekdayName (int dayNumber,
+                                  bool threeLetterVersion);
 
     /** Returns the name of one of the months.
 
@@ -277,8 +277,8 @@ public:
         @param threeLetterVersion   if true, it'll be a 3-letter abbreviation, e.g. "Jan"; if false
                                     it'll return the long form, e.g. "January"
     */
-    static const String getMonthName (int monthNumber,
-                                      bool threeLetterVersion);
+    static String getMonthName (int monthNumber,
+                                bool threeLetterVersion);
 
     //==============================================================================
     // Static methods for getting system timers directly..
@@ -374,12 +374,12 @@ private:
 
 //==============================================================================
 /** Adds a RelativeTime to a Time. */
-JUCE_API const Time operator+ (const Time& time, const RelativeTime& delta);
+JUCE_API Time operator+ (const Time& time, const RelativeTime& delta);
 /** Adds a RelativeTime to a Time. */
-JUCE_API const Time operator+ (const RelativeTime& delta, const Time& time);
+JUCE_API Time operator+ (const RelativeTime& delta, const Time& time);
 
 /** Subtracts a RelativeTime from a Time. */
-JUCE_API const Time operator- (const Time& time, const RelativeTime& delta);
+JUCE_API Time operator- (const Time& time, const RelativeTime& delta);
 /** Returns the relative time difference between two times. */
 JUCE_API const RelativeTime operator- (const Time& time1, const Time& time2);
 

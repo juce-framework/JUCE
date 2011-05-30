@@ -1092,6 +1092,10 @@
                   file="src/gui/graphics/effects/juce_ImageEffectFilter.h"/>
           </GROUP>
           <GROUP id="nw92NleR1" name="fonts">
+            <FILE id="BQmnc2" name="juce_CustomTypeface.cpp" compile="1" resource="0"
+                  file="src/gui/graphics/fonts/juce_CustomTypeface.cpp"/>
+            <FILE id="qq3mPn" name="juce_CustomTypeface.h" compile="0" resource="0"
+                  file="src/gui/graphics/fonts/juce_CustomTypeface.h"/>
             <FILE id="2zj67pVi" name="juce_Font.cpp" compile="1" resource="0" file="src/gui/graphics/fonts/juce_Font.cpp"/>
             <FILE id="Ln7yTYyJY" name="juce_Font.h" compile="0" resource="0" file="src/gui/graphics/fonts/juce_Font.h"/>
             <FILE id="rVpLDxysZ" name="juce_GlyphArrangement.cpp" compile="1" resource="0"

@@ -211,7 +211,7 @@ public:
         It is changed when one of the load or save methods is used, or when setFile()
         is used to explicitly set it.
     */
-    const File getFile() const                              { return documentFile; }
+    const File& getFile() const                             { return documentFile; }
 
     /** Sets the file that this document thinks it was loaded from.
 

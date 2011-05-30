@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_XmlElement.h"
 #include "../io/streams/juce_MemoryOutputStream.h"
+#include "../io/files/juce_FileOutputStream.h"
 #include "../io/files/juce_TemporaryFile.h"
 #include "../threads/juce_Thread.h"
 #include "../memory/juce_ScopedPointer.h"
@@ -293,11 +294,11 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
     }
 }
 
-const String XmlElement::createDocument (const String& dtdToUse,
-                                         const bool allOnOneLine,
-                                         const bool includeXmlHeader,
-                                         const String& encodingType,
-                                         const int lineWrapLength) const
+String XmlElement::createDocument (const String& dtdToUse,
+                                   const bool allOnOneLine,
+                                   const bool includeXmlHeader,
+                                   const String& encodingType,
+                                   const int lineWrapLength) const
 {
     MemoryOutputStream mem (2048);
     writeToStream (mem, dtdToUse, allOnOneLine, includeXmlHeader, encodingType, lineWrapLength);
@@ -430,7 +431,7 @@ const String& XmlElement::getStringAttribute (const String& attributeName) const
     return String::empty;
 }
 
-const String XmlElement::getStringAttribute (const String& attributeName, const String& defaultReturnValue) const
+String XmlElement::getStringAttribute (const String& attributeName, const String& defaultReturnValue) const
 {
     for (const XmlAttributeNode* att = attributes; att != nullptr; att = att->nextListItem)
         if (att->hasName (attributeName))
@@ -797,7 +798,7 @@ void XmlElement::setText (const String& newText)
         jassertfalse; // you can only change the text in a text element, not a normal one.
 }
 
-const String XmlElement::getAllSubText() const
+String XmlElement::getAllSubText() const
 {
     if (isTextElement())
         return getText();
@@ -815,8 +816,8 @@ const String XmlElement::getAllSubText() const
     return result;
 }
 
-const String XmlElement::getChildElementAllSubText (const String& childTagName,
-                                                    const String& defaultReturnValue) const
+String XmlElement::getChildElementAllSubText (const String& childTagName,
+                                              const String& defaultReturnValue) const
 {
     const XmlElement* const child = getChildByName (childTagName);
 

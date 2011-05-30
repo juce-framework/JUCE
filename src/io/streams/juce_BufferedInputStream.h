@@ -28,6 +28,7 @@
 
 #include "juce_InputStream.h"
 #include "../../memory/juce_OptionalScopedPointer.h"
+#include "../../memory/juce_HeapBlock.h"
 
 
 //==============================================================================
@@ -74,7 +75,7 @@ public:
     int64 getPosition();
     bool setPosition (int64 newPosition);
     int read (void* destBuffer, int maxBytesToRead);
-    const String readString();
+    String readString();
     bool isExhausted();
 
 

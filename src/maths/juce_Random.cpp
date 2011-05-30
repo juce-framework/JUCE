@@ -106,7 +106,7 @@ double Random::nextDouble() noexcept
     return static_cast <uint32> (nextInt()) / (double) 0xffffffff;
 }
 
-const BigInteger Random::nextLargeNumber (const BigInteger& maximumValue)
+BigInteger Random::nextLargeNumber (const BigInteger& maximumValue)
 {
     BigInteger n;
 

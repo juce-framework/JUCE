@@ -28,10 +28,8 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_PathIterator.h"
-#include "juce_Line.h"
 #include "../../../io/streams/juce_MemoryInputStream.h"
 #include "../../../io/streams/juce_MemoryOutputStream.h"
-#include "../imaging/juce_Image.h"
 
 
 // tests that some co-ords aren't NaNs
@@ -43,7 +41,7 @@ namespace PathHelpers
 {
     const float ellipseAngularIncrement = 0.05f;
 
-    const String nextToken (String::CharPointerType& t)
+    String nextToken (String::CharPointerType& t)
     {
         t = t.findEndOfWhitespace();
 
@@ -196,14 +194,14 @@ bool Path::isEmpty() const noexcept
     return true;
 }
 
-const Rectangle<float> Path::getBounds() const noexcept
+Rectangle<float> Path::getBounds() const noexcept
 {
     return Rectangle<float> (pathXMin, pathYMin,
                              pathXMax - pathXMin,
                              pathYMax - pathYMin);
 }
 
-const Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const noexcept
+Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const noexcept
 {
     return getBounds().transformed (transform);
 }
@@ -338,7 +336,7 @@ void Path::closeSubPath()
     }
 }
 
-const Point<float> Path::getCurrentPosition() const
+Point<float> Path::getCurrentPosition() const
 {
     int i = (int) numElements - 1;
 
@@ -917,10 +915,10 @@ void Path::applyTransform (const AffineTransform& transform) noexcept
 
 
 //==============================================================================
-const AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
-                                                      const float w, const float h,
-                                                      const bool preserveProportions,
-                                                      const Justification& justification) const
+AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
+                                                const float w, const float h,
+                                                const bool preserveProportions,
+                                                const Justification& justification) const
 {
     Rectangle<float> bounds (getBounds());
 
@@ -1022,7 +1020,7 @@ bool Path::intersectsLine (const Line<float>& line, const float tolerance)
     return false;
 }
 
-const Line<float> Path::getClippedLine (const Line<float>& line, const bool keepSectionOutsidePath) const
+Line<float> Path::getClippedLine (const Line<float>& line, const bool keepSectionOutsidePath) const
 {
     Line<float> result (line);
     const bool startInside = contains (line.getStart());
@@ -1064,7 +1062,7 @@ float Path::getLength (const AffineTransform& transform) const
     return length;
 }
 
-const Point<float> Path::getPointAlongPath (float distanceFromStart, const AffineTransform& transform) const
+Point<float> Path::getPointAlongPath (float distanceFromStart, const AffineTransform& transform) const
 {
     PathFlatteningIterator i (*this, transform);
 
@@ -1109,7 +1107,7 @@ float Path::getNearestPoint (const Point<float>& targetPoint, Point<float>& poin
 }
 
 //==============================================================================
-const Path Path::createPathWithRoundedCorners (const float cornerRadius) const
+Path Path::createPathWithRoundedCorners (const float cornerRadius) const
 {
     if (cornerRadius <= 0.01f)
         return *this;
@@ -1381,7 +1379,7 @@ void Path::writePathToStream (OutputStream& dest) const
     dest.writeByte ('e'); // marks the end-of-path
 }
 
-const String Path::toString() const
+String Path::toString() const
 {
     MemoryOutputStream s (2048);
     if (! useNonZeroWinding)

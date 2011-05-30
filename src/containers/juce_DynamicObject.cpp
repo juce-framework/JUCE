@@ -69,7 +69,7 @@ const var DynamicObject::invokeMethod (const Identifier& methodName,
                                        const var* parameters,
                                        int numParameters)
 {
-    return properties [methodName].invoke (var (this), parameters, numParameters);
+    return properties [methodName].invokeMethod (this, parameters, numParameters);
 }
 
 void DynamicObject::setMethod (const Identifier& name,

@@ -160,7 +160,7 @@ bool RelativeCoordinate::isDynamic() const
     return term.usesAnySymbols();
 }
 
-const String RelativeCoordinate::toString() const
+String RelativeCoordinate::toString() const
 {
     return term.toString();
 }

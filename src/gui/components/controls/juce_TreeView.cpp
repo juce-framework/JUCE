@@ -626,6 +626,17 @@ TreeViewItem* TreeView::findItemFromIdentifierString (const String& identifierSt
 }
 
 //==============================================================================
+static void addAllSelectedItemIds (TreeViewItem* item, XmlElement& parent)
+{
+    if (item->isSelected())
+        parent.createNewChildElement ("SELECTED")->setAttribute ("id", item->getItemIdentifierString());
+
+    const int numSubItems = item->getNumSubItems();
+
+    for (int i = 0; i < numSubItems; ++i)
+        addAllSelectedItemIds (item->getSubItem(i), parent);
+}
+
 XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) const
 {
     XmlElement* e = nullptr;
@@ -634,14 +645,19 @@ XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) co
     {
         e = rootItem->getOpennessState();
 
-        if (e != nullptr && alsoIncludeScrollPosition)
-            e->setAttribute ("scrollPos", viewport->getViewPositionY());
+        if (e != nullptr)
+        {
+            if (alsoIncludeScrollPosition)
+                e->setAttribute ("scrollPos", viewport->getViewPositionY());
+
+            addAllSelectedItemIds (rootItem, *e);
+        }
     }
 
     return e;
 }
 
-void TreeView::restoreOpennessState (const XmlElement& newState)
+void TreeView::restoreOpennessState (const XmlElement& newState, const bool restoreStoredSelection)
 {
     if (rootItem != nullptr)
     {
@@ -650,6 +666,19 @@ void TreeView::restoreOpennessState (const XmlElement& newState)
         if (newState.hasAttribute ("scrollPos"))
             viewport->setViewPosition (viewport->getViewPositionX(),
                                        newState.getIntAttribute ("scrollPos"));
+
+        if (restoreStoredSelection)
+        {
+            clearSelectedItems();
+
+            forEachXmlChildElementWithTagName (newState, e, "SELECTED")
+            {
+                TreeViewItem* const item = rootItem->findItemFromIdentifierString (e->getStringAttribute ("id"));
+
+                if (item != nullptr)
+                    item->setSelected (true, false);
+            }
+        }
     }
 }
 
@@ -1702,7 +1731,7 @@ TreeViewItem* TreeViewItem::getNextVisibleItem (const bool recurse) const noexce
     return nullptr;
 }
 
-const String TreeViewItem::getItemIdentifierString() const
+String TreeViewItem::getItemIdentifierString() const
 {
     String s;
 
@@ -1723,7 +1752,7 @@ TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifi
     {
         const String remainingPath (identifierString.substring (thisId.length() + 1));
 
-        bool wasOpen = isOpen();
+        const bool wasOpen = isOpen();
         setOpen (true);
 
         for (int i = subItems.size(); --i >= 0;)

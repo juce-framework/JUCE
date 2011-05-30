@@ -286,10 +286,10 @@ void PropertiesFile::propertyChanged()
 }
 
 //==============================================================================
-const File PropertiesFile::getDefaultAppSettingsFile (const String& applicationName,
-                                                      const String& fileNameSuffix,
-                                                      const String& folderName,
-                                                      const bool commonToAllUsers)
+File PropertiesFile::getDefaultAppSettingsFile (const String& applicationName,
+                                                const String& fileNameSuffix,
+                                                const String& folderName,
+                                                const bool commonToAllUsers)
 {
     // mustn't have illegal characters in this name..
     jassert (applicationName == File::createLegalFileName (applicationName));

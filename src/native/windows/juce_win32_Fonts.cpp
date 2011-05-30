@@ -66,7 +66,7 @@ static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int t
     return 1;
 }
 
-const StringArray Font::findAllTypefaceNames()
+StringArray Font::findAllTypefaceNames()
 {
     StringArray results;
     HDC dc = CreateCompatibleDC (0);

@@ -136,7 +136,7 @@ public:
 
     //==============================================================================
     /** Returns the file that's being used. */
-    const File getFile() const                              { return file; }
+    File getFile() const                              { return file; }
 
     //==============================================================================
     /** Handy utility to create a properties file in whatever the standard OS-specific
@@ -177,10 +177,10 @@ public:
         only the current user. Use this to choose whether you're saving settings that are common
         or user-specific.
     */
-    static const File getDefaultAppSettingsFile (const String& applicationName,
-                                                 const String& fileNameSuffix,
-                                                 const String& folderName,
-                                                 bool commonToAllUsers);
+    static File getDefaultAppSettingsFile (const String& applicationName,
+                                           const String& fileNameSuffix,
+                                           const String& folderName,
+                                           bool commonToAllUsers);
 
 protected:
     virtual void propertyChanged();

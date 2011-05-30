@@ -254,7 +254,7 @@ public:
 
         @see setFont
     */
-    const Font getFont() const;
+    const Font& getFont() const;
 
     //==============================================================================
     /** If set to true, focusing on the editor will highlight all its text.
@@ -336,7 +336,7 @@ public:
 
     //==============================================================================
     /** Returns the entire contents of the editor. */
-    const String getText() const;
+    String getText() const;
 
     /** Returns a section of the contents of the editor. */
     const String getTextInRange (const Range<int>& textRange) const;
@@ -444,7 +444,7 @@ public:
     const Range<int> getHighlightedRegion() const                   { return selection; }
 
     /** Returns the section of text that is currently selected. */
-    const String getHighlightedText() const;
+    String getHighlightedText() const;
 
     /** Finds the index of the character at a given position.
 

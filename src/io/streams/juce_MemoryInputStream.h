@@ -27,6 +27,7 @@
 #define __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
 
 #include "juce_InputStream.h"
+#include "../../memory/juce_HeapBlock.h"
 
 
 //==============================================================================

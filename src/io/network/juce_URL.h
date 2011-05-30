@@ -27,8 +27,9 @@
 #define __JUCE_URL_JUCEHEADER__
 
 #include "../../text/juce_StringPairArray.h"
-#include "../../text/juce_XmlElement.h"
-#include "../streams/juce_InputStream.h"
+#include "../../io/files/juce_File.h"
+class InputStream;
+class XmlElement;
 
 
 //==============================================================================
@@ -64,7 +65,7 @@ public:
         withParameter() method, then the string will have these appended on the
         end and url-encoded.
     */
-    const String toString (bool includeGetParameters) const;
+    String toString (bool includeGetParameters) const;
 
     /** True if it seems to be valid. */
     bool isWellFormed() const;
@@ -73,20 +74,20 @@ public:
 
         E.g. for "http://www.xyz.com/foobar", this will return "www.xyz.com".
     */
-    const String getDomain() const;
+    String getDomain() const;
 
     /** Returns the path part of the URL.
 
         E.g. for "http://www.xyz.com/foo/bar?x=1", this will return "foo/bar".
     */
-    const String getSubPath() const;
+    String getSubPath() const;
 
     /** Returns the scheme of the URL.
 
         E.g. for "http://www.xyz.com/foobar", this will return "http". (It won't
         include the colon).
     */
-    const String getScheme() const;
+    String getScheme() const;
 
     /** Returns a new version of this URL that uses a different sub-path.
 
@@ -157,7 +158,7 @@ public:
 
     /** Returns the data that was set using withPOSTData().
     */
-    const String getPostData() const                            { return postData; }
+    String getPostData() const                            { return postData; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
@@ -241,7 +242,7 @@ public:
                                 a GET command if this is false)
         @see readEntireBinaryStream, readEntireXmlStream
     */
-    const String readEntireTextStream (bool usePostCommand = false) const;
+    String readEntireTextStream (bool usePostCommand = false) const;
 
     /** Tries to download the entire contents of this URL and parse it as XML.
 
@@ -272,8 +273,8 @@ public:
 
         @see removeEscapeChars
     */
-    static const String addEscapeChars (const String& stringToAddEscapeCharsTo,
-                                        bool isParameter);
+    static String addEscapeChars (const String& stringToAddEscapeCharsTo,
+                                  bool isParameter);
 
     /** Replaces any escape character sequences in a string with their original
         character codes.
@@ -284,7 +285,7 @@ public:
 
         @see addEscapeChars
     */
-    static const String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
+    static String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
 
 private:
     //==============================================================================

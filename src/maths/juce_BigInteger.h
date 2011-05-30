@@ -127,7 +127,7 @@ public:
         e.g. getBitRangeAsInt (0, 64) would return the lowest 64 bits.
         @see getBitRangeAsInt
     */
-    const BigInteger getBitRange (int startBit, int numBits) const;
+    BigInteger getBitRange (int startBit, int numBits) const;
 
     /** Returns a range of bits as an integer value.
 
@@ -189,20 +189,20 @@ public:
     BigInteger& operator>>= (int numBitsToShift);
     BigInteger& operator++();
     BigInteger& operator--();
-    const BigInteger operator++ (int);
-    const BigInteger operator-- (int);
+    BigInteger operator++ (int);
+    BigInteger operator-- (int);
 
-    const BigInteger operator-() const;
-    const BigInteger operator+ (const BigInteger& other) const;
-    const BigInteger operator- (const BigInteger& other) const;
-    const BigInteger operator* (const BigInteger& other) const;
-    const BigInteger operator/ (const BigInteger& other) const;
-    const BigInteger operator| (const BigInteger& other) const;
-    const BigInteger operator& (const BigInteger& other) const;
-    const BigInteger operator^ (const BigInteger& other) const;
-    const BigInteger operator% (const BigInteger& other) const;
-    const BigInteger operator<< (int numBitsToShift) const;
-    const BigInteger operator>> (int numBitsToShift) const;
+    BigInteger operator-() const;
+    BigInteger operator+ (const BigInteger& other) const;
+    BigInteger operator- (const BigInteger& other) const;
+    BigInteger operator* (const BigInteger& other) const;
+    BigInteger operator/ (const BigInteger& other) const;
+    BigInteger operator| (const BigInteger& other) const;
+    BigInteger operator& (const BigInteger& other) const;
+    BigInteger operator^ (const BigInteger& other) const;
+    BigInteger operator% (const BigInteger& other) const;
+    BigInteger operator<< (int numBitsToShift) const;
+    BigInteger operator>> (int numBitsToShift) const;
 
     bool operator== (const BigInteger& other) const noexcept;
     bool operator!= (const BigInteger& other) const noexcept;
@@ -239,7 +239,7 @@ public:
 
     /** Returns the largest value that will divide both this value and the one passed-in.
     */
-    const BigInteger findGreatestCommonDivisor (BigInteger other) const;
+    BigInteger findGreatestCommonDivisor (BigInteger other) const;
 
     /** Performs a combined exponent and modulo operation.
 
@@ -276,7 +276,7 @@ public:
         If minimumNumCharacters is greater than 0, the returned string will be
         padded with leading zeros to reach at least that length.
     */
-    const String toString (int base, int minimumNumCharacters = 1) const;
+    String toString (int base, int minimumNumCharacters = 1) const;
 
     /** Reads the numeric value from a string.
 
@@ -293,7 +293,7 @@ public:
 
         @see loadFromMemoryBlock
     */
-    const MemoryBlock toMemoryBlock() const;
+    MemoryBlock toMemoryBlock() const;
 
     /** Converts a block of raw data into a number.
 
@@ -313,7 +313,7 @@ private:
     void ensureSize (int numVals);
     void shiftLeft (int bits, int startBit);
     void shiftRight (int bits, int startBit);
-    static const BigInteger simpleGCD (BigInteger* m, BigInteger* n);
+    static BigInteger simpleGCD (BigInteger* m, BigInteger* n);
 
     static inline int bitToIndex (const int bit) noexcept       { return bit >> 5; }
     static inline uint32 bitToMask (const int bit) noexcept     { return 1 << (bit & 31); }

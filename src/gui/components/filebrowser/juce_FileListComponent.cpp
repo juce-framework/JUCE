@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/imaging/juce_ImageCache.h"
 #include "../../../events/juce_AsyncUpdater.h"
 
-const Image juce_createIconForFile (const File& file);
+Image juce_createIconForFile (const File& file);
 
 
 //==============================================================================

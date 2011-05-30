@@ -48,7 +48,7 @@ ThreadPoolJob::~ThreadPoolJob()
     jassert (pool == nullptr || ! pool->contains (this));
 }
 
-const String ThreadPoolJob::getJobName() const
+String ThreadPoolJob::getJobName() const
 {
     return jobName;
 }
@@ -297,7 +297,7 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
     return true;
 }
 
-const StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs) const
+StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs) const
 {
     StringArray s;
     const ScopedLock sl (lock);

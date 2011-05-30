@@ -51,18 +51,18 @@ public:
     virtual int toInt (const ValueUnion&) const noexcept                        { return 0; }
     virtual int64 toInt64 (const ValueUnion&) const noexcept                    { return 0; }
     virtual double toDouble (const ValueUnion&) const noexcept                  { return 0; }
-    virtual const String toString (const ValueUnion&) const                     { return String::empty; }
+    virtual String toString (const ValueUnion&) const                           { return String::empty; }
     virtual bool toBool (const ValueUnion&) const noexcept                      { return false; }
     virtual ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
 
-    virtual bool isVoid() const noexcept                        { return false; }
-    virtual bool isInt() const noexcept                         { return false; }
-    virtual bool isInt64() const noexcept                       { return false; }
-    virtual bool isBool() const noexcept                        { return false; }
-    virtual bool isDouble() const noexcept                      { return false; }
-    virtual bool isString() const noexcept                      { return false; }
-    virtual bool isObject() const noexcept                      { return false; }
-    virtual bool isMethod() const noexcept                      { return false; }
+    virtual bool isVoid() const noexcept      { return false; }
+    virtual bool isInt() const noexcept       { return false; }
+    virtual bool isInt64() const noexcept     { return false; }
+    virtual bool isBool() const noexcept      { return false; }
+    virtual bool isDouble() const noexcept    { return false; }
+    virtual bool isString() const noexcept    { return false; }
+    virtual bool isObject() const noexcept    { return false; }
+    virtual bool isMethod() const noexcept    { return false; }
 
     virtual void cleanUp (ValueUnion&) const noexcept {}
     virtual void createCopy (ValueUnion& dest, const ValueUnion& source) const      { dest = source; }
@@ -92,7 +92,7 @@ public:
     int toInt (const ValueUnion& data) const noexcept       { return data.intValue; };
     int64 toInt64 (const ValueUnion& data) const noexcept   { return (int64) data.intValue; };
     double toDouble (const ValueUnion& data) const noexcept { return (double) data.intValue; }
-    const String toString (const ValueUnion& data) const    { return String (data.intValue); }
+    String toString (const ValueUnion& data) const          { return String (data.intValue); }
     bool toBool (const ValueUnion& data) const noexcept     { return data.intValue != 0; }
     bool isInt() const noexcept                             { return true; }
 
@@ -119,7 +119,7 @@ public:
     int toInt (const ValueUnion& data) const noexcept       { return (int) data.int64Value; };
     int64 toInt64 (const ValueUnion& data) const noexcept   { return data.int64Value; };
     double toDouble (const ValueUnion& data) const noexcept { return (double) data.int64Value; }
-    const String toString (const ValueUnion& data) const    { return String (data.int64Value); }
+    String toString (const ValueUnion& data) const          { return String (data.int64Value); }
     bool toBool (const ValueUnion& data) const noexcept     { return data.int64Value != 0; }
     bool isInt64() const noexcept                           { return true; }
 
@@ -146,7 +146,7 @@ public:
     int toInt (const ValueUnion& data) const noexcept       { return (int) data.doubleValue; };
     int64 toInt64 (const ValueUnion& data) const noexcept   { return (int64) data.doubleValue; };
     double toDouble (const ValueUnion& data) const noexcept { return data.doubleValue; }
-    const String toString (const ValueUnion& data) const    { return String (data.doubleValue); }
+    String toString (const ValueUnion& data) const          { return String (data.doubleValue); }
     bool toBool (const ValueUnion& data) const noexcept     { return data.doubleValue != 0; }
     bool isDouble() const noexcept                          { return true; }
 
@@ -173,7 +173,7 @@ public:
     int toInt (const ValueUnion& data) const noexcept       { return data.boolValue ? 1 : 0; };
     int64 toInt64 (const ValueUnion& data) const noexcept   { return data.boolValue ? 1 : 0; };
     double toDouble (const ValueUnion& data) const noexcept { return data.boolValue ? 1.0 : 0.0; }
-    const String toString (const ValueUnion& data) const    { return String::charToString (data.boolValue ? '1' : '0'); }
+    String toString (const ValueUnion& data) const          { return String::charToString (data.boolValue ? '1' : '0'); }
     bool toBool (const ValueUnion& data) const noexcept     { return data.boolValue; }
     bool isBool() const noexcept                            { return true; }
 
@@ -196,32 +196,37 @@ public:
     VariantType_String() noexcept {}
     static const VariantType_String instance;
 
-    void cleanUp (ValueUnion& data) const noexcept                       { delete data.stringValue; }
-    void createCopy (ValueUnion& dest, const ValueUnion& source) const   { dest.stringValue = new String (*source.stringValue); }
+    void cleanUp (ValueUnion& data) const noexcept                       { getString (data)-> ~String(); }
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const   { new (dest.stringValue) String (*getString (source)); }
 
-    int toInt (const ValueUnion& data) const noexcept       { return data.stringValue->getIntValue(); };
-    int64 toInt64 (const ValueUnion& data) const noexcept   { return data.stringValue->getLargeIntValue(); };
-    double toDouble (const ValueUnion& data) const noexcept { return data.stringValue->getDoubleValue(); }
-    const String toString (const ValueUnion& data) const    { return *data.stringValue; }
-    bool toBool (const ValueUnion& data) const noexcept     { return data.stringValue->getIntValue() != 0
-                                                                      || data.stringValue->trim().equalsIgnoreCase ("true")
-                                                                      || data.stringValue->trim().equalsIgnoreCase ("yes"); }
     bool isString() const noexcept                          { return true; }
+    int toInt (const ValueUnion& data) const noexcept       { return getString (data)->getIntValue(); };
+    int64 toInt64 (const ValueUnion& data) const noexcept   { return getString (data)->getLargeIntValue(); };
+    double toDouble (const ValueUnion& data) const noexcept { return getString (data)->getDoubleValue(); }
+    String toString (const ValueUnion& data) const          { return *getString (data); }
+    bool toBool (const ValueUnion& data) const noexcept     { return getString (data)->getIntValue() != 0
+                                                                      || getString (data)->trim().equalsIgnoreCase ("true")
+                                                                      || getString (data)->trim().equalsIgnoreCase ("yes"); }
 
     bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
-        return otherType.toString (otherData) == *data.stringValue;
+        return otherType.toString (otherData) == *getString (data);
     }
 
     void writeToStream (const ValueUnion& data, OutputStream& output) const
     {
-        const int len = data.stringValue->getNumBytesAsUTF8() + 1;
+        const String* const s = getString (data);
+        const int len = s->getNumBytesAsUTF8() + 1;
+        HeapBlock<char> temp (len);
+        s->copyToUTF8 (temp, len);
         output.writeCompressedInt (len + 1);
         output.writeByte (varMarker_String);
-        HeapBlock<char> temp (len);
-        data.stringValue->copyToUTF8 (temp, len);
         output.write (temp, len);
     }
+
+private:
+    static inline const String* getString (const ValueUnion& data) noexcept { return reinterpret_cast <const String*> (data.stringValue); }
+    static inline String* getString (ValueUnion& data) noexcept             { return reinterpret_cast <String*> (data.stringValue); }
 };
 
 //==============================================================================
@@ -234,7 +239,7 @@ public:
     void cleanUp (ValueUnion& data) const noexcept                      { if (data.objectValue != nullptr) data.objectValue->decReferenceCount(); }
     void createCopy (ValueUnion& dest, const ValueUnion& source) const  { dest.objectValue = source.objectValue; if (dest.objectValue != nullptr) dest.objectValue->incReferenceCount(); }
 
-    const String toString (const ValueUnion& data) const                      { return "Object 0x" + String::toHexString ((int) (pointer_sized_int) data.objectValue); }
+    String toString (const ValueUnion& data) const                            { return "Object 0x" + String::toHexString ((int) (pointer_sized_int) data.objectValue); }
     bool toBool (const ValueUnion& data) const noexcept                       { return data.objectValue != 0; }
     ReferenceCountedObject* toObject (const ValueUnion& data) const noexcept  { return data.objectValue; }
     bool isObject() const noexcept                                            { return true; }
@@ -258,7 +263,7 @@ public:
     VariantType_Method() noexcept {}
     static const VariantType_Method instance;
 
-    const String toString (const ValueUnion&) const         { return "Method"; }
+    String toString (const ValueUnion&) const               { return "Method"; }
     bool toBool (const ValueUnion& data) const noexcept     { return data.methodValue != 0; }
     bool isMethod() const noexcept                          { return true; }
 
@@ -325,17 +330,17 @@ var::var (const double value_) noexcept : type (&VariantType_Double::instance)
 
 var::var (const String& value_)  : type (&VariantType_String::instance)
 {
-    value.stringValue = new String (value_);
+    new (value.stringValue) String (value_);
 }
 
 var::var (const char* const value_)  : type (&VariantType_String::instance)
 {
-    value.stringValue = new String (value_);
+    new (value.stringValue) String (value_);
 }
 
 var::var (const wchar_t* const value_)  : type (&VariantType_String::instance)
 {
-    value.stringValue = new String (value_);
+    new (value.stringValue) String (value_);
 }
 
 var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::instance)
@@ -352,22 +357,22 @@ var::var (MethodFunction method_) noexcept : type (&VariantType_Method::instance
 }
 
 //==============================================================================
-bool var::isVoid() const noexcept               { return type->isVoid(); }
-bool var::isInt() const noexcept                { return type->isInt(); }
-bool var::isInt64() const noexcept              { return type->isInt64(); }
-bool var::isBool() const noexcept               { return type->isBool(); }
-bool var::isDouble() const noexcept             { return type->isDouble(); }
-bool var::isString() const noexcept             { return type->isString(); }
-bool var::isObject() const noexcept             { return type->isObject(); }
-bool var::isMethod() const noexcept             { return type->isMethod(); }
+bool var::isVoid() const noexcept     { return type->isVoid(); }
+bool var::isInt() const noexcept      { return type->isInt(); }
+bool var::isInt64() const noexcept    { return type->isInt64(); }
+bool var::isBool() const noexcept     { return type->isBool(); }
+bool var::isDouble() const noexcept   { return type->isDouble(); }
+bool var::isString() const noexcept   { return type->isString(); }
+bool var::isObject() const noexcept   { return type->isObject(); }
+bool var::isMethod() const noexcept   { return type->isMethod(); }
 
 var::operator int() const noexcept                      { return type->toInt (value); }
 var::operator int64() const noexcept                    { return type->toInt64 (value); }
 var::operator bool() const noexcept                     { return type->toBool (value); }
 var::operator float() const noexcept                    { return (float) type->toDouble (value); }
 var::operator double() const noexcept                   { return type->toDouble (value); }
-const String var::toString() const                      { return type->toString (value); }
-var::operator const String() const                      { return type->toString (value); }
+String var::toString() const                            { return type->toString (value); }
+var::operator String() const                            { return type->toString (value); }
 ReferenceCountedObject* var::getObject() const noexcept { return type->toObject (value); }
 DynamicObject* var::getDynamicObject() const noexcept   { return dynamic_cast <DynamicObject*> (getObject()); }
 
@@ -414,7 +419,7 @@ void var::writeToStream (OutputStream& output) const
     type->writeToStream (value, output);
 }
 
-const var var::readFromStream (InputStream& input)
+var var::readFromStream (InputStream& input)
 {
     const int numBytes = input.readCompressedInt();
 
@@ -441,60 +446,57 @@ const var var::readFromStream (InputStream& input)
     return var::null;
 }
 
-const var var::operator[] (const Identifier& propertyName) const
+var var::operator[] (const Identifier& propertyName) const
 {
     DynamicObject* const o = getDynamicObject();
     return o != nullptr ? o->getProperty (propertyName) : var::null;
 }
 
-const var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
+var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
 {
     DynamicObject* const o = getDynamicObject();
     return o != nullptr ? o->invokeMethod (method, arguments, numArguments) : var::null;
 }
 
-const var var::invoke (const var& targetObject, const var* arguments, int numArguments) const
+var var::invokeMethod (DynamicObject* const target, const var* const arguments, const int numArguments) const
 {
-    if (isMethod())
-    {
-        DynamicObject* const target = targetObject.getDynamicObject();
+    jassert (target != nullptr);
 
-        if (target != nullptr)
-            return (target->*(value.methodValue)) (arguments, numArguments);
-    }
+    if (isMethod())
+        return (target->*(value.methodValue)) (arguments, numArguments);
 
     return var::null;
 }
 
-const var var::call (const Identifier& method) const
+var var::call (const Identifier& method) const
 {
     return invoke (method, nullptr, 0);
 }
 
-const var var::call (const Identifier& method, const var& arg1) const
+var var::call (const Identifier& method, const var& arg1) const
 {
     return invoke (method, &arg1, 1);
 }
 
-const var var::call (const Identifier& method, const var& arg1, const var& arg2) const
+var var::call (const Identifier& method, const var& arg1, const var& arg2) const
 {
     var args[] = { arg1, arg2 };
     return invoke (method, args, 2);
 }
 
-const var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3)
+var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3)
 {
     var args[] = { arg1, arg2, arg3 };
     return invoke (method, args, 3);
 }
 
-const var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
+var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
 {
     var args[] = { arg1, arg2, arg3, arg4 };
     return invoke (method, args, 4);
 }
 
-const var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
+var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
 {
     var args[] = { arg1, arg2, arg3, arg4, arg5 };
     return invoke (method, args, 5);

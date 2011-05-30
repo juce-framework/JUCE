@@ -225,10 +225,7 @@ void JPEGImageFormat::setQuality (const float newQuality)
     quality = newQuality;
 }
 
-const String JPEGImageFormat::getFormatName()
-{
-    return "JPEG";
-}
+String JPEGImageFormat::getFormatName() { return "JPEG"; }
 
 bool JPEGImageFormat::canUnderstand (InputStream& in)
 {
@@ -247,10 +244,10 @@ bool JPEGImageFormat::canUnderstand (InputStream& in)
 }
 
 #if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
-  const Image juce_loadWithCoreImage (InputStream& input);
+ Image juce_loadWithCoreImage (InputStream& input);
 #endif
 
-const Image JPEGImageFormat::decodeImage (InputStream& in)
+Image JPEGImageFormat::decodeImage (InputStream& in)
 {
 #if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);

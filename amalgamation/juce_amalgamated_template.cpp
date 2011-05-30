@@ -365,6 +365,7 @@
  #include "../src/gui/graphics/fonts/juce_GlyphArrangement.cpp"
  #include "../src/gui/graphics/fonts/juce_TextLayout.cpp"
  #include "../src/gui/graphics/fonts/juce_Typeface.cpp"
+ #include "../src/gui/graphics/fonts/juce_CustomTypeface.cpp"
  #include "../src/gui/graphics/geometry/juce_AffineTransform.cpp"
  #include "../src/gui/graphics/geometry/juce_Path.cpp"
  #include "../src/gui/graphics/geometry/juce_PathIterator.cpp"

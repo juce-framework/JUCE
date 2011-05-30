@@ -403,7 +403,7 @@ public:
         }
     }
 
-    const Font getFont()
+    Font getFont()
     {
         return currentState->font;
     }

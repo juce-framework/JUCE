@@ -32,6 +32,7 @@
 #include "../io/files/juce_NamedPipe.h"
 #include "../memory/juce_ScopedPointer.h"
 class InterprocessConnectionServer;
+class MemoryBlock;
 
 
 //==============================================================================

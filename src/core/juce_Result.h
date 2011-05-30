@@ -36,7 +36,7 @@
 
     E.g.
     @code
-    const Result myOperation()
+    Result myOperation()
     {
         if (doSomeKindOfFoobar())
             return Result::ok();
@@ -62,13 +62,13 @@ class Result
 public:
     //==============================================================================
     /** Creates and returns a 'successful' result. */
-    static const Result ok() noexcept;
+    static Result ok() noexcept;
 
     /** Creates a 'failure' result.
         If you pass a blank error message in here, a default "Unknown Error" message
         will be used instead.
     */
-    static const Result fail (const String& errorMessage) noexcept;
+    static Result fail (const String& errorMessage) noexcept;
 
     //==============================================================================
     /** Returns true if this result indicates a success. */
@@ -93,7 +93,7 @@ public:
     /** Returns the error message that was set when this result was created.
         For a successful result, this will be an empty string;
     */
-    const String getErrorMessage() const noexcept;
+    const String& getErrorMessage() const noexcept;
 
     //==============================================================================
     Result (const Result& other);

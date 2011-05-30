@@ -159,10 +159,10 @@ namespace PrimesHelpers
 }
 
 //==============================================================================
-const BigInteger Primes::createProbablePrime (const int bitLength,
-                                              const int certainty,
-                                              const int* randomSeeds,
-                                              int numRandomSeeds)
+BigInteger Primes::createProbablePrime (const int bitLength,
+                                        const int certainty,
+                                        const int* randomSeeds,
+                                        int numRandomSeeds)
 {
     using namespace PrimesHelpers;
     int defaultSeeds [16];

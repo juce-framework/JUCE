@@ -90,7 +90,7 @@ void RelativePoint::moveToAbsolute (const Point<float>& newPos, const Expression
     y.moveToAbsolute (newPos.getY(), scope);
 }
 
-const String RelativePoint::toString() const
+String RelativePoint::toString() const
 {
     return x.toString() + ", " + y.toString();
 }

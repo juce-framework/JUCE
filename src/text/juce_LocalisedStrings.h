@@ -135,7 +135,7 @@ public:
 
         @see setCurrentMappings, getCurrentMappings
     */
-    static const String translateWithCurrentMappings (const String& text);
+    static String translateWithCurrentMappings (const String& text);
 
     /** Tries to translate a string using the currently selected set of mappings.
 
@@ -146,14 +146,14 @@ public:
 
         @see setCurrentMappings, getCurrentMappings
     */
-    static const String translateWithCurrentMappings (const char* text);
+    static String translateWithCurrentMappings (const char* text);
 
     //==============================================================================
     /** Attempts to look up a string and return its localised version.
 
         If the string isn't found in the list, the original string will be returned.
     */
-    const String translate (const String& text) const;
+    String translate (const String& text) const;
 
     /** Returns the name of the language specified in the translation file.
 
@@ -162,7 +162,7 @@ public:
         language: german
         @endcode
     */
-    const String getLanguageName() const                        { return languageName; }
+    String getLanguageName() const                        { return languageName; }
 
     /** Returns the list of suitable country codes listed in the translation file.
 

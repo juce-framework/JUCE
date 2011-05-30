@@ -26,7 +26,6 @@
 #ifndef __JUCE_NAMEDPIPE_JUCEHEADER__
 #define __JUCE_NAMEDPIPE_JUCEHEADER__
 
-#include "../streams/juce_OutputStream.h"
 #include "../../threads/juce_CriticalSection.h"
 
 
@@ -69,7 +68,7 @@ public:
     bool isOpen() const;
 
     /** Returns the last name that was used to try to open this pipe. */
-    const String getName() const;
+    String getName() const;
 
     //==============================================================================
     /** Reads data from the pipe.

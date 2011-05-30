@@ -137,7 +137,7 @@ int BigInteger::toInteger() const noexcept
     return negative ? -n : n;
 }
 
-const BigInteger BigInteger::getBitRange (int startBit, int numBits) const
+BigInteger BigInteger::getBitRange (int startBit, int numBits) const
 {
     BigInteger r;
     numBits = jmin (numBits, getHighestBit() + 1 - startBit);
@@ -609,33 +609,24 @@ BigInteger& BigInteger::operator%= (const BigInteger& divisor)
     return *this;
 }
 
-BigInteger& BigInteger::operator<<= (int numBitsToShift)
-{
-    shiftBits (numBitsToShift, 0);
-    return *this;
-}
+BigInteger& BigInteger::operator++()      { return operator+= (1); }
+BigInteger& BigInteger::operator--()      { return operator-= (1); }
+BigInteger  BigInteger::operator++ (int)  { const BigInteger old (*this); operator+= (1); return old; }
+BigInteger  BigInteger::operator-- (int)  { const BigInteger old (*this); operator-= (1); return old; }
 
-BigInteger& BigInteger::operator>>= (int numBitsToShift)
-{
-    return operator<<= (-numBitsToShift);
-}
-
-BigInteger& BigInteger::operator++()            { return operator+= (1); }
-BigInteger& BigInteger::operator--()            { return operator-= (1); }
-const BigInteger BigInteger::operator++ (int)   { const BigInteger old (*this); operator+= (1); return old; }
-const BigInteger BigInteger::operator-- (int)   { const BigInteger old (*this); operator-= (1); return old; }
-
-const BigInteger BigInteger::operator+ (const BigInteger& other) const  { BigInteger b (*this); return b += other; }
-const BigInteger BigInteger::operator- (const BigInteger& other) const  { BigInteger b (*this); return b -= other; }
-const BigInteger BigInteger::operator* (const BigInteger& other) const  { BigInteger b (*this); return b *= other; }
-const BigInteger BigInteger::operator/ (const BigInteger& other) const  { BigInteger b (*this); return b /= other; }
-const BigInteger BigInteger::operator| (const BigInteger& other) const  { BigInteger b (*this); return b |= other; }
-const BigInteger BigInteger::operator& (const BigInteger& other) const  { BigInteger b (*this); return b &= other; }
-const BigInteger BigInteger::operator^ (const BigInteger& other) const  { BigInteger b (*this); return b ^= other; }
-const BigInteger BigInteger::operator% (const BigInteger& other) const  { BigInteger b (*this); return b %= other; }
-const BigInteger BigInteger::operator<< (const int numBits) const       { BigInteger b (*this); return b <<= numBits; }
-const BigInteger BigInteger::operator>> (const int numBits) const       { BigInteger b (*this); return b >>= numBits; }
-const BigInteger BigInteger::operator-() const                          { BigInteger b (*this); b.negate(); return b; }
+BigInteger  BigInteger::operator-() const                            { BigInteger b (*this); b.negate(); return b; }
+BigInteger  BigInteger::operator+   (const BigInteger& other) const  { BigInteger b (*this); return b += other; }
+BigInteger  BigInteger::operator-   (const BigInteger& other) const  { BigInteger b (*this); return b -= other; }
+BigInteger  BigInteger::operator*   (const BigInteger& other) const  { BigInteger b (*this); return b *= other; }
+BigInteger  BigInteger::operator/   (const BigInteger& other) const  { BigInteger b (*this); return b /= other; }
+BigInteger  BigInteger::operator|   (const BigInteger& other) const  { BigInteger b (*this); return b |= other; }
+BigInteger  BigInteger::operator&   (const BigInteger& other) const  { BigInteger b (*this); return b &= other; }
+BigInteger  BigInteger::operator^   (const BigInteger& other) const  { BigInteger b (*this); return b ^= other; }
+BigInteger  BigInteger::operator%   (const BigInteger& other) const  { BigInteger b (*this); return b %= other; }
+BigInteger  BigInteger::operator<<  (const int numBits) const        { BigInteger b (*this); return b <<= numBits; }
+BigInteger  BigInteger::operator>>  (const int numBits) const        { BigInteger b (*this); return b >>= numBits; }
+BigInteger& BigInteger::operator<<= (const int numBits)              { shiftBits (numBits, 0);  return *this; }
+BigInteger& BigInteger::operator>>= (const int numBits)              { shiftBits (-numBits, 0); return *this; }
 
 //==============================================================================
 int BigInteger::compare (const BigInteger& other) const noexcept
@@ -781,7 +772,7 @@ void BigInteger::shiftBits (int bits, const int startBit)
 }
 
 //==============================================================================
-const BigInteger BigInteger::simpleGCD (BigInteger* m, BigInteger* n)
+BigInteger BigInteger::simpleGCD (BigInteger* m, BigInteger* n)
 {
     while (! m->isZero())
     {
@@ -794,7 +785,7 @@ const BigInteger BigInteger::simpleGCD (BigInteger* m, BigInteger* n)
     return *n;
 }
 
-const BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
+BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
 {
     BigInteger m (*this);
 
@@ -895,7 +886,7 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& 
     return stream << value.toString (10);
 }
 
-const String BigInteger::toString (const int base, const int minimumNumCharacters) const
+String BigInteger::toString (const int base, const int minimumNumCharacters) const
 {
     String s;
     BigInteger v (*this);
@@ -991,7 +982,7 @@ void BigInteger::parseString (const String& text, const int base)
     setNegative (text.trimStart().startsWithChar ('-'));
 }
 
-const MemoryBlock BigInteger::toMemoryBlock() const
+MemoryBlock BigInteger::toMemoryBlock() const
 {
     const int numBytes = (getHighestBit() + 8) >> 3;
     MemoryBlock mb ((size_t) numBytes);

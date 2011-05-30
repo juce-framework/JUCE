@@ -47,12 +47,12 @@ const String SystemStats::getOperatingSystemName()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-#if JUCE_64BIT
+   #if JUCE_64BIT
     return true;
-#else
+   #else
     //xxx not sure how to find this out?..
     return false;
-#endif
+   #endif
 }
 
 //==============================================================================
@@ -129,9 +129,9 @@ const String SystemStats::getComputerName()
 SystemStats::CPUFlags::CPUFlags()
 {
     const String flags (LinuxStatsHelpers::getCpuInfo ("flags"));
-    hasMMX = flags.contains ("mmx");
-    hasSSE = flags.contains ("sse");
-    hasSSE2 = flags.contains ("sse2");
+    hasMMX   = flags.contains ("mmx");
+    hasSSE   = flags.contains ("sse");
+    hasSSE2  = flags.contains ("sse2");
     has3DNow = flags.contains ("3dnow");
 
     numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;

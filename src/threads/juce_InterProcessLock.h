@@ -29,6 +29,7 @@
 #include "../text/juce_String.h"
 #include "../memory/juce_ScopedPointer.h"
 
+
 //==============================================================================
 /**
     Acts as a critical section which processes can use to block each other.

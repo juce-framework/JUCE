@@ -47,7 +47,7 @@ LocalisedStrings::~LocalisedStrings()
 }
 
 //==============================================================================
-const String LocalisedStrings::translate (const String& text) const
+String LocalisedStrings::translate (const String& text) const
 {
     return translations.getValue (text, text);
 }
@@ -93,7 +93,7 @@ namespace
         return startPos;
     }
 
-    const String unescapeString (const String& s)
+    String unescapeString (const String& s)
     {
         return s.replace ("\\\"", "\"")
                 .replace ("\\\'", "\'")
@@ -159,7 +159,7 @@ LocalisedStrings* LocalisedStrings::getCurrentMappings()
     return currentMappings;
 }
 
-const String LocalisedStrings::translateWithCurrentMappings (const String& text)
+String LocalisedStrings::translateWithCurrentMappings (const String& text)
 {
     const SpinLock::ScopedLockType sl (currentMappingsLock);
 
@@ -169,7 +169,7 @@ const String LocalisedStrings::translateWithCurrentMappings (const String& text)
     return text;
 }
 
-const String LocalisedStrings::translateWithCurrentMappings (const char* text)
+String LocalisedStrings::translateWithCurrentMappings (const char* text)
 {
     return translateWithCurrentMappings (String (text));
 }

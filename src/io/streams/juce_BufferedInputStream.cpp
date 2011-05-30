@@ -177,7 +177,7 @@ int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
     }
 }
 
-const String BufferedInputStream::readString()
+String BufferedInputStream::readString()
 {
     if (position >= bufferStart
          && position < lastReadPos)

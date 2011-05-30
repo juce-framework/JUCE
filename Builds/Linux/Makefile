@@ -253,6 +253,7 @@ OBJECTS := \
   $(OBJDIR)/juce_SVGParser_b79416c5.o \
   $(OBJDIR)/juce_DropShadowEffect_da52d75.o \
   $(OBJDIR)/juce_GlowEffect_c0959893.o \
+  $(OBJDIR)/juce_CustomTypeface_b93a3eff.o \
   $(OBJDIR)/juce_Font_fa88db26.o \
   $(OBJDIR)/juce_GlyphArrangement_f0797295.o \
   $(OBJDIR)/juce_TextLayout_d18f700e.o \
@@ -1453,6 +1454,11 @@ $(OBJDIR)/juce_DropShadowEffect_da52d75.o: ../../src/gui/graphics/effects/juce_D
 $(OBJDIR)/juce_GlowEffect_c0959893.o: ../../src/gui/graphics/effects/juce_GlowEffect.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_GlowEffect.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_CustomTypeface_b93a3eff.o: ../../src/gui/graphics/fonts/juce_CustomTypeface.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_CustomTypeface.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Font_fa88db26.o: ../../src/gui/graphics/fonts/juce_Font.cpp

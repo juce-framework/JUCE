@@ -402,8 +402,9 @@ void Synthesiser::handleSostenutoPedal (int midiChannel, bool isDown)
     }
 }
 
-void Synthesiser::handleSoftPedal (int midiChannel, bool isDown)
+void Synthesiser::handleSoftPedal (int midiChannel, bool /*isDown*/)
 {
+    (void) midiChannel;
     jassert (midiChannel > 0 && midiChannel <= 16);
 }
 

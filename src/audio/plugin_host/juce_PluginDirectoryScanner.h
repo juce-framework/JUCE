@@ -115,7 +115,7 @@ private:
     int nextIndex;
     float progress;
 
-    const StringArray getDeadMansPedalFile();
+    StringArray getDeadMansPedalFile();
     void setDeadMansPedalFile (const StringArray& newContents);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginDirectoryScanner);

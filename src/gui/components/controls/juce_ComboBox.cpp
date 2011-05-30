@@ -222,7 +222,7 @@ int ComboBox::getNumItems() const noexcept
     return n;
 }
 
-const String ComboBox::getItemText (const int index) const
+String ComboBox::getItemText (const int index) const
 {
     const ItemInfo* const item = getItemForIndex (index);
 
@@ -315,7 +315,7 @@ void ComboBox::valueChanged (Value&)
 }
 
 //==============================================================================
-const String ComboBox::getText() const
+String ComboBox::getText() const
 {
     return label->getText();
 }
@@ -365,7 +365,7 @@ void ComboBox::setTextWhenNothingSelected (const String& newMessage)
     }
 }
 
-const String ComboBox::getTextWhenNothingSelected() const
+String ComboBox::getTextWhenNothingSelected() const
 {
     return textWhenNothingSelected;
 }
@@ -375,7 +375,7 @@ void ComboBox::setTextWhenNoChoicesAvailable (const String& newMessage)
     noChoicesMessage = newMessage;
 }
 
-const String ComboBox::getTextWhenNoChoicesAvailable() const
+String ComboBox::getTextWhenNoChoicesAvailable() const
 {
     return noChoicesMessage;
 }

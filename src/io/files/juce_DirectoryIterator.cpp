@@ -119,7 +119,7 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
     return false;
 }
 
-const File DirectoryIterator::getFile() const
+const File& DirectoryIterator::getFile() const
 {
     if (subIterator != nullptr && subIterator->hasBeenAdvanced)
         return subIterator->getFile();

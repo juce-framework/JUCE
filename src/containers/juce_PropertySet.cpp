@@ -71,8 +71,8 @@ void PropertySet::clear()
     }
 }
 
-const String PropertySet::getValue (const String& keyName,
-                                    const String& defaultValue) const noexcept
+String PropertySet::getValue (const String& keyName,
+                              const String& defaultValue) const noexcept
 {
     const ScopedLock sl (lock);
 

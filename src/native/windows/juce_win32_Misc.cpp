@@ -56,7 +56,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
     }
 }
 
-const String SystemClipboard::getTextFromClipboard()
+String SystemClipboard::getTextFromClipboard()
 {
     String result;
 

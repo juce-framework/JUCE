@@ -73,7 +73,7 @@ public:
 
         @returns a 32 character hex string.
     */
-    const String toString() const;
+    String toString() const;
 
     /** Creates an ID from an encoded string version.
 

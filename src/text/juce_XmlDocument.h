@@ -29,8 +29,8 @@
 #include "juce_XmlElement.h"
 #include "juce_StringArray.h"
 #include "../io/files/juce_File.h"
-#include "../io/streams/juce_InputSource.h"
 #include "../memory/juce_ScopedPointer.h"
+class InputSource;
 
 
 //==============================================================================
@@ -171,10 +171,10 @@ private:
     void readQuotedString (String& result);
     void readEntity (String& result);
 
-    const String getFileContents (const String& filename) const;
-    const String expandEntity (const String& entity);
-    const String expandExternalEntity (const String& entity);
-    const String getParameterEntity (const String& entity);
+    String getFileContents (const String& filename) const;
+    String expandEntity (const String& entity);
+    String expandExternalEntity (const String& entity);
+    String getParameterEntity (const String& entity);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument);
 };

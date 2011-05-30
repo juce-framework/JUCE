@@ -172,7 +172,7 @@ public:
         @param line     the line to intersect with
         @returns        the point at which the lines intersect, even if this lies beyond the end of the lines
     */
-    const Point<ValueType> getIntersection (const Line& line) const noexcept
+    Point<ValueType> getIntersection (const Line& line) const noexcept
     {
         Point<ValueType> p;
         findIntersection (start, end, line.start, line.end, p);
@@ -187,7 +187,7 @@ public:
                                     than the line itself
         @see getPointAlongLineProportionally
     */
-    const Point<ValueType> getPointAlongLine (ValueType distanceFromStart) const noexcept
+    Point<ValueType> getPointAlongLine (ValueType distanceFromStart) const noexcept
     {
         return start + (end - start) * (distanceFromStart / getLength());
     }
@@ -205,8 +205,8 @@ public:
                                     end, then a positive value here will move to the
                                     right, negative value move to the left.
     */
-    const Point<ValueType> getPointAlongLine (ValueType distanceFromStart,
-                                              ValueType perpendicularDistance) const noexcept
+    Point<ValueType> getPointAlongLine (ValueType distanceFromStart,
+                                        ValueType perpendicularDistance) const noexcept
     {
         const Point<ValueType> delta (end - start);
         const double length = juce_hypot ((double) delta.getX(),
@@ -228,7 +228,7 @@ public:
                                     can be negative or greater than 1.0).
         @see getPointAlongLine
     */
-    const Point<ValueType> getPointAlongLineProportionally (ValueType proportionOfLength) const noexcept
+    Point<ValueType> getPointAlongLineProportionally (ValueType proportionOfLength) const noexcept
     {
         return start + (end - start) * proportionOfLength;
     }
@@ -299,7 +299,7 @@ public:
     /** Finds the point on this line which is nearest to a given point.
         @see getDistanceFromPoint, findNearestProportionalPositionTo
     */
-    const Point<ValueType> findNearestPointTo (const Point<ValueType>& point) const noexcept
+    Point<ValueType> findNearestPointTo (const Point<ValueType>& point) const noexcept
     {
         return getPointAlongLineProportionally (findNearestProportionalPositionTo (point));
     }
@@ -323,7 +323,7 @@ public:
         This will chop off part of the start of this line by a certain amount, (leaving the
         end-point the same), and return the new line.
     */
-    const Line withShortenedStart (ValueType distanceToShortenBy) const noexcept
+    Line withShortenedStart (ValueType distanceToShortenBy) const noexcept
     {
         return Line (getPointAlongLine (jmin (distanceToShortenBy, getLength())), end);
     }
@@ -333,7 +333,7 @@ public:
         This will chop off part of the end of this line by a certain amount, (leaving the
         start-point the same), and return the new line.
     */
-    const Line withShortenedEnd (ValueType distanceToShortenBy) const noexcept
+    Line withShortenedEnd (ValueType distanceToShortenBy) const noexcept
     {
         const ValueType length = getLength();
         return Line (start, getPointAlongLine (length - jmin (distanceToShortenBy, length)));

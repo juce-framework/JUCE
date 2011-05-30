@@ -183,7 +183,7 @@ public:
     int getNumTabs() const;
 
     /** Returns a list of all the tab names in the bar. */
-    const StringArray getTabNames() const;
+    StringArray getTabNames() const;
 
     /** Changes the currently selected tab.
 

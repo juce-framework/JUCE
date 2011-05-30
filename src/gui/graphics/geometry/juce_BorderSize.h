@@ -106,7 +106,7 @@ public:
 
     //==============================================================================
     /** Returns a rectangle with these borders removed from it. */
-    const Rectangle<ValueType> subtractedFrom (const Rectangle<ValueType>& original) const noexcept
+    Rectangle<ValueType> subtractedFrom (const Rectangle<ValueType>& original) const noexcept
     {
         return Rectangle<ValueType> (original.getX() + left,
                                      original.getY() + top,
@@ -121,7 +121,7 @@ public:
     }
 
     /** Returns a rectangle with these borders added around it. */
-    const Rectangle<ValueType> addedTo (const Rectangle<ValueType>& original) const noexcept
+    Rectangle<ValueType> addedTo (const Rectangle<ValueType>& original) const noexcept
     {
         return Rectangle<ValueType> (original.getX() - left,
                                      original.getY() - top,

@@ -71,7 +71,7 @@ public:
         The result will be ok if the file opened successfully. If an error occurs while
         opening or writing to the file, this will contain an error message.
     */
-    const Result getStatus() const                      { return status; }
+    Result getStatus() const                            { return status; }
 
     /** Returns true if the stream couldn't be opened for some reason.
         @see getResult()

@@ -106,7 +106,7 @@ public:
 
         The result of this call is only valid after a call to next() has returned true.
     */
-    const File getFile() const;
+    const File& getFile() const;
 
     /** Returns a guess of how far through the search the iterator has got.
 

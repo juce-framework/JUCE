@@ -28,7 +28,6 @@
 
 #include "juce_WaitableEvent.h"
 #include "juce_CriticalSection.h"
-#include "../containers/juce_Array.h"
 
 
 //==============================================================================
@@ -255,7 +254,7 @@ public:
 
         This is the name that gets set in the constructor.
     */
-    const String getThreadName() const                              { return threadName_; }
+    const String& getThreadName() const                             { return threadName_; }
 
     /** Changes the name of the caller thread.
         Different OSes may place different length or content limits on this name.

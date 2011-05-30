@@ -336,6 +336,7 @@
     <ClCompile Include="..\..\src\gui\graphics\drawables\juce_SVGParser.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\effects\juce_DropShadowEffect.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\effects\juce_GlowEffect.cpp"/>
+    <ClCompile Include="..\..\src\gui\graphics\fonts\juce_CustomTypeface.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\fonts\juce_Font.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\fonts\juce_GlyphArrangement.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\fonts\juce_TextLayout.cpp"/>
@@ -722,6 +723,7 @@
     <ClInclude Include="..\..\src\gui\graphics\effects\juce_DropShadowEffect.h"/>
     <ClInclude Include="..\..\src\gui\graphics\effects\juce_GlowEffect.h"/>
     <ClInclude Include="..\..\src\gui\graphics\effects\juce_ImageEffectFilter.h"/>
+    <ClInclude Include="..\..\src\gui\graphics\fonts\juce_CustomTypeface.h"/>
     <ClInclude Include="..\..\src\gui\graphics\fonts\juce_Font.h"/>
     <ClInclude Include="..\..\src\gui\graphics\fonts\juce_GlyphArrangement.h"/>
     <ClInclude Include="..\..\src\gui\graphics\fonts\juce_TextLayout.h"/>

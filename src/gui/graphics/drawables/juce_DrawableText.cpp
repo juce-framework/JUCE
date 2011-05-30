@@ -210,7 +210,7 @@ DrawableText::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
     jassert (state.hasType (valueTreeType));
 }
 
-const String DrawableText::ValueTreeWrapper::getText() const
+String DrawableText::ValueTreeWrapper::getText() const
 {
     return state [text].toString();
 }
@@ -225,7 +225,7 @@ Value DrawableText::ValueTreeWrapper::getTextValue (UndoManager* undoManager)
     return state.getPropertyAsValue (text, undoManager);
 }
 
-const Colour DrawableText::ValueTreeWrapper::getColour() const
+Colour DrawableText::ValueTreeWrapper::getColour() const
 {
     return Colour::fromString (state [colour].toString());
 }
@@ -235,7 +235,7 @@ void DrawableText::ValueTreeWrapper::setColour (const Colour& newColour, UndoMan
     state.setProperty (colour, newColour.toString(), undoManager);
 }
 
-const Justification DrawableText::ValueTreeWrapper::getJustification() const
+Justification DrawableText::ValueTreeWrapper::getJustification() const
 {
     return Justification ((int) state [justification]);
 }
@@ -245,7 +245,7 @@ void DrawableText::ValueTreeWrapper::setJustification (const Justification& newJ
     state.setProperty (justification, newJustification.getFlags(), undoManager);
 }
 
-const Font DrawableText::ValueTreeWrapper::getFont() const
+Font DrawableText::ValueTreeWrapper::getFont() const
 {
     return Font::fromString (state [font]);
 }
@@ -260,7 +260,7 @@ Value DrawableText::ValueTreeWrapper::getFontValue (UndoManager* undoManager)
     return state.getPropertyAsValue (font, undoManager);
 }
 
-const RelativeParallelogram DrawableText::ValueTreeWrapper::getBoundingBox() const
+RelativeParallelogram DrawableText::ValueTreeWrapper::getBoundingBox() const
 {
     return RelativeParallelogram (state [topLeft].toString(), state [topRight].toString(), state [bottomLeft].toString());
 }
@@ -272,7 +272,7 @@ void DrawableText::ValueTreeWrapper::setBoundingBox (const RelativeParallelogram
     state.setProperty (bottomLeft, newBounds.bottomLeft.toString(), undoManager);
 }
 
-const RelativePoint DrawableText::ValueTreeWrapper::getFontSizeControlPoint() const
+RelativePoint DrawableText::ValueTreeWrapper::getFontSizeControlPoint() const
 {
     return state [fontSizeAnchor].toString();
 }

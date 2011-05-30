@@ -305,7 +305,7 @@ public:
     int getRight() const noexcept                           { return bounds.getRight(); }
 
     /** Returns the component's top-left position as a Point. */
-    const Point<int> getPosition() const noexcept           { return bounds.getPosition(); }
+    Point<int> getPosition() const noexcept                 { return bounds.getPosition(); }
 
     /** Returns the y coordinate of the bottom edge of this component.
         This is a distance in pixels from the top edge of the component's parent.
@@ -329,7 +329,7 @@ public:
         This is like getBounds(), but returns the rectangle in local coordinates, In practice, it'll
         return a rectangle with position (0, 0), and the same size as this component.
     */
-    const Rectangle<int> getLocalBounds() const noexcept;
+    Rectangle<int> getLocalBounds() const noexcept;
 
     /** Returns the area of this component's parent which this component covers.
 
@@ -338,7 +338,7 @@ public:
         the smallest rectangle that fully covers the component's transformed bounding box.
         If this component has no parent, the return value will simply be the same as getBounds().
     */
-    const Rectangle<int> getBoundsInParent() const noexcept;
+    Rectangle<int> getBoundsInParent() const noexcept;
 
     /** Returns the region of this component that's not obscured by other, opaque components.
 
@@ -365,12 +365,12 @@ public:
     /** Returns the position of this component's top-left corner relative to the screen's top-left.
         @see getScreenBounds
     */
-    const Point<int> getScreenPosition() const;
+    Point<int> getScreenPosition() const;
 
     /** Returns the bounds of this component, relative to the screen's top-left.
         @see getScreenPosition
     */
-    const Rectangle<int> getScreenBounds() const;
+    Rectangle<int> getScreenBounds() const;
 
     /** Converts a point to be relative to this component's coordinate space.
 
@@ -378,8 +378,8 @@ public:
         component. If the sourceComponent parameter is null, the source point is assumed to be a global
         screen coordinate.
     */
-    const Point<int> getLocalPoint (const Component* sourceComponent,
-                                    const Point<int>& pointRelativeToSourceComponent) const;
+    Point<int> getLocalPoint (const Component* sourceComponent,
+                              const Point<int>& pointRelativeToSourceComponent) const;
 
     /** Converts a rectangle to be relative to this component's coordinate space.
 
@@ -391,13 +391,13 @@ public:
         may not actually be rectanglular when converted to the target space, so in that situation this will return
         the smallest rectangle that fully contains the transformed area.
     */
-    const Rectangle<int> getLocalArea (const Component* sourceComponent,
-                                       const Rectangle<int>& areaRelativeToSourceComponent) const;
+    Rectangle<int> getLocalArea (const Component* sourceComponent,
+                                 const Rectangle<int>& areaRelativeToSourceComponent) const;
 
     /** Converts a point relative to this component's top-left into a screen coordinate.
         @see getLocalPoint, localAreaToGlobal
     */
-    const Point<int> localPointToGlobal (const Point<int>& localPoint) const;
+    Point<int> localPointToGlobal (const Point<int>& localPoint) const;
 
     /** Converts a rectangle from this component's coordinate space to a screen coordinate.
 
@@ -406,7 +406,7 @@ public:
         the smallest rectangle that fully contains the transformed area.
         @see getLocalPoint, localPointToGlobal
     */
-    const Rectangle<int> localAreaToGlobal (const Rectangle<int>& localArea) const;
+    Rectangle<int> localAreaToGlobal (const Rectangle<int>& localArea) const;
 
     //==============================================================================
     /** Moves the component to a new position.
@@ -621,7 +621,7 @@ public:
         For more details about transforms, see setTransform().
         @see setTransform
     */
-    const AffineTransform getTransform() const;
+    AffineTransform getTransform() const;
 
     /** Returns true if a non-identity transform is being applied to this component.
         For more details about transforms, see setTransform().
@@ -662,7 +662,7 @@ public:
         monitors, it will return the area of the monitor that contains the component's
         centre.
     */
-    const Rectangle<int> getParentMonitorArea() const;
+    Rectangle<int> getParentMonitorArea() const;
 
     //==============================================================================
     /** Returns the number of child components that this component contains.
@@ -1022,8 +1022,8 @@ public:
 
         @see paintEntireComponent
     */
-    const Image createComponentSnapshot (const Rectangle<int>& areaToGrab,
-                                         bool clipImageToComponentBounds = true);
+    Image createComponentSnapshot (const Rectangle<int>& areaToGrab,
+                                   bool clipImageToComponentBounds = true);
 
     /** Draws this component and all its subcomponents onto the specified graphics
         context.
@@ -1792,7 +1792,7 @@ public:
     /** Returns the mouse's current position, relative to this component.
         The return value is relative to the component's top-left corner.
     */
-    const Point<int> getMouseXYRelative() const;
+    Point<int> getMouseXYRelative() const;
 
     //==============================================================================
     /** Called when this component's size has been changed.

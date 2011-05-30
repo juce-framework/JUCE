@@ -607,7 +607,7 @@ public:
         }
     }
 
-    const Font getFont()
+    Font getFont()
     {
         return state->font;
     }
@@ -841,7 +841,7 @@ LowLevelGraphicsContext* CoreGraphicsImage::createLowLevelContext()
 
 //==============================================================================
 #if USE_COREGRAPHICS_RENDERING && ! DONT_USE_COREIMAGE_LOADER
-const Image juce_loadWithCoreImage (InputStream& input)
+Image juce_loadWithCoreImage (InputStream& input)
 {
     MemoryBlock data;
     input.readIntoMemoryBlock (data, -1);

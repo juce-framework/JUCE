@@ -90,7 +90,7 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
     repaint();
 }
 
-const Image ImageButton::getCurrentImage() const
+Image ImageButton::getCurrentImage() const
 {
     if (isDown() || getToggleState())
         return getDownImage();
@@ -101,18 +101,18 @@ const Image ImageButton::getCurrentImage() const
     return getNormalImage();
 }
 
-const Image ImageButton::getNormalImage() const
+Image ImageButton::getNormalImage() const
 {
     return normalImage;
 }
 
-const Image ImageButton::getOverImage() const
+Image ImageButton::getOverImage() const
 {
     return overImage.isValid() ? overImage
                                : normalImage;
 }
 
-const Image ImageButton::getDownImage() const
+Image ImageButton::getDownImage() const
 {
     return downImage.isValid() ? downImage
                                : getOverImage();

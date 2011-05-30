@@ -62,7 +62,7 @@ void RectangleList::clear()
     rects.clearQuick();
 }
 
-const Rectangle<int> RectangleList::getRectangle (const int index) const noexcept
+Rectangle<int> RectangleList::getRectangle (const int index) const noexcept
 {
     if (isPositiveAndBelow (index, rects.size()))
         return rects.getReference (index);
@@ -466,7 +466,7 @@ bool RectangleList::intersects (const RectangleList& other) const noexcept
     return false;
 }
 
-const Rectangle<int> RectangleList::getBounds() const noexcept
+Rectangle<int> RectangleList::getBounds() const noexcept
 {
     if (rects.size() <= 1)
     {
@@ -510,7 +510,7 @@ void RectangleList::offsetAll (const int dx, const int dy) noexcept
 }
 
 //==============================================================================
-const Path RectangleList::toPath() const
+Path RectangleList::toPath() const
 {
     Path p;
 

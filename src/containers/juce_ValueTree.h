@@ -133,7 +133,7 @@ public:
         The type is specified when the ValueTree is created.
         @see hasType
     */
-    const Identifier getType() const;
+    Identifier getType() const;
 
     /** Returns true if the node has this type.
         The comparison is case-sensitive.
@@ -153,7 +153,7 @@ public:
         You can also use operator[] and getProperty to get a property.
         @see var, getProperty, setProperty, hasProperty
     */
-    const var getProperty (const Identifier& name, const var& defaultReturnValue) const;
+    var getProperty (const Identifier& name, const var& defaultReturnValue) const;
 
     /** Returns the value of a named property.
         If no such property has been set, this will return a void variant. This is the same as
@@ -192,7 +192,7 @@ public:
     /** Returns the identifier of the property with a given index.
         @see getNumProperties
     */
-    const Identifier getPropertyName (int index) const;
+    Identifier getPropertyName (int index) const;
 
     /** Returns a Value object that can be used to control and respond to one of the tree's properties.
 

@@ -91,8 +91,8 @@ public:
     operator bool() const noexcept;
     operator float() const noexcept;
     operator double() const noexcept;
-    operator const String() const;
-    const String toString() const;
+    operator String() const;
+    String toString() const;
     ReferenceCountedObject* getObject() const noexcept;
     DynamicObject* getDynamicObject() const noexcept;
 
@@ -115,32 +115,27 @@ public:
         The data in the stream must have been written using writeToStream(), or this
         will have unpredictable results.
     */
-    static const var readFromStream (InputStream& input);
+    static var readFromStream (InputStream& input);
 
     //==============================================================================
     /** If this variant is an object, this returns one of its properties. */
-    const var operator[] (const Identifier& propertyName) const;
+    var operator[] (const Identifier& propertyName) const;
 
     //==============================================================================
     /** If this variant is an object, this invokes one of its methods with no arguments. */
-    const var call (const Identifier& method) const;
+    var call (const Identifier& method) const;
     /** If this variant is an object, this invokes one of its methods with one argument. */
-    const var call (const Identifier& method, const var& arg1) const;
+    var call (const Identifier& method, const var& arg1) const;
     /** If this variant is an object, this invokes one of its methods with 2 arguments. */
-    const var call (const Identifier& method, const var& arg1, const var& arg2) const;
+    var call (const Identifier& method, const var& arg1, const var& arg2) const;
     /** If this variant is an object, this invokes one of its methods with 3 arguments. */
-    const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3);
+    var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3);
     /** If this variant is an object, this invokes one of its methods with 4 arguments. */
-    const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+    var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
     /** If this variant is an object, this invokes one of its methods with 5 arguments. */
-    const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
-
+    var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
     /** If this variant is an object, this invokes one of its methods with a list of arguments. */
-    const var invoke (const Identifier& method, const var* arguments, int numArguments) const;
-
-    //==============================================================================
-    /** If this variant is a method pointer, this invokes it on a target object. */
-    const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
+    var invoke (const Identifier& method, const var* arguments, int numArguments) const;
 
     //==============================================================================
     /** Returns true if this var has the same value as the one supplied.
@@ -156,27 +151,18 @@ public:
     */
     bool equalsWithSameType (const var& other) const noexcept;
 
+
 private:
-    class VariantType;
-    friend class VariantType;
-    class VariantType_Void;
-    friend class VariantType_Void;
-    class VariantType_Int;
-    friend class VariantType_Int;
-    class VariantType_Int64;
-    friend class VariantType_Int64;
-    class VariantType_Double;
-    friend class VariantType_Double;
-    class VariantType_Float;
-    friend class VariantType_Float;
-    class VariantType_Bool;
-    friend class VariantType_Bool;
-    class VariantType_String;
-    friend class VariantType_String;
-    class VariantType_Object;
-    friend class VariantType_Object;
-    class VariantType_Method;
-    friend class VariantType_Method;
+    //==============================================================================
+    class VariantType;         friend class VariantType;
+    class VariantType_Void;    friend class VariantType_Void;
+    class VariantType_Int;     friend class VariantType_Int;
+    class VariantType_Int64;   friend class VariantType_Int64;
+    class VariantType_Double;  friend class VariantType_Double;
+    class VariantType_Bool;    friend class VariantType_Bool;
+    class VariantType_String;  friend class VariantType_String;
+    class VariantType_Object;  friend class VariantType_Object;
+    class VariantType_Method;  friend class VariantType_Method;
 
     union ValueUnion
     {
@@ -184,13 +170,16 @@ private:
         int64 int64Value;
         bool boolValue;
         double doubleValue;
-        String* stringValue;
+        char stringValue [sizeof (String)];
         ReferenceCountedObject* objectValue;
         MethodFunction methodValue;
     };
 
     const VariantType* type;
     ValueUnion value;
+
+    friend class DynamicObject;
+    var invokeMethod (DynamicObject*, const var*, int) const;
 };
 
 /** Compares the values of two var objects, using the var::equals() comparison. */

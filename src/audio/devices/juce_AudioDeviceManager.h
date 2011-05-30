@@ -30,8 +30,9 @@
 #include "../midi/juce_MidiInput.h"
 #include "../midi/juce_MidiOutput.h"
 #include "../../text/juce_XmlElement.h"
-#include "../../gui/components/controls/juce_ComboBox.h"
+#include "../../events/juce_ChangeBroadcaster.h"
 #include "../dsp/juce_AudioSampleBuffer.h"
+#include "../../containers/juce_OwnedArray.h"
 
 
 //==============================================================================
@@ -450,7 +451,7 @@ private:
 
     AudioDeviceSetup currentSetup;
     ScopedPointer <AudioIODevice> currentAudioDevice;
-    SortedSet <AudioIODeviceCallback*> callbacks;
+    Array <AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded, numOutputChansNeeded;
     String currentDeviceType;
     BigInteger inputChannels, outputChannels;

@@ -68,7 +68,7 @@ public:
     /** Tries to return the named value, but if no such value is found, this will
         instead return the supplied default value.
     */
-    const var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
+    var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
 
     /** Changes or adds a named value.
         @returns    true if a value was changed or added; false if the
@@ -93,7 +93,7 @@ public:
     /** Returns the value of the item at a given index.
         The index must be between 0 and size() - 1.
     */
-    const var getValueAt (int index) const;
+    var getValueAt (int index) const;
 
     /** Removes all values. */
     void clear();

@@ -90,7 +90,7 @@ public:
 
         These are the sections that have been added with addSection().
     */
-    const StringArray getSectionNames() const;
+    StringArray getSectionNames() const;
 
     /** Returns true if the section at this index is currently open.
 

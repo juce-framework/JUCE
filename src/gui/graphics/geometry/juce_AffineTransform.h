@@ -126,71 +126,71 @@ public:
 
     //==============================================================================
     /** Returns a new transform which is the same as this one followed by a translation. */
-    const AffineTransform translated (float deltaX,
-                                      float deltaY) const noexcept;
+    AffineTransform translated (float deltaX,
+                                float deltaY) const noexcept;
 
     /** Returns a new transform which is a translation. */
-    static const AffineTransform translation (float deltaX,
-                                              float deltaY) noexcept;
+    static AffineTransform translation (float deltaX,
+                                        float deltaY) noexcept;
 
     /** Returns a transform which is the same as this one followed by a rotation.
 
         The rotation is specified by a number of radians to rotate clockwise, centred around
         the origin (0, 0).
     */
-    const AffineTransform rotated (float angleInRadians) const noexcept;
+    AffineTransform rotated (float angleInRadians) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a rotation about a given point.
 
         The rotation is specified by a number of radians to rotate clockwise, centred around
         the co-ordinates passed in.
     */
-    const AffineTransform rotated (float angleInRadians,
-                                   float pivotX,
-                                   float pivotY) const noexcept;
+    AffineTransform rotated (float angleInRadians,
+                             float pivotX,
+                             float pivotY) const noexcept;
 
     /** Returns a new transform which is a rotation about (0, 0). */
-    static const AffineTransform rotation (float angleInRadians) noexcept;
+    static AffineTransform rotation (float angleInRadians) noexcept;
 
     /** Returns a new transform which is a rotation about a given point. */
-    static const AffineTransform rotation (float angleInRadians,
-                                           float pivotX,
-                                           float pivotY) noexcept;
+    static AffineTransform rotation (float angleInRadians,
+                                     float pivotX,
+                                     float pivotY) noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
         The scaling is centred around the origin (0, 0).
     */
-    const AffineTransform scaled (float factorX,
-                                  float factorY) const noexcept;
+    AffineTransform scaled (float factorX,
+                            float factorY) const noexcept;
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
         The scaling is centred around the origin provided.
     */
-    const AffineTransform scaled (float factorX, float factorY,
-                                  float pivotX, float pivotY) const noexcept;
+    AffineTransform scaled (float factorX, float factorY,
+                            float pivotX, float pivotY) const noexcept;
 
     /** Returns a new transform which is a re-scale about the origin. */
-    static const AffineTransform scale (float factorX,
-                                        float factorY) noexcept;
+    static AffineTransform scale (float factorX,
+                                  float factorY) noexcept;
 
     /** Returns a new transform which is a re-scale centred around the point provided. */
-    static const AffineTransform scale (float factorX, float factorY,
-                                        float pivotX, float pivotY) noexcept;
+    static AffineTransform scale (float factorX, float factorY,
+                                  float pivotX, float pivotY) noexcept;
 
     /** Returns a transform which is the same as this one followed by a shear.
         The shear is centred around the origin (0, 0).
     */
-    const AffineTransform sheared (float shearX, float shearY) const noexcept;
+    AffineTransform sheared (float shearX, float shearY) const noexcept;
 
     /** Returns a shear transform, centred around the origin (0, 0). */
-    static const AffineTransform shear (float shearX, float shearY) noexcept;
+    static AffineTransform shear (float shearX, float shearY) noexcept;
 
     /** Returns a matrix which is the inverse operation of this one.
 
         Some matrices don't have an inverse - in this case, the method will just return
         an identity transform.
     */
-    const AffineTransform inverted() const noexcept;
+    AffineTransform inverted() const noexcept;
 
     /** Returns the transform that will map three known points onto three coordinates
         that are supplied.
@@ -198,19 +198,19 @@ public:
         This returns the transform that will transform (0, 0) into (x00, y00),
         (1, 0) to (x10, y10), and (0, 1) to (x01, y01).
     */
-    static const AffineTransform fromTargetPoints (float x00, float y00,
-                                                   float x10, float y10,
-                                                   float x01, float y01) noexcept;
+    static AffineTransform fromTargetPoints (float x00, float y00,
+                                             float x10, float y10,
+                                             float x01, float y01) noexcept;
 
     /** Returns the transform that will map three specified points onto three target points.
     */
-    static const AffineTransform fromTargetPoints (float sourceX1, float sourceY1, float targetX1, float targetY1,
-                                                   float sourceX2, float sourceY2, float targetX2, float targetY2,
-                                                   float sourceX3, float sourceY3, float targetX3, float targetY3) noexcept;
+    static AffineTransform fromTargetPoints (float sourceX1, float sourceY1, float targetX1, float targetY1,
+                                             float sourceX2, float sourceY2, float targetX2, float targetY2,
+                                             float sourceX3, float sourceY3, float targetX3, float targetY3) noexcept;
 
     //==============================================================================
     /** Returns the result of concatenating another transformation after this one. */
-    const AffineTransform followedBy (const AffineTransform& other) const noexcept;
+    AffineTransform followedBy (const AffineTransform& other) const noexcept;
 
     /** Returns true if this transform has no effect on points. */
     bool isIdentity() const noexcept;

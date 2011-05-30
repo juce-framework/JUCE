@@ -26,7 +26,7 @@
 #ifndef __JUCE_TEMPORARYFILE_JUCEHEADER__
 #define __JUCE_TEMPORARYFILE_JUCEHEADER__
 
-#include "juce_FileOutputStream.h"
+#include "juce_File.h"
 
 
 //==============================================================================
@@ -120,10 +120,10 @@ public:
 
     //==============================================================================
     /** Returns the temporary file. */
-    const File getFile() const                  { return temporaryFile; }
+    const File& getFile() const                 { return temporaryFile; }
 
     /** Returns the target file that was specified in the constructor. */
-    const File getTargetFile() const            { return targetFile; }
+    const File& getTargetFile() const           { return targetFile; }
 
     /** Tries to move the temporary file to overwrite the target file that was
         specified in the constructor.

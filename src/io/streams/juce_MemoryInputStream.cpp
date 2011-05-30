@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MemoryInputStream.h"
+#include "../../memory/juce_MemoryBlock.h"
 
 
 //==============================================================================

@@ -71,16 +71,16 @@ public:
 
     //==============================================================================
     /** Returns the current value. */
-    const var getValue() const;
+    var getValue() const;
 
     /** Returns the current value. */
-    operator const var() const;
+    operator var() const;
 
     /** Returns the value as a string.
 
         This is alternative to writing things like "myValue.getValue().toString()".
     */
-    const String toString() const;
+    String toString() const;
 
     /** Sets the current value.
 

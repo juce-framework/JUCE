@@ -114,25 +114,25 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 
 void SystemClipboard::copyTextToClipboard (const String& text)
 {
-#if JUCE_IOS
+   #if JUCE_IOS
     [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
                              forPasteboardType: @"public.text"];
-#else
+   #else
     [[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSStringPboardType]
                                              owner: nil];
 
     [[NSPasteboard generalPasteboard] setString: juceStringToNS (text)
                                         forType: NSStringPboardType];
-#endif
+   #endif
 }
 
-const String SystemClipboard::getTextFromClipboard()
+String SystemClipboard::getTextFromClipboard()
 {
-#if JUCE_IOS
+   #if JUCE_IOS
     NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"];
-#else
+   #else
     NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
-#endif
+   #endif
 
     return text == nil ? String::empty
                        : nsStringToJuce (text);

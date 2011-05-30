@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	94
+#define JUCE_BUILDNUMBER	95
 
 /** Current Juce version number.
 
@@ -4305,7 +4305,7 @@ public:
 	String (const CharPointer_ASCII& text);
 
 	/** Creates a string from a single character. */
-	static const String charToString (juce_wchar character);
+	static String charToString (juce_wchar character);
 
 	/** Destructor. */
 	~String() noexcept;
@@ -4736,7 +4736,7 @@ public:
 							this index are returned
 		@see fromFirstOccurrenceOf, dropLastCharacters, getLastCharacters, upToFirstOccurrenceOf
 	*/
-	const String substring (int startIndex, int endIndex) const;
+	String substring (int startIndex, int endIndex) const;
 
 	/** Returns a section of the string, starting from a given position.
 
@@ -4746,7 +4746,7 @@ public:
 		@returns		the substring from startIndex up to the end of the string
 		@see dropLastCharacters, getLastCharacters, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf
 	*/
-	const String substring (int startIndex) const;
+	String substring (int startIndex) const;
 
 	/** Returns a version of this string with a number of characters removed
 		from the end.
@@ -4757,7 +4757,7 @@ public:
 								original string will be returned.
 		@see substring, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf, getLastCharacter
 	*/
-	const String dropLastCharacters (int numberToDrop) const;
+	String dropLastCharacters (int numberToDrop) const;
 
 	/** Returns a number of characters from the end of the string.
 
@@ -4766,7 +4766,7 @@ public:
 
 		@see substring, dropLastCharacters, getLastCharacter
 	*/
-	const String getLastCharacters (int numCharacters) const;
+	String getLastCharacters (int numCharacters) const;
 
 	/** Returns a section of the string starting from a given substring.
 
@@ -4783,8 +4783,8 @@ public:
 
 		@see upToFirstOccurrenceOf, fromLastOccurrenceOf
 	*/
-	const String fromFirstOccurrenceOf (const String& substringToStartFrom,
-										bool includeSubStringInResult,
+	String fromFirstOccurrenceOf (const String& substringToStartFrom,
+								  bool includeSubStringInResult,
 										bool ignoreCase) const;
 
 	/** Returns a section of the string starting from the last occurrence of a given substring.
@@ -4795,9 +4795,9 @@ public:
 
 		@see fromFirstOccurrenceOf, upToLastOccurrenceOf
 	*/
-	const String fromLastOccurrenceOf (const String& substringToFind,
-									   bool includeSubStringInResult,
-									   bool ignoreCase) const;
+	String fromLastOccurrenceOf (const String& substringToFind,
+								 bool includeSubStringInResult,
+								 bool ignoreCase) const;
 
 	/** Returns the start of this string, up to the first occurrence of a substring.
 
@@ -4812,9 +4812,9 @@ public:
 
 		@see upToLastOccurrenceOf, fromFirstOccurrenceOf
 	*/
-	const String upToFirstOccurrenceOf (const String& substringToEndWith,
-										bool includeSubStringInResult,
-										bool ignoreCase) const;
+	String upToFirstOccurrenceOf (const String& substringToEndWith,
+								  bool includeSubStringInResult,
+								  bool ignoreCase) const;
 
 	/** Returns the start of this string, up to the last occurrence of a substring.
 
@@ -4823,18 +4823,18 @@ public:
 
 		@see upToFirstOccurrenceOf, fromFirstOccurrenceOf
 	*/
-	const String upToLastOccurrenceOf (const String& substringToFind,
-									   bool includeSubStringInResult,
-									   bool ignoreCase) const;
+	String upToLastOccurrenceOf (const String& substringToFind,
+								 bool includeSubStringInResult,
+								 bool ignoreCase) const;
 
 	/** Returns a copy of this string with any whitespace characters removed from the start and end. */
-	const String trim() const;
+	String trim() const;
 
 	/** Returns a copy of this string with any whitespace characters removed from the start. */
-	const String trimStart() const;
+	String trimStart() const;
 
 	/** Returns a copy of this string with any whitespace characters removed from the end. */
-	const String trimEnd() const;
+	String trimEnd() const;
 
 	/** Returns a copy of this string, having removed a specified set of characters from its start.
 		Characters are removed from the start of the string until it finds one that is not in the
@@ -4842,7 +4842,7 @@ public:
 		@param charactersToTrim	 the set of characters to remove.
 		@see trim, trimStart, trimCharactersAtEnd
 	*/
-	const String trimCharactersAtStart (const String& charactersToTrim) const;
+	String trimCharactersAtStart (const String& charactersToTrim) const;
 
 	/** Returns a copy of this string, having removed a specified set of characters from its end.
 		Characters are removed from the end of the string until it finds one that is not in the
@@ -4850,13 +4850,13 @@ public:
 		@param charactersToTrim	 the set of characters to remove.
 		@see trim, trimEnd, trimCharactersAtStart
 	*/
-	const String trimCharactersAtEnd (const String& charactersToTrim) const;
+	String trimCharactersAtEnd (const String& charactersToTrim) const;
 
 	/** Returns an upper-case version of this string. */
-	const String toUpperCase() const;
+	String toUpperCase() const;
 
 	/** Returns an lower-case version of this string. */
-	const String toLowerCase() const;
+	String toLowerCase() const;
 
 	/** Replaces a sub-section of the string with another string.
 
@@ -4873,9 +4873,9 @@ public:
 		@param stringToInsert	   the new string to insert at startIndex after the characters have been
 										removed.
 	*/
-	const String replaceSection (int startIndex,
-								 int numCharactersToReplace,
-								 const String& stringToInsert) const;
+	String replaceSection (int startIndex,
+						   int numCharactersToReplace,
+						   const String& stringToInsert) const;
 
 	/** Replaces all occurrences of a substring with another string.
 
@@ -4884,13 +4884,13 @@ public:
 
 		Note that this is a const method, and won't alter the string itself.
 	*/
-	const String replace (const String& stringToReplace,
-						  const String& stringToInsertInstead,
-						  bool ignoreCase = false) const;
+	String replace (const String& stringToReplace,
+					const String& stringToInsertInstead,
+					bool ignoreCase = false) const;
 
 	/** Returns a string with all occurrences of a character replaced with a different one. */
-	const String replaceCharacter (juce_wchar characterToReplace,
-								   juce_wchar characterToInsertInstead) const;
+	String replaceCharacter (juce_wchar characterToReplace,
+							 juce_wchar characterToInsertInstead) const;
 
 	/** Replaces a set of characters with another set.
 
@@ -4902,8 +4902,8 @@ public:
 
 		Note that this is a const method, and won't affect the string itself.
 	*/
-	const String replaceCharacters (const String& charactersToReplace,
-									const String& charactersToInsertInstead) const;
+	String replaceCharacters (const String& charactersToReplace,
+							  const String& charactersToInsertInstead) const;
 
 	/** Returns a version of this string that only retains a fixed set of characters.
 
@@ -4914,7 +4914,7 @@ public:
 
 		Note that this is a const method, and won't alter the string itself.
 	*/
-	const String retainCharacters (const String& charactersToRetain) const;
+	String retainCharacters (const String& charactersToRetain) const;
 
 	/** Returns a version of this string with a set of characters removed.
 
@@ -4925,14 +4925,14 @@ public:
 
 		Note that this is a const method, and won't alter the string itself.
 	*/
-	const String removeCharacters (const String& charactersToRemove) const;
+	String removeCharacters (const String& charactersToRemove) const;
 
 	/** Returns a section from the start of the string that only contains a certain set of characters.
 
 		This returns the leftmost section of the string, up to (and not including) the
 		first character that doesn't appear in the string passed in.
 	*/
-	const String initialSectionContainingOnly (const String& permittedCharacters) const;
+	String initialSectionContainingOnly (const String& permittedCharacters) const;
 
 	/** Returns a section from the start of the string that only contains a certain set of characters.
 
@@ -4940,7 +4940,7 @@ public:
 		first character that occurs in the string passed in. (If none of the specified
 		characters are found in the string, the return value will just be the original string).
 	*/
-	const String initialSectionNotContaining (const String& charactersToStopAt) const;
+	String initialSectionNotContaining (const String& charactersToStopAt) const;
 
 	/** Checks whether the string might be in quotation marks.
 
@@ -4960,7 +4960,7 @@ public:
 
 		@see isQuotedString, quoted
 	*/
-	const String unquoted() const;
+	String unquoted() const;
 
 	/** Adds quotation marks around a string.
 
@@ -4973,25 +4973,25 @@ public:
 		@param quoteCharacter   the character to add at the start and end
 		@see isQuotedString, unquoted
 	*/
-	const String quoted (juce_wchar quoteCharacter = '"') const;
+	String quoted (juce_wchar quoteCharacter = '"') const;
 
 	/** Creates a string which is a version of a string repeated and joined together.
 
 		@param stringToRepeat	 the string to repeat
 		@param numberOfTimesToRepeat  how many times to repeat it
 	*/
-	static const String repeatedString (const String& stringToRepeat,
-										int numberOfTimesToRepeat);
+	static String repeatedString (const String& stringToRepeat,
+								  int numberOfTimesToRepeat);
 
 	/** Returns a copy of this string with the specified character repeatedly added to its
 		beginning until the total length is at least the minimum length specified.
 	*/
-	const String paddedLeft (juce_wchar padCharacter, int minimumLength) const;
+	String paddedLeft (juce_wchar padCharacter, int minimumLength) const;
 
 	/** Returns a copy of this string with the specified character repeatedly added to its
 		end until the total length is at least the minimum length specified.
 	*/
-	const String paddedRight (juce_wchar padCharacter, int minimumLength) const;
+	String paddedRight (juce_wchar padCharacter, int minimumLength) const;
 
 	/** Creates a string from data in an unknown format.
 
@@ -5001,7 +5001,7 @@ public:
 		Should be able to handle Unicode endianness correctly, by looking at
 		the first two bytes.
 	*/
-	static const String createStringFromData (const void* data, int size);
+	static String createStringFromData (const void* data, int size);
 
 	/** Creates a String from a printf-style parameter list.
 
@@ -5014,7 +5014,7 @@ public:
 		on the platform, it may be using wchar_t or char character types, so that even string
 		literals can't be safely used as parameters if you're writing portable code.
 	*/
-	static const String formatted (const String formatString, ... );
+	static String formatted (const String formatString, ... );
 
 	// Numeric conversions..
 
@@ -5138,13 +5138,13 @@ public:
 	int64 getHexValue64() const noexcept;
 
 	/** Creates a string representing this 32-bit value in hexadecimal. */
-	static const String toHexString (int number);
+	static String toHexString (int number);
 
 	/** Creates a string representing this 64-bit value in hexadecimal. */
-	static const String toHexString (int64 number);
+	static String toHexString (int64 number);
 
 	/** Creates a string representing this 16-bit value in hexadecimal. */
-	static const String toHexString (short number);
+	static String toHexString (short number);
 
 	/** Creates a string containing a hex dump of a block of binary data.
 
@@ -5155,9 +5155,7 @@ public:
 							group size 1 looks like: "be a1 c2 ff", group size 2 looks
 							like "bea1 c2ff".
 	*/
-	static const String toHexString (const unsigned char* data,
-									 int size,
-									 int groupSize = 1);
+	static String toHexString (const void* data, int size, int groupSize = 1);
 
 	/** Returns the character pointer currently being used to store this string.
 
@@ -5220,7 +5218,7 @@ public:
 	/** Creates a String from a UTF-8 encoded buffer.
 		If the size is < 0, it'll keep reading until it hits a zero.
 	*/
-	static const String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
+	static String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
 
 	/** Returns the number of bytes required to represent this string as UTF8.
 		The number returned does NOT include the trailing zero.
@@ -5346,31 +5344,31 @@ private:
 };
 
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (const char* string1,	 const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (const char* string1,	 const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t* string1,  const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (const wchar_t* string1,  const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (char string1,		const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (char string1,		const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (wchar_t string1,	 const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (wchar_t string1,	 const String& string2);
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (juce_wchar string1,	  const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (juce_wchar string1,	  const String& string2);
 #endif
 
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const char* string2);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, const char* string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, char characterToAppend);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, char characterToAppend);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, wchar_t characterToAppend);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, wchar_t characterToAppend);
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, juce_wchar characterToAppend);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, juce_wchar characterToAppend);
 #endif
 
 /** Appends a character at the end of a string. */
@@ -7840,68 +7838,7 @@ private:
 #ifndef __JUCE_IDENTIFIER_JUCEHEADER__
 #define __JUCE_IDENTIFIER_JUCEHEADER__
 
-
-/*** Start of inlined file: juce_StringPool.h ***/
-#ifndef __JUCE_STRINGPOOL_JUCEHEADER__
-#define __JUCE_STRINGPOOL_JUCEHEADER__
-
-/**
-	A StringPool holds a set of shared strings, which reduces storage overheads and improves
-	comparison speed when dealing with many duplicate strings.
-
-	When you add a string to a pool using getPooledString, it'll return a character
-	array containing the same string. This array is owned by the pool, and the same array
-	is returned every time a matching string is asked for. This means that it's trivial to
-	compare two pooled strings for equality, as you can simply compare their pointers. It
-	also cuts down on storage if you're using many copies of the same string.
-*/
-class JUCE_API  StringPool
-{
-public:
-
-	/** Creates an empty pool. */
-	StringPool() noexcept;
-
-	/** Destructor */
-	~StringPool();
-
-	/** Returns a pointer to a copy of the string that is passed in.
-
-		The pool will always return the same pointer when asked for a string that matches it.
-		The pool will own all the pointers that it returns, deleting them when the pool itself
-		is deleted.
-	*/
-	const String::CharPointerType getPooledString (const String& original);
-
-	/** Returns a pointer to a copy of the string that is passed in.
-
-		The pool will always return the same pointer when asked for a string that matches it.
-		The pool will own all the pointers that it returns, deleting them when the pool itself
-		is deleted.
-	*/
-	const String::CharPointerType getPooledString (const char* original);
-
-	/** Returns a pointer to a copy of the string that is passed in.
-
-		The pool will always return the same pointer when asked for a string that matches it.
-		The pool will own all the pointers that it returns, deleting them when the pool itself
-		is deleted.
-	*/
-	const String::CharPointerType getPooledString (const wchar_t* original);
-
-	/** Returns the number of strings in the pool. */
-	int size() const noexcept;
-
-	/** Returns one of the strings in the pool, by index. */
-	const String::CharPointerType operator[] (int index) const noexcept;
-
-private:
-	Array <String> strings;
-};
-
-#endif   // __JUCE_STRINGPOOL_JUCEHEADER__
-
-/*** End of inlined file: juce_StringPool.h ***/
+class StringPool;
 
 /**
 	Represents a string identifier, designed for accessing properties by name.
@@ -7946,7 +7883,7 @@ public:
 	inline bool operator!= (const Identifier& other) const noexcept	 { return name != other.name; }
 
 	/** Returns this identifier as a string. */
-	const String toString() const					   { return name; }
+	String toString() const						 { return name; }
 
 	/** Returns this identifier's raw string pointer. */
 	operator const String::CharPointerType() const noexcept		 { return name; }
@@ -7999,7 +7936,7 @@ public:
 	/** Returns the default new-line sequence that the library uses.
 		@see getDefault()
 	*/
-	operator const String() const		   { return getDefault(); }
+	operator String() const			 { return getDefault(); }
 };
 
 /** A predefined object representing a new-line, which can be written to a string or stream.
@@ -8023,467 +7960,8 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const NewLine&);
 
 /*** End of inlined file: juce_NewLine.h ***/
 
-
-/*** Start of inlined file: juce_InputStream.h ***/
-#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
-#define __JUCE_INPUTSTREAM_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_MemoryBlock.h ***/
-#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
-#define __JUCE_MEMORYBLOCK_JUCEHEADER__
-
-/**
-	A class to hold a resizable block of raw data.
-
-*/
-class JUCE_API  MemoryBlock
-{
-public:
-
-	/** Create an uninitialised block with 0 size. */
-	MemoryBlock() noexcept;
-
-	/** Creates a memory block with a given initial size.
-
-		@param initialSize	  the size of block to create
-		@param initialiseToZero	 whether to clear the memory or just leave it uninitialised
-	*/
-	MemoryBlock (const size_t initialSize,
-				 bool initialiseToZero = false);
-
-	/** Creates a copy of another memory block. */
-	MemoryBlock (const MemoryBlock& other);
-
-	/** Creates a memory block using a copy of a block of data.
-
-		@param dataToInitialiseFrom	 some data to copy into this block
-		@param sizeInBytes		  how much space to use
-	*/
-	MemoryBlock (const void* dataToInitialiseFrom, size_t sizeInBytes);
-
-	/** Destructor. */
-	~MemoryBlock() noexcept;
-
-	/** Copies another memory block onto this one.
-
-		This block will be resized and copied to exactly match the other one.
-	*/
-	MemoryBlock& operator= (const MemoryBlock& other);
-
-	/** Compares two memory blocks.
-
-		@returns true only if the two blocks are the same size and have identical contents.
-	*/
-	bool operator== (const MemoryBlock& other) const noexcept;
-
-	/** Compares two memory blocks.
-
-		@returns true if the two blocks are different sizes or have different contents.
-	*/
-	bool operator!= (const MemoryBlock& other) const noexcept;
-
-	/** Returns true if the data in this MemoryBlock matches the raw bytes passed-in.
-	*/
-	bool matches (const void* data, size_t dataSize) const noexcept;
-
-	/** Returns a void pointer to the data.
-
-		Note that the pointer returned will probably become invalid when the
-		block is resized.
-	*/
-	void* getData() const noexcept				  { return data; }
-
-	/** Returns a byte from the memory block.
-
-		This returns a reference, so you can also use it to set a byte.
-	*/
-	template <typename Type>
-	char& operator[] (const Type offset) const noexcept		 { return data [offset]; }
-
-	/** Returns the block's current allocated size, in bytes. */
-	size_t getSize() const noexcept				 { return size; }
-
-	/** Resizes the memory block.
-
-		This will try to keep as much of the block's current content as it can,
-		and can optionally be made to clear any new space that gets allocated at
-		the end of the block.
-
-		@param newSize			  the new desired size for the block
-		@param initialiseNewSpaceToZero	 if the block gets enlarged, this determines
-											whether to clear the new section or just leave it
-											uninitialised
-		@see ensureSize
-	*/
-	void setSize (const size_t newSize,
-				  bool initialiseNewSpaceToZero = false);
-
-	/** Increases the block's size only if it's smaller than a given size.
-
-		@param minimumSize		  if the block is already bigger than this size, no action
-											will be taken; otherwise it will be increased to this size
-		@param initialiseNewSpaceToZero	 if the block gets enlarged, this determines
-											whether to clear the new section or just leave it
-											uninitialised
-		@see setSize
-	*/
-	void ensureSize (const size_t minimumSize,
-					 bool initialiseNewSpaceToZero = false);
-
-	/** Fills the entire memory block with a repeated byte value.
-
-		This is handy for clearing a block of memory to zero.
-	*/
-	void fillWith (uint8 valueToUse) noexcept;
-
-	/** Adds another block of data to the end of this one.
-
-		This block's size will be increased accordingly.
-	*/
-	void append (const void* data, size_t numBytes);
-
-	/** Exchanges the contents of this and another memory block.
-		No actual copying is required for this, so it's very fast.
-	*/
-	void swapWith (MemoryBlock& other) noexcept;
-
-	/** Copies data into this MemoryBlock from a memory address.
-
-		@param srcData		  the memory location of the data to copy into this block
-		@param destinationOffset	the offset in this block at which the data being copied should begin
-		@param numBytes		 how much to copy in (if this goes beyond the size of the memory block,
-									it will be clipped so not to do anything nasty)
-	*/
-	void copyFrom (const void* srcData,
-				   int destinationOffset,
-				   size_t numBytes) noexcept;
-
-	/** Copies data from this MemoryBlock to a memory address.
-
-		@param destData	 the memory location to write to
-		@param sourceOffset	 the offset within this block from which the copied data will be read
-		@param numBytes	 how much to copy (if this extends beyond the limits of the memory block,
-								zeros will be used for that portion of the data)
-	*/
-	void copyTo (void* destData,
-				 int sourceOffset,
-				 size_t numBytes) const noexcept;
-
-	/** Chops out a section  of the block.
-
-		This will remove a section of the memory block and close the gap around it,
-		shifting any subsequent data downwards and reducing the size of the block.
-
-		If the range specified goes beyond the size of the block, it will be clipped.
-	*/
-	void removeSection (size_t startByte, size_t numBytesToRemove);
-
-	/** Attempts to parse the contents of the block as a zero-terminated string of 8-bit
-		characters in the system's default encoding. */
-	const String toString() const;
-
-	/** Parses a string of hexadecimal numbers and writes this data into the memory block.
-
-		The block will be resized to the number of valid bytes read from the string.
-		Non-hex characters in the string will be ignored.
-
-		@see String::toHexString()
-	*/
-	void loadFromHexString (const String& sourceHexString);
-
-	/** Sets a number of bits in the memory block, treating it as a long binary sequence. */
-	void setBitRange (size_t bitRangeStart,
-					  size_t numBits,
-					  int binaryNumberToApply) noexcept;
-
-	/** Reads a number of bits from the memory block, treating it as one long binary sequence */
-	int getBitRange (size_t bitRangeStart,
-					 size_t numBitsToRead) const noexcept;
-
-	/** Returns a string of characters that represent the binary contents of this block.
-
-		Uses a 64-bit encoding system to allow binary data to be turned into a string
-		of simple non-extended characters, e.g. for storage in XML.
-
-		@see fromBase64Encoding
-	*/
-	const String toBase64Encoding() const;
-
-	/** Takes a string of encoded characters and turns it into binary data.
-
-		The string passed in must have been created by to64BitEncoding(), and this
-		block will be resized to recreate the original data block.
-
-		@see toBase64Encoding
-	*/
-	bool fromBase64Encoding  (const String& encodedString);
-
-private:
-
-	HeapBlock <char> data;
-	size_t size;
-	static const char* const encodingTable;
-
-	JUCE_LEAK_DETECTOR (MemoryBlock);
-};
-
-#endif   // __JUCE_MEMORYBLOCK_JUCEHEADER__
-
-/*** End of inlined file: juce_MemoryBlock.h ***/
-
-/** The base class for streams that read data.
-
-	Input and output streams are used throughout the library - subclasses can override
-	some or all of the virtual functions to implement their behaviour.
-
-	@see OutputStream, MemoryInputStream, BufferedInputStream, FileInputStream
-*/
-class JUCE_API  InputStream
-{
-public:
-	/** Destructor. */
-	virtual ~InputStream()  {}
-
-	/** Returns the total number of bytes available for reading in this stream.
-
-		Note that this is the number of bytes available from the start of the
-		stream, not from the current position.
-
-		If the size of the stream isn't actually known, this may return -1.
-	*/
-	virtual int64 getTotalLength() = 0;
-
-	/** Returns true if the stream has no more data to read. */
-	virtual bool isExhausted() = 0;
-
-	/** Reads a set of bytes from the stream into a memory buffer.
-
-		This is the only read method that subclasses actually need to implement, as the
-		InputStream base class implements the other read methods in terms of this one (although
-		it's often more efficient for subclasses to implement them directly).
-
-		@param destBuffer	   the destination buffer for the data
-		@param maxBytesToRead   the maximum number of bytes to read - make sure the
-								memory block passed in is big enough to contain this
-								many bytes.
-
-		@returns	the actual number of bytes that were read, which may be less than
-					maxBytesToRead if the stream is exhausted before it gets that far
-	*/
-	virtual int read (void* destBuffer, int maxBytesToRead) = 0;
-
-	/** Reads a byte from the stream.
-
-		If the stream is exhausted, this will return zero.
-
-		@see OutputStream::writeByte
-	*/
-	virtual char readByte();
-
-	/** Reads a boolean from the stream.
-
-		The bool is encoded as a single byte - 1 for true, 0 for false.
-
-		If the stream is exhausted, this will return false.
-
-		@see OutputStream::writeBool
-	*/
-	virtual bool readBool();
-
-	/** Reads two bytes from the stream as a little-endian 16-bit value.
-
-		If the next two bytes read are byte1 and byte2, this returns
-		(byte1 | (byte2 << 8)).
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeShort, readShortBigEndian
-	*/
-	virtual short readShort();
-
-	/** Reads two bytes from the stream as a little-endian 16-bit value.
-
-		If the next two bytes read are byte1 and byte2, this returns
-		(byte2 | (byte1 << 8)).
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeShortBigEndian, readShort
-	*/
-	virtual short readShortBigEndian();
-
-	/** Reads four bytes from the stream as a little-endian 32-bit value.
-
-		If the next four bytes are byte1 to byte4, this returns
-		(byte1 | (byte2 << 8) | (byte3 << 16) | (byte4 << 24)).
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeInt, readIntBigEndian
-	*/
-	virtual int readInt();
-
-	/** Reads four bytes from the stream as a big-endian 32-bit value.
-
-		If the next four bytes are byte1 to byte4, this returns
-		(byte4 | (byte3 << 8) | (byte2 << 16) | (byte1 << 24)).
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeIntBigEndian, readInt
-	*/
-	virtual int readIntBigEndian();
-
-	/** Reads eight bytes from the stream as a little-endian 64-bit value.
-
-		If the next eight bytes are byte1 to byte8, this returns
-		(byte1 | (byte2 << 8) | (byte3 << 16) | (byte4 << 24) | (byte5 << 32) | (byte6 << 40) | (byte7 << 48) | (byte8 << 56)).
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeInt64, readInt64BigEndian
-	*/
-	virtual int64 readInt64();
-
-	/** Reads eight bytes from the stream as a big-endian 64-bit value.
-
-		If the next eight bytes are byte1 to byte8, this returns
-		(byte8 | (byte7 << 8) | (byte6 << 16) | (byte5 << 24) | (byte4 << 32) | (byte3 << 40) | (byte2 << 48) | (byte1 << 56)).
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeInt64BigEndian, readInt64
-	*/
-	virtual int64 readInt64BigEndian();
-
-	/** Reads four bytes as a 32-bit floating point value.
-
-		The raw 32-bit encoding of the float is read from the stream as a little-endian int.
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeFloat, readDouble
-	*/
-	virtual float readFloat();
-
-	/** Reads four bytes as a 32-bit floating point value.
-
-		The raw 32-bit encoding of the float is read from the stream as a big-endian int.
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeFloatBigEndian, readDoubleBigEndian
-	*/
-	virtual float readFloatBigEndian();
-
-	/** Reads eight bytes as a 64-bit floating point value.
-
-		The raw 64-bit encoding of the double is read from the stream as a little-endian int64.
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeDouble, readFloat
-	*/
-	virtual double readDouble();
-
-	/** Reads eight bytes as a 64-bit floating point value.
-
-		The raw 64-bit encoding of the double is read from the stream as a big-endian int64.
-
-		If the stream is exhausted partway through reading the bytes, this will return zero.
-
-		@see OutputStream::writeDoubleBigEndian, readFloatBigEndian
-	*/
-	virtual double readDoubleBigEndian();
-
-	/** Reads an encoded 32-bit number from the stream using a space-saving compressed format.
-
-		For small values, this is more space-efficient than using readInt() and OutputStream::writeInt()
-
-		The format used is: number of significant bytes + up to 4 bytes in little-endian order.
-
-		@see OutputStream::writeCompressedInt()
-	*/
-	virtual int readCompressedInt();
-
-	/** Reads a UTF8 string from the stream, up to the next linefeed or carriage return.
-
-		This will read up to the next "\n" or "\r\n" or end-of-stream.
-
-		After this call, the stream's position will be left pointing to the next character
-		following the line-feed, but the linefeeds aren't included in the string that
-		is returned.
-	*/
-	virtual const String readNextLine();
-
-	/** Reads a zero-terminated UTF8 string from the stream.
-
-		This will read characters from the stream until it hits a zero character or
-		end-of-stream.
-
-		@see OutputStream::writeString, readEntireStreamAsString
-	*/
-	virtual const String readString();
-
-	/** Tries to read the whole stream and turn it into a string.
-
-		This will read from the stream's current position until the end-of-stream, and
-		will try to make an educated guess about whether it's unicode or an 8-bit encoding.
-	*/
-	virtual const String readEntireStreamAsString();
-
-	/** Reads from the stream and appends the data to a MemoryBlock.
-
-		@param destBlock		the block to append the data onto
-		@param maxNumBytesToRead	if this is a positive value, it sets a limit to the number
-									of bytes that will be read - if it's negative, data
-									will be read until the stream is exhausted.
-		@returns the number of bytes that were added to the memory block
-	*/
-	virtual int readIntoMemoryBlock (MemoryBlock& destBlock,
-									 int maxNumBytesToRead = -1);
-
-	/** Returns the offset of the next byte that will be read from the stream.
-
-		@see setPosition
-	*/
-	virtual int64 getPosition() = 0;
-
-	/** Tries to move the current read position of the stream.
-
-		The position is an absolute number of bytes from the stream's start.
-
-		Some streams might not be able to do this, in which case they should do
-		nothing and return false. Others might be able to manage it by resetting
-		themselves and skipping to the correct position, although this is
-		obviously a bit slow.
-
-		@returns  true if the stream manages to reposition itself correctly
-		@see getPosition
-	*/
-	virtual bool setPosition (int64 newPosition) = 0;
-
-	/** Reads and discards a number of bytes from the stream.
-
-		Some input streams might implement this efficiently, but the base
-		class will just keep reading data until the requisite number of bytes
-		have been done.
-	*/
-	virtual void skipNextBytes (int64 numBytesToSkip);
-
-protected:
-
-	InputStream() noexcept {}
-
-private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream);
-};
-
-#endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
-
-/*** End of inlined file: juce_InputStream.h ***/
-
+class InputStream;
+class MemoryBlock;
 class File;
 
 /**
@@ -8703,6 +8181,265 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
 
 /*** End of inlined file: juce_OutputStream.h ***/
 
+
+/*** Start of inlined file: juce_InputStream.h ***/
+#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
+#define __JUCE_INPUTSTREAM_JUCEHEADER__
+
+class MemoryBlock;
+
+/** The base class for streams that read data.
+
+	Input and output streams are used throughout the library - subclasses can override
+	some or all of the virtual functions to implement their behaviour.
+
+	@see OutputStream, MemoryInputStream, BufferedInputStream, FileInputStream
+*/
+class JUCE_API  InputStream
+{
+public:
+	/** Destructor. */
+	virtual ~InputStream()  {}
+
+	/** Returns the total number of bytes available for reading in this stream.
+
+		Note that this is the number of bytes available from the start of the
+		stream, not from the current position.
+
+		If the size of the stream isn't actually known, this may return -1.
+	*/
+	virtual int64 getTotalLength() = 0;
+
+	/** Returns true if the stream has no more data to read. */
+	virtual bool isExhausted() = 0;
+
+	/** Reads a set of bytes from the stream into a memory buffer.
+
+		This is the only read method that subclasses actually need to implement, as the
+		InputStream base class implements the other read methods in terms of this one (although
+		it's often more efficient for subclasses to implement them directly).
+
+		@param destBuffer	   the destination buffer for the data
+		@param maxBytesToRead   the maximum number of bytes to read - make sure the
+								memory block passed in is big enough to contain this
+								many bytes.
+
+		@returns	the actual number of bytes that were read, which may be less than
+					maxBytesToRead if the stream is exhausted before it gets that far
+	*/
+	virtual int read (void* destBuffer, int maxBytesToRead) = 0;
+
+	/** Reads a byte from the stream.
+
+		If the stream is exhausted, this will return zero.
+
+		@see OutputStream::writeByte
+	*/
+	virtual char readByte();
+
+	/** Reads a boolean from the stream.
+
+		The bool is encoded as a single byte - 1 for true, 0 for false.
+
+		If the stream is exhausted, this will return false.
+
+		@see OutputStream::writeBool
+	*/
+	virtual bool readBool();
+
+	/** Reads two bytes from the stream as a little-endian 16-bit value.
+
+		If the next two bytes read are byte1 and byte2, this returns
+		(byte1 | (byte2 << 8)).
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeShort, readShortBigEndian
+	*/
+	virtual short readShort();
+
+	/** Reads two bytes from the stream as a little-endian 16-bit value.
+
+		If the next two bytes read are byte1 and byte2, this returns
+		(byte2 | (byte1 << 8)).
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeShortBigEndian, readShort
+	*/
+	virtual short readShortBigEndian();
+
+	/** Reads four bytes from the stream as a little-endian 32-bit value.
+
+		If the next four bytes are byte1 to byte4, this returns
+		(byte1 | (byte2 << 8) | (byte3 << 16) | (byte4 << 24)).
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeInt, readIntBigEndian
+	*/
+	virtual int readInt();
+
+	/** Reads four bytes from the stream as a big-endian 32-bit value.
+
+		If the next four bytes are byte1 to byte4, this returns
+		(byte4 | (byte3 << 8) | (byte2 << 16) | (byte1 << 24)).
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeIntBigEndian, readInt
+	*/
+	virtual int readIntBigEndian();
+
+	/** Reads eight bytes from the stream as a little-endian 64-bit value.
+
+		If the next eight bytes are byte1 to byte8, this returns
+		(byte1 | (byte2 << 8) | (byte3 << 16) | (byte4 << 24) | (byte5 << 32) | (byte6 << 40) | (byte7 << 48) | (byte8 << 56)).
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeInt64, readInt64BigEndian
+	*/
+	virtual int64 readInt64();
+
+	/** Reads eight bytes from the stream as a big-endian 64-bit value.
+
+		If the next eight bytes are byte1 to byte8, this returns
+		(byte8 | (byte7 << 8) | (byte6 << 16) | (byte5 << 24) | (byte4 << 32) | (byte3 << 40) | (byte2 << 48) | (byte1 << 56)).
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeInt64BigEndian, readInt64
+	*/
+	virtual int64 readInt64BigEndian();
+
+	/** Reads four bytes as a 32-bit floating point value.
+
+		The raw 32-bit encoding of the float is read from the stream as a little-endian int.
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeFloat, readDouble
+	*/
+	virtual float readFloat();
+
+	/** Reads four bytes as a 32-bit floating point value.
+
+		The raw 32-bit encoding of the float is read from the stream as a big-endian int.
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeFloatBigEndian, readDoubleBigEndian
+	*/
+	virtual float readFloatBigEndian();
+
+	/** Reads eight bytes as a 64-bit floating point value.
+
+		The raw 64-bit encoding of the double is read from the stream as a little-endian int64.
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeDouble, readFloat
+	*/
+	virtual double readDouble();
+
+	/** Reads eight bytes as a 64-bit floating point value.
+
+		The raw 64-bit encoding of the double is read from the stream as a big-endian int64.
+
+		If the stream is exhausted partway through reading the bytes, this will return zero.
+
+		@see OutputStream::writeDoubleBigEndian, readFloatBigEndian
+	*/
+	virtual double readDoubleBigEndian();
+
+	/** Reads an encoded 32-bit number from the stream using a space-saving compressed format.
+
+		For small values, this is more space-efficient than using readInt() and OutputStream::writeInt()
+
+		The format used is: number of significant bytes + up to 4 bytes in little-endian order.
+
+		@see OutputStream::writeCompressedInt()
+	*/
+	virtual int readCompressedInt();
+
+	/** Reads a UTF8 string from the stream, up to the next linefeed or carriage return.
+
+		This will read up to the next "\n" or "\r\n" or end-of-stream.
+
+		After this call, the stream's position will be left pointing to the next character
+		following the line-feed, but the linefeeds aren't included in the string that
+		is returned.
+	*/
+	virtual String readNextLine();
+
+	/** Reads a zero-terminated UTF8 string from the stream.
+
+		This will read characters from the stream until it hits a zero character or
+		end-of-stream.
+
+		@see OutputStream::writeString, readEntireStreamAsString
+	*/
+	virtual String readString();
+
+	/** Tries to read the whole stream and turn it into a string.
+
+		This will read from the stream's current position until the end-of-stream, and
+		will try to make an educated guess about whether it's unicode or an 8-bit encoding.
+	*/
+	virtual String readEntireStreamAsString();
+
+	/** Reads from the stream and appends the data to a MemoryBlock.
+
+		@param destBlock		the block to append the data onto
+		@param maxNumBytesToRead	if this is a positive value, it sets a limit to the number
+									of bytes that will be read - if it's negative, data
+									will be read until the stream is exhausted.
+		@returns the number of bytes that were added to the memory block
+	*/
+	virtual int readIntoMemoryBlock (MemoryBlock& destBlock,
+									 int maxNumBytesToRead = -1);
+
+	/** Returns the offset of the next byte that will be read from the stream.
+
+		@see setPosition
+	*/
+	virtual int64 getPosition() = 0;
+
+	/** Tries to move the current read position of the stream.
+
+		The position is an absolute number of bytes from the stream's start.
+
+		Some streams might not be able to do this, in which case they should do
+		nothing and return false. Others might be able to manage it by resetting
+		themselves and skipping to the correct position, although this is
+		obviously a bit slow.
+
+		@returns  true if the stream manages to reposition itself correctly
+		@see getPosition
+	*/
+	virtual bool setPosition (int64 newPosition) = 0;
+
+	/** Reads and discards a number of bytes from the stream.
+
+		Some input streams might implement this efficiently, but the base
+		class will just keep reading data until the requisite number of bytes
+		have been done.
+	*/
+	virtual void skipNextBytes (int64 numBytesToSkip);
+
+protected:
+
+	InputStream() noexcept {}
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream);
+};
+
+#endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
+
+/*** End of inlined file: juce_InputStream.h ***/
+
 #ifndef DOXYGEN
  class ReferenceCountedObject;
  class DynamicObject;
@@ -8762,8 +8499,8 @@ public:
 	operator bool() const noexcept;
 	operator float() const noexcept;
 	operator double() const noexcept;
-	operator const String() const;
-	const String toString() const;
+	operator String() const;
+	String toString() const;
 	ReferenceCountedObject* getObject() const noexcept;
 	DynamicObject* getDynamicObject() const noexcept;
 
@@ -8785,29 +8522,25 @@ public:
 		The data in the stream must have been written using writeToStream(), or this
 		will have unpredictable results.
 	*/
-	static const var readFromStream (InputStream& input);
+	static var readFromStream (InputStream& input);
 
 	/** If this variant is an object, this returns one of its properties. */
-	const var operator[] (const Identifier& propertyName) const;
+	var operator[] (const Identifier& propertyName) const;
 
 	/** If this variant is an object, this invokes one of its methods with no arguments. */
-	const var call (const Identifier& method) const;
+	var call (const Identifier& method) const;
 	/** If this variant is an object, this invokes one of its methods with one argument. */
-	const var call (const Identifier& method, const var& arg1) const;
+	var call (const Identifier& method, const var& arg1) const;
 	/** If this variant is an object, this invokes one of its methods with 2 arguments. */
-	const var call (const Identifier& method, const var& arg1, const var& arg2) const;
+	var call (const Identifier& method, const var& arg1, const var& arg2) const;
 	/** If this variant is an object, this invokes one of its methods with 3 arguments. */
-	const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3);
+	var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3);
 	/** If this variant is an object, this invokes one of its methods with 4 arguments. */
-	const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+	var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
 	/** If this variant is an object, this invokes one of its methods with 5 arguments. */
-	const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
-
+	var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
 	/** If this variant is an object, this invokes one of its methods with a list of arguments. */
-	const var invoke (const Identifier& method, const var* arguments, int numArguments) const;
-
-	/** If this variant is a method pointer, this invokes it on a target object. */
-	const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
+	var invoke (const Identifier& method, const var* arguments, int numArguments) const;
 
 	/** Returns true if this var has the same value as the one supplied.
 		Note that this ignores the type, so a string var "123" and an integer var with the
@@ -8823,26 +8556,16 @@ public:
 	bool equalsWithSameType (const var& other) const noexcept;
 
 private:
-	class VariantType;
-	friend class VariantType;
-	class VariantType_Void;
-	friend class VariantType_Void;
-	class VariantType_Int;
-	friend class VariantType_Int;
-	class VariantType_Int64;
-	friend class VariantType_Int64;
-	class VariantType_Double;
-	friend class VariantType_Double;
-	class VariantType_Float;
-	friend class VariantType_Float;
-	class VariantType_Bool;
-	friend class VariantType_Bool;
-	class VariantType_String;
-	friend class VariantType_String;
-	class VariantType_Object;
-	friend class VariantType_Object;
-	class VariantType_Method;
-	friend class VariantType_Method;
+
+	class VariantType;	 friend class VariantType;
+	class VariantType_Void;	friend class VariantType_Void;
+	class VariantType_Int;	 friend class VariantType_Int;
+	class VariantType_Int64;   friend class VariantType_Int64;
+	class VariantType_Double;  friend class VariantType_Double;
+	class VariantType_Bool;	friend class VariantType_Bool;
+	class VariantType_String;  friend class VariantType_String;
+	class VariantType_Object;  friend class VariantType_Object;
+	class VariantType_Method;  friend class VariantType_Method;
 
 	union ValueUnion
 	{
@@ -8850,13 +8573,16 @@ private:
 		int64 int64Value;
 		bool boolValue;
 		double doubleValue;
-		String* stringValue;
+		char stringValue [sizeof (String)];
 		ReferenceCountedObject* objectValue;
 		MethodFunction methodValue;
 	};
 
 	const VariantType* type;
 	ValueUnion value;
+
+	friend class DynamicObject;
+	var invokeMethod (DynamicObject*, const var*, int) const;
 };
 
 /** Compares the values of two var objects, using the var::equals() comparison. */
@@ -9230,7 +8956,7 @@ public:
 	/** Tries to return the named value, but if no such value is found, this will
 		instead return the supplied default value.
 	*/
-	const var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
+	var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
 
 	/** Changes or adds a named value.
 		@returns	true if a value was changed or added; false if the
@@ -9255,7 +8981,7 @@ public:
 	/** Returns the value of the item at a given index.
 		The index must be between 0 and size() - 1.
 	*/
-	const var getValueAt (int index) const;
+	var getValueAt (int index) const;
 
 	/** Removes all values. */
 	void clear();
@@ -10629,7 +10355,7 @@ public:
 	/** Generates a simple hash from an integer. */
 	static int generateHash (const int key, const int upperLimit) noexcept	{ return std::abs (key) % upperLimit; }
 	/** Generates a simple hash from a string. */
-	static int generateHash (const String& key, const int upperLimit) noexcept	{ return key.hashCode() % upperLimit; }
+	static int generateHash (const String& key, const int upperLimit) noexcept	{ return (int) (((uint32) key.hashCode()) % upperLimit); }
 	/** Generates a simple hash from a variant. */
 	static int generateHash (const var& key, const int upperLimit) noexcept	   { return generateHash (key.toString(), upperLimit); }
 };
@@ -11324,9 +11050,9 @@ public:
 		@param numberOfElements	 how many elements to join together. If this is less
 									than zero, all available elements will be used.
 	*/
-	const String joinIntoString (const String& separatorString,
-								 int startIndex = 0,
-								 int numberOfElements = -1) const;
+	String joinIntoString (const String& separatorString,
+						   int startIndex = 0,
+						   int numberOfElements = -1) const;
 
 	/** Sorts the array into alphabetical order.
 
@@ -11409,7 +11135,7 @@ public:
 
 		@see operator[]
 	*/
-	const String getValue (const String& key, const String& defaultReturnValue) const;
+	String getValue (const String& key, const String& defaultReturnValue) const;
 
 	/** Returns a list of all keys in the array. */
 	const StringArray& getAllKeys() const noexcept	  { return keys; }
@@ -11453,10 +11179,9 @@ public:
 	void setIgnoresCase (bool shouldIgnoreCase);
 
 	/** Returns a descriptive string containing the items.
-
 		This is handy for dumping the contents of an array.
 	*/
-	const String getDescription() const;
+	String getDescription() const;
 
 	/** Reduces the amount of storage being used by the array.
 
@@ -11600,7 +11325,7 @@ public:
 
 		@see inMilliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
 	*/
-	const String getDescription (const String& returnValueForZeroTime = "0") const;
+	String getDescription (const String& returnValueForZeroTime = "0") const;
 
 	/** Adds another RelativeTime to this one. */
 	const RelativeTime& operator+= (const RelativeTime& timeToAdd) noexcept;
@@ -11631,9 +11356,9 @@ bool operator>= (const RelativeTime& t1, const RelativeTime& t2) noexcept;
 bool operator<= (const RelativeTime& t1, const RelativeTime& t2) noexcept;
 
 /** Adds two RelativeTimes together. */
-const RelativeTime  operator+  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
+RelativeTime  operator+  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
 /** Subtracts two RelativeTimes. */
-const RelativeTime  operator-  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
+RelativeTime  operator-  (const RelativeTime&  t1, const RelativeTime& t2) noexcept;
 
 #endif   // __JUCE_RELATIVETIME_JUCEHEADER__
 
@@ -11708,7 +11433,7 @@ public:
 
 		@see currentTimeMillis
 	*/
-	static const Time JUCE_CALLTYPE getCurrentTime() noexcept;
+	static Time JUCE_CALLTYPE getCurrentTime() noexcept;
 
 	/** Returns the time as a number of milliseconds.
 
@@ -11737,7 +11462,7 @@ public:
 									it'll return the long form, e.g. "January"
 		@see getMonth
 	*/
-	const String getMonthName (bool threeLetterVersion) const;
+	String getMonthName (bool threeLetterVersion) const;
 
 	/** Returns the day of the month.
 
@@ -11756,7 +11481,7 @@ public:
 		@param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
 									false, it'll return the full version, e.g. "Tuesday".
 	*/
-	const String getWeekdayName (bool threeLetterVersion) const;
+	String getWeekdayName (bool threeLetterVersion) const;
 
 	/** Returns the number of hours since midnight.
 
@@ -11802,7 +11527,7 @@ public:
 	bool isDaylightSavingTime() const noexcept;
 
 	/** Returns a 3-character string to indicate the local timezone. */
-	const String getTimeZone() const noexcept;
+	String getTimeZone() const noexcept;
 
 	/** Quick way of getting a string version of a date and time.
 
@@ -11816,10 +11541,10 @@ public:
 								hour notation.
 		@see formatted
 	*/
-	const String toString (bool includeDate,
-						   bool includeTime,
-						   bool includeSeconds = true,
-						   bool use24HourClock = false) const noexcept;
+	String toString (bool includeDate,
+					 bool includeTime,
+					 bool includeSeconds = true,
+					 bool use24HourClock = false) const noexcept;
 
 	/** Converts this date/time to a string with a user-defined format.
 
@@ -11852,7 +11577,7 @@ public:
 
 		@see toString
 	*/
-	const String formatted (const String& format) const;
+	String formatted (const String& format) const;
 
 	/** Adds a RelativeTime to this time. */
 	Time& operator+= (const RelativeTime& delta);
@@ -11872,8 +11597,8 @@ public:
 		@param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
 									false, it'll return the full version, e.g. "Tuesday".
 	*/
-	static const String getWeekdayName (int dayNumber,
-										bool threeLetterVersion);
+	static String getWeekdayName (int dayNumber,
+								  bool threeLetterVersion);
 
 	/** Returns the name of one of the months.
 
@@ -11881,8 +11606,8 @@ public:
 		@param threeLetterVersion   if true, it'll be a 3-letter abbreviation, e.g. "Jan"; if false
 									it'll return the long form, e.g. "January"
 	*/
-	static const String getMonthName (int monthNumber,
-									  bool threeLetterVersion);
+	static String getMonthName (int monthNumber,
+								bool threeLetterVersion);
 
 	// Static methods for getting system timers directly..
 
@@ -11974,12 +11699,12 @@ private:
 };
 
 /** Adds a RelativeTime to a Time. */
-JUCE_API const Time operator+ (const Time& time, const RelativeTime& delta);
+JUCE_API Time operator+ (const Time& time, const RelativeTime& delta);
 /** Adds a RelativeTime to a Time. */
-JUCE_API const Time operator+ (const RelativeTime& delta, const Time& time);
+JUCE_API Time operator+ (const RelativeTime& delta, const Time& time);
 
 /** Subtracts a RelativeTime from a Time. */
-JUCE_API const Time operator- (const Time& time, const RelativeTime& delta);
+JUCE_API Time operator- (const Time& time, const RelativeTime& delta);
 /** Returns the relative time difference between two times. */
 JUCE_API const RelativeTime operator- (const Time& time1, const Time& time2);
 
@@ -12001,6 +11726,210 @@ JUCE_API bool operator>= (const Time& time1, const Time& time2);
 /*** End of inlined file: juce_Time.h ***/
 
 
+/*** Start of inlined file: juce_MemoryBlock.h ***/
+#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
+#define __JUCE_MEMORYBLOCK_JUCEHEADER__
+
+/**
+	A class to hold a resizable block of raw data.
+
+*/
+class JUCE_API  MemoryBlock
+{
+public:
+
+	/** Create an uninitialised block with 0 size. */
+	MemoryBlock() noexcept;
+
+	/** Creates a memory block with a given initial size.
+
+		@param initialSize	  the size of block to create
+		@param initialiseToZero	 whether to clear the memory or just leave it uninitialised
+	*/
+	MemoryBlock (const size_t initialSize,
+				 bool initialiseToZero = false);
+
+	/** Creates a copy of another memory block. */
+	MemoryBlock (const MemoryBlock& other);
+
+	/** Creates a memory block using a copy of a block of data.
+
+		@param dataToInitialiseFrom	 some data to copy into this block
+		@param sizeInBytes		  how much space to use
+	*/
+	MemoryBlock (const void* dataToInitialiseFrom, size_t sizeInBytes);
+
+	/** Destructor. */
+	~MemoryBlock() noexcept;
+
+	/** Copies another memory block onto this one.
+
+		This block will be resized and copied to exactly match the other one.
+	*/
+	MemoryBlock& operator= (const MemoryBlock& other);
+
+	/** Compares two memory blocks.
+
+		@returns true only if the two blocks are the same size and have identical contents.
+	*/
+	bool operator== (const MemoryBlock& other) const noexcept;
+
+	/** Compares two memory blocks.
+
+		@returns true if the two blocks are different sizes or have different contents.
+	*/
+	bool operator!= (const MemoryBlock& other) const noexcept;
+
+	/** Returns true if the data in this MemoryBlock matches the raw bytes passed-in.
+	*/
+	bool matches (const void* data, size_t dataSize) const noexcept;
+
+	/** Returns a void pointer to the data.
+
+		Note that the pointer returned will probably become invalid when the
+		block is resized.
+	*/
+	void* getData() const noexcept				  { return data; }
+
+	/** Returns a byte from the memory block.
+
+		This returns a reference, so you can also use it to set a byte.
+	*/
+	template <typename Type>
+	char& operator[] (const Type offset) const noexcept		 { return data [offset]; }
+
+	/** Returns the block's current allocated size, in bytes. */
+	size_t getSize() const noexcept				 { return size; }
+
+	/** Resizes the memory block.
+
+		This will try to keep as much of the block's current content as it can,
+		and can optionally be made to clear any new space that gets allocated at
+		the end of the block.
+
+		@param newSize			  the new desired size for the block
+		@param initialiseNewSpaceToZero	 if the block gets enlarged, this determines
+											whether to clear the new section or just leave it
+											uninitialised
+		@see ensureSize
+	*/
+	void setSize (const size_t newSize,
+				  bool initialiseNewSpaceToZero = false);
+
+	/** Increases the block's size only if it's smaller than a given size.
+
+		@param minimumSize		  if the block is already bigger than this size, no action
+											will be taken; otherwise it will be increased to this size
+		@param initialiseNewSpaceToZero	 if the block gets enlarged, this determines
+											whether to clear the new section or just leave it
+											uninitialised
+		@see setSize
+	*/
+	void ensureSize (const size_t minimumSize,
+					 bool initialiseNewSpaceToZero = false);
+
+	/** Fills the entire memory block with a repeated byte value.
+
+		This is handy for clearing a block of memory to zero.
+	*/
+	void fillWith (uint8 valueToUse) noexcept;
+
+	/** Adds another block of data to the end of this one.
+
+		This block's size will be increased accordingly.
+	*/
+	void append (const void* data, size_t numBytes);
+
+	/** Exchanges the contents of this and another memory block.
+		No actual copying is required for this, so it's very fast.
+	*/
+	void swapWith (MemoryBlock& other) noexcept;
+
+	/** Copies data into this MemoryBlock from a memory address.
+
+		@param srcData		  the memory location of the data to copy into this block
+		@param destinationOffset	the offset in this block at which the data being copied should begin
+		@param numBytes		 how much to copy in (if this goes beyond the size of the memory block,
+									it will be clipped so not to do anything nasty)
+	*/
+	void copyFrom (const void* srcData,
+				   int destinationOffset,
+				   size_t numBytes) noexcept;
+
+	/** Copies data from this MemoryBlock to a memory address.
+
+		@param destData	 the memory location to write to
+		@param sourceOffset	 the offset within this block from which the copied data will be read
+		@param numBytes	 how much to copy (if this extends beyond the limits of the memory block,
+								zeros will be used for that portion of the data)
+	*/
+	void copyTo (void* destData,
+				 int sourceOffset,
+				 size_t numBytes) const noexcept;
+
+	/** Chops out a section  of the block.
+
+		This will remove a section of the memory block and close the gap around it,
+		shifting any subsequent data downwards and reducing the size of the block.
+
+		If the range specified goes beyond the size of the block, it will be clipped.
+	*/
+	void removeSection (size_t startByte, size_t numBytesToRemove);
+
+	/** Attempts to parse the contents of the block as a zero-terminated string of 8-bit
+		characters in the system's default encoding. */
+	const String toString() const;
+
+	/** Parses a string of hexadecimal numbers and writes this data into the memory block.
+
+		The block will be resized to the number of valid bytes read from the string.
+		Non-hex characters in the string will be ignored.
+
+		@see String::toHexString()
+	*/
+	void loadFromHexString (const String& sourceHexString);
+
+	/** Sets a number of bits in the memory block, treating it as a long binary sequence. */
+	void setBitRange (size_t bitRangeStart,
+					  size_t numBits,
+					  int binaryNumberToApply) noexcept;
+
+	/** Reads a number of bits from the memory block, treating it as one long binary sequence */
+	int getBitRange (size_t bitRangeStart,
+					 size_t numBitsToRead) const noexcept;
+
+	/** Returns a string of characters that represent the binary contents of this block.
+
+		Uses a 64-bit encoding system to allow binary data to be turned into a string
+		of simple non-extended characters, e.g. for storage in XML.
+
+		@see fromBase64Encoding
+	*/
+	const String toBase64Encoding() const;
+
+	/** Takes a string of encoded characters and turns it into binary data.
+
+		The string passed in must have been created by to64BitEncoding(), and this
+		block will be resized to recreate the original data block.
+
+		@see toBase64Encoding
+	*/
+	bool fromBase64Encoding  (const String& encodedString);
+
+private:
+
+	HeapBlock <char> data;
+	size_t size;
+	static const char* const encodingTable;
+
+	JUCE_LEAK_DETECTOR (MemoryBlock);
+};
+
+#endif   // __JUCE_MEMORYBLOCK_JUCEHEADER__
+
+/*** End of inlined file: juce_MemoryBlock.h ***/
+
+
 /*** Start of inlined file: juce_Result.h ***/
 #ifndef __JUCE_RESULT_JUCEHEADER__
 #define __JUCE_RESULT_JUCEHEADER__
@@ -12011,7 +11940,7 @@ JUCE_API bool operator>= (const Time& time1, const Time& time2);
 
 	E.g.
 	@code
-	const Result myOperation()
+	Result myOperation()
 	{
 		if (doSomeKindOfFoobar())
 			return Result::ok();
@@ -12037,13 +11966,13 @@ class Result
 public:
 
 	/** Creates and returns a 'successful' result. */
-	static const Result ok() noexcept;
+	static Result ok() noexcept;
 
 	/** Creates a 'failure' result.
 		If you pass a blank error message in here, a default "Unknown Error" message
 		will be used instead.
 	*/
-	static const Result fail (const String& errorMessage) noexcept;
+	static Result fail (const String& errorMessage) noexcept;
 
 	/** Returns true if this result indicates a success. */
 	bool wasOk() const noexcept;
@@ -12067,7 +11996,7 @@ public:
 	/** Returns the error message that was set when this result was created.
 		For a successful result, this will be an empty string;
 	*/
-	const String getErrorMessage() const noexcept;
+	const String& getErrorMessage() const noexcept;
 
 	Result (const Result& other);
 	Result& operator= (const Result& other);
@@ -12187,7 +12116,7 @@ public:
 		So for example 100 would return "100 bytes", 2000 would return "2 KB",
 		2000000 would produce "2 MB", etc.
 	*/
-	static const String descriptionOfSizeInBytes (int64 bytes);
+	static String descriptionOfSizeInBytes (int64 bytes);
 
 	/** Returns the complete, absolute path of this file.
 
@@ -12215,7 +12144,7 @@ public:
 
 		@see getFullPathName, getFileNameWithoutExtension
 	*/
-	const String getFileName() const;
+	String getFileName() const;
 
 	/** Creates a relative path that refers to a file relatively to a given directory.
 
@@ -12232,7 +12161,7 @@ public:
 										If it doesn't exist, it's assumed to be a directory.
 		@see getChildFile, isAbsolutePath
 	*/
-	const String getRelativePathFrom (const File& directoryToBeRelativeTo) const;
+	String getRelativePathFrom (const File& directoryToBeRelativeTo) const;
 
 	/** Returns the file's extension.
 
@@ -12242,7 +12171,7 @@ public:
 
 		@see hasFileExtension, withFileExtension, getFileNameWithoutExtension
 	*/
-	const String getFileExtension() const;
+	String getFileExtension() const;
 
 	/** Checks whether the file has a given extension.
 
@@ -12268,7 +12197,7 @@ public:
 
 		@see getFileName, getFileExtension, hasFileExtension, getFileNameWithoutExtension
 	*/
-	const File withFileExtension (const String& newExtension) const;
+	File withFileExtension (const String& newExtension) const;
 
 	/** Returns the last part of the filename, without its file extension.
 
@@ -12276,7 +12205,7 @@ public:
 
 		@see getFileName, getFileExtension, hasFileExtension, withFileExtension
 	*/
-	const String getFileNameWithoutExtension() const;
+	String getFileNameWithoutExtension() const;
 
 	/** Returns a 32-bit hash-code that identifies this file.
 
@@ -12305,7 +12234,7 @@ public:
 
 		@see getSiblingFile, getParentDirectory, getRelativePathFrom, isAChildOf
 	*/
-	const File getChildFile (String relativePath) const;
+	File getChildFile (String relativePath) const;
 
 	/** Returns a file which is in the same directory as this one.
 
@@ -12313,13 +12242,13 @@ public:
 
 		@see getChildFile, getParentDirectory
 	*/
-	const File getSiblingFile (const String& siblingFileName) const;
+	File getSiblingFile (const String& siblingFileName) const;
 
 	/** Returns the directory that contains this file or directory.
 
 		e.g. for "/moose/fish/foo.txt" this will return "/moose/fish".
 	*/
-	const File getParentDirectory() const;
+	File getParentDirectory() const;
 
 	/** Checks whether a file is somewhere inside a directory.
 
@@ -12349,9 +12278,9 @@ public:
 										format "prefix(number)suffix", if false, it will leave the
 										brackets out.
 	*/
-	const File getNonexistentChildFile (const String& prefix,
-										const String& suffix,
-										bool putNumbersInBrackets = true) const;
+	File getNonexistentChildFile (const String& prefix,
+								  const String& suffix,
+								  bool putNumbersInBrackets = true) const;
 
 	/** Chooses a filename for a sibling file to this one that doesn't already exist.
 
@@ -12362,7 +12291,7 @@ public:
 		@param putNumbersInBrackets	 whether to add brackets around the numbers that
 										get appended to the new filename.
 	*/
-	const File getNonexistentSibling (bool putNumbersInBrackets = true) const;
+	File getNonexistentSibling (bool putNumbersInBrackets = true) const;
 
 	/** Compares the pathnames for two files. */
 	bool operator== (const File& otherFile) const;
@@ -12404,7 +12333,7 @@ public:
 
 		If this file isn't actually link, it'll just return itself.
 	*/
-	const File getLinkedTarget() const;
+	File getLinkedTarget() const;
 
 	/** Returns the last modification time of this file.
 
@@ -12457,7 +12386,7 @@ public:
 		executables, bundles, dlls, etc. If no version is available, this will
 		return an empty string.
 	*/
-	const String getVersion() const;
+	String getVersion() const;
 
 	/** Creates an empty file if it doesn't already exist.
 
@@ -12469,7 +12398,7 @@ public:
 		@returns	true if the file has been created (or if it already existed).
 		@see createDirectory
 	*/
-	const Result create() const;
+	Result create() const;
 
 	/** Creates a new directory for this filename.
 
@@ -12480,7 +12409,7 @@ public:
 					an error message if it failed.
 		@see create
 	*/
-	const Result createDirectory() const;
+	Result createDirectory() const;
 
 	/** Deletes a file.
 
@@ -12645,7 +12574,7 @@ public:
 		This makes use of InputStream::readEntireStreamAsString, which should
 		automatically cope with unicode/acsii file formats.
 	*/
-	const String loadFileAsString() const;
+	String loadFileAsString() const;
 
 	/** Appends a block of binary data to the end of the file.
 
@@ -12726,7 +12655,7 @@ public:
 
 		@returns the volume label of the drive, or an empty string if this isn't possible
 	*/
-	const String getVolumeLabel() const;
+	String getVolumeLabel() const;
 
 	/** Returns the serial number of the volume on which this file lives.
 
@@ -12875,7 +12804,7 @@ public:
 
 		@see SpecialLocationType
 	*/
-	static const File JUCE_CALLTYPE getSpecialLocation (const SpecialLocationType type);
+	static File JUCE_CALLTYPE getSpecialLocation (const SpecialLocationType type);
 
 	/** Returns a temporary file in the system's temp directory.
 
@@ -12883,13 +12812,13 @@ public:
 
 		To get the temp folder, you can use getSpecialLocation (File::tempDirectory).
 	*/
-	static const File createTempFile (const String& fileNameEnding);
+	static File createTempFile (const String& fileNameEnding);
 
 	/** Returns the current working directory.
 
 		@see setAsCurrentWorkingDirectory
 	*/
-	static const File getCurrentWorkingDirectory();
+	static File getCurrentWorkingDirectory();
 
 	/** Sets the current working directory to be this file.
 
@@ -12922,7 +12851,7 @@ public:
 
 		@see createLegalPathName
 	*/
-	static const String createLegalFileName (const String& fileNameToFix);
+	static String createLegalFileName (const String& fileNameToFix);
 
 	/** Removes illegal characters from a pathname.
 
@@ -12931,7 +12860,7 @@ public:
 
 		@see createLegalFileName
 	*/
-	static const String createLegalPathName (const String& pathNameToFix);
+	static String createLegalPathName (const String& pathNameToFix);
 
 	/** Indicates whether filenames are case-sensitive on the current operating system.
 	*/
@@ -12946,10 +12875,10 @@ public:
 
 		Best to avoid this unless you really know what you're doing.
 	*/
-	static const File createFileWithoutCheckingPath (const String& path);
+	static File createFileWithoutCheckingPath (const String& path);
 
 	/** Adds a separator character to the end of a path if it doesn't already have one. */
-	static const String addTrailingSeparator (const String& path);
+	static String addTrailingSeparator (const String& path);
 
 private:
 
@@ -12958,16 +12887,16 @@ private:
 	// internal way of contructing a file without checking the path
 	friend class DirectoryIterator;
 	File (const String&, int);
-	const String getPathUpToLastSlash() const;
+	String getPathUpToLastSlash() const;
 
-	const Result createDirectoryInternal (const String& fileName) const;
+	Result createDirectoryInternal (const String& fileName) const;
 	bool copyInternal (const File& dest) const;
 	bool moveInternal (const File& dest) const;
 	bool setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const;
 	void getFileTimesInternal (int64& modificationTime, int64& accessTime, int64& creationTime) const;
 	bool setFileReadOnlyInternal (bool shouldBeReadOnly) const;
 
-	static const String parseAbsolutePath (const String& path);
+	static String parseAbsolutePath (const String& path);
 
 	JUCE_LEAK_DETECTOR (File);
 };
@@ -13129,11 +13058,11 @@ public:
 								determines how lists of attributes get broken up
 		@see writeToStream, writeToFile
 	*/
-	const String createDocument (const String& dtdToUse,
-								 bool allOnOneLine = false,
-								 bool includeXmlHeader = true,
-								 const String& encodingType = "UTF-8",
-								 int lineWrapLength = 60) const;
+	String createDocument (const String& dtdToUse,
+						   bool allOnOneLine = false,
+						   bool includeXmlHeader = true,
+						   const String& encodingType = "UTF-8",
+						   int lineWrapLength = 60) const;
 
 	/** Writes the document to a stream as UTF-8.
 
@@ -13240,8 +13169,8 @@ public:
 		@param defaultReturnValue   a value to return if the element doesn't have an attribute
 									with this name
 	*/
-	const String getStringAttribute (const String& attributeName,
-									 const String& defaultReturnValue) const;
+	String getStringAttribute (const String& attributeName,
+							   const String& defaultReturnValue) const;
 
 	/** Compares the value of a named attribute with a value passed-in.
 
@@ -13588,7 +13517,7 @@ public:
 
 		@see isTextElement, getChildElementAllSubText, getText, addTextElement
 	*/
-	const String getAllSubText() const;
+	String getAllSubText() const;
 
 	/** Returns all the sub-text of a named child element.
 
@@ -13598,8 +13527,8 @@ public:
 
 		@see getAllSubText
 	*/
-	const String getChildElementAllSubText (const String& childTagName,
-											const String& defaultReturnValue) const;
+	String getChildElementAllSubText (const String& childTagName,
+									  const String& defaultReturnValue) const;
 
 	/** Appends a section of text to this element.
 
@@ -13695,8 +13624,8 @@ public:
 		@param keyName		  the name of the property to retrieve
 		@param defaultReturnValue   a value to return if the named property doesn't actually exist
 	*/
-	const String getValue (const String& keyName,
-						   const String& defaultReturnValue = String::empty) const noexcept;
+	String getValue (const String& keyName,
+					 const String& defaultReturnValue = String::empty) const noexcept;
 
 	/** Returns one of the properties as an integer.
 
@@ -15226,14 +15155,14 @@ public:
 	}
 
 	/** Returns the range that lies between two positions (in either order). */
-	static const Range between (const ValueType position1, const ValueType position2) noexcept
+	static Range between (const ValueType position1, const ValueType position2) noexcept
 	{
 		return (position1 < position2) ? Range (position1, position2)
 									   : Range (position2, position1);
 	}
 
 	/** Returns a range with the specified start position and a length of zero. */
-	static const Range emptyRange (const ValueType start) noexcept
+	static Range emptyRange (const ValueType start) noexcept
 	{
 		return Range (start, start);
 	}
@@ -15265,13 +15194,13 @@ public:
 		If the new start position is higher than the current end of the range, the end point
 		will be pushed along to equal it, returning an empty range at the new position.
 	*/
-	const Range withStart (const ValueType newStart) const noexcept
+	Range withStart (const ValueType newStart) const noexcept
 	{
 		return Range (newStart, jmax (newStart, end));
 	}
 
 	/** Returns a range with the same length as this one, but moved to have the given start position. */
-	const Range movedToStartAt (const ValueType newStart) const noexcept
+	Range movedToStartAt (const ValueType newStart) const noexcept
 	{
 		return Range (newStart, end + (newStart - start));
 	}
@@ -15291,13 +15220,13 @@ public:
 		If the new end position is below the current start of the range, the start point
 		will be pushed back to equal the new end point.
 	*/
-	const Range withEnd (const ValueType newEnd) const noexcept
+	Range withEnd (const ValueType newEnd) const noexcept
 	{
 		return Range (jmin (start, newEnd), newEnd);
 	}
 
 	/** Returns a range with the same length as this one, but moved to have the given start position. */
-	const Range movedToEndAt (const ValueType newEnd) const noexcept
+	Range movedToEndAt (const ValueType newEnd) const noexcept
 	{
 		return Range (start + (newEnd - end), newEnd);
 	}
@@ -15313,7 +15242,7 @@ public:
 	/** Returns a range with the same start as this one, but a different length.
 		Lengths less than zero are treated as zero.
 	*/
-	const Range withLength (const ValueType newLength) const noexcept
+	Range withLength (const ValueType newLength) const noexcept
 	{
 		return Range (start, start + newLength);
 	}
@@ -15337,14 +15266,14 @@ public:
 	/** Returns a range that is equal to this one with an amount added to its
 		start and end.
 	*/
-	const Range operator+ (const ValueType amountToAdd) const noexcept
+	Range operator+ (const ValueType amountToAdd) const noexcept
 	{
 		return Range (start + amountToAdd, end + amountToAdd);
 	}
 
 	/** Returns a range that is equal to this one with the specified amount
 		subtracted from its start and end. */
-	const Range operator- (const ValueType amountToSubtract) const noexcept
+	Range operator- (const ValueType amountToSubtract) const noexcept
 	{
 		return Range (start - amountToSubtract, end - amountToSubtract);
 	}
@@ -15378,14 +15307,14 @@ public:
 
 	/** Returns the range that is the intersection of the two ranges, or an empty range
 		with an undefined start position if they don't overlap. */
-	const Range getIntersectionWith (const Range& other) const noexcept
+	Range getIntersectionWith (const Range& other) const noexcept
 	{
 		return Range (jmax (start, other.start),
 					  jmin (end, other.end));
 	}
 
 	/** Returns the smallest range that contains both this one and the other one. */
-	const Range getUnionWith (const Range& other) const noexcept
+	Range getUnionWith (const Range& other) const noexcept
 	{
 		return Range (jmin (start, other.start),
 					  jmax (end, other.end));
@@ -15401,7 +15330,7 @@ public:
 		will be the new range, shifted forwards or backwards so that it doesn't extend
 		beyond this one, but keeping its original length.
 	*/
-	const Range constrainRange (const Range& rangeToConstrain) const noexcept
+	Range constrainRange (const Range& rangeToConstrain) const noexcept
 	{
 		const ValueType otherLen = rangeToConstrain.getLength();
 		return getLength() <= otherLen
@@ -16237,16 +16166,16 @@ public:
 	~Value();
 
 	/** Returns the current value. */
-	const var getValue() const;
+	var getValue() const;
 
 	/** Returns the current value. */
-	operator const var() const;
+	operator var() const;
 
 	/** Returns the value as a string.
 
 		This is alternative to writing things like "myValue.getValue().toString()".
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Sets the current value.
 
@@ -16718,7 +16647,7 @@ public:
 
 		@see undo
 	*/
-	const String getUndoDescription() const;
+	String getUndoDescription() const;
 
 	/** Tries to roll-back the last transaction.
 
@@ -16771,7 +16700,7 @@ public:
 
 		@see redo
 	*/
-	const String getRedoDescription() const;
+	String getRedoDescription() const;
 
 	/** Tries to redo the last transaction that was undone.
 
@@ -16891,7 +16820,7 @@ public:
 		The type is specified when the ValueTree is created.
 		@see hasType
 	*/
-	const Identifier getType() const;
+	Identifier getType() const;
 
 	/** Returns true if the node has this type.
 		The comparison is case-sensitive.
@@ -16910,7 +16839,7 @@ public:
 		You can also use operator[] and getProperty to get a property.
 		@see var, getProperty, setProperty, hasProperty
 	*/
-	const var getProperty (const Identifier& name, const var& defaultReturnValue) const;
+	var getProperty (const Identifier& name, const var& defaultReturnValue) const;
 
 	/** Returns the value of a named property.
 		If no such property has been set, this will return a void variant. This is the same as
@@ -16949,7 +16878,7 @@ public:
 	/** Returns the identifier of the property with a given index.
 		@see getNumProperties
 	*/
-	const Identifier getPropertyName (int index) const;
+	Identifier getPropertyName (int index) const;
 
 	/** Returns a Value object that can be used to control and respond to one of the tree's properties.
 
@@ -17349,7 +17278,7 @@ public:
 
 	void logMessage (const String& message);
 
-	const File getLogFile() const		   { return logFile; }
+	File getLogFile() const		   { return logFile; }
 
 	/** Helper function to create a log file in the correct place for this platform.
 
@@ -18362,7 +18291,7 @@ public:
 
 		@returns a 32 character hex string.
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Creates an ID from an encoded string version.
 
@@ -18522,10 +18451,10 @@ public:
 	~MD5();
 
 	/** Returns the checksum as a 16-byte block of data. */
-	const MemoryBlock getRawChecksumData() const;
+	MemoryBlock getRawChecksumData() const;
 
 	/** Returns the checksum as a 32-digit hex string. */
-	const String toHexString() const;
+	String toHexString() const;
 
 	/** Compares this to another MD5. */
 	bool operator== (const MD5& other) const;
@@ -18550,7 +18479,7 @@ private:
 		void finish (void* result);
 	};
 
-	void processStream (InputStream& input, int64 numBytesToRead);
+	void processStream (InputStream&, int64 numBytesToRead);
 
 	JUCE_LEAK_DETECTOR (MD5);
 };
@@ -18666,7 +18595,7 @@ public:
 		e.g. getBitRangeAsInt (0, 64) would return the lowest 64 bits.
 		@see getBitRangeAsInt
 	*/
-	const BigInteger getBitRange (int startBit, int numBits) const;
+	BigInteger getBitRange (int startBit, int numBits) const;
 
 	/** Returns a range of bits as an integer value.
 
@@ -18727,20 +18656,20 @@ public:
 	BigInteger& operator>>= (int numBitsToShift);
 	BigInteger& operator++();
 	BigInteger& operator--();
-	const BigInteger operator++ (int);
-	const BigInteger operator-- (int);
+	BigInteger operator++ (int);
+	BigInteger operator-- (int);
 
-	const BigInteger operator-() const;
-	const BigInteger operator+ (const BigInteger& other) const;
-	const BigInteger operator- (const BigInteger& other) const;
-	const BigInteger operator* (const BigInteger& other) const;
-	const BigInteger operator/ (const BigInteger& other) const;
-	const BigInteger operator| (const BigInteger& other) const;
-	const BigInteger operator& (const BigInteger& other) const;
-	const BigInteger operator^ (const BigInteger& other) const;
-	const BigInteger operator% (const BigInteger& other) const;
-	const BigInteger operator<< (int numBitsToShift) const;
-	const BigInteger operator>> (int numBitsToShift) const;
+	BigInteger operator-() const;
+	BigInteger operator+ (const BigInteger& other) const;
+	BigInteger operator- (const BigInteger& other) const;
+	BigInteger operator* (const BigInteger& other) const;
+	BigInteger operator/ (const BigInteger& other) const;
+	BigInteger operator| (const BigInteger& other) const;
+	BigInteger operator& (const BigInteger& other) const;
+	BigInteger operator^ (const BigInteger& other) const;
+	BigInteger operator% (const BigInteger& other) const;
+	BigInteger operator<< (int numBitsToShift) const;
+	BigInteger operator>> (int numBitsToShift) const;
 
 	bool operator== (const BigInteger& other) const noexcept;
 	bool operator!= (const BigInteger& other) const noexcept;
@@ -18776,7 +18705,7 @@ public:
 
 	/** Returns the largest value that will divide both this value and the one passed-in.
 	*/
-	const BigInteger findGreatestCommonDivisor (BigInteger other) const;
+	BigInteger findGreatestCommonDivisor (BigInteger other) const;
 
 	/** Performs a combined exponent and modulo operation.
 
@@ -18811,7 +18740,7 @@ public:
 		If minimumNumCharacters is greater than 0, the returned string will be
 		padded with leading zeros to reach at least that length.
 	*/
-	const String toString (int base, int minimumNumCharacters = 1) const;
+	String toString (int base, int minimumNumCharacters = 1) const;
 
 	/** Reads the numeric value from a string.
 
@@ -18827,7 +18756,7 @@ public:
 
 		@see loadFromMemoryBlock
 	*/
-	const MemoryBlock toMemoryBlock() const;
+	MemoryBlock toMemoryBlock() const;
 
 	/** Converts a block of raw data into a number.
 
@@ -18847,7 +18776,7 @@ private:
 	void ensureSize (int numVals);
 	void shiftLeft (int bits, int startBit);
 	void shiftRight (int bits, int startBit);
-	static const BigInteger simpleGCD (BigInteger* m, BigInteger* n);
+	static BigInteger simpleGCD (BigInteger* m, BigInteger* n);
 
 	static inline int bitToIndex (const int bit) noexcept	   { return bit >> 5; }
 	static inline uint32 bitToMask (const int bit) noexcept	 { return 1 << (bit & 31); }
@@ -18887,10 +18816,10 @@ public:
 		which to seed the random number generation, improving the security of the
 		keys generated.
 	*/
-	static const BigInteger createProbablePrime (int bitLength,
-												 int certainty,
-												 const int* randomSeeds = 0,
-												 int numRandomSeeds = 0);
+	static BigInteger createProbablePrime (int bitLength,
+										   int certainty,
+										   const int* randomSeeds = 0,
+										   int numRandomSeeds = 0);
 
 	/** Tests a number to see if it's prime.
 
@@ -18952,7 +18881,7 @@ public:
 
 		This can be reloaded using the constructor that takes a string.
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Encodes or decodes a value.
 
@@ -18994,7 +18923,7 @@ protected:
 
 private:
 
-	static const BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
+	static BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
 
 	JUCE_LEAK_DETECTOR (RSAKey);
 };
@@ -19086,7 +19015,7 @@ public:
 
 		The result of this call is only valid after a call to next() has returned true.
 	*/
-	const File getFile() const;
+	const File& getFile() const;
 
 	/** Returns a guess of how far through the search the iterator has got.
 
@@ -19172,7 +19101,7 @@ public:
 		The result will be ok if the file opened successfully. If an error occurs while
 		opening or reading from the file, this will contain an error message.
 	*/
-	const Result getStatus() const			  { return status; }
+	Result getStatus() const				{ return status; }
 
 	int64 getTotalLength();
 	int read (void* destBuffer, int maxBytesToRead);
@@ -19246,7 +19175,7 @@ public:
 		The result will be ok if the file opened successfully. If an error occurs while
 		opening or writing to the file, this will contain an error message.
 	*/
-	const Result getStatus() const			  { return status; }
+	Result getStatus() const				{ return status; }
 
 	/** Returns true if the stream couldn't be opened for some reason.
 		@see getResult()
@@ -19335,10 +19264,10 @@ public:
 
 		@see getNumPaths
 	*/
-	const File operator[] (int index) const;
+	File operator[] (int index) const;
 
 	/** Returns the search path as a semicolon-separated list of directories. */
-	const String toString() const;
+	String toString() const;
 
 	/** Adds a new directory to the search path.
 
@@ -19532,7 +19461,7 @@ public:
 	bool isOpen() const;
 
 	/** Returns the last name that was used to try to open this pipe. */
-	const String getName() const;
+	String getName() const;
 
 	/** Reads data from the pipe.
 
@@ -19671,10 +19600,10 @@ public:
 	~TemporaryFile();
 
 	/** Returns the temporary file. */
-	const File getFile() const		  { return temporaryFile; }
+	const File& getFile() const		 { return temporaryFile; }
 
 	/** Returns the target file that was specified in the constructor. */
-	const File getTargetFile() const		{ return targetFile; }
+	const File& getTargetFile() const	   { return targetFile; }
 
 	/** Tries to move the temporary file to overwrite the target file that was
 		specified in the constructor.
@@ -19948,9 +19877,9 @@ private:
 	ScopedPointer <InputStream> streamToDelete;
 	ScopedPointer <InputSource> inputSource;
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
 	int numOpenStreams;
-#endif
+   #endif
 
 	void init();
 	int findEndOfZipEntryTable (InputStream& input, int& numEntries);
@@ -20307,6 +20236,9 @@ private:
 #ifndef __JUCE_URL_JUCEHEADER__
 #define __JUCE_URL_JUCEHEADER__
 
+class InputStream;
+class XmlElement;
+
 /**
 	Represents a URL and has a bunch of useful functions to manipulate it.
 
@@ -20338,7 +20270,7 @@ public:
 		withParameter() method, then the string will have these appended on the
 		end and url-encoded.
 	*/
-	const String toString (bool includeGetParameters) const;
+	String toString (bool includeGetParameters) const;
 
 	/** True if it seems to be valid. */
 	bool isWellFormed() const;
@@ -20347,20 +20279,20 @@ public:
 
 		E.g. for "http://www.xyz.com/foobar", this will return "www.xyz.com".
 	*/
-	const String getDomain() const;
+	String getDomain() const;
 
 	/** Returns the path part of the URL.
 
 		E.g. for "http://www.xyz.com/foo/bar?x=1", this will return "foo/bar".
 	*/
-	const String getSubPath() const;
+	String getSubPath() const;
 
 	/** Returns the scheme of the URL.
 
 		E.g. for "http://www.xyz.com/foobar", this will return "http". (It won't
 		include the colon).
 	*/
-	const String getScheme() const;
+	String getScheme() const;
 
 	/** Returns a new version of this URL that uses a different sub-path.
 
@@ -20430,7 +20362,7 @@ public:
 
 	/** Returns the data that was set using withPOSTData().
 	*/
-	const String getPostData() const				{ return postData; }
+	String getPostData() const				{ return postData; }
 
 	/** Tries to launch the system's default browser to open the URL.
 
@@ -20509,7 +20441,7 @@ public:
 								a GET command if this is false)
 		@see readEntireBinaryStream, readEntireXmlStream
 	*/
-	const String readEntireTextStream (bool usePostCommand = false) const;
+	String readEntireTextStream (bool usePostCommand = false) const;
 
 	/** Tries to download the entire contents of this URL and parse it as XML.
 
@@ -20539,8 +20471,8 @@ public:
 
 		@see removeEscapeChars
 	*/
-	static const String addEscapeChars (const String& stringToAddEscapeCharsTo,
-										bool isParameter);
+	static String addEscapeChars (const String& stringToAddEscapeCharsTo,
+								  bool isParameter);
 
 	/** Replaces any escape character sequences in a string with their original
 		character codes.
@@ -20551,7 +20483,7 @@ public:
 
 		@see addEscapeChars
 	*/
-	static const String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
+	static String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
 
 private:
 
@@ -20738,7 +20670,7 @@ public:
 	int64 getPosition();
 	bool setPosition (int64 newPosition);
 	int read (void* destBuffer, int maxBytesToRead);
-	const String readString();
+	String readString();
 	bool isExhausted();
 
 private:
@@ -21074,12 +21006,12 @@ public:
 	void preallocate (size_t bytesToPreallocate);
 
 	/** Returns a String created from the (UTF8) data that has been written to the stream. */
-	const String toUTF8() const;
+	String toUTF8() const;
 
 	/** Attempts to detect the encoding of the data and convert it to a string.
 		@see String::createStringFromData
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** If the stream is writing to a user-supplied MemoryBlock, this will trim any excess
 		capacity off the block, so that its length matches the amount of actual data that
@@ -21227,24 +21159,24 @@ public:
 	explicit Expression (const String& stringToParse);
 
 	/** Returns a string version of the expression. */
-	const String toString() const;
+	String toString() const;
 
 	/** Returns an expression which is an addtion operation of two existing expressions. */
-	const Expression operator+ (const Expression& other) const;
+	Expression operator+ (const Expression& other) const;
 	/** Returns an expression which is a subtraction operation of two existing expressions. */
-	const Expression operator- (const Expression& other) const;
+	Expression operator- (const Expression& other) const;
 	/** Returns an expression which is a multiplication operation of two existing expressions. */
-	const Expression operator* (const Expression& other) const;
+	Expression operator* (const Expression& other) const;
 	/** Returns an expression which is a division operation of two existing expressions. */
-	const Expression operator/ (const Expression& other) const;
+	Expression operator/ (const Expression& other) const;
 	/** Returns an expression which performs a negation operation on an existing expression. */
-	const Expression operator-() const;
+	Expression operator-() const;
 
 	/** Returns an Expression which is an identifier reference. */
-	static const Expression symbol (const String& symbol);
+	static Expression symbol (const String& symbol);
 
 	/** Returns an Expression which is a function call. */
-	static const Expression function (const String& functionName, const Array<Expression>& parameters);
+	static Expression function (const String& functionName, const Array<Expression>& parameters);
 
 	/** Returns an Expression which parses a string from a character pointer, and updates the pointer
 		to indicate where it finished.
@@ -21255,7 +21187,7 @@ public:
 		If there's a syntax error in the string, this will throw a ParseError exception.
 		@throws ParseError
 	*/
-	static const Expression parse (String::CharPointerType& stringToParse);
+	static Expression parse (String::CharPointerType& stringToParse);
 
 	/** When evaluating an Expression object, this class is used to resolve symbols and
 		perform functions that the expression uses.
@@ -21334,7 +21266,7 @@ public:
 
 		@throws Expression::EvaluationError
 	*/
-	const Expression adjustedToGiveNewResult (double targetValue, const Scope& scope) const;
+	Expression adjustedToGiveNewResult (double targetValue, const Scope& scope) const;
 
 	/** Represents a symbol that is used in an Expression. */
 	struct Symbol
@@ -21348,7 +21280,7 @@ public:
 	};
 
 	/** Returns a copy of this expression in which all instances of a given symbol have been renamed. */
-	const Expression withRenamedSymbol (const Symbol& oldSymbol, const String& newName, const Scope& scope) const;
+	Expression withRenamedSymbol (const Symbol& oldSymbol, const String& newName, const Scope& scope) const;
 
 	/** Returns true if this expression makes use of the specified symbol.
 		If a suitable scope is supplied, the search will dereference and recursively check
@@ -21390,7 +21322,7 @@ public:
 	Type getType() const noexcept;
 
 	/** If this expression is a symbol, function or operator, this returns its identifier. */
-	const String getSymbolOrFunction() const;
+	String getSymbolOrFunction() const;
 
 	/** Returns the number of inputs to this expression.
 		@see getInput
@@ -21400,7 +21332,7 @@ public:
 	/** Retrieves one of the inputs to this expression.
 		@see getNumInputs
 	*/
-	const Expression getInput (int index) const;
+	Expression getInput (int index) const;
 
 private:
 
@@ -21498,7 +21430,7 @@ public:
 
 		@returns a random value in the range 0 to (maximumValue - 1).
 	*/
-	const BigInteger nextLargeNumber (const BigInteger& maximumValue);
+	BigInteger nextLargeNumber (const BigInteger& maximumValue);
 
 	/** Sets a range of bits in a BigInteger to random values. */
 	void fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numBits);
@@ -21877,7 +21809,7 @@ public:
 
 		@see setCurrentMappings, getCurrentMappings
 	*/
-	static const String translateWithCurrentMappings (const String& text);
+	static String translateWithCurrentMappings (const String& text);
 
 	/** Tries to translate a string using the currently selected set of mappings.
 
@@ -21888,13 +21820,13 @@ public:
 
 		@see setCurrentMappings, getCurrentMappings
 	*/
-	static const String translateWithCurrentMappings (const char* text);
+	static String translateWithCurrentMappings (const char* text);
 
 	/** Attempts to look up a string and return its localised version.
 
 		If the string isn't found in the list, the original string will be returned.
 	*/
-	const String translate (const String& text) const;
+	String translate (const String& text) const;
 
 	/** Returns the name of the language specified in the translation file.
 
@@ -21903,7 +21835,7 @@ public:
 		language: german
 		@endcode
 	*/
-	const String getLanguageName() const			{ return languageName; }
+	String getLanguageName() const			{ return languageName; }
 
 	/** Returns the list of suitable country codes listed in the translation file.
 
@@ -21952,12 +21884,77 @@ private:
 #endif
 #ifndef __JUCE_STRINGPOOL_JUCEHEADER__
 
+/*** Start of inlined file: juce_StringPool.h ***/
+#ifndef __JUCE_STRINGPOOL_JUCEHEADER__
+#define __JUCE_STRINGPOOL_JUCEHEADER__
+
+/**
+	A StringPool holds a set of shared strings, which reduces storage overheads and improves
+	comparison speed when dealing with many duplicate strings.
+
+	When you add a string to a pool using getPooledString, it'll return a character
+	array containing the same string. This array is owned by the pool, and the same array
+	is returned every time a matching string is asked for. This means that it's trivial to
+	compare two pooled strings for equality, as you can simply compare their pointers. It
+	also cuts down on storage if you're using many copies of the same string.
+*/
+class JUCE_API  StringPool
+{
+public:
+
+	/** Creates an empty pool. */
+	StringPool() noexcept;
+
+	/** Destructor */
+	~StringPool();
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const String::CharPointerType getPooledString (const String& original);
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const String::CharPointerType getPooledString (const char* original);
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const String::CharPointerType getPooledString (const wchar_t* original);
+
+	/** Returns the number of strings in the pool. */
+	int size() const noexcept;
+
+	/** Returns one of the strings in the pool, by index. */
+	const String::CharPointerType operator[] (int index) const noexcept;
+
+private:
+	Array <String> strings;
+};
+
+#endif   // __JUCE_STRINGPOOL_JUCEHEADER__
+
+/*** End of inlined file: juce_StringPool.h ***/
+
+
 #endif
 #ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__
 
 /*** Start of inlined file: juce_XmlDocument.h ***/
 #ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__
 #define __JUCE_XMLDOCUMENT_JUCEHEADER__
+
+class InputSource;
 
 /**
 	Parses a text-based XML document and creates an XmlElement object from it.
@@ -22092,10 +22089,10 @@ private:
 	void readQuotedString (String& result);
 	void readEntity (String& result);
 
-	const String getFileContents (const String& filename) const;
-	const String expandEntity (const String& entity);
-	const String expandExternalEntity (const String& entity);
-	const String getParameterEntity (const String& entity);
+	String getFileContents (const String& filename) const;
+	String expandEntity (const String& entity);
+	String expandExternalEntity (const String& entity);
+	String getParameterEntity (const String& entity);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument);
 };
@@ -22667,7 +22664,7 @@ public:
 
 		This is the name that gets set in the constructor.
 	*/
-	const String getThreadName() const				  { return threadName_; }
+	const String& getThreadName() const				 { return threadName_; }
 
 	/** Changes the name of the caller thread.
 		Different OSes may place different length or content limits on this name.
@@ -22998,7 +22995,7 @@ public:
 	/** Returns the name of this job.
 		@see setJobName
 	*/
-	const String getJobName() const;
+	String getJobName() const;
 
 	/** Changes the job's name.
 		@see getJobName
@@ -23205,7 +23202,7 @@ public:
 
 		If onlyReturnActiveJobs is true, only the ones currently running are returned.
 	*/
-	const StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
+	StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
 
 	/** Changes the priority of all the threads.
 
@@ -23964,71 +23961,71 @@ public:
 	}
 
 	/** Returns a new transform which is the same as this one followed by a translation. */
-	const AffineTransform translated (float deltaX,
-									  float deltaY) const noexcept;
+	AffineTransform translated (float deltaX,
+								float deltaY) const noexcept;
 
 	/** Returns a new transform which is a translation. */
-	static const AffineTransform translation (float deltaX,
-											  float deltaY) noexcept;
+	static AffineTransform translation (float deltaX,
+										float deltaY) noexcept;
 
 	/** Returns a transform which is the same as this one followed by a rotation.
 
 		The rotation is specified by a number of radians to rotate clockwise, centred around
 		the origin (0, 0).
 	*/
-	const AffineTransform rotated (float angleInRadians) const noexcept;
+	AffineTransform rotated (float angleInRadians) const noexcept;
 
 	/** Returns a transform which is the same as this one followed by a rotation about a given point.
 
 		The rotation is specified by a number of radians to rotate clockwise, centred around
 		the co-ordinates passed in.
 	*/
-	const AffineTransform rotated (float angleInRadians,
-								   float pivotX,
-								   float pivotY) const noexcept;
+	AffineTransform rotated (float angleInRadians,
+							 float pivotX,
+							 float pivotY) const noexcept;
 
 	/** Returns a new transform which is a rotation about (0, 0). */
-	static const AffineTransform rotation (float angleInRadians) noexcept;
+	static AffineTransform rotation (float angleInRadians) noexcept;
 
 	/** Returns a new transform which is a rotation about a given point. */
-	static const AffineTransform rotation (float angleInRadians,
-										   float pivotX,
-										   float pivotY) noexcept;
+	static AffineTransform rotation (float angleInRadians,
+									 float pivotX,
+									 float pivotY) noexcept;
 
 	/** Returns a transform which is the same as this one followed by a re-scaling.
 		The scaling is centred around the origin (0, 0).
 	*/
-	const AffineTransform scaled (float factorX,
-								  float factorY) const noexcept;
+	AffineTransform scaled (float factorX,
+							float factorY) const noexcept;
 
 	/** Returns a transform which is the same as this one followed by a re-scaling.
 		The scaling is centred around the origin provided.
 	*/
-	const AffineTransform scaled (float factorX, float factorY,
-								  float pivotX, float pivotY) const noexcept;
+	AffineTransform scaled (float factorX, float factorY,
+							float pivotX, float pivotY) const noexcept;
 
 	/** Returns a new transform which is a re-scale about the origin. */
-	static const AffineTransform scale (float factorX,
-										float factorY) noexcept;
+	static AffineTransform scale (float factorX,
+								  float factorY) noexcept;
 
 	/** Returns a new transform which is a re-scale centred around the point provided. */
-	static const AffineTransform scale (float factorX, float factorY,
-										float pivotX, float pivotY) noexcept;
+	static AffineTransform scale (float factorX, float factorY,
+								  float pivotX, float pivotY) noexcept;
 
 	/** Returns a transform which is the same as this one followed by a shear.
 		The shear is centred around the origin (0, 0).
 	*/
-	const AffineTransform sheared (float shearX, float shearY) const noexcept;
+	AffineTransform sheared (float shearX, float shearY) const noexcept;
 
 	/** Returns a shear transform, centred around the origin (0, 0). */
-	static const AffineTransform shear (float shearX, float shearY) noexcept;
+	static AffineTransform shear (float shearX, float shearY) noexcept;
 
 	/** Returns a matrix which is the inverse operation of this one.
 
 		Some matrices don't have an inverse - in this case, the method will just return
 		an identity transform.
 	*/
-	const AffineTransform inverted() const noexcept;
+	AffineTransform inverted() const noexcept;
 
 	/** Returns the transform that will map three known points onto three coordinates
 		that are supplied.
@@ -24036,18 +24033,18 @@ public:
 		This returns the transform that will transform (0, 0) into (x00, y00),
 		(1, 0) to (x10, y10), and (0, 1) to (x01, y01).
 	*/
-	static const AffineTransform fromTargetPoints (float x00, float y00,
-												   float x10, float y10,
-												   float x01, float y01) noexcept;
+	static AffineTransform fromTargetPoints (float x00, float y00,
+											 float x10, float y10,
+											 float x01, float y01) noexcept;
 
 	/** Returns the transform that will map three specified points onto three target points.
 	*/
-	static const AffineTransform fromTargetPoints (float sourceX1, float sourceY1, float targetX1, float targetY1,
-												   float sourceX2, float sourceY2, float targetX2, float targetY2,
-												   float sourceX3, float sourceY3, float targetX3, float targetY3) noexcept;
+	static AffineTransform fromTargetPoints (float sourceX1, float sourceY1, float targetX1, float targetY1,
+											 float sourceX2, float sourceY2, float targetX2, float targetY2,
+											 float sourceX3, float sourceY3, float targetX3, float targetY3) noexcept;
 
 	/** Returns the result of concatenating another transformation after this one. */
-	const AffineTransform followedBy (const AffineTransform& other) const noexcept;
+	AffineTransform followedBy (const AffineTransform& other) const noexcept;
 
 	/** Returns true if this transform has no effect on points. */
 	bool isIdentity() const noexcept;
@@ -24140,10 +24137,10 @@ public:
 	inline void setY (const ValueType newY) noexcept			{ y = newY; }
 
 	/** Returns a point which has the same Y position as this one, but a new X. */
-	const Point withX (const ValueType newX) const noexcept		 { return Point (newX, y); }
+	Point withX (const ValueType newX) const noexcept		   { return Point (newX, y); }
 
 	/** Returns a point which has the same X position as this one, but a new Y. */
-	const Point withY (const ValueType newY) const noexcept		 { return Point (x, newY); }
+	Point withY (const ValueType newY) const noexcept		   { return Point (x, newY); }
 
 	/** Changes the point's x and y co-ordinates. */
 	void setXY (const ValueType newX, const ValueType newY) noexcept	{ x = newX; y = newY; }
@@ -24152,34 +24149,34 @@ public:
 	void addXY (const ValueType xToAdd, const ValueType yToAdd) noexcept { x += xToAdd; y += yToAdd; }
 
 	/** Returns a point with a given offset from this one. */
-	const Point translated (const ValueType xDelta, const ValueType yDelta) const noexcept  { return Point (x + xDelta, y + yDelta); }
+	Point translated (const ValueType xDelta, const ValueType yDelta) const noexcept  { return Point (x + xDelta, y + yDelta); }
 
 	/** Adds two points together. */
-	const Point operator+ (const Point& other) const noexcept	   { return Point (x + other.x, y + other.y); }
+	Point operator+ (const Point& other) const noexcept		 { return Point (x + other.x, y + other.y); }
 
 	/** Adds another point's co-ordinates to this one. */
 	Point& operator+= (const Point& other) noexcept			 { x += other.x; y += other.y; return *this; }
 
 	/** Subtracts one points from another. */
-	const Point operator- (const Point& other) const noexcept	   { return Point (x - other.x, y - other.y); }
+	Point operator- (const Point& other) const noexcept		 { return Point (x - other.x, y - other.y); }
 
 	/** Subtracts another point's co-ordinates to this one. */
 	Point& operator-= (const Point& other) noexcept			 { x -= other.x; y -= other.y; return *this; }
 
 	/** Returns a point whose coordinates are multiplied by a given value. */
-	const Point operator* (const ValueType multiplier) const noexcept   { return Point (x * multiplier, y * multiplier); }
+	Point operator* (const ValueType multiplier) const noexcept	 { return Point (x * multiplier, y * multiplier); }
 
 	/** Multiplies the point's co-ordinates by a value. */
 	Point& operator*= (const ValueType multiplier) noexcept		 { x *= multiplier; y *= multiplier; return *this; }
 
 	/** Returns a point whose coordinates are divided by a given value. */
-	const Point operator/ (const ValueType divisor) const noexcept	  { return Point (x / divisor, y / divisor); }
+	Point operator/ (const ValueType divisor) const noexcept		{ return Point (x / divisor, y / divisor); }
 
 	/** Divides the point's co-ordinates by a value. */
 	Point& operator/= (const ValueType divisor) noexcept		{ x /= divisor; y /= divisor; return *this; }
 
 	/** Returns the inverse of this point. */
-	const Point operator-() const noexcept				  { return Point (-x, -y); }
+	Point operator-() const noexcept					{ return Point (-x, -y); }
 
 	/** Returns the straight-line distance between this point and another one. */
 	ValueType getDistanceFromOrigin() const noexcept			{ return juce_hypot (x, y); }
@@ -24198,14 +24195,14 @@ public:
 		@param radius   the radius of the circle.
 		@param angle	the angle of the point, in radians clockwise from the 12 o'clock position.
 	*/
-	const Point getPointOnCircumference (const float radius, const float angle) const noexcept  { return Point<float> (x + radius * std::sin (angle),
+	Point getPointOnCircumference (const float radius, const float angle) const noexcept  { return Point<float> (x + radius * std::sin (angle),
 																													   y - radius * std::cos (angle)); }
 	/** Taking this point to be the centre of an ellipse, this returns a point on its circumference.
 		@param radiusX  the horizontal radius of the circle.
 		@param radiusY  the vertical radius of the circle.
 		@param angle	the angle of the point, in radians clockwise from the 12 o'clock position.
 	*/
-	const Point getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const noexcept  { return Point<float> (x + radiusX * std::sin (angle),
+	Point getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const noexcept  { return Point<float> (x + radiusX * std::sin (angle),
 																																			 y - radiusY * std::cos (angle)); }
 
 	/** Uses a transform to change the point's co-ordinates.
@@ -24215,20 +24212,20 @@ public:
 	void applyTransform (const AffineTransform& transform) noexcept	 { transform.transformPoint (x, y); }
 
 	/** Returns the position of this point, if it is transformed by a given AffineTransform. */
-	const Point transformedBy (const AffineTransform& transform) const noexcept   { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
-																								  transform.mat10 * x + transform.mat11 * y + transform.mat12); }
+	Point transformedBy (const AffineTransform& transform) const noexcept   { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
+																							transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
 	/** Casts this point to a Point<int> object. */
-	const Point<int> toInt() const noexcept				 { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
+	Point<int> toInt() const noexcept				 { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
 
 	/** Casts this point to a Point<float> object. */
-	const Point<float> toFloat() const noexcept			 { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
+	Point<float> toFloat() const noexcept			 { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
 
 	/** Casts this point to a Point<double> object. */
-	const Point<double> toDouble() const noexcept			   { return Point<double> (static_cast <double> (x), static_cast<double> (y)); }
+	Point<double> toDouble() const noexcept			   { return Point<double> (static_cast <double> (x), static_cast<double> (y)); }
 
 	/** Returns the point as a string in the form "x, y". */
-	const String toString() const                                       { return String (x) + ", " + String (y); }
+	String toString() const                                       { return String (x) + ", " + String (y); }
 
 private:
 
@@ -24485,13 +24482,13 @@ public:
 		The x and y positions of the event that is returned will have been
 		adjusted to be relative to the new component.
 	*/
-	const MouseEvent getEventRelativeTo (Component* otherComponent) const noexcept;
+	MouseEvent getEventRelativeTo (Component* otherComponent) const noexcept;
 
 	/** Creates a copy of this event with a different position.
 		All other members of the event object are the same, but the x and y are
 		replaced with these new values.
 	*/
-	const MouseEvent withNewPosition (const Point<int>& newPosition) const noexcept;
+	MouseEvent withNewPosition (const Point<int>& newPosition) const noexcept;
 
 	/** Changes the application-wide setting for the double-click time limit.
 
@@ -24739,14 +24736,14 @@ public:
 		To store a keypress in a file, use this method, along with createFromDescription()
 		to retrieve it later.
 	*/
-	const String getTextDescription() const;
+	String getTextDescription() const;
 
 	/** Creates a textual description of the key combination, using unicode icon symbols if possible.
 
 		On OSX, this uses the Apple symbols for command, option, shift, etc, instead of the textual
 		modifier key descriptions that are returned by getTextDescription()
 	*/
-	const String getTextDescriptionWithIcons() const;
+	String getTextDescriptionWithIcons() const;
 
 	/** Checks whether the user is currently holding down the keys that make up this
 		KeyPress.
@@ -24983,6 +24980,1167 @@ public:
 #ifndef __JUCE_TYPEFACE_JUCEHEADER__
 #define __JUCE_TYPEFACE_JUCEHEADER__
 
+class Path;
+class Font;
+class EdgeTable;
+class AffineTransform;
+
+/**
+	A typeface represents a size-independent font.
+
+	This base class is abstract, but calling createSystemTypefaceFor() will return
+	a platform-specific subclass that can be used.
+
+	The CustomTypeface subclass allow you to build your own typeface, and to
+	load and save it in the Juce typeface format.
+
+	Normally you should never need to deal directly with Typeface objects - the Font
+	class does everything you typically need for rendering text.
+
+	@see CustomTypeface, Font
+*/
+class JUCE_API  Typeface  : public ReferenceCountedObject
+{
+public:
+
+	/** A handy typedef for a pointer to a typeface. */
+	typedef ReferenceCountedObjectPtr <Typeface> Ptr;
+
+	/** Returns the name of the typeface.
+		@see Font::getTypefaceName
+	*/
+	const String& getName() const noexcept	  { return name; }
+
+	/** Creates a new system typeface. */
+	static const Ptr createSystemTypefaceFor (const Font& font);
+
+	/** Destructor. */
+	virtual ~Typeface();
+
+	/** Returns true if this typeface can be used to render the specified font.
+		When called, the font will already have been checked to make sure that its name and
+		style flags match the typeface.
+	*/
+	virtual bool isSuitableForFont (const Font&) const	  { return true; }
+
+	/** Returns the ascent of the font, as a proportion of its height.
+		The height is considered to always be normalised as 1.0, so this will be a
+		value less that 1.0, indicating the proportion of the font that lies above
+		its baseline.
+	*/
+	virtual float getAscent() const = 0;
+
+	/** Returns the descent of the font, as a proportion of its height.
+		The height is considered to always be normalised as 1.0, so this will be a
+		value less that 1.0, indicating the proportion of the font that lies below
+		its baseline.
+	*/
+	virtual float getDescent() const = 0;
+
+	/** Measures the width of a line of text.
+
+		The distance returned is based on the font having an normalised height of 1.0.
+
+		You should never need to call this directly! Use Font::getStringWidth() instead!
+	*/
+	virtual float getStringWidth (const String& text) = 0;
+
+	/** Converts a line of text into its glyph numbers and their positions.
+
+		The distances returned are based on the font having an normalised height of 1.0.
+
+		You should never need to call this directly! Use Font::getGlyphPositions() instead!
+	*/
+	virtual void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets) = 0;
+
+	/** Returns the outline for a glyph.
+
+		The path returned will be normalised to a font height of 1.0.
+	*/
+	virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
+
+	/** Returns a new EdgeTable that contains the path for the givem glyph, with the specified transform applied. */
+	virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform) = 0;
+
+	/** Returns true if the typeface uses hinting. */
+	virtual bool isHinted() const			   { return false; }
+
+	/** Changes the number of fonts that are cached in memory. */
+	static void setTypefaceCacheSize (int numFontsToCache);
+
+protected:
+
+	String name;
+	bool isFallbackFont;
+
+	explicit Typeface (const String& name) noexcept;
+
+	static const Ptr getFallbackTypeface();
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface);
+};
+
+#endif   // __JUCE_TYPEFACE_JUCEHEADER__
+
+/*** End of inlined file: juce_Typeface.h ***/
+
+class LowLevelGraphicsContext;
+
+/**
+	Represents a particular font, including its size, style, etc.
+
+	Apart from the typeface to be used, a Font object also dictates whether
+	the font is bold, italic, underlined, how big it is, and its kerning and
+	horizontal scale factor.
+
+	@see Typeface
+*/
+class JUCE_API  Font
+{
+public:
+
+	/** A combination of these values is used by the constructor to specify the
+		style of font to use.
+	*/
+	enum FontStyleFlags
+	{
+		plain	   = 0,	/**< indicates a plain, non-bold, non-italic version of the font. @see setStyleFlags */
+		bold	= 1,	/**< boldens the font. @see setStyleFlags */
+		italic	  = 2,	/**< finds an italic version of the font. @see setStyleFlags */
+		underlined  = 4	 /**< underlines the font. @see setStyleFlags */
+	};
+
+	/** Creates a sans-serif font in a given size.
+
+		@param fontHeight   the height in pixels (can be fractional)
+		@param styleFlags   the style to use - this can be a combination of the
+							Font::bold, Font::italic and Font::underlined, or
+							just Font::plain for the normal style.
+		@see FontStyleFlags, getDefaultSansSerifFontName
+	*/
+	Font (float fontHeight, int styleFlags = plain);
+
+	/** Creates a font with a given typeface and parameters.
+
+		@param typefaceName the name of the typeface to use
+		@param fontHeight   the height in pixels (can be fractional)
+		@param styleFlags   the style to use - this can be a combination of the
+							Font::bold, Font::italic and Font::underlined, or
+							just Font::plain for the normal style.
+		@see FontStyleFlags, getDefaultSansSerifFontName
+	*/
+	Font (const String& typefaceName, float fontHeight, int styleFlags);
+
+	/** Creates a copy of another Font object. */
+	Font (const Font& other) noexcept;
+
+	/** Creates a font for a typeface. */
+	Font (const Typeface::Ptr& typeface);
+
+	/** Creates a basic sans-serif font at a default height.
+
+		You should use one of the other constructors for creating a font that you're planning
+		on drawing with - this constructor is here to help initialise objects before changing
+		the font's settings later.
+	*/
+	Font();
+
+	/** Copies this font from another one. */
+	Font& operator= (const Font& other) noexcept;
+
+	bool operator== (const Font& other) const noexcept;
+	bool operator!= (const Font& other) const noexcept;
+
+	/** Destructor. */
+	~Font() noexcept;
+
+	/** Changes the name of the typeface family.
+
+		e.g. "Arial", "Courier", etc.
+
+		This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
+		or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font names,
+		but are generic names that are used to represent the various default fonts.
+		If you need to know the exact typeface name being used, you can call
+		Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
+
+		If a suitable font isn't found on the machine, it'll just use a default instead.
+	*/
+	void setTypefaceName (const String& faceName);
+
+	/** Returns the name of the typeface family that this font uses.
+
+		e.g. "Arial", "Courier", etc.
+
+		This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
+		or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font names,
+		but are generic names that are used to represent the various default fonts.
+
+		If you need to know the exact typeface name being used, you can call
+		Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
+	*/
+	const String& getTypefaceName() const noexcept		  { return font->typefaceName; }
+
+	/** Returns a typeface name that represents the default sans-serif font.
+
+		This is also the typeface that will be used when a font is created without
+		specifying any typeface details.
+
+		Note that this method just returns a generic placeholder string that means "the default
+		sans-serif font" - it's not the actual name of this font. To get the actual name, use
+		getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
+
+		@see setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName
+	*/
+	static const String& getDefaultSansSerifFontName();
+
+	/** Returns a typeface name that represents the default sans-serif font.
+
+		Note that this method just returns a generic placeholder string that means "the default
+		serif font" - it's not the actual name of this font. To get the actual name, use
+		getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
+
+		@see setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
+	*/
+	static const String& getDefaultSerifFontName();
+
+	/** Returns a typeface name that represents the default sans-serif font.
+
+		Note that this method just returns a generic placeholder string that means "the default
+		monospaced font" - it's not the actual name of this font. To get the actual name, use
+		getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
+
+		@see setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
+	*/
+	static const String& getDefaultMonospacedFontName();
+
+	/** Returns the typeface names of the default fonts on the current platform. */
+	static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& defaultFallback);
+
+	/** Returns the total height of this font.
+
+		This is the maximum height, from the top of the ascent to the bottom of the
+		descenders.
+
+		@see setHeight, setHeightWithoutChangingWidth, getAscent
+	*/
+	float getHeight() const noexcept				{ return font->height; }
+
+	/** Changes the font's height.
+
+		@see getHeight, setHeightWithoutChangingWidth
+	*/
+	void setHeight (float newHeight);
+
+	/** Changes the font's height without changing its width.
+
+		This alters the horizontal scale to compensate for the change in height.
+	*/
+	void setHeightWithoutChangingWidth (float newHeight);
+
+	/** Returns the height of the font above its baseline.
+
+		This is the maximum height from the baseline to the top.
+
+		@see getHeight, getDescent
+	*/
+	float getAscent() const;
+
+	/** Returns the amount that the font descends below its baseline.
+
+		This is calculated as (getHeight() - getAscent()).
+
+		@see getAscent, getHeight
+	*/
+	float getDescent() const;
+
+	/** Returns the font's style flags.
+
+		This will return a bitwise-or'ed combination of values from the FontStyleFlags
+		enum, to describe whether the font is bold, italic, etc.
+
+		@see FontStyleFlags
+	*/
+	int getStyleFlags() const noexcept			  { return font->styleFlags; }
+
+	/** Changes the font's style.
+
+		@param newFlags	 a bitwise-or'ed combination of values from the FontStyleFlags
+							enum, to set the font's properties
+		@see FontStyleFlags
+	*/
+	void setStyleFlags (int newFlags);
+
+	/** Makes the font bold or non-bold. */
+	void setBold (bool shouldBeBold);
+	/** Returns a copy of this font with the bold attribute set. */
+	Font boldened() const;
+	/** Returns true if the font is bold. */
+	bool isBold() const noexcept;
+
+	/** Makes the font italic or non-italic. */
+	void setItalic (bool shouldBeItalic);
+	/** Returns a copy of this font with the italic attribute set. */
+	Font italicised() const;
+	/** Returns true if the font is italic. */
+	bool isItalic() const noexcept;
+
+	/** Makes the font underlined or non-underlined. */
+	void setUnderline (bool shouldBeUnderlined);
+	/** Returns true if the font is underlined. */
+	bool isUnderlined() const noexcept;
+
+	/** Changes the font's horizontal scale factor.
+
+		@param scaleFactor  a value of 1.0 is the normal scale, less than this will be
+							narrower, greater than 1.0 will be stretched out.
+	*/
+	void setHorizontalScale (float scaleFactor);
+
+	/** Returns the font's horizontal scale.
+
+		A value of 1.0 is the normal scale, less than this will be narrower, greater
+		than 1.0 will be stretched out.
+
+		@see setHorizontalScale
+	*/
+	float getHorizontalScale() const noexcept		   { return font->horizontalScale; }
+
+	/** Changes the font's kerning.
+
+		@param extraKerning	 a multiple of the font's height that will be added
+								to space between the characters. So a value of zero is
+								normal spacing, positive values spread the letters out,
+								negative values make them closer together.
+	*/
+	void setExtraKerningFactor (float extraKerning);
+
+	/** Returns the font's kerning.
+
+		This is the extra space added between adjacent characters, as a proportion
+		of the font's height.
+
+		A value of zero is normal spacing, positive values will spread the letters
+		out more, and negative values make them closer together.
+	*/
+	float getExtraKerningFactor() const noexcept		{ return font->kerning; }
+
+	/** Changes all the font's characteristics with one call. */
+	void setSizeAndStyle (float newHeight,
+						  int newStyleFlags,
+						  float newHorizontalScale,
+						  float newKerningAmount);
+
+	/** Returns the total width of a string as it would be drawn using this font.
+
+		For a more accurate floating-point result, use getStringWidthFloat().
+	*/
+	int getStringWidth (const String& text) const;
+
+	/** Returns the total width of a string as it would be drawn using this font.
+
+		@see getStringWidth
+	*/
+	float getStringWidthFloat (const String& text) const;
+
+	/** Returns the series of glyph numbers and their x offsets needed to represent a string.
+
+		An extra x offset is added at the end of the run, to indicate where the right hand
+		edge of the last character is.
+	*/
+	void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const;
+
+	/** Returns the typeface used by this font.
+
+		Note that the object returned may go out of scope if this font is deleted
+		or has its style changed.
+	*/
+	Typeface* getTypeface() const;
+
+	/** Creates an array of Font objects to represent all the fonts on the system.
+
+		If you just need the names of the typefaces, you can also use
+		findAllTypefaceNames() instead.
+
+		@param results  the array to which new Font objects will be added.
+	*/
+	static void findFonts (Array<Font>& results);
+
+	/** Returns a list of all the available typeface names.
+
+		The names returned can be passed into setTypefaceName().
+
+		You can use this instead of findFonts() if you only need their names, and not
+		font objects.
+	*/
+	static StringArray findAllTypefaceNames();
+
+	/** Returns the name of the typeface to be used for rendering glyphs that aren't found
+		in the requested typeface.
+	*/
+	static const String& getFallbackFontName();
+
+	/** Sets the (platform-specific) name of the typeface to use to find glyphs that aren't
+		available in whatever font you're trying to use.
+	*/
+	static void setFallbackFontName (const String& name);
+
+	/** Creates a string to describe this font.
+		The string will contain information to describe the font's typeface, size, and
+		style. To recreate the font from this string, use fromString().
+	*/
+	String toString() const;
+
+	/** Recreates a font from its stringified encoding.
+		This method takes a string that was created by toString(), and recreates the
+		original font.
+	*/
+	static Font fromString (const String& fontDescription);
+
+private:
+
+	friend class FontGlyphAlphaMap;
+	friend class TypefaceCache;
+
+	class SharedFontInternal  : public ReferenceCountedObject
+	{
+	public:
+		SharedFontInternal (float height, int styleFlags) noexcept;
+		SharedFontInternal (const String& typefaceName, float height, int styleFlags) noexcept;
+		SharedFontInternal (const Typeface::Ptr& typeface) noexcept;
+		SharedFontInternal (const SharedFontInternal& other) noexcept;
+
+		bool operator== (const SharedFontInternal&) const noexcept;
+
+		String typefaceName;
+		float height, horizontalScale, kerning, ascent;
+		int styleFlags;
+		Typeface::Ptr typeface;
+	};
+
+	ReferenceCountedObjectPtr <SharedFontInternal> font;
+	void dupeInternalIfShared();
+
+	JUCE_LEAK_DETECTOR (Font);
+};
+
+#endif   // __JUCE_FONT_JUCEHEADER__
+
+/*** End of inlined file: juce_Font.h ***/
+
+
+/*** Start of inlined file: juce_Rectangle.h ***/
+#ifndef __JUCE_RECTANGLE_JUCEHEADER__
+#define __JUCE_RECTANGLE_JUCEHEADER__
+
+class RectangleList;
+
+/**
+	Manages a rectangle and allows geometric operations to be performed on it.
+
+	@see RectangleList, Path, Line, Point
+*/
+template <typename ValueType>
+class Rectangle
+{
+public:
+
+	/** Creates a rectangle of zero size.
+
+		The default co-ordinates will be (0, 0, 0, 0).
+	*/
+	Rectangle() noexcept
+	  : x(), y(), w(), h()
+	{
+	}
+
+	/** Creates a copy of another rectangle. */
+	Rectangle (const Rectangle& other) noexcept
+	  : x (other.x), y (other.y),
+		w (other.w), h (other.h)
+	{
+	}
+
+	/** Creates a rectangle with a given position and size. */
+	Rectangle (const ValueType initialX, const ValueType initialY,
+			   const ValueType width, const ValueType height) noexcept
+	  : x (initialX), y (initialY),
+		w (width), h (height)
+	{
+	}
+
+	/** Creates a rectangle with a given size, and a position of (0, 0). */
+	Rectangle (const ValueType width, const ValueType height) noexcept
+	  : x(), y(), w (width), h (height)
+	{
+	}
+
+	/** Creates a Rectangle from the positions of two opposite corners. */
+	Rectangle (const Point<ValueType>& corner1, const Point<ValueType>& corner2) noexcept
+	  : x (jmin (corner1.getX(), corner2.getX())),
+		y (jmin (corner1.getY(), corner2.getY())),
+		w (corner1.getX() - corner2.getX()),
+		h (corner1.getY() - corner2.getY())
+	{
+		if (w < ValueType()) w = -w;
+		if (h < ValueType()) h = -h;
+	}
+
+	/** Creates a Rectangle from a set of left, right, top, bottom coordinates.
+		The right and bottom values must be larger than the left and top ones, or the resulting
+		rectangle will have a negative size.
+	*/
+	static Rectangle leftTopRightBottom (const ValueType left, const ValueType top,
+										 const ValueType right, const ValueType bottom) noexcept
+	{
+		return Rectangle (left, top, right - left, bottom - top);
+	}
+
+	Rectangle& operator= (const Rectangle& other) noexcept
+	{
+		x = other.x; y = other.y;
+		w = other.w; h = other.h;
+		return *this;
+	}
+
+	/** Destructor. */
+	~Rectangle() noexcept {}
+
+	/** Returns true if the rectangle's width and height are both zero or less */
+	bool isEmpty() const noexcept				   { return w <= ValueType() || h <= ValueType(); }
+
+	/** Returns the x co-ordinate of the rectangle's left-hand-side. */
+	inline ValueType getX() const noexcept			  { return x; }
+
+	/** Returns the y co-ordinate of the rectangle's top edge. */
+	inline ValueType getY() const noexcept			  { return y; }
+
+	/** Returns the width of the rectangle. */
+	inline ValueType getWidth() const noexcept			  { return w; }
+
+	/** Returns the height of the rectangle. */
+	inline ValueType getHeight() const noexcept			 { return h; }
+
+	/** Returns the x co-ordinate of the rectangle's right-hand-side. */
+	inline ValueType getRight() const noexcept			  { return x + w; }
+
+	/** Returns the y co-ordinate of the rectangle's bottom edge. */
+	inline ValueType getBottom() const noexcept			 { return y + h; }
+
+	/** Returns the x co-ordinate of the rectangle's centre. */
+	ValueType getCentreX() const noexcept			   { return x + w / (ValueType) 2; }
+
+	/** Returns the y co-ordinate of the rectangle's centre. */
+	ValueType getCentreY() const noexcept			   { return y + h / (ValueType) 2; }
+
+	/** Returns the centre point of the rectangle. */
+	Point<ValueType> getCentre() const noexcept			 { return Point<ValueType> (x + w / (ValueType) 2, y + h / (ValueType) 2); }
+
+	/** Returns the aspect ratio of the rectangle's width / height.
+		If widthOverHeight is true, it returns width / height; if widthOverHeight is false,
+		it returns height / width. */
+	ValueType getAspectRatio (const bool widthOverHeight = true) const noexcept			 { return widthOverHeight ? w / h : h / w; }
+
+	/** Returns the rectangle's top-left position as a Point. */
+	Point<ValueType> getPosition() const noexcept						   { return Point<ValueType> (x, y); }
+
+	/** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
+	void setPosition (const Point<ValueType>& newPos) noexcept					  { x = newPos.getX(); y = newPos.getY(); }
+
+	/** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
+	void setPosition (const ValueType newX, const ValueType newY) noexcept			  { x = newX; y = newY; }
+
+	/** Returns a rectangle with the same size as this one, but a new position. */
+	Rectangle withPosition (const ValueType newX, const ValueType newY) const noexcept		  { return Rectangle (newX, newY, w, h); }
+
+	/** Returns a rectangle with the same size as this one, but a new position. */
+	Rectangle withPosition (const Point<ValueType>& newPos) const noexcept			  { return Rectangle (newPos.getX(), newPos.getY(), w, h); }
+
+	/** Returns the rectangle's top-left position as a Point. */
+	Point<ValueType> getTopLeft() const noexcept							{ return getPosition(); }
+
+	/** Returns the rectangle's top-right position as a Point. */
+	Point<ValueType> getTopRight() const noexcept						   { return Point<ValueType> (x + w, y); }
+
+	/** Returns the rectangle's bottom-left position as a Point. */
+	Point<ValueType> getBottomLeft() const noexcept						 { return Point<ValueType> (x, y + h); }
+
+	/** Returns the rectangle's bottom-right position as a Point. */
+	Point<ValueType> getBottomRight() const noexcept						{ return Point<ValueType> (x + w, y + h); }
+
+	/** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
+	void setSize (const ValueType newWidth, const ValueType newHeight) noexcept			 { w = newWidth; h = newHeight; }
+
+	/** Returns a rectangle with the same position as this one, but a new size. */
+	Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const noexcept	 { return Rectangle (x, y, newWidth, newHeight); }
+
+	/** Changes all the rectangle's co-ordinates. */
+	void setBounds (const ValueType newX, const ValueType newY,
+					const ValueType newWidth, const ValueType newHeight) noexcept
+	{
+		x = newX; y = newY; w = newWidth; h = newHeight;
+	}
+
+	/** Changes the rectangle's X coordinate */
+	void setX (const ValueType newX) noexcept			   { x = newX; }
+
+	/** Changes the rectangle's Y coordinate */
+	void setY (const ValueType newY) noexcept			   { y = newY; }
+
+	/** Changes the rectangle's width */
+	void setWidth (const ValueType newWidth) noexcept		   { w = newWidth; }
+
+	/** Changes the rectangle's height */
+	void setHeight (const ValueType newHeight) noexcept		 { h = newHeight; }
+
+	/** Returns a rectangle which has the same size and y-position as this one, but with a different x-position. */
+	Rectangle withX (const ValueType newX) const noexcept					 { return Rectangle (newX, y, w, h); }
+
+	/** Returns a rectangle which has the same size and x-position as this one, but with a different y-position. */
+	Rectangle withY (const ValueType newY) const noexcept					 { return Rectangle (x, newY, w, h); }
+
+	/** Returns a rectangle which has the same position and height as this one, but with a different width. */
+	Rectangle withWidth (const ValueType newWidth) const noexcept				 { return Rectangle (x, y, newWidth, h); }
+
+	/** Returns a rectangle which has the same position and width as this one, but with a different height. */
+	Rectangle withHeight (const ValueType newHeight) const noexcept			   { return Rectangle (x, y, w, newHeight); }
+
+	/** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
+		If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
+		@see withLeft
+	*/
+	void setLeft (const ValueType newLeft) noexcept
+	{
+		w = jmax (ValueType(), x + w - newLeft);
+		x = newLeft;
+	}
+
+	/** Returns a new rectangle with a different x position, but the same right-hand edge as this one.
+		If the new x is beyond the right of the current right-hand edge, the width will be set to zero.
+		@see setLeft
+	*/
+	Rectangle withLeft (const ValueType newLeft) const noexcept	   { return Rectangle (newLeft, y, jmax (ValueType(), x + w - newLeft), h); }
+
+	/** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
+		If the y is moved to be below the current bottom edge, the height will be set to zero.
+		@see withTop
+	*/
+	void setTop (const ValueType newTop) noexcept
+	{
+		h = jmax (ValueType(), y + h - newTop);
+		y = newTop;
+	}
+
+	/** Returns a new rectangle with a different y position, but the same bottom edge as this one.
+		If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
+		@see setTop
+	*/
+	Rectangle withTop (const ValueType newTop) const noexcept	 { return Rectangle (x, newTop, w, jmax (ValueType(), y + h - newTop)); }
+
+	/** Adjusts the width so that the right-hand edge of the rectangle has this new value.
+		If the new right is below the current X value, the X will be pushed down to match it.
+		@see getRight, withRight
+	*/
+	void setRight (const ValueType newRight) noexcept
+	{
+		x = jmin (x, newRight);
+		w = newRight - x;
+	}
+
+	/** Returns a new rectangle with a different right-hand edge position, but the same left-hand edge as this one.
+		If the new right edge is below the current left-hand edge, the width will be set to zero.
+		@see setRight
+	*/
+	Rectangle withRight (const ValueType newRight) const noexcept	 { return Rectangle (jmin (x, newRight), y, jmax (ValueType(), newRight - x), h); }
+
+	/** Adjusts the height so that the bottom edge of the rectangle has this new value.
+		If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
+		@see getBottom, withBottom
+	*/
+	void setBottom (const ValueType newBottom) noexcept
+	{
+		y = jmin (y, newBottom);
+		h = newBottom - y;
+	}
+
+	/** Returns a new rectangle with a different bottom edge position, but the same top edge as this one.
+		If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
+		@see setBottom
+	*/
+	Rectangle withBottom (const ValueType newBottom) const noexcept   { return Rectangle (x, jmin (y, newBottom), w, jmax (ValueType(), newBottom - y)); }
+
+	/** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
+	void translate (const ValueType deltaX,
+					const ValueType deltaY) noexcept
+	{
+		x += deltaX;
+		y += deltaY;
+	}
+
+	/** Returns a rectangle which is the same as this one moved by a given amount. */
+	Rectangle translated (const ValueType deltaX,
+						  const ValueType deltaY) const noexcept
+	{
+		return Rectangle (x + deltaX, y + deltaY, w, h);
+	}
+
+	/** Returns a rectangle which is the same as this one moved by a given amount. */
+	Rectangle operator+ (const Point<ValueType>& deltaPosition) const noexcept
+	{
+		return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
+	}
+
+	/** Moves this rectangle by a given amount. */
+	Rectangle& operator+= (const Point<ValueType>& deltaPosition) noexcept
+	{
+		x += deltaPosition.getX(); y += deltaPosition.getY();
+		return *this;
+	}
+
+	/** Returns a rectangle which is the same as this one moved by a given amount. */
+	Rectangle operator- (const Point<ValueType>& deltaPosition) const noexcept
+	{
+		return Rectangle (x - deltaPosition.getX(), y - deltaPosition.getY(), w, h);
+	}
+
+	/** Moves this rectangle by a given amount. */
+	Rectangle& operator-= (const Point<ValueType>& deltaPosition) noexcept
+	{
+		x -= deltaPosition.getX(); y -= deltaPosition.getY();
+		return *this;
+	}
+
+	/** Expands the rectangle by a given amount.
+
+		Effectively, its new size is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
+		@see expanded, reduce, reduced
+	*/
+	void expand (const ValueType deltaX,
+				 const ValueType deltaY) noexcept
+	{
+		const ValueType nw = jmax (ValueType(), w + deltaX * 2);
+		const ValueType nh = jmax (ValueType(), h + deltaY * 2);
+		setBounds (x - deltaX, y - deltaY, nw, nh);
+	}
+
+	/** Returns a rectangle that is larger than this one by a given amount.
+
+		Effectively, the rectangle returned is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
+		@see expand, reduce, reduced
+	*/
+	Rectangle expanded (const ValueType deltaX,
+						const ValueType deltaY) const noexcept
+	{
+		const ValueType nw = jmax (ValueType(), w + deltaX * 2);
+		const ValueType nh = jmax (ValueType(), h + deltaY * 2);
+		return Rectangle (x - deltaX, y - deltaY, nw, nh);
+	}
+
+	/** Shrinks the rectangle by a given amount.
+
+		Effectively, its new size is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
+		@see reduced, expand, expanded
+	*/
+	void reduce (const ValueType deltaX,
+				 const ValueType deltaY) noexcept
+	{
+		expand (-deltaX, -deltaY);
+	}
+
+	/** Returns a rectangle that is smaller than this one by a given amount.
+
+		Effectively, the rectangle returned is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
+		@see reduce, expand, expanded
+	*/
+	Rectangle reduced (const ValueType deltaX,
+					   const ValueType deltaY) const noexcept
+	{
+		return expanded (-deltaX, -deltaY);
+	}
+
+	/** Removes a strip from the top of this rectangle, reducing this rectangle
+		by the specified amount and returning the section that was removed.
+
+		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
+		return (100, 100, 300, 50) and leave this rectangle as (100, 150, 300, 250).
+
+		If amountToRemove is greater than the height of this rectangle, it'll be clipped to
+		that value.
+	*/
+	Rectangle removeFromTop (const ValueType amountToRemove) noexcept
+	{
+		const Rectangle r (x, y, w, jmin (amountToRemove, h));
+		y += r.h; h -= r.h;
+		return r;
+	}
+
+	/** Removes a strip from the left-hand edge of this rectangle, reducing this rectangle
+		by the specified amount and returning the section that was removed.
+
+		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
+		return (100, 100, 50, 300) and leave this rectangle as (150, 100, 250, 300).
+
+		If amountToRemove is greater than the width of this rectangle, it'll be clipped to
+		that value.
+	*/
+	Rectangle removeFromLeft (const ValueType amountToRemove) noexcept
+	{
+		const Rectangle r (x, y, jmin (amountToRemove, w), h);
+		x += r.w; w -= r.w;
+		return r;
+	}
+
+	/** Removes a strip from the right-hand edge of this rectangle, reducing this rectangle
+		by the specified amount and returning the section that was removed.
+
+		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
+		return (250, 100, 50, 300) and leave this rectangle as (100, 100, 250, 300).
+
+		If amountToRemove is greater than the width of this rectangle, it'll be clipped to
+		that value.
+	*/
+	Rectangle removeFromRight (ValueType amountToRemove) noexcept
+	{
+		amountToRemove = jmin (amountToRemove, w);
+		const Rectangle r (x + w - amountToRemove, y, amountToRemove, h);
+		w -= amountToRemove;
+		return r;
+	}
+
+	/** Removes a strip from the bottom of this rectangle, reducing this rectangle
+		by the specified amount and returning the section that was removed.
+
+		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
+		return (100, 250, 300, 50) and leave this rectangle as (100, 100, 300, 250).
+
+		If amountToRemove is greater than the height of this rectangle, it'll be clipped to
+		that value.
+	*/
+	Rectangle removeFromBottom (ValueType amountToRemove) noexcept
+	{
+		amountToRemove = jmin (amountToRemove, h);
+		const Rectangle r (x, y + h - amountToRemove, w, amountToRemove);
+		h -= amountToRemove;
+		return r;
+	}
+
+	/** Returns true if the two rectangles are identical. */
+	bool operator== (const Rectangle& other) const noexcept
+	{
+		return x == other.x && y == other.y
+			&& w == other.w && h == other.h;
+	}
+
+	/** Returns true if the two rectangles are not identical. */
+	bool operator!= (const Rectangle& other) const noexcept
+	{
+		return x != other.x || y != other.y
+			|| w != other.w || h != other.h;
+	}
+
+	/** Returns true if this co-ordinate is inside the rectangle. */
+	bool contains (const ValueType xCoord, const ValueType yCoord) const noexcept
+	{
+		return xCoord >= x && yCoord >= y && xCoord < x + w && yCoord < y + h;
+	}
+
+	/** Returns true if this co-ordinate is inside the rectangle. */
+	bool contains (const Point<ValueType>& point) const noexcept
+	{
+		return point.getX() >= x && point.getY() >= y && point.getX() < x + w && point.getY() < y + h;
+	}
+
+	/** Returns true if this other rectangle is completely inside this one. */
+	bool contains (const Rectangle& other) const noexcept
+	{
+		return x <= other.x && y <= other.y
+			&& x + w >= other.x + other.w && y + h >= other.y + other.h;
+	}
+
+	/** Returns the nearest point to the specified point that lies within this rectangle. */
+	Point<ValueType> getConstrainedPoint (const Point<ValueType>& point) const noexcept
+	{
+		return Point<ValueType> (jlimit (x, x + w, point.getX()),
+								 jlimit (y, y + h, point.getY()));
+	}
+
+	/** Returns true if any part of another rectangle overlaps this one. */
+	bool intersects (const Rectangle& other) const noexcept
+	{
+		return x + w > other.x
+			&& y + h > other.y
+			&& x < other.x + other.w
+			&& y < other.y + other.h
+			&& w > ValueType() && h > ValueType();
+	}
+
+	/** Returns the region that is the overlap between this and another rectangle.
+
+		If the two rectangles don't overlap, the rectangle returned will be empty.
+	*/
+	Rectangle getIntersection (const Rectangle& other) const noexcept
+	{
+		const ValueType nx = jmax (x, other.x);
+		const ValueType ny = jmax (y, other.y);
+		const ValueType nw = jmin (x + w, other.x + other.w) - nx;
+		const ValueType nh = jmin (y + h, other.y + other.h) - ny;
+
+		if (nw >= ValueType() && nh >= ValueType())
+			return Rectangle (nx, ny, nw, nh);
+
+		return Rectangle();
+	}
+
+	/** Clips a rectangle so that it lies only within this one.
+
+		This is a non-static version of intersectRectangles().
+
+		Returns false if the two regions didn't overlap.
+	*/
+	bool intersectRectangle (ValueType& otherX, ValueType& otherY, ValueType& otherW, ValueType& otherH) const noexcept
+	{
+		const int maxX = jmax (otherX, x);
+		otherW = jmin (otherX + otherW, x + w) - maxX;
+
+		if (otherW > ValueType())
+		{
+			const int maxY = jmax (otherY, y);
+			otherH = jmin (otherY + otherH, y + h) - maxY;
+
+			if (otherH > ValueType())
+			{
+				otherX = maxX; otherY = maxY;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/** Returns the smallest rectangle that contains both this one and the one passed-in.
+
+		If either this or the other rectangle are empty, they will not be counted as
+		part of the resulting region.
+	*/
+	Rectangle getUnion (const Rectangle& other) const noexcept
+	{
+		if (other.isEmpty())  return *this;
+		if (isEmpty())	return other;
+
+		const ValueType newX = jmin (x, other.x);
+		const ValueType newY = jmin (y, other.y);
+
+		return Rectangle (newX, newY,
+						  jmax (x + w, other.x + other.w) - newX,
+						  jmax (y + h, other.y + other.h) - newY);
+	}
+
+	/** If this rectangle merged with another one results in a simple rectangle, this
+		will set this rectangle to the result, and return true.
+
+		Returns false and does nothing to this rectangle if the two rectangles don't overlap,
+		or if they form a complex region.
+	*/
+	bool enlargeIfAdjacent (const Rectangle& other) noexcept
+	{
+		if (x == other.x && getRight() == other.getRight()
+			 && (other.getBottom() >= y && other.y <= getBottom()))
+		{
+			const ValueType newY = jmin (y, other.y);
+			h = jmax (getBottom(), other.getBottom()) - newY;
+			y = newY;
+			return true;
+		}
+		else if (y == other.y && getBottom() == other.getBottom()
+				  && (other.getRight() >= x && other.x <= getRight()))
+		{
+			const ValueType newX = jmin (x, other.x);
+			w = jmax (getRight(), other.getRight()) - newX;
+			x = newX;
+			return true;
+		}
+
+		return false;
+	}
+
+	/** If after removing another rectangle from this one the result is a simple rectangle,
+		this will set this object's bounds to be the result, and return true.
+
+		Returns false and does nothing to this rectangle if the two rectangles don't overlap,
+		or if removing the other one would form a complex region.
+	*/
+	bool reduceIfPartlyContainedIn (const Rectangle& other) noexcept
+	{
+		int inside = 0;
+		const int otherR = other.getRight();
+		if (x >= other.x && x < otherR) inside = 1;
+		const int otherB = other.getBottom();
+		if (y >= other.y && y < otherB) inside |= 2;
+		const int r = x + w;
+		if (r >= other.x && r < otherR) inside |= 4;
+		const int b = y + h;
+		if (b >= other.y && b < otherB) inside |= 8;
+
+		switch (inside)
+		{
+			case 1 + 2 + 8:	 w = r - otherR; x = otherR; return true;
+			case 1 + 2 + 4:	 h = b - otherB; y = otherB; return true;
+			case 2 + 4 + 8:	 w = other.x - x; return true;
+			case 1 + 4 + 8:	 h = other.y - y; return true;
+		}
+
+		return false;
+	}
+
+	/** Returns the smallest rectangle that can contain the shape created by applying
+		a transform to this rectangle.
+
+		This should only be used on floating point rectangles.
+	*/
+	Rectangle transformed (const AffineTransform& transform) const noexcept
+	{
+		float x1 = x,	 y1 = y;
+		float x2 = x + w, y2 = y;
+		float x3 = x,	 y3 = y + h;
+		float x4 = x2,	y4 = y3;
+
+		transform.transformPoints (x1, y1, x2, y2);
+		transform.transformPoints (x3, y3, x4, y4);
+
+		const float rx = jmin (x1, x2, x3, x4);
+		const float ry = jmin (y1, y2, y3, y4);
+
+		return Rectangle (rx, ry,
+						  jmax (x1, x2, x3, x4) - rx,
+						  jmax (y1, y2, y3, y4) - ry);
+	}
+
+	/** Returns the smallest integer-aligned rectangle that completely contains this one.
+		This is only relevent for floating-point rectangles, of course.
+		@see toFloat()
+	*/
+	const Rectangle<int> getSmallestIntegerContainer() const noexcept
+	{
+		const int x1 = (int) std::floor (static_cast<float> (x));
+		const int y1 = (int) std::floor (static_cast<float> (y));
+		const int x2 = (int) std::ceil (static_cast<float> (x + w));
+		const int y2 = (int) std::ceil (static_cast<float> (y + h));
+
+		return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+	}
+
+	/** Returns the smallest Rectangle that can contain a set of points. */
+	static Rectangle findAreaContainingPoints (const Point<ValueType>* const points, const int numPoints) noexcept
+	{
+		if (numPoints == 0)
+			return Rectangle();
+
+		ValueType minX (points[0].getX());
+		ValueType maxX (minX);
+		ValueType minY (points[0].getY());
+		ValueType maxY (minY);
+
+		for (int i = 1; i < numPoints; ++i)
+		{
+			minX = jmin (minX, points[i].getX());
+			maxX = jmax (maxX, points[i].getX());
+			minY = jmin (minY, points[i].getY());
+			maxY = jmax (maxY, points[i].getY());
+		}
+
+		return Rectangle (minX, minY, maxX - minX, maxY - minY);
+	}
+
+	/** Casts this rectangle to a Rectangle<float>.
+		Obviously this is mainly useful for rectangles that use integer types.
+		@see getSmallestIntegerContainer
+	*/
+	const Rectangle<float> toFloat() const noexcept
+	{
+		return Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
+								 static_cast<float> (w), static_cast<float> (h));
+	}
+
+	/** Static utility to intersect two sets of rectangular co-ordinates.
+
+		Returns false if the two regions didn't overlap.
+
+		@see intersectRectangle
+	*/
+	static bool intersectRectangles (ValueType& x1, ValueType& y1, ValueType& w1, ValueType& h1,
+									 const ValueType x2, const ValueType y2, const ValueType w2, const ValueType h2) noexcept
+	{
+		const ValueType x = jmax (x1, x2);
+		w1 = jmin (x1 + w1, x2 + w2) - x;
+
+		if (w1 > ValueType())
+		{
+			const ValueType y = jmax (y1, y2);
+			h1 = jmin (y1 + h1, y2 + h2) - y;
+
+			if (h1 > ValueType())
+			{
+				x1 = x; y1 = y;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/** Creates a string describing this rectangle.
+
+		The string will be of the form "x y width height", e.g. "100 100 400 200".
+
+		Coupled with the fromString() method, this is very handy for things like
+		storing rectangles (particularly component positions) in XML attributes.
+
+		@see fromString
+	*/
+	String toString() const
+	{
+		String s;
+		s.preallocateBytes (32);
+		s << x << ' ' << y << ' ' << w << ' ' << h;
+		return s;
+	}
+
+	/** Parses a string containing a rectangle's details.
+
+		The string should contain 4 integer tokens, in the form "x y width height". They
+		can be comma or whitespace separated.
+
+		This method is intended to go with the toString() method, to form an easy way
+		of saving/loading rectangles as strings.
+
+		@see toString
+	*/
+	static Rectangle fromString (const String& stringVersion)
+	{
+		StringArray toks;
+		toks.addTokens (stringVersion.trim(), ",; \t\r\n", String::empty);
+
+		return Rectangle (toks[0].trim().getIntValue(),
+						  toks[1].trim().getIntValue(),
+						  toks[2].trim().getIntValue(),
+						  toks[3].trim().getIntValue());
+	}
+
+private:
+	friend class RectangleList;
+	ValueType x, y, w, h;
+};
+
+#endif   // __JUCE_RECTANGLE_JUCEHEADER__
+
+/*** End of inlined file: juce_Rectangle.h ***/
+
+
+/*** Start of inlined file: juce_PathStrokeType.h ***/
+#ifndef __JUCE_PATHSTROKETYPE_JUCEHEADER__
+#define __JUCE_PATHSTROKETYPE_JUCEHEADER__
+
 
 /*** Start of inlined file: juce_Path.h ***/
 #ifndef __JUCE_PATH_JUCEHEADER__
@@ -25131,7 +26289,7 @@ public:
 		@param line	 the line to intersect with
 		@returns	the point at which the lines intersect, even if this lies beyond the end of the lines
 	*/
-	const Point<ValueType> getIntersection (const Line& line) const noexcept
+	Point<ValueType> getIntersection (const Line& line) const noexcept
 	{
 		Point<ValueType> p;
 		findIntersection (start, end, line.start, line.end, p);
@@ -25145,7 +26303,7 @@ public:
 									than the line itself
 		@see getPointAlongLineProportionally
 	*/
-	const Point<ValueType> getPointAlongLine (ValueType distanceFromStart) const noexcept
+	Point<ValueType> getPointAlongLine (ValueType distanceFromStart) const noexcept
 	{
 		return start + (end - start) * (distanceFromStart / getLength());
 	}
@@ -25163,8 +26321,8 @@ public:
 									end, then a positive value here will move to the
 									right, negative value move to the left.
 	*/
-	const Point<ValueType> getPointAlongLine (ValueType distanceFromStart,
-											  ValueType perpendicularDistance) const noexcept
+	Point<ValueType> getPointAlongLine (ValueType distanceFromStart,
+										ValueType perpendicularDistance) const noexcept
 	{
 		const Point<ValueType> delta (end - start);
 		const double length = juce_hypot ((double) delta.getX(),
@@ -25186,7 +26344,7 @@ public:
 									can be negative or greater than 1.0).
 		@see getPointAlongLine
 	*/
-	const Point<ValueType> getPointAlongLineProportionally (ValueType proportionOfLength) const noexcept
+	Point<ValueType> getPointAlongLineProportionally (ValueType proportionOfLength) const noexcept
 	{
 		return start + (end - start) * proportionOfLength;
 	}
@@ -25257,7 +26415,7 @@ public:
 	/** Finds the point on this line which is nearest to a given point.
 		@see getDistanceFromPoint, findNearestProportionalPositionTo
 	*/
-	const Point<ValueType> findNearestPointTo (const Point<ValueType>& point) const noexcept
+	Point<ValueType> findNearestPointTo (const Point<ValueType>& point) const noexcept
 	{
 		return getPointAlongLineProportionally (findNearestProportionalPositionTo (point));
 	}
@@ -25280,7 +26438,7 @@ public:
 		This will chop off part of the start of this line by a certain amount, (leaving the
 		end-point the same), and return the new line.
 	*/
-	const Line withShortenedStart (ValueType distanceToShortenBy) const noexcept
+	Line withShortenedStart (ValueType distanceToShortenBy) const noexcept
 	{
 		return Line (getPointAlongLine (jmin (distanceToShortenBy, getLength())), end);
 	}
@@ -25290,7 +26448,7 @@ public:
 		This will chop off part of the end of this line by a certain amount, (leaving the
 		start-point the same), and return the new line.
 	*/
-	const Line withShortenedEnd (ValueType distanceToShortenBy) const noexcept
+	Line withShortenedEnd (ValueType distanceToShortenBy) const noexcept
 	{
 		const ValueType length = getLength();
 		return Line (start, getPointAlongLine (length - jmin (distanceToShortenBy, length)));
@@ -25362,713 +26520,6 @@ private:
 #endif   // __JUCE_LINE_JUCEHEADER__
 
 /*** End of inlined file: juce_Line.h ***/
-
-
-/*** Start of inlined file: juce_Rectangle.h ***/
-#ifndef __JUCE_RECTANGLE_JUCEHEADER__
-#define __JUCE_RECTANGLE_JUCEHEADER__
-
-class RectangleList;
-
-/**
-	Manages a rectangle and allows geometric operations to be performed on it.
-
-	@see RectangleList, Path, Line, Point
-*/
-template <typename ValueType>
-class Rectangle
-{
-public:
-
-	/** Creates a rectangle of zero size.
-
-		The default co-ordinates will be (0, 0, 0, 0).
-	*/
-	Rectangle() noexcept
-	  : x(), y(), w(), h()
-	{
-	}
-
-	/** Creates a copy of another rectangle. */
-	Rectangle (const Rectangle& other) noexcept
-	  : x (other.x), y (other.y),
-		w (other.w), h (other.h)
-	{
-	}
-
-	/** Creates a rectangle with a given position and size. */
-	Rectangle (const ValueType initialX, const ValueType initialY,
-			   const ValueType width, const ValueType height) noexcept
-	  : x (initialX), y (initialY),
-		w (width), h (height)
-	{
-	}
-
-	/** Creates a rectangle with a given size, and a position of (0, 0). */
-	Rectangle (const ValueType width, const ValueType height) noexcept
-	  : x(), y(), w (width), h (height)
-	{
-	}
-
-	/** Creates a Rectangle from the positions of two opposite corners. */
-	Rectangle (const Point<ValueType>& corner1, const Point<ValueType>& corner2) noexcept
-	  : x (jmin (corner1.getX(), corner2.getX())),
-		y (jmin (corner1.getY(), corner2.getY())),
-		w (corner1.getX() - corner2.getX()),
-		h (corner1.getY() - corner2.getY())
-	{
-		if (w < ValueType()) w = -w;
-		if (h < ValueType()) h = -h;
-	}
-
-	/** Creates a Rectangle from a set of left, right, top, bottom coordinates.
-		The right and bottom values must be larger than the left and top ones, or the resulting
-		rectangle will have a negative size.
-	*/
-	static const Rectangle leftTopRightBottom (const ValueType left, const ValueType top,
-											   const ValueType right, const ValueType bottom) noexcept
-	{
-		return Rectangle (left, top, right - left, bottom - top);
-	}
-
-	Rectangle& operator= (const Rectangle& other) noexcept
-	{
-		x = other.x; y = other.y;
-		w = other.w; h = other.h;
-		return *this;
-	}
-
-	/** Destructor. */
-	~Rectangle() noexcept {}
-
-	/** Returns true if the rectangle's width and height are both zero or less */
-	bool isEmpty() const noexcept				   { return w <= ValueType() || h <= ValueType(); }
-
-	/** Returns the x co-ordinate of the rectangle's left-hand-side. */
-	inline ValueType getX() const noexcept			  { return x; }
-
-	/** Returns the y co-ordinate of the rectangle's top edge. */
-	inline ValueType getY() const noexcept			  { return y; }
-
-	/** Returns the width of the rectangle. */
-	inline ValueType getWidth() const noexcept			  { return w; }
-
-	/** Returns the height of the rectangle. */
-	inline ValueType getHeight() const noexcept			 { return h; }
-
-	/** Returns the x co-ordinate of the rectangle's right-hand-side. */
-	inline ValueType getRight() const noexcept			  { return x + w; }
-
-	/** Returns the y co-ordinate of the rectangle's bottom edge. */
-	inline ValueType getBottom() const noexcept			 { return y + h; }
-
-	/** Returns the x co-ordinate of the rectangle's centre. */
-	ValueType getCentreX() const noexcept			   { return x + w / (ValueType) 2; }
-
-	/** Returns the y co-ordinate of the rectangle's centre. */
-	ValueType getCentreY() const noexcept			   { return y + h / (ValueType) 2; }
-
-	/** Returns the centre point of the rectangle. */
-	const Point<ValueType> getCentre() const noexcept		   { return Point<ValueType> (x + w / (ValueType) 2, y + h / (ValueType) 2); }
-
-	/** Returns the aspect ratio of the rectangle's width / height.
-		If widthOverHeight is true, it returns width / height; if widthOverHeight is false,
-		it returns height / width. */
-	ValueType getAspectRatio (const bool widthOverHeight = true) const noexcept			 { return widthOverHeight ? w / h : h / w; }
-
-	/** Returns the rectangle's top-left position as a Point. */
-	const Point<ValueType> getPosition() const noexcept						 { return Point<ValueType> (x, y); }
-
-	/** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-	void setPosition (const Point<ValueType>& newPos) noexcept					  { x = newPos.getX(); y = newPos.getY(); }
-
-	/** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-	void setPosition (const ValueType newX, const ValueType newY) noexcept			  { x = newX; y = newY; }
-
-	/** Returns a rectangle with the same size as this one, but a new position. */
-	const Rectangle withPosition (const ValueType newX, const ValueType newY) const noexcept	{ return Rectangle (newX, newY, w, h); }
-
-	/** Returns a rectangle with the same size as this one, but a new position. */
-	const Rectangle withPosition (const Point<ValueType>& newPos) const noexcept			{ return Rectangle (newPos.getX(), newPos.getY(), w, h); }
-
-	/** Returns the rectangle's top-left position as a Point. */
-	const Point<ValueType> getTopLeft() const noexcept						  { return getPosition(); }
-
-	/** Returns the rectangle's top-right position as a Point. */
-	const Point<ValueType> getTopRight() const noexcept						 { return Point<ValueType> (x + w, y); }
-
-	/** Returns the rectangle's bottom-left position as a Point. */
-	const Point<ValueType> getBottomLeft() const noexcept					   { return Point<ValueType> (x, y + h); }
-
-	/** Returns the rectangle's bottom-right position as a Point. */
-	const Point<ValueType> getBottomRight() const noexcept					  { return Point<ValueType> (x + w, y + h); }
-
-	/** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
-	void setSize (const ValueType newWidth, const ValueType newHeight) noexcept			 { w = newWidth; h = newHeight; }
-
-	/** Returns a rectangle with the same position as this one, but a new size. */
-	const Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const noexcept   { return Rectangle (x, y, newWidth, newHeight); }
-
-	/** Changes all the rectangle's co-ordinates. */
-	void setBounds (const ValueType newX, const ValueType newY,
-					const ValueType newWidth, const ValueType newHeight) noexcept
-	{
-		x = newX; y = newY; w = newWidth; h = newHeight;
-	}
-
-	/** Changes the rectangle's X coordinate */
-	void setX (const ValueType newX) noexcept			   { x = newX; }
-
-	/** Changes the rectangle's Y coordinate */
-	void setY (const ValueType newY) noexcept			   { y = newY; }
-
-	/** Changes the rectangle's width */
-	void setWidth (const ValueType newWidth) noexcept		   { w = newWidth; }
-
-	/** Changes the rectangle's height */
-	void setHeight (const ValueType newHeight) noexcept		 { h = newHeight; }
-
-	/** Returns a rectangle which has the same size and y-position as this one, but with a different x-position. */
-	const Rectangle withX (const ValueType newX) const noexcept					 { return Rectangle (newX, y, w, h); }
-
-	/** Returns a rectangle which has the same size and x-position as this one, but with a different y-position. */
-	const Rectangle withY (const ValueType newY) const noexcept					 { return Rectangle (x, newY, w, h); }
-
-	/** Returns a rectangle which has the same position and height as this one, but with a different width. */
-	const Rectangle withWidth (const ValueType newWidth) const noexcept				 { return Rectangle (x, y, newWidth, h); }
-
-	/** Returns a rectangle which has the same position and width as this one, but with a different height. */
-	const Rectangle withHeight (const ValueType newHeight) const noexcept			   { return Rectangle (x, y, w, newHeight); }
-
-	/** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
-		If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
-		@see withLeft
-	*/
-	void setLeft (const ValueType newLeft) noexcept
-	{
-		w = jmax (ValueType(), x + w - newLeft);
-		x = newLeft;
-	}
-
-	/** Returns a new rectangle with a different x position, but the same right-hand edge as this one.
-		If the new x is beyond the right of the current right-hand edge, the width will be set to zero.
-		@see setLeft
-	*/
-	const Rectangle withLeft (const ValueType newLeft) const noexcept	   { return Rectangle (newLeft, y, jmax (ValueType(), x + w - newLeft), h); }
-
-	/** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
-		If the y is moved to be below the current bottom edge, the height will be set to zero.
-		@see withTop
-	*/
-	void setTop (const ValueType newTop) noexcept
-	{
-		h = jmax (ValueType(), y + h - newTop);
-		y = newTop;
-	}
-
-	/** Returns a new rectangle with a different y position, but the same bottom edge as this one.
-		If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
-		@see setTop
-	*/
-	const Rectangle withTop (const ValueType newTop) const noexcept	 { return Rectangle (x, newTop, w, jmax (ValueType(), y + h - newTop)); }
-
-	/** Adjusts the width so that the right-hand edge of the rectangle has this new value.
-		If the new right is below the current X value, the X will be pushed down to match it.
-		@see getRight, withRight
-	*/
-	void setRight (const ValueType newRight) noexcept
-	{
-		x = jmin (x, newRight);
-		w = newRight - x;
-	}
-
-	/** Returns a new rectangle with a different right-hand edge position, but the same left-hand edge as this one.
-		If the new right edge is below the current left-hand edge, the width will be set to zero.
-		@see setRight
-	*/
-	const Rectangle withRight (const ValueType newRight) const noexcept	 { return Rectangle (jmin (x, newRight), y, jmax (ValueType(), newRight - x), h); }
-
-	/** Adjusts the height so that the bottom edge of the rectangle has this new value.
-		If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
-		@see getBottom, withBottom
-	*/
-	void setBottom (const ValueType newBottom) noexcept
-	{
-		y = jmin (y, newBottom);
-		h = newBottom - y;
-	}
-
-	/** Returns a new rectangle with a different bottom edge position, but the same top edge as this one.
-		If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
-		@see setBottom
-	*/
-	const Rectangle withBottom (const ValueType newBottom) const noexcept   { return Rectangle (x, jmin (y, newBottom), w, jmax (ValueType(), newBottom - y)); }
-
-	/** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
-	void translate (const ValueType deltaX,
-					const ValueType deltaY) noexcept
-	{
-		x += deltaX;
-		y += deltaY;
-	}
-
-	/** Returns a rectangle which is the same as this one moved by a given amount. */
-	const Rectangle translated (const ValueType deltaX,
-								const ValueType deltaY) const noexcept
-	{
-		return Rectangle (x + deltaX, y + deltaY, w, h);
-	}
-
-	/** Returns a rectangle which is the same as this one moved by a given amount. */
-	const Rectangle operator+ (const Point<ValueType>& deltaPosition) const noexcept
-	{
-		return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
-	}
-
-	/** Moves this rectangle by a given amount. */
-	Rectangle& operator+= (const Point<ValueType>& deltaPosition) noexcept
-	{
-		x += deltaPosition.getX(); y += deltaPosition.getY();
-		return *this;
-	}
-
-	/** Returns a rectangle which is the same as this one moved by a given amount. */
-	const Rectangle operator- (const Point<ValueType>& deltaPosition) const noexcept
-	{
-		return Rectangle (x - deltaPosition.getX(), y - deltaPosition.getY(), w, h);
-	}
-
-	/** Moves this rectangle by a given amount. */
-	Rectangle& operator-= (const Point<ValueType>& deltaPosition) noexcept
-	{
-		x -= deltaPosition.getX(); y -= deltaPosition.getY();
-		return *this;
-	}
-
-	/** Expands the rectangle by a given amount.
-
-		Effectively, its new size is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
-		@see expanded, reduce, reduced
-	*/
-	void expand (const ValueType deltaX,
-				 const ValueType deltaY) noexcept
-	{
-		const ValueType nw = jmax (ValueType(), w + deltaX * 2);
-		const ValueType nh = jmax (ValueType(), h + deltaY * 2);
-		setBounds (x - deltaX, y - deltaY, nw, nh);
-	}
-
-	/** Returns a rectangle that is larger than this one by a given amount.
-
-		Effectively, the rectangle returned is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
-		@see expand, reduce, reduced
-	*/
-	const Rectangle expanded (const ValueType deltaX,
-							  const ValueType deltaY) const noexcept
-	{
-		const ValueType nw = jmax (ValueType(), w + deltaX * 2);
-		const ValueType nh = jmax (ValueType(), h + deltaY * 2);
-		return Rectangle (x - deltaX, y - deltaY, nw, nh);
-	}
-
-	/** Shrinks the rectangle by a given amount.
-
-		Effectively, its new size is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
-		@see reduced, expand, expanded
-	*/
-	void reduce (const ValueType deltaX,
-				 const ValueType deltaY) noexcept
-	{
-		expand (-deltaX, -deltaY);
-	}
-
-	/** Returns a rectangle that is smaller than this one by a given amount.
-
-		Effectively, the rectangle returned is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
-		@see reduce, expand, expanded
-	*/
-	const Rectangle reduced (const ValueType deltaX,
-							 const ValueType deltaY) const noexcept
-	{
-		return expanded (-deltaX, -deltaY);
-	}
-
-	/** Removes a strip from the top of this rectangle, reducing this rectangle
-		by the specified amount and returning the section that was removed.
-
-		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
-		return (100, 100, 300, 50) and leave this rectangle as (100, 150, 300, 250).
-
-		If amountToRemove is greater than the height of this rectangle, it'll be clipped to
-		that value.
-	*/
-	const Rectangle removeFromTop (const ValueType amountToRemove) noexcept
-	{
-		const Rectangle r (x, y, w, jmin (amountToRemove, h));
-		y += r.h; h -= r.h;
-		return r;
-	}
-
-	/** Removes a strip from the left-hand edge of this rectangle, reducing this rectangle
-		by the specified amount and returning the section that was removed.
-
-		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
-		return (100, 100, 50, 300) and leave this rectangle as (150, 100, 250, 300).
-
-		If amountToRemove is greater than the width of this rectangle, it'll be clipped to
-		that value.
-	*/
-	const Rectangle removeFromLeft (const ValueType amountToRemove) noexcept
-	{
-		const Rectangle r (x, y, jmin (amountToRemove, w), h);
-		x += r.w; w -= r.w;
-		return r;
-	}
-
-	/** Removes a strip from the right-hand edge of this rectangle, reducing this rectangle
-		by the specified amount and returning the section that was removed.
-
-		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
-		return (250, 100, 50, 300) and leave this rectangle as (100, 100, 250, 300).
-
-		If amountToRemove is greater than the width of this rectangle, it'll be clipped to
-		that value.
-	*/
-	const Rectangle removeFromRight (ValueType amountToRemove) noexcept
-	{
-		amountToRemove = jmin (amountToRemove, w);
-		const Rectangle r (x + w - amountToRemove, y, amountToRemove, h);
-		w -= amountToRemove;
-		return r;
-	}
-
-	/** Removes a strip from the bottom of this rectangle, reducing this rectangle
-		by the specified amount and returning the section that was removed.
-
-		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
-		return (100, 250, 300, 50) and leave this rectangle as (100, 100, 300, 250).
-
-		If amountToRemove is greater than the height of this rectangle, it'll be clipped to
-		that value.
-	*/
-	const Rectangle removeFromBottom (ValueType amountToRemove) noexcept
-	{
-		amountToRemove = jmin (amountToRemove, h);
-		const Rectangle r (x, y + h - amountToRemove, w, amountToRemove);
-		h -= amountToRemove;
-		return r;
-	}
-
-	/** Returns true if the two rectangles are identical. */
-	bool operator== (const Rectangle& other) const noexcept
-	{
-		return x == other.x && y == other.y
-			&& w == other.w && h == other.h;
-	}
-
-	/** Returns true if the two rectangles are not identical. */
-	bool operator!= (const Rectangle& other) const noexcept
-	{
-		return x != other.x || y != other.y
-			|| w != other.w || h != other.h;
-	}
-
-	/** Returns true if this co-ordinate is inside the rectangle. */
-	bool contains (const ValueType xCoord, const ValueType yCoord) const noexcept
-	{
-		return xCoord >= x && yCoord >= y && xCoord < x + w && yCoord < y + h;
-	}
-
-	/** Returns true if this co-ordinate is inside the rectangle. */
-	bool contains (const Point<ValueType>& point) const noexcept
-	{
-		return point.getX() >= x && point.getY() >= y && point.getX() < x + w && point.getY() < y + h;
-	}
-
-	/** Returns true if this other rectangle is completely inside this one. */
-	bool contains (const Rectangle& other) const noexcept
-	{
-		return x <= other.x && y <= other.y
-			&& x + w >= other.x + other.w && y + h >= other.y + other.h;
-	}
-
-	/** Returns the nearest point to the specified point that lies within this rectangle. */
-	const Point<ValueType> getConstrainedPoint (const Point<ValueType>& point) const noexcept
-	{
-		return Point<ValueType> (jlimit (x, x + w, point.getX()),
-								 jlimit (y, y + h, point.getY()));
-	}
-
-	/** Returns true if any part of another rectangle overlaps this one. */
-	bool intersects (const Rectangle& other) const noexcept
-	{
-		return x + w > other.x
-			&& y + h > other.y
-			&& x < other.x + other.w
-			&& y < other.y + other.h
-			&& w > ValueType() && h > ValueType();
-	}
-
-	/** Returns the region that is the overlap between this and another rectangle.
-
-		If the two rectangles don't overlap, the rectangle returned will be empty.
-	*/
-	const Rectangle getIntersection (const Rectangle& other) const noexcept
-	{
-		const ValueType nx = jmax (x, other.x);
-		const ValueType ny = jmax (y, other.y);
-		const ValueType nw = jmin (x + w, other.x + other.w) - nx;
-		const ValueType nh = jmin (y + h, other.y + other.h) - ny;
-
-		if (nw >= ValueType() && nh >= ValueType())
-			return Rectangle (nx, ny, nw, nh);
-
-		return Rectangle();
-	}
-
-	/** Clips a rectangle so that it lies only within this one.
-
-		This is a non-static version of intersectRectangles().
-
-		Returns false if the two regions didn't overlap.
-	*/
-	bool intersectRectangle (ValueType& otherX, ValueType& otherY, ValueType& otherW, ValueType& otherH) const noexcept
-	{
-		const int maxX = jmax (otherX, x);
-		otherW = jmin (otherX + otherW, x + w) - maxX;
-
-		if (otherW > ValueType())
-		{
-			const int maxY = jmax (otherY, y);
-			otherH = jmin (otherY + otherH, y + h) - maxY;
-
-			if (otherH > ValueType())
-			{
-				otherX = maxX; otherY = maxY;
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/** Returns the smallest rectangle that contains both this one and the one passed-in.
-
-		If either this or the other rectangle are empty, they will not be counted as
-		part of the resulting region.
-	*/
-	const Rectangle getUnion (const Rectangle& other) const noexcept
-	{
-		if (other.isEmpty())  return *this;
-		if (isEmpty())	return other;
-
-		const ValueType newX = jmin (x, other.x);
-		const ValueType newY = jmin (y, other.y);
-
-		return Rectangle (newX, newY,
-						  jmax (x + w, other.x + other.w) - newX,
-						  jmax (y + h, other.y + other.h) - newY);
-	}
-
-	/** If this rectangle merged with another one results in a simple rectangle, this
-		will set this rectangle to the result, and return true.
-
-		Returns false and does nothing to this rectangle if the two rectangles don't overlap,
-		or if they form a complex region.
-	*/
-	bool enlargeIfAdjacent (const Rectangle& other) noexcept
-	{
-		if (x == other.x && getRight() == other.getRight()
-			 && (other.getBottom() >= y && other.y <= getBottom()))
-		{
-			const ValueType newY = jmin (y, other.y);
-			h = jmax (getBottom(), other.getBottom()) - newY;
-			y = newY;
-			return true;
-		}
-		else if (y == other.y && getBottom() == other.getBottom()
-				  && (other.getRight() >= x && other.x <= getRight()))
-		{
-			const ValueType newX = jmin (x, other.x);
-			w = jmax (getRight(), other.getRight()) - newX;
-			x = newX;
-			return true;
-		}
-
-		return false;
-	}
-
-	/** If after removing another rectangle from this one the result is a simple rectangle,
-		this will set this object's bounds to be the result, and return true.
-
-		Returns false and does nothing to this rectangle if the two rectangles don't overlap,
-		or if removing the other one would form a complex region.
-	*/
-	bool reduceIfPartlyContainedIn (const Rectangle& other) noexcept
-	{
-		int inside = 0;
-		const int otherR = other.getRight();
-		if (x >= other.x && x < otherR) inside = 1;
-		const int otherB = other.getBottom();
-		if (y >= other.y && y < otherB) inside |= 2;
-		const int r = x + w;
-		if (r >= other.x && r < otherR) inside |= 4;
-		const int b = y + h;
-		if (b >= other.y && b < otherB) inside |= 8;
-
-		switch (inside)
-		{
-			case 1 + 2 + 8:	 w = r - otherR; x = otherR; return true;
-			case 1 + 2 + 4:	 h = b - otherB; y = otherB; return true;
-			case 2 + 4 + 8:	 w = other.x - x; return true;
-			case 1 + 4 + 8:	 h = other.y - y; return true;
-		}
-
-		return false;
-	}
-
-	/** Returns the smallest rectangle that can contain the shape created by applying
-		a transform to this rectangle.
-
-		This should only be used on floating point rectangles.
-	*/
-	const Rectangle transformed (const AffineTransform& transform) const noexcept
-	{
-		float x1 = x,	 y1 = y;
-		float x2 = x + w, y2 = y;
-		float x3 = x,	 y3 = y + h;
-		float x4 = x2,	y4 = y3;
-
-		transform.transformPoints (x1, y1, x2, y2);
-		transform.transformPoints (x3, y3, x4, y4);
-
-		const float rx = jmin (x1, x2, x3, x4);
-		const float ry = jmin (y1, y2, y3, y4);
-
-		return Rectangle (rx, ry,
-						  jmax (x1, x2, x3, x4) - rx,
-						  jmax (y1, y2, y3, y4) - ry);
-	}
-
-	/** Returns the smallest integer-aligned rectangle that completely contains this one.
-		This is only relevent for floating-point rectangles, of course.
-		@see toFloat()
-	*/
-	const Rectangle<int> getSmallestIntegerContainer() const noexcept
-	{
-		const int x1 = (int) std::floor (static_cast<float> (x));
-		const int y1 = (int) std::floor (static_cast<float> (y));
-		const int x2 = (int) std::ceil (static_cast<float> (x + w));
-		const int y2 = (int) std::ceil (static_cast<float> (y + h));
-
-		return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
-	}
-
-	/** Returns the smallest Rectangle that can contain a set of points. */
-	static const Rectangle findAreaContainingPoints (const Point<ValueType>* const points, const int numPoints) noexcept
-	{
-		if (numPoints == 0)
-			return Rectangle();
-
-		ValueType minX (points[0].getX());
-		ValueType maxX (minX);
-		ValueType minY (points[0].getY());
-		ValueType maxY (minY);
-
-		for (int i = 1; i < numPoints; ++i)
-		{
-			minX = jmin (minX, points[i].getX());
-			maxX = jmax (maxX, points[i].getX());
-			minY = jmin (minY, points[i].getY());
-			maxY = jmax (maxY, points[i].getY());
-		}
-
-		return Rectangle (minX, minY, maxX - minX, maxY - minY);
-	}
-
-	/** Casts this rectangle to a Rectangle<float>.
-		Obviously this is mainly useful for rectangles that use integer types.
-		@see getSmallestIntegerContainer
-	*/
-	const Rectangle<float> toFloat() const noexcept
-	{
-		return Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
-								 static_cast<float> (w), static_cast<float> (h));
-	}
-
-	/** Static utility to intersect two sets of rectangular co-ordinates.
-
-		Returns false if the two regions didn't overlap.
-
-		@see intersectRectangle
-	*/
-	static bool intersectRectangles (ValueType& x1, ValueType& y1, ValueType& w1, ValueType& h1,
-									 const ValueType x2, const ValueType y2, const ValueType w2, const ValueType h2) noexcept
-	{
-		const ValueType x = jmax (x1, x2);
-		w1 = jmin (x1 + w1, x2 + w2) - x;
-
-		if (w1 > ValueType())
-		{
-			const ValueType y = jmax (y1, y2);
-			h1 = jmin (y1 + h1, y2 + h2) - y;
-
-			if (h1 > ValueType())
-			{
-				x1 = x; y1 = y;
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/** Creates a string describing this rectangle.
-
-		The string will be of the form "x y width height", e.g. "100 100 400 200".
-
-		Coupled with the fromString() method, this is very handy for things like
-		storing rectangles (particularly component positions) in XML attributes.
-
-		@see fromString
-	*/
-	const String toString() const
-	{
-		String s;
-		s.preallocateBytes (32);
-		s << x << ' ' << y << ' ' << w << ' ' << h;
-		return s;
-	}
-
-	/** Parses a string containing a rectangle's details.
-
-		The string should contain 4 integer tokens, in the form "x y width height". They
-		can be comma or whitespace separated.
-
-		This method is intended to go with the toString() method, to form an easy way
-		of saving/loading rectangles as strings.
-
-		@see toString
-	*/
-	static const Rectangle fromString (const String& stringVersion)
-	{
-		StringArray toks;
-		toks.addTokens (stringVersion.trim(), ",; \t\r\n", String::empty);
-
-		return Rectangle (toks[0].trim().getIntValue(),
-						  toks[1].trim().getIntValue(),
-						  toks[2].trim().getIntValue(),
-						  toks[3].trim().getIntValue());
-	}
-
-private:
-	friend class RectangleList;
-	ValueType x, y, w, h;
-};
-
-#endif   // __JUCE_RECTANGLE_JUCEHEADER__
-
-/*** End of inlined file: juce_Rectangle.h ***/
 
 
 /*** Start of inlined file: juce_Justification.h ***/
@@ -26229,6 +26680,8 @@ private:
 /*** End of inlined file: juce_Justification.h ***/
 
 class Image;
+class InputStream;
+class OutputStream;
 
 /**
 	A path is a sequence of lines and curves that may either form a closed shape
@@ -26286,12 +26739,12 @@ public:
 
 	/** Returns the smallest rectangle that contains all points within the path.
 	*/
-	const Rectangle<float> getBounds() const noexcept;
+	Rectangle<float> getBounds() const noexcept;
 
 	/** Returns the smallest rectangle that contains all points within the path
 		after it's been transformed with the given tranasform matrix.
 	*/
-	const Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const noexcept;
+	Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const noexcept;
 
 	/** Checks whether a point lies within the path.
 
@@ -26350,7 +26803,7 @@ public:
 										that will be kept; if false its the section inside
 										the path
 	*/
-	const Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
+	Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
 
 	/** Returns the length of the path.
 		@see getPointAlongPath
@@ -26362,8 +26815,8 @@ public:
 		end point.
 		@see getLength
 	*/
-	const Point<float> getPointAlongPath (float distanceFromStart,
-										  const AffineTransform& transform = AffineTransform::identity) const;
+	Point<float> getPointAlongPath (float distanceFromStart,
+									const AffineTransform& transform = AffineTransform::identity) const;
 
 	/** Finds the point along the path which is nearest to a given position.
 		This sets pointOnPath to the nearest point, and returns the distance of this point from the start
@@ -26495,7 +26948,7 @@ public:
 
 	/** Returns the last point that was added to the path by one of the drawing methods.
 	*/
-	const Point<float> getCurrentPosition() const;
+	Point<float> getCurrentPosition() const;
 
 	/** Adds a rectangle to the path.
 		The rectangle is added as a new sub-path. (Any currently open paths will be left open).
@@ -26794,16 +27247,16 @@ public:
 		@see applyTransform, scaleToFit
 
 	*/
-	const AffineTransform getTransformToScaleToFit (float x, float y, float width, float height,
-													bool preserveProportions,
-													const Justification& justificationType = Justification::centred) const;
+	AffineTransform getTransformToScaleToFit (float x, float y, float width, float height,
+											  bool preserveProportions,
+											  const Justification& justificationType = Justification::centred) const;
 
 	/** Creates a version of this path where all sharp corners have been replaced by curves.
 
 		Wherever two lines meet at an angle, this will replace the corner with a curve
 		of the given radius.
 	*/
-	const Path createPathWithRoundedCorners (float cornerRadius) const;
+	Path createPathWithRoundedCorners (float cornerRadius) const;
 
 	/** Changes the winding-rule to be used when filling the path.
 
@@ -26901,7 +27354,7 @@ public:
 	/** Creates a string containing a textual representation of this path.
 		@see restoreFromString
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Restores this path from a string that was created with the toString() method.
 		@see toString()
@@ -26929,563 +27382,6 @@ private:
 #endif   // __JUCE_PATH_JUCEHEADER__
 
 /*** End of inlined file: juce_Path.h ***/
-
-class Font;
-class EdgeTable;
-
-/** A typeface represents a size-independent font.
-
-	This base class is abstract, but calling createSystemTypefaceFor() will return
-	a platform-specific subclass that can be used.
-
-	The CustomTypeface subclass allow you to build your own typeface, and to
-	load and save it in the Juce typeface format.
-
-	Normally you should never need to deal directly with Typeface objects - the Font
-	class does everything you typically need for rendering text.
-
-	@see CustomTypeface, Font
-*/
-class JUCE_API  Typeface  : public ReferenceCountedObject
-{
-public:
-
-	/** A handy typedef for a pointer to a typeface. */
-	typedef ReferenceCountedObjectPtr <Typeface> Ptr;
-
-	/** Returns the name of the typeface.
-		@see Font::getTypefaceName
-	*/
-	const String getName() const noexcept	  { return name; }
-
-	/** Creates a new system typeface. */
-	static const Ptr createSystemTypefaceFor (const Font& font);
-
-	/** Destructor. */
-	virtual ~Typeface();
-
-	/** Returns true if this typeface can be used to render the specified font.
-		When called, the font will already have been checked to make sure that its name and
-		style flags match the typeface.
-	*/
-	virtual bool isSuitableForFont (const Font&) const	  { return true; }
-
-	/** Returns the ascent of the font, as a proportion of its height.
-		The height is considered to always be normalised as 1.0, so this will be a
-		value less that 1.0, indicating the proportion of the font that lies above
-		its baseline.
-	*/
-	virtual float getAscent() const = 0;
-
-	/** Returns the descent of the font, as a proportion of its height.
-		The height is considered to always be normalised as 1.0, so this will be a
-		value less that 1.0, indicating the proportion of the font that lies below
-		its baseline.
-	*/
-	virtual float getDescent() const = 0;
-
-	/** Measures the width of a line of text.
-
-		The distance returned is based on the font having an normalised height of 1.0.
-
-		You should never need to call this directly! Use Font::getStringWidth() instead!
-	*/
-	virtual float getStringWidth (const String& text) = 0;
-
-	/** Converts a line of text into its glyph numbers and their positions.
-
-		The distances returned are based on the font having an normalised height of 1.0.
-
-		You should never need to call this directly! Use Font::getGlyphPositions() instead!
-	*/
-	virtual void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets) = 0;
-
-	/** Returns the outline for a glyph.
-
-		The path returned will be normalised to a font height of 1.0.
-	*/
-	virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
-
-	/** Returns a new EdgeTable that contains the path for the givem glyph, with the specified transform applied. */
-	virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform) = 0;
-
-	/** Returns true if the typeface uses hinting. */
-	virtual bool isHinted() const			   { return false; }
-
-	/** Changes the number of fonts that are cached in memory. */
-	static void setTypefaceCacheSize (int numFontsToCache);
-
-protected:
-
-	String name;
-	bool isFallbackFont;
-
-	explicit Typeface (const String& name) noexcept;
-
-	static const Ptr getFallbackTypeface();
-
-private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface);
-};
-
-/** A typeface that can be populated with custom glyphs.
-
-	You can create a CustomTypeface if you need one that contains your own glyphs,
-	or if you need to load a typeface from a Juce-formatted binary stream.
-
-	If you want to create a copy of a native face, you can use addGlyphsFromOtherTypeface()
-	to copy glyphs into this face.
-
-	@see Typeface, Font
-*/
-class JUCE_API  CustomTypeface  : public Typeface
-{
-public:
-
-	/** Creates a new, empty typeface. */
-	CustomTypeface();
-
-	/** Loads a typeface from a previously saved stream.
-		The stream must have been created by writeToStream().
-		@see writeToStream
-	*/
-	explicit CustomTypeface (InputStream& serialisedTypefaceStream);
-
-	/** Destructor. */
-	~CustomTypeface();
-
-	/** Resets this typeface, deleting all its glyphs and settings. */
-	void clear();
-
-	/** Sets the vital statistics for the typeface.
-		@param name	 the typeface's name
-		@param ascent   the ascent - this is normalised to a height of 1.0 and this is
-						the value that will be returned by Typeface::getAscent(). The
-						descent is assumed to be (1.0 - ascent)
-		@param isBold   should be true if the typeface is bold
-		@param isItalic should be true if the typeface is italic
-		@param defaultCharacter	 the character to be used as a replacement if there's
-						no glyph available for the character that's being drawn
-	*/
-	void setCharacteristics (const String& name, float ascent,
-							 bool isBold, bool isItalic,
-							 juce_wchar defaultCharacter) noexcept;
-
-	/** Adds a glyph to the typeface.
-
-		The path that is passed in is normalised so that the font height is 1.0, and its
-		origin is the anchor point of the character on its baseline.
-
-		The width is the nominal width of the character, and any extra kerning values that
-		are specified will be added to this width.
-	*/
-	void addGlyph (juce_wchar character, const Path& path, float width) noexcept;
-
-	/** Specifies an extra kerning amount to be used between a pair of characters.
-		The amount will be added to the nominal width of the first character when laying out a string.
-	*/
-	void addKerningPair (juce_wchar char1, juce_wchar char2, float extraAmount) noexcept;
-
-	/** Adds a range of glyphs from another typeface.
-		This will attempt to pull in the paths and kerning information from another typeface and
-		add it to this one.
-	*/
-	void addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_wchar characterStartIndex, int numCharacters) noexcept;
-
-	/** Saves this typeface as a Juce-formatted font file.
-		A CustomTypeface can be created to reload the data that is written - see the CustomTypeface
-		constructor.
-	*/
-	bool writeToStream (OutputStream& outputStream);
-
-	// The following methods implement the basic Typeface behaviour.
-	float getAscent() const;
-	float getDescent() const;
-	float getStringWidth (const String& text);
-	void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets);
-	bool getOutlineForGlyph (int glyphNumber, Path& path);
-	EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform);
-	int getGlyphForCharacter (juce_wchar character);
-
-protected:
-
-	juce_wchar defaultCharacter;
-	float ascent;
-	bool isBold, isItalic;
-
-	/** If a subclass overrides this, it can load glyphs into the font on-demand.
-		When methods such as getGlyphPositions() or getOutlineForGlyph() are asked for a
-		particular character and there's no corresponding glyph, they'll call this
-		method so that a subclass can try to add that glyph, returning true if it
-		manages to do so.
-	*/
-	virtual bool loadGlyphIfPossible (juce_wchar characterNeeded);
-
-private:
-
-	class GlyphInfo;
-	friend class OwnedArray<GlyphInfo>;
-	OwnedArray <GlyphInfo> glyphs;
-	short lookupTable [128];
-
-	GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) noexcept;
-	GlyphInfo* findGlyphSubstituting (juce_wchar character) noexcept;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface);
-};
-
-#endif   // __JUCE_TYPEFACE_JUCEHEADER__
-
-/*** End of inlined file: juce_Typeface.h ***/
-
-class LowLevelGraphicsContext;
-
-/**
-	Represents a particular font, including its size, style, etc.
-
-	Apart from the typeface to be used, a Font object also dictates whether
-	the font is bold, italic, underlined, how big it is, and its kerning and
-	horizontal scale factor.
-
-	@see Typeface
-*/
-class JUCE_API  Font
-{
-public:
-
-	/** A combination of these values is used by the constructor to specify the
-		style of font to use.
-	*/
-	enum FontStyleFlags
-	{
-		plain	   = 0,	/**< indicates a plain, non-bold, non-italic version of the font. @see setStyleFlags */
-		bold	= 1,	/**< boldens the font. @see setStyleFlags */
-		italic	  = 2,	/**< finds an italic version of the font. @see setStyleFlags */
-		underlined  = 4	 /**< underlines the font. @see setStyleFlags */
-	};
-
-	/** Creates a sans-serif font in a given size.
-
-		@param fontHeight   the height in pixels (can be fractional)
-		@param styleFlags   the style to use - this can be a combination of the
-							Font::bold, Font::italic and Font::underlined, or
-							just Font::plain for the normal style.
-		@see FontStyleFlags, getDefaultSansSerifFontName
-	*/
-	Font (float fontHeight, int styleFlags = plain);
-
-	/** Creates a font with a given typeface and parameters.
-
-		@param typefaceName the name of the typeface to use
-		@param fontHeight   the height in pixels (can be fractional)
-		@param styleFlags   the style to use - this can be a combination of the
-							Font::bold, Font::italic and Font::underlined, or
-							just Font::plain for the normal style.
-		@see FontStyleFlags, getDefaultSansSerifFontName
-	*/
-	Font (const String& typefaceName, float fontHeight, int styleFlags);
-
-	/** Creates a copy of another Font object. */
-	Font (const Font& other) noexcept;
-
-	/** Creates a font for a typeface. */
-	Font (const Typeface::Ptr& typeface);
-
-	/** Creates a basic sans-serif font at a default height.
-
-		You should use one of the other constructors for creating a font that you're planning
-		on drawing with - this constructor is here to help initialise objects before changing
-		the font's settings later.
-	*/
-	Font();
-
-	/** Copies this font from another one. */
-	Font& operator= (const Font& other) noexcept;
-
-	bool operator== (const Font& other) const noexcept;
-	bool operator!= (const Font& other) const noexcept;
-
-	/** Destructor. */
-	~Font() noexcept;
-
-	/** Changes the name of the typeface family.
-
-		e.g. "Arial", "Courier", etc.
-
-		This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
-		or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font names,
-		but are generic names that are used to represent the various default fonts.
-		If you need to know the exact typeface name being used, you can call
-		Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
-
-		If a suitable font isn't found on the machine, it'll just use a default instead.
-	*/
-	void setTypefaceName (const String& faceName);
-
-	/** Returns the name of the typeface family that this font uses.
-
-		e.g. "Arial", "Courier", etc.
-
-		This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
-		or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font names,
-		but are generic names that are used to represent the various default fonts.
-
-		If you need to know the exact typeface name being used, you can call
-		Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
-	*/
-	const String& getTypefaceName() const noexcept		  { return font->typefaceName; }
-
-	/** Returns a typeface name that represents the default sans-serif font.
-
-		This is also the typeface that will be used when a font is created without
-		specifying any typeface details.
-
-		Note that this method just returns a generic placeholder string that means "the default
-		sans-serif font" - it's not the actual name of this font. To get the actual name, use
-		getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
-
-		@see setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName
-	*/
-	static const String getDefaultSansSerifFontName();
-
-	/** Returns a typeface name that represents the default sans-serif font.
-
-		Note that this method just returns a generic placeholder string that means "the default
-		serif font" - it's not the actual name of this font. To get the actual name, use
-		getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
-
-		@see setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
-	*/
-	static const String getDefaultSerifFontName();
-
-	/** Returns a typeface name that represents the default sans-serif font.
-
-		Note that this method just returns a generic placeholder string that means "the default
-		monospaced font" - it's not the actual name of this font. To get the actual name, use
-		getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
-
-		@see setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
-	*/
-	static const String getDefaultMonospacedFontName();
-
-	/** Returns the typeface names of the default fonts on the current platform. */
-	static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed, String& defaultFallback);
-
-	/** Returns the total height of this font.
-
-		This is the maximum height, from the top of the ascent to the bottom of the
-		descenders.
-
-		@see setHeight, setHeightWithoutChangingWidth, getAscent
-	*/
-	float getHeight() const noexcept				{ return font->height; }
-
-	/** Changes the font's height.
-
-		@see getHeight, setHeightWithoutChangingWidth
-	*/
-	void setHeight (float newHeight);
-
-	/** Changes the font's height without changing its width.
-
-		This alters the horizontal scale to compensate for the change in height.
-	*/
-	void setHeightWithoutChangingWidth (float newHeight);
-
-	/** Returns the height of the font above its baseline.
-
-		This is the maximum height from the baseline to the top.
-
-		@see getHeight, getDescent
-	*/
-	float getAscent() const;
-
-	/** Returns the amount that the font descends below its baseline.
-
-		This is calculated as (getHeight() - getAscent()).
-
-		@see getAscent, getHeight
-	*/
-	float getDescent() const;
-
-	/** Returns the font's style flags.
-
-		This will return a bitwise-or'ed combination of values from the FontStyleFlags
-		enum, to describe whether the font is bold, italic, etc.
-
-		@see FontStyleFlags
-	*/
-	int getStyleFlags() const noexcept			  { return font->styleFlags; }
-
-	/** Changes the font's style.
-
-		@param newFlags	 a bitwise-or'ed combination of values from the FontStyleFlags
-							enum, to set the font's properties
-		@see FontStyleFlags
-	*/
-	void setStyleFlags (int newFlags);
-
-	/** Makes the font bold or non-bold. */
-	void setBold (bool shouldBeBold);
-	/** Returns a copy of this font with the bold attribute set. */
-	const Font boldened() const;
-	/** Returns true if the font is bold. */
-	bool isBold() const noexcept;
-
-	/** Makes the font italic or non-italic. */
-	void setItalic (bool shouldBeItalic);
-	/** Returns a copy of this font with the italic attribute set. */
-	const Font italicised() const;
-	/** Returns true if the font is italic. */
-	bool isItalic() const noexcept;
-
-	/** Makes the font underlined or non-underlined. */
-	void setUnderline (bool shouldBeUnderlined);
-	/** Returns true if the font is underlined. */
-	bool isUnderlined() const noexcept;
-
-	/** Changes the font's horizontal scale factor.
-
-		@param scaleFactor  a value of 1.0 is the normal scale, less than this will be
-							narrower, greater than 1.0 will be stretched out.
-	*/
-	void setHorizontalScale (float scaleFactor);
-
-	/** Returns the font's horizontal scale.
-
-		A value of 1.0 is the normal scale, less than this will be narrower, greater
-		than 1.0 will be stretched out.
-
-		@see setHorizontalScale
-	*/
-	float getHorizontalScale() const noexcept		   { return font->horizontalScale; }
-
-	/** Changes the font's kerning.
-
-		@param extraKerning	 a multiple of the font's height that will be added
-								to space between the characters. So a value of zero is
-								normal spacing, positive values spread the letters out,
-								negative values make them closer together.
-	*/
-	void setExtraKerningFactor (float extraKerning);
-
-	/** Returns the font's kerning.
-
-		This is the extra space added between adjacent characters, as a proportion
-		of the font's height.
-
-		A value of zero is normal spacing, positive values will spread the letters
-		out more, and negative values make them closer together.
-	*/
-	float getExtraKerningFactor() const noexcept		{ return font->kerning; }
-
-	/** Changes all the font's characteristics with one call. */
-	void setSizeAndStyle (float newHeight,
-						  int newStyleFlags,
-						  float newHorizontalScale,
-						  float newKerningAmount);
-
-	/** Returns the total width of a string as it would be drawn using this font.
-
-		For a more accurate floating-point result, use getStringWidthFloat().
-	*/
-	int getStringWidth (const String& text) const;
-
-	/** Returns the total width of a string as it would be drawn using this font.
-
-		@see getStringWidth
-	*/
-	float getStringWidthFloat (const String& text) const;
-
-	/** Returns the series of glyph numbers and their x offsets needed to represent a string.
-
-		An extra x offset is added at the end of the run, to indicate where the right hand
-		edge of the last character is.
-	*/
-	void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const;
-
-	/** Returns the typeface used by this font.
-
-		Note that the object returned may go out of scope if this font is deleted
-		or has its style changed.
-	*/
-	Typeface* getTypeface() const;
-
-	/** Creates an array of Font objects to represent all the fonts on the system.
-
-		If you just need the names of the typefaces, you can also use
-		findAllTypefaceNames() instead.
-
-		@param results  the array to which new Font objects will be added.
-	*/
-	static void findFonts (Array<Font>& results);
-
-	/** Returns a list of all the available typeface names.
-
-		The names returned can be passed into setTypefaceName().
-
-		You can use this instead of findFonts() if you only need their names, and not
-		font objects.
-	*/
-	static const StringArray findAllTypefaceNames();
-
-	/** Returns the name of the typeface to be used for rendering glyphs that aren't found
-		in the requested typeface.
-	*/
-	static const String getFallbackFontName();
-
-	/** Sets the (platform-specific) name of the typeface to use to find glyphs that aren't
-		available in whatever font you're trying to use.
-	*/
-	static void setFallbackFontName (const String& name);
-
-	/** Creates a string to describe this font.
-		The string will contain information to describe the font's typeface, size, and
-		style. To recreate the font from this string, use fromString().
-	*/
-	const String toString() const;
-
-	/** Recreates a font from its stringified encoding.
-		This method takes a string that was created by toString(), and recreates the
-		original font.
-	*/
-	static const Font fromString (const String& fontDescription);
-
-private:
-
-	friend class FontGlyphAlphaMap;
-	friend class TypefaceCache;
-
-	class SharedFontInternal  : public ReferenceCountedObject
-	{
-	public:
-		SharedFontInternal (float height, int styleFlags) noexcept;
-		SharedFontInternal (const String& typefaceName, float height, int styleFlags) noexcept;
-		SharedFontInternal (const Typeface::Ptr& typeface) noexcept;
-		SharedFontInternal (const SharedFontInternal& other) noexcept;
-
-		bool operator== (const SharedFontInternal&) const noexcept;
-
-		String typefaceName;
-		float height, horizontalScale, kerning, ascent;
-		int styleFlags;
-		Typeface::Ptr typeface;
-	};
-
-	ReferenceCountedObjectPtr <SharedFontInternal> font;
-	void dupeInternalIfShared();
-
-	JUCE_LEAK_DETECTOR (Font);
-};
-
-#endif   // __JUCE_FONT_JUCEHEADER__
-
-/*** End of inlined file: juce_Font.h ***/
-
-
-/*** Start of inlined file: juce_PathStrokeType.h ***/
-#ifndef __JUCE_PATHSTROKETYPE_JUCEHEADER__
-#define __JUCE_PATHSTROKETYPE_JUCEHEADER__
 
 /**
 	Describes a type of stroke used to render a solid outline along a path.
@@ -28267,9 +28163,9 @@ public:
 			uint8 blue) noexcept;
 
 	/** Creates an opaque colour using 8-bit red, green and blue values */
-	static const Colour fromRGB (uint8 red,
-								 uint8 green,
-								 uint8 blue) noexcept;
+	static Colour fromRGB (uint8 red,
+						   uint8 green,
+						   uint8 blue) noexcept;
 
 	/** Creates a colour using 8-bit red, green, blue and alpha values. */
 	Colour (uint8 red,
@@ -28278,10 +28174,10 @@ public:
 			uint8 alpha) noexcept;
 
 	/** Creates a colour using 8-bit red, green, blue and alpha values. */
-	static const Colour fromRGBA (uint8 red,
-								  uint8 green,
-								  uint8 blue,
-								  uint8 alpha) noexcept;
+	static Colour fromRGBA (uint8 red,
+							uint8 green,
+							uint8 blue,
+							uint8 alpha) noexcept;
 
 	/** Creates a colour from 8-bit red, green, and blue values, and a floating-point alpha.
 
@@ -28294,10 +28190,10 @@ public:
 			float alpha) noexcept;
 
 	/** Creates a colour using 8-bit red, green, blue and float alpha values. */
-	static const Colour fromRGBAFloat (uint8 red,
-									   uint8 green,
-									   uint8 blue,
-									   float alpha) noexcept;
+	static Colour fromRGBAFloat (uint8 red,
+								 uint8 green,
+								 uint8 blue,
+								 float alpha) noexcept;
 
 	/** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
 
@@ -28326,10 +28222,10 @@ public:
 		An alpha of 0x00 is completely transparent, alpha of 0xff is opaque.
 		Values outside the valid range will be clipped.
 	*/
-	static const Colour fromHSV (float hue,
-								 float saturation,
-								 float brightness,
-								 float alpha) noexcept;
+	static Colour fromHSV (float hue,
+						   float saturation,
+						   float brightness,
+						   float alpha) noexcept;
 
 	/** Destructor. */
 	~Colour() noexcept;
@@ -28414,30 +28310,30 @@ public:
 	bool isTransparent() const noexcept;
 
 	/** Returns a colour that's the same colour as this one, but with a new alpha value. */
-	const Colour withAlpha (uint8 newAlpha) const noexcept;
+	Colour withAlpha (uint8 newAlpha) const noexcept;
 
 	/** Returns a colour that's the same colour as this one, but with a new alpha value. */
-	const Colour withAlpha (float newAlpha) const noexcept;
+	Colour withAlpha (float newAlpha) const noexcept;
 
 	/** Returns a colour that's the same colour as this one, but with a modified alpha value.
 
 		The new colour's alpha will be this object's alpha multiplied by the value passed-in.
 	*/
-	const Colour withMultipliedAlpha (float alphaMultiplier) const noexcept;
+	Colour withMultipliedAlpha (float alphaMultiplier) const noexcept;
 
 	/** Returns a colour that is the result of alpha-compositing a new colour over this one.
 
 		If the foreground colour is semi-transparent, it is blended onto this colour
 		accordingly.
 	*/
-	const Colour overlaidWith (const Colour& foregroundColour) const noexcept;
+	Colour overlaidWith (const Colour& foregroundColour) const noexcept;
 
 	/** Returns a colour that lies somewhere between this one and another.
 
 		If amountOfOther is zero, the result is 100% this colour, if amountOfOther
 		is 1.0, the result is 100% of the other colour.
 	*/
-	const Colour interpolatedWith (const Colour& other, float proportionOfOther) const noexcept;
+	Colour interpolatedWith (const Colour& other, float proportionOfOther) const noexcept;
 
 	/** Returns the colour's hue component.
 		The value returned is in the range 0.0 to 1.0
@@ -28462,15 +28358,15 @@ public:
 				 float& brightness) const noexcept;
 
 	/** Returns a copy of this colour with a different hue. */
-	const Colour withHue (float newHue) const noexcept;
+	Colour withHue (float newHue) const noexcept;
 
 	/** Returns a copy of this colour with a different saturation. */
-	const Colour withSaturation (float newSaturation) const noexcept;
+	Colour withSaturation (float newSaturation) const noexcept;
 
 	/** Returns a copy of this colour with a different brightness.
 		@see brighter, darker, withMultipliedBrightness
 	*/
-	const Colour withBrightness (float newBrightness) const noexcept;
+	Colour withBrightness (float newBrightness) const noexcept;
 
 	/** Returns a copy of this colour with it hue rotated.
 
@@ -28478,21 +28374,21 @@ public:
 
 		@see brighter, darker, withMultipliedBrightness
 	*/
-	const Colour withRotatedHue (float amountToRotate) const noexcept;
+	Colour withRotatedHue (float amountToRotate) const noexcept;
 
 	/** Returns a copy of this colour with its saturation multiplied by the given value.
 
 		The new colour's saturation is (this->getSaturation() * multiplier)
 		(the result is clipped to legal limits).
 	*/
-	const Colour withMultipliedSaturation (float multiplier) const noexcept;
+	Colour withMultipliedSaturation (float multiplier) const noexcept;
 
 	/** Returns a copy of this colour with its brightness multiplied by the given value.
 
 		The new colour's saturation is (this->getBrightness() * multiplier)
 		(the result is clipped to legal limits).
 	*/
-	const Colour withMultipliedBrightness (float amount) const noexcept;
+	Colour withMultipliedBrightness (float amount) const noexcept;
 
 	/** Returns a brighter version of this colour.
 
@@ -28500,7 +28396,7 @@ public:
 								unchanged, and higher values make it brighter
 		@see withMultipliedBrightness
 	*/
-	const Colour brighter (float amountBrighter = 0.4f) const noexcept;
+	Colour brighter (float amountBrighter = 0.4f) const noexcept;
 
 	/** Returns a darker version of this colour.
 
@@ -28508,7 +28404,7 @@ public:
 								unchanged, and higher values make it darker
 		@see withMultipliedBrightness
 	*/
-	const Colour darker (float amountDarker = 0.4f) const noexcept;
+	Colour darker (float amountDarker = 0.4f) const noexcept;
 
 	/** Returns a colour that will be clearly visible against this colour.
 
@@ -28517,7 +28413,7 @@ public:
 		that's just a little bit lighter; Colours::black.contrasting (1.0f) will
 		return white; Colours::white.contrasting (1.0f) will return black, etc.
 	*/
-	const Colour contrasting (float amount = 1.0f) const noexcept;
+	Colour contrasting (float amount = 1.0f) const noexcept;
 
 	/** Returns a colour that contrasts against two colours.
 
@@ -28525,27 +28421,27 @@ public:
 
 		Handy for things like choosing a highlight colour in text editors, etc.
 	*/
-	static const Colour contrasting (const Colour& colour1,
-									 const Colour& colour2) noexcept;
+	static Colour contrasting (const Colour& colour1,
+							   const Colour& colour2) noexcept;
 
 	/** Returns an opaque shade of grey.
 
 		@param brightness the level of grey to return - 0 is black, 1.0 is white
 	*/
-	static const Colour greyLevel (float brightness) noexcept;
+	static Colour greyLevel (float brightness) noexcept;
 
 	/** Returns a stringified version of this colour.
 
 		The string can be turned back into a colour using the fromString() method.
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Reads the colour from a string that was created with toString().
 	*/
-	static const Colour fromString (const String& encodedColourString);
+	static Colour fromString (const String& encodedColourString);
 
 	/** Returns the colour as a hex string in the form RRGGBB or AARRGGBB. */
-	const String toDisplayString (bool includeAlphaValue) const;
+	String toDisplayString (bool includeAlphaValue) const;
 
 private:
 
@@ -28728,7 +28624,7 @@ public:
 	/** Returns the an interpolated colour at any position along the gradient.
 		@param position	 the position along the gradient, between 0 and 1
 	*/
-	const Colour getColourAtPosition (double position) const noexcept;
+	Colour getColourAtPosition (double position) const noexcept;
 
 	/** Creates a set of interpolated premultiplied ARGB values.
 		This will resize the HeapBlock, fill it with the colours, and will return the number of
@@ -29013,7 +28909,7 @@ public:
 	void setFont (float newFontHeight, int fontStyleFlags = Font::plain);
 
 	/** Returns the currently selected font. */
-	const Font getCurrentFont() const;
+	Font getCurrentFont() const;
 
 	/** Draws a one-line text string.
 
@@ -29768,8 +29664,8 @@ public:
 		Note that if the new size is identical to the existing image, this will just return
 		a reference to the original image, and won't actually create a duplicate.
 	*/
-	const Image rescaled (int newWidth, int newHeight,
-						  Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
+	Image rescaled (int newWidth, int newHeight,
+					Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
 
 	/** Returns a version of this image with a different image format.
 
@@ -29778,7 +29674,7 @@ public:
 		Note that if the new format is no different to the current one, this will just return
 		a reference to the original image, and won't actually create a copy.
 	*/
-	const Image convertedToFormat (PixelFormat newFormat) const;
+	Image convertedToFormat (PixelFormat newFormat) const;
 
 	/** Makes sure that no other Image objects share the same underlying data as this one.
 
@@ -29804,7 +29700,7 @@ public:
 		The area passed-in will be clipped to the bounds of this image, so this may return a smaller
 		image than the area you asked for, or even a null image if the area was out-of-bounds.
 	*/
-	const Image getClippedImage (const Rectangle<int>& area) const;
+	Image getClippedImage (const Rectangle<int>& area) const;
 
 	/** Returns the colour of one of the pixels in the image.
 
@@ -30064,7 +29960,7 @@ public:
 		@returns	the rectangle at the index, or an empty rectangle if the
 					index is out-of-range.
 	*/
-	const Rectangle<int> getRectangle (int index) const noexcept;
+	Rectangle<int> getRectangle (int index) const noexcept;
 
 	/** Removes all rectangles to leave an empty region. */
 	void clear();
@@ -30183,7 +30079,7 @@ public:
 	bool intersects (const RectangleList& other) const noexcept;
 
 	/** Returns the smallest rectangle that can enclose the whole of this region. */
-	const Rectangle<int> getBounds() const noexcept;
+	Rectangle<int> getBounds() const noexcept;
 
 	/** Optimises the list into a minimum number of constituent rectangles.
 
@@ -30197,7 +30093,7 @@ public:
 	void offsetAll (int dx, int dy) noexcept;
 
 	/** Creates a Path object to represent this region. */
-	const Path toPath() const;
+	Path toPath() const;
 
 	/** An iterator for accessing all the rectangles in a RectangleList. */
 	class JUCE_API  Iterator
@@ -30314,7 +30210,7 @@ public:
 	void setRight (ValueType newRightGap) noexcept	  { right = newRightGap; }
 
 	/** Returns a rectangle with these borders removed from it. */
-	const Rectangle<ValueType> subtractedFrom (const Rectangle<ValueType>& original) const noexcept
+	Rectangle<ValueType> subtractedFrom (const Rectangle<ValueType>& original) const noexcept
 	{
 		return Rectangle<ValueType> (original.getX() + left,
 									 original.getY() + top,
@@ -30329,7 +30225,7 @@ public:
 	}
 
 	/** Returns a rectangle with these borders added around it. */
-	const Rectangle<ValueType> addedTo (const Rectangle<ValueType>& original) const noexcept
+	Rectangle<ValueType> addedTo (const Rectangle<ValueType>& original) const noexcept
 	{
 		return Rectangle<ValueType> (original.getX() - left,
 									 original.getY() - top,
@@ -31002,7 +30898,7 @@ public:
 	int getRight() const noexcept			   { return bounds.getRight(); }
 
 	/** Returns the component's top-left position as a Point. */
-	const Point<int> getPosition() const noexcept	   { return bounds.getPosition(); }
+	Point<int> getPosition() const noexcept		 { return bounds.getPosition(); }
 
 	/** Returns the y coordinate of the bottom edge of this component.
 		This is a distance in pixels from the top edge of the component's parent.
@@ -31026,7 +30922,7 @@ public:
 		This is like getBounds(), but returns the rectangle in local coordinates, In practice, it'll
 		return a rectangle with position (0, 0), and the same size as this component.
 	*/
-	const Rectangle<int> getLocalBounds() const noexcept;
+	Rectangle<int> getLocalBounds() const noexcept;
 
 	/** Returns the area of this component's parent which this component covers.
 
@@ -31035,7 +30931,7 @@ public:
 		the smallest rectangle that fully covers the component's transformed bounding box.
 		If this component has no parent, the return value will simply be the same as getBounds().
 	*/
-	const Rectangle<int> getBoundsInParent() const noexcept;
+	Rectangle<int> getBoundsInParent() const noexcept;
 
 	/** Returns the region of this component that's not obscured by other, opaque components.
 
@@ -31061,12 +30957,12 @@ public:
 	/** Returns the position of this component's top-left corner relative to the screen's top-left.
 		@see getScreenBounds
 	*/
-	const Point<int> getScreenPosition() const;
+	Point<int> getScreenPosition() const;
 
 	/** Returns the bounds of this component, relative to the screen's top-left.
 		@see getScreenPosition
 	*/
-	const Rectangle<int> getScreenBounds() const;
+	Rectangle<int> getScreenBounds() const;
 
 	/** Converts a point to be relative to this component's coordinate space.
 
@@ -31074,8 +30970,8 @@ public:
 		component. If the sourceComponent parameter is null, the source point is assumed to be a global
 		screen coordinate.
 	*/
-	const Point<int> getLocalPoint (const Component* sourceComponent,
-									const Point<int>& pointRelativeToSourceComponent) const;
+	Point<int> getLocalPoint (const Component* sourceComponent,
+							  const Point<int>& pointRelativeToSourceComponent) const;
 
 	/** Converts a rectangle to be relative to this component's coordinate space.
 
@@ -31087,13 +30983,13 @@ public:
 		may not actually be rectanglular when converted to the target space, so in that situation this will return
 		the smallest rectangle that fully contains the transformed area.
 	*/
-	const Rectangle<int> getLocalArea (const Component* sourceComponent,
-									   const Rectangle<int>& areaRelativeToSourceComponent) const;
+	Rectangle<int> getLocalArea (const Component* sourceComponent,
+								 const Rectangle<int>& areaRelativeToSourceComponent) const;
 
 	/** Converts a point relative to this component's top-left into a screen coordinate.
 		@see getLocalPoint, localAreaToGlobal
 	*/
-	const Point<int> localPointToGlobal (const Point<int>& localPoint) const;
+	Point<int> localPointToGlobal (const Point<int>& localPoint) const;
 
 	/** Converts a rectangle from this component's coordinate space to a screen coordinate.
 
@@ -31102,7 +30998,7 @@ public:
 		the smallest rectangle that fully contains the transformed area.
 		@see getLocalPoint, localPointToGlobal
 	*/
-	const Rectangle<int> localAreaToGlobal (const Rectangle<int>& localArea) const;
+	Rectangle<int> localAreaToGlobal (const Rectangle<int>& localArea) const;
 
 	/** Moves the component to a new position.
 
@@ -31315,7 +31211,7 @@ public:
 		For more details about transforms, see setTransform().
 		@see setTransform
 	*/
-	const AffineTransform getTransform() const;
+	AffineTransform getTransform() const;
 
 	/** Returns true if a non-identity transform is being applied to this component.
 		For more details about transforms, see setTransform().
@@ -31355,7 +31251,7 @@ public:
 		monitors, it will return the area of the monitor that contains the component's
 		centre.
 	*/
-	const Rectangle<int> getParentMonitorArea() const;
+	Rectangle<int> getParentMonitorArea() const;
 
 	/** Returns the number of child components that this component contains.
 
@@ -31709,8 +31605,8 @@ public:
 
 		@see paintEntireComponent
 	*/
-	const Image createComponentSnapshot (const Rectangle<int>& areaToGrab,
-										 bool clipImageToComponentBounds = true);
+	Image createComponentSnapshot (const Rectangle<int>& areaToGrab,
+								   bool clipImageToComponentBounds = true);
 
 	/** Draws this component and all its subcomponents onto the specified graphics
 		context.
@@ -32462,7 +32358,7 @@ public:
 	/** Returns the mouse's current position, relative to this component.
 		The return value is relative to the component's top-left corner.
 	*/
-	const Point<int> getMouseXYRelative() const;
+	Point<int> getMouseXYRelative() const;
 
 	/** Called when this component's size has been changed.
 
@@ -34586,7 +34482,7 @@ public:
 
 		@see getCommandsInCategory()
 	*/
-	const StringArray getCommandCategories() const;
+	StringArray getCommandCategories() const;
 
 	/** Returns a list of all the command UIDs in a particular category.
 
@@ -34862,7 +34758,7 @@ public:
 	void setNeedsToBeSaved (bool needsToBeSaved);
 
 	/** Returns the file that's being used. */
-	const File getFile() const				  { return file; }
+	File getFile() const				  { return file; }
 
 	/** Handy utility to create a properties file in whatever the standard OS-specific
 		location is for these things.
@@ -34902,10 +34798,10 @@ public:
 		only the current user. Use this to choose whether you're saving settings that are common
 		or user-specific.
 	*/
-	static const File getDefaultAppSettingsFile (const String& applicationName,
-												 const String& fileNameSuffix,
-												 const String& folderName,
-												 bool commonToAllUsers);
+	static File getDefaultAppSettingsFile (const String& applicationName,
+										   const String& fileNameSuffix,
+										   const String& folderName,
+										   bool commonToAllUsers);
 
 protected:
 	virtual void propertyChanged();
@@ -37887,12 +37783,12 @@ public:
 		This just makes it easier than using the property names directly, and it
 		fills out the time and date in the right format.
 	*/
-	static const StringPairArray createBWAVMetadata (const String& description,
-													 const String& originator,
-													 const String& originatorRef,
-													 const Time& dateAndTime,
-													 const int64 timeReferenceSamples,
-													 const String& codingHistory);
+	static StringPairArray createBWAVMetadata (const String& description,
+											   const String& originator,
+											   const String& originatorRef,
+											   const Time& dateAndTime,
+											   const int64 timeReferenceSamples,
+											   const String& codingHistory);
 
 	const Array <int> getPossibleSampleRates();
 	const Array <int> getPossibleBitDepths();
@@ -39572,7 +39468,6 @@ private:
 #define __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
 
 class AudioDeviceManager;
-class Component;
 
 /**
 	Represents a type of audio driver, such as DirectSound, ASIO, CoreAudio, etc.
@@ -39895,7 +39790,7 @@ public:
 		@param velocity	 in the range 0 to 1.0
 		@see isNoteOn
 	*/
-	static const MidiMessage noteOn (int channel, int noteNumber, float velocity) noexcept;
+	static MidiMessage noteOn (int channel, int noteNumber, float velocity) noexcept;
 
 	/** Creates a key-down message (using an integer velocity).
 
@@ -39904,7 +39799,7 @@ public:
 		@param velocity	 in the range 0 to 127
 		@see isNoteOn
 	*/
-	static const MidiMessage noteOn (int channel, int noteNumber, uint8 velocity) noexcept;
+	static MidiMessage noteOn (int channel, int noteNumber, uint8 velocity) noexcept;
 
 	/** Returns true if this message is a 'key-up' event.
 
@@ -39922,7 +39817,7 @@ public:
 		@param velocity	 in the range 0 to 127
 		@see isNoteOff
 	*/
-	static const MidiMessage noteOff (int channel, int noteNumber, uint8 velocity = 0) noexcept;
+	static MidiMessage noteOff (int channel, int noteNumber, uint8 velocity = 0) noexcept;
 
 	/** Returns true if this message is a 'key-down' or 'key-up' event.
 
@@ -40016,7 +39911,7 @@ public:
 		@param programNumber	the midi program number, 0 to 127
 		@see isProgramChange, getGMInstrumentName
 	*/
-	static const MidiMessage programChange (int channel, int programNumber) noexcept;
+	static MidiMessage programChange (int channel, int programNumber) noexcept;
 
 	/** Returns true if the message is a pitch-wheel move.
 
@@ -40040,7 +39935,7 @@ public:
 		@param position	 the wheel position, in the range 0 to 16383
 		@see isPitchWheel
 	*/
-	static const MidiMessage pitchWheel (int channel, int position) noexcept;
+	static MidiMessage pitchWheel (int channel, int position) noexcept;
 
 	/** Returns true if the message is an aftertouch event.
 
@@ -40068,9 +39963,9 @@ public:
 		@param aftertouchAmount	 the amount of aftertouch, 0 to 127
 		@see isAftertouch
 	*/
-	static const MidiMessage aftertouchChange (int channel,
-											   int noteNumber,
-											   int aftertouchAmount) noexcept;
+	static MidiMessage aftertouchChange (int channel,
+										 int noteNumber,
+										 int aftertouchAmount) noexcept;
 
 	/** Returns true if the message is a channel-pressure change event.
 
@@ -40095,7 +39990,7 @@ public:
 		@param pressure		 the pressure, 0 to 127
 		@see isChannelPressure
 	*/
-	static const MidiMessage channelPressureChange (int channel, int pressure) noexcept;
+	static MidiMessage channelPressureChange (int channel, int pressure) noexcept;
 
 	/** Returns true if this is a midi controller message.
 
@@ -40135,9 +40030,9 @@ public:
 		@param value		the controller value
 		@see isController
 	*/
-	static const MidiMessage controllerEvent (int channel,
-											  int controllerType,
-											  int value) noexcept;
+	static MidiMessage controllerEvent (int channel,
+										int controllerType,
+										int value) noexcept;
 
 	/** Checks whether this message is an all-notes-off message.
 
@@ -40156,20 +40051,20 @@ public:
 		@param channel		  the midi channel, in the range 1 to 16
 		@see isAllNotesOff
 	*/
-	static const MidiMessage allNotesOff (int channel) noexcept;
+	static MidiMessage allNotesOff (int channel) noexcept;
 
 	/** Creates an all-sound-off message.
 
 		@param channel		  the midi channel, in the range 1 to 16
 		@see isAllSoundOff
 	*/
-	static const MidiMessage allSoundOff (int channel) noexcept;
+	static MidiMessage allSoundOff (int channel) noexcept;
 
 	/** Creates an all-controllers-off message.
 
 		@param channel		  the midi channel, in the range 1 to 16
 	*/
-	static const MidiMessage allControllersOff (int channel) noexcept;
+	static MidiMessage allControllersOff (int channel) noexcept;
 
 	/** Returns true if this event is a meta-event.
 
@@ -40213,7 +40108,7 @@ public:
 
 		@see isEndOfTrackMetaEvent
 	*/
-	static const MidiMessage endOfTrack() noexcept;
+	static MidiMessage endOfTrack() noexcept;
 
 	/** Returns true if this is an 'track name' meta-event.
 
@@ -40231,7 +40126,7 @@ public:
 
 		@see isTextMetaEvent
 	*/
-	const String getTextFromTextMetaEvent() const;
+	String getTextFromTextMetaEvent() const;
 
 	/** Returns true if this is a 'tempo' meta-event.
 
@@ -40257,7 +40152,7 @@ public:
 
 		@see isTempoMetaEvent
 	*/
-	static const MidiMessage tempoMetaEvent (int microsecondsPerQuarterNote) noexcept;
+	static MidiMessage tempoMetaEvent (int microsecondsPerQuarterNote) noexcept;
 
 	/** Returns true if this is a 'time-signature' meta-event.
 
@@ -40275,7 +40170,7 @@ public:
 
 		@see isTimeSignatureMetaEvent
 	*/
-	static const MidiMessage timeSignatureMetaEvent (int numerator, int denominator);
+	static MidiMessage timeSignatureMetaEvent (int numerator, int denominator);
 
 	/** Returns true if this is a 'key-signature' meta-event.
 
@@ -40310,7 +40205,7 @@ public:
 		@param channel		  the midi channel, in the range 1 to 16
 		@see isMidiChannelMetaEvent
 	*/
-	static const MidiMessage midiChannelMetaEvent (int channel) noexcept;
+	static MidiMessage midiChannelMetaEvent (int channel) noexcept;
 
 	/** Returns true if this is an active-sense message. */
 	bool isActiveSense() const noexcept;
@@ -40322,7 +40217,7 @@ public:
 	bool isMidiStart() const noexcept;
 
 	/** Creates a midi start event. */
-	static const MidiMessage midiStart() noexcept;
+	static MidiMessage midiStart() noexcept;
 
 	/** Returns true if this is a midi continue event.
 
@@ -40331,7 +40226,7 @@ public:
 	bool isMidiContinue() const noexcept;
 
 	/** Creates a midi continue event. */
-	static const MidiMessage midiContinue() noexcept;
+	static MidiMessage midiContinue() noexcept;
 
 	/** Returns true if this is a midi stop event.
 
@@ -40340,7 +40235,7 @@ public:
 	bool isMidiStop() const noexcept;
 
 	/** Creates a midi stop event. */
-	static const MidiMessage midiStop() noexcept;
+	static MidiMessage midiStop() noexcept;
 
 	/** Returns true if this is a midi clock event.
 
@@ -40349,7 +40244,7 @@ public:
 	bool isMidiClock() const noexcept;
 
 	/** Creates a midi clock event. */
-	static const MidiMessage midiClock() noexcept;
+	static MidiMessage midiClock() noexcept;
 
 	/** Returns true if this is a song-position-pointer message.
 
@@ -40371,7 +40266,7 @@ public:
 
 		@see isSongPositionPointer, getSongPositionPointerMidiBeat
 	*/
-	static const MidiMessage songPositionPointer (int positionInMidiBeats) noexcept;
+	static MidiMessage songPositionPointer (int positionInMidiBeats) noexcept;
 
 	/** Returns true if this is a quarter-frame midi timecode message.
 
@@ -40399,7 +40294,7 @@ public:
 		@param sequenceNumber   a value 0 to 7 for the upper nybble of the message's data byte
 		@param value		a value 0 to 15 for the lower nybble of the message's data byte
 	*/
-	static const MidiMessage quarterFrame (int sequenceNumber, int value) noexcept;
+	static MidiMessage quarterFrame (int sequenceNumber, int value) noexcept;
 
 	/** SMPTE timecode types.
 
@@ -40430,11 +40325,11 @@ public:
 
 	/** Creates a full-frame MTC message.
 	*/
-	static const MidiMessage fullFrame (int hours,
-										int minutes,
-										int seconds,
-										int frames,
-										SmpteTimecodeType timecodeType);
+	static MidiMessage fullFrame (int hours,
+								  int minutes,
+								  int seconds,
+								  int frames,
+								  SmpteTimecodeType timecodeType);
 
 	/** Types of MMC command.
 
@@ -40467,7 +40362,7 @@ public:
 
 	/** Creates an MMC message.
 	*/
-	static const MidiMessage midiMachineControlCommand (MidiMachineControlCommand command);
+	static MidiMessage midiMachineControlCommand (MidiMachineControlCommand command);
 
 	/** Checks whether this is an MMC "goto" message.
 
@@ -40486,23 +40381,23 @@ public:
 
 		@see isMidiMachineControlGoto
 	*/
-	static const MidiMessage midiMachineControlGoto (int hours,
-													 int minutes,
-													 int seconds,
-													 int frames);
+	static MidiMessage midiMachineControlGoto (int hours,
+											   int minutes,
+											   int seconds,
+											   int frames);
 
 	/** Creates a master-volume change message.
 
 		@param volume   the volume, 0 to 1.0
 	*/
-	static const MidiMessage masterVolume (float volume);
+	static MidiMessage masterVolume (float volume);
 
 	/** Creates a system-exclusive message.
 
 		The data passed in is wrapped with header and tail bytes of 0xf0 and 0xf7.
 	*/
-	static const MidiMessage createSysExMessage (const uint8* sysexData,
-												 int dataSize);
+	static MidiMessage createSysExMessage (const uint8* sysexData,
+										   int dataSize);
 
 	/** Reads a midi variable-length integer.
 
@@ -40533,10 +40428,10 @@ public:
 
 		@see getMidiNoteInHertz
 	*/
-	static const String getMidiNoteName (int noteNumber,
-										 bool useSharps,
-										 bool includeOctaveNumber,
-										 int octaveNumForMiddleC);
+	static String getMidiNoteName (int noteNumber,
+								   bool useSharps,
+								   bool includeOctaveNumber,
+								   int octaveNumForMiddleC);
 
 	/** Returns the frequency of a midi note number.
 
@@ -40550,25 +40445,25 @@ public:
 		@param midiInstrumentNumber	 the program number 0 to 127
 		@see getProgramChangeNumber
 	*/
-	static const String getGMInstrumentName (int midiInstrumentNumber);
+	static String getGMInstrumentName (int midiInstrumentNumber);
 
 	/** Returns the name of a bank of GM instruments.
 
 		@param midiBankNumber   the bank, 0 to 15
 	*/
-	static const String getGMInstrumentBankName (int midiBankNumber);
+	static String getGMInstrumentBankName (int midiBankNumber);
 
 	/** Returns the standard name of a channel 10 percussion sound.
 
 		@param midiNoteNumber   the key number, 35 to 81
 	*/
-	static const String getRhythmInstrumentName (int midiNoteNumber);
+	static String getRhythmInstrumentName (int midiNoteNumber);
 
 	/** Returns the name of a controller type number.
 
 		@see getControllerNumber
 	*/
-	static const String getControllerName (int controllerNumber);
+	static String getControllerName (int controllerNumber);
 
 private:
 
@@ -41080,3096 +40975,6 @@ private:
 
 /*** End of inlined file: juce_MidiOutput.h ***/
 
-
-/*** Start of inlined file: juce_ComboBox.h ***/
-#ifndef __JUCE_COMBOBOX_JUCEHEADER__
-#define __JUCE_COMBOBOX_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_Label.h ***/
-#ifndef __JUCE_LABEL_JUCEHEADER__
-#define __JUCE_LABEL_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_TextEditor.h ***/
-#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
-#define __JUCE_TEXTEDITOR_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_Viewport.h ***/
-#ifndef __JUCE_VIEWPORT_JUCEHEADER__
-#define __JUCE_VIEWPORT_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_ScrollBar.h ***/
-#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
-#define __JUCE_SCROLLBAR_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_Button.h ***/
-#ifndef __JUCE_BUTTON_JUCEHEADER__
-#define __JUCE_BUTTON_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_TooltipWindow.h ***/
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-#define __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_TooltipClient.h ***/
-#ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
-#define __JUCE_TOOLTIPCLIENT_JUCEHEADER__
-
-/**
-	Components that want to use pop-up tooltips should implement this interface.
-
-	A TooltipWindow will wait for the mouse to hover over a component that
-	implements the TooltipClient interface, and when it finds one, it will display
-	the tooltip returned by its getTooltip() method.
-
-	@see TooltipWindow, SettableTooltipClient
-*/
-class JUCE_API  TooltipClient
-{
-public:
-	/** Destructor. */
-	virtual ~TooltipClient()  {}
-
-	/** Returns the string that this object wants to show as its tooltip. */
-	virtual const String getTooltip() = 0;
-};
-
-/**
-	An implementation of TooltipClient that stores the tooltip string and a method
-	for changing it.
-
-	This makes it easy to add a tooltip to a custom component, by simply adding this
-	as a base class and calling setTooltip().
-
-	Many of the Juce widgets already use this as a base class to implement their
-	tooltips.
-
-	@see TooltipClient, TooltipWindow
-*/
-class JUCE_API  SettableTooltipClient   : public TooltipClient
-{
-public:
-
-	/** Destructor. */
-	virtual ~SettableTooltipClient()				{}
-
-	/** Assigns a new tooltip to this object. */
-	virtual void setTooltip (const String& newTooltip)		  { tooltipString = newTooltip; }
-
-	/** Returns the tooltip assigned to this object. */
-	virtual const String getTooltip()				   { return tooltipString; }
-
-protected:
-	SettableTooltipClient() {}
-
-private:
-	String tooltipString;
-};
-
-#endif   // __JUCE_TOOLTIPCLIENT_JUCEHEADER__
-
-/*** End of inlined file: juce_TooltipClient.h ***/
-
-/**
-	A window that displays a pop-up tooltip when the mouse hovers over another component.
-
-	To enable tooltips in your app, just create a single instance of a TooltipWindow
-	object.
-
-	The TooltipWindow object will then stay invisible, waiting until the mouse
-	hovers for the specified length of time - it will then see if it's currently
-	over a component which implements the TooltipClient interface, and if so,
-	it will make itself visible to show the tooltip in the appropriate place.
-
-	@see TooltipClient, SettableTooltipClient
-*/
-class JUCE_API  TooltipWindow  : public Component,
-								 private Timer
-{
-public:
-
-	/** Creates a tooltip window.
-
-		Make sure your app only creates one instance of this class, otherwise you'll
-		get multiple overlaid tooltips appearing. The window will initially be invisible
-		and will make itself visible when it needs to display a tip.
-
-		To change the style of tooltips, see the LookAndFeel class for its tooltip
-		methods.
-
-		@param parentComponent  if set to 0, the TooltipWindow will appear on the desktop,
-								otherwise the tooltip will be added to the given parent
-								component.
-		@param millisecondsBeforeTipAppears	 the time for which the mouse has to stay still
-												before a tooltip will be shown
-
-		@see TooltipClient, LookAndFeel::drawTooltip, LookAndFeel::getTooltipSize
-	*/
-	explicit TooltipWindow (Component* parentComponent = nullptr,
-							int millisecondsBeforeTipAppears = 700);
-
-	/** Destructor. */
-	~TooltipWindow();
-
-	/** Changes the time before the tip appears.
-		This lets you change the value that was set in the constructor.
-	*/
-	void setMillisecondsBeforeTipAppears (int newTimeMs = 700) noexcept;
-
-	/** A set of colour IDs to use to change the colour of various aspects of the tooltip.
-
-		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-		methods.
-
-		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-	*/
-	enum ColourIds
-	{
-		backgroundColourId	  = 0x1001b00,	/**< The colour to fill the background with. */
-		textColourId		= 0x1001c00,	/**< The colour to use for the text. */
-		outlineColourId	 = 0x1001c10	 /**< The colour to use to draw an outline around the tooltip. */
-	};
-
-private:
-
-	int millisecondsBeforeTipAppears;
-	Point<int> lastMousePos;
-	int mouseClicks;
-	unsigned int lastCompChangeTime, lastHideTime;
-	Component* lastComponentUnderMouse;
-	bool changedCompsSinceShown;
-	String tipShowing, lastTipUnderMouse;
-
-	void paint (Graphics& g);
-	void mouseEnter (const MouseEvent& e);
-	void timerCallback();
-
-	static const String getTipFor (Component* c);
-	void showFor (const String& tip);
-	void hide();
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipWindow);
-};
-
-#endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-
-/*** End of inlined file: juce_TooltipWindow.h ***/
-
-#if JUCE_VC6
- #define Listener ButtonListener
-#endif
-
-/**
-	A base class for buttons.
-
-	This contains all the logic for button behaviours such as enabling/disabling,
-	responding to shortcut keystrokes, auto-repeating when held down, toggle-buttons
-	and radio groups, etc.
-
-	@see TextButton, DrawableButton, ToggleButton
-*/
-class JUCE_API  Button  : public Component,
-						  public SettableTooltipClient,
-						  public ApplicationCommandManagerListener,
-						  public ValueListener,
-						  private KeyListener
-{
-protected:
-
-	/** Creates a button.
-
-		@param buttonName	   the text to put in the button (the component's name is also
-									initially set to this string, but these can be changed later
-									using the setName() and setButtonText() methods)
-	*/
-	explicit Button (const String& buttonName);
-
-public:
-	/** Destructor. */
-	virtual ~Button();
-
-	/** Changes the button's text.
-
-		@see getButtonText
-	*/
-	void setButtonText (const String& newText);
-
-	/** Returns the text displayed in the button.
-
-		@see setButtonText
-	*/
-	const String getButtonText() const			  { return text; }
-
-	/** Returns true if the button is currently being held down by the mouse.
-
-		@see isOver
-	*/
-	bool isDown() const noexcept;
-
-	/** Returns true if the mouse is currently over the button.
-
-		This will be also be true if the mouse is being held down.
-
-		@see isDown
-	*/
-	bool isOver() const noexcept;
-
-	/** A button has an on/off state associated with it, and this changes that.
-
-		By default buttons are 'off' and for simple buttons that you click to perform
-		an action you won't change this. Toggle buttons, however will want to
-		change their state when turned on or off.
-
-		@param shouldBeOn		   whether to set the button's toggle state to be on or
-										off. If it's a member of a button group, this will
-										always try to turn it on, and to turn off any other
-										buttons in the group
-		@param sendChangeNotification   if true, a callback will be made to clicked(); if false
-										the button will be repainted but no notification will
-										be sent
-		@see getToggleState, setRadioGroupId
-	*/
-	void setToggleState (bool shouldBeOn,
-						 bool sendChangeNotification);
-
-	/** Returns true if the button in 'on'.
-
-		By default buttons are 'off' and for simple buttons that you click to perform
-		an action you won't change this. Toggle buttons, however will want to
-		change their state when turned on or off.
-
-		@see setToggleState
-	*/
-	bool getToggleState() const noexcept			{ return isOn.getValue(); }
-
-	/** Returns the Value object that represents the botton's toggle state.
-		You can use this Value object to connect the button's state to external values or setters,
-		either by taking a copy of the Value, or by using Value::referTo() to make it point to
-		your own Value object.
-		@see getToggleState, Value
-	*/
-	Value& getToggleStateValue()				{ return isOn; }
-
-	/** This tells the button to automatically flip the toggle state when
-		the button is clicked.
-
-		If set to true, then before the clicked() callback occurs, the toggle-state
-		of the button is flipped.
-	*/
-	void setClickingTogglesState (bool shouldToggle) noexcept;
-
-	/** Returns true if this button is set to be an automatic toggle-button.
-
-		This returns the last value that was passed to setClickingTogglesState().
-	*/
-	bool getClickingTogglesState() const noexcept;
-
-	/** Enables the button to act as a member of a mutually-exclusive group
-		of 'radio buttons'.
-
-		If the group ID is set to a non-zero number, then this button will
-		act as part of a group of buttons with the same ID, only one of
-		which can be 'on' at the same time. Note that when it's part of
-		a group, clicking a toggle-button that's 'on' won't turn it off.
-
-		To find other buttons with the same ID, this button will search through
-		its sibling components for ToggleButtons, so all the buttons for a
-		particular group must be placed inside the same parent component.
-
-		Set the group ID back to zero if you want it to act as a normal toggle
-		button again.
-
-		@see getRadioGroupId
-	*/
-	void setRadioGroupId (int newGroupId);
-
-	/** Returns the ID of the group to which this button belongs.
-
-		(See setRadioGroupId() for an explanation of this).
-	*/
-	int getRadioGroupId() const noexcept			{ return radioGroupId; }
-
-	/**
-		Used to receive callbacks when a button is clicked.
-
-		@see Button::addListener, Button::removeListener
-	*/
-	class JUCE_API  Listener
-	{
-	public:
-		/** Destructor. */
-		virtual ~Listener()					 {}
-
-		/** Called when the button is clicked. */
-		virtual void buttonClicked (Button* button) = 0;
-
-		/** Called when the button's state changes. */
-		virtual void buttonStateChanged (Button*)		   {}
-	};
-
-	/** Registers a listener to receive events when this button's state changes.
-		If the listener is already registered, this will not register it again.
-		@see removeListener
-	*/
-	void addListener (Listener* newListener);
-
-	/** Removes a previously-registered button listener
-		@see addListener
-	*/
-	void removeListener (Listener* listener);
-
-	/** Causes the button to act as if it's been clicked.
-
-		This will asynchronously make the button draw itself going down and up, and
-		will then call back the clicked() method as if mouse was clicked on it.
-
-		@see clicked
-	*/
-	virtual void triggerClick();
-
-	/** Sets a command ID for this button to automatically invoke when it's clicked.
-
-		When the button is pressed, it will use the given manager to trigger the
-		command ID.
-
-		Obviously be careful that the ApplicationCommandManager doesn't get deleted
-		before this button is. To disable the command triggering, call this method and
-		pass 0 for the parameters.
-
-		If generateTooltip is true, then the button's tooltip will be automatically
-		generated based on the name of this command and its current shortcut key.
-
-		@see addShortcut, getCommandID
-	*/
-	void setCommandToTrigger (ApplicationCommandManager* commandManagerToUse,
-							  int commandID,
-							  bool generateTooltip);
-
-	/** Returns the command ID that was set by setCommandToTrigger().
-	*/
-	int getCommandID() const noexcept		   { return commandID; }
-
-	/** Assigns a shortcut key to trigger the button.
-
-		The button registers itself with its top-level parent component for keypresses.
-
-		Note that a different way of linking buttons to keypresses is by using the
-		setCommandToTrigger() method to invoke a command.
-
-		@see clearShortcuts
-	*/
-	void addShortcut (const KeyPress& key);
-
-	/** Removes all key shortcuts that had been set for this button.
-
-		@see addShortcut
-	*/
-	void clearShortcuts();
-
-	/** Returns true if the given keypress is a shortcut for this button.
-
-		@see addShortcut
-	*/
-	bool isRegisteredForShortcut (const KeyPress& key) const;
-
-	/** Sets an auto-repeat speed for the button when it is held down.
-
-		(Auto-repeat is disabled by default).
-
-		@param initialDelayInMillisecs	  how long to wait after the mouse is pressed before
-											triggering the next click. If this is zero, auto-repeat
-											is disabled
-		@param repeatDelayInMillisecs	   the frequently subsequent repeated clicks should be
-											triggered
-		@param minimumDelayInMillisecs	  if this is greater than 0, the auto-repeat speed will
-											get faster, the longer the button is held down, up to the
-											minimum interval specified here
-	*/
-	void setRepeatSpeed (int initialDelayInMillisecs,
-						 int repeatDelayInMillisecs,
-						 int minimumDelayInMillisecs = -1) noexcept;
-
-	/** Sets whether the button click should happen when the mouse is pressed or released.
-
-		By default the button is only considered to have been clicked when the mouse is
-		released, but setting this to true will make it call the clicked() method as soon
-		as the button is pressed.
-
-		This is useful if the button is being used to show a pop-up menu, as it allows
-		the click to be used as a drag onto the menu.
-	*/
-	void setTriggeredOnMouseDown (bool isTriggeredOnMouseDown) noexcept;
-
-	/** Returns the number of milliseconds since the last time the button
-		went into the 'down' state.
-	*/
-	uint32 getMillisecondsSinceButtonDown() const noexcept;
-
-	/** Sets the tooltip for this button.
-
-		@see TooltipClient, TooltipWindow
-	*/
-	void setTooltip (const String& newTooltip);
-
-	// (implementation of the TooltipClient method)
-	const String getTooltip();
-
-	/** A combination of these flags are used by setConnectedEdges().
-	*/
-	enum ConnectedEdgeFlags
-	{
-		ConnectedOnLeft = 1,
-		ConnectedOnRight = 2,
-		ConnectedOnTop = 4,
-		ConnectedOnBottom = 8
-	};
-
-	/** Hints about which edges of the button might be connected to adjoining buttons.
-
-		The value passed in is a bitwise combination of any of the values in the
-		ConnectedEdgeFlags enum.
-
-		E.g. if you are placing two buttons adjacent to each other, you could use this to
-		indicate which edges are touching, and the LookAndFeel might choose to drawn them
-		without rounded corners on the edges that connect. It's only a hint, so the
-		LookAndFeel can choose to ignore it if it's not relevent for this type of
-		button.
-	*/
-	void setConnectedEdges (int connectedEdgeFlags);
-
-	/** Returns the set of flags passed into setConnectedEdges(). */
-	int getConnectedEdgeFlags() const noexcept		  { return connectedEdgeFlags; }
-
-	/** Indicates whether the button adjoins another one on its left edge.
-		@see setConnectedEdges
-	*/
-	bool isConnectedOnLeft() const noexcept			 { return (connectedEdgeFlags & ConnectedOnLeft) != 0; }
-
-	/** Indicates whether the button adjoins another one on its right edge.
-		@see setConnectedEdges
-	*/
-	bool isConnectedOnRight() const noexcept			{ return (connectedEdgeFlags & ConnectedOnRight) != 0; }
-
-	/** Indicates whether the button adjoins another one on its top edge.
-		@see setConnectedEdges
-	*/
-	bool isConnectedOnTop() const noexcept			  { return (connectedEdgeFlags & ConnectedOnTop) != 0; }
-
-	/** Indicates whether the button adjoins another one on its bottom edge.
-		@see setConnectedEdges
-	*/
-	bool isConnectedOnBottom() const noexcept		   { return (connectedEdgeFlags & ConnectedOnBottom) != 0; }
-
-	/** Used by setState(). */
-	enum ButtonState
-	{
-		buttonNormal,
-		buttonOver,
-		buttonDown
-	};
-
-	/** Can be used to force the button into a particular state.
-
-		This only changes the button's appearance, it won't trigger a click, or stop any mouse-clicks
-		from happening.
-
-		The state that you set here will only last until it is automatically changed when the mouse
-		enters or exits the button, or the mouse-button is pressed or released.
-	*/
-	void setState (const ButtonState newState);
-
-	// These are deprecated - please use addListener() and removeListener() instead!
-	JUCE_DEPRECATED (void addButtonListener (Listener*));
-	JUCE_DEPRECATED (void removeButtonListener (Listener*));
-
-protected:
-
-	/** This method is called when the button has been clicked.
-
-		Subclasses can override this to perform whatever they actions they need
-		to do.
-
-		Alternatively, a ButtonListener can be added to the button, and these listeners
-		will be called when the click occurs.
-
-		@see triggerClick
-	*/
-	virtual void clicked();
-
-	/** This method is called when the button has been clicked.
-
-		By default it just calls clicked(), but you might want to override it to handle
-		things like clicking when a modifier key is pressed, etc.
-
-		@see ModifierKeys
-	*/
-	virtual void clicked (const ModifierKeys& modifiers);
-
-	/** Subclasses should override this to actually paint the button's contents.
-
-		It's better to use this than the paint method, because it gives you information
-		about the over/down state of the button.
-
-		@param g			the graphics context to use
-		@param isMouseOverButton	true if the button is either in the 'over' or
-									'down' state
-		@param isButtonDown	 true if the button should be drawn in the 'down' position
-	*/
-	virtual void paintButton (Graphics& g,
-							  bool isMouseOverButton,
-							  bool isButtonDown) = 0;
-
-	/** Called when the button's up/down/over state changes.
-
-		Subclasses can override this if they need to do something special when the button
-		goes up or down.
-
-		@see isDown, isOver
-	*/
-	virtual void buttonStateChanged();
-
-	/** @internal */
-	virtual void internalClickCallback (const ModifierKeys& modifiers);
-	/** @internal */
-	void handleCommandMessage (int commandId);
-	/** @internal */
-	void mouseEnter (const MouseEvent& e);
-	/** @internal */
-	void mouseExit (const MouseEvent& e);
-	/** @internal */
-	void mouseDown (const MouseEvent& e);
-	/** @internal */
-	void mouseDrag (const MouseEvent& e);
-	/** @internal */
-	void mouseUp (const MouseEvent& e);
-	/** @internal */
-	bool keyPressed (const KeyPress& key);
-	/** @internal */
-	bool keyPressed (const KeyPress& key, Component* originatingComponent);
-	/** @internal */
-	bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
-	/** @internal */
-	void paint (Graphics& g);
-	/** @internal */
-	void parentHierarchyChanged();
-	/** @internal */
-	void visibilityChanged();
-	/** @internal */
-	void focusGained (FocusChangeType cause);
-	/** @internal */
-	void focusLost (FocusChangeType cause);
-	/** @internal */
-	void enablementChanged();
-	/** @internal */
-	void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&);
-	/** @internal */
-	void applicationCommandListChanged();
-	/** @internal */
-	void valueChanged (Value& value);
-
-private:
-
-	Array <KeyPress> shortcuts;
-	WeakReference<Component> keySource;
-	String text;
-	ListenerList <Listener> buttonListeners;
-
-	class RepeatTimer;
-	friend class RepeatTimer;
-	friend class ScopedPointer <RepeatTimer>;
-	ScopedPointer <RepeatTimer> repeatTimer;
-	uint32 buttonPressTime, lastRepeatTime;
-	ApplicationCommandManager* commandManagerToUse;
-	int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
-	int radioGroupId, commandID, connectedEdgeFlags;
-	ButtonState buttonState;
-
-	Value isOn;
-	bool lastToggleState : 1;
-	bool clickTogglesState : 1;
-	bool needsToRelease : 1;
-	bool needsRepainting : 1;
-	bool isKeyDown : 1;
-	bool triggerOnMouseDown : 1;
-	bool generateTooltip : 1;
-
-	void repeatTimerCallback();
-	RepeatTimer& getRepeatTimer();
-
-	ButtonState updateState();
-	ButtonState updateState (bool isOver, bool isDown);
-	bool isShortcutPressed() const;
-	void turnOffOtherButtonsInGroup (bool sendChangeNotification);
-
-	void flashButtonState();
-	void sendClickMessage (const ModifierKeys& modifiers);
-	void sendStateMessage();
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button);
-};
-
-#ifndef DOXYGEN
- /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
- typedef Button::Listener ButtonListener;
-#endif
-
-#if JUCE_VC6
- #undef Listener
-#endif
-
-#endif   // __JUCE_BUTTON_JUCEHEADER__
-
-/*** End of inlined file: juce_Button.h ***/
-
-/**
-	A scrollbar component.
-
-	To use a scrollbar, set up its total range using the setRangeLimits() method - this
-	sets the range of values it can represent. Then you can use setCurrentRange() to
-	change the position and size of the scrollbar's 'thumb'.
-
-	Registering a ScrollBar::Listener with the scrollbar will allow you to find out when
-	the user moves it, and you can use the getCurrentRangeStart() to find out where
-	they moved it to.
-
-	The scrollbar will adjust its own visibility according to whether its thumb size
-	allows it to actually be scrolled.
-
-	For most purposes, it's probably easier to use a ViewportContainer or ListBox
-	instead of handling a scrollbar directly.
-
-	@see ScrollBar::Listener
-*/
-class JUCE_API  ScrollBar  : public Component,
-							 public AsyncUpdater,
-							 private Timer
-{
-public:
-
-	/** Creates a Scrollbar.
-
-		@param isVertical	   whether it should be a vertical or horizontal bar
-		@param buttonsAreVisible	whether to show the up/down or left/right buttons
-	*/
-	ScrollBar (bool isVertical,
-			   bool buttonsAreVisible = true);
-
-	/** Destructor. */
-	~ScrollBar();
-
-	/** Returns true if the scrollbar is vertical, false if it's horizontal. */
-	bool isVertical() const noexcept				{ return vertical; }
-
-	/** Changes the scrollbar's direction.
-
-		You'll also need to resize the bar appropriately - this just changes its internal
-		layout.
-
-		@param shouldBeVertical	 true makes it vertical; false makes it horizontal.
-	*/
-	void setOrientation (bool shouldBeVertical);
-
-	/** Shows or hides the scrollbar's buttons. */
-	void setButtonVisibility (bool buttonsAreVisible);
-
-	/** Tells the scrollbar whether to make itself invisible when not needed.
-
-		The default behaviour is for a scrollbar to become invisible when the thumb
-		fills the whole of its range (i.e. when it can't be moved). Setting this
-		value to false forces the bar to always be visible.
-		@see autoHides()
-	*/
-	void setAutoHide (bool shouldHideWhenFullRange);
-
-	/** Returns true if this scrollbar is set to auto-hide when its thumb is as big
-		as its maximum range.
-		@see setAutoHide
-	*/
-	bool autoHides() const noexcept;
-
-	/** Sets the minimum and maximum values that the bar will move between.
-
-		The bar's thumb will always be constrained so that the entire thumb lies
-		within this range.
-
-		@see setCurrentRange
-	*/
-	void setRangeLimits (const Range<double>& newRangeLimit);
-
-	/** Sets the minimum and maximum values that the bar will move between.
-
-		The bar's thumb will always be constrained so that the entire thumb lies
-		within this range.
-
-		@see setCurrentRange
-	*/
-	void setRangeLimits (double minimum, double maximum);
-
-	/** Returns the current limits on the thumb position.
-		@see setRangeLimits
-	*/
-	const Range<double> getRangeLimit() const noexcept		  { return totalRange; }
-
-	/** Returns the lower value that the thumb can be set to.
-
-		This is the value set by setRangeLimits().
-	*/
-	double getMinimumRangeLimit() const noexcept			{ return totalRange.getStart(); }
-
-	/** Returns the upper value that the thumb can be set to.
-
-		This is the value set by setRangeLimits().
-	*/
-	double getMaximumRangeLimit() const noexcept			{ return totalRange.getEnd(); }
-
-	/** Changes the position of the scrollbar's 'thumb'.
-
-		If this method call actually changes the scrollbar's position, it will trigger an
-		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
-		are registered.
-
-		@see getCurrentRange. setCurrentRangeStart
-	*/
-	void setCurrentRange (const Range<double>& newRange);
-
-	/** Changes the position of the scrollbar's 'thumb'.
-
-		This sets both the position and size of the thumb - to just set the position without
-		changing the size, you can use setCurrentRangeStart().
-
-		If this method call actually changes the scrollbar's position, it will trigger an
-		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
-		are registered.
-
-		@param newStart	 the top (or left) of the thumb, in the range
-							getMinimumRangeLimit() <= newStart <= getMaximumRangeLimit(). If the
-							value is beyond these limits, it will be clipped.
-		@param newSize	  the size of the thumb, such that
-							getMinimumRangeLimit() <= newStart + newSize <= getMaximumRangeLimit(). If the
-							size is beyond these limits, it will be clipped.
-		@see setCurrentRangeStart, getCurrentRangeStart, getCurrentRangeSize
-	*/
-	void setCurrentRange (double newStart, double newSize);
-
-	/** Moves the bar's thumb position.
-
-		This will move the thumb position without changing the thumb size. Note
-		that the maximum thumb start position is (getMaximumRangeLimit() - getCurrentRangeSize()).
-
-		If this method call actually changes the scrollbar's position, it will trigger an
-		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
-		are registered.
-
-		@see setCurrentRange
-	*/
-	void setCurrentRangeStart (double newStart);
-
-	/** Returns the current thumb range.
-		@see getCurrentRange, setCurrentRange
-	*/
-	const Range<double> getCurrentRange() const noexcept		{ return visibleRange; }
-
-	/** Returns the position of the top of the thumb.
-		@see getCurrentRange, setCurrentRangeStart
-	*/
-	double getCurrentRangeStart() const noexcept			{ return visibleRange.getStart(); }
-
-	/** Returns the current size of the thumb.
-		@see getCurrentRange, setCurrentRange
-	*/
-	double getCurrentRangeSize() const noexcept			 { return visibleRange.getLength(); }
-
-	/** Sets the amount by which the up and down buttons will move the bar.
-
-		The value here is in terms of the total range, and is added or subtracted
-		from the thumb position when the user clicks an up/down (or left/right) button.
-	*/
-	void setSingleStepSize (double newSingleStepSize);
-
-	/** Moves the scrollbar by a number of single-steps.
-
-		This will move the bar by a multiple of its single-step interval (as
-		specified using the setSingleStepSize() method).
-
-		A positive value here will move the bar down or to the right, a negative
-		value moves it up or to the left.
-	*/
-	void moveScrollbarInSteps (int howManySteps);
-
-	/** Moves the scroll bar up or down in pages.
-
-		This will move the bar by a multiple of its current thumb size, effectively
-		doing a page-up or down.
-
-		A positive value here will move the bar down or to the right, a negative
-		value moves it up or to the left.
-	*/
-	void moveScrollbarInPages (int howManyPages);
-
-	/** Scrolls to the top (or left).
-
-		This is the same as calling setCurrentRangeStart (getMinimumRangeLimit());
-	*/
-	void scrollToTop();
-
-	/** Scrolls to the bottom (or right).
-
-		This is the same as calling setCurrentRangeStart (getMaximumRangeLimit() - getCurrentRangeSize());
-	*/
-	void scrollToBottom();
-
-	/** Changes the delay before the up and down buttons autorepeat when they are held
-		down.
-
-		For an explanation of what the parameters are for, see Button::setRepeatSpeed().
-
-		@see Button::setRepeatSpeed
-	*/
-	void setButtonRepeatSpeed (int initialDelayInMillisecs,
-							   int repeatDelayInMillisecs,
-							   int minimumDelayInMillisecs = -1);
-
-	/** A set of colour IDs to use to change the colour of various aspects of the component.
-
-		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-		methods.
-
-		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-	*/
-	enum ColourIds
-	{
-		backgroundColourId	  = 0x1000300,	/**< The background colour of the scrollbar. */
-		thumbColourId		   = 0x1000400,	/**< A base colour to use for the thumb. The look and feel will probably use variations on this colour. */
-		trackColourId		   = 0x1000401	 /**< A base colour to use for the slot area of the bar. The look and feel will probably use variations on this colour. */
-	};
-
-	/**
-		A class for receiving events from a ScrollBar.
-
-		You can register a ScrollBar::Listener with a ScrollBar using the ScrollBar::addListener()
-		method, and it will be called when the bar's position changes.
-
-		@see ScrollBar::addListener, ScrollBar::removeListener
-	*/
-	class JUCE_API  Listener
-	{
-	public:
-		/** Destructor. */
-		virtual ~Listener() {}
-
-		/** Called when a ScrollBar is moved.
-
-			@param scrollBarThatHasMoved	the bar that has moved
-			@param newRangeStart		the new range start of this bar
-		*/
-		virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
-									 double newRangeStart) = 0;
-	};
-
-	/** Registers a listener that will be called when the scrollbar is moved. */
-	void addListener (Listener* listener);
-
-	/** Deregisters a previously-registered listener. */
-	void removeListener (Listener* listener);
-
-	/** @internal */
-	bool keyPressed (const KeyPress& key);
-	/** @internal */
-	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
-	/** @internal */
-	void lookAndFeelChanged();
-	/** @internal */
-	void handleAsyncUpdate();
-	/** @internal */
-	void mouseDown (const MouseEvent& e);
-	/** @internal */
-	void mouseDrag (const MouseEvent& e);
-	/** @internal */
-	void mouseUp   (const MouseEvent& e);
-	/** @internal */
-	void paint (Graphics& g);
-	/** @internal */
-	void resized();
-
-private:
-
-	Range <double> totalRange, visibleRange;
-	double singleStepSize, dragStartRange;
-	int thumbAreaStart, thumbAreaSize, thumbStart, thumbSize;
-	int dragStartMousePos, lastMousePos;
-	int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
-	bool vertical, isDraggingThumb, autohides;
-	class ScrollbarButton;
-	friend class ScopedPointer<ScrollbarButton>;
-	ScopedPointer<ScrollbarButton> upButton, downButton;
-	ListenerList <Listener> listeners;
-
-	void updateThumbPosition();
-	void timerCallback();
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar);
-};
-
-/** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */
-typedef ScrollBar::Listener ScrollBarListener;
-
-#endif   // __JUCE_SCROLLBAR_JUCEHEADER__
-
-/*** End of inlined file: juce_ScrollBar.h ***/
-
-/**
-	A Viewport is used to contain a larger child component, and allows the child
-	to be automatically scrolled around.
-
-	To use a Viewport, just create one and set the component that goes inside it
-	using the setViewedComponent() method. When the child component changes size,
-	the Viewport will adjust its scrollbars accordingly.
-
-	A subclass of the viewport can be created which will receive calls to its
-	visibleAreaChanged() method when the subcomponent changes position or size.
-
-*/
-class JUCE_API  Viewport  : public Component,
-							private ComponentListener,
-							private ScrollBar::Listener
-{
-public:
-
-	/** Creates a Viewport.
-
-		The viewport is initially empty - use the setViewedComponent() method to
-		add a child component for it to manage.
-	*/
-	explicit Viewport (const String& componentName = String::empty);
-
-	/** Destructor. */
-	~Viewport();
-
-	/** Sets the component that this viewport will contain and scroll around.
-
-		This will add the given component to this Viewport and position it at (0, 0).
-
-		(Don't add or remove any child components directly using the normal
-		Component::addChildComponent() methods).
-
-		@param newViewedComponent   the component to add to this viewport, or null to remove
-									the current component.
-		@param deleteComponentWhenNoLongerNeeded	if true, the component will be deleted
-									automatically when the viewport is deleted or when a different
-									component is added. If false, the caller must manage the lifetime
-									of the component
-		@see getViewedComponent
-	*/
-	void setViewedComponent (Component* newViewedComponent,
-							 bool deleteComponentWhenNoLongerNeeded = true);
-
-	/** Returns the component that's currently being used inside the Viewport.
-
-		@see setViewedComponent
-	*/
-	Component* getViewedComponent() const noexcept		  { return contentComp; }
-
-	/** Changes the position of the viewed component.
-
-		The inner component will be moved so that the pixel at the top left of
-		the viewport will be the pixel at position (xPixelsOffset, yPixelsOffset)
-		within the inner component.
-
-		This will update the scrollbars and might cause a call to visibleAreaChanged().
-
-		@see getViewPositionX, getViewPositionY, setViewPositionProportionately
-	*/
-	void setViewPosition (int xPixelsOffset, int yPixelsOffset);
-
-	/** Changes the position of the viewed component.
-
-		The inner component will be moved so that the pixel at the top left of
-		the viewport will be the pixel at the specified coordinates within the
-		inner component.
-
-		This will update the scrollbars and might cause a call to visibleAreaChanged().
-
-		@see getViewPositionX, getViewPositionY, setViewPositionProportionately
-	*/
-	void setViewPosition (const Point<int>& newPosition);
-
-	/** Changes the view position as a proportion of the distance it can move.
-
-		The values here are from 0.0 to 1.0 - where (0, 0) would put the
-		visible area in the top-left, and (1, 1) would put it as far down and
-		to the right as it's possible to go whilst keeping the child component
-		on-screen.
-	*/
-	void setViewPositionProportionately (double proportionX, double proportionY);
-
-	/** If the specified position is at the edges of the viewport, this method scrolls
-		the viewport to bring that position nearer to the centre.
-
-		Call this if you're dragging an object inside a viewport and want to make it scroll
-		when the user approaches an edge. You might also find Component::beginDragAutoRepeat()
-		useful when auto-scrolling.
-
-		@param mouseX	   the x position, relative to the Viewport's top-left
-		@param mouseY	   the y position, relative to the Viewport's top-left
-		@param distanceFromEdge	 specifies how close to an edge the position needs to be
-							before the viewport should scroll in that direction
-		@param maximumSpeed the maximum number of pixels that the viewport is allowed
-							to scroll by.
-		@returns		true if the viewport was scrolled
-	*/
-	bool autoScroll (int mouseX, int mouseY, int distanceFromEdge, int maximumSpeed);
-
-	/** Returns the position within the child component of the top-left of its visible area.
-	*/
-	const Point<int> getViewPosition() const noexcept	   { return lastVisibleArea.getPosition(); }
-
-	/** Returns the position within the child component of the top-left of its visible area.
-		@see getViewWidth, setViewPosition
-	*/
-	int getViewPositionX() const noexcept		   { return lastVisibleArea.getX(); }
-
-	/** Returns the position within the child component of the top-left of its visible area.
-		@see getViewHeight, setViewPosition
-	*/
-	int getViewPositionY() const noexcept		   { return lastVisibleArea.getY(); }
-
-	/** Returns the width of the visible area of the child component.
-
-		This may be less than the width of this Viewport if there's a vertical scrollbar
-		or if the child component is itself smaller.
-	*/
-	int getViewWidth() const noexcept			   { return lastVisibleArea.getWidth(); }
-
-	/** Returns the height of the visible area of the child component.
-
-		This may be less than the height of this Viewport if there's a horizontal scrollbar
-		or if the child component is itself smaller.
-	*/
-	int getViewHeight() const noexcept			  { return lastVisibleArea.getHeight(); }
-
-	/** Returns the width available within this component for the contents.
-
-		This will be the width of the viewport component minus the width of a
-		vertical scrollbar (if visible).
-	*/
-	int getMaximumVisibleWidth() const;
-
-	/** Returns the height available within this component for the contents.
-
-		This will be the height of the viewport component minus the space taken up
-		by a horizontal scrollbar (if visible).
-	*/
-	int getMaximumVisibleHeight() const;
-
-	/** Callback method that is called when the visible area changes.
-
-		This will be called when the visible area is moved either be scrolling or
-		by calls to setViewPosition(), etc.
-	*/
-	virtual void visibleAreaChanged (const Rectangle<int>& newVisibleArea);
-
-	/** Turns scrollbars on or off.
-
-		If set to false, the scrollbars won't ever appear. When true (the default)
-		they will appear only when needed.
-	*/
-	void setScrollBarsShown (bool showVerticalScrollbarIfNeeded,
-							 bool showHorizontalScrollbarIfNeeded);
-
-	/** True if the vertical scrollbar is enabled.
-		@see setScrollBarsShown
-	*/
-	bool isVerticalScrollBarShown() const noexcept		  { return showVScrollbar; }
-
-	/** True if the horizontal scrollbar is enabled.
-		@see setScrollBarsShown
-	*/
-	bool isHorizontalScrollBarShown() const noexcept		{ return showHScrollbar; }
-
-	/** Changes the width of the scrollbars.
-
-		If this isn't specified, the default width from the LookAndFeel class will be used.
-
-		@see LookAndFeel::getDefaultScrollbarWidth
-	*/
-	void setScrollBarThickness (int thickness);
-
-	/** Returns the thickness of the scrollbars.
-
-		@see setScrollBarThickness
-	*/
-	int getScrollBarThickness() const;
-
-	/** Changes the distance that a single-step click on a scrollbar button
-		will move the viewport.
-	*/
-	void setSingleStepSizes (int stepX, int stepY);
-
-	/** Shows or hides the buttons on any scrollbars that are used.
-
-		@see ScrollBar::setButtonVisibility
-	*/
-	void setScrollBarButtonVisibility (bool buttonsVisible);
-
-	/** Returns a pointer to the scrollbar component being used.
-		Handy if you need to customise the bar somehow.
-	*/
-	ScrollBar* getVerticalScrollBar() noexcept		  { return &verticalScrollBar; }
-
-	/** Returns a pointer to the scrollbar component being used.
-		Handy if you need to customise the bar somehow.
-	*/
-	ScrollBar* getHorizontalScrollBar() noexcept		{ return &horizontalScrollBar; }
-
-	/** @internal */
-	void resized();
-	/** @internal */
-	void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
-	/** @internal */
-	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
-	/** @internal */
-	bool keyPressed (const KeyPress& key);
-	/** @internal */
-	void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
-	/** @internal */
-	bool useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
-
-private:
-
-	WeakReference<Component> contentComp;
-	Rectangle<int> lastVisibleArea;
-	int scrollBarThickness;
-	int singleStepX, singleStepY;
-	bool showHScrollbar, showVScrollbar, deleteContent;
-	Component contentHolder;
-	ScrollBar verticalScrollBar;
-	ScrollBar horizontalScrollBar;
-
-	void updateVisibleArea();
-	void deleteContentComp();
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-	// If you get an error here, it's because this method's parameters have changed! See the new definition above..
-	virtual int visibleAreaChanged (int, int, int, int) { return 0; }
-   #endif
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Viewport);
-};
-
-#endif   // __JUCE_VIEWPORT_JUCEHEADER__
-
-/*** End of inlined file: juce_Viewport.h ***/
-
-
-/*** Start of inlined file: juce_PopupMenu.h ***/
-#ifndef __JUCE_POPUPMENU_JUCEHEADER__
-#define __JUCE_POPUPMENU_JUCEHEADER__
-
-/** Creates and displays a popup-menu.
-
-	To show a popup-menu, you create one of these, add some items to it, then
-	call its show() method, which returns the id of the item the user selects.
-
-	E.g. @code
-	void MyWidget::mouseDown (const MouseEvent& e)
-	{
-		PopupMenu m;
-		m.addItem (1, "item 1");
-		m.addItem (2, "item 2");
-
-		const int result = m.show();
-
-		if (result == 0)
-		{
-			// user dismissed the menu without picking anything
-		}
-		else if (result == 1)
-		{
-			// user picked item 1
-		}
-		else if (result == 2)
-		{
-			// user picked item 2
-		}
-	}
-	@endcode
-
-	Submenus are easy too: @code
-
-	void MyWidget::mouseDown (const MouseEvent& e)
-	{
-		PopupMenu subMenu;
-		subMenu.addItem (1, "item 1");
-		subMenu.addItem (2, "item 2");
-
-		PopupMenu mainMenu;
-		mainMenu.addItem (3, "item 3");
-		mainMenu.addSubMenu ("other choices", subMenu);
-
-		const int result = m.show();
-
-		...etc
-	}
-	@endcode
-*/
-class JUCE_API  PopupMenu
-{
-public:
-
-	/** Creates an empty popup menu. */
-	PopupMenu();
-
-	/** Creates a copy of another menu. */
-	PopupMenu (const PopupMenu& other);
-
-	/** Destructor. */
-	~PopupMenu();
-
-	/** Copies this menu from another one. */
-	PopupMenu& operator= (const PopupMenu& other);
-
-	/** Resets the menu, removing all its items. */
-	void clear();
-
-	/** Appends a new text item for this menu to show.
-
-		@param itemResultId	 the number that will be returned from the show() method
-								if the user picks this item. The value should never be
-								zero, because that's used to indicate that the user didn't
-								select anything.
-		@param itemText	 the text to show.
-		@param isActive	 if false, the item will be shown 'greyed-out' and can't be
-								picked
-		@param isTicked	 if true, the item will be shown with a tick next to it
-		@param iconToUse	if this is non-zero, it should be an image that will be
-								displayed to the left of the item. This method will take its
-								own copy of the image passed-in, so there's no need to keep
-								it hanging around.
-
-		@see addSeparator, addColouredItem, addCustomItem, addSubMenu
-	*/
-	void addItem (int itemResultId,
-				  const String& itemText,
-				  bool isActive = true,
-				  bool isTicked = false,
-				  const Image& iconToUse = Image::null);
-
-	/** Adds an item that represents one of the commands in a command manager object.
-
-		@param commandManager	   the manager to use to trigger the command and get information
-									about it
-		@param commandID		the ID of the command
-		@param displayName	  if this is non-empty, then this string will be used instead of
-									the command's registered name
-	*/
-	void addCommandItem (ApplicationCommandManager* commandManager,
-						 int commandID,
-						 const String& displayName = String::empty);
-
-	/** Appends a text item with a special colour.
-
-		This is the same as addItem(), but specifies a colour to use for the
-		text, which will override the default colours that are used by the
-		current look-and-feel. See addItem() for a description of the parameters.
-	*/
-	void addColouredItem (int itemResultId,
-						  const String& itemText,
-						  const Colour& itemTextColour,
-						  bool isActive = true,
-						  bool isTicked = false,
-						  const Image& iconToUse = Image::null);
-
-	/** Appends a custom menu item that can't be used to trigger a result.
-
-		This will add a user-defined component to use as a menu item. Unlike the
-		addCustomItem() method that takes a PopupMenu::CustomComponent, this version
-		can't trigger a result from it, so doesn't take a menu ID. It also doesn't
-		delete the component when it's finished, so it's the caller's responsibility
-		to manage the component that is passed-in.
-
-		if triggerMenuItemAutomaticallyWhenClicked is true, the menu itself will handle
-		detection of a mouse-click on your component, and use that to trigger the
-		menu ID specified in itemResultId. If this is false, the menu item can't
-		be triggered, so itemResultId is not used.
-
-		@see CustomComponent
-	*/
-	void addCustomItem (int itemResultId,
-						Component* customComponent,
-						int idealWidth, int idealHeight,
-						bool triggerMenuItemAutomaticallyWhenClicked);
-
-	/** Appends a sub-menu.
-
-		If the menu that's passed in is empty, it will appear as an inactive item.
-	*/
-	void addSubMenu (const String& subMenuName,
-					 const PopupMenu& subMenu,
-					 bool isActive = true,
-					 const Image& iconToUse = Image::null,
-					 bool isTicked = false);
-
-	/** Appends a separator to the menu, to help break it up into sections.
-
-		The menu class is smart enough not to display separators at the top or bottom
-		of the menu, and it will replace mutliple adjacent separators with a single
-		one, so your code can be quite free and easy about adding these, and it'll
-		always look ok.
-	*/
-	void addSeparator();
-
-	/** Adds a non-clickable text item to the menu.
-
-		This is a bold-font items which can be used as a header to separate the items
-		into named groups.
-	*/
-	void addSectionHeader (const String& title);
-
-	/** Returns the number of items that the menu currently contains.
-
-		(This doesn't count separators).
-	*/
-	int getNumItems() const noexcept;
-
-	/** Returns true if the menu contains a command item that triggers the given command. */
-	bool containsCommandItem (int commandID) const;
-
-	/** Returns true if the menu contains any items that can be used. */
-	bool containsAnyActiveItems() const noexcept;
-
-	/** Class used to create a set of options to pass to the show() method.
-		You can chain together a series of calls to this class's methods to create
-		a set of whatever options you want to specify.
-		E.g. @code
-		PopupMenu menu;
-		...
-		menu.showMenu (PopupMenu::Options().withMaximumWidth (100),
-										   .withMaximumNumColumns (3)
-										   .withTargetComponent (myComp));
-		@endcode
-	*/
-	class JUCE_API  Options
-	{
-	public:
-		Options();
-
-		const Options withTargetComponent (Component* targetComponent) const;
-		const Options withTargetScreenArea (const Rectangle<int>& targetArea) const;
-		const Options withMinimumWidth (int minWidth) const;
-		const Options withMaximumNumColumns (int maxNumColumns) const;
-		const Options withStandardItemHeight (int standardHeight) const;
-		const Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
-
-	private:
-		friend class PopupMenu;
-		Rectangle<int> targetArea;
-		Component* targetComponent;
-		int visibleItemID, minWidth, maxColumns, standardHeight;
-	};
-
-   #if JUCE_MODAL_LOOPS_PERMITTED
-	/** Displays the menu and waits for the user to pick something.
-
-		This will display the menu modally, and return the ID of the item that the
-		user picks. If they click somewhere off the menu to get rid of it without
-		choosing anything, this will return 0.
-
-		The current location of the mouse will be used as the position to show the
-		menu - to explicitly set the menu's position, use showAt() instead. Depending
-		on where this point is on the screen, the menu will appear above, below or
-		to the side of the point.
-
-		@param itemIdThatMustBeVisible  if you set this to the ID of one of the menu items,
-										then when the menu first appears, it will make sure
-										that this item is visible. So if the menu has too many
-										items to fit on the screen, it will be scrolled to a
-										position where this item is visible.
-		@param minimumWidth		 a minimum width for the menu, in pixels. It may be wider
-										than this if some items are too long to fit.
-		@param maximumNumColumns	if there are too many items to fit on-screen in a single
-										vertical column, the menu may be laid out as a series of
-										columns - this is the maximum number allowed. To use the
-										default value for this (probably about 7), you can pass
-										in zero.
-		@param standardItemHeight	   if this is non-zero, it will be used as the standard
-										height for menu items (apart from custom items)
-		@param callback		 if this is non-zero, the menu will be launched asynchronously,
-										returning immediately, and the callback will receive a
-										call when the menu is either dismissed or has an item
-										selected. This object will be owned and deleted by the
-										system, so make sure that it works safely and that any
-										pointers that it uses are safely within scope.
-		@see showAt
-	*/
-	int show (int itemIdThatMustBeVisible = 0,
-			  int minimumWidth = 0,
-			  int maximumNumColumns = 0,
-			  int standardItemHeight = 0,
-			  ModalComponentManager::Callback* callback = nullptr);
-
-	/** Displays the menu at a specific location.
-
-		This is the same as show(), but uses a specific location (in global screen
-		co-ordinates) rather than the current mouse position.
-
-		The screenAreaToAttachTo parameter indicates a screen area to which the menu
-		will be adjacent. Depending on where this is, the menu will decide which edge to
-		attach itself to, in order to fit itself fully on-screen. If you just want to
-		trigger a menu at a specific point, you can pass in a rectangle of size (0, 0)
-		with the position that you want.
-
-		@see show()
-	*/
-	int showAt (const Rectangle<int>& screenAreaToAttachTo,
-				int itemIdThatMustBeVisible = 0,
-				int minimumWidth = 0,
-				int maximumNumColumns = 0,
-				int standardItemHeight = 0,
-				ModalComponentManager::Callback* callback = nullptr);
-
-	/** Displays the menu as if it's attached to a component such as a button.
-
-		This is similar to showAt(), but will position it next to the given component, e.g.
-		so that the menu's edge is aligned with that of the component. This is intended for
-		things like buttons that trigger a pop-up menu.
-	*/
-	int showAt (Component* componentToAttachTo,
-				int itemIdThatMustBeVisible = 0,
-				int minimumWidth = 0,
-				int maximumNumColumns = 0,
-				int standardItemHeight = 0,
-				ModalComponentManager::Callback* callback = nullptr);
-
-	/** Displays and runs the menu modally, with a set of options.
-	*/
-	int showMenu (const Options& options);
-   #endif
-
-	/** Runs the menu asynchronously, with a user-provided callback that will receive the result. */
-	void showMenuAsync (const Options& options,
-						ModalComponentManager::Callback* callback);
-
-	/** Closes any menus that are currently open.
-
-		This might be useful if you have a situation where your window is being closed
-		by some means other than a user action, and you'd like to make sure that menus
-		aren't left hanging around.
-	*/
-	static bool JUCE_CALLTYPE dismissAllActiveMenus();
-
-	/** Specifies a look-and-feel for the menu and any sub-menus that it has.
-
-		This can be called before show() if you need a customised menu. Be careful
-		not to delete the LookAndFeel object before the menu has been deleted.
-	*/
-	void setLookAndFeel (LookAndFeel* newLookAndFeel);
-
-	/** A set of colour IDs to use to change the colour of various aspects of the menu.
-
-		These constants can be used either via the LookAndFeel::setColour()
-		method for the look and feel that is set for this menu with setLookAndFeel()
-
-		@see setLookAndFeel, LookAndFeel::setColour, LookAndFeel::findColour
-	*/
-	enum ColourIds
-	{
-		backgroundColourId		 = 0x1000700,  /**< The colour to fill the menu's background with. */
-		textColourId		   = 0x1000600,  /**< The colour for normal menu item text, (unless the
-														  colour is specified when the item is added). */
-		headerTextColourId		 = 0x1000601,  /**< The colour for section header item text (see the
-														  addSectionHeader() method). */
-		highlightedBackgroundColourId  = 0x1000900,  /**< The colour to fill the background of the currently
-														  highlighted menu item. */
-		highlightedTextColourId	= 0x1000800,  /**< The colour to use for the text of the currently
-														  highlighted item. */
-	};
-
-	/**
-		Allows you to iterate through the items in a pop-up menu, and examine
-		their properties.
-
-		To use this, just create one and repeatedly call its next() method. When this
-		returns true, all the member variables of the iterator are filled-out with
-		information describing the menu item. When it returns false, the end of the
-		list has been reached.
-	*/
-	class JUCE_API  MenuItemIterator
-	{
-	public:
-
-		/** Creates an iterator that will scan through the items in the specified
-			menu.
-
-			Be careful not to add any items to a menu while it is being iterated,
-			or things could get out of step.
-		*/
-		MenuItemIterator (const PopupMenu& menu);
-
-		/** Destructor. */
-		~MenuItemIterator();
-
-		/** Returns true if there is another item, and sets up all this object's
-			member variables to reflect that item's properties.
-		*/
-		bool next();
-
-		String itemName;
-		const PopupMenu* subMenu;
-		int itemId;
-		bool isSeparator;
-		bool isTicked;
-		bool isEnabled;
-		bool isCustomComponent;
-		bool isSectionHeader;
-		const Colour* customColour;
-		Image customImage;
-		ApplicationCommandManager* commandManager;
-
-	private:
-
-		const PopupMenu& menu;
-		int index;
-
-		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuItemIterator);
-	};
-
-	/** A user-defined copmonent that can be used as an item in a popup menu.
-		@see PopupMenu::addCustomItem
-	*/
-	class JUCE_API  CustomComponent  : public Component,
-									   public ReferenceCountedObject
-	{
-	public:
-		/** Creates a custom item.
-			If isTriggeredAutomatically is true, then the menu will automatically detect
-			a mouse-click on this component and use that to invoke the menu item. If it's
-			false, then it's up to your class to manually trigger the item when it wants to.
-		*/
-		CustomComponent (bool isTriggeredAutomatically = true);
-
-		/** Destructor. */
-		~CustomComponent();
-
-		/** Returns a rectangle with the size that this component would like to have.
-
-			Note that the size which this method returns isn't necessarily the one that
-			the menu will give it, as the items will be stretched to have a uniform width.
-		*/
-		virtual void getIdealSize (int& idealWidth, int& idealHeight) = 0;
-
-		/** Dismisses the menu, indicating that this item has been chosen.
-
-			This will cause the menu to exit from its modal state, returning
-			this item's id as the result.
-		*/
-		void triggerMenuItem();
-
-		/** Returns true if this item should be highlighted because the mouse is over it.
-			You can call this method in your paint() method to find out whether
-			to draw a highlight.
-		*/
-		bool isItemHighlighted() const noexcept		 { return isHighlighted; }
-
-		/** @internal */
-		bool isTriggeredAutomatically() const noexcept	  { return triggeredAutomatically; }
-		/** @internal */
-		void setHighlighted (bool shouldBeHighlighted);
-
-	private:
-
-		bool isHighlighted, triggeredAutomatically;
-
-		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponent);
-	};
-
-	/** Appends a custom menu item.
-
-		This will add a user-defined component to use as a menu item. The component
-		passed in will be deleted by this menu when it's no longer needed.
-
-		@see CustomComponent
-	*/
-	void addCustomItem (int itemResultId, CustomComponent* customComponent);
-
-private:
-
-	class Item;
-	class ItemComponent;
-	class Window;
-
-	friend class MenuItemIterator;
-	friend class ItemComponent;
-	friend class Window;
-	friend class CustomComponent;
-	friend class MenuBarComponent;
-	friend class OwnedArray <Item>;
-	friend class OwnedArray <ItemComponent>;
-	friend class ScopedPointer <Window>;
-
-	OwnedArray <Item> items;
-	LookAndFeel* lookAndFeel;
-	bool separatorPending;
-
-	void addSeparatorIfPending();
-	Component* createWindow (const Options&, ApplicationCommandManager**) const;
-	int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
-
-	JUCE_LEAK_DETECTOR (PopupMenu);
-};
-
-#endif   // __JUCE_POPUPMENU_JUCEHEADER__
-
-/*** End of inlined file: juce_PopupMenu.h ***/
-
-
-/*** Start of inlined file: juce_TextInputTarget.h ***/
-#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-#define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-
-/**
-	An abstract base class which can be implemented by components that function as
-	text editors.
-
-	This class allows different types of text editor component to provide a uniform
-	interface, which can be used by things like OS-specific input methods, on-screen
-	keyboards, etc.
-*/
-class JUCE_API  TextInputTarget
-{
-public:
-
-	/** */
-	TextInputTarget() {}
-
-	/** Destructor. */
-	virtual ~TextInputTarget() {}
-
-	/** Returns true if this input target is currently accepting input.
-		For example, a text editor might return false if it's in read-only mode.
-	*/
-	virtual bool isTextInputActive() const = 0;
-
-	/** Returns the extents of the selected text region, or an empty range if
-		nothing is selected,
-	*/
-	virtual const Range<int> getHighlightedRegion() const = 0;
-
-	/** Sets the currently-selected text region. */
-	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
-
-	/** Sets a number of temporarily underlined sections.
-		This is needed by MS Windows input method UI.
-	*/
-	virtual void setTemporaryUnderlining (const Array <Range<int> >& underlinedRegions) = 0;
-
-	/** Returns a specified sub-section of the text. */
-	virtual const String getTextInRange (const Range<int>& range) const = 0;
-
-	/** Inserts some text, overwriting the selected text region, if there is one. */
-	virtual void insertTextAtCaret (const String& textToInsert) = 0;
-
-	/** Returns the position of the caret, relative to the component's origin. */
-	virtual const Rectangle<int> getCaretRectangle() = 0;
-};
-
-#endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-
-/*** End of inlined file: juce_TextInputTarget.h ***/
-
-
-/*** Start of inlined file: juce_CaretComponent.h ***/
-#ifndef __JUCE_CARETCOMPONENT_JUCEHEADER__
-#define __JUCE_CARETCOMPONENT_JUCEHEADER__
-
-/**
-*/
-class JUCE_API  CaretComponent   : public Component,
-								   public Timer
-{
-public:
-
-	/** Creates the caret component.
-		The keyFocusOwner is an optional component which the caret will check, making
-		itself visible only when the keyFocusOwner has keyboard focus.
-	*/
-	CaretComponent (Component* keyFocusOwner);
-
-	/** Destructor. */
-	~CaretComponent();
-
-	/** Sets the caret's position to place it next to the given character.
-		The area is the rectangle containing the entire character that the caret is
-		positioned on, so by default a vertical-line caret may choose to just show itself
-		at the left of this area. You can override this method to customise its size.
-		This method will also force the caret to reset its timer and become visible (if
-		appropriate), so that as it moves, you can see where it is.
-	*/
-	virtual void setCaretPosition (const Rectangle<int>& characterArea);
-
-	/** A set of colour IDs to use to change the colour of various aspects of the caret.
-		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-		methods.
-		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-	*/
-	enum ColourIds
-	{
-		caretColourId	= 0x1000204, /**< The colour with which to draw the caret. */
-	};
-
-	/** @internal */
-	void paint (Graphics& g);
-	/** @internal */
-	void timerCallback();
-
-private:
-	Component* owner;
-	bool shouldBeShown() const;
-
-	JUCE_DECLARE_NON_COPYABLE (CaretComponent);
-};
-
-#endif   // __JUCE_CARETCOMPONENT_JUCEHEADER__
-
-/*** End of inlined file: juce_CaretComponent.h ***/
-
-/**
-	A component containing text that can be edited.
-
-	A TextEditor can either be in single- or multi-line mode, and supports mixed
-	fonts and colours.
-
-	@see TextEditor::Listener, Label
-*/
-class JUCE_API  TextEditor  : public Component,
-							  public TextInputTarget,
-							  public SettableTooltipClient
-{
-public:
-
-	/** Creates a new, empty text editor.
-
-		@param componentName	the name to pass to the component for it to use as its name
-		@param passwordCharacter	if this is not zero, this character will be used as a replacement
-									for all characters that are drawn on screen - e.g. to create
-									a password-style textbox containing circular blobs instead of text,
-									you could set this value to 0x25cf, which is the unicode character
-									for a black splodge (not all fonts include this, though), or 0x2022,
-									which is a bullet (probably the best choice for linux).
-	*/
-	explicit TextEditor (const String& componentName = String::empty,
-						 juce_wchar passwordCharacter = 0);
-
-	/** Destructor. */
-	virtual ~TextEditor();
-
-	/** Puts the editor into either multi- or single-line mode.
-
-		By default, the editor will be in single-line mode, so use this if you need a multi-line
-		editor.
-
-		See also the setReturnKeyStartsNewLine() method, which will also need to be turned
-		on if you want a multi-line editor with line-breaks.
-
-		@see isMultiLine, setReturnKeyStartsNewLine
-	*/
-	void setMultiLine (bool shouldBeMultiLine,
-					   bool shouldWordWrap = true);
-
-	/** Returns true if the editor is in multi-line mode.
-	*/
-	bool isMultiLine() const;
-
-	/** Changes the behaviour of the return key.
-
-		If set to true, the return key will insert a new-line into the text; if false
-		it will trigger a call to the TextEditor::Listener::textEditorReturnKeyPressed()
-		method. By default this is set to false, and when true it will only insert
-		new-lines when in multi-line mode (see setMultiLine()).
-	*/
-	void setReturnKeyStartsNewLine (bool shouldStartNewLine);
-
-	/** Returns the value set by setReturnKeyStartsNewLine().
-
-		See setReturnKeyStartsNewLine() for more info.
-	*/
-	bool getReturnKeyStartsNewLine() const			  { return returnKeyStartsNewLine; }
-
-	/** Indicates whether the tab key should be accepted and used to input a tab character,
-		or whether it gets ignored.
-
-		By default the tab key is ignored, so that it can be used to switch keyboard focus
-		between components.
-	*/
-	void setTabKeyUsedAsCharacter (bool shouldTabKeyBeUsed);
-
-	/** Returns true if the tab key is being used for input.
-		@see setTabKeyUsedAsCharacter
-	*/
-	bool isTabKeyUsedAsCharacter() const			{ return tabKeyUsed; }
-
-	/** Changes the editor to read-only mode.
-
-		By default, the text editor is not read-only. If you're making it read-only, you
-		might also want to call setCaretVisible (false) to get rid of the caret.
-
-		The text can still be highlighted and copied when in read-only mode.
-
-		@see isReadOnly, setCaretVisible
-	*/
-	void setReadOnly (bool shouldBeReadOnly);
-
-	/** Returns true if the editor is in read-only mode.
-	*/
-	bool isReadOnly() const;
-
-	/** Makes the caret visible or invisible.
-		By default the caret is visible.
-		@see setCaretColour, setCaretPosition
-	*/
-	void setCaretVisible (bool shouldBeVisible);
-
-	/** Returns true if the caret is enabled.
-		@see setCaretVisible
-	*/
-	bool isCaretVisible() const				 { return caret != nullptr; }
-
-	/** Enables/disables a vertical scrollbar.
-
-		(This only applies when in multi-line mode). When the text gets too long to fit
-		in the component, a scrollbar can appear to allow it to be scrolled. Even when
-		this is enabled, the scrollbar will be hidden unless it's needed.
-
-		By default the scrollbar is enabled.
-	*/
-	void setScrollbarsShown (bool shouldBeEnabled);
-
-	/** Returns true if scrollbars are enabled.
-		@see setScrollbarsShown
-	*/
-	bool areScrollbarsShown() const				 { return scrollbarVisible; }
-
-	/** Changes the password character used to disguise the text.
-
-		@param passwordCharacter	if this is not zero, this character will be used as a replacement
-									for all characters that are drawn on screen - e.g. to create
-									a password-style textbox containing circular blobs instead of text,
-									you could set this value to 0x25cf, which is the unicode character
-									for a black splodge (not all fonts include this, though), or 0x2022,
-									which is a bullet (probably the best choice for linux).
-	*/
-	void setPasswordCharacter (juce_wchar passwordCharacter);
-
-	/** Returns the current password character.
-		@see setPasswordCharacter
-	*/
-	juce_wchar getPasswordCharacter() const			 { return passwordCharacter; }
-
-	/** Allows a right-click menu to appear for the editor.
-
-		(This defaults to being enabled).
-
-		If enabled, right-clicking (or command-clicking on the Mac) will pop up a menu
-		of options such as cut/copy/paste, undo/redo, etc.
-	*/
-	void setPopupMenuEnabled (bool menuEnabled);
-
-	/** Returns true if the right-click menu is enabled.
-		@see setPopupMenuEnabled
-	*/
-	bool isPopupMenuEnabled() const				 { return popupMenuEnabled; }
-
-	/** Returns true if a popup-menu is currently being displayed.
-	*/
-	bool isPopupMenuCurrentlyActive() const			 { return menuActive; }
-
-	/** A set of colour IDs to use to change the colour of various aspects of the editor.
-
-		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-		methods.
-
-		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-	*/
-	enum ColourIds
-	{
-		backgroundColourId	   = 0x1000200, /**< The colour to use for the text component's background - this can be
-												   transparent if necessary. */
-
-		textColourId		 = 0x1000201, /**< The colour that will be used when text is added to the editor. Note
-												   that because the editor can contain multiple colours, calling this
-												   method won't change the colour of existing text - to do that, call
-												   applyFontToAllText() after calling this method.*/
-
-		highlightColourId	= 0x1000202, /**< The colour with which to fill the background of highlighted sections of
-												   the text - this can be transparent if you don't want to show any
-												   highlighting.*/
-
-		highlightedTextColourId  = 0x1000203, /**< The colour with which to draw the text in highlighted sections. */
-
-		outlineColourId	  = 0x1000205, /**< If this is non-transparent, it will be used to draw a box around
-												   the edge of the component. */
-
-		focusedOutlineColourId   = 0x1000206, /**< If this is non-transparent, it will be used to draw a box around
-												   the edge of the component when it has focus. */
-
-		shadowColourId	   = 0x1000207, /**< If this is non-transparent, it'll be used to draw an inner shadow
-												   around the edge of the editor. */
-	};
-
-	/** Sets the font to use for newly added text.
-
-		This will change the font that will be used next time any text is added or entered
-		into the editor. It won't change the font of any existing text - to do that, use
-		applyFontToAllText() instead.
-
-		@see applyFontToAllText
-	*/
-	void setFont (const Font& newFont);
-
-	/** Applies a font to all the text in the editor.
-
-		This will also set the current font to use for any new text that's added.
-
-		@see setFont
-	*/
-	void applyFontToAllText (const Font& newFont);
-
-	/** Returns the font that's currently being used for new text.
-
-		@see setFont
-	*/
-	const Font getFont() const;
-
-	/** If set to true, focusing on the editor will highlight all its text.
-
-		(Set to false by default).
-
-		This is useful for boxes where you expect the user to re-enter all the
-		text when they focus on the component, rather than editing what's already there.
-	*/
-	void setSelectAllWhenFocused (bool b);
-
-	/** Sets limits on the characters that can be entered.
-
-		@param maxTextLength	if this is > 0, it sets a maximum length limit; if 0, no
-									limit is set
-		@param allowedCharacters	if this is non-empty, then only characters that occur in
-									this string are allowed to be entered into the editor.
-	*/
-	void setInputRestrictions (int maxTextLength,
-							   const String& allowedCharacters = String::empty);
-
-	/** When the text editor is empty, it can be set to display a message.
-
-		This is handy for things like telling the user what to type in the box - the
-		string is only displayed, it's not taken to actually be the contents of
-		the editor.
-	*/
-	void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse);
-
-	/** Changes the size of the scrollbars that are used.
-
-		Handy if you need smaller scrollbars for a small text box.
-	*/
-	void setScrollBarThickness (int newThicknessPixels);
-
-	/** Shows or hides the buttons on any scrollbars that are used.
-
-		@see ScrollBar::setButtonVisibility
-	*/
-	void setScrollBarButtonVisibility (bool buttonsVisible);
-
-	/**
-		Receives callbacks from a TextEditor component when it changes.
-
-		@see TextEditor::addListener
-	*/
-	class JUCE_API  Listener
-	{
-	public:
-		/** Destructor. */
-		virtual ~Listener()  {}
-
-		/** Called when the user changes the text in some way. */
-		virtual void textEditorTextChanged (TextEditor& editor);
-
-		/** Called when the user presses the return key. */
-		virtual void textEditorReturnKeyPressed (TextEditor& editor);
-
-		/** Called when the user presses the escape key. */
-		virtual void textEditorEscapeKeyPressed (TextEditor& editor);
-
-		/** Called when the text editor loses focus. */
-		virtual void textEditorFocusLost (TextEditor& editor);
-	};
-
-	/** Registers a listener to be told when things happen to the text.
-
-		@see removeListener
-	*/
-	void addListener (Listener* newListener);
-
-	/** Deregisters a listener.
-
-		@see addListener
-	*/
-	void removeListener (Listener* listenerToRemove);
-
-	/** Returns the entire contents of the editor. */
-	const String getText() const;
-
-	/** Returns a section of the contents of the editor. */
-	const String getTextInRange (const Range<int>& textRange) const;
-
-	/** Returns true if there are no characters in the editor.
-
-		This is more efficient than calling getText().isEmpty().
-	*/
-	bool isEmpty() const;
-
-	/** Sets the entire content of the editor.
-
-		This will clear the editor and insert the given text (using the current text colour
-		and font). You can set the current text colour using
-		@code setColour (TextEditor::textColourId, ...);
-		@endcode
-
-		@param newText		  the text to add
-		@param sendTextChangeMessage	if true, this will cause a change message to
-										be sent to all the listeners.
-		@see insertText
-	*/
-	void setText (const String& newText,
-				  bool sendTextChangeMessage = true);
-
-	/** Returns a Value object that can be used to get or set the text.
-
-		Bear in mind that this operate quite slowly if your text box contains large
-		amounts of text, as it needs to dynamically build the string that's involved. It's
-		best used for small text boxes.
-	*/
-	Value& getTextValue();
-
-	/** Inserts some text at the current caret position.
-
-		If a section of the text is highlighted, it will be replaced by
-		this string, otherwise it will be inserted.
-
-		To delete a section of text, you can use setHighlightedRegion() to
-		highlight it, and call insertTextAtCursor (String::empty).
-
-		@see setCaretPosition, getCaretPosition, setHighlightedRegion
-	*/
-	void insertTextAtCaret (const String& textToInsert);
-
-	/** Deletes all the text from the editor. */
-	void clear();
-
-	/** Deletes the currently selected region.
-		This doesn't copy the deleted section to the clipboard - if you need to do that, call copy() first.
-		@see copy, paste, SystemClipboard
-	*/
-	void cut();
-
-	/** Copies the currently selected region to the clipboard.
-		@see cut, paste, SystemClipboard
-	*/
-	void copy();
-
-	/** Pastes the contents of the clipboard into the editor at the caret position.
-		@see cut, copy, SystemClipboard
-	*/
-	void paste();
-
-	/** Moves the caret to be in front of a given character.
-
-		@see getCaretPosition
-	*/
-	void setCaretPosition (int newIndex);
-
-	/** Returns the current index of the caret.
-
-		@see setCaretPosition
-	*/
-	int getCaretPosition() const;
-
-	/** Attempts to scroll the text editor so that the caret ends up at
-		a specified position.
-
-		This won't affect the caret's position within the text, it tries to scroll
-		the entire editor vertically and horizontally so that the caret is sitting
-		at the given position (relative to the top-left of this component).
-
-		Depending on the amount of text available, it might not be possible to
-		scroll far enough for the caret to reach this exact position, but it
-		will go as far as it can in that direction.
-	*/
-	void scrollEditorToPositionCaret (int desiredCaretX, int desiredCaretY);
-
-	/** Get the graphical position of the caret.
-
-		The rectangle returned is relative to the component's top-left corner.
-		@see scrollEditorToPositionCaret
-	*/
-	const Rectangle<int> getCaretRectangle();
-
-	/** Selects a section of the text. */
-	void setHighlightedRegion (const Range<int>& newSelection);
-
-	/** Returns the range of characters that are selected.
-		If nothing is selected, this will return an empty range.
-		@see setHighlightedRegion
-	*/
-	const Range<int> getHighlightedRegion() const		   { return selection; }
-
-	/** Returns the section of text that is currently selected. */
-	const String getHighlightedText() const;
-
-	/** Finds the index of the character at a given position.
-
-		The co-ordinates are relative to the component's top-left.
-	*/
-	int getTextIndexAt (int x, int y);
-
-	/** Counts the number of characters in the text.
-
-		This is quicker than getting the text as a string if you just need to know
-		the length.
-	*/
-	int getTotalNumChars() const;
-
-	/** Returns the total width of the text, as it is currently laid-out.
-
-		This may be larger than the size of the TextEditor, and can change when
-		the TextEditor is resized or the text changes.
-	*/
-	int getTextWidth() const;
-
-	/** Returns the maximum height of the text, as it is currently laid-out.
-
-		This may be larger than the size of the TextEditor, and can change when
-		the TextEditor is resized or the text changes.
-	*/
-	int getTextHeight() const;
-
-	/** Changes the size of the gap at the top and left-edge of the editor.
-
-		By default there's a gap of 4 pixels.
-	*/
-	void setIndents (int newLeftIndent, int newTopIndent);
-
-	/** Changes the size of border left around the edge of the component.
-
-		@see getBorder
-	*/
-	void setBorder (const BorderSize<int>& border);
-
-	/** Returns the size of border around the edge of the component.
-
-		@see setBorder
-	*/
-	const BorderSize<int> getBorder() const;
-
-	/** Used to disable the auto-scrolling which keeps the caret visible.
-
-		If true (the default), the editor will scroll when the caret moves offscreen. If
-		set to false, it won't.
-	*/
-	void setScrollToShowCursor (bool shouldScrollToShowCaret);
-
-	/** @internal */
-	void paint (Graphics& g);
-	/** @internal */
-	void paintOverChildren (Graphics& g);
-	/** @internal */
-	void mouseDown (const MouseEvent& e);
-	/** @internal */
-	void mouseUp (const MouseEvent& e);
-	/** @internal */
-	void mouseDrag (const MouseEvent& e);
-	/** @internal */
-	void mouseDoubleClick (const MouseEvent& e);
-	/** @internal */
-	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
-	/** @internal */
-	bool keyPressed (const KeyPress& key);
-	/** @internal */
-	bool keyStateChanged (bool isKeyDown);
-	/** @internal */
-	void focusGained (FocusChangeType cause);
-	/** @internal */
-	void focusLost (FocusChangeType cause);
-	/** @internal */
-	void resized();
-	/** @internal */
-	void enablementChanged();
-	/** @internal */
-	void colourChanged();
-	/** @internal */
-	void lookAndFeelChanged();
-	/** @internal */
-	bool isTextInputActive() const;
-	/** @internal */
-	void setTemporaryUnderlining (const Array <Range<int> >&);
-
-	bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
-	bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
-	bool moveCaretUp (bool selecting);
-	bool moveCaretDown (bool selecting);
-	bool pageUp (bool selecting);
-	bool pageDown (bool selecting);
-	bool scrollDown();
-	bool scrollUp();
-	bool moveCaretToTop (bool selecting);
-	bool moveCaretToStartOfLine (bool selecting);
-	bool moveCaretToEnd (bool selecting);
-	bool moveCaretToEndOfLine (bool selecting);
-	bool deleteBackwards (bool moveInWholeWordSteps);
-	bool deleteForwards (bool moveInWholeWordSteps);
-	bool copyToClipboard();
-	bool cutToClipboard();
-	bool pasteFromClipboard();
-	bool selectAll();
-	bool undo();
-	bool redo();
-
-	/** This adds the items to the popup menu.
-
-		By default it adds the cut/copy/paste items, but you can override this if
-		you need to replace these with your own items.
-
-		If you want to add your own items to the existing ones, you can override this,
-		call the base class's addPopupMenuItems() method, then append your own items.
-
-		When the menu has been shown, performPopupMenuAction() will be called to
-		perform the item that the user has chosen.
-
-		The default menu items will be added using item IDs in the range
-		0x7fff0000 - 0x7fff1000, so you should avoid those values for your own
-		menu IDs.
-
-		If this was triggered by a mouse-click, the mouseClickEvent parameter will be
-		a pointer to the info about it, or may be null if the menu is being triggered
-		by some other means.
-
-		@see performPopupMenuAction, setPopupMenuEnabled, isPopupMenuEnabled
-	*/
-	virtual void addPopupMenuItems (PopupMenu& menuToAddTo,
-									const MouseEvent* mouseClickEvent);
-
-	/** This is called to perform one of the items that was shown on the popup menu.
-
-		If you've overridden addPopupMenuItems(), you should also override this
-		to perform the actions that you've added.
-
-		If you've overridden addPopupMenuItems() but have still left the default items
-		on the menu, remember to call the superclass's performPopupMenuAction()
-		so that it can perform the default actions if that's what the user clicked on.
-
-		@see addPopupMenuItems, setPopupMenuEnabled, isPopupMenuEnabled
-	*/
-	virtual void performPopupMenuAction (int menuItemID);
-
-protected:
-
-	/** Scrolls the minimum distance needed to get the caret into view. */
-	void scrollToMakeSureCursorIsVisible();
-
-	/** @internal */
-	void moveCaret (int newCaretPos);
-
-	/** @internal */
-	void moveCaretTo (int newPosition, bool isSelecting);
-
-	/** Used internally to dispatch a text-change message. */
-	void textChanged();
-
-	/** Begins a new transaction in the UndoManager. */
-	void newTransaction();
-
-	/** Used internally to trigger an undo or redo. */
-	void doUndoRedo (bool isRedo);
-
-	/** Can be overridden to intercept return key presses directly */
-	virtual void returnPressed();
-
-	/** Can be overridden to intercept escape key presses directly */
-	virtual void escapePressed();
-
-	/** @internal */
-	void handleCommandMessage (int commandId);
-
-private:
-
-	class Iterator;
-	class UniformTextSection;
-	class TextHolderComponent;
-	class InsertAction;
-	class RemoveAction;
-	friend class InsertAction;
-	friend class RemoveAction;
-
-	ScopedPointer <Viewport> viewport;
-	TextHolderComponent* textHolder;
-	BorderSize<int> borderSize;
-
-	bool readOnly		   : 1;
-	bool multiline		  : 1;
-	bool wordWrap		   : 1;
-	bool returnKeyStartsNewLine	 : 1;
-	bool popupMenuEnabled	   : 1;
-	bool selectAllTextWhenFocused   : 1;
-	bool scrollbarVisible	   : 1;
-	bool wasFocused		 : 1;
-	bool keepCaretOnScreen	  : 1;
-	bool tabKeyUsed		 : 1;
-	bool menuActive		 : 1;
-	bool valueTextNeedsUpdating	 : 1;
-
-	UndoManager undoManager;
-	ScopedPointer<CaretComponent> caret;
-	int maxTextLength;
-	Range<int> selection;
-	int leftIndent, topIndent;
-	unsigned int lastTransactionTime;
-	Font currentFont;
-	mutable int totalNumChars;
-	int caretPosition;
-	Array <UniformTextSection*> sections;
-	String textToShowWhenEmpty;
-	Colour colourForTextWhenEmpty;
-	juce_wchar passwordCharacter;
-	Value textValue;
-
-	enum
-	{
-		notDragging,
-		draggingSelectionStart,
-		draggingSelectionEnd
-	} dragType;
-
-	String allowedCharacters;
-	ListenerList <Listener> listeners;
-	Array <Range<int> > underlinedSections;
-
-	void coalesceSimilarSections();
-	void splitSection (int sectionIndex, int charToSplitAt);
-	void clearInternal (UndoManager* um);
-	void insert (const String& text, int insertIndex, const Font& font,
-				 const Colour& colour, UndoManager* um, int caretPositionToMoveTo);
-	void reinsert (int insertIndex, const Array <UniformTextSection*>& sections);
-	void remove (const Range<int>& range, UndoManager* um, int caretPositionToMoveTo);
-	void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
-	void updateCaretPosition();
-	void textWasChangedByValue();
-	int indexAtPosition (float x, float y);
-	int findWordBreakAfter (int position) const;
-	int findWordBreakBefore (int position) const;
-	bool moveCaretWithTransation (int newPos, bool selecting);
-	friend class TextHolderComponent;
-	friend class TextEditorViewport;
-	void drawContent (Graphics& g);
-	void updateTextHolderSize();
-	float getWordWrapWidth() const;
-	void timerCallbackInt();
-	void repaintText (const Range<int>& range);
-	void scrollByLines (int deltaLines);
-	bool undoOrRedo (bool shouldUndo);
-	UndoManager* getUndoManager() noexcept;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor);
-};
-
-/** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */
-typedef TextEditor::Listener TextEditorListener;
-
-#endif   // __JUCE_TEXTEDITOR_JUCEHEADER__
-
-/*** End of inlined file: juce_TextEditor.h ***/
-
-#if JUCE_VC6
- #define Listener ButtonListener
-#endif
-
-/**
-	A component that displays a text string, and can optionally become a text
-	editor when clicked.
-*/
-class JUCE_API  Label  : public Component,
-						 public SettableTooltipClient,
-						 protected TextEditorListener,
-						 private ComponentListener,
-						 private ValueListener
-{
-public:
-
-	/** Creates a Label.
-
-		@param componentName	the name to give the component
-		@param labelText	the text to show in the label
-	*/
-	Label (const String& componentName = String::empty,
-		   const String& labelText = String::empty);
-
-	/** Destructor. */
-	~Label();
-
-	/** Changes the label text.
-
-		If broadcastChangeMessage is true and the new text is different to the current
-		text, then the class will broadcast a change message to any Label::Listener objects
-		that are registered.
-	*/
-	void setText (const String& newText, bool broadcastChangeMessage);
-
-	/** Returns the label's current text.
-
-		@param returnActiveEditorContents   if this is true and the label is currently
-											being edited, then this method will return the
-											text as it's being shown in the editor. If false,
-											then the value returned here won't be updated until
-											the user has finished typing and pressed the return
-											key.
-	*/
-	const String getText (bool returnActiveEditorContents = false) const;
-
-	/** Returns the text content as a Value object.
-		You can call Value::referTo() on this object to make the label read and control
-		a Value object that you supply.
-	*/
-	Value& getTextValue()				   { return textValue; }
-
-	/** Changes the font to use to draw the text.
-
-		@see getFont
-	*/
-	void setFont (const Font& newFont);
-
-	/** Returns the font currently being used.
-
-		@see setFont
-	*/
-	const Font& getFont() const noexcept;
-
-	/** A set of colour IDs to use to change the colour of various aspects of the label.
-
-		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-		methods.
-
-		Note that you can also use the constants from TextEditor::ColourIds to change the
-		colour of the text editor that is opened when a label is editable.
-
-		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-	*/
-	enum ColourIds
-	{
-		backgroundColourId	 = 0x1000280, /**< The background colour to fill the label with. */
-		textColourId	   = 0x1000281, /**< The colour for the text. */
-		outlineColourId	= 0x1000282  /**< An optional colour to use to draw a border around the label.
-												 Leave this transparent to not have an outline. */
-	};
-
-	/** Sets the style of justification to be used for positioning the text.
-
-		(The default is Justification::centredLeft)
-	*/
-	void setJustificationType (const Justification& justification);
-
-	/** Returns the type of justification, as set in setJustificationType(). */
-	const Justification getJustificationType() const noexcept		   { return justification; }
-
-	/** Changes the gap that is left between the edge of the component and the text.
-		By default there's a small gap left at the sides of the component to allow for
-		the drawing of the border, but you can change this if necessary.
-	*/
-	void setBorderSize (int horizontalBorder, int verticalBorder);
-
-	/** Returns the size of the horizontal gap being left around the text.
-	*/
-	int getHorizontalBorderSize() const noexcept				{ return horizontalBorderSize; }
-
-	/** Returns the size of the vertical gap being left around the text.
-	*/
-	int getVerticalBorderSize() const noexcept				  { return verticalBorderSize; }
-
-	/** Makes this label "stick to" another component.
-
-		This will cause the label to follow another component around, staying
-		either to its left or above it.
-
-		@param owner	the component to follow
-		@param onLeft   if true, the label will stay on the left of its component; if
-						false, it will stay above it.
-	*/
-	void attachToComponent (Component* owner, bool onLeft);
-
-	/** If this label has been attached to another component using attachToComponent, this
-		returns the other component.
-
-		Returns 0 if the label is not attached.
-	*/
-	Component* getAttachedComponent() const;
-
-	/** If the label is attached to the left of another component, this returns true.
-
-		Returns false if the label is above the other component. This is only relevent if
-		attachToComponent() has been called.
-	*/
-	bool isAttachedOnLeft() const noexcept					  { return leftOfOwnerComp; }
-
-	/** Specifies the minimum amount that the font can be squashed horizantally before it starts
-		using ellipsis.
-
-		@see Graphics::drawFittedText
-	*/
-	void setMinimumHorizontalScale (float newScale);
-
-	float getMinimumHorizontalScale() const noexcept				{ return minimumHorizontalScale; }
-
-	/**
-		A class for receiving events from a Label.
-
-		You can register a Label::Listener with a Label using the Label::addListener()
-		method, and it will be called when the text of the label changes, either because
-		of a call to Label::setText() or by the user editing the text (if the label is
-		editable).
-
-		@see Label::addListener, Label::removeListener
-	*/
-	class JUCE_API  Listener
-	{
-	public:
-		/** Destructor. */
-		virtual ~Listener() {}
-
-		/** Called when a Label's text has changed.
-		*/
-		virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
-	};
-
-	/** Registers a listener that will be called when the label's text changes. */
-	void addListener (Listener* listener);
-
-	/** Deregisters a previously-registered listener. */
-	void removeListener (Listener* listener);
-
-	/** Makes the label turn into a TextEditor when clicked.
-
-		By default this is turned off.
-
-		If turned on, then single- or double-clicking will turn the label into
-		an editor. If the user then changes the text, then the ChangeBroadcaster
-		base class will be used to send change messages to any listeners that
-		have registered.
-
-		If the user changes the text, the textWasEdited() method will be called
-		afterwards, and subclasses can override this if they need to do anything
-		special.
-
-		@param editOnSingleClick		if true, just clicking once on the label will start editing the text
-		@param editOnDoubleClick		if true, a double-click is needed to start editing
-		@param lossOfFocusDiscardsChanges   if true, clicking somewhere else while the text is being
-											edited will discard any changes; if false, then this will
-											commit the changes.
-		@see showEditor, setEditorColours, TextEditor
-	*/
-	void setEditable (bool editOnSingleClick,
-					  bool editOnDoubleClick = false,
-					  bool lossOfFocusDiscardsChanges = false);
-
-	/** Returns true if this option was set using setEditable(). */
-	bool isEditableOnSingleClick() const noexcept			   { return editSingleClick; }
-
-	/** Returns true if this option was set using setEditable(). */
-	bool isEditableOnDoubleClick() const noexcept			   { return editDoubleClick; }
-
-	/** Returns true if this option has been set in a call to setEditable(). */
-	bool doesLossOfFocusDiscardChanges() const noexcept		 { return lossOfFocusDiscardsChanges; }
-
-	/** Returns true if the user can edit this label's text. */
-	bool isEditable() const noexcept					{ return editSingleClick || editDoubleClick; }
-
-	/** Makes the editor appear as if the label had been clicked by the user.
-
-		@see textWasEdited, setEditable
-	*/
-	void showEditor();
-
-	/** Hides the editor if it was being shown.
-
-		@param discardCurrentEditorContents	 if true, the label's text will be
-												reset to whatever it was before the editor
-												was shown; if false, the current contents of the
-												editor will be used to set the label's text
-												before it is hidden.
-	*/
-	void hideEditor (bool discardCurrentEditorContents);
-
-	/** Returns true if the editor is currently focused and active. */
-	bool isBeingEdited() const noexcept;
-
-protected:
-
-	/** Creates the TextEditor component that will be used when the user has clicked on the label.
-		Subclasses can override this if they need to customise this component in some way.
-	*/
-	virtual TextEditor* createEditorComponent();
-
-	/** Called after the user changes the text. */
-	virtual void textWasEdited();
-
-	/** Called when the text has been altered. */
-	virtual void textWasChanged();
-
-	/** Called when the text editor has just appeared, due to a user click or other focus change. */
-	virtual void editorShown (TextEditor* editorComponent);
-
-	/** Called when the text editor is going to be deleted, after editing has finished. */
-	virtual void editorAboutToBeHidden (TextEditor* editorComponent);
-
-	/** @internal */
-	void paint (Graphics& g);
-	/** @internal */
-	void resized();
-	/** @internal */
-	void mouseUp (const MouseEvent& e);
-	/** @internal */
-	void mouseDoubleClick (const MouseEvent& e);
-	/** @internal */
-	void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
-	/** @internal */
-	void componentParentHierarchyChanged (Component& component);
-	/** @internal */
-	void componentVisibilityChanged (Component& component);
-	/** @internal */
-	void inputAttemptWhenModal();
-	/** @internal */
-	void focusGained (FocusChangeType);
-	/** @internal */
-	void enablementChanged();
-	/** @internal */
-	KeyboardFocusTraverser* createFocusTraverser();
-	/** @internal */
-	void textEditorTextChanged (TextEditor& editor);
-	/** @internal */
-	void textEditorReturnKeyPressed (TextEditor& editor);
-	/** @internal */
-	void textEditorEscapeKeyPressed (TextEditor& editor);
-	/** @internal */
-	void textEditorFocusLost (TextEditor& editor);
-	/** @internal */
-	void colourChanged();
-	/** @internal */
-	void valueChanged (Value&);
-
-private:
-
-	Value textValue;
-	String lastTextValue;
-	Font font;
-	Justification justification;
-	ScopedPointer<TextEditor> editor;
-	ListenerList<Listener> listeners;
-	WeakReference<Component> ownerComponent;
-	int horizontalBorderSize, verticalBorderSize;
-	float minimumHorizontalScale;
-	bool editSingleClick : 1;
-	bool editDoubleClick : 1;
-	bool lossOfFocusDiscardsChanges : 1;
-	bool leftOfOwnerComp : 1;
-
-	bool updateFromTextEditorContents (TextEditor&);
-	void callChangeListeners();
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label);
-};
-
-/** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
-typedef Label::Listener LabelListener;
-
-#if JUCE_VC6
- #undef Listener
-#endif
-
-#endif   // __JUCE_LABEL_JUCEHEADER__
-
-/*** End of inlined file: juce_Label.h ***/
-
-#if JUCE_VC6
- #define Listener SliderListener
-#endif
-
-/**
-	A component that lets the user choose from a drop-down list of choices.
-
-	The combo-box has a list of text strings, each with an associated id number,
-	that will be shown in the drop-down list when the user clicks on the component.
-
-	The currently selected choice is displayed in the combo-box, and this can
-	either be read-only text, or editable.
-
-	To find out when the user selects a different item or edits the text, you
-	can register a ComboBox::Listener to receive callbacks.
-
-	@see ComboBox::Listener
-*/
-class JUCE_API  ComboBox  : public Component,
-							public SettableTooltipClient,
-							public LabelListener,  // (can't use Label::Listener due to idiotic VC2005 bug)
-							public ValueListener,
-							private AsyncUpdater
-{
-public:
-
-	/** Creates a combo-box.
-
-		On construction, the text field will be empty, so you should call the
-		setSelectedId() or setText() method to choose the initial value before
-		displaying it.
-
-		@param componentName	the name to set for the component (see Component::setName())
-	*/
-	explicit ComboBox (const String& componentName = String::empty);
-
-	/** Destructor. */
-	~ComboBox();
-
-	/** Sets whether the test in the combo-box is editable.
-
-		The default state for a new ComboBox is non-editable, and can only be changed
-		by choosing from the drop-down list.
-	*/
-	void setEditableText (bool isEditable);
-
-	/** Returns true if the text is directly editable.
-		@see setEditableText
-	*/
-	bool isTextEditable() const noexcept;
-
-	/** Sets the style of justification to be used for positioning the text.
-
-		The default is Justification::centredLeft. The text is displayed using a
-		Label component inside the ComboBox.
-	*/
-	void setJustificationType (const Justification& justification);
-
-	/** Returns the current justification for the text box.
-		@see setJustificationType
-	*/
-	const Justification getJustificationType() const noexcept;
-
-	/** Adds an item to be shown in the drop-down list.
-
-		@param newItemText	  the text of the item to show in the list
-		@param newItemId	an associated ID number that can be set or retrieved - see
-								getSelectedId() and setSelectedId(). Note that this value can not
-								be 0!
-		@see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
-	*/
-	void addItem (const String& newItemText, int newItemId);
-
-	/** Adds a separator line to the drop-down list.
-
-		This is like adding a separator to a popup menu. See PopupMenu::addSeparator().
-	*/
-	void addSeparator();
-
-	/** Adds a heading to the drop-down list, so that you can group the items into
-		different sections.
-
-		The headings are indented slightly differently to set them apart from the
-		items on the list, and obviously can't be selected. You might want to add
-		separators between your sections too.
-
-		@see addItem, addSeparator
-	*/
-	void addSectionHeading (const String& headingName);
-
-	/** This allows items in the drop-down list to be selectively disabled.
-
-		When you add an item, it's enabled by default, but you can call this
-		method to change its status.
-
-		If you disable an item which is already selected, this won't change the
-		current selection - it just stops the user choosing that item from the list.
-	*/
-	void setItemEnabled (int itemId, bool shouldBeEnabled);
-
-	/** Returns true if the given item is enabled. */
-	bool isItemEnabled (int itemId) const noexcept;
-
-	/** Changes the text for an existing item.
-	*/
-	void changeItemText (int itemId, const String& newText);
-
-	/** Removes all the items from the drop-down list.
-
-		If this call causes the content to be cleared, then a change-message
-		will be broadcast unless dontSendChangeMessage is true.
-
-		@see addItem, removeItem, getNumItems
-	*/
-	void clear (bool dontSendChangeMessage = false);
-
-	/** Returns the number of items that have been added to the list.
-
-		Note that this doesn't include headers or separators.
-	*/
-	int getNumItems() const noexcept;
-
-	/** Returns the text for one of the items in the list.
-
-		Note that this doesn't include headers or separators.
-
-		@param index	the item's index from 0 to (getNumItems() - 1)
-	*/
-	const String getItemText (int index) const;
-
-	/** Returns the ID for one of the items in the list.
-
-		Note that this doesn't include headers or separators.
-
-		@param index	the item's index from 0 to (getNumItems() - 1)
-	*/
-	int getItemId (int index) const noexcept;
-
-	/** Returns the index in the list of a particular item ID.
-		If no such ID is found, this will return -1.
-	*/
-	int indexOfItemId (int itemId) const noexcept;
-
-	/** Returns the ID of the item that's currently shown in the box.
-
-		If no item is selected, or if the text is editable and the user
-		has entered something which isn't one of the items in the list, then
-		this will return 0.
-
-		@see setSelectedId, getSelectedItemIndex, getText
-	*/
-	int getSelectedId() const noexcept;
-
-	/** Returns a Value object that can be used to get or set the selected item's ID.
-
-		You can call Value::referTo() on this object to make the combo box control
-		another Value object.
-	*/
-	Value& getSelectedIdAsValue()			   { return currentId; }
-
-	/** Sets one of the items to be the current selection.
-
-		This will set the ComboBox's text to that of the item that matches
-		this ID.
-
-		@param newItemId		the new item to select
-		@param dontSendChangeMessage	if set to true, this method won't trigger a
-										change notification
-		@see getSelectedId, setSelectedItemIndex, setText
-	*/
-	void setSelectedId (int newItemId, bool dontSendChangeMessage = false);
-
-	/** Returns the index of the item that's currently shown in the box.
-
-		If no item is selected, or if the text is editable and the user
-		has entered something which isn't one of the items in the list, then
-		this will return -1.
-
-		@see setSelectedItemIndex, getSelectedId, getText
-	*/
-	int getSelectedItemIndex() const;
-
-	/** Sets one of the items to be the current selection.
-
-		This will set the ComboBox's text to that of the item at the given
-		index in the list.
-
-		@param newItemIndex		 the new item to select
-		@param dontSendChangeMessage	if set to true, this method won't trigger a
-										change notification
-		@see getSelectedItemIndex, setSelectedId, setText
-	*/
-	void setSelectedItemIndex (int newItemIndex, bool dontSendChangeMessage = false);
-
-	/** Returns the text that is currently shown in the combo-box's text field.
-
-		If the ComboBox has editable text, then this text may have been edited
-		by the user; otherwise it will be one of the items from the list, or
-		possibly an empty string if nothing was selected.
-
-		@see setText, getSelectedId, getSelectedItemIndex
-	*/
-	const String getText() const;
-
-	/** Sets the contents of the combo-box's text field.
-
-		The text passed-in will be set as the current text regardless of whether
-		it is one of the items in the list. If the current text isn't one of the
-		items, then getSelectedId() will return -1, otherwise it wil return
-		the approriate ID.
-
-		@param newText		  the text to select
-		@param dontSendChangeMessage	if set to true, this method won't trigger a
-										change notification
-		@see getText
-	*/
-	void setText (const String& newText, bool dontSendChangeMessage = false);
-
-	/** Programmatically opens the text editor to allow the user to edit the current item.
-
-		This is the same effect as when the box is clicked-on.
-		@see Label::showEditor();
-	*/
-	void showEditor();
-
-	/** Pops up the combo box's list. */
-	void showPopup();
-
-	/**
-		A class for receiving events from a ComboBox.
-
-		You can register a ComboBox::Listener with a ComboBox using the ComboBox::addListener()
-		method, and it will be called when the selected item in the box changes.
-
-		@see ComboBox::addListener, ComboBox::removeListener
-	*/
-	class JUCE_API  Listener
-	{
-	public:
-		/** Destructor. */
-		virtual ~Listener() {}
-
-		/** Called when a ComboBox has its selected item changed. */
-		virtual void comboBoxChanged (ComboBox* comboBoxThatHasChanged) = 0;
-	};
-
-	/** Registers a listener that will be called when the box's content changes. */
-	void addListener (Listener* listener);
-
-	/** Deregisters a previously-registered listener. */
-	void removeListener (Listener* listener);
-
-	/** Sets a message to display when there is no item currently selected.
-
-		@see getTextWhenNothingSelected
-	*/
-	void setTextWhenNothingSelected (const String& newMessage);
-
-	/** Returns the text that is shown when no item is selected.
-
-		@see setTextWhenNothingSelected
-	*/
-	const String getTextWhenNothingSelected() const;
-
-	/** Sets the message to show when there are no items in the list, and the user clicks
-		on the drop-down box.
-
-		By default it just says "no choices", but this lets you change it to something more
-		meaningful.
-	*/
-	void setTextWhenNoChoicesAvailable (const String& newMessage);
-
-	/** Returns the text shown when no items have been added to the list.
-		@see setTextWhenNoChoicesAvailable
-	*/
-	const String getTextWhenNoChoicesAvailable() const;
-
-	/** Gives the ComboBox a tooltip. */
-	void setTooltip (const String& newTooltip);
-
-	/** A set of colour IDs to use to change the colour of various aspects of the combo box.
-
-		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-		methods.
-
-		To change the colours of the menu that pops up
-
-		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-	*/
-	enum ColourIds
-	{
-		backgroundColourId  = 0x1000b00,	/**< The background colour to fill the box with. */
-		textColourId	= 0x1000a00,	/**< The colour for the text in the box. */
-		outlineColourId	 = 0x1000c00,	/**< The colour for an outline around the box. */
-		buttonColourId	  = 0x1000d00,	/**< The base colour for the button (a LookAndFeel class will probably use variations on this). */
-		arrowColourId	   = 0x1000e00,	/**< The colour for the arrow shape that pops up the menu */
-	};
-
-	/** @internal */
-	void labelTextChanged (Label*);
-	/** @internal */
-	void enablementChanged();
-	/** @internal */
-	void colourChanged();
-	/** @internal */
-	void focusGained (Component::FocusChangeType cause);
-	/** @internal */
-	void focusLost (Component::FocusChangeType cause);
-	/** @internal */
-	void handleAsyncUpdate();
-	/** @internal */
-	const String getTooltip()					   { return label->getTooltip(); }
-	/** @internal */
-	void mouseDown (const MouseEvent&);
-	/** @internal */
-	void mouseDrag (const MouseEvent&);
-	/** @internal */
-	void mouseUp (const MouseEvent&);
-	/** @internal */
-	void lookAndFeelChanged();
-	/** @internal */
-	void paint (Graphics&);
-	/** @internal */
-	void resized();
-	/** @internal */
-	bool keyStateChanged (bool isKeyDown);
-	/** @internal */
-	bool keyPressed (const KeyPress&);
-	/** @internal */
-	void valueChanged (Value&);
-
-private:
-
-	struct ItemInfo
-	{
-		ItemInfo (const String& name, int itemId, bool isEnabled, bool isHeading);
-		bool isSeparator() const noexcept;
-		bool isRealItem() const noexcept;
-
-		String name;
-		int itemId;
-		bool isEnabled : 1, isHeading : 1;
-	};
-
-	OwnedArray <ItemInfo> items;
-	Value currentId;
-	int lastCurrentId;
-	bool isButtonDown, separatorPending, menuActive, textIsCustom;
-	ListenerList <Listener> listeners;
-	ScopedPointer<Label> label;
-	String textWhenNothingSelected, noChoicesMessage;
-
-	ItemInfo* getItemForId (int itemId) const noexcept;
-	ItemInfo* getItemForIndex (int index) const noexcept;
-	bool selectIfEnabled (int index);
-	static void popupMenuFinishedCallback (int, ComboBox*);
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
-};
-
-/** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
-typedef ComboBox::Listener ComboBoxListener;
-
-#if JUCE_VC6
- #undef Listener
-#endif
-
-#endif   // __JUCE_COMBOBOX_JUCEHEADER__
-
-/*** End of inlined file: juce_ComboBox.h ***/
-
 /**
 	Manages the state of some audio and midi i/o devices.
 
@@ -44573,7 +41378,7 @@ private:
 
 	AudioDeviceSetup currentSetup;
 	ScopedPointer <AudioIODevice> currentAudioDevice;
-	SortedSet <AudioIODeviceCallback*> callbacks;
+	Array <AudioIODeviceCallback*> callbacks;
 	int numInputChansNeeded, numOutputChansNeeded;
 	String currentDeviceType;
 	BigInteger inputChannels, outputChannels;
@@ -46863,6 +43668,467 @@ private:
 #ifndef __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
 #define __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
 
+
+/*** Start of inlined file: juce_PopupMenu.h ***/
+#ifndef __JUCE_POPUPMENU_JUCEHEADER__
+#define __JUCE_POPUPMENU_JUCEHEADER__
+
+/** Creates and displays a popup-menu.
+
+	To show a popup-menu, you create one of these, add some items to it, then
+	call its show() method, which returns the id of the item the user selects.
+
+	E.g. @code
+	void MyWidget::mouseDown (const MouseEvent& e)
+	{
+		PopupMenu m;
+		m.addItem (1, "item 1");
+		m.addItem (2, "item 2");
+
+		const int result = m.show();
+
+		if (result == 0)
+		{
+			// user dismissed the menu without picking anything
+		}
+		else if (result == 1)
+		{
+			// user picked item 1
+		}
+		else if (result == 2)
+		{
+			// user picked item 2
+		}
+	}
+	@endcode
+
+	Submenus are easy too: @code
+
+	void MyWidget::mouseDown (const MouseEvent& e)
+	{
+		PopupMenu subMenu;
+		subMenu.addItem (1, "item 1");
+		subMenu.addItem (2, "item 2");
+
+		PopupMenu mainMenu;
+		mainMenu.addItem (3, "item 3");
+		mainMenu.addSubMenu ("other choices", subMenu);
+
+		const int result = m.show();
+
+		...etc
+	}
+	@endcode
+*/
+class JUCE_API  PopupMenu
+{
+public:
+
+	/** Creates an empty popup menu. */
+	PopupMenu();
+
+	/** Creates a copy of another menu. */
+	PopupMenu (const PopupMenu& other);
+
+	/** Destructor. */
+	~PopupMenu();
+
+	/** Copies this menu from another one. */
+	PopupMenu& operator= (const PopupMenu& other);
+
+	/** Resets the menu, removing all its items. */
+	void clear();
+
+	/** Appends a new text item for this menu to show.
+
+		@param itemResultId	 the number that will be returned from the show() method
+								if the user picks this item. The value should never be
+								zero, because that's used to indicate that the user didn't
+								select anything.
+		@param itemText	 the text to show.
+		@param isActive	 if false, the item will be shown 'greyed-out' and can't be
+								picked
+		@param isTicked	 if true, the item will be shown with a tick next to it
+		@param iconToUse	if this is non-zero, it should be an image that will be
+								displayed to the left of the item. This method will take its
+								own copy of the image passed-in, so there's no need to keep
+								it hanging around.
+
+		@see addSeparator, addColouredItem, addCustomItem, addSubMenu
+	*/
+	void addItem (int itemResultId,
+				  const String& itemText,
+				  bool isActive = true,
+				  bool isTicked = false,
+				  const Image& iconToUse = Image::null);
+
+	/** Adds an item that represents one of the commands in a command manager object.
+
+		@param commandManager	   the manager to use to trigger the command and get information
+									about it
+		@param commandID		the ID of the command
+		@param displayName	  if this is non-empty, then this string will be used instead of
+									the command's registered name
+	*/
+	void addCommandItem (ApplicationCommandManager* commandManager,
+						 int commandID,
+						 const String& displayName = String::empty);
+
+	/** Appends a text item with a special colour.
+
+		This is the same as addItem(), but specifies a colour to use for the
+		text, which will override the default colours that are used by the
+		current look-and-feel. See addItem() for a description of the parameters.
+	*/
+	void addColouredItem (int itemResultId,
+						  const String& itemText,
+						  const Colour& itemTextColour,
+						  bool isActive = true,
+						  bool isTicked = false,
+						  const Image& iconToUse = Image::null);
+
+	/** Appends a custom menu item that can't be used to trigger a result.
+
+		This will add a user-defined component to use as a menu item. Unlike the
+		addCustomItem() method that takes a PopupMenu::CustomComponent, this version
+		can't trigger a result from it, so doesn't take a menu ID. It also doesn't
+		delete the component when it's finished, so it's the caller's responsibility
+		to manage the component that is passed-in.
+
+		if triggerMenuItemAutomaticallyWhenClicked is true, the menu itself will handle
+		detection of a mouse-click on your component, and use that to trigger the
+		menu ID specified in itemResultId. If this is false, the menu item can't
+		be triggered, so itemResultId is not used.
+
+		@see CustomComponent
+	*/
+	void addCustomItem (int itemResultId,
+						Component* customComponent,
+						int idealWidth, int idealHeight,
+						bool triggerMenuItemAutomaticallyWhenClicked);
+
+	/** Appends a sub-menu.
+
+		If the menu that's passed in is empty, it will appear as an inactive item.
+	*/
+	void addSubMenu (const String& subMenuName,
+					 const PopupMenu& subMenu,
+					 bool isActive = true,
+					 const Image& iconToUse = Image::null,
+					 bool isTicked = false);
+
+	/** Appends a separator to the menu, to help break it up into sections.
+
+		The menu class is smart enough not to display separators at the top or bottom
+		of the menu, and it will replace mutliple adjacent separators with a single
+		one, so your code can be quite free and easy about adding these, and it'll
+		always look ok.
+	*/
+	void addSeparator();
+
+	/** Adds a non-clickable text item to the menu.
+
+		This is a bold-font items which can be used as a header to separate the items
+		into named groups.
+	*/
+	void addSectionHeader (const String& title);
+
+	/** Returns the number of items that the menu currently contains.
+
+		(This doesn't count separators).
+	*/
+	int getNumItems() const noexcept;
+
+	/** Returns true if the menu contains a command item that triggers the given command. */
+	bool containsCommandItem (int commandID) const;
+
+	/** Returns true if the menu contains any items that can be used. */
+	bool containsAnyActiveItems() const noexcept;
+
+	/** Class used to create a set of options to pass to the show() method.
+		You can chain together a series of calls to this class's methods to create
+		a set of whatever options you want to specify.
+		E.g. @code
+		PopupMenu menu;
+		...
+		menu.showMenu (PopupMenu::Options().withMaximumWidth (100),
+										   .withMaximumNumColumns (3)
+										   .withTargetComponent (myComp));
+		@endcode
+	*/
+	class JUCE_API  Options
+	{
+	public:
+		Options();
+
+		const Options withTargetComponent (Component* targetComponent) const;
+		const Options withTargetScreenArea (const Rectangle<int>& targetArea) const;
+		const Options withMinimumWidth (int minWidth) const;
+		const Options withMaximumNumColumns (int maxNumColumns) const;
+		const Options withStandardItemHeight (int standardHeight) const;
+		const Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
+
+	private:
+		friend class PopupMenu;
+		Rectangle<int> targetArea;
+		Component* targetComponent;
+		int visibleItemID, minWidth, maxColumns, standardHeight;
+	};
+
+   #if JUCE_MODAL_LOOPS_PERMITTED
+	/** Displays the menu and waits for the user to pick something.
+
+		This will display the menu modally, and return the ID of the item that the
+		user picks. If they click somewhere off the menu to get rid of it without
+		choosing anything, this will return 0.
+
+		The current location of the mouse will be used as the position to show the
+		menu - to explicitly set the menu's position, use showAt() instead. Depending
+		on where this point is on the screen, the menu will appear above, below or
+		to the side of the point.
+
+		@param itemIdThatMustBeVisible  if you set this to the ID of one of the menu items,
+										then when the menu first appears, it will make sure
+										that this item is visible. So if the menu has too many
+										items to fit on the screen, it will be scrolled to a
+										position where this item is visible.
+		@param minimumWidth		 a minimum width for the menu, in pixels. It may be wider
+										than this if some items are too long to fit.
+		@param maximumNumColumns	if there are too many items to fit on-screen in a single
+										vertical column, the menu may be laid out as a series of
+										columns - this is the maximum number allowed. To use the
+										default value for this (probably about 7), you can pass
+										in zero.
+		@param standardItemHeight	   if this is non-zero, it will be used as the standard
+										height for menu items (apart from custom items)
+		@param callback		 if this is non-zero, the menu will be launched asynchronously,
+										returning immediately, and the callback will receive a
+										call when the menu is either dismissed or has an item
+										selected. This object will be owned and deleted by the
+										system, so make sure that it works safely and that any
+										pointers that it uses are safely within scope.
+		@see showAt
+	*/
+	int show (int itemIdThatMustBeVisible = 0,
+			  int minimumWidth = 0,
+			  int maximumNumColumns = 0,
+			  int standardItemHeight = 0,
+			  ModalComponentManager::Callback* callback = nullptr);
+
+	/** Displays the menu at a specific location.
+
+		This is the same as show(), but uses a specific location (in global screen
+		co-ordinates) rather than the current mouse position.
+
+		The screenAreaToAttachTo parameter indicates a screen area to which the menu
+		will be adjacent. Depending on where this is, the menu will decide which edge to
+		attach itself to, in order to fit itself fully on-screen. If you just want to
+		trigger a menu at a specific point, you can pass in a rectangle of size (0, 0)
+		with the position that you want.
+
+		@see show()
+	*/
+	int showAt (const Rectangle<int>& screenAreaToAttachTo,
+				int itemIdThatMustBeVisible = 0,
+				int minimumWidth = 0,
+				int maximumNumColumns = 0,
+				int standardItemHeight = 0,
+				ModalComponentManager::Callback* callback = nullptr);
+
+	/** Displays the menu as if it's attached to a component such as a button.
+
+		This is similar to showAt(), but will position it next to the given component, e.g.
+		so that the menu's edge is aligned with that of the component. This is intended for
+		things like buttons that trigger a pop-up menu.
+	*/
+	int showAt (Component* componentToAttachTo,
+				int itemIdThatMustBeVisible = 0,
+				int minimumWidth = 0,
+				int maximumNumColumns = 0,
+				int standardItemHeight = 0,
+				ModalComponentManager::Callback* callback = nullptr);
+
+	/** Displays and runs the menu modally, with a set of options.
+	*/
+	int showMenu (const Options& options);
+   #endif
+
+	/** Runs the menu asynchronously, with a user-provided callback that will receive the result. */
+	void showMenuAsync (const Options& options,
+						ModalComponentManager::Callback* callback);
+
+	/** Closes any menus that are currently open.
+
+		This might be useful if you have a situation where your window is being closed
+		by some means other than a user action, and you'd like to make sure that menus
+		aren't left hanging around.
+	*/
+	static bool JUCE_CALLTYPE dismissAllActiveMenus();
+
+	/** Specifies a look-and-feel for the menu and any sub-menus that it has.
+
+		This can be called before show() if you need a customised menu. Be careful
+		not to delete the LookAndFeel object before the menu has been deleted.
+	*/
+	void setLookAndFeel (LookAndFeel* newLookAndFeel);
+
+	/** A set of colour IDs to use to change the colour of various aspects of the menu.
+
+		These constants can be used either via the LookAndFeel::setColour()
+		method for the look and feel that is set for this menu with setLookAndFeel()
+
+		@see setLookAndFeel, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		backgroundColourId		 = 0x1000700,  /**< The colour to fill the menu's background with. */
+		textColourId		   = 0x1000600,  /**< The colour for normal menu item text, (unless the
+														  colour is specified when the item is added). */
+		headerTextColourId		 = 0x1000601,  /**< The colour for section header item text (see the
+														  addSectionHeader() method). */
+		highlightedBackgroundColourId  = 0x1000900,  /**< The colour to fill the background of the currently
+														  highlighted menu item. */
+		highlightedTextColourId	= 0x1000800,  /**< The colour to use for the text of the currently
+														  highlighted item. */
+	};
+
+	/**
+		Allows you to iterate through the items in a pop-up menu, and examine
+		their properties.
+
+		To use this, just create one and repeatedly call its next() method. When this
+		returns true, all the member variables of the iterator are filled-out with
+		information describing the menu item. When it returns false, the end of the
+		list has been reached.
+	*/
+	class JUCE_API  MenuItemIterator
+	{
+	public:
+
+		/** Creates an iterator that will scan through the items in the specified
+			menu.
+
+			Be careful not to add any items to a menu while it is being iterated,
+			or things could get out of step.
+		*/
+		MenuItemIterator (const PopupMenu& menu);
+
+		/** Destructor. */
+		~MenuItemIterator();
+
+		/** Returns true if there is another item, and sets up all this object's
+			member variables to reflect that item's properties.
+		*/
+		bool next();
+
+		String itemName;
+		const PopupMenu* subMenu;
+		int itemId;
+		bool isSeparator;
+		bool isTicked;
+		bool isEnabled;
+		bool isCustomComponent;
+		bool isSectionHeader;
+		const Colour* customColour;
+		Image customImage;
+		ApplicationCommandManager* commandManager;
+
+	private:
+
+		const PopupMenu& menu;
+		int index;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuItemIterator);
+	};
+
+	/** A user-defined copmonent that can be used as an item in a popup menu.
+		@see PopupMenu::addCustomItem
+	*/
+	class JUCE_API  CustomComponent  : public Component,
+									   public ReferenceCountedObject
+	{
+	public:
+		/** Creates a custom item.
+			If isTriggeredAutomatically is true, then the menu will automatically detect
+			a mouse-click on this component and use that to invoke the menu item. If it's
+			false, then it's up to your class to manually trigger the item when it wants to.
+		*/
+		CustomComponent (bool isTriggeredAutomatically = true);
+
+		/** Destructor. */
+		~CustomComponent();
+
+		/** Returns a rectangle with the size that this component would like to have.
+
+			Note that the size which this method returns isn't necessarily the one that
+			the menu will give it, as the items will be stretched to have a uniform width.
+		*/
+		virtual void getIdealSize (int& idealWidth, int& idealHeight) = 0;
+
+		/** Dismisses the menu, indicating that this item has been chosen.
+
+			This will cause the menu to exit from its modal state, returning
+			this item's id as the result.
+		*/
+		void triggerMenuItem();
+
+		/** Returns true if this item should be highlighted because the mouse is over it.
+			You can call this method in your paint() method to find out whether
+			to draw a highlight.
+		*/
+		bool isItemHighlighted() const noexcept		 { return isHighlighted; }
+
+		/** @internal */
+		bool isTriggeredAutomatically() const noexcept	  { return triggeredAutomatically; }
+		/** @internal */
+		void setHighlighted (bool shouldBeHighlighted);
+
+	private:
+
+		bool isHighlighted, triggeredAutomatically;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponent);
+	};
+
+	/** Appends a custom menu item.
+
+		This will add a user-defined component to use as a menu item. The component
+		passed in will be deleted by this menu when it's no longer needed.
+
+		@see CustomComponent
+	*/
+	void addCustomItem (int itemResultId, CustomComponent* customComponent);
+
+private:
+
+	class Item;
+	class ItemComponent;
+	class Window;
+
+	friend class MenuItemIterator;
+	friend class ItemComponent;
+	friend class Window;
+	friend class CustomComponent;
+	friend class MenuBarComponent;
+	friend class OwnedArray <Item>;
+	friend class OwnedArray <ItemComponent>;
+	friend class ScopedPointer <Window>;
+
+	OwnedArray <Item> items;
+	LookAndFeel* lookAndFeel;
+	bool separatorPending;
+
+	void addSeparatorIfPending();
+	Component* createWindow (const Options&, ApplicationCommandManager**) const;
+	int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
+
+	JUCE_LEAK_DETECTOR (PopupMenu);
+};
+
+#endif   // __JUCE_POPUPMENU_JUCEHEADER__
+
+/*** End of inlined file: juce_PopupMenu.h ***/
+
 /**
 	Manages a list of plugin types.
 
@@ -47086,7 +44352,7 @@ private:
 	int nextIndex;
 	float progress;
 
-	const StringArray getDeadMansPedalFile();
+	StringArray getDeadMansPedalFile();
 	void setDeadMansPedalFile (const StringArray& newContents);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginDirectoryScanner);
@@ -47108,6 +44374,1176 @@ private:
 /*** Start of inlined file: juce_ListBox.h ***/
 #ifndef __JUCE_LISTBOX_JUCEHEADER__
 #define __JUCE_LISTBOX_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_Viewport.h ***/
+#ifndef __JUCE_VIEWPORT_JUCEHEADER__
+#define __JUCE_VIEWPORT_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_ScrollBar.h ***/
+#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
+#define __JUCE_SCROLLBAR_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_Button.h ***/
+#ifndef __JUCE_BUTTON_JUCEHEADER__
+#define __JUCE_BUTTON_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_TooltipWindow.h ***/
+#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+#define __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_TooltipClient.h ***/
+#ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+#define __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+
+/**
+	Components that want to use pop-up tooltips should implement this interface.
+
+	A TooltipWindow will wait for the mouse to hover over a component that
+	implements the TooltipClient interface, and when it finds one, it will display
+	the tooltip returned by its getTooltip() method.
+
+	@see TooltipWindow, SettableTooltipClient
+*/
+class JUCE_API  TooltipClient
+{
+public:
+	/** Destructor. */
+	virtual ~TooltipClient()  {}
+
+	/** Returns the string that this object wants to show as its tooltip. */
+	virtual const String getTooltip() = 0;
+};
+
+/**
+	An implementation of TooltipClient that stores the tooltip string and a method
+	for changing it.
+
+	This makes it easy to add a tooltip to a custom component, by simply adding this
+	as a base class and calling setTooltip().
+
+	Many of the Juce widgets already use this as a base class to implement their
+	tooltips.
+
+	@see TooltipClient, TooltipWindow
+*/
+class JUCE_API  SettableTooltipClient   : public TooltipClient
+{
+public:
+
+	/** Destructor. */
+	virtual ~SettableTooltipClient()				{}
+
+	/** Assigns a new tooltip to this object. */
+	virtual void setTooltip (const String& newTooltip)		  { tooltipString = newTooltip; }
+
+	/** Returns the tooltip assigned to this object. */
+	virtual const String getTooltip()				   { return tooltipString; }
+
+protected:
+	SettableTooltipClient() {}
+
+private:
+	String tooltipString;
+};
+
+#endif   // __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+
+/*** End of inlined file: juce_TooltipClient.h ***/
+
+/**
+	A window that displays a pop-up tooltip when the mouse hovers over another component.
+
+	To enable tooltips in your app, just create a single instance of a TooltipWindow
+	object.
+
+	The TooltipWindow object will then stay invisible, waiting until the mouse
+	hovers for the specified length of time - it will then see if it's currently
+	over a component which implements the TooltipClient interface, and if so,
+	it will make itself visible to show the tooltip in the appropriate place.
+
+	@see TooltipClient, SettableTooltipClient
+*/
+class JUCE_API  TooltipWindow  : public Component,
+								 private Timer
+{
+public:
+
+	/** Creates a tooltip window.
+
+		Make sure your app only creates one instance of this class, otherwise you'll
+		get multiple overlaid tooltips appearing. The window will initially be invisible
+		and will make itself visible when it needs to display a tip.
+
+		To change the style of tooltips, see the LookAndFeel class for its tooltip
+		methods.
+
+		@param parentComponent  if set to 0, the TooltipWindow will appear on the desktop,
+								otherwise the tooltip will be added to the given parent
+								component.
+		@param millisecondsBeforeTipAppears	 the time for which the mouse has to stay still
+												before a tooltip will be shown
+
+		@see TooltipClient, LookAndFeel::drawTooltip, LookAndFeel::getTooltipSize
+	*/
+	explicit TooltipWindow (Component* parentComponent = nullptr,
+							int millisecondsBeforeTipAppears = 700);
+
+	/** Destructor. */
+	~TooltipWindow();
+
+	/** Changes the time before the tip appears.
+		This lets you change the value that was set in the constructor.
+	*/
+	void setMillisecondsBeforeTipAppears (int newTimeMs = 700) noexcept;
+
+	/** A set of colour IDs to use to change the colour of various aspects of the tooltip.
+
+		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+		methods.
+
+		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		backgroundColourId	  = 0x1001b00,	/**< The colour to fill the background with. */
+		textColourId		= 0x1001c00,	/**< The colour to use for the text. */
+		outlineColourId	 = 0x1001c10	 /**< The colour to use to draw an outline around the tooltip. */
+	};
+
+private:
+
+	int millisecondsBeforeTipAppears;
+	Point<int> lastMousePos;
+	int mouseClicks;
+	unsigned int lastCompChangeTime, lastHideTime;
+	Component* lastComponentUnderMouse;
+	bool changedCompsSinceShown;
+	String tipShowing, lastTipUnderMouse;
+
+	void paint (Graphics& g);
+	void mouseEnter (const MouseEvent& e);
+	void timerCallback();
+
+	static String getTipFor (Component* c);
+	void showFor (const String& tip);
+	void hide();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipWindow);
+};
+
+#endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+
+/*** End of inlined file: juce_TooltipWindow.h ***/
+
+#if JUCE_VC6
+ #define Listener ButtonListener
+#endif
+
+/**
+	A base class for buttons.
+
+	This contains all the logic for button behaviours such as enabling/disabling,
+	responding to shortcut keystrokes, auto-repeating when held down, toggle-buttons
+	and radio groups, etc.
+
+	@see TextButton, DrawableButton, ToggleButton
+*/
+class JUCE_API  Button  : public Component,
+						  public SettableTooltipClient,
+						  public ApplicationCommandManagerListener,
+						  public ValueListener,
+						  private KeyListener
+{
+protected:
+
+	/** Creates a button.
+
+		@param buttonName	   the text to put in the button (the component's name is also
+									initially set to this string, but these can be changed later
+									using the setName() and setButtonText() methods)
+	*/
+	explicit Button (const String& buttonName);
+
+public:
+	/** Destructor. */
+	virtual ~Button();
+
+	/** Changes the button's text.
+
+		@see getButtonText
+	*/
+	void setButtonText (const String& newText);
+
+	/** Returns the text displayed in the button.
+
+		@see setButtonText
+	*/
+	const String getButtonText() const			  { return text; }
+
+	/** Returns true if the button is currently being held down by the mouse.
+
+		@see isOver
+	*/
+	bool isDown() const noexcept;
+
+	/** Returns true if the mouse is currently over the button.
+
+		This will be also be true if the mouse is being held down.
+
+		@see isDown
+	*/
+	bool isOver() const noexcept;
+
+	/** A button has an on/off state associated with it, and this changes that.
+
+		By default buttons are 'off' and for simple buttons that you click to perform
+		an action you won't change this. Toggle buttons, however will want to
+		change their state when turned on or off.
+
+		@param shouldBeOn		   whether to set the button's toggle state to be on or
+										off. If it's a member of a button group, this will
+										always try to turn it on, and to turn off any other
+										buttons in the group
+		@param sendChangeNotification   if true, a callback will be made to clicked(); if false
+										the button will be repainted but no notification will
+										be sent
+		@see getToggleState, setRadioGroupId
+	*/
+	void setToggleState (bool shouldBeOn,
+						 bool sendChangeNotification);
+
+	/** Returns true if the button in 'on'.
+
+		By default buttons are 'off' and for simple buttons that you click to perform
+		an action you won't change this. Toggle buttons, however will want to
+		change their state when turned on or off.
+
+		@see setToggleState
+	*/
+	bool getToggleState() const noexcept			{ return isOn.getValue(); }
+
+	/** Returns the Value object that represents the botton's toggle state.
+		You can use this Value object to connect the button's state to external values or setters,
+		either by taking a copy of the Value, or by using Value::referTo() to make it point to
+		your own Value object.
+		@see getToggleState, Value
+	*/
+	Value& getToggleStateValue()				{ return isOn; }
+
+	/** This tells the button to automatically flip the toggle state when
+		the button is clicked.
+
+		If set to true, then before the clicked() callback occurs, the toggle-state
+		of the button is flipped.
+	*/
+	void setClickingTogglesState (bool shouldToggle) noexcept;
+
+	/** Returns true if this button is set to be an automatic toggle-button.
+
+		This returns the last value that was passed to setClickingTogglesState().
+	*/
+	bool getClickingTogglesState() const noexcept;
+
+	/** Enables the button to act as a member of a mutually-exclusive group
+		of 'radio buttons'.
+
+		If the group ID is set to a non-zero number, then this button will
+		act as part of a group of buttons with the same ID, only one of
+		which can be 'on' at the same time. Note that when it's part of
+		a group, clicking a toggle-button that's 'on' won't turn it off.
+
+		To find other buttons with the same ID, this button will search through
+		its sibling components for ToggleButtons, so all the buttons for a
+		particular group must be placed inside the same parent component.
+
+		Set the group ID back to zero if you want it to act as a normal toggle
+		button again.
+
+		@see getRadioGroupId
+	*/
+	void setRadioGroupId (int newGroupId);
+
+	/** Returns the ID of the group to which this button belongs.
+
+		(See setRadioGroupId() for an explanation of this).
+	*/
+	int getRadioGroupId() const noexcept			{ return radioGroupId; }
+
+	/**
+		Used to receive callbacks when a button is clicked.
+
+		@see Button::addListener, Button::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener()					 {}
+
+		/** Called when the button is clicked. */
+		virtual void buttonClicked (Button* button) = 0;
+
+		/** Called when the button's state changes. */
+		virtual void buttonStateChanged (Button*)		   {}
+	};
+
+	/** Registers a listener to receive events when this button's state changes.
+		If the listener is already registered, this will not register it again.
+		@see removeListener
+	*/
+	void addListener (Listener* newListener);
+
+	/** Removes a previously-registered button listener
+		@see addListener
+	*/
+	void removeListener (Listener* listener);
+
+	/** Causes the button to act as if it's been clicked.
+
+		This will asynchronously make the button draw itself going down and up, and
+		will then call back the clicked() method as if mouse was clicked on it.
+
+		@see clicked
+	*/
+	virtual void triggerClick();
+
+	/** Sets a command ID for this button to automatically invoke when it's clicked.
+
+		When the button is pressed, it will use the given manager to trigger the
+		command ID.
+
+		Obviously be careful that the ApplicationCommandManager doesn't get deleted
+		before this button is. To disable the command triggering, call this method and
+		pass 0 for the parameters.
+
+		If generateTooltip is true, then the button's tooltip will be automatically
+		generated based on the name of this command and its current shortcut key.
+
+		@see addShortcut, getCommandID
+	*/
+	void setCommandToTrigger (ApplicationCommandManager* commandManagerToUse,
+							  int commandID,
+							  bool generateTooltip);
+
+	/** Returns the command ID that was set by setCommandToTrigger().
+	*/
+	int getCommandID() const noexcept		   { return commandID; }
+
+	/** Assigns a shortcut key to trigger the button.
+
+		The button registers itself with its top-level parent component for keypresses.
+
+		Note that a different way of linking buttons to keypresses is by using the
+		setCommandToTrigger() method to invoke a command.
+
+		@see clearShortcuts
+	*/
+	void addShortcut (const KeyPress& key);
+
+	/** Removes all key shortcuts that had been set for this button.
+
+		@see addShortcut
+	*/
+	void clearShortcuts();
+
+	/** Returns true if the given keypress is a shortcut for this button.
+
+		@see addShortcut
+	*/
+	bool isRegisteredForShortcut (const KeyPress& key) const;
+
+	/** Sets an auto-repeat speed for the button when it is held down.
+
+		(Auto-repeat is disabled by default).
+
+		@param initialDelayInMillisecs	  how long to wait after the mouse is pressed before
+											triggering the next click. If this is zero, auto-repeat
+											is disabled
+		@param repeatDelayInMillisecs	   the frequently subsequent repeated clicks should be
+											triggered
+		@param minimumDelayInMillisecs	  if this is greater than 0, the auto-repeat speed will
+											get faster, the longer the button is held down, up to the
+											minimum interval specified here
+	*/
+	void setRepeatSpeed (int initialDelayInMillisecs,
+						 int repeatDelayInMillisecs,
+						 int minimumDelayInMillisecs = -1) noexcept;
+
+	/** Sets whether the button click should happen when the mouse is pressed or released.
+
+		By default the button is only considered to have been clicked when the mouse is
+		released, but setting this to true will make it call the clicked() method as soon
+		as the button is pressed.
+
+		This is useful if the button is being used to show a pop-up menu, as it allows
+		the click to be used as a drag onto the menu.
+	*/
+	void setTriggeredOnMouseDown (bool isTriggeredOnMouseDown) noexcept;
+
+	/** Returns the number of milliseconds since the last time the button
+		went into the 'down' state.
+	*/
+	uint32 getMillisecondsSinceButtonDown() const noexcept;
+
+	/** Sets the tooltip for this button.
+
+		@see TooltipClient, TooltipWindow
+	*/
+	void setTooltip (const String& newTooltip);
+
+	// (implementation of the TooltipClient method)
+	const String getTooltip();
+
+	/** A combination of these flags are used by setConnectedEdges().
+	*/
+	enum ConnectedEdgeFlags
+	{
+		ConnectedOnLeft = 1,
+		ConnectedOnRight = 2,
+		ConnectedOnTop = 4,
+		ConnectedOnBottom = 8
+	};
+
+	/** Hints about which edges of the button might be connected to adjoining buttons.
+
+		The value passed in is a bitwise combination of any of the values in the
+		ConnectedEdgeFlags enum.
+
+		E.g. if you are placing two buttons adjacent to each other, you could use this to
+		indicate which edges are touching, and the LookAndFeel might choose to drawn them
+		without rounded corners on the edges that connect. It's only a hint, so the
+		LookAndFeel can choose to ignore it if it's not relevent for this type of
+		button.
+	*/
+	void setConnectedEdges (int connectedEdgeFlags);
+
+	/** Returns the set of flags passed into setConnectedEdges(). */
+	int getConnectedEdgeFlags() const noexcept		  { return connectedEdgeFlags; }
+
+	/** Indicates whether the button adjoins another one on its left edge.
+		@see setConnectedEdges
+	*/
+	bool isConnectedOnLeft() const noexcept			 { return (connectedEdgeFlags & ConnectedOnLeft) != 0; }
+
+	/** Indicates whether the button adjoins another one on its right edge.
+		@see setConnectedEdges
+	*/
+	bool isConnectedOnRight() const noexcept			{ return (connectedEdgeFlags & ConnectedOnRight) != 0; }
+
+	/** Indicates whether the button adjoins another one on its top edge.
+		@see setConnectedEdges
+	*/
+	bool isConnectedOnTop() const noexcept			  { return (connectedEdgeFlags & ConnectedOnTop) != 0; }
+
+	/** Indicates whether the button adjoins another one on its bottom edge.
+		@see setConnectedEdges
+	*/
+	bool isConnectedOnBottom() const noexcept		   { return (connectedEdgeFlags & ConnectedOnBottom) != 0; }
+
+	/** Used by setState(). */
+	enum ButtonState
+	{
+		buttonNormal,
+		buttonOver,
+		buttonDown
+	};
+
+	/** Can be used to force the button into a particular state.
+
+		This only changes the button's appearance, it won't trigger a click, or stop any mouse-clicks
+		from happening.
+
+		The state that you set here will only last until it is automatically changed when the mouse
+		enters or exits the button, or the mouse-button is pressed or released.
+	*/
+	void setState (const ButtonState newState);
+
+	// These are deprecated - please use addListener() and removeListener() instead!
+	JUCE_DEPRECATED (void addButtonListener (Listener*));
+	JUCE_DEPRECATED (void removeButtonListener (Listener*));
+
+protected:
+
+	/** This method is called when the button has been clicked.
+
+		Subclasses can override this to perform whatever they actions they need
+		to do.
+
+		Alternatively, a ButtonListener can be added to the button, and these listeners
+		will be called when the click occurs.
+
+		@see triggerClick
+	*/
+	virtual void clicked();
+
+	/** This method is called when the button has been clicked.
+
+		By default it just calls clicked(), but you might want to override it to handle
+		things like clicking when a modifier key is pressed, etc.
+
+		@see ModifierKeys
+	*/
+	virtual void clicked (const ModifierKeys& modifiers);
+
+	/** Subclasses should override this to actually paint the button's contents.
+
+		It's better to use this than the paint method, because it gives you information
+		about the over/down state of the button.
+
+		@param g			the graphics context to use
+		@param isMouseOverButton	true if the button is either in the 'over' or
+									'down' state
+		@param isButtonDown	 true if the button should be drawn in the 'down' position
+	*/
+	virtual void paintButton (Graphics& g,
+							  bool isMouseOverButton,
+							  bool isButtonDown) = 0;
+
+	/** Called when the button's up/down/over state changes.
+
+		Subclasses can override this if they need to do something special when the button
+		goes up or down.
+
+		@see isDown, isOver
+	*/
+	virtual void buttonStateChanged();
+
+	/** @internal */
+	virtual void internalClickCallback (const ModifierKeys& modifiers);
+	/** @internal */
+	void handleCommandMessage (int commandId);
+	/** @internal */
+	void mouseEnter (const MouseEvent& e);
+	/** @internal */
+	void mouseExit (const MouseEvent& e);
+	/** @internal */
+	void mouseDown (const MouseEvent& e);
+	/** @internal */
+	void mouseDrag (const MouseEvent& e);
+	/** @internal */
+	void mouseUp (const MouseEvent& e);
+	/** @internal */
+	bool keyPressed (const KeyPress& key);
+	/** @internal */
+	bool keyPressed (const KeyPress& key, Component* originatingComponent);
+	/** @internal */
+	bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void parentHierarchyChanged();
+	/** @internal */
+	void visibilityChanged();
+	/** @internal */
+	void focusGained (FocusChangeType cause);
+	/** @internal */
+	void focusLost (FocusChangeType cause);
+	/** @internal */
+	void enablementChanged();
+	/** @internal */
+	void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&);
+	/** @internal */
+	void applicationCommandListChanged();
+	/** @internal */
+	void valueChanged (Value& value);
+
+private:
+
+	Array <KeyPress> shortcuts;
+	WeakReference<Component> keySource;
+	String text;
+	ListenerList <Listener> buttonListeners;
+
+	class RepeatTimer;
+	friend class RepeatTimer;
+	friend class ScopedPointer <RepeatTimer>;
+	ScopedPointer <RepeatTimer> repeatTimer;
+	uint32 buttonPressTime, lastRepeatTime;
+	ApplicationCommandManager* commandManagerToUse;
+	int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
+	int radioGroupId, commandID, connectedEdgeFlags;
+	ButtonState buttonState;
+
+	Value isOn;
+	bool lastToggleState : 1;
+	bool clickTogglesState : 1;
+	bool needsToRelease : 1;
+	bool needsRepainting : 1;
+	bool isKeyDown : 1;
+	bool triggerOnMouseDown : 1;
+	bool generateTooltip : 1;
+
+	void repeatTimerCallback();
+	RepeatTimer& getRepeatTimer();
+
+	ButtonState updateState();
+	ButtonState updateState (bool isOver, bool isDown);
+	bool isShortcutPressed() const;
+	void turnOffOtherButtonsInGroup (bool sendChangeNotification);
+
+	void flashButtonState();
+	void sendClickMessage (const ModifierKeys& modifiers);
+	void sendStateMessage();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button);
+};
+
+#ifndef DOXYGEN
+ /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
+ typedef Button::Listener ButtonListener;
+#endif
+
+#if JUCE_VC6
+ #undef Listener
+#endif
+
+#endif   // __JUCE_BUTTON_JUCEHEADER__
+
+/*** End of inlined file: juce_Button.h ***/
+
+/**
+	A scrollbar component.
+
+	To use a scrollbar, set up its total range using the setRangeLimits() method - this
+	sets the range of values it can represent. Then you can use setCurrentRange() to
+	change the position and size of the scrollbar's 'thumb'.
+
+	Registering a ScrollBar::Listener with the scrollbar will allow you to find out when
+	the user moves it, and you can use the getCurrentRangeStart() to find out where
+	they moved it to.
+
+	The scrollbar will adjust its own visibility according to whether its thumb size
+	allows it to actually be scrolled.
+
+	For most purposes, it's probably easier to use a ViewportContainer or ListBox
+	instead of handling a scrollbar directly.
+
+	@see ScrollBar::Listener
+*/
+class JUCE_API  ScrollBar  : public Component,
+							 public AsyncUpdater,
+							 private Timer
+{
+public:
+
+	/** Creates a Scrollbar.
+
+		@param isVertical	   whether it should be a vertical or horizontal bar
+		@param buttonsAreVisible	whether to show the up/down or left/right buttons
+	*/
+	ScrollBar (bool isVertical,
+			   bool buttonsAreVisible = true);
+
+	/** Destructor. */
+	~ScrollBar();
+
+	/** Returns true if the scrollbar is vertical, false if it's horizontal. */
+	bool isVertical() const noexcept				{ return vertical; }
+
+	/** Changes the scrollbar's direction.
+
+		You'll also need to resize the bar appropriately - this just changes its internal
+		layout.
+
+		@param shouldBeVertical	 true makes it vertical; false makes it horizontal.
+	*/
+	void setOrientation (bool shouldBeVertical);
+
+	/** Shows or hides the scrollbar's buttons. */
+	void setButtonVisibility (bool buttonsAreVisible);
+
+	/** Tells the scrollbar whether to make itself invisible when not needed.
+
+		The default behaviour is for a scrollbar to become invisible when the thumb
+		fills the whole of its range (i.e. when it can't be moved). Setting this
+		value to false forces the bar to always be visible.
+		@see autoHides()
+	*/
+	void setAutoHide (bool shouldHideWhenFullRange);
+
+	/** Returns true if this scrollbar is set to auto-hide when its thumb is as big
+		as its maximum range.
+		@see setAutoHide
+	*/
+	bool autoHides() const noexcept;
+
+	/** Sets the minimum and maximum values that the bar will move between.
+
+		The bar's thumb will always be constrained so that the entire thumb lies
+		within this range.
+
+		@see setCurrentRange
+	*/
+	void setRangeLimits (const Range<double>& newRangeLimit);
+
+	/** Sets the minimum and maximum values that the bar will move between.
+
+		The bar's thumb will always be constrained so that the entire thumb lies
+		within this range.
+
+		@see setCurrentRange
+	*/
+	void setRangeLimits (double minimum, double maximum);
+
+	/** Returns the current limits on the thumb position.
+		@see setRangeLimits
+	*/
+	const Range<double> getRangeLimit() const noexcept		  { return totalRange; }
+
+	/** Returns the lower value that the thumb can be set to.
+
+		This is the value set by setRangeLimits().
+	*/
+	double getMinimumRangeLimit() const noexcept			{ return totalRange.getStart(); }
+
+	/** Returns the upper value that the thumb can be set to.
+
+		This is the value set by setRangeLimits().
+	*/
+	double getMaximumRangeLimit() const noexcept			{ return totalRange.getEnd(); }
+
+	/** Changes the position of the scrollbar's 'thumb'.
+
+		If this method call actually changes the scrollbar's position, it will trigger an
+		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
+		are registered.
+
+		@see getCurrentRange. setCurrentRangeStart
+	*/
+	void setCurrentRange (const Range<double>& newRange);
+
+	/** Changes the position of the scrollbar's 'thumb'.
+
+		This sets both the position and size of the thumb - to just set the position without
+		changing the size, you can use setCurrentRangeStart().
+
+		If this method call actually changes the scrollbar's position, it will trigger an
+		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
+		are registered.
+
+		@param newStart	 the top (or left) of the thumb, in the range
+							getMinimumRangeLimit() <= newStart <= getMaximumRangeLimit(). If the
+							value is beyond these limits, it will be clipped.
+		@param newSize	  the size of the thumb, such that
+							getMinimumRangeLimit() <= newStart + newSize <= getMaximumRangeLimit(). If the
+							size is beyond these limits, it will be clipped.
+		@see setCurrentRangeStart, getCurrentRangeStart, getCurrentRangeSize
+	*/
+	void setCurrentRange (double newStart, double newSize);
+
+	/** Moves the bar's thumb position.
+
+		This will move the thumb position without changing the thumb size. Note
+		that the maximum thumb start position is (getMaximumRangeLimit() - getCurrentRangeSize()).
+
+		If this method call actually changes the scrollbar's position, it will trigger an
+		asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
+		are registered.
+
+		@see setCurrentRange
+	*/
+	void setCurrentRangeStart (double newStart);
+
+	/** Returns the current thumb range.
+		@see getCurrentRange, setCurrentRange
+	*/
+	const Range<double> getCurrentRange() const noexcept		{ return visibleRange; }
+
+	/** Returns the position of the top of the thumb.
+		@see getCurrentRange, setCurrentRangeStart
+	*/
+	double getCurrentRangeStart() const noexcept			{ return visibleRange.getStart(); }
+
+	/** Returns the current size of the thumb.
+		@see getCurrentRange, setCurrentRange
+	*/
+	double getCurrentRangeSize() const noexcept			 { return visibleRange.getLength(); }
+
+	/** Sets the amount by which the up and down buttons will move the bar.
+
+		The value here is in terms of the total range, and is added or subtracted
+		from the thumb position when the user clicks an up/down (or left/right) button.
+	*/
+	void setSingleStepSize (double newSingleStepSize);
+
+	/** Moves the scrollbar by a number of single-steps.
+
+		This will move the bar by a multiple of its single-step interval (as
+		specified using the setSingleStepSize() method).
+
+		A positive value here will move the bar down or to the right, a negative
+		value moves it up or to the left.
+	*/
+	void moveScrollbarInSteps (int howManySteps);
+
+	/** Moves the scroll bar up or down in pages.
+
+		This will move the bar by a multiple of its current thumb size, effectively
+		doing a page-up or down.
+
+		A positive value here will move the bar down or to the right, a negative
+		value moves it up or to the left.
+	*/
+	void moveScrollbarInPages (int howManyPages);
+
+	/** Scrolls to the top (or left).
+
+		This is the same as calling setCurrentRangeStart (getMinimumRangeLimit());
+	*/
+	void scrollToTop();
+
+	/** Scrolls to the bottom (or right).
+
+		This is the same as calling setCurrentRangeStart (getMaximumRangeLimit() - getCurrentRangeSize());
+	*/
+	void scrollToBottom();
+
+	/** Changes the delay before the up and down buttons autorepeat when they are held
+		down.
+
+		For an explanation of what the parameters are for, see Button::setRepeatSpeed().
+
+		@see Button::setRepeatSpeed
+	*/
+	void setButtonRepeatSpeed (int initialDelayInMillisecs,
+							   int repeatDelayInMillisecs,
+							   int minimumDelayInMillisecs = -1);
+
+	/** A set of colour IDs to use to change the colour of various aspects of the component.
+
+		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+		methods.
+
+		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		backgroundColourId	  = 0x1000300,	/**< The background colour of the scrollbar. */
+		thumbColourId		   = 0x1000400,	/**< A base colour to use for the thumb. The look and feel will probably use variations on this colour. */
+		trackColourId		   = 0x1000401	 /**< A base colour to use for the slot area of the bar. The look and feel will probably use variations on this colour. */
+	};
+
+	/**
+		A class for receiving events from a ScrollBar.
+
+		You can register a ScrollBar::Listener with a ScrollBar using the ScrollBar::addListener()
+		method, and it will be called when the bar's position changes.
+
+		@see ScrollBar::addListener, ScrollBar::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when a ScrollBar is moved.
+
+			@param scrollBarThatHasMoved	the bar that has moved
+			@param newRangeStart		the new range start of this bar
+		*/
+		virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
+									 double newRangeStart) = 0;
+	};
+
+	/** Registers a listener that will be called when the scrollbar is moved. */
+	void addListener (Listener* listener);
+
+	/** Deregisters a previously-registered listener. */
+	void removeListener (Listener* listener);
+
+	/** @internal */
+	bool keyPressed (const KeyPress& key);
+	/** @internal */
+	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+	/** @internal */
+	void lookAndFeelChanged();
+	/** @internal */
+	void handleAsyncUpdate();
+	/** @internal */
+	void mouseDown (const MouseEvent& e);
+	/** @internal */
+	void mouseDrag (const MouseEvent& e);
+	/** @internal */
+	void mouseUp   (const MouseEvent& e);
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void resized();
+
+private:
+
+	Range <double> totalRange, visibleRange;
+	double singleStepSize, dragStartRange;
+	int thumbAreaStart, thumbAreaSize, thumbStart, thumbSize;
+	int dragStartMousePos, lastMousePos;
+	int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
+	bool vertical, isDraggingThumb, autohides;
+	class ScrollbarButton;
+	friend class ScopedPointer<ScrollbarButton>;
+	ScopedPointer<ScrollbarButton> upButton, downButton;
+	ListenerList <Listener> listeners;
+
+	void updateThumbPosition();
+	void timerCallback();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar);
+};
+
+/** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */
+typedef ScrollBar::Listener ScrollBarListener;
+
+#endif   // __JUCE_SCROLLBAR_JUCEHEADER__
+
+/*** End of inlined file: juce_ScrollBar.h ***/
+
+/**
+	A Viewport is used to contain a larger child component, and allows the child
+	to be automatically scrolled around.
+
+	To use a Viewport, just create one and set the component that goes inside it
+	using the setViewedComponent() method. When the child component changes size,
+	the Viewport will adjust its scrollbars accordingly.
+
+	A subclass of the viewport can be created which will receive calls to its
+	visibleAreaChanged() method when the subcomponent changes position or size.
+
+*/
+class JUCE_API  Viewport  : public Component,
+							private ComponentListener,
+							private ScrollBar::Listener
+{
+public:
+
+	/** Creates a Viewport.
+
+		The viewport is initially empty - use the setViewedComponent() method to
+		add a child component for it to manage.
+	*/
+	explicit Viewport (const String& componentName = String::empty);
+
+	/** Destructor. */
+	~Viewport();
+
+	/** Sets the component that this viewport will contain and scroll around.
+
+		This will add the given component to this Viewport and position it at (0, 0).
+
+		(Don't add or remove any child components directly using the normal
+		Component::addChildComponent() methods).
+
+		@param newViewedComponent   the component to add to this viewport, or null to remove
+									the current component.
+		@param deleteComponentWhenNoLongerNeeded	if true, the component will be deleted
+									automatically when the viewport is deleted or when a different
+									component is added. If false, the caller must manage the lifetime
+									of the component
+		@see getViewedComponent
+	*/
+	void setViewedComponent (Component* newViewedComponent,
+							 bool deleteComponentWhenNoLongerNeeded = true);
+
+	/** Returns the component that's currently being used inside the Viewport.
+
+		@see setViewedComponent
+	*/
+	Component* getViewedComponent() const noexcept		  { return contentComp; }
+
+	/** Changes the position of the viewed component.
+
+		The inner component will be moved so that the pixel at the top left of
+		the viewport will be the pixel at position (xPixelsOffset, yPixelsOffset)
+		within the inner component.
+
+		This will update the scrollbars and might cause a call to visibleAreaChanged().
+
+		@see getViewPositionX, getViewPositionY, setViewPositionProportionately
+	*/
+	void setViewPosition (int xPixelsOffset, int yPixelsOffset);
+
+	/** Changes the position of the viewed component.
+
+		The inner component will be moved so that the pixel at the top left of
+		the viewport will be the pixel at the specified coordinates within the
+		inner component.
+
+		This will update the scrollbars and might cause a call to visibleAreaChanged().
+
+		@see getViewPositionX, getViewPositionY, setViewPositionProportionately
+	*/
+	void setViewPosition (const Point<int>& newPosition);
+
+	/** Changes the view position as a proportion of the distance it can move.
+
+		The values here are from 0.0 to 1.0 - where (0, 0) would put the
+		visible area in the top-left, and (1, 1) would put it as far down and
+		to the right as it's possible to go whilst keeping the child component
+		on-screen.
+	*/
+	void setViewPositionProportionately (double proportionX, double proportionY);
+
+	/** If the specified position is at the edges of the viewport, this method scrolls
+		the viewport to bring that position nearer to the centre.
+
+		Call this if you're dragging an object inside a viewport and want to make it scroll
+		when the user approaches an edge. You might also find Component::beginDragAutoRepeat()
+		useful when auto-scrolling.
+
+		@param mouseX	   the x position, relative to the Viewport's top-left
+		@param mouseY	   the y position, relative to the Viewport's top-left
+		@param distanceFromEdge	 specifies how close to an edge the position needs to be
+							before the viewport should scroll in that direction
+		@param maximumSpeed the maximum number of pixels that the viewport is allowed
+							to scroll by.
+		@returns		true if the viewport was scrolled
+	*/
+	bool autoScroll (int mouseX, int mouseY, int distanceFromEdge, int maximumSpeed);
+
+	/** Returns the position within the child component of the top-left of its visible area.
+	*/
+	const Point<int> getViewPosition() const noexcept	   { return lastVisibleArea.getPosition(); }
+
+	/** Returns the position within the child component of the top-left of its visible area.
+		@see getViewWidth, setViewPosition
+	*/
+	int getViewPositionX() const noexcept		   { return lastVisibleArea.getX(); }
+
+	/** Returns the position within the child component of the top-left of its visible area.
+		@see getViewHeight, setViewPosition
+	*/
+	int getViewPositionY() const noexcept		   { return lastVisibleArea.getY(); }
+
+	/** Returns the width of the visible area of the child component.
+
+		This may be less than the width of this Viewport if there's a vertical scrollbar
+		or if the child component is itself smaller.
+	*/
+	int getViewWidth() const noexcept			   { return lastVisibleArea.getWidth(); }
+
+	/** Returns the height of the visible area of the child component.
+
+		This may be less than the height of this Viewport if there's a horizontal scrollbar
+		or if the child component is itself smaller.
+	*/
+	int getViewHeight() const noexcept			  { return lastVisibleArea.getHeight(); }
+
+	/** Returns the width available within this component for the contents.
+
+		This will be the width of the viewport component minus the width of a
+		vertical scrollbar (if visible).
+	*/
+	int getMaximumVisibleWidth() const;
+
+	/** Returns the height available within this component for the contents.
+
+		This will be the height of the viewport component minus the space taken up
+		by a horizontal scrollbar (if visible).
+	*/
+	int getMaximumVisibleHeight() const;
+
+	/** Callback method that is called when the visible area changes.
+
+		This will be called when the visible area is moved either be scrolling or
+		by calls to setViewPosition(), etc.
+	*/
+	virtual void visibleAreaChanged (const Rectangle<int>& newVisibleArea);
+
+	/** Turns scrollbars on or off.
+
+		If set to false, the scrollbars won't ever appear. When true (the default)
+		they will appear only when needed.
+	*/
+	void setScrollBarsShown (bool showVerticalScrollbarIfNeeded,
+							 bool showHorizontalScrollbarIfNeeded);
+
+	/** True if the vertical scrollbar is enabled.
+		@see setScrollBarsShown
+	*/
+	bool isVerticalScrollBarShown() const noexcept		  { return showVScrollbar; }
+
+	/** True if the horizontal scrollbar is enabled.
+		@see setScrollBarsShown
+	*/
+	bool isHorizontalScrollBarShown() const noexcept		{ return showHScrollbar; }
+
+	/** Changes the width of the scrollbars.
+
+		If this isn't specified, the default width from the LookAndFeel class will be used.
+
+		@see LookAndFeel::getDefaultScrollbarWidth
+	*/
+	void setScrollBarThickness (int thickness);
+
+	/** Returns the thickness of the scrollbars.
+
+		@see setScrollBarThickness
+	*/
+	int getScrollBarThickness() const;
+
+	/** Changes the distance that a single-step click on a scrollbar button
+		will move the viewport.
+	*/
+	void setSingleStepSizes (int stepX, int stepY);
+
+	/** Shows or hides the buttons on any scrollbars that are used.
+
+		@see ScrollBar::setButtonVisibility
+	*/
+	void setScrollBarButtonVisibility (bool buttonsVisible);
+
+	/** Returns a pointer to the scrollbar component being used.
+		Handy if you need to customise the bar somehow.
+	*/
+	ScrollBar* getVerticalScrollBar() noexcept		  { return &verticalScrollBar; }
+
+	/** Returns a pointer to the scrollbar component being used.
+		Handy if you need to customise the bar somehow.
+	*/
+	ScrollBar* getHorizontalScrollBar() noexcept		{ return &horizontalScrollBar; }
+
+	/** @internal */
+	void resized();
+	/** @internal */
+	void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
+	/** @internal */
+	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+	/** @internal */
+	bool keyPressed (const KeyPress& key);
+	/** @internal */
+	void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+	/** @internal */
+	bool useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+
+private:
+
+	WeakReference<Component> contentComp;
+	Rectangle<int> lastVisibleArea;
+	int scrollBarThickness;
+	int singleStepX, singleStepY;
+	bool showHScrollbar, showVScrollbar, deleteContent;
+	Component contentHolder;
+	ScrollBar verticalScrollBar;
+	ScrollBar horizontalScrollBar;
+
+	void updateVisibleArea();
+	void deleteContentComp();
+
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+	// If you get an error here, it's because this method's parameters have changed! See the new definition above..
+	virtual int visibleAreaChanged (int, int, int, int) { return 0; }
+   #endif
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Viewport);
+};
+
+#endif   // __JUCE_VIEWPORT_JUCEHEADER__
+
+/*** End of inlined file: juce_Viewport.h ***/
 
 class ListViewport;
 
@@ -48439,7 +46875,7 @@ public:
 
 		These are the sections that have been added with addSection().
 	*/
-	const StringArray getSectionNames() const;
+	StringArray getSectionNames() const;
 
 	/** Returns true if the section at this index is currently open.
 
@@ -49212,6 +47648,7 @@ private:
 #define __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 
 class InterprocessConnectionServer;
+class MemoryBlock;
 
 /**
 	Manages a simple two-way messaging connection to another process, using either
@@ -49478,6 +47915,9 @@ private:
 
 class Component;
 class MessageManagerLock;
+class ThreadPoolJob;
+class ActionListener;
+class ActionBroadcaster;
 
 /** See MessageManager::callFunctionOnMessageThread() for use of this function type
 */
@@ -50056,7 +48496,7 @@ public:
 	/** Returns a string which represents this coordinate.
 		For details of the string syntax, see the constructor notes.
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** A set of static strings that are commonly used by the RelativeCoordinate class.
 
@@ -50160,7 +48600,7 @@ public:
 		coordinates, see the RelativeCoordinate constructor notes.
 		The string that is returned can be passed to the RelativePoint constructor to recreate the point.
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Returns true if this point depends on any other coordinates for its position. */
 	bool isDynamic() const;
@@ -51069,7 +49509,7 @@ private:
 	bool resizeFont;
 	Justification justification;
 
-	const Font getFontToUse() const;
+	Font getFontToUse() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HyperlinkButton);
 };
@@ -51166,21 +49606,21 @@ public:
 					float hitTestAlphaThreshold = 0.0f);
 
 	/** Returns the currently set 'normal' image. */
-	const Image getNormalImage() const;
+	Image getNormalImage() const;
 
 	/** Returns the image that's drawn when the mouse is over the button.
 
 		If a valid 'over' image has been set, this will return it; otherwise it'll
 		just return the normal image.
 	*/
-	const Image getOverImage() const;
+	Image getOverImage() const;
 
 	/** Returns the image that's drawn when the button is held down.
 
 		If a valid 'down' image has been set, this will return it; otherwise it'll
 		return the 'over' image or normal image, depending on what's available.
 	*/
-	const Image getDownImage() const;
+	Image getDownImage() const;
 
 protected:
 
@@ -51200,7 +49640,7 @@ private:
 	float normalOpacity, overOpacity, downOpacity;
 	Colour normalOverlay, overOverlay, downOverlay;
 
-	const Image getCurrentImage() const;
+	Image getCurrentImage() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageButton);
 };
@@ -52556,6 +50996,117 @@ private:
 #define __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
 
 
+/*** Start of inlined file: juce_TextInputTarget.h ***/
+#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+#define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+
+/**
+	An abstract base class which can be implemented by components that function as
+	text editors.
+
+	This class allows different types of text editor component to provide a uniform
+	interface, which can be used by things like OS-specific input methods, on-screen
+	keyboards, etc.
+*/
+class JUCE_API  TextInputTarget
+{
+public:
+
+	/** */
+	TextInputTarget() {}
+
+	/** Destructor. */
+	virtual ~TextInputTarget() {}
+
+	/** Returns true if this input target is currently accepting input.
+		For example, a text editor might return false if it's in read-only mode.
+	*/
+	virtual bool isTextInputActive() const = 0;
+
+	/** Returns the extents of the selected text region, or an empty range if
+		nothing is selected,
+	*/
+	virtual const Range<int> getHighlightedRegion() const = 0;
+
+	/** Sets the currently-selected text region. */
+	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
+
+	/** Sets a number of temporarily underlined sections.
+		This is needed by MS Windows input method UI.
+	*/
+	virtual void setTemporaryUnderlining (const Array <Range<int> >& underlinedRegions) = 0;
+
+	/** Returns a specified sub-section of the text. */
+	virtual const String getTextInRange (const Range<int>& range) const = 0;
+
+	/** Inserts some text, overwriting the selected text region, if there is one. */
+	virtual void insertTextAtCaret (const String& textToInsert) = 0;
+
+	/** Returns the position of the caret, relative to the component's origin. */
+	virtual const Rectangle<int> getCaretRectangle() = 0;
+};
+
+#endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+
+/*** End of inlined file: juce_TextInputTarget.h ***/
+
+
+/*** Start of inlined file: juce_CaretComponent.h ***/
+#ifndef __JUCE_CARETCOMPONENT_JUCEHEADER__
+#define __JUCE_CARETCOMPONENT_JUCEHEADER__
+
+/**
+*/
+class JUCE_API  CaretComponent   : public Component,
+								   public Timer
+{
+public:
+
+	/** Creates the caret component.
+		The keyFocusOwner is an optional component which the caret will check, making
+		itself visible only when the keyFocusOwner has keyboard focus.
+	*/
+	CaretComponent (Component* keyFocusOwner);
+
+	/** Destructor. */
+	~CaretComponent();
+
+	/** Sets the caret's position to place it next to the given character.
+		The area is the rectangle containing the entire character that the caret is
+		positioned on, so by default a vertical-line caret may choose to just show itself
+		at the left of this area. You can override this method to customise its size.
+		This method will also force the caret to reset its timer and become visible (if
+		appropriate), so that as it moves, you can see where it is.
+	*/
+	virtual void setCaretPosition (const Rectangle<int>& characterArea);
+
+	/** A set of colour IDs to use to change the colour of various aspects of the caret.
+		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+		methods.
+		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		caretColourId	= 0x1000204, /**< The colour with which to draw the caret. */
+	};
+
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void timerCallback();
+
+private:
+	Component* owner;
+	bool shouldBeShown() const;
+
+	JUCE_DECLARE_NON_COPYABLE (CaretComponent);
+};
+
+#endif   // __JUCE_CARETCOMPONENT_JUCEHEADER__
+
+/*** End of inlined file: juce_CaretComponent.h ***/
+
+
 /*** Start of inlined file: juce_CodeTokeniser.h ***/
 #ifndef __JUCE_CODETOKENISER_JUCEHEADER__
 #define __JUCE_CODETOKENISER_JUCEHEADER__
@@ -52928,6 +51479,1352 @@ private:
 #endif
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
 
+/*** Start of inlined file: juce_ComboBox.h ***/
+#ifndef __JUCE_COMBOBOX_JUCEHEADER__
+#define __JUCE_COMBOBOX_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_Label.h ***/
+#ifndef __JUCE_LABEL_JUCEHEADER__
+#define __JUCE_LABEL_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_TextEditor.h ***/
+#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
+#define __JUCE_TEXTEDITOR_JUCEHEADER__
+
+/**
+	A component containing text that can be edited.
+
+	A TextEditor can either be in single- or multi-line mode, and supports mixed
+	fonts and colours.
+
+	@see TextEditor::Listener, Label
+*/
+class JUCE_API  TextEditor  : public Component,
+							  public TextInputTarget,
+							  public SettableTooltipClient
+{
+public:
+
+	/** Creates a new, empty text editor.
+
+		@param componentName	the name to pass to the component for it to use as its name
+		@param passwordCharacter	if this is not zero, this character will be used as a replacement
+									for all characters that are drawn on screen - e.g. to create
+									a password-style textbox containing circular blobs instead of text,
+									you could set this value to 0x25cf, which is the unicode character
+									for a black splodge (not all fonts include this, though), or 0x2022,
+									which is a bullet (probably the best choice for linux).
+	*/
+	explicit TextEditor (const String& componentName = String::empty,
+						 juce_wchar passwordCharacter = 0);
+
+	/** Destructor. */
+	virtual ~TextEditor();
+
+	/** Puts the editor into either multi- or single-line mode.
+
+		By default, the editor will be in single-line mode, so use this if you need a multi-line
+		editor.
+
+		See also the setReturnKeyStartsNewLine() method, which will also need to be turned
+		on if you want a multi-line editor with line-breaks.
+
+		@see isMultiLine, setReturnKeyStartsNewLine
+	*/
+	void setMultiLine (bool shouldBeMultiLine,
+					   bool shouldWordWrap = true);
+
+	/** Returns true if the editor is in multi-line mode.
+	*/
+	bool isMultiLine() const;
+
+	/** Changes the behaviour of the return key.
+
+		If set to true, the return key will insert a new-line into the text; if false
+		it will trigger a call to the TextEditor::Listener::textEditorReturnKeyPressed()
+		method. By default this is set to false, and when true it will only insert
+		new-lines when in multi-line mode (see setMultiLine()).
+	*/
+	void setReturnKeyStartsNewLine (bool shouldStartNewLine);
+
+	/** Returns the value set by setReturnKeyStartsNewLine().
+
+		See setReturnKeyStartsNewLine() for more info.
+	*/
+	bool getReturnKeyStartsNewLine() const			  { return returnKeyStartsNewLine; }
+
+	/** Indicates whether the tab key should be accepted and used to input a tab character,
+		or whether it gets ignored.
+
+		By default the tab key is ignored, so that it can be used to switch keyboard focus
+		between components.
+	*/
+	void setTabKeyUsedAsCharacter (bool shouldTabKeyBeUsed);
+
+	/** Returns true if the tab key is being used for input.
+		@see setTabKeyUsedAsCharacter
+	*/
+	bool isTabKeyUsedAsCharacter() const			{ return tabKeyUsed; }
+
+	/** Changes the editor to read-only mode.
+
+		By default, the text editor is not read-only. If you're making it read-only, you
+		might also want to call setCaretVisible (false) to get rid of the caret.
+
+		The text can still be highlighted and copied when in read-only mode.
+
+		@see isReadOnly, setCaretVisible
+	*/
+	void setReadOnly (bool shouldBeReadOnly);
+
+	/** Returns true if the editor is in read-only mode.
+	*/
+	bool isReadOnly() const;
+
+	/** Makes the caret visible or invisible.
+		By default the caret is visible.
+		@see setCaretColour, setCaretPosition
+	*/
+	void setCaretVisible (bool shouldBeVisible);
+
+	/** Returns true if the caret is enabled.
+		@see setCaretVisible
+	*/
+	bool isCaretVisible() const				 { return caret != nullptr; }
+
+	/** Enables/disables a vertical scrollbar.
+
+		(This only applies when in multi-line mode). When the text gets too long to fit
+		in the component, a scrollbar can appear to allow it to be scrolled. Even when
+		this is enabled, the scrollbar will be hidden unless it's needed.
+
+		By default the scrollbar is enabled.
+	*/
+	void setScrollbarsShown (bool shouldBeEnabled);
+
+	/** Returns true if scrollbars are enabled.
+		@see setScrollbarsShown
+	*/
+	bool areScrollbarsShown() const				 { return scrollbarVisible; }
+
+	/** Changes the password character used to disguise the text.
+
+		@param passwordCharacter	if this is not zero, this character will be used as a replacement
+									for all characters that are drawn on screen - e.g. to create
+									a password-style textbox containing circular blobs instead of text,
+									you could set this value to 0x25cf, which is the unicode character
+									for a black splodge (not all fonts include this, though), or 0x2022,
+									which is a bullet (probably the best choice for linux).
+	*/
+	void setPasswordCharacter (juce_wchar passwordCharacter);
+
+	/** Returns the current password character.
+		@see setPasswordCharacter
+	*/
+	juce_wchar getPasswordCharacter() const			 { return passwordCharacter; }
+
+	/** Allows a right-click menu to appear for the editor.
+
+		(This defaults to being enabled).
+
+		If enabled, right-clicking (or command-clicking on the Mac) will pop up a menu
+		of options such as cut/copy/paste, undo/redo, etc.
+	*/
+	void setPopupMenuEnabled (bool menuEnabled);
+
+	/** Returns true if the right-click menu is enabled.
+		@see setPopupMenuEnabled
+	*/
+	bool isPopupMenuEnabled() const				 { return popupMenuEnabled; }
+
+	/** Returns true if a popup-menu is currently being displayed.
+	*/
+	bool isPopupMenuCurrentlyActive() const			 { return menuActive; }
+
+	/** A set of colour IDs to use to change the colour of various aspects of the editor.
+
+		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+		methods.
+
+		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		backgroundColourId	   = 0x1000200, /**< The colour to use for the text component's background - this can be
+												   transparent if necessary. */
+
+		textColourId		 = 0x1000201, /**< The colour that will be used when text is added to the editor. Note
+												   that because the editor can contain multiple colours, calling this
+												   method won't change the colour of existing text - to do that, call
+												   applyFontToAllText() after calling this method.*/
+
+		highlightColourId	= 0x1000202, /**< The colour with which to fill the background of highlighted sections of
+												   the text - this can be transparent if you don't want to show any
+												   highlighting.*/
+
+		highlightedTextColourId  = 0x1000203, /**< The colour with which to draw the text in highlighted sections. */
+
+		outlineColourId	  = 0x1000205, /**< If this is non-transparent, it will be used to draw a box around
+												   the edge of the component. */
+
+		focusedOutlineColourId   = 0x1000206, /**< If this is non-transparent, it will be used to draw a box around
+												   the edge of the component when it has focus. */
+
+		shadowColourId	   = 0x1000207, /**< If this is non-transparent, it'll be used to draw an inner shadow
+												   around the edge of the editor. */
+	};
+
+	/** Sets the font to use for newly added text.
+
+		This will change the font that will be used next time any text is added or entered
+		into the editor. It won't change the font of any existing text - to do that, use
+		applyFontToAllText() instead.
+
+		@see applyFontToAllText
+	*/
+	void setFont (const Font& newFont);
+
+	/** Applies a font to all the text in the editor.
+
+		This will also set the current font to use for any new text that's added.
+
+		@see setFont
+	*/
+	void applyFontToAllText (const Font& newFont);
+
+	/** Returns the font that's currently being used for new text.
+
+		@see setFont
+	*/
+	const Font& getFont() const;
+
+	/** If set to true, focusing on the editor will highlight all its text.
+
+		(Set to false by default).
+
+		This is useful for boxes where you expect the user to re-enter all the
+		text when they focus on the component, rather than editing what's already there.
+	*/
+	void setSelectAllWhenFocused (bool b);
+
+	/** Sets limits on the characters that can be entered.
+
+		@param maxTextLength	if this is > 0, it sets a maximum length limit; if 0, no
+									limit is set
+		@param allowedCharacters	if this is non-empty, then only characters that occur in
+									this string are allowed to be entered into the editor.
+	*/
+	void setInputRestrictions (int maxTextLength,
+							   const String& allowedCharacters = String::empty);
+
+	/** When the text editor is empty, it can be set to display a message.
+
+		This is handy for things like telling the user what to type in the box - the
+		string is only displayed, it's not taken to actually be the contents of
+		the editor.
+	*/
+	void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse);
+
+	/** Changes the size of the scrollbars that are used.
+
+		Handy if you need smaller scrollbars for a small text box.
+	*/
+	void setScrollBarThickness (int newThicknessPixels);
+
+	/** Shows or hides the buttons on any scrollbars that are used.
+
+		@see ScrollBar::setButtonVisibility
+	*/
+	void setScrollBarButtonVisibility (bool buttonsVisible);
+
+	/**
+		Receives callbacks from a TextEditor component when it changes.
+
+		@see TextEditor::addListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener()  {}
+
+		/** Called when the user changes the text in some way. */
+		virtual void textEditorTextChanged (TextEditor& editor);
+
+		/** Called when the user presses the return key. */
+		virtual void textEditorReturnKeyPressed (TextEditor& editor);
+
+		/** Called when the user presses the escape key. */
+		virtual void textEditorEscapeKeyPressed (TextEditor& editor);
+
+		/** Called when the text editor loses focus. */
+		virtual void textEditorFocusLost (TextEditor& editor);
+	};
+
+	/** Registers a listener to be told when things happen to the text.
+
+		@see removeListener
+	*/
+	void addListener (Listener* newListener);
+
+	/** Deregisters a listener.
+
+		@see addListener
+	*/
+	void removeListener (Listener* listenerToRemove);
+
+	/** Returns the entire contents of the editor. */
+	String getText() const;
+
+	/** Returns a section of the contents of the editor. */
+	const String getTextInRange (const Range<int>& textRange) const;
+
+	/** Returns true if there are no characters in the editor.
+
+		This is more efficient than calling getText().isEmpty().
+	*/
+	bool isEmpty() const;
+
+	/** Sets the entire content of the editor.
+
+		This will clear the editor and insert the given text (using the current text colour
+		and font). You can set the current text colour using
+		@code setColour (TextEditor::textColourId, ...);
+		@endcode
+
+		@param newText		  the text to add
+		@param sendTextChangeMessage	if true, this will cause a change message to
+										be sent to all the listeners.
+		@see insertText
+	*/
+	void setText (const String& newText,
+				  bool sendTextChangeMessage = true);
+
+	/** Returns a Value object that can be used to get or set the text.
+
+		Bear in mind that this operate quite slowly if your text box contains large
+		amounts of text, as it needs to dynamically build the string that's involved. It's
+		best used for small text boxes.
+	*/
+	Value& getTextValue();
+
+	/** Inserts some text at the current caret position.
+
+		If a section of the text is highlighted, it will be replaced by
+		this string, otherwise it will be inserted.
+
+		To delete a section of text, you can use setHighlightedRegion() to
+		highlight it, and call insertTextAtCursor (String::empty).
+
+		@see setCaretPosition, getCaretPosition, setHighlightedRegion
+	*/
+	void insertTextAtCaret (const String& textToInsert);
+
+	/** Deletes all the text from the editor. */
+	void clear();
+
+	/** Deletes the currently selected region.
+		This doesn't copy the deleted section to the clipboard - if you need to do that, call copy() first.
+		@see copy, paste, SystemClipboard
+	*/
+	void cut();
+
+	/** Copies the currently selected region to the clipboard.
+		@see cut, paste, SystemClipboard
+	*/
+	void copy();
+
+	/** Pastes the contents of the clipboard into the editor at the caret position.
+		@see cut, copy, SystemClipboard
+	*/
+	void paste();
+
+	/** Moves the caret to be in front of a given character.
+
+		@see getCaretPosition
+	*/
+	void setCaretPosition (int newIndex);
+
+	/** Returns the current index of the caret.
+
+		@see setCaretPosition
+	*/
+	int getCaretPosition() const;
+
+	/** Attempts to scroll the text editor so that the caret ends up at
+		a specified position.
+
+		This won't affect the caret's position within the text, it tries to scroll
+		the entire editor vertically and horizontally so that the caret is sitting
+		at the given position (relative to the top-left of this component).
+
+		Depending on the amount of text available, it might not be possible to
+		scroll far enough for the caret to reach this exact position, but it
+		will go as far as it can in that direction.
+	*/
+	void scrollEditorToPositionCaret (int desiredCaretX, int desiredCaretY);
+
+	/** Get the graphical position of the caret.
+
+		The rectangle returned is relative to the component's top-left corner.
+		@see scrollEditorToPositionCaret
+	*/
+	const Rectangle<int> getCaretRectangle();
+
+	/** Selects a section of the text. */
+	void setHighlightedRegion (const Range<int>& newSelection);
+
+	/** Returns the range of characters that are selected.
+		If nothing is selected, this will return an empty range.
+		@see setHighlightedRegion
+	*/
+	const Range<int> getHighlightedRegion() const		   { return selection; }
+
+	/** Returns the section of text that is currently selected. */
+	String getHighlightedText() const;
+
+	/** Finds the index of the character at a given position.
+
+		The co-ordinates are relative to the component's top-left.
+	*/
+	int getTextIndexAt (int x, int y);
+
+	/** Counts the number of characters in the text.
+
+		This is quicker than getting the text as a string if you just need to know
+		the length.
+	*/
+	int getTotalNumChars() const;
+
+	/** Returns the total width of the text, as it is currently laid-out.
+
+		This may be larger than the size of the TextEditor, and can change when
+		the TextEditor is resized or the text changes.
+	*/
+	int getTextWidth() const;
+
+	/** Returns the maximum height of the text, as it is currently laid-out.
+
+		This may be larger than the size of the TextEditor, and can change when
+		the TextEditor is resized or the text changes.
+	*/
+	int getTextHeight() const;
+
+	/** Changes the size of the gap at the top and left-edge of the editor.
+
+		By default there's a gap of 4 pixels.
+	*/
+	void setIndents (int newLeftIndent, int newTopIndent);
+
+	/** Changes the size of border left around the edge of the component.
+
+		@see getBorder
+	*/
+	void setBorder (const BorderSize<int>& border);
+
+	/** Returns the size of border around the edge of the component.
+
+		@see setBorder
+	*/
+	const BorderSize<int> getBorder() const;
+
+	/** Used to disable the auto-scrolling which keeps the caret visible.
+
+		If true (the default), the editor will scroll when the caret moves offscreen. If
+		set to false, it won't.
+	*/
+	void setScrollToShowCursor (bool shouldScrollToShowCaret);
+
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void paintOverChildren (Graphics& g);
+	/** @internal */
+	void mouseDown (const MouseEvent& e);
+	/** @internal */
+	void mouseUp (const MouseEvent& e);
+	/** @internal */
+	void mouseDrag (const MouseEvent& e);
+	/** @internal */
+	void mouseDoubleClick (const MouseEvent& e);
+	/** @internal */
+	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+	/** @internal */
+	bool keyPressed (const KeyPress& key);
+	/** @internal */
+	bool keyStateChanged (bool isKeyDown);
+	/** @internal */
+	void focusGained (FocusChangeType cause);
+	/** @internal */
+	void focusLost (FocusChangeType cause);
+	/** @internal */
+	void resized();
+	/** @internal */
+	void enablementChanged();
+	/** @internal */
+	void colourChanged();
+	/** @internal */
+	void lookAndFeelChanged();
+	/** @internal */
+	bool isTextInputActive() const;
+	/** @internal */
+	void setTemporaryUnderlining (const Array <Range<int> >&);
+
+	bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
+	bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
+	bool moveCaretUp (bool selecting);
+	bool moveCaretDown (bool selecting);
+	bool pageUp (bool selecting);
+	bool pageDown (bool selecting);
+	bool scrollDown();
+	bool scrollUp();
+	bool moveCaretToTop (bool selecting);
+	bool moveCaretToStartOfLine (bool selecting);
+	bool moveCaretToEnd (bool selecting);
+	bool moveCaretToEndOfLine (bool selecting);
+	bool deleteBackwards (bool moveInWholeWordSteps);
+	bool deleteForwards (bool moveInWholeWordSteps);
+	bool copyToClipboard();
+	bool cutToClipboard();
+	bool pasteFromClipboard();
+	bool selectAll();
+	bool undo();
+	bool redo();
+
+	/** This adds the items to the popup menu.
+
+		By default it adds the cut/copy/paste items, but you can override this if
+		you need to replace these with your own items.
+
+		If you want to add your own items to the existing ones, you can override this,
+		call the base class's addPopupMenuItems() method, then append your own items.
+
+		When the menu has been shown, performPopupMenuAction() will be called to
+		perform the item that the user has chosen.
+
+		The default menu items will be added using item IDs in the range
+		0x7fff0000 - 0x7fff1000, so you should avoid those values for your own
+		menu IDs.
+
+		If this was triggered by a mouse-click, the mouseClickEvent parameter will be
+		a pointer to the info about it, or may be null if the menu is being triggered
+		by some other means.
+
+		@see performPopupMenuAction, setPopupMenuEnabled, isPopupMenuEnabled
+	*/
+	virtual void addPopupMenuItems (PopupMenu& menuToAddTo,
+									const MouseEvent* mouseClickEvent);
+
+	/** This is called to perform one of the items that was shown on the popup menu.
+
+		If you've overridden addPopupMenuItems(), you should also override this
+		to perform the actions that you've added.
+
+		If you've overridden addPopupMenuItems() but have still left the default items
+		on the menu, remember to call the superclass's performPopupMenuAction()
+		so that it can perform the default actions if that's what the user clicked on.
+
+		@see addPopupMenuItems, setPopupMenuEnabled, isPopupMenuEnabled
+	*/
+	virtual void performPopupMenuAction (int menuItemID);
+
+protected:
+
+	/** Scrolls the minimum distance needed to get the caret into view. */
+	void scrollToMakeSureCursorIsVisible();
+
+	/** @internal */
+	void moveCaret (int newCaretPos);
+
+	/** @internal */
+	void moveCaretTo (int newPosition, bool isSelecting);
+
+	/** Used internally to dispatch a text-change message. */
+	void textChanged();
+
+	/** Begins a new transaction in the UndoManager. */
+	void newTransaction();
+
+	/** Used internally to trigger an undo or redo. */
+	void doUndoRedo (bool isRedo);
+
+	/** Can be overridden to intercept return key presses directly */
+	virtual void returnPressed();
+
+	/** Can be overridden to intercept escape key presses directly */
+	virtual void escapePressed();
+
+	/** @internal */
+	void handleCommandMessage (int commandId);
+
+private:
+
+	class Iterator;
+	class UniformTextSection;
+	class TextHolderComponent;
+	class InsertAction;
+	class RemoveAction;
+	friend class InsertAction;
+	friend class RemoveAction;
+
+	ScopedPointer <Viewport> viewport;
+	TextHolderComponent* textHolder;
+	BorderSize<int> borderSize;
+
+	bool readOnly		   : 1;
+	bool multiline		  : 1;
+	bool wordWrap		   : 1;
+	bool returnKeyStartsNewLine	 : 1;
+	bool popupMenuEnabled	   : 1;
+	bool selectAllTextWhenFocused   : 1;
+	bool scrollbarVisible	   : 1;
+	bool wasFocused		 : 1;
+	bool keepCaretOnScreen	  : 1;
+	bool tabKeyUsed		 : 1;
+	bool menuActive		 : 1;
+	bool valueTextNeedsUpdating	 : 1;
+
+	UndoManager undoManager;
+	ScopedPointer<CaretComponent> caret;
+	int maxTextLength;
+	Range<int> selection;
+	int leftIndent, topIndent;
+	unsigned int lastTransactionTime;
+	Font currentFont;
+	mutable int totalNumChars;
+	int caretPosition;
+	Array <UniformTextSection*> sections;
+	String textToShowWhenEmpty;
+	Colour colourForTextWhenEmpty;
+	juce_wchar passwordCharacter;
+	Value textValue;
+
+	enum
+	{
+		notDragging,
+		draggingSelectionStart,
+		draggingSelectionEnd
+	} dragType;
+
+	String allowedCharacters;
+	ListenerList <Listener> listeners;
+	Array <Range<int> > underlinedSections;
+
+	void coalesceSimilarSections();
+	void splitSection (int sectionIndex, int charToSplitAt);
+	void clearInternal (UndoManager* um);
+	void insert (const String& text, int insertIndex, const Font& font,
+				 const Colour& colour, UndoManager* um, int caretPositionToMoveTo);
+	void reinsert (int insertIndex, const Array <UniformTextSection*>& sections);
+	void remove (const Range<int>& range, UndoManager* um, int caretPositionToMoveTo);
+	void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
+	void updateCaretPosition();
+	void textWasChangedByValue();
+	int indexAtPosition (float x, float y);
+	int findWordBreakAfter (int position) const;
+	int findWordBreakBefore (int position) const;
+	bool moveCaretWithTransation (int newPos, bool selecting);
+	friend class TextHolderComponent;
+	friend class TextEditorViewport;
+	void drawContent (Graphics& g);
+	void updateTextHolderSize();
+	float getWordWrapWidth() const;
+	void timerCallbackInt();
+	void repaintText (const Range<int>& range);
+	void scrollByLines (int deltaLines);
+	bool undoOrRedo (bool shouldUndo);
+	UndoManager* getUndoManager() noexcept;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor);
+};
+
+/** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */
+typedef TextEditor::Listener TextEditorListener;
+
+#endif   // __JUCE_TEXTEDITOR_JUCEHEADER__
+
+/*** End of inlined file: juce_TextEditor.h ***/
+
+#if JUCE_VC6
+ #define Listener ButtonListener
+#endif
+
+/**
+	A component that displays a text string, and can optionally become a text
+	editor when clicked.
+*/
+class JUCE_API  Label  : public Component,
+						 public SettableTooltipClient,
+						 protected TextEditorListener,
+						 private ComponentListener,
+						 private ValueListener
+{
+public:
+
+	/** Creates a Label.
+
+		@param componentName	the name to give the component
+		@param labelText	the text to show in the label
+	*/
+	Label (const String& componentName = String::empty,
+		   const String& labelText = String::empty);
+
+	/** Destructor. */
+	~Label();
+
+	/** Changes the label text.
+
+		If broadcastChangeMessage is true and the new text is different to the current
+		text, then the class will broadcast a change message to any Label::Listener objects
+		that are registered.
+	*/
+	void setText (const String& newText, bool broadcastChangeMessage);
+
+	/** Returns the label's current text.
+
+		@param returnActiveEditorContents   if this is true and the label is currently
+											being edited, then this method will return the
+											text as it's being shown in the editor. If false,
+											then the value returned here won't be updated until
+											the user has finished typing and pressed the return
+											key.
+	*/
+	const String getText (bool returnActiveEditorContents = false) const;
+
+	/** Returns the text content as a Value object.
+		You can call Value::referTo() on this object to make the label read and control
+		a Value object that you supply.
+	*/
+	Value& getTextValue()				   { return textValue; }
+
+	/** Changes the font to use to draw the text.
+
+		@see getFont
+	*/
+	void setFont (const Font& newFont);
+
+	/** Returns the font currently being used.
+
+		@see setFont
+	*/
+	const Font& getFont() const noexcept;
+
+	/** A set of colour IDs to use to change the colour of various aspects of the label.
+
+		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+		methods.
+
+		Note that you can also use the constants from TextEditor::ColourIds to change the
+		colour of the text editor that is opened when a label is editable.
+
+		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		backgroundColourId	 = 0x1000280, /**< The background colour to fill the label with. */
+		textColourId	   = 0x1000281, /**< The colour for the text. */
+		outlineColourId	= 0x1000282  /**< An optional colour to use to draw a border around the label.
+												 Leave this transparent to not have an outline. */
+	};
+
+	/** Sets the style of justification to be used for positioning the text.
+
+		(The default is Justification::centredLeft)
+	*/
+	void setJustificationType (const Justification& justification);
+
+	/** Returns the type of justification, as set in setJustificationType(). */
+	const Justification getJustificationType() const noexcept		   { return justification; }
+
+	/** Changes the gap that is left between the edge of the component and the text.
+		By default there's a small gap left at the sides of the component to allow for
+		the drawing of the border, but you can change this if necessary.
+	*/
+	void setBorderSize (int horizontalBorder, int verticalBorder);
+
+	/** Returns the size of the horizontal gap being left around the text.
+	*/
+	int getHorizontalBorderSize() const noexcept				{ return horizontalBorderSize; }
+
+	/** Returns the size of the vertical gap being left around the text.
+	*/
+	int getVerticalBorderSize() const noexcept				  { return verticalBorderSize; }
+
+	/** Makes this label "stick to" another component.
+
+		This will cause the label to follow another component around, staying
+		either to its left or above it.
+
+		@param owner	the component to follow
+		@param onLeft   if true, the label will stay on the left of its component; if
+						false, it will stay above it.
+	*/
+	void attachToComponent (Component* owner, bool onLeft);
+
+	/** If this label has been attached to another component using attachToComponent, this
+		returns the other component.
+
+		Returns 0 if the label is not attached.
+	*/
+	Component* getAttachedComponent() const;
+
+	/** If the label is attached to the left of another component, this returns true.
+
+		Returns false if the label is above the other component. This is only relevent if
+		attachToComponent() has been called.
+	*/
+	bool isAttachedOnLeft() const noexcept					  { return leftOfOwnerComp; }
+
+	/** Specifies the minimum amount that the font can be squashed horizantally before it starts
+		using ellipsis.
+
+		@see Graphics::drawFittedText
+	*/
+	void setMinimumHorizontalScale (float newScale);
+
+	float getMinimumHorizontalScale() const noexcept				{ return minimumHorizontalScale; }
+
+	/**
+		A class for receiving events from a Label.
+
+		You can register a Label::Listener with a Label using the Label::addListener()
+		method, and it will be called when the text of the label changes, either because
+		of a call to Label::setText() or by the user editing the text (if the label is
+		editable).
+
+		@see Label::addListener, Label::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when a Label's text has changed.
+		*/
+		virtual void labelTextChanged (Label* labelThatHasChanged) = 0;
+	};
+
+	/** Registers a listener that will be called when the label's text changes. */
+	void addListener (Listener* listener);
+
+	/** Deregisters a previously-registered listener. */
+	void removeListener (Listener* listener);
+
+	/** Makes the label turn into a TextEditor when clicked.
+
+		By default this is turned off.
+
+		If turned on, then single- or double-clicking will turn the label into
+		an editor. If the user then changes the text, then the ChangeBroadcaster
+		base class will be used to send change messages to any listeners that
+		have registered.
+
+		If the user changes the text, the textWasEdited() method will be called
+		afterwards, and subclasses can override this if they need to do anything
+		special.
+
+		@param editOnSingleClick		if true, just clicking once on the label will start editing the text
+		@param editOnDoubleClick		if true, a double-click is needed to start editing
+		@param lossOfFocusDiscardsChanges   if true, clicking somewhere else while the text is being
+											edited will discard any changes; if false, then this will
+											commit the changes.
+		@see showEditor, setEditorColours, TextEditor
+	*/
+	void setEditable (bool editOnSingleClick,
+					  bool editOnDoubleClick = false,
+					  bool lossOfFocusDiscardsChanges = false);
+
+	/** Returns true if this option was set using setEditable(). */
+	bool isEditableOnSingleClick() const noexcept			   { return editSingleClick; }
+
+	/** Returns true if this option was set using setEditable(). */
+	bool isEditableOnDoubleClick() const noexcept			   { return editDoubleClick; }
+
+	/** Returns true if this option has been set in a call to setEditable(). */
+	bool doesLossOfFocusDiscardChanges() const noexcept		 { return lossOfFocusDiscardsChanges; }
+
+	/** Returns true if the user can edit this label's text. */
+	bool isEditable() const noexcept					{ return editSingleClick || editDoubleClick; }
+
+	/** Makes the editor appear as if the label had been clicked by the user.
+
+		@see textWasEdited, setEditable
+	*/
+	void showEditor();
+
+	/** Hides the editor if it was being shown.
+
+		@param discardCurrentEditorContents	 if true, the label's text will be
+												reset to whatever it was before the editor
+												was shown; if false, the current contents of the
+												editor will be used to set the label's text
+												before it is hidden.
+	*/
+	void hideEditor (bool discardCurrentEditorContents);
+
+	/** Returns true if the editor is currently focused and active. */
+	bool isBeingEdited() const noexcept;
+
+protected:
+
+	/** Creates the TextEditor component that will be used when the user has clicked on the label.
+		Subclasses can override this if they need to customise this component in some way.
+	*/
+	virtual TextEditor* createEditorComponent();
+
+	/** Called after the user changes the text. */
+	virtual void textWasEdited();
+
+	/** Called when the text has been altered. */
+	virtual void textWasChanged();
+
+	/** Called when the text editor has just appeared, due to a user click or other focus change. */
+	virtual void editorShown (TextEditor* editorComponent);
+
+	/** Called when the text editor is going to be deleted, after editing has finished. */
+	virtual void editorAboutToBeHidden (TextEditor* editorComponent);
+
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void resized();
+	/** @internal */
+	void mouseUp (const MouseEvent& e);
+	/** @internal */
+	void mouseDoubleClick (const MouseEvent& e);
+	/** @internal */
+	void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+	/** @internal */
+	void componentParentHierarchyChanged (Component& component);
+	/** @internal */
+	void componentVisibilityChanged (Component& component);
+	/** @internal */
+	void inputAttemptWhenModal();
+	/** @internal */
+	void focusGained (FocusChangeType);
+	/** @internal */
+	void enablementChanged();
+	/** @internal */
+	KeyboardFocusTraverser* createFocusTraverser();
+	/** @internal */
+	void textEditorTextChanged (TextEditor& editor);
+	/** @internal */
+	void textEditorReturnKeyPressed (TextEditor& editor);
+	/** @internal */
+	void textEditorEscapeKeyPressed (TextEditor& editor);
+	/** @internal */
+	void textEditorFocusLost (TextEditor& editor);
+	/** @internal */
+	void colourChanged();
+	/** @internal */
+	void valueChanged (Value&);
+
+private:
+
+	Value textValue;
+	String lastTextValue;
+	Font font;
+	Justification justification;
+	ScopedPointer<TextEditor> editor;
+	ListenerList<Listener> listeners;
+	WeakReference<Component> ownerComponent;
+	int horizontalBorderSize, verticalBorderSize;
+	float minimumHorizontalScale;
+	bool editSingleClick : 1;
+	bool editDoubleClick : 1;
+	bool lossOfFocusDiscardsChanges : 1;
+	bool leftOfOwnerComp : 1;
+
+	bool updateFromTextEditorContents (TextEditor&);
+	void callChangeListeners();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label);
+};
+
+/** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
+typedef Label::Listener LabelListener;
+
+#if JUCE_VC6
+ #undef Listener
+#endif
+
+#endif   // __JUCE_LABEL_JUCEHEADER__
+
+/*** End of inlined file: juce_Label.h ***/
+
+#if JUCE_VC6
+ #define Listener SliderListener
+#endif
+
+/**
+	A component that lets the user choose from a drop-down list of choices.
+
+	The combo-box has a list of text strings, each with an associated id number,
+	that will be shown in the drop-down list when the user clicks on the component.
+
+	The currently selected choice is displayed in the combo-box, and this can
+	either be read-only text, or editable.
+
+	To find out when the user selects a different item or edits the text, you
+	can register a ComboBox::Listener to receive callbacks.
+
+	@see ComboBox::Listener
+*/
+class JUCE_API  ComboBox  : public Component,
+							public SettableTooltipClient,
+							public LabelListener,  // (can't use Label::Listener due to idiotic VC2005 bug)
+							public ValueListener,
+							private AsyncUpdater
+{
+public:
+
+	/** Creates a combo-box.
+
+		On construction, the text field will be empty, so you should call the
+		setSelectedId() or setText() method to choose the initial value before
+		displaying it.
+
+		@param componentName	the name to set for the component (see Component::setName())
+	*/
+	explicit ComboBox (const String& componentName = String::empty);
+
+	/** Destructor. */
+	~ComboBox();
+
+	/** Sets whether the test in the combo-box is editable.
+
+		The default state for a new ComboBox is non-editable, and can only be changed
+		by choosing from the drop-down list.
+	*/
+	void setEditableText (bool isEditable);
+
+	/** Returns true if the text is directly editable.
+		@see setEditableText
+	*/
+	bool isTextEditable() const noexcept;
+
+	/** Sets the style of justification to be used for positioning the text.
+
+		The default is Justification::centredLeft. The text is displayed using a
+		Label component inside the ComboBox.
+	*/
+	void setJustificationType (const Justification& justification);
+
+	/** Returns the current justification for the text box.
+		@see setJustificationType
+	*/
+	const Justification getJustificationType() const noexcept;
+
+	/** Adds an item to be shown in the drop-down list.
+
+		@param newItemText	  the text of the item to show in the list
+		@param newItemId	an associated ID number that can be set or retrieved - see
+								getSelectedId() and setSelectedId(). Note that this value can not
+								be 0!
+		@see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
+	*/
+	void addItem (const String& newItemText, int newItemId);
+
+	/** Adds a separator line to the drop-down list.
+
+		This is like adding a separator to a popup menu. See PopupMenu::addSeparator().
+	*/
+	void addSeparator();
+
+	/** Adds a heading to the drop-down list, so that you can group the items into
+		different sections.
+
+		The headings are indented slightly differently to set them apart from the
+		items on the list, and obviously can't be selected. You might want to add
+		separators between your sections too.
+
+		@see addItem, addSeparator
+	*/
+	void addSectionHeading (const String& headingName);
+
+	/** This allows items in the drop-down list to be selectively disabled.
+
+		When you add an item, it's enabled by default, but you can call this
+		method to change its status.
+
+		If you disable an item which is already selected, this won't change the
+		current selection - it just stops the user choosing that item from the list.
+	*/
+	void setItemEnabled (int itemId, bool shouldBeEnabled);
+
+	/** Returns true if the given item is enabled. */
+	bool isItemEnabled (int itemId) const noexcept;
+
+	/** Changes the text for an existing item.
+	*/
+	void changeItemText (int itemId, const String& newText);
+
+	/** Removes all the items from the drop-down list.
+
+		If this call causes the content to be cleared, then a change-message
+		will be broadcast unless dontSendChangeMessage is true.
+
+		@see addItem, removeItem, getNumItems
+	*/
+	void clear (bool dontSendChangeMessage = false);
+
+	/** Returns the number of items that have been added to the list.
+
+		Note that this doesn't include headers or separators.
+	*/
+	int getNumItems() const noexcept;
+
+	/** Returns the text for one of the items in the list.
+		Note that this doesn't include headers or separators.
+		@param index	the item's index from 0 to (getNumItems() - 1)
+	*/
+	String getItemText (int index) const;
+
+	/** Returns the ID for one of the items in the list.
+
+		Note that this doesn't include headers or separators.
+
+		@param index	the item's index from 0 to (getNumItems() - 1)
+	*/
+	int getItemId (int index) const noexcept;
+
+	/** Returns the index in the list of a particular item ID.
+		If no such ID is found, this will return -1.
+	*/
+	int indexOfItemId (int itemId) const noexcept;
+
+	/** Returns the ID of the item that's currently shown in the box.
+
+		If no item is selected, or if the text is editable and the user
+		has entered something which isn't one of the items in the list, then
+		this will return 0.
+
+		@see setSelectedId, getSelectedItemIndex, getText
+	*/
+	int getSelectedId() const noexcept;
+
+	/** Returns a Value object that can be used to get or set the selected item's ID.
+
+		You can call Value::referTo() on this object to make the combo box control
+		another Value object.
+	*/
+	Value& getSelectedIdAsValue()			   { return currentId; }
+
+	/** Sets one of the items to be the current selection.
+
+		This will set the ComboBox's text to that of the item that matches
+		this ID.
+
+		@param newItemId		the new item to select
+		@param dontSendChangeMessage	if set to true, this method won't trigger a
+										change notification
+		@see getSelectedId, setSelectedItemIndex, setText
+	*/
+	void setSelectedId (int newItemId, bool dontSendChangeMessage = false);
+
+	/** Returns the index of the item that's currently shown in the box.
+
+		If no item is selected, or if the text is editable and the user
+		has entered something which isn't one of the items in the list, then
+		this will return -1.
+
+		@see setSelectedItemIndex, getSelectedId, getText
+	*/
+	int getSelectedItemIndex() const;
+
+	/** Sets one of the items to be the current selection.
+
+		This will set the ComboBox's text to that of the item at the given
+		index in the list.
+
+		@param newItemIndex		 the new item to select
+		@param dontSendChangeMessage	if set to true, this method won't trigger a
+										change notification
+		@see getSelectedItemIndex, setSelectedId, setText
+	*/
+	void setSelectedItemIndex (int newItemIndex, bool dontSendChangeMessage = false);
+
+	/** Returns the text that is currently shown in the combo-box's text field.
+
+		If the ComboBox has editable text, then this text may have been edited
+		by the user; otherwise it will be one of the items from the list, or
+		possibly an empty string if nothing was selected.
+
+		@see setText, getSelectedId, getSelectedItemIndex
+	*/
+	String getText() const;
+
+	/** Sets the contents of the combo-box's text field.
+
+		The text passed-in will be set as the current text regardless of whether
+		it is one of the items in the list. If the current text isn't one of the
+		items, then getSelectedId() will return -1, otherwise it wil return
+		the approriate ID.
+
+		@param newText		  the text to select
+		@param dontSendChangeMessage	if set to true, this method won't trigger a
+										change notification
+		@see getText
+	*/
+	void setText (const String& newText, bool dontSendChangeMessage = false);
+
+	/** Programmatically opens the text editor to allow the user to edit the current item.
+
+		This is the same effect as when the box is clicked-on.
+		@see Label::showEditor();
+	*/
+	void showEditor();
+
+	/** Pops up the combo box's list. */
+	void showPopup();
+
+	/**
+		A class for receiving events from a ComboBox.
+
+		You can register a ComboBox::Listener with a ComboBox using the ComboBox::addListener()
+		method, and it will be called when the selected item in the box changes.
+
+		@see ComboBox::addListener, ComboBox::removeListener
+	*/
+	class JUCE_API  Listener
+	{
+	public:
+		/** Destructor. */
+		virtual ~Listener() {}
+
+		/** Called when a ComboBox has its selected item changed. */
+		virtual void comboBoxChanged (ComboBox* comboBoxThatHasChanged) = 0;
+	};
+
+	/** Registers a listener that will be called when the box's content changes. */
+	void addListener (Listener* listener);
+
+	/** Deregisters a previously-registered listener. */
+	void removeListener (Listener* listener);
+
+	/** Sets a message to display when there is no item currently selected.
+
+		@see getTextWhenNothingSelected
+	*/
+	void setTextWhenNothingSelected (const String& newMessage);
+
+	/** Returns the text that is shown when no item is selected.
+
+		@see setTextWhenNothingSelected
+	*/
+	String getTextWhenNothingSelected() const;
+
+	/** Sets the message to show when there are no items in the list, and the user clicks
+		on the drop-down box.
+
+		By default it just says "no choices", but this lets you change it to something more
+		meaningful.
+	*/
+	void setTextWhenNoChoicesAvailable (const String& newMessage);
+
+	/** Returns the text shown when no items have been added to the list.
+		@see setTextWhenNoChoicesAvailable
+	*/
+	String getTextWhenNoChoicesAvailable() const;
+
+	/** Gives the ComboBox a tooltip. */
+	void setTooltip (const String& newTooltip);
+
+	/** A set of colour IDs to use to change the colour of various aspects of the combo box.
+
+		These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+		methods.
+
+		To change the colours of the menu that pops up
+
+		@see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+	*/
+	enum ColourIds
+	{
+		backgroundColourId  = 0x1000b00,	/**< The background colour to fill the box with. */
+		textColourId	= 0x1000a00,	/**< The colour for the text in the box. */
+		outlineColourId	 = 0x1000c00,	/**< The colour for an outline around the box. */
+		buttonColourId	  = 0x1000d00,	/**< The base colour for the button (a LookAndFeel class will probably use variations on this). */
+		arrowColourId	   = 0x1000e00,	/**< The colour for the arrow shape that pops up the menu */
+	};
+
+	/** @internal */
+	void labelTextChanged (Label*);
+	/** @internal */
+	void enablementChanged();
+	/** @internal */
+	void colourChanged();
+	/** @internal */
+	void focusGained (Component::FocusChangeType cause);
+	/** @internal */
+	void focusLost (Component::FocusChangeType cause);
+	/** @internal */
+	void handleAsyncUpdate();
+	/** @internal */
+	const String getTooltip()					   { return label->getTooltip(); }
+	/** @internal */
+	void mouseDown (const MouseEvent&);
+	/** @internal */
+	void mouseDrag (const MouseEvent&);
+	/** @internal */
+	void mouseUp (const MouseEvent&);
+	/** @internal */
+	void lookAndFeelChanged();
+	/** @internal */
+	void paint (Graphics&);
+	/** @internal */
+	void resized();
+	/** @internal */
+	bool keyStateChanged (bool isKeyDown);
+	/** @internal */
+	bool keyPressed (const KeyPress&);
+	/** @internal */
+	void valueChanged (Value&);
+
+private:
+
+	struct ItemInfo
+	{
+		ItemInfo (const String& name, int itemId, bool isEnabled, bool isHeading);
+		bool isSeparator() const noexcept;
+		bool isRealItem() const noexcept;
+
+		String name;
+		int itemId;
+		bool isEnabled : 1, isHeading : 1;
+	};
+
+	OwnedArray <ItemInfo> items;
+	Value currentId;
+	int lastCurrentId;
+	bool isButtonDown, separatorPending, menuActive, textIsCustom;
+	ListenerList <Listener> listeners;
+	ScopedPointer<Label> label;
+	String textWhenNothingSelected, noChoicesMessage;
+
+	ItemInfo* getItemForId (int itemId) const noexcept;
+	ItemInfo* getItemForIndex (int index) const noexcept;
+	bool selectIfEnabled (int index);
+	static void popupMenuFinishedCallback (int, ComboBox*);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox);
+};
+
+/** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
+typedef ComboBox::Listener ComboBoxListener;
+
+#if JUCE_VC6
+ #undef Listener
+#endif
+
+#endif   // __JUCE_COMBOBOX_JUCEHEADER__
+
+/*** End of inlined file: juce_ComboBox.h ***/
+
+
 #endif
 #ifndef __JUCE_IMAGECOMPONENT_JUCEHEADER__
 
@@ -52959,7 +52856,7 @@ public:
 				   const RectanglePlacement& placementToUse);
 
 	/** Returns the current image. */
-	const Image getImage() const;
+	const Image& getImage() const;
 
 	/** Sets the method of positioning that will be used to fit the image within the component's bounds.
 		By default the positioning is centred, and will fit the image inside the component's bounds
@@ -55271,7 +55168,7 @@ public:
 		item and all its parents, so these must all be correctly implemented for it to work.
 		@see TreeView::findItemFromIdentifierString, getUniqueName
 	*/
-	const String getItemIdentifierString() const;
+	String getItemIdentifierString() const;
 
 	/**
 		This handy class takes a copy of a TreeViewItem's openness when you create it,
@@ -55325,8 +55222,8 @@ private:
 
 	void updatePositions (int newY);
 	int getIndentX() const noexcept;
-	void setOwnerView (TreeView* newOwner) noexcept;
-	void paintRecursively (Graphics& g, int width);
+	void setOwnerView (TreeView*) noexcept;
+	void paintRecursively (Graphics&, int width);
 	TreeViewItem* getTopLevelItem() noexcept;
 	TreeViewItem* findItemRecursively (int y) noexcept;
 	TreeViewItem* getDeepestOpenParentItem() noexcept;
@@ -55336,7 +55233,7 @@ private:
 	int countSelectedItemsRecursively (int depth) const noexcept;
 	TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
 	TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
-	TreeViewItem* findItemFromIdentifierString (const String& identifierString);
+	TreeViewItem* findItemFromIdentifierString (const String&);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
 	// The parameters for these methods have changed - please update your code!
@@ -55543,9 +55440,13 @@ public:
 		the getOpennessState() method. If any of the nodes named in the original
 		XML aren't present in this tree, they will be ignored.
 
+		If restoreStoredSelection is true, it will also try to re-select any items that
+		were selected in the stored state.
+
 		@see getOpennessState
 	*/
-	void restoreOpennessState (const XmlElement& newState);
+	void restoreOpennessState (const XmlElement& newState,
+							   bool restoreStoredSelection);
 
 	/** A set of colour IDs to use to change the colour of various aspects of the treeview.
 
@@ -55829,7 +55730,7 @@ public:
 						return value will be File::nonexistent
 		@see getNumFiles, getFileInfo
 	*/
-	const File getFile (int index) const;
+	File getFile (int index) const;
 
 	/** Returns the file filter being used.
 
@@ -56104,7 +56005,7 @@ public:
 		to get - see getNumSelectedFiles() to find out how many files were chosen.
 		@see getHighlightedFile
 	*/
-	const File getSelectedFile (int index) const noexcept;
+	File getSelectedFile (int index) const noexcept;
 
 	/** Deselects any files that are currently selected.
 	*/
@@ -56125,10 +56026,10 @@ public:
 		this will only return one of them.
 		@see getSelectedFile
 	*/
-	const File getHighlightedFile() const noexcept;
+	File getHighlightedFile() const noexcept;
 
 	/** Returns the directory whose contents are currently being shown in the listbox. */
-	const File getRoot() const;
+	const File& getRoot() const;
 
 	/** Changes the directory that's being shown in the listbox. */
 	void setRoot (const File& newRootDirectory);
@@ -56369,7 +56270,7 @@ public:
 
 		@see getResults
 	*/
-	const File getResult() const;
+	File getResult() const;
 
 	/** Returns a list of all the files that were chosen during the last call to a
 		browse method.
@@ -57279,7 +57180,7 @@ public:
 
 		@see restoreWindowStateFromString
 	*/
-	const String getWindowStateAsString();
+	String getWindowStateAsString();
 
 	/** Restores the window to a previously-saved size and position.
 
@@ -57951,7 +57852,7 @@ public:
 		@param nameOfTextEditor	 the name of the text box that you're interested in
 		@see addTextEditor
 	*/
-	const String getTextEditorContents (const String& nameOfTextEditor) const;
+	String getTextEditorContents (const String& nameOfTextEditor) const;
 
 	/** Returns a pointer to a textbox that was added with addTextEditor(). */
 	TextEditor* getTextEditor (const String& nameOfTextEditor) const;
@@ -58554,7 +58455,7 @@ public:
 	~FilenameComponent();
 
 	/** Returns the currently displayed filename. */
-	const File getCurrentFile() const;
+	File getCurrentFile() const;
 
 	/** Changes the current filename.
 
@@ -58585,7 +58486,7 @@ public:
 
 		@see setRecentlyUsedFilenames
 	*/
-	const StringArray getRecentlyUsedFilenames() const;
+	StringArray getRecentlyUsedFilenames() const;
 
 	/** Sets all the entries on the recent files list.
 
@@ -59740,7 +59641,7 @@ public:
 	int getNumTabs() const;
 
 	/** Returns a list of all the tab names in the bar. */
-	const StringArray getTabNames() const;
+	StringArray getTabNames() const;
 
 	/** Changes the currently selected tab.
 
@@ -59959,7 +59860,7 @@ public:
 	int getNumTabs() const;
 
 	/** Returns a list of all the tab names in the bar. */
-	const StringArray getTabNames() const;
+	StringArray getTabNames() const;
 
 	/** Returns the content component that was added for the given index.
 
@@ -66784,7 +66685,7 @@ public:
 	virtual void drawHorizontalLine (int y, float left, float right) = 0;
 
 	virtual void setFont (const Font& newFont) = 0;
-	virtual const Font getFont() = 0;
+	virtual Font getFont() = 0;
 	virtual void drawGlyph (int glyphNumber, const AffineTransform& transform) = 0;
 };
 
@@ -66851,7 +66752,7 @@ public:
 	void drawVerticalLine (int x, float top, float bottom);
 	void drawHorizontalLine (int x, float top, float bottom);
 
-	const Font getFont();
+	Font getFont();
 	void setFont (const Font& newFont);
 	void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
@@ -66952,7 +66853,7 @@ public:
 	void drawHorizontalLine (int x, float top, float bottom);
 
 	void setFont (const Font& newFont);
-	const Font getFont();
+	Font getFont();
 	void drawGlyph (int glyphNumber, float x, float y);
 	void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
@@ -67669,24 +67570,24 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
-		const String getText() const;
+		String getText() const;
 		void setText (const String& newText, UndoManager* undoManager);
 		Value getTextValue (UndoManager* undoManager);
 
-		const Colour getColour() const;
+		Colour getColour() const;
 		void setColour (const Colour& newColour, UndoManager* undoManager);
 
-		const Justification getJustification() const;
+		Justification getJustification() const;
 		void setJustification (const Justification& newJustification, UndoManager* undoManager);
 
-		const Font getFont() const;
+		Font getFont() const;
 		void setFont (const Font& newFont, UndoManager* undoManager);
 		Value getFontValue (UndoManager* undoManager);
 
-		const RelativeParallelogram getBoundingBox() const;
+		RelativeParallelogram getBoundingBox() const;
 		void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
-		const RelativePoint getFontSizeControlPoint() const;
+		RelativePoint getFontSizeControlPoint() const;
 		void setFontSizeControlPoint (const RelativePoint& p, UndoManager* undoManager);
 
 		static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontSizeAnchor;
@@ -67774,6 +67675,128 @@ private:
 
 #endif
 #ifndef __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
+
+/*** Start of inlined file: juce_CustomTypeface.h ***/
+#ifndef __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
+#define __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
+
+class InputStream;
+class OutputStream;
+
+/**
+	A typeface that can be populated with custom glyphs.
+
+	You can create a CustomTypeface if you need one that contains your own glyphs,
+	or if you need to load a typeface from a Juce-formatted binary stream.
+
+	If you want to create a copy of a native face, you can use addGlyphsFromOtherTypeface()
+	to copy glyphs into this face.
+
+	@see Typeface, Font
+*/
+class JUCE_API  CustomTypeface  : public Typeface
+{
+public:
+
+	/** Creates a new, empty typeface. */
+	CustomTypeface();
+
+	/** Loads a typeface from a previously saved stream.
+		The stream must have been created by writeToStream().
+		@see writeToStream
+	*/
+	explicit CustomTypeface (InputStream& serialisedTypefaceStream);
+
+	/** Destructor. */
+	~CustomTypeface();
+
+	/** Resets this typeface, deleting all its glyphs and settings. */
+	void clear();
+
+	/** Sets the vital statistics for the typeface.
+		@param name	 the typeface's name
+		@param ascent   the ascent - this is normalised to a height of 1.0 and this is
+						the value that will be returned by Typeface::getAscent(). The
+						descent is assumed to be (1.0 - ascent)
+		@param isBold   should be true if the typeface is bold
+		@param isItalic should be true if the typeface is italic
+		@param defaultCharacter	 the character to be used as a replacement if there's
+						no glyph available for the character that's being drawn
+	*/
+	void setCharacteristics (const String& name, float ascent,
+							 bool isBold, bool isItalic,
+							 juce_wchar defaultCharacter) noexcept;
+
+	/** Adds a glyph to the typeface.
+
+		The path that is passed in is normalised so that the font height is 1.0, and its
+		origin is the anchor point of the character on its baseline.
+
+		The width is the nominal width of the character, and any extra kerning values that
+		are specified will be added to this width.
+	*/
+	void addGlyph (juce_wchar character, const Path& path, float width) noexcept;
+
+	/** Specifies an extra kerning amount to be used between a pair of characters.
+		The amount will be added to the nominal width of the first character when laying out a string.
+	*/
+	void addKerningPair (juce_wchar char1, juce_wchar char2, float extraAmount) noexcept;
+
+	/** Adds a range of glyphs from another typeface.
+		This will attempt to pull in the paths and kerning information from another typeface and
+		add it to this one.
+	*/
+	void addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_wchar characterStartIndex, int numCharacters) noexcept;
+
+	/** Saves this typeface as a Juce-formatted font file.
+		A CustomTypeface can be created to reload the data that is written - see the CustomTypeface
+		constructor.
+	*/
+	bool writeToStream (OutputStream& outputStream);
+
+	// The following methods implement the basic Typeface behaviour.
+	float getAscent() const;
+	float getDescent() const;
+	float getStringWidth (const String& text);
+	void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets);
+	bool getOutlineForGlyph (int glyphNumber, Path& path);
+	EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform);
+	int getGlyphForCharacter (juce_wchar character);
+
+protected:
+
+	juce_wchar defaultCharacter;
+	float ascent;
+	bool isBold, isItalic;
+
+	/** If a subclass overrides this, it can load glyphs into the font on-demand.
+		When methods such as getGlyphPositions() or getOutlineForGlyph() are asked for a
+		particular character and there's no corresponding glyph, they'll call this
+		method so that a subclass can try to add that glyph, returning true if it
+		manages to do so.
+	*/
+	virtual bool loadGlyphIfPossible (juce_wchar characterNeeded);
+
+private:
+
+	class GlyphInfo;
+	friend class OwnedArray<GlyphInfo>;
+	OwnedArray <GlyphInfo> glyphs;
+	short lookupTable [128];
+
+	GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) noexcept;
+	GlyphInfo* findGlyphSubstituting (juce_wchar character) noexcept;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface);
+};
+
+#endif   // __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
+
+/*** End of inlined file: juce_CustomTypeface.h ***/
+
 
 #endif
 #ifndef __JUCE_FONT_JUCEHEADER__
@@ -67947,7 +67970,7 @@ public:
 									 int maxWidth = 1024, int maxHeight = 768);
 
 	/** Returns the name of this device */
-	const String getName() const		{ return name; }
+	String getName() const		{ return name; }
 
 	/** Creates a component that can be used to display a preview of the
 		video from this camera.
@@ -68081,7 +68104,7 @@ public:
 		@returns	the image, or null if it there was an error loading it
 		@see getFromMemory, getFromCache, ImageFileFormat::loadFrom
 	*/
-	static const Image getFromFile (const File& file);
+	static Image getFromFile (const File& file);
 
 	/** Loads an image from an in-memory image file, (or just returns the image if it's already cached).
 
@@ -68098,7 +68121,7 @@ public:
 		@returns		the image, or an invalid image if it there was an error loading it
 		@see getFromMemory, getFromCache, ImageFileFormat::loadFrom
 	*/
-	static const Image getFromMemory (const void* imageData, int dataSize);
+	static Image getFromMemory (const void* imageData, int dataSize);
 
 	/** Checks the cache for an image with a particular hashcode.
 
@@ -68108,7 +68131,7 @@ public:
 		@param hashCode the hash code that was associated with the image by addImageToCache()
 		@see addImageToCache
 	*/
-	static const Image getFromHashCode (int64 hashCode);
+	static Image getFromHashCode (int64 hashCode);
 
 	/** Adds an image to the cache with a user-defined hash-code.
 
@@ -68263,7 +68286,7 @@ public:
 
 		E.g. "JPEG", "PNG"
 	*/
-	virtual const String getFormatName() = 0;
+	virtual String getFormatName() = 0;
 
 	/** Returns true if the given stream seems to contain data that this format
 		understands.
@@ -68286,7 +68309,7 @@ public:
 		@returns	the image that was decoded, or an invalid image if it fails.
 		@see loadFrom
 	*/
-	virtual const Image decodeImage (InputStream& input) = 0;
+	virtual Image decodeImage (InputStream& input) = 0;
 
 	/** Attempts to write an image to a stream.
 
@@ -68315,7 +68338,7 @@ public:
 
 		@returns	the image that was decoded, or an invalid image if it fails.
 	*/
-	static const Image loadFrom (InputStream& input);
+	static Image loadFrom (InputStream& input);
 
 	/** Tries to load an image from a file.
 
@@ -68324,7 +68347,7 @@ public:
 
 		@returns	the image that was decoded, or an invalid image if it fails.
 	*/
-	static const Image loadFrom (const File& file);
+	static Image loadFrom (const File& file);
 
 	/** Tries to load an image from a block of raw image data.
 
@@ -68333,8 +68356,8 @@ public:
 
 		@returns	the image that was decoded, or an invalid image if it fails.
 	*/
-	static const Image loadFrom (const void* rawData,
-								 const int numBytesOfData);
+	static Image loadFrom (const void* rawData,
+						   const int numBytesOfData);
 
 };
 
@@ -68350,9 +68373,9 @@ public:
 	PNGImageFormat();
 	~PNGImageFormat();
 
-	const String getFormatName();
+	String getFormatName();
 	bool canUnderstand (InputStream& input);
-	const Image decodeImage (InputStream& input);
+	Image decodeImage (InputStream& input);
 	bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
 
@@ -68375,9 +68398,9 @@ public:
 	*/
 	void setQuality (float newQuality);
 
-	const String getFormatName();
+	String getFormatName();
 	bool canUnderstand (InputStream& input);
-	const Image decodeImage (InputStream& input);
+	Image decodeImage (InputStream& input);
 	bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 
 private:
@@ -68396,9 +68419,9 @@ public:
 	GIFImageFormat();
 	~GIFImageFormat();
 
-	const String getFormatName();
+	String getFormatName();
 	bool canUnderstand (InputStream& input);
-	const Image decodeImage (InputStream& input);
+	Image decodeImage (InputStream& input);
 	bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
 
@@ -68593,7 +68616,7 @@ public:
 		It is changed when one of the load or save methods is used, or when setFile()
 		is used to explicitly set it.
 	*/
-	const File getFile() const				  { return documentFile; }
+	const File& getFile() const				 { return documentFile; }
 
 	/** Sets the file that this document thinks it was loaded from.
 
@@ -68727,7 +68750,7 @@ public:
 
 		The most recently added file is always at index 0.
 	*/
-	const File getFile (int index) const;
+	File getFile (int index) const;
 
 	/** Returns an array of all the absolute pathnames in the list.
 	*/
@@ -68787,7 +68810,7 @@ public:
 
 		@see restoreFromString
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Restores the list from a previously stringified version of the list.
 
@@ -68835,7 +68858,7 @@ public:
 		Obviously this might have come from another app, so could contain
 		anything..
 	*/
-	static const String getTextFromClipboard();
+	static String getTextFromClipboard();
 };
 
 #endif   // __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
@@ -68906,7 +68929,7 @@ public:
 	virtual ~UnitTest();
 
 	/** Returns the name of the test. */
-	const String getName() const noexcept	   { return name; }
+	const String& getName() const noexcept	   { return name; }
 
 	/** Runs the test, using the specified UnitTestRunner.
 		You shouldn't need to call this method directly - use

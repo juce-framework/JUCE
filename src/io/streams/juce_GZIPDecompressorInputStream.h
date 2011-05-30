@@ -28,6 +28,7 @@
 
 #include "juce_InputStream.h"
 #include "../../memory/juce_OptionalScopedPointer.h"
+#include "../../memory/juce_HeapBlock.h"
 
 
 //==============================================================================

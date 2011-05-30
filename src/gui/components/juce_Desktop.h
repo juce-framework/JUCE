@@ -27,7 +27,6 @@
 #define __JUCE_DESKTOP_JUCEHEADER__
 
 #include "juce_Component.h"
-#include "../../core/juce_Time.h"
 #include "../../utilities/juce_DeletedAtShutdown.h"
 #include "../../events/juce_Timer.h"
 #include "../../events/juce_AsyncUpdater.h"

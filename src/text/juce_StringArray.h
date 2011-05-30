@@ -308,9 +308,9 @@ public:
         @param numberOfElements     how many elements to join together. If this is less
                                     than zero, all available elements will be used.
     */
-    const String joinIntoString (const String& separatorString,
-                                 int startIndex = 0,
-                                 int numberOfElements = -1) const;
+    String joinIntoString (const String& separatorString,
+                           int startIndex = 0,
+                           int numberOfElements = -1) const;
 
     //==============================================================================
     /** Sorts the array into alphabetical order.

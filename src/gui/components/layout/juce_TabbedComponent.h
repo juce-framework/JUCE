@@ -128,7 +128,7 @@ public:
     int getNumTabs() const;
 
     /** Returns a list of all the tab names in the bar. */
-    const StringArray getTabNames() const;
+    StringArray getTabNames() const;
 
     /** Returns the content component that was added for the given index.
 

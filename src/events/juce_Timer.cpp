@@ -28,13 +28,12 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Timer.h"
-#include "juce_MessageManager.h"
 #include "juce_AsyncUpdater.h"
+#include "../containers/juce_SortedSet.h"
 #include "../application/juce_Application.h"
 #include "../utilities/juce_DeletedAtShutdown.h"
 #include "../core/juce_Time.h"
 #include "../threads/juce_Thread.h"
-#include "../threads/juce_SpinLock.h"
 
 
 //==============================================================================

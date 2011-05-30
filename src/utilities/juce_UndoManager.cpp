@@ -178,12 +178,12 @@ bool UndoManager::canRedo() const
     return nextIndex < transactions.size();
 }
 
-const String UndoManager::getUndoDescription() const
+String UndoManager::getUndoDescription() const
 {
     return transactionNames [nextIndex - 1];
 }
 
-const String UndoManager::getRedoDescription() const
+String UndoManager::getRedoDescription() const
 {
     return transactionNames [nextIndex];
 }

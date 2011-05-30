@@ -327,7 +327,7 @@ private:
 
 namespace IconConverters
 {
-    const Image createImageFromHBITMAP (HBITMAP bitmap)
+    Image createImageFromHBITMAP (HBITMAP bitmap)
     {
         Image im;
 
@@ -366,7 +366,7 @@ namespace IconConverters
         return im;
     }
 
-    const Image createImageFromHICON (HICON icon)
+    Image createImageFromHICON (HICON icon)
     {
         ICONINFO info;
 
@@ -2927,7 +2927,7 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
 }
 
 //==============================================================================
-const Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File& file)
 {
     Image image;
     WORD iconNum = 0;

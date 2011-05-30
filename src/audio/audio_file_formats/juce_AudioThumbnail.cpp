@@ -30,55 +30,57 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_AudioThumbnail.h"
 #include "juce_AudioThumbnailCache.h"
 #include "../../events/juce_MessageManager.h"
+#include "../../io/streams/juce_BufferedInputStream.h"
 
 
 //==============================================================================
 struct AudioThumbnail::MinMaxValue
 {
-    char minValue;
-    char maxValue;
-
-    MinMaxValue() noexcept  : minValue (0), maxValue (0)
+    MinMaxValue() noexcept
     {
+        values[0] = 0;
+        values[1] = 0;
     }
 
     inline void set (const char newMin, const char newMax) noexcept
     {
-        minValue = newMin;
-        maxValue = newMax;
+        values[0] = newMin;
+        values[1] = newMax;
     }
+
+    inline char getMinValue() const noexcept        { return values[0]; }
+    inline char getMaxValue() const noexcept        { return values[1]; }
 
     inline void setFloat (const float newMin, const float newMax) noexcept
     {
-        minValue = (char) jlimit (-128, 127, roundFloatToInt (newMin * 127.0f));
-        maxValue = (char) jlimit (-128, 127, roundFloatToInt (newMax * 127.0f));
+        values[0] = (char) jlimit (-128, 127, roundFloatToInt (newMin * 127.0f));
+        values[1] = (char) jlimit (-128, 127, roundFloatToInt (newMax * 127.0f));
 
-        if (maxValue == minValue)
-            maxValue = (char) jmin (127, maxValue + 1);
+        if (values[0] == values[1])
+        {
+            if (values[1] == 127)
+                values[0]--;
+            else
+                values[1]++;
+        }
     }
 
     inline bool isNonZero() const noexcept
     {
-        return maxValue > minValue;
+        return values[1] > values[0];
     }
 
     inline int getPeak() const noexcept
     {
-        return jmax (std::abs ((int) minValue),
-                     std::abs ((int) maxValue));
+        return jmax (std::abs ((int) values[0]),
+                     std::abs ((int) values[1]));
     }
 
-    inline void read (InputStream& input)
-    {
-        minValue = input.readByte();
-        maxValue = input.readByte();
-    }
+    inline void read (InputStream& input)      { input.read (values, 2); }
+    inline void write (OutputStream& output)   { output.write (values, 2); }
 
-    inline void write (OutputStream& output)
-    {
-        output.writeByte (minValue);
-        output.writeByte (maxValue);
-    }
+private:
+    char values[2];
 };
 
 //==============================================================================
@@ -294,8 +296,8 @@ public:
             {
                 const MinMaxValue& v = data.getReference (startSample);
 
-                if (v.minValue < mn)  mn = v.minValue;
-                if (v.maxValue > mx)  mx = v.maxValue;
+                if (v.getMinValue() < mn)  mn = v.getMinValue();
+                if (v.getMaxValue() > mx)  mx = v.getMaxValue();
 
                 ++startSample;
             }
@@ -397,8 +399,8 @@ public:
                 for (int w = clip.getWidth(); --w >= 0;)
                 {
                     if (cacheData->isNonZero())
-                        g.drawVerticalLine (x, jmax (midY - cacheData->maxValue * vscale - 0.3f, topY),
-                                               jmin (midY - cacheData->minValue * vscale + 0.3f, bottomY));
+                        g.drawVerticalLine (x, jmax (midY - cacheData->getMaxValue() * vscale - 0.3f, topY),
+                                               jmin (midY - cacheData->getMinValue() * vscale + 0.3f, bottomY));
 
                     ++x;
                     ++cacheData;
@@ -568,9 +570,11 @@ void AudioThumbnail::createChannels (const int length)
 }
 
 //==============================================================================
-void AudioThumbnail::loadFrom (InputStream& input)
+void AudioThumbnail::loadFrom (InputStream& rawInput)
 {
     clear();
+
+    BufferedInputStream input (rawInput, 4096);
 
     if (input.readByte() != 'j' || input.readByte() != 'a' || input.readByte() != 't' || input.readByte() != 'm')
         return;
@@ -581,7 +585,7 @@ void AudioThumbnail::loadFrom (InputStream& input)
     int32 numThumbnailSamples = input.readInt();  // Number of samples in the thumbnail data.
     numChannels = input.readInt();                // Number of audio channels.
     sampleRate = input.readInt();                 // Source sample rate.
-    input.skipNextBytes (16);                           // reserved area
+    input.skipNextBytes (16);                     // (reserved)
 
     createChannels (numThumbnailSamples);
 
@@ -762,8 +766,8 @@ void AudioThumbnail::getApproximateMinMax (const double startTime, const double 
         data->getMinMax (jmax (0, firstThumbIndex), lastThumbIndex, result);
     }
 
-    minValue = result.minValue / 128.0f;
-    maxValue = result.maxValue / 128.0f;
+    minValue = result.getMinValue() / 128.0f;
+    maxValue = result.getMaxValue() / 128.0f;
 }
 
 void AudioThumbnail::drawChannel (Graphics& g, const Rectangle<int>& area, double startTime,

@@ -111,12 +111,12 @@ public:
         This just makes it easier than using the property names directly, and it
         fills out the time and date in the right format.
     */
-    static const StringPairArray createBWAVMetadata (const String& description,
-                                                     const String& originator,
-                                                     const String& originatorRef,
-                                                     const Time& dateAndTime,
-                                                     const int64 timeReferenceSamples,
-                                                     const String& codingHistory);
+    static StringPairArray createBWAVMetadata (const String& description,
+                                               const String& originator,
+                                               const String& originatorRef,
+                                               const Time& dateAndTime,
+                                               const int64 timeReferenceSamples,
+                                               const String& codingHistory);
 
     //==============================================================================
     const Array <int> getPossibleSampleRates();

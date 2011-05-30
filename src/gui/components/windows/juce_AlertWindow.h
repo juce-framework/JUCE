@@ -143,7 +143,7 @@ public:
         @param nameOfTextEditor     the name of the text box that you're interested in
         @see addTextEditor
     */
-    const String getTextEditorContents (const String& nameOfTextEditor) const;
+    String getTextEditorContents (const String& nameOfTextEditor) const;
 
     /** Returns a pointer to a textbox that was added with addTextEditor(). */
     TextEditor* getTextEditor (const String& nameOfTextEditor) const;

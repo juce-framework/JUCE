@@ -79,6 +79,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../audio/midi/juce_MidiOutput.h"
 #include "../../audio/midi/juce_MidiInput.h"
 #include "../../gui/graphics/fonts/juce_Font.h"
+#include "../../gui/graphics/fonts/juce_CustomTypeface.h"
 #include "../../gui/graphics/geometry/juce_RectangleList.h"
 #include "../../gui/graphics/imaging/juce_ImageFileFormat.h"
 #include "../../gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"

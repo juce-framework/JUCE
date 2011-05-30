@@ -155,7 +155,7 @@ bool FileChooser::showDialog (const bool selectsDirectories,
 }
 #endif
 
-const File FileChooser::getResult() const
+File FileChooser::getResult() const
 {
     // if you've used a multiple-file select, you should use the getResults() method
     // to retrieve all the files that were chosen.

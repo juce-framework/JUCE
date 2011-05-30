@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_InterprocessConnection.h"
 #include "../memory/juce_ScopedPointer.h"
+#include "../memory/juce_MemoryBlock.h"
 
 
 //==============================================================================

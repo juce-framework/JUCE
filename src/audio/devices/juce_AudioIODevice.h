@@ -28,7 +28,6 @@
 
 #include "../../text/juce_StringArray.h"
 #include "../../maths/juce_BigInteger.h"
-#include "../../containers/juce_OwnedArray.h"
 class AudioIODevice;
 
 

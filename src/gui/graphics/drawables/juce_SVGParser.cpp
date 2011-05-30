@@ -916,8 +916,8 @@ private:
         cssStyleText = xml.getAllSubText() + "\n" + cssStyleText;
     }
 
-    const String getStyleAttribute (const XmlElement* xml, const String& attributeName,
-                                    const String& defaultValue = String::empty) const
+    String getStyleAttribute (const XmlElement* xml, const String& attributeName,
+                              const String& defaultValue = String::empty) const
     {
         if (xml->hasAttribute (attributeName))
             return xml->getStringAttribute (attributeName, defaultValue);
@@ -967,7 +967,7 @@ private:
         return defaultValue;
     }
 
-    const String getInheritedAttribute (const XmlElement* xml, const String& attributeName) const
+    String getInheritedAttribute (const XmlElement* xml, const String& attributeName) const
     {
         if (xml->hasAttribute (attributeName))
             return xml->getStringAttribute (attributeName);
@@ -986,7 +986,7 @@ private:
         return CharacterFunctions::isLetter (c) || c == '-';
     }
 
-    static const String getAttributeFromStyleList (const String& list, const String& attributeName, const String& defaultValue)
+    static String getAttributeFromStyleList (const String& list, const String& attributeName, const String& defaultValue)
     {
         int i = 0;
 

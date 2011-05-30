@@ -169,7 +169,7 @@ bool File::isHidden() const
 //==============================================================================
 const char* juce_Argv0 = nullptr;  // referenced from juce_Application.cpp
 
-const File File::getSpecialLocation (const SpecialLocationType type)
+File File::getSpecialLocation (const SpecialLocationType type)
 {
     JUCE_AUTORELEASEPOOL
     String resultPath;
@@ -251,7 +251,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 }
 
 //==============================================================================
-const String File::getVersion() const
+String File::getVersion() const
 {
     JUCE_AUTORELEASEPOOL
     String result;
@@ -275,7 +275,7 @@ const String File::getVersion() const
 }
 
 //==============================================================================
-const File File::getLinkedTarget() const
+File File::getLinkedTarget() const
 {
   #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5)
     NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];

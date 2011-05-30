@@ -57,17 +57,17 @@ bool Result::operator!= (const Result& other) const noexcept
     return errorMessage != other.errorMessage;
 }
 
-const Result Result::ok() noexcept
+Result Result::ok() noexcept
 {
     return Result (String::empty);
 }
 
-const Result Result::fail (const String& errorMessage) noexcept
+Result Result::fail (const String& errorMessage) noexcept
 {
     return Result (errorMessage.isEmpty() ? "Unknown Error" : errorMessage);
 }
 
-const String Result::getErrorMessage() const noexcept
+const String& Result::getErrorMessage() const noexcept
 {
     return errorMessage;
 }

@@ -31,6 +31,7 @@
 #include "../core/juce_Time.h"
 class TimeSliceThread;
 
+
 //==============================================================================
 /**
     Used by the TimeSliceThread class.

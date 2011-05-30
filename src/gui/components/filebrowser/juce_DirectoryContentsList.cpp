@@ -141,7 +141,7 @@ bool DirectoryContentsList::getFileInfo (const int index,
     return false;
 }
 
-const File DirectoryContentsList::getFile (const int index) const
+File DirectoryContentsList::getFile (const int index) const
 {
     const ScopedLock sl (fileListLock);
     const FileInfo* const info = files [index];

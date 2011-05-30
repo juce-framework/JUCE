@@ -78,10 +78,10 @@ public:
     inline void setY (const ValueType newY) noexcept                    { y = newY; }
 
     /** Returns a point which has the same Y position as this one, but a new X. */
-    const Point withX (const ValueType newX) const noexcept             { return Point (newX, y); }
+    Point withX (const ValueType newX) const noexcept                   { return Point (newX, y); }
 
     /** Returns a point which has the same X position as this one, but a new Y. */
-    const Point withY (const ValueType newY) const noexcept             { return Point (x, newY); }
+    Point withY (const ValueType newY) const noexcept                   { return Point (x, newY); }
 
     /** Changes the point's x and y co-ordinates. */
     void setXY (const ValueType newX, const ValueType newY) noexcept    { x = newX; y = newY; }
@@ -90,34 +90,34 @@ public:
     void addXY (const ValueType xToAdd, const ValueType yToAdd) noexcept { x += xToAdd; y += yToAdd; }
 
     /** Returns a point with a given offset from this one. */
-    const Point translated (const ValueType xDelta, const ValueType yDelta) const noexcept  { return Point (x + xDelta, y + yDelta); }
+    Point translated (const ValueType xDelta, const ValueType yDelta) const noexcept  { return Point (x + xDelta, y + yDelta); }
 
     /** Adds two points together. */
-    const Point operator+ (const Point& other) const noexcept           { return Point (x + other.x, y + other.y); }
+    Point operator+ (const Point& other) const noexcept                 { return Point (x + other.x, y + other.y); }
 
     /** Adds another point's co-ordinates to this one. */
     Point& operator+= (const Point& other) noexcept                     { x += other.x; y += other.y; return *this; }
 
     /** Subtracts one points from another. */
-    const Point operator- (const Point& other) const noexcept           { return Point (x - other.x, y - other.y); }
+    Point operator- (const Point& other) const noexcept                 { return Point (x - other.x, y - other.y); }
 
     /** Subtracts another point's co-ordinates to this one. */
     Point& operator-= (const Point& other) noexcept                     { x -= other.x; y -= other.y; return *this; }
 
     /** Returns a point whose coordinates are multiplied by a given value. */
-    const Point operator* (const ValueType multiplier) const noexcept   { return Point (x * multiplier, y * multiplier); }
+    Point operator* (const ValueType multiplier) const noexcept         { return Point (x * multiplier, y * multiplier); }
 
     /** Multiplies the point's co-ordinates by a value. */
     Point& operator*= (const ValueType multiplier) noexcept             { x *= multiplier; y *= multiplier; return *this; }
 
     /** Returns a point whose coordinates are divided by a given value. */
-    const Point operator/ (const ValueType divisor) const noexcept      { return Point (x / divisor, y / divisor); }
+    Point operator/ (const ValueType divisor) const noexcept            { return Point (x / divisor, y / divisor); }
 
     /** Divides the point's co-ordinates by a value. */
     Point& operator/= (const ValueType divisor) noexcept                { x /= divisor; y /= divisor; return *this; }
 
     /** Returns the inverse of this point. */
-    const Point operator-() const noexcept                              { return Point (-x, -y); }
+    Point operator-() const noexcept                                    { return Point (-x, -y); }
 
     /** Returns the straight-line distance between this point and another one. */
     ValueType getDistanceFromOrigin() const noexcept                    { return juce_hypot (x, y); }
@@ -136,14 +136,14 @@ public:
         @param radius   the radius of the circle.
         @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
     */
-    const Point getPointOnCircumference (const float radius, const float angle) const noexcept  { return Point<float> (x + radius * std::sin (angle),
+    Point getPointOnCircumference (const float radius, const float angle) const noexcept  { return Point<float> (x + radius * std::sin (angle),
                                                                                                                        y - radius * std::cos (angle)); }
     /** Taking this point to be the centre of an ellipse, this returns a point on its circumference.
         @param radiusX  the horizontal radius of the circle.
         @param radiusY  the vertical radius of the circle.
         @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
     */
-    const Point getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const noexcept  { return Point<float> (x + radiusX * std::sin (angle),
+    Point getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const noexcept  { return Point<float> (x + radiusX * std::sin (angle),
                                                                                                                                              y - radiusY * std::cos (angle)); }
 
     /** Uses a transform to change the point's co-ordinates.
@@ -153,20 +153,20 @@ public:
     void applyTransform (const AffineTransform& transform) noexcept     { transform.transformPoint (x, y); }
 
     /** Returns the position of this point, if it is transformed by a given AffineTransform. */
-    const Point transformedBy (const AffineTransform& transform) const noexcept   { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
-                                                                                                  transform.mat10 * x + transform.mat11 * y + transform.mat12); }
+    Point transformedBy (const AffineTransform& transform) const noexcept   { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
+                                                                                            transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
     /** Casts this point to a Point<int> object. */
-    const Point<int> toInt() const noexcept                             { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
+    Point<int> toInt() const noexcept                             { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
 
     /** Casts this point to a Point<float> object. */
-    const Point<float> toFloat() const noexcept                         { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
+    Point<float> toFloat() const noexcept                         { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
 
     /** Casts this point to a Point<double> object. */
-    const Point<double> toDouble() const noexcept                       { return Point<double> (static_cast <double> (x), static_cast<double> (y)); }
+    Point<double> toDouble() const noexcept                       { return Point<double> (static_cast <double> (x), static_cast<double> (y)); }
 
     /** Returns the point as a string in the form "x, y". */
-    const String toString() const                                       { return String (x) + ", " + String (y); }
+    String toString() const                                       { return String (x) + ", " + String (y); }
 
 private:
     //==============================================================================

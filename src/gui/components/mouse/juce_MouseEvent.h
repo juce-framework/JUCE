@@ -284,13 +284,13 @@ public:
         The x and y positions of the event that is returned will have been
         adjusted to be relative to the new component.
     */
-    const MouseEvent getEventRelativeTo (Component* otherComponent) const noexcept;
+    MouseEvent getEventRelativeTo (Component* otherComponent) const noexcept;
 
     /** Creates a copy of this event with a different position.
         All other members of the event object are the same, but the x and y are
         replaced with these new values.
     */
-    const MouseEvent withNewPosition (const Point<int>& newPosition) const noexcept;
+    MouseEvent withNewPosition (const Point<int>& newPosition) const noexcept;
 
     //==============================================================================
     /** Changes the application-wide setting for the double-click time limit.

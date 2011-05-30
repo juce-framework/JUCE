@@ -28,10 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_AudioDeviceManager.h"
-#include "../../gui/components/juce_Desktop.h"
-#include "../../text/juce_LocalisedStrings.h"
-#include "../dsp/juce_AudioSampleBuffer.h"
-#include "../../core/juce_SystemStats.h"
 
 
 //==============================================================================
@@ -816,7 +812,7 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
 {
     if (defaultMidiOutputName != deviceName)
     {
-        SortedSet <AudioIODeviceCallback*> oldCallbacks;
+        Array <AudioIODeviceCallback*> oldCallbacks;
 
         {
             const ScopedLock sl (audioCallbackLock);

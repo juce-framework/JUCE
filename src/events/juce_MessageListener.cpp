@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MessageManager.h"
+#include "juce_MessageListener.h"
 
 
 //==============================================================================

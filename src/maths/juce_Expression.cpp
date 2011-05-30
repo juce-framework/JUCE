@@ -41,7 +41,7 @@ public:
     virtual Type getType() const noexcept = 0;
     virtual Term* clone() const = 0;
     virtual const ReferenceCountedObjectPtr<Term> resolve (const Scope&, int recursionDepth) = 0;
-    virtual const String toString() const = 0;
+    virtual String toString() const = 0;
     virtual double toDouble() const                                          { return 0; }
     virtual int getInputIndexFor (const Term*) const                         { return -1; }
     virtual int getOperatorPrecedence() const                                { return 0; }
@@ -56,7 +56,7 @@ public:
         return nullptr;
     }
 
-    virtual const String getName() const
+    virtual String getName() const
     {
         jassertfalse; // You shouldn't call this for an expression that's not actually a function!
         return String::empty;
@@ -130,7 +130,7 @@ public:
         double toDouble() const                      { return value; }
         const TermPtr negated()                      { return new Constant (-value, isResolutionTarget); }
 
-        const String toString() const
+        String toString() const
         {
             String s (value);
             if (isResolutionTarget)
@@ -170,7 +170,7 @@ public:
                                                   right->resolve (scope, recursionDepth)->toDouble()), false);
         }
 
-        const String toString() const
+        String toString() const
         {
             String s;
 
@@ -222,8 +222,8 @@ public:
 
         Type getType() const noexcept   { return symbolType; }
         Term* clone() const             { return new SymbolTerm (symbol); }
-        const String toString() const   { return symbol; }
-        const String getName() const    { return symbol; }
+        String toString() const         { return symbol; }
+        String getName() const          { return symbol; }
 
         void visitAllSymbols (SymbolVisitor& visitor, const Scope& scope, int recursionDepth)
         {
@@ -255,7 +255,7 @@ public:
         Term* clone() const             { return new Function (functionName, parameters); }
         int getNumInputs() const        { return parameters.size(); }
         Term* getInput (int i) const    { return getTermFor (parameters [i]); }
-        const String getName() const    { return functionName; }
+        String getName() const          { return functionName; }
 
         const TermPtr resolve (const Scope& scope, int recursionDepth)
         {
@@ -287,7 +287,7 @@ public:
             return -1;
         }
 
-        const String toString() const
+        String toString() const
         {
             if (parameters.size() == 0)
                 return functionName + "()";
@@ -326,7 +326,7 @@ public:
         }
 
         Term* clone() const                             { return new DotOperator (getSymbol(), right); }
-        const String getName() const                    { return "."; }
+        String getName() const                          { return "."; }
         int getOperatorPrecedence() const               { return 1; }
         void writeOperator (String& dest) const         { dest << '.'; }
         double performFunction (double, double) const   { return 0.0; }
@@ -435,7 +435,7 @@ public:
             return new Constant (-input->resolve (scope, recursionDepth)->toDouble(), false);
         }
 
-        const String getName() const    { return "-"; }
+        String getName() const          { return "-"; }
         const TermPtr negated()         { return input; }
 
         const TermPtr createTermToEvaluateInput (const Scope& scope, const Term* input_, double overallTarget, Term* topLevelTerm) const
@@ -449,7 +449,7 @@ public:
                                                : dest->createTermToEvaluateInput (scope, this, overallTarget, topLevelTerm));
         }
 
-        const String toString() const
+        String toString() const
         {
             if (input->getOperatorPrecedence() > 0)
                 return "-(" + input->toString() + ")";
@@ -470,7 +470,7 @@ public:
         Term* clone() const                     { return new Add (left->clone(), right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs + rhs; }
         int getOperatorPrecedence() const       { return 3; }
-        const String getName() const            { return "+"; }
+        String getName() const                  { return "+"; }
         void writeOperator (String& dest) const { dest << " + "; }
 
         const TermPtr createTermToEvaluateInput (const Scope& scope, const Term* input, double overallTarget, Term* topLevelTerm) const
@@ -495,7 +495,7 @@ public:
         Term* clone() const                     { return new Subtract (left->clone(), right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs - rhs; }
         int getOperatorPrecedence() const       { return 3; }
-        const String getName() const            { return "-"; }
+        String getName() const                  { return "-"; }
         void writeOperator (String& dest) const { dest << " - "; }
 
         const TermPtr createTermToEvaluateInput (const Scope& scope, const Term* input, double overallTarget, Term* topLevelTerm) const
@@ -522,7 +522,7 @@ public:
 
         Term* clone() const                     { return new Multiply (left->clone(), right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs * rhs; }
-        const String getName() const            { return "*"; }
+        String getName() const                  { return "*"; }
         void writeOperator (String& dest) const { dest << " * "; }
         int getOperatorPrecedence() const       { return 2; }
 
@@ -547,7 +547,7 @@ public:
 
         Term* clone() const                     { return new Divide (left->clone(), right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs / rhs; }
-        const String getName() const            { return "/"; }
+        String getName() const                  { return "/"; }
         void writeOperator (String& dest) const { dest << " / "; }
         int getOperatorPrecedence() const       { return 2; }
 
@@ -959,7 +959,7 @@ Expression::Expression (const String& stringToParse)
     term = parser.readUpToComma();
 }
 
-const Expression Expression::parse (String::CharPointerType& stringToParse)
+Expression Expression::parse (String::CharPointerType& stringToParse)
 {
     Helpers::Parser parser (stringToParse);
     return Expression (parser.readUpToComma());
@@ -996,19 +996,19 @@ double Expression::evaluate (const Scope& scope, String& evaluationError) const
     return 0;
 }
 
-const Expression Expression::operator+ (const Expression& other) const  { return Expression (new Helpers::Add (term, other.term)); }
-const Expression Expression::operator- (const Expression& other) const  { return Expression (new Helpers::Subtract (term, other.term)); }
-const Expression Expression::operator* (const Expression& other) const  { return Expression (new Helpers::Multiply (term, other.term)); }
-const Expression Expression::operator/ (const Expression& other) const  { return Expression (new Helpers::Divide (term, other.term)); }
-const Expression Expression::operator-() const                          { return Expression (term->negated()); }
-const Expression Expression::symbol (const String& symbol)              { return Expression (new Helpers::SymbolTerm (symbol)); }
+Expression Expression::operator+ (const Expression& other) const  { return Expression (new Helpers::Add (term, other.term)); }
+Expression Expression::operator- (const Expression& other) const  { return Expression (new Helpers::Subtract (term, other.term)); }
+Expression Expression::operator* (const Expression& other) const  { return Expression (new Helpers::Multiply (term, other.term)); }
+Expression Expression::operator/ (const Expression& other) const  { return Expression (new Helpers::Divide (term, other.term)); }
+Expression Expression::operator-() const                          { return Expression (term->negated()); }
+Expression Expression::symbol (const String& symbol)              { return Expression (new Helpers::SymbolTerm (symbol)); }
 
-const Expression Expression::function (const String& functionName, const Array<Expression>& parameters)
+Expression Expression::function (const String& functionName, const Array<Expression>& parameters)
 {
     return Expression (new Helpers::Function (functionName, parameters));
 }
 
-const Expression Expression::adjustedToGiveNewResult (const double targetValue, const Expression::Scope& scope) const
+Expression Expression::adjustedToGiveNewResult (const double targetValue, const Expression::Scope& scope) const
 {
     ScopedPointer<Term> newTerm (term->clone());
 
@@ -1044,7 +1044,7 @@ const Expression Expression::adjustedToGiveNewResult (const double targetValue, 
     return Expression (newTerm.release());
 }
 
-const Expression Expression::withRenamedSymbol (const Expression::Symbol& oldSymbol, const String& newName, const Scope& scope) const
+Expression Expression::withRenamedSymbol (const Expression::Symbol& oldSymbol, const String& newName, const Scope& scope) const
 {
     jassert (newName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_"));
 
@@ -1081,12 +1081,12 @@ void Expression::findReferencedSymbols (Array<Symbol>& results, const Scope& sco
     {}
 }
 
-const String Expression::toString() const                   { return term->toString(); }
-bool Expression::usesAnySymbols() const                     { return Helpers::containsAnySymbols (term); }
-Expression::Type Expression::getType() const noexcept       { return term->getType(); }
-const String Expression::getSymbolOrFunction() const        { return term->getName(); }
-int Expression::getNumInputs() const                        { return term->getNumInputs(); }
-const Expression Expression::getInput (int index) const     { return Expression (term->getInput (index)); }
+String Expression::toString() const                     { return term->toString(); }
+bool Expression::usesAnySymbols() const                 { return Helpers::containsAnySymbols (term); }
+Expression::Type Expression::getType() const noexcept   { return term->getType(); }
+String Expression::getSymbolOrFunction() const          { return term->getName(); }
+int Expression::getNumInputs() const                    { return term->getNumInputs(); }
+Expression Expression::getInput (int index) const       { return Expression (term->getInput (index)); }
 
 //==============================================================================
 const ReferenceCountedObjectPtr<Expression::Term> Expression::Term::negated()

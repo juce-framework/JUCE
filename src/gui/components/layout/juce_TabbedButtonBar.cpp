@@ -278,7 +278,7 @@ const String TabbedButtonBar::getCurrentTabName() const
     return tab == nullptr ? String::empty : tab->name;
 }
 
-const StringArray TabbedButtonBar::getTabNames() const
+StringArray TabbedButtonBar::getTabNames() const
 {
     StringArray names;
 

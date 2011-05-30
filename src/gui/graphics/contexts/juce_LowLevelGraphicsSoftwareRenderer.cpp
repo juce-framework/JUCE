@@ -2502,7 +2502,7 @@ void LowLevelGraphicsSoftwareRenderer::setFont (const Font& newFont)
     currentState->font = newFont;
 }
 
-const Font LowLevelGraphicsSoftwareRenderer::getFont()
+Font LowLevelGraphicsSoftwareRenderer::getFont()
 {
     return currentState->font;
 }

@@ -540,7 +540,7 @@ void LowLevelGraphicsPostScriptRenderer::setFont (const Font& newFont)
     stateStack.getLast()->font = newFont;
 }
 
-const Font LowLevelGraphicsPostScriptRenderer::getFont()
+Font LowLevelGraphicsPostScriptRenderer::getFont()
 {
     return stateStack.getLast()->font;
 }

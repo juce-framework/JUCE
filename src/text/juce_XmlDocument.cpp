@@ -164,7 +164,7 @@ void XmlDocument::setLastError (const String& desc, const bool carryOn)
     errorOccurred = ! carryOn;
 }
 
-const String XmlDocument::getFileContents (const String& filename) const
+String XmlDocument::getFileContents (const String& filename) const
 {
     if (inputSource != nullptr)
     {
@@ -717,7 +717,7 @@ void XmlDocument::readEntity (String& result)
     }
 }
 
-const String XmlDocument::expandEntity (const String& ent)
+String XmlDocument::expandEntity (const String& ent)
 {
     if (ent.equalsIgnoreCase ("amp"))   return String::charToString ('&');
     if (ent.equalsIgnoreCase ("quot"))  return String::charToString ('"');
@@ -742,7 +742,7 @@ const String XmlDocument::expandEntity (const String& ent)
     return expandExternalEntity (ent);
 }
 
-const String XmlDocument::expandExternalEntity (const String& entity)
+String XmlDocument::expandExternalEntity (const String& entity)
 {
     if (needToLoadDTD)
     {
@@ -834,7 +834,7 @@ const String XmlDocument::expandExternalEntity (const String& entity)
     return entity;
 }
 
-const String XmlDocument::getParameterEntity (const String& entity)
+String XmlDocument::getParameterEntity (const String& entity)
 {
     for (int i = 0; i < tokenisedDTD.size(); ++i)
     {

@@ -738,6 +738,8 @@
               <File RelativePath="..\..\src\gui\graphics\effects\juce_ImageEffectFilter.h"/>
             </Filter>
             <Filter Name="fonts">
+              <File RelativePath="..\..\src\gui\graphics\fonts\juce_CustomTypeface.cpp"/>
+              <File RelativePath="..\..\src\gui\graphics\fonts\juce_CustomTypeface.h"/>
               <File RelativePath="..\..\src\gui\graphics\fonts\juce_Font.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\fonts\juce_Font.h"/>
               <File RelativePath="..\..\src\gui\graphics\fonts\juce_GlyphArrangement.cpp"/>

@@ -225,14 +225,18 @@ private:
         if (sessionHandle != 0)
         {
             // break up the url..
-            TCHAR file[1024], server[1024];
+            TCHAR file[1024], server[1024], username[1024], password[1024];
 
             URL_COMPONENTS uc = { 0 };
             uc.dwStructSize = sizeof (uc);
-            uc.dwUrlPathLength = sizeof (file);
-            uc.dwHostNameLength = sizeof (server);
             uc.lpszUrlPath = file;
+            uc.dwUrlPathLength = numElementsInArray (file);
             uc.lpszHostName = server;
+            uc.dwHostNameLength = numElementsInArray (server);
+            uc.lpszUserName = username;
+            uc.dwUserNameLength = numElementsInArray (username);
+            uc.lpszPassword = password;
+            uc.dwPasswordLength = numElementsInArray (password);
 
             if (InternetCrackUrl (address.toWideCharPointer(), 0, 0, &uc))
             {
@@ -263,7 +267,7 @@ private:
                 }
               #else
                 connection = InternetConnect (sessionHandle, uc.lpszHostName, uc.nPort,
-                                              _T(""), _T(""),
+                                              uc.lpszUserName, uc.lpszPassword,
                                               isFtp ? INTERNET_SERVICE_FTP
                                                     : INTERNET_SERVICE_HTTP,
                                               0, 0);

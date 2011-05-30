@@ -71,12 +71,12 @@ int FileSearchPath::getNumPaths() const
     return directories.size();
 }
 
-const File FileSearchPath::operator[] (const int index) const
+File FileSearchPath::operator[] (const int index) const
 {
     return File (directories [index]);
 }
 
-const String FileSearchPath::toString() const
+String FileSearchPath::toString() const
 {
     StringArray directories2 (directories);
     for (int i = directories2.size(); --i >= 0;)

@@ -78,10 +78,10 @@ public:
 
         @see getNumPaths
     */
-    const File operator[] (int index) const;
+    File operator[] (int index) const;
 
     /** Returns the search path as a semicolon-separated list of directories. */
-    const String toString() const;
+    String toString() const;
 
     //==============================================================================
     /** Adds a new directory to the search path.

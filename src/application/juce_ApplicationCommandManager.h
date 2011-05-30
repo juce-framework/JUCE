@@ -194,7 +194,7 @@ public:
 
         @see getCommandsInCategory()
     */
-    const StringArray getCommandCategories() const;
+    StringArray getCommandCategories() const;
 
     /** Returns a list of all the command UIDs in a particular category.
 

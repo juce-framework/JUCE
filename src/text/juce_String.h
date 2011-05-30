@@ -150,7 +150,7 @@ public:
 
     //==============================================================================
     /** Creates a string from a single character. */
-    static const String charToString (juce_wchar character);
+    static String charToString (juce_wchar character);
 
     /** Destructor. */
     ~String() noexcept;
@@ -589,7 +589,7 @@ public:
                             this index are returned
         @see fromFirstOccurrenceOf, dropLastCharacters, getLastCharacters, upToFirstOccurrenceOf
     */
-    const String substring (int startIndex, int endIndex) const;
+    String substring (int startIndex, int endIndex) const;
 
     /** Returns a section of the string, starting from a given position.
 
@@ -599,7 +599,7 @@ public:
         @returns            the substring from startIndex up to the end of the string
         @see dropLastCharacters, getLastCharacters, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf
     */
-    const String substring (int startIndex) const;
+    String substring (int startIndex) const;
 
     /** Returns a version of this string with a number of characters removed
         from the end.
@@ -610,7 +610,7 @@ public:
                                 original string will be returned.
         @see substring, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf, getLastCharacter
     */
-    const String dropLastCharacters (int numberToDrop) const;
+    String dropLastCharacters (int numberToDrop) const;
 
     /** Returns a number of characters from the end of the string.
 
@@ -619,7 +619,7 @@ public:
 
         @see substring, dropLastCharacters, getLastCharacter
     */
-    const String getLastCharacters (int numCharacters) const;
+    String getLastCharacters (int numCharacters) const;
 
     //==============================================================================
     /** Returns a section of the string starting from a given substring.
@@ -637,8 +637,8 @@ public:
 
         @see upToFirstOccurrenceOf, fromLastOccurrenceOf
     */
-    const String fromFirstOccurrenceOf (const String& substringToStartFrom,
-                                        bool includeSubStringInResult,
+    String fromFirstOccurrenceOf (const String& substringToStartFrom,
+                                  bool includeSubStringInResult,
                                         bool ignoreCase) const;
 
     /** Returns a section of the string starting from the last occurrence of a given substring.
@@ -649,9 +649,9 @@ public:
 
         @see fromFirstOccurrenceOf, upToLastOccurrenceOf
     */
-    const String fromLastOccurrenceOf (const String& substringToFind,
-                                       bool includeSubStringInResult,
-                                       bool ignoreCase) const;
+    String fromLastOccurrenceOf (const String& substringToFind,
+                                 bool includeSubStringInResult,
+                                 bool ignoreCase) const;
 
     /** Returns the start of this string, up to the first occurrence of a substring.
 
@@ -666,9 +666,9 @@ public:
 
         @see upToLastOccurrenceOf, fromFirstOccurrenceOf
     */
-    const String upToFirstOccurrenceOf (const String& substringToEndWith,
-                                        bool includeSubStringInResult,
-                                        bool ignoreCase) const;
+    String upToFirstOccurrenceOf (const String& substringToEndWith,
+                                  bool includeSubStringInResult,
+                                  bool ignoreCase) const;
 
     /** Returns the start of this string, up to the last occurrence of a substring.
 
@@ -677,19 +677,19 @@ public:
 
         @see upToFirstOccurrenceOf, fromFirstOccurrenceOf
     */
-    const String upToLastOccurrenceOf (const String& substringToFind,
-                                       bool includeSubStringInResult,
-                                       bool ignoreCase) const;
+    String upToLastOccurrenceOf (const String& substringToFind,
+                                 bool includeSubStringInResult,
+                                 bool ignoreCase) const;
 
     //==============================================================================
     /** Returns a copy of this string with any whitespace characters removed from the start and end. */
-    const String trim() const;
+    String trim() const;
 
     /** Returns a copy of this string with any whitespace characters removed from the start. */
-    const String trimStart() const;
+    String trimStart() const;
 
     /** Returns a copy of this string with any whitespace characters removed from the end. */
-    const String trimEnd() const;
+    String trimEnd() const;
 
     /** Returns a copy of this string, having removed a specified set of characters from its start.
         Characters are removed from the start of the string until it finds one that is not in the
@@ -697,7 +697,7 @@ public:
         @param charactersToTrim     the set of characters to remove.
         @see trim, trimStart, trimCharactersAtEnd
     */
-    const String trimCharactersAtStart (const String& charactersToTrim) const;
+    String trimCharactersAtStart (const String& charactersToTrim) const;
 
     /** Returns a copy of this string, having removed a specified set of characters from its end.
         Characters are removed from the end of the string until it finds one that is not in the
@@ -705,14 +705,14 @@ public:
         @param charactersToTrim     the set of characters to remove.
         @see trim, trimEnd, trimCharactersAtStart
     */
-    const String trimCharactersAtEnd (const String& charactersToTrim) const;
+    String trimCharactersAtEnd (const String& charactersToTrim) const;
 
     //==============================================================================
     /** Returns an upper-case version of this string. */
-    const String toUpperCase() const;
+    String toUpperCase() const;
 
     /** Returns an lower-case version of this string. */
-    const String toLowerCase() const;
+    String toLowerCase() const;
 
     //==============================================================================
     /** Replaces a sub-section of the string with another string.
@@ -730,9 +730,9 @@ public:
         @param stringToInsert           the new string to insert at startIndex after the characters have been
                                         removed.
     */
-    const String replaceSection (int startIndex,
-                                 int numCharactersToReplace,
-                                 const String& stringToInsert) const;
+    String replaceSection (int startIndex,
+                           int numCharactersToReplace,
+                           const String& stringToInsert) const;
 
     /** Replaces all occurrences of a substring with another string.
 
@@ -741,13 +741,13 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String replace (const String& stringToReplace,
-                          const String& stringToInsertInstead,
-                          bool ignoreCase = false) const;
+    String replace (const String& stringToReplace,
+                    const String& stringToInsertInstead,
+                    bool ignoreCase = false) const;
 
     /** Returns a string with all occurrences of a character replaced with a different one. */
-    const String replaceCharacter (juce_wchar characterToReplace,
-                                   juce_wchar characterToInsertInstead) const;
+    String replaceCharacter (juce_wchar characterToReplace,
+                             juce_wchar characterToInsertInstead) const;
 
     /** Replaces a set of characters with another set.
 
@@ -759,8 +759,8 @@ public:
 
         Note that this is a const method, and won't affect the string itself.
     */
-    const String replaceCharacters (const String& charactersToReplace,
-                                    const String& charactersToInsertInstead) const;
+    String replaceCharacters (const String& charactersToReplace,
+                              const String& charactersToInsertInstead) const;
 
     /** Returns a version of this string that only retains a fixed set of characters.
 
@@ -771,7 +771,7 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String retainCharacters (const String& charactersToRetain) const;
+    String retainCharacters (const String& charactersToRetain) const;
 
     /** Returns a version of this string with a set of characters removed.
 
@@ -782,14 +782,14 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String removeCharacters (const String& charactersToRemove) const;
+    String removeCharacters (const String& charactersToRemove) const;
 
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
         This returns the leftmost section of the string, up to (and not including) the
         first character that doesn't appear in the string passed in.
     */
-    const String initialSectionContainingOnly (const String& permittedCharacters) const;
+    String initialSectionContainingOnly (const String& permittedCharacters) const;
 
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
@@ -797,7 +797,7 @@ public:
         first character that occurs in the string passed in. (If none of the specified
         characters are found in the string, the return value will just be the original string).
     */
-    const String initialSectionNotContaining (const String& charactersToStopAt) const;
+    String initialSectionNotContaining (const String& charactersToStopAt) const;
 
     //==============================================================================
     /** Checks whether the string might be in quotation marks.
@@ -818,7 +818,7 @@ public:
 
         @see isQuotedString, quoted
     */
-    const String unquoted() const;
+    String unquoted() const;
 
     /** Adds quotation marks around a string.
 
@@ -831,7 +831,7 @@ public:
         @param quoteCharacter   the character to add at the start and end
         @see isQuotedString, unquoted
     */
-    const String quoted (juce_wchar quoteCharacter = '"') const;
+    String quoted (juce_wchar quoteCharacter = '"') const;
 
 
     //==============================================================================
@@ -840,18 +840,18 @@ public:
         @param stringToRepeat         the string to repeat
         @param numberOfTimesToRepeat  how many times to repeat it
     */
-    static const String repeatedString (const String& stringToRepeat,
-                                        int numberOfTimesToRepeat);
+    static String repeatedString (const String& stringToRepeat,
+                                  int numberOfTimesToRepeat);
 
     /** Returns a copy of this string with the specified character repeatedly added to its
         beginning until the total length is at least the minimum length specified.
     */
-    const String paddedLeft (juce_wchar padCharacter, int minimumLength) const;
+    String paddedLeft (juce_wchar padCharacter, int minimumLength) const;
 
     /** Returns a copy of this string with the specified character repeatedly added to its
         end until the total length is at least the minimum length specified.
     */
-    const String paddedRight (juce_wchar padCharacter, int minimumLength) const;
+    String paddedRight (juce_wchar padCharacter, int minimumLength) const;
 
     /** Creates a string from data in an unknown format.
 
@@ -861,7 +861,7 @@ public:
         Should be able to handle Unicode endianness correctly, by looking at
         the first two bytes.
     */
-    static const String createStringFromData (const void* data, int size);
+    static String createStringFromData (const void* data, int size);
 
     /** Creates a String from a printf-style parameter list.
 
@@ -874,7 +874,7 @@ public:
         on the platform, it may be using wchar_t or char character types, so that even string
         literals can't be safely used as parameters if you're writing portable code.
     */
-    static const String formatted (const String formatString, ... );
+    static String formatted (const String formatString, ... );
 
     //==============================================================================
     // Numeric conversions..
@@ -999,13 +999,13 @@ public:
     int64 getHexValue64() const noexcept;
 
     /** Creates a string representing this 32-bit value in hexadecimal. */
-    static const String toHexString (int number);
+    static String toHexString (int number);
 
     /** Creates a string representing this 64-bit value in hexadecimal. */
-    static const String toHexString (int64 number);
+    static String toHexString (int64 number);
 
     /** Creates a string representing this 16-bit value in hexadecimal. */
-    static const String toHexString (short number);
+    static String toHexString (short number);
 
     /** Creates a string containing a hex dump of a block of binary data.
 
@@ -1016,9 +1016,7 @@ public:
                             group size 1 looks like: "be a1 c2 ff", group size 2 looks
                             like "bea1 c2ff".
     */
-    static const String toHexString (const unsigned char* data,
-                                     int size,
-                                     int groupSize = 1);
+    static String toHexString (const void* data, int size, int groupSize = 1);
 
     //==============================================================================
     /** Returns the character pointer currently being used to store this string.
@@ -1083,7 +1081,7 @@ public:
     /** Creates a String from a UTF-8 encoded buffer.
         If the size is < 0, it'll keep reading until it hits a zero.
     */
-    static const String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
+    static String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
 
     /** Returns the number of bytes required to represent this string as UTF8.
         The number returned does NOT include the trailing zero.
@@ -1214,31 +1212,31 @@ private:
 
 //==============================================================================
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (const char* string1,     const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (const char* string1,     const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (const wchar_t* string1,  const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (const wchar_t* string1,  const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (char string1,            const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (char string1,            const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (wchar_t string1,         const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (wchar_t string1,         const String& string2);
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (juce_wchar string1,      const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (juce_wchar string1,      const String& string2);
 #endif
 
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const String& string2);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, const String& string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const char* string2);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, const char* string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, const wchar_t* string2);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, char characterToAppend);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, char characterToAppend);
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, wchar_t characterToAppend);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, wchar_t characterToAppend);
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 /** Concatenates two strings. */
-JUCE_API const String JUCE_CALLTYPE operator+ (String string1, juce_wchar characterToAppend);
+JUCE_API String JUCE_CALLTYPE operator+ (String string1, juce_wchar characterToAppend);
 #endif
 
 //==============================================================================

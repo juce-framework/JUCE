@@ -44,7 +44,7 @@ public:
         Obviously this might have come from another app, so could contain
         anything..
     */
-    static const String getTextFromClipboard();
+    static String getTextFromClipboard();
 };
 
 #endif   // __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
