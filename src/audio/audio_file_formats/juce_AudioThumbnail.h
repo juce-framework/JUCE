@@ -227,6 +227,7 @@ private:
     double sampleRate;
     CriticalSection lock;
 
+    void clearChannelData();
     bool setDataSource (LevelDataSource* newSource);
     void setLevels (const MinMaxValue* const* values, int thumbIndex, int numChans, int numValues);
     void createChannels (int length);

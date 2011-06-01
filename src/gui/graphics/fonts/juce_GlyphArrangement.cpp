@@ -34,33 +34,40 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-PositionedGlyph::PositionedGlyph (const float x_, const float y_, const float w_, const Font& font_,
-                                  const juce_wchar character_, const int glyph_)
-    : x (x_),
-      y (y_),
-      w (w_),
-      font (font_),
-      character (character_),
-      glyph (glyph_)
+PositionedGlyph::PositionedGlyph (const Font& font_, const juce_wchar character_, const int glyph_,
+                                  const float x_, const float y_, const float w_, const bool whitespace_)
+    : font (font_), character (character_), glyph (glyph_),
+      x (x_), y (y_), w (w_), whitespace (whitespace_)
 {
 }
 
 PositionedGlyph::PositionedGlyph (const PositionedGlyph& other)
-    : x (other.x),
-      y (other.y),
-      w (other.w),
-      font (other.font),
-      character (other.character),
-      glyph (other.glyph)
+    : font (other.font), character (other.character), glyph (other.glyph),
+      x (other.x), y (other.y), w (other.w), whitespace (other.whitespace)
 {
+}
+
+PositionedGlyph::~PositionedGlyph() {}
+
+PositionedGlyph& PositionedGlyph::operator= (const PositionedGlyph& other)
+{
+    font = other.font;
+    character = other.character;
+    glyph = other.glyph;
+    x = other.x;
+    y = other.y;
+    w = other.w;
+    whitespace = other.whitespace;
+    return *this;
 }
 
 void PositionedGlyph::draw (const Graphics& g) const
 {
     if (! isWhitespace())
     {
-        g.getInternalContext()->setFont (font);
-        g.getInternalContext()->drawGlyph (glyph, AffineTransform::translation (x, y));
+        LowLevelGraphicsContext* const context = g.getInternalContext();
+        context->setFont (font);
+        context->drawGlyph (glyph, AffineTransform::translation (x, y));
     }
 }
 
@@ -69,9 +76,10 @@ void PositionedGlyph::draw (const Graphics& g,
 {
     if (! isWhitespace())
     {
-        g.getInternalContext()->setFont (font);
-        g.getInternalContext()->drawGlyph (glyph, AffineTransform::translation (x, y)
-                                                                  .followedBy (transform));
+        LowLevelGraphicsContext* const context = g.getInternalContext();
+        context->setFont (font);
+        context->drawGlyph (glyph, AffineTransform::translation (x, y)
+                                                   .followedBy (transform));
     }
 }
 
@@ -168,6 +176,11 @@ void GlyphArrangement::addGlyphArrangement (const GlyphArrangement& other)
     glyphs.addCopiesOf (other.glyphs);
 }
 
+void GlyphArrangement::addGlyph (const PositionedGlyph& glyph)
+{
+    glyphs.add (new PositionedGlyph (glyph));
+}
+
 void GlyphArrangement::removeRangeOfGlyphs (int startIndex, const int num)
 {
     glyphs.removeRange (startIndex, num < 0 ? glyphs.size() : num);
@@ -186,7 +199,7 @@ void GlyphArrangement::addLineOfText (const Font& font,
 
 void GlyphArrangement::addCurtailedLineOfText (const Font& font,
                                                const String& text,
-                                               float xOffset,
+                                               const float xOffset,
                                                const float yOffset,
                                                const float maxWidthPixels,
                                                const bool useEllipsis)
@@ -197,6 +210,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
         Array <float> xOffsets;
         font.getGlyphPositions (text, newGlyphs, xOffsets);
         const int textLen = newGlyphs.size();
+        glyphs.ensureStorageAllocated (glyphs.size() + textLen);
 
         String::CharPointerType t (text.getCharPointer());
 
@@ -215,8 +229,12 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
             }
             else
             {
-                glyphs.add (new PositionedGlyph (xOffset + thisX, yOffset, nextX - thisX,
-                                                 font, t.getAndAdvance(), newGlyphs.getUnchecked(i)));
+                const bool isWhitespace = t.isWhitespace();
+
+                glyphs.add (new PositionedGlyph (font, t.getAndAdvance(),
+                                                 newGlyphs.getUnchecked(i),
+                                                 xOffset + thisX, yOffset,
+                                                 nextX - thisX, isWhitespace));
             }
         }
     }
@@ -251,8 +269,8 @@ int GlyphArrangement::insertEllipsis (const Font& font, const float maxXPos,
 
         for (int i = 3; --i >= 0;)
         {
-            glyphs.insert (endIndex++, new PositionedGlyph (xOffset, yOffset, dx,
-                                                            font, '.', dotGlyphs.getFirst()));
+            glyphs.insert (endIndex++, new PositionedGlyph (font, '.', dotGlyphs.getFirst(),
+                                                            xOffset, yOffset, dx, false));
             --numDeleted;
             xOffset += dx;
 

@@ -541,7 +541,11 @@ AudioThumbnail::~AudioThumbnail()
 void AudioThumbnail::clear()
 {
     source = nullptr;
+    clearChannelData();
+}
 
+void AudioThumbnail::clearChannelData()
+{
     const ScopedLock sl (lock);
     window->invalidate();
     channels.clear();
@@ -572,7 +576,7 @@ void AudioThumbnail::createChannels (const int length)
 //==============================================================================
 void AudioThumbnail::loadFrom (InputStream& rawInput)
 {
-    clear();
+    clearChannelData();
 
     BufferedInputStream input (rawInput, 4096);
 

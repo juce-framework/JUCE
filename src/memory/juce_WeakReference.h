@@ -81,7 +81,7 @@
 
     @see WeakReference::Master
 */
-template <class ObjectType>
+template <class ObjectType, class ReferenceCountingType = ReferenceCountedObject>
 class WeakReference
 {
 public:
@@ -129,7 +129,7 @@ public:
         in your code!
         @see WeakReference
     */
-    class SharedPointer   : public ReferenceCountedObject
+    class SharedPointer   : public ReferenceCountingType
     {
     public:
         explicit SharedPointer (ObjectType* const owner_) noexcept : owner (owner_) {}

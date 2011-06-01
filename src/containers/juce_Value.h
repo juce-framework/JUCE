@@ -170,7 +170,7 @@ public:
         of a ValueSource object. If you're feeling adventurous, you can create your own custom
         ValueSource classes to allow Value objects to represent your own custom data items.
     */
-    class JUCE_API  ValueSource   : public ReferenceCountedObject,
+    class JUCE_API  ValueSource   : public SingleThreadedReferenceCountedObject,
                                     public AsyncUpdater
     {
     public:

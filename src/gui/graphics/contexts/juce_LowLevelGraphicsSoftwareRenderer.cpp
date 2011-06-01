@@ -1018,7 +1018,7 @@ private:
 };
 
 //==============================================================================
-class ClipRegionBase  : public ReferenceCountedObject
+class ClipRegionBase  : public SingleThreadedReferenceCountedObject
 {
 public:
     ClipRegionBase() {}

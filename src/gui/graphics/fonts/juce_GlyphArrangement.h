@@ -35,25 +35,33 @@
     A glyph from a particular font, with a particular size, style,
     typeface and position.
 
+    You should rarely need to use this class directly - for most purposes, the
+    GlyphArrangement class will do what you need for text layout.
+
     @see GlyphArrangement, Font
 */
 class JUCE_API  PositionedGlyph
 {
 public:
     //==============================================================================
+    PositionedGlyph (const Font& font, juce_wchar character, int glyphNumber,
+                     float anchorX, float baselineY, float width, bool isWhitespace);
+
     PositionedGlyph (const PositionedGlyph& other);
+    PositionedGlyph& operator= (const PositionedGlyph& other);
+    ~PositionedGlyph();
 
     /** Returns the character the glyph represents. */
-    juce_wchar getCharacter() const             { return character; }
+    juce_wchar getCharacter() const noexcept    { return character; }
     /** Checks whether the glyph is actually empty. */
-    bool isWhitespace() const                   { return CharacterFunctions::isWhitespace (character); }
+    bool isWhitespace() const noexcept          { return whitespace; }
 
     /** Returns the position of the glyph's left-hand edge. */
-    float getLeft() const                       { return x; }
+    float getLeft() const noexcept              { return x; }
     /** Returns the position of the glyph's right-hand edge. */
-    float getRight() const                      { return x + w; }
+    float getRight() const noexcept             { return x + w; }
     /** Returns the y position of the glyph's baseline. */
-    float getBaselineY() const                  { return y; }
+    float getBaselineY() const noexcept         { return y; }
     /** Returns the y position of the top of the glyph. */
     float getTop() const                        { return y - font.getAscent(); }
     /** Returns the y position of the bottom of the glyph. */
@@ -84,12 +92,12 @@ public:
 private:
     //==============================================================================
     friend class GlyphArrangement;
-    float x, y, w;
     Font font;
     juce_wchar character;
     int glyph;
+    float x, y, w;
+    bool whitespace;
 
-    PositionedGlyph (float x, float y, float w, const Font& font, juce_wchar character, int glyph);
     JUCE_LEAK_DETECTOR (PositionedGlyph);
 };
 
@@ -115,7 +123,6 @@ public:
     GlyphArrangement (const GlyphArrangement& other);
 
     /** Copies another arrangement onto this one.
-
         To add another arrangement without clearing this one, use addGlyphArrangement().
     */
     GlyphArrangement& operator= (const GlyphArrangement& other);
@@ -208,6 +215,9 @@ public:
     /** Appends another glyph arrangement to this one. */
     void addGlyphArrangement (const GlyphArrangement& other);
 
+    /** Appends a custom glyph to the arrangement. */
+    void addGlyph (const PositionedGlyph& glyph);
+
     //==============================================================================
     /** Draws this glyph arrangement to a graphics context.
 
@@ -293,9 +303,9 @@ private:
     //==============================================================================
     OwnedArray <PositionedGlyph> glyphs;
 
-    int insertEllipsis (const Font& font, float maxXPos, int startIndex, int endIndex);
-    int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
-                          const Justification& justification, float minimumHorizontalScale);
+    int insertEllipsis (const Font&, float maxXPos, int startIndex, int endIndex);
+    int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font&,
+                          const Justification&, float minimumHorizontalScale);
     void spreadOutLine (int start, int numGlyphs, float targetWidth);
 
     JUCE_LEAK_DETECTOR (GlyphArrangement);

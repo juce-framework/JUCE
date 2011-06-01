@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class Expression::Term  : public ReferenceCountedObject
+class Expression::Term  : public SingleThreadedReferenceCountedObject
 {
 public:
     Term() {}

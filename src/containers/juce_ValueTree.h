@@ -466,14 +466,11 @@ public:
 
 private:
     //==============================================================================
-    class SetPropertyAction;
-    friend class SetPropertyAction;
-    class AddOrRemoveChildAction;
-    friend class AddOrRemoveChildAction;
-    class MoveChildAction;
-    friend class MoveChildAction;
+    class SetPropertyAction;        friend class SetPropertyAction;
+    class AddOrRemoveChildAction;   friend class AddOrRemoveChildAction;
+    class MoveChildAction;          friend class MoveChildAction;
 
-    class JUCE_API  SharedObject    : public ReferenceCountedObject
+    class JUCE_API  SharedObject    : public SingleThreadedReferenceCountedObject
     {
     public:
         explicit SharedObject (const Identifier& type);

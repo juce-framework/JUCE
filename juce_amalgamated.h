@@ -7412,6 +7412,24 @@ public:
 		}
 	}
 
+	/** This will enlarge or shrink the array to the given number of elements, by adding
+		or removing items from its end.
+
+		If the array is smaller than the given target size, empty elements will be appended
+		until its size is as specified. If its size is larger than the target, items will be
+		removed from its end to shorten it.
+	*/
+	void resize (const int targetNumItems)
+	{
+		jassert (targetNumItems >= 0);
+
+		const int numToAdd = targetNumItems - numUsed;
+		if (numToAdd > 0)
+			insertMultiple (numUsed, ElementType(), numToAdd);
+		else if (numToAdd < 0)
+			removeRange (targetNumItems, -numToAdd);
+	}
+
 	/** Inserts a new element into the array, assuming that the array is sorted.
 
 		This will use a comparator to find the position at which the new element
@@ -9059,7 +9077,11 @@ private:
 	Once a new ReferenceCountedObject has been assigned to a pointer, be
 	careful not to delete the object manually.
 
-	@see ReferenceCountedObjectPtr, ReferenceCountedArray
+	This class uses an Atomic<int> value to hold the reference count, so that it
+	the pointers can be passed between threads safely. For a faster but non-thread-safe
+	version, use SingleThreadedReferenceCountedObject instead.
+
+	@see ReferenceCountedObjectPtr, ReferenceCountedArray, SingleThreadedReferenceCountedObject
 */
 class JUCE_API  ReferenceCountedObject
 {
@@ -9088,10 +9110,7 @@ public:
 	}
 
 	/** Returns the object's current reference count. */
-	inline int getReferenceCount() const noexcept
-	{
-		return refCount.get();
-	}
+	inline int getReferenceCount() const noexcept	   { return refCount.get(); }
 
 protected:
 
@@ -9110,6 +9129,62 @@ protected:
 private:
 
 	Atomic <int> refCount;
+};
+
+/**
+	Adds reference-counting to an object.
+
+	This is efectively a version of the ReferenceCountedObject class, but which
+	uses a non-atomic counter, and so is not thread-safe (but which will be more
+	efficient).
+	For more details on how to use it, see the ReferenceCountedObject class notes.
+
+	@see ReferenceCountedObject, ReferenceCountedObjectPtr, ReferenceCountedArray
+*/
+class JUCE_API  SingleThreadedReferenceCountedObject
+{
+public:
+
+	/** Increments the object's reference count.
+
+		This is done automatically by the smart pointer, but is public just
+		in case it's needed for nefarious purposes.
+	*/
+	inline void incReferenceCount() noexcept
+	{
+		++refCount;
+	}
+
+	/** Decreases the object's reference count.
+
+		If the count gets to zero, the object will be deleted.
+	*/
+	inline void decReferenceCount() noexcept
+	{
+		jassert (getReferenceCount() > 0);
+
+		if (--refCount == 0)
+			delete this;
+	}
+
+	/** Returns the object's current reference count. */
+	inline int getReferenceCount() const noexcept	   { return refCount; }
+
+protected:
+
+	/** Creates the reference-counted object (with an initial ref count of zero). */
+	SingleThreadedReferenceCountedObject() : refCount (0)  {}
+
+	/** Destructor. */
+	virtual ~SingleThreadedReferenceCountedObject()
+	{
+		// it's dangerous to delete an object that's still referenced by something else!
+		jassert (getReferenceCount() == 0);
+	}
+
+private:
+
+	int refCount;
 };
 
 /**
@@ -16262,7 +16337,7 @@ public:
 		of a ValueSource object. If you're feeling adventurous, you can create your own custom
 		ValueSource classes to allow Value objects to represent your own custom data items.
 	*/
-	class JUCE_API  ValueSource   : public ReferenceCountedObject,
+	class JUCE_API  ValueSource   : public SingleThreadedReferenceCountedObject,
 									public AsyncUpdater
 	{
 	public:
@@ -17147,14 +17222,11 @@ public:
 
 private:
 
-	class SetPropertyAction;
-	friend class SetPropertyAction;
-	class AddOrRemoveChildAction;
-	friend class AddOrRemoveChildAction;
-	class MoveChildAction;
-	friend class MoveChildAction;
+	class SetPropertyAction;	friend class SetPropertyAction;
+	class AddOrRemoveChildAction;   friend class AddOrRemoveChildAction;
+	class MoveChildAction;	  friend class MoveChildAction;
 
-	class JUCE_API  SharedObject	: public ReferenceCountedObject
+	class JUCE_API  SharedObject	: public SingleThreadedReferenceCountedObject
 	{
 	public:
 		explicit SharedObject (const Identifier& type);
@@ -21560,7 +21632,7 @@ private:
 
 	@see WeakReference::Master
 */
-template <class ObjectType>
+template <class ObjectType, class ReferenceCountingType = ReferenceCountedObject>
 class WeakReference
 {
 public:
@@ -21607,7 +21679,7 @@ public:
 		in your code!
 		@see WeakReference
 	*/
-	class SharedPointer   : public ReferenceCountedObject
+	class SharedPointer   : public ReferenceCountingType
 	{
 	public:
 		explicit SharedPointer (ObjectType* const owner_) noexcept : owner (owner_) {}
@@ -24999,7 +25071,7 @@ class AffineTransform;
 
 	@see CustomTypeface, Font
 */
-class JUCE_API  Typeface  : public ReferenceCountedObject
+class JUCE_API  Typeface  : public SingleThreadedReferenceCountedObject
 {
 public:
 
@@ -25403,7 +25475,7 @@ private:
 	friend class FontGlyphAlphaMap;
 	friend class TypefaceCache;
 
-	class SharedFontInternal  : public ReferenceCountedObject
+	class SharedFontInternal  : public SingleThreadedReferenceCountedObject
 	{
 	public:
 		SharedFontInternal (float height, int styleFlags) noexcept;
@@ -37453,6 +37525,7 @@ private:
 	double sampleRate;
 	CriticalSection lock;
 
+	void clearChannelData();
 	bool setDataSource (LevelDataSource* newSource);
 	void setLevels (const MinMaxValue* const* values, int thumbIndex, int numChans, int numValues);
 	void createChannels (int length);
@@ -44045,7 +44118,7 @@ public:
 		@see PopupMenu::addCustomItem
 	*/
 	class JUCE_API  CustomComponent  : public Component,
-									   public ReferenceCountedObject
+									   public SingleThreadedReferenceCountedObject
 	{
 	public:
 		/** Creates a custom item.
@@ -57363,25 +57436,33 @@ private:
 	A glyph from a particular font, with a particular size, style,
 	typeface and position.
 
+	You should rarely need to use this class directly - for most purposes, the
+	GlyphArrangement class will do what you need for text layout.
+
 	@see GlyphArrangement, Font
 */
 class JUCE_API  PositionedGlyph
 {
 public:
 
+	PositionedGlyph (const Font& font, juce_wchar character, int glyphNumber,
+					 float anchorX, float baselineY, float width, bool isWhitespace);
+
 	PositionedGlyph (const PositionedGlyph& other);
+	PositionedGlyph& operator= (const PositionedGlyph& other);
+	~PositionedGlyph();
 
 	/** Returns the character the glyph represents. */
-	juce_wchar getCharacter() const		 { return character; }
+	juce_wchar getCharacter() const noexcept	{ return character; }
 	/** Checks whether the glyph is actually empty. */
-	bool isWhitespace() const		   { return CharacterFunctions::isWhitespace (character); }
+	bool isWhitespace() const noexcept	  { return whitespace; }
 
 	/** Returns the position of the glyph's left-hand edge. */
-	float getLeft() const			   { return x; }
+	float getLeft() const noexcept		  { return x; }
 	/** Returns the position of the glyph's right-hand edge. */
-	float getRight() const			  { return x + w; }
+	float getRight() const noexcept		 { return x + w; }
 	/** Returns the y position of the glyph's baseline. */
-	float getBaselineY() const		  { return y; }
+	float getBaselineY() const noexcept	 { return y; }
 	/** Returns the y position of the top of the glyph. */
 	float getTop() const			{ return y - font.getAscent(); }
 	/** Returns the y position of the bottom of the glyph. */
@@ -57410,12 +57491,12 @@ public:
 private:
 
 	friend class GlyphArrangement;
-	float x, y, w;
 	Font font;
 	juce_wchar character;
 	int glyph;
+	float x, y, w;
+	bool whitespace;
 
-	PositionedGlyph (float x, float y, float w, const Font& font, juce_wchar character, int glyph);
 	JUCE_LEAK_DETECTOR (PositionedGlyph);
 };
 
@@ -57439,7 +57520,6 @@ public:
 	GlyphArrangement (const GlyphArrangement& other);
 
 	/** Copies another arrangement onto this one.
-
 		To add another arrangement without clearing this one, use addGlyphArrangement().
 	*/
 	GlyphArrangement& operator= (const GlyphArrangement& other);
@@ -57530,6 +57610,9 @@ public:
 	/** Appends another glyph arrangement to this one. */
 	void addGlyphArrangement (const GlyphArrangement& other);
 
+	/** Appends a custom glyph to the arrangement. */
+	void addGlyph (const PositionedGlyph& glyph);
+
 	/** Draws this glyph arrangement to a graphics context.
 
 		This uses cached bitmaps so is much faster than the draw (Graphics&, const AffineTransform&)
@@ -57611,9 +57694,9 @@ private:
 
 	OwnedArray <PositionedGlyph> glyphs;
 
-	int insertEllipsis (const Font& font, float maxXPos, int startIndex, int endIndex);
-	int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
-						  const Justification& justification, float minimumHorizontalScale);
+	int insertEllipsis (const Font&, float maxXPos, int startIndex, int endIndex);
+	int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font&,
+						  const Justification&, float minimumHorizontalScale);
 	void spreadOutLine (int start, int numGlyphs, float targetWidth);
 
 	JUCE_LEAK_DETECTOR (GlyphArrangement);

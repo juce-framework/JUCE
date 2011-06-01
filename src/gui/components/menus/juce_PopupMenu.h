@@ -415,7 +415,7 @@ public:
         @see PopupMenu::addCustomItem
     */
     class JUCE_API  CustomComponent  : public Component,
-                                       public ReferenceCountedObject
+                                       public SingleThreadedReferenceCountedObject
     {
     public:
         /** Creates a custom item.

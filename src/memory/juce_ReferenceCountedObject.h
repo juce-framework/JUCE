@@ -55,7 +55,11 @@
     Once a new ReferenceCountedObject has been assigned to a pointer, be
     careful not to delete the object manually.
 
-    @see ReferenceCountedObjectPtr, ReferenceCountedArray
+    This class uses an Atomic<int> value to hold the reference count, so that it
+    the pointers can be passed between threads safely. For a faster but non-thread-safe
+    version, use SingleThreadedReferenceCountedObject instead.
+
+    @see ReferenceCountedObjectPtr, ReferenceCountedArray, SingleThreadedReferenceCountedObject
 */
 class JUCE_API  ReferenceCountedObject
 {
@@ -84,10 +88,7 @@ public:
     }
 
     /** Returns the object's current reference count. */
-    inline int getReferenceCount() const noexcept
-    {
-        return refCount.get();
-    }
+    inline int getReferenceCount() const noexcept       { return refCount.get(); }
 
 
 protected:
@@ -109,6 +110,64 @@ private:
     Atomic <int> refCount;
 };
 
+
+//==============================================================================
+/**
+    Adds reference-counting to an object.
+
+    This is efectively a version of the ReferenceCountedObject class, but which
+    uses a non-atomic counter, and so is not thread-safe (but which will be more
+    efficient).
+    For more details on how to use it, see the ReferenceCountedObject class notes.
+
+    @see ReferenceCountedObject, ReferenceCountedObjectPtr, ReferenceCountedArray
+*/
+class JUCE_API  SingleThreadedReferenceCountedObject
+{
+public:
+    //==============================================================================
+    /** Increments the object's reference count.
+
+        This is done automatically by the smart pointer, but is public just
+        in case it's needed for nefarious purposes.
+    */
+    inline void incReferenceCount() noexcept
+    {
+        ++refCount;
+    }
+
+    /** Decreases the object's reference count.
+
+        If the count gets to zero, the object will be deleted.
+    */
+    inline void decReferenceCount() noexcept
+    {
+        jassert (getReferenceCount() > 0);
+
+        if (--refCount == 0)
+            delete this;
+    }
+
+    /** Returns the object's current reference count. */
+    inline int getReferenceCount() const noexcept       { return refCount; }
+
+
+protected:
+    //==============================================================================
+    /** Creates the reference-counted object (with an initial ref count of zero). */
+    SingleThreadedReferenceCountedObject() : refCount (0)  {}
+
+    /** Destructor. */
+    virtual ~SingleThreadedReferenceCountedObject()
+    {
+        // it's dangerous to delete an object that's still referenced by something else!
+        jassert (getReferenceCount() == 0);
+    }
+
+private:
+    //==============================================================================
+    int refCount;
+};
 
 
 //==============================================================================

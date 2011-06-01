@@ -364,7 +364,7 @@ private:
     friend class FontGlyphAlphaMap;
     friend class TypefaceCache;
 
-    class SharedFontInternal  : public ReferenceCountedObject
+    class SharedFontInternal  : public SingleThreadedReferenceCountedObject
     {
     public:
         SharedFontInternal (float height, int styleFlags) noexcept;

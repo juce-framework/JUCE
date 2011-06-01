@@ -594,6 +594,24 @@ public:
         }
     }
 
+    /** This will enlarge or shrink the array to the given number of elements, by adding
+        or removing items from its end.
+
+        If the array is smaller than the given target size, empty elements will be appended
+        until its size is as specified. If its size is larger than the target, items will be
+        removed from its end to shorten it.
+    */
+    void resize (const int targetNumItems)
+    {
+        jassert (targetNumItems >= 0);
+
+        const int numToAdd = targetNumItems - numUsed;
+        if (numToAdd > 0)
+            insertMultiple (numUsed, ElementType(), numToAdd);
+        else if (numToAdd < 0)
+            removeRange (targetNumItems, -numToAdd);
+    }
+
     /** Inserts a new element into the array, assuming that the array is sorted.
 
         This will use a comparator to find the position at which the new element
