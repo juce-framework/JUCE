@@ -1059,15 +1059,15 @@ protected:
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelARGB, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelARGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelRGB, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelRGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             }
@@ -1077,15 +1077,15 @@ protected:
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelARGB, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelARGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelRGB, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelRGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             }
@@ -1095,15 +1095,15 @@ protected:
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, true> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
+                if (tiledFill)  { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, true>  r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 else            { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); iter.iterate (r); }
                 break;
             }
@@ -1120,15 +1120,15 @@ protected:
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelARGB, PixelARGB, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelARGB, PixelARGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 else            { ImageFillEdgeTableRenderer <PixelARGB, PixelARGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelARGB, PixelRGB, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelARGB, PixelRGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 else            { ImageFillEdgeTableRenderer <PixelARGB, PixelRGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 else            { ImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             }
@@ -1138,15 +1138,15 @@ protected:
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelRGB, PixelARGB, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelRGB, PixelARGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 else            { ImageFillEdgeTableRenderer <PixelRGB, PixelARGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelRGB, PixelRGB, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelRGB, PixelRGB, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 else            { ImageFillEdgeTableRenderer <PixelRGB, PixelRGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 else            { ImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             }
@@ -1156,15 +1156,15 @@ protected:
             switch (srcData.pixelFormat)
             {
             case Image::ARGB:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, true>   r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, false>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             case Image::RGB:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
-                else            { ImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, true>    r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                else            { ImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, false>   r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             default:
-                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, true> r (destData, srcData, alpha, x, y); iter.iterate (r); }
+                if (tiledFill)  { ImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, true>  r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 else            { ImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, false> r (destData, srcData, alpha, x, y); iter.iterate (r); }
                 break;
             }
@@ -1219,10 +1219,10 @@ protected:
 class ClipRegion_EdgeTable  : public ClipRegionBase
 {
 public:
-    ClipRegion_EdgeTable (const EdgeTable& e) : edgeTable (e) {}
-    ClipRegion_EdgeTable (const Rectangle<int>& r) : edgeTable (r) {}
+    ClipRegion_EdgeTable (const EdgeTable& e)        : edgeTable (e) {}
+    ClipRegion_EdgeTable (const Rectangle<int>& r)   : edgeTable (r) {}
     ClipRegion_EdgeTable (const Rectangle<float>& r) : edgeTable (r) {}
-    ClipRegion_EdgeTable (const RectangleList& r) : edgeTable (r) {}
+    ClipRegion_EdgeTable (const RectangleList& r)    : edgeTable (r) {}
     ClipRegion_EdgeTable (const Rectangle<int>& bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
     ClipRegion_EdgeTable (const ClipRegion_EdgeTable& other) : edgeTable (other.edgeTable) {}
 
@@ -1428,7 +1428,7 @@ class ClipRegion_RectangleList  : public ClipRegionBase
 {
 public:
     ClipRegion_RectangleList (const Rectangle<int>& r) : clip (r) {}
-    ClipRegion_RectangleList (const RectangleList& r) : clip (r) {}
+    ClipRegion_RectangleList (const RectangleList& r)  : clip (r) {}
     ClipRegion_RectangleList (const ClipRegion_RectangleList& other) : clip (other.clip) {}
 
     const Ptr clone() const

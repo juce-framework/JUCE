@@ -1693,7 +1693,7 @@ const MouseCursor Component::getMouseCursor()
 
 void Component::updateMouseCursor() const
 {
-    sendFakeMouseMove();
+    Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
 }
 
 //==============================================================================

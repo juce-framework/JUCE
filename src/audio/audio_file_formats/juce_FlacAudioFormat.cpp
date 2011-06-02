@@ -34,6 +34,8 @@
 
 #include "../../core/juce_StandardHeader.h"
 
+BEGIN_JUCE_NAMESPACE
+
 namespace FlacNamespace
 {
 #if JUCE_INCLUDE_FLAC_CODE
@@ -71,8 +73,6 @@ namespace FlacNamespace
 
 #undef max
 #undef min
-
-BEGIN_JUCE_NAMESPACE
 
 #include "juce_FlacAudioFormat.h"
 #include "../../text/juce_LocalisedStrings.h"
@@ -328,7 +328,7 @@ public:
         FLAC__stream_encoder_set_channels (encoder, numChannels);
         FLAC__stream_encoder_set_bits_per_sample (encoder, jmin ((unsigned int) 24, bitsPerSample));
         FLAC__stream_encoder_set_sample_rate (encoder, (unsigned int) sampleRate);
-        FLAC__stream_encoder_set_blocksize (encoder, 2048);
+        FLAC__stream_encoder_set_blocksize (encoder, 0);
         FLAC__stream_encoder_set_do_escape_coding (encoder, true);
 
         ok = FLAC__stream_encoder_init_stream (encoder,
@@ -360,25 +360,28 @@ public:
         if (! ok)
             return false;
 
-        int* buf[3];
+        HeapBlock<int*> channels;
         HeapBlock<int> temp;
         const int bitsToShift = 32 - bitsPerSample;
 
         if (bitsToShift > 0)
         {
-            const int numChannelsToWrite = (samplesToWrite[1] == 0) ? 1 : 2;
-            temp.malloc (numSamples * numChannelsToWrite);
+            temp.malloc (numSamples * numChannels);
+            channels.calloc (numChannels + 1);
 
-            buf[0] = temp.getData();
-            buf[1] = temp.getData() + numSamples;
-            buf[2] = 0;
+            for (unsigned int i = 0; i < numChannels; ++i)
+            {
+                if (samplesToWrite[i] == nullptr)
+                    break;
 
-            for (int i = numChannelsToWrite; --i >= 0;)
-                if (samplesToWrite[i] != nullptr)
-                    for (int j = 0; j < numSamples; ++j)
-                        buf [i][j] = (samplesToWrite [i][j] >> bitsToShift);
+                int* const destData = temp.getData() + i * numSamples;
+                channels[i] = destData;
 
-            samplesToWrite = const_cast<const int**> (buf);
+                for (int j = 0; j < numSamples; ++j)
+                    destData[j] = (samplesToWrite[i][j] >> bitsToShift);
+            }
+
+            samplesToWrite = const_cast<const int**> (channels.getData());
         }
 
         return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, numSamples) != 0;
@@ -391,12 +394,11 @@ public:
 
     static void packUint32 (FlacNamespace::FLAC__uint32 val, FlacNamespace::FLAC__byte* b, const int bytes)
     {
-        using namespace FlacNamespace;
         b += bytes;
 
         for (int i = 0; i < bytes; ++i)
         {
-            *(--b) = (FLAC__byte) (val & 0xff);
+            *(--b) = (FlacNamespace::FLAC__byte) (val & 0xff);
             val >>= 8;
         }
     }

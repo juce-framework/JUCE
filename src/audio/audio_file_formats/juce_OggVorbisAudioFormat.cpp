@@ -30,10 +30,11 @@
 
 #include "../../core/juce_StandardHeader.h"
 
-#if JUCE_MAC
-  #define __MACOSX__ 1
+#if JUCE_MAC && ! defined (__MACOSX__)
+ #define __MACOSX__ 1
 #endif
 
+BEGIN_JUCE_NAMESPACE
 
 namespace OggVorbisNamespace
 {
@@ -74,8 +75,6 @@ namespace OggVorbisNamespace
 
 #undef max
 #undef min
-
-BEGIN_JUCE_NAMESPACE
 
 #include "juce_OggVorbisAudioFormat.h"
 #include "../../application/juce_Application.h"

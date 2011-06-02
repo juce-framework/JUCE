@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	95
+#define JUCE_BUILDNUMBER	96
 
 /** Current Juce version number.
 
@@ -37110,25 +37110,25 @@ private:
 
 	Array<int> trackStartSamples;
 
-#if JUCE_MAC
+   #if JUCE_MAC
 	File volumeDir;
 	Array<File> tracks;
 	int currentReaderTrack;
 	ScopedPointer <AudioFormatReader> reader;
 	AudioCDReader (const File& volume);
 
-#elif JUCE_WINDOWS
+   #elif JUCE_WINDOWS
 	bool audioTracks [100];
 	void* handle;
+	MemoryBlock buffer;
 	bool indexingEnabled;
 	int lastIndex, firstFrameInBuffer, samplesInBuffer;
-	MemoryBlock buffer;
 	AudioCDReader (void* handle);
 	int getIndexAt (int samplePos);
 
-#elif JUCE_LINUX
+   #elif JUCE_LINUX
 	AudioCDReader();
-#endif
+   #endif
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioCDReader);
 };

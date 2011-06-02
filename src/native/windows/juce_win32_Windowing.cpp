@@ -247,25 +247,6 @@ public:
 
         if (transparent)
         {
-            POINT p, pos;
-            SIZE size;
-
-            RECT windowBounds;
-            GetWindowRect (hwnd, &windowBounds);
-
-            p.x = -x;
-            p.y = -y;
-            pos.x = windowBounds.left;
-            pos.y = windowBounds.top;
-            size.cx = windowBounds.right - windowBounds.left;
-            size.cy = windowBounds.bottom - windowBounds.top;
-
-            BLENDFUNCTION bf;
-            bf.AlphaFormat = AC_SRC_ALPHA;
-            bf.BlendFlags = 0;
-            bf.BlendOp = AC_SRC_OVER;
-            bf.SourceConstantAlpha = updateLayeredWindowAlpha;
-
             if (! maskedRegion.isEmpty())
             {
                 for (RectangleList::Iterator i (maskedRegion); i.next();)
@@ -274,6 +255,20 @@ public:
                     ExcludeClipRect (hdc, r.getX(), r.getY(), r.getRight(), r.getBottom());
                 }
             }
+
+            RECT windowBounds;
+            GetWindowRect (hwnd, &windowBounds);
+
+            POINT p = { -x, -y };
+            POINT pos = { windowBounds.left, windowBounds.top };
+            SIZE size = { windowBounds.right - windowBounds.left,
+                          windowBounds.bottom - windowBounds.top };
+
+            BLENDFUNCTION bf;
+            bf.AlphaFormat = AC_SRC_ALPHA;
+            bf.BlendFlags = 0;
+            bf.BlendOp = AC_SRC_OVER;
+            bf.SourceConstantAlpha = updateLayeredWindowAlpha;
 
             updateLayeredWindow (hwnd, 0, &pos, &size, hdc, &p, 0, &bf, ULW_ALPHA);
         }
@@ -708,9 +703,8 @@ public:
         RECT r;
         GetWindowRect (hwnd, &r);
 
-        POINT p;
-        p.x = position.getX() + r.left + windowBorder.getLeft();
-        p.y = position.getY() + r.top + windowBorder.getTop();
+        POINT p = { position.getX() + r.left + windowBorder.getLeft(),
+                    position.getY() + r.top  + windowBorder.getTop() };
 
         HWND w = WindowFromPoint (p);
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
@@ -1514,15 +1508,22 @@ private:
         doMouseEvent (getCurrentMousePos());
     }
 
-    void doMouseWheel (const Point<int>& position, const WPARAM wParam, const bool isVertical)
+    void doMouseWheel (const Point<int>& globalPos, const WPARAM wParam, const bool isVertical)
     {
         updateKeyModifiers();
-
         const float amount = jlimit (-1000.0f, 1000.0f, 0.75f * (short) HIWORD (wParam));
 
-        handleMouseWheel (0, position, getMouseEventTime(),
-                          isVertical ? 0.0f : amount,
-                          isVertical ? amount : 0.0f);
+        // Because win32 stupidly sends all wheel events to the window with the keyboard
+        // focus, we have to redirect them here according to the mouse pos..
+        POINT p = { globalPos.getX(), globalPos.getY() };
+        Win32ComponentPeer* peer = getOwnerOfWindow (WindowFromPoint (p));
+
+        if (peer == nullptr)
+            peer = this;
+
+        peer->handleMouseWheel (0, peer->globalToLocal (globalPos), getMouseEventTime(),
+                                isVertical ? 0.0f : amount,
+                                isVertical ? amount : 0.0f);
     }
 
     //==============================================================================
@@ -1985,14 +1986,16 @@ private:
         return Point<int> (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
     }
 
+    static const Point<int> getCurrentMousePosGlobal() noexcept
+    {
+        const DWORD mp = GetMessagePos();
+        return Point<int> (GET_X_LPARAM (mp),
+                           GET_Y_LPARAM (mp));
+    }
+
     const Point<int> getCurrentMousePos() noexcept
     {
-        RECT wr;
-        GetWindowRect (hwnd, &wr);
-        const DWORD mp = GetMessagePos();
-
-        return Point<int> (GET_X_LPARAM (mp) - wr.left - windowBorder.getLeft(),
-                           GET_Y_LPARAM (mp) - wr.top - windowBorder.getTop());
+        return globalToLocal (getCurrentMousePosGlobal());
     }
 
     LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
@@ -2062,7 +2065,7 @@ private:
 
             case 0x020A: /* WM_MOUSEWHEEL */
             case 0x020E: /* WM_MOUSEHWHEEL */
-                doMouseWheel (getCurrentMousePos(), wParam, message == 0x020A);
+                doMouseWheel (getCurrentMousePosGlobal(), wParam, message == 0x020A);
                 return 0;
 
             //==============================================================================

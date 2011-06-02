@@ -32,8 +32,9 @@
 #include "../../containers/juce_Array.h"
 #include "../../memory/juce_ScopedPointer.h"
 #include "../../text/juce_StringArray.h"
+#include "../../memory/juce_MemoryBlock.h"
 #if JUCE_MAC
-#include "../../io/files/juce_File.h"
+ #include "../../io/files/juce_File.h"
 #endif
 
 //==============================================================================
@@ -163,25 +164,25 @@ private:
     //==============================================================================
     Array<int> trackStartSamples;
 
-#if JUCE_MAC
+   #if JUCE_MAC
     File volumeDir;
     Array<File> tracks;
     int currentReaderTrack;
     ScopedPointer <AudioFormatReader> reader;
     AudioCDReader (const File& volume);
 
-#elif JUCE_WINDOWS
+   #elif JUCE_WINDOWS
     bool audioTracks [100];
     void* handle;
+    MemoryBlock buffer;
     bool indexingEnabled;
     int lastIndex, firstFrameInBuffer, samplesInBuffer;
-    MemoryBlock buffer;
     AudioCDReader (void* handle);
     int getIndexAt (int samplePos);
 
-#elif JUCE_LINUX
+   #elif JUCE_LINUX
     AudioCDReader();
-#endif
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioCDReader);
 };
