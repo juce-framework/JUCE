@@ -113,7 +113,6 @@ public:
     void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets);
     bool getOutlineForGlyph (int glyphNumber, Path& path);
     EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform);
-    int getGlyphForCharacter (juce_wchar character);
 
 protected:
     //==============================================================================
@@ -138,7 +137,6 @@ private:
     short lookupTable [128];
 
     GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) noexcept;
-    GlyphInfo* findGlyphSubstituting (juce_wchar character) noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface);
 };

@@ -113,7 +113,7 @@ public:
     virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
     /** Returns a new EdgeTable that contains the path for the givem glyph, with the specified transform applied. */
-    virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform) = 0;
+    virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform);
 
     /** Returns true if the typeface uses hinting. */
     virtual bool isHinted() const                           { return false; }
@@ -125,7 +125,6 @@ public:
 protected:
     //==============================================================================
     String name;
-    bool isFallbackFont;
 
     explicit Typeface (const String& name) noexcept;
 

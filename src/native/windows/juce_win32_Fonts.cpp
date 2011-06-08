@@ -29,41 +29,44 @@
 
 
 //==============================================================================
-static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
+namespace FontEnumerators
 {
-    if (lpelfe != nullptr && (type & RASTER_FONTTYPE) == 0)
+    int CALLBACK fontEnum2 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
     {
-        const String fontName (lpelfe->elfLogFont.lfFaceName);
+        if (lpelfe != nullptr && (type & RASTER_FONTTYPE) == 0)
+        {
+            const String fontName (lpelfe->elfLogFont.lfFaceName);
 
-        ((StringArray*) lParam)->addIfNotAlreadyThere (fontName.removeCharacters ("@"));
+            ((StringArray*) lParam)->addIfNotAlreadyThere (fontName.removeCharacters ("@"));
+        }
+
+        return 1;
     }
 
-    return 1;
-}
-
-static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
-{
-    if (lpelfe != nullptr && (type & RASTER_FONTTYPE) == 0)
+    int CALLBACK fontEnum1 (ENUMLOGFONTEXW* lpelfe, NEWTEXTMETRICEXW*, int type, LPARAM lParam)
     {
-        LOGFONTW lf = { 0 };
-        lf.lfWeight = FW_DONTCARE;
-        lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
-        lf.lfQuality = DEFAULT_QUALITY;
-        lf.lfCharSet = DEFAULT_CHARSET;
-        lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-        lf.lfPitchAndFamily = FF_DONTCARE;
+        if (lpelfe != nullptr && (type & RASTER_FONTTYPE) == 0)
+        {
+            LOGFONTW lf = { 0 };
+            lf.lfWeight = FW_DONTCARE;
+            lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
+            lf.lfQuality = DEFAULT_QUALITY;
+            lf.lfCharSet = DEFAULT_CHARSET;
+            lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+            lf.lfPitchAndFamily = FF_DONTCARE;
 
-        const String fontName (lpelfe->elfLogFont.lfFaceName);
-        fontName.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
+            const String fontName (lpelfe->elfLogFont.lfFaceName);
+            fontName.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
 
-        HDC dc = CreateCompatibleDC (0);
-        EnumFontFamiliesEx (dc, &lf,
-                            (FONTENUMPROCW) &wfontEnum2,
-                            lParam, 0);
-        DeleteDC (dc);
+            HDC dc = CreateCompatibleDC (0);
+            EnumFontFamiliesEx (dc, &lf,
+                                (FONTENUMPROCW) &fontEnum2,
+                                lParam, 0);
+            DeleteDC (dc);
+        }
+
+        return 1;
     }
-
-    return 1;
 }
 
 StringArray Font::findAllTypefaceNames()
@@ -81,7 +84,7 @@ StringArray Font::findAllTypefaceNames()
         lf.lfPitchAndFamily = FF_DONTCARE;
 
         EnumFontFamiliesEx (dc, &lf,
-                            (FONTENUMPROCW) &wfontEnum1,
+                            (FONTENUMPROCW) &FontEnumerators::fontEnum1,
                             (LPARAM) &results, 0);
     }
 
@@ -111,203 +114,109 @@ void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSeri
     }
 }
 
-
 //==============================================================================
-class FontDCHolder  : private DeletedAtShutdown
-{
-public:
-    //==============================================================================
-    FontDCHolder()
-        : fontH (0), previousFontH (0), dc (0), numKPs (0), size (0),
-          bold (false), italic (false)
-    {
-    }
-
-    ~FontDCHolder()
-    {
-        deleteDCAndFont();
-        clearSingletonInstance();
-    }
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (FontDCHolder);
-
-    //==============================================================================
-    HDC loadFont (const String& fontName_, const bool bold_, const bool italic_, const int size_)
-    {
-        if (fontName != fontName_ || bold != bold_ || italic != italic_ || size != size_)
-        {
-            fontName = fontName_;
-            bold = bold_;
-            italic = italic_;
-            size = size_;
-
-            deleteDCAndFont();
-
-            dc = CreateCompatibleDC (0);
-            SetMapperFlags (dc, 0);
-            SetMapMode (dc, MM_TEXT);
-
-            LOGFONTW lf = { 0 };
-            lf.lfCharSet = DEFAULT_CHARSET;
-            lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-            lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
-            lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-            lf.lfQuality = PROOF_QUALITY;
-            lf.lfItalic = (BYTE) (italic ? TRUE : FALSE);
-            lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
-            lf.lfHeight = size > 0 ? size : -256;
-            fontName.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
-
-            HFONT standardSizedFont = CreateFontIndirect (&lf);
-
-            if (standardSizedFont != 0)
-            {
-                if ((previousFontH = SelectObject (dc, standardSizedFont)) != 0)
-                {
-                    fontH = standardSizedFont;
-
-                    if (size == 0)
-                    {
-                        OUTLINETEXTMETRIC otm;
-                        if (GetOutlineTextMetrics (dc, sizeof (otm), &otm) != 0)
-                        {
-                            lf.lfHeight = -(int) otm.otmEMSquare;
-                            fontH = CreateFontIndirect (&lf);
-
-                            SelectObject (dc, fontH);
-                            DeleteObject (standardSizedFont);
-                        }
-                    }
-                }
-            }
-        }
-
-        return dc;
-    }
-
-    //==============================================================================
-    KERNINGPAIR* getKerningPairs (int& numKPs_)
-    {
-        if (kps == nullptr)
-        {
-            numKPs = GetKerningPairs (dc, 0, 0);
-            kps.calloc (numKPs);
-            GetKerningPairs (dc, numKPs, kps);
-        }
-
-        numKPs_ = numKPs;
-        return kps;
-    }
-
-
-private:
-    //==============================================================================
-    HFONT fontH;
-    HGDIOBJ previousFontH;
-    HDC dc;
-    String fontName;
-    HeapBlock <KERNINGPAIR> kps;
-    int numKPs, size;
-    bool bold, italic;
-
-    void deleteDCAndFont()
-    {
-        if (dc != 0)
-        {
-            SelectObject (dc, previousFontH); // Replacing the previous font before deleting the DC avoids a warning in BoundsChecker
-            DeleteDC (dc);
-            dc = 0;
-        }
-
-        if (fontH != 0)
-        {
-            DeleteObject (fontH);
-            fontH = 0;
-        }
-
-        kps.free();
-    }
-
-    JUCE_DECLARE_NON_COPYABLE (FontDCHolder);
-};
-
-juce_ImplementSingleton_SingleThreaded (FontDCHolder);
-
-
-//==============================================================================
-class WindowsTypeface   : public CustomTypeface
+class WindowsTypeface   : public Typeface
 {
 public:
     WindowsTypeface (const Font& font)
+        : Typeface (font.getTypefaceName()),
+          fontH (0),
+          previousFontH (0),
+          dc (CreateCompatibleDC (0)),
+          ascent (1.0f),
+          defaultGlyph (-1),
+          bold (font.isBold()),
+          italic (font.isItalic())
     {
-        HDC dc = FontDCHolder::getInstance()->loadFont (font.getTypefaceName(),
-                                                        font.isBold(), font.isItalic(), 0);
+        loadFont();
 
-        TEXTMETRIC tm;
-        tm.tmAscent = tm.tmHeight = 1;
-        tm.tmDefaultChar = 0;
-        GetTextMetrics (dc, &tm);
-
-        setCharacteristics (font.getTypefaceName(),
-                            tm.tmAscent / (float) tm.tmHeight,
-                            font.isBold(), font.isItalic(),
-                            tm.tmDefaultChar);
+        if (GetTextMetrics (dc, &tm))
+        {
+            ascent = tm.tmAscent / (float) tm.tmHeight;
+            defaultGlyph = getGlyphForChar (dc, tm.tmDefaultChar);
+            createKerningPairs (dc, (float) tm.tmHeight);
+        }
     }
 
-    bool loadGlyphIfPossible (juce_wchar character)
+    ~WindowsTypeface()
     {
-        HDC dc = FontDCHolder::getInstance()->loadFont (name, isBold, isItalic, 0);
+        SelectObject (dc, previousFontH); // Replacing the previous font before deleting the DC avoids a warning in BoundsChecker
+        DeleteDC (dc);
 
-        GLYPHMETRICS gm;
+        if (fontH != 0)
+            DeleteObject (fontH);
+    }
 
-        // if this is the fallback font, skip checking for the glyph's existence. This is because
-        // with fonts like Tahoma, GetGlyphIndices can say that a glyph doesn't exist, but it still
-        // gets correctly created later on.
-        if (! isFallbackFont)
+    float getAscent() const     { return ascent; }
+    float getDescent() const    { return 1.0f - ascent; }
+
+    float getStringWidth (const String& text)
+    {
+        const CharPointer_UTF16 utf16 (text.toUTF16());
+        const int numChars = utf16.length();
+        HeapBlock<int16> results (numChars + 1);
+        results[numChars] = -1;
+        float x = 0;
+
+        if (GetGlyphIndices (dc, utf16, numChars, reinterpret_cast <WORD*> (results.getData()),
+                             GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR)
         {
-            const WCHAR charToTest[] = { (WCHAR) character, 0 };
-            WORD index = 0;
+            for (int i = 0; i < numChars; ++i)
+                x += getKerning (dc, results[i], results[i + 1]);
+        }
 
-            if (GetGlyphIndices (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR
-                 && index == 0xffff)
+        return x;
+    }
+
+    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets)
+    {
+        const CharPointer_UTF16 utf16 (text.toUTF16());
+        const int numChars = utf16.length();
+        HeapBlock<int16> results (numChars + 1);
+        results[numChars] = -1;
+        float x = 0;
+
+        if (GetGlyphIndices (dc, utf16, numChars, reinterpret_cast <WORD*> (results.getData()),
+                             GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR)
+        {
+            resultGlyphs.ensureStorageAllocated (numChars);
+            xOffsets.ensureStorageAllocated (numChars + 1);
+
+            for (int i = 0; i < numChars; ++i)
             {
-                return false;
+                resultGlyphs.add (results[i]);
+                xOffsets.add (x);
+                x += getKerning (dc, results[i], results[i + 1]);
             }
         }
 
-        Path glyphPath;
+        xOffsets.add (x);
+    }
 
-        TEXTMETRIC tm;
-        if (! GetTextMetrics (dc, &tm))
-        {
-            addGlyph (character, glyphPath, 0);
-            return true;
-        }
+    bool getOutlineForGlyph (int glyphNumber, Path& glyphPath)
+    {
+        if (glyphNumber < 0)
+            glyphNumber = defaultGlyph;
 
-        const float height = (float) tm.tmHeight;
-        static const MAT2 identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
-
-        const int bufSize = GetGlyphOutline (dc, character, GGO_NATIVE,
+        GLYPHMETRICS gm;
+        const int bufSize = GetGlyphOutline (dc, glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX,
                                              &gm, 0, 0, &identityMatrix);
 
         if (bufSize > 0)
         {
             HeapBlock<char> data (bufSize);
-
-            GetGlyphOutline (dc, character, GGO_NATIVE, &gm,
+            GetGlyphOutline (dc, glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX, &gm,
                              bufSize, data, &identityMatrix);
 
             const TTPOLYGONHEADER* pheader = reinterpret_cast<TTPOLYGONHEADER*> (data.getData());
 
-            const float scaleX = 1.0f / height;
-            const float scaleY = -1.0f / height;
+            const float scaleX = 1.0f / tm.tmHeight;
+            const float scaleY = -scaleX;
 
             while ((char*) pheader < data + bufSize)
             {
-                float x = scaleX * pheader->pfxStart.x.value;
-                float y = scaleY * pheader->pfxStart.y.value;
-
-                glyphPath.startNewSubPath (x, y);
+                glyphPath.startNewSubPath (scaleX * pheader->pfxStart.x.value,
+                                           scaleY * pheader->pfxStart.y.value);
 
                 const TTPOLYCURVE* curve = (const TTPOLYCURVE*) ((const char*) pheader + sizeof (TTPOLYGONHEADER));
                 const char* const curveEnd = ((const char*) pheader) + pheader->cb;
@@ -317,12 +226,8 @@ public:
                     if (curve->wType == TT_PRIM_LINE)
                     {
                         for (int i = 0; i < curve->cpfx; ++i)
-                        {
-                            x = scaleX * curve->apfx[i].x.value;
-                            y = scaleY * curve->apfx[i].y.value;
-
-                            glyphPath.lineTo (x, y);
-                        }
+                            glyphPath.lineTo (scaleX * curve->apfx[i].x.value,
+                                              scaleY * curve->apfx[i].y.value);
                     }
                     else if (curve->wType == TT_PRIM_QSPLINE)
                     {
@@ -330,23 +235,16 @@ public:
                         {
                             const float x2 = scaleX * curve->apfx[i].x.value;
                             const float y2 = scaleY * curve->apfx[i].y.value;
-                            float x3, y3;
+                            float x3       = scaleX * curve->apfx[i + 1].x.value;
+                            float y3       = scaleY * curve->apfx[i + 1].y.value;
 
                             if (i < curve->cpfx - 2)
                             {
-                                x3 = 0.5f * (x2 + scaleX * curve->apfx[i + 1].x.value);
-                                y3 = 0.5f * (y2 + scaleY * curve->apfx[i + 1].y.value);
-                            }
-                            else
-                            {
-                                x3 = scaleX * curve->apfx[i + 1].x.value;
-                                y3 = scaleY * curve->apfx[i + 1].y.value;
+                                x3 = 0.5f * (x2 + x3);
+                                y3 = 0.5f * (y2 + y3);
                             }
 
                             glyphPath.quadraticTo (x2, y2, x3, y3);
-
-                            x = x3;
-                            y = y3;
                         }
                     }
 
@@ -359,24 +257,149 @@ public:
             }
         }
 
-        addGlyph (character, glyphPath, gm.gmCellIncX / height);
-
-        int numKPs;
-        const KERNINGPAIR* const kps = FontDCHolder::getInstance()->getKerningPairs (numKPs);
-
-        for (int i = 0; i < numKPs; ++i)
-        {
-            if (kps[i].wFirst == character)
-                addKerningPair (kps[i].wFirst, kps[i].wSecond,
-                                kps[i].iKernAmount / height);
-        }
-
         return true;
     }
 
 private:
+    static const MAT2 identityMatrix;
+    HFONT fontH;
+    HGDIOBJ previousFontH;
+    HDC dc;
+    TEXTMETRIC tm;
+    float ascent;
+    int defaultGlyph;
+    bool bold, italic;
+
+    struct KerningPair
+    {
+        int glyph1, glyph2;
+        float kerning;
+
+        bool operator== (const KerningPair& other) const noexcept
+        {
+            return glyph1 == other.glyph1 && glyph2 == other.glyph2;
+        }
+
+        bool operator< (const KerningPair& other) const noexcept
+        {
+            return glyph1 < other.glyph1
+                    || (glyph1 == other.glyph1 && glyph2 < other.glyph2);
+        }
+    };
+
+    SortedSet<KerningPair> kerningPairs;
+
+    void loadFont()
+    {
+        SetMapperFlags (dc, 0);
+        SetMapMode (dc, MM_TEXT);
+
+        LOGFONTW lf = { 0 };
+        lf.lfCharSet = DEFAULT_CHARSET;
+        lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+        lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
+        lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+        lf.lfQuality = PROOF_QUALITY;
+        lf.lfItalic = (BYTE) (italic ? TRUE : FALSE);
+        lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
+        lf.lfHeight = -256;
+        name.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
+
+        HFONT standardSizedFont = CreateFontIndirect (&lf);
+
+        if (standardSizedFont != 0)
+        {
+            if ((previousFontH = SelectObject (dc, standardSizedFont)) != 0)
+            {
+                fontH = standardSizedFont;
+
+                OUTLINETEXTMETRIC otm;
+                if (GetOutlineTextMetrics (dc, sizeof (otm), &otm) != 0)
+                {
+                    lf.lfHeight = -(int) otm.otmEMSquare;
+                    fontH = CreateFontIndirect (&lf);
+
+                    SelectObject (dc, fontH);
+                    DeleteObject (standardSizedFont);
+                }
+            }
+        }
+    }
+
+    void createKerningPairs (HDC dc, const float height)
+    {
+        HeapBlock<KERNINGPAIR> rawKerning;
+        const int numKPs = GetKerningPairs (dc, 0, 0);
+        rawKerning.calloc (numKPs);
+        GetKerningPairs (dc, numKPs, rawKerning);
+
+        kerningPairs.ensureStorageAllocated (numKPs);
+
+        for (int i = 0; i < numKPs; ++i)
+        {
+            KerningPair kp;
+            kp.glyph1 = getGlyphForChar (dc, rawKerning[i].wFirst);
+            kp.glyph2 = getGlyphForChar (dc, rawKerning[i].wSecond);
+
+            const int standardWidth = getGlyphWidth (dc, kp.glyph1);
+            kp.kerning = (standardWidth + rawKerning[i].iKernAmount) / height;
+            kerningPairs.add (kp);
+
+            kp.glyph2 = -1;  // add another entry for the standard width version..
+            kp.kerning = standardWidth / height;
+            kerningPairs.add (kp);
+        }
+    }
+
+    static int getGlyphForChar (HDC dc, juce_wchar character)
+    {
+        const WCHAR charToTest[] = { (WCHAR) character, 0 };
+        WORD index = 0;
+
+        if (GetGlyphIndices (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) == GDI_ERROR
+              || index == 0xffff)
+            return -1;
+
+        return index;
+    }
+
+    static int getGlyphWidth (HDC dc, int glyphNumber)
+    {
+        GLYPHMETRICS gm;
+        gm.gmCellIncX = 0;
+        GetGlyphOutline (dc, glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX, &gm, 0, 0, &identityMatrix);
+        return gm.gmCellIncX;
+    }
+
+    float getKerning (HDC dc, const int glyph1, const int glyph2)
+    {
+        KerningPair kp;
+        kp.glyph1 = glyph1;
+        kp.glyph2 = glyph2;
+        int index = kerningPairs.indexOf (kp);
+
+        if (index < 0)
+        {
+            kp.glyph2 = -1;
+            index = kerningPairs.indexOf (kp);
+
+            if (index < 0)
+            {
+                kp.glyph2 = -1;
+                kp.kerning = getGlyphWidth (dc, kp.glyph1) / (float) tm.tmHeight;
+                kerningPairs.add (kp);
+                return kp.kerning;
+            }
+        }
+
+        return kerningPairs.getReference (index).kerning;
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsTypeface);
 };
+
+const MAT2 WindowsTypeface::identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
+
 
 const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {

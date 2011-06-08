@@ -222,34 +222,6 @@ CustomTypeface::GlyphInfo* CustomTypeface::findGlyph (const juce_wchar character
     return nullptr;
 }
 
-CustomTypeface::GlyphInfo* CustomTypeface::findGlyphSubstituting (const juce_wchar character) noexcept
-{
-    GlyphInfo* glyph = findGlyph (character, true);
-
-    if (glyph == nullptr)
-    {
-        if (CharacterFunctions::isWhitespace (character) && character != L' ')
-            glyph = findGlyph (L' ', true);
-
-        if (glyph == nullptr)
-        {
-            const Font fallbackFont (Font::getFallbackFontName(), 10, 0);
-            Typeface* const fallbackTypeface = fallbackFont.getTypeface();
-            if (fallbackTypeface != nullptr && fallbackTypeface != this)
-            {
-                Path path;
-                fallbackTypeface->getOutlineForGlyph (character, path);
-                addGlyph (character, path, fallbackTypeface->getStringWidth (String::charToString (character)));
-            }
-
-            if (glyph == nullptr)
-                glyph = findGlyph (defaultCharacter, true);
-        }
-    }
-
-    return glyph;
-}
-
 bool CustomTypeface::loadGlyphIfPossible (const juce_wchar /*characterNeeded*/)
 {
     return false;
@@ -352,13 +324,13 @@ float CustomTypeface::getStringWidth (const String& text)
     while (! t.isEmpty())
     {
         const juce_wchar c = t.getAndAdvance();
-        const GlyphInfo* const glyph = findGlyphSubstituting (c);
+        const GlyphInfo* const glyph = findGlyph (c, true);
 
-        if (glyph == nullptr && ! isFallbackFont)
+        if (glyph == nullptr)
         {
             const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
 
-            if (fallbackTypeface != nullptr)
+            if (fallbackTypeface != nullptr && fallbackTypeface != this)
                 x += fallbackTypeface->getStringWidth (String::charToString (c));
         }
 
@@ -380,11 +352,11 @@ void CustomTypeface::getGlyphPositions (const String& text, Array <int>& resultG
         const juce_wchar c = t.getAndAdvance();
         const GlyphInfo* const glyph = findGlyph (c, true);
 
-        if (glyph == nullptr && ! isFallbackFont)
+        if (glyph == nullptr)
         {
             const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
 
-            if (fallbackTypeface != nullptr)
+            if (fallbackTypeface != nullptr && fallbackTypeface != this)
             {
                 Array <int> subGlyphs;
                 Array <float> subOffsets;
@@ -412,11 +384,11 @@ bool CustomTypeface::getOutlineForGlyph (int glyphNumber, Path& path)
 {
     const GlyphInfo* const glyph = findGlyph ((juce_wchar) glyphNumber, true);
 
-    if (glyph == nullptr && ! isFallbackFont)
+    if (glyph == nullptr)
     {
         const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
 
-        if (fallbackTypeface != nullptr)
+        if (fallbackTypeface != nullptr && fallbackTypeface != this)
             fallbackTypeface->getOutlineForGlyph (glyphNumber, path);
     }
 
@@ -433,11 +405,11 @@ EdgeTable* CustomTypeface::getEdgeTableForGlyph (int glyphNumber, const AffineTr
 {
     const GlyphInfo* const glyph = findGlyph ((juce_wchar) glyphNumber, true);
 
-    if (glyph == nullptr && ! isFallbackFont)
+    if (glyph == nullptr)
     {
         const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
 
-        if (fallbackTypeface != nullptr)
+        if (fallbackTypeface != nullptr && fallbackTypeface != this)
             return fallbackTypeface->getEdgeTableForGlyph (glyphNumber, transform);
     }
 

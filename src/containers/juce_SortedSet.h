@@ -119,7 +119,7 @@ public:
             return false;
 
         for (int i = numUsed; --i >= 0;)
-            if (data.elements[i] != other.data.elements[i])
+            if (! (data.elements[i] == other.data.elements[i]))
                 return false;
 
         return true;
@@ -204,6 +204,21 @@ public:
         return data.elements [index];
     }
 
+    /** Returns a direct reference to one of the elements in the set, without checking the index passed in.
+
+        This is like getUnchecked, but returns a direct reference to the element, so that
+        you can alter it directly. Obviously this can be dangerous, so only use it when
+        absolutely necessary.
+
+        @param index    the index of the element being requested (0 is the first element in the array)
+    */
+    inline ElementType& getReference (const int index) const noexcept
+    {
+        const ScopedLockType lock (getLock());
+        jassert (isPositiveAndBelow (index, numUsed));
+        return data.elements [index];
+    }
+
     /** Returns the first element in the set, or 0 if the set is empty.
 
         @see operator[], getUnchecked, getLast
@@ -273,10 +288,10 @@ public:
 
                 if (halfway == start)
                     return -1;
-                else if (elementToLookFor >= data.elements [halfway])
-                    start = halfway;
-                else
+                else if (elementToLookFor < data.elements [halfway])
                     end = halfway;
+                else
+                    start = halfway;
             }
         }
     }
@@ -309,10 +324,10 @@ public:
 
                 if (halfway == start)
                     return false;
-                else if (elementToLookFor >= data.elements [halfway])
-                    start = halfway;
-                else
+                else if (elementToLookFor < data.elements [halfway])
                     end = halfway;
+                else
+                    start = halfway;
             }
         }
     }
@@ -348,17 +363,17 @@ public:
 
                 if (halfway == start)
                 {
-                    if (newElement >= data.elements [halfway])
-                        insertInternal (start + 1, newElement);
-                    else
+                    if (newElement < data.elements [halfway])
                         insertInternal (start, newElement);
+                    else
+                        insertInternal (start + 1, newElement);
 
                     break;
                 }
-                else if (newElement >= data.elements [halfway])
-                    start = halfway;
-                else
+                else if (newElement < data.elements [halfway])
                     end = halfway;
+                else
+                    start = halfway;
             }
         }
     }
@@ -527,6 +542,18 @@ public:
     {
         const ScopedLockType lock (getLock());
         data.shrinkToNoMoreThan (numUsed);
+    }
+
+    /** Increases the set's internal storage to hold a minimum number of elements.
+
+        Calling this before adding a large known number of elements means that
+        the set won't have to keep dynamically resizing itself as the elements
+        are added, and it'll therefore be more efficient.
+    */
+    void ensureStorageAllocated (const int minNumElements)
+    {
+        const ScopedLockType lock (getLock());
+        data.ensureAllocatedSize (minNumElements);
     }
 
     //==============================================================================

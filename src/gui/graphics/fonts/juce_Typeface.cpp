@@ -29,11 +29,12 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Typeface.h"
 #include "juce_Font.h"
+#include "../contexts/juce_EdgeTable.h"
 
 
 //==============================================================================
 Typeface::Typeface (const String& name_) noexcept
-    : name (name_), isFallbackFont (false)
+    : name (name_)
 {
 }
 
@@ -44,10 +45,20 @@ Typeface::~Typeface()
 const Typeface::Ptr Typeface::getFallbackTypeface()
 {
     const Font fallbackFont (Font::getFallbackFontName(), 10, 0);
-    Typeface* t = fallbackFont.getTypeface();
-    t->isFallbackFont = true;
-    return t;
+    return fallbackFont.getTypeface();
 }
+
+EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform)
+{
+    Path path;
+
+    if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
+        return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
+                              path, transform);
+
+    return nullptr;
+}
+
 
 
 END_JUCE_NAMESPACE

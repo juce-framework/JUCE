@@ -1522,7 +1522,7 @@ private:
             peer = this;
 
         peer->handleMouseWheel (0, peer->globalToLocal (globalPos), getMouseEventTime(),
-                                isVertical ? 0.0f : amount,
+                                isVertical ? 0.0f : -amount,
                                 isVertical ? amount : 0.0f);
     }
 

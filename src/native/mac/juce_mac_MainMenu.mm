@@ -121,7 +121,10 @@ public:
         [menu setAutoenablesItems: false];
         [menu update];
         [parentItem setTag: tag];
-        [parentItem setSubmenu: menu];
+
+        if (! [[parentItem submenu] equals: menu])  // NB this comparison is needed to avoid a strange
+            [parentItem setSubmenu: menu];          // crash deep inside Apple code when no windows are focused..
+
         [menu release];
     }
 
