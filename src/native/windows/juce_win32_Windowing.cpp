@@ -648,7 +648,7 @@ public:
     {
         setMinimised (false);
 
-        if (fullScreen != shouldBeFullScreen)
+        if (isFullScreen() != shouldBeFullScreen)
         {
             fullScreen = shouldBeFullScreen;
             const WeakReference<Component> deletionChecker (component);

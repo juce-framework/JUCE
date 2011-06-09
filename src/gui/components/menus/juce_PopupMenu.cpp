@@ -1608,7 +1608,7 @@ int PopupMenu::getNumItems() const noexcept
     int num = 0;
 
     for (int i = items.size(); --i >= 0;)
-        if (! (items.getUnchecked(i))->isSeparator)
+        if (! items.getUnchecked(i)->isSeparator)
             ++num;
 
     return num;

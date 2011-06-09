@@ -121,10 +121,7 @@ public:
         [menu setAutoenablesItems: false];
         [menu update];
         [parentItem setTag: tag];
-
-        if (! [[parentItem submenu] equals: menu])  // NB this comparison is needed to avoid a strange
-            [parentItem setSubmenu: menu];          // crash deep inside Apple code when no windows are focused..
-
+        [parentItem setSubmenu: menu];
         [menu release];
     }
 
@@ -172,7 +169,7 @@ public:
         }
 
         if (Time::getMillisecondCounter() > lastUpdateTime + 500)
-            menuBarItemsChanged (nullptr);
+            (new AsyncMenuUpdater())->post();
     }
 
     void invoke (const int commandId, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
@@ -358,6 +355,21 @@ private:
         if (mods.isCommandDown())  m |= NSCommandKeyMask;
         return m;
     }
+
+    class AsyncMenuUpdater  : public CallbackMessage
+    {
+    public:
+        AsyncMenuUpdater() {}
+
+        void messageCallback()
+        {
+            if (JuceMainMenuHandler::instance != nullptr)
+                JuceMainMenuHandler::instance->menuBarItemsChanged (nullptr);
+        }
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE (AsyncMenuUpdater);
+    };
 };
 
 JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;

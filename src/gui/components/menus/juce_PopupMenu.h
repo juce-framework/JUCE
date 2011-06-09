@@ -105,8 +105,7 @@ public:
                                 zero, because that's used to indicate that the user didn't
                                 select anything.
         @param itemText         the text to show.
-        @param isActive         if false, the item will be shown 'greyed-out' and can't be
-                                picked
+        @param isEnabled        if false, the item will be shown 'greyed-out' and can't be picked
         @param isTicked         if true, the item will be shown with a tick next to it
         @param iconToUse        if this is non-zero, it should be an image that will be
                                 displayed to the left of the item. This method will take its
@@ -117,7 +116,7 @@ public:
     */
     void addItem (int itemResultId,
                   const String& itemText,
-                  bool isActive = true,
+                  bool isEnabled = true,
                   bool isTicked = false,
                   const Image& iconToUse = Image::null);
 
@@ -143,7 +142,7 @@ public:
     void addColouredItem (int itemResultId,
                           const String& itemText,
                           const Colour& itemTextColour,
-                          bool isActive = true,
+                          bool isEnabled = true,
                           bool isTicked = false,
                           const Image& iconToUse = Image::null);
 
@@ -173,7 +172,7 @@ public:
     */
     void addSubMenu (const String& subMenuName,
                      const PopupMenu& subMenu,
-                     bool isActive = true,
+                     bool isEnabled = true,
                      const Image& iconToUse = Image::null,
                      bool isTicked = false);
 
