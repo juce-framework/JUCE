@@ -108,7 +108,7 @@ public:
     int64 getPosition()                                 { return position; }
     bool setPosition (int64 newPosition);
     int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
-
+    void writeRepeatedByte (uint8 byte, int numTimesToRepeat);
 
 private:
     //==============================================================================
@@ -117,6 +117,7 @@ private:
     size_t position, size;
 
     void trimExternalBlockSize();
+    void prepareToWrite (int numBytes);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryOutputStream);
 };

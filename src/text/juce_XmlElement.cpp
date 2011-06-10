@@ -193,21 +193,9 @@ namespace XmlOutputFunctions
         }
     }
 
-    void writeSpaces (OutputStream& out, int numSpaces)
+    void writeSpaces (OutputStream& out, const int numSpaces)
     {
-        if (numSpaces > 0)
-        {
-            const char blanks[] = "                        ";
-            const int blankSize = (int) numElementsInArray (blanks) - 1;
-
-            while (numSpaces > blankSize)
-            {
-                out.write (blanks, blankSize);
-                numSpaces -= blankSize;
-            }
-
-            out.write (blanks, numSpaces);
-        }
+        out.writeRepeatedByte (' ', numSpaces);
     }
 }
 

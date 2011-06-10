@@ -83,6 +83,7 @@ public:
     int64 getPosition();
     bool setPosition (int64 pos);
     bool write (const void* data, int numBytes);
+    void writeRepeatedByte (uint8 byte, int numTimesToRepeat);
 
 
 private:

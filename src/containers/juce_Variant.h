@@ -29,6 +29,7 @@
 #include "../text/juce_Identifier.h"
 #include "../io/streams/juce_OutputStream.h"
 #include "../io/streams/juce_InputStream.h"
+#include "../containers/juce_Array.h"
 
 #ifndef DOXYGEN
  class ReferenceCountedObject;
@@ -70,6 +71,7 @@ public:
     var (const char* value);
     var (const wchar_t* value);
     var (const String& value);
+    var (const Array<var>& value);
     var (ReferenceCountedObject* object);
     var (MethodFunction method) noexcept;
 
@@ -81,6 +83,7 @@ public:
     const var& operator= (const char* value);
     const var& operator= (const wchar_t* value);
     const var& operator= (const String& value);
+    const var& operator= (const Array<var>& value);
     const var& operator= (ReferenceCountedObject* object);
     const var& operator= (MethodFunction method);
 
@@ -93,6 +96,7 @@ public:
     operator double() const noexcept;
     operator String() const;
     String toString() const;
+    Array<var>* getArray() const noexcept;
     ReferenceCountedObject* getObject() const noexcept;
     DynamicObject* getDynamicObject() const noexcept;
 
@@ -103,25 +107,89 @@ public:
     bool isDouble() const noexcept;
     bool isString() const noexcept;
     bool isObject() const noexcept;
+    bool isArray() const noexcept;
     bool isMethod() const noexcept;
 
-    //==============================================================================
-    /** Writes a binary representation of this value to a stream.
-        The data can be read back later using readFromStream().
+    /** Returns true if this var has the same value as the one supplied.
+        Note that this ignores the type, so a string var "123" and an integer var with the
+        value 123 are considered to be equal.
+        @see equalsWithSameType
     */
-    void writeToStream (OutputStream& output) const;
+    bool equals (const var& other) const noexcept;
 
-    /** Reads back a stored binary representation of a value.
-        The data in the stream must have been written using writeToStream(), or this
-        will have unpredictable results.
+    /** Returns true if this var has the same value and type as the one supplied.
+        This differs from equals() because e.g. "123" and 123 will be considered different.
+        @see equals
     */
-    static var readFromStream (InputStream& input);
+    bool equalsWithSameType (const var& other) const noexcept;
+
+    //==============================================================================
+    /** If the var is an array, this returns the number of elements.
+        If the var isn't actually an array, this will return 0.
+    */
+    int size() const;
+
+    /** If the var is an array, this can be used to return one of its elements.
+        To call this method, you must make sure that the var is actually an array, and
+        that the index is a valid number. If these conditions aren't met, behaviour is
+        undefined.
+        For more control over the array's contents, you can call getArray() and manipulate
+        it directly as an Array<var>.
+    */
+    const var& operator[] (int arrayIndex) const;
+
+    /** If the var is an array, this can be used to return one of its elements.
+        To call this method, you must make sure that the var is actually an array, and
+        that the index is a valid number. If these conditions aren't met, behaviour is
+        undefined.
+        For more control over the array's contents, you can call getArray() and manipulate
+        it directly as an Array<var>.
+    */
+    var& operator[] (int arrayIndex);
+
+    /** Appends an element to the var, converting it to an array if it isn't already one.
+        If the var isn't an array, it will be converted to one, and if its value was non-void,
+        this value will be kept as the first element of the new array. The parameter value
+        will then be appended to it.
+        For more control over the array's contents, you can call getArray() and manipulate
+        it directly as an Array<var>.
+    */
+    void append (const var& valueToAppend);
+
+    /** Inserts an element to the var, converting it to an array if it isn't already one.
+        If the var isn't an array, it will be converted to one, and if its value was non-void,
+        this value will be kept as the first element of the new array. The parameter value
+        will then be inserted into it.
+        For more control over the array's contents, you can call getArray() and manipulate
+        it directly as an Array<var>.
+    */
+    void insert (int index, const var& value);
+
+    /** If the var is an array, this removes one of its elements.
+        If the index is out-of-range or the var isn't an array, nothing will be done.
+        For more control over the array's contents, you can call getArray() and manipulate
+        it directly as an Array<var>.
+    */
+    void remove (int index);
+
+    /** Treating the var as an array, this resizes it to contain the specified number of elements.
+        If the var isn't an array, it will be converted to one, and if its value was non-void,
+        this value will be kept as the first element of the new array before resizing.
+        For more control over the array's contents, you can call getArray() and manipulate
+        it directly as an Array<var>.
+    */
+    void resize (int numArrayElementsWanted);
+
+    /** If the var is an array, this searches it for the first occurrence of the specified value,
+        and returns its index.
+        If the var isn't an array, or if the value isn't found, this returns -1.
+    */
+    int indexOf (const var& value) const;
 
     //==============================================================================
     /** If this variant is an object, this returns one of its properties. */
     var operator[] (const Identifier& propertyName) const;
 
-    //==============================================================================
     /** If this variant is an object, this invokes one of its methods with no arguments. */
     var call (const Identifier& method) const;
     /** If this variant is an object, this invokes one of its methods with one argument. */
@@ -138,19 +206,16 @@ public:
     var invoke (const Identifier& method, const var* arguments, int numArguments) const;
 
     //==============================================================================
-    /** Returns true if this var has the same value as the one supplied.
-        Note that this ignores the type, so a string var "123" and an integer var with the
-        value 123 are considered to be equal.
-        @see equalsWithSameType
+    /** Writes a binary representation of this value to a stream.
+        The data can be read back later using readFromStream().
     */
-    bool equals (const var& other) const noexcept;
+    void writeToStream (OutputStream& output) const;
 
-    /** Returns true if this var has the same value and type as the one supplied.
-        This differs from equals() because e.g. "123" and 123 will be considered different.
-        @see equals
+    /** Reads back a stored binary representation of a value.
+        The data in the stream must have been written using writeToStream(), or this
+        will have unpredictable results.
     */
-    bool equalsWithSameType (const var& other) const noexcept;
-
+    static var readFromStream (InputStream& input);
 
 private:
     //==============================================================================
@@ -162,6 +227,7 @@ private:
     class VariantType_Bool;    friend class VariantType_Bool;
     class VariantType_String;  friend class VariantType_String;
     class VariantType_Object;  friend class VariantType_Object;
+    class VariantType_Array;   friend class VariantType_Array;
     class VariantType_Method;  friend class VariantType_Method;
 
     union ValueUnion
@@ -172,12 +238,14 @@ private:
         double doubleValue;
         char stringValue [sizeof (String)];
         ReferenceCountedObject* objectValue;
+        Array<var>* arrayValue;
         MethodFunction methodValue;
     };
 
     const VariantType* type;
     ValueUnion value;
 
+    Array<var>* convertToArray();
     friend class DynamicObject;
     var invokeMethod (DynamicObject*, const var*, int) const;
 };

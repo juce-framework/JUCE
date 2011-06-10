@@ -147,6 +147,7 @@
  #include "../src/text/juce_StringPool.cpp"
  #include "../src/text/juce_XmlDocument.cpp"
  #include "../src/text/juce_XmlElement.cpp"
+ #include "../src/text/juce_JSON.cpp"
  #include "../src/threads/juce_ReadWriteLock.cpp"
  #include "../src/threads/juce_Thread.cpp"
  #include "../src/threads/juce_ThreadPool.cpp"

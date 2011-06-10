@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	97
+#define JUCE_BUILDNUMBER	98
 
 /** Current Juce version number.
 
@@ -7908,7 +7908,7 @@ public:
 
 	/** Checks a given string for characters that might not be valid in an Identifier.
 		Since Identifiers are used as a script variables and XML attributes, they should only contain
-		alphanumeric characters and underscores.
+		alphanumeric characters, underscores, or the '-' and ':' characters.
 	*/
 	static bool isValidIdentifier (const String& possibleIdentifier) noexcept;
 
@@ -8496,6 +8496,7 @@ public:
 	var (const char* value);
 	var (const wchar_t* value);
 	var (const String& value);
+	var (const Array<var>& value);
 	var (ReferenceCountedObject* object);
 	var (MethodFunction method) noexcept;
 
@@ -8507,6 +8508,7 @@ public:
 	const var& operator= (const char* value);
 	const var& operator= (const wchar_t* value);
 	const var& operator= (const String& value);
+	const var& operator= (const Array<var>& value);
 	const var& operator= (ReferenceCountedObject* object);
 	const var& operator= (MethodFunction method);
 
@@ -8519,6 +8521,7 @@ public:
 	operator double() const noexcept;
 	operator String() const;
 	String toString() const;
+	Array<var>* getArray() const noexcept;
 	ReferenceCountedObject* getObject() const noexcept;
 	DynamicObject* getDynamicObject() const noexcept;
 
@@ -8529,18 +8532,83 @@ public:
 	bool isDouble() const noexcept;
 	bool isString() const noexcept;
 	bool isObject() const noexcept;
+	bool isArray() const noexcept;
 	bool isMethod() const noexcept;
 
-	/** Writes a binary representation of this value to a stream.
-		The data can be read back later using readFromStream().
+	/** Returns true if this var has the same value as the one supplied.
+		Note that this ignores the type, so a string var "123" and an integer var with the
+		value 123 are considered to be equal.
+		@see equalsWithSameType
 	*/
-	void writeToStream (OutputStream& output) const;
+	bool equals (const var& other) const noexcept;
 
-	/** Reads back a stored binary representation of a value.
-		The data in the stream must have been written using writeToStream(), or this
-		will have unpredictable results.
+	/** Returns true if this var has the same value and type as the one supplied.
+		This differs from equals() because e.g. "123" and 123 will be considered different.
+		@see equals
 	*/
-	static var readFromStream (InputStream& input);
+	bool equalsWithSameType (const var& other) const noexcept;
+
+	/** If the var is an array, this returns the number of elements.
+		If the var isn't actually an array, this will return 0.
+	*/
+	int size() const;
+
+	/** If the var is an array, this can be used to return one of its elements.
+		To call this method, you must make sure that the var is actually an array, and
+		that the index is a valid number. If these conditions aren't met, behaviour is
+		undefined.
+		For more control over the array's contents, you can call getArray() and manipulate
+		it directly as an Array<var>.
+	*/
+	const var& operator[] (int arrayIndex) const;
+
+	/** If the var is an array, this can be used to return one of its elements.
+		To call this method, you must make sure that the var is actually an array, and
+		that the index is a valid number. If these conditions aren't met, behaviour is
+		undefined.
+		For more control over the array's contents, you can call getArray() and manipulate
+		it directly as an Array<var>.
+	*/
+	var& operator[] (int arrayIndex);
+
+	/** Appends an element to the var, converting it to an array if it isn't already one.
+		If the var isn't an array, it will be converted to one, and if its value was non-void,
+		this value will be kept as the first element of the new array. The parameter value
+		will then be appended to it.
+		For more control over the array's contents, you can call getArray() and manipulate
+		it directly as an Array<var>.
+	*/
+	void append (const var& valueToAppend);
+
+	/** Inserts an element to the var, converting it to an array if it isn't already one.
+		If the var isn't an array, it will be converted to one, and if its value was non-void,
+		this value will be kept as the first element of the new array. The parameter value
+		will then be inserted into it.
+		For more control over the array's contents, you can call getArray() and manipulate
+		it directly as an Array<var>.
+	*/
+	void insert (int index, const var& value);
+
+	/** If the var is an array, this removes one of its elements.
+		If the index is out-of-range or the var isn't an array, nothing will be done.
+		For more control over the array's contents, you can call getArray() and manipulate
+		it directly as an Array<var>.
+	*/
+	void remove (int index);
+
+	/** Treating the var as an array, this resizes it to contain the specified number of elements.
+		If the var isn't an array, it will be converted to one, and if its value was non-void,
+		this value will be kept as the first element of the new array before resizing.
+		For more control over the array's contents, you can call getArray() and manipulate
+		it directly as an Array<var>.
+	*/
+	void resize (int numArrayElementsWanted);
+
+	/** If the var is an array, this searches it for the first occurrence of the specified value,
+		and returns its index.
+		If the var isn't an array, or if the value isn't found, this returns -1.
+	*/
+	int indexOf (const var& value) const;
 
 	/** If this variant is an object, this returns one of its properties. */
 	var operator[] (const Identifier& propertyName) const;
@@ -8560,18 +8628,16 @@ public:
 	/** If this variant is an object, this invokes one of its methods with a list of arguments. */
 	var invoke (const Identifier& method, const var* arguments, int numArguments) const;
 
-	/** Returns true if this var has the same value as the one supplied.
-		Note that this ignores the type, so a string var "123" and an integer var with the
-		value 123 are considered to be equal.
-		@see equalsWithSameType
+	/** Writes a binary representation of this value to a stream.
+		The data can be read back later using readFromStream().
 	*/
-	bool equals (const var& other) const noexcept;
+	void writeToStream (OutputStream& output) const;
 
-	/** Returns true if this var has the same value and type as the one supplied.
-		This differs from equals() because e.g. "123" and 123 will be considered different.
-		@see equals
+	/** Reads back a stored binary representation of a value.
+		The data in the stream must have been written using writeToStream(), or this
+		will have unpredictable results.
 	*/
-	bool equalsWithSameType (const var& other) const noexcept;
+	static var readFromStream (InputStream& input);
 
 private:
 
@@ -8583,6 +8649,7 @@ private:
 	class VariantType_Bool;	friend class VariantType_Bool;
 	class VariantType_String;  friend class VariantType_String;
 	class VariantType_Object;  friend class VariantType_Object;
+	class VariantType_Array;   friend class VariantType_Array;
 	class VariantType_Method;  friend class VariantType_Method;
 
 	union ValueUnion
@@ -8593,12 +8660,14 @@ private:
 		double doubleValue;
 		char stringValue [sizeof (String)];
 		ReferenceCountedObject* objectValue;
+		Array<var>* arrayValue;
 		MethodFunction methodValue;
 	};
 
 	const VariantType* type;
 	ValueUnion value;
 
+	Array<var>* convertToArray();
 	friend class DynamicObject;
 	var invokeMethod (DynamicObject*, const var*, int) const;
 };
@@ -8938,6 +9007,9 @@ private:
 /*** End of inlined file: juce_LinkedListPointer.h ***/
 
 class XmlElement;
+#ifndef DOXYGEN
+ class JSONFormatter;
+#endif
 
 /** Holds a set of named var objects.
 
@@ -8999,7 +9071,7 @@ public:
 	/** Returns the value of the item at a given index.
 		The index must be between 0 and size() - 1.
 	*/
-	var getValueAt (int index) const;
+	const var& getValueAt (int index) const;
 
 	/** Removes all values. */
 	void clear();
@@ -9041,6 +9113,8 @@ private:
 
 	friend class LinkedListPointer<NamedValue>;
 	LinkedListPointer<NamedValue> values;
+
+	friend class JSONFormatter;
 };
 
 #endif   // __JUCE_NAMEDVALUESET_JUCEHEADER__
@@ -9438,6 +9512,9 @@ public:
 
 	/** Removes all properties and methods from the object. */
 	void clear();
+
+	/** Returns the NamedValueSet that holds the object's properties. */
+	NamedValueSet& getProperties() noexcept	 { return properties; }
 
 private:
 
@@ -19285,6 +19362,7 @@ public:
 	int64 getPosition();
 	bool setPosition (int64 pos);
 	bool write (const void* data, int numBytes);
+	void writeRepeatedByte (uint8 byte, int numTimesToRepeat);
 
 private:
 
@@ -21122,6 +21200,7 @@ public:
 	int64 getPosition()				 { return position; }
 	bool setPosition (int64 newPosition);
 	int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
+	void writeRepeatedByte (uint8 byte, int numTimesToRepeat);
 
 private:
 
@@ -21130,6 +21209,7 @@ private:
 	size_t position, size;
 
 	void trimExternalBlockSize();
+	void prepareToWrite (int numBytes);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryOutputStream);
 };
@@ -21801,6 +21881,98 @@ private:
 
 #endif
 #ifndef __JUCE_IDENTIFIER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_JSON_JUCEHEADER__
+
+/*** Start of inlined file: juce_JSON.h ***/
+#ifndef __JUCE_JSON_JUCEHEADER__
+#define __JUCE_JSON_JUCEHEADER__
+
+class InputStream;
+class OutputStream;
+class File;
+
+/**
+	Contains static methods for converting JSON-formatted text to and from var objects.
+
+	The var class is structurally compatible with JSON-formatted data, so these
+	functions allow you to parse JSON into a var object, and to convert a var
+	object to JSON-formatted text.
+
+	@see var
+*/
+class JSON
+{
+public:
+
+	/** Parses a string of JSON-formatted text, and returns a result code containing
+		any parse errors.
+
+		This will return the parsed structure in the parsedResult parameter, and will
+		return a Result object to indicate whether parsing was successful, and if not,
+		it will contain an error message.
+
+		If you're not interested in the error message, you can use one of the other
+		shortcut parse methods, which simply return a var::null if the parsing fails.
+	*/
+	static Result parse (const String& text, var& parsedResult);
+
+	/** Attempts to parse some JSON-formatted text, and returns the result as a var object.
+
+		If the parsing fails, this simply returns var::null - if you need to find out more
+		detail about the parse error, use the alternative parse() method which returns a Result.
+	*/
+	static var parse (const String& text);
+
+	/** Attempts to parse some JSON-formatted text from a file, and returns the result
+		as a var object.
+
+		Note that this is just a short-cut for reading the entire file into a string and
+		parsing the result.
+
+		If the parsing fails, this simply returns var::null - if you need to find out more
+		detail about the parse error, use the alternative parse() method which returns a Result.
+	*/
+	static var parse (const File& file);
+
+	/** Attempts to parse some JSON-formatted text from a stream, and returns the result
+		as a var object.
+
+		Note that this is just a short-cut for reading the entire stream into a string and
+		parsing the result.
+
+		If the parsing fails, this simply returns var::null - if you need to find out more
+		detail about the parse error, use the alternative parse() method which returns a Result.
+	*/
+	static var parse (InputStream& input);
+
+	/** Returns a string which contains a JSON-formatted representation of the var object.
+		If allOnOneLine is true, the result will be compacted into a single line of text
+		with no carriage-returns. If false, it will be laid-out in a more human-readable format.
+		@see writeToStream
+	*/
+	static String toString (const var& objectToFormat,
+							bool allOnOneLine = false);
+
+	/** Writes a JSON-formatted representation of the var object to the given stream.
+		If allOnOneLine is true, the result will be compacted into a single line of text
+		with no carriage-returns. If false, it will be laid-out in a more human-readable format.
+		@see toString
+	*/
+	static void writeToStream (OutputStream& output,
+							   const var& objectToFormat,
+							   bool allOnOneLine = false);
+
+private:
+
+	JSON(); // This class can't be instantiated - just use its static methods.
+};
+
+#endif   // __JUCE_JSON_JUCEHEADER__
+
+/*** End of inlined file: juce_JSON.h ***/
+
 
 #endif
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__

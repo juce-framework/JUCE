@@ -260,6 +260,9 @@
 #ifndef __JUCE_IDENTIFIER_JUCEHEADER__
  #include "text/juce_Identifier.h"
 #endif
+#ifndef __JUCE_JSON_JUCEHEADER__
+ #include "text/juce_JSON.h"
+#endif
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
  #include "text/juce_LocalisedStrings.h"
 #endif

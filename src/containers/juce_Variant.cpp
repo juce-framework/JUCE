@@ -38,7 +38,8 @@ enum VariantStreamMarkers
     varMarker_BoolFalse = 3,
     varMarker_Double    = 4,
     varMarker_String    = 5,
-    varMarker_Int64     = 6
+    varMarker_Int64     = 6,
+    varMarker_Array     = 7
 };
 
 //==============================================================================
@@ -54,6 +55,7 @@ public:
     virtual String toString (const ValueUnion&) const                           { return String::empty; }
     virtual bool toBool (const ValueUnion&) const noexcept                      { return false; }
     virtual ReferenceCountedObject* toObject (const ValueUnion&) const noexcept { return nullptr; }
+    virtual Array<var>* toArray (const ValueUnion&) const noexcept              { return 0; }
 
     virtual bool isVoid() const noexcept      { return false; }
     virtual bool isInt() const noexcept       { return false; }
@@ -62,6 +64,7 @@ public:
     virtual bool isDouble() const noexcept    { return false; }
     virtual bool isString() const noexcept    { return false; }
     virtual bool isObject() const noexcept    { return false; }
+    virtual bool isArray() const noexcept     { return false; }
     virtual bool isMethod() const noexcept    { return false; }
 
     virtual void cleanUp (ValueUnion&) const noexcept {}
@@ -257,6 +260,41 @@ public:
 };
 
 //==============================================================================
+class var::VariantType_Array   : public var::VariantType
+{
+public:
+    VariantType_Array() noexcept {}
+    static const VariantType_Array instance;
+
+    void cleanUp (ValueUnion& data) const noexcept                      { delete data.arrayValue; }
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const  { dest.arrayValue = new Array<var> (*(source.arrayValue)); }
+
+    String toString (const ValueUnion&) const                           { return "[Array]"; }
+    bool isArray() const noexcept                                       { return true; }
+    Array<var>* toArray (const ValueUnion& data) const noexcept         { return data.arrayValue; }
+
+    bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
+    {
+        const Array<var>* const otherArray = otherType.toArray (otherData);
+        return otherArray != nullptr && *otherArray == *(data.arrayValue);
+    }
+
+    void writeToStream (const ValueUnion& data, OutputStream& output) const
+    {
+        MemoryOutputStream buffer (512);
+        const int numItems = data.arrayValue->size();
+        buffer.writeCompressedInt (numItems);
+
+        for (int i = 0; i < numItems; ++i)
+            data.arrayValue->getReference(i).writeToStream (buffer);
+
+        output.writeCompressedInt (1 + buffer.getDataSize());
+        output.writeByte (varMarker_Array);
+        output << buffer;
+    }
+};
+
+//==============================================================================
 class var::VariantType_Method   : public var::VariantType
 {
 public:
@@ -287,6 +325,7 @@ const var::VariantType_Bool    var::VariantType_Bool::instance;
 const var::VariantType_Double  var::VariantType_Double::instance;
 const var::VariantType_String  var::VariantType_String::instance;
 const var::VariantType_Object  var::VariantType_Object::instance;
+const var::VariantType_Array   var::VariantType_Array::instance;
 const var::VariantType_Method  var::VariantType_Method::instance;
 
 
@@ -343,6 +382,11 @@ var::var (const wchar_t* const value_)  : type (&VariantType_String::instance)
     new (value.stringValue) String (value_);
 }
 
+var::var (const Array<var>& value_)  : type (&VariantType_Array::instance)
+{
+    value.arrayValue = new Array<var> (value_);
+}
+
 var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::instance)
 {
     value.objectValue = object;
@@ -364,6 +408,7 @@ bool var::isBool() const noexcept     { return type->isBool(); }
 bool var::isDouble() const noexcept   { return type->isDouble(); }
 bool var::isString() const noexcept   { return type->isString(); }
 bool var::isObject() const noexcept   { return type->isObject(); }
+bool var::isArray() const noexcept    { return type->isArray(); }
 bool var::isMethod() const noexcept   { return type->isMethod(); }
 
 var::operator int() const noexcept                      { return type->toInt (value); }
@@ -374,6 +419,7 @@ var::operator double() const noexcept                   { return type->toDouble 
 String var::toString() const                            { return type->toString (value); }
 var::operator String() const                            { return type->toString (value); }
 ReferenceCountedObject* var::getObject() const noexcept { return type->toObject (value); }
+Array<var>* var::getArray() const noexcept              { return type->toArray (value); }
 DynamicObject* var::getDynamicObject() const noexcept   { return dynamic_cast <DynamicObject*> (getObject()); }
 
 //==============================================================================
@@ -391,6 +437,7 @@ const var& var::operator= (const double newValue)             { type->cleanUp (v
 const var& var::operator= (const char* const newValue)        { var v (newValue); swapWith (v); return *this; }
 const var& var::operator= (const wchar_t* const newValue)     { var v (newValue); swapWith (v); return *this; }
 const var& var::operator= (const String& newValue)            { var v (newValue); swapWith (v); return *this; }
+const var& var::operator= (const Array<var>& newValue)        { var v (newValue); swapWith (v); return *this; }
 const var& var::operator= (ReferenceCountedObject* newValue)  { var v (newValue); swapWith (v); return *this; }
 const var& var::operator= (MethodFunction newValue)           { var v (newValue); swapWith (v); return *this; }
 
@@ -414,38 +461,6 @@ bool operator!= (const var& v1, const char* const v2)       { return v1.toString
 
 
 //==============================================================================
-void var::writeToStream (OutputStream& output) const
-{
-    type->writeToStream (value, output);
-}
-
-var var::readFromStream (InputStream& input)
-{
-    const int numBytes = input.readCompressedInt();
-
-    if (numBytes > 0)
-    {
-        switch (input.readByte())
-        {
-            case varMarker_Int:         return var (input.readInt());
-            case varMarker_Int64:       return var (input.readInt64());
-            case varMarker_BoolTrue:    return var (true);
-            case varMarker_BoolFalse:   return var (false);
-            case varMarker_Double:      return var (input.readDouble());
-            case varMarker_String:
-            {
-                MemoryOutputStream mo;
-                mo.writeFromInputStream (input, numBytes - 1);
-                return var (mo.toUTF8());
-            }
-
-            default:    input.skipNextBytes (numBytes - 1); break;
-        }
-    }
-
-    return var::null;
-}
-
 var var::operator[] (const Identifier& propertyName) const
 {
     DynamicObject* const o = getDynamicObject();
@@ -500,6 +515,127 @@ var var::call (const Identifier& method, const var& arg1, const var& arg2, const
 {
     var args[] = { arg1, arg2, arg3, arg4, arg5 };
     return invoke (method, args, 5);
+}
+
+//==============================================================================
+int var::size() const
+{
+    const Array<var>* const array = getArray();
+    return array != nullptr ? array->size() : 0;
+}
+
+const var& var::operator[] (int arrayIndex) const
+{
+    const Array<var>* const array = getArray();
+
+    // When using this method, the var must actually be an array, and the index
+    // must be in-range!
+    jassert (array != nullptr && isPositiveAndBelow (arrayIndex, array->size()));
+
+    return array->getReference (arrayIndex);
+}
+
+var& var::operator[] (int arrayIndex)
+{
+    const Array<var>* const array = getArray();
+
+    // When using this method, the var must actually be an array, and the index
+    // must be in-range!
+    jassert (array != nullptr && isPositiveAndBelow (arrayIndex, array->size()));
+
+    return array->getReference (arrayIndex);
+}
+
+Array<var>* var::convertToArray()
+{
+    Array<var>* array = getArray();
+
+    if (array == nullptr)
+    {
+        const Array<var> tempVar;
+        var v (tempVar);
+        array = v.value.arrayValue;
+
+        if (! isVoid())
+            array->add (*this);
+
+        swapWith (v);
+    }
+
+    return array;
+}
+
+void var::append (const var& value)
+{
+    convertToArray()->add (value);
+}
+
+void var::remove (const int index)
+{
+    Array<var>* const array = getArray();
+
+    if (array != nullptr)
+        array->remove (index);
+}
+
+void var::insert (const int index, const var& value)
+{
+    convertToArray()->insert (index, value);
+}
+
+void var::resize (const int numArrayElementsWanted)
+{
+    convertToArray()->resize (numArrayElementsWanted);
+}
+
+int var::indexOf (const var& value) const
+{
+    const Array<var>* const array = getArray();
+    return array != nullptr ? array->indexOf (value) : -1;
+}
+
+//==============================================================================
+void var::writeToStream (OutputStream& output) const
+{
+    type->writeToStream (value, output);
+}
+
+var var::readFromStream (InputStream& input)
+{
+    const int numBytes = input.readCompressedInt();
+
+    if (numBytes > 0)
+    {
+        switch (input.readByte())
+        {
+            case varMarker_Int:         return var (input.readInt());
+            case varMarker_Int64:       return var (input.readInt64());
+            case varMarker_BoolTrue:    return var (true);
+            case varMarker_BoolFalse:   return var (false);
+            case varMarker_Double:      return var (input.readDouble());
+            case varMarker_String:
+            {
+                MemoryOutputStream mo;
+                mo.writeFromInputStream (input, numBytes - 1);
+                return var (mo.toUTF8());
+            }
+
+            case varMarker_Array:
+            {
+                var v;
+                Array<var>* const destArray = v.convertToArray();
+
+                for (int i = input.readCompressedInt(); --i >= 0;)
+                    destArray->add (readFromStream (input));
+
+                return v;
+            }
+
+            default:    input.skipNextBytes (numBytes - 1); break;
+        }
+    }
+
+    return var::null;
 }
 
 

@@ -436,6 +436,7 @@
     <ClCompile Include="..\..\src\native\android\juce_android_Windowing.cpp"/>
     <ClCompile Include="..\..\src\text\juce_CharacterFunctions.cpp"/>
     <ClCompile Include="..\..\src\text\juce_Identifier.cpp"/>
+    <ClCompile Include="..\..\src\text\juce_JSON.cpp"/>
     <ClCompile Include="..\..\src\text\juce_LocalisedStrings.cpp"/>
     <ClCompile Include="..\..\src\text\juce_String.cpp"/>
     <ClCompile Include="..\..\src\text\juce_StringArray.cpp"/>
@@ -790,11 +791,12 @@
     <ClInclude Include="..\..\src\native\windows\juce_win32_NativeIncludes.h"/>
     <ClInclude Include="..\..\src\native\android\juce_android_NativeIncludes.h"/>
     <ClInclude Include="..\..\src\text\juce_CharacterFunctions.h"/>
-    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF8.h"/>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_ASCII.h"/>
     <ClInclude Include="..\..\src\text\juce_CharPointer_UTF16.h"/>
     <ClInclude Include="..\..\src\text\juce_CharPointer_UTF32.h"/>
-    <ClInclude Include="..\..\src\text\juce_CharPointer_ASCII.h"/>
+    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF8.h"/>
     <ClInclude Include="..\..\src\text\juce_Identifier.h"/>
+    <ClInclude Include="..\..\src\text\juce_JSON.h"/>
     <ClInclude Include="..\..\src\text\juce_LocalisedStrings.h"/>
     <ClInclude Include="..\..\src\text\juce_NewLine.h"/>
     <ClInclude Include="..\..\src\text\juce_String.h"/>

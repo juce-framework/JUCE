@@ -121,4 +121,19 @@ bool FileOutputStream::write (const void* const src, const int numBytes)
     return true;
 }
 
+void FileOutputStream::writeRepeatedByte (uint8 byte, int numBytes)
+{
+    if (bytesInBuffer + numBytes < bufferSize)
+    {
+        memset (buffer + bytesInBuffer, byte, numBytes);
+        bytesInBuffer += numBytes;
+        currentPosition += numBytes;
+    }
+    else
+    {
+        OutputStream::writeRepeatedByte (byte, numBytes);
+    }
+}
+
+
 END_JUCE_NAMESPACE

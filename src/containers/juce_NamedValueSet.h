@@ -29,6 +29,9 @@
 #include "juce_Variant.h"
 #include "../containers/juce_LinkedListPointer.h"
 class XmlElement;
+#ifndef DOXYGEN
+ class JSONFormatter;
+#endif
 
 
 //==============================================================================
@@ -137,6 +140,8 @@ private:
 
     friend class LinkedListPointer<NamedValue>;
     LinkedListPointer<NamedValue> values;
+
+    friend class JSONFormatter;
 };
 
 

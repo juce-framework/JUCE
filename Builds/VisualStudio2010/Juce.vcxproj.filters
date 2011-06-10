@@ -1243,6 +1243,9 @@
     <ClCompile Include="..\..\src\text\juce_Identifier.cpp">
       <Filter>Juce\Source\text</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\text\juce_JSON.cpp">
+      <Filter>Juce\Source\text</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\text\juce_LocalisedStrings.cpp">
       <Filter>Juce\Source\text</Filter>
     </ClCompile>
@@ -2301,7 +2304,7 @@
     <ClInclude Include="..\..\src\text\juce_CharacterFunctions.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF8.h">
+    <ClInclude Include="..\..\src\text\juce_CharPointer_ASCII.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\text\juce_CharPointer_UTF16.h">
@@ -2310,10 +2313,13 @@
     <ClInclude Include="..\..\src\text\juce_CharPointer_UTF32.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\text\juce_CharPointer_ASCII.h">
+    <ClInclude Include="..\..\src\text\juce_CharPointer_UTF8.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\text\juce_Identifier.h">
+      <Filter>Juce\Source\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\text\juce_JSON.h">
       <Filter>Juce\Source\text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\text\juce_LocalisedStrings.h">

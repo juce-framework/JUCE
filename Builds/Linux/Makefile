@@ -353,6 +353,7 @@ OBJECTS := \
   $(OBJDIR)/juce_android_Windowing_2a620a72.o \
   $(OBJDIR)/juce_CharacterFunctions_b1a5ac62.o \
   $(OBJDIR)/juce_Identifier_e99ee619.o \
+  $(OBJDIR)/juce_JSON_bbf64af8.o \
   $(OBJDIR)/juce_LocalisedStrings_3ddfa55e.o \
   $(OBJDIR)/juce_String_80587b01.o \
   $(OBJDIR)/juce_StringArray_4aaa67a2.o \
@@ -1954,6 +1955,11 @@ $(OBJDIR)/juce_CharacterFunctions_b1a5ac62.o: ../../src/text/juce_CharacterFunct
 $(OBJDIR)/juce_Identifier_e99ee619.o: ../../src/text/juce_Identifier.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_Identifier.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_JSON_bbf64af8.o: ../../src/text/juce_JSON.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_JSON.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_LocalisedStrings_3ddfa55e.o: ../../src/text/juce_LocalisedStrings.cpp
