@@ -179,14 +179,8 @@ void PlatformUtilities::registerFileAssociation (const String& fileExtension,
 //==============================================================================
 bool juce_IsRunningInWine()
 {
-    HKEY key;
-    if (RegOpenKeyEx (HKEY_CURRENT_USER, _T("Software\\Wine"), 0, KEY_READ, &key) == ERROR_SUCCESS)
-    {
-        RegCloseKey (key);
-        return true;
-    }
-
-    return false;
+    HMODULE ntdll = GetModuleHandle (_T("ntdll.dll"));
+    return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != 0;
 }
 
 //==============================================================================

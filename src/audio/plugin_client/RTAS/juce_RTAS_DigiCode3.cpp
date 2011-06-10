@@ -60,7 +60,7 @@
  // This overloaded DllMain can work as either an RTAS or a VST..
  extern "C" BOOL WINAPI DllMain (HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpReserved)
  {
-    if (GetModuleHandle ("DAE.DLL") != 0)
+    if (GetModuleHandle (_T("DAE.DLL")) != 0)
         return DllMainRTAS (hInstance, ul_reason_for_call, lpReserved);
     else
         return DllMainVST (hInstance, ul_reason_for_call, lpReserved);

@@ -93,7 +93,7 @@ public:
     /** Returns the value of the item at a given index.
         The index must be between 0 and size() - 1.
     */
-    var getValueAt (int index) const;
+    const var& getValueAt (int index) const;
 
     /** Removes all values. */
     void clear();

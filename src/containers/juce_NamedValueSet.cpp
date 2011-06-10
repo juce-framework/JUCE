@@ -195,7 +195,7 @@ const Identifier NamedValueSet::getName (const int index) const
     return v->name;
 }
 
-var NamedValueSet::getValueAt (const int index) const
+const var& NamedValueSet::getValueAt (const int index) const
 {
     const NamedValue* const v = values[index];
     jassert (v != nullptr);

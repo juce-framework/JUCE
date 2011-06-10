@@ -185,11 +185,11 @@ bool SystemStats::isOperatingSystem64Bit()
    #else
     typedef BOOL (WINAPI* LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
-    LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandle (L"kernel32"), "IsWow64Process");
+    LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandle (_T("kernel32")), "IsWow64Process");
 
     BOOL isWow64 = FALSE;
 
-    return (fnIsWow64Process != 0)
+    return fnIsWow64Process != 0
             && fnIsWow64Process (GetCurrentProcess(), &isWow64)
             && (isWow64 != FALSE);
    #endif

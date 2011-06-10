@@ -107,6 +107,9 @@ public:
     /** Removes all properties and methods from the object. */
     void clear();
 
+    /** Returns the NamedValueSet that holds the object's properties. */
+    NamedValueSet& getProperties() noexcept     { return properties; }
+
 private:
     //==============================================================================
     NamedValueSet properties;

@@ -1427,6 +1427,14 @@ private:
        #endif
     }
 
+    static int getMinTimeBetweenMouseMoves()
+    {
+        if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
+            return 0;
+
+        return 1000 / 60;  // Throttling the incoming mouse-events seems to still be needed in XP..
+    }
+
     void doMouseMove (const Point<int>& position)
     {
         if (! isMouseOver)
@@ -1451,12 +1459,11 @@ private:
                 return;
         }
 
-        // (Throttling the incoming queue of mouse-events seems to still be required in XP..)
         static uint32 lastMouseTime = 0;
+        static int minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
         const uint32 now = Time::getMillisecondCounter();
-        const int maxMouseMovesPerSecond = 60;
 
-        if (now > lastMouseTime + 1000 / maxMouseMovesPerSecond)
+        if (now >= lastMouseTime + minTimeBetweenMouses)
         {
             lastMouseTime = now;
             doMouseEvent (position);

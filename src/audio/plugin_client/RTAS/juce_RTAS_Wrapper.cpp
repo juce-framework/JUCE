@@ -246,11 +246,11 @@ public:
                 JUCE_AUTORELEASEPOOL
                 updateSize();
 
-#if JUCE_WINDOWS
+               #if JUCE_WINDOWS
                 void* const hostWindow = (void*) ASI_GethWnd ((WindowPtr) port);
-#else
+               #else
                 void* const hostWindow = (void*) GetWindowFromPort (port);
-#endif
+               #endif
                 wrapper = nullptr;
                 wrapper = new EditorCompWrapper (hostWindow, editorComp, this);
 
@@ -264,7 +264,7 @@ public:
 
         void DrawContents (Rect*)
         {
-#if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             if (wrapper != nullptr)
             {
                 ComponentPeer* const peer = wrapper->getPeer();
@@ -275,7 +275,7 @@ public:
                     peer->repaint (wrapper->getLocalBounds());
                 }
             }
-#endif
+           #endif
         }
 
         void DrawBackground (Rect*)  {}
@@ -309,9 +309,9 @@ public:
         // A component to hold the AudioProcessorEditor, and cope with some housekeeping
         // chores when it changes or repaints.
         class EditorCompWrapper  : public JUCE_NAMESPACE::Component
-#if ! JUCE_MAC
+                                 #if ! JUCE_MAC
                                    , public FocusChangeListener
-#endif
+                                 #endif
         {
         public:
             EditorCompWrapper (void* const hostWindow_,
@@ -322,37 +322,37 @@ public:
                   titleW (0),
                   titleH (0)
             {
-#if ! JucePlugin_EditorRequiresKeyboardFocus
+               #if ! JucePlugin_EditorRequiresKeyboardFocus
                 setMouseClickGrabsKeyboardFocus (false);
                 setWantsKeyboardFocus (false);
-#endif
+               #endif
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
                 setBounds (editorComp->getBounds());
                 editorComp->setTopLeftPosition (0, 0);
                 addAndMakeVisible (editorComp);
 
-#if JUCE_WINDOWS
+               #if JUCE_WINDOWS
                 attachSubWindow (hostWindow, titleW, titleH, this);
-#else
+               #else
                 nsWindow = attachSubWindow (hostWindow, this);
-#endif
+               #endif
                 setVisible (true);
 
-#if JUCE_WINDOWS && ! JucePlugin_EditorRequiresKeyboardFocus
+               #if JUCE_WINDOWS && ! JucePlugin_EditorRequiresKeyboardFocus
                 Desktop::getInstance().addFocusChangeListener (this);
-#endif
+               #endif
             }
 
             ~EditorCompWrapper()
             {
-#if JUCE_WINDOWS && ! JucePlugin_EditorRequiresKeyboardFocus
+               #if JUCE_WINDOWS && ! JucePlugin_EditorRequiresKeyboardFocus
                 Desktop::getInstance().removeFocusChangeListener (this);
-#endif
+               #endif
 
-#if JUCE_MAC
+               #if JUCE_MAC
                 removeSubWindow (nsWindow, this);
-#endif
+               #endif
             }
 
             void paint (Graphics&)
@@ -369,24 +369,24 @@ public:
                 repaint();
             }
 
-#if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             void globalFocusChanged (JUCE_NAMESPACE::Component*)
             {
-  #if ! JucePlugin_EditorRequiresKeyboardFocus
+               #if ! JucePlugin_EditorRequiresKeyboardFocus
                 if (hasKeyboardFocus (true))
                     passFocusToHostWindow (hostWindow);
-  #endif
+               #endif
             }
-#endif
+           #endif
 
             void childBoundsChanged (JUCE_NAMESPACE::Component* child)
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
 
-#if JUCE_WINDOWS
+               #if JUCE_WINDOWS
                 resizeHostWindow (hostWindow, titleW, titleH, this);
-#endif
+               #endif
                 owner->updateSize();
             }
 
@@ -394,14 +394,14 @@ public:
             {
             }
 
-#if JUCE_MAC && JucePlugin_EditorRequiresKeyboardFocus
+           #if JUCE_MAC && JucePlugin_EditorRequiresKeyboardFocus
             bool keyPressed (const KeyPress& kp)
             {
                 owner->updateSize();
                 forwardCurrentKeyEventToHostWindow();
                 return true;
             }
-#endif
+           #endif
 
         private:
             //==============================================================================
@@ -469,7 +469,7 @@ protected:
         // the plugin actually uses midi...
         if (MIDILogIn() == noErr)
         {
-#if JucePlugin_WantsMidiInput
+           #if JucePlugin_WantsMidiInput
             CEffectType* const type = dynamic_cast <CEffectType*> (this->GetProcessType());
 
             if (type != nullptr)
@@ -486,7 +486,7 @@ protected:
 
                 midiBufferNode->Initialize (1, true);
             }
-#endif
+           #endif
         }
 
         midiTransport = new CEffectMIDITransport (&mMIDIWorld);
@@ -532,7 +532,7 @@ protected:
             return;
         }
 
-#if JucePlugin_WantsMidiInput
+       #if JucePlugin_WantsMidiInput
         midiEvents.clear();
 
         const Cmn_UInt32 bufferSize = mRTGlobals->mHWBufferSizeInSamples;
@@ -558,12 +558,12 @@ protected:
                 }
             }
         }
-#endif
+       #endif
 
-#if defined (JUCE_DEBUG) || JUCE_LOG_ASSERTIONS
+       #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
         (void) numMidiEventsComingIn;
-#endif
+       #endif
 
         {
             const ScopedLock sl (juceFilter->getCallbackLock());
@@ -601,23 +601,21 @@ protected:
 
         if (! midiEvents.isEmpty())
         {
-#if JucePlugin_ProducesMidiOutput
+           #if JucePlugin_ProducesMidiOutput
             const JUCE_NAMESPACE::uint8* midiEventData;
             int midiEventSize, midiEventPosition;
             MidiBuffer::Iterator i (midiEvents);
 
             while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
             {
-//                        jassert (midiEventPosition >= 0 && midiEventPosition < (int) numSamples);
-
-                //xxx
+                //jassert (midiEventPosition >= 0 && midiEventPosition < (int) numSamples);
             }
-#else
+           #else
             // if your plugin creates midi messages, you'll need to set
             // the JucePlugin_ProducesMidiOutput macro to 1 in your
             // JucePluginCharacteristics.h file
             jassert (midiEvents.getNumEvents() <= numMidiEventsComingIn);
-#endif
+           #endif
 
             midiEvents.clear();
         }
@@ -729,44 +727,14 @@ protected:
 
         switch (fTimeCodeInfo.mFrameRate)
         {
-        case ficFrameRate_24Frame:
-            info.frameRate = AudioPlayHead::fps24;
-            break;
-
-        case ficFrameRate_25Frame:
-            info.frameRate = AudioPlayHead::fps25;
-            framesPerSec = 25.0;
-            break;
-
-        case ficFrameRate_2997NonDrop:
-            info.frameRate = AudioPlayHead::fps2997;
-            framesPerSec = 29.97002997;
-            break;
-
-        case ficFrameRate_2997DropFrame:
-            info.frameRate = AudioPlayHead::fps2997drop;
-            framesPerSec = 29.97002997;
-            break;
-
-        case ficFrameRate_30NonDrop:
-            info.frameRate = AudioPlayHead::fps30;
-            framesPerSec = 30.0;
-            break;
-
-        case ficFrameRate_30DropFrame:
-            info.frameRate = AudioPlayHead::fps30drop;
-            framesPerSec = 30.0;
-            break;
-
-        case ficFrameRate_23976:
-            // xxx not strictly true..
-            info.frameRate = AudioPlayHead::fps24;
-            framesPerSec = 23.976;
-            break;
-
-        default:
-            info.frameRate = AudioPlayHead::fpsUnknown;
-            break;
+            case ficFrameRate_24Frame:       info.frameRate = AudioPlayHead::fps24;       break;
+            case ficFrameRate_25Frame:       info.frameRate = AudioPlayHead::fps25;       framesPerSec = 25.0; break;
+            case ficFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 29.97002997; break;
+            case ficFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 29.97002997; break;
+            case ficFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
+            case ficFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
+            case ficFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 23.976; break;
+            default:                         info.frameRate = AudioPlayHead::fpsUnknown;  break;
         }
 
         info.editOriginTime = fTimeCodeInfo.mFrameOffset / framesPerSec;
@@ -862,10 +830,6 @@ private:
         JucePluginControl (AudioProcessor* const juceFilter_, const int index_)
             : juceFilter (juceFilter_),
               index (index_)
-        {
-        }
-
-        ~JucePluginControl()
         {
         }
 
@@ -976,9 +940,9 @@ public:
 private:
     static CEffectProcess* createNewProcess()
     {
-      #if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         PlatformUtilities::setCurrentModuleInstanceHandle (gThisModule);
-      #endif
+       #endif
 
         initialiseJuce_GUI();
 
@@ -1016,9 +980,9 @@ void initialiseMacRTAS();
 
 CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 {
-  #if JUCE_MAC
+   #if JUCE_MAC
     initialiseMacRTAS();
-  #endif
+   #endif
 
     return new JucePlugInGroup();
 }
