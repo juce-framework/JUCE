@@ -270,11 +270,11 @@ public:
         const ScopedLockType lock (getLock());
 
         int start = 0;
-        int end = numUsed;
+        int end_ = numUsed;
 
         for (;;)
         {
-            if (start >= end)
+            if (start >= end_)
             {
                 return -1;
             }
@@ -284,12 +284,12 @@ public:
             }
             else
             {
-                const int halfway = (start + end) >> 1;
+                const int halfway = (start + end_) >> 1;
 
                 if (halfway == start)
                     return -1;
                 else if (elementToLookFor < data.elements [halfway])
-                    end = halfway;
+                    end_ = halfway;
                 else
                     start = halfway;
             }
@@ -306,11 +306,11 @@ public:
         const ScopedLockType lock (getLock());
 
         int start = 0;
-        int end = numUsed;
+        int end_ = numUsed;
 
         for (;;)
         {
-            if (start >= end)
+            if (start >= end_)
             {
                 return false;
             }
@@ -320,12 +320,12 @@ public:
             }
             else
             {
-                const int halfway = (start + end) >> 1;
+                const int halfway = (start + end_) >> 1;
 
                 if (halfway == start)
                     return false;
                 else if (elementToLookFor < data.elements [halfway])
-                    end = halfway;
+                    end_ = halfway;
                 else
                     start = halfway;
             }
@@ -343,13 +343,13 @@ public:
         const ScopedLockType lock (getLock());
 
         int start = 0;
-        int end = numUsed;
+        int end_ = numUsed;
 
         for (;;)
         {
-            if (start >= end)
+            if (start >= end_)
             {
-                jassert (start <= end);
+                jassert (start <= end_);
                 insertInternal (start, newElement);
                 break;
             }
@@ -359,7 +359,7 @@ public:
             }
             else
             {
-                const int halfway = (start + end) >> 1;
+                const int halfway = (start + end_) >> 1;
 
                 if (halfway == start)
                 {
@@ -371,7 +371,7 @@ public:
                     break;
                 }
                 else if (newElement < data.elements [halfway])
-                    end = halfway;
+                    end_ = halfway;
                 else
                     start = halfway;
             }

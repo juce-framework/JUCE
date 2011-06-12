@@ -459,8 +459,8 @@ private:
 
 
 //==============================================================================
-TreeView::TreeView (const String& componentName)
-    : Component (componentName),
+TreeView::TreeView (const String& name)
+    : Component (name),
       rootItem (nullptr),
       indentSize (24),
       defaultOpenness (false),

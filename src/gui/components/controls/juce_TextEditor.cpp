@@ -1715,9 +1715,9 @@ void TextEditor::drawContent (Graphics& g)
             }
         }
 
-        for (int i = underlinedSections.size(); --i >= 0;)
+        for (int j = underlinedSections.size(); --j >= 0;)
         {
-            const Range<int>& underlinedSection = underlinedSections.getReference (i);
+            const Range<int>& underlinedSection = underlinedSections.getReference (j);
 
             Iterator i2 (sections, wordWrapWidth, passwordCharacter);
 

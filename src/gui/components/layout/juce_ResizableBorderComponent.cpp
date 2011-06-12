@@ -150,11 +150,11 @@ void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
         return;
     }
 
-    const Rectangle<int> bounds (mouseZone.resizeRectangleBy (originalBounds, e.getOffsetFromDragStart()));
+    const Rectangle<int> newBounds (mouseZone.resizeRectangleBy (originalBounds, e.getOffsetFromDragStart()));
 
     if (constrainer != nullptr)
     {
-        constrainer->setBoundsForComponent (component, bounds,
+        constrainer->setBoundsForComponent (component, newBounds,
                                             mouseZone.isDraggingTopEdge(),
                                             mouseZone.isDraggingLeftEdge(),
                                             mouseZone.isDraggingBottomEdge(),
@@ -162,12 +162,12 @@ void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
     }
     else
     {
-        Component::Positioner* const positioner = component->getPositioner();
+        Component::Positioner* const pos = component->getPositioner();
 
-        if (positioner != nullptr)
-            positioner->applyNewBounds (bounds);
+        if (pos != nullptr)
+            pos->applyNewBounds (newBounds);
         else
-            component->setBounds (bounds);
+            component->setBounds (newBounds);
     }
 }
 

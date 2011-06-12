@@ -83,13 +83,13 @@ ResizableWindow::~ResizableWindow()
     jassert (getNumChildComponents() == 0);
 }
 
-void ResizableWindow::initialise (const bool addToDesktop)
+void ResizableWindow::initialise (const bool shouldAddToDesktop)
 {
     defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
 
     lastNonFullScreenPos.setBounds (50, 50, 256, 256);
 
-    if (addToDesktop)
+    if (shouldAddToDesktop)
         Component::addToDesktop (ResizableWindow::getDesktopWindowStyleFlags());
 }
 
@@ -349,12 +349,12 @@ void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer
     }
 }
 
-void ResizableWindow::setBoundsConstrained (const Rectangle<int>& bounds)
+void ResizableWindow::setBoundsConstrained (const Rectangle<int>& newBounds)
 {
     if (constrainer != nullptr)
-        constrainer->setBoundsForComponent (this, bounds, false, false, false, false);
+        constrainer->setBoundsForComponent (this, newBounds, false, false, false, false);
     else
-        setBounds (bounds);
+        setBounds (newBounds);
 }
 
 //==============================================================================

@@ -198,9 +198,9 @@ public:
     {
         const ScopedLockType lock (getLock());
         ObjectClass** e = data.elements.getData();
-        ObjectClass** const end = e + numUsed;
+        ObjectClass** const end_ = e + numUsed;
 
-        while (e != end)
+        while (e != end_)
         {
             if (objectToLookFor == *e)
                 return static_cast <int> (e - data.elements.getData());
@@ -220,9 +220,9 @@ public:
     {
         const ScopedLockType lock (getLock());
         ObjectClass** e = data.elements.getData();
-        ObjectClass** const end = e + numUsed;
+        ObjectClass** const end_ = e + numUsed;
 
-        while (e != end)
+        while (e != end_)
         {
             if (objectToLookFor == *e)
                 return true;
@@ -529,12 +529,12 @@ public:
         const ScopedLockType lock (getLock());
 
         const int start = jlimit (0, numUsed, startIndex);
-        const int end   = jlimit (0, numUsed, startIndex + numberToRemove);
+        const int end_   = jlimit (0, numUsed, startIndex + numberToRemove);
 
-        if (end > start)
+        if (end_ > start)
         {
             int i;
-            for (i = start; i < end; ++i)
+            for (i = start; i < end_; ++i)
             {
                 if (data.elements[i] != nullptr)
                 {
@@ -543,9 +543,9 @@ public:
                 }
             }
 
-            const int rangeSize = end - start;
+            const int rangeSize = end_ - start;
             ObjectClass** e = data.elements + start;
-            i = numUsed - end;
+            i = numUsed - end_;
             numUsed -= rangeSize;
 
             while (--i >= 0)

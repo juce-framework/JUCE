@@ -108,7 +108,7 @@ public:
         will be the "upperLimit" parameter that is passed to your generateHash() function. The number
         of hash slots will grow automatically if necessary, or it can be remapped manually using remapTable().
     */
-    HashMap (const int numberOfSlots = defaultHashTableSize)
+    explicit HashMap (const int numberOfSlots = defaultHashTableSize)
        : totalNumItems (0)
     {
         slots.insertMultiple (0, nullptr, numberOfSlots);

@@ -1056,9 +1056,9 @@ Expression Expression::withRenamedSymbol (const Expression::Symbol& oldSymbol, c
     return e;
 }
 
-bool Expression::referencesSymbol (const Expression::Symbol& symbol, const Scope& scope) const
+bool Expression::referencesSymbol (const Expression::Symbol& symbolToCheck, const Scope& scope) const
 {
-    Helpers::SymbolCheckVisitor visitor (symbol);
+    Helpers::SymbolCheckVisitor visitor (symbolToCheck);
 
     try
     {

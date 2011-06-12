@@ -185,9 +185,9 @@ public:
     {
         const ScopedLockType lock (getLock());
         ObjectClass* const* e = data.elements.getData();
-        ObjectClass* const* const end = e + numUsed;
+        ObjectClass* const* const end_ = e + numUsed;
 
-        for (; e != end; ++e)
+        for (; e != end_; ++e)
             if (objectToLookFor == *e)
                 return static_cast <int> (e - data.elements.getData());
 
@@ -203,9 +203,9 @@ public:
     {
         const ScopedLockType lock (getLock());
         ObjectClass* const* e = data.elements.getData();
-        ObjectClass* const* const end = e + numUsed;
+        ObjectClass* const* const end_ = e + numUsed;
 
-        for (; e != end; ++e)
+        for (; e != end_; ++e)
             if (objectToLookFor == *e)
                 return true;
 
@@ -463,11 +463,11 @@ public:
         const ScopedLockType lock (getLock());
 
         int start = 0;
-        int end = numUsed;
+        int end_ = numUsed;
 
         for (;;)
         {
-            if (start >= end)
+            if (start >= end_)
             {
                 return -1;
             }
@@ -477,14 +477,14 @@ public:
             }
             else
             {
-                const int halfway = (start + end) >> 1;
+                const int halfway = (start + end_) >> 1;
 
                 if (halfway == start)
                     return -1;
                 else if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
                     start = halfway;
                 else
-                    end = halfway;
+                    end_ = halfway;
             }
         }
     }

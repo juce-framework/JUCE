@@ -210,16 +210,15 @@ void DrawablePath::ValueTreeWrapper::writeTo (RelativePointPath& relativePath) c
         for (int j = 0; j < numCps; ++j)
             points[j] = e.getControlPoint (j);
 
-        const Identifier type (e.getType());
-
         RelativePointPath::ElementBase* newElement = 0;
+        const Identifier t (e.getType());
 
-        if (type == Element::startSubPathElement)       newElement = new RelativePointPath::StartSubPath (points[0]);
-        else if (type == Element::closeSubPathElement)  newElement = new RelativePointPath::CloseSubPath();
-        else if (type == Element::lineToElement)        newElement = new RelativePointPath::LineTo (points[0]);
-        else if (type == Element::quadraticToElement)   newElement = new RelativePointPath::QuadraticTo (points[0], points[1]);
-        else if (type == Element::cubicToElement)       newElement = new RelativePointPath::CubicTo (points[0], points[1], points[2]);
-        else                                            jassertfalse;
+        if      (t == Element::startSubPathElement)  newElement = new RelativePointPath::StartSubPath (points[0]);
+        else if (t == Element::closeSubPathElement)  newElement = new RelativePointPath::CloseSubPath();
+        else if (t == Element::lineToElement)        newElement = new RelativePointPath::LineTo (points[0]);
+        else if (t == Element::quadraticToElement)   newElement = new RelativePointPath::QuadraticTo (points[0], points[1]);
+        else if (t == Element::cubicToElement)       newElement = new RelativePointPath::CubicTo (points[0], points[1], points[2]);
+        else                                         jassertfalse;
 
         relativePath.addElement (newElement);
     }

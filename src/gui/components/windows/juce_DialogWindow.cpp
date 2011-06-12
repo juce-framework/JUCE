@@ -65,18 +65,18 @@ class TempDialogWindow : public DialogWindow
 {
 public:
     TempDialogWindow (const String& title,
-                      Component* contentComponent,
+                      Component* contentComponent_,
                       Component* componentToCentreAround,
                       const Colour& colour,
-                      const bool escapeKeyTriggersCloseButton,
+                      const bool escapeKeyTriggersCloseButton_,
                       const bool shouldBeResizable,
                       const bool useBottomRightCornerResizer)
-        : DialogWindow (title, colour, escapeKeyTriggersCloseButton, true)
+        : DialogWindow (title, colour, escapeKeyTriggersCloseButton_, true)
     {
         if (! JUCEApplication::isStandaloneApp())
             setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
 
-        setContentNonOwned (contentComponent, true);
+        setContentNonOwned (contentComponent_, true);
         centreAroundComponent (componentToCentreAround, getWidth(), getHeight());
         setResizable (shouldBeResizable, useBottomRightCornerResizer);
     }

@@ -775,11 +775,11 @@ void AudioDeviceManager::addMidiInputCallback (const String& name,
     }
 }
 
-void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* callback)
+void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* callbackToRemove)
 {
     for (int i = midiCallbacks.size(); --i >= 0;)
     {
-        if (midiCallbackDevices[i] == name && midiCallbacks.getUnchecked(i) == callback)
+        if (midiCallbackDevices[i] == name && midiCallbacks.getUnchecked(i) == callbackToRemove)
         {
             const ScopedLock sl (midiCallbackLock);
             midiCallbacks.remove (i);

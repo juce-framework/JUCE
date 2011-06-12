@@ -78,12 +78,12 @@ void ReverbAudioSource::setParameters (const Reverb::Parameters& newParams)
     reverb.setParameters (newParams);
 }
 
-void ReverbAudioSource::setBypassed (bool isBypassed) noexcept
+void ReverbAudioSource::setBypassed (bool b) noexcept
 {
-    if (bypass != isBypassed)
+    if (bypass != b)
     {
         const ScopedLock sl (lock);
-        bypass = isBypassed;
+        bypass = b;
         reverb.reset();
     }
 }

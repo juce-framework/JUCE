@@ -146,11 +146,11 @@ void DrawableComposite::resetContentAreaAndBoundingBoxToFitChildren()
     resetBoundingBoxToContentArea();
 }
 
-bool DrawableComposite::registerCoordinates (RelativeCoordinatePositionerBase& positioner)
+bool DrawableComposite::registerCoordinates (RelativeCoordinatePositionerBase& pos)
 {
-    bool ok = positioner.addPoint (bounds.topLeft);
-    ok = positioner.addPoint (bounds.topRight) && ok;
-    return positioner.addPoint (bounds.bottomLeft) && ok;
+    bool ok = pos.addPoint (bounds.topLeft);
+    ok = pos.addPoint (bounds.topRight) && ok;
+    return pos.addPoint (bounds.bottomLeft) && ok;
 }
 
 void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)

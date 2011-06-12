@@ -200,7 +200,7 @@ void ModalComponentManager::handleAsyncUpdate()
 
         if (! item->isActive)
         {
-            ScopedPointer<ModalItem> item (stack.removeAndReturn (i));
+            ScopedPointer<ModalItem> deleter (stack.removeAndReturn (i));
 
             for (int j = item->callbacks.size(); --j >= 0;)
                 item->callbacks.getUnchecked(j)->modalStateFinished (item->returnValue);

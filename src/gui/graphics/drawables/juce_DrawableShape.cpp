@@ -101,17 +101,17 @@ void DrawableShape::setStrokeFill (const FillType& newFill)
 }
 
 void DrawableShape::setFillInternal (RelativeFillType& fill, const RelativeFillType& newFill,
-                                     ScopedPointer<RelativeCoordinatePositionerBase>& positioner)
+                                     ScopedPointer<RelativeCoordinatePositionerBase>& pos)
 {
     if (fill != newFill)
     {
         fill = newFill;
-        positioner = nullptr;
+        pos = nullptr;
 
         if (fill.isDynamic())
         {
-            positioner = new RelativePositioner (*this, fill, true);
-            positioner->apply();
+            pos = new RelativePositioner (*this, fill, true);
+            pos->apply();
         }
         else
         {

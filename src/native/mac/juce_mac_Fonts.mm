@@ -51,9 +51,9 @@ public:
           unitsToHeightScaleFactor (0.0f)
     {
         JUCE_AUTORELEASEPOOL
-        CFStringRef name = PlatformUtilities::juceStringToCFString (font.getTypefaceName());
-        ctFontRef = CTFontCreateWithName (name, 1024, nullptr);
-        CFRelease (name);
+        CFStringRef cfName = PlatformUtilities::juceStringToCFString (font.getTypefaceName());
+        ctFontRef = CTFontCreateWithName (cfName, 1024, nullptr);
+        CFRelease (cfName);
 
         if (ctFontRef != nullptr)
         {
@@ -61,7 +61,7 @@ public:
 
             if (font.isItalic())
             {
-                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0, nullptr,
+                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr,
                                                                         kCTFontItalicTrait, kCTFontItalicTrait);
 
                 if (newFont != nullptr)
@@ -77,7 +77,7 @@ public:
 
             if (font.isBold())
             {
-                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0, nullptr,
+                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr,
                                                                         kCTFontBoldTrait, kCTFontBoldTrait);
                 if (newFont != nullptr)
                 {

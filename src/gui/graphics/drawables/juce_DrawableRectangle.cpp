@@ -87,12 +87,12 @@ void DrawableRectangle::rebuildPath()
     }
 }
 
-bool DrawableRectangle::registerCoordinates (RelativeCoordinatePositionerBase& positioner)
+bool DrawableRectangle::registerCoordinates (RelativeCoordinatePositionerBase& pos)
 {
-    bool ok = positioner.addPoint (bounds.topLeft);
-    ok = positioner.addPoint (bounds.topRight) && ok;
-    ok = positioner.addPoint (bounds.bottomLeft) && ok;
-    return positioner.addPoint (cornerSize) && ok;
+    bool ok = pos.addPoint (bounds.topLeft);
+    ok = pos.addPoint (bounds.topRight) && ok;
+    ok = pos.addPoint (bounds.bottomLeft) && ok;
+    return pos.addPoint (cornerSize) && ok;
 }
 
 void DrawableRectangle::recalculateCoordinates (Expression::Scope* scope)

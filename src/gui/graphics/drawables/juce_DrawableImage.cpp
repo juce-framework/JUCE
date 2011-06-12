@@ -98,11 +98,11 @@ void DrawableImage::setBoundingBox (const RelativeParallelogram& newBounds)
 }
 
 //==============================================================================
-bool DrawableImage::registerCoordinates (RelativeCoordinatePositionerBase& positioner)
+bool DrawableImage::registerCoordinates (RelativeCoordinatePositionerBase& pos)
 {
-    bool ok = positioner.addPoint (bounds.topLeft);
-    ok = positioner.addPoint (bounds.topRight) && ok;
-    return positioner.addPoint (bounds.bottomLeft) && ok;
+    bool ok = pos.addPoint (bounds.topLeft);
+    ok = pos.addPoint (bounds.topRight) && ok;
+    return pos.addPoint (bounds.bottomLeft) && ok;
 }
 
 void DrawableImage::recalculateCoordinates (Expression::Scope* scope)

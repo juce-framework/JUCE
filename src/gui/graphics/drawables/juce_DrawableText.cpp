@@ -130,12 +130,12 @@ void DrawableText::refreshBounds()
     }
 }
 
-bool DrawableText::registerCoordinates (RelativeCoordinatePositionerBase& positioner)
+bool DrawableText::registerCoordinates (RelativeCoordinatePositionerBase& pos)
 {
-    bool ok = positioner.addPoint (bounds.topLeft);
-    ok = positioner.addPoint (bounds.topRight) && ok;
-    ok = positioner.addPoint (bounds.bottomLeft) && ok;
-    return positioner.addPoint (fontSizeControlPoint) && ok;
+    bool ok = pos.addPoint (bounds.topLeft);
+    ok = pos.addPoint (bounds.topRight) && ok;
+    ok = pos.addPoint (bounds.bottomLeft) && ok;
+    return pos.addPoint (fontSizeControlPoint) && ok;
 }
 
 void DrawableText::recalculateCoordinates (Expression::Scope* scope)

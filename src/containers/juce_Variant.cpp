@@ -565,9 +565,9 @@ Array<var>* var::convertToArray()
     return array;
 }
 
-void var::append (const var& value)
+void var::append (const var& n)
 {
-    convertToArray()->add (value);
+    convertToArray()->add (n);
 }
 
 void var::remove (const int index)
@@ -578,9 +578,9 @@ void var::remove (const int index)
         array->remove (index);
 }
 
-void var::insert (const int index, const var& value)
+void var::insert (const int index, const var& n)
 {
-    convertToArray()->insert (index, value);
+    convertToArray()->insert (index, n);
 }
 
 void var::resize (const int numArrayElementsWanted)
@@ -588,10 +588,10 @@ void var::resize (const int numArrayElementsWanted)
     convertToArray()->resize (numArrayElementsWanted);
 }
 
-int var::indexOf (const var& value) const
+int var::indexOf (const var& n) const
 {
     const Array<var>* const array = getArray();
-    return array != nullptr ? array->indexOf (value) : -1;
+    return array != nullptr ? array->indexOf (n) : -1;
 }
 
 //==============================================================================

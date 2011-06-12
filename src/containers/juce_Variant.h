@@ -44,7 +44,10 @@
     any kind of ReferenceCountedObject. The var class is intended to act like
     the kind of values used in dynamic scripting languages.
 
-    @see DynamicObject
+    You can save/load var objects either in a small, proprietary binary format
+    using writeToStream()/readFromStream(), or as JSON by using the JSON class.
+
+    @see JSON, DynamicObject
 */
 class JUCE_API  var
 {
@@ -208,12 +211,14 @@ public:
     //==============================================================================
     /** Writes a binary representation of this value to a stream.
         The data can be read back later using readFromStream().
+        @see JSON
     */
     void writeToStream (OutputStream& output) const;
 
     /** Reads back a stored binary representation of a value.
         The data in the stream must have been written using writeToStream(), or this
         will have unpredictable results.
+        @see JSON
     */
     static var readFromStream (InputStream& input);
 

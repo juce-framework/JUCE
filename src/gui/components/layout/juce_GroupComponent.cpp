@@ -32,9 +32,9 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-GroupComponent::GroupComponent (const String& componentName,
+GroupComponent::GroupComponent (const String& name,
                                 const String& labelText)
-    : Component (componentName),
+    : Component (name),
       text (labelText),
       justification (Justification::left)
 {

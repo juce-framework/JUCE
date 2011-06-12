@@ -36,17 +36,17 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 CallOutBox::CallOutBox (Component& contentComponent,
                         Component& componentToPointTo,
-                        Component* const parentComponent)
+                        Component* const parent)
     : borderSpace (20), arrowSize (16.0f), content (contentComponent)
 {
     addAndMakeVisible (&content);
 
-    if (parentComponent != nullptr)
+    if (parent != nullptr)
     {
-        parentComponent->addChildComponent (this);
+        parent->addChildComponent (this);
 
-        updatePosition (parentComponent->getLocalArea (&componentToPointTo, componentToPointTo.getLocalBounds()),
-                        parentComponent->getLocalBounds());
+        updatePosition (parent->getLocalArea (&componentToPointTo, componentToPointTo.getLocalBounds()),
+                        parent->getLocalBounds());
 
         setVisible (true);
     }
@@ -155,12 +155,12 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
     targetArea = newAreaToPointTo;
     availableArea = newAreaToFitIn;
 
-    Rectangle<int> bounds (0, 0,
-                           content.getWidth() + borderSpace * 2,
-                           content.getHeight() + borderSpace * 2);
+    Rectangle<int> newBounds (0, 0,
+                              content.getWidth() + borderSpace * 2,
+                              content.getHeight() + borderSpace * 2);
 
-    const int hw = bounds.getWidth() / 2;
-    const int hh = bounds.getHeight() / 2;
+    const int hw = newBounds.getWidth() / 2;
+    const int hh = newBounds.getHeight() / 2;
     const float hwReduced = (float) (hw - borderSpace * 3);
     const float hhReduced = (float) (hh - borderSpace * 3);
     const float arrowIndent = borderSpace - arrowSize;
@@ -195,12 +195,12 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
             nearest = distanceFromCentre;
 
             targetPoint = targets[i];
-            bounds.setPosition ((int) (centre.getX() - hw),
-                                (int) (centre.getY() - hh));
+            newBounds.setPosition ((int) (centre.getX() - hw),
+                                   (int) (centre.getY() - hh));
         }
     }
 
-    setBounds (bounds);
+    setBounds (newBounds);
 }
 
 void CallOutBox::refreshPath()

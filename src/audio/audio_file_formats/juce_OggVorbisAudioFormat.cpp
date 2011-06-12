@@ -250,18 +250,18 @@ class OggWriter  : public AudioFormatWriter
 public:
     //==============================================================================
     OggWriter (OutputStream* const out,
-               const double sampleRate,
-               const int numChannels,
-               const int bitsPerSample,
+               const double sampleRate_,
+               const int numChannels_,
+               const int bitsPerSample_,
                const int qualityIndex)
-        : AudioFormatWriter (out, TRANS (oggFormatName), sampleRate, numChannels, bitsPerSample),
+        : AudioFormatWriter (out, TRANS (oggFormatName), sampleRate_, numChannels_, bitsPerSample_),
           ok (false)
     {
         using namespace OggVorbisNamespace;
 
         vorbis_info_init (&vi);
 
-        if (vorbis_encode_init_vbr (&vi, numChannels, (int) sampleRate,
+        if (vorbis_encode_init_vbr (&vi, numChannels_, (int) sampleRate_,
                                     jlimit (0.0f, 1.0f, qualityIndex * 0.1f)) == 0)
         {
             vorbis_comment_init (&vc);

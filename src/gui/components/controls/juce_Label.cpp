@@ -34,9 +34,9 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Label::Label (const String& componentName,
+Label::Label (const String& name,
               const String& labelText)
-    : Component (componentName),
+    : Component (name),
       textValue (labelText),
       lastTextValue (labelText),
       font (15.0f),

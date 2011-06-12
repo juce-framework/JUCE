@@ -32,8 +32,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Viewport::Viewport (const String& componentName)
-  : Component (componentName),
+Viewport::Viewport (const String& name)
+  : Component (name),
     scrollBarThickness (0),
     singleStepX (16),
     singleStepY (16),

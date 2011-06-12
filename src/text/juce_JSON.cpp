@@ -156,6 +156,7 @@ private:
     {
         DynamicObject* const resultObject = new DynamicObject();
         result = resultObject;
+        NamedValueSet& resultProperties = resultObject->getProperties();
 
         for (;;)
         {
@@ -185,17 +186,17 @@ private:
                     t = t.findEndOfWhitespace();
                     oldT = t;
 
-                    const juce_wchar c = t.getAndAdvance();
-                    if (c != ':')
+                    const juce_wchar c2 = t.getAndAdvance();
+                    if (c2 != ':')
                         return createFail ("Expected ':', but found", &oldT);
 
-                    var propertyValue;
-                    Result r (parseAny (t, propertyValue));
+                    resultProperties.set (propertyName, var::null);
+                    var* propertyValue = resultProperties.getVarPointer (propertyName);
 
-                    if (r.failed())
-                        return r;
+                    Result r2 (parseAny (t, *propertyValue));
 
-                    resultObject->setProperty (propertyName, propertyValue);
+                    if (r2.failed())
+                        return r2;
 
                     t = t.findEndOfWhitespace();
                     oldT = t;
@@ -528,5 +529,123 @@ void JSON::writeToStream (OutputStream& output, const var& data, const bool allO
     JSONFormatter::write (output, data, 0, allOnOneLine);
 }
 
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+#include "../utilities/juce_UnitTest.h"
+#include "../maths/juce_Random.h"
+
+
+class JSONTests  : public UnitTest
+{
+public:
+    JSONTests() : UnitTest ("JSON") {}
+
+    static String createRandomWideCharString (Random& r)
+    {
+        juce_wchar buffer[40] = { 0 };
+
+        for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
+        {
+            if (r.nextBool())
+            {
+                do
+                {
+                    buffer[i] = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
+                }
+                while (! CharPointer_UTF16::canRepresent (buffer[i]));
+            }
+            else
+                buffer[i] = (juce_wchar) (1 + r.nextInt (0xff));
+        }
+
+        return CharPointer_UTF32 (buffer);
+    }
+
+    static String createRandomIdentifier (Random& r)
+    {
+        char buffer[30] = { 0 };
+
+        for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
+        {
+            static const char chars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-:";
+            buffer[i] = chars [r.nextInt (sizeof (chars) - 1)];
+        }
+
+        return CharPointer_ASCII (buffer);
+    }
+
+    static var createRandomVar (Random& r, int depth)
+    {
+        switch (r.nextInt (depth > 3 ? 6 : 8))
+        {
+            case 0:     return var::null;
+            case 1:     return r.nextInt();
+            case 2:     return r.nextInt64();
+            case 3:     return r.nextBool();
+            case 4:     return r.nextDouble();
+            case 5:     return createRandomWideCharString (r);
+
+            case 6:
+            {
+                var v (createRandomVar (r, depth + 1));
+
+                for (int i = 1 + r.nextInt (30); --i >= 0;)
+                    v.append (createRandomVar (r, depth + 1));
+
+                return v;
+            }
+
+            case 7:
+            {
+                DynamicObject* o = new DynamicObject();
+
+                for (int i = r.nextInt (30); --i >= 0;)
+                    o->setProperty (createRandomIdentifier (r), createRandomVar (r, depth + 1));
+
+                return o;
+            }
+
+            default:
+                return var::null;
+        }
+    }
+
+    void runTest()
+    {
+        beginTest ("JSON");
+        Random r;
+        r.setSeedRandomly();
+
+        expect (JSON::parse (String::empty) == var::null);
+        expect (JSON::parse ("{}").isObject());
+        expect (JSON::parse ("[]").isArray());
+        expect (JSON::parse ("1234").isInt());
+        expect (JSON::parse ("12345678901234").isInt64());
+        expect (JSON::parse ("1.123e3").isDouble());
+        expect (JSON::parse ("-1234").isInt());
+        expect (JSON::parse ("-12345678901234").isInt64());
+        expect (JSON::parse ("-1.123e3").isDouble());
+
+        for (int i = 100; --i >= 0;)
+        {
+            var v;
+
+            if (i > 0)
+                v = createRandomVar (r, 0);
+
+            const bool oneLine = r.nextBool();
+            String asString (JSON::toString (v, oneLine));
+            var parsed = JSON::parse (asString);
+            String parsedString (JSON::toString (parsed, oneLine));
+            expect (asString.isNotEmpty() && parsedString == asString);
+        }
+    }
+};
+
+static JSONTests JSONUnitTests;
+
+#endif
 
 END_JUCE_NAMESPACE

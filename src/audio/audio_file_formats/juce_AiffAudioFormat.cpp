@@ -176,8 +176,6 @@ namespace MarkChunk
             for (int i = 0; i < numCues; ++i)
             {
                 const String prefixCue ("Cue" + String (i));
-                const String prefixLabel ("CueLabel" + String (i));
-
                 const int identifier = idOffset + values.getValue (prefixCue + "Identifier", "1").getIntValue();
 
                #if JUCE_DEBUG
@@ -186,8 +184,7 @@ namespace MarkChunk
                #endif
 
                 const int offset = values.getValue (prefixCue + "Offset", "0").getIntValue();
-
-                String label (prefixLabel);
+                String label ("CueLabel" + String (i));
 
                 for (int labelIndex = 0; labelIndex < numCueLabels; ++labelIndex)
                 {

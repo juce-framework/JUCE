@@ -315,9 +315,9 @@ private:
         return code;
     }
 
-    int getCode (const int codeSize_, const bool initialise)
+    int getCode (const int codeSize_, const bool shouldInitialise)
     {
-        if (initialise)
+        if (shouldInitialise)
         {
             currentBit = 0;
             lastBit = 0;

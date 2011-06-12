@@ -31,8 +31,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ImageComponent::ImageComponent (const String& componentName)
-    : Component (componentName),
+ImageComponent::ImageComponent (const String& name)
+    : Component (name),
       placement (RectanglePlacement::centred)
 {
 }

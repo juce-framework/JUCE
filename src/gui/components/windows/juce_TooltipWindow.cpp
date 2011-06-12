@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-TooltipWindow::TooltipWindow (Component* const parentComponent,
+TooltipWindow::TooltipWindow (Component* const parent_,
                               const int millisecondsBeforeTipAppears_)
     : Component ("tooltip"),
       millisecondsBeforeTipAppears (millisecondsBeforeTipAppears_),
@@ -52,8 +52,8 @@ TooltipWindow::TooltipWindow (Component* const parentComponent,
     setAlwaysOnTop (true);
     setOpaque (true);
 
-    if (parentComponent != nullptr)
-        parentComponent->addChildComponent (this);
+    if (parent_ != nullptr)
+        parent_->addChildComponent (this);
 }
 
 TooltipWindow::~TooltipWindow()

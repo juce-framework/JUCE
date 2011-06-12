@@ -220,10 +220,10 @@ void RelativeCoordinatePositionerBase::componentChildrenChanged (Component& chan
         apply();
 }
 
-void RelativeCoordinatePositionerBase::componentBeingDeleted (Component& component)
+void RelativeCoordinatePositionerBase::componentBeingDeleted (Component& comp)
 {
-    jassert (sourceComponents.contains (&component));
-    sourceComponents.removeValue (&component);
+    jassert (sourceComponents.contains (&comp));
+    sourceComponents.removeValue (&comp);
     registeredOk = false;
 }
 

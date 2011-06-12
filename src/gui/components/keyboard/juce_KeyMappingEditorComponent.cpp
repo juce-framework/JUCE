@@ -385,7 +385,7 @@ public:
 
     void changeListenerCallback (ChangeBroadcaster*)
     {
-        const OpennessRestorer openness (*this);
+        const OpennessRestorer opennessRestorer (*this);
         clearSubItems();
 
         const StringArray categories (owner.getMappings().getCommandManager()->getCommandCategories());

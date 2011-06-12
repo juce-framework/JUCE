@@ -147,8 +147,8 @@ const Rectangle<float> RelativeRectangle::resolve (const Expression::Scope* scop
 {
     if (scope == nullptr)
     {
-        RelativeRectangleLocalScope scope (*this);
-        return resolve (&scope);
+        RelativeRectangleLocalScope defaultScope (*this);
+        return resolve (&defaultScope);
     }
     else
     {

@@ -235,9 +235,9 @@ void Synthesiser::noteOn (const int midiChannel,
         {
             // If hitting a note that's still ringing, stop it first (it could be
             // still playing because of the sustain or sostenuto pedal).
-            for (int i = voices.size(); --i >= 0;)
+            for (int j = voices.size(); --j >= 0;)
             {
-                SynthesiserVoice* const voice = voices.getUnchecked (i);
+                SynthesiserVoice* const voice = voices.getUnchecked (j);
 
                 if (voice->getCurrentlyPlayingNote() == midiNoteNumber
                      && voice->isPlayingChannel (midiChannel))
