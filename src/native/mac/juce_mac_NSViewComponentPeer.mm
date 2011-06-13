@@ -165,7 +165,9 @@ public:
     bool isMinimised() const;
     void setFullScreen (bool shouldBeFullScreen);
     bool isFullScreen() const;
+    void updateFullscreenStatus();
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const;
+    bool hasNativeTitleBar() const        { return (getStyleFlags() & windowHasTitleBar) != 0; }
     const BorderSize<int> getFrameSize() const;
     bool setAlwaysOnTop (bool alwaysOnTop);
     void toFront (bool makeActiveWindow);
@@ -267,6 +269,17 @@ public:
         return num == 0 ? ModifierKeys::leftButtonModifier
                     : (num == 1 ? ModifierKeys::rightButtonModifier
                                 : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
+    }
+
+    static unsigned int getNSWindowStyleMask (const int flags) noexcept
+    {
+        unsigned int style = (flags & windowHasTitleBar) != 0 ? NSTitledWindowMask
+                                                              : NSBorderlessWindowMask;
+
+        if ((flags & windowHasMinimiseButton) != 0)  style |= NSMiniaturizableWindowMask;
+        if ((flags & windowHasCloseButton) != 0)     style |= NSClosableWindowMask;
+        if ((flags & windowIsResizable) != 0)        style |= NSResizableWindowMask;
+        return style;
     }
 
     //==============================================================================
@@ -701,7 +714,7 @@ END_JUCE_NAMESPACE
 
     if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != nullptr
           && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
-          && (owner->getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowHasTitleBar) != 0)
+          && owner->hasNativeTitleBar())
         JUCE_NAMESPACE::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
 
     return frameRect.size;
@@ -712,6 +725,8 @@ END_JUCE_NAMESPACE
     isZooming = true;
     [super zoom: sender];
     isZooming = false;
+
+    owner->redirectMovedOrResized();
 }
 
 - (void) windowWillMove: (NSNotification*) notification
@@ -720,7 +735,7 @@ END_JUCE_NAMESPACE
 
     if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != nullptr
           && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
-          && (owner->getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowHasTitleBar) != 0)
+          && owner->hasNativeTitleBar())
         JUCE_NAMESPACE::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
 }
 
@@ -805,7 +820,7 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
      #endif
       recursiveToFrontCall (false)
 {
-    NSRect r = NSMakeRect (0, 0, (float) component->getWidth(), (float) component->getHeight());
+    NSRect r = NSMakeRect (0, 0, (CGFloat) component->getWidth(), (CGFloat) component->getHeight());
 
     view = [[JuceNSView alloc] initWithOwner: this withFrame: r];
     [view setPostsFrameChangedNotifications: YES];
@@ -817,27 +832,12 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
     }
     else
     {
-        r.origin.x = (float) component->getX();
-        r.origin.y = (float) component->getY();
+        r.origin.x = (CGFloat) component->getX();
+        r.origin.y = (CGFloat) component->getY();
         r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - (r.origin.y + r.size.height);
 
-        unsigned int style = 0;
-        if ((windowStyleFlags & windowHasTitleBar) == 0)
-            style = NSBorderlessWindowMask;
-        else
-            style = NSTitledWindowMask;
-
-        if ((windowStyleFlags & windowHasMinimiseButton) != 0)
-            style |= NSMiniaturizableWindowMask;
-
-        if ((windowStyleFlags & windowHasCloseButton) != 0)
-            style |= NSClosableWindowMask;
-
-        if ((windowStyleFlags & windowIsResizable) != 0)
-            style |= NSResizableWindowMask;
-
         window = [[JuceNSWindow alloc] initWithContentRect: r
-                                                 styleMask: style
+                                                 styleMask: getNSWindowStyleMask (windowStyleFlags)
                                                    backing: NSBackingStoreBuffered
                                                      defer: YES];
 
@@ -932,7 +932,7 @@ void NSViewComponentPeer::setBounds (int x, int y, int w, int h, bool isNowFullS
 {
     fullScreen = isNowFullScreen;
 
-    NSRect r = NSMakeRect ((float) x, (float) y, (float) jmax (0, w), (float) jmax (0, h));
+    NSRect r = NSMakeRect ((CGFloat) x, (CGFloat) y, (CGFloat) jmax (0, w), (CGFloat) jmax (0, h));
 
     if (isSharedWindow)
     {
@@ -1073,7 +1073,7 @@ void NSViewComponentPeer::setMinimised (bool shouldBeMinimised)
 
 bool NSViewComponentPeer::isMinimised() const
 {
-    return window != nil && [window isMiniaturized];
+    return [window isMiniaturized];
 }
 
 void NSViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
@@ -1082,11 +1082,12 @@ void NSViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
     {
         Rectangle<int> r (lastNonFullscreenBounds);
 
-        setMinimised (false);
+        if (isMinimised())
+            setMinimised (false);
 
         if (fullScreen != shouldBeFullScreen)
         {
-            if (shouldBeFullScreen && (getStyleFlags() & windowHasTitleBar) != 0)
+            if (shouldBeFullScreen && hasNativeTitleBar())
             {
                 fullScreen = true;
                 [window performZoom: nil];
@@ -1094,7 +1095,7 @@ void NSViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
             else
             {
                 if (shouldBeFullScreen)
-                    r = Desktop::getInstance().getMainMonitorArea();
+                    r = component->getParentMonitorArea();
 
                 // (can't call the component's setBounds method because that'll reset our fullscreen flag)
                 if (r != getComponent()->getBounds() && ! r.isEmpty())
@@ -1192,8 +1193,7 @@ void NSViewComponentPeer::toBehind (ComponentPeer* other)
         else
         {
             [window orderWindow: NSWindowBelow
-                     relativeTo: otherPeer->window != nil ? [otherPeer->window windowNumber]
-                                                          : 0 ];
+                     relativeTo: [otherPeer->window windowNumber]];
         }
     }
 }
@@ -1250,7 +1250,7 @@ void juce_HandleProcessFocusChange()
 bool NSViewComponentPeer::isFocused() const
 {
     return isSharedWindow ? this == currentlyFocusedPeer
-                          : (window != nil && [window isKeyWindow]);
+                          : [window isKeyWindow];
 }
 
 void NSViewComponentPeer::grabFocus()
@@ -1610,8 +1610,23 @@ bool NSViewComponentPeer::windowShouldClose()
     return NO;
 }
 
+void NSViewComponentPeer::updateFullscreenStatus()
+{
+    if (hasNativeTitleBar())
+    {
+        const Rectangle<int> screen (getFrameSize().subtractedFrom (component->getParentMonitorArea()));
+        const Rectangle<int> window (component->getScreenBounds());
+
+        fullScreen = std::abs (screen.getX() - window.getX()) <= 2
+                  && std::abs (screen.getY() - window.getY()) <= 2
+                  && std::abs (screen.getRight() - window.getRight()) <= 2
+                  && std::abs (screen.getBottom() - window.getBottom()) <= 2;
+    }
+}
+
 void NSViewComponentPeer::redirectMovedOrResized()
 {
+    updateFullscreenStatus();
     handleMovedOrResized();
 }
 
@@ -1682,8 +1697,8 @@ void NSViewComponentPeer::repaint (const Rectangle<int>& area)
     }
     else
     {
-        [view setNeedsDisplayInRect: NSMakeRect ((float) area.getX(), [view frame].size.height - (float) area.getBottom(),
-                                                 (float) area.getWidth(), (float) area.getHeight())];
+        [view setNeedsDisplayInRect: NSMakeRect ((CGFloat) area.getX(), [view frame].size.height - (CGFloat) area.getBottom(),
+                                                 (CGFloat) area.getWidth(), (CGFloat) area.getHeight())];
     }
 }
 

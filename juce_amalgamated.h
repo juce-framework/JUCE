@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	98
+#define JUCE_BUILDNUMBER	99
 
 /** Current Juce version number.
 
@@ -7134,9 +7134,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements.getData();
-		const ElementType* const end = e + numUsed;
+		const ElementType* const end_ = e + numUsed;
 
-		for (; e != end; ++e)
+		for (; e != end_; ++e)
 			if (elementToLookFor == *e)
 				return static_cast <int> (e - data.elements.getData());
 
@@ -7152,9 +7152,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements.getData();
-		const ElementType* const end = e + numUsed;
+		const ElementType* const end_ = e + numUsed;
 
-		for (; e != end; ++e)
+		for (; e != end_; ++e)
 			if (elementToLookFor == *e)
 				return true;
 
@@ -7486,11 +7486,11 @@ public:
 
 		const ScopedLockType lock (getLock());
 		int start = 0;
-		int end = numUsed;
+		int end_ = numUsed;
 
 		for (;;)
 		{
-			if (start >= end)
+			if (start >= end_)
 			{
 				return -1;
 			}
@@ -7500,14 +7500,14 @@ public:
 			}
 			else
 			{
-				const int halfway = (start + end) >> 1;
+				const int halfway = (start + end_) >> 1;
 
 				if (halfway == start)
 					return -1;
 				else if (comparator.compareElements (elementToLookFor, data.elements [halfway]) >= 0)
 					start = halfway;
 				else
-					end = halfway;
+					end_ = halfway;
 			}
 		}
 	}
@@ -8470,7 +8470,10 @@ private:
 	any kind of ReferenceCountedObject. The var class is intended to act like
 	the kind of values used in dynamic scripting languages.
 
-	@see DynamicObject
+	You can save/load var objects either in a small, proprietary binary format
+	using writeToStream()/readFromStream(), or as JSON by using the JSON class.
+
+	@see JSON, DynamicObject
 */
 class JUCE_API  var
 {
@@ -8630,12 +8633,14 @@ public:
 
 	/** Writes a binary representation of this value to a stream.
 		The data can be read back later using readFromStream().
+		@see JSON
 	*/
 	void writeToStream (OutputStream& output) const;
 
 	/** Reads back a stored binary representation of a value.
 		The data in the stream must have been written using writeToStream(), or this
 		will have unpredictable results.
+		@see JSON
 	*/
 	static var readFromStream (InputStream& input);
 
@@ -9692,9 +9697,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		ObjectClass* const* e = data.elements.getData();
-		ObjectClass* const* const end = e + numUsed;
+		ObjectClass* const* const end_ = e + numUsed;
 
-		for (; e != end; ++e)
+		for (; e != end_; ++e)
 			if (objectToLookFor == *e)
 				return static_cast <int> (e - data.elements.getData());
 
@@ -9710,9 +9715,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		ObjectClass* const* e = data.elements.getData();
-		ObjectClass* const* const end = e + numUsed;
+		ObjectClass* const* const end_ = e + numUsed;
 
-		for (; e != end; ++e)
+		for (; e != end_; ++e)
 			if (objectToLookFor == *e)
 				return true;
 
@@ -9969,11 +9974,11 @@ public:
 		const ScopedLockType lock (getLock());
 
 		int start = 0;
-		int end = numUsed;
+		int end_ = numUsed;
 
 		for (;;)
 		{
-			if (start >= end)
+			if (start >= end_)
 			{
 				return -1;
 			}
@@ -9983,14 +9988,14 @@ public:
 			}
 			else
 			{
-				const int halfway = (start + end) >> 1;
+				const int halfway = (start + end_) >> 1;
 
 				if (halfway == start)
 					return -1;
 				else if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
 					start = halfway;
 				else
-					end = halfway;
+					end_ = halfway;
 			}
 		}
 	}
@@ -10570,7 +10575,7 @@ public:
 		will be the "upperLimit" parameter that is passed to your generateHash() function. The number
 		of hash slots will grow automatically if necessary, or it can be remapped manually using remapTable().
 	*/
-	HashMap (const int numberOfSlots = defaultHashTableSize)
+	explicit HashMap (const int numberOfSlots = defaultHashTableSize)
 	   : totalNumItems (0)
 	{
 		slots.insertMultiple (0, nullptr, numberOfSlots);
@@ -14088,9 +14093,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		ObjectClass** e = data.elements.getData();
-		ObjectClass** const end = e + numUsed;
+		ObjectClass** const end_ = e + numUsed;
 
-		while (e != end)
+		while (e != end_)
 		{
 			if (objectToLookFor == *e)
 				return static_cast <int> (e - data.elements.getData());
@@ -14110,9 +14115,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		ObjectClass** e = data.elements.getData();
-		ObjectClass** const end = e + numUsed;
+		ObjectClass** const end_ = e + numUsed;
 
-		while (e != end)
+		while (e != end_)
 		{
 			if (objectToLookFor == *e)
 				return true;
@@ -14418,12 +14423,12 @@ public:
 		const ScopedLockType lock (getLock());
 
 		const int start = jlimit (0, numUsed, startIndex);
-		const int end   = jlimit (0, numUsed, startIndex + numberToRemove);
+		const int end_   = jlimit (0, numUsed, startIndex + numberToRemove);
 
-		if (end > start)
+		if (end_ > start)
 		{
 			int i;
-			for (i = start; i < end; ++i)
+			for (i = start; i < end_; ++i)
 			{
 				if (data.elements[i] != nullptr)
 				{
@@ -14432,9 +14437,9 @@ public:
 				}
 			}
 
-			const int rangeSize = end - start;
+			const int rangeSize = end_ - start;
 			ObjectClass** e = data.elements + start;
-			i = numUsed - end;
+			i = numUsed - end_;
 			numUsed -= rangeSize;
 
 			while (--i >= 0)
@@ -14959,11 +14964,11 @@ public:
 		const ScopedLockType lock (getLock());
 
 		int start = 0;
-		int end = numUsed;
+		int end_ = numUsed;
 
 		for (;;)
 		{
-			if (start >= end)
+			if (start >= end_)
 			{
 				return -1;
 			}
@@ -14973,12 +14978,12 @@ public:
 			}
 			else
 			{
-				const int halfway = (start + end) >> 1;
+				const int halfway = (start + end_) >> 1;
 
 				if (halfway == start)
 					return -1;
 				else if (elementToLookFor < data.elements [halfway])
-					end = halfway;
+					end_ = halfway;
 				else
 					start = halfway;
 			}
@@ -14995,11 +15000,11 @@ public:
 		const ScopedLockType lock (getLock());
 
 		int start = 0;
-		int end = numUsed;
+		int end_ = numUsed;
 
 		for (;;)
 		{
-			if (start >= end)
+			if (start >= end_)
 			{
 				return false;
 			}
@@ -15009,12 +15014,12 @@ public:
 			}
 			else
 			{
-				const int halfway = (start + end) >> 1;
+				const int halfway = (start + end_) >> 1;
 
 				if (halfway == start)
 					return false;
 				else if (elementToLookFor < data.elements [halfway])
-					end = halfway;
+					end_ = halfway;
 				else
 					start = halfway;
 			}
@@ -15031,13 +15036,13 @@ public:
 		const ScopedLockType lock (getLock());
 
 		int start = 0;
-		int end = numUsed;
+		int end_ = numUsed;
 
 		for (;;)
 		{
-			if (start >= end)
+			if (start >= end_)
 			{
-				jassert (start <= end);
+				jassert (start <= end_);
 				insertInternal (start, newElement);
 				break;
 			}
@@ -15047,7 +15052,7 @@ public:
 			}
 			else
 			{
-				const int halfway = (start + end) >> 1;
+				const int halfway = (start + end_) >> 1;
 
 				if (halfway == start)
 				{
@@ -15059,7 +15064,7 @@ public:
 					break;
 				}
 				else if (newElement < data.elements [halfway])
-					end = halfway;
+					end_ = halfway;
 				else
 					start = halfway;
 			}
