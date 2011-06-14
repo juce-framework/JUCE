@@ -401,6 +401,7 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_AudioCDReader.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_CameraDevice.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Direct2DGraphicsContext.cpp"/>
+    <ClCompile Include="..\..\src\native\windows\juce_win32_DirectShowComponent.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_DirectSound.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_FileChooser.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Files.cpp"/>
@@ -683,6 +684,7 @@
     <ClInclude Include="..\..\src\gui\components\special\juce_BubbleComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_BubbleMessageComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_ColourSelector.h"/>
+    <ClInclude Include="..\..\src\gui\components\special\juce_DirectShowComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_DropShadower.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_MidiKeyboardComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_NSViewComponent.h"/>

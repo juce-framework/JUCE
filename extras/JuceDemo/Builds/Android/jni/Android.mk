@@ -18,6 +18,7 @@ LOCAL_SRC_FILES := \
   ../../../Source/demos/AudioDemoTabComponent.cpp\
   ../../../Source/demos/CameraDemo.cpp\
   ../../../Source/demos/CodeEditorDemo.cpp\
+  ../../../Source/demos/DirectShowDemo.cpp\
   ../../../Source/demos/DragAndDropDemo.cpp\
   ../../../Source/demos/FontsAndTextDemo.cpp\
   ../../../Source/demos/InterprocessCommsDemo.cpp\

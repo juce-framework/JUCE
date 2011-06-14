@@ -359,11 +359,7 @@ void OpenGLComponent::updateContextPosition()
             const ScopedLock sl (contextLock);
 
             if (context != nullptr)
-                context->updateWindowPosition (getScreenX() - topComp->getScreenX(),
-                                               getScreenY() - topComp->getScreenY(),
-                                               getWidth(),
-                                               getHeight(),
-                                               topComp->getHeight());
+                context->updateWindowPosition (topComp->getLocalArea (this, getLocalBounds()));
         }
     }
 }

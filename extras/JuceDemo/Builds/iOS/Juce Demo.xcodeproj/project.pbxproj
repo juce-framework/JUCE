@@ -24,6 +24,7 @@
 		7EFB4E7D738BFFF90F49E0C0 = { isa = PBXBuildFile; fileRef = 048CEE4CC06227D8A57E47F2; };
 		B69F5957B1729915BFB18735 = { isa = PBXBuildFile; fileRef = 7D65727C8F72F2BCC9A17D34; };
 		F920A5AB6D0FF01022575079 = { isa = PBXBuildFile; fileRef = 268D7AFE2F3822C2C8E9A612; };
+		940BE0338CC1FEB65B4B82E2 = { isa = PBXBuildFile; fileRef = E072353A8A1F26CFB7090905; };
 		A3AF0F559DD97F1B908AC1CA = { isa = PBXBuildFile; fileRef = F23738E4EFD2323063F82F1C; };
 		2C0AB902CB01E38D87A2A6A5 = { isa = PBXBuildFile; fileRef = B7F4DAFA5F8F1FC976C8B55D; };
 		ACD2210FDE1137548F995F85 = { isa = PBXBuildFile; fileRef = F7620D8D567CCE463ADDE0A6; };
@@ -68,6 +69,7 @@
 		8BEA0B754661F3038DBAF558 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioDemoTabComponent.h; path = ../../Source/demos/AudioDemoTabComponent.h; sourceTree = SOURCE_ROOT; };
 		7D65727C8F72F2BCC9A17D34 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CameraDemo.cpp; path = ../../Source/demos/CameraDemo.cpp; sourceTree = SOURCE_ROOT; };
 		268D7AFE2F3822C2C8E9A612 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CodeEditorDemo.cpp; path = ../../Source/demos/CodeEditorDemo.cpp; sourceTree = SOURCE_ROOT; };
+		E072353A8A1F26CFB7090905 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DirectShowDemo.cpp; path = ../../Source/demos/DirectShowDemo.cpp; sourceTree = SOURCE_ROOT; };
 		F23738E4EFD2323063F82F1C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DragAndDropDemo.cpp; path = ../../Source/demos/DragAndDropDemo.cpp; sourceTree = SOURCE_ROOT; };
 		B7F4DAFA5F8F1FC976C8B55D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FontsAndTextDemo.cpp; path = ../../Source/demos/FontsAndTextDemo.cpp; sourceTree = SOURCE_ROOT; };
 		F7620D8D567CCE463ADDE0A6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = InterprocessCommsDemo.cpp; path = ../../Source/demos/InterprocessCommsDemo.cpp; sourceTree = SOURCE_ROOT; };
@@ -109,6 +111,7 @@
 				8BEA0B754661F3038DBAF558,
 				7D65727C8F72F2BCC9A17D34,
 				268D7AFE2F3822C2C8E9A612,
+				E072353A8A1F26CFB7090905,
 				F23738E4EFD2323063F82F1C,
 				B7F4DAFA5F8F1FC976C8B55D,
 				F7620D8D567CCE463ADDE0A6,
@@ -249,6 +252,7 @@
 				7EFB4E7D738BFFF90F49E0C0,
 				B69F5957B1729915BFB18735,
 				F920A5AB6D0FF01022575079,
+				940BE0338CC1FEB65B4B82E2,
 				A3AF0F559DD97F1B908AC1CA,
 				2C0AB902CB01E38D87A2A6A5,
 				ACD2210FDE1137548F995F85,

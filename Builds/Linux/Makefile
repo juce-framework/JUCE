@@ -318,6 +318,7 @@ OBJECTS := \
   $(OBJDIR)/juce_win32_AudioCDReader_66c7252.o \
   $(OBJDIR)/juce_win32_CameraDevice_ea35306d.o \
   $(OBJDIR)/juce_win32_Direct2DGraphicsContext_9f1b6be1.o \
+  $(OBJDIR)/juce_win32_DirectShowComponent_e4030c4f.o \
   $(OBJDIR)/juce_win32_DirectSound_3462415e.o \
   $(OBJDIR)/juce_win32_FileChooser_18a257.o \
   $(OBJDIR)/juce_win32_Files_f3e9a2ef.o \
@@ -1780,6 +1781,11 @@ $(OBJDIR)/juce_win32_CameraDevice_ea35306d.o: ../../src/native/windows/juce_win3
 $(OBJDIR)/juce_win32_Direct2DGraphicsContext_9f1b6be1.o: ../../src/native/windows/juce_win32_Direct2DGraphicsContext.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_win32_Direct2DGraphicsContext.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_win32_DirectShowComponent_e4030c4f.o: ../../src/native/windows/juce_win32_DirectShowComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_win32_DirectShowComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_DirectSound_3462415e.o: ../../src/native/windows/juce_win32_DirectSound.cpp

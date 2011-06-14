@@ -53,6 +53,7 @@ OBJECTS := \
   $(OBJDIR)/AudioDemoTabComponent_81185e3.o \
   $(OBJDIR)/CameraDemo_954a4a30.o \
   $(OBJDIR)/CodeEditorDemo_55f35645.o \
+  $(OBJDIR)/DirectShowDemo_2e0bc311.o \
   $(OBJDIR)/DragAndDropDemo_f8c9e5d7.o \
   $(OBJDIR)/FontsAndTextDemo_2cefcecb.o \
   $(OBJDIR)/InterprocessCommsDemo_aa1c1119.o \
@@ -133,6 +134,11 @@ $(OBJDIR)/CameraDemo_954a4a30.o: ../../Source/demos/CameraDemo.cpp
 $(OBJDIR)/CodeEditorDemo_55f35645.o: ../../Source/demos/CodeEditorDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling CodeEditorDemo.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/DirectShowDemo_2e0bc311.o: ../../Source/demos/DirectShowDemo.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling DirectShowDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/DragAndDropDemo_f8c9e5d7.o: ../../Source/demos/DragAndDropDemo.cpp

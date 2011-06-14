@@ -16,6 +16,8 @@
 #define    JUCE_ASIO 0
 #define    JUCE_WASAPI 0
 #define    JUCE_DIRECTSOUND 0
+//#define  JUCE_DIRECTSHOW
+//#define  JUCE_MEDIAFOUNDATION
 #define    JUCE_ALSA 0
 #define    JUCE_QUICKTIME 0
 #define    JUCE_OPENGL 0

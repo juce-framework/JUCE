@@ -148,6 +148,7 @@
           <File RelativePath="..\..\Source\demos\AudioDemoTabComponent.h"/>
           <File RelativePath="..\..\Source\demos\CameraDemo.cpp"/>
           <File RelativePath="..\..\Source\demos\CodeEditorDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\DirectShowDemo.cpp"/>
           <File RelativePath="..\..\Source\demos\DragAndDropDemo.cpp"/>
           <File RelativePath="..\..\Source\demos\FontsAndTextDemo.cpp"/>
           <File RelativePath="..\..\Source\demos\InterprocessCommsDemo.cpp"/>

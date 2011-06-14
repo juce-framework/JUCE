@@ -48,3 +48,11 @@
  #pragma comment (lib, "Dwrite.lib")
  #pragma comment (lib, "D2d1.lib")
 #endif
+
+#if JUCE_DIRECTSHOW
+ #pragma comment (lib, "strmiids.lib")
+#endif
+
+#if JUCE_MEDIAFOUNDATION
+ #pragma comment (lib, "mfuuid.lib")
+#endif

@@ -72,6 +72,8 @@
               file="Source/demos/CameraDemo.cpp"/>
         <FILE id="VrH9xEBt4" name="CodeEditorDemo.cpp" compile="1" resource="0"
               file="Source/demos/CodeEditorDemo.cpp"/>
+        <FILE id="Biv7Wl" name="DirectShowDemo.cpp" compile="1" resource="0"
+              file="Source/demos/DirectShowDemo.cpp"/>
         <FILE id="LQxkyT31Q" name="DragAndDropDemo.cpp" compile="1" resource="0"
               file="Source/demos/DragAndDropDemo.cpp"/>
         <FILE id="WlmBspVQo" name="FontsAndTextDemo.cpp" compile="1" resource="0"
@@ -117,5 +119,6 @@
                JUCE_PLUGINHOST_AU="disabled" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
                JUCE_WEB_BROWSER="default" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
                JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"
-               JUCE_USE_XRENDER="default" JUCE_USE_XCURSOR="default" JUCE_DIRECT2D="default"/>
+               JUCE_USE_XRENDER="default" JUCE_USE_XCURSOR="default" JUCE_DIRECT2D="default"
+               JUCE_MEDIAFOUNDATION="default" JUCE_DIRECTSHOW="default"/>
 </JUCERPROJECT>

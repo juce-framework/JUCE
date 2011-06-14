@@ -307,7 +307,7 @@ MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMo
 {
     jassert (mode == readOnly || mode == readWrite);
 
-    DWORD accessMode = GENERIC_READ, shareMode = FILE_SHARE_READ, createType = OPEN_EXISTING;
+    DWORD accessMode = GENERIC_READ, createType = OPEN_EXISTING;
     DWORD protect = PAGE_READONLY, access = FILE_MAP_READ;
 
     if (mode == readWrite)

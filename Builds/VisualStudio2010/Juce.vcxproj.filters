@@ -1138,6 +1138,9 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_Direct2DGraphicsContext.cpp">
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\native\windows\juce_win32_DirectShowComponent.cpp">
+      <Filter>Juce\Source\native\windows</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_DirectSound.cpp">
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
@@ -1978,6 +1981,9 @@
       <Filter>Juce\Source\gui\components\special</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\special\juce_ColourSelector.h">
+      <Filter>Juce\Source\gui\components\special</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\special\juce_DirectShowComponent.h">
       <Filter>Juce\Source\gui\components\special</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\special\juce_DropShadower.h">

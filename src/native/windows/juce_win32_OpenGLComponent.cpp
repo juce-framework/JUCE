@@ -287,10 +287,10 @@ public:
         return false;
     }
 
-    void updateWindowPosition (int x, int y, int w, int h, int)
+    void updateWindowPosition (const Rectangle<int>& bounds)
     {
         SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
-                      x, y, w, h,
+                      bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                       SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
     }
 

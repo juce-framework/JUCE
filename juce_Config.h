@@ -86,6 +86,25 @@
   #define JUCE_DIRECTSOUND 1
 #endif
 
+/** JUCE_DIRECTSHOW: Enables DirectShow media-streaming architecture
+    (MS Windows only).
+*/
+#ifndef JUCE_DIRECTSHOW
+  #define JUCE_DIRECTSHOW 1
+#endif
+
+/** JUCE_MEDIAFOUNDATION: Enables Media Foundation multimedia platform
+    (Windows Vista and above).
+*/
+#ifndef JUCE_MEDIAFOUNDATION
+  #define JUCE_MEDIAFOUNDATION 1
+#endif
+
+#if ! JUCE_WINDOWS
+  #undef JUCE_DIRECTSHOW
+  #undef JUCE_MEDIAFOUNDATION
+#endif
+
 /** JUCE_ALSA: Enables ALSA audio devices (Linux only). */
 #ifndef JUCE_ALSA
   #define JUCE_ALSA 1

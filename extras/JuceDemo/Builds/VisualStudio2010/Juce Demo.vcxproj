@@ -132,6 +132,7 @@
     <ClCompile Include="..\..\Source\demos\AudioDemoTabComponent.cpp"/>
     <ClCompile Include="..\..\Source\demos\CameraDemo.cpp"/>
     <ClCompile Include="..\..\Source\demos\CodeEditorDemo.cpp"/>
+    <ClCompile Include="..\..\Source\demos\DirectShowDemo.cpp"/>
     <ClCompile Include="..\..\Source\demos\DragAndDropDemo.cpp"/>
     <ClCompile Include="..\..\Source\demos\FontsAndTextDemo.cpp"/>
     <ClCompile Include="..\..\Source\demos\InterprocessCommsDemo.cpp"/>

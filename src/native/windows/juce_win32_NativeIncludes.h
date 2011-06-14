@@ -183,6 +183,14 @@
  #import <QTOControl.dll>
 #endif
 
+#if JUCE_DIRECTSHOW && JUCE_BUILD_NATIVE
+ #include <DShow.h>
+#endif
+
+#if JUCE_MEDIAFOUNDATION && JUCE_BUILD_NATIVE
+ #include <evr.h>
+#endif
+
 //==============================================================================
 #if JUCE_MSVC
  #pragma warning (pop)

@@ -61,5 +61,8 @@ Component* createCodeEditorDemo();
   Component* createCameraDemo();
 #endif
 
+#if JUCE_DIRECTSHOW
+  Component* createDirectShowDemo();
+#endif
 
 #endif   // __JUCEDEMO_HEADERS_JUCEHEADER__

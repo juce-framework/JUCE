@@ -132,7 +132,7 @@ public:
     /** For windowed contexts, this moves the context within the bounds of
         its parent window.
     */
-    virtual void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight) = 0;
+    virtual void updateWindowPosition (const Rectangle<int>& bounds) = 0;
 
     /** For windowed contexts, this triggers a repaint of the window.
 

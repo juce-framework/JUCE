@@ -49,6 +49,9 @@
     <ClCompile Include="..\..\Source\demos\CodeEditorDemo.cpp">
       <Filter>Juce Demo\Source\Demos</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\demos\DirectShowDemo.cpp">
+      <Filter>Juce Demo\Source\Demos</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\demos\DragAndDropDemo.cpp">
       <Filter>Juce Demo\Source\Demos</Filter>
     </ClCompile>

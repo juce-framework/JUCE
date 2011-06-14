@@ -587,6 +587,9 @@
 #ifndef __JUCE_COLOURSELECTOR_JUCEHEADER__
  #include "gui/components/special/juce_ColourSelector.h"
 #endif
+#ifndef __JUCE_DIRECTSHOWCOMPONENT_JUCEHEADER__
+ #include "gui/components/special/juce_DirectShowComponent.h"
+#endif
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
  #include "gui/components/special/juce_DropShadower.h"
 #endif

@@ -215,9 +215,7 @@ public:
     const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
     void* getRawContext() const noexcept            { return renderContext; }
 
-    void updateWindowPosition (int /*x*/, int /*y*/, int /*w*/, int /*h*/, int /*outerWindowHeight*/)
-    {
-    }
+    void updateWindowPosition (const Rectangle<int>&) {}
 
     void swapBuffers()
     {
@@ -424,9 +422,10 @@ public:
     const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
     void* getRawContext() const noexcept            { return glLayer; }
 
-    void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight)
+    void updateWindowPosition (const Rectangle<int>& bounds)
     {
-        view.frame = CGRectMake ((CGFloat) x, (CGFloat) y, (CGFloat) w, (CGFloat) h);
+        view.frame = CGRectMake ((CGFloat) bounds.getX(), (CGFloat) bounds.getY(),
+                                 (CGFloat) bounds.getWidth(), (CGFloat) bounds.getHeight());
 
         if (lastWidth != w || lastHeight != h)
         {

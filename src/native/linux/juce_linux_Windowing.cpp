@@ -3213,11 +3213,11 @@ public:
         return renderContext;
     }
 
-    void updateWindowPosition (int x, int y, int w, int h, int)
+    void updateWindowPosition (const Rectangle<int>& bounds)
     {
         ScopedXLock xlock;
         XMoveResizeWindow (display, embeddedWindow,
-                           x, y, jmax (1, w), jmax (1, h));
+                           bounds.getX(), bounds.getY(), jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()));
     }
 
     void swapBuffers()

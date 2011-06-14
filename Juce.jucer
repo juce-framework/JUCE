@@ -926,6 +926,8 @@
                   file="src/gui/components/special/juce_ColourSelector.cpp"/>
             <FILE id="W0GkpoQPd" name="juce_ColourSelector.h" compile="0" resource="0"
                   file="src/gui/components/special/juce_ColourSelector.h"/>
+            <FILE id="FfvKX" name="juce_DirectShowComponent.h" compile="0" resource="0"
+                  file="src/gui/components/special/juce_DirectShowComponent.h"/>
             <FILE id="l18RV2qVq" name="juce_DropShadower.cpp" compile="1" resource="0"
                   file="src/gui/components/special/juce_DropShadower.cpp"/>
             <FILE id="tNsR3nrMx" name="juce_DropShadower.h" compile="0" resource="0"
@@ -1416,6 +1418,8 @@
                 resource="0" file="src/native/windows/juce_win32_CameraDevice.cpp"/>
           <FILE id="c4BNPC" name="juce_win32_Direct2DGraphicsContext.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_Direct2DGraphicsContext.cpp"/>
+          <FILE id="lWJ3cT" name="juce_win32_DirectShowComponent.cpp" compile="1"
+                resource="0" file="src/native/windows/juce_win32_DirectShowComponent.cpp"/>
           <FILE id="CVNbte6ov" name="juce_win32_DirectSound.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_DirectSound.cpp"/>
           <FILE id="WuS4E8Pvz" name="juce_win32_DynamicLibraryLoader.h" compile="0"
@@ -1620,5 +1624,5 @@
                JUCE_PLUGINHOST_VST="default" JUCE_PLUGINHOST_AU="default" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
                JUCE_WEB_BROWSER="default" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
                JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_USE_XCURSOR="default"
-               JUCE_DIRECT2D="default"/>
+               JUCE_DIRECT2D="default" JUCE_MEDIAFOUNDATION="default" JUCE_DIRECTSHOW="default"/>
 </JUCERPROJECT>
