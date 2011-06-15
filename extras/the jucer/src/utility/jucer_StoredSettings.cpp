@@ -29,7 +29,6 @@
 
 //==============================================================================
 StoredSettings::StoredSettings()
-    : props (0)
 {
     flush();
 }
@@ -37,7 +36,7 @@ StoredSettings::StoredSettings()
 StoredSettings::~StoredSettings()
 {
     flush();
-    deleteAndZero (props);
+    props = nullptr;
     clearSingletonInstance();
 }
 
@@ -52,31 +51,30 @@ PropertiesFile& StoredSettings::getProps()
 
 void StoredSettings::flush()
 {
-    if (props != 0)
+    if (props != nullptr)
     {
         props->setValue ("recentFiles", recentFiles.toString());
-
         props->removeValue ("keyMappings");
 
-        XmlElement* keys = commandManager->getKeyMappings()->createXml (true);
+        ScopedPointer<XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
-        if (keys != 0)
-        {
+        if (keys != nullptr)
             props->setValue ("keyMappings", keys);
-            delete keys;
-        }
 
         for (int i = 0; i < swatchColours.size(); ++i)
             props->setValue ("swatchColour" + String (i), colourToHex (swatchColours [i]));
     }
 
-    deleteAndZero (props);
+    props = nullptr;
 
-    props = PropertiesFile::createDefaultAppPropertiesFile ("Jucer",
-                                                            "settings",
-                                                            String::empty,
-                                                            false, 3000,
-                                                            PropertiesFile::storeAsXML);
+    {
+        PropertiesFile::Options options;
+        options.applicationName      = "Jucer";
+        options.filenameSuffix       = "settings";
+        options.osxLibrarySubFolder  = "Preferences";
+
+        props = new PropertiesFile (options);
+    }
 
     // recent files...
     recentFiles.restoreFromString (props->getValue ("recentFiles"));

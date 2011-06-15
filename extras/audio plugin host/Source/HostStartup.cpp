@@ -51,10 +51,13 @@ public:
     void initialise (const String& commandLine)
     {
         // initialise our settings file..
-        ApplicationProperties::getInstance()
-            ->setStorageParameters ("Juce Audio Plugin Host",
-                                    "settings", String::empty, 1000,
-                                    PropertiesFile::storeAsXML);
+
+        PropertiesFile::Options options;
+        options.applicationName     = "Juce Audio Plugin Host";
+        options.filenameSuffix      = "settings";
+        options.osxLibrarySubFolder = "Preferences";
+
+        ApplicationProperties::getInstance()->setStorageParameters (options);
 
         commandManager = new ApplicationCommandManager();
 

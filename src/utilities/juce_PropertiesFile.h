@@ -53,44 +53,126 @@ class JUCE_API  PropertiesFile  : public PropertySet,
 {
 public:
     //==============================================================================
-    enum FileFormatOptions
+    enum StorageFormat
     {
-        ignoreCaseOfKeyNames            = 1,
-        storeAsBinary                   = 2,
-        storeAsCompressedBinary         = 4,
-        storeAsXML                      = 8
+        storeAsBinary,
+        storeAsCompressedBinary,
+        storeAsXML
     };
 
     //==============================================================================
-    /**
-        Creates a PropertiesFile object.
+    struct Options
+    {
+        /** Creates an empty Options structure.
+            You'll need to fill-in the data memebers appropriately before using this structure.
+        */
+        Options();
 
-        @param file                         the file to use
-        @param millisecondsBeforeSaving     if this is zero or greater, then after a value
-                                            is changed, the object will wait for this amount
-                                            of time and then save the file. If zero, the file
-                                            will be written to disk immediately on being changed
-                                            (which might be slow, as it'll re-write synchronously
-                                            each time a value-change method is called). If it is
-                                            less than zero, the file won't be saved until
-                                            save() or saveIfNeeded() are explicitly called.
-        @param optionFlags                  a combination of the flags in the FileFormatOptions
-                                            enum, which specify the type of file to save, and other
-                                            options.
-        @param processLock                  an optional InterprocessLock object that will be used to
-                                            prevent multiple threads or processes from writing to the file
-                                            at the same time. The PropertiesFile will keep a pointer to
-                                            this object but will not take ownership of it - the caller is
-                                            responsible for making sure that the lock doesn't get deleted
-                                            before the PropertiesFile has been deleted.
+        /** The name of your application - this is used to help generate the path and filename
+            at which the properties file will be stored. */
+        String applicationName;
+
+        /** The suffix to use for your properties file.
+            It doesn't really matter what this is - you may want to use ".settings" or
+            ".properties" or something.
+        */
+        String filenameSuffix;
+
+        /** The name of a subfolder in which you'd like your properties file to live.
+            See the getDefaultFile() method for more details about how this is used.
+        */
+        String folderName;
+
+        /** If you're using properties files on a Mac, you must set this value - failure to
+            do so will cause a runtime assertion.
+
+            The PropertiesFile class always used to put its settings files in "Library/Preferences", but Apple
+            have changed their advice, and now stipulate that settings should go in "Library/Application Support".
+
+            Because older apps would be broken by a silent change in this class's behaviour, you must now
+            explicitly set the osxLibrarySubFolder value to indicate which path you want to use.
+
+            In newer apps, you should always set this to "Application Support".
+
+            If your app needs to load settings files that were created by older versions of juce and
+            you want to maintain backwards-compatibility, then you can set this to "Preferences".
+            But.. for better Apple-compliance, the recommended approach would be to write some code that
+            finds your old settings files in ~/Library/Preferences, moves them to ~/Library/Application Support,
+            and then uses the new path.
+        */
+        String osxLibrarySubFolder;
+
+        /** If true, the file will be created in a location that's shared between users.
+            The default constructor initialises this value to false.
+        */
+        bool commonToAllUsers;
+
+        /** If true, this means that property names are matched in a case-insensitive manner.
+            See the PropertySet constructor for more info.
+            The default constructor initialises this value to false.
+        */
+        bool ignoreCaseOfKeyNames;
+
+        /** If this is zero or greater, then after a value is changed, the object will wait
+            for this amount of time and then save the file. If this zero, the file will be
+            written to disk immediately on being changed (which might be slow, as it'll re-write
+            synchronously each time a value-change method is called). If it is less than zero,
+            the file won't be saved until save() or saveIfNeeded() are explicitly called.
+            The default constructor sets this to a reasonable value of a few seconds, so you
+            only need to change it if you need a special case.
+        */
+        int millisecondsBeforeSaving;
+
+        /** Specifies whether the file should be written as XML, binary, etc.
+            The default constructor sets this to storeAsXML, so you only need to set it explicitly
+            if you want to use a different format.
+        */
+        StorageFormat storageFormat;
+
+        /** An optional InterprocessLock object that will be used to prevent multiple threads or
+            processes from writing to the file at the same time. The PropertiesFile will keep a
+            pointer to this object but will not take ownership of it - the caller is responsible for
+            making sure that the lock doesn't get deleted before the PropertiesFile has been deleted.
+            The default constructor initialises this value to nullptr, so you don't need to touch it
+            unless you want to use a lock.
+        */
+        InterProcessLock* processLock;
+
+        /** This can be called to suggest a file that should be used, based on the values
+            in this structure.
+
+            So on a Mac, this will return a file called:
+            ~/Library/[osxLibrarySubFolder]/[folderName]/[applicationName].[filenameSuffix]
+
+            On Windows it'll return something like:
+            C:\\Documents and Settings\\username\\Application Data\\[folderName]\\[applicationName].[filenameSuffix]
+
+            On Linux it'll return
+            ~/.[folderName]/[applicationName].[filenameSuffix]
+
+            If the folderName variable is empty, it'll use the app name for this (or omit the
+            folder name on the Mac).
+
+            The paths will also vary depending on whether commonToAllUsers is true.
+        */
+        File getDefaultFile() const;
+    };
+
+    //==============================================================================
+    /** Creates a PropertiesFile object.
+        The file used will be chosen by calling PropertiesFile::Options::getDefaultFile()
+        for the options provided. To set the file explicitly, use the other constructor.
+    */
+    explicit PropertiesFile (const Options& options);
+
+    /** Creates a PropertiesFile object.
+        Unlike the other constructor, this one allows you to explicitly set the file that you
+        want to be used, rather than using the default one.
     */
     PropertiesFile (const File& file,
-                    int millisecondsBeforeSaving,
-                    int optionFlags,
-                    InterProcessLock* processLock = nullptr);
+                    const Options& options);
 
     /** Destructor.
-
         When deleted, the file will first call saveIfNeeded() to flush any changes to disk.
     */
     ~PropertiesFile();
@@ -138,65 +220,22 @@ public:
     /** Returns the file that's being used. */
     File getFile() const                              { return file; }
 
-    //==============================================================================
-    /** Handy utility to create a properties file in whatever the standard OS-specific
-        location is for these things.
-
-        This uses getDefaultAppSettingsFile() to decide what file to create, then
-        creates a PropertiesFile object with the specified properties. See
-        getDefaultAppSettingsFile() and the class's constructor for descriptions of
-        what the parameters do.
-
-        @see getDefaultAppSettingsFile
-    */
-    static PropertiesFile* createDefaultAppPropertiesFile (const String& applicationName,
-                                                           const String& fileNameSuffix,
-                                                           const String& folderName,
-                                                           bool commonToAllUsers,
-                                                           int millisecondsBeforeSaving,
-                                                           int propertiesFileOptions,
-                                                           InterProcessLock* processLock = nullptr);
-
-    /** Handy utility to choose a file in the standard OS-dependent location for application
-        settings files.
-
-        So on a Mac, this will return a file called:
-        ~/Library/Preferences/[folderName]/[applicationName].[fileNameSuffix]
-
-        On Windows it'll return something like:
-        C:\\Documents and Settings\\username\\Application Data\\[folderName]\\[applicationName].[fileNameSuffix]
-
-        On Linux it'll return
-        ~/.[folderName]/[applicationName].[fileNameSuffix]
-
-        If you pass an empty string as the folder name, it'll use the app name for this (or
-        omit the folder name on the Mac).
-
-        If commonToAllUsers is true, then this will return the same file for all users of the
-        computer, regardless of the current user. If it is false, the file will be specific to
-        only the current user. Use this to choose whether you're saving settings that are common
-        or user-specific.
-    */
-    static File getDefaultAppSettingsFile (const String& applicationName,
-                                           const String& fileNameSuffix,
-                                           const String& folderName,
-                                           bool commonToAllUsers);
 
 protected:
+    /** @internal */
     virtual void propertyChanged();
 
 private:
     //==============================================================================
     File file;
-    int timerInterval;
-    const int options;
+    Options options;
     bool loadedOk, needsWriting;
 
-    InterProcessLock* processLock;
     typedef const ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
     InterProcessLock::ScopedLockType* createProcessLock() const;
 
     void timerCallback();
+    void initialise();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesFile);
 };

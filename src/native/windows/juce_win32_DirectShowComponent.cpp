@@ -896,7 +896,7 @@ void DirectShowComponent::play()
 void DirectShowComponent::stop()
 {
     if (videoLoaded)
-        context->stop();
+        context->pause();
 }
 
 bool DirectShowComponent::isPlaying() const

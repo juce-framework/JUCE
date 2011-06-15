@@ -175,6 +175,15 @@ bool PropertySet::containsKey (const String& keyName) const noexcept
     return properties.getAllKeys().contains (keyName, ignoreCaseOfKeys);
 }
 
+void PropertySet::addAllPropertiesFrom (const PropertySet& source)
+{
+    const ScopedLock sl (source.getLock());
+
+    for (int i = 0; i < source.properties.size(); ++i)
+        setValue (source.properties.getAllKeys() [i],
+                  source.properties.getAllValues() [i]);
+}
+
 void PropertySet::setFallbackPropertySet (PropertySet* fallbackProperties_) noexcept
 {
     const ScopedLock sl (lock);

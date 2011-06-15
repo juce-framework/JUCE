@@ -673,12 +673,14 @@ public:
     Pimpl (const String& name, const int timeOutMillisecs)
         : handle (0), refCount (1)
     {
-      #if JUCE_MAC
-        // (don't use getSpecialLocation() to avoid the temp folder being different for each app)
-        const File temp (File ("~/Library/Caches/Juce").getChildFile (name));
-      #else
-        const File temp (File::getSpecialLocation (File::tempDirectory).getChildFile (name));
-      #endif
+        // Note that we can't get the normal temp folder here, as it might be different for each app.
+        File tempFolder ("/var/tmp");
+
+        if (! tempFolder.isDirectory())
+            tempFolder = "/tmp";
+
+        const File temp (tempFolder.getChildFile (name));
+
         temp.create();
         handle = open (temp.getFullPathName().toUTF8(), O_RDWR);
 

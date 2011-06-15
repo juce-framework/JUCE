@@ -53,7 +53,7 @@ public:
     Array <Colour> swatchColours;
 
 private:
-    PropertiesFile* props;
+    ScopedPointer<PropertiesFile> props;
 };
 
 

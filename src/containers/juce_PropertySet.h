@@ -145,6 +145,11 @@ public:
     */
     void setValue (const String& keyName, const XmlElement* xml);
 
+    /** This copies all the values from a source PropertySet to this one.
+        This won't remove any existing settings, it just adds any that it finds in the source set.
+    */
+    void addAllPropertiesFrom (const PropertySet& source);
+
     //==============================================================================
     /** Deletes a property.
 

@@ -38,10 +38,7 @@ juce_ImplementSingleton (ApplicationProperties)
 
 //==============================================================================
 ApplicationProperties::ApplicationProperties()
-    : msBeforeSaving (3000),
-      options (PropertiesFile::storeAsBinary),
-      commonSettingsAreReadOnly (0),
-      processLock (nullptr)
+    : commonSettingsAreReadOnly (0)
 {
 }
 
@@ -52,19 +49,9 @@ ApplicationProperties::~ApplicationProperties()
 }
 
 //==============================================================================
-void ApplicationProperties::setStorageParameters (const String& applicationName,
-                                                  const String& fileNameSuffix,
-                                                  const String& folderName_,
-                                                  const int millisecondsBeforeSaving,
-                                                  const int propertiesFileOptions,
-                                                  InterProcessLock* processLock_)
+void ApplicationProperties::setStorageParameters (const PropertiesFile::Options& newOptions)
 {
-    appName = applicationName;
-    fileSuffix = fileNameSuffix;
-    folderName = folderName_;
-    msBeforeSaving = millisecondsBeforeSaving;
-    options = propertiesFileOptions;
-    processLock = processLock_;
+    options = newOptions;
 }
 
 bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
@@ -87,9 +74,9 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
                 filenames << '\n' << commonProps->getFile().getFullPathName();
 
             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                              appName + TRANS(" - Unable to save settings"),
+                                              options.applicationName + TRANS(" - Unable to save settings"),
                                               TRANS("An error occurred when trying to save the application's settings file...\n\nIn order to save and restore its settings, ")
-                                                + appName + TRANS(" needs to be able to write to the following files:\n")
+                                                + options.applicationName + TRANS(" needs to be able to write to the following files:\n")
                                                 + filenames
                                                 + TRANS("\n\nMake sure that these files aren't read-only, and that the disk isn't full."));
         }
@@ -103,19 +90,24 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
 //==============================================================================
 void ApplicationProperties::openFiles()
 {
-    // You need to call setStorageParameters() before trying to get hold of the
-    // properties!
-    jassert (appName.isNotEmpty());
+    // You need to call setStorageParameters() before trying to get hold of the properties!
+    jassert (options.applicationName.isNotEmpty());
 
-    if (appName.isNotEmpty())
+    if (options.applicationName.isNotEmpty())
     {
+        PropertiesFile::Options o (options);
+
         if (userProps == nullptr)
-            userProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
-                                                                        false, msBeforeSaving, options, processLock);
+        {
+            o.commonToAllUsers = false;
+            userProps = new PropertiesFile (o);
+        }
 
         if (commonProps == nullptr)
-            commonProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
-                                                                          true, msBeforeSaving, options, processLock);
+        {
+            o.commonToAllUsers = true;
+            commonProps = new PropertiesFile (o);
+        }
 
         userProps->setFallbackPropertySet (commonProps);
     }

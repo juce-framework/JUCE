@@ -73,16 +73,9 @@ public:
 
     //==============================================================================
     /** Gives the object the information it needs to create the appropriate properties files.
-
-        See the comments for PropertiesFile::createDefaultAppPropertiesFile() for more
-        info about how these parameters are used.
+        See the PropertiesFile::Options class for details about what options you need to set.
     */
-    void setStorageParameters (const String& applicationName,
-                               const String& fileNameSuffix,
-                               const String& folderName,
-                               int millisecondsBeforeSaving,
-                               int propertiesFileOptions,
-                               InterProcessLock* processLock = nullptr);
+    void setStorageParameters (const PropertiesFile::Options& options);
 
     /** Tests whether the files can be successfully written to, and can show
         an error message if not.
@@ -146,12 +139,9 @@ public:
 
 private:
     //==============================================================================
+    PropertiesFile::Options options;
     ScopedPointer <PropertiesFile> userProps, commonProps;
-
-    String appName, fileSuffix, folderName;
-    int msBeforeSaving, options;
     int commonSettingsAreReadOnly;
-    InterProcessLock* processLock;
 
     void openFiles();
 
