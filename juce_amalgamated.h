@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	101
+#define JUCE_BUILDNUMBER	102
 
 /** Current Juce version number.
 
@@ -9492,7 +9492,7 @@ public:
 
 		This returns a void if no such property exists.
 	*/
-	virtual const var getProperty (const Identifier& propertyName) const;
+	virtual var getProperty (const Identifier& propertyName) const;
 
 	/** Sets a named property. */
 	virtual void setProperty (const Identifier& propertyName, const var& newValue);
@@ -9516,9 +9516,9 @@ public:
 		This method is virtual to allow more dynamic invocation to used for objects
 		where the methods may not already be set as properies.
 	*/
-	virtual const var invokeMethod (const Identifier& methodName,
-									const var* parameters,
-									int numParameters);
+	virtual var invokeMethod (const Identifier& methodName,
+							  const var* parameters,
+							  int numParameters);
 
 	/** Sets up a method.
 
@@ -12054,7 +12054,7 @@ public:
 
 	/** Attempts to parse the contents of the block as a zero-terminated string of 8-bit
 		characters in the system's default encoding. */
-	const String toString() const;
+	String toString() const;
 
 	/** Parses a string of hexadecimal numbers and writes this data into the memory block.
 
@@ -12081,7 +12081,7 @@ public:
 
 		@see fromBase64Encoding
 	*/
-	const String toBase64Encoding() const;
+	String toBase64Encoding() const;
 
 	/** Takes a string of encoded characters and turns it into binary data.
 
@@ -12516,21 +12516,21 @@ public:
 		@returns	the time, or an invalid time if the file doesn't exist.
 		@see setLastModificationTime, getLastAccessTime, getCreationTime
 	*/
-	const Time getLastModificationTime() const;
+	Time getLastModificationTime() const;
 
 	/** Returns the last time this file was accessed.
 
 		@returns	the time, or an invalid time if the file doesn't exist.
 		@see setLastAccessTime, getLastModificationTime, getCreationTime
 	*/
-	const Time getLastAccessTime() const;
+	Time getLastAccessTime() const;
 
 	/** Returns the time that this file was created.
 
 		@returns	the time, or an invalid time if the file doesn't exist.
 		@see getLastModificationTime, getLastAccessTime
 	*/
-	const Time getCreationTime() const;
+	Time getCreationTime() const;
 
 	/** Changes the modification time for this file.
 
@@ -16478,7 +16478,7 @@ public:
 		virtual ~ValueSource();
 
 		/** Returns the current value of this object. */
-		virtual const var getValue() const = 0;
+		virtual var getValue() const = 0;
 
 		/** Changes the current value.
 			This must also trigger a change message if the value actually changes.
@@ -17382,7 +17382,7 @@ private:
 		void sendChildOrderChangedMessage();
 		void sendParentChangeMessage();
 		const var& getProperty (const Identifier& name) const;
-		const var getProperty (const Identifier& name, const var& defaultReturnValue) const;
+		var getProperty (const Identifier& name, const var& defaultReturnValue) const;
 		void setProperty (const Identifier& name, const var& newValue, UndoManager*);
 		bool hasProperty (const Identifier& name) const;
 		void removeProperty (const Identifier& name, UndoManager*);
@@ -17755,7 +17755,7 @@ public:
 #if JUCE_MAC || JUCE_IOS || DOXYGEN
 
 	/** MAC ONLY - Turns a Core CF String into a juce one. */
-	static const String cfStringToJuceString (CFStringRef cfString);
+	static String cfStringToJuceString (CFStringRef cfString);
 
 	/** MAC ONLY - Turns a juce string into a Core CF one. */
 	static CFStringRef juceStringToCFString (const String& s);
@@ -17764,12 +17764,12 @@ public:
 	static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
 
 	/** MAC ONLY - Turns an FSRef into a juce string path. */
-	static const String makePathFromFSRef (FSRef* file);
+	static String makePathFromFSRef (FSRef* file);
 
 	/** MAC ONLY - Converts any decomposed unicode characters in a string into
 		their precomposed equivalents.
 	*/
-	static const String convertToPrecomposedUnicode (const String& s);
+	static String convertToPrecomposedUnicode (const String& s);
 
 	/** MAC ONLY - Gets the type of a file from the file's resources. */
 	static OSType getTypeOfFile (const String& filename);
@@ -17795,8 +17795,8 @@ public:
 		The path is a string for the entire path of a value in the registry,
 		e.g. "HKEY_CURRENT_USER\Software\foo\bar"
 	*/
-	static const String getRegistryValue (const String& regValuePath,
-										  const String& defaultValue = String::empty);
+	static String getRegistryValue (const String& regValuePath,
+									const String& defaultValue = String::empty);
 
 	/** WIN32 ONLY - Sets a registry value as a string.
 
@@ -17855,7 +17855,7 @@ public:
 
 		This is needed to avoid unicode problems with the argc type params.
 	*/
-	static const String JUCE_CALLTYPE getCurrentCommandLineParams();
+	static String JUCE_CALLTYPE getCurrentCommandLineParams();
 #endif
 
 	/** Clears the floating point unit's flags.
@@ -18316,7 +18316,7 @@ public:
 
 		See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
 	*/
-	static const String getJUCEVersion();
+	static String getJUCEVersion();
 
 	/** The set of possible results of the getOperatingSystemType() method.
 	*/
@@ -18355,7 +18355,7 @@ public:
 		@returns a string describing the OS type.
 		@see getOperatingSystemType
 	*/
-	static const String getOperatingSystemName();
+	static String getOperatingSystemName();
 
 	/** Returns true if the OS is 64-bit, or false for a 32-bit OS.
 	*/
@@ -18364,16 +18364,16 @@ public:
 	/** Returns the current user's name, if available.
 		@see getFullUserName()
 	*/
-	static const String getLogonName();
+	static String getLogonName();
 
 	/** Returns the current user's full name, if available.
 		On some OSes, this may just return the same value as getLogonName().
 		@see getLogonName()
 	*/
-	static const String getFullUserName();
+	static String getFullUserName();
 
 	/** Returns the host-name of the computer. */
-	static const String getComputerName();
+	static String getComputerName();
 
 	// CPU and memory information..
 
@@ -18388,7 +18388,7 @@ public:
 
 		Might not be known on some systems.
 	*/
-	static const String getCpuVendor();
+	static String getCpuVendor();
 
 	/** Checks whether Intel MMX instructions are available. */
 	static bool hasMMX() noexcept		   { return getCPUFlags().hasMMX; }
@@ -20137,7 +20137,7 @@ public:
 	const uint8* getBytes() const noexcept	{ return asBytes; }
 
 	/** Returns a dash-separated string in the form "11-22-33-44-55-66" */
-	const String toString() const;
+	String toString() const;
 
 	/** Returns the address in the lower 6 bytes of an int64.
 
@@ -21407,7 +21407,7 @@ public:
 		virtual ~Scope();
 
 		/** Returns some kind of globally unique ID that identifies this scope. */
-		virtual const String getScopeUID() const;
+		virtual String getScopeUID() const;
 
 		/** Returns the value of a symbol.
 			If the symbol is unknown, this can throw an Expression::EvaluationError exception.
@@ -21415,7 +21415,7 @@ public:
 			one, e.g. for "foo.bar", symbol = "foo" and member = "bar".
 			@throws Expression::EvaluationError
 		*/
-		virtual const Expression getSymbolValue (const String& symbol) const;
+		virtual Expression getSymbolValue (const String& symbol) const;
 
 		/** Executes a named function.
 			If the function name is unknown, this can throw an Expression::EvaluationError exception.
@@ -22146,7 +22146,7 @@ public:
 
 		The country codes are supposed to be 2-character ISO complient codes.
 	*/
-	const StringArray getCountryCodes() const		   { return countryCodes; }
+	const StringArray& getCountryCodes() const		{ return countryCodes; }
 
 	/** Indicates whether to use a case-insensitive search when looking up a string.
 		This defaults to true.
@@ -25312,7 +25312,7 @@ public:
 	const String& getName() const noexcept	  { return name; }
 
 	/** Creates a new system typeface. */
-	static const Ptr createSystemTypefaceFor (const Font& font);
+	static Ptr createSystemTypefaceFor (const Font& font);
 
 	/** Destructor. */
 	virtual ~Typeface();
@@ -25374,7 +25374,7 @@ protected:
 
 	explicit Typeface (const String& name) noexcept;
 
-	static const Ptr getFallbackTypeface();
+	static Ptr getFallbackTypeface();
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface);
@@ -33950,9 +33950,8 @@ public:
 	*/
 	int getApplicationReturnValue() const noexcept		  { return appReturnValue; }
 
-	/** Returns the application's command line params.
-	*/
-	const String getCommandLineParameters() const noexcept	  { return commandLineParameters; }
+	/** Returns the application's command line parameters. */
+	const String& getCommandLineParameters() const noexcept	 { return commandLineParameters; }
 
 	/** Returns true if this executable is running as an app (as opposed to being a plugin
 		or other kind of shared library. */
@@ -34763,7 +34762,7 @@ public:
 		An empty string is returned if no command with this ID has been registered.
 		@see getDescriptionOfCommand
 	*/
-	const String getNameOfCommand (CommandID commandID) const noexcept;
+	String getNameOfCommand (CommandID commandID) const noexcept;
 
 	/** Returns the description field for a command.
 
@@ -34772,7 +34771,7 @@ public:
 
 		@see getNameOfCommand
 	*/
-	const String getDescriptionOfCommand (CommandID commandID) const noexcept;
+	String getDescriptionOfCommand (CommandID commandID) const noexcept;
 
 	/** Returns the list of categories.
 
@@ -34787,7 +34786,7 @@ public:
 
 		@see getCommandCategories()
 	*/
-	const Array <CommandID> getCommandsInCategory (const String& categoryName) const;
+	Array<CommandID> getCommandsInCategory (const String& categoryName) const;
 
 	/** Returns the manager's internal set of key mappings.
 
@@ -35938,7 +35937,7 @@ public:
 
 		E.g. "AIFF"
 	*/
-	const String getFormatName() const noexcept	 { return formatName; }
+	const String& getFormatName() const noexcept	{ return formatName; }
 
 	/** Reads samples from the stream.
 
@@ -36729,7 +36728,7 @@ public:
 
 		E.g. "AIFF file"
 	*/
-	const String getFormatName() const noexcept	 { return formatName; }
+	const String& getFormatName() const noexcept	{ return formatName; }
 
 	/** Writes a set of samples to the audio stream.
 
@@ -36839,8 +36838,9 @@ public:
 		*/
 		void setThumbnailToUpdate (AudioThumbnail* thumbnailToUpdate);
 
-		/** @internal */
+	   #ifndef DOXYGEN
 		class Buffer; // (only public for VC6 compatibility)
+	   #endif
 
 	private:
 		friend class ScopedPointer<Buffer>;
@@ -36961,7 +36961,7 @@ public:
 		When calling createWriterFor(), an index from this array is passed in to
 		tell the format which option is required.
 	*/
-	virtual const StringArray getQualityOptions();
+	virtual StringArray getQualityOptions();
 
 	/** Tries to create an object that can read from a stream containing audio
 		data in this format.
@@ -37102,7 +37102,7 @@ public:
 
 		Use openDevice() to open one of the items from this list.
 	*/
-	static const StringArray findAvailableDevices();
+	static StringArray findAvailableDevices();
 
 	/** Tries to open one of the optical drives.
 
@@ -37149,7 +37149,7 @@ public:
 		Note that if there's no media present in the drive, this value may be unavailable!
 		@see setWriteSpeed, getWriteSpeed
 	*/
-	const Array<int> getAvailableWriteSpeeds() const;
+	Array<int> getAvailableWriteSpeeds() const;
 
 	/** Tries to enable or disable buffer underrun safety on devices that support it.
 		@returns	true if it's now enabled. If the device doesn't support it, this
@@ -37198,10 +37198,10 @@ public:
 		@param writeSpeed	   one of the write speeds from getAvailableWriteSpeeds(), or
 									0 or less to mean the fastest speed.
 	*/
-	const String burn (BurnProgressListener* listener,
-					   bool ejectDiscAfterwards,
-					   bool performFakeBurnForTesting,
-					   int writeSpeed);
+	String burn (BurnProgressListener* listener,
+				 bool ejectDiscAfterwards,
+				 bool performFakeBurnForTesting,
+				 int writeSpeed);
 
 	/** If a burn operation is currently in progress, this tells it to stop
 		as soon as possible.
@@ -37262,7 +37262,7 @@ public:
 
 		@see createReaderForCD
 	*/
-	static const StringArray getAvailableCDNames();
+	static StringArray getAvailableCDNames();
 
 	/** Tries to create an AudioFormatReader that can read from an Audio CD.
 
@@ -37477,7 +37477,7 @@ public:
 
 		E.g. if might return "*.wav;*.aiff" if it just knows about wavs and aiffs.
 	*/
-	const String getWildcardForAllFormats() const;
+	String getWildcardForAllFormats() const;
 
 	/** Searches through the known formats to try to create a suitable reader for
 		this file.
@@ -37889,7 +37889,7 @@ public:
 	bool canDoStereo();
 	bool canDoMono();
 	bool isCompressed();
-	const StringArray getQualityOptions();
+	StringArray getQualityOptions();
 
 	AudioFormatReader* createReaderFor (InputStream* sourceStream,
 										bool deleteStreamIfOpeningFails);
@@ -37935,12 +37935,12 @@ public:
 	OggVorbisAudioFormat();
 	~OggVorbisAudioFormat();
 
-	const Array <int> getPossibleSampleRates();
-	const Array <int> getPossibleBitDepths();
+	const Array<int> getPossibleSampleRates();
+	const Array<int> getPossibleBitDepths();
 	bool canDoStereo();
 	bool canDoMono();
 	bool isCompressed();
-	const StringArray getQualityOptions();
+	StringArray getQualityOptions();
 
 	/** Tries to estimate the quality level of an ogg file based on its size.
 
@@ -38417,12 +38417,12 @@ public:
 	/** Returns the names of all the available output channels on this device.
 		To find out which of these are currently in use, call getActiveOutputChannels().
 	*/
-	virtual const StringArray getOutputChannelNames() = 0;
+	virtual StringArray getOutputChannelNames() = 0;
 
 	/** Returns the names of all the available input channels on this device.
 		To find out which of these are currently in use, call getActiveInputChannels().
 	*/
-	virtual const StringArray getInputChannelNames() = 0;
+	virtual StringArray getInputChannelNames() = 0;
 
 	/** Returns the number of sample-rates this device supports.
 
@@ -39854,7 +39854,7 @@ public:
 								  into inputs and outputs, this indicates whether to use
 								  the input or output name to refer to a pair of devices.
 	*/
-	virtual const StringArray getDeviceNames (bool wantInputNames = false) const = 0;
+	virtual StringArray getDeviceNames (bool wantInputNames = false) const = 0;
 
 	/** Returns the name of the default device.
 
@@ -40882,7 +40882,7 @@ public:
 
 		@see getDefaultDeviceIndex, openDevice
 	*/
-	static const StringArray getDevices();
+	static StringArray getDevices();
 
 	/** Returns the index of the default midi input device to use.
 
@@ -40905,7 +40905,7 @@ public:
 	static MidiInput* openDevice (int deviceIndex,
 								  MidiInputCallback* callback);
 
-#if JUCE_LINUX || JUCE_MAC || DOXYGEN
+   #if JUCE_LINUX || JUCE_MAC || DOXYGEN
 	/** This will try to create a new midi input device (Not available on Windows).
 
 		This will attempt to create a new midi input device with the specified name,
@@ -40918,19 +40918,18 @@ public:
 	*/
 	static MidiInput* createNewDevice (const String& deviceName,
 									   MidiInputCallback* callback);
-#endif
+   #endif
 
 	/** Destructor. */
 	virtual ~MidiInput();
 
-	/** Returns the name of this device.
-	*/
-	virtual const String getName() const noexcept		   { return name; }
+	/** Returns the name of this device. */
+	const String& getName() const noexcept			  { return name; }
 
 	/** Allows you to set a custom name for the device, in case you don't like the name
 		it was given when created.
 	*/
-	virtual void setName (const String& newName) noexcept	   { name = newName; }
+	void setName (const String& newName) noexcept		   { name = newName; }
 
 	/** Starts the device running.
 
@@ -41198,7 +41197,7 @@ public:
 
 		@see getDefaultDeviceIndex, openDevice
 	*/
-	static const StringArray getDevices();
+	static StringArray getDevices();
 
 	/** Returns the index of the default midi output device to use.
 
@@ -41455,12 +41454,12 @@ public:
 
 		@returns an error message if anything went wrong, or an empty string if it worked ok.
 	*/
-	const String initialise (int numInputChannelsNeeded,
-							 int numOutputChannelsNeeded,
-							 const XmlElement* savedState,
-							 bool selectDefaultDeviceOnFailure,
-							 const String& preferredDefaultDeviceName = String::empty,
-							 const AudioDeviceSetup* preferredSetupOptions = 0);
+	String initialise (int numInputChannelsNeeded,
+					   int numOutputChannelsNeeded,
+					   const XmlElement* savedState,
+					   bool selectDefaultDeviceOnFailure,
+					   const String& preferredDefaultDeviceName = String::empty,
+					   const AudioDeviceSetup* preferredSetupOptions = 0);
 
 	/** Returns some XML representing the current state of the manager.
 
@@ -41497,8 +41496,8 @@ public:
 
 		@see getAudioDeviceSetup
 	*/
-	const String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
-									  bool treatAsChosenDevice);
+	String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
+								bool treatAsChosenDevice);
 
 	/** Returns the currently-active audio device. */
 	AudioIODevice* getCurrentAudioDevice() const noexcept		   { return currentAudioDevice; }
@@ -41506,7 +41505,7 @@ public:
 	/** Returns the type of audio device currently in use.
 		@see setCurrentAudioDeviceType
 	*/
-	const String getCurrentAudioDeviceType() const			  { return currentDeviceType; }
+	String getCurrentAudioDeviceType() const				{ return currentDeviceType; }
 
 	/** Returns the currently active audio device type object.
 		Don't keep a copy of this pointer - it's owned by the device manager and could
@@ -41632,7 +41631,7 @@ public:
 
 		@see setDefaultMidiOutput, getDefaultMidiOutput
 	*/
-	const String getDefaultMidiOutputName() const		   { return defaultMidiOutputName; }
+	String getDefaultMidiOutputName() const			 { return defaultMidiOutputName; }
 
 	/** Returns the current default midi output device.
 
@@ -41750,8 +41749,8 @@ private:
 	void audioDeviceStoppedInt();
 	void handleIncomingMidiMessageInt (MidiInput*, const MidiMessage&);
 
-	const String restartDevice (int blockSizeToUse, double sampleRateToUse,
-								const BigInteger& ins, const BigInteger& outs);
+	String restartDevice (int blockSizeToUse, double sampleRateToUse,
+						  const BigInteger& ins, const BigInteger& outs);
 	void stopDevice();
 
 	void updateXml();
@@ -41831,9 +41830,9 @@ public:
 		be "-INF dB".
 	*/
 	template <typename Type>
-	static const String toString (const Type decibels,
-								  const int decimalPlaces = 2,
-								  const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
+	static String toString (const Type decibels,
+							const int decimalPlaces = 2,
+							const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
 	{
 		String s;
 
@@ -43442,7 +43441,7 @@ public:
 		plugin's file location, so can be used to store a plugin ID for use
 		across different machines.
 	*/
-	const String createIdentifierString() const;
+	String createIdentifierString() const;
 
 	/** Creates an XML object containing these details.
 
@@ -43526,7 +43525,7 @@ public:
 
 		E.g. "VST", "AudioUnit", etc.
 	*/
-	virtual const String getName() const = 0;
+	virtual String getName() const = 0;
 
 	/** This tries to create descriptions for all the plugin types available in
 		a binary module file.
@@ -43556,7 +43555,7 @@ public:
 
 	/** Returns a readable version of the name of the plugin that this identifier refers to.
 	*/
-	virtual const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) = 0;
+	virtual String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) = 0;
 
 	/** Checks whether this plugin could possibly be loaded.
 
@@ -43570,15 +43569,15 @@ public:
 		The path might be ignored, e.g. by AUs, which are found by the OS rather
 		than manually.
 	*/
-	virtual const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
-													 bool recursive) = 0;
+	virtual StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
+											   bool recursive) = 0;
 
 	/** Returns the typical places to look for this kind of plugin.
 
 		Note that if this returns no paths, it means that the format can't be scanned-for
 		(i.e. it's an internal format that doesn't live in files)
 	*/
-	virtual const FileSearchPath getDefaultLocationsToSearch() = 0;
+	virtual FileSearchPath getDefaultLocationsToSearch() = 0;
 
 protected:
 
@@ -43603,14 +43602,14 @@ public:
 	AudioUnitPluginFormat();
 	~AudioUnitPluginFormat();
 
-	const String getName() const                { return "AudioUnit"; }
+	String getName() const                { return "AudioUnit"; }
 	void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
 	AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 	bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-	const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-	const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
+	String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
+	StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
 	bool doesPluginStillExist (const PluginDescription& desc);
-	const FileSearchPath getDefaultLocationsToSearch();
+	FileSearchPath getDefaultLocationsToSearch();
 
 private:
 
@@ -43645,12 +43644,12 @@ public:
 	DirectXPluginFormat();
 	~DirectXPluginFormat();
 
-	const String getName() const                { return "DirectX"; }
+	String getName() const                { return "DirectX"; }
 	void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
 	AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 	bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-	const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
-	const FileSearchPath getDefaultLocationsToSearch();
+	String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
+	FileSearchPath getDefaultLocationsToSearch();
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectXPluginFormat);
@@ -43684,12 +43683,12 @@ public:
 	LADSPAPluginFormat();
 	~LADSPAPluginFormat();
 
-	const String getName() const                { return "LADSPA"; }
+	String getName() const                { return "LADSPA"; }
 	void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
 	AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 	bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-	const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
-	const FileSearchPath getDefaultLocationsToSearch();
+	String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
+	FileSearchPath getDefaultLocationsToSearch();
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LADSPAPluginFormat);
@@ -43887,14 +43886,14 @@ public:
 	VSTPluginFormat();
 	~VSTPluginFormat();
 
-	const String getName() const                { return "VST"; }
+	String getName() const                { return "VST"; }
 	void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
 	AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 	bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-	const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-	const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
+	String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
+	StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
 	bool doesPluginStillExist (const PluginDescription& desc);
-	const FileSearchPath getDefaultLocationsToSearch();
+	FileSearchPath getDefaultLocationsToSearch();
 
 private:
 
@@ -44910,7 +44909,7 @@ public:
 
 		@see setButtonText
 	*/
-	const String getButtonText() const			  { return text; }
+	const String& getButtonText() const		   { return text; }
 
 	/** Returns true if the button is currently being held down by the mouse.
 
@@ -47384,13 +47383,13 @@ public:
 
 		Returns a value less than 0 if no note is playing.
 	*/
-	int getCurrentlyPlayingNote() const					 { return currentlyPlayingNote; }
+	int getCurrentlyPlayingNote() const				   { return currentlyPlayingNote; }
 
 	/** Returns the sound that this voice is currently playing.
 
 		Returns 0 if it's not playing.
 	*/
-	const SynthesiserSound::Ptr getCurrentlyPlayingSound() const		{ return currentlyPlayingSound; }
+	SynthesiserSound::Ptr getCurrentlyPlayingSound() const		{ return currentlyPlayingSound; }
 
 	/** Must return true if this voice object is capable of playing the given sound.
 
@@ -48079,7 +48078,7 @@ public:
 		This will return an empty string if the other machine isn't known for
 		some reason.
 	*/
-	const String getConnectedHostName() const;
+	String getConnectedHostName() const;
 
 	/** Tries to send a message to the other end of this connection.
 
@@ -49070,10 +49069,10 @@ public:
 
 		ValueTree& getState() noexcept	  { return state; }
 		int getNumMarkers() const;
-		const ValueTree getMarkerState (int index) const;
-		const ValueTree getMarkerState (const String& name) const;
+		ValueTree getMarkerState (int index) const;
+		ValueTree getMarkerState (const String& name) const;
 		bool containsMarker (const ValueTree& state) const;
-		const MarkerList::Marker getMarker (const ValueTree& state) const;
+		MarkerList::Marker getMarker (const ValueTree& state) const;
 		void setMarker (const MarkerList::Marker& marker, UndoManager* undoManager);
 		void removeMarker (const ValueTree& state, UndoManager* undoManager);
 
@@ -49127,9 +49126,9 @@ public:
 	public:
 		ComponentScope (Component& component_);
 
-		const Expression getSymbolValue (const String& symbol) const;
+		Expression getSymbolValue (const String& symbol) const;
 		void visitRelativeScope (const String& scopeName, Visitor& visitor) const;
-		const String getScopeUID() const;
+		String getScopeUID() const;
 
 	protected:
 		Component& component;
@@ -49326,12 +49325,12 @@ public:
 			The image that is returned will be owned by the caller, but it may come
 			from the ImageCache.
 		*/
-		virtual const Image getImageForIdentifier (const var& imageIdentifier) = 0;
+		virtual Image getImageForIdentifier (const var& imageIdentifier) = 0;
 
 		/** Returns an identifier to be used to refer to a given image.
 			This is used when a reference to an image is stored in a ValueTree.
 		*/
-		virtual const var getIdentifierForImage (const Image& image) = 0;
+		virtual var getIdentifierForImage (const Image& image) = 0;
 	};
 
 	/** Gives the builder an ImageProvider object that the type handlers can use when
@@ -49517,13 +49516,13 @@ public:
 		If there are any images used in this drawable, you'll need to provide a valid ImageProvider
 		object that can be used to create storable representations of them.
 	*/
-	virtual const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const = 0;
+	virtual ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const = 0;
 
 	/** Returns the area that this drawble covers.
 		The result is expressed in this drawable's own coordinate space, and does not take
 		into account any transforms that may be applied to the component.
 	*/
-	virtual const Rectangle<float> getDrawableBounds() const = 0;
+	virtual Rectangle<float> getDrawableBounds() const = 0;
 
 	/** Internal class used to manage ValueTrees that represent Drawables. */
 	class ValueTreeWrapperBase
@@ -49533,7 +49532,7 @@ public:
 
 		ValueTree& getState() noexcept	  { return state; }
 
-		const String getID() const;
+		String getID() const;
 		void setID (const String& newID);
 
 		ValueTree state;
@@ -50350,7 +50349,7 @@ public:
 
 		@see startDragging
 	*/
-	const String getCurrentDragDescription() const;
+	String getCurrentDragDescription() const;
 
 	/** Utility to find the DragAndDropContainer for a given Component.
 
@@ -50648,7 +50647,7 @@ public:
 
 		@see restoreFromString
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Restores a set of items that was previously stored in a string by the toString()
 		method.
@@ -51096,7 +51095,7 @@ public:
 		/** Returns the line from the document that this position is within.
 			@see getCharacter, getLineNumber
 		*/
-		const String getLineText() const;
+		String getLineText() const;
 
 	private:
 		CodeDocument* owner;
@@ -51105,13 +51104,13 @@ public:
 	};
 
 	/** Returns the full text of the document. */
-	const String getAllContent() const;
+	String getAllContent() const;
 
 	/** Returns a section of the document's text. */
-	const String getTextBetween (const Position& start, const Position& end) const;
+	String getTextBetween (const Position& start, const Position& end) const;
 
 	/** Returns a line from the document. */
-	const String getLine (int lineIndex) const noexcept;
+	String getLine (int lineIndex) const noexcept;
 
 	/** Returns the number of characters in the document. */
 	int getNumCharacters() const noexcept;
@@ -51153,7 +51152,7 @@ public:
 		This will be either "\n", "\r\n", or (rarely) "\r".
 		@see setNewLineCharacters
 	*/
-	const String getNewLineCharacters() const noexcept	  { return newLineChars; }
+	String getNewLineCharacters() const noexcept	  { return newLineChars; }
 
 	/** Sets the new-line characters that the document should use.
 		The string must be either "\n", "\r\n", or (rarely) "\r".
@@ -51462,7 +51461,7 @@ public:
 		The index in this list must match the token type numbers that are
 		returned by readNextToken().
 	*/
-	virtual const StringArray getTokenTypes() = 0;
+	virtual StringArray getTokenTypes() = 0;
 
 	/** Returns a suggested syntax highlighting colour for a specified
 		token type.
@@ -51787,7 +51786,7 @@ public:
 	};
 
 	int readNextToken (CodeDocument::Iterator& source);
-	const StringArray getTokenTypes();
+	StringArray getTokenTypes();
 	const Colour getDefaultColour (int tokenType);
 
 	/** This is a handy method for checking whether a string is a c++ reserved keyword. */
@@ -52518,7 +52517,7 @@ public:
 											the user has finished typing and pressed the return
 											key.
 	*/
-	const String getText (bool returnActiveEditorContents = false) const;
+	String getText (bool returnActiveEditorContents = false) const;
 
 	/** Returns the text content as a Value object.
 		You can call Value::referTo() on this object to make the label read and control
@@ -53950,7 +53949,7 @@ public:
 	void setTextValueSuffix (const String& suffix);
 
 	/** Returns the suffix that was set by setTextValueSuffix(). */
-	const String getTextValueSuffix() const;
+	String getTextValueSuffix() const;
 
 	/** Allows a user-defined mapping of distance along the slider to its value.
 
@@ -54250,7 +54249,7 @@ public:
 	/** Returns the name for a column.
 		@see setColumnName
 	*/
-	const String getColumnName (int columnId) const;
+	String getColumnName (int columnId) const;
 
 	/** Changes the name of a column. */
 	void setColumnName (int columnId, const String& newName);
@@ -54396,7 +54395,7 @@ public:
 
 		@see restoreFromString
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Restores the state of the table, based on a string previously created with
 		toString().
@@ -59768,7 +59767,7 @@ public:
 	void setText (const String& newText);
 
 	/** Returns the currently displayed text label. */
-	const String getText() const;
+	String getText() const;
 
 	/** Sets the positioning of the text label.
 
@@ -59994,7 +59993,7 @@ public:
 
 		This could be an empty string if none are selected.
 	*/
-	const String getCurrentTabName() const;
+	String getCurrentTabName() const;
 
 	/** Returns the index of the currently selected tab.
 
@@ -60230,7 +60229,7 @@ public:
 
 		@see addTab, TabbedButtonBar::getCurrentTabName()
 	*/
-	const String getCurrentTabName() const;
+	String getCurrentTabName() const;
 
 	/** Returns the current component that's filling the panel.
 
@@ -62917,10 +62916,10 @@ public:
 	int getNumberOfMultipleClicks() const noexcept;
 
 	/** Returns the time at which the last mouse-down occurred. */
-	const Time getLastMouseDownTime() const noexcept;
+	Time getLastMouseDownTime() const noexcept;
 
 	/** Returns the screen position at which the last mouse-down occurred. */
-	const Point<int> getLastMouseDownPosition() const noexcept;
+	Point<int> getLastMouseDownPosition() const noexcept;
 
 	/** Returns true if this mouse is currently down, and if it has been dragged more
 		than a couple of pixels from the place it was pressed.
@@ -63106,7 +63105,7 @@ public:
 	public:
 		ElementBase (ElementType type);
 		virtual ~ElementBase() {}
-		virtual const ValueTree createTree() const = 0;
+		virtual ValueTree createTree() const = 0;
 		virtual void addToPath (Path& path, Expression::Scope*) const = 0;
 		virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 		virtual ElementBase* clone() const = 0;
@@ -63122,7 +63121,7 @@ public:
 	{
 	public:
 		StartSubPath (const RelativePoint& pos);
-		const ValueTree createTree() const;
+		ValueTree createTree() const;
 		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
@@ -63137,7 +63136,7 @@ public:
 	{
 	public:
 		CloseSubPath();
-		const ValueTree createTree() const;
+		ValueTree createTree() const;
 		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
@@ -63150,7 +63149,7 @@ public:
 	{
 	public:
 		LineTo (const RelativePoint& endPoint);
-		const ValueTree createTree() const;
+		ValueTree createTree() const;
 		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
@@ -63165,7 +63164,7 @@ public:
 	{
 	public:
 		QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
-		const ValueTree createTree() const;
+		ValueTree createTree() const;
 		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
@@ -63180,7 +63179,7 @@ public:
 	{
 	public:
 		CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
-		const ValueTree createTree() const;
+		ValueTree createTree() const;
 		void addToPath (Path& path, Expression::Scope*) const;
 		RelativePoint* getControlPoints (int& numPoints);
 		ElementBase* clone() const;
@@ -63278,7 +63277,7 @@ public:
 		the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
 		The string that is returned can be passed to the RelativeRectangle constructor to recreate the rectangle.
 	*/
-	const String toString() const;
+	String toString() const;
 
 	/** Renames a symbol if it is used by any of the coordinates.
 		This calls Expression::withRenamedSymbol() on the rectangle's coordinates.
@@ -64363,7 +64362,7 @@ public:
 	/** Returns the file path or URL from which the video file was loaded.
 		If there isn't one, this returns an empty string.
 	*/
-	const File getCurrentMoviePath() const;
+	File getCurrentMoviePath() const;
 
 	/** Returns true if there's currently a video open. */
 	bool isMovieOpen() const;
@@ -65526,7 +65525,7 @@ public:
 
 		If there isn't one, this returns File::nonexistent
 	*/
-	const File getCurrentMovieFile() const;
+	File getCurrentMovieFile() const;
 
 	/** Returns true if there's currently a movie open. */
 	bool isMovieOpen() const;
@@ -66224,7 +66223,7 @@ public:
 	*/
 	static bool isValidPeer (const ComponentPeer* peer) noexcept;
 
-	virtual const StringArray getAvailableRenderingEngines();
+	virtual StringArray getAvailableRenderingEngines();
 	virtual int getCurrentRenderingEngine() const;
 	virtual void setCurrentRenderingEngine (int index);
 
@@ -67462,7 +67461,7 @@ public:
 		"bottom", but this method is a shortcut that returns them all at once.
 		@see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
 	*/
-	const RelativeRectangle getContentArea() const;
+	RelativeRectangle getContentArea() const;
 
 	/** Changes the main content area.
 		The content area is actually defined by the markers named "left", "right", "top" and
@@ -67490,11 +67489,11 @@ public:
 	/** @internal */
 	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+	ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
 	/** @internal */
-	const Rectangle<float> getDrawableBounds() const;
+	Rectangle<float> getDrawableBounds() const;
 	/** @internal */
 	void childBoundsChanged (Component*);
 	/** @internal */
@@ -67513,11 +67512,11 @@ public:
 		ValueTree getChildList() const;
 		ValueTree getChildListCreating (UndoManager* undoManager);
 
-		const RelativeParallelogram getBoundingBox() const;
+		RelativeParallelogram getBoundingBox() const;
 		void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 		void resetBoundingBoxToContentArea (UndoManager* undoManager);
 
-		const RelativeRectangle getContentArea() const;
+		RelativeRectangle getContentArea() const;
 		void setContentArea (const RelativeRectangle& newArea, UndoManager* undoManager);
 
 		MarkerList::ValueTreeWrapper getMarkerList (bool xAxis) const;
@@ -67576,7 +67575,7 @@ public:
 	void setImage (const Image& imageToUse);
 
 	/** Returns the current image. */
-	const Image getImage() const				{ return image; }
+	const Image& getImage() const noexcept			  { return image; }
 
 	/** Sets the opacity to use when drawing the image. */
 	void setOpacity (float newOpacity);
@@ -67614,11 +67613,11 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	const Rectangle<float> getDrawableBounds() const;
+	Rectangle<float> getDrawableBounds() const;
 	/** @internal */
 	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+	ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
 
@@ -67628,7 +67627,7 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
-		const var getImageIdentifier() const;
+		var getImageIdentifier() const;
 		void setImageIdentifier (const var& newIdentifier, UndoManager* undoManager);
 		Value getImageIdentifierValue (UndoManager* undoManager);
 
@@ -67640,7 +67639,7 @@ public:
 		void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
 		Value getOverlayColourValue (UndoManager* undoManager);
 
-		const RelativeParallelogram getBoundingBox() const;
+		RelativeParallelogram getBoundingBox() const;
 		void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
 		static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
@@ -67777,11 +67776,11 @@ public:
 		FillAndStrokeState (const ValueTree& state);
 
 		ValueTree getFillState (const Identifier& fillOrStrokeType);
-		const RelativeFillType getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider*) const;
+		RelativeFillType getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider*) const;
 		void setFill (const Identifier& fillOrStrokeType, const RelativeFillType& newFill,
 					  ComponentBuilder::ImageProvider*, UndoManager*);
 
-		const PathStrokeType getStrokeType() const;
+		PathStrokeType getStrokeType() const;
 		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager*);
 
 		static const Identifier type, colour, colours, fill, stroke, path, jointStyle, capStyle, strokeWidth,
@@ -67789,7 +67788,7 @@ public:
 	};
 
 	/** @internal */
-	const Rectangle<float> getDrawableBounds() const;
+	Rectangle<float> getDrawableBounds() const;
 	/** @internal */
 	void paint (Graphics& g);
 	/** @internal */
@@ -67866,7 +67865,7 @@ public:
 	/** @internal */
 	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+	ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
 
@@ -67888,17 +67887,17 @@ public:
 			const Identifier getType() const noexcept   { return state.getType(); }
 			int getNumControlPoints() const noexcept;
 
-			const RelativePoint getControlPoint (int index) const;
+			RelativePoint getControlPoint (int index) const;
 			Value getControlPointValue (int index, UndoManager*) const;
-			const RelativePoint getStartPoint() const;
-			const RelativePoint getEndPoint() const;
+			RelativePoint getStartPoint() const;
+			RelativePoint getEndPoint() const;
 			void setControlPoint (int index, const RelativePoint& point, UndoManager*);
 			float getLength (Expression::Scope*) const;
 
 			ValueTreeWrapper getParent() const;
 			Element getPreviousElement() const;
 
-			const String getModeOfEndPoint() const;
+			String getModeOfEndPoint() const;
 			void setModeOfEndPoint (const String& newMode, UndoManager*);
 
 			void convertToLine (UndoManager*);
@@ -67973,7 +67972,7 @@ public:
 	const RelativeParallelogram& getRectangle() const noexcept	  { return bounds; }
 
 	/** Returns the corner size to be used. */
-	const RelativePoint getCornerSize() const			   { return cornerSize; }
+	const RelativePoint& getCornerSize() const noexcept		 { return cornerSize; }
 
 	/** Sets a new corner size for the rectangle */
 	void setCornerSize (const RelativePoint& newSize);
@@ -67983,7 +67982,7 @@ public:
 	/** @internal */
 	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+	ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
 
@@ -67993,11 +67992,11 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
-		const RelativeParallelogram getRectangle() const;
+		RelativeParallelogram getRectangle() const;
 		void setRectangle (const RelativeParallelogram& newBounds, UndoManager*);
 
 		void setCornerSize (const RelativePoint& cornerSize, UndoManager*);
-		const RelativePoint getCornerSize() const;
+		RelativePoint getCornerSize() const;
 		Value getCornerSizeValue (UndoManager*) const;
 
 		static const Identifier topLeft, topRight, bottomLeft, cornerSize;
@@ -68091,11 +68090,11 @@ public:
 	/** @internal */
 	void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
 	/** @internal */
-	const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+	ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
 	/** @internal */
 	static const Identifier valueTreeType;
 	/** @internal */
-	const Rectangle<float> getDrawableBounds() const;
+	Rectangle<float> getDrawableBounds() const;
 
 	/** Internally-used class for wrapping a DrawableText's state into a ValueTree. */
 	class ValueTreeWrapper   : public Drawable::ValueTreeWrapperBase
@@ -68485,7 +68484,7 @@ public:
 
 		You can open one of these devices by calling openDevice().
 	*/
-	static const StringArray getAvailableDevices();
+	static StringArray getAvailableDevices();
 
 	/** Opens a camera device.
 
@@ -68533,12 +68532,12 @@ public:
 
 		This may be platform-specific, e.g. ".mov" or ".avi".
 	*/
-	static const String getFileExtension();
+	static String getFileExtension();
 
 	/** After calling stopRecording(), this method can be called to return the timestamp
 		of the first frame that was written to the file.
 	*/
-	const Time getTimeOfFirstRecordedFrame() const;
+	Time getTimeOfFirstRecordedFrame() const;
 
 	/**
 		Receives callbacks with images from a CameraDevice.

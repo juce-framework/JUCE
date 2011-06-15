@@ -177,7 +177,7 @@ void QuickTimeMovieComponent::closeMovie()
     pimpl->clearHandle();
 }
 
-const File QuickTimeMovieComponent::getCurrentMovieFile() const
+File QuickTimeMovieComponent::getCurrentMovieFile() const
 {
     return movieFile;
 }

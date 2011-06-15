@@ -160,7 +160,8 @@ Font::SharedFontInternal::SharedFontInternal (const float height_, const int sty
       kerning (0),
       ascent (0),
       styleFlags (styleFlags_),
-      typeface (TypefaceCache::getInstance()->getDefaultTypeface())
+      typeface ((styleFlags_ & (Font::bold | Font::italic)) == 0
+                    ? TypefaceCache::getInstance()->getDefaultTypeface() : nullptr)
 {
 }
 
@@ -171,7 +172,7 @@ Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const
       kerning (0),
       ascent (0),
       styleFlags (styleFlags_),
-      typeface (0)
+      typeface (nullptr)
 {
 }
 

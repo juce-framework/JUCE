@@ -127,7 +127,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_USE_CAMERA && JUCE_BUILD_NATIVE
+#if (JUCE_USE_CAMERA || JUCE_DIRECTSHOW) && JUCE_BUILD_NATIVE
 
  /*  If you're using the camera classes, you'll need access to a few DirectShow headers.
 
@@ -148,6 +148,10 @@
  #include <dshow.h>
  #include <qedit.h>
  #include <dshowasf.h>
+#endif
+
+#if JUCE_MEDIAFOUNDATION && JUCE_BUILD_NATIVE
+ #include <evr.h>
 #endif
 
 //==============================================================================
@@ -181,14 +185,6 @@
  */
  #import <QTOLibrary.dll>
  #import <QTOControl.dll>
-#endif
-
-#if JUCE_DIRECTSHOW && JUCE_BUILD_NATIVE
- #include <DShow.h>
-#endif
-
-#if JUCE_MEDIAFOUNDATION && JUCE_BUILD_NATIVE
- #include <evr.h>
 #endif
 
 //==============================================================================

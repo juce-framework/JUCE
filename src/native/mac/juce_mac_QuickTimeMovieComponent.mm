@@ -209,7 +209,7 @@ bool QuickTimeMovieComponent::isMovieOpen() const
     return movie != nil;
 }
 
-const File QuickTimeMovieComponent::getCurrentMovieFile() const
+File QuickTimeMovieComponent::getCurrentMovieFile() const
 {
     return movieFile;
 }
