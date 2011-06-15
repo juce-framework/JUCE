@@ -69,7 +69,7 @@ Component* CameraDevice::createViewerComponent()
     return nullptr;
 }
 
-const String CameraDevice::getFileExtension()
+String CameraDevice::getFileExtension()
 {
     return ".m4a";  // TODO correct?
 }
@@ -79,7 +79,7 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
     // TODO
 }
 
-const Time CameraDevice::getTimeOfFirstRecordedFrame() const
+Time CameraDevice::getTimeOfFirstRecordedFrame() const
 {
     // TODO
     return Time();
@@ -100,7 +100,7 @@ void CameraDevice::removeListener (Listener* listenerToRemove)
     // TODO
 }
 
-const StringArray CameraDevice::getAvailableDevices()
+StringArray CameraDevice::getAvailableDevices()
 {
     StringArray devs;
 

@@ -177,7 +177,7 @@ public:
         }
     }
 
-    const StringArray getChannelNames (bool forInput) const
+    StringArray getChannelNames (bool forInput) const
     {
         StringArray names;
         const char** const ports = JUCE_NAMESPACE::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */
@@ -200,8 +200,8 @@ public:
         return names;
     }
 
-    const StringArray getOutputChannelNames()   { return getChannelNames (false); }
-    const StringArray getInputChannelNames()    { return getChannelNames (true); }
+    StringArray getOutputChannelNames()         { return getChannelNames (false); }
+    StringArray getInputChannelNames()          { return getChannelNames (true); }
     int getNumSampleRates()                     { return client != 0 ? 1 : 0; }
     double getSampleRate (int index)            { return client != 0 ? JUCE_NAMESPACE::jack_get_sample_rate (client) : 0; }
     int getNumBufferSizesAvailable()            { return client != 0 ? 1 : 0; }
@@ -536,7 +536,7 @@ public:
         }
     }
 
-    const StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
         return wantInputNames ? inputNames : outputNames;

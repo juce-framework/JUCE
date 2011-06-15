@@ -306,12 +306,12 @@ public:
     }
 
     //==============================================================================
-    const Time getLastMouseDownTime() const noexcept
+    Time getLastMouseDownTime() const noexcept
     {
         return Time (mouseDowns[0].time);
     }
 
-    const Point<int> getLastMouseDownPosition() const noexcept
+    Point<int> getLastMouseDownPosition() const noexcept
     {
         return mouseDowns[0].position;
     }
@@ -512,8 +512,8 @@ const ModifierKeys MouseInputSource::getCurrentModifiers() const        { return
 Component* MouseInputSource::getComponentUnderMouse() const             { return pimpl->getComponentUnderMouse(); }
 void MouseInputSource::triggerFakeMove() const                          { pimpl->triggerFakeMove(); }
 int MouseInputSource::getNumberOfMultipleClicks() const noexcept        { return pimpl->getNumberOfMultipleClicks(); }
-const Time MouseInputSource::getLastMouseDownTime() const noexcept      { return pimpl->getLastMouseDownTime(); }
-const Point<int> MouseInputSource::getLastMouseDownPosition() const noexcept    { return pimpl->getLastMouseDownPosition(); }
+Time MouseInputSource::getLastMouseDownTime() const noexcept            { return pimpl->getLastMouseDownTime(); }
+Point<int> MouseInputSource::getLastMouseDownPosition() const noexcept  { return pimpl->getLastMouseDownPosition(); }
 bool MouseInputSource::hasMouseMovedSignificantlySincePressed() const noexcept  { return pimpl->hasMouseMovedSignificantlySincePressed(); }
 bool MouseInputSource::canDoUnboundedMovement() const noexcept          { return isMouse(); }
 void MouseInputSource::enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen)    { pimpl->enableUnboundedMouseMovement (isEnabled, keepCursorVisibleUntilOffscreen); }

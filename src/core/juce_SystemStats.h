@@ -41,7 +41,7 @@ public:
 
         See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
     */
-    static const String getJUCEVersion();
+    static String getJUCEVersion();
 
     //==============================================================================
     /** The set of possible results of the getOperatingSystemType() method.
@@ -81,7 +81,7 @@ public:
         @returns a string describing the OS type.
         @see getOperatingSystemType
     */
-    static const String getOperatingSystemName();
+    static String getOperatingSystemName();
 
     /** Returns true if the OS is 64-bit, or false for a 32-bit OS.
     */
@@ -91,16 +91,16 @@ public:
     /** Returns the current user's name, if available.
         @see getFullUserName()
     */
-    static const String getLogonName();
+    static String getLogonName();
 
     /** Returns the current user's full name, if available.
         On some OSes, this may just return the same value as getLogonName().
         @see getLogonName()
     */
-    static const String getFullUserName();
+    static String getFullUserName();
 
     /** Returns the host-name of the computer. */
-    static const String getComputerName();
+    static String getComputerName();
 
     //==============================================================================
     // CPU and memory information..
@@ -116,7 +116,7 @@ public:
 
         Might not be known on some systems.
     */
-    static const String getCpuVendor();
+    static String getCpuVendor();
 
     /** Checks whether Intel MMX instructions are available. */
     static bool hasMMX() noexcept               { return getCPUFlags().hasMMX; }

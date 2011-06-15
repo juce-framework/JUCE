@@ -194,12 +194,12 @@ public:
             The image that is returned will be owned by the caller, but it may come
             from the ImageCache.
         */
-        virtual const Image getImageForIdentifier (const var& imageIdentifier) = 0;
+        virtual Image getImageForIdentifier (const var& imageIdentifier) = 0;
 
         /** Returns an identifier to be used to refer to a given image.
             This is used when a reference to an image is stored in a ValueTree.
         */
-        virtual const var getIdentifierForImage (const Image& image) = 0;
+        virtual var getIdentifierForImage (const Image& image) = 0;
     };
 
     //==============================================================================

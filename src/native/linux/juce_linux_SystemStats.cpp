@@ -40,7 +40,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     return Linux;
 }
 
-const String SystemStats::getOperatingSystemName()
+String SystemStats::getOperatingSystemName()
 {
     return "Linux";
 }
@@ -58,7 +58,7 @@ bool SystemStats::isOperatingSystem64Bit()
 //==============================================================================
 namespace LinuxStatsHelpers
 {
-    const String getCpuInfo (const char* const key)
+    String getCpuInfo (const char* const key)
     {
         StringArray lines;
         lines.addLines (File ("/proc/cpuinfo").loadFileAsString());
@@ -71,7 +71,7 @@ namespace LinuxStatsHelpers
     }
 }
 
-const String SystemStats::getCpuVendor()
+String SystemStats::getCpuVendor()
 {
     return LinuxStatsHelpers::getCpuInfo ("vendor_id");
 }
@@ -97,7 +97,7 @@ int SystemStats::getPageSize()
 }
 
 //==============================================================================
-const String SystemStats::getLogonName()
+String SystemStats::getLogonName()
 {
     const char* user = getenv ("USER");
 
@@ -111,12 +111,12 @@ const String SystemStats::getLogonName()
     return CharPointer_UTF8 (user);
 }
 
-const String SystemStats::getFullUserName()
+String SystemStats::getFullUserName()
 {
     return getLogonName();
 }
 
-const String SystemStats::getComputerName()
+String SystemStats::getComputerName()
 {
     char name [256] = { 0 };
     if (gethostname (name, sizeof (name) - 1) == 0)

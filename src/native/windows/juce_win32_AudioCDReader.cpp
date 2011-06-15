@@ -966,7 +966,7 @@ const int framesPerIndexRead = 4;
 }
 
 //==============================================================================
-const StringArray AudioCDReader::getAvailableCDNames()
+StringArray AudioCDReader::getAvailableCDNames()
 {
     using namespace CDReaderHelpers;
     StringArray results;
@@ -1533,7 +1533,7 @@ AudioCDBurner::~AudioCDBurner()
         pimpl.release()->releaseObjects();
 }
 
-const StringArray AudioCDBurner::findAvailableDevices()
+StringArray AudioCDBurner::findAvailableDevices()
 {
     StringArray devs;
     CDBurnerHelpers::enumCDBurners (&devs, -1, 0);
@@ -1581,7 +1581,7 @@ AudioCDBurner::DiskState AudioCDBurner::waitUntilStateChange (int timeOutMillise
     return newState;
 }
 
-const Array<int> AudioCDBurner::getAvailableWriteSpeeds() const
+Array<int> AudioCDBurner::getAvailableWriteSpeeds() const
 {
     Array<int> results;
     const int maxSpeed = pimpl->getIntProperty (L"MaxWriteSpeed", 1);
@@ -1611,8 +1611,8 @@ int AudioCDBurner::getNumAvailableAudioBlocks() const
     return blocksFree;
 }
 
-const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener, bool ejectDiscAfterwards,
-                                  bool performFakeBurnForTesting, int writeSpeed)
+String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener, bool ejectDiscAfterwards,
+                            bool performFakeBurnForTesting, int writeSpeed)
 {
     pimpl->setIntProperty (L"WriteSpeed", writeSpeed > 0 ? writeSpeed : -1);
 

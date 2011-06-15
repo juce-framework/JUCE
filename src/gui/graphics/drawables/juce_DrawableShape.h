@@ -136,11 +136,11 @@ public:
         FillAndStrokeState (const ValueTree& state);
 
         ValueTree getFillState (const Identifier& fillOrStrokeType);
-        const RelativeFillType getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider*) const;
+        RelativeFillType getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider*) const;
         void setFill (const Identifier& fillOrStrokeType, const RelativeFillType& newFill,
                       ComponentBuilder::ImageProvider*, UndoManager*);
 
-        const PathStrokeType getStrokeType() const;
+        PathStrokeType getStrokeType() const;
         void setStrokeType (const PathStrokeType& newStrokeType, UndoManager*);
 
         static const Identifier type, colour, colours, fill, stroke, path, jointStyle, capStyle, strokeWidth,
@@ -148,7 +148,7 @@ public:
     };
 
     /** @internal */
-    const Rectangle<float> getDrawableBounds() const;
+    Rectangle<float> getDrawableBounds() const;
     /** @internal */
     void paint (Graphics& g);
     /** @internal */

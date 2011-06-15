@@ -42,7 +42,7 @@ Typeface::~Typeface()
 {
 }
 
-const Typeface::Ptr Typeface::getFallbackTypeface()
+Typeface::Ptr Typeface::getFallbackTypeface()
 {
     const Font fallbackFont (Font::getFallbackFontName(), 10, 0);
     return fallbackFont.getTypeface();

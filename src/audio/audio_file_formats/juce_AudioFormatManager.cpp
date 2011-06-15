@@ -123,7 +123,7 @@ AudioFormat* AudioFormatManager::findFormatForFileExtension (const String& fileE
     return nullptr;
 }
 
-const String AudioFormatManager::getWildcardForAllFormats() const
+String AudioFormatManager::getWildcardForAllFormats() const
 {
     StringArray allExtensions;
 

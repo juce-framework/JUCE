@@ -52,7 +52,7 @@ public:
     void setImage (const Image& imageToUse);
 
     /** Returns the current image. */
-    const Image getImage() const                                { return image; }
+    const Image& getImage() const noexcept                      { return image; }
 
     /** Sets the opacity to use when drawing the image. */
     void setOpacity (float newOpacity);
@@ -91,11 +91,11 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    const Rectangle<float> getDrawableBounds() const;
+    Rectangle<float> getDrawableBounds() const;
     /** @internal */
     void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
     /** @internal */
-    const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
     /** @internal */
     static const Identifier valueTreeType;
 
@@ -106,7 +106,7 @@ public:
     public:
         ValueTreeWrapper (const ValueTree& state);
 
-        const var getImageIdentifier() const;
+        var getImageIdentifier() const;
         void setImageIdentifier (const var& newIdentifier, UndoManager* undoManager);
         Value getImageIdentifierValue (UndoManager* undoManager);
 
@@ -118,7 +118,7 @@ public:
         void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
         Value getOverlayColourValue (UndoManager* undoManager);
 
-        const RelativeParallelogram getBoundingBox() const;
+        RelativeParallelogram getBoundingBox() const;
         void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
         static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;

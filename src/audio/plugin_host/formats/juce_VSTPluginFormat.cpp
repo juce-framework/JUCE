@@ -2877,7 +2877,7 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
   #endif
 }
 
-const String VSTPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
+String VSTPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
 {
     return fileOrIdentifier;
 }
@@ -2887,7 +2887,7 @@ bool VSTPluginFormat::doesPluginStillExist (const PluginDescription& desc)
     return File (desc.fileOrIdentifier).exists();
 }
 
-const StringArray VSTPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
+StringArray VSTPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
 {
     StringArray results;
 
@@ -2919,7 +2919,7 @@ void VSTPluginFormat::recursiveFileSearch (StringArray& results, const File& dir
     }
 }
 
-const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
+FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
    #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");

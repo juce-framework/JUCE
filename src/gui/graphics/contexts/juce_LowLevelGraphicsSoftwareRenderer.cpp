@@ -1026,19 +1026,19 @@ public:
 
     typedef ReferenceCountedObjectPtr<ClipRegionBase> Ptr;
 
-    virtual const Ptr clone() const = 0;
-    virtual const Ptr applyClipTo (const Ptr& target) const = 0;
+    virtual Ptr clone() const = 0;
+    virtual Ptr applyClipTo (const Ptr& target) const = 0;
 
-    virtual const Ptr clipToRectangle (const Rectangle<int>& r) = 0;
-    virtual const Ptr clipToRectangleList (const RectangleList& r) = 0;
-    virtual const Ptr excludeClipRectangle (const Rectangle<int>& r) = 0;
-    virtual const Ptr clipToPath (const Path& p, const AffineTransform& transform) = 0;
-    virtual const Ptr clipToEdgeTable (const EdgeTable& et) = 0;
-    virtual const Ptr clipToImageAlpha (const Image& image, const AffineTransform& t, const bool betterQuality) = 0;
-    virtual const Ptr translated (const Point<int>& delta) = 0;
+    virtual Ptr clipToRectangle (const Rectangle<int>& r) = 0;
+    virtual Ptr clipToRectangleList (const RectangleList& r) = 0;
+    virtual Ptr excludeClipRectangle (const Rectangle<int>& r) = 0;
+    virtual Ptr clipToPath (const Path& p, const AffineTransform& transform) = 0;
+    virtual Ptr clipToEdgeTable (const EdgeTable& et) = 0;
+    virtual Ptr clipToImageAlpha (const Image& image, const AffineTransform& t, const bool betterQuality) = 0;
+    virtual Ptr translated (const Point<int>& delta) = 0;
 
     virtual bool clipRegionIntersects (const Rectangle<int>& r) const = 0;
-    virtual const Rectangle<int> getClipBounds() const = 0;
+    virtual Rectangle<int> getClipBounds() const = 0;
 
     virtual void fillRectWithColour (Image::BitmapData& destData, const Rectangle<int>& area, const PixelARGB& colour, bool replaceContents) const = 0;
     virtual void fillRectWithColour (Image::BitmapData& destData, const Rectangle<float>& area, const PixelARGB& colour) const = 0;
@@ -1226,23 +1226,23 @@ public:
     ClipRegion_EdgeTable (const Rectangle<int>& bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
     ClipRegion_EdgeTable (const ClipRegion_EdgeTable& other) : edgeTable (other.edgeTable) {}
 
-    const Ptr clone() const
+    Ptr clone() const
     {
         return new ClipRegion_EdgeTable (*this);
     }
 
-    const Ptr applyClipTo (const Ptr& target) const
+    Ptr applyClipTo (const Ptr& target) const
     {
         return target->clipToEdgeTable (edgeTable);
     }
 
-    const Ptr clipToRectangle (const Rectangle<int>& r)
+    Ptr clipToRectangle (const Rectangle<int>& r)
     {
         edgeTable.clipToRectangle (r);
         return edgeTable.isEmpty() ? nullptr : this;
     }
 
-    const Ptr clipToRectangleList (const RectangleList& r)
+    Ptr clipToRectangleList (const RectangleList& r)
     {
         RectangleList inverse (edgeTable.getMaximumBounds());
 
@@ -1253,26 +1253,26 @@ public:
         return edgeTable.isEmpty() ? nullptr : this;
     }
 
-    const Ptr excludeClipRectangle (const Rectangle<int>& r)
+    Ptr excludeClipRectangle (const Rectangle<int>& r)
     {
         edgeTable.excludeRectangle (r);
         return edgeTable.isEmpty() ? nullptr : this;
     }
 
-    const Ptr clipToPath (const Path& p, const AffineTransform& transform)
+    Ptr clipToPath (const Path& p, const AffineTransform& transform)
     {
         EdgeTable et (edgeTable.getMaximumBounds(), p, transform);
         edgeTable.clipToEdgeTable (et);
         return edgeTable.isEmpty() ? nullptr : this;
     }
 
-    const Ptr clipToEdgeTable (const EdgeTable& et)
+    Ptr clipToEdgeTable (const EdgeTable& et)
     {
         edgeTable.clipToEdgeTable (et);
         return edgeTable.isEmpty() ? nullptr : this;
     }
 
-    const Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
+    Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
     {
         const Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
@@ -1317,7 +1317,7 @@ public:
         return edgeTable.isEmpty() ? nullptr : this;
     }
 
-    const Ptr translated (const Point<int>& delta)
+    Ptr translated (const Point<int>& delta)
     {
         edgeTable.translate ((float) delta.getX(), delta.getY());
         return edgeTable.isEmpty() ? nullptr : this;
@@ -1328,7 +1328,7 @@ public:
         return edgeTable.getMaximumBounds().intersects (r);
     }
 
-    const Rectangle<int> getClipBounds() const
+    Rectangle<int> getClipBounds() const
     {
         return edgeTable.getMaximumBounds();
     }
@@ -1431,50 +1431,50 @@ public:
     ClipRegion_RectangleList (const RectangleList& r)  : clip (r) {}
     ClipRegion_RectangleList (const ClipRegion_RectangleList& other) : clip (other.clip) {}
 
-    const Ptr clone() const
+    Ptr clone() const
     {
         return new ClipRegion_RectangleList (*this);
     }
 
-    const Ptr applyClipTo (const Ptr& target) const
+    Ptr applyClipTo (const Ptr& target) const
     {
         return target->clipToRectangleList (clip);
     }
 
-    const Ptr clipToRectangle (const Rectangle<int>& r)
+    Ptr clipToRectangle (const Rectangle<int>& r)
     {
         clip.clipTo (r);
         return clip.isEmpty() ? nullptr : this;
     }
 
-    const Ptr clipToRectangleList (const RectangleList& r)
+    Ptr clipToRectangleList (const RectangleList& r)
     {
         clip.clipTo (r);
         return clip.isEmpty() ? nullptr : this;
     }
 
-    const Ptr excludeClipRectangle (const Rectangle<int>& r)
+    Ptr excludeClipRectangle (const Rectangle<int>& r)
     {
         clip.subtract (r);
         return clip.isEmpty() ? nullptr : this;
     }
 
-    const Ptr clipToPath (const Path& p, const AffineTransform& transform)
+    Ptr clipToPath (const Path& p, const AffineTransform& transform)
     {
         return Ptr (new ClipRegion_EdgeTable (clip))->clipToPath (p, transform);
     }
 
-    const Ptr clipToEdgeTable (const EdgeTable& et)
+    Ptr clipToEdgeTable (const EdgeTable& et)
     {
         return Ptr (new ClipRegion_EdgeTable (clip))->clipToEdgeTable (et);
     }
 
-    const Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
+    Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
     {
         return Ptr (new ClipRegion_EdgeTable (clip))->clipToImageAlpha (image, transform, betterQuality);
     }
 
-    const Ptr translated (const Point<int>& delta)
+    Ptr translated (const Point<int>& delta)
     {
         clip.offsetAll (delta.getX(), delta.getY());
         return clip.isEmpty() ? nullptr : this;
@@ -1485,7 +1485,7 @@ public:
         return clip.intersects (r);
     }
 
-    const Rectangle<int> getClipBounds() const
+    Rectangle<int> getClipBounds() const
     {
         return clip.getBounds();
     }
@@ -1934,12 +1934,12 @@ public:
         return false;
     }
 
-    const Rectangle<int> getUntransformedClipBounds() const
+    Rectangle<int> getUntransformedClipBounds() const
     {
         return clip != nullptr ? clip->getClipBounds() : Rectangle<int>();
     }
 
-    const Rectangle<int> getClipBounds() const
+    Rectangle<int> getClipBounds() const
     {
         if (clip != nullptr)
         {

@@ -173,7 +173,7 @@ public:
 
         The country codes are supposed to be 2-character ISO complient codes.
     */
-    const StringArray getCountryCodes() const                   { return countryCodes; }
+    const StringArray& getCountryCodes() const            { return countryCodes; }
 
 
     //==============================================================================

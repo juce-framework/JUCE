@@ -493,7 +493,7 @@ private:
         void sendChildOrderChangedMessage();
         void sendParentChangeMessage();
         const var& getProperty (const Identifier& name) const;
-        const var getProperty (const Identifier& name, const var& defaultReturnValue) const;
+        var getProperty (const Identifier& name, const var& defaultReturnValue) const;
         void setProperty (const Identifier& name, const var& newValue, UndoManager*);
         bool hasProperty (const Identifier& name) const;
         void removeProperty (const Identifier& name, UndoManager*);

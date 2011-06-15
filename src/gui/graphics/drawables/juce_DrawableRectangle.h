@@ -56,7 +56,7 @@ public:
     const RelativeParallelogram& getRectangle() const noexcept          { return bounds; }
 
     /** Returns the corner size to be used. */
-    const RelativePoint getCornerSize() const                           { return cornerSize; }
+    const RelativePoint& getCornerSize() const noexcept                 { return cornerSize; }
 
     /** Sets a new corner size for the rectangle */
     void setCornerSize (const RelativePoint& newSize);
@@ -67,7 +67,7 @@ public:
     /** @internal */
     void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
     /** @internal */
-    const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
     /** @internal */
     static const Identifier valueTreeType;
 
@@ -78,11 +78,11 @@ public:
     public:
         ValueTreeWrapper (const ValueTree& state);
 
-        const RelativeParallelogram getRectangle() const;
+        RelativeParallelogram getRectangle() const;
         void setRectangle (const RelativeParallelogram& newBounds, UndoManager*);
 
         void setCornerSize (const RelativePoint& cornerSize, UndoManager*);
-        const RelativePoint getCornerSize() const;
+        RelativePoint getCornerSize() const;
         Value getCornerSizeValue (UndoManager*) const;
 
         static const Identifier topLeft, topRight, bottomLeft, cornerSize;

@@ -50,7 +50,7 @@ public:
 
         E.g. "VST", "AudioUnit", etc.
     */
-    virtual const String getName() const = 0;
+    virtual String getName() const = 0;
 
     /** This tries to create descriptions for all the plugin types available in
         a binary module file.
@@ -80,7 +80,7 @@ public:
 
     /** Returns a readable version of the name of the plugin that this identifier refers to.
     */
-    virtual const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) = 0;
+    virtual String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) = 0;
 
     /** Checks whether this plugin could possibly be loaded.
 
@@ -94,15 +94,15 @@ public:
         The path might be ignored, e.g. by AUs, which are found by the OS rather
         than manually.
     */
-    virtual const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
-                                                     bool recursive) = 0;
+    virtual StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
+                                               bool recursive) = 0;
 
     /** Returns the typical places to look for this kind of plugin.
 
         Note that if this returns no paths, it means that the format can't be scanned-for
         (i.e. it's an internal format that doesn't live in files)
     */
-    virtual const FileSearchPath getDefaultLocationsToSearch() = 0;
+    virtual FileSearchPath getDefaultLocationsToSearch() = 0;
 
 
 protected:

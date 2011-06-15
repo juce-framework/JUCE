@@ -77,7 +77,7 @@ public:
 
         E.g. "AIFF file"
     */
-    const String getFormatName() const noexcept     { return formatName; }
+    const String& getFormatName() const noexcept        { return formatName; }
 
     //==============================================================================
     /** Writes a set of samples to the audio stream.
@@ -192,8 +192,9 @@ public:
         */
         void setThumbnailToUpdate (AudioThumbnail* thumbnailToUpdate);
 
-        /** @internal */
+       #ifndef DOXYGEN
         class Buffer; // (only public for VC6 compatibility)
+       #endif
 
     private:
         friend class ScopedPointer<Buffer>;

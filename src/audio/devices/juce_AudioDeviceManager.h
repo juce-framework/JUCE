@@ -191,12 +191,12 @@ public:
 
         @returns an error message if anything went wrong, or an empty string if it worked ok.
     */
-    const String initialise (int numInputChannelsNeeded,
-                             int numOutputChannelsNeeded,
-                             const XmlElement* savedState,
-                             bool selectDefaultDeviceOnFailure,
-                             const String& preferredDefaultDeviceName = String::empty,
-                             const AudioDeviceSetup* preferredSetupOptions = 0);
+    String initialise (int numInputChannelsNeeded,
+                       int numOutputChannelsNeeded,
+                       const XmlElement* savedState,
+                       bool selectDefaultDeviceOnFailure,
+                       const String& preferredDefaultDeviceName = String::empty,
+                       const AudioDeviceSetup* preferredSetupOptions = 0);
 
     /** Returns some XML representing the current state of the manager.
 
@@ -234,8 +234,8 @@ public:
 
         @see getAudioDeviceSetup
     */
-    const String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
-                                      bool treatAsChosenDevice);
+    String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
+                                bool treatAsChosenDevice);
 
 
     /** Returns the currently-active audio device. */
@@ -244,7 +244,7 @@ public:
     /** Returns the type of audio device currently in use.
         @see setCurrentAudioDeviceType
     */
-    const String getCurrentAudioDeviceType() const                      { return currentDeviceType; }
+    String getCurrentAudioDeviceType() const                            { return currentDeviceType; }
 
     /** Returns the currently active audio device type object.
         Don't keep a copy of this pointer - it's owned by the device manager and could
@@ -375,7 +375,7 @@ public:
 
         @see setDefaultMidiOutput, getDefaultMidiOutput
     */
-    const String getDefaultMidiOutputName() const                   { return defaultMidiOutputName; }
+    String getDefaultMidiOutputName() const                         { return defaultMidiOutputName; }
 
     /** Returns the current default midi output device.
 
@@ -496,8 +496,8 @@ private:
     void audioDeviceStoppedInt();
     void handleIncomingMidiMessageInt (MidiInput*, const MidiMessage&);
 
-    const String restartDevice (int blockSizeToUse, double sampleRateToUse,
-                                const BigInteger& ins, const BigInteger& outs);
+    String restartDevice (int blockSizeToUse, double sampleRateToUse,
+                          const BigInteger& ins, const BigInteger& outs);
     void stopDevice();
 
     void updateXml();

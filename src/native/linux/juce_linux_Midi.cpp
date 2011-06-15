@@ -215,7 +215,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice);
 };
 
-const StringArray MidiOutput::getDevices()
+StringArray MidiOutput::getDevices()
 {
     StringArray devices;
     iterateMidiDevices (false, devices, -1);
@@ -379,7 +379,7 @@ int MidiInput::getDefaultDeviceIndex()
     return 0;
 }
 
-const StringArray MidiInput::getDevices()
+StringArray MidiInput::getDevices()
 {
     StringArray devices;
     iterateMidiDevices (true, devices, -1);
@@ -424,7 +424,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
 // (These are just stub functions if ALSA is unavailable...)
 
-const StringArray MidiOutput::getDevices()                          { return StringArray(); }
+StringArray MidiOutput::getDevices()                                { return StringArray(); }
 int MidiOutput::getDefaultDeviceIndex()                             { return 0; }
 MidiOutput* MidiOutput::openDevice (int)                            { return nullptr; }
 MidiOutput* MidiOutput::createNewDevice (const String&)             { return nullptr; }
@@ -436,7 +436,7 @@ MidiInput::~MidiInput() {}
 void MidiInput::start() {}
 void MidiInput::stop()  {}
 int MidiInput::getDefaultDeviceIndex()      { return 0; }
-const StringArray MidiInput::getDevices()   { return StringArray(); }
+StringArray MidiInput::getDevices()         { return StringArray(); }
 MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { return nullptr; }
 MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return nullptr; }
 

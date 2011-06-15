@@ -105,7 +105,7 @@ int TableHeaderComponent::getNumColumns (const bool onlyCountVisibleColumns) con
     }
 }
 
-const String TableHeaderComponent::getColumnName (const int columnId) const
+String TableHeaderComponent::getColumnName (const int columnId) const
 {
     const ColumnInfo* const ci = getInfoForId (columnId);
     return ci != nullptr ? ci->name : String::empty;
@@ -431,7 +431,7 @@ void TableHeaderComponent::reSortTable()
 }
 
 //==============================================================================
-const String TableHeaderComponent::toString() const
+String TableHeaderComponent::toString() const
 {
     String s;
 

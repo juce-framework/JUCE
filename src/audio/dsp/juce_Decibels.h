@@ -67,9 +67,9 @@ public:
         be "-INF dB".
     */
     template <typename Type>
-    static const String toString (const Type decibels,
-                                  const int decimalPlaces = 2,
-                                  const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
+    static String toString (const Type decibels,
+                            const int decimalPlaces = 2,
+                            const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
     {
         String s;
 

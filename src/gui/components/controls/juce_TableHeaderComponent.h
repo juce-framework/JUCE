@@ -137,7 +137,7 @@ public:
     /** Returns the name for a column.
         @see setColumnName
     */
-    const String getColumnName (int columnId) const;
+    String getColumnName (int columnId) const;
 
     /** Changes the name of a column. */
     void setColumnName (int columnId, const String& newName);
@@ -286,7 +286,7 @@ public:
 
         @see restoreFromString
     */
-    const String toString() const;
+    String toString() const;
 
     /** Restores the state of the table, based on a string previously created with
         toString().

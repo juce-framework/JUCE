@@ -138,7 +138,7 @@ DrawableRectangle::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
     jassert (state.hasType (valueTreeType));
 }
 
-const RelativeParallelogram DrawableRectangle::ValueTreeWrapper::getRectangle() const
+RelativeParallelogram DrawableRectangle::ValueTreeWrapper::getRectangle() const
 {
     return RelativeParallelogram (state.getProperty (topLeft, "0, 0"),
                                   state.getProperty (topRight, "100, 0"),
@@ -157,7 +157,7 @@ void DrawableRectangle::ValueTreeWrapper::setCornerSize (const RelativePoint& ne
     state.setProperty (cornerSize, newSize.toString(), undoManager);
 }
 
-const RelativePoint DrawableRectangle::ValueTreeWrapper::getCornerSize() const
+RelativePoint DrawableRectangle::ValueTreeWrapper::getCornerSize() const
 {
     return RelativePoint (state [cornerSize]);
 }
@@ -179,7 +179,7 @@ void DrawableRectangle::refreshFromValueTree (const ValueTree& tree, ComponentBu
     setCornerSize (v.getCornerSize());
 }
 
-const ValueTree DrawableRectangle::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
+ValueTree DrawableRectangle::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);

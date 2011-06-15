@@ -46,12 +46,12 @@ public:
     ~LADSPAPluginFormat();
 
     //==============================================================================
-    const String getName() const                { return "LADSPA"; }
+    String getName() const                { return "LADSPA"; }
     void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
     bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
-    const FileSearchPath getDefaultLocationsToSearch();
+    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
+    FileSearchPath getDefaultLocationsToSearch();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LADSPAPluginFormat);

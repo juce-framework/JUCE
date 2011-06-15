@@ -728,7 +728,7 @@ private:
 #endif
 
 //==============================================================================
-const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
+Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new MacTypeface (font);
 }

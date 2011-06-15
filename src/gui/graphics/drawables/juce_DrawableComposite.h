@@ -72,7 +72,7 @@ public:
         "bottom", but this method is a shortcut that returns them all at once.
         @see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
     */
-    const RelativeRectangle getContentArea() const;
+    RelativeRectangle getContentArea() const;
 
     /** Changes the main content area.
         The content area is actually defined by the markers named "left", "right", "top" and
@@ -102,11 +102,11 @@ public:
     /** @internal */
     void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
     /** @internal */
-    const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
     /** @internal */
     static const Identifier valueTreeType;
     /** @internal */
-    const Rectangle<float> getDrawableBounds() const;
+    Rectangle<float> getDrawableBounds() const;
     /** @internal */
     void childBoundsChanged (Component*);
     /** @internal */
@@ -126,11 +126,11 @@ public:
         ValueTree getChildList() const;
         ValueTree getChildListCreating (UndoManager* undoManager);
 
-        const RelativeParallelogram getBoundingBox() const;
+        RelativeParallelogram getBoundingBox() const;
         void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
         void resetBoundingBoxToContentArea (UndoManager* undoManager);
 
-        const RelativeRectangle getContentArea() const;
+        RelativeRectangle getContentArea() const;
         void setContentArea (const RelativeRectangle& newArea, UndoManager* undoManager);
 
         MarkerList::ValueTreeWrapper getMarkerList (bool xAxis) const;

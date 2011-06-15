@@ -84,7 +84,7 @@ public:
     public:
         ElementBase (ElementType type);
         virtual ~ElementBase() {}
-        virtual const ValueTree createTree() const = 0;
+        virtual ValueTree createTree() const = 0;
         virtual void addToPath (Path& path, Expression::Scope*) const = 0;
         virtual RelativePoint* getControlPoints (int& numPoints) = 0;
         virtual ElementBase* clone() const = 0;
@@ -101,7 +101,7 @@ public:
     {
     public:
         StartSubPath (const RelativePoint& pos);
-        const ValueTree createTree() const;
+        ValueTree createTree() const;
         void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
@@ -117,7 +117,7 @@ public:
     {
     public:
         CloseSubPath();
-        const ValueTree createTree() const;
+        ValueTree createTree() const;
         void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
@@ -131,7 +131,7 @@ public:
     {
     public:
         LineTo (const RelativePoint& endPoint);
-        const ValueTree createTree() const;
+        ValueTree createTree() const;
         void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
@@ -147,7 +147,7 @@ public:
     {
     public:
         QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
-        const ValueTree createTree() const;
+        ValueTree createTree() const;
         void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
@@ -163,7 +163,7 @@ public:
     {
     public:
         CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
-        const ValueTree createTree() const;
+        ValueTree createTree() const;
         void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;

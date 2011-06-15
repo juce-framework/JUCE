@@ -46,7 +46,7 @@ namespace CoreMidiHelpers
     #define CHECK_ERROR(a) CoreMidiHelpers::logError (a, __LINE__)
 
     //==============================================================================
-    const String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
+    String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
     {
         String result;
         CFStringRef str = 0;
@@ -108,7 +108,7 @@ namespace CoreMidiHelpers
         return result;
     }
 
-    const String getConnectedEndpointName (MIDIEndpointRef endpoint)
+    String getConnectedEndpointName (MIDIEndpointRef endpoint)
     {
         String result;
 
@@ -287,7 +287,7 @@ namespace CoreMidiHelpers
 }
 
 //==============================================================================
-const StringArray MidiOutput::getDevices()
+StringArray MidiOutput::getDevices()
 {
     StringArray s;
 
@@ -409,7 +409,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 }
 
 //==============================================================================
-const StringArray MidiInput::getDevices()
+StringArray MidiInput::getDevices()
 {
     StringArray s;
 
@@ -556,9 +556,9 @@ void MidiInput::stop()
 
 MidiOutput::~MidiOutput() {}
 void MidiOutput::sendMessageNow (const MidiMessage& message)                {}
-const StringArray MidiOutput::getDevices()                                  { return StringArray(); }
+StringArray MidiOutput::getDevices()                                        { return StringArray(); }
 MidiOutput* MidiOutput::openDevice (int index)                              { return nullptr; }
-const StringArray MidiInput::getDevices()                                   { return StringArray(); }
+StringArray MidiInput::getDevices()                                         { return StringArray(); }
 MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)   { return nullptr; }
 
 #endif

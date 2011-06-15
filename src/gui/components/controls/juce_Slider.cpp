@@ -653,7 +653,7 @@ void Slider::setTextValueSuffix (const String& suffix)
     }
 }
 
-const String Slider::getTextValueSuffix() const
+String Slider::getTextValueSuffix() const
 {
     return textSuffix;
 }

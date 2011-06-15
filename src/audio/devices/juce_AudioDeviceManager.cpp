@@ -114,12 +114,12 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>&
 }
 
 //==============================================================================
-const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
-                                             const int numOutputChannelsNeeded,
-                                             const XmlElement* const e,
-                                             const bool selectDefaultDeviceOnFailure,
-                                             const String& preferredDefaultDeviceName,
-                                             const AudioDeviceSetup* preferredSetupOptions)
+String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
+                                       const int numOutputChannelsNeeded,
+                                       const XmlElement* const e,
+                                       const bool selectDefaultDeviceOnFailure,
+                                       const String& preferredDefaultDeviceName,
+                                       const AudioDeviceSetup* preferredSetupOptions)
 {
     scanDevicesIfNeeded();
 
@@ -322,8 +322,8 @@ AudioIODeviceType* AudioDeviceManager::getCurrentDeviceTypeObject() const
     return availableDeviceTypes[0];
 }
 
-const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
-                                                      const bool treatAsChosenDevice)
+String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
+                                                const bool treatAsChosenDevice)
 {
     jassert (&newSetup != &currentSetup);    // this will have no effect
 

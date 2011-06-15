@@ -74,7 +74,7 @@ public:
                                             the user has finished typing and pressed the return
                                             key.
     */
-    const String getText (bool returnActiveEditorContents = false) const;
+    String getText (bool returnActiveEditorContents = false) const;
 
     /** Returns the text content as a Value object.
         You can call Value::referTo() on this object to make the label read and control

@@ -859,7 +859,7 @@ void DirectShowComponent::closeMovie()
 }
 
 //======================================================================
-const File DirectShowComponent::getCurrentMoviePath() const     { return videoPath; }
+File DirectShowComponent::getCurrentMoviePath() const           { return videoPath; }
 bool DirectShowComponent::isMovieOpen() const                   { return videoLoaded; }
 double DirectShowComponent::getMovieDuration() const            { return videoLoaded ? context->getDuration() : 0.0; }
 void DirectShowComponent::setLooping (const bool shouldLoop)    { looping = shouldLoop; }

@@ -64,7 +64,7 @@ public:
 
     //==============================================================================
     /** Creates a new system typeface. */
-    static const Ptr createSystemTypefaceFor (const Font& font);
+    static Ptr createSystemTypefaceFor (const Font& font);
 
     //==============================================================================
     /** Destructor. */
@@ -128,7 +128,7 @@ protected:
 
     explicit Typeface (const String& name) noexcept;
 
-    static const Ptr getFallbackTypeface();
+    static Ptr getFallbackTypeface();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface);

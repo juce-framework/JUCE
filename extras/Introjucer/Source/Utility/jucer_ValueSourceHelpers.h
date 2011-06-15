@@ -42,7 +42,7 @@ public:
     }
 
     void valueChanged (Value&)   { sendChangeMessage (true); }
-    const var getValue() const   { return (Type) sourceValue.getValue(); }
+    var getValue() const         { return (Type) sourceValue.getValue(); }
 
     void setValue (const var& newValue)
     {

@@ -88,7 +88,7 @@ public:
         the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
         The string that is returned can be passed to the RelativeRectangle constructor to recreate the rectangle.
     */
-    const String toString() const;
+    String toString() const;
 
     /** Renames a symbol if it is used by any of the coordinates.
         This calls Expression::withRenamedSymbol() on the rectangle's coordinates.

@@ -102,7 +102,7 @@ public:
 
         @see getDefaultDeviceIndex, openDevice
     */
-    static const StringArray getDevices();
+    static StringArray getDevices();
 
     /** Returns the index of the default midi input device to use.
 
@@ -125,7 +125,7 @@ public:
     static MidiInput* openDevice (int deviceIndex,
                                   MidiInputCallback* callback);
 
-#if JUCE_LINUX || JUCE_MAC || DOXYGEN
+   #if JUCE_LINUX || JUCE_MAC || DOXYGEN
     /** This will try to create a new midi input device (Not available on Windows).
 
         This will attempt to create a new midi input device with the specified name,
@@ -138,20 +138,19 @@ public:
     */
     static MidiInput* createNewDevice (const String& deviceName,
                                        MidiInputCallback* callback);
-#endif
+   #endif
 
     //==============================================================================
     /** Destructor. */
     virtual ~MidiInput();
 
-    /** Returns the name of this device.
-    */
-    virtual const String getName() const noexcept                   { return name; }
+    /** Returns the name of this device. */
+    const String& getName() const noexcept                      { return name; }
 
     /** Allows you to set a custom name for the device, in case you don't like the name
         it was given when created.
     */
-    virtual void setName (const String& newName) noexcept           { name = newName; }
+    void setName (const String& newName) noexcept               { name = newName; }
 
     //==============================================================================
     /** Starts the device running.

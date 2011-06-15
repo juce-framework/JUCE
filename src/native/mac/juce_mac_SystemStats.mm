@@ -97,7 +97,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     return MacOSX;
 }
 
-const String SystemStats::getOperatingSystemName()
+String SystemStats::getOperatingSystemName()
 {
    #if JUCE_IOS
     String s ("iOS ");
@@ -143,7 +143,7 @@ int SystemStats::getMemorySizeInMegabytes()
     return (int) (mem / (1024 * 1024));
 }
 
-const String SystemStats::getCpuVendor()
+String SystemStats::getCpuVendor()
 {
    #if JUCE_INTEL
     uint32 dummy = 0;
@@ -173,17 +173,17 @@ int SystemStats::getCpuSpeedInMegaherz()
 }
 
 //==============================================================================
-const String SystemStats::getLogonName()
+String SystemStats::getLogonName()
 {
     return nsStringToJuce (NSUserName());
 }
 
-const String SystemStats::getFullUserName()
+String SystemStats::getFullUserName()
 {
     return nsStringToJuce (NSFullUserName());
 }
 
-const String SystemStats::getComputerName()
+String SystemStats::getComputerName()
 {
     char name [256] = { 0 };
     if (gethostname (name, sizeof (name) - 1) == 0)

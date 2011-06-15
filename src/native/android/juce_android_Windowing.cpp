@@ -398,7 +398,7 @@ public:
         // TODO
     }
 
-    const StringArray getAvailableRenderingEngines()
+    StringArray getAvailableRenderingEngines()
     {
         StringArray s (ComponentPeer::getAvailableRenderingEngines());
         s.add ("Android Canvas Renderer");

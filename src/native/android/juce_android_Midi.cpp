@@ -29,7 +29,7 @@
 
 
 //==============================================================================
-const StringArray MidiOutput::getDevices()
+StringArray MidiOutput::getDevices()
 {
     StringArray devices;
 
@@ -78,7 +78,7 @@ int MidiInput::getDefaultDeviceIndex()
     return 0;
 }
 
-const StringArray MidiInput::getDevices()
+StringArray MidiInput::getDevices()
 {
     StringArray devs;
 

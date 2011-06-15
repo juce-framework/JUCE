@@ -667,11 +667,11 @@ private:
         }
     }
 
-    const FillType getPathFillType (const Path& path,
-                                    const String& fill,
-                                    const String& fillOpacity,
-                                    const String& overallOpacity,
-                                    const Colour& defaultColour) const
+    FillType getPathFillType (const Path& path,
+                              const String& fill,
+                              const String& fillOpacity,
+                              const String& overallOpacity,
+                              const Colour& defaultColour) const
     {
         float opacity = 1.0f;
 
@@ -785,7 +785,7 @@ private:
         return colour.withMultipliedAlpha (opacity);
     }
 
-    const PathStrokeType getStrokeFor (const XmlElement* const xml) const
+    PathStrokeType getStrokeFor (const XmlElement* const xml) const
     {
         const String strokeWidth (getStyleAttribute (xml, "stroke-width"));
         const String cap (getStyleAttribute (xml, "stroke-linecap"));

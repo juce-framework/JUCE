@@ -73,7 +73,7 @@ public:
     /** @internal */
     void refreshFromValueTree (const ValueTree& tree, ComponentBuilder& builder);
     /** @internal */
-    const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
+    ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const;
     /** @internal */
     static const Identifier valueTreeType;
 
@@ -96,17 +96,17 @@ public:
             const Identifier getType() const noexcept   { return state.getType(); }
             int getNumControlPoints() const noexcept;
 
-            const RelativePoint getControlPoint (int index) const;
+            RelativePoint getControlPoint (int index) const;
             Value getControlPointValue (int index, UndoManager*) const;
-            const RelativePoint getStartPoint() const;
-            const RelativePoint getEndPoint() const;
+            RelativePoint getStartPoint() const;
+            RelativePoint getEndPoint() const;
             void setControlPoint (int index, const RelativePoint& point, UndoManager*);
             float getLength (Expression::Scope*) const;
 
             ValueTreeWrapper getParent() const;
             Element getPreviousElement() const;
 
-            const String getModeOfEndPoint() const;
+            String getModeOfEndPoint() const;
             void setModeOfEndPoint (const String& newMode, UndoManager*);
 
             void convertToLine (UndoManager*);

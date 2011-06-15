@@ -180,7 +180,7 @@ public:
         /** Returns the line from the document that this position is within.
             @see getCharacter, getLineNumber
         */
-        const String getLineText() const;
+        String getLineText() const;
 
         //==============================================================================
     private:
@@ -191,13 +191,13 @@ public:
 
     //==============================================================================
     /** Returns the full text of the document. */
-    const String getAllContent() const;
+    String getAllContent() const;
 
     /** Returns a section of the document's text. */
-    const String getTextBetween (const Position& start, const Position& end) const;
+    String getTextBetween (const Position& start, const Position& end) const;
 
     /** Returns a line from the document. */
-    const String getLine (int lineIndex) const noexcept;
+    String getLine (int lineIndex) const noexcept;
 
     /** Returns the number of characters in the document. */
     int getNumCharacters() const noexcept;
@@ -240,7 +240,7 @@ public:
         This will be either "\n", "\r\n", or (rarely) "\r".
         @see setNewLineCharacters
     */
-    const String getNewLineCharacters() const noexcept          { return newLineChars; }
+    String getNewLineCharacters() const noexcept          { return newLineChars; }
 
     /** Sets the new-line characters that the document should use.
         The string must be either "\n", "\r\n", or (rarely) "\r".

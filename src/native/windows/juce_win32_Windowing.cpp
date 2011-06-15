@@ -1389,7 +1389,7 @@ private:
         handleMouseEvent (0, position, currentModifiers, getMouseEventTime());
     }
 
-    const StringArray getAvailableRenderingEngines()
+    StringArray getAvailableRenderingEngines()
     {
         StringArray s (ComponentPeer::getAvailableRenderingEngines());
 
@@ -2457,7 +2457,7 @@ private:
             compositionInProgress = false;
         }
 
-        const String getCompositionString (HIMC hImc, const DWORD type) const
+        String getCompositionString (HIMC hImc, const DWORD type) const
         {
             jassert (hImc != 0);
 
@@ -2492,7 +2492,7 @@ private:
 
         // Get selected/highlighted range while doing composition:
         // returned range is relative to beginning of TextInputTarget, not composition string
-        const Range<int> getCompositionSelection (HIMC hImc, LPARAM lParam) const
+        Range<int> getCompositionSelection (HIMC hImc, LPARAM lParam) const
         {
             jassert (hImc != 0);
             int selectionStart = 0;
@@ -2533,7 +2533,7 @@ private:
             target->setHighlightedRegion (newSelection);
         }
 
-        const Array<Range<int> > getCompositionUnderlines (HIMC hImc, LPARAM lParam) const
+        Array<Range<int> > getCompositionUnderlines (HIMC hImc, LPARAM lParam) const
         {
             Array<Range<int> > result;
 

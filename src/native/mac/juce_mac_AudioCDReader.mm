@@ -116,7 +116,7 @@ namespace CDReaderHelpers
 }
 
 //==============================================================================
-const StringArray AudioCDReader::getAvailableCDNames()
+StringArray AudioCDReader::getAvailableCDNames()
 {
     Array<File> cds;
     CDReaderHelpers::findDevices (cds);

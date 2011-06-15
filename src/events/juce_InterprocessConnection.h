@@ -139,7 +139,7 @@ public:
         This will return an empty string if the other machine isn't known for
         some reason.
     */
-    const String getConnectedHostName() const;
+    String getConnectedHostName() const;
 
     //==============================================================================
     /** Tries to send a message to the other end of this connection.

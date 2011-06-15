@@ -98,7 +98,7 @@ namespace FileHelpers
     }
 
   #if JUCE_IOS
-    const String getIOSSystemLocation (NSSearchPathDirectory type)
+    String getIOSSystemLocation (NSSearchPathDirectory type)
     {
         return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
                                 objectAtIndex: 0]);
@@ -445,7 +445,7 @@ bool PlatformUtilities::makeFSRefFromPath (FSRef* destFSRef, const String& path)
     return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toUTF8().getAddress()), destFSRef, 0) == noErr;
 }
 
-const String PlatformUtilities::makePathFromFSRef (FSRef* file)
+String PlatformUtilities::makePathFromFSRef (FSRef* file)
 {
     char path [2048] = { 0 };
 

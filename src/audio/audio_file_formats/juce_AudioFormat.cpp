@@ -54,7 +54,7 @@ bool AudioFormat::canHandleFile (const File& f)
 const String& AudioFormat::getFormatName() const                { return formatName; }
 const StringArray& AudioFormat::getFileExtensions() const       { return fileExtensions; }
 bool AudioFormat::isCompressed()                                { return false; }
-const StringArray AudioFormat::getQualityOptions()              { return StringArray(); }
+StringArray AudioFormat::getQualityOptions()                    { return StringArray(); }
 
 
 END_JUCE_NAMESPACE

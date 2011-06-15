@@ -62,7 +62,7 @@ public:
     const uint8* getBytes() const noexcept        { return asBytes; }
 
     /** Returns a dash-separated string in the form "11-22-33-44-55-66" */
-    const String toString() const;
+    String toString() const;
 
     /** Returns the address in the lower 6 bytes of an int64.
 

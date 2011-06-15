@@ -264,7 +264,7 @@ int DrawablePath::ValueTreeWrapper::Element::getNumControlPoints() const noexcep
     return 0;
 }
 
-const RelativePoint DrawablePath::ValueTreeWrapper::Element::getControlPoint (const int index) const
+RelativePoint DrawablePath::ValueTreeWrapper::Element::getControlPoint (const int index) const
 {
     jassert (index >= 0 && index < getNumControlPoints());
     return RelativePoint (state [index == 0 ? point1 : (index == 1 ? point2 : point3)].toString());
@@ -282,7 +282,7 @@ void DrawablePath::ValueTreeWrapper::Element::setControlPoint (const int index, 
     state.setProperty (index == 0 ? point1 : (index == 1 ? point2 : point3), point.toString(), undoManager);
 }
 
-const RelativePoint DrawablePath::ValueTreeWrapper::Element::getStartPoint() const
+RelativePoint DrawablePath::ValueTreeWrapper::Element::getStartPoint() const
 {
     const Identifier i (state.getType());
 
@@ -294,7 +294,7 @@ const RelativePoint DrawablePath::ValueTreeWrapper::Element::getStartPoint() con
     return getPreviousElement().getEndPoint();
 }
 
-const RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
+RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
 {
     const Identifier i (state.getType());
     if (i == startSubPathElement || i == lineToElement)  return getControlPoint (0);
@@ -332,7 +332,7 @@ float DrawablePath::ValueTreeWrapper::Element::getLength (Expression::Scope* sco
     return 0;
 }
 
-const String DrawablePath::ValueTreeWrapper::Element::getModeOfEndPoint() const
+String DrawablePath::ValueTreeWrapper::Element::getModeOfEndPoint() const
 {
     return state [mode].toString();
 }
@@ -392,7 +392,7 @@ void DrawablePath::ValueTreeWrapper::Element::convertToPathBreak (UndoManager* u
 
 namespace DrawablePathHelpers
 {
-    const Point<float> findCubicSubdivisionPoint (float proportion, const Point<float> points[4])
+    Point<float> findCubicSubdivisionPoint (float proportion, const Point<float> points[4])
     {
         const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
                            mid2 (points[1] + (points[2] - points[1]) * proportion),
@@ -404,7 +404,7 @@ namespace DrawablePathHelpers
         return newCp1 + (newCp2 - newCp1) * proportion;
     }
 
-    const Point<float> findQuadraticSubdivisionPoint (float proportion, const Point<float> points[3])
+    Point<float> findQuadraticSubdivisionPoint (float proportion, const Point<float> points[3])
     {
         const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
                            mid2 (points[1] + (points[2] - points[1]) * proportion);
@@ -564,7 +564,7 @@ void DrawablePath::refreshFromValueTree (const ValueTree& tree, ComponentBuilder
     setPath (newRelativePath);
 }
 
-const ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
+ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);

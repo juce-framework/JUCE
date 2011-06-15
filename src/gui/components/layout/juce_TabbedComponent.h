@@ -162,7 +162,7 @@ public:
 
         @see addTab, TabbedButtonBar::getCurrentTabName()
     */
-    const String getCurrentTabName() const;
+    String getCurrentTabName() const;
 
     /** Returns the current component that's filling the panel.
 

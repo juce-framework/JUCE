@@ -55,7 +55,7 @@ public:
     void setText (const String& newText);
 
     /** Returns the currently displayed text label. */
-    const String getText() const;
+    String getText() const;
 
     /** Sets the positioning of the text label.
 

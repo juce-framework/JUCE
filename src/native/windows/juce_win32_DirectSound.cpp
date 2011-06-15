@@ -139,7 +139,7 @@ BEGIN_JUCE_NAMESPACE
 
 namespace
 {
-    const String getDSErrorMessage (HRESULT hr)
+    String getDSErrorMessage (HRESULT hr)
     {
         const char* result = nullptr;
 
@@ -264,7 +264,7 @@ public:
         }
     }
 
-    const String open()
+    String open()
     {
         log ("opening dsound out device: " + name + "  rate=" + String (sampleRate)
               + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
@@ -582,7 +582,7 @@ public:
         }
     }
 
-    const String open()
+    String open()
     {
         log ("opening dsound in device: " + name
               + "  rate=" + String (sampleRate) + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
@@ -852,8 +852,8 @@ public:
     const BigInteger getActiveInputChannels() const     { return enabledInputs; }
     int getOutputLatencyInSamples()                     { return (int) (getCurrentBufferSizeSamples() * 1.5); }
     int getInputLatencyInSamples()                      { return getOutputLatencyInSamples(); }
-    const StringArray getOutputChannelNames()           { return outChannels; }
-    const StringArray getInputChannelNames()            { return inChannels; }
+    StringArray getOutputChannelNames()                 { return outChannels; }
+    StringArray getInputChannelNames()                  { return inChannels; }
 
     int getNumSampleRates()                             { return 4; }
     int getDefaultBufferSize()                          { return 2560; }
@@ -953,9 +953,9 @@ private:
     AudioIODeviceCallback* callback;
     CriticalSection startStopLock;
 
-    const String openDevice (const BigInteger& inputChannels,
-                             const BigInteger& outputChannels,
-                             double sampleRate_, int bufferSizeSamples_);
+    String openDevice (const BigInteger& inputChannels,
+                       const BigInteger& outputChannels,
+                       double sampleRate_, int bufferSizeSamples_);
 
     void closeDevice()
     {
@@ -1123,7 +1123,7 @@ public:
         }
     }
 
-    const StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1251,9 +1251,9 @@ private:
 };
 
 //==============================================================================
-const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
-                                              const BigInteger& outputChannels,
-                                              double sampleRate_, int bufferSizeSamples_)
+String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
+                                        const BigInteger& outputChannels,
+                                        double sampleRate_, int bufferSizeSamples_)
 {
     closeDevice();
     totalSamplesOut = 0;

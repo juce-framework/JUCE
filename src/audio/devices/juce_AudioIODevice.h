@@ -152,12 +152,12 @@ public:
     /** Returns the names of all the available output channels on this device.
         To find out which of these are currently in use, call getActiveOutputChannels().
     */
-    virtual const StringArray getOutputChannelNames() = 0;
+    virtual StringArray getOutputChannelNames() = 0;
 
     /** Returns the names of all the available input channels on this device.
         To find out which of these are currently in use, call getActiveInputChannels().
     */
-    virtual const StringArray getInputChannelNames() = 0;
+    virtual StringArray getInputChannelNames() = 0;
 
     //==============================================================================
     /** Returns the number of sample-rates this device supports.

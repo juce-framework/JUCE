@@ -701,8 +701,8 @@ public:
         close();
     }
 
-    const StringArray getOutputChannelNames()       { return internal.channelNamesOut; }
-    const StringArray getInputChannelNames()        { return internal.channelNamesIn; }
+    StringArray getOutputChannelNames()             { return internal.channelNamesOut; }
+    StringArray getInputChannelNames()              { return internal.channelNamesIn; }
 
     int getNumSampleRates()                         { return internal.sampleRates.size(); }
     double getSampleRate (int index)                { return internal.sampleRates [index]; }
@@ -930,7 +930,7 @@ public:
         outputNames.appendNumbersToDuplicates (false, true);
     }
 
-    const StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1000,7 +1000,7 @@ private:
         return (isInput || isOutput) && rates.size() > 0;
     }
 
-    /*static const String getHint (void* hint, const char* type)
+    /*static String getHint (void* hint, const char* type)
     {
         char* const n = snd_device_name_get_hint (hint, type);
         const String s ((const char*) n);

@@ -95,7 +95,7 @@ void KnownPluginList::removeType (const int index)
 
 namespace
 {
-    const Time getPluginFileModTime (const String& fileOrIdentifier)
+    Time getPluginFileModTime (const String& fileOrIdentifier)
     {
         if (fileOrIdentifier.startsWithChar ('/') || fileOrIdentifier[1] == ':')
             return File (fileOrIdentifier).getLastModificationTime();

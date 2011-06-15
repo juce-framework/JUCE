@@ -120,7 +120,7 @@ public:
         plugin's file location, so can be used to store a plugin ID for use
         across different machines.
     */
-    const String createIdentifierString() const;
+    String createIdentifierString() const;
 
     //==============================================================================
     /** Creates an XML object containing these details.

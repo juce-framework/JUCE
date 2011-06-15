@@ -172,13 +172,13 @@ public:
         If there are any images used in this drawable, you'll need to provide a valid ImageProvider
         object that can be used to create storable representations of them.
     */
-    virtual const ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const = 0;
+    virtual ValueTree createValueTree (ComponentBuilder::ImageProvider* imageProvider) const = 0;
 
     /** Returns the area that this drawble covers.
         The result is expressed in this drawable's own coordinate space, and does not take
         into account any transforms that may be applied to the component.
     */
-    virtual const Rectangle<float> getDrawableBounds() const = 0;
+    virtual Rectangle<float> getDrawableBounds() const = 0;
 
     //==============================================================================
     /** Internal class used to manage ValueTrees that represent Drawables. */
@@ -189,7 +189,7 @@ public:
 
         ValueTree& getState() noexcept          { return state; }
 
-        const String getID() const;
+        String getID() const;
         void setID (const String& newID);
 
         ValueTree state;

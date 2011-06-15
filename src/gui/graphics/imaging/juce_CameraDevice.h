@@ -49,7 +49,7 @@ public:
 
         You can open one of these devices by calling openDevice().
     */
-    static const StringArray getAvailableDevices();
+    static StringArray getAvailableDevices();
 
     /** Opens a camera device.
 
@@ -99,12 +99,12 @@ public:
 
         This may be platform-specific, e.g. ".mov" or ".avi".
     */
-    static const String getFileExtension();
+    static String getFileExtension();
 
     /** After calling stopRecording(), this method can be called to return the timestamp
         of the first frame that was written to the file.
     */
-    const Time getTimeOfFirstRecordedFrame() const;
+    Time getTimeOfFirstRecordedFrame() const;
 
     //==============================================================================
     /**

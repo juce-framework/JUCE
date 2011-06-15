@@ -30,7 +30,7 @@
 //==============================================================================
 namespace AndroidStatsHelpers
 {
-    const String getSystemProperty (const String& name)
+    String getSystemProperty (const String& name)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (android.systemClass,
                                                                                           android.getProperty,
@@ -44,7 +44,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     return Android;
 }
 
-const String SystemStats::getOperatingSystemName()
+String SystemStats::getOperatingSystemName()
 {
     return "Android " + AndroidStatsHelpers::getSystemProperty ("os.version");
 }
@@ -58,7 +58,7 @@ bool SystemStats::isOperatingSystem64Bit()
   #endif
 }
 
-const String SystemStats::getCpuVendor()
+String SystemStats::getCpuVendor()
 {
     return AndroidStatsHelpers::getSystemProperty ("os.arch");
 }
@@ -86,7 +86,7 @@ int SystemStats::getPageSize()
 }
 
 //==============================================================================
-const String SystemStats::getLogonName()
+String SystemStats::getLogonName()
 {
     const char* user = getenv ("USER");
 
@@ -100,12 +100,12 @@ const String SystemStats::getLogonName()
     return CharPointer_UTF8 (user);
 }
 
-const String SystemStats::getFullUserName()
+String SystemStats::getFullUserName()
 {
     return getLogonName();
 }
 
-const String SystemStats::getComputerName()
+String SystemStats::getComputerName()
 {
     char name [256] = { 0 };
     if (gethostname (name, sizeof (name) - 1) == 0)

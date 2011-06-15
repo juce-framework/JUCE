@@ -113,7 +113,7 @@ public:
         virtual ~Scope();
 
         /** Returns some kind of globally unique ID that identifies this scope. */
-        virtual const String getScopeUID() const;
+        virtual String getScopeUID() const;
 
         /** Returns the value of a symbol.
             If the symbol is unknown, this can throw an Expression::EvaluationError exception.
@@ -121,7 +121,7 @@ public:
             one, e.g. for "foo.bar", symbol = "foo" and member = "bar".
             @throws Expression::EvaluationError
         */
-        virtual const Expression getSymbolValue (const String& symbol) const;
+        virtual Expression getSymbolValue (const String& symbol) const;
 
         /** Executes a named function.
             If the function name is unknown, this can throw an Expression::EvaluationError exception.

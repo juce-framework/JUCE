@@ -89,7 +89,7 @@ public:
                                   into inputs and outputs, this indicates whether to use
                                   the input or output name to refer to a pair of devices.
     */
-    virtual const StringArray getDeviceNames (bool wantInputNames = false) const = 0;
+    virtual StringArray getDeviceNames (bool wantInputNames = false) const = 0;
 
     /** Returns the name of the default device.
 

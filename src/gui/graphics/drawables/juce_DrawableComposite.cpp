@@ -68,7 +68,7 @@ Drawable* DrawableComposite::createCopy() const
 }
 
 //==============================================================================
-const Rectangle<float> DrawableComposite::getDrawableBounds() const
+Rectangle<float> DrawableComposite::getDrawableBounds() const
 {
     Rectangle<float> r;
 
@@ -89,7 +89,7 @@ MarkerList* DrawableComposite::getMarkers (bool xAxis)
     return xAxis ? &markersX : &markersY;
 }
 
-const RelativeRectangle DrawableComposite::getContentArea() const
+RelativeRectangle DrawableComposite::getContentArea() const
 {
     jassert (markersX.getNumMarkers() >= 2 && markersX.getMarker (0)->name == contentLeftMarkerName && markersX.getMarker (1)->name == contentRightMarkerName);
     jassert (markersY.getNumMarkers() >= 2 && markersY.getMarker (0)->name == contentTopMarkerName && markersY.getMarker (1)->name == contentBottomMarkerName);
@@ -254,7 +254,7 @@ ValueTree DrawableComposite::ValueTreeWrapper::getChildListCreating (UndoManager
     return state.getOrCreateChildWithName (childGroupTag, undoManager);
 }
 
-const RelativeParallelogram DrawableComposite::ValueTreeWrapper::getBoundingBox() const
+RelativeParallelogram DrawableComposite::ValueTreeWrapper::getBoundingBox() const
 {
     return RelativeParallelogram (state.getProperty (topLeft, "0, 0"),
                                   state.getProperty (topRight, "100, 0"),
@@ -277,7 +277,7 @@ void DrawableComposite::ValueTreeWrapper::resetBoundingBoxToContentArea (UndoMan
                                            RelativePoint (content.left, content.bottom)), undoManager);
 }
 
-const RelativeRectangle DrawableComposite::ValueTreeWrapper::getContentArea() const
+RelativeRectangle DrawableComposite::ValueTreeWrapper::getContentArea() const
 {
     MarkerList::ValueTreeWrapper markersX (getMarkerList (true));
     MarkerList::ValueTreeWrapper markersY (getMarkerList (false));
@@ -323,7 +323,7 @@ void DrawableComposite::refreshFromValueTree (const ValueTree& tree, ComponentBu
     builder.updateChildComponents (*this, wrapper.getChildList());
 }
 
-const ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
+ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);

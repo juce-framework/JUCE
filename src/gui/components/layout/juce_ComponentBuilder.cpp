@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 //=============================================================================
 namespace ComponentBuilderHelpers
 {
-    const String getStateId (const ValueTree& state)
+    String getStateId (const ValueTree& state)
     {
         return state [ComponentBuilder::idProperty].toString();
     }

@@ -145,7 +145,7 @@ void DrawableImage::paint (Graphics& g)
     }
 }
 
-const Rectangle<float> DrawableImage::getDrawableBounds() const
+Rectangle<float> DrawableImage::getDrawableBounds() const
 {
     return image.getBounds().toFloat();
 }
@@ -177,7 +177,7 @@ DrawableImage::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
     jassert (state.hasType (valueTreeType));
 }
 
-const var DrawableImage::ValueTreeWrapper::getImageIdentifier() const
+var DrawableImage::ValueTreeWrapper::getImageIdentifier() const
 {
     return state [image];
 }
@@ -228,7 +228,7 @@ Value DrawableImage::ValueTreeWrapper::getOverlayColourValue (UndoManager* undoM
     return state.getPropertyAsValue (overlay, undoManager);
 }
 
-const RelativeParallelogram DrawableImage::ValueTreeWrapper::getBoundingBox() const
+RelativeParallelogram DrawableImage::ValueTreeWrapper::getBoundingBox() const
 {
     return RelativeParallelogram (state.getProperty (topLeft, "0, 0"),
                                   state.getProperty (topRight, "100, 0"),
@@ -277,7 +277,7 @@ void DrawableImage::refreshFromValueTree (const ValueTree& tree, ComponentBuilde
     }
 }
 
-const ValueTree DrawableImage::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
+ValueTree DrawableImage::createValueTree (ComponentBuilder::ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);

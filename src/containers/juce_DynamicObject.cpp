@@ -45,7 +45,7 @@ bool DynamicObject::hasProperty (const Identifier& propertyName) const
     return v != nullptr && ! v->isMethod();
 }
 
-const var DynamicObject::getProperty (const Identifier& propertyName) const
+var DynamicObject::getProperty (const Identifier& propertyName) const
 {
     return properties [propertyName];
 }
@@ -65,9 +65,9 @@ bool DynamicObject::hasMethod (const Identifier& methodName) const
     return getProperty (methodName).isMethod();
 }
 
-const var DynamicObject::invokeMethod (const Identifier& methodName,
-                                       const var* parameters,
-                                       int numParameters)
+var DynamicObject::invokeMethod (const Identifier& methodName,
+                                 const var* parameters,
+                                 int numParameters)
 {
     return properties [methodName].invokeMethod (this, parameters, numParameters);
 }

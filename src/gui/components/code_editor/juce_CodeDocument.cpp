@@ -444,7 +444,7 @@ const juce_wchar CodeDocument::Position::getCharacter() const
     return l == nullptr ? 0 : l->line [getIndexInLine()];
 }
 
-const String CodeDocument::Position::getLineText() const
+String CodeDocument::Position::getLineText() const
 {
     const CodeDocumentLine* const l = owner->lines [line];
     return l == nullptr ? String::empty : l->line;
@@ -487,13 +487,13 @@ CodeDocument::~CodeDocument()
 {
 }
 
-const String CodeDocument::getAllContent() const
+String CodeDocument::getAllContent() const
 {
     return getTextBetween (Position (this, 0),
                            Position (this, lines.size(), 0));
 }
 
-const String CodeDocument::getTextBetween (const Position& start, const Position& end) const
+String CodeDocument::getTextBetween (const Position& start, const Position& end) const
 {
     if (end.getPosition() <= start.getPosition())
         return String::empty;
@@ -542,7 +542,7 @@ int CodeDocument::getNumCharacters() const noexcept
     return (lastLine == nullptr) ? 0 : lastLine->lineStartInFile + lastLine->lineLength;
 }
 
-const String CodeDocument::getLine (const int lineIndex) const noexcept
+String CodeDocument::getLine (const int lineIndex) const noexcept
 {
     const CodeDocumentLine* const line = lines [lineIndex];
     return (line == nullptr) ? String::empty : line->line;

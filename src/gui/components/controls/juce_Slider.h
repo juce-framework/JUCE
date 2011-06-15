@@ -682,7 +682,7 @@ public:
     void setTextValueSuffix (const String& suffix);
 
     /** Returns the suffix that was set by setTextValueSuffix(). */
-    const String getTextValueSuffix() const;
+    String getTextValueSuffix() const;
 
     //==============================================================================
     /** Allows a user-defined mapping of distance along the slider to its value.

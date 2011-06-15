@@ -36,7 +36,7 @@ RelativeCoordinatePositionerBase::ComponentScope::ComponentScope (Component& com
 {
 }
 
-const Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (const String& symbol) const
+Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (const String& symbol) const
 {
     switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
     {
@@ -75,7 +75,7 @@ void RelativeCoordinatePositionerBase::ComponentScope::visitRelativeScope (const
         Expression::Scope::visitRelativeScope (scopeName, visitor);
 }
 
-const String RelativeCoordinatePositionerBase::ComponentScope::getScopeUID() const
+String RelativeCoordinatePositionerBase::ComponentScope::getScopeUID() const
 {
     return String::toHexString ((int) (pointer_sized_int) (void*) &component);
 }
@@ -131,7 +131,7 @@ public:
     {
     }
 
-    const Expression getSymbolValue (const String& symbol) const
+    Expression getSymbolValue (const String& symbol) const
     {
         if (symbol == RelativeCoordinate::Strings::left || symbol == RelativeCoordinate::Strings::x
              || symbol == RelativeCoordinate::Strings::width || symbol == RelativeCoordinate::Strings::right

@@ -226,7 +226,7 @@ void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove)
     }
 }
 
-const String MemoryBlock::toString() const
+String MemoryBlock::toString() const
 {
     return String (static_cast <const char*> (getData()), size);
 }
@@ -328,7 +328,7 @@ void MemoryBlock::loadFromHexString (const String& hex)
 //==============================================================================
 const char* const MemoryBlock::encodingTable = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
 
-const String MemoryBlock::toBase64Encoding() const
+String MemoryBlock::toBase64Encoding() const
 {
     const size_t numChars = ((size << 3) + 5) / 6;
 

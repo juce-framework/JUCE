@@ -367,21 +367,21 @@ public:
         @returns    the time, or an invalid time if the file doesn't exist.
         @see setLastModificationTime, getLastAccessTime, getCreationTime
     */
-    const Time getLastModificationTime() const;
+    Time getLastModificationTime() const;
 
     /** Returns the last time this file was accessed.
 
         @returns    the time, or an invalid time if the file doesn't exist.
         @see setLastAccessTime, getLastModificationTime, getCreationTime
     */
-    const Time getLastAccessTime() const;
+    Time getLastAccessTime() const;
 
     /** Returns the time that this file was created.
 
         @returns    the time, or an invalid time if the file doesn't exist.
         @see getLastModificationTime, getLastAccessTime
     */
-    const Time getCreationTime() const;
+    Time getCreationTime() const;
 
     /** Changes the modification time for this file.
 

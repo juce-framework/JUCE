@@ -93,7 +93,7 @@ public:
         When calling createWriterFor(), an index from this array is passed in to
         tell the format which option is required.
     */
-    virtual const StringArray getQualityOptions();
+    virtual StringArray getQualityOptions();
 
     //==============================================================================
     /** Tries to create an object that can read from a stream containing audio

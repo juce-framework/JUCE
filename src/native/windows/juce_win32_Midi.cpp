@@ -226,7 +226,7 @@ Array <MidiInCollector*, CriticalSection> MidiInCollector::activeMidiCollectors;
 
 
 //==============================================================================
-const StringArray MidiInput::getDevices()
+StringArray MidiInput::getDevices()
 {
     StringArray s;
     const int num = midiInGetNumDevs();
@@ -332,7 +332,7 @@ private:
 Array<MidiOutHandle*> MidiOutHandle::activeHandles;
 
 //==============================================================================
-const StringArray MidiOutput::getDevices()
+StringArray MidiOutput::getDevices()
 {
     StringArray s;
     const int num = midiOutGetNumDevs();

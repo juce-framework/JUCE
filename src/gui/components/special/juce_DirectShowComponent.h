@@ -111,7 +111,7 @@ public:
     /** Returns the file path or URL from which the video file was loaded.
         If there isn't one, this returns an empty string.
     */
-    const File getCurrentMoviePath() const;
+    File getCurrentMoviePath() const;
 
     /** Returns true if there's currently a video open. */
     bool isMovieOpen() const;

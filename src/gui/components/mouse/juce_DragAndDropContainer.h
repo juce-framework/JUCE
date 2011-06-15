@@ -103,7 +103,7 @@ public:
 
         @see startDragging
     */
-    const String getCurrentDragDescription() const;
+    String getCurrentDragDescription() const;
 
     /** Utility to find the DragAndDropContainer for a given Component.
 

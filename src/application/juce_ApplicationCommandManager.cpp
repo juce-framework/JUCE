@@ -139,14 +139,14 @@ const ApplicationCommandInfo* ApplicationCommandManager::getCommandForID (const 
     return nullptr;
 }
 
-const String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) const noexcept
+String ApplicationCommandManager::getNameOfCommand (const CommandID commandID) const noexcept
 {
     const ApplicationCommandInfo* const ci = getCommandForID (commandID);
 
     return ci != nullptr ? ci->shortName : String::empty;
 }
 
-const String ApplicationCommandManager::getDescriptionOfCommand (const CommandID commandID) const noexcept
+String ApplicationCommandManager::getDescriptionOfCommand (const CommandID commandID) const noexcept
 {
     const ApplicationCommandInfo* const ci = getCommandForID (commandID);
 
@@ -164,7 +164,7 @@ StringArray ApplicationCommandManager::getCommandCategories() const
     return s;
 }
 
-const Array <CommandID> ApplicationCommandManager::getCommandsInCategory (const String& categoryName) const
+Array<CommandID> ApplicationCommandManager::getCommandsInCategory (const String& categoryName) const
 {
     Array <CommandID> results;
 

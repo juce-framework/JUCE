@@ -44,7 +44,7 @@ public:
 
     ~RemapperValueSource() {}
 
-    const var getValue() const
+    var getValue() const
     {
         return mappings.indexOf (sourceValue.getValue()) + 1;
     }

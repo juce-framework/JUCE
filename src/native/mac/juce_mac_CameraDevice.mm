@@ -323,7 +323,7 @@ Component* CameraDevice::createViewerComponent()
     return new QTCaptureViewerComp (this, static_cast <QTCameraDeviceInteral*> (internal));
 }
 
-const String CameraDevice::getFileExtension()
+String CameraDevice::getFileExtension()
 {
     return ".mov";
 }
@@ -367,7 +367,7 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
     isRecording = true;
 }
 
-const Time CameraDevice::getTimeOfFirstRecordedFrame() const
+Time CameraDevice::getTimeOfFirstRecordedFrame() const
 {
     QTCameraDeviceInteral* const d = static_cast <QTCameraDeviceInteral*> (internal);
     if (d->callbackDelegate->firstPresentationTime != 0)
@@ -398,7 +398,7 @@ void CameraDevice::removeListener (Listener* listenerToRemove)
 }
 
 //==============================================================================
-const StringArray CameraDevice::getAvailableDevices()
+StringArray CameraDevice::getAvailableDevices()
 {
     JUCE_AUTORELEASEPOOL
 

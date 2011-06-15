@@ -66,7 +66,7 @@ public:
 
         E.g. "AIFF"
     */
-    const String getFormatName() const noexcept     { return formatName; }
+    const String& getFormatName() const noexcept    { return formatName; }
 
     //==============================================================================
     /** Reads samples from the stream.

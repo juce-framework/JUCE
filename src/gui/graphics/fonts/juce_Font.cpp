@@ -70,7 +70,7 @@ public:
         faces.insertMultiple (-1, CachedFace(), numToCache);
     }
 
-    const Typeface::Ptr findTypefaceFor (const Font& font)
+    Typeface::Ptr findTypefaceFor (const Font& font)
     {
         const int flags = font.getStyleFlags() & (Font::bold | Font::italic);
         const String faceName (font.getTypefaceName());
@@ -116,7 +116,7 @@ public:
         return face.typeface;
     }
 
-    const Typeface::Ptr getDefaultTypeface() const noexcept
+    Typeface::Ptr getDefaultTypeface() const noexcept
     {
         return defaultFace;
     }

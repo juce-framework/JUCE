@@ -55,7 +55,7 @@ public:
         The index in this list must match the token type numbers that are
         returned by readNextToken().
     */
-    virtual const StringArray getTokenTypes() = 0;
+    virtual StringArray getTokenTypes() = 0;
 
     /** Returns a suggested syntax highlighting colour for a specified
         token type.

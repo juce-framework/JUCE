@@ -257,7 +257,7 @@ public:
 
         @see restoreFromString
     */
-    const String toString() const;
+    String toString() const;
 
     /** Restores a set of items that was previously stored in a string by the toString()
         method.

@@ -326,7 +326,7 @@ const var& ValueTree::SharedObject::getProperty (const Identifier& name) const
     return properties [name];
 }
 
-const var ValueTree::SharedObject::getProperty (const Identifier& name, const var& defaultReturnValue) const
+var ValueTree::SharedObject::getProperty (const Identifier& name, const var& defaultReturnValue) const
 {
     return properties.getWithDefault (name, defaultReturnValue);
 }
@@ -733,7 +733,7 @@ public:
         tree.removeListener (this);
     }
 
-    const var getValue() const
+    var getValue() const
     {
         return tree [property];
     }

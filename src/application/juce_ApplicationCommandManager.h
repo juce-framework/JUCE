@@ -176,7 +176,7 @@ public:
         An empty string is returned if no command with this ID has been registered.
         @see getDescriptionOfCommand
     */
-    const String getNameOfCommand (CommandID commandID) const noexcept;
+    String getNameOfCommand (CommandID commandID) const noexcept;
 
     /** Returns the description field for a command.
 
@@ -185,7 +185,7 @@ public:
 
         @see getNameOfCommand
     */
-    const String getDescriptionOfCommand (CommandID commandID) const noexcept;
+    String getDescriptionOfCommand (CommandID commandID) const noexcept;
 
     /** Returns the list of categories.
 
@@ -200,7 +200,7 @@ public:
 
         @see getCommandCategories()
     */
-    const Array <CommandID> getCommandsInCategory (const String& categoryName) const;
+    Array<CommandID> getCommandsInCategory (const String& categoryName) const;
 
     //==============================================================================
     /** Returns the manager's internal set of key mappings.

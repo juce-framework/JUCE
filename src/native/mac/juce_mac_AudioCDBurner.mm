@@ -396,7 +396,7 @@ public:
 
     bool openTray() { return [device->device isValid] && [device->device ejectMedia]; }
 
-    const Array<int> getAvailableWriteSpeeds() const
+    Array<int> getAvailableWriteSpeeds() const
     {
         Array<int> results;
 
@@ -476,7 +476,7 @@ namespace
     }
 }
 
-const StringArray AudioCDBurner::findAvailableDevices()
+StringArray AudioCDBurner::findAvailableDevices()
 {
     NSArray* names = findDiskBurnerDevices();
     StringArray s;
@@ -517,7 +517,7 @@ AudioCDBurner::DiskState AudioCDBurner::waitUntilStateChange (int timeOutMillise
     return newState;
 }
 
-const Array<int> AudioCDBurner::getAvailableWriteSpeeds() const
+Array<int> AudioCDBurner::getAvailableWriteSpeeds() const
 {
     return pimpl->getAvailableWriteSpeeds();
 }
@@ -543,10 +543,10 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamps)
     return false;
 }
 
-const String AudioCDBurner::burn (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener* listener,
-                                  bool ejectDiscAfterwards,
-                                  bool performFakeBurnForTesting,
-                                  int writeSpeed)
+String AudioCDBurner::burn (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener* listener,
+                            bool ejectDiscAfterwards,
+                            bool performFakeBurnForTesting,
+                            int writeSpeed)
 {
     String error ("Couldn't open or write to the CD device");
 

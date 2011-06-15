@@ -78,7 +78,7 @@ public:
 
         @see setButtonText
     */
-    const String getButtonText() const                      { return text; }
+    const String& getButtonText() const               { return text; }
 
     //==============================================================================
     /** Returns true if the button is currently being held down by the mouse.

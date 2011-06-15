@@ -178,7 +178,7 @@ public:
         virtual ~ValueSource();
 
         /** Returns the current value of this object. */
-        virtual const var getValue() const = 0;
+        virtual var getValue() const = 0;
 
         /** Changes the current value.
             This must also trigger a change message if the value actually changes.

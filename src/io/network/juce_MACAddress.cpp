@@ -53,7 +53,7 @@ MACAddress::MACAddress (const uint8 bytes[6])
     memcpy (asBytes, bytes, sizeof (asBytes));
 }
 
-const String MACAddress::toString() const
+String MACAddress::toString() const
 {
     String s;
 

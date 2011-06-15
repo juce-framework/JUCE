@@ -79,7 +79,7 @@ public:
         close();
     }
 
-    const StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames()
     {
         StringArray s;
         s.add ("Left");
@@ -87,7 +87,7 @@ public:
         return s;
     }
 
-    const StringArray getInputChannelNames()
+    StringArray getInputChannelNames()
     {
         StringArray s;
 
@@ -351,7 +351,7 @@ public:
     int getIndexOfDevice (AudioIODevice* device, bool asInput) const    { return device != nullptr ? 0 : -1; }
     bool hasSeparateInputsAndOutputs() const                            { return false; }
 
-    const StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const
     {
         StringArray s;
         s.add ("Android Audio");

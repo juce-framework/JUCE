@@ -108,13 +108,13 @@ public:
 
         Returns a value less than 0 if no note is playing.
     */
-    int getCurrentlyPlayingNote() const                                     { return currentlyPlayingNote; }
+    int getCurrentlyPlayingNote() const                               { return currentlyPlayingNote; }
 
     /** Returns the sound that this voice is currently playing.
 
         Returns 0 if it's not playing.
     */
-    const SynthesiserSound::Ptr getCurrentlyPlayingSound() const            { return currentlyPlayingSound; }
+    SynthesiserSound::Ptr getCurrentlyPlayingSound() const            { return currentlyPlayingSound; }
 
     /** Must return true if this voice object is capable of playing the given sound.
 

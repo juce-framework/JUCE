@@ -193,7 +193,7 @@ void DrawableShape::strokeChanged()
     repaint();
 }
 
-const Rectangle<float> DrawableShape::getDrawableBounds() const
+Rectangle<float> DrawableShape::getDrawableBounds() const
 {
     if (isStrokeVisible())
         return strokePath.getBounds();
@@ -415,7 +415,7 @@ DrawableShape::FillAndStrokeState::FillAndStrokeState (const ValueTree& state_)
 {
 }
 
-const DrawableShape::RelativeFillType DrawableShape::FillAndStrokeState::getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider* imageProvider) const
+DrawableShape::RelativeFillType DrawableShape::FillAndStrokeState::getFill (const Identifier& fillOrStrokeType, ComponentBuilder::ImageProvider* imageProvider) const
 {
     DrawableShape::RelativeFillType f;
     f.readFrom (state.getChildWithName (fillOrStrokeType), imageProvider);
@@ -439,7 +439,7 @@ void DrawableShape::FillAndStrokeState::setFill (const Identifier& fillOrStrokeT
     newFill.writeTo (v, imageProvider, undoManager);
 }
 
-const PathStrokeType DrawableShape::FillAndStrokeState::getStrokeType() const
+PathStrokeType DrawableShape::FillAndStrokeState::getStrokeType() const
 {
     const String jointStyleString (state [jointStyle].toString());
     const String capStyleString (state [capStyle].toString());

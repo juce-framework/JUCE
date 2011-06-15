@@ -482,9 +482,9 @@ Result File::createDirectory() const
 }
 
 //==============================================================================
-const Time File::getLastModificationTime() const            { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (m); }
-const Time File::getLastAccessTime() const                  { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (a); }
-const Time File::getCreationTime() const                    { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (c); }
+Time File::getLastModificationTime() const                  { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (m); }
+Time File::getLastAccessTime() const                        { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (a); }
+Time File::getCreationTime() const                          { int64 m, a, c; getFileTimesInternal (m, a, c); return Time (c); }
 
 bool File::setLastModificationTime (const Time& t) const    { return setFileTimesInternal (t.toMilliseconds(), 0, 0); }
 bool File::setLastAccessTime (const Time& t) const          { return setFileTimesInternal (0, t.toMilliseconds(), 0); }

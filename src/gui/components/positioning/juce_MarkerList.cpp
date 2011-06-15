@@ -204,12 +204,12 @@ int MarkerList::ValueTreeWrapper::getNumMarkers() const
     return state.getNumChildren();
 }
 
-const ValueTree MarkerList::ValueTreeWrapper::getMarkerState (int index) const
+ValueTree MarkerList::ValueTreeWrapper::getMarkerState (int index) const
 {
     return state.getChild (index);
 }
 
-const ValueTree MarkerList::ValueTreeWrapper::getMarkerState (const String& name) const
+ValueTree MarkerList::ValueTreeWrapper::getMarkerState (const String& name) const
 {
     return state.getChildWithProperty (nameProperty, name);
 }
@@ -219,7 +219,7 @@ bool MarkerList::ValueTreeWrapper::containsMarker (const ValueTree& marker) cons
     return marker.isAChildOf (state);
 }
 
-const MarkerList::Marker MarkerList::ValueTreeWrapper::getMarker (const ValueTree& marker) const
+MarkerList::Marker MarkerList::ValueTreeWrapper::getMarker (const ValueTree& marker) const
 {
     jassert (containsMarker (marker));
 

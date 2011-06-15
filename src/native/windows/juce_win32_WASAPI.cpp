@@ -91,7 +91,7 @@ bool check (HRESULT hr)
 }
 
 //==============================================================================
-const String getDeviceID (IMMDevice* const device)
+String getDeviceID (IMMDevice* const device)
 {
     String s;
     WCHAR* deviceId = nullptr;
@@ -678,7 +678,7 @@ public:
         return false;
     }
 
-    const StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames()
     {
         StringArray outChannels;
 
@@ -689,7 +689,7 @@ public:
         return outChannels;
     }
 
-    const StringArray getInputChannelNames()
+    StringArray getInputChannelNames()
     {
         StringArray inChannels;
 
@@ -1047,7 +1047,7 @@ public:
         outputDeviceNames.appendNumbersToDuplicates (false, false);
     }
 
-    const StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1105,7 +1105,7 @@ private:
     bool hasScanned;
 
     //==============================================================================
-    static const String getDefaultEndpoint (IMMDeviceEnumerator* const enumerator, const bool forCapture)
+    static String getDefaultEndpoint (IMMDeviceEnumerator* const enumerator, const bool forCapture)
     {
         String s;
         IMMDevice* dev = nullptr;

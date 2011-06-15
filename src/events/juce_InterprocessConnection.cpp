@@ -140,7 +140,7 @@ bool InterprocessConnection::isConnected() const
             && isThreadRunning();
 }
 
-const String InterprocessConnection::getConnectedHostName() const
+String InterprocessConnection::getConnectedHostName() const
 {
     if (pipe != nullptr)
     {

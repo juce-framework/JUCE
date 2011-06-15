@@ -55,7 +55,7 @@ public:
 #if JUCE_MAC || JUCE_IOS || DOXYGEN
     //==============================================================================
     /** MAC ONLY - Turns a Core CF String into a juce one. */
-    static const String cfStringToJuceString (CFStringRef cfString);
+    static String cfStringToJuceString (CFStringRef cfString);
 
     /** MAC ONLY - Turns a juce string into a Core CF one. */
     static CFStringRef juceStringToCFString (const String& s);
@@ -64,12 +64,12 @@ public:
     static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
 
     /** MAC ONLY - Turns an FSRef into a juce string path. */
-    static const String makePathFromFSRef (FSRef* file);
+    static String makePathFromFSRef (FSRef* file);
 
     /** MAC ONLY - Converts any decomposed unicode characters in a string into
         their precomposed equivalents.
     */
-    static const String convertToPrecomposedUnicode (const String& s);
+    static String convertToPrecomposedUnicode (const String& s);
 
     /** MAC ONLY - Gets the type of a file from the file's resources. */
     static OSType getTypeOfFile (const String& filename);
@@ -96,8 +96,8 @@ public:
         The path is a string for the entire path of a value in the registry,
         e.g. "HKEY_CURRENT_USER\Software\foo\bar"
     */
-    static const String getRegistryValue (const String& regValuePath,
-                                          const String& defaultValue = String::empty);
+    static String getRegistryValue (const String& regValuePath,
+                                    const String& defaultValue = String::empty);
 
     /** WIN32 ONLY - Sets a registry value as a string.
 
@@ -156,7 +156,7 @@ public:
 
         This is needed to avoid unicode problems with the argc type params.
     */
-    static const String JUCE_CALLTYPE getCurrentCommandLineParams();
+    static String JUCE_CALLTYPE getCurrentCommandLineParams();
 #endif
 
     /** Clears the floating point unit's flags.

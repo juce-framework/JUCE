@@ -567,7 +567,7 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     return result;
 }
 
-const StringArray CPlusPlusCodeTokeniser::getTokenTypes()
+StringArray CPlusPlusCodeTokeniser::getTokenTypes()
 {
     const char* const types[] =
     {

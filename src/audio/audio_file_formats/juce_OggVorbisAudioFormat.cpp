@@ -453,7 +453,7 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
     return w->ok ? w.release() : nullptr;
 }
 
-const StringArray OggVorbisAudioFormat::getQualityOptions()
+StringArray OggVorbisAudioFormat::getQualityOptions()
 {
     const char* options[] = { "64 kbps", "80 kbps", "96 kbps", "112 kbps", "128 kbps", "160 kbps",
                               "192 kbps", "224 kbps", "256 kbps", "320 kbps", "500 kbps", 0 };

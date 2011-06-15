@@ -77,7 +77,7 @@ public:
     {
     }
 
-    const var getValue() const
+    var getValue() const
     {
         return value;
     }

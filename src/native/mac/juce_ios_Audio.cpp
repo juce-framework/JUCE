@@ -54,7 +54,7 @@ public:
         close();
     }
 
-    const StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames()
     {
         StringArray s;
         s.add ("Left");
@@ -62,7 +62,7 @@ public:
         return s;
     }
 
-    const StringArray getInputChannelNames()
+    StringArray getInputChannelNames()
     {
         StringArray s;
         if (audioInputIsAvailable)
@@ -538,7 +538,7 @@ public:
     {
     }
 
-    const StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const
     {
         StringArray s;
         s.add ("iPhone Audio");

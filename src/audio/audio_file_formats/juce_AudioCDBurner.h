@@ -43,7 +43,7 @@ public:
 
         Use openDevice() to open one of the items from this list.
     */
-    static const StringArray findAvailableDevices();
+    static StringArray findAvailableDevices();
 
     /** Tries to open one of the optical drives.
 
@@ -92,7 +92,7 @@ public:
         Note that if there's no media present in the drive, this value may be unavailable!
         @see setWriteSpeed, getWriteSpeed
     */
-    const Array<int> getAvailableWriteSpeeds() const;
+    Array<int> getAvailableWriteSpeeds() const;
 
     //==============================================================================
     /** Tries to enable or disable buffer underrun safety on devices that support it.
@@ -144,10 +144,10 @@ public:
         @param writeSpeed           one of the write speeds from getAvailableWriteSpeeds(), or
                                     0 or less to mean the fastest speed.
     */
-    const String burn (BurnProgressListener* listener,
-                       bool ejectDiscAfterwards,
-                       bool performFakeBurnForTesting,
-                       int writeSpeed);
+    String burn (BurnProgressListener* listener,
+                 bool ejectDiscAfterwards,
+                 bool performFakeBurnForTesting,
+                 int writeSpeed);
 
     /** If a burn operation is currently in progress, this tells it to stop
         as soon as possible.

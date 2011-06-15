@@ -306,7 +306,7 @@ public:
     }
 
     //==============================================================================
-    const StringArray getSources (bool input)
+    StringArray getSources (bool input)
     {
         StringArray s;
         HeapBlock <OSType> types;
@@ -393,10 +393,10 @@ public:
     }
 
     //==============================================================================
-    const String reopen (const BigInteger& inputChannels,
-                         const BigInteger& outputChannels,
-                         double newSampleRate,
-                         int bufferSizeSamples)
+    String reopen (const BigInteger& inputChannels,
+                   const BigInteger& outputChannels,
+                   double newSampleRate,
+                   int bufferSizeSamples)
     {
         String error;
         JUCE_COREAUDIOLOG ("CoreAudio reopen");
@@ -892,12 +892,12 @@ public:
         AudioObjectRemovePropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal);
     }
 
-    const StringArray getOutputChannelNames()
+    StringArray getOutputChannelNames()
     {
         return internal->outChanNames;
     }
 
-    const StringArray getInputChannelNames()
+    StringArray getInputChannelNames()
     {
         if (internal->inputDevice != 0)
             return internal->inputDevice->inChanNames;
@@ -1111,7 +1111,7 @@ public:
         outputDeviceNames.appendNumbersToDuplicates (false, true);
     }
 
-    const StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 

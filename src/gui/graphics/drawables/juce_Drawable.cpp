@@ -230,7 +230,7 @@ Drawable::ValueTreeWrapperBase::ValueTreeWrapperBase (const ValueTree& state_)
 {
 }
 
-const String Drawable::ValueTreeWrapperBase::getID() const
+String Drawable::ValueTreeWrapperBase::getID() const
 {
     return state [ComponentBuilder::idProperty];
 }

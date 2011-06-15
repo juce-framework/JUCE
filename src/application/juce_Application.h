@@ -239,9 +239,8 @@ public:
     */
     int getApplicationReturnValue() const noexcept                  { return appReturnValue; }
 
-    /** Returns the application's command line params.
-    */
-    const String getCommandLineParameters() const noexcept          { return commandLineParameters; }
+    /** Returns the application's command line parameters. */
+    const String& getCommandLineParameters() const noexcept         { return commandLineParameters; }
 
     /** Returns true if this executable is running as an app (as opposed to being a plugin
         or other kind of shared library. */

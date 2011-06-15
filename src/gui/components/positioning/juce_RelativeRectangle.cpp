@@ -121,7 +121,7 @@ class RelativeRectangleLocalScope  : public Expression::Scope
 public:
     RelativeRectangleLocalScope (const RelativeRectangle& rect_)  : rect (rect_) {}
 
-    const Expression getSymbolValue (const String& symbol) const
+    Expression getSymbolValue (const String& symbol) const
     {
         switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
         {
@@ -179,7 +179,7 @@ bool RelativeRectangle::isDynamic() const
             || dependsOnSymbolsOtherThanThis (bottom.getExpression());
 }
 
-const String RelativeRectangle::toString() const
+String RelativeRectangle::toString() const
 {
     return left.toString() + ", " + top.toString() + ", " + right.toString() + ", " + bottom.toString();
 }

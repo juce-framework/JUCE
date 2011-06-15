@@ -84,7 +84,7 @@ bool PluginDescription::isDuplicateOf (const PluginDescription& other) const
             && uid == other.uid;
 }
 
-const String PluginDescription::createIdentifierString() const
+String PluginDescription::createIdentifierString() const
 {
     return pluginFormatName
             + "-" + name

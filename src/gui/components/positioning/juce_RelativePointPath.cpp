@@ -152,7 +152,7 @@ RelativePointPath::StartSubPath::StartSubPath (const RelativePoint& pos)
 {
 }
 
-const ValueTree RelativePointPath::StartSubPath::createTree() const
+ValueTree RelativePointPath::StartSubPath::createTree() const
 {
     ValueTree v (DrawablePath::ValueTreeWrapper::Element::startSubPathElement);
     v.setProperty (DrawablePath::ValueTreeWrapper::point1, startPos.toString(), nullptr);
@@ -181,7 +181,7 @@ RelativePointPath::CloseSubPath::CloseSubPath()
 {
 }
 
-const ValueTree RelativePointPath::CloseSubPath::createTree() const
+ValueTree RelativePointPath::CloseSubPath::createTree() const
 {
     return ValueTree (DrawablePath::ValueTreeWrapper::Element::closeSubPathElement);
 }
@@ -208,7 +208,7 @@ RelativePointPath::LineTo::LineTo (const RelativePoint& endPoint_)
 {
 }
 
-const ValueTree RelativePointPath::LineTo::createTree() const
+ValueTree RelativePointPath::LineTo::createTree() const
 {
     ValueTree v (DrawablePath::ValueTreeWrapper::Element::lineToElement);
     v.setProperty (DrawablePath::ValueTreeWrapper::point1, endPoint.toString(), nullptr);
@@ -239,7 +239,7 @@ RelativePointPath::QuadraticTo::QuadraticTo (const RelativePoint& controlPoint, 
     controlPoints[1] = endPoint;
 }
 
-const ValueTree RelativePointPath::QuadraticTo::createTree() const
+ValueTree RelativePointPath::QuadraticTo::createTree() const
 {
     ValueTree v (DrawablePath::ValueTreeWrapper::Element::quadraticToElement);
     v.setProperty (DrawablePath::ValueTreeWrapper::point1, controlPoints[0].toString(), nullptr);
@@ -274,7 +274,7 @@ RelativePointPath::CubicTo::CubicTo (const RelativePoint& controlPoint1, const R
     controlPoints[2] = endPoint;
 }
 
-const ValueTree RelativePointPath::CubicTo::createTree() const
+ValueTree RelativePointPath::CubicTo::createTree() const
 {
     ValueTree v (DrawablePath::ValueTreeWrapper::Element::cubicToElement);
     v.setProperty (DrawablePath::ValueTreeWrapper::point1, controlPoints[0].toString(), nullptr);

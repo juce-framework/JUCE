@@ -52,7 +52,7 @@ public:
 
         @see getDefaultDeviceIndex, openDevice
     */
-    static const StringArray getDevices();
+    static StringArray getDevices();
 
     /** Returns the index of the default midi output device to use.
 

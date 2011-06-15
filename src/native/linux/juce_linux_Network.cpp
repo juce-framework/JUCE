@@ -259,7 +259,7 @@ private:
             }
         }
 
-        const String responseHeader (readResponse (socketHandle, timeOutTime));
+        String responseHeader (readResponse (socketHandle, timeOutTime));
 
         if (responseHeader.isNotEmpty())
         {
@@ -297,7 +297,7 @@ private:
     }
 
     //==============================================================================
-    static const String readResponse (const int socketHandle, const uint32 timeOutTime)
+    static String readResponse (const int socketHandle, const uint32 timeOutTime)
     {
         int bytesRead = 0, numConsecutiveLFs  = 0;
         MemoryBlock buffer (1024, true);
@@ -431,7 +431,7 @@ private:
         return true;
     }
 
-    static const String findHeaderItem (const StringArray& lines, const String& itemName)
+    static String findHeaderItem (const StringArray& lines, const String& itemName)
     {
         for (int i = 0; i < lines.size(); ++i)
             if (lines[i].startsWithIgnoreCase (itemName))

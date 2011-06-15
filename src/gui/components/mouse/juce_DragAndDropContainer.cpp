@@ -425,7 +425,7 @@ bool DragAndDropContainer::isDragAndDropActive() const
     return dragImageComponent != nullptr;
 }
 
-const String DragAndDropContainer::getCurrentDragDescription() const
+String DragAndDropContainer::getCurrentDragDescription() const
 {
     return dragImageComponent != nullptr ? currentDragDesc
                                          : String::empty;

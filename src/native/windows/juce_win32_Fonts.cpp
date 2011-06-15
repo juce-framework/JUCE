@@ -401,7 +401,7 @@ private:
 const MAT2 WindowsTypeface::identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
 
 
-const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
+Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new WindowsTypeface (font);
 }

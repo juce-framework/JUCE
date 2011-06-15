@@ -181,7 +181,7 @@ void DrawableText::paint (Graphics& g)
     ga.draw (g, transform);
 }
 
-const Rectangle<float> DrawableText::getDrawableBounds() const
+Rectangle<float> DrawableText::getDrawableBounds() const
 {
     return RelativeParallelogram::getBoundingBox (resolvedPoints);
 }
@@ -307,7 +307,7 @@ void DrawableText::refreshFromValueTree (const ValueTree& tree, ComponentBuilder
     }
 }
 
-const ValueTree DrawableText::createValueTree (ComponentBuilder::ImageProvider*) const
+ValueTree DrawableText::createValueTree (ComponentBuilder::ImageProvider*) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);

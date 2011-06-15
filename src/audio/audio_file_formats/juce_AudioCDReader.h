@@ -59,7 +59,7 @@ public:
 
         @see createReaderForCD
     */
-    static const StringArray getAvailableCDNames();
+    static StringArray getAvailableCDNames();
 
     /** Tries to create an AudioFormatReader that can read from an Audio CD.
 

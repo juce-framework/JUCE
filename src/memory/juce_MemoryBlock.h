@@ -186,7 +186,7 @@ public:
     //==============================================================================
     /** Attempts to parse the contents of the block as a zero-terminated string of 8-bit
         characters in the system's default encoding. */
-    const String toString() const;
+    String toString() const;
 
     //==============================================================================
     /** Parses a string of hexadecimal numbers and writes this data into the memory block.
@@ -216,7 +216,7 @@ public:
 
         @see fromBase64Encoding
     */
-    const String toBase64Encoding() const;
+    String toBase64Encoding() const;
 
     /** Takes a string of encoded characters and turns it into binary data.
 

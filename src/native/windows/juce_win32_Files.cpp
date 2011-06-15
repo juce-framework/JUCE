@@ -56,7 +56,7 @@ namespace WindowsFileHelpers
         reinterpret_cast<ULARGE_INTEGER*> (ft)->QuadPart = time * 10000 + literal64bit (116444736000000000);
     }
 
-    const String getDriveFromPath (String path)
+    String getDriveFromPath (String path)
     {
         // (mess with the string to make sure it's not sharing its internal storage)
         path = (path + " ").dropLastCharacters(1);

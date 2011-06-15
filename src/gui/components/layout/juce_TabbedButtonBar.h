@@ -199,7 +199,7 @@ public:
 
         This could be an empty string if none are selected.
     */
-    const String getCurrentTabName() const;
+    String getCurrentTabName() const;
 
     /** Returns the index of the currently selected tab.
 

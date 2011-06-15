@@ -514,7 +514,7 @@ public:
     }
 };
 
-const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
+Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new FreetypeTypeface (font);
 }
@@ -530,8 +530,8 @@ StringArray Font::findAllTypefaceNames()
 
 namespace LinuxFontHelpers
 {
-    const String pickBestFont (const StringArray& names,
-                               const char* const* choicesString)
+    String pickBestFont (const StringArray& names,
+                         const char* const* choicesString)
     {
         const StringArray choices (choicesString);
 
@@ -553,7 +553,7 @@ namespace LinuxFontHelpers
         return names[0];
     }
 
-    const String getDefaultSansSerifFontName()
+    String getDefaultSansSerifFontName()
     {
         StringArray allFonts;
         FreeTypeInterface::getInstance()->getSansSerifNames (allFonts);
@@ -562,7 +562,7 @@ namespace LinuxFontHelpers
         return pickBestFont (allFonts, targets);
     }
 
-    const String getDefaultSerifFontName()
+    String getDefaultSerifFontName()
     {
         StringArray allFonts;
         FreeTypeInterface::getInstance()->getSerifNames (allFonts);
@@ -571,7 +571,7 @@ namespace LinuxFontHelpers
         return pickBestFont (allFonts, targets);
     }
 
-    const String getDefaultMonospacedFontName()
+    String getDefaultMonospacedFontName()
     {
         StringArray allFonts;
         FreeTypeInterface::getInstance()->getMonospacedNames (allFonts);

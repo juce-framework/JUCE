@@ -156,8 +156,8 @@ public:
         }
     }
 
-    const StringArray getOutputChannelNames()   { return outputChannelNames; }
-    const StringArray getInputChannelNames()    { return inputChannelNames; }
+    StringArray getOutputChannelNames()         { return outputChannelNames; }
+    StringArray getInputChannelNames()          { return inputChannelNames; }
 
     int getNumSampleRates()                     { return sampleRates.size(); }
     double getSampleRate (int index)            { return sampleRates [index]; }
@@ -829,7 +829,7 @@ private:
         return false;
     }
 
-    const String initDriver()
+    String initDriver()
     {
         if (asioObject != nullptr)
         {
@@ -850,7 +850,7 @@ private:
         return "No Driver";
     }
 
-    const String openDevice()
+    String openDevice()
     {
         // use this in case the driver starts opening dialog boxes..
         Component modalWindow (String::empty);
@@ -1667,7 +1667,7 @@ public:
         }
     }
 
-    const StringArray getDeviceNames (bool /*wantInputNames*/) const
+    StringArray getDeviceNames (bool /*wantInputNames*/) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 

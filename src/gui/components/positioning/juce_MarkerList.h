@@ -159,10 +159,10 @@ public:
 
         ValueTree& getState() noexcept      { return state; }
         int getNumMarkers() const;
-        const ValueTree getMarkerState (int index) const;
-        const ValueTree getMarkerState (const String& name) const;
+        ValueTree getMarkerState (int index) const;
+        ValueTree getMarkerState (const String& name) const;
         bool containsMarker (const ValueTree& state) const;
-        const MarkerList::Marker getMarker (const ValueTree& state) const;
+        MarkerList::Marker getMarker (const ValueTree& state) const;
         void setMarker (const MarkerList::Marker& marker, UndoManager* undoManager);
         void removeMarker (const ValueTree& state, UndoManager* undoManager);
 

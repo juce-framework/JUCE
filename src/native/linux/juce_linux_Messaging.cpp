@@ -193,7 +193,7 @@ private:
         return true;
     }
 
-    const Message::Ptr popNextMessage()
+    Message::Ptr popNextMessage()
     {
         const ScopedLock sl (lock);
 

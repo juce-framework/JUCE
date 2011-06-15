@@ -652,7 +652,7 @@ void juce_runSystemCommand (const String& command)
     (void) result;
 }
 
-const String juce_getOutputFromCommand (const String& command)
+String juce_getOutputFromCommand (const String& command)
 {
     // slight bodge here, as we just pipe the output into a temp file and read it...
     const File tempFile (File::getSpecialLocation (File::tempDirectory)

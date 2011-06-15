@@ -48,7 +48,7 @@ void Logger::outputDebugString (const String& text)
 #pragma intrinsic (__cpuid)
 #pragma intrinsic (__rdtsc)
 
-const String SystemStats::getCpuVendor()
+String SystemStats::getCpuVendor()
 {
     int info [4];
     __cpuid (info, 0);
@@ -98,7 +98,7 @@ static void juce_getCpuVendor (char* const v)
     memcpy (v, vendor, 16);
 }
 
-const String SystemStats::getCpuVendor()
+String SystemStats::getCpuVendor()
 {
     char v [16];
     juce_getCpuVendor (v);
@@ -161,7 +161,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     return UnknownOS;
 }
 
-const String SystemStats::getOperatingSystemName()
+String SystemStats::getOperatingSystemName()
 {
     const char* name = "Unknown OS";
 
@@ -356,7 +356,7 @@ int SystemStats::getPageSize()
 }
 
 //==============================================================================
-const String SystemStats::getLogonName()
+String SystemStats::getLogonName()
 {
     TCHAR text [256] = { 0 };
     DWORD len = numElementsInArray (text) - 1;
@@ -364,12 +364,12 @@ const String SystemStats::getLogonName()
     return String (text, len);
 }
 
-const String SystemStats::getFullUserName()
+String SystemStats::getFullUserName()
 {
     return getLogonName();
 }
 
-const String SystemStats::getComputerName()
+String SystemStats::getComputerName()
 {
     TCHAR text [MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
     DWORD len = numElementsInArray (text) - 1;

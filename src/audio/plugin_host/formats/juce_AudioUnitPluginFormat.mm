@@ -1493,7 +1493,7 @@ AudioPluginInstance* AudioUnitPluginFormat::createInstanceFromDescription (const
     return nullptr;
 }
 
-const StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath& /*directoriesToSearch*/,
+StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath& /*directoriesToSearch*/,
                                                                 const bool /*recursive*/)
 {
     StringArray result;
@@ -1538,7 +1538,7 @@ bool AudioUnitPluginFormat::fileMightContainThisPluginType (const String& fileOr
              && f.isDirectory();
 }
 
-const String AudioUnitPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
+String AudioUnitPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
 {
     ComponentDescription desc;
     String name, version, manufacturer;
@@ -1558,7 +1558,7 @@ bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
         return File (desc.fileOrIdentifier).exists();
 }
 
-const FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
+FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 {
     return FileSearchPath ("/(Default AudioUnit locations)");
 }

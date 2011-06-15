@@ -120,7 +120,7 @@ public:
 
         If there isn't one, this returns File::nonexistent
     */
-    const File getCurrentMovieFile() const;
+    File getCurrentMovieFile() const;
 
     /** Returns true if there's currently a movie open. */
     bool isMovieOpen() const;

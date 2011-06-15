@@ -173,7 +173,7 @@ public:
     void toFront (bool makeActiveWindow);
     void toBehind (ComponentPeer* other);
     void setIcon (const Image& newIcon);
-    const StringArray getAvailableRenderingEngines();
+    StringArray getAvailableRenderingEngines();
     int getCurrentRenderingEngine() const;
     void setCurrentRenderingEngine (int index);
 
@@ -1569,7 +1569,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
     }
 }
 
-const StringArray NSViewComponentPeer::getAvailableRenderingEngines()
+StringArray NSViewComponentPeer::getAvailableRenderingEngines()
 {
     StringArray s (ComponentPeer::getAvailableRenderingEngines());
 

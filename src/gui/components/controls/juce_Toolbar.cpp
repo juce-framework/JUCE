@@ -398,7 +398,7 @@ void Toolbar::setStyle (const ToolbarItemStyle& newStyle)
     }
 }
 
-const String Toolbar::toString() const
+String Toolbar::toString() const
 {
     String s ("TB:");
 

@@ -54,7 +54,7 @@ public:
     bool canDoStereo();
     bool canDoMono();
     bool isCompressed();
-    const StringArray getQualityOptions();
+    StringArray getQualityOptions();
 
     //==============================================================================
     AudioFormatReader* createReaderFor (InputStream* sourceStream,

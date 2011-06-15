@@ -70,8 +70,8 @@ namespace
     }
 }
 
-const String PlatformUtilities::getRegistryValue (const String& regValuePath,
-                                                  const String& defaultValue)
+String PlatformUtilities::getRegistryValue (const String& regValuePath,
+                                            const String& defaultValue)
 {
     String valueName, result (defaultValue);
     HKEY k = findKeyForPath (regValuePath, false, valueName);
@@ -184,7 +184,7 @@ bool juce_IsRunningInWine()
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams()
+String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams()
 {
     const String commandLine (GetCommandLineW());
     return String (CharacterFunctions::findEndOfToken (commandLine.getCharPointer(),

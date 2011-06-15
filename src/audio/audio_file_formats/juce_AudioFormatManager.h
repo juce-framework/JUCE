@@ -106,7 +106,7 @@ public:
 
         E.g. if might return "*.wav;*.aiff" if it just knows about wavs and aiffs.
     */
-    const String getWildcardForAllFormats() const;
+    String getWildcardForAllFormats() const;
 
     //==============================================================================
     /** Searches through the known formats to try to create a suitable reader for

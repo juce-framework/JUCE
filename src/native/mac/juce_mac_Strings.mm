@@ -30,7 +30,7 @@
 //==============================================================================
 namespace
 {
-    const String nsStringToJuce (NSString* s)
+    String nsStringToJuce (NSString* s)
     {
         return CharPointer_UTF8 ([s UTF8String]);
     }
@@ -41,7 +41,7 @@ namespace
     }
 }
 
-const String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)
+String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)
 {
     if (cfString == 0)
         return String::empty;
@@ -61,7 +61,7 @@ CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
     return CFStringCreateWithCharacters (kCFAllocatorDefault, (const UniChar*) utf16.getAddress(), utf16.length());
 }
 
-const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
+String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 {
 #if JUCE_IOS
     JUCE_AUTORELEASEPOOL

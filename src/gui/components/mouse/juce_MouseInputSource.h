@@ -120,10 +120,10 @@ public:
     int getNumberOfMultipleClicks() const noexcept;
 
     /** Returns the time at which the last mouse-down occurred. */
-    const Time getLastMouseDownTime() const noexcept;
+    Time getLastMouseDownTime() const noexcept;
 
     /** Returns the screen position at which the last mouse-down occurred. */
-    const Point<int> getLastMouseDownPosition() const noexcept;
+    Point<int> getLastMouseDownPosition() const noexcept;
 
     /** Returns true if this mouse is currently down, and if it has been dragged more
         than a couple of pixels from the place it was pressed.

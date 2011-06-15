@@ -140,7 +140,7 @@ public:
         expect (mi.readDoubleBigEndian() == randomDouble);
     }
 
-    static const String createRandomWideCharString()
+    static String createRandomWideCharString()
     {
         juce_wchar buffer [50] = { 0 };
 

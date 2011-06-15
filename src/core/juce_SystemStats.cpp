@@ -40,7 +40,7 @@ const SystemStats::CPUFlags& SystemStats::getCPUFlags()
     return cpuFlags;
 }
 
-const String SystemStats::getJUCEVersion()
+String SystemStats::getJUCEVersion()
 {
     // Some basic tests, to keep an eye on things and make sure these types work ok
     // on all platforms. Let me know if any of these assertions fail on your system!

@@ -62,9 +62,9 @@ public:
     public:
         ComponentScope (Component& component_);
 
-        const Expression getSymbolValue (const String& symbol) const;
+        Expression getSymbolValue (const String& symbol) const;
         void visitRelativeScope (const String& scopeName, Visitor& visitor) const;
-        const String getScopeUID() const;
+        String getScopeUID() const;
 
     protected:
         Component& component;

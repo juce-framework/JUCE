@@ -221,7 +221,7 @@ int TabbedComponent::getCurrentTabIndex() const
     return tabs->getCurrentTabIndex();
 }
 
-const String TabbedComponent::getCurrentTabName() const
+String TabbedComponent::getCurrentTabName() const
 {
     return tabs->getCurrentTabName();
 }

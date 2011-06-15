@@ -717,7 +717,7 @@ Component* CameraDevice::createViewerComponent()
     return new DShowCameraDeviceInteral::DShowCaptureViewerComp (static_cast <DShowCameraDeviceInteral*> (internal));
 }
 
-const String CameraDevice::getFileExtension()
+String CameraDevice::getFileExtension()
 {
     return ".wmv";
 }
@@ -731,7 +731,7 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
     isRecording = d->createFileCaptureFilter (file, quality);
 }
 
-const Time CameraDevice::getTimeOfFirstRecordedFrame() const
+Time CameraDevice::getTimeOfFirstRecordedFrame() const
 {
     DShowCameraDeviceInteral* const d = (DShowCameraDeviceInteral*) internal;
     return d->firstRecordedTime;
@@ -830,7 +830,7 @@ namespace
     }
 }
 
-const StringArray CameraDevice::getAvailableDevices()
+StringArray CameraDevice::getAvailableDevices()
 {
     StringArray devs;
     String dummy;

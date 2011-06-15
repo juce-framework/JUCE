@@ -87,7 +87,7 @@ void Label::setText (const String& newText,
     }
 }
 
-const String Label::getText (const bool returnActiveEditorContents) const
+String Label::getText (const bool returnActiveEditorContents) const
 {
     return (returnActiveEditorContents && isBeingEdited())
                 ? editor->getText()

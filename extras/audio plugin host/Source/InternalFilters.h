@@ -55,13 +55,13 @@ public:
     void getAllTypes (OwnedArray <PluginDescription>& results);
 
     //==============================================================================
-    const String getName() const                                { return "Internal"; }
+    String getName() const                                      { return "Internal"; }
     bool fileMightContainThisPluginType (const String&)         { return false; }
-    const FileSearchPath getDefaultLocationsToSearch()          { return FileSearchPath(); }
+    FileSearchPath getDefaultLocationsToSearch()                { return FileSearchPath(); }
     void findAllTypesForFile (OwnedArray <PluginDescription>&, const String&)     {}
     bool doesPluginStillExist (const PluginDescription&)        { return true; }
-    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)   { return fileOrIdentifier; }
-    const StringArray searchPathsForPlugins (const FileSearchPath&, bool)         { return StringArray(); }
+    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)   { return fileOrIdentifier; }
+    StringArray searchPathsForPlugins (const FileSearchPath&, bool)         { return StringArray(); }
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 
 private:

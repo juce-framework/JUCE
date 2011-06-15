@@ -42,14 +42,14 @@ public:
     ~AudioUnitPluginFormat();
 
     //==============================================================================
-    const String getName() const                { return "AudioUnit"; }
+    String getName() const                { return "AudioUnit"; }
     void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
     bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-    const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
+    String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
+    StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
     bool doesPluginStillExist (const PluginDescription& desc);
-    const FileSearchPath getDefaultLocationsToSearch();
+    FileSearchPath getDefaultLocationsToSearch();
 
 private:
     //==============================================================================

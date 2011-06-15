@@ -60,7 +60,7 @@ public:
 
         This returns a void if no such property exists.
     */
-    virtual const var getProperty (const Identifier& propertyName) const;
+    virtual var getProperty (const Identifier& propertyName) const;
 
     /** Sets a named property. */
     virtual void setProperty (const Identifier& propertyName, const var& newValue);
@@ -85,9 +85,9 @@ public:
         This method is virtual to allow more dynamic invocation to used for objects
         where the methods may not already be set as properies.
     */
-    virtual const var invokeMethod (const Identifier& methodName,
-                                    const var* parameters,
-                                    int numParameters);
+    virtual var invokeMethod (const Identifier& methodName,
+                              const var* parameters,
+                              int numParameters);
 
     /** Sets up a method.
 

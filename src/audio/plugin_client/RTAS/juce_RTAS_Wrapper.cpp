@@ -949,7 +949,7 @@ private:
         return new JucePlugInProcess();
     }
 
-    static const String createRTASName()
+    static String createRTASName()
     {
         return String (JucePlugin_Name) + "\n"
                  + String (JucePlugin_Name).substring (0, 4);

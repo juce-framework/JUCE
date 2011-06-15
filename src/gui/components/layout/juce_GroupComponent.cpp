@@ -55,7 +55,7 @@ void GroupComponent::setText (const String& newText)
     }
 }
 
-const String GroupComponent::getText() const
+String GroupComponent::getText() const
 {
     return text;
 }
