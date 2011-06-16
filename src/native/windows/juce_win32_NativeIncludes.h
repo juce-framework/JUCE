@@ -150,7 +150,7 @@
  #include <dshowasf.h>
 #endif
 
-#if JUCE_MEDIAFOUNDATION && JUCE_BUILD_NATIVE
+#if JUCE_DIRECTSHOW && JUCE_MEDIAFOUNDATION && JUCE_BUILD_NATIVE
  #include <evr.h>
 #endif
 

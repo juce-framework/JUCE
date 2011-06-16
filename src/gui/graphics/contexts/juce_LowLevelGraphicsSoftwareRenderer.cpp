@@ -2144,11 +2144,17 @@ public:
                 }
                 else
                 {
-                    SoftwareRendererClasses::ClipRegionBase::Ptr c (new SoftwareRendererClasses::ClipRegion_EdgeTable (Rectangle<int> (tx, ty, sourceImage.getWidth(), sourceImage.getHeight()).getIntersection (image.getBounds())));
-                    c = clip->applyClipTo (c);
+                    Rectangle<int> area (tx, ty, sourceImage.getWidth(), sourceImage.getHeight());
+                    area = area.getIntersection (image.getBounds());
 
-                    if (c != nullptr)
-                        c->renderImageUntransformed (destData, srcData, alpha, tx, ty, false);
+                    if (! area.isEmpty())
+                    {
+                        SoftwareRendererClasses::ClipRegionBase::Ptr c (new SoftwareRendererClasses::ClipRegion_EdgeTable (area));
+                        c = clip->applyClipTo (c);
+
+                        if (c != nullptr)
+                            c->renderImageUntransformed (destData, srcData, alpha, tx, ty, false);
+                    }
                 }
 
                 return;

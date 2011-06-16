@@ -184,8 +184,14 @@ public:
                 commandManager->invoke (info, true);
             }
 
-            currentModel->menuItemSelected (commandId, topLevelIndex);
+            (new AsyncCommandInvoker (commandId, topLevelIndex))->post();
         }
+    }
+
+    void invokeDirectly (const int commandId, const int topLevelIndex)
+    {
+        if (currentModel != nullptr)
+            currentModel->menuItemSelected (commandId, topLevelIndex);
     }
 
     void addMenuItem (PopupMenu::MenuItemIterator& iter, NSMenu* menuToAddTo,
@@ -369,6 +375,25 @@ private:
 
     private:
         JUCE_DECLARE_NON_COPYABLE (AsyncMenuUpdater);
+    };
+
+    class AsyncCommandInvoker  : public CallbackMessage
+    {
+    public:
+        AsyncCommandInvoker (const int commandId_, const int topLevelIndex_)
+            : commandId (commandId_), topLevelIndex (topLevelIndex_)
+        {}
+
+        void messageCallback()
+        {
+            if (JuceMainMenuHandler::instance != nullptr)
+                JuceMainMenuHandler::instance->invokeDirectly (commandId, topLevelIndex);
+        }
+
+    private:
+        const int commandId, topLevelIndex;
+
+        JUCE_DECLARE_NON_COPYABLE (AsyncCommandInvoker);
     };
 };
 
