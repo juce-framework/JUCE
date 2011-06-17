@@ -101,7 +101,7 @@ private:
 
 
 //==============================================================================
-#if JUCE_USE_INTRINSICS
+#if JUCE_USE_INTRINSICS && ! defined (__INTEL_COMPILER)
   #pragma intrinsic (_byteswap_ulong)
 #endif
 

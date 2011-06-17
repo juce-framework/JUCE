@@ -281,7 +281,7 @@ void BigInteger::negate() noexcept
     negative = (! negative) && ! isZero();
 }
 
-#if JUCE_USE_INTRINSICS
+#if JUCE_USE_INTRINSICS && ! defined (__INTEL_COMPILER)
  #pragma intrinsic (_BitScanReverse)
 #endif
 

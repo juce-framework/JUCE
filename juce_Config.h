@@ -86,18 +86,16 @@
   #define JUCE_DIRECTSOUND 1
 #endif
 
-/** JUCE_DIRECTSHOW: Enables DirectShow media-streaming architecture
-    (MS Windows only).
+/** JUCE_DIRECTSHOW: Enables DirectShow media-streaming architecture (MS Windows only).
 */
 #ifndef JUCE_DIRECTSHOW
-  #define JUCE_DIRECTSHOW 1
+  #define JUCE_DIRECTSHOW 0
 #endif
 
-/** JUCE_MEDIAFOUNDATION: Enables Media Foundation multimedia platform
-    (Windows Vista and above).
+/** JUCE_MEDIAFOUNDATION: Enables Media Foundation multimedia platform (Windows Vista and above).
 */
 #ifndef JUCE_MEDIAFOUNDATION
-  #define JUCE_MEDIAFOUNDATION 1
+  #define JUCE_MEDIAFOUNDATION 0
 #endif
 
 #if ! JUCE_WINDOWS

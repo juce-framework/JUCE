@@ -2312,6 +2312,7 @@ void TextEditor::insert (const String& text,
             totalNumChars = -1;
             valueTextNeedsUpdating = true;
 
+            updateTextHolderSize();
             moveCaretTo (caretPositionToMoveTo, false);
 
             repaintText (Range<int> (insertIndex, getTotalNumChars()));

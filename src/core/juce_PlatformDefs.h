@@ -71,7 +71,9 @@
 #elif JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
   #define juce_breakDebugger        { kill (0, SIGTRAP); }
 #elif JUCE_USE_INTRINSICS
-  #pragma intrinsic (__debugbreak)
+  #ifndef __INTEL_COMPILER
+    #pragma intrinsic (__debugbreak)
+  #endif
   #define juce_breakDebugger        { __debugbreak(); }
 #elif JUCE_GCC
   #define juce_breakDebugger        { asm("int $3"); }

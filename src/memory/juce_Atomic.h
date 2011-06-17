@@ -202,8 +202,10 @@ private:
   #define JUCE_ATOMICS_WINDOWS 1    // Windows with intrinsics
 
   #if JUCE_USE_INTRINSICS || JUCE_64BIT
-    #pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
-                       _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
+    #ifndef __INTEL_COMPILER
+     #pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
+                        _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
+    #endif
     #define juce_InterlockedExchange(a, b)              _InterlockedExchange(a, b)
     #define juce_InterlockedIncrement(a)                _InterlockedIncrement(a)
     #define juce_InterlockedDecrement(a)                _InterlockedDecrement(a)
@@ -223,7 +225,9 @@ private:
   #endif
 
   #if JUCE_64BIT
-    #pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
+    #ifndef __INTEL_COMPILER
+     #pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
+    #endif
     #define juce_InterlockedExchangeAdd64(a, b)     _InterlockedExchangeAdd64(a, b)
     #define juce_InterlockedExchange64(a, b)        _InterlockedExchange64(a, b)
     #define juce_InterlockedIncrement64(a)          _InterlockedIncrement64(a)

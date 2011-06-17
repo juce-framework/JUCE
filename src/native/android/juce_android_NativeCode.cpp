@@ -629,6 +629,11 @@ public:
 
 static AndroidJavaCallbacks android;
 
+// This is an unsatisfactory workaround for a linker warning that appeared in NDK5c.
+// If anyone actually understands what this symbol is for and why the linker gets confused by it,
+// please let me know!
+extern "C" { void* __dso_handle = 0; }
+
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1
 

@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	103
+#define JUCE_BUILDNUMBER	104
 
 /** Current Juce version number.
 
@@ -305,18 +305,16 @@ namespace JuceDummyNamespace {}
   #define JUCE_DIRECTSOUND 1
 #endif
 
-/** JUCE_DIRECTSHOW: Enables DirectShow media-streaming architecture
-	(MS Windows only).
+/** JUCE_DIRECTSHOW: Enables DirectShow media-streaming architecture (MS Windows only).
 */
 #ifndef JUCE_DIRECTSHOW
-  #define JUCE_DIRECTSHOW 1
+  #define JUCE_DIRECTSHOW 0
 #endif
 
-/** JUCE_MEDIAFOUNDATION: Enables Media Foundation multimedia platform
-	(Windows Vista and above).
+/** JUCE_MEDIAFOUNDATION: Enables Media Foundation multimedia platform (Windows Vista and above).
 */
 #ifndef JUCE_MEDIAFOUNDATION
-  #define JUCE_MEDIAFOUNDATION 1
+  #define JUCE_MEDIAFOUNDATION 0
 #endif
 
 #if ! JUCE_WINDOWS
@@ -591,7 +589,9 @@ namespace JuceDummyNamespace {}
 #elif JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
   #define juce_breakDebugger	{ kill (0, SIGTRAP); }
 #elif JUCE_USE_INTRINSICS
-  #pragma intrinsic (__debugbreak)
+  #ifndef __INTEL_COMPILER
+	#pragma intrinsic (__debugbreak)
+  #endif
   #define juce_breakDebugger	{ __debugbreak(); }
 #elif JUCE_GCC
   #define juce_breakDebugger        { asm("int $3"); }
@@ -1501,7 +1501,7 @@ private:
 	JUCE_DECLARE_NON_COPYABLE (ByteOrder);
 };
 
-#if JUCE_USE_INTRINSICS
+#if JUCE_USE_INTRINSICS && ! defined (__INTEL_COMPILER)
   #pragma intrinsic (_byteswap_ulong)
 #endif
 
@@ -2284,8 +2284,10 @@ private:
   #define JUCE_ATOMICS_WINDOWS 1	// Windows with intrinsics
 
   #if JUCE_USE_INTRINSICS || JUCE_64BIT
-	#pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
-					   _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
+	#ifndef __INTEL_COMPILER
+	 #pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
+						_InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
+	#endif
 	#define juce_InterlockedExchange(a, b)		  _InterlockedExchange(a, b)
 	#define juce_InterlockedIncrement(a)		_InterlockedIncrement(a)
 	#define juce_InterlockedDecrement(a)		_InterlockedDecrement(a)
@@ -2305,7 +2307,9 @@ private:
   #endif
 
   #if JUCE_64BIT
-	#pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
+	#ifndef __INTEL_COMPILER
+	 #pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
+	#endif
 	#define juce_InterlockedExchangeAdd64(a, b)	 _InterlockedExchangeAdd64(a, b)
 	#define juce_InterlockedExchange64(a, b)	_InterlockedExchange64(a, b)
 	#define juce_InterlockedIncrement64(a)	  _InterlockedIncrement64(a)
