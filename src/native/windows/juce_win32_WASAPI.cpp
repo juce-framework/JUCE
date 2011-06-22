@@ -632,8 +632,6 @@ public:
 
     bool initialise()
     {
-        double defaultSampleRateIn = 0, defaultSampleRateOut = 0;
-        int minBufferSizeIn = 0, defaultBufferSizeIn = 0, minBufferSizeOut = 0, defaultBufferSizeOut = 0;
         latencyIn = latencyOut = 0;
         Array <double> ratesIn, ratesOut;
 
@@ -965,12 +963,10 @@ class WASAPIAudioIODeviceType  : public AudioIODeviceType
 public:
     WASAPIAudioIODeviceType()
         : AudioIODeviceType ("Windows Audio"),
+          deviceChangeCatcher (_T("Windows Audio"), (WNDPROC) deviceChangeEventCallback),
           hasScanned (false)
     {
-    }
-
-    ~WASAPIAudioIODeviceType()
-    {
+        SetWindowLongPtr (deviceChangeCatcher.getHWND(), GWLP_USERDATA, (LONG_PTR) this);
     }
 
     //==============================================================================
@@ -983,68 +979,8 @@ public:
         outputDeviceIds.clear();
         inputDeviceIds.clear();
 
-        ComSmartPtr <IMMDeviceEnumerator> enumerator;
-        if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
-            return;
-
-        const String defaultRenderer = getDefaultEndpoint (enumerator, false);
-        const String defaultCapture = getDefaultEndpoint (enumerator, true);
-
-        ComSmartPtr <IMMDeviceCollection> deviceCollection;
-        UINT32 numDevices = 0;
-
-        if (! (check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, deviceCollection.resetAndGetPointerAddress()))
-                && check (deviceCollection->GetCount (&numDevices))))
-            return;
-
-        for (UINT32 i = 0; i < numDevices; ++i)
-        {
-            ComSmartPtr <IMMDevice> device;
-            if (! check (deviceCollection->Item (i, device.resetAndGetPointerAddress())))
-                continue;
-
-            const String deviceId (getDeviceID (device));
-
-            DWORD state = 0;
-            if (! check (device->GetState (&state)))
-                continue;
-
-            if (state != DEVICE_STATE_ACTIVE)
-                continue;
-
-            String name;
-
-            {
-                ComSmartPtr <IPropertyStore> properties;
-                if (! check (device->OpenPropertyStore (STGM_READ, properties.resetAndGetPointerAddress())))
-                    continue;
-
-                PROPVARIANT value;
-                PropVariantInit (&value);
-                if (check (properties->GetValue (PKEY_Device_FriendlyName, &value)))
-                    name = value.pwszVal;
-
-                PropVariantClear (&value);
-            }
-
-            const EDataFlow flow = getDataFlow (device);
-
-            if (flow == eRender)
-            {
-                const int index = (deviceId == defaultRenderer) ? 0 : -1;
-                outputDeviceIds.insert (index, deviceId);
-                outputDeviceNames.insert (index, name);
-            }
-            else if (flow == eCapture)
-            {
-                const int index = (deviceId == defaultCapture) ? 0 : -1;
-                inputDeviceIds.insert (index, deviceId);
-                inputDeviceNames.insert (index, name);
-            }
-        }
-
-        inputDeviceNames.appendNumbersToDuplicates (false, false);
-        outputDeviceNames.appendNumbersToDuplicates (false, false);
+        scan (outputDeviceNames, inputDeviceNames,
+              outputDeviceIds, inputDeviceIds);
     }
 
     StringArray getDeviceNames (bool wantInputNames) const
@@ -1102,6 +1038,7 @@ public:
     StringArray inputDeviceNames, inputDeviceIds;
 
 private:
+    HiddenMessageWindow deviceChangeCatcher;
     bool hasScanned;
 
     //==============================================================================
@@ -1115,7 +1052,7 @@ private:
             WCHAR* deviceId = nullptr;
             if (check (dev->GetId (&deviceId)))
             {
-                s = String (deviceId);
+                s = deviceId;
                 CoTaskMemFree (deviceId);
             }
 
@@ -1123,6 +1060,106 @@ private:
         }
 
         return s;
+    }
+
+    //==============================================================================
+    void scan (StringArray& outputDeviceNames,
+               StringArray& inputDeviceNames,
+               StringArray& outputDeviceIds,
+               StringArray& inputDeviceIds)
+    {
+        ComSmartPtr <IMMDeviceEnumerator> enumerator;
+        if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
+            return;
+
+        const String defaultRenderer (getDefaultEndpoint (enumerator, false));
+        const String defaultCapture (getDefaultEndpoint (enumerator, true));
+
+        ComSmartPtr <IMMDeviceCollection> deviceCollection;
+        UINT32 numDevices = 0;
+
+        if (! (check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, deviceCollection.resetAndGetPointerAddress()))
+                && check (deviceCollection->GetCount (&numDevices))))
+            return;
+
+        for (UINT32 i = 0; i < numDevices; ++i)
+        {
+            ComSmartPtr <IMMDevice> device;
+            if (! check (deviceCollection->Item (i, device.resetAndGetPointerAddress())))
+                continue;
+
+            DWORD state = 0;
+            if (! (check (device->GetState (&state)) && state == DEVICE_STATE_ACTIVE))
+                continue;
+
+            const String deviceId (getDeviceID (device));
+            String name;
+
+            {
+                ComSmartPtr <IPropertyStore> properties;
+                if (! check (device->OpenPropertyStore (STGM_READ, properties.resetAndGetPointerAddress())))
+                    continue;
+
+                PROPVARIANT value;
+                PropVariantInit (&value);
+                if (check (properties->GetValue (PKEY_Device_FriendlyName, &value)))
+                    name = value.pwszVal;
+
+                PropVariantClear (&value);
+            }
+
+            const EDataFlow flow = getDataFlow (device);
+
+            if (flow == eRender)
+            {
+                const int index = (deviceId == defaultRenderer) ? 0 : -1;
+                outputDeviceIds.insert (index, deviceId);
+                outputDeviceNames.insert (index, name);
+            }
+            else if (flow == eCapture)
+            {
+                const int index = (deviceId == defaultCapture) ? 0 : -1;
+                inputDeviceIds.insert (index, deviceId);
+                inputDeviceNames.insert (index, name);
+            }
+        }
+
+        inputDeviceNames.appendNumbersToDuplicates (false, false);
+        outputDeviceNames.appendNumbersToDuplicates (false, false);
+    }
+
+    //==============================================================================
+    static LRESULT CALLBACK deviceChangeEventCallback (HWND h, const UINT message,
+                                                       const WPARAM wParam, const LPARAM lParam)
+    {
+        if (message == WM_DEVICECHANGE
+             && (wParam == 0x8000 /*DBT_DEVICEARRIVAL*/
+                  || wParam == 0x8004 /*DBT_DEVICEREMOVECOMPLETE*/))
+        {
+            ((WASAPIAudioIODeviceType*) GetWindowLongPtr (h, GWLP_USERDATA))->handleDeviceChange();
+        }
+
+        return DefWindowProc (h, message, wParam, lParam);
+    }
+
+    void handleDeviceChange()
+    {
+        StringArray newOutNames, newInNames, newOutIds, newInIds;
+        scan (newOutNames, newInNames, newOutIds, newInIds);
+
+        if (newOutNames != outputDeviceNames
+             || newInNames != inputDeviceNames
+             || newOutIds != outputDeviceIds
+             || newInIds != inputDeviceIds)
+        {
+            hasScanned = true;
+            outputDeviceNames = newOutNames;
+            inputDeviceNames = newInNames;
+            outputDeviceIds = newOutIds;
+            inputDeviceIds = newInIds;
+
+            callDeviceChangeListeners();
+        }
     }
 
     //==============================================================================

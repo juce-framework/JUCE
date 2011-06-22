@@ -210,6 +210,7 @@ public:
     virtual void drawRect (NSRect r);
 
     virtual bool canBecomeKeyWindow();
+    virtual void becomeKeyWindow();
     virtual bool windowShouldClose();
 
     virtual void redirectMovedOrResized();
@@ -681,7 +682,7 @@ END_JUCE_NAMESPACE
     [super becomeKeyWindow];
 
     if (owner != nullptr)
-        owner->grabFocus();
+        owner->becomeKeyWindow();
 }
 
 - (BOOL) windowShouldClose: (id) window
@@ -1599,6 +1600,12 @@ void NSViewComponentPeer::setCurrentRenderingEngine (int index)
 bool NSViewComponentPeer::canBecomeKeyWindow()
 {
     return (getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowIgnoresKeyPresses) == 0;
+}
+
+void NSViewComponentPeer::becomeKeyWindow()
+{
+    handleBroughtToFront();
+    grabFocus();
 }
 
 bool NSViewComponentPeer::windowShouldClose()

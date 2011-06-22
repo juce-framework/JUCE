@@ -1270,14 +1270,18 @@ void TextEditor::setText (const String& newText,
 }
 
 //==============================================================================
-Value& TextEditor::getTextValue()
+void TextEditor::updateValueFromText()
 {
     if (valueTextNeedsUpdating)
     {
         valueTextNeedsUpdating = false;
         textValue = getText();
     }
+}
 
+Value& TextEditor::getTextValue()
+{
+    updateValueFromText();
     return textValue;
 }
 
@@ -2222,6 +2226,7 @@ void TextEditor::handleCommandMessage (const int commandId)
         break;
 
     case TextEditorDefs::focusLossMessageId:
+        updateValueFromText();
         listeners.callChecked (checker, &TextEditorListener::textEditorFocusLost, (TextEditor&) *this);
         break;
 

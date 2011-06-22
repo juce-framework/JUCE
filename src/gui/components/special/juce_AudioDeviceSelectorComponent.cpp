@@ -198,6 +198,16 @@ private:
 
 
 //==============================================================================
+struct AudioDeviceSetupDetails
+{
+    AudioDeviceManager* manager;
+    int minNumInputChannels, maxNumInputChannels;
+    int minNumOutputChannels, maxNumOutputChannels;
+    bool useStereoPairs;
+};
+
+
+//==============================================================================
 class AudioDeviceSettingsPanel : public Component,
                                  public ChangeListener,
                                  public ComboBoxListener,  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
@@ -205,7 +215,7 @@ class AudioDeviceSettingsPanel : public Component,
 {
 public:
     AudioDeviceSettingsPanel (AudioIODeviceType* type_,
-                              AudioIODeviceType::DeviceSetupDetails& setup_,
+                              AudioDeviceSetupDetails& setup_,
                               const bool hideAdvancedOptionsWithButton)
         : type (type_),
           setup (setup_)
@@ -475,7 +485,7 @@ public:
 
 private:
     AudioIODeviceType* const type;
-    const AudioIODeviceType::DeviceSetupDetails setup;
+    const AudioDeviceSetupDetails setup;
 
     ScopedPointer<ComboBox> outputDeviceDropDown, inputDeviceDropDown, sampleRateDropDown, bufferSizeDropDown;
     ScopedPointer<Label> outputDeviceLabel, inputDeviceLabel, sampleRateLabel, bufferSizeLabel, inputChanLabel, outputChanLabel;
@@ -661,7 +671,7 @@ public:
         };
 
         //==============================================================================
-        ChannelSelectorListBox (const AudioIODeviceType::DeviceSetupDetails& setup_,
+        ChannelSelectorListBox (const AudioDeviceSetupDetails& setup_,
                                 const BoxType type_,
                                 const String& noItemsMessage_)
             : ListBox (String::empty, nullptr),
@@ -804,7 +814,7 @@ public:
 
     private:
         //==============================================================================
-        const AudioIODeviceType::DeviceSetupDetails setup;
+        const AudioDeviceSetupDetails setup;
         const BoxType type;
         const String noItemsMessage;
         StringArray items;
@@ -1076,7 +1086,7 @@ void AudioDeviceSelectorComponent::updateAllControls()
 
         if (type != nullptr)
         {
-            AudioIODeviceType::DeviceSetupDetails details;
+            AudioDeviceSetupDetails details;
             details.manager = &deviceManager;
             details.minNumInputChannels = minInputChannels;
             details.maxNumInputChannels = maxInputChannels;

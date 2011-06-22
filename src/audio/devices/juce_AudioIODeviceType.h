@@ -27,6 +27,7 @@
 #define __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
 
 #include "juce_AudioIODevice.h"
+#include "../../events/juce_ListenerList.h"
 class AudioDeviceManager;
 
 
@@ -119,13 +120,31 @@ public:
                                          const String& inputDeviceName) = 0;
 
     //==============================================================================
-    struct DeviceSetupDetails
+    /**
+        A class for receiving events when audio devices are inserted or removed.
+
+        You can register a AudioIODeviceType::Listener with an~AudioIODeviceType object
+        using the AudioIODeviceType::addListener() method, and it will be called when
+        devices of that type are added or removed.
+
+        @see AudioIODeviceType::addListener, AudioIODeviceType::removeListener
+    */
+    class Listener
     {
-        AudioDeviceManager* manager;
-        int minNumInputChannels, maxNumInputChannels;
-        int minNumOutputChannels, maxNumOutputChannels;
-        bool useStereoPairs;
+    public:
+        virtual ~Listener() {}
+
+        /** Called when the list of available audio devices changes. */
+        virtual void audioDeviceListChanged() = 0;
     };
+
+    /** Adds a listener that will be called when this type of device is added or
+        removed from the system.
+    */
+    void addListener (Listener* listener);
+
+    /** Removes a listener that was previously added with addListener(). */
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** Destructor. */
@@ -152,8 +171,12 @@ public:
 protected:
     explicit AudioIODeviceType (const String& typeName);
 
+    /** Synchronously calls all the registered device list change listeners. */
+    void callDeviceChangeListeners();
+
 private:
     String typeName;
+    ListenerList<Listener> listeners;
 
     JUCE_DECLARE_NON_COPYABLE (AudioIODeviceType);
 };

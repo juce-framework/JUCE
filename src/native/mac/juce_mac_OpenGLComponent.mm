@@ -427,10 +427,10 @@ public:
         view.frame = CGRectMake ((CGFloat) bounds.getX(), (CGFloat) bounds.getY(),
                                  (CGFloat) bounds.getWidth(), (CGFloat) bounds.getHeight());
 
-        if (lastWidth != w || lastHeight != h)
+        if (lastWidth != bounds.getWidth() || lastHeight != bounds.getHeight())
         {
-            lastWidth = w;
-            lastHeight = h;
+            lastWidth = bounds.getWidth();
+            lastHeight = bounds.getHeight();
             freeGLBuffers();
             createGLBuffers();
         }

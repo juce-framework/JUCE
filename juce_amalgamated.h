@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	104
+#define JUCE_BUILDNUMBER	105
 
 /** Current Juce version number.
 
@@ -39887,13 +39887,31 @@ public:
 	virtual AudioIODevice* createDevice (const String& outputDeviceName,
 										 const String& inputDeviceName) = 0;
 
-	struct DeviceSetupDetails
+	/**
+		A class for receiving events when audio devices are inserted or removed.
+
+		You can register a AudioIODeviceType::Listener with an~AudioIODeviceType object
+		using the AudioIODeviceType::addListener() method, and it will be called when
+		devices of that type are added or removed.
+
+		@see AudioIODeviceType::addListener, AudioIODeviceType::removeListener
+	*/
+	class Listener
 	{
-		AudioDeviceManager* manager;
-		int minNumInputChannels, maxNumInputChannels;
-		int minNumOutputChannels, maxNumOutputChannels;
-		bool useStereoPairs;
+	public:
+		virtual ~Listener() {}
+
+		/** Called when the list of available audio devices changes. */
+		virtual void audioDeviceListChanged() = 0;
 	};
+
+	/** Adds a listener that will be called when this type of device is added or
+		removed from the system.
+	*/
+	void addListener (Listener* listener);
+
+	/** Removes a listener that was previously added with addListener(). */
+	void removeListener (Listener* listener);
 
 	/** Destructor. */
 	virtual ~AudioIODeviceType();
@@ -39918,8 +39936,12 @@ public:
 protected:
 	explicit AudioIODeviceType (const String& typeName);
 
+	/** Synchronously calls all the registered device list change listeners. */
+	void callDeviceChangeListeners();
+
 private:
 	String typeName;
+	ListenerList<Listener> listeners;
 
 	JUCE_DECLARE_NON_COPYABLE (AudioIODeviceType);
 };
@@ -41733,13 +41755,15 @@ private:
 	double cpuUsageMs, timeToCpuScale;
 
 	class CallbackHandler  : public AudioIODeviceCallback,
-							 public MidiInputCallback
+							 public MidiInputCallback,
+							 public AudioIODeviceType::Listener
 	{
 	public:
 		void audioDeviceIOCallback (const float**, int, float**, int, int);
 		void audioDeviceAboutToStart (AudioIODevice*);
 		void audioDeviceStopped();
 		void handleIncomingMidiMessage (MidiInput*, const MidiMessage&);
+		void audioDeviceListChanged();
 
 		AudioDeviceManager* owner;
 	};
@@ -41752,6 +41776,7 @@ private:
 	void audioDeviceAboutToStartInt (AudioIODevice*);
 	void audioDeviceStoppedInt();
 	void handleIncomingMidiMessageInt (MidiInput*, const MidiMessage&);
+	void audioDeviceListChanged();
 
 	String restartDevice (int blockSizeToUse, double sampleRateToUse,
 						  const BigInteger& ins, const BigInteger& outs);
@@ -41764,7 +41789,7 @@ private:
 	void deleteCurrentDevice();
 	double chooseBestSampleRate (double preferred) const;
 	int chooseBestBufferSize (int preferred) const;
-	void insertDefaultDeviceNames (AudioDeviceSetup& setup) const;
+	void insertDefaultDeviceNames (AudioDeviceSetup&) const;
 
 	AudioIODeviceType* findType (const String& inputName, const String& outputName);
 
@@ -52451,6 +52476,7 @@ private:
 	void remove (const Range<int>& range, UndoManager* um, int caretPositionToMoveTo);
 	void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
 	void updateCaretPosition();
+	void updateValueFromText();
 	void textWasChangedByValue();
 	int indexAtPosition (float x, float y);
 	int findWordBreakAfter (int position) const;

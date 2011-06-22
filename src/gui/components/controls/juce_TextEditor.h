@@ -685,6 +685,7 @@ private:
     void remove (const Range<int>& range, UndoManager* um, int caretPositionToMoveTo);
     void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
     void updateCaretPosition();
+    void updateValueFromText();
     void textWasChangedByValue();
     int indexAtPosition (float x, float y);
     int findWordBreakAfter (int position) const;

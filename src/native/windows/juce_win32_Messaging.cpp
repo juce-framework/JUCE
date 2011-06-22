@@ -29,13 +29,54 @@
 
 
 //==============================================================================
+class HiddenMessageWindow
+{
+public:
+    HiddenMessageWindow (const TCHAR* const messageWindowName, WNDPROC wndProc)
+    {
+        String className ("JUCE_");
+        className << String::toHexString (Time::getHighResolutionTicks());
+
+        HMODULE moduleHandle = (HMODULE) PlatformUtilities::getCurrentModuleInstanceHandle();
+
+        WNDCLASSEX wc = { 0 };
+        wc.cbSize         = sizeof (wc);
+        wc.lpfnWndProc    = wndProc;
+        wc.cbWndExtra     = 4;
+        wc.hInstance      = moduleHandle;
+        wc.lpszClassName  = className.toWideCharPointer();
+
+        atom = RegisterClassEx (&wc);
+        jassert (atom != 0);
+
+        hwnd = CreateWindow (getClassNameFromAtom(), messageWindowName,
+                             0, 0, 0, 0, 0, 0, 0, moduleHandle, 0);
+        jassert (hwnd != 0);
+    }
+
+    ~HiddenMessageWindow()
+    {
+        DestroyWindow (hwnd);
+        UnregisterClass (getClassNameFromAtom(), 0);
+    }
+
+    inline HWND getHWND() const noexcept     { return hwnd; }
+
+private:
+    ATOM atom;
+    HWND hwnd;
+
+    LPCTSTR getClassNameFromAtom() noexcept  { return (LPCTSTR) MAKELONG (atom, 0); }
+};
+
+
+//==============================================================================
 static const unsigned int specialId             = WM_APP + 0x4400;
 static const unsigned int broadcastId           = WM_APP + 0x4403;
 static const unsigned int specialCallbackId     = WM_APP + 0x4402;
 
-static const TCHAR* const messageWindowName = _T("JUCEWindow");
-static ATOM messageWindowClassAtom = 0;
-static LPCTSTR getMessageWindowClassName() noexcept     { return (LPCTSTR) MAKELONG (messageWindowClassAtom, 0); }
+static const TCHAR messageWindowName[] = _T("JUCEWindow");
+static ScopedPointer<HiddenMessageWindow> messageWindow;
 
 HWND juce_messageWindowHandle = 0;
 
@@ -259,34 +300,14 @@ void MessageManager::doPlatformSpecificInitialisation()
 {
     OleInitialize (0);
 
-    // this name has to be different for each app/dll instance because otherwise
-    // poor old Win32 can get a bit confused (even despite it not being a process-global
-    // window class).
-
-    String className ("JUCEcs_");
-    className << (int) (Time::getHighResolutionTicks() & 0x7fffffff);
-
-    HMODULE moduleHandle = (HMODULE) PlatformUtilities::getCurrentModuleInstanceHandle();
-
-    WNDCLASSEX wc = { 0 };
-    wc.cbSize         = sizeof (wc);
-    wc.lpfnWndProc    = (WNDPROC) juce_MessageWndProc;
-    wc.cbWndExtra     = 4;
-    wc.hInstance      = moduleHandle;
-    wc.lpszClassName  = className.toWideCharPointer();
-
-    messageWindowClassAtom = RegisterClassEx (&wc);
-    jassert (messageWindowClassAtom != 0);
-
-    juce_messageWindowHandle = CreateWindow (getMessageWindowClassName(), messageWindowName,
-                                             0, 0, 0, 0, 0, 0, 0, moduleHandle, 0);
-    jassert (juce_messageWindowHandle != 0);
+    messageWindow = new HiddenMessageWindow (messageWindowName, (WNDPROC) juce_MessageWndProc);
+    juce_messageWindowHandle = messageWindow->getHWND();
 }
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    DestroyWindow (juce_messageWindowHandle);
-    UnregisterClass (getMessageWindowClassName(), 0);
+    messageWindow = nullptr;
+
     OleUninitialize();
 }
 

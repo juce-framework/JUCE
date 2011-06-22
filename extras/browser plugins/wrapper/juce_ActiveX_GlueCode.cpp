@@ -233,7 +233,7 @@ public:
         log ("num IDispatch wrapper objs: " + String (--numDOWID));
     }
 
-    const var getProperty (const Identifier& propertyName) const
+    var getProperty (const Identifier& propertyName) const
     {
         const String nameCopy (propertyName.toString());
         LPCOLESTR name = nameCopy.toUTF16();
@@ -312,7 +312,7 @@ public:
         return source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK;
     }
 
-    const var invokeMethod (const Identifier& methodName, const var* parameters, int numParameters)
+    var invokeMethod (const Identifier& methodName, const var* parameters, int numParameters)
     {
         var returnValue;
         const String nameCopy (methodName.toString());

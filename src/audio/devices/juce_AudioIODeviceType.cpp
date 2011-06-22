@@ -40,6 +40,16 @@ AudioIODeviceType::~AudioIODeviceType()
 {
 }
 
+//==============================================================================
+void AudioIODeviceType::addListener (Listener* l)      { listeners.add (l); }
+void AudioIODeviceType::removeListener (Listener* l)   { listeners.remove (l); }
+
+void AudioIODeviceType::callDeviceChangeListeners()
+{
+    listeners.call (&AudioIODeviceType::Listener::audioDeviceListChanged);
+}
+
+//==============================================================================
 #if ! JUCE_MAC
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()       { return nullptr; }
 #endif

@@ -1052,6 +1052,22 @@ public:
         : AudioIODeviceType ("CoreAudio"),
           hasScanned (false)
     {
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioHardwarePropertyDevices;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementWildcard;
+
+        AudioObjectAddPropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, this);
+    }
+
+    ~CoreAudioIODeviceType()
+    {
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioHardwarePropertyDevices;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementWildcard;
+
+        AudioObjectRemovePropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, this);
     }
 
     //==============================================================================
@@ -1224,6 +1240,18 @@ private:
         }
 
         return total;
+    }
+
+    void audioDeviceListChanged()
+    {
+        scanForDevices();
+        callDeviceChangeListeners();
+    }
+
+    static OSStatus hardwareListenerProc (AudioDeviceID, UInt32, const AudioObjectPropertyAddress*, void* clientData)
+    {
+        static_cast <CoreAudioIODeviceType*> (clientData)->audioDeviceListChanged();
+        return noErr;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioIODeviceType);

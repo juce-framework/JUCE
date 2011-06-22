@@ -572,7 +572,7 @@ public:
         DBG ("num NP wrapper objs: " + String (--numDOWNP));
     }
 
-    const var getProperty (const var::identifier& propertyName) const
+    var getProperty (const var::identifier& propertyName) const
     {
         NPVariant result;
         VOID_TO_NPVARIANT (result);
@@ -610,8 +610,8 @@ public:
         return browser.hasmethod (npp, source, getIdentifierFromString (methodName));
     }
 
-    const var invokeMethod (const var::identifier& methodName,
-                            const var* parameters,
+    var invokeMethod (const var::identifier& methodName,
+                      const var* parameters,
                             int numParameters)
     {
         var returnVal;

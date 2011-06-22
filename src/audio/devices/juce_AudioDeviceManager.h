@@ -476,13 +476,15 @@ private:
 
     //==============================================================================
     class CallbackHandler  : public AudioIODeviceCallback,
-                             public MidiInputCallback
+                             public MidiInputCallback,
+                             public AudioIODeviceType::Listener
     {
     public:
         void audioDeviceIOCallback (const float**, int, float**, int, int);
         void audioDeviceAboutToStart (AudioIODevice*);
         void audioDeviceStopped();
         void handleIncomingMidiMessage (MidiInput*, const MidiMessage&);
+        void audioDeviceListChanged();
 
         AudioDeviceManager* owner;
     };
@@ -495,6 +497,7 @@ private:
     void audioDeviceAboutToStartInt (AudioIODevice*);
     void audioDeviceStoppedInt();
     void handleIncomingMidiMessageInt (MidiInput*, const MidiMessage&);
+    void audioDeviceListChanged();
 
     String restartDevice (int blockSizeToUse, double sampleRateToUse,
                           const BigInteger& ins, const BigInteger& outs);
@@ -507,7 +510,7 @@ private:
     void deleteCurrentDevice();
     double chooseBestSampleRate (double preferred) const;
     int chooseBestBufferSize (int preferred) const;
-    void insertDefaultDeviceNames (AudioDeviceSetup& setup) const;
+    void insertDefaultDeviceNames (AudioDeviceSetup&) const;
 
     AudioIODeviceType* findType (const String& inputName, const String& outputName);
 

@@ -85,6 +85,9 @@ void AudioDeviceManager::createDeviceTypesIfNeeded()
 
         if (availableDeviceTypes.size() > 0)
             currentDeviceType = availableDeviceTypes.getUnchecked(0)->getTypeName();
+
+        for (int i = 0; i < availableDeviceTypes.size(); ++i)
+            availableDeviceTypes.getUnchecked(i)->addListener (&callbackHandler);
     }
 }
 
@@ -92,6 +95,11 @@ const OwnedArray <AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceType
 {
     scanDevicesIfNeeded();
     return availableDeviceTypes;
+}
+
+void AudioDeviceManager::audioDeviceListChanged()
+{
+    sendChangeMessage();
 }
 
 //==============================================================================
@@ -867,6 +875,11 @@ void AudioDeviceManager::CallbackHandler::audioDeviceStopped()
 void AudioDeviceManager::CallbackHandler::handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message)
 {
     owner->handleIncomingMidiMessageInt (source, message);
+}
+
+void AudioDeviceManager::CallbackHandler::audioDeviceListChanged()
+{
+    owner->audioDeviceListChanged();
 }
 
 //==============================================================================
