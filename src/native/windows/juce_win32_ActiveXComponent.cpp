@@ -55,8 +55,6 @@ namespace ActiveXHelpers
     //==============================================================================
     class JuceOleInPlaceFrame   : public ComBaseClassHelper <IOleInPlaceFrame>
     {
-        HWND window;
-
     public:
         JuceOleInPlaceFrame (HWND window_)   : window (window_) {}
 
@@ -71,15 +69,15 @@ namespace ActiveXHelpers
         HRESULT __stdcall RemoveMenus (HMENU)                           { return E_NOTIMPL; }
         HRESULT __stdcall SetStatusText (LPCOLESTR)                     { return S_OK; }
         HRESULT __stdcall EnableModeless (BOOL)                         { return S_OK; }
-        HRESULT __stdcall TranslateAccelerator(LPMSG, WORD)             { return E_NOTIMPL; }
+        HRESULT __stdcall TranslateAccelerator (LPMSG, WORD)            { return E_NOTIMPL; }
+
+    private:
+        HWND window;
     };
 
     //==============================================================================
     class JuceIOleInPlaceSite   : public ComBaseClassHelper <IOleInPlaceSite>
     {
-        HWND window;
-        JuceOleInPlaceFrame* frame;
-
     public:
         JuceIOleInPlaceSite (HWND window_)
             : window (window_),
@@ -117,13 +115,15 @@ namespace ActiveXHelpers
         HRESULT __stdcall DiscardUndoState()            { return E_NOTIMPL; }
         HRESULT __stdcall DeactivateAndUndo()           { return E_NOTIMPL; }
         HRESULT __stdcall OnPosRectChange (LPCRECT)     { return S_OK; }
+
+    private:
+        HWND window;
+        JuceOleInPlaceFrame* frame;
     };
 
     //==============================================================================
     class JuceIOleClientSite  : public ComBaseClassHelper <IOleClientSite>
     {
-        JuceIOleInPlaceSite* inplaceSite;
-
     public:
         JuceIOleClientSite (HWND window)
             : inplaceSite (new JuceIOleInPlaceSite (window))
@@ -152,12 +152,15 @@ namespace ActiveXHelpers
         HRESULT __stdcall ShowObject()                                  { return S_OK; }
         HRESULT __stdcall OnShowWindow (BOOL)                           { return E_NOTIMPL; }
         HRESULT __stdcall RequestNewObjectLayout()                      { return E_NOTIMPL; }
+
+    private:
+        JuceIOleInPlaceSite* inplaceSite;
     };
 
     //==============================================================================
     static Array<ActiveXControlComponent*> activeXComps;
 
-    static HWND getHWND (const ActiveXControlComponent* const component)
+    HWND getHWND (const ActiveXControlComponent* const component)
     {
         HWND hwnd = 0;
 
@@ -173,7 +176,7 @@ namespace ActiveXHelpers
         return hwnd;
     }
 
-    static void offerActiveXMouseEventToPeer (ComponentPeer* const peer, HWND hwnd, UINT message, LPARAM lParam)
+    void offerActiveXMouseEventToPeer (ComponentPeer* const peer, HWND hwnd, UINT message, LPARAM lParam)
     {
         RECT activeXRect, peerRect;
         GetWindowRect (hwnd, &activeXRect);
@@ -214,7 +217,7 @@ public:
           controlHWND (0),
           storage (new ActiveXHelpers::JuceIStorage()),
           clientSite (new ActiveXHelpers::JuceIOleClientSite (hwnd)),
-          control (0)
+          control (nullptr)
     {
     }
 
@@ -309,6 +312,7 @@ public:
     IOleObject* control;
 };
 
+//==============================================================================
 ActiveXControlComponent::ActiveXControlComponent()
     : originalWndProc (0),
       mouseEventsAllowed (true)

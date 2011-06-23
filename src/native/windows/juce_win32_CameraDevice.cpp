@@ -56,7 +56,7 @@ public:
         if (FAILED (hr))
             return;
 
-        hr = graphBuilder.QueryInterface (IID_IMediaControl, mediaControl);
+        hr = graphBuilder.QueryInterface (mediaControl);
         if (FAILED (hr))
             return;
 
@@ -95,7 +95,7 @@ public:
         if (FAILED (hr))
             return;
 
-        hr = sampleGrabberBase.QueryInterface (IID_ISampleGrabber, sampleGrabber);
+        hr = sampleGrabberBase.QueryInterface (sampleGrabber);
         if (FAILED (hr))
             return;
 
@@ -196,7 +196,7 @@ public:
             if (getPin (filter, PINDIR_OUTPUT, pin))
             {
                 ComSmartPtr <IAMPushSource> pushSource;
-                HRESULT hr = pin.QueryInterface (IID_IAMPushSource, pushSource);
+                HRESULT hr = pin.QueryInterface (pushSource);
 
                 if (pushSource != nullptr)
                 {
@@ -269,7 +269,7 @@ public:
         if (SUCCEEDED (hr))
         {
             ComSmartPtr <IFileSinkFilter> fileSink;
-            hr = asfWriter.QueryInterface (IID_IFileSinkFilter, fileSink);
+            hr = asfWriter.QueryInterface (fileSink);
 
             if (SUCCEEDED (hr))
             {
@@ -282,7 +282,7 @@ public:
                     if (SUCCEEDED (hr))
                     {
                         ComSmartPtr <IConfigAsfWriter> asfConfig;
-                        hr = asfWriter.QueryInterface (IID_IConfigAsfWriter, asfConfig);
+                        hr = asfWriter.QueryInterface (asfConfig);
                         asfConfig->SetIndexMode (true);
                         ComSmartPtr <IWMProfileManager> profileManager;
                         hr = WMCreateProfileManager (profileManager.resetAndGetPointerAddress());

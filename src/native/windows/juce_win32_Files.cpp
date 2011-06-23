@@ -598,7 +598,7 @@ File File::getLinkedTarget() const
     if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink)))
     {
         ComSmartPtr <IPersistFile> persistFile;
-        if (SUCCEEDED (shellLink.QueryInterface (IID_IPersistFile, persistFile)))
+        if (SUCCEEDED (shellLink.QueryInterface (persistFile)))
         {
             if (SUCCEEDED (persistFile->Load (p.toWideCharPointer(), STGM_READ))
                  && SUCCEEDED (shellLink->Resolve (0, SLR_ANY_MATCH | SLR_NO_UI)))

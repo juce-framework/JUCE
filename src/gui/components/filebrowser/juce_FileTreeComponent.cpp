@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
 #include "../../../events/juce_AsyncUpdater.h"
+#include "../../../memory/juce_OptionalScopedPointer.h"
 
 Image juce_createIconForFile (const File& file);
 
@@ -52,8 +53,7 @@ public:
           owner (owner_),
           parentContentsList (parentContentsList_),
           indexInContentsList (indexInContentsList_),
-          subContentsList (nullptr),
-          canDeleteSubContentsList (false),
+          subContentsList (nullptr, false),
           thread (thread_)
     {
         DirectoryContentsList::FileInfo fileInfo;
@@ -74,11 +74,7 @@ public:
     ~FileListTreeItem()
     {
         thread.removeTimeSliceClient (this);
-
         clearSubItems();
-
-        if (canDeleteSubContentsList)
-            delete subContentsList;
     }
 
     //==============================================================================
@@ -105,8 +101,7 @@ public:
                     DirectoryContentsList* const l = new DirectoryContentsList (parentContentsList->getFilter(), thread);
                     l->setDirectory (file, true, true);
 
-                    setSubContentsList (l);
-                    canDeleteSubContentsList = true;
+                    setSubContentsList (l, true);
                 }
 
                 changeListenerCallback (nullptr);
@@ -114,10 +109,10 @@ public:
         }
     }
 
-    void setSubContentsList (DirectoryContentsList* newList)
+    void setSubContentsList (DirectoryContentsList* newList, const bool canDeleteList)
     {
-        jassert (subContentsList == nullptr);
-        subContentsList = newList;
+        OptionalScopedPointer<DirectoryContentsList> newPointer (newList, canDeleteList);
+        subContentsList = newPointer;
         newList->addChangeListener (this);
     }
 
@@ -189,8 +184,8 @@ private:
     FileTreeComponent& owner;
     DirectoryContentsList* parentContentsList;
     int indexInContentsList;
-    DirectoryContentsList* subContentsList;
-    bool isDirectory, canDeleteSubContentsList;
+    OptionalScopedPointer<DirectoryContentsList> subContentsList;
+    bool isDirectory;
     TimeSliceThread& thread;
     Image icon;
     String fileSize;
@@ -230,7 +225,7 @@ FileTreeComponent::FileTreeComponent (DirectoryContentsList& listToShow)
         = new FileListTreeItem (*this, 0, 0, listToShow.getDirectory(),
                                 listToShow.getTimeSliceThread());
 
-    root->setSubContentsList (&listToShow);
+    root->setSubContentsList (&listToShow, false);
     setRootItemVisible (false);
     setRootItem (root);
 }

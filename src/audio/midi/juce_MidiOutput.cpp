@@ -32,15 +32,20 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+struct MidiOutput::PendingMessage
+{
+    PendingMessage (const void* const data, const int len, const double timeStamp)
+        : message (data, len, timeStamp)
+    {}
+
+    MidiMessage message;
+    PendingMessage* next;
+};
+
 MidiOutput::MidiOutput()
     : Thread ("midi out"),
       internal (nullptr),
       firstMessage (nullptr)
-{
-}
-
-MidiOutput::PendingMessage::PendingMessage (const void* const data, const int len, const double timeStamp)
-    : message (data, len, timeStamp)
 {
 }
 
@@ -65,8 +70,7 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
     {
         const double eventTime = millisecondCounterToStartAt + timeScaleFactor * time;
 
-        PendingMessage* const m
-            = new PendingMessage (data, len, eventTime);
+        PendingMessage* const m = new PendingMessage (data, len, eventTime);
 
         const ScopedLock sl (lock);
 

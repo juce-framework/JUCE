@@ -373,6 +373,8 @@ public:
 
         For this to work, you'll need to have also implemented isInterestedInFileDrag().
         The insertIndex value indicates where in the list of sub-items the files were dropped.
+        If files are dropped onto an area of the tree where there are no visible items, this
+        method is called on the root item of the tree, with an insert index of 0.
         @see FileDragAndDropTarget::filesDropped, isInterestedInFileDrag
     */
     virtual void filesDropped (const StringArray& files, int insertIndex);
@@ -390,6 +392,8 @@ public:
 
         For this to work, you need to have also implemented isInterestedInDragSource().
         The insertIndex value indicates where in the list of sub-items the new items should be placed.
+        If files are dropped onto an area of the tree where there are no visible items, this
+        method is called on the root item of the tree, with an insert index of 0.
         @see isInterestedInDragSource, DragAndDropTarget::itemDropped
     */
     virtual void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex);

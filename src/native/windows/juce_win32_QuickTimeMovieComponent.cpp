@@ -99,7 +99,7 @@ void QuickTimeMovieComponent::createControlIfNeeded()
             const IID qtInterfaceIID = __uuidof (IQTControl);
             pimpl->qtControl = (IQTControl*) queryInterface (&qtInterfaceIID);
 
-            if (pimpl->qtControl != 0)
+            if (pimpl->qtControl != nullptr)
             {
                 pimpl->qtControl->Release(); // it has one ref too many at this point
 

@@ -125,7 +125,7 @@ struct MessageDispatchSystem
     MessageQueue messageQueue;
 };
 
-static MessageDispatchSystem* dispatcher = nullptr;
+static ScopedPointer<MessageDispatchSystem> dispatcher;
 
 void MessageManager::doPlatformSpecificInitialisation()
 {
@@ -135,7 +135,7 @@ void MessageManager::doPlatformSpecificInitialisation()
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    deleteAndZero (dispatcher);
+    dispatcher = nullptr;
 }
 
 bool MessageManager::postMessageToSystemQueue (Message* message)

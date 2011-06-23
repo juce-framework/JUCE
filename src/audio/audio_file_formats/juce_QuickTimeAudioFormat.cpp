@@ -53,7 +53,7 @@
  #include <ImageCodec.h>
 
  #if JUCE_MSVC
-   #pragma warning (pop)
+  #pragma warning (pop)
  #endif
 #endif
 
@@ -90,10 +90,11 @@ public:
         JUCE_AUTORELEASEPOOL
         bufferList.calloc (256, 1);
 
-#if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         if (InitializeQTML (0) != noErr)
             return;
-#endif
+       #endif
+
         if (EnterMovies() != noErr)
             return;
 
@@ -227,9 +228,9 @@ public:
 
         DisposeMovie (movie);
 
-#if JUCE_MAC
+       #if JUCE_MAC
         ExitMoviesOnThread ();
-#endif
+       #endif
     }
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -328,18 +329,18 @@ private:
     //==============================================================================
     void checkThreadIsAttached()
     {
-#if JUCE_MAC
+       #if JUCE_MAC
         if (Thread::getCurrentThreadId() != lastThreadId)
             EnterMoviesOnThread (0);
         AttachMovieToCurrentThread (movie);
-#endif
+       #endif
     }
 
     void detachThread()
     {
-#if JUCE_MAC
+       #if JUCE_MAC
         DetachMovieFromCurrentThread (movie);
-#endif
+       #endif
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QTAudioReader);

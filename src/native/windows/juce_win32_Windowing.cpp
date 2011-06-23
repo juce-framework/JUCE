@@ -416,10 +416,6 @@ namespace IconConverters
 }
 
 //==============================================================================
-long improbableWindowNumber = 0xf965aa01; // also referenced by messaging.cpp
-
-
-//==============================================================================
 class Win32ComponentPeer  : public ComponentPeer
 {
 public:
@@ -467,7 +463,7 @@ public:
 
         // do this before the next bit to avoid messages arriving for this window
         // before it's destroyed
-        SetWindowLongPtr (hwnd, GWLP_USERDATA, 0);
+        JuceWindowIdentifier::setAsJUCEWindow (hwnd, false);
 
         callFunctionIfNotLocked (&destroyWindowCallback, (void*) hwnd);
 
@@ -820,7 +816,7 @@ public:
     //==============================================================================
     static Win32ComponentPeer* getOwnerOfWindow (HWND h) noexcept
     {
-        if (h != 0 && GetWindowLongPtr (h, GWLP_USERDATA) == improbableWindowNumber)
+        if (h != 0 && JuceWindowIdentifier::isJUCEWindow (h))
             return (Win32ComponentPeer*) (pointer_sized_int) GetWindowLongPtr (h, 8);
 
         return nullptr;
@@ -1140,7 +1136,7 @@ private:
         {
             SetWindowLongPtr (hwnd, 0, 0);
             SetWindowLongPtr (hwnd, 8, (LONG_PTR) this);
-            SetWindowLongPtr (hwnd, GWLP_USERDATA, improbableWindowNumber);
+            JuceWindowIdentifier::setAsJUCEWindow (hwnd, true);
 
             if (dropTarget == nullptr)
                 dropTarget = new JuceDropTarget (this);

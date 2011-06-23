@@ -1036,7 +1036,7 @@ void TreeView::handleDrag (const StringArray& files, const SourceDetails& dragSo
 
     if (item != nullptr)
     {
-        if (scrolled || dragInsertPointHighlight == 0
+        if (scrolled || dragInsertPointHighlight == nullptr
              || dragInsertPointHighlight->lastItem != item
              || dragInsertPointHighlight->lastIndex != insertIndex)
         {
@@ -1058,7 +1058,13 @@ void TreeView::handleDrop (const StringArray& files, const SourceDetails& dragSo
     hideDragHighlight();
 
     int insertIndex, x, y;
-    TreeViewItem* const item = getInsertPosition (x, y, insertIndex, files, dragSourceDetails);
+    TreeViewItem* item = getInsertPosition (x, y, insertIndex, files, dragSourceDetails);
+
+    if (item == nullptr)
+    {
+        insertIndex = 0;
+        item = rootItem;
+    }
 
     if (item != nullptr)
     {

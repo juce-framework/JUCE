@@ -69,13 +69,13 @@ namespace DirectShowHelpers
                 hr = graphBuilder->AddFilter (baseFilter, L"VMR-7");
 
             if (SUCCEEDED (hr))
-                hr = baseFilter.QueryInterface (IID_IVMRFilterConfig, filterConfig);
+                hr = baseFilter.QueryInterface (filterConfig);
 
             if (SUCCEEDED (hr))
                 hr = filterConfig->SetRenderingMode (VMRMode_Windowless);
 
             if (SUCCEEDED (hr))
-                hr = baseFilter.QueryInterface (IID_IVMRWindowlessControl, windowlessControl);
+                hr = baseFilter.QueryInterface (windowlessControl);
 
             if (SUCCEEDED (hr))
                 hr = windowlessControl->SetVideoClippingWindow (hwnd);
@@ -141,7 +141,7 @@ namespace DirectShowHelpers
                 hr = graphBuilder->AddFilter (baseFilter, L"EVR");
 
             if (SUCCEEDED (hr))
-                hr = baseFilter.QueryInterface (IID_IMFGetService, getService);
+                hr = baseFilter.QueryInterface (getService);
 
             if (SUCCEEDED (hr))
                 hr = getService->GetService (MR_VIDEO_RENDER_SERVICE, IID_IMFVideoDisplayControl,
@@ -292,10 +292,10 @@ public:
         HRESULT hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph);
 
         // basic playback interfaces
-        if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (IID_IMediaControl, mediaControl);
-        if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (IID_IMediaPosition, mediaPosition);
-        if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (IID_IMediaEventEx, mediaEvent);
-        if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (IID_IBasicAudio, basicAudio);
+        if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (mediaControl);
+        if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (mediaPosition);
+        if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (mediaEvent);
+        if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (basicAudio);
 
         // video renderer interface
         if (SUCCEEDED (hr))

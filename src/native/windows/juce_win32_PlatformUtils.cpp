@@ -35,12 +35,9 @@ namespace
     {
         HKEY rootKey = 0;
 
-        if (name.startsWithIgnoreCase ("HKEY_CURRENT_USER\\"))
-            rootKey = HKEY_CURRENT_USER;
-        else if (name.startsWithIgnoreCase ("HKEY_LOCAL_MACHINE\\"))
-            rootKey = HKEY_LOCAL_MACHINE;
-        else if (name.startsWithIgnoreCase ("HKEY_CLASSES_ROOT\\"))
-            rootKey = HKEY_CLASSES_ROOT;
+        if (name.startsWithIgnoreCase ("HKEY_CURRENT_USER\\"))        rootKey = HKEY_CURRENT_USER;
+        else if (name.startsWithIgnoreCase ("HKEY_LOCAL_MACHINE\\"))  rootKey = HKEY_LOCAL_MACHINE;
+        else if (name.startsWithIgnoreCase ("HKEY_CLASSES_ROOT\\"))   rootKey = HKEY_CLASSES_ROOT;
 
         if (rootKey != 0)
         {
@@ -186,10 +183,9 @@ bool juce_IsRunningInWine()
 //==============================================================================
 String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams()
 {
-    const String commandLine (GetCommandLineW());
-    return String (CharacterFunctions::findEndOfToken (commandLine.getCharPointer(),
-                                                       String (" ").getCharPointer(),
-                                                       String ("\"").getCharPointer())).trimStart();
+    return String (CharacterFunctions::findEndOfToken (CharPointer_UTF16 (GetCommandLineW()),
+                                                       CharPointer_UTF16 (L" "),
+                                                       CharPointer_UTF16 (L"\""))).trimStart();
 }
 
 //==============================================================================

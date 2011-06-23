@@ -109,7 +109,7 @@ EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
 {
     EDataFlow flow = eRender;
     ComSmartPtr <IMMEndpoint> endPoint;
-    if (check (device.QueryInterface (__uuidof (IMMEndpoint), endPoint)))
+    if (check (device.QueryInterface (endPoint)))
         (void) check (endPoint->GetDataFlow (&flow));
 
     return flow;
@@ -1134,7 +1134,8 @@ private:
     {
         if (message == WM_DEVICECHANGE
              && (wParam == 0x8000 /*DBT_DEVICEARRIVAL*/
-                  || wParam == 0x8004 /*DBT_DEVICEREMOVECOMPLETE*/))
+                  || wParam == 0x8004 /*DBT_DEVICEREMOVECOMPLETE*/
+                  || wParam == 0x0007 /*DBT_DEVNODES_CHANGED*/))
         {
             ((WASAPIAudioIODeviceType*) GetWindowLongPtr (h, GWLP_USERDATA))->handleDeviceChange();
         }

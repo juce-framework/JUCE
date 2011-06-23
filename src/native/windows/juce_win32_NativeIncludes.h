@@ -254,6 +254,12 @@ public:
         return p->QueryInterface (classUUID, (void**) destObject.resetAndGetPointerAddress());
     }
 
+    template <class OtherComClass>
+    HRESULT QueryInterface (ComSmartPtr<OtherComClass>& destObject) const
+    {
+        return this->QueryInterface (__uuidof (OtherComClass), destObject);
+    }
+
 private:
     ComClass* p;
 

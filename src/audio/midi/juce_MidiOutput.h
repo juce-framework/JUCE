@@ -138,16 +138,8 @@ public:
 protected:
     //==============================================================================
     void* internal;
-
-    struct PendingMessage
-    {
-        PendingMessage (const void* data, int len, double timeStamp);
-
-        MidiMessage message;
-        PendingMessage* next;
-    };
-
     CriticalSection lock;
+    struct PendingMessage;
     PendingMessage* firstMessage;
 
     MidiOutput();

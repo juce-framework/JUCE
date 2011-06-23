@@ -85,12 +85,9 @@ void AudioSubsectionReader::readMaxLevels (int64 startSampleInFile,
     startSampleInFile = jmax ((int64) 0, startSampleInFile);
     numSamples = jmax ((int64) 0, jmin (numSamples, length - startSampleInFile));
 
-    source->readMaxLevels (startSampleInFile + startSample,
-                           numSamples,
-                           lowestLeft,
-                           highestLeft,
-                           lowestRight,
-                           highestRight);
+    source->readMaxLevels (startSampleInFile + startSample, numSamples,
+                           lowestLeft, highestLeft,
+                           lowestRight, highestRight);
 }
 
 END_JUCE_NAMESPACE
