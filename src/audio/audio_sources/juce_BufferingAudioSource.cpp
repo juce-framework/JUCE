@@ -51,7 +51,7 @@ public:
         clearSingletonInstance();
     }
 
-    juce_DeclareSingleton (SharedBufferingAudioSourceThread, false)
+    juce_DeclareSingleton (SharedBufferingAudioSourceThread, false);
 
     void addSource (BufferingAudioSource* source)
     {

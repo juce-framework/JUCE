@@ -26,15 +26,13 @@ public:
                           DocumentWindow::allButtons,
                           true)
     {
-        // Create an instance of our main content component, and add it
-        // to our window.
+        // Create an instance of our main content component, and add it to our window..
+        setContentOwned (new MainComponent(), true);
 
-        MainComponent* const contentComponent = new MainComponent();
-
-        setContentOwned (contentComponent, true);
-
+        // Centre the window on the screen
         centreWithSize (getWidth(), getHeight());
 
+        // And show it!
         setVisible (true);
     }
 
@@ -47,8 +45,7 @@ public:
     void closeButtonPressed()
     {
         // When the user presses the close button, we'll tell the app to quit. This
-        // window will be deleted by our HelloWorldApplication::shutdown() method
-        //
+        // HelloWorldWindow object will be deleted by the JUCEHelloWorldApplication class.
         JUCEApplication::quit();
     }
 };
@@ -62,7 +59,6 @@ class JUCEHelloWorldApplication : public JUCEApplication
 public:
     //==============================================================================
     JUCEHelloWorldApplication()
-        : helloWorldWindow (0)
     {
     }
 

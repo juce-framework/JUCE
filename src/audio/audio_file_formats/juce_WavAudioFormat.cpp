@@ -644,10 +644,9 @@ public:
 
                                 MemoryBlock textBlock;
                                 input->readIntoMemoryBlock (textBlock, stringLength);
-                                const String text (String::fromUTF8 (static_cast <const char*> (textBlock.getData()), textBlock.getSize()));
 
                                 metadataValues.set (prefix + "Identifier", String (identifier));
-                                metadataValues.set (prefix + "Text", text);
+                                metadataValues.set (prefix + "Text", textBlock.toString());
                             }
                             else if (adtlChunkType == chunkName ("ltxt"))
                             {
@@ -663,7 +662,6 @@ public:
 
                                 MemoryBlock textBlock;
                                 input->readIntoMemoryBlock (textBlock, stringLength);
-                                const String text = String::fromUTF8 ((const char*)textBlock.getData(), textBlock.getSize());
 
                                 metadataValues.set (prefix + "Identifier",      String (identifier));
                                 metadataValues.set (prefix + "SampleLength",    String (sampleLength));
@@ -672,7 +670,7 @@ public:
                                 metadataValues.set (prefix + "Language",        String (language));
                                 metadataValues.set (prefix + "Dialect",         String (dialect));
                                 metadataValues.set (prefix + "CodePage",        String (codePage));
-                                metadataValues.set (prefix + "Text",            text);
+                                metadataValues.set (prefix + "Text",            textBlock.toString());
                             }
 
                             input->setPosition (adtlChunkEnd);

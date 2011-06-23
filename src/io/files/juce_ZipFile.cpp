@@ -458,7 +458,7 @@ public:
                 return false;
         }
 
-        compressedSize = compressedData.getDataSize();
+        compressedSize = (int) compressedData.getDataSize();
         headerStart = (int) (target.getPosition() - overallStartPosition);
 
         target.writeInt (0x04034b50);

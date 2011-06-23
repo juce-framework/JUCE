@@ -30,11 +30,11 @@
 		9088DD545C3708EA053CC371 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		94105561197974333B7BD632 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		36A58EE4FBF01289682D7DAD = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
-		7FABD4A9FCB57F9C63BD5D34 = { isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BinaryBuilder; sourceTree = BUILT_PRODUCTS_DIR; };
-		9049BFDEB4FA33D1BAC82FAC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = SOURCE_ROOT; };
-		351908352BAB95A544A300F2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = SOURCE_ROOT; };
-		FC95DFE22E66CA05B8BF7352 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = SOURCE_ROOT; };
-		8B9506611F425243DD224A90 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode.mm; path = ../../JuceLibraryCode/JuceLibraryCode.mm; sourceTree = SOURCE_ROOT; };
+		7FABD4A9FCB57F9C63BD5D34 = { isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BinaryBuilder; sourceTree = "BUILT_PRODUCTS_DIR"; };
+		9049BFDEB4FA33D1BAC82FAC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
+		351908352BAB95A544A300F2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
+		FC95DFE22E66CA05B8BF7352 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
+		8B9506611F425243DD224A90 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode.mm; path = ../../JuceLibraryCode/JuceLibraryCode.mm; sourceTree = "SOURCE_ROOT"; };
 		B7B714F1BC580B5898069A1D = { isa = PBXGroup; children = (
 				9049BFDEB4FA33D1BAC82FAC ); name = Source; sourceTree = "<group>"; };
 		9310BD97E4BDBEE06D277513 = { isa = PBXGroup; children = (

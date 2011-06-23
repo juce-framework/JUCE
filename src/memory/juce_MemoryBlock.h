@@ -184,8 +184,7 @@ public:
     void removeSection (size_t startByte, size_t numBytesToRemove);
 
     //==============================================================================
-    /** Attempts to parse the contents of the block as a zero-terminated string of 8-bit
-        characters in the system's default encoding. */
+    /** Attempts to parse the contents of the block as a zero-terminated UTF8 string. */
     String toString() const;
 
     //==============================================================================

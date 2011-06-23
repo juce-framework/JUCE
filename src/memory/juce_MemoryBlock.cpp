@@ -228,7 +228,7 @@ void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove)
 
 String MemoryBlock::toString() const
 {
-    return String (static_cast <const char*> (getData()), size);
+    return String (CharPointer_UTF8 (data), size);
 }
 
 //==============================================================================

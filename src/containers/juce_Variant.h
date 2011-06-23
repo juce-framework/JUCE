@@ -137,7 +137,7 @@ public:
         that the index is a valid number. If these conditions aren't met, behaviour is
         undefined.
         For more control over the array's contents, you can call getArray() and manipulate
-        it directly as an Array<var>.
+        it directly as an Array\<var\>.
     */
     const var& operator[] (int arrayIndex) const;
 
@@ -146,7 +146,7 @@ public:
         that the index is a valid number. If these conditions aren't met, behaviour is
         undefined.
         For more control over the array's contents, you can call getArray() and manipulate
-        it directly as an Array<var>.
+        it directly as an Array\<var\>.
     */
     var& operator[] (int arrayIndex);
 
@@ -155,7 +155,7 @@ public:
         this value will be kept as the first element of the new array. The parameter value
         will then be appended to it.
         For more control over the array's contents, you can call getArray() and manipulate
-        it directly as an Array<var>.
+        it directly as an Array\<var\>.
     */
     void append (const var& valueToAppend);
 
@@ -164,14 +164,14 @@ public:
         this value will be kept as the first element of the new array. The parameter value
         will then be inserted into it.
         For more control over the array's contents, you can call getArray() and manipulate
-        it directly as an Array<var>.
+        it directly as an Array\<var\>.
     */
     void insert (int index, const var& value);
 
     /** If the var is an array, this removes one of its elements.
         If the index is out-of-range or the var isn't an array, nothing will be done.
         For more control over the array's contents, you can call getArray() and manipulate
-        it directly as an Array<var>.
+        it directly as an Array\<var\>.
     */
     void remove (int index);
 
@@ -179,7 +179,7 @@ public:
         If the var isn't an array, it will be converted to one, and if its value was non-void,
         this value will be kept as the first element of the new array before resizing.
         For more control over the array's contents, you can call getArray() and manipulate
-        it directly as an Array<var>.
+        it directly as an Array\<var\>.
     */
     void resize (int numArrayElementsWanted);
 

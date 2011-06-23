@@ -278,7 +278,7 @@ public:
         {}
     }
 
-    juce_DeclareSingleton (SharedMessageThread, false)
+    juce_DeclareSingleton (SharedMessageThread, false);
 
 private:
     bool initialised;

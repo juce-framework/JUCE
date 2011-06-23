@@ -208,7 +208,7 @@ void CodeDocument::Iterator::skipToEndOfLine()
         charPointer = l->line.getCharPointer();
     }
 
-    position += charPointer.length();
+    position += (int) charPointer.length();
     ++line;
     charPointer = nullptr;
 }

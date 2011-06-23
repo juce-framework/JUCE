@@ -69,7 +69,7 @@ public:
     ~ApplicationProperties();
 
     //==============================================================================
-    juce_DeclareSingleton (ApplicationProperties, false)
+    juce_DeclareSingleton (ApplicationProperties, false);
 
     //==============================================================================
     /** Gives the object the information it needs to create the appropriate properties files.

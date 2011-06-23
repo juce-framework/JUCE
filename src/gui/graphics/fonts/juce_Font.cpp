@@ -62,7 +62,7 @@ public:
         clearSingletonInstance();
     }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (TypefaceCache)
+    juce_DeclareSingleton_SingleThreaded_Minimal (TypefaceCache);
 
     void setSize (const int numToCache)
     {

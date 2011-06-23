@@ -288,7 +288,7 @@ public:
         for (int i = 0; i < numItems; ++i)
             data.arrayValue->getReference(i).writeToStream (buffer);
 
-        output.writeCompressedInt (1 + buffer.getDataSize());
+        output.writeCompressedInt (1 + (int) buffer.getDataSize());
         output.writeByte (varMarker_Array);
         output << buffer;
     }

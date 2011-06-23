@@ -362,15 +362,13 @@ public:
                             if ((stringLength & 1) == 0)
                                 input->readByte();
 
-                            const String text = String::fromUTF8 ((const char*)textBlock.getData(), stringLength);
-
                             const String prefixCue ("Cue" + String (i));
                             metadataValues.set (prefixCue + "Identifier", String (identifier));
                             metadataValues.set (prefixCue + "Offset", String (offset));
 
                             const String prefixLabel ("CueLabel" + String (i));
                             metadataValues.set (prefixLabel + "Identifier", String (identifier));
-                            metadataValues.set (prefixLabel + "Text", text);
+                            metadataValues.set (prefixLabel + "Text", textBlock.toString());
                         }
                     }
                     else if (type == chunkName ("COMT"))
@@ -386,12 +384,11 @@ public:
 
                             MemoryBlock textBlock;
                             input->readIntoMemoryBlock (textBlock, stringLength + (stringLength & 1));
-                            const String text = String::fromUTF8 ((const char*)textBlock.getData(), stringLength);
 
                             const String prefix ("CueNote" + String (i));
                             metadataValues.set (prefix + "TimeStamp", String (timestamp));
                             metadataValues.set (prefix + "Identifier", String (identifier));
-                            metadataValues.set (prefix + "Text", text);
+                            metadataValues.set (prefix + "Text", textBlock.toString());
                         }
                     }
                     else if (type == chunkName ("INST"))
@@ -582,9 +579,9 @@ private:
         // to be able to seek back to write the header
         jassert (couldSeekOk);
 
-        const int headerLen = 54 + (markChunk.getSize() > 0 ? markChunk.getSize() + 8 : 0)
-                                 + (comtChunk.getSize() > 0 ? comtChunk.getSize() + 8 : 0)
-                                 + (instChunk.getSize() > 0 ? instChunk.getSize() + 8 : 0);
+        const int headerLen = (int) (54 + (markChunk.getSize() > 0 ? markChunk.getSize() + 8 : 0)
+                                        + (comtChunk.getSize() > 0 ? comtChunk.getSize() + 8 : 0)
+                                        + (instChunk.getSize() > 0 ? instChunk.getSize() + 8 : 0));
         int audioBytes = lengthInSamples * ((bitsPerSample * numChannels) / 8);
         audioBytes += (audioBytes & 1);
 

@@ -24,7 +24,7 @@
     <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
                    osxSDK="default" osxCompatibility="default"/>
     <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
-                   osxSDK="default" osxCompatibility="default"/>
+                   osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
   </CONFIGURATIONS>
   <MAINGROUP id="YdWL7hi7p" name="Plugin Host">
     <GROUP id="uhHLubiaQ" name="Source">
@@ -50,12 +50,12 @@
   </MAINGROUP>
   <JUCEOPTIONS JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default" JUCE_ASIO="default"
                JUCE_WASAPI="enabled" JUCE_DIRECTSOUND="enabled" JUCE_ALSA="enabled"
-               JUCE_QUICKTIME="default" JUCE_OPENGL="default" JUCE_USE_FLAC="default"
-               JUCE_USE_OGGVORBIS="default" JUCE_USE_CDBURNER="default" JUCE_USE_CDREADER="default"
-               JUCE_USE_CAMERA="default" JUCE_ENABLE_REPAINT_DEBUGGING="default"
+               JUCE_QUICKTIME="disabled" JUCE_OPENGL="default" JUCE_USE_FLAC="disabled"
+               JUCE_USE_OGGVORBIS="disabled" JUCE_USE_CDBURNER="disabled" JUCE_USE_CDREADER="disabled"
+               JUCE_USE_CAMERA="disabled" JUCE_ENABLE_REPAINT_DEBUGGING="default"
                JUCE_USE_XINERAMA="default" JUCE_USE_XSHM="default" JUCE_PLUGINHOST_VST="enabled"
                JUCE_PLUGINHOST_AU="enabled" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
-               JUCE_WEB_BROWSER="default" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
+               JUCE_WEB_BROWSER="disabled" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
                JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"
                JUCE_USE_XRENDER="default" JUCE_USE_XCURSOR="default" JUCE_DIRECT2D="default"
                JUCE_DIRECTSHOW="default" JUCE_MEDIAFOUNDATION="default"/>

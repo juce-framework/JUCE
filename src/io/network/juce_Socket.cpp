@@ -257,7 +257,7 @@ namespace SocketHelpers
         }
 
         setSocketBlockingState (handle, false);
-        const int result = ::connect (handle, info->ai_addr, info->ai_addrlen);
+        const int result = ::connect (handle, info->ai_addr, (int) info->ai_addrlen);
         freeaddrinfo (info);
 
         if (result < 0)
