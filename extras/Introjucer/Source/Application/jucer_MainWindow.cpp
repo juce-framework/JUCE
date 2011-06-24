@@ -37,15 +37,16 @@ ApplicationCommandManager* commandManager = nullptr;
 MainWindow::MainWindow()
     : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(),
                       Colour::greyLevel (0.6f),
-                      DocumentWindow::allButtons)
+                      DocumentWindow::allButtons,
+                      false)
 {
     setUsingNativeTitleBar (true);
     setContentOwned (new ProjectContentComponent(), false);
 
-#if ! JUCE_MAC
+   #if ! JUCE_MAC
     JucerApplication* app = static_cast<JucerApplication*> (JUCEApplication::getInstance());
     setMenuBar (app->menuModel);
-#endif
+   #endif
 
     setResizable (true, false);
 
@@ -77,6 +78,11 @@ MainWindow::MainWindow()
 
     //getPeer()->setCurrentRenderingEngine (0);
     getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+
+    setVisible (true);
+    addToDesktop();
+
+    getContentComponent()->grabKeyboardFocus();
 }
 
 MainWindow::~MainWindow()

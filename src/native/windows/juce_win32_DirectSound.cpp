@@ -228,7 +228,7 @@ namespace
 class DSoundInternalOutChannel
 {
 public:
-    DSoundInternalOutChannel (const String& name_, LPGUID guid_, int rate,
+    DSoundInternalOutChannel (const String& name_, const GUID& guid_, int rate,
                               int bufferSize, float* left, float* right)
         : bitDepth (16), name (name_), guid (guid_), sampleRate (rate),
           bufferSizeSamples (bufferSize), leftBuffer (left), rightBuffer (right),
@@ -277,7 +277,7 @@ public:
         HRESULT hr = E_NOINTERFACE;
 
         if (dsDirectSoundCreate != 0)
-            hr = dsDirectSoundCreate (guid, &pDirectSound, 0);
+            hr = dsDirectSoundCreate (&guid, &pDirectSound, 0);
 
         if (hr == S_OK)
         {
@@ -516,7 +516,7 @@ public:
 
 private:
     String name;
-    LPGUID guid;
+    GUID guid;
     int sampleRate, bufferSizeSamples;
     float* leftBuffer;
     float* rightBuffer;
@@ -539,7 +539,7 @@ private:
 struct DSoundInternalInChannel
 {
 public:
-    DSoundInternalInChannel (const String& name_, LPGUID guid_, int rate,
+    DSoundInternalInChannel (const String& name_, const GUID& guid_, int rate,
                              int bufferSize, float* left, float* right)
         : bitDepth (16), name (name_), guid (guid_), sampleRate (rate),
           bufferSizeSamples (bufferSize), leftBuffer (left), rightBuffer (right),
@@ -597,7 +597,7 @@ public:
         HRESULT hr = E_NOINTERFACE;
 
         if (dsDirectSoundCaptureCreate != 0)
-            hr = dsDirectSoundCaptureCreate (guid, &pDirectSoundCapture, 0);
+            hr = dsDirectSoundCaptureCreate (&guid, &pDirectSoundCapture, 0);
 
         logError (hr);
 
@@ -773,7 +773,7 @@ public:
 
 private:
     String name;
-    LPGUID guid;
+    GUID guid;
     int sampleRate, bufferSizeSamples;
     float* leftBuffer;
     float* rightBuffer;
@@ -1094,26 +1094,17 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSoundAudioIODevice);
 };
 
-
 //==============================================================================
-class DSoundAudioIODeviceType  : public AudioIODeviceType
+struct DSoundDeviceList
 {
-public:
-    DSoundAudioIODeviceType()
-        : AudioIODeviceType ("DirectSound"),
-          hasScanned (false)
-    {
-        initialiseDSoundFunctions();
-    }
+    StringArray outputDeviceNames, inputDeviceNames;
+    Array<GUID> outputGuids, inputGuids;
 
-    //==============================================================================
-    void scanForDevices()
+    void scan()
     {
-        hasScanned = true;
-
         outputDeviceNames.clear();
-        outputGuids.clear();
         inputDeviceNames.clear();
+        outputGuids.clear();
         inputGuids.clear();
 
         if (dsDirectSoundEnumerateW != 0)
@@ -1123,59 +1114,16 @@ public:
         }
     }
 
-    StringArray getDeviceNames (bool wantInputNames) const
+    bool operator!= (const DSoundDeviceList& other) const noexcept
     {
-        jassert (hasScanned); // need to call scanForDevices() before doing this
-
-        return wantInputNames ? inputDeviceNames
-                              : outputDeviceNames;
+        return outputDeviceNames != other.outputDeviceNames
+            || inputDeviceNames != other.inputDeviceNames
+            || outputGuids != other.outputGuids
+            || inputGuids != other.inputGuids;
     }
-
-    int getDefaultDeviceIndex (bool /*forInput*/) const
-    {
-        jassert (hasScanned); // need to call scanForDevices() before doing this
-        return 0;
-    }
-
-    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
-    {
-        jassert (hasScanned); // need to call scanForDevices() before doing this
-
-        DSoundAudioIODevice* const d = dynamic_cast <DSoundAudioIODevice*> (device);
-        if (d == 0)
-            return -1;
-
-        return asInput ? d->inputDeviceIndex
-                       : d->outputDeviceIndex;
-    }
-
-    bool hasSeparateInputsAndOutputs() const    { return true; }
-
-    AudioIODevice* createDevice (const String& outputDeviceName,
-                                 const String& inputDeviceName)
-    {
-        jassert (hasScanned); // need to call scanForDevices() before doing this
-
-        const int outputIndex = outputDeviceNames.indexOf (outputDeviceName);
-        const int inputIndex = inputDeviceNames.indexOf (inputDeviceName);
-
-        if (outputIndex >= 0 || inputIndex >= 0)
-            return new DSoundAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
-                                                                          : inputDeviceName,
-                                            outputIndex, inputIndex);
-
-        return nullptr;
-    }
-
-    //==============================================================================
-    StringArray outputDeviceNames, inputDeviceNames;
-    OwnedArray <GUID> outputGuids, inputGuids;
 
 private:
-    bool hasScanned;
-
-    //==============================================================================
-    BOOL outputEnumProc (LPGUID lpGUID, String desc)
+    static BOOL enumProc (LPGUID lpGUID, String desc, StringArray& names, Array<GUID>& guids)
     {
         desc = desc.trim();
 
@@ -1184,70 +1132,28 @@ private:
             const String origDesc (desc);
 
             int n = 2;
-            while (outputDeviceNames.contains (desc))
+            while (names.contains (desc))
                 desc = origDesc + " (" + String (n++) + ")";
 
-            outputDeviceNames.add (desc);
-
-            if (lpGUID != 0)
-                outputGuids.add (new GUID (*lpGUID));
-            else
-                outputGuids.add (nullptr);
+            names.add (desc);
+            guids.add (lpGUID != nullptr ? *lpGUID : GUID());
         }
 
         return TRUE;
     }
+
+    BOOL outputEnumProc (LPGUID guid, LPCWSTR desc)  { return enumProc (guid, desc, outputDeviceNames, outputGuids); }
+    BOOL inputEnumProc (LPGUID guid, LPCWSTR desc)   { return enumProc (guid, desc, inputDeviceNames, inputGuids); }
 
     static BOOL CALLBACK outputEnumProcW (LPGUID lpGUID, LPCWSTR description, LPCWSTR, LPVOID object)
     {
-        return ((DSoundAudioIODeviceType*) object)
-                    ->outputEnumProc (lpGUID, String (description));
-    }
-
-    static BOOL CALLBACK outputEnumProcA (LPGUID lpGUID, LPCTSTR description, LPCTSTR, LPVOID object)
-    {
-        return ((DSoundAudioIODeviceType*) object)
-                    ->outputEnumProc (lpGUID, String (description));
-    }
-
-    //==============================================================================
-    BOOL CALLBACK inputEnumProc (LPGUID lpGUID, String desc)
-    {
-        desc = desc.trim();
-
-        if (desc.isNotEmpty())
-        {
-            const String origDesc (desc);
-
-            int n = 2;
-            while (inputDeviceNames.contains (desc))
-                desc = origDesc + " (" + String (n++) + ")";
-
-            inputDeviceNames.add (desc);
-
-            if (lpGUID != 0)
-                inputGuids.add (new GUID (*lpGUID));
-            else
-                inputGuids.add (nullptr);
-        }
-
-        return TRUE;
+        return static_cast<DSoundDeviceList*> (object)->outputEnumProc (lpGUID, description);
     }
 
     static BOOL CALLBACK inputEnumProcW (LPGUID lpGUID, LPCWSTR description, LPCWSTR, LPVOID object)
     {
-        return ((DSoundAudioIODeviceType*) object)
-                    ->inputEnumProc (lpGUID, String (description));
+        return static_cast<DSoundDeviceList*> (object)->inputEnumProc (lpGUID, description);
     }
-
-    static BOOL CALLBACK inputEnumProcA (LPGUID lpGUID, LPCTSTR description, LPCTSTR, LPVOID object)
-    {
-        return ((DSoundAudioIODeviceType*) object)
-                    ->inputEnumProc (lpGUID, String (description));
-    }
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSoundAudioIODeviceType);
 };
 
 //==============================================================================
@@ -1265,8 +1171,8 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 
     bufferSizeSamples = bufferSizeSamples_ & ~7;
 
-    DSoundAudioIODeviceType dlh;
-    dlh.scanForDevices();
+    DSoundDeviceList dlh;
+    dlh.scan();
 
     enabledInputs = inputChannels;
     enabledInputs.setRange (inChannels.size(),
@@ -1378,6 +1284,91 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 
     return error;
 }
+
+//==============================================================================
+class DSoundAudioIODeviceType  : public AudioIODeviceType,
+                                 private DeviceChangeDetector
+{
+public:
+    DSoundAudioIODeviceType()
+        : AudioIODeviceType ("DirectSound"),
+          DeviceChangeDetector (L"DirectSound"),
+          hasScanned (false)
+    {
+        initialiseDSoundFunctions();
+    }
+
+    //==============================================================================
+    void scanForDevices()
+    {
+        hasScanned = true;
+        deviceList.scan();
+    }
+
+    StringArray getDeviceNames (bool wantInputNames) const
+    {
+        jassert (hasScanned); // need to call scanForDevices() before doing this
+
+        return wantInputNames ? deviceList.inputDeviceNames
+                              : deviceList.outputDeviceNames;
+    }
+
+    int getDefaultDeviceIndex (bool /*forInput*/) const
+    {
+        jassert (hasScanned); // need to call scanForDevices() before doing this
+        return 0;
+    }
+
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
+    {
+        jassert (hasScanned); // need to call scanForDevices() before doing this
+
+        DSoundAudioIODevice* const d = dynamic_cast <DSoundAudioIODevice*> (device);
+        if (d == 0)
+            return -1;
+
+        return asInput ? d->inputDeviceIndex
+                       : d->outputDeviceIndex;
+    }
+
+    bool hasSeparateInputsAndOutputs() const    { return true; }
+
+    AudioIODevice* createDevice (const String& outputDeviceName,
+                                 const String& inputDeviceName)
+    {
+        jassert (hasScanned); // need to call scanForDevices() before doing this
+
+        const int outputIndex = deviceList.outputDeviceNames.indexOf (outputDeviceName);
+        const int inputIndex = deviceList.inputDeviceNames.indexOf (inputDeviceName);
+
+        if (outputIndex >= 0 || inputIndex >= 0)
+            return new DSoundAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                                          : inputDeviceName,
+                                            outputIndex, inputIndex);
+
+        return nullptr;
+    }
+
+private:
+    //==============================================================================
+    DSoundDeviceList deviceList;
+    bool hasScanned;
+
+    void systemDeviceChanged()
+    {
+        DSoundDeviceList newList;
+        newList.scan();
+
+        if (newList != deviceList)
+        {
+            deviceList = newList;
+            callDeviceChangeListeners();
+        }
+    }
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSoundAudioIODeviceType);
+};
 
 //==============================================================================
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_DirectSound()

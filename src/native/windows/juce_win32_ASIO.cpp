@@ -75,8 +75,6 @@ namespace ASIODebugging
 class ASIOAudioIODevice;
 static ASIOAudioIODevice* volatile currentASIODev[3] = { 0 };
 
-static const int maxASIOChannels = 160;
-
 
 //==============================================================================
 class JUCE_API  ASIOAudioIODevice  : public AudioIODevice,
@@ -373,30 +371,7 @@ public:
 
             const int totalBuffers = numActiveInputChans + numActiveOutputChans;
 
-            callbacks.sampleRateDidChange = &sampleRateChangedCallback;
-
-            if (currentASIODev[0] == this)
-            {
-                callbacks.bufferSwitch = &bufferSwitchCallback0;
-                callbacks.asioMessage = &asioMessagesCallback0;
-                callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback0;
-            }
-            else if (currentASIODev[1] == this)
-            {
-                callbacks.bufferSwitch = &bufferSwitchCallback1;
-                callbacks.asioMessage = &asioMessagesCallback1;
-                callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback1;
-            }
-            else if (currentASIODev[2] == this)
-            {
-                callbacks.bufferSwitch = &bufferSwitchCallback2;
-                callbacks.asioMessage = &asioMessagesCallback2;
-                callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback2;
-            }
-            else
-            {
-                jassertfalse;
-            }
+            setCallbackFunctions();
 
             log ("disposing buffers");
             err = asioObject->disposeBuffers();
@@ -429,7 +404,7 @@ public:
                 Array <int> types;
                 currentBitDepth = 16;
 
-                for (i = 0; i < jmin ((int) totalNumInputChans, maxASIOChannels); ++i)
+                for (i = 0; i < jmin ((int) totalNumInputChans, (int) maxASIOChannels); ++i)
                 {
                     if (inputChannels[i])
                     {
@@ -456,7 +431,7 @@ public:
                 jassert (numActiveInputChans == n);
                 n = 0;
 
-                for (i = 0; i < jmin ((int) totalNumOutputChans, maxASIOChannels); ++i)
+                for (i = 0; i < jmin ((int) totalNumOutputChans, (int) maxASIOChannels); ++i)
                 {
                     if (outputChannels[i])
                     {
@@ -750,6 +725,8 @@ private:
     AudioIODeviceCallback* volatile currentCallback;
     CriticalSection callbackLock;
 
+    enum { maxASIOChannels = 160 };
+
     ASIOBufferInfo bufferInfos [maxASIOChannels];
     float* inBuffers [maxASIOChannels];
     float* outBuffers [maxASIOChannels];
@@ -982,31 +959,7 @@ private:
                             ++numChans;
                         }
 
-
-                        callbacks.sampleRateDidChange = &sampleRateChangedCallback;
-
-                        if (currentASIODev[0] == this)
-                        {
-                            callbacks.bufferSwitch = &bufferSwitchCallback0;
-                            callbacks.asioMessage = &asioMessagesCallback0;
-                            callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback0;
-                        }
-                        else if (currentASIODev[1] == this)
-                        {
-                            callbacks.bufferSwitch = &bufferSwitchCallback1;
-                            callbacks.asioMessage = &asioMessagesCallback1;
-                            callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback1;
-                        }
-                        else if (currentASIODev[2] == this)
-                        {
-                            callbacks.bufferSwitch = &bufferSwitchCallback2;
-                            callbacks.asioMessage = &asioMessagesCallback2;
-                            callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback2;
-                        }
-                        else
-                        {
-                            jassertfalse;
-                        }
+                        setCallbackFunctions();
 
                         log ("creating buffers (dummy): " + String (numChans) + ", " + String ((int) preferredSize));
 
@@ -1264,65 +1217,48 @@ private:
     }
 
     //==============================================================================
-    static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback0 (ASIOTime*, long index, long)
+    template <int deviceIndex>
+    struct ASIOCallbackFunctions
     {
-        if (currentASIODev[0] != nullptr)
-            currentASIODev[0]->callback (index);
+        static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback (ASIOTime*, long index, long)
+        {
+            if (currentASIODev[deviceIndex] != nullptr)
+                currentASIODev[deviceIndex]->callback (index);
 
-        return nullptr;
-    }
+            return nullptr;
+        }
 
-    static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback1 (ASIOTime*, long index, long)
+        static void JUCE_ASIOCALLBACK bufferSwitchCallback (long index, long)
+        {
+            if (currentASIODev[deviceIndex] != nullptr)
+                currentASIODev[deviceIndex]->callback (index);
+        }
+
+        static long JUCE_ASIOCALLBACK asioMessagesCallback (long selector, long value, void*, double*)
+        {
+            return ASIOAudioIODevice::asioMessagesCallback (selector, value, deviceIndex);
+        }
+
+        static void setCallbacks (ASIOCallbacks& callbacks)
+        {
+            callbacks.bufferSwitch = &bufferSwitchCallback;
+            callbacks.asioMessage = &asioMessagesCallback;
+            callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback;
+        }
+    };
+
+    void setCallbackFunctions()
     {
-        if (currentASIODev[1] != nullptr)
-            currentASIODev[1]->callback (index);
+        callbacks.sampleRateDidChange = &sampleRateChangedCallback;
 
-        return nullptr;
-    }
-
-    static ASIOTime* JUCE_ASIOCALLBACK bufferSwitchTimeInfoCallback2 (ASIOTime*, long index, long)
-    {
-        if (currentASIODev[2] != nullptr)
-            currentASIODev[2]->callback (index);
-
-        return nullptr;
-    }
-
-    static void JUCE_ASIOCALLBACK bufferSwitchCallback0 (long index, long)
-    {
-        if (currentASIODev[0] != nullptr)
-            currentASIODev[0]->callback (index);
-    }
-
-    static void JUCE_ASIOCALLBACK bufferSwitchCallback1 (long index, long)
-    {
-        if (currentASIODev[1] != nullptr)
-            currentASIODev[1]->callback (index);
-    }
-
-    static void JUCE_ASIOCALLBACK bufferSwitchCallback2 (long index, long)
-    {
-        if (currentASIODev[2] != nullptr)
-            currentASIODev[2]->callback (index);
-    }
-
-    static long JUCE_ASIOCALLBACK asioMessagesCallback0 (long selector, long value, void*, double*)
-    {
-        return asioMessagesCallback (selector, value, 0);
-    }
-
-    static long JUCE_ASIOCALLBACK asioMessagesCallback1 (long selector, long value, void*, double*)
-    {
-        return asioMessagesCallback (selector, value, 1);
-    }
-
-    static long JUCE_ASIOCALLBACK asioMessagesCallback2 (long selector, long value, void*, double*)
-    {
-        return asioMessagesCallback (selector, value, 2);
+        if      (currentASIODev[0] == this)  ASIOCallbackFunctions<0>::setCallbacks (callbacks);
+        else if (currentASIODev[1] == this)  ASIOCallbackFunctions<1>::setCallbacks (callbacks);
+        else if (currentASIODev[2] == this)  ASIOCallbackFunctions<2>::setCallbacks (callbacks);
+        else                                 jassertfalse;
     }
 
     //==============================================================================
-    static long JUCE_ASIOCALLBACK asioMessagesCallback (long selector, long value, const int deviceIndex)
+    static long asioMessagesCallback (long selector, long value, const int deviceIndex)
     {
         switch (selector)
         {

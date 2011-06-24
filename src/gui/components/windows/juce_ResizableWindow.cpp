@@ -90,7 +90,7 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
     lastNonFullScreenPos.setBounds (50, 50, 256, 256);
 
     if (shouldAddToDesktop)
-        Component::addToDesktop (ResizableWindow::getDesktopWindowStyleFlags());
+        addToDesktop();
 }
 
 int ResizableWindow::getDesktopWindowStyleFlags() const
@@ -101,6 +101,11 @@ int ResizableWindow::getDesktopWindowStyleFlags() const
         styleFlags |= ComponentPeer::windowIsResizable;
 
     return styleFlags;
+}
+
+void ResizableWindow::addToDesktop()
+{
+    Component::addToDesktop (ResizableWindow::getDesktopWindowStyleFlags());
 }
 
 //==============================================================================

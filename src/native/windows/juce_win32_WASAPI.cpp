@@ -958,15 +958,15 @@ private:
 
 
 //==============================================================================
-class WASAPIAudioIODeviceType  : public AudioIODeviceType
+class WASAPIAudioIODeviceType  : public AudioIODeviceType,
+                                 private DeviceChangeDetector
 {
 public:
     WASAPIAudioIODeviceType()
         : AudioIODeviceType ("Windows Audio"),
-          deviceChangeCatcher (_T("Windows Audio"), (WNDPROC) deviceChangeEventCallback),
+          DeviceChangeDetector (L"Windows Audio"),
           hasScanned (false)
     {
-        SetWindowLongPtr (deviceChangeCatcher.getHWND(), GWLP_USERDATA, (LONG_PTR) this);
     }
 
     //==============================================================================
@@ -1038,7 +1038,6 @@ public:
     StringArray inputDeviceNames, inputDeviceIds;
 
 private:
-    HiddenMessageWindow deviceChangeCatcher;
     bool hasScanned;
 
     //==============================================================================
@@ -1129,21 +1128,7 @@ private:
     }
 
     //==============================================================================
-    static LRESULT CALLBACK deviceChangeEventCallback (HWND h, const UINT message,
-                                                       const WPARAM wParam, const LPARAM lParam)
-    {
-        if (message == WM_DEVICECHANGE
-             && (wParam == 0x8000 /*DBT_DEVICEARRIVAL*/
-                  || wParam == 0x8004 /*DBT_DEVICEREMOVECOMPLETE*/
-                  || wParam == 0x0007 /*DBT_DEVNODES_CHANGED*/))
-        {
-            ((WASAPIAudioIODeviceType*) GetWindowLongPtr (h, GWLP_USERDATA))->handleDeviceChange();
-        }
-
-        return DefWindowProc (h, message, wParam, lParam);
-    }
-
-    void handleDeviceChange()
+    void systemDeviceChanged()
     {
         StringArray newOutNames, newInNames, newOutIds, newInIds;
         scan (newOutNames, newInNames, newOutIds, newInIds);

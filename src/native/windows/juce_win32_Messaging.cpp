@@ -344,4 +344,37 @@ void MessageManager::doPlatformSpecificShutdown()
     OleUninitialize();
 }
 
+//==============================================================================
+class DeviceChangeDetector   // (Used by various audio classes)
+{
+public:
+    DeviceChangeDetector (const wchar_t* const name)
+        : messageWindow (name, (WNDPROC) deviceChangeEventCallback)
+    {
+        SetWindowLongPtr (messageWindow.getHWND(), GWLP_USERDATA, (LONG_PTR) this);
+    }
+
+    virtual ~DeviceChangeDetector() {}
+
+protected:
+    virtual void systemDeviceChanged() = 0;
+
+private:
+    HiddenMessageWindow messageWindow;
+
+    static LRESULT CALLBACK deviceChangeEventCallback (HWND h, const UINT message,
+                                                       const WPARAM wParam, const LPARAM lParam)
+    {
+        if (message == WM_DEVICECHANGE
+             && (wParam == 0x8000 /*DBT_DEVICEARRIVAL*/
+                  || wParam == 0x8004 /*DBT_DEVICEREMOVECOMPLETE*/
+                  || wParam == 0x0007 /*DBT_DEVNODES_CHANGED*/))
+        {
+            ((DeviceChangeDetector*) GetWindowLongPtr (h, GWLP_USERDATA))->systemDeviceChanged();
+        }
+
+        return DefWindowProc (h, message, wParam, lParam);
+    }
+};
+
 #endif
