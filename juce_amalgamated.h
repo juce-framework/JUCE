@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	2
+#define JUCE_BUILDNUMBER	3
 
 /** Current Juce version number.
 
@@ -8640,6 +8640,9 @@ public:
 	var operator[] (const Identifier& propertyName) const;
 	/** If this variant is an object, this returns one of its properties. */
 	var operator[] (const char* propertyName) const;
+	/** If this variant is an object, this returns one of its properties, or a default
+		fallback value if the property is not set. */
+	var getProperty (const Identifier& propertyName, const var& defaultReturnValue) const;
 
 	/** If this variant is an object, this invokes one of its methods with no arguments. */
 	var call (const Identifier& method) const;

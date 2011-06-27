@@ -448,6 +448,12 @@ var var::operator[] (const char* const propertyName) const
     return operator[] (Identifier (propertyName));
 }
 
+var var::getProperty (const Identifier& propertyName, const var& defaultReturnValue) const
+{
+    DynamicObject* const o = getDynamicObject();
+    return o != nullptr ? o->getProperties().getWithDefault (propertyName, defaultReturnValue) : defaultReturnValue;
+}
+
 var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
 {
     DynamicObject* const o = getDynamicObject();

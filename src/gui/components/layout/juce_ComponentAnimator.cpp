@@ -161,7 +161,7 @@ public:
             if (parent != nullptr)
                 parent->addAndMakeVisible (this);
             else if (component.isOnDesktop() && component.getPeer() != nullptr)
-                addToDesktop (component.getPeer()->getStyleFlags());
+                addToDesktop (component.getPeer()->getStyleFlags() | ComponentPeer::windowIgnoresKeyPresses);
             else
                 jassertfalse; // seem to be trying to animate a component that's not visible..
 
