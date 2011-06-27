@@ -192,6 +192,8 @@ public:
     //==============================================================================
     /** If this variant is an object, this returns one of its properties. */
     var operator[] (const Identifier& propertyName) const;
+    /** If this variant is an object, this returns one of its properties. */
+    var operator[] (const char* propertyName) const;
 
     /** If this variant is an object, this invokes one of its methods with no arguments. */
     var call (const Identifier& method) const;

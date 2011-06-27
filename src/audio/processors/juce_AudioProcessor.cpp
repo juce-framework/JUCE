@@ -50,11 +50,11 @@ AudioProcessor::~AudioProcessor()
     // that it refers to is deleted..
     jassert (activeEditor == nullptr);
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // This will fail if you've called beginParameterChangeGesture() for one
     // or more parameters without having made a corresponding call to endParameterChangeGesture...
     jassert (changingParams.countNumberOfSetBits() == 0);
-#endif
+   #endif
 }
 
 void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead) noexcept
@@ -128,12 +128,12 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
 {
     jassert (isPositiveAndBelow (parameterIndex, getNumParameters()));
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // This means you've called beginParameterChangeGesture twice in succession without a matching
     // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
     jassert (! changingParams [parameterIndex]);
     changingParams.setBit (parameterIndex);
-#endif
+   #endif
 
     for (int i = listeners.size(); --i >= 0;)
     {
@@ -153,13 +153,13 @@ void AudioProcessor::endParameterChangeGesture (int parameterIndex)
 {
     jassert (isPositiveAndBelow (parameterIndex, getNumParameters()));
 
-#if JUCE_DEBUG
+   #if JUCE_DEBUG
     // This means you've called endParameterChangeGesture without having previously called
     // endParameterChangeGesture. That might be fine in most hosts, but better to keep the
     // calls matched correctly.
     jassert (changingParams [parameterIndex]);
     changingParams.clearBit (parameterIndex);
-#endif
+   #endif
 
     for (int i = listeners.size(); --i >= 0;)
     {

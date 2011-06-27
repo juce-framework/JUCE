@@ -240,7 +240,13 @@ public:
     static const VariantType_Object instance;
 
     void cleanUp (ValueUnion& data) const noexcept                      { if (data.objectValue != nullptr) data.objectValue->decReferenceCount(); }
-    void createCopy (ValueUnion& dest, const ValueUnion& source) const  { dest.objectValue = source.objectValue; if (dest.objectValue != nullptr) dest.objectValue->incReferenceCount(); }
+
+    void createCopy (ValueUnion& dest, const ValueUnion& source) const
+    {
+        dest.objectValue = source.objectValue;
+        if (dest.objectValue != nullptr)
+            dest.objectValue->incReferenceCount();
+    }
 
     String toString (const ValueUnion& data) const                            { return "Object 0x" + String::toHexString ((int) (pointer_sized_int) data.objectValue); }
     bool toBool (const ValueUnion& data) const noexcept                       { return data.objectValue != 0; }
@@ -347,40 +353,15 @@ var::var (const var& valueToCopy)  : type (valueToCopy.type)
     type->createCopy (value, valueToCopy.value);
 }
 
-var::var (const int value_) noexcept : type (&VariantType_Int::instance)
-{
-    value.intValue = value_;
-}
+var::var (const int value_) noexcept       : type (&VariantType_Int::instance)    { value.intValue = value_; }
+var::var (const int64 value_) noexcept     : type (&VariantType_Int64::instance)  { value.int64Value = value_; }
+var::var (const bool value_) noexcept      : type (&VariantType_Bool::instance)   { value.boolValue = value_; }
+var::var (const double value_) noexcept    : type (&VariantType_Double::instance) { value.doubleValue = value_; }
+var::var (MethodFunction method_) noexcept : type (&VariantType_Method::instance) { value.methodValue = method_; }
 
-var::var (const int64 value_) noexcept : type (&VariantType_Int64::instance)
-{
-    value.int64Value = value_;
-}
-
-var::var (const bool value_) noexcept : type (&VariantType_Bool::instance)
-{
-    value.boolValue = value_;
-}
-
-var::var (const double value_) noexcept : type (&VariantType_Double::instance)
-{
-    value.doubleValue = value_;
-}
-
-var::var (const String& value_)  : type (&VariantType_String::instance)
-{
-    new (value.stringValue) String (value_);
-}
-
-var::var (const char* const value_)  : type (&VariantType_String::instance)
-{
-    new (value.stringValue) String (value_);
-}
-
-var::var (const wchar_t* const value_)  : type (&VariantType_String::instance)
-{
-    new (value.stringValue) String (value_);
-}
+var::var (const String& value_)        : type (&VariantType_String::instance) { new (value.stringValue) String (value_); }
+var::var (const char* const value_)    : type (&VariantType_String::instance) { new (value.stringValue) String (value_); }
+var::var (const wchar_t* const value_) : type (&VariantType_String::instance) { new (value.stringValue) String (value_); }
 
 var::var (const Array<var>& value_)  : type (&VariantType_Array::instance)
 {
@@ -393,11 +374,6 @@ var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::in
 
     if (object != nullptr)
         object->incReferenceCount();
-}
-
-var::var (MethodFunction method_) noexcept : type (&VariantType_Method::instance)
-{
-    value.methodValue = method_;
 }
 
 //==============================================================================
@@ -429,17 +405,17 @@ void var::swapWith (var& other) noexcept
     std::swap (value, other.value);
 }
 
-const var& var::operator= (const var& newValue)               { type->cleanUp (value); type = newValue.type; type->createCopy (value, newValue.value); return *this; }
-const var& var::operator= (const int newValue)                { type->cleanUp (value); type = &VariantType_Int::instance; value.intValue = newValue; return *this; }
-const var& var::operator= (const int64 newValue)              { type->cleanUp (value); type = &VariantType_Int64::instance; value.int64Value = newValue; return *this; }
-const var& var::operator= (const bool newValue)               { type->cleanUp (value); type = &VariantType_Bool::instance; value.boolValue = newValue; return *this; }
-const var& var::operator= (const double newValue)             { type->cleanUp (value); type = &VariantType_Double::instance; value.doubleValue = newValue; return *this; }
-const var& var::operator= (const char* const newValue)        { var v (newValue); swapWith (v); return *this; }
-const var& var::operator= (const wchar_t* const newValue)     { var v (newValue); swapWith (v); return *this; }
-const var& var::operator= (const String& newValue)            { var v (newValue); swapWith (v); return *this; }
-const var& var::operator= (const Array<var>& newValue)        { var v (newValue); swapWith (v); return *this; }
-const var& var::operator= (ReferenceCountedObject* newValue)  { var v (newValue); swapWith (v); return *this; }
-const var& var::operator= (MethodFunction newValue)           { var v (newValue); swapWith (v); return *this; }
+const var& var::operator= (const var& v)               { type->cleanUp (value); type = v.type; type->createCopy (value, v.value); return *this; }
+const var& var::operator= (const int v)                { type->cleanUp (value); type = &VariantType_Int::instance; value.intValue = v; return *this; }
+const var& var::operator= (const int64 v)              { type->cleanUp (value); type = &VariantType_Int64::instance; value.int64Value = v; return *this; }
+const var& var::operator= (const bool v)               { type->cleanUp (value); type = &VariantType_Bool::instance; value.boolValue = v; return *this; }
+const var& var::operator= (const double v)             { type->cleanUp (value); type = &VariantType_Double::instance; value.doubleValue = v; return *this; }
+const var& var::operator= (const char* const v)        { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
+const var& var::operator= (const wchar_t* const v)     { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
+const var& var::operator= (const String& v)            { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
+const var& var::operator= (const Array<var>& v)        { var v2 (v); swapWith (v2); return *this; }
+const var& var::operator= (ReferenceCountedObject* v)  { var v2 (v); swapWith (v2); return *this; }
+const var& var::operator= (MethodFunction v)           { var v2 (v); swapWith (v2); return *this; }
 
 //==============================================================================
 bool var::equals (const var& other) const noexcept
@@ -465,6 +441,11 @@ var var::operator[] (const Identifier& propertyName) const
 {
     DynamicObject* const o = getDynamicObject();
     return o != nullptr ? o->getProperty (propertyName) : var::null;
+}
+
+var var::operator[] (const char* const propertyName) const
+{
+    return operator[] (Identifier (propertyName));
 }
 
 var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
@@ -631,7 +612,8 @@ var var::readFromStream (InputStream& input)
                 return v;
             }
 
-            default:    input.skipNextBytes (numBytes - 1); break;
+            default:
+                input.skipNextBytes (numBytes - 1); break;
         }
     }
 

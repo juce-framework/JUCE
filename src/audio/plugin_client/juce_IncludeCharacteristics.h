@@ -94,7 +94,6 @@
 
 //==============================================================================
 #if __LP64__ && (defined(__APPLE_CPP__) || defined(__APPLE_CC__))  // (disable VSTs and RTAS in a 64-bit mac build)
- #undef JucePlugin_Build_VST
  #undef JucePlugin_Build_RTAS
 #endif
 

@@ -72,8 +72,8 @@ namespace JuceDummyNamespace {}
 	See also SystemStats::getJUCEVersion() for a string version.
 */
 #define JUCE_MAJOR_VERSION	  1
-#define JUCE_MINOR_VERSION	  53
-#define JUCE_BUILDNUMBER	107
+#define JUCE_MINOR_VERSION	  54
+#define JUCE_BUILDNUMBER	2
 
 /** Current Juce version number.
 
@@ -8638,6 +8638,8 @@ public:
 
 	/** If this variant is an object, this returns one of its properties. */
 	var operator[] (const Identifier& propertyName) const;
+	/** If this variant is an object, this returns one of its properties. */
+	var operator[] (const char* propertyName) const;
 
 	/** If this variant is an object, this invokes one of its methods with no arguments. */
 	var call (const Identifier& method) const;

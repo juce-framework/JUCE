@@ -36,13 +36,10 @@
 #include "../juce_PluginHeaders.h"
 #include "../juce_PluginHostType.h"
 
-#if ! (JUCE_64BIT || defined (ADD_CARBON_BODGE))
- #define ADD_CARBON_BODGE 1   // see note below..
-#endif
-
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
 
+#if ! JUCE_64BIT
 static void updateComponentPos (Component* const comp)
 {
     HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
@@ -66,6 +63,7 @@ static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, vo
     updateComponentPos ((Component*) user);
     return noErr;
 }
+#endif
 
 //==============================================================================
 void initialiseMac()
