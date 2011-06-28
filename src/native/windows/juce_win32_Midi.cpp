@@ -73,7 +73,7 @@ public:
 
     void handleSysEx (MIDIHDR* const hdr, const uint32 timeStamp)
     {
-        if (isStarted)
+        if (isStarted && hdr->dwBytesRecorded > 0)
         {
             concatenator.pushMidiData (hdr->lpData, hdr->dwBytesRecorded, convertTimeStamp (timeStamp), input, callback);
             writeFinishedBlocks();

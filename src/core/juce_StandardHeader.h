@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      54
-#define JUCE_BUILDNUMBER        3
+#define JUCE_BUILDNUMBER        4
 
 /** Current Juce version number.
 
@@ -52,13 +52,12 @@
 #include "../../juce_Config.h"
 
 //==============================================================================
-#ifdef JUCE_NAMESPACE
-  #define BEGIN_JUCE_NAMESPACE    namespace JUCE_NAMESPACE {
-  #define END_JUCE_NAMESPACE      }
-#else
-  #define BEGIN_JUCE_NAMESPACE
-  #define END_JUCE_NAMESPACE
+#ifndef JUCE_NAMESPACE
+ #define JUCE_NAMESPACE juce
 #endif
+
+#define BEGIN_JUCE_NAMESPACE    namespace JUCE_NAMESPACE {
+#define END_JUCE_NAMESPACE      }
 
 //==============================================================================
 #include "juce_PlatformDefs.h"

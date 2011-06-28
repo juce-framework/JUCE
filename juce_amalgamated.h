@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	3
+#define JUCE_BUILDNUMBER	4
 
 /** Current Juce version number.
 
@@ -253,13 +253,6 @@ namespace JuceDummyNamespace {}
 /*
 	This file contains macros that enable/disable various JUCE features.
 */
-
-/** The name of the namespace that all Juce classes and functions will be
-	put inside. If this is not defined, no namespace will be used.
-*/
-#ifndef JUCE_NAMESPACE
-  #define JUCE_NAMESPACE juce
-#endif
 
 /** JUCE_FORCE_DEBUG: Normally, JUCE_DEBUG is set to 1 or 0 based on compiler and
 	project settings, but if you define this value, you can override this to force
@@ -535,13 +528,12 @@ namespace JuceDummyNamespace {}
 
 /*** End of inlined file: juce_Config.h ***/
 
-#ifdef JUCE_NAMESPACE
-  #define BEGIN_JUCE_NAMESPACE	namespace JUCE_NAMESPACE {
-  #define END_JUCE_NAMESPACE	  }
-#else
-  #define BEGIN_JUCE_NAMESPACE
-  #define END_JUCE_NAMESPACE
+#ifndef JUCE_NAMESPACE
+ #define JUCE_NAMESPACE juce
 #endif
+
+#define BEGIN_JUCE_NAMESPACE	namespace JUCE_NAMESPACE {
+#define END_JUCE_NAMESPACE	  }
 
 
 /*** Start of inlined file: juce_PlatformDefs.h ***/

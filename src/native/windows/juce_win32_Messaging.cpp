@@ -345,7 +345,7 @@ void MessageManager::doPlatformSpecificShutdown()
 }
 
 //==============================================================================
-class DeviceChangeDetector   // (Used by various audio classes)
+class DeviceChangeDetector  : private Timer // (Used by various audio classes)
 {
 public:
     DeviceChangeDetector (const wchar_t* const name)
@@ -370,10 +370,17 @@ private:
                   || wParam == 0x8004 /*DBT_DEVICEREMOVECOMPLETE*/
                   || wParam == 0x0007 /*DBT_DEVNODES_CHANGED*/))
         {
-            ((DeviceChangeDetector*) GetWindowLongPtr (h, GWLP_USERDATA))->systemDeviceChanged();
+            // We'll pause before sending a message, because on device removal, the OS hasn't always updated
+            // its device lists correctly at this point. This also helps avoid repeated callbacks.
+            ((DeviceChangeDetector*) GetWindowLongPtr (h, GWLP_USERDATA))->startTimer (500);
         }
 
         return DefWindowProc (h, message, wParam, lParam);
+    }
+
+    void timerCallback()
+    {
+        systemDeviceChanged();
     }
 };
 

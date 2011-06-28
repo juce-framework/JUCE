@@ -225,7 +225,7 @@ void Thread::signalThreadShouldExit()
 bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
 {
     // Doh! So how exactly do you expect this thread to wait for itself to stop??
-    jassert (getThreadId() != getCurrentThreadId());
+    jassert (getThreadId() != getCurrentThreadId() || getCurrentThreadId() == 0);
 
     const int sleepMsPerIteration = 5;
     int count = timeOutMilliseconds / sleepMsPerIteration;
