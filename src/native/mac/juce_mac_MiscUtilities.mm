@@ -263,9 +263,11 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 }
 
 //==============================================================================
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-class ScreenSaverDefeater   : public Timer,
-                              public DeletedAtShutdown
+#ifndef __POWER__  // Some versions of the SDK omit this function..
+ extern "C"  { extern OSErr UpdateSystemActivity (UInt8); }
+#endif
+
+class ScreenSaverDefeater   : public Timer
 {
 public:
     ScreenSaverDefeater()
@@ -277,60 +279,24 @@ public:
     void timerCallback()
     {
         if (Process::isForegroundProcess())
-            UpdateSystemActivity (UsrActivity);
+            UpdateSystemActivity (1 /*UsrActivity*/);
     }
 };
 
-static ScreenSaverDefeater* screenSaverDefeater = nullptr;
+static ScopedPointer<ScreenSaverDefeater> screenSaverDefeater;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (isEnabled)
-        deleteAndZero (screenSaverDefeater);
+        screenSaverDefeater = nullptr;
     else if (screenSaverDefeater == nullptr)
         screenSaverDefeater = new ScreenSaverDefeater();
 }
 
 bool Desktop::isScreenSaverEnabled()
 {
-    return screenSaverDefeater == 0;
+    return screenSaverDefeater == nullptr;
 }
-
-#else
-//==============================================================================
-static IOPMAssertionID screenSaverDisablerID = 0;
-
-void Desktop::setScreenSaverEnabled (const bool isEnabled)
-{
-    if (isEnabled)
-    {
-        if (screenSaverDisablerID != 0)
-        {
-            IOPMAssertionRelease (screenSaverDisablerID);
-            screenSaverDisablerID = 0;
-        }
-    }
-    else
-    {
-        if (screenSaverDisablerID == 0)
-        {
-           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-            IOPMAssertionCreateWithName (kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn,
-                                         CFSTR ("Juce"), &screenSaverDisablerID);
-           #else
-            IOPMAssertionCreate (kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn,
-                                 &screenSaverDisablerID);
-           #endif
-        }
-    }
-}
-
-bool Desktop::isScreenSaverEnabled()
-{
-    return screenSaverDisablerID == 0;
-}
-
-#endif
 
 //==============================================================================
 class DisplaySettingsChangeCallback  : public DeletedAtShutdown

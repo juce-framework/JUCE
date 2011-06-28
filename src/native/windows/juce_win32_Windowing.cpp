@@ -2820,8 +2820,7 @@ Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, i
 }
 
 //==============================================================================
-class ScreenSaverDefeater   : public Timer,
-                              public DeletedAtShutdown
+class ScreenSaverDefeater   : public Timer
 {
 public:
     ScreenSaverDefeater()
@@ -2851,12 +2850,12 @@ public:
     }
 };
 
-static ScreenSaverDefeater* screenSaverDefeater = nullptr;
+static ScopedPointer<ScreenSaverDefeater> screenSaverDefeater;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (isEnabled)
-        deleteAndZero (screenSaverDefeater);
+        screenSaverDefeater = nullptr;
     else if (screenSaverDefeater == nullptr)
         screenSaverDefeater = new ScreenSaverDefeater();
 }

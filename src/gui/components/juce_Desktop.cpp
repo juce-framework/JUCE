@@ -47,6 +47,8 @@ Desktop::Desktop()
 
 Desktop::~Desktop()
 {
+    setScreenSaverEnabled (true);
+
     jassert (instance == this);
     instance = nullptr;
 

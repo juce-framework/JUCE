@@ -179,11 +179,15 @@ String XmlDocument::getFileContents (const String& filename) const
 
 juce_wchar XmlDocument::readNextChar() noexcept
 {
-    if (*input != 0)
-        return *input++;
+    const juce_wchar c = input.getAndAdvance();
 
-    outOfData = true;
-    return 0;
+    if (c == 0)
+    {
+        outOfData = true;
+        --input;
+    }
+
+    return c;
 }
 
 int XmlDocument::findNextTokenLength() noexcept
@@ -315,15 +319,16 @@ void XmlDocument::readQuotedString (String& result)
         if (c == quote)
             break;
 
+        --input;
+
         if (c == '&')
         {
-            --input;
             readEntity (result);
         }
         else
         {
-            --input;
             const String::CharPointerType start (input);
+            int numChars = 0;
 
             for (;;)
             {
@@ -331,14 +336,13 @@ void XmlDocument::readQuotedString (String& result)
 
                 if (character == quote)
                 {
-                    result.appendCharPointer (start, (int) (input.getAddress() - start.getAddress()));
+                    result.appendCharPointer (start, numChars);
                     ++input;
-
                     return;
                 }
                 else if (character == '&')
                 {
-                    result.appendCharPointer (start, (int) (input.getAddress() - start.getAddress()));
+                    result.appendCharPointer (start, numChars);
                     break;
                 }
                 else if (character == 0)
@@ -349,6 +353,7 @@ void XmlDocument::readQuotedString (String& result)
                 }
 
                 ++input;
+                ++numChars;
             }
         }
     }
