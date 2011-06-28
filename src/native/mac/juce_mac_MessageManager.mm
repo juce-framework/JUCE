@@ -445,6 +445,14 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 #endif
 
 //==============================================================================
+void initialiseNSApplication()
+{
+   #if JUCE_MAC
+    JUCE_AUTORELEASEPOOL
+    [NSApplication sharedApplication];
+   #endif
+}
+
 void MessageManager::doPlatformSpecificInitialisation()
 {
     if (juceAppDelegate == nil)

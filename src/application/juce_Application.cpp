@@ -256,9 +256,17 @@ int JUCEApplication::main (const String& commandLine)
  extern const char* juce_Argv0;
 #endif
 
+#if JUCE_MAC
+ extern void initialiseNSApplication();
+#endif
+
 int JUCEApplication::main (int argc, const char* argv[])
 {
     JUCE_AUTORELEASEPOOL
+
+   #if JUCE_MAC
+    initialiseNSApplication();
+   #endif
 
    #if ! JUCE_WINDOWS
     jassert (createInstance != nullptr);

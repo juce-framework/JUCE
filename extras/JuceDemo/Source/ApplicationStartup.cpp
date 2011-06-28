@@ -103,39 +103,43 @@ private:
 
     //==============================================================================
     // this little function just demonstrates a few system info calls
-    static const String collectSomeSystemInfo()
+    static String collectSomeSystemInfo()
     {
         String systemInfo;
 
         systemInfo
-          << "Time and date: " << Time::getCurrentTime().toString (true, true)
-          << "\nUser logon name: " << SystemStats::getLogonName()
-          << "\nFull user name: " << SystemStats::getFullUserName()
-          << "\nHost name: " << SystemStats::getComputerName()
-          << "\nOperating system: " << SystemStats::getOperatingSystemName()
-          << "\nCPU vendor: " << SystemStats::getCpuVendor()
-          << "\nCPU speed: " << SystemStats::getCpuSpeedInMegaherz() << "MHz"
-          << "\nNumber of CPUs: " << SystemStats::getNumCpus()
-          << "\nCPU has MMX: " << (SystemStats::hasMMX() ? "yes" : "no")
-          << "\nCPU has SSE: " << (SystemStats::hasSSE() ? "yes" : "no")
-          << "\nCPU has SSE2: " << (SystemStats::hasSSE2() ? "yes" : "no")
-          << "\nCPU has 3DNOW: " << (SystemStats::has3DNow() ? "yes" : "no")
-          << "\nMemory size: " << SystemStats::getMemorySizeInMegabytes() << "MB"
-          << "\nFound network card MAC addresses: " << getMacAddressList()
-          << "\nCurrent executable file: " << File::getSpecialLocation (File::currentExecutableFile).getFullPathName()
-          << "\nCurrent application file: " << File::getSpecialLocation (File::currentApplicationFile).getFullPathName()
-          << "\nCurrent working directory: " << File::getCurrentWorkingDirectory().getFullPathName()
-          << "\nUser home directory: " << File::getSpecialLocation (File::userHomeDirectory).getFullPathName()
-          << "\nUser documents directory: " << File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName()
-          << "\nUser application data directory: " << File::getSpecialLocation (File::userApplicationDataDirectory).getFullPathName()
-          << "\nCommon application data directory: " << File::getSpecialLocation (File::commonApplicationDataDirectory).getFullPathName()
-          << "\nTemp directory: " << File::getSpecialLocation (File::tempDirectory).getFullPathName()
-          << "\n\n";
+          << "Time and date: " << Time::getCurrentTime().toString (true, true) << newLine
+
+          << "User logon name: "  << SystemStats::getLogonName() << newLine
+          << "Full user name: "   << SystemStats::getFullUserName() << newLine
+          << "Host name: "        << SystemStats::getComputerName() << newLine
+          << "Operating system: " << SystemStats::getOperatingSystemName() << newLine
+
+          << "Memory size: "    << SystemStats::getMemorySizeInMegabytes() << "MB" << newLine
+          << "Number of CPUs: " << SystemStats::getNumCpus() << newLine
+          << "CPU vendor: "     << SystemStats::getCpuVendor() << newLine
+          << "CPU speed: "      << SystemStats::getCpuSpeedInMegaherz() << "MHz" << newLine
+          << "CPU has MMX: "    << (SystemStats::hasMMX()   ? "yes" : "no") << newLine
+          << "CPU has SSE: "    << (SystemStats::hasSSE()   ? "yes" : "no") << newLine
+          << "CPU has SSE2: "   << (SystemStats::hasSSE2()  ? "yes" : "no") << newLine
+          << "CPU has 3DNOW: "  << (SystemStats::has3DNow() ? "yes" : "no") << newLine
+
+          << "Found network card MAC addresses: " << getMacAddressList() << newLine
+
+          << "Current working directory: "         << File::getCurrentWorkingDirectory().getFullPathName() << newLine
+          << "Current executable file: "           << File::getSpecialLocation (File::currentExecutableFile).getFullPathName() << newLine
+          << "Current application file: "          << File::getSpecialLocation (File::currentApplicationFile).getFullPathName() << newLine
+          << "User home directory: "               << File::getSpecialLocation (File::userHomeDirectory).getFullPathName() << newLine
+          << "User documents directory: "          << File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName() << newLine
+          << "User application data directory: "   << File::getSpecialLocation (File::userApplicationDataDirectory).getFullPathName() << newLine
+          << "Common application data directory: " << File::getSpecialLocation (File::commonApplicationDataDirectory).getFullPathName() << newLine
+          << "Temp directory: "                    << File::getSpecialLocation (File::tempDirectory).getFullPathName() << newLine
+          << newLine;
 
         return systemInfo;
     }
 
-    static const String getMacAddressList()
+    static String getMacAddressList()
     {
         Array <MACAddress> macAddresses;
         MACAddress::findAllAddresses (macAddresses);

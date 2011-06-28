@@ -74,13 +74,10 @@ SystemStats::CPUFlags::CPUFlags()
 }
 
 #if JUCE_MAC
-struct SharedAppInitialiser
+struct RLimitInitialiser
 {
-    SharedAppInitialiser()
+    RLimitInitialiser()
     {
-        JUCE_AUTORELEASEPOOL
-        [NSApplication sharedApplication];
-
         rlimit lim;
         getrlimit (RLIMIT_NOFILE, &lim);
         lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
@@ -88,7 +85,7 @@ struct SharedAppInitialiser
     }
 };
 
-static SharedAppInitialiser sharedAppInitialiser;
+static RLimitInitialiser rLimitInitialiser;
 #endif
 
 //==============================================================================
