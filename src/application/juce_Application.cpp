@@ -31,7 +31,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../events/juce_MessageManager.h"
 #include "../core/juce_Initialisation.h"
 #include "../threads/juce_Process.h"
-#include "../core/juce_PlatformUtilities.h"
 #include "../text/juce_LocalisedStrings.h"
 
 #if JUCE_MAC

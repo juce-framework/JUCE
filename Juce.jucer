@@ -418,8 +418,6 @@
               file="src/core/juce_PerformanceCounter.h"/>
         <FILE id="DHk9U0sFO" name="juce_PlatformDefs.h" compile="0" resource="0"
               file="src/core/juce_PlatformDefs.h"/>
-        <FILE id="o1vDnzWWu" name="juce_PlatformUtilities.h" compile="0" resource="0"
-              file="src/core/juce_PlatformUtilities.h"/>
         <FILE id="n3tbSp" name="juce_RelativeTime.cpp" compile="1" resource="0"
               file="src/core/juce_RelativeTime.cpp"/>
         <FILE id="51S3JEvsR" name="juce_RelativeTime.h" compile="0" resource="0"
@@ -466,6 +464,8 @@
               file="src/events/juce_ActionBroadcaster.h"/>
         <FILE id="Ux4rL61r9" name="juce_ActionListener.h" compile="0" resource="0"
               file="src/events/juce_ActionListener.h"/>
+        <FILE id="wDbxVg" name="juce_AppleRemote.h" compile="0" resource="0"
+              file="src/events/juce_AppleRemote.h"/>
         <FILE id="LgjeCwe5N" name="juce_AsyncUpdater.cpp" compile="1" resource="0"
               file="src/events/juce_AsyncUpdater.cpp"/>
         <FILE id="TABmiJS44" name="juce_AsyncUpdater.h" compile="0" resource="0"
@@ -948,6 +948,8 @@
                   file="src/gui/components/special/juce_PreferencesPanel.h"/>
             <FILE id="oOdQxgR9" name="juce_QuickTimeMovieComponent.h" compile="0"
                   resource="0" file="src/gui/components/special/juce_QuickTimeMovieComponent.h"/>
+            <FILE id="jkB0RG" name="juce_ScopedXLock.h" compile="0" resource="0"
+                  file="src/gui/components/special/juce_ScopedXLock.h"/>
             <FILE id="tpZc46Dqw" name="juce_SystemTrayIconComponent.cpp" compile="1"
                   resource="0" file="src/gui/components/special/juce_SystemTrayIconComponent.cpp"/>
             <FILE id="ai8Wt8YDp" name="juce_SystemTrayIconComponent.h" compile="0"
@@ -1404,6 +1406,10 @@
                 file="src/native/mac/juce_mac_Threads.mm"/>
           <FILE id="ZV5RUI3V" name="juce_mac_WebBrowserComponent.mm" compile="1"
                 resource="0" file="src/native/mac/juce_mac_WebBrowserComponent.mm"/>
+          <FILE id="Gc7s3v" name="juce_osx_MessageQueue.h" compile="0" resource="0"
+                file="src/native/mac/juce_osx_MessageQueue.h"/>
+          <FILE id="ffVfA" name="juce_osx_ObjCHelpers.h" compile="0" resource="0"
+                file="src/native/mac/juce_osx_ObjCHelpers.h"/>
         </GROUP>
         <GROUP id="BxIyjNkBx" name="windows">
           <FILE id="9nfkX5LVo" name="juce_win32_ActiveXComponent.cpp" compile="1"
@@ -1444,8 +1450,8 @@
                 file="src/native/windows/juce_win32_Network.cpp"/>
           <FILE id="b6VjPJxV4" name="juce_win32_OpenGLComponent.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_OpenGLComponent.cpp"/>
-          <FILE id="J1VD4Mcx" name="juce_win32_PlatformUtils.cpp" compile="1"
-                resource="0" file="src/native/windows/juce_win32_PlatformUtils.cpp"/>
+          <FILE id="J1VD4Mcx" name="juce_win32_Registry.cpp" compile="1" resource="0"
+                file="src/native/windows/juce_win32_Registry.cpp"/>
           <FILE id="Hl7dGm8qs" name="juce_win32_QuickTimeMovieComponent.cpp"
                 compile="1" resource="0" file="src/native/windows/juce_win32_QuickTimeMovieComponent.cpp"/>
           <FILE id="y50XdiuL8" name="juce_win32_SystemStats.cpp" compile="1"
@@ -1548,6 +1554,8 @@
       <GROUP id="3rpUojvWX" name="threads">
         <FILE id="XYKZpJGDt" name="juce_CriticalSection.h" compile="0" resource="0"
               file="src/threads/juce_CriticalSection.h"/>
+        <FILE id="k5cd2b" name="juce_DynamicLibrary.h" compile="0" resource="0"
+              file="src/threads/juce_DynamicLibrary.h"/>
         <FILE id="mz2gopdp" name="juce_InterProcessLock.h" compile="0" resource="0"
               file="src/threads/juce_InterProcessLock.h"/>
         <FILE id="Qa3Okegv" name="juce_Process.h" compile="0" resource="0"
@@ -1609,6 +1617,8 @@
               file="src/utilities/juce_UnitTest.cpp"/>
         <FILE id="PQBhHBA" name="juce_UnitTest.h" compile="0" resource="0"
               file="src/utilities/juce_UnitTest.h"/>
+        <FILE id="JQYPb" name="juce_WindowsRegistry.h" compile="0" resource="0"
+              file="src/utilities/juce_WindowsRegistry.h"/>
       </GROUP>
       <FILE id="Jp7xh1cg9" name="juce.h" compile="0" resource="0" file="juce.h"/>
       <FILE id="G2j0wJTna" name="juce_Config.h" compile="0" resource="0"

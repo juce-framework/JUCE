@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#include "juce_PlatformUtilities.h"
 #include "../utilities/juce_DeletedAtShutdown.h"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY

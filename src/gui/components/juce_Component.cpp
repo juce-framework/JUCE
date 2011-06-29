@@ -39,7 +39,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../events/juce_MessageManager.h"
 #include "../../events/juce_Timer.h"
 #include "../../core/juce_Time.h"
-#include "../../core/juce_PlatformUtilities.h"
 #include "mouse/juce_MouseInputSource.h"
 #include "positioning/juce_RelativeRectangle.h"
 

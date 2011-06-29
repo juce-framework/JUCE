@@ -1171,7 +1171,7 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_OpenGLComponent.cpp">
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\windows\juce_win32_PlatformUtils.cpp">
+    <ClCompile Include="..\..\src\native\windows\juce_win32_Registry.cpp">
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_QuickTimeMovieComponent.cpp">
@@ -1590,9 +1590,6 @@
     <ClInclude Include="..\..\src\core\juce_PlatformDefs.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\juce_PlatformUtilities.h">
-      <Filter>Juce\Source\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\juce_RelativeTime.h">
       <Filter>Juce\Source\core</Filter>
     </ClInclude>
@@ -1633,6 +1630,9 @@
       <Filter>Juce\Source\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\events\juce_ActionListener.h">
+      <Filter>Juce\Source\events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\events\juce_AppleRemote.h">
       <Filter>Juce\Source\events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\events\juce_AsyncUpdater.h">
@@ -2004,6 +2004,9 @@
     <ClInclude Include="..\..\src\gui\components\special\juce_QuickTimeMovieComponent.h">
       <Filter>Juce\Source\gui\components\special</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\special\juce_ScopedXLock.h">
+      <Filter>Juce\Source\gui\components\special</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\gui\components\special\juce_SystemTrayIconComponent.h">
       <Filter>Juce\Source\gui\components\special</Filter>
     </ClInclude>
@@ -2295,6 +2298,12 @@
     <ClInclude Include="..\..\src\native\mac\juce_mac_ObjCSuffix.h">
       <Filter>Juce\Source\native\mac</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\native\mac\juce_osx_MessageQueue.h">
+      <Filter>Juce\Source\native\mac</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\native\mac\juce_osx_ObjCHelpers.h">
+      <Filter>Juce\Source\native\mac</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\native\windows\juce_win32_AutoLinkLibraries.h">
       <Filter>Juce\Source\native\windows</Filter>
     </ClInclude>
@@ -2355,6 +2364,9 @@
     <ClInclude Include="..\..\src\threads\juce_CriticalSection.h">
       <Filter>Juce\Source\threads</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\threads\juce_DynamicLibrary.h">
+      <Filter>Juce\Source\threads</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\threads\juce_InterProcessLock.h">
       <Filter>Juce\Source\threads</Filter>
     </ClInclude>
@@ -2413,6 +2425,9 @@
       <Filter>Juce\Source\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\utilities\juce_UnitTest.h">
+      <Filter>Juce\Source\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utilities\juce_WindowsRegistry.h">
       <Filter>Juce\Source\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\juce.h">

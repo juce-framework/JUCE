@@ -93,9 +93,50 @@ public:
     static bool JUCE_CALLTYPE isRunningUnderDebugger();
 
 
+    //==============================================================================
+    /** Tries to launch the OS's default reader application for a given file or URL. */
+    static bool openDocument (const String& documentURL, const String& parameters);
+
+    /** Tries to launch the OS's default email application to let the user create a message. */
+    static bool openEmailWithAttachments (const String& targetEmailAddress,
+                                          const String& emailSubject,
+                                          const String& bodyText,
+                                          const StringArray& filesToAttach);
+
+   #if JUCE_WINDOWS || DOXYGEN
+    //==============================================================================
+    /** WINDOWS ONLY - This returns the HINSTANCE of the current module.
+
+        The return type is a void* to avoid being dependent on windows.h - just cast
+        it to a HINSTANCE to use it.
+
+        In a normal JUCE application, this will be automatically set to the module
+        handle of the executable.
+
+        If you've built a DLL and plan to use any JUCE messaging or windowing classes,
+        you'll need to make sure you call the setCurrentModuleInstanceHandle()
+        to provide the correct module handle in your DllMain() function, because
+        the system relies on the correct instance handle when opening windows.
+    */
+    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() noexcept;
+
+    /** WINDOWS ONLY - Sets a new module handle to be used by the library.
+
+        The parameter type is a void* to avoid being dependent on windows.h, but it actually
+        expects a HINSTANCE value.
+
+        @see getCurrentModuleInstanceHandle()
+    */
+    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) noexcept;
+
+    /** WINDOWS ONLY - Gets the command-line params as a string.
+        This is needed to avoid unicode problems with the argc type params.
+    */
+    static String JUCE_CALLTYPE getCurrentCommandLineParams();
+   #endif
+
 private:
     Process();
-
     JUCE_DECLARE_NON_COPYABLE (Process);
 };
 

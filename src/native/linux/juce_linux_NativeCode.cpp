@@ -47,7 +47,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../core/juce_Time.h"
 #include "../../maths/juce_Random.h"
 #include "../../core/juce_Singleton.h"
-#include "../../core/juce_PlatformUtilities.h"
 #include "../../memory/juce_MemoryBlock.h"
 #include "../../containers/juce_ReferenceCountedArray.h"
 #include "../../utilities/juce_DeletedAtShutdown.h"
@@ -59,6 +58,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../threads/juce_InterProcessLock.h"
 #include "../../threads/juce_WaitableEvent.h"
 #include "../../threads/juce_Process.h"
+#include "../../threads/juce_DynamicLibrary.h"
 #include "../../io/files/juce_File.h"
 #include "../../io/files/juce_NamedPipe.h"
 #include "../../io/files/juce_FileInputStream.h"
@@ -83,6 +83,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../gui/graphics/geometry/juce_RectangleList.h"
 #include "../../gui/graphics/imaging/juce_ImageFileFormat.h"
 #include "../../gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
+#include "../../gui/components/lookandfeel/juce_LookAndFeel.h"
 #include "../../gui/components/juce_Desktop.h"
 #include "../../gui/components/mouse/juce_MouseInputSource.h"
 #include "../../gui/components/mouse/juce_DragAndDropContainer.h"
@@ -94,6 +95,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../gui/components/special/juce_WebBrowserComponent.h"
 #include "../../gui/components/special/juce_OpenGLComponent.h"
 #include "../../gui/components/special/juce_SystemTrayIconComponent.h"
+#include "../../gui/components/special/juce_ScopedXLock.h"
 #include "../../containers/juce_ScopedValueSetter.h"
 
 //==============================================================================

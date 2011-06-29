@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	6
+#define JUCE_BUILDNUMBER	7
 
 /** Current Juce version number.
 
@@ -5337,6 +5337,22 @@ public:
 		JUCE_DECLARE_NON_COPYABLE (Concatenator);
 	};
 
+   #if JUCE_MAC || JUCE_IOS || DOXYGEN
+
+	/** MAC ONLY - Creates a String from an OSX CFString. */
+	static String fromCFString (CFStringRef cfString);
+
+	/** MAC ONLY - Converts this string to a CFString.
+		Remember that you must use CFRelease() to free the returned string when you're
+		finished with it.
+	*/
+	CFStringRef toCFString() const;
+
+	/** MAC ONLY - Returns a copy of this string in which any decomposed unicode characters have
+		been converted to their precomposed equivalents. */
+	String convertToPrecomposedUnicode() const;
+   #endif
+
 private:
 
 	CharPointerType text;
@@ -5653,6 +5669,28 @@ private:
 /*** End of inlined file: juce_LeakedObjectDetector.h ***/
 
 #undef TYPE_BOOL  // (stupidly-named CoreServices definition which interferes with other libraries).
+
+#if JUCE_MAC || JUCE_IOS || DOXYGEN
+
+ /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII. */
+ class JUCE_API  ScopedAutoReleasePool
+ {
+ public:
+	 ScopedAutoReleasePool();
+	 ~ScopedAutoReleasePool();
+
+ private:
+	 void* pool;
+
+	 JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
+ };
+
+ /** A macro that can be used to easily declare a local ScopedAutoReleasePool object for RAII-based obj-C autoreleasing. */
+ #define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
+
+#else
+ #define JUCE_AUTORELEASEPOOL
+#endif
 
 END_JUCE_NAMESPACE
 
@@ -13056,6 +13094,20 @@ public:
 	/** Adds a separator character to the end of a path if it doesn't already have one. */
 	static String addTrailingSeparator (const String& path);
 
+   #if JUCE_MAC || JUCE_IOS || DOXYGEN
+
+	/** OSX ONLY - Finds the OSType of a file from the its resources. */
+	OSType getMacOSType() const;
+
+	/** OSX ONLY - Returns true if this file is actually a bundle. */
+	bool isBundle() const;
+   #endif
+
+   #if JUCE_MAC || DOXYGEN
+	/** OSX ONLY - Adds this file to the OSX dock */
+	void addToDock() const;
+   #endif
+
 private:
 
 	String fullPath;
@@ -17538,7 +17590,7 @@ private:
 	Juce calls, to make sure things are initialised correctly.
 
 	Note that if you're creating a Juce DLL for Windows, you may also need to call the
-	PlatformUtilities::setCurrentModuleInstanceHandle() method.
+	Process::setCurrentModuleInstanceHandle() method.
 
 	@see shutdownJuce_GUI()
 */
@@ -17606,7 +17658,7 @@ public:
 		int main (int, char* argv[]) \
 		{ \
 			JUCE_NAMESPACE::JUCEApplication::createInstance = &juce_CreateApplication; \
-			return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
+			return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::Process::getCurrentCommandLineParams()); \
 		}
   #elif ! defined (_AFXDLL)
 	#ifdef _WINDOWS_
@@ -17615,7 +17667,7 @@ public:
 		  int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
 		  { \
 			  JUCE_NAMESPACE::JUCEApplication::createInstance = &juce_CreateApplication; \
-			  return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
+			  return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::Process::getCurrentCommandLineParams()); \
 		  }
 	#else
 	  #define START_JUCE_APPLICATION(AppClass) \
@@ -17623,7 +17675,7 @@ public:
 		  int __stdcall WinMain (int, int, const char*, int) \
 		  { \
 			  JUCE_NAMESPACE::JUCEApplication::createInstance = &juce_CreateApplication; \
-			  return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
+			  return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::Process::getCurrentCommandLineParams()); \
 		  }
 	#endif
   #endif
@@ -17723,311 +17775,6 @@ private:
 
 #endif
 #ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/*** Start of inlined file: juce_PlatformUtilities.h ***/
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-#define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/**
-	A collection of miscellaneous platform-specific utilities.
-
-*/
-class JUCE_API  PlatformUtilities
-{
-public:
-
-	/** Plays the operating system's default alert 'beep' sound. */
-	static void beep();
-
-	/** Tries to launch the system's default reader for a given file or URL. */
-	static bool openDocument (const String& documentURL, const String& parameters);
-
-	/** Tries to launch the system's default email app to let the user create an email.
-	*/
-	static bool launchEmailWithAttachments (const String& targetEmailAddress,
-											const String& emailSubject,
-											const String& bodyText,
-											const StringArray& filesToAttach);
-
-#if JUCE_MAC || JUCE_IOS || DOXYGEN
-
-	/** MAC ONLY - Turns a Core CF String into a juce one. */
-	static String cfStringToJuceString (CFStringRef cfString);
-
-	/** MAC ONLY - Turns a juce string into a Core CF one. */
-	static CFStringRef juceStringToCFString (const String& s);
-
-	/** MAC ONLY - Turns a file path into an FSRef, returning true if it succeeds. */
-	static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
-
-	/** MAC ONLY - Turns an FSRef into a juce string path. */
-	static String makePathFromFSRef (FSRef* file);
-
-	/** MAC ONLY - Converts any decomposed unicode characters in a string into
-		their precomposed equivalents.
-	*/
-	static String convertToPrecomposedUnicode (const String& s);
-
-	/** MAC ONLY - Gets the type of a file from the file's resources. */
-	static OSType getTypeOfFile (const String& filename);
-
-	/** MAC ONLY - Returns true if this file is actually a bundle. */
-	static bool isBundle (const String& filename);
-
-	/** MAC ONLY - Adds an item to the dock */
-	static void addItemToDock (const File& file);
-
-	/** MAC ONLY - Returns the current OS version number.
-		E.g. if it's running on 10.4, this will be 4, 10.5 will return 5, etc.
-	*/
-	static int getOSXMinorVersionNumber();
-#endif
-
-#if JUCE_WINDOWS || DOXYGEN
-
-	// Some registry helper functions:
-
-	/** WIN32 ONLY - Returns a string from the registry.
-
-		The path is a string for the entire path of a value in the registry,
-		e.g. "HKEY_CURRENT_USER\Software\foo\bar"
-	*/
-	static String getRegistryValue (const String& regValuePath,
-									const String& defaultValue = String::empty);
-
-	/** WIN32 ONLY - Sets a registry value as a string.
-
-		This will take care of creating any groups needed to get to the given
-		registry value.
-	*/
-	static void setRegistryValue (const String& regValuePath,
-								  const String& value);
-
-	/** WIN32 ONLY - Returns true if the given value exists in the registry. */
-	static bool registryValueExists (const String& regValuePath);
-
-	/** WIN32 ONLY - Deletes a registry value. */
-	static void deleteRegistryValue (const String& regValuePath);
-
-	/** WIN32 ONLY - Deletes a registry key (which is registry-talk for 'folder'). */
-	static void deleteRegistryKey (const String& regKeyPath);
-
-	/** WIN32 ONLY - Creates a file association in the registry.
-
-		This lets you set the exe that should be launched by a given file extension.
-		@param fileExtension	the file extension to associate, including the
-									initial dot, e.g. ".txt"
-		@param symbolicDescription  a space-free short token to identify the file type
-		@param fullDescription	  a human-readable description of the file type
-		@param targetExecutable	 the executable that should be launched
-		@param iconResourceNumber   the icon that gets displayed for the file type will be
-									found by looking up this resource number in the
-									executable. Pass 0 here to not use an icon
-	*/
-	static void registerFileAssociation (const String& fileExtension,
-										 const String& symbolicDescription,
-										 const String& fullDescription,
-										 const File& targetExecutable,
-										 int iconResourceNumber);
-
-	/** WIN32 ONLY - This returns the HINSTANCE of the current module.
-
-		In a normal Juce application this will be set to the module handle
-		of the application executable.
-
-		If you're writing a DLL using Juce and plan to use any Juce messaging or
-		windows, you'll need to make sure you use the setCurrentModuleInstanceHandle()
-		to set the correct module handle in your DllMain() function, because
-		the win32 system relies on the correct instance handle when opening windows.
-	*/
-	static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() noexcept;
-
-	/** WIN32 ONLY - Sets a new module handle to be used by the library.
-
-		@see getCurrentModuleInstanceHandle()
-	*/
-	static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) noexcept;
-
-	/** WIN32 ONLY - Gets the command-line params as a string.
-
-		This is needed to avoid unicode problems with the argc type params.
-	*/
-	static String JUCE_CALLTYPE getCurrentCommandLineParams();
-#endif
-
-	/** Clears the floating point unit's flags.
-
-		Only has an effect under win32, currently.
-	*/
-	static void fpuReset();
-
-#if JUCE_LINUX || JUCE_WINDOWS
-
-	/** Loads a dynamically-linked library into the process's address space.
-
-		@param pathOrFilename   the platform-dependent name and search path
-		@returns		a handle which can be used by getProcedureEntryPoint(), or
-								zero if it fails.
-		@see freeDynamicLibrary, getProcedureEntryPoint
-	*/
-	static void* loadDynamicLibrary (const String& pathOrFilename);
-
-	/** Frees a dynamically-linked library.
-
-		@param libraryHandle   a handle created by loadDynamicLibrary
-		@see loadDynamicLibrary, getProcedureEntryPoint
-	*/
-	static void freeDynamicLibrary (void* libraryHandle);
-
-	/** Finds a procedure call in a dynamically-linked library.
-
-		@param libraryHandle	a library handle returned by loadDynamicLibrary
-		@param procedureName	the name of the procedure call to try to load
-		@returns		a pointer to the function if found, or 0 if it fails
-		@see loadDynamicLibrary
-	*/
-	static void* getProcedureEntryPoint (void* libraryHandle,
-										 const String& procedureName);
-#endif
-
-private:
-	PlatformUtilities();
-
-	JUCE_DECLARE_NON_COPYABLE (PlatformUtilities);
-};
-
-#if JUCE_MAC || JUCE_IOS || DOXYGEN
-
- /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII. */
- class JUCE_API  ScopedAutoReleasePool
- {
- public:
-	 ScopedAutoReleasePool();
-	 ~ScopedAutoReleasePool();
-
- private:
-	 void* pool;
-
-	 JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
- };
-
- /** A macro that can be used to easily declare a local ScopedAutoReleasePool object for RAII-based obj-C autoreleasing. */
- #define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
-
-#else
- #define JUCE_AUTORELEASEPOOL
-#endif
-
-#if JUCE_LINUX
-
-/** A handy class that uses XLockDisplay and XUnlockDisplay to lock the X server
-	using an RAII approach.
-*/
-class ScopedXLock
-{
-public:
-	/** Creating a ScopedXLock object locks the X display.
-		This uses XLockDisplay() to grab the display that Juce is using.
-	*/
-	ScopedXLock();
-
-	/** Deleting a ScopedXLock object unlocks the X display.
-		This calls XUnlockDisplay() to release the lock.
-	*/
-	~ScopedXLock();
-};
-
-#endif
-
-#if JUCE_MAC
-
-/**
-	A wrapper class for picking up events from an Apple IR remote control device.
-
-	To use it, just create a subclass of this class, implementing the buttonPressed()
-	callback, then call start() and stop() to start or stop receiving events.
-*/
-class JUCE_API  AppleRemoteDevice
-{
-public:
-
-	AppleRemoteDevice();
-	virtual ~AppleRemoteDevice();
-
-	/** The set of buttons that may be pressed.
-		@see buttonPressed
-	*/
-	enum ButtonType
-	{
-		menuButton = 0,	 /**< The menu button (if it's held for a short time). */
-		playButton,	 /**< The play button. */
-		plusButton,	 /**< The plus or volume-up button. */
-		minusButton,	/**< The minus or volume-down button. */
-		rightButton,	/**< The right button (if it's held for a short time). */
-		leftButton,	 /**< The left button (if it's held for a short time). */
-		rightButton_Long,   /**< The right button (if it's held for a long time). */
-		leftButton_Long,	/**< The menu button (if it's held for a long time). */
-		menuButton_Long,	/**< The menu button (if it's held for a long time). */
-		playButtonSleepMode,
-		switched
-	};
-
-	/** Override this method to receive the callback about a button press.
-
-		The callback will happen on the application's message thread.
-
-		Some buttons trigger matching up and down events, in which the isDown parameter
-		will be true and then false. Others only send a single event when the
-		button is pressed.
-	*/
-	virtual void buttonPressed (ButtonType buttonId, bool isDown) = 0;
-
-	/** Starts the device running and responding to events.
-
-		Returns true if it managed to open the device.
-
-		@param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
-								and will not be available to any other part of the system. If
-								false, it will be shared with other apps.
-		@see stop
-	*/
-	bool start (bool inExclusiveMode);
-
-	/** Stops the device running.
-		@see start
-	*/
-	void stop();
-
-	/** Returns true if the device has been started successfully.
-	*/
-	bool isActive() const;
-
-	/** Returns the ID number of the remote, if it has sent one.
-	*/
-	int getRemoteId() const			 { return remoteId; }
-
-	/** @internal */
-	void handleCallbackInternal();
-
-private:
-	void* device;
-	void* queue;
-	int remoteId;
-
-	bool open (bool openInExclusiveMode);
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppleRemoteDevice);
-};
-
-#endif
-
-#endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/*** End of inlined file: juce_PlatformUtilities.h ***/
-
 
 #endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
@@ -18360,6 +18107,13 @@ public:
 	/** Returns true if the OS is 64-bit, or false for a 32-bit OS.
 	*/
 	static bool isOperatingSystem64Bit();
+
+   #if JUCE_MAC || DOXYGEN
+	/** OSX ONLY - Returns the current OS version number.
+		E.g. if it's running on 10.4, this will be 4, 10.5 will return 5, etc.
+	*/
+	static int getOSXMinorVersionNumber();
+   #endif
 
 	/** Returns the current user's name, if available.
 		@see getFullUserName()
@@ -22409,6 +22163,70 @@ private:
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_DYNAMICLIBRARY_JUCEHEADER__
+
+/*** Start of inlined file: juce_DynamicLibrary.h ***/
+#ifndef __JUCE_DYNAMICLIBRARY_JUCEHEADER__
+#define __JUCE_DYNAMICLIBRARY_JUCEHEADER__
+
+/**
+	Handles the opening and closing of DLLs.
+
+	This class can be used to open a DLL and get some function pointers from it.
+	Since the DLL is freed when this object is deleted, it's handy for managing
+	library lifetimes using RAII.
+*/
+class DynamicLibrary
+{
+public:
+	/** Creates an unopened DynamicLibrary object.
+		Call open() to actually open one.
+	*/
+	DynamicLibrary() noexcept : handle (nullptr) {}
+
+	/**
+	*/
+	DynamicLibrary (const String& name) : handle (nullptr) { open (name); }
+
+	/** Destructor.
+		If a library is currently open, it will be closed when this object is destroyed.
+	*/
+	~DynamicLibrary()   { close(); }
+
+	/** Opens a DLL.
+		The name and the method by which it gets found is of course platform-specific, and
+		may or may not include a path, depending on the OS.
+		If a library is already open when this method is called, it will first close the library
+		before attempting to load the new one.
+		@returns true if the library was successfully found and opened.
+	*/
+	bool open (const String& name);
+
+	/** Releases the currently-open DLL, or has no effect if none was open. */
+	void close() noexcept;
+
+	/** Tries to find a named function in the currently-open DLL, and returns a pointer to it.
+		If no library is open, or if the function isn't found, this will return a null pointer.
+	*/
+	void* getFunction (const String& functionName) noexcept;
+
+	/** Returns the platform-specific native library handle.
+		You'll need to cast this to whatever is appropriate for the OS that's in use.
+	*/
+	void* getNativeHandle() const noexcept	 { return handle; }
+
+private:
+	void* handle;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DynamicLibrary);
+};
+
+#endif   // __JUCE_DYNAMICLIBRARY_JUCEHEADER__
+
+/*** End of inlined file: juce_DynamicLibrary.h ***/
+
+
+#endif
 #ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
 
 /*** Start of inlined file: juce_InterProcessLock.h ***/
@@ -22581,9 +22399,49 @@ public:
 	*/
 	static bool JUCE_CALLTYPE isRunningUnderDebugger();
 
+	/** Tries to launch the OS's default reader application for a given file or URL. */
+	static bool openDocument (const String& documentURL, const String& parameters);
+
+	/** Tries to launch the OS's default email application to let the user create a message. */
+	static bool openEmailWithAttachments (const String& targetEmailAddress,
+										  const String& emailSubject,
+										  const String& bodyText,
+										  const StringArray& filesToAttach);
+
+   #if JUCE_WINDOWS || DOXYGEN
+
+	/** WINDOWS ONLY - This returns the HINSTANCE of the current module.
+
+		The return type is a void* to avoid being dependent on windows.h - just cast
+		it to a HINSTANCE to use it.
+
+		In a normal JUCE application, this will be automatically set to the module
+		handle of the executable.
+
+		If you've built a DLL and plan to use any JUCE messaging or windowing classes,
+		you'll need to make sure you call the setCurrentModuleInstanceHandle()
+		to provide the correct module handle in your DllMain() function, because
+		the system relies on the correct instance handle when opening windows.
+	*/
+	static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() noexcept;
+
+	/** WINDOWS ONLY - Sets a new module handle to be used by the library.
+
+		The parameter type is a void* to avoid being dependent on windows.h, but it actually
+		expects a HINSTANCE value.
+
+		@see getCurrentModuleInstanceHandle()
+	*/
+	static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) noexcept;
+
+	/** WINDOWS ONLY - Gets the command-line params as a string.
+		This is needed to avoid unicode problems with the argc type params.
+	*/
+	static String JUCE_CALLTYPE getCurrentCommandLineParams();
+   #endif
+
 private:
 	Process();
-
 	JUCE_DECLARE_NON_COPYABLE (Process);
 };
 
@@ -47972,6 +47830,98 @@ private:
 #ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_APPLEREMOTE_JUCEHEADER__
+
+/*** Start of inlined file: juce_AppleRemote.h ***/
+#ifndef __JUCE_APPLEREMOTE_JUCEHEADER__
+#define __JUCE_APPLEREMOTE_JUCEHEADER__
+
+#if JUCE_MAC || DOXYGEN
+/**
+	Receives events from an Apple IR remote control device (Only available in OSX!).
+
+	To use it, just create a subclass of this class, implementing the buttonPressed()
+	callback, then call start() and stop() to start or stop receiving events.
+*/
+class JUCE_API  AppleRemoteDevice
+{
+public:
+
+	AppleRemoteDevice();
+	virtual ~AppleRemoteDevice();
+
+	/** The set of buttons that may be pressed.
+		@see buttonPressed
+	*/
+	enum ButtonType
+	{
+		menuButton = 0,	 /**< The menu button (if it's held for a short time). */
+		playButton,	 /**< The play button. */
+		plusButton,	 /**< The plus or volume-up button. */
+		minusButton,	/**< The minus or volume-down button. */
+		rightButton,	/**< The right button (if it's held for a short time). */
+		leftButton,	 /**< The left button (if it's held for a short time). */
+		rightButton_Long,   /**< The right button (if it's held for a long time). */
+		leftButton_Long,	/**< The menu button (if it's held for a long time). */
+		menuButton_Long,	/**< The menu button (if it's held for a long time). */
+		playButtonSleepMode,
+		switched
+	};
+
+	/** Override this method to receive the callback about a button press.
+
+		The callback will happen on the application's message thread.
+
+		Some buttons trigger matching up and down events, in which the isDown parameter
+		will be true and then false. Others only send a single event when the
+		button is pressed.
+	*/
+	virtual void buttonPressed (ButtonType buttonId, bool isDown) = 0;
+
+	/** Starts the device running and responding to events.
+
+		Returns true if it managed to open the device.
+
+		@param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
+								and will not be available to any other part of the system. If
+								false, it will be shared with other apps.
+		@see stop
+	*/
+	bool start (bool inExclusiveMode);
+
+	/** Stops the device running.
+		@see start
+	*/
+	void stop();
+
+	/** Returns true if the device has been started successfully.
+	*/
+	bool isActive() const;
+
+	/** Returns the ID number of the remote, if it has sent one.
+	*/
+	int getRemoteId() const			 { return remoteId; }
+
+	/** @internal */
+	void handleCallbackInternal();
+
+private:
+	void* device;
+	void* queue;
+	int remoteId;
+
+	bool open (bool openInExclusiveMode);
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppleRemoteDevice);
+};
+
+#endif
+#endif   // __JUCE_APPLEREMOTE_JUCEHEADER__
+
+/*** End of inlined file: juce_AppleRemote.h ***/
+
+
+#endif
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
 
 #endif
@@ -62029,7 +61979,7 @@ public:
 
 	virtual void drawKeymapChangeButton (Graphics& g, int width, int height, Button& button, const String& keyDescription);
 
-	/**
+	/** Plays the system's default 'beep' noise, to alert the user about something very important.
 	*/
 	virtual void playAlertSound();
 
@@ -65658,6 +65608,38 @@ private:
 #endif   // __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
 
 /*** End of inlined file: juce_QuickTimeMovieComponent.h ***/
+
+
+#endif
+#ifndef __JUCE_SCOPEDXLOCK_JUCEHEADER__
+
+/*** Start of inlined file: juce_ScopedXLock.h ***/
+#ifndef __JUCE_SCOPEDXLOCK_JUCEHEADER__
+#define __JUCE_SCOPEDXLOCK_JUCEHEADER__
+
+#if JUCE_LINUX || DOXYGEN
+
+/** A handy class that uses XLockDisplay and XUnlockDisplay to lock the X server
+	using RAII (Only available in Linux!).
+*/
+class ScopedXLock
+{
+public:
+	/** Creating a ScopedXLock object locks the X display.
+		This uses XLockDisplay() to grab the display that Juce is using.
+	*/
+	ScopedXLock();
+
+	/** Deleting a ScopedXLock object unlocks the X display.
+		This calls XUnlockDisplay() to release the lock.
+	*/
+	~ScopedXLock();
+};
+
+#endif
+#endif   // __JUCE_SCOPEDXLOCK_JUCEHEADER__
+
+/*** End of inlined file: juce_ScopedXLock.h ***/
 
 
 #endif
@@ -69668,6 +69650,76 @@ private:
 #endif   // __JUCE_UNITTEST_JUCEHEADER__
 
 /*** End of inlined file: juce_UnitTest.h ***/
+
+
+#endif
+#ifndef __JUCE_WINDOWSREGISTRY_JUCEHEADER__
+
+/*** Start of inlined file: juce_WindowsRegistry.h ***/
+#ifndef __JUCE_WINDOWSREGISTRY_JUCEHEADER__
+#define __JUCE_WINDOWSREGISTRY_JUCEHEADER__
+
+#if JUCE_WINDOWS || DOXYGEN
+
+/**
+	Contains some static helper functions for manipulating the MS Windows registry
+	(Only available on Windows, of course!)
+*/
+class WindowsRegistry
+{
+
+	/** Returns a string from the registry.
+
+		The path is a string for the entire path of a value in the registry,
+		e.g. "HKEY_CURRENT_USER\Software\foo\bar"
+	*/
+	static String getValue (const String& regValuePath,
+							const String& defaultValue = String::empty);
+
+	/** Sets a registry value as a string.
+
+		This will take care of creating any groups needed to get to the given
+		registry value.
+	*/
+	static void setValue (const String& regValuePath,
+						  const String& value);
+
+	/** Returns true if the given value exists in the registry. */
+	static bool valueExists (const String& regValuePath);
+
+	/** Deletes a registry value. */
+	static void deleteValue (const String& regValuePath);
+
+	/** Deletes a registry key (which is registry-talk for 'folder'). */
+	static void deleteKey (const String& regKeyPath);
+
+	/** Creates a file association in the registry.
+
+		This lets you set the executable that should be launched by a given file extension.
+		@param fileExtension	the file extension to associate, including the
+									initial dot, e.g. ".txt"
+		@param symbolicDescription  a space-free short token to identify the file type
+		@param fullDescription	  a human-readable description of the file type
+		@param targetExecutable	 the executable that should be launched
+		@param iconResourceNumber   the icon that gets displayed for the file type will be
+									found by looking up this resource number in the
+									executable. Pass 0 here to not use an icon
+	*/
+	static void registerFileAssociation (const String& fileExtension,
+										 const String& symbolicDescription,
+										 const String& fullDescription,
+										 const File& targetExecutable,
+										 int iconResourceNumber);
+
+private:
+	WindowsRegistry();
+	JUCE_DECLARE_NON_COPYABLE (WindowsRegistry);
+};
+
+#endif
+#endif   // __JUCE_WINDOWSREGISTRY_JUCEHEADER__
+
+/*** End of inlined file: juce_WindowsRegistry.h ***/
 
 
 #endif

@@ -55,10 +55,10 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 }
 
 //==============================================================================
-bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAddress,
-                                                    const String& emailSubject,
-                                                    const String& bodyText,
-                                                    const StringArray& filesToAttach)
+bool Process::openEmailWithAttachments (const String& targetEmailAddress,
+                                        const String& emailSubject,
+                                        const String& bodyText,
+                                        const StringArray& filesToAttach)
 {
   #if JUCE_IOS
     //xxx probably need to use MFMailComposeViewController

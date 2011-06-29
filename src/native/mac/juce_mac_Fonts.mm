@@ -51,7 +51,7 @@ public:
           unitsToHeightScaleFactor (0.0f)
     {
         JUCE_AUTORELEASEPOOL
-        CFStringRef cfName = PlatformUtilities::juceStringToCFString (font.getTypefaceName());
+        CFStringRef cfName = font.getTypefaceName().toCFString();
         ctFontRef = CTFontCreateWithName (cfName, 1024, nullptr);
         CFRelease (cfName);
 
@@ -137,7 +137,7 @@ public:
 
         if (ctFontRef != nullptr && text.isNotEmpty())
         {
-            CFStringRef cfText = PlatformUtilities::juceStringToCFString (text);
+            CFStringRef cfText = text.toCFString();
             CFAttributedStringRef attribString = CFAttributedStringCreate (kCFAllocatorDefault, cfText, attributedStringAtts);
             CFRelease (cfText);
 
@@ -172,7 +172,7 @@ public:
         {
             float x = 0;
 
-            CFStringRef cfText = PlatformUtilities::juceStringToCFString (text);
+            CFStringRef cfText = text.toCFString();
             CFAttributedStringRef attribString = CFAttributedStringCreate (kCFAllocatorDefault, cfText, attributedStringAtts);
             CFRelease (cfText);
 

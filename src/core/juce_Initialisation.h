@@ -35,7 +35,7 @@
     Juce calls, to make sure things are initialised correctly.
 
     Note that if you're creating a Juce DLL for Windows, you may also need to call the
-    PlatformUtilities::setCurrentModuleInstanceHandle() method.
+    Process::setCurrentModuleInstanceHandle() method.
 
     @see shutdownJuce_GUI()
 */
@@ -107,7 +107,7 @@ public:
         int main (int, char* argv[]) \
         { \
             JUCE_NAMESPACE::JUCEApplication::createInstance = &juce_CreateApplication; \
-            return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
+            return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::Process::getCurrentCommandLineParams()); \
         }
   #elif ! defined (_AFXDLL)
     #ifdef _WINDOWS_
@@ -116,7 +116,7 @@ public:
           int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
           { \
               JUCE_NAMESPACE::JUCEApplication::createInstance = &juce_CreateApplication; \
-              return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
+              return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::Process::getCurrentCommandLineParams()); \
           }
     #else
       #define START_JUCE_APPLICATION(AppClass) \
@@ -124,7 +124,7 @@ public:
           int __stdcall WinMain (int, int, const char*, int) \
           { \
               JUCE_NAMESPACE::JUCEApplication::createInstance = &juce_CreateApplication; \
-              return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
+              return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::Process::getCurrentCommandLineParams()); \
           }
     #endif
   #endif

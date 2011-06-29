@@ -55,7 +55,7 @@ JUCE_JNI_CALLBACK (JuceAppActivity, quitApp, void, (JNIEnv* env, jobject activit
 }
 
 //==============================================================================
-void PlatformUtilities::beep()
+void LookAndFeel::playAlertSound()
 {
 }
 

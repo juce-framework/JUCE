@@ -801,7 +801,7 @@ extern "C" BOOL WINAPI DllMain (HANDLE instance, DWORD reason, LPVOID)
     {
     case DLL_PROCESS_ATTACH:
         log ("DLL_PROCESS_ATTACH");
-        PlatformUtilities::setCurrentModuleInstanceHandle (instance);
+        Process::setCurrentModuleInstanceHandle (instance);
         break;
 
     case DLL_PROCESS_DETACH:
@@ -905,26 +905,26 @@ static HRESULT doRegistration (const bool unregister)
     if (unregister)
     {
         for (int i = 0; i < settings.getAllKeys().size(); ++i)
-            PlatformUtilities::deleteRegistryValue (settings.getAllKeys()[i]);
+            WindowsRegistry::deleteValue (settings.getAllKeys()[i]);
 
-        PlatformUtilities::deleteRegistryKey (root + companyDotPluginCur);
-        PlatformUtilities::deleteRegistryKey (root + companyDotPlugin);
-        PlatformUtilities::deleteRegistryKey (clsIDRoot);
+        WindowsRegistry::deleteKey (root + companyDotPluginCur);
+        WindowsRegistry::deleteKey (root + companyDotPlugin);
+        WindowsRegistry::deleteKey (clsIDRoot);
 
-        if (PlatformUtilities::registryValueExists (clsIDRoot + "InProcServer32"))
+        if (WindowsRegistry::valueExists (clsIDRoot + "InProcServer32"))
             return SELFREG_E_CLASS;
     }
     else
     {
-        PlatformUtilities::deleteRegistryKey (clsIDRoot);
+        WindowsRegistry::deleteKey (clsIDRoot);
 
         for (int i = 0; i < settings.getAllKeys().size(); ++i)
-            PlatformUtilities::setRegistryValue (settings.getAllKeys()[i],
-                                                 settings [settings.getAllKeys()[i]]);
+            WindowsRegistry::setValue (settings.getAllKeys()[i],
+                                       settings [settings.getAllKeys()[i]]);
 
         // check whether the registration actually worked - if not, we probably don't have
         // enough privileges to write to the registry..
-        if (PlatformUtilities::getRegistryValue (clsIDRoot + "InProcServer32\\") != dllPath)
+        if (WindowsRegistry::getValue (clsIDRoot + "InProcServer32\\") != dllPath)
             return SELFREG_E_CLASS;
     }
 

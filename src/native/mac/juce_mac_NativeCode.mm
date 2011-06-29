@@ -49,6 +49,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../threads/juce_Process.h"
 #include "../../threads/juce_Thread.h"
 #include "../../threads/juce_InterProcessLock.h"
+#include "../../threads/juce_DynamicLibrary.h"
 #include "../../io/files/juce_FileInputStream.h"
 #include "../../io/files/juce_FileOutputStream.h"
 #include "../../io/files/juce_NamedPipe.h"
@@ -58,7 +59,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../io/network/juce_MACAddress.h"
 #include "../../io/streams/juce_MemoryInputStream.h"
 #include "../../io/streams/juce_BufferedInputStream.h"
-#include "../../core/juce_PlatformUtilities.h"
 #include "../../core/juce_Initialisation.h"
 #include "../../text/juce_LocalisedStrings.h"
 #include "../../text/juce_XmlDocument.h"
@@ -86,6 +86,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../../gui/components/special/juce_WebBrowserComponent.h"
 #include "../../gui/components/filebrowser/juce_FileChooser.h"
+#include "../../gui/components/lookandfeel/juce_LookAndFeel.h"
 #include "../../audio/audio_file_formats/juce_AudioCDBurner.h"
 #include "../../audio/audio_file_formats/juce_AudioCDReader.h"
 #include "../../audio/audio_file_formats/juce_AiffAudioFormat.h"
@@ -95,97 +96,13 @@ BEGIN_JUCE_NAMESPACE
 #include "../../audio/midi/juce_MidiOutput.h"
 #include "../../audio/midi/juce_MidiInput.h"
 #include "../../containers/juce_ScopedValueSetter.h"
+#include "../../events/juce_AppleRemote.h"
 #include "../common/juce_MidiDataConcatenator.h"
 #undef Point
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-namespace
-{
-    template <class RectType>
-    const Rectangle<int> convertToRectInt (const RectType& r)
-    {
-        return Rectangle<int> ((int) r.origin.x, (int) r.origin.y, (int) r.size.width, (int) r.size.height);
-    }
-
-    template <class RectType>
-    const Rectangle<float> convertToRectFloat (const RectType& r)
-    {
-        return Rectangle<float> (r.origin.x, r.origin.y, r.size.width, r.size.height);
-    }
-
-    template <class RectType>
-    CGRect convertToCGRect (const RectType& r)
-    {
-        return CGRectMake ((CGFloat) r.getX(), (CGFloat) r.getY(), (CGFloat) r.getWidth(), (CGFloat) r.getHeight());
-    }
-}
-
-//==============================================================================
-class MessageQueue
-{
-public:
-    MessageQueue()
-    {
-       #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4 && ! JUCE_IOS
-        runLoop = CFRunLoopGetMain();
-       #else
-        runLoop = CFRunLoopGetCurrent();
-       #endif
-
-        CFRunLoopSourceContext sourceContext = { 0 };
-        sourceContext.info = this;
-        sourceContext.perform = runLoopSourceCallback;
-        runLoopSource = CFRunLoopSourceCreate (kCFAllocatorDefault, 1, &sourceContext);
-        CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
-    }
-
-    ~MessageQueue()
-    {
-        CFRunLoopRemoveSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
-        CFRunLoopSourceInvalidate (runLoopSource);
-        CFRelease (runLoopSource);
-    }
-
-    void post (Message* const message)
-    {
-        messages.add (message);
-        CFRunLoopSourceSignal (runLoopSource);
-        CFRunLoopWakeUp (runLoop);
-    }
-
-private:
-    ReferenceCountedArray <Message, CriticalSection> messages;
-    CriticalSection lock;
-    CFRunLoopRef runLoop;
-    CFRunLoopSourceRef runLoopSource;
-
-    bool deliverNextMessage()
-    {
-        const Message::Ptr nextMessage (messages.removeAndReturn (0));
-
-        if (nextMessage == nullptr)
-            return false;
-
-        JUCE_AUTORELEASEPOOL
-        MessageManager::getInstance()->deliverMessage (nextMessage);
-        return true;
-    }
-
-    void runLoopCallback()
-    {
-        for (int i = 4; --i >= 0;)
-            if (! deliverNextMessage())
-                return;
-
-        CFRunLoopSourceSignal (runLoopSource);
-        CFRunLoopWakeUp (runLoop);
-    }
-
-    static void runLoopSourceCallback (void* info)
-    {
-        static_cast <MessageQueue*> (info)->runLoopCallback();
-    }
-};
+ #include "juce_osx_ObjCHelpers.h"
+ #include "juce_osx_MessageQueue.h"
 #endif
 
 //==============================================================================

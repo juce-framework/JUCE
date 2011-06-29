@@ -49,6 +49,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../threads/juce_Process.h"
 #include "../../threads/juce_Thread.h"
 #include "../../threads/juce_InterProcessLock.h"
+#include "../../threads/juce_DynamicLibrary.h"
 #include "../../io/files/juce_FileInputStream.h"
 #include "../../io/files/juce_FileOutputStream.h"
 #include "../../io/streams/juce_MemoryOutputStream.h"
@@ -57,7 +58,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../io/files/juce_MemoryMappedFile.h"
 #include "../../io/network/juce_URL.h"
 #include "../../io/network/juce_MACAddress.h"
-#include "../../core/juce_PlatformUtilities.h"
 #include "../../text/juce_LocalisedStrings.h"
 #include "../../utilities/juce_DeletedAtShutdown.h"
 #include "../../application/juce_Application.h"
@@ -93,6 +93,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../audio/midi/juce_MidiOutput.h"
 #include "../../audio/midi/juce_MidiInput.h"
 #include "../../containers/juce_ScopedValueSetter.h"
+#include "../../utilities/juce_WindowsRegistry.h"
 #include "../common/juce_MidiDataConcatenator.h"
 
 //==============================================================================
@@ -104,7 +105,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_win32_Threads.cpp"
 #include "juce_win32_Files.cpp"
 #include "juce_win32_Network.cpp"
-#include "juce_win32_PlatformUtils.cpp"
+#include "juce_win32_Registry.cpp"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
  #include "juce_win32_Messaging.cpp"

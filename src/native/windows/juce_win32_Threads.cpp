@@ -312,32 +312,31 @@ void Process::terminate()
 }
 
 //==============================================================================
-void* PlatformUtilities::loadDynamicLibrary (const String& name)
-{
-    void* result = nullptr;
-
-    JUCE_TRY
-    {
-        result = LoadLibrary (name.toWideCharPointer());
-    }
-    JUCE_CATCH_ALL
-
-    return result;
-}
-
-void PlatformUtilities::freeDynamicLibrary (void* h)
+bool DynamicLibrary::open (const String& name)
 {
     JUCE_TRY
     {
-        if (h != nullptr)
-            FreeLibrary ((HMODULE) h);
+        handle = LoadLibrary (name.toWideCharPointer());
+    }
+    JUCE_CATCH_ALL
+
+    return handle != nullptr;
+}
+
+void DynamicLibrary::close() noexcept
+{
+    JUCE_TRY
+    {
+        if (handle != nullptr)
+            FreeLibrary ((HMODULE) handle);
     }
     JUCE_CATCH_ALL
 }
 
-void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
+void* DynamicLibrary::getFunction (const String& functionName) noexcept
 {
-    return (h != nullptr) ? (void*) GetProcAddress ((HMODULE) h, name.toUTF8()) : nullptr; // (void* cast is required for mingw)
+    return handle != nullptr ? (void*) GetProcAddress ((HMODULE) handle, functionName.toUTF8()) // (void* cast is required for mingw)
+                             : nullptr;
 }
 
 

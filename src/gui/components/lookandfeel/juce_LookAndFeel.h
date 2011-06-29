@@ -616,7 +616,7 @@ public:
     virtual void drawKeymapChangeButton (Graphics& g, int width, int height, Button& button, const String& keyDescription);
 
     //==============================================================================
-    /**
+    /** Plays the system's default 'beep' noise, to alert the user about something very important.
     */
     virtual void playAlertSound();
 

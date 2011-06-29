@@ -304,7 +304,7 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
-bool PlatformUtilities::openDocument (const String& fileName, const String& parameters)
+bool Process::openDocument (const String& fileName, const String& parameters)
 {
     String cmdString (fileName.replace (" ", "\\ ",false));
     cmdString << " " << parameters;

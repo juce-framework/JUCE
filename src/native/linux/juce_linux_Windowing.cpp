@@ -3334,7 +3334,7 @@ void SystemTrayIconComponent::setIconTooltip (const String& tooltip)
 
 
 //==============================================================================
-void PlatformUtilities::beep()
+void LookAndFeel::playAlertSound()
 {
     std::cout << "\a" << std::flush;
 }

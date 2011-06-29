@@ -1011,6 +1011,21 @@ Image juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
+void SystemClipboard::copyTextToClipboard (const String& text)
+{
+    [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
+                             forPasteboardType: @"public.text"];
+}
+
+String SystemClipboard::getTextFromClipboard()
+{
+    NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"];
+
+    return text == nil ? String::empty
+                       : nsStringToJuce (text);
+}
+
+//==============================================================================
 void Desktop::createMouseInputSources()
 {
     for (int i = 0; i < 10; ++i)

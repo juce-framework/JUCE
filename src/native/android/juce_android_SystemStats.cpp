@@ -126,8 +126,6 @@ SystemStats::CPUFlags::CPUFlags()
     numCpus = jmax (1, sysconf (_SC_NPROCESSORS_ONLN));
 }
 
-void PlatformUtilities::fpuReset() {}
-
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() noexcept
 {

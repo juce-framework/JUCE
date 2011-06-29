@@ -28,20 +28,7 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-namespace
-{
-    String nsStringToJuce (NSString* s)
-    {
-        return CharPointer_UTF8 ([s UTF8String]);
-    }
-
-    NSString* juceStringToNS (const String& s)
-    {
-        return [NSString stringWithUTF8String: s.toUTF8()];
-    }
-}
-
-String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)
+String String::fromCFString (CFStringRef cfString)
 {
     if (cfString == 0)
         return String::empty;
@@ -54,19 +41,18 @@ String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)
     return String (CharPointer_UTF16 ((const CharPointer_UTF16::CharType*) u.getData()));
 }
 
-CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
+CFStringRef String::toCFString() const
 {
-    CharPointer_UTF16 utf16 (s.toUTF16());
-
+    CharPointer_UTF16 utf16 (toUTF16());
     return CFStringCreateWithCharacters (kCFAllocatorDefault, (const UniChar*) utf16.getAddress(), utf16.length());
 }
 
-String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
+String String::convertToPrecomposedUnicode() const
 {
-#if JUCE_IOS
+   #if JUCE_IOS
     JUCE_AUTORELEASEPOOL
-    return nsStringToJuce ([juceStringToNS (s) precomposedStringWithCanonicalMapping]);
-#else
+    return nsStringToJuce ([juceStringToNS (*this) precomposedStringWithCanonicalMapping]);
+   #else
     UnicodeMapping map;
 
     map.unicodeEncoding = CreateTextEncoding (kTextEncodingUnicodeDefault,
@@ -84,7 +70,7 @@ String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 
     if (CreateUnicodeToTextInfo (&map, &conversionInfo) == noErr)
     {
-        const int bytesNeeded = CharPointer_UTF16::getBytesRequiredFor (s.getCharPointer());
+        const int bytesNeeded = CharPointer_UTF16::getBytesRequiredFor (getCharPointer());
 
         HeapBlock <char> tempOut;
         tempOut.calloc (bytesNeeded + 4);
@@ -93,7 +79,7 @@ String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
         ByteCount outputBufferSize = 0;
 
         if (ConvertFromUnicodeToText (conversionInfo,
-                                      bytesNeeded, (ConstUniCharArrayPtr) s.toUTF16().getAddress(),
+                                      bytesNeeded, (ConstUniCharArrayPtr) toUTF16().getAddress(),
                                       kUnicodeDefaultDirectionMask,
                                       0, 0, 0, 0,
                                       bytesNeeded, &bytesRead,
@@ -106,38 +92,7 @@ String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
     }
 
     return result;
-#endif
-}
-
-//==============================================================================
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-
-void SystemClipboard::copyTextToClipboard (const String& text)
-{
-   #if JUCE_IOS
-    [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
-                             forPasteboardType: @"public.text"];
-   #else
-    [[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSStringPboardType]
-                                             owner: nil];
-
-    [[NSPasteboard generalPasteboard] setString: juceStringToNS (text)
-                                        forType: NSStringPboardType];
    #endif
 }
-
-String SystemClipboard::getTextFromClipboard()
-{
-   #if JUCE_IOS
-    NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"];
-   #else
-    NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
-   #endif
-
-    return text == nil ? String::empty
-                       : nsStringToJuce (text);
-}
-
-#endif
 
 #endif

@@ -111,23 +111,22 @@ void Process::lowerPrivilege()
     }
 }
 
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-
-void* PlatformUtilities::loadDynamicLibrary (const String& name)
+bool DynamicLibrary::open (const String& name)
 {
-    return dlopen (name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
+    close();
+    handle = dlopen (name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
+    return handle != 0;
 }
 
-void PlatformUtilities::freeDynamicLibrary (void* handle)
+void DynamicLibrary::close() noexcept
 {
-    dlclose(handle);
+    if (handle != nullptr)
+        dlclose (handle);
 }
 
-void* PlatformUtilities::getProcedureEntryPoint (void* libraryHandle, const String& procedureName)
+void* DynamicLibrary::getFunction (const String& functionName) noexcept
 {
-    return dlsym (libraryHandle, procedureName.toUTF8());
+    return handle != nullptr ? dlsym (handle, functionName.toUTF8()) : nullptr;
 }
-
-#endif
 
 #endif

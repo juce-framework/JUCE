@@ -55,7 +55,7 @@ namespace CoreMidiHelpers
 
         if (str != 0)
         {
-            result = PlatformUtilities::cfStringToJuceString (str);
+            result = String::fromCFString (str);
             CFRelease (str);
             str = 0;
         }
@@ -73,7 +73,7 @@ namespace CoreMidiHelpers
 
             if (str != 0)
             {
-                result += PlatformUtilities::cfStringToJuceString (str);
+                result += String::fromCFString (str);
                 CFRelease (str);
                 str = 0;
             }
@@ -89,7 +89,7 @@ namespace CoreMidiHelpers
 
         if (str != 0)
         {
-            const String s (PlatformUtilities::cfStringToJuceString (str));
+            const String s (String::fromCFString (str));
             CFRelease (str);
 
             // if an external device has only one entity, throw away
@@ -151,7 +151,7 @@ namespace CoreMidiHelpers
 
                             if (str != 0)
                             {
-                                s = PlatformUtilities::cfStringToJuceString (str);
+                                s = String::fromCFString (str);
                                 CFRelease (str);
                             }
                         }
@@ -188,7 +188,7 @@ namespace CoreMidiHelpers
             if (JUCEApplication::getInstance() != nullptr)
                 name = JUCEApplication::getInstance()->getApplicationName();
 
-            CFStringRef appName = PlatformUtilities::juceStringToCFString (name);
+            CFStringRef appName = name.toCFString();
             CHECK_ERROR (MIDIClientCreate (appName, 0, 0, &globalMidiClient));
             CFRelease (appName);
         }
@@ -352,7 +352,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
     MIDIClientRef client = CoreMidiHelpers::getGlobalMidiClient();
 
     MIDIEndpointRef endPoint;
-    CFStringRef name = PlatformUtilities::juceStringToCFString (deviceName);
+    CFStringRef name = deviceName.toCFString();
 
     if (client != 0 && CHECK_ERROR (MIDISourceCreate (client, name, &endPoint)))
     {
@@ -507,7 +507,8 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
         mpc->active = false;
 
         MIDIEndpointRef endPoint;
-        CFStringRef name = PlatformUtilities::juceStringToCFString(deviceName);
+        CFStringRef name = deviceName.toCFString();
+
         if (CHECK_ERROR (MIDIDestinationCreate (client, name, midiInputProc, mpc, &endPoint)))
         {
             mpc->portAndEndpoint = new MidiPortAndEndpoint (0, endPoint);

@@ -229,7 +229,7 @@ namespace
     {
         if (mouseHookUsers++ == 0)
             mouseWheelHook = SetWindowsHookEx (WH_MOUSE, mouseWheelHookCallback,
-                                               (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(),
+                                               (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
                                                GetCurrentThreadId());
     }
 
@@ -1519,7 +1519,7 @@ namespace
    #endif
     {
         if (dwReason == DLL_PROCESS_ATTACH)
-            PlatformUtilities::setCurrentModuleInstanceHandle (instance);
+            Process::setCurrentModuleInstanceHandle (instance);
 
         return TRUE;
     }

@@ -329,7 +329,7 @@ OBJECTS := \
   $(OBJDIR)/juce_win32_NativeCode_c247c7f6.o \
   $(OBJDIR)/juce_win32_Network_6c84a66.o \
   $(OBJDIR)/juce_win32_OpenGLComponent_d0d99a46.o \
-  $(OBJDIR)/juce_win32_PlatformUtils_73e7e1f6.o \
+  $(OBJDIR)/juce_win32_Registry_86da784f.o \
   $(OBJDIR)/juce_win32_QuickTimeMovieComponent_be08e5f.o \
   $(OBJDIR)/juce_win32_SystemStats_6446cd68.o \
   $(OBJDIR)/juce_win32_Threads_ee986e61.o \
@@ -1838,9 +1838,9 @@ $(OBJDIR)/juce_win32_OpenGLComponent_d0d99a46.o: ../../src/native/windows/juce_w
 	@echo "Compiling juce_win32_OpenGLComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_win32_PlatformUtils_73e7e1f6.o: ../../src/native/windows/juce_win32_PlatformUtils.cpp
+$(OBJDIR)/juce_win32_Registry_86da784f.o: ../../src/native/windows/juce_win32_Registry.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_win32_PlatformUtils.cpp"
+	@echo "Compiling juce_win32_Registry.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_QuickTimeMovieComponent_be08e5f.o: ../../src/native/windows/juce_win32_QuickTimeMovieComponent.cpp

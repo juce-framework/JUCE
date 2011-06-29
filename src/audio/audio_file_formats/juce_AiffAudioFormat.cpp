@@ -30,7 +30,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_AiffAudioFormat.h"
 #include "../../io/streams/juce_BufferedInputStream.h"
 #include "../../io/streams/juce_MemoryOutputStream.h"
-#include "../../core/juce_PlatformUtilities.h"
 #include "../../text/juce_LocalisedStrings.h"
 
 
@@ -700,7 +699,7 @@ bool AiffAudioFormat::canHandleFile (const File& f)
     if (AudioFormat::canHandleFile (f))
         return true;
 
-    const OSType type = PlatformUtilities::getTypeOfFile (f.getFullPathName());
+    const OSType type = f.getMacOSType();
     return type == 'AIFF' || type == 'AIFC'
         || type == 'aiff' || type == 'aifc';
 }

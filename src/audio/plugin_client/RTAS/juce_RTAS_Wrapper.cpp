@@ -941,7 +941,7 @@ private:
     static CEffectProcess* createNewProcess()
     {
        #if JUCE_WINDOWS
-        PlatformUtilities::setCurrentModuleInstanceHandle (gThisModule);
+        Process::setCurrentModuleInstanceHandle (gThisModule);
        #endif
 
         initialiseJuce_GUI();

@@ -245,7 +245,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
     }
 
     if (resultPath.isNotEmpty())
-        return File (PlatformUtilities::convertToPrecomposedUnicode (resultPath));
+        return File (resultPath.convertToPrecomposedUnicode());
 
     return File::nonexistent;
 }
@@ -389,7 +389,7 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
-bool PlatformUtilities::openDocument (const String& fileName, const String& parameters)
+bool Process::openDocument (const String& fileName, const String& parameters)
 {
   #if JUCE_IOS
     return [[UIApplication sharedApplication] openURL: [NSURL fileURLWithPath: juceStringToNS (fileName)]];
@@ -403,8 +403,9 @@ bool PlatformUtilities::openDocument (const String& fileName, const String& para
     }
 
     bool ok = false;
+    const File file (fileName);
 
-    if (PlatformUtilities::isBundle (fileName))
+    if (file.isBundle())
     {
         NSMutableArray* urls = [NSMutableArray array];
 
@@ -419,7 +420,7 @@ bool PlatformUtilities::openDocument (const String& fileName, const String& para
                       additionalEventParamDescriptor: nil
                                    launchIdentifiers: nil];
     }
-    else if (File (fileName).exists())
+    else if (file.exists())
     {
         ok = FileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters);
     }
@@ -439,46 +440,42 @@ void File::revealToUser() const
 }
 
 //==============================================================================
-#if ! JUCE_IOS
-bool PlatformUtilities::makeFSRefFromPath (FSRef* destFSRef, const String& path)
-{
-    return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toUTF8().getAddress()), destFSRef, 0) == noErr;
-}
-
-String PlatformUtilities::makePathFromFSRef (FSRef* file)
-{
-    char path [2048] = { 0 };
-
-    if (FSRefMakePath (file, (UInt8*) path, sizeof (path) - 1) == noErr)
-        return PlatformUtilities::convertToPrecomposedUnicode (CharPointer_UTF8 (path));
-
-    return String::empty;
-}
-#endif
-
-//==============================================================================
-OSType PlatformUtilities::getTypeOfFile (const String& filename)
+OSType File::getMacOSType() const
 {
     JUCE_AUTORELEASEPOOL
 
    #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5)
-    NSDictionary* fileDict = [[NSFileManager defaultManager] attributesOfItemAtPath: juceStringToNS (filename) error: nil];
+    NSDictionary* fileDict = [[NSFileManager defaultManager] attributesOfItemAtPath: juceStringToNS (getFullPathName()) error: nil];
    #else
     // (the cast here avoids a deprecation warning)
-    NSDictionary* fileDict = [((id) [NSFileManager defaultManager]) fileAttributesAtPath: juceStringToNS (filename) traverseLink: NO];
+    NSDictionary* fileDict = [((id) [NSFileManager defaultManager]) fileAttributesAtPath: juceStringToNS (getFullPathName()) traverseLink: NO];
    #endif
 
     return [fileDict fileHFSTypeCode];
 }
 
-bool PlatformUtilities::isBundle (const String& filename)
+bool File::isBundle() const
 {
    #if JUCE_IOS
     return false; // xxx can't find a sensible way to do this without trying to open the bundle..
    #else
     JUCE_AUTORELEASEPOOL
-    return [[NSWorkspace sharedWorkspace] isFilePackageAtPath: juceStringToNS (filename)];
+    return [[NSWorkspace sharedWorkspace] isFilePackageAtPath: juceStringToNS (getFullPathName())];
    #endif
 }
+
+#if ! JUCE_IOS
+void File::addToDock() const
+{
+    // check that it's not already there...
+    if (! juce_getOutputFromCommand ("defaults read com.apple.dock persistent-apps").containsIgnoreCase (getFullPathName()))
+    {
+        juce_runSystemCommand ("defaults write com.apple.dock persistent-apps -array-add \"<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>"
+                                 + getFullPathName() + "</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>\"");
+
+        juce_runSystemCommand ("osascript -e \"tell application \\\"Dock\\\" to quit\"");
+    }
+}
+#endif
 
 #endif

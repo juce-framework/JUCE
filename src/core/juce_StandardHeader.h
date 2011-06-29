@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      54
-#define JUCE_BUILDNUMBER        6
+#define JUCE_BUILDNUMBER        7
 
 /** Current Juce version number.
 
@@ -186,6 +186,29 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 #include "../memory/juce_LeakedObjectDetector.h"
 
 #undef TYPE_BOOL  // (stupidly-named CoreServices definition which interferes with other libraries).
+
+//==============================================================================
+#if JUCE_MAC || JUCE_IOS || DOXYGEN
+
+ /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII. */
+ class JUCE_API  ScopedAutoReleasePool
+ {
+ public:
+     ScopedAutoReleasePool();
+     ~ScopedAutoReleasePool();
+
+ private:
+     void* pool;
+
+     JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
+ };
+
+ /** A macro that can be used to easily declare a local ScopedAutoReleasePool object for RAII-based obj-C autoreleasing. */
+ #define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
+
+#else
+ #define JUCE_AUTORELEASEPOOL
+#endif
 
 END_JUCE_NAMESPACE
 

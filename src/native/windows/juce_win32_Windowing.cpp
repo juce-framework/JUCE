@@ -1030,7 +1030,7 @@ private:
             String windowClassName ("JUCE_");
             windowClassName << (int) (Time::currentTimeMillis() & 0x7fffffff);
 
-            HINSTANCE moduleHandle = (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle();
+            HINSTANCE moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
 
             TCHAR moduleFile [1024] = { 0 };
             GetModuleFileName (moduleHandle, moduleFile, 1024);
@@ -1054,7 +1054,7 @@ private:
         ~WindowClassHolder()
         {
             if (ComponentPeer::getNumPeers() == 0)
-                UnregisterClass (getWindowClassName(), (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
+                UnregisterClass (getWindowClassName(), (HINSTANCE) Process::getCurrentModuleInstanceHandle());
 
             clearSingletonInstance();
         }
@@ -1126,7 +1126,7 @@ private:
 
         hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->getWindowClassName(),
                                L"", type, 0, 0, 0, 0, parentToAddTo, 0,
-                               (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
+                               (HINSTANCE) Process::getCurrentModuleInstanceHandle(), 0);
 
        #if JUCE_DIRECT2D
         setCurrentRenderingEngine (1);
@@ -2884,6 +2884,12 @@ bool Desktop::isScreenSaverEnabled() noexcept
 */
 
 //==============================================================================
+void LookAndFeel::playAlertSound()
+{
+    MessageBeep (MB_OK);
+}
+
+//==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
     if (enableOrDisable)
@@ -2937,7 +2943,7 @@ Image juce_createIconForFile (const File& file)
     Image image;
     WORD iconNum = 0;
 
-    HICON icon = ExtractAssociatedIcon ((HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(),
+    HICON icon = ExtractAssociatedIcon ((HINSTANCE) Process::getCurrentModuleInstanceHandle(),
                                         const_cast <WCHAR*> (file.getFullPathName().toWideCharPointer()), &iconNum);
 
     if (icon != 0)

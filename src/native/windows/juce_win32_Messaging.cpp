@@ -37,7 +37,7 @@ public:
         String className ("JUCE_");
         className << String::toHexString (Time::getHighResolutionTicks());
 
-        HMODULE moduleHandle = (HMODULE) PlatformUtilities::getCurrentModuleInstanceHandle();
+        HMODULE moduleHandle = (HMODULE) Process::getCurrentModuleInstanceHandle();
 
         WNDCLASSEX wc = { 0 };
         wc.cbSize         = sizeof (wc);

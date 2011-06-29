@@ -412,7 +412,7 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_NativeCode.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Network.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_OpenGLComponent.cpp"/>
-    <ClCompile Include="..\..\src\native\windows\juce_win32_PlatformUtils.cpp"/>
+    <ClCompile Include="..\..\src\native\windows\juce_win32_Registry.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_QuickTimeMovieComponent.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_SystemStats.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Threads.cpp"/>
@@ -553,7 +553,6 @@
     <ClInclude Include="..\..\src\core\juce_Logger.h"/>
     <ClInclude Include="..\..\src\core\juce_PerformanceCounter.h"/>
     <ClInclude Include="..\..\src\core\juce_PlatformDefs.h"/>
-    <ClInclude Include="..\..\src\core\juce_PlatformUtilities.h"/>
     <ClInclude Include="..\..\src\core\juce_RelativeTime.h"/>
     <ClInclude Include="..\..\src\core\juce_Result.h"/>
     <ClInclude Include="..\..\src\core\juce_Singleton.h"/>
@@ -568,6 +567,7 @@
     <ClInclude Include="..\..\src\cryptography\juce_RSAKey.h"/>
     <ClInclude Include="..\..\src\events\juce_ActionBroadcaster.h"/>
     <ClInclude Include="..\..\src\events\juce_ActionListener.h"/>
+    <ClInclude Include="..\..\src\events\juce_AppleRemote.h"/>
     <ClInclude Include="..\..\src\events\juce_AsyncUpdater.h"/>
     <ClInclude Include="..\..\src\events\juce_CallbackMessage.h"/>
     <ClInclude Include="..\..\src\events\juce_ChangeBroadcaster.h"/>
@@ -691,6 +691,7 @@
     <ClInclude Include="..\..\src\gui\components\special\juce_OpenGLComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_PreferencesPanel.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_QuickTimeMovieComponent.h"/>
+    <ClInclude Include="..\..\src\gui\components\special\juce_ScopedXLock.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_SystemTrayIconComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\special\juce_WebBrowserComponent.h"/>
     <ClInclude Include="..\..\src\gui\components\windows\juce_AlertWindow.h"/>
@@ -788,6 +789,8 @@
     <ClInclude Include="..\..\src\native\mac\juce_mac_CarbonViewWrapperComponent.h"/>
     <ClInclude Include="..\..\src\native\mac\juce_mac_NativeIncludes.h"/>
     <ClInclude Include="..\..\src\native\mac\juce_mac_ObjCSuffix.h"/>
+    <ClInclude Include="..\..\src\native\mac\juce_osx_MessageQueue.h"/>
+    <ClInclude Include="..\..\src\native\mac\juce_osx_ObjCHelpers.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_AutoLinkLibraries.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_DynamicLibraryLoader.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_NativeIncludes.h"/>
@@ -808,6 +811,7 @@
     <ClInclude Include="..\..\src\text\juce_XmlDocument.h"/>
     <ClInclude Include="..\..\src\text\juce_XmlElement.h"/>
     <ClInclude Include="..\..\src\threads\juce_CriticalSection.h"/>
+    <ClInclude Include="..\..\src\threads\juce_DynamicLibrary.h"/>
     <ClInclude Include="..\..\src\threads\juce_InterProcessLock.h"/>
     <ClInclude Include="..\..\src\threads\juce_Process.h"/>
     <ClInclude Include="..\..\src\threads\juce_ReadWriteLock.h"/>
@@ -828,6 +832,7 @@
     <ClInclude Include="..\..\src\utilities\juce_UndoableAction.h"/>
     <ClInclude Include="..\..\src\utilities\juce_UndoManager.h"/>
     <ClInclude Include="..\..\src\utilities\juce_UnitTest.h"/>
+    <ClInclude Include="..\..\src\utilities\juce_WindowsRegistry.h"/>
     <ClInclude Include="..\..\juce.h"/>
     <ClInclude Include="..\..\juce_Config.h"/>
   </ItemGroup>

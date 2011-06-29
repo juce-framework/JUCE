@@ -38,8 +38,8 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_TemporaryFile.h"
 #include "../../core/juce_SystemStats.h"
 #include "../../maths/juce_Random.h"
-#include "../../core/juce_PlatformUtilities.h"
 #include "../../memory/juce_ScopedPointer.h"
+#include "../../threads/juce_Process.h"
 
 
 //==============================================================================
@@ -669,7 +669,7 @@ File File::withFileExtension (const String& newExtension) const
 //==============================================================================
 bool File::startAsProcess (const String& parameters) const
 {
-    return exists() && PlatformUtilities::openDocument (fullPath, parameters);
+    return exists() && Process::openDocument (fullPath, parameters);
 }
 
 //==============================================================================

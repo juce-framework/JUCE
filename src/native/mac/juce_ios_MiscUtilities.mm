@@ -76,17 +76,11 @@ ScopedAutoReleasePool::~ScopedAutoReleasePool()
 }
 
 //==============================================================================
-void PlatformUtilities::beep()
+void LookAndFeel::playAlertSound()
 {
     //xxx
     //AudioServicesPlaySystemSound ();
 }
-
-//==============================================================================
-void PlatformUtilities::addItemToDock (const File& file)
-{
-}
-
 
 //==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY

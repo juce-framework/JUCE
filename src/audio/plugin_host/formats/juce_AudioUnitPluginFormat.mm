@@ -45,7 +45,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_PluginDescription.h"
 #include "../../../threads/juce_CriticalSection.h"
 #include "../../../events/juce_Timer.h"
-#include "../../../core/juce_PlatformUtilities.h"
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../../../gui/components/windows/juce_ComponentPeer.h"
 #include "../../../gui/components/special/juce_NSViewComponent.h"
@@ -480,7 +479,7 @@ bool AudioUnitPluginInstance::getComponentDescFromFile (const String& fileOrIden
             CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef, CFSTR("CFBundleName"));
 
             if (name != 0 && CFGetTypeID (name) == CFStringGetTypeID())
-                pluginName = PlatformUtilities::cfStringToJuceString ((CFStringRef) name);
+                pluginName = String::fromCFString ((CFStringRef) name);
 
             if (pluginName.isEmpty())
                 pluginName = file.getFileNameWithoutExtension();
@@ -488,12 +487,12 @@ bool AudioUnitPluginInstance::getComponentDescFromFile (const String& fileOrIden
             CFTypeRef versionString = CFBundleGetValueForInfoDictionaryKey (bundleRef, CFSTR("CFBundleVersion"));
 
             if (versionString != 0 && CFGetTypeID (versionString) == CFStringGetTypeID())
-                version = PlatformUtilities::cfStringToJuceString ((CFStringRef) versionString);
+                version = String::fromCFString ((CFStringRef) versionString);
 
             CFTypeRef manuString = CFBundleGetValueForInfoDictionaryKey (bundleRef, CFSTR("CFBundleGetInfoString"));
 
             if (manuString != 0 && CFGetTypeID (manuString) == CFStringGetTypeID())
-                manufacturer = PlatformUtilities::cfStringToJuceString ((CFStringRef) manuString);
+                manufacturer = String::fromCFString ((CFStringRef) manuString);
 
             short resFileId = CFBundleOpenBundleResourceMap (bundleRef);
             UseResFile (resFileId);
@@ -1237,7 +1236,7 @@ const String AudioUnitPluginInstance::getParameterName (int index)
                               parameterIds [index], &info, &sz) == noErr)
     {
         if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) != 0)
-            name = PlatformUtilities::cfStringToJuceString (info.cfNameString);
+            name = String::fromCFString (info.cfNameString);
         else
             name = String (info.name, sizeof (info.name));
     }
@@ -1328,7 +1327,7 @@ const String AudioUnitPluginInstance::getProgramName (int index)
 
             if (p != nullptr && p->presetNumber == index)
             {
-                s = PlatformUtilities::cfStringToJuceString (p->presetName);
+                s = String::fromCFString (p->presetName);
                 break;
             }
         }

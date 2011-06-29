@@ -30,9 +30,9 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_URL.h"
 #include "../streams/juce_InputStream.h"
 #include "../../maths/juce_Random.h"
-#include "../../core/juce_PlatformUtilities.h"
 #include "../../text/juce_XmlDocument.h"
 #include "../../io/streams/juce_MemoryOutputStream.h"
+#include "../../threads/juce_Process.h"
 
 
 //==============================================================================
@@ -450,7 +450,7 @@ bool URL::launchInDefaultBrowser() const
     if (u.containsChar ('@') && ! u.containsChar (':'))
         u = "mailto:" + u;
 
-    return PlatformUtilities::openDocument (u, String::empty);
+    return Process::openDocument (u, String::empty);
 }
 
 

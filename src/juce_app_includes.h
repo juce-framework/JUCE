@@ -239,6 +239,9 @@
 #ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
  #include "events/juce_ActionListener.h"
 #endif
+#ifndef __JUCE_APPLEREMOTE_JUCEHEADER__
+ #include "events/juce_AppleRemote.h"
+#endif
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
  #include "events/juce_AsyncUpdater.h"
 #endif
@@ -608,6 +611,9 @@
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_QuickTimeMovieComponent.h"
 #endif
+#ifndef __JUCE_SCOPEDXLOCK_JUCEHEADER__
+ #include "gui/components/special/juce_ScopedXLock.h"
+#endif
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_SystemTrayIconComponent.h"
 #endif
@@ -796,6 +802,9 @@
 #endif
 #ifndef __JUCE_UNITTEST_JUCEHEADER__
  #include "utilities/juce_UnitTest.h"
+#endif
+#ifndef __JUCE_WINDOWSREGISTRY_JUCEHEADER__
+ #include "utilities/juce_WindowsRegistry.h"
 #endif
 
 #endif

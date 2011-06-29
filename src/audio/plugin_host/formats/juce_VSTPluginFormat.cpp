@@ -52,6 +52,11 @@
 #else
  #include <Cocoa/Cocoa.h>
  #include <Carbon/Carbon.h>
+
+ static bool makeFSRefFromPath (FSRef* destFSRef, const String& path)
+ {
+     return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toUTF8().getAddress()), destFSRef, 0) == noErr;
+ }
 #endif
 
 //==============================================================================
@@ -64,6 +69,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_VSTPluginFormat.h"
 #include "../../../threads/juce_Process.h"
 #include "../../../threads/juce_CriticalSection.h"
+#include "../../../threads/juce_DynamicLibrary.h"
 #include "../../../maths/juce_Random.h"
 #include "../../../io/files/juce_DirectoryIterator.h"
 #include "../../../events/juce_Timer.h"
@@ -72,7 +78,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../../../gui/components/windows/juce_ComponentPeer.h"
 #include "../../../application/juce_Application.h"
-#include "../../../core/juce_PlatformUtilities.h"
 
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
 #include "../../../native/mac/juce_mac_CarbonViewWrapperComponent.h"
@@ -423,11 +428,9 @@ public:
     //==============================================================================
     ModuleHandle (const File& file_)
         : file (file_),
-          moduleMain (0),
-         #if JUCE_WINDOWS || JUCE_LINUX
-          hModule (0)
-         #elif JUCE_MAC
-          fragId (0), resHandle (0), bundleRef (0), resFileId (0)
+          moduleMain (0)
+         #if JUCE_MAC
+          , fragId (0), resHandle (0), bundleRef (0), resFileId (0)
          #endif
     {
         getActiveModules().add (this);
@@ -436,7 +439,7 @@ public:
         fullParentDirectoryPathName = file_.getParentDirectory().getFullPathName();
        #elif JUCE_MAC
         FSRef ref;
-        PlatformUtilities::makeFSRefFromPath (&ref, file_.getParentDirectory().getFullPathName());
+        makeFSRefFromPath (&ref, file_.getParentDirectory().getFullPathName());
         FSGetCatalogInfo (&ref, kFSCatInfoNone, 0, 0, &parentDirFSSpec, 0);
        #endif
     }
@@ -449,7 +452,7 @@ public:
 
     //==============================================================================
 #if JUCE_WINDOWS || JUCE_LINUX
-    void* hModule;
+    DynamicLibrary module;
     String fullParentDirectoryPathName;
 
     bool open()
@@ -466,21 +469,21 @@ public:
 
         pluginName = file.getFileNameWithoutExtension();
 
-        hModule = PlatformUtilities::loadDynamicLibrary (file.getFullPathName());
+        module.open (file.getFullPathName());
 
-        moduleMain = (MainCall) PlatformUtilities::getProcedureEntryPoint (hModule, "VSTPluginMain");
+        moduleMain = (MainCall) module.getFunction ("VSTPluginMain");
 
-        if (moduleMain == 0)
-            moduleMain = (MainCall) PlatformUtilities::getProcedureEntryPoint (hModule, "main");
+        if (moduleMain == nullptr)
+            moduleMain = (MainCall) module.getFunction ("main");
 
-        return moduleMain != 0;
+        return moduleMain != nullptr;
     }
 
     void close()
     {
         _fpreset(); // (doesn't do any harm)
 
-        PlatformUtilities::freeDynamicLibrary (hModule);
+        module.close();
     }
 
     void closeEffect (AEffect* eff)
@@ -2854,7 +2857,7 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
 
    #if JUCE_PPC
     FSRef fileRef;
-    if (PlatformUtilities::makeFSRefFromPath (&fileRef, f.getFullPathName()))
+    if (makeFSRefFromPath (&fileRef, f.getFullPathName()))
     {
         const short resFileId = FSOpenResFile (&fileRef, fsRdPerm);
 

@@ -341,7 +341,9 @@ void Slider::lookAndFeelChanged()
         valueBox->setWantsKeyboardFocus (false);
         valueBox->setText (previousTextBoxContent, false);
 
-        valueBox->setEditable (editableText && isEnabled());
+        if (valueBox->isEditable() != editableText) // (avoid overriding the single/double click flags unless we have to)
+            valueBox->setEditable (editableText && isEnabled());
+
         valueBox->addListener (this);
 
         if (style == LinearBar)

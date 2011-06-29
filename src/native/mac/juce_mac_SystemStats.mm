@@ -110,7 +110,7 @@ String SystemStats::getOperatingSystemName()
 }
 
 #if ! JUCE_IOS
-int PlatformUtilities::getOSXMinorVersionNumber()
+int SystemStats::getOSXMinorVersionNumber()
 {
     SInt32 versionMinor = 0;
     OSErr err = Gestalt (gestaltSystemVersionMinor, &versionMinor);
@@ -127,7 +127,7 @@ bool SystemStats::isOperatingSystem64Bit()
    #elif JUCE_64BIT
     return true;
    #else
-    return PlatformUtilities::getOSXMinorVersionNumber() >= 6;
+    return getOSXMinorVersionNumber() >= 6;
    #endif
 }
 
@@ -238,10 +238,5 @@ int SystemStats::getPageSize()
 {
     return (int) NSPageSize();
 }
-
-void PlatformUtilities::fpuReset()
-{
-}
-
 
 #endif

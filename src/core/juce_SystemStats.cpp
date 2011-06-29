@@ -30,7 +30,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../text/juce_String.h"
 #include "juce_SystemStats.h"
 #include "juce_Time.h"
-#include "juce_PlatformUtilities.h"
 
 
 //==============================================================================

@@ -920,6 +920,20 @@ public:
     /** Adds a separator character to the end of a path if it doesn't already have one. */
     static String addTrailingSeparator (const String& path);
 
+   #if JUCE_MAC || JUCE_IOS || DOXYGEN
+    //==============================================================================
+    /** OSX ONLY - Finds the OSType of a file from the its resources. */
+    OSType getMacOSType() const;
+
+    /** OSX ONLY - Returns true if this file is actually a bundle. */
+    bool isBundle() const;
+   #endif
+
+   #if JUCE_MAC || DOXYGEN
+    /** OSX ONLY - Adds this file to the OSX dock */
+    void addToDock() const;
+   #endif
+
 private:
     //==============================================================================
     String fullPath;

@@ -510,7 +510,7 @@ private:
             String windowClassName ("JUCE_DIRECTSHOW_");
             windowClassName << (int) (Time::currentTimeMillis() & 0x7fffffff);
 
-            HINSTANCE moduleHandle = (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle();
+            HINSTANCE moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
 
             TCHAR moduleFile [1024] = { 0 };
             GetModuleFileName (moduleHandle, moduleFile, 1024);
@@ -529,7 +529,7 @@ private:
         ~NativeWindowClass()
         {
             if (atom != 0)
-                UnregisterClass (getWindowClassName(), (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
+                UnregisterClass (getWindowClassName(), (HINSTANCE) Process::getCurrentModuleInstanceHandle());
 
             clearSingletonInstance();
         }
@@ -582,7 +582,7 @@ private:
 
                 hwnd = CreateWindowEx (exstyle, wc->getWindowClassName(),
                                        L"", type, 0, 0, 0, 0, parentToAddTo, 0,
-                                       (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(), 0);
+                                       (HINSTANCE) Process::getCurrentModuleInstanceHandle(), 0);
 
                 if (hwnd != 0)
                 {

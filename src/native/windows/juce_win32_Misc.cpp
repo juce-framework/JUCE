@@ -82,5 +82,35 @@ String SystemClipboard::getTextFromClipboard()
     return result;
 }
 
+//==============================================================================
+bool juce_IsRunningInWine()
+{
+    HMODULE ntdll = GetModuleHandle (_T("ntdll.dll"));
+    return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != 0;
+}
+
+//==============================================================================
+String JUCE_CALLTYPE Process::getCurrentCommandLineParams()
+{
+    return String (CharacterFunctions::findEndOfToken (CharPointer_UTF16 (GetCommandLineW()),
+                                                       CharPointer_UTF16 (L" "),
+                                                       CharPointer_UTF16 (L"\""))).trimStart();
+}
+
+//==============================================================================
+static void* currentModuleHandle = nullptr;
+
+void* Process::getCurrentModuleInstanceHandle() noexcept
+{
+    if (currentModuleHandle == nullptr)
+        currentModuleHandle = GetModuleHandle (0);
+
+    return currentModuleHandle;
+}
+
+void Process::setCurrentModuleInstanceHandle (void* const newHandle) noexcept
+{
+    currentModuleHandle = newHandle;
+}
 
 #endif

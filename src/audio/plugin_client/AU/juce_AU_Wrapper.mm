@@ -208,7 +208,7 @@ public:
             {
               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (PlatformUtilities::getOSXMinorVersionNumber() > 4)
+                if (SystemStats::getOSXMinorVersionNumber() > 4)
               #endif
                 {
                     outDataSize = sizeof (AudioUnitCocoaViewInfo);
@@ -246,10 +246,10 @@ public:
             }
             else if (inID == kAudioUnitProperty_CocoaUI)
             {
-              #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (PlatformUtilities::getOSXMinorVersionNumber() > 4)
-              #endif
+                if (SystemStats::getOSXMinorVersionNumber() > 4)
+               #endif
                 {
                     JUCE_AUTORELEASEPOOL
 
@@ -390,9 +390,7 @@ public:
             if (juceFilter->isMetaParameter (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
-            AUBase::FillInParameterName (outParameterInfo,
-                                         PlatformUtilities::juceStringToCFString (name),
-                                         false);
+            AUBase::FillInParameterName (outParameterInfo, name.toCFString(), false);
 
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = 1.0f;
@@ -869,7 +867,7 @@ protected:
             for (int i = 0; i < numPrograms; ++i)
             {
                 presets[i].presetNumber = i;
-                presets[i].presetName = PlatformUtilities::juceStringToCFString (juceFilter->getProgramName (i));
+                presets[i].presetName = juceFilter->getProgramName(i).toCFString();
 
                 CFArrayAppendValue (presetsArray, presets + i);
             }
@@ -890,7 +888,7 @@ protected:
 
         AUPreset chosenPreset;
         chosenPreset.presetNumber = chosenPresetNumber;
-        chosenPreset.presetName = PlatformUtilities::juceStringToCFString (juceFilter->getProgramName (chosenPresetNumber));
+        chosenPreset.presetName = juceFilter->getProgramName (chosenPresetNumber).toCFString();
 
         juceFilter->setCurrentProgram (chosenPresetNumber);
         SetAFactoryPresetAsCurrent (chosenPreset);

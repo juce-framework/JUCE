@@ -375,7 +375,6 @@
           <File RelativePath="..\..\src\core\juce_PerformanceCounter.cpp"/>
           <File RelativePath="..\..\src\core\juce_PerformanceCounter.h"/>
           <File RelativePath="..\..\src\core\juce_PlatformDefs.h"/>
-          <File RelativePath="..\..\src\core\juce_PlatformUtilities.h"/>
           <File RelativePath="..\..\src\core\juce_RelativeTime.cpp"/>
           <File RelativePath="..\..\src\core\juce_RelativeTime.h"/>
           <File RelativePath="..\..\src\core\juce_Result.cpp"/>
@@ -404,6 +403,7 @@
           <File RelativePath="..\..\src\events\juce_ActionBroadcaster.cpp"/>
           <File RelativePath="..\..\src\events\juce_ActionBroadcaster.h"/>
           <File RelativePath="..\..\src\events\juce_ActionListener.h"/>
+          <File RelativePath="..\..\src\events\juce_AppleRemote.h"/>
           <File RelativePath="..\..\src\events\juce_AsyncUpdater.cpp"/>
           <File RelativePath="..\..\src\events\juce_AsyncUpdater.h"/>
           <File RelativePath="..\..\src\events\juce_CallbackMessage.h"/>
@@ -659,6 +659,7 @@
               <File RelativePath="..\..\src\gui\components\special\juce_PreferencesPanel.cpp"/>
               <File RelativePath="..\..\src\gui\components\special\juce_PreferencesPanel.h"/>
               <File RelativePath="..\..\src\gui\components\special\juce_QuickTimeMovieComponent.h"/>
+              <File RelativePath="..\..\src\gui\components\special\juce_ScopedXLock.h"/>
               <File RelativePath="..\..\src\gui\components\special\juce_SystemTrayIconComponent.cpp"/>
               <File RelativePath="..\..\src\gui\components\special\juce_SystemTrayIconComponent.h"/>
               <File RelativePath="..\..\src\gui\components\special\juce_WebBrowserComponent.h"/>
@@ -914,6 +915,8 @@
             <File RelativePath="..\..\src\native\mac\juce_mac_SystemStats.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_Threads.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_WebBrowserComponent.mm"/>
+            <File RelativePath="..\..\src\native\mac\juce_osx_MessageQueue.h"/>
+            <File RelativePath="..\..\src\native\mac\juce_osx_ObjCHelpers.h"/>
           </Filter>
           <Filter Name="windows">
             <File RelativePath="..\..\src\native\windows\juce_win32_ActiveXComponent.cpp"/>
@@ -935,7 +938,7 @@
             <File RelativePath="..\..\src\native\windows\juce_win32_NativeIncludes.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Network.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_OpenGLComponent.cpp"/>
-            <File RelativePath="..\..\src\native\windows\juce_win32_PlatformUtils.cpp"/>
+            <File RelativePath="..\..\src\native\windows\juce_win32_Registry.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_QuickTimeMovieComponent.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_SystemStats.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Threads.cpp"/>
@@ -992,6 +995,7 @@
         </Filter>
         <Filter Name="threads">
           <File RelativePath="..\..\src\threads\juce_CriticalSection.h"/>
+          <File RelativePath="..\..\src\threads\juce_DynamicLibrary.h"/>
           <File RelativePath="..\..\src\threads\juce_InterProcessLock.h"/>
           <File RelativePath="..\..\src\threads\juce_Process.h"/>
           <File RelativePath="..\..\src\threads\juce_ReadWriteLock.cpp"/>
@@ -1024,6 +1028,7 @@
           <File RelativePath="..\..\src\utilities\juce_UndoManager.h"/>
           <File RelativePath="..\..\src\utilities\juce_UnitTest.cpp"/>
           <File RelativePath="..\..\src\utilities\juce_UnitTest.h"/>
+          <File RelativePath="..\..\src\utilities\juce_WindowsRegistry.h"/>
         </Filter>
         <File RelativePath="..\..\juce.h"/>
         <File RelativePath="..\..\juce_Config.h"/>

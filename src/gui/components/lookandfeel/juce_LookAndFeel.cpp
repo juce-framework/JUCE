@@ -69,7 +69,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../text/juce_LocalisedStrings.h"
 #include "../special/juce_MidiKeyboardComponent.h"
 #include "../special/juce_ColourSelector.h"
-#include "../../../core/juce_PlatformUtilities.h"
 #include "../../../text/juce_XmlDocument.h"
 #include "../../../io/streams/juce_GZIPDecompressorInputStream.h"
 #include "../../../io/streams/juce_MemoryInputStream.h"
@@ -2820,13 +2819,6 @@ const Drawable* LookAndFeel::getDefaultDocumentFileImage()
     }
 
     return documentImage;
-}
-
-
-//==============================================================================
-void LookAndFeel::playAlertSound()
-{
-    PlatformUtilities::beep();
 }
 
 //==============================================================================

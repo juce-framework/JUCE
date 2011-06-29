@@ -87,6 +87,13 @@ public:
     */
     static bool isOperatingSystem64Bit();
 
+   #if JUCE_MAC || DOXYGEN
+    /** OSX ONLY - Returns the current OS version number.
+        E.g. if it's running on 10.4, this will be 4, 10.5 will return 5, etc.
+    */
+    static int getOSXMinorVersionNumber();
+   #endif
+
     //==============================================================================
     /** Returns the current user's name, if available.
         @see getFullUserName()

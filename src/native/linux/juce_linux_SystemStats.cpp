@@ -137,10 +137,6 @@ SystemStats::CPUFlags::CPUFlags()
     numCpus = LinuxStatsHelpers::getCpuInfo ("processor").getIntValue() + 1;
 }
 
-void PlatformUtilities::fpuReset()
-{
-}
-
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() noexcept
 {

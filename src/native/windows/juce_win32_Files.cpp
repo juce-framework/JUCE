@@ -518,7 +518,7 @@ File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
         case currentExecutableFile:
         case currentApplicationFile:
         {
-            HINSTANCE moduleHandle = (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle();
+            HINSTANCE moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
 
             WCHAR dest [MAX_PATH + 256];
             dest[0] = 0;
@@ -689,7 +689,7 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
-bool PlatformUtilities::openDocument (const String& fileName, const String& parameters)
+bool Process::openDocument (const String& fileName, const String& parameters)
 {
     HINSTANCE hInstance = 0;
 

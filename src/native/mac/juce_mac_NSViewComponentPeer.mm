@@ -1742,6 +1742,24 @@ Image juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
+void SystemClipboard::copyTextToClipboard (const String& text)
+{
+    [[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSStringPboardType]
+                                             owner: nil];
+
+    [[NSPasteboard generalPasteboard] setString: juceStringToNS (text)
+                                        forType: NSStringPboardType];
+}
+
+String SystemClipboard::getTextFromClipboard()
+{
+    NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
+
+    return text == nil ? String::empty
+                       : nsStringToJuce (text);
+}
+
+//==============================================================================
 const int KeyPress::spaceKey        = ' ';
 const int KeyPress::returnKey       = 0x0d;
 const int KeyPress::escapeKey       = 0x1b;

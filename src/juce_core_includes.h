@@ -92,9 +92,6 @@
 #ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
  #include "core/juce_PlatformDefs.h"
 #endif
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
- #include "core/juce_PlatformUtilities.h"
-#endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
  #include "core/juce_RelativeTime.h"
 #endif
@@ -289,6 +286,9 @@
 #endif
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
  #include "threads/juce_CriticalSection.h"
+#endif
+#ifndef __JUCE_DYNAMICLIBRARY_JUCEHEADER__
+ #include "threads/juce_DynamicLibrary.h"
 #endif
 #ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
  #include "threads/juce_InterProcessLock.h"

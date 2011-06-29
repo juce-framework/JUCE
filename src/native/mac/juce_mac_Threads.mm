@@ -63,4 +63,23 @@ void Process::setPriority (ProcessPriority)
     // xxx
 }
 
+bool DynamicLibrary::open (const String& name)
+{
+    close();
+    handle = dlopen (name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
+    return handle != 0;
+}
+
+void DynamicLibrary::close() noexcept
+{
+    if (handle != nullptr)
+        dlclose (handle);
+}
+
+void* DynamicLibrary::getFunction (const String& functionName) noexcept
+{
+    return handle != nullptr ? dlsym (handle, functionName.toUTF8()) : nullptr;
+}
+
+
 #endif
