@@ -60,7 +60,7 @@ public:
     bool open (const String& name);
 
     /** Releases the currently-open DLL, or has no effect if none was open. */
-    void close() noexcept;
+    void close();
 
     /** Tries to find a named function in the currently-open DLL, and returns a pointer to it.
         If no library is open, or if the function isn't found, this will return a null pointer.

@@ -361,8 +361,8 @@ namespace MACAddressHelpers
 {
     void getViaGetAdaptersInfo (Array<MACAddress>& result)
     {
-        DynamicLibraryLoader dll ("iphlpapi.dll");
-        DynamicLibraryImport (GetAdaptersInfo, getAdaptersInfo, DWORD, dll, (PIP_ADAPTER_INFO, PULONG))
+        DynamicLibrary dll ("iphlpapi.dll");
+        JUCE_DLL_FUNCTION (GetAdaptersInfo, getAdaptersInfo, DWORD, dll, (PIP_ADAPTER_INFO, PULONG))
 
         if (getAdaptersInfo != 0)
         {
@@ -389,8 +389,8 @@ namespace MACAddressHelpers
 
     void getViaNetBios (Array<MACAddress>& result)
     {
-        DynamicLibraryLoader dll ("netapi32.dll");
-        DynamicLibraryImport (Netbios, NetbiosCall, UCHAR, dll, (PNCB))
+        DynamicLibrary dll ("netapi32.dll");
+        JUCE_DLL_FUNCTION (Netbios, NetbiosCall, UCHAR, dll, (PNCB))
 
         if (NetbiosCall != 0)
         {
@@ -447,45 +447,40 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
                                         const String& bodyText,
                                         const StringArray& filesToAttach)
 {
-    HMODULE h = LoadLibraryA ("MAPI32.dll");
-
     typedef ULONG (WINAPI *MAPISendMailType) (LHANDLE, ULONG, lpMapiMessage, ::FLAGS, ULONG);
 
-    MAPISendMailType mapiSendMail = (MAPISendMailType) GetProcAddress (h, "MAPISendMail");
-    bool ok = false;
+    DynamicLibrary mapiLib ("MAPI32.dll");
+    MAPISendMailType mapiSendMail = (MAPISendMailType) mapiLib.getFunction ("MAPISendMail");
 
-    if (mapiSendMail != 0)
+    if (mapiSendMail == nullptr)
+        return false;
+
+    MapiMessage message = { 0 };
+    message.lpszSubject = (LPSTR) emailSubject.toUTF8().getAddress();
+    message.lpszNoteText = (LPSTR) bodyText.toUTF8().getAddress();
+
+    MapiRecipDesc recip = { 0 };
+    recip.ulRecipClass = MAPI_TO;
+    String targetEmailAddress_ (targetEmailAddress);
+    if (targetEmailAddress_.isEmpty())
+        targetEmailAddress_ = " "; // (Windows Mail can't deal with a blank address)
+    recip.lpszName = (LPSTR) targetEmailAddress_.toUTF8().getAddress();
+    message.nRecipCount = 1;
+    message.lpRecips = &recip;
+
+    HeapBlock <MapiFileDesc> files;
+    files.calloc (filesToAttach.size());
+
+    message.nFileCount = filesToAttach.size();
+    message.lpFiles = files;
+
+    for (int i = 0; i < filesToAttach.size(); ++i)
     {
-        MapiMessage message = { 0 };
-        message.lpszSubject = (LPSTR) emailSubject.toUTF8().getAddress();
-        message.lpszNoteText = (LPSTR) bodyText.toUTF8().getAddress();
-
-        MapiRecipDesc recip = { 0 };
-        recip.ulRecipClass = MAPI_TO;
-        String targetEmailAddress_ (targetEmailAddress);
-        if (targetEmailAddress_.isEmpty())
-            targetEmailAddress_ = " "; // (Windows Mail can't deal with a blank address)
-        recip.lpszName = (LPSTR) targetEmailAddress_.toUTF8().getAddress();
-        message.nRecipCount = 1;
-        message.lpRecips = &recip;
-
-        HeapBlock <MapiFileDesc> files;
-        files.calloc (filesToAttach.size());
-
-        message.nFileCount = filesToAttach.size();
-        message.lpFiles = files;
-
-        for (int i = 0; i < filesToAttach.size(); ++i)
-        {
-            files[i].nPosition = (ULONG) -1;
-            files[i].lpszPathName = (LPSTR) filesToAttach[i].toUTF8().getAddress();
-        }
-
-        ok = (mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS);
+        files[i].nPosition = (ULONG) -1;
+        files[i].lpszPathName = (LPSTR) filesToAttach[i].toUTF8().getAddress();
     }
 
-    FreeLibrary (h);
-    return ok;
+    return mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS;
 }
 
 

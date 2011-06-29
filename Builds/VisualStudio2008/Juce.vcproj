@@ -922,10 +922,10 @@
             <File RelativePath="..\..\src\native\windows\juce_win32_AudioCDReader.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_AutoLinkLibraries.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_CameraDevice.cpp"/>
+            <File RelativePath="..\..\src\native\windows\juce_win32_ComSmartPtr.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Direct2DGraphicsContext.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_DirectShowComponent.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_DirectSound.cpp"/>
-            <File RelativePath="..\..\src\native\windows\juce_win32_DynamicLibraryLoader.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_FileChooser.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Files.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Fonts.cpp"/>
@@ -936,8 +936,8 @@
             <File RelativePath="..\..\src\native\windows\juce_win32_NativeIncludes.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Network.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_OpenGLComponent.cpp"/>
-            <File RelativePath="..\..\src\native\windows\juce_win32_Registry.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_QuickTimeMovieComponent.cpp"/>
+            <File RelativePath="..\..\src\native\windows\juce_win32_Registry.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_SystemStats.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Threads.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_WASAPI.cpp"/>

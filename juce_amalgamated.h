@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	7
+#define JUCE_BUILDNUMBER	8
 
 /** Current Juce version number.
 
@@ -22203,7 +22203,7 @@ public:
 	bool open (const String& name);
 
 	/** Releases the currently-open DLL, or has no effect if none was open. */
-	void close() noexcept;
+	void close();
 
 	/** Tries to find a named function in the currently-open DLL, and returns a pointer to it.
 		If no library is open, or if the function isn't found, this will return a null pointer.
@@ -56752,6 +56752,9 @@ public:
 
 	/** Turns the drop-shadow on and off. */
 	void setDropShadowEnabled (bool useShadow);
+
+	/** True if drop-shadowing is enabled. */
+	bool isDropShadowEnabled() const noexcept		   { return useDropShadow; }
 
 	/** Sets whether an OS-native title bar will be used, or a Juce one.
 

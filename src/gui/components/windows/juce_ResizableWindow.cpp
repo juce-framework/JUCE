@@ -106,6 +106,7 @@ int ResizableWindow::getDesktopWindowStyleFlags() const
 void ResizableWindow::addToDesktop()
 {
     Component::addToDesktop (ResizableWindow::getDesktopWindowStyleFlags());
+    setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary.
 }
 
 //==============================================================================

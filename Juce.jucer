@@ -1422,14 +1422,14 @@
                 resource="0" file="src/native/windows/juce_win32_AutoLinkLibraries.h"/>
           <FILE id="Ay6VgqxOG" name="juce_win32_CameraDevice.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_CameraDevice.cpp"/>
+          <FILE id="anmnYd" name="juce_win32_ComSmartPtr.h" compile="0" resource="0"
+                file="src/native/windows/juce_win32_ComSmartPtr.h"/>
           <FILE id="c4BNPC" name="juce_win32_Direct2DGraphicsContext.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_Direct2DGraphicsContext.cpp"/>
           <FILE id="lWJ3cT" name="juce_win32_DirectShowComponent.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_DirectShowComponent.cpp"/>
           <FILE id="CVNbte6ov" name="juce_win32_DirectSound.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_DirectSound.cpp"/>
-          <FILE id="WuS4E8Pvz" name="juce_win32_DynamicLibraryLoader.h" compile="0"
-                resource="0" file="src/native/windows/juce_win32_DynamicLibraryLoader.h"/>
           <FILE id="bHW3fjXfz" name="juce_win32_FileChooser.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_FileChooser.cpp"/>
           <FILE id="T3W3aGOvf" name="juce_win32_Files.cpp" compile="1" resource="0"
@@ -1450,10 +1450,10 @@
                 file="src/native/windows/juce_win32_Network.cpp"/>
           <FILE id="b6VjPJxV4" name="juce_win32_OpenGLComponent.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_OpenGLComponent.cpp"/>
-          <FILE id="J1VD4Mcx" name="juce_win32_Registry.cpp" compile="1" resource="0"
-                file="src/native/windows/juce_win32_Registry.cpp"/>
           <FILE id="Hl7dGm8qs" name="juce_win32_QuickTimeMovieComponent.cpp"
                 compile="1" resource="0" file="src/native/windows/juce_win32_QuickTimeMovieComponent.cpp"/>
+          <FILE id="J1VD4Mcx" name="juce_win32_Registry.cpp" compile="1" resource="0"
+                file="src/native/windows/juce_win32_Registry.cpp"/>
           <FILE id="y50XdiuL8" name="juce_win32_SystemStats.cpp" compile="1"
                 resource="0" file="src/native/windows/juce_win32_SystemStats.cpp"/>
           <FILE id="Z2lkCeIwN" name="juce_win32_Threads.cpp" compile="1" resource="0"

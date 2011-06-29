@@ -822,9 +822,9 @@ public:
 
     void setMMThreadPriority()
     {
-        DynamicLibraryLoader dll ("avrt.dll");
-        DynamicLibraryImport (AvSetMmThreadCharacteristicsW, avSetMmThreadCharacteristics, HANDLE, dll, (LPCWSTR, LPDWORD))
-        DynamicLibraryImport (AvSetMmThreadPriority, avSetMmThreadPriority, HANDLE, dll, (HANDLE, AVRT_PRIORITY))
+        DynamicLibrary dll ("avrt.dll");
+        JUCE_DLL_FUNCTION (AvSetMmThreadCharacteristicsW, avSetMmThreadCharacteristics, HANDLE, dll, (LPCWSTR, LPDWORD))
+        JUCE_DLL_FUNCTION (AvSetMmThreadPriority, avSetMmThreadPriority, HANDLE, dll, (HANDLE, AVRT_PRIORITY))
 
         if (avSetMmThreadCharacteristics != 0 && avSetMmThreadPriority != 0)
         {

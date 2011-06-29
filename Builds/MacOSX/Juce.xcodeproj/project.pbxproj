@@ -324,8 +324,8 @@
 		A46B0025A68136ED993E0D85 = { isa = PBXBuildFile; fileRef = 50159A5B7A552A6C1EB557F3; };
 		B99678E919BF547A3A3F5D6E = { isa = PBXBuildFile; fileRef = CDA5FCC51F6C1E84D7DC3274; };
 		5B714CDD0082419BFED7D2D4 = { isa = PBXBuildFile; fileRef = B14735381ADB00741166E330; };
-		5B33FFE120A47EF42CBC05E4 = { isa = PBXBuildFile; fileRef = 0EB41C0AB478EE02D8C851F9; };
 		2DD498313DA488A5063C4C1B = { isa = PBXBuildFile; fileRef = 09AE0882D58BE1715219556A; };
+		5B33FFE120A47EF42CBC05E4 = { isa = PBXBuildFile; fileRef = 0EB41C0AB478EE02D8C851F9; };
 		552D45FB250C62F86CD02A57 = { isa = PBXBuildFile; fileRef = FBE07C5CC622A5D36BDAB9E1; };
 		0E8E9829E95E32163F45482D = { isa = PBXBuildFile; fileRef = B07C853EB60D8D8691BC1B4B; };
 		6801797B247CB3A6890C0AB0 = { isa = PBXBuildFile; fileRef = 5D32C8856093B33438AEB758; };
@@ -1019,10 +1019,10 @@
 		F3B50EE3939E9F16D13C3C7C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_AudioCDReader.cpp"; path = "../../src/native/windows/juce_win32_AudioCDReader.cpp"; sourceTree = "SOURCE_ROOT"; };
 		9C4D1018ECC0BA07346453EF = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_win32_AutoLinkLibraries.h"; path = "../../src/native/windows/juce_win32_AutoLinkLibraries.h"; sourceTree = "SOURCE_ROOT"; };
 		3A37CD82212075940421CE4F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_CameraDevice.cpp"; path = "../../src/native/windows/juce_win32_CameraDevice.cpp"; sourceTree = "SOURCE_ROOT"; };
+		B296F736C0CD6AC15BE6424B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_win32_ComSmartPtr.h"; path = "../../src/native/windows/juce_win32_ComSmartPtr.h"; sourceTree = "SOURCE_ROOT"; };
 		7F3EF672D07ECE3E13AAF267 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Direct2DGraphicsContext.cpp"; path = "../../src/native/windows/juce_win32_Direct2DGraphicsContext.cpp"; sourceTree = "SOURCE_ROOT"; };
 		249959E338D7750E56A9F2F8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_DirectShowComponent.cpp"; path = "../../src/native/windows/juce_win32_DirectShowComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		58B70C726D186B4E770300BC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_DirectSound.cpp"; path = "../../src/native/windows/juce_win32_DirectSound.cpp"; sourceTree = "SOURCE_ROOT"; };
-		BA66E265749F75DBA86EC3F1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_win32_DynamicLibraryLoader.h"; path = "../../src/native/windows/juce_win32_DynamicLibraryLoader.h"; sourceTree = "SOURCE_ROOT"; };
 		DCD09B6EF4A4A109DE01F152 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_FileChooser.cpp"; path = "../../src/native/windows/juce_win32_FileChooser.cpp"; sourceTree = "SOURCE_ROOT"; };
 		7527A5E8F4F39581159D3E5B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Files.cpp"; path = "../../src/native/windows/juce_win32_Files.cpp"; sourceTree = "SOURCE_ROOT"; };
 		1DBF9DAAD0690CB2CA4E9960 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Fonts.cpp"; path = "../../src/native/windows/juce_win32_Fonts.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1033,8 +1033,8 @@
 		E7625D7A06CBC11F40A56A70 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_win32_NativeIncludes.h"; path = "../../src/native/windows/juce_win32_NativeIncludes.h"; sourceTree = "SOURCE_ROOT"; };
 		CDA5FCC51F6C1E84D7DC3274 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Network.cpp"; path = "../../src/native/windows/juce_win32_Network.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B14735381ADB00741166E330 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_OpenGLComponent.cpp"; path = "../../src/native/windows/juce_win32_OpenGLComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
-		0EB41C0AB478EE02D8C851F9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Registry.cpp"; path = "../../src/native/windows/juce_win32_Registry.cpp"; sourceTree = "SOURCE_ROOT"; };
 		09AE0882D58BE1715219556A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_QuickTimeMovieComponent.cpp"; path = "../../src/native/windows/juce_win32_QuickTimeMovieComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
+		0EB41C0AB478EE02D8C851F9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Registry.cpp"; path = "../../src/native/windows/juce_win32_Registry.cpp"; sourceTree = "SOURCE_ROOT"; };
 		FBE07C5CC622A5D36BDAB9E1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_SystemStats.cpp"; path = "../../src/native/windows/juce_win32_SystemStats.cpp"; sourceTree = "SOURCE_ROOT"; };
 		B07C853EB60D8D8691BC1B4B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Threads.cpp"; path = "../../src/native/windows/juce_win32_Threads.cpp"; sourceTree = "SOURCE_ROOT"; };
 		5D32C8856093B33438AEB758 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_WASAPI.cpp"; path = "../../src/native/windows/juce_win32_WASAPI.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1862,10 +1862,10 @@
 				F3B50EE3939E9F16D13C3C7C,
 				9C4D1018ECC0BA07346453EF,
 				3A37CD82212075940421CE4F,
+				B296F736C0CD6AC15BE6424B,
 				7F3EF672D07ECE3E13AAF267,
 				249959E338D7750E56A9F2F8,
 				58B70C726D186B4E770300BC,
-				BA66E265749F75DBA86EC3F1,
 				DCD09B6EF4A4A109DE01F152,
 				7527A5E8F4F39581159D3E5B,
 				1DBF9DAAD0690CB2CA4E9960,
@@ -1876,8 +1876,8 @@
 				E7625D7A06CBC11F40A56A70,
 				CDA5FCC51F6C1E84D7DC3274,
 				B14735381ADB00741166E330,
-				0EB41C0AB478EE02D8C851F9,
 				09AE0882D58BE1715219556A,
+				0EB41C0AB478EE02D8C851F9,
 				FBE07C5CC622A5D36BDAB9E1,
 				B07C853EB60D8D8691BC1B4B,
 				5D32C8856093B33438AEB758,
@@ -2387,8 +2387,8 @@
 				A46B0025A68136ED993E0D85,
 				B99678E919BF547A3A3F5D6E,
 				5B714CDD0082419BFED7D2D4,
-				5B33FFE120A47EF42CBC05E4,
 				2DD498313DA488A5063C4C1B,
+				5B33FFE120A47EF42CBC05E4,
 				552D45FB250C62F86CD02A57,
 				0E8E9829E95E32163F45482D,
 				6801797B247CB3A6890C0AB0,

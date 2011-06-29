@@ -868,12 +868,12 @@ void Thread::yield()
    versions, and a lot of distros seem to ship with obsolete versions)
 */
 #if defined (CPU_ISSET) && ! defined (SUPPORT_AFFINITIES)
-  #define SUPPORT_AFFINITIES 1
+ #define SUPPORT_AFFINITIES 1
 #endif
 
 void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 {
-#if SUPPORT_AFFINITIES
+   #if SUPPORT_AFFINITIES
     cpu_set_t affinity;
     CPU_ZERO (&affinity);
 
@@ -891,11 +891,33 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
     sched_setaffinity (getpid(), sizeof (cpu_set_t), &affinity);
     sched_yield();
 
-#else
+   #else
     /* affinities aren't supported because either the appropriate header files weren't found,
        or the SUPPORT_AFFINITIES macro was turned off
     */
     jassertfalse;
     (void) affinityMask;
-#endif
+   #endif
+}
+
+//==============================================================================
+bool DynamicLibrary::open (const String& name)
+{
+    close();
+    handle = dlopen (name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
+    return handle != 0;
+}
+
+void DynamicLibrary::close()
+{
+    if (handle != nullptr)
+    {
+        dlclose (handle);
+        handle = nullptr;
+    }
+}
+
+void* DynamicLibrary::getFunction (const String& functionName) noexcept
+{
+    return handle != nullptr ? dlsym (handle, functionName.toUTF8()) : nullptr;
 }

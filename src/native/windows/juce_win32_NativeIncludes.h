@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-//==============================================================================
 #ifndef __JUCE_WIN32_NATIVEINCLUDES_JUCEHEADER__
 #define __JUCE_WIN32_NATIVEINCLUDES_JUCEHEADER__
 
@@ -201,100 +200,20 @@
  #define WM_APPCOMMAND 0x0319
 #endif
 
-//==============================================================================
-/** A simple COM smart pointer.
-    Avoids having to include ATL just to get one of these.
+#include "juce_win32_ComSmartPtr.h"
+
+/* Used with DynamicLibrary to simplify importing functions
+
+   functionName: function to import
+   localFunctionName: name you want to use to actually call it (must be different)
+   returnType: the return type
+   object: the DynamicLibrary to use
+   params: list of params (bracketed)
 */
-template <class ComClass>
-class ComSmartPtr
-{
-public:
-    ComSmartPtr() throw() : p (0)                               {}
-    ComSmartPtr (ComClass* const p_) : p (p_)                   { if (p_ != 0) p_->AddRef(); }
-    ComSmartPtr (const ComSmartPtr<ComClass>& p_) : p (p_.p)    { if (p != 0) p->AddRef(); }
-    ~ComSmartPtr()                                              { release(); }
+#define JUCE_DLL_FUNCTION(functionName, localFunctionName, returnType, object, params) \
+    typedef returnType (WINAPI *type##localFunctionName) params; \
+    type##localFunctionName localFunctionName  \
+        = (type##localFunctionName)object.getFunction (#functionName);
 
-    operator ComClass*() const throw()     { return p; }
-    ComClass& operator*() const throw()    { return *p; }
-    ComClass* operator->() const throw()   { return p; }
-
-    ComSmartPtr& operator= (ComClass* const newP)
-    {
-        if (newP != 0)  newP->AddRef();
-        release();
-        p = newP;
-        return *this;
-    }
-
-    ComSmartPtr& operator= (const ComSmartPtr<ComClass>& newP)  { return operator= (newP.p); }
-
-    // Releases and nullifies this pointer and returns its address
-    ComClass** resetAndGetPointerAddress()
-    {
-        release();
-        p = 0;
-        return &p;
-    }
-
-    HRESULT CoCreateInstance (REFCLSID classUUID, DWORD dwClsContext = CLSCTX_INPROC_SERVER)
-    {
-      #ifndef __MINGW32__
-        return ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
-      #else
-        return E_NOTIMPL;
-      #endif
-    }
-
-    template <class OtherComClass>
-    HRESULT QueryInterface (REFCLSID classUUID, ComSmartPtr<OtherComClass>& destObject) const
-    {
-        if (p == 0)
-            return E_POINTER;
-
-        return p->QueryInterface (classUUID, (void**) destObject.resetAndGetPointerAddress());
-    }
-
-    template <class OtherComClass>
-    HRESULT QueryInterface (ComSmartPtr<OtherComClass>& destObject) const
-    {
-        return this->QueryInterface (__uuidof (OtherComClass), destObject);
-    }
-
-private:
-    ComClass* p;
-
-    void release()  { if (p != 0) p->Release(); }
-
-    ComClass** operator&() throw(); // private to avoid it being used accidentally
-};
-
-//==============================================================================
-/** Handy base class for writing COM objects, providing ref-counting and a basic QueryInterface method.
-*/
-template <class ComClass>
-class ComBaseClassHelper   : public ComClass
-{
-public:
-    ComBaseClassHelper()  : refCount (1) {}
-    virtual ~ComBaseClassHelper() {}
-
-    HRESULT __stdcall QueryInterface (REFIID refId, void** result)
-    {
-      #ifndef __MINGW32__
-        if (refId == __uuidof (ComClass))   { AddRef(); *result = dynamic_cast <ComClass*> (this); return S_OK; }
-      #endif
-
-        if (refId == IID_IUnknown)          { AddRef(); *result = dynamic_cast <IUnknown*> (this); return S_OK; }
-
-        *result = 0;
-        return E_NOINTERFACE;
-    }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
-
-protected:
-    int refCount;
-};
 
 #endif   // __JUCE_WIN32_NATIVEINCLUDES_JUCEHEADER__

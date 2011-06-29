@@ -97,6 +97,9 @@ public:
     /** Turns the drop-shadow on and off. */
     void setDropShadowEnabled (bool useShadow);
 
+    /** True if drop-shadowing is enabled. */
+    bool isDropShadowEnabled() const noexcept               { return useDropShadow; }
+
     /** Sets whether an OS-native title bar will be used, or a Juce one.
 
         @see isUsingNativeTitleBar

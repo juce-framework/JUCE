@@ -412,8 +412,8 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_NativeCode.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Network.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_OpenGLComponent.cpp"/>
-    <ClCompile Include="..\..\src\native\windows\juce_win32_Registry.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_QuickTimeMovieComponent.cpp"/>
+    <ClCompile Include="..\..\src\native\windows\juce_win32_Registry.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_SystemStats.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Threads.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_WASAPI.cpp"/>
@@ -792,7 +792,7 @@
     <ClInclude Include="..\..\src\native\mac\juce_osx_MessageQueue.h"/>
     <ClInclude Include="..\..\src\native\mac\juce_osx_ObjCHelpers.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_AutoLinkLibraries.h"/>
-    <ClInclude Include="..\..\src\native\windows\juce_win32_DynamicLibraryLoader.h"/>
+    <ClInclude Include="..\..\src\native\windows\juce_win32_ComSmartPtr.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_NativeIncludes.h"/>
     <ClInclude Include="..\..\src\native\android\juce_android_NativeIncludes.h"/>
     <ClInclude Include="..\..\src\text\juce_CharacterFunctions.h"/>

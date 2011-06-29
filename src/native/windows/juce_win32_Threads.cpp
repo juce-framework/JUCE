@@ -314,6 +314,8 @@ void Process::terminate()
 //==============================================================================
 bool DynamicLibrary::open (const String& name)
 {
+    close();
+
     JUCE_TRY
     {
         handle = LoadLibrary (name.toWideCharPointer());
@@ -323,12 +325,15 @@ bool DynamicLibrary::open (const String& name)
     return handle != nullptr;
 }
 
-void DynamicLibrary::close() noexcept
+void DynamicLibrary::close()
 {
     JUCE_TRY
     {
         if (handle != nullptr)
+        {
             FreeLibrary ((HMODULE) handle);
+            handle = nullptr;
+        }
     }
     JUCE_CATCH_ALL
 }
