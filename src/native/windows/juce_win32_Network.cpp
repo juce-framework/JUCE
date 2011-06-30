@@ -225,120 +225,133 @@ private:
         if (sessionHandle != 0)
         {
             // break up the url..
-            TCHAR file[1024], server[1024], username[1024], password[1024];
+            const int fileNumChars = 65536;
+            const int serverNumChars = 2048;
+            const int usernameNumChars = 1024;
+            const int passwordNumChars = 1024;
+            HeapBlock<TCHAR> file (fileNumChars), server (serverNumChars),
+                             username (usernameNumChars), password (passwordNumChars);
 
             URL_COMPONENTS uc = { 0 };
             uc.dwStructSize = sizeof (uc);
             uc.lpszUrlPath = file;
-            uc.dwUrlPathLength = numElementsInArray (file);
+            uc.dwUrlPathLength = fileNumChars;
             uc.lpszHostName = server;
-            uc.dwHostNameLength = numElementsInArray (server);
+            uc.dwHostNameLength = serverNumChars;
             uc.lpszUserName = username;
-            uc.dwUserNameLength = numElementsInArray (username);
+            uc.dwUserNameLength = usernameNumChars;
             uc.lpszPassword = password;
-            uc.dwPasswordLength = numElementsInArray (password);
+            uc.dwPasswordLength = passwordNumChars;
 
             if (InternetCrackUrl (address.toWideCharPointer(), 0, 0, &uc))
+                openConnection (uc, sessionHandle, progressCallback, progressCallbackContext);
+        }
+    }
+
+    void openConnection (URL_COMPONENTS& uc, HINTERNET sessionHandle,
+                         URL::OpenStreamProgressCallback* progressCallback,
+                         void* progressCallbackContext)
+    {
+        int disable = 1;
+        InternetSetOption (sessionHandle, INTERNET_OPTION_DISABLE_AUTODIAL, &disable, sizeof (disable));
+
+        if (timeOutMs == 0)
+            timeOutMs = 30000;
+        else if (timeOutMs < 0)
+            timeOutMs = -1;
+
+        InternetSetOption (sessionHandle, INTERNET_OPTION_CONNECT_TIMEOUT, &timeOutMs, sizeof (timeOutMs));
+
+        const bool isFtp = address.startsWithIgnoreCase ("ftp:");
+
+      #if WORKAROUND_TIMEOUT_BUG
+        connection = 0;
+
+        {
+            InternetConnectThread connectThread (uc, sessionHandle, connection, isFtp);
+            connectThread.wait (timeOutMs);
+
+            if (connection == 0)
             {
-                int disable = 1;
-                InternetSetOption (sessionHandle, INTERNET_OPTION_DISABLE_AUTODIAL, &disable, sizeof (disable));
+                InternetCloseHandle (sessionHandle);
+                sessionHandle = 0;
+            }
+        }
+      #else
+        connection = InternetConnect (sessionHandle, uc.lpszHostName, uc.nPort,
+                                      uc.lpszUserName, uc.lpszPassword,
+                                      isFtp ? INTERNET_SERVICE_FTP
+                                            : INTERNET_SERVICE_HTTP,
+                                      0, 0);
+      #endif
 
-                if (timeOutMs == 0)
-                    timeOutMs = 30000;
-                else if (timeOutMs < 0)
-                    timeOutMs = -1;
+        if (connection != 0)
+        {
+            if (isFtp)
+                request = FtpOpenFile (connection, uc.lpszUrlPath, GENERIC_READ,
+                                       FTP_TRANSFER_TYPE_BINARY | INTERNET_FLAG_NEED_FILE, 0);
+            else
+                openHTTPConnection (uc, sessionHandle, progressCallback, progressCallbackContext);
+        }
+    }
 
-                InternetSetOption (sessionHandle, INTERNET_OPTION_CONNECT_TIMEOUT, &timeOutMs, sizeof (timeOutMs));
+    void openHTTPConnection (URL_COMPONENTS& uc, HINTERNET sessionHandle,
+                             URL::OpenStreamProgressCallback* progressCallback,
+                             void* progressCallbackContext)
+    {
+        const TCHAR* mimeTypes[] = { _T("*/*"), 0 };
 
-                const bool isFtp = address.startsWithIgnoreCase ("ftp:");
+        DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES;
 
-              #if WORKAROUND_TIMEOUT_BUG
-                connection = 0;
+        if (address.startsWithIgnoreCase ("https:"))
+            flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
+                                            //  IE7 seems to automatically work out when it's https)
 
+        request = HttpOpenRequest (connection, isPost ? _T("POST") : _T("GET"),
+                                   uc.lpszUrlPath, 0, 0, mimeTypes, flags, 0);
+
+        if (request != 0)
+        {
+            INTERNET_BUFFERS buffers = { 0 };
+            buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
+            buffers.lpcszHeader = headers.toWideCharPointer();
+            buffers.dwHeadersLength = headers.length();
+            buffers.dwBufferTotal = (DWORD) postData.getSize();
+
+            if (HttpSendRequestEx (request, &buffers, 0, HSR_INITIATE, 0))
+            {
+                int bytesSent = 0;
+
+                for (;;)
                 {
-                    InternetConnectThread connectThread (uc, sessionHandle, connection, isFtp);
-                    connectThread.wait (timeOutMs);
+                    const int bytesToDo = jmin (1024, (int) postData.getSize() - bytesSent);
+                    DWORD bytesDone = 0;
 
-                    if (connection == 0)
+                    if (bytesToDo > 0
+                         && ! InternetWriteFile (request,
+                                                 static_cast <const char*> (postData.getData()) + bytesSent,
+                                                 bytesToDo, &bytesDone))
                     {
-                        InternetCloseHandle (sessionHandle);
-                        sessionHandle = 0;
+                        break;
                     }
-                }
-              #else
-                connection = InternetConnect (sessionHandle, uc.lpszHostName, uc.nPort,
-                                              uc.lpszUserName, uc.lpszPassword,
-                                              isFtp ? INTERNET_SERVICE_FTP
-                                                    : INTERNET_SERVICE_HTTP,
-                                              0, 0);
-              #endif
 
-                if (connection != 0)
-                {
-                    if (isFtp)
+                    if (bytesToDo == 0 || (int) bytesDone < bytesToDo)
                     {
-                        request = FtpOpenFile (connection, uc.lpszUrlPath, GENERIC_READ,
-                                               FTP_TRANSFER_TYPE_BINARY | INTERNET_FLAG_NEED_FILE, 0);
+                        if (HttpEndRequest (request, 0, 0, 0))
+                            return;
+
+                        break;
                     }
-                    else
-                    {
-                        const TCHAR* mimeTypes[] = { _T("*/*"), 0 };
 
-                        DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES;
+                    bytesSent += bytesDone;
 
-                        if (address.startsWithIgnoreCase ("https:"))
-                            flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
-                                                            //  IE7 seems to automatically work out when it's https)
-
-                        request = HttpOpenRequest (connection, isPost ? _T("POST") : _T("GET"),
-                                                   uc.lpszUrlPath, 0, 0, mimeTypes, flags, 0);
-
-                        if (request != 0)
-                        {
-                            INTERNET_BUFFERS buffers = { 0 };
-                            buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
-                            buffers.lpcszHeader = headers.toWideCharPointer();
-                            buffers.dwHeadersLength = headers.length();
-                            buffers.dwBufferTotal = (DWORD) postData.getSize();
-
-                            if (HttpSendRequestEx (request, &buffers, 0, HSR_INITIATE, 0))
-                            {
-                                int bytesSent = 0;
-
-                                for (;;)
-                                {
-                                    const int bytesToDo = jmin (1024, (int) postData.getSize() - bytesSent);
-                                    DWORD bytesDone = 0;
-
-                                    if (bytesToDo > 0
-                                         && ! InternetWriteFile (request,
-                                                                 static_cast <const char*> (postData.getData()) + bytesSent,
-                                                                 bytesToDo, &bytesDone))
-                                    {
-                                        break;
-                                    }
-
-                                    if (bytesToDo == 0 || (int) bytesDone < bytesToDo)
-                                    {
-                                        if (HttpEndRequest (request, 0, 0, 0))
-                                            return;
-
-                                        break;
-                                    }
-
-                                    bytesSent += bytesDone;
-
-                                    if (progressCallback != nullptr && ! progressCallback (progressCallbackContext, bytesSent, postData.getSize()))
-                                        break;
-                                }
-                            }
-                        }
-
-                        close();
-                    }
+                    if (progressCallback != nullptr && ! progressCallback (progressCallbackContext, bytesSent, postData.getSize()))
+                        break;
                 }
             }
         }
+
+        close();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream);

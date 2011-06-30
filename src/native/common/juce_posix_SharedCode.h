@@ -225,20 +225,18 @@ bool File::setAsCurrentWorkingDirectory() const
 //==============================================================================
 namespace
 {
-  #if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
-   typedef struct stat64  juce_statStruct; // (need to use the 64-bit version to work around a simulator bug)
-  #else
-   typedef struct stat    juce_statStruct;
-  #endif
+   #if JUCE_LINUX || (JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T) // (this iOS stuff is to avoid a simulator bug)
+    typedef struct stat64 juce_statStruct;
+    #define JUCE_STAT     stat64
+   #else
+    typedef struct stat   juce_statStruct;
+    #define JUCE_STAT     stat
+   #endif
 
     bool juce_stat (const String& fileName, juce_statStruct& info)
     {
         return fileName.isNotEmpty()
-          #if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
-                && (stat64 (fileName.toUTF8(), &info) == 0);
-          #else
-                && (stat (fileName.toUTF8(), &info) == 0);
-          #endif
+                 && JUCE_STAT (fileName.toUTF8(), &info) == 0;
     }
 
     // if this file doesn't exist, find a parent of it that does..
@@ -258,14 +256,14 @@ namespace
     void updateStatInfoForFile (const String& path, bool* const isDir, int64* const fileSize,
                                 Time* const modTime, Time* const creationTime, bool* const isReadOnly)
     {
-        if (isDir != 0 || fileSize != 0 || modTime != 0 || creationTime != 0)
+        if (isDir != nullptr || fileSize != nullptr || modTime != nullptr || creationTime != nullptr)
         {
             juce_statStruct info;
             const bool statOk = juce_stat (path, info);
 
-            if (isDir != nullptr)         *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
-            if (fileSize != nullptr)      *fileSize = statOk ? info.st_size : 0;
-            if (modTime != nullptr)       *modTime = Time (statOk ? (int64) info.st_mtime * 1000 : 0);
+            if (isDir != nullptr)         *isDir        = statOk && ((info.st_mode & S_IFDIR) != 0);
+            if (fileSize != nullptr)      *fileSize     = statOk ? info.st_size : 0;
+            if (modTime != nullptr)       *modTime      = Time (statOk ? (int64) info.st_mtime * 1000 : 0);
             if (creationTime != nullptr)  *creationTime = Time (statOk ? (int64) info.st_ctime * 1000 : 0);
         }
 
@@ -294,14 +292,8 @@ bool File::isDirectory() const
 
 bool File::exists() const
 {
-    juce_statStruct info;
-
     return fullPath.isNotEmpty()
-      #if JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T
-            && (lstat64 (fullPath.toUTF8(), &info) == 0);
-      #else
-            && (lstat (fullPath.toUTF8(), &info) == 0);
-      #endif
+             && access (fullPath.toUTF8(), F_OK) == 0;
 }
 
 bool File::existsAsFile() const
