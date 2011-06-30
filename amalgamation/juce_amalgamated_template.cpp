@@ -406,7 +406,9 @@
  // Non-public headers that are needed by more than one platform must be included
  // before the platform-specific sections..
  BEGIN_JUCE_NAMESPACE
-  #include "../src/native/common/juce_MidiDataConcatenator.h"
+  #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+   #include "../src/native/common/juce_MidiDataConcatenator.h"
+  #endif
  END_JUCE_NAMESPACE
 
  #if JUCE_WINDOWS
