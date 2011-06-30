@@ -48,7 +48,8 @@ public:
     static ProjectExporter* createPlatformDefaultExporter (Project& project);
 
     //=============================================================================
-    virtual bool isDefaultFormatForCurrentOS() = 0;
+    // return 0 if this can't be opened in the current OS, or a higher value, where higher numbers are more preferable.
+    virtual int getLaunchPreferenceOrderForCurrentOS() = 0;
     virtual bool isPossibleForCurrentProject() = 0;
     virtual bool usesMMFiles() const = 0;
     virtual void createPropertyEditors (Array <PropertyComponent*>& props);

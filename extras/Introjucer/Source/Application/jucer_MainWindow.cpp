@@ -232,6 +232,10 @@ void MainWindow::activeWindowStatusChanged()
 void MainWindow::updateTitle (const String& documentName)
 {
     String name (JUCEApplication::getInstance()->getApplicationName());
+
+    if (currentProject != nullptr)
+        name = currentProject->getDocumentTitle() + " - " + name;
+
     if (documentName.isNotEmpty())
         name = documentName + " - " + name;
 

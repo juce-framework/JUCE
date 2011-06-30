@@ -1204,7 +1204,7 @@ public:
             demoComponent->performDemoMenuItem (result);
     }
 
-    static void alertBoxResultChosen (int result, WidgetsDemo* demoComponent)
+    static void alertBoxResultChosen (int result, WidgetsDemo*)
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
                                           "Alert Box",

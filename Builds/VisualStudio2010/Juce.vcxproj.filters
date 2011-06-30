@@ -1042,10 +1042,10 @@
     <ClCompile Include="..\..\src\native\mac\juce_ios_MessageManager.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\mac\juce_ios_MiscUtilities.mm">
+    <ClCompile Include="..\..\src\native\mac\juce_ios_UIViewComponentPeer.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\mac\juce_ios_UIViewComponentPeer.mm">
+    <ClCompile Include="..\..\src\native\mac\juce_ios_Windowing.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\mac\juce_mac_AppleRemote.mm">
@@ -1087,9 +1087,6 @@
     <ClCompile Include="..\..\src\native\mac\juce_mac_MessageManager.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\mac\juce_mac_MiscUtilities.mm">
-      <Filter>Juce\Source\native\mac</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\native\mac\juce_mac_MouseCursor.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
@@ -1121,6 +1118,9 @@
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\mac\juce_mac_WebBrowserComponent.mm">
+      <Filter>Juce\Source\native\mac</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\native\mac\juce_mac_Windowing.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_ActiveXComponent.cpp">

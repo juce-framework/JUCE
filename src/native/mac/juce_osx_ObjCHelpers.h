@@ -63,5 +63,16 @@ namespace
     }
 }
 
+//==============================================================================
+ScopedAutoReleasePool::ScopedAutoReleasePool()
+{
+    pool = [[NSAutoreleasePool alloc] init];
+}
+
+ScopedAutoReleasePool::~ScopedAutoReleasePool()
+{
+    [((NSAutoreleasePool*) pool) release];
+}
+
 
 #endif   // __JUCE_OSX_OBJCHELPERS_JUCEHEADER__

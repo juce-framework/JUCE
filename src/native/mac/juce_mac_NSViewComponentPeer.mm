@@ -1720,46 +1720,6 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File& file)
-{
-    JUCE_AUTORELEASEPOOL
-
-    NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: juceStringToNS (file.getFullPathName())];
-
-    CoreGraphicsImage* result = new CoreGraphicsImage (Image::ARGB, (int) [image size].width, (int) [image size].height, true);
-
-    [NSGraphicsContext saveGraphicsState];
-    [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithGraphicsPort: result->context flipped: false]];
-
-    [image drawAtPoint: NSMakePoint (0, 0)
-              fromRect: NSMakeRect (0, 0, [image size].width, [image size].height)
-             operation: NSCompositeSourceOver fraction: 1.0f];
-
-    [[NSGraphicsContext currentContext] flushGraphics];
-    [NSGraphicsContext restoreGraphicsState];
-
-    return Image (result);
-}
-
-//==============================================================================
-void SystemClipboard::copyTextToClipboard (const String& text)
-{
-    [[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSStringPboardType]
-                                             owner: nil];
-
-    [[NSPasteboard generalPasteboard] setString: juceStringToNS (text)
-                                        forType: NSStringPboardType];
-}
-
-String SystemClipboard::getTextFromClipboard()
-{
-    NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
-
-    return text == nil ? String::empty
-                       : nsStringToJuce (text);
-}
-
-//==============================================================================
 const int KeyPress::spaceKey        = ' ';
 const int KeyPress::returnKey       = 0x0d;
 const int KeyPress::escapeKey       = 0x1b;

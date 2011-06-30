@@ -1005,64 +1005,6 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File& file)
-{
-    return Image::null;
-}
-
-//==============================================================================
-void SystemClipboard::copyTextToClipboard (const String& text)
-{
-    [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
-                             forPasteboardType: @"public.text"];
-}
-
-String SystemClipboard::getTextFromClipboard()
-{
-    NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"];
-
-    return text == nil ? String::empty
-                       : nsStringToJuce (text);
-}
-
-//==============================================================================
-void Desktop::createMouseInputSources()
-{
-    for (int i = 0; i < 10; ++i)
-        mouseSources.add (new MouseInputSource (i, false));
-}
-
-bool Desktop::canUseSemiTransparentWindows() noexcept
-{
-    return true;
-}
-
-const Point<int> MouseInputSource::getCurrentMousePosition()
-{
-    return juce_lastMousePos;
-}
-
-void Desktop::setMousePosition (const Point<int>&)
-{
-}
-
-Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
-{
-    return convertToJuceOrientation ([[UIApplication sharedApplication] statusBarOrientation]);
-}
-
-void Desktop::getCurrentMonitorPositions (Array <Rectangle <int> >& monitorCoords, const bool clipToWorkArea)
-{
-    JUCE_AUTORELEASEPOOL
-    monitorCoords.clear();
-
-    CGRect r = clipToWorkArea ? [[UIScreen mainScreen] applicationFrame]
-                              : [[UIScreen mainScreen] bounds];
-
-    monitorCoords.add (UIViewComponentPeer::realScreenPosToRotated (convertToRectInt (r)));
-}
-
-//==============================================================================
 const int KeyPress::spaceKey        = ' ';
 const int KeyPress::returnKey       = 0x0d;
 const int KeyPress::escapeKey       = 0x1b;

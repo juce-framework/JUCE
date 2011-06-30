@@ -883,8 +883,8 @@
           <Filter Name="mac">
             <File RelativePath="..\..\src\native\mac\juce_ios_Audio.cpp"/>
             <File RelativePath="..\..\src\native\mac\juce_ios_MessageManager.mm"/>
-            <File RelativePath="..\..\src\native\mac\juce_ios_MiscUtilities.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_ios_UIViewComponentPeer.mm"/>
+            <File RelativePath="..\..\src\native\mac\juce_ios_Windowing.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_AppleRemote.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_AudioCDBurner.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_AudioCDReader.mm"/>
@@ -899,7 +899,6 @@
             <File RelativePath="..\..\src\native\mac\juce_mac_Fonts.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_MainMenu.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_MessageManager.mm"/>
-            <File RelativePath="..\..\src\native\mac\juce_mac_MiscUtilities.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_MouseCursor.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_NativeCode.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_NativeIncludes.h"/>
@@ -913,6 +912,7 @@
             <File RelativePath="..\..\src\native\mac\juce_mac_SystemStats.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_Threads.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_WebBrowserComponent.mm"/>
+            <File RelativePath="..\..\src\native\mac\juce_mac_Windowing.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_osx_MessageQueue.h"/>
             <File RelativePath="..\..\src\native\mac\juce_osx_ObjCHelpers.h"/>
           </Filter>

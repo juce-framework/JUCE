@@ -431,13 +431,13 @@ public:
 
     void launchProject()                            { getSLNFile().startAsProcess(); }
 
-    bool isDefaultFormatForCurrentOS()
+    int getLaunchPreferenceOrderForCurrentOS()
     {
-      #if JUCE_WINDOWS
-        return true;
-      #else
-        return false;
-      #endif
+       #if JUCE_WINDOWS
+        return 4;
+       #else
+        return 0;
+       #endif
     }
 
     static MSVCProjectExporterVC2008* createForSettings (Project& project, const ValueTree& settings)
@@ -785,7 +785,14 @@ public:
     static const char* getName()                    { return "Visual Studio 2005"; }
     static const char* getValueTreeTypeName()       { return "VS2005"; }
 
-    bool isDefaultFormatForCurrentOS()              { return false; }
+    int getLaunchPreferenceOrderForCurrentOS()
+    {
+       #if JUCE_WINDOWS
+        return 2;
+       #else
+        return 0;
+       #endif
+    }
 
     static MSVCProjectExporterVC2005* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -817,7 +824,15 @@ public:
     static const char* getName()                   { return "Visual C++ 6.0"; }
     static const char* getValueTreeTypeName()      { return "MSVC6"; }
 
-    bool isDefaultFormatForCurrentOS()              { return false; }
+    int getLaunchPreferenceOrderForCurrentOS()
+    {
+       #if JUCE_WINDOWS
+        return 1;
+       #else
+        return 0;
+       #endif
+    }
+
     void launchProject()                            { getDSWFile().startAsProcess(); }
 
     static MSVCProjectExporterVC6* createForSettings (Project& project, const ValueTree& settings)
@@ -1078,7 +1093,15 @@ public:
     static const char* getName()                    { return "Visual Studio 2010"; }
     static const char* getValueTreeTypeName()       { return "VS2010"; }
 
-    bool isDefaultFormatForCurrentOS()              { return false; }
+    int getLaunchPreferenceOrderForCurrentOS()
+    {
+       #if JUCE_WINDOWS
+        return 3;
+       #else
+        return 0;
+       #endif
+    }
+
     void launchProject()                            { getSLNFile().startAsProcess(); }
 
     static MSVCProjectExporterVC2010* createForSettings (Project& project, const ValueTree& settings)
@@ -1235,63 +1258,77 @@ protected:
             XmlElement* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
             setConditionAttribute (*group, config);
 
-            XmlElement* midl = group->createNewChildElement ("Midl");
-            midl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
-                                                                                             : "NDEBUG;%(PreprocessorDefinitions)");
-            midl->createNewChildElement ("MkTypLibCompatible")->addTextElement ("true");
-            midl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-            midl->createNewChildElement ("TargetEnvironment")->addTextElement ("Win32");
-            //midl->createNewChildElement ("TypeLibraryName")->addTextElement ("");
-            midl->createNewChildElement ("HeaderFileName");
-
-            XmlElement* cl = group->createNewChildElement ("ClCompile");
-            cl->createNewChildElement ("Optimization")->addTextElement (isDebug ? "Disabled" : "MaxSpeed");
-
-            if (isDebug)
-                cl->createNewChildElement ("DebugInformationFormat")->addTextElement ("EditAndContinue");
-
-            StringArray includePaths (getHeaderSearchPaths (config));
-            includePaths.add ("%(AdditionalIncludeDirectories)");
-            cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
-            cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
-            cl->createNewChildElement ("RuntimeLibrary")->addTextElement (isRTAS() ? (isDebug ? "MultiThreadedDLLDebug" : "MultiThreadedDLL")
-                                                                                   : (isDebug ? "MultiThreadedDebug" : "MultiThreaded"));
-            cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
-            cl->createNewChildElement ("PrecompiledHeader");
-            cl->createNewChildElement ("AssemblerListingLocation")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            cl->createNewChildElement ("ObjectFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            cl->createNewChildElement ("WarningLevel")->addTextElement ("Level4");
-            cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-
-            XmlElement* res = group->createNewChildElement ("ResourceCompile");
-            res->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
-                                                                                            : "NDEBUG;%(PreprocessorDefinitions)");
-
-            XmlElement* link = group->createNewChildElement ("Link");
-            link->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
-            link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-            link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
-                                                                                                    : "%(IgnoreSpecificDefaultLibraries)");
-            link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
-            link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
-            link->createNewChildElement ("SubSystem")->addTextElement (project.isCommandLineApp() ? "Console" : "Windows");
-            link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
-
-            if (! isDebug)
             {
-                link->createNewChildElement ("OptimizeReferences")->addTextElement ("true");
-                link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
+                XmlElement* midl = group->createNewChildElement ("Midl");
+                midl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
+                                                                                                 : "NDEBUG;%(PreprocessorDefinitions)");
+                midl->createNewChildElement ("MkTypLibCompatible")->addTextElement ("true");
+                midl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+                midl->createNewChildElement ("TargetEnvironment")->addTextElement ("Win32");
+                //midl->createNewChildElement ("TypeLibraryName")->addTextElement ("");
+                midl->createNewChildElement ("HeaderFileName");
             }
 
-            String extraLinkerOptions (getExtraLinkerFlags().toString());
-            if (extraLinkerOptions.isNotEmpty())
-                link->createNewChildElement ("AdditionalOptions")->addTextElement (replacePreprocessorTokens (config, extraLinkerOptions).trim()
-                                                                                     + " %(AdditionalOptions)");
+            {
+                XmlElement* cl = group->createNewChildElement ("ClCompile");
+                cl->createNewChildElement ("Optimization")->addTextElement (isDebug ? "Disabled" : "MaxSpeed");
 
-            XmlElement* bsc = group->createNewChildElement ("Bscmake");
-            bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-            bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
+                if (isDebug)
+                    cl->createNewChildElement ("DebugInformationFormat")->addTextElement ("EditAndContinue");
+
+                StringArray includePaths (getHeaderSearchPaths (config));
+                includePaths.add ("%(AdditionalIncludeDirectories)");
+                cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
+                cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
+                cl->createNewChildElement ("RuntimeLibrary")->addTextElement (isRTAS() ? (isDebug ? "MultiThreadedDLLDebug" : "MultiThreadedDLL")
+                                                                                       : (isDebug ? "MultiThreadedDebug" : "MultiThreaded"));
+                cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
+                cl->createNewChildElement ("PrecompiledHeader");
+                cl->createNewChildElement ("AssemblerListingLocation")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
+                cl->createNewChildElement ("ObjectFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
+                cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
+                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level4");
+                cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+
+                const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim());
+                if (extraFlags.isNotEmpty())
+                    cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
+            }
+
+            {
+                XmlElement* res = group->createNewChildElement ("ResourceCompile");
+                res->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
+                                                                                                : "NDEBUG;%(PreprocessorDefinitions)");
+            }
+
+            {
+                XmlElement* link = group->createNewChildElement ("Link");
+                link->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
+                link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+                link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
+                                                                                                        : "%(IgnoreSpecificDefaultLibraries)");
+                link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
+                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
+                link->createNewChildElement ("SubSystem")->addTextElement (project.isCommandLineApp() ? "Console" : "Windows");
+                link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
+
+                if (! isDebug)
+                {
+                    link->createNewChildElement ("OptimizeReferences")->addTextElement ("true");
+                    link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
+                }
+
+                String extraLinkerOptions (getExtraLinkerFlags().toString());
+                if (extraLinkerOptions.isNotEmpty())
+                    link->createNewChildElement ("AdditionalOptions")->addTextElement (replacePreprocessorTokens (config, extraLinkerOptions).trim()
+                                                                                         + " %(AdditionalOptions)");
+            }
+
+            {
+                XmlElement* bsc = group->createNewChildElement ("Bscmake");
+                bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+                bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
+            }
         }
 
         {
@@ -1332,12 +1369,9 @@ protected:
 
     const String getProjectType() const
     {
-        if (project.isGUIApplication() || project.isCommandLineApp())
-            return "Application";
-        else if (project.isAudioPlugin() || project.isBrowserPlugin())
-            return "DynamicLibrary";
-        else if (project.isLibrary())
-            return "StaticLibrary";
+        if (project.isGUIApplication() || project.isCommandLineApp())   return "Application";
+        else if (project.isAudioPlugin() || project.isBrowserPlugin())  return "DynamicLibrary";
+        else if (project.isLibrary())                                   return "StaticLibrary";
 
         jassertfalse;
         return String::empty;

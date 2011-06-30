@@ -73,13 +73,22 @@ public:
     //==============================================================================
     Value getObjCSuffix()       { return getSetting ("objCExtraSuffix"); }
 
-    bool isDefaultFormatForCurrentOS()
+    int getLaunchPreferenceOrderForCurrentOS()
     {
-      #if JUCE_MAC
-        return ! iPhone;
-      #else
+       #if JUCE_MAC
+        return iPhone ? 1 : 2;
+       #else
+        return 0;
+       #endif
+    }
+
+    bool isAvailableOnCurrentOS()
+    {
+       #if JUCE_MAC
+        return true;
+       #else
         return false;
-      #endif
+       #endif
     }
 
     bool isPossibleForCurrentProject()      { return project.isGUIApplication() || ! iPhone; }

@@ -308,7 +308,9 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         if (project != nullptr)
         {
             ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
-            exporter->launchProject();
+
+            if (exporter != nullptr)
+                exporter->launchProject();
         }
         break;
 
@@ -316,7 +318,9 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         if (project != nullptr && project->save (true, true) == FileBasedDocument::savedOk)
         {
             ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
-            exporter->launchProject();
+
+            if (exporter != nullptr)
+                exporter->launchProject();
         }
         break;
 

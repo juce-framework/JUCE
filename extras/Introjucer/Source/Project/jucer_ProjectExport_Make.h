@@ -60,13 +60,13 @@ public:
     }
 
     //==============================================================================
-    bool isDefaultFormatForCurrentOS()
+    int getLaunchPreferenceOrderForCurrentOS()
     {
-      #if JUCE_LINUX
-        return true;
-      #else
-        return false;
-      #endif
+       #if JUCE_LINUX
+        return 1;
+       #else
+        return 0;
+       #endif
     }
 
     bool isPossibleForCurrentProject()          { return true; }

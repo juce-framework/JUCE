@@ -1346,10 +1346,10 @@
                 file="src/native/mac/juce_ios_Audio.cpp"/>
           <FILE id="XTxdCBen" name="juce_ios_MessageManager.mm" compile="1" resource="0"
                 file="src/native/mac/juce_ios_MessageManager.mm"/>
-          <FILE id="kGVgE6vYV" name="juce_ios_MiscUtilities.mm" compile="1" resource="0"
-                file="src/native/mac/juce_ios_MiscUtilities.mm"/>
           <FILE id="SKGkPpvaz" name="juce_ios_UIViewComponentPeer.mm" compile="1"
                 resource="0" file="src/native/mac/juce_ios_UIViewComponentPeer.mm"/>
+          <FILE id="kGVgE6vYV" name="juce_ios_Windowing.mm" compile="1" resource="0"
+                file="src/native/mac/juce_ios_Windowing.mm"/>
           <FILE id="2cnGnB7g9" name="juce_mac_AppleRemote.mm" compile="1" resource="0"
                 file="src/native/mac/juce_mac_AppleRemote.mm"/>
           <FILE id="8rKYGEkhh" name="juce_mac_AudioCDBurner.mm" compile="1" resource="0"
@@ -1378,8 +1378,6 @@
                 file="src/native/mac/juce_mac_MainMenu.mm"/>
           <FILE id="g8rCLjth" name="juce_mac_MessageManager.mm" compile="1" resource="0"
                 file="src/native/mac/juce_mac_MessageManager.mm"/>
-          <FILE id="dLoEmsdfl" name="juce_mac_MiscUtilities.mm" compile="1" resource="0"
-                file="src/native/mac/juce_mac_MiscUtilities.mm"/>
           <FILE id="84ADkew8H" name="juce_mac_MouseCursor.mm" compile="1" resource="0"
                 file="src/native/mac/juce_mac_MouseCursor.mm"/>
           <FILE id="FCbPaX" name="juce_mac_NativeCode.mm" compile="1" resource="0"
@@ -1406,6 +1404,8 @@
                 file="src/native/mac/juce_mac_Threads.mm"/>
           <FILE id="ZV5RUI3V" name="juce_mac_WebBrowserComponent.mm" compile="1"
                 resource="0" file="src/native/mac/juce_mac_WebBrowserComponent.mm"/>
+          <FILE id="dLoEmsdfl" name="juce_mac_Windowing.mm" compile="1" resource="0"
+                file="src/native/mac/juce_mac_Windowing.mm"/>
           <FILE id="Gc7s3v" name="juce_osx_MessageQueue.h" compile="0" resource="0"
                 file="src/native/mac/juce_osx_MessageQueue.h"/>
           <FILE id="ffVfA" name="juce_osx_ObjCHelpers.h" compile="0" resource="0"

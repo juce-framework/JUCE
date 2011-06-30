@@ -65,13 +65,13 @@ public:
     }
 
     //==============================================================================
-    bool isDefaultFormatForCurrentOS()
+    int getLaunchPreferenceOrderForCurrentOS()
     {
-      #if JUCE_ANDROID
-        return true;
-      #else
-        return false;
-      #endif
+       #if JUCE_ANDROID
+        return 1;
+       #else
+        return 0;
+       #endif
     }
 
     bool isPossibleForCurrentProject()          { return project.isGUIApplication(); }

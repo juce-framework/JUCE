@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	8
+#define JUCE_BUILDNUMBER	9
 
 /** Current Juce version number.
 

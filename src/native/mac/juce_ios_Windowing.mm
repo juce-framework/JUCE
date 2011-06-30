@@ -29,61 +29,11 @@
 
 
 //==============================================================================
-END_JUCE_NAMESPACE
-
-@interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
-{
-}
-
-- (void) applicationDidFinishLaunching: (UIApplication*) application;
-- (void) applicationWillTerminate: (UIApplication*) application;
-
-@end
-
-@implementation JuceAppStartupDelegate
-
-- (void) applicationDidFinishLaunching: (UIApplication*) application
-{
-    initialiseJuce_GUI();
-
-    if (! JUCEApplication::createInstance()->initialiseApp (String::empty))
-        exit (0);
-}
-
-- (void) applicationWillTerminate: (UIApplication*) application
-{
-    JUCEApplication::appWillTerminateByForce();
-}
-
-@end
-
-BEGIN_JUCE_NAMESPACE
-
-int juce_iOSMain (int argc, const char* argv[])
-{
-    return UIApplicationMain (argc, const_cast<char**> (argv), nil, @"JuceAppStartupDelegate");
-}
-
-//==============================================================================
-ScopedAutoReleasePool::ScopedAutoReleasePool()
-{
-    pool = [[NSAutoreleasePool alloc] init];
-}
-
-ScopedAutoReleasePool::~ScopedAutoReleasePool()
-{
-    [((NSAutoreleasePool*) pool) release];
-}
-
-//==============================================================================
 void LookAndFeel::playAlertSound()
 {
     //xxx
     //AudioServicesPlaySystemSound ();
 }
-
-//==============================================================================
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
 //==============================================================================
 class iOSMessageBox;
@@ -245,7 +195,62 @@ bool Desktop::isScreenSaverEnabled()
     return ! [[UIApplication sharedApplication] isIdleTimerDisabled];
 }
 
+//==============================================================================
+Image juce_createIconForFile (const File& file)
+{
+    return Image::null;
+}
 
-#endif
+//==============================================================================
+void SystemClipboard::copyTextToClipboard (const String& text)
+{
+    [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
+                             forPasteboardType: @"public.text"];
+}
+
+String SystemClipboard::getTextFromClipboard()
+{
+    NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"];
+
+    return text == nil ? String::empty
+                       : nsStringToJuce (text);
+}
+
+//==============================================================================
+void Desktop::createMouseInputSources()
+{
+    for (int i = 0; i < 10; ++i)
+        mouseSources.add (new MouseInputSource (i, false));
+}
+
+bool Desktop::canUseSemiTransparentWindows() noexcept
+{
+    return true;
+}
+
+const Point<int> MouseInputSource::getCurrentMousePosition()
+{
+    return juce_lastMousePos;
+}
+
+void Desktop::setMousePosition (const Point<int>&)
+{
+}
+
+Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
+{
+    return convertToJuceOrientation ([[UIApplication sharedApplication] statusBarOrientation]);
+}
+
+void Desktop::getCurrentMonitorPositions (Array <Rectangle <int> >& monitorCoords, const bool clipToWorkArea)
+{
+    JUCE_AUTORELEASEPOOL
+    monitorCoords.clear();
+
+    CGRect r = clipToWorkArea ? [[UIScreen mainScreen] applicationFrame]
+                              : [[UIScreen mainScreen] bounds];
+
+    monitorCoords.add (UIViewComponentPeer::realScreenPosToRotated (convertToRectInt (r)));
+}
 
 #endif

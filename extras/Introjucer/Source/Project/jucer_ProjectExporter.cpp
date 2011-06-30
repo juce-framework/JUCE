@@ -104,15 +104,23 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
 
 ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& project)
 {
+    ScopedPointer <ProjectExporter> best;
+    int bestPref = 0;
+
     for (int i = 0; i < project.getNumExporters(); ++i)
     {
         ScopedPointer <ProjectExporter> exp (project.createExporter (i));
 
-        if (exp->isDefaultFormatForCurrentOS())
-            return exp.release();
+        const int pref = exp->getLaunchPreferenceOrderForCurrentOS();
+
+        if (pref > bestPref)
+        {
+            bestPref = pref;
+            best = exp;
+        }
     }
 
-    return 0;
+    return best.release();
 }
 
 const File ProjectExporter::getTargetFolder() const

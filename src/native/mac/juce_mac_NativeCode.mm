@@ -118,13 +118,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_mac_Threads.mm"
 #include "../common/juce_posix_SharedCode.h"
 #include "juce_mac_Files.mm"
-
-#if JUCE_IOS
- #include "juce_ios_MiscUtilities.mm"
-#else
- #include "juce_mac_MiscUtilities.mm"
-#endif
-
 #include "juce_mac_Debugging.mm"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
@@ -132,6 +125,7 @@ BEGIN_JUCE_NAMESPACE
   #include "juce_mac_Fonts.mm"
   #include "juce_mac_CoreGraphicsContext.mm"
   #include "juce_ios_UIViewComponentPeer.mm"
+  #include "juce_ios_Windowing.mm"
   #include "juce_ios_MessageManager.mm"
   #include "juce_mac_FileChooser.mm"
   #include "juce_mac_OpenGLComponent.mm"
@@ -143,6 +137,7 @@ BEGIN_JUCE_NAMESPACE
   #include "juce_mac_Fonts.mm" // (must go before juce_mac_CoreGraphicsContext.mm)
   #include "juce_mac_CoreGraphicsContext.mm"
   #include "juce_mac_NSViewComponentPeer.mm"
+  #include "juce_mac_Windowing.mm"
   #include "juce_mac_MouseCursor.mm"
   #include "juce_mac_NSViewComponent.mm"
   #include "juce_mac_AppleRemote.mm"

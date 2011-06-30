@@ -27,6 +27,43 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+END_JUCE_NAMESPACE
+
+@interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
+{
+}
+
+- (void) applicationDidFinishLaunching: (UIApplication*) application;
+- (void) applicationWillTerminate: (UIApplication*) application;
+
+@end
+
+@implementation JuceAppStartupDelegate
+
+- (void) applicationDidFinishLaunching: (UIApplication*) application
+{
+    initialiseJuce_GUI();
+
+    if (! JUCEApplication::createInstance()->initialiseApp (String::empty))
+        exit (0);
+}
+
+- (void) applicationWillTerminate: (UIApplication*) application
+{
+    JUCEApplication::appWillTerminateByForce();
+}
+
+@end
+
+BEGIN_JUCE_NAMESPACE
+
+int juce_iOSMain (int argc, const char* argv[])
+{
+    return UIApplicationMain (argc, const_cast<char**> (argv), nil, @"JuceAppStartupDelegate");
+}
+
+//==============================================================================
 struct CallbackMessagePayload
 {
     MessageCallbackFunction* function;
