@@ -97,19 +97,14 @@ BEGIN_JUCE_NAMESPACE
 #include "../../audio/midi/juce_MidiInput.h"
 #include "../../containers/juce_ScopedValueSetter.h"
 #include "../../events/juce_AppleRemote.h"
-#include "../common/juce_MidiDataConcatenator.h"
 #undef Point
-
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
- #include "juce_osx_ObjCHelpers.h"
- #include "juce_osx_MessageQueue.h"
-#endif
 
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1
 
 // Now include the actual code files..
 
+#include "juce_osx_ObjCHelpers.h"
 #include "juce_mac_ObjCSuffix.h"
 #include "juce_mac_Strings.mm"
 #include "juce_mac_SystemStats.mm"
@@ -121,6 +116,9 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_mac_Debugging.mm"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+  #include "juce_osx_MessageQueue.h"
+  #include "../common/juce_MidiDataConcatenator.h"
+
  #if JUCE_IOS
   #include "juce_mac_Fonts.mm"
   #include "juce_mac_CoreGraphicsContext.mm"

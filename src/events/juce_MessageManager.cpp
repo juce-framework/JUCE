@@ -63,7 +63,7 @@ MessageManager::~MessageManager() noexcept
     instance = nullptr;  // do this last in case this instance is still needed by doPlatformSpecificShutdown()
 }
 
-MessageManager* MessageManager::getInstance() noexcept
+MessageManager* MessageManager::getInstance()
 {
     if (instance == nullptr)
     {
@@ -72,6 +72,11 @@ MessageManager* MessageManager::getInstance() noexcept
     }
 
     return instance;
+}
+
+void MessageManager::deleteInstance()
+{
+    deleteAndZero (instance);
 }
 
 void MessageManager::postMessageToQueue (Message* const message)
@@ -315,5 +320,18 @@ MessageManagerLock::~MessageManagerLock() noexcept
     }
 }
 
+//==============================================================================
+JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
+{
+    JUCE_AUTORELEASEPOOL
+    MessageManager::getInstance();
+}
+
+JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
+{
+    JUCE_AUTORELEASEPOOL
+    DeletedAtShutdown::deleteAll();
+    MessageManager::deleteInstance();
+}
 
 END_JUCE_NAMESPACE

@@ -186,7 +186,6 @@
     <ClCompile Include="..\..\src\containers\juce_ValueTree.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_Variant.cpp"/>
     <ClCompile Include="..\..\src\core\juce_FileLogger.cpp"/>
-    <ClCompile Include="..\..\src\core\juce_Initialisation.cpp"/>
     <ClCompile Include="..\..\src\core\juce_Logger.cpp"/>
     <ClCompile Include="..\..\src\core\juce_PerformanceCounter.cpp"/>
     <ClCompile Include="..\..\src\core\juce_RelativeTime.cpp"/>

@@ -38,9 +38,9 @@ bool juce_IsRunningInWine()
 //==============================================================================
 String JUCE_CALLTYPE Process::getCurrentCommandLineParams()
 {
-    return String (CharacterFunctions::findEndOfToken (CharPointer_UTF16 (GetCommandLineW()),
-                                                       CharPointer_UTF16 (L" "),
-                                                       CharPointer_UTF16 (L"\""))).trimStart();
+    return CharacterFunctions::findEndOfToken (CharPointer_UTF16 (GetCommandLineW()),
+                                               CharPointer_UTF16 (L" "),
+                                               CharPointer_UTF16 (L"\"")).findEndOfWhitespace();
 }
 
 //==============================================================================

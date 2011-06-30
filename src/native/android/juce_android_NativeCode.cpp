@@ -89,7 +89,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../audio/midi/juce_MidiOutput.h"
 #include "../../audio/midi/juce_MidiInput.h"
 #include "../../containers/juce_ScopedValueSetter.h"
-#include "../common/juce_MidiDataConcatenator.h"
 
 #define USE_ANDROID_CANVAS 0
 

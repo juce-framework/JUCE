@@ -27,9 +27,7 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
- extern HWND juce_messageWindowHandle;
-#endif
+HWND juce_messageWindowHandle = 0;  // (this is used by other parts of the codebase)
 
 //==============================================================================
 #if ! JUCE_USE_INTRINSICS
@@ -118,10 +116,9 @@ void JUCE_API juce_threadEntryPoint (void*);
 
 static unsigned int __stdcall threadEntryProc (void* userData)
 {
-   #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-    AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, 0),
-                       GetCurrentThreadId(), TRUE);
-   #endif
+    if (juce_messageWindowHandle != 0)
+        AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, 0),
+                           GetCurrentThreadId(), TRUE);
 
     juce_threadEntryPoint (userData);
 

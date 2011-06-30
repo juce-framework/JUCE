@@ -94,7 +94,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../audio/midi/juce_MidiInput.h"
 #include "../../containers/juce_ScopedValueSetter.h"
 #include "../../utilities/juce_WindowsRegistry.h"
-#include "../common/juce_MidiDataConcatenator.h"
 
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1
@@ -119,6 +118,7 @@ BEGIN_JUCE_NAMESPACE
  #include "juce_win32_WebBrowserComponent.cpp"
  #include "juce_win32_OpenGLComponent.cpp"
  #include "juce_win32_AudioCDReader.cpp"
+ #include "../common/juce_MidiDataConcatenator.h"
  #include "juce_win32_Midi.cpp"
  #include "juce_win32_ASIO.cpp"
  #include "juce_win32_DirectSound.cpp"

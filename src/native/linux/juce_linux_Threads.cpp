@@ -33,30 +33,22 @@
 */
 
 //==============================================================================
-// sets the process to 0=low priority, 1=normal, 2=high, 3=realtime
-void Process::setPriority (ProcessPriority prior)
+void Process::setPriority (const ProcessPriority prior)
 {
+    const int policy = (prior <= NormalPriority) ? SCHED_OTHER : SCHED_RR;
+    const int minp = sched_get_priority_min (policy);
+    const int maxp = sched_get_priority_max (policy);
+
     struct sched_param param;
-    int policy, maxp, minp;
 
-    const int p = (int) prior;
-
-    if (p <= 1)
-        policy = SCHED_OTHER;
-    else
-        policy = SCHED_RR;
-
-    minp = sched_get_priority_min (policy);
-    maxp = sched_get_priority_max (policy);
-
-    if (p < 2)
-        param.sched_priority = 0;
-    else if (p == 2 )
-        // Set to middle of lower realtime priority range
-        param.sched_priority = minp + (maxp - minp) / 4;
-    else
-        // Set to middle of higher realtime priority range
-        param.sched_priority = minp + (3 * (maxp - minp) / 4);
+    switch (prior)
+    {
+        case LowPriority:
+        case NormalPriority:    param.sched_priority = 0; break;
+        case HighPriority:      param.sched_priority = minp + (maxp - minp) / 4; break;
+        case RealtimePriority:  param.sched_priority = minp + (3 * (maxp - minp) / 4); break;
+        default:                jassertfalse; break;
+    }
 
     pthread_setschedparam (pthread_self(), policy, &param);
 }
@@ -91,8 +83,7 @@ JUCE_API bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
 
 void Process::raisePrivilege()
 {
-    // If running suid root, change effective user
-    // to root
+    // If running suid root, change effective user to root
     if (geteuid() != 0 && getuid() == 0)
     {
         setreuid (geteuid(), getuid());
@@ -102,8 +93,7 @@ void Process::raisePrivilege()
 
 void Process::lowerPrivilege()
 {
-    // If runing suid root, change effective user
-    // back to real user
+    // If runing suid root, change effective user back to real user
     if (geteuid() == 0 && getuid() != 0)
     {
         setreuid (geteuid(), getuid());

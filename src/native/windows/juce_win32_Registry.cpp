@@ -29,7 +29,7 @@
 
 
 //==============================================================================
-namespace
+namespace RegistryHelpers
 {
     HKEY findKeyForPath (String name, const bool createForWriting, String& valueName)
     {
@@ -70,7 +70,7 @@ namespace
 String WindowsRegistry::getValue (const String& regValuePath, const String& defaultValue)
 {
     String valueName, result (defaultValue);
-    HKEY k = findKeyForPath (regValuePath, false, valueName);
+    HKEY k = RegistryHelpers::findKeyForPath (regValuePath, false, valueName);
 
     if (k != 0)
     {
@@ -95,7 +95,7 @@ String WindowsRegistry::getValue (const String& regValuePath, const String& defa
 void WindowsRegistry::setValue (const String& regValuePath, const String& value)
 {
     String valueName;
-    HKEY k = findKeyForPath (regValuePath, true, valueName);
+    HKEY k = RegistryHelpers::findKeyForPath (regValuePath, true, valueName);
 
     if (k != 0)
     {
@@ -111,7 +111,7 @@ bool WindowsRegistry::valueExists (const String& regValuePath)
 {
     bool exists = false;
     String valueName;
-    HKEY k = findKeyForPath (regValuePath, false, valueName);
+    HKEY k = RegistryHelpers::findKeyForPath (regValuePath, false, valueName);
 
     if (k != 0)
     {
@@ -131,7 +131,7 @@ bool WindowsRegistry::valueExists (const String& regValuePath)
 void WindowsRegistry::deleteValue (const String& regValuePath)
 {
     String valueName;
-    HKEY k = findKeyForPath (regValuePath, true, valueName);
+    HKEY k = RegistryHelpers::findKeyForPath (regValuePath, true, valueName);
 
     if (k != 0)
     {
@@ -143,7 +143,7 @@ void WindowsRegistry::deleteValue (const String& regValuePath)
 void WindowsRegistry::deleteKey (const String& regKeyPath)
 {
     String valueName;
-    HKEY k = findKeyForPath (regKeyPath, true, valueName);
+    HKEY k = RegistryHelpers::findKeyForPath (regKeyPath, true, valueName);
 
     if (k != 0)
     {

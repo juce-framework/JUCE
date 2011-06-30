@@ -404,8 +404,6 @@
               file="src/core/juce_FileLogger.cpp"/>
         <FILE id="7nItXGiB" name="juce_FileLogger.h" compile="0" resource="0"
               file="src/core/juce_FileLogger.h"/>
-        <FILE id="eux3SL3" name="juce_Initialisation.cpp" compile="1" resource="0"
-              file="src/core/juce_Initialisation.cpp"/>
         <FILE id="nsfdNZAs" name="juce_Initialisation.h" compile="0" resource="0"
               file="src/core/juce_Initialisation.h"/>
         <FILE id="43AWfo8b2" name="juce_Logger.cpp" compile="1" resource="0"

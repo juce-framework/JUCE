@@ -33,7 +33,7 @@
     Since the DLL is freed when this object is deleted, it's handy for managing
     library lifetimes using RAII.
 */
-class DynamicLibrary
+class JUCE_API  DynamicLibrary
 {
 public:
     /** Creates an unopened DynamicLibrary object.

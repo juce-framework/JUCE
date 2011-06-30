@@ -71,9 +71,6 @@ private:
 
 
 //==============================================================================
-HWND juce_messageWindowHandle = 0;  // (this is referred to by other parts of the codebase)
-
-//==============================================================================
 class JuceWindowIdentifier
 {
 public:

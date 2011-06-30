@@ -27,42 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#include "../utilities/juce_DeletedAtShutdown.h"
-
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
- #include "../events/juce_MessageManager.h"
-#endif
-
-//==============================================================================
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-
-static bool juceInitialisedGUI = false;
-
-JUCE_API void JUCE_CALLTYPE initialiseJuce_GUI()
-{
-    if (! juceInitialisedGUI)
-    {
-        juceInitialisedGUI = true;
-
-        JUCE_AUTORELEASEPOOL
-        MessageManager::getInstance();
-    }
-}
-
-JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
-{
-    if (juceInitialisedGUI)
-    {
-        juceInitialisedGUI = false;
-
-        JUCE_AUTORELEASEPOOL
-        DeletedAtShutdown::deleteAll();
-        delete MessageManager::getInstance();
-    }
-}
-
-#endif
-
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

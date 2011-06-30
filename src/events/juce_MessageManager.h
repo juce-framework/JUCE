@@ -53,7 +53,12 @@ class JUCE_API  MessageManager
 public:
     //==============================================================================
     /** Returns the global instance of the MessageManager. */
-    static MessageManager* getInstance() noexcept;
+    static MessageManager* getInstance();
+
+    /** Deletes the global MessageManager instance.
+        Does nothing if no instance had been created.
+    */
+    static void deleteInstance();
 
     //==============================================================================
     /** Runs the event dispatch loop until a stop message is posted.

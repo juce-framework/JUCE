@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	9
+#define JUCE_BUILDNUMBER	10
 
 /** Current Juce version number.
 
@@ -12175,7 +12175,7 @@ private:
 	}
 	@endcode
 */
-class Result
+class JUCE_API  Result
 {
 public:
 
@@ -22176,7 +22176,7 @@ private:
 	Since the DLL is freed when this object is deleted, it's handy for managing
 	library lifetimes using RAII.
 */
-class DynamicLibrary
+class JUCE_API  DynamicLibrary
 {
 public:
 	/** Creates an unopened DynamicLibrary object.
@@ -48225,7 +48225,12 @@ class JUCE_API  MessageManager
 public:
 
 	/** Returns the global instance of the MessageManager. */
-	static MessageManager* getInstance() noexcept;
+	static MessageManager* getInstance();
+
+	/** Deletes the global MessageManager instance.
+		Does nothing if no instance had been created.
+	*/
+	static void deleteInstance();
 
 	/** Runs the event dispatch loop until a stop message is posted.
 

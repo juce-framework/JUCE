@@ -103,7 +103,6 @@ OBJECTS := \
   $(OBJDIR)/juce_ValueTree_f822be84.o \
   $(OBJDIR)/juce_Variant_4f31c35a.o \
   $(OBJDIR)/juce_FileLogger_7858478e.o \
-  $(OBJDIR)/juce_Initialisation_fec765a9.o \
   $(OBJDIR)/juce_Logger_4f4f7f72.o \
   $(OBJDIR)/juce_PerformanceCounter_6422080e.o \
   $(OBJDIR)/juce_RelativeTime_bc5ef35b.o \
@@ -706,11 +705,6 @@ $(OBJDIR)/juce_Variant_4f31c35a.o: ../../src/containers/juce_Variant.cpp
 $(OBJDIR)/juce_FileLogger_7858478e.o: ../../src/core/juce_FileLogger.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_FileLogger.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_Initialisation_fec765a9.o: ../../src/core/juce_Initialisation.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_Initialisation.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Logger_4f4f7f72.o: ../../src/core/juce_Logger.cpp
