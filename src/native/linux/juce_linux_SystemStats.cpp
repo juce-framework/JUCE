@@ -61,7 +61,7 @@ namespace LinuxStatsHelpers
     String getCpuInfo (const char* const key)
     {
         StringArray lines;
-        lines.addLines (File ("/proc/cpuinfo").loadFileAsString());
+        File ("/proc/cpuinfo").readLines (lines);
 
         for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
             if (lines[i].startsWithIgnoreCase (key))

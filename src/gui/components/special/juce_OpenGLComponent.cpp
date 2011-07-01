@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../windows/juce_ComponentPeer.h"
 #include "../layout/juce_ComponentMovementWatcher.h"
 #include "../../../threads/juce_Thread.h"
-
+#include "../../../events/juce_MessageManager.h"
 
 //==============================================================================
 extern void juce_glViewport (const int w, const int h);
@@ -177,6 +177,18 @@ public:
 
     void run()
     {
+       #if JUCE_LINUX
+        {
+            MessageManagerLock mml (this);
+
+            if (! mml.lockWasGained())
+                return;
+
+            owner.updateContext();
+            owner.updateContextPosition();
+        }
+       #endif
+
         while (! threadShouldExit())
         {
             const uint32 startOfRendering = Time::getMillisecondCounter();

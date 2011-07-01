@@ -34,6 +34,7 @@
 */
 class WindowsRegistry
 {
+public:
     //==============================================================================
     /** Returns a string from the registry.
 

@@ -81,7 +81,8 @@ AlertWindow::AlertWindow (const String& title,
                           Component* associatedComponent_)
    : TopLevelWindow (title, true),
      alertIconType (iconType),
-     associatedComponent (associatedComponent_)
+     associatedComponent (associatedComponent_),
+     escapeKeyCancels (true)
 {
     if (message.isEmpty())
         text = " "; // to force an update if the message is empty
@@ -114,7 +115,8 @@ AlertWindow::~AlertWindow()
 
 void AlertWindow::userTriedToCloseWindow()
 {
-    exitModalState (0);
+    if (escapeKeyCancels || buttons.size() > 0)
+        exitModalState (0);
 }
 
 //==============================================================================
@@ -184,6 +186,11 @@ void AlertWindow::triggerButtonClick (const String& buttonName)
             break;
         }
     }
+}
+
+void AlertWindow::setEscapeKeyCancels (bool shouldEscapeKeyCancel)
+{
+    escapeKeyCancels = shouldEscapeKeyCancel;
 }
 
 //==============================================================================
@@ -272,10 +279,6 @@ public:
         setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
         setColour (TextEditor::outlineColourId, Colours::transparentBlack);
         setColour (TextEditor::shadowColourId, Colours::transparentBlack);
-    }
-
-    ~AlertTextComp()
-    {
     }
 
     int getPreferredWidth() const noexcept   { return bestWidth; }
@@ -576,7 +579,7 @@ bool AlertWindow::keyPressed (const KeyPress& key)
         }
     }
 
-    if (key.isKeyCode (KeyPress::escapeKey) && buttons.size() == 0)
+    if (key.isKeyCode (KeyPress::escapeKey) && escapeKeyCancels && buttons.size() == 0)
     {
         exitModalState (0);
         return true;

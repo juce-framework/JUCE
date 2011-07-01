@@ -607,6 +607,11 @@ public:
     */
     String loadFileAsString() const;
 
+    /** Reads the contents of this file as text and splits it into lines, which are
+        appended to the given StringArray.
+    */
+    void readLines (StringArray& destLines) const;
+
     //==============================================================================
     /** Appends a block of binary data to the end of the file.
 

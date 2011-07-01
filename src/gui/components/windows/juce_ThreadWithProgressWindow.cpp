@@ -47,6 +47,9 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                         String::empty, String::empty,
                                         AlertWindow::NoIcon, hasCancelButton ? 1 : 0, 0);
 
+    // if there are no buttons, we won't allow the user to interrupt the thread.
+    alertWindow->setEscapeKeyCancels (false);
+
     if (hasProgressBar)
         alertWindow->addProgressBarComponent (progress);
 }

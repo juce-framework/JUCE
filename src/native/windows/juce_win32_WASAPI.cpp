@@ -267,14 +267,14 @@ private:
     public:
         SessionEventCallback (WASAPIDeviceBase& owner_) : owner (owner_) {}
 
-        HRESULT __stdcall OnDisplayNameChanged (LPCWSTR, LPCGUID)                 { return S_OK; }
-        HRESULT __stdcall OnIconPathChanged (LPCWSTR, LPCGUID)                    { return S_OK; }
-        HRESULT __stdcall OnSimpleVolumeChanged (float, BOOL, LPCGUID)            { return S_OK; }
-        HRESULT __stdcall OnChannelVolumeChanged (DWORD, float*, DWORD, LPCGUID)  { return S_OK; }
-        HRESULT __stdcall OnGroupingParamChanged (LPCGUID, LPCGUID)               { return S_OK; }
-        HRESULT __stdcall OnStateChanged (AudioSessionState)                      { return S_OK; }
+        JUCE_COMRESULT OnDisplayNameChanged (LPCWSTR, LPCGUID)                 { return S_OK; }
+        JUCE_COMRESULT OnIconPathChanged (LPCWSTR, LPCGUID)                    { return S_OK; }
+        JUCE_COMRESULT OnSimpleVolumeChanged (float, BOOL, LPCGUID)            { return S_OK; }
+        JUCE_COMRESULT OnChannelVolumeChanged (DWORD, float*, DWORD, LPCGUID)  { return S_OK; }
+        JUCE_COMRESULT OnGroupingParamChanged (LPCGUID, LPCGUID)               { return S_OK; }
+        JUCE_COMRESULT OnStateChanged (AudioSessionState)                      { return S_OK; }
 
-        HRESULT __stdcall OnSessionDisconnected (AudioSessionDisconnectReason reason)
+        JUCE_COMRESULT OnSessionDisconnected (AudioSessionDisconnectReason reason)
         {
             if (reason == DisconnectReasonFormatChanged)
                 owner.deviceSampleRateChanged();

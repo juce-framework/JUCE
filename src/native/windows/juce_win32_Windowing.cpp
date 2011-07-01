@@ -1859,38 +1859,57 @@ private:
         {
         }
 
-        HRESULT __stdcall DragEnter (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        JUCE_COMRESULT DragEnter (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);
-            owner->handleFileDragMove (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
-            *pdwEffect = DROPEFFECT_COPY;
-            return S_OK;
+            const bool wasWanted = owner->handleFileDragMove (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
+            *pdwEffect = wasWanted ? DROPEFFECT_COPY : DROPEFFECT_NONE;
+            return wasWanted ? S_OK : S_FALSE;
         }
 
-        HRESULT __stdcall DragLeave()
+        JUCE_COMRESULT DragLeave()
         {
             owner->handleFileDragExit (files);
             return S_OK;
         }
 
-        HRESULT __stdcall DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        JUCE_COMRESULT DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
-            owner->handleFileDragMove (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
-            *pdwEffect = DROPEFFECT_COPY;
-            return S_OK;
+            const bool wasWanted = owner->handleFileDragMove (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
+            *pdwEffect = wasWanted ? DROPEFFECT_COPY : DROPEFFECT_NONE;
+            return wasWanted ? S_OK : S_FALSE;
         }
 
-        HRESULT __stdcall Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        JUCE_COMRESULT Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);
-            owner->handleFileDragDrop (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
-            *pdwEffect = DROPEFFECT_COPY;
-            return S_OK;
+            const bool wasWanted = owner->handleFileDragDrop (files, owner->globalToLocal (Point<int> (mousePos.x, mousePos.y)));
+            *pdwEffect = wasWanted ? DROPEFFECT_COPY : DROPEFFECT_NONE;
+            return wasWanted ? S_OK : S_FALSE;
         }
 
     private:
         Win32ComponentPeer* const owner;
         StringArray files;
+
+        template <typename CharType>
+        void parseFileList (const CharType* names, const SIZE_T totalLen)
+        {
+            unsigned int i = 0;
+
+            for (;;)
+            {
+                unsigned int len = 0;
+                while (i + len < totalLen && names [i + len] != 0)
+                    ++len;
+
+                if (len == 0)
+                    break;
+
+                files.add (String (names + i, len));
+                i += len + 1;
+            }
+        }
 
         void updateFileList (IDataObject* const pDataObject)
         {
@@ -1902,43 +1921,13 @@ private:
             if (pDataObject->GetData (&format, &medium) == S_OK)
             {
                 const SIZE_T totalLen = GlobalSize (medium.hGlobal);
-                const LPDROPFILES pDropFiles = (const LPDROPFILES) GlobalLock (medium.hGlobal);
-                unsigned int i = 0;
+                const LPDROPFILES dropFiles = (const LPDROPFILES) GlobalLock (medium.hGlobal);
+                const void* const names = addBytesToPointer (dropFiles, sizeof (DROPFILES));
 
-                if (pDropFiles->fWide)
-                {
-                    const WCHAR* const fname = (WCHAR*) addBytesToPointer (pDropFiles, sizeof (DROPFILES));
-
-                    for (;;)
-                    {
-                        unsigned int len = 0;
-                        while (i + len < totalLen && fname [i + len] != 0)
-                            ++len;
-
-                        if (len == 0)
-                            break;
-
-                        files.add (String (fname + i, len));
-                        i += len + 1;
-                    }
-                }
+                if (dropFiles->fWide)
+                    parseFileList (static_cast <const WCHAR*> (names), totalLen);
                 else
-                {
-                    const char* const fname = (const char*) addBytesToPointer (pDropFiles, sizeof (DROPFILES));
-
-                    for (;;)
-                    {
-                        unsigned int len = 0;
-                        while (i + len < totalLen && fname [i + len] != 0)
-                            ++len;
-
-                        if (len == 0)
-                            break;
-
-                        files.add (String (fname + i, len));
-                        i += len + 1;
-                    }
-                }
+                    parseFileList (static_cast <const char*> (names), totalLen);
 
                 GlobalUnlock (medium.hGlobal);
             }
@@ -3127,7 +3116,7 @@ class JuceDropSource   : public ComBaseClassHelper <IDropSource>
 public:
     JuceDropSource() {}
 
-    HRESULT __stdcall QueryContinueDrag (BOOL escapePressed, DWORD keys)
+    JUCE_COMRESULT QueryContinueDrag (BOOL escapePressed, DWORD keys)
     {
         if (escapePressed)
             return DRAGDROP_S_CANCEL;
@@ -3138,7 +3127,7 @@ public:
         return S_OK;
     }
 
-    HRESULT __stdcall GiveFeedback (DWORD)
+    JUCE_COMRESULT GiveFeedback (DWORD)
     {
         return DRAGDROP_S_USEDEFAULTCURSORS;
     }
@@ -3154,7 +3143,7 @@ public:
     {
     }
 
-    HRESULT __stdcall Clone (IEnumFORMATETC** result)
+    JUCE_COMRESULT Clone (IEnumFORMATETC** result)
     {
         if (result == 0)
             return E_POINTER;
@@ -3166,7 +3155,7 @@ public:
         return S_OK;
     }
 
-    HRESULT __stdcall Next (ULONG celt, LPFORMATETC lpFormatEtc, ULONG* pceltFetched)
+    JUCE_COMRESULT Next (ULONG celt, LPFORMATETC lpFormatEtc, ULONG* pceltFetched)
     {
         if (pceltFetched != nullptr)
             *pceltFetched = 0;
@@ -3187,7 +3176,7 @@ public:
         return S_FALSE;
     }
 
-    HRESULT __stdcall Skip (ULONG celt)
+    JUCE_COMRESULT Skip (ULONG celt)
     {
         if (index + (int) celt >= 1)
             return S_FALSE;
@@ -3196,7 +3185,7 @@ public:
         return S_OK;
     }
 
-    HRESULT __stdcall Reset()
+    JUCE_COMRESULT Reset()
     {
         index = 0;
         return S_OK;
@@ -3237,7 +3226,7 @@ public:
         jassert (refCount == 0);
     }
 
-    HRESULT __stdcall GetData (FORMATETC* pFormatEtc, STGMEDIUM* pMedium)
+    JUCE_COMRESULT GetData (FORMATETC* pFormatEtc, STGMEDIUM* pMedium)
     {
         if ((pFormatEtc->tymed & format->tymed) != 0
              && pFormatEtc->cfFormat == format->cfFormat
@@ -3264,7 +3253,7 @@ public:
         return DV_E_FORMATETC;
     }
 
-    HRESULT __stdcall QueryGetData (FORMATETC* f)
+    JUCE_COMRESULT QueryGetData (FORMATETC* f)
     {
         if (f == 0)
             return E_INVALIDARG;
@@ -3277,13 +3266,13 @@ public:
         return DV_E_FORMATETC;
     }
 
-    HRESULT __stdcall GetCanonicalFormatEtc (FORMATETC*, FORMATETC* pFormatEtcOut)
+    JUCE_COMRESULT GetCanonicalFormatEtc (FORMATETC*, FORMATETC* pFormatEtcOut)
     {
         pFormatEtcOut->ptd = 0;
         return E_NOTIMPL;
     }
 
-    HRESULT __stdcall EnumFormatEtc (DWORD direction, IEnumFORMATETC** result)
+    JUCE_COMRESULT EnumFormatEtc (DWORD direction, IEnumFORMATETC** result)
     {
         if (result == 0)
             return E_POINTER;
@@ -3298,11 +3287,11 @@ public:
         return E_NOTIMPL;
     }
 
-    HRESULT __stdcall GetDataHere (FORMATETC*, STGMEDIUM*)                  { return DATA_E_FORMATETC; }
-    HRESULT __stdcall SetData (FORMATETC*, STGMEDIUM*, BOOL)                { return E_NOTIMPL; }
-    HRESULT __stdcall DAdvise (FORMATETC*, DWORD, IAdviseSink*, DWORD*)     { return OLE_E_ADVISENOTSUPPORTED; }
-    HRESULT __stdcall DUnadvise (DWORD)                                     { return E_NOTIMPL; }
-    HRESULT __stdcall EnumDAdvise (IEnumSTATDATA**)                         { return OLE_E_ADVISENOTSUPPORTED; }
+    JUCE_COMRESULT GetDataHere (FORMATETC*, STGMEDIUM*)                  { return DATA_E_FORMATETC; }
+    JUCE_COMRESULT SetData (FORMATETC*, STGMEDIUM*, BOOL)                { return E_NOTIMPL; }
+    JUCE_COMRESULT DAdvise (FORMATETC*, DWORD, IAdviseSink*, DWORD*)     { return OLE_E_ADVISENOTSUPPORTED; }
+    JUCE_COMRESULT DUnadvise (DWORD)                                     { return E_NOTIMPL; }
+    JUCE_COMRESULT EnumDAdvise (IEnumSTATDATA**)                         { return OLE_E_ADVISENOTSUPPORTED; }
 
 private:
     JuceDropSource* const dropSource;

@@ -833,9 +833,8 @@ void Project::getJuceConfigFlags (OwnedArray <JuceConfigFlag>& flags)
 {
     ValueTree configNode (getJuceConfigNode());
 
-    File juceConfigH (getLocalJuceFolder().getChildFile ("juce_Config.h"));
     StringArray lines;
-    lines.addLines (juceConfigH.loadFileAsString());
+    getLocalJuceFolder().getChildFile ("juce_Config.h").readLines (lines);
 
     for (int i = 0; i < lines.size(); ++i)
     {

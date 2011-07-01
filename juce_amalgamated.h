@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	12
+#define JUCE_BUILDNUMBER	13
 
 /** Current Juce version number.
 
@@ -12789,6 +12789,11 @@ public:
 		automatically cope with unicode/acsii file formats.
 	*/
 	String loadFileAsString() const;
+
+	/** Reads the contents of this file as text and splits it into lines, which are
+		appended to the given StringArray.
+	*/
+	void readLines (StringArray& destLines) const;
 
 	/** Appends a block of binary data to the end of the file.
 
@@ -58146,6 +58151,14 @@ public:
 	/** Invokes a click of one of the buttons. */
 	void triggerButtonClick (const String& buttonName);
 
+	/** If set to true and the window contains no buttons, then pressing the escape key will make
+		the alert cancel its modal state.
+		By default this setting is true - turn it off if you don't want the box to respond to
+		the escape key. Note that it is ignored if you have any buttons, and in that case you
+		should give the buttons appropriate keypresses to trigger cancelling if you want to.
+	*/
+	void setEscapeKeyCancels (bool shouldEscapeKeyCancel);
+
 	/** Adds a textbox to the window for entering strings.
 
 		@param name		 an internal name for the text-box. This is the name to pass to
@@ -58473,6 +58486,7 @@ private:
 	StringArray textboxNames, comboBoxNames;
 	Font font;
 	Component* associatedComponent;
+	bool escapeKeyCancels;
 
 	void updateLayout (bool onlyIncreaseSize);
 
@@ -66196,9 +66210,9 @@ public:
 
 	void handleUserClosingWindow();
 
-	void handleFileDragMove (const StringArray& files, const Point<int>& position);
-	void handleFileDragExit (const StringArray& files);
-	void handleFileDragDrop (const StringArray& files, const Point<int>& position);
+	bool handleFileDragMove (const StringArray& files, const Point<int>& position);
+	bool handleFileDragExit (const StringArray& files);
+	bool handleFileDragDrop (const StringArray& files, const Point<int>& position);
 
 	/** Resets the masking region.
 
@@ -69675,6 +69689,7 @@ private:
 */
 class WindowsRegistry
 {
+public:
 
 	/** Returns a string from the registry.
 

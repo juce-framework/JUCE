@@ -117,7 +117,7 @@ StringArray PluginDirectoryScanner::getDeadMansPedalFile()
 
     if (deadMansPedalFile != File::nonexistent)
     {
-        lines.addLines (deadMansPedalFile.loadFileAsString());
+        deadMansPedalFile.readLines (lines);
         lines.removeEmptyStrings();
     }
 

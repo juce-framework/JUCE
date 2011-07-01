@@ -1491,13 +1491,11 @@ BOOL NSViewComponentPeer::sendDragCallback (const int type, id <NSDraggingInfo> 
     {
         switch (type)
         {
-            case 0:   handleFileDragMove (files, pos); break;
-            case 1:   handleFileDragExit (files); break;
-            case 2:   handleFileDragDrop (files, pos); break;
+            case 0:   return handleFileDragMove (files, pos);
+            case 1:   return handleFileDragExit (files);
+            case 2:   return handleFileDragDrop (files, pos);
             default:  jassertfalse; break;
         }
-
-        return true;
     }
 
     return false;

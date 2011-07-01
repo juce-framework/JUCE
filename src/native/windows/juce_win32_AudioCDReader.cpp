@@ -1405,7 +1405,7 @@ public:
         Release();
     }
 
-    HRESULT __stdcall QueryCancel (boolean* pbCancel)
+    JUCE_COMRESULT QueryCancel (boolean* pbCancel)
     {
         if (listener != nullptr && ! shouldCancel)
             shouldCancel = listener->audioCDBurnProgress (progress);
@@ -1415,7 +1415,7 @@ public:
         return S_OK;
     }
 
-    HRESULT __stdcall NotifyBlockProgress (long nCompleted, long nTotal)
+    JUCE_COMRESULT NotifyBlockProgress (long nCompleted, long nTotal)
     {
         progress = nCompleted / (float) nTotal;
         shouldCancel = listener != nullptr && listener->audioCDBurnProgress (progress);
@@ -1423,13 +1423,13 @@ public:
         return E_NOTIMPL;
     }
 
-    HRESULT __stdcall NotifyPnPActivity (void)                              { return E_NOTIMPL; }
-    HRESULT __stdcall NotifyAddProgress (long /*nCompletedSteps*/, long /*nTotalSteps*/)    { return E_NOTIMPL; }
-    HRESULT __stdcall NotifyTrackProgress (long /*nCurrentTrack*/, long /*nTotalTracks*/)   { return E_NOTIMPL; }
-    HRESULT __stdcall NotifyPreparingBurn (long /*nEstimatedSeconds*/)      { return E_NOTIMPL; }
-    HRESULT __stdcall NotifyClosingDisc (long /*nEstimatedSeconds*/)        { return E_NOTIMPL; }
-    HRESULT __stdcall NotifyBurnComplete (HRESULT /*status*/)               { return E_NOTIMPL; }
-    HRESULT __stdcall NotifyEraseComplete (HRESULT /*status*/)              { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyPnPActivity (void)                              { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyAddProgress (long /*nCompletedSteps*/, long /*nTotalSteps*/)    { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyTrackProgress (long /*nCurrentTrack*/, long /*nTotalTracks*/)   { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyPreparingBurn (long /*nEstimatedSeconds*/)      { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyClosingDisc (long /*nEstimatedSeconds*/)        { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyBurnComplete (HRESULT /*status*/)               { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyEraseComplete (HRESULT /*status*/)              { return E_NOTIMPL; }
 
     class ScopedDiscOpener
     {

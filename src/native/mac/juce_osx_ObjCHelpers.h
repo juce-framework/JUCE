@@ -42,25 +42,6 @@ namespace
     {
         return [NSString stringWithUTF8String: s.toUTF8()];
     }
-
-    //==============================================================================
-    template <class RectType>
-    const Rectangle<int> convertToRectInt (const RectType& r)
-    {
-        return Rectangle<int> ((int) r.origin.x, (int) r.origin.y, (int) r.size.width, (int) r.size.height);
-    }
-
-    template <class RectType>
-    const Rectangle<float> convertToRectFloat (const RectType& r)
-    {
-        return Rectangle<float> (r.origin.x, r.origin.y, r.size.width, r.size.height);
-    }
-
-    template <class RectType>
-    CGRect convertToCGRect (const RectType& r)
-    {
-        return CGRectMake ((CGFloat) r.getX(), (CGFloat) r.getY(), (CGFloat) r.getWidth(), (CGFloat) r.getHeight());
-    }
 }
 
 //==============================================================================

@@ -509,6 +509,11 @@ String File::loadFileAsString() const
     return in.readEntireStreamAsString();
 }
 
+void File::readLines (StringArray& destLines) const
+{
+    destLines.addLines (loadFileAsString());
+}
+
 //==============================================================================
 int File::findChildFiles (Array<File>& results,
                           const int whatToLookFor,

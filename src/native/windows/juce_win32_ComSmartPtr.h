@@ -63,11 +63,11 @@ public:
 
     HRESULT CoCreateInstance (REFCLSID classUUID, DWORD dwClsContext = CLSCTX_INPROC_SERVER)
     {
-      #ifndef __MINGW32__
+       #ifndef __MINGW32__
         return ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
-      #else
+       #else
         return E_NOTIMPL;
-      #endif
+       #endif
     }
 
     template <class OtherComClass>
@@ -94,6 +94,9 @@ private:
 };
 
 //==============================================================================
+#define JUCE_COMRESULT  HRESULT __stdcall
+
+//==============================================================================
 /** Handy base class for writing COM objects, providing ref-counting and a basic QueryInterface method.
 */
 template <class ComClass>
@@ -103,11 +106,11 @@ public:
     ComBaseClassHelper()  : refCount (1) {}
     virtual ~ComBaseClassHelper() {}
 
-    HRESULT __stdcall QueryInterface (REFIID refId, void** result)
+    JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
-      #ifndef __MINGW32__
+       #ifndef __MINGW32__
         if (refId == __uuidof (ComClass))   { AddRef(); *result = dynamic_cast <ComClass*> (this); return S_OK; }
-      #endif
+       #endif
 
         if (refId == IID_IUnknown)          { AddRef(); *result = dynamic_cast <IUnknown*> (this); return S_OK; }
 

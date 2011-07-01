@@ -435,7 +435,7 @@ namespace ComponentPeerHelpers
     }
 }
 
-void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<int>& position)
+bool ComponentPeer::handleFileDragMove (const StringArray& files, const Point<int>& position)
 {
     updateCurrentModifiers();
 
@@ -471,21 +471,22 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
         newTarget = lastTarget;
     }
 
-    if (newTarget != nullptr)
-    {
-        Component* const targetComp = dynamic_cast <Component*> (newTarget);
-        const Point<int> pos (targetComp->getLocalPoint (component, position));
+    if (newTarget == nullptr)
+        return false;
 
-        newTarget->fileDragMove (files, pos.getX(), pos.getY());
-    }
+    Component* const targetComp = dynamic_cast <Component*> (newTarget);
+    const Point<int> pos (targetComp->getLocalPoint (component, position));
+    newTarget->fileDragMove (files, pos.getX(), pos.getY());
+    return true;
 }
 
-void ComponentPeer::handleFileDragExit (const StringArray& files)
+bool ComponentPeer::handleFileDragExit (const StringArray& files)
 {
-    handleFileDragMove (files, Point<int> (-1, -1));
+    const bool used = handleFileDragMove (files, Point<int> (-1, -1));
 
     jassert (dragAndDropTargetComponent == nullptr);
     lastDragAndDropCompUnderMouse = nullptr;
+    return used;
 }
 
 // We'll use an async message to deliver the drop, because if the target decides
@@ -514,7 +515,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (AsyncFileDropMessage);
 };
 
-void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<int>& position)
+bool ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<int>& position)
 {
     handleFileDragMove (files, position);
 
@@ -535,12 +536,15 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
                 targetComp->internalModalInputAttempt();
 
                 if (targetComp->isCurrentlyBlockedByAnotherModalComponent())
-                    return;
+                    return true;
             }
 
             (new AsyncFileDropMessage (targetComp, target, targetComp->getLocalPoint (component, position), files))->post();
+            return true;
         }
     }
+
+    return false;
 }
 
 //==============================================================================

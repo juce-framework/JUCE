@@ -313,9 +313,9 @@ public:
 
     void handleUserClosingWindow();
 
-    void handleFileDragMove (const StringArray& files, const Point<int>& position);
-    void handleFileDragExit (const StringArray& files);
-    void handleFileDragDrop (const StringArray& files, const Point<int>& position);
+    bool handleFileDragMove (const StringArray& files, const Point<int>& position);
+    bool handleFileDragExit (const StringArray& files);
+    bool handleFileDragDrop (const StringArray& files, const Point<int>& position);
 
     //==============================================================================
     /** Resets the masking region.
