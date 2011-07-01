@@ -27,6 +27,18 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+ScopedAutoReleasePool::ScopedAutoReleasePool()
+{
+    pool = [[NSAutoreleasePool alloc] init];
+}
+
+ScopedAutoReleasePool::~ScopedAutoReleasePool()
+{
+    [((NSAutoreleasePool*) pool) release];
+}
+
+//==============================================================================
 namespace SystemStatsHelpers
 {
    #if JUCE_INTEL

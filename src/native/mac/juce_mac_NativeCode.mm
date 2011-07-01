@@ -120,11 +120,11 @@ BEGIN_JUCE_NAMESPACE
   #include "../common/juce_MidiDataConcatenator.h"
 
  #if JUCE_IOS
+  #include "juce_ios_MessageManager.mm"
   #include "juce_mac_Fonts.mm"
   #include "juce_mac_CoreGraphicsContext.mm"
   #include "juce_ios_UIViewComponentPeer.mm"
   #include "juce_ios_Windowing.mm"
-  #include "juce_ios_MessageManager.mm"
   #include "juce_mac_FileChooser.mm"
   #include "juce_mac_OpenGLComponent.mm"
   #include "juce_mac_MouseCursor.mm"
@@ -132,6 +132,7 @@ BEGIN_JUCE_NAMESPACE
   #include "juce_ios_Audio.cpp"
   #include "juce_mac_CoreMidi.cpp"
  #else
+  #include "juce_mac_MessageManager.mm"
   #include "juce_mac_Fonts.mm" // (must go before juce_mac_CoreGraphicsContext.mm)
   #include "juce_mac_CoreGraphicsContext.mm"
   #include "juce_mac_NSViewComponentPeer.mm"
@@ -145,7 +146,6 @@ BEGIN_JUCE_NAMESPACE
   #include "juce_mac_QuickTimeMovieComponent.mm"
   #include "juce_mac_AudioCDBurner.mm"
   #include "juce_mac_AudioCDReader.mm"
-  #include "juce_mac_MessageManager.mm"
   #include "juce_mac_WebBrowserComponent.mm"
   #include "juce_mac_CoreAudio.cpp"
   #include "juce_mac_CoreMidi.cpp"

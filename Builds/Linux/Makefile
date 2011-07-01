@@ -237,7 +237,7 @@ OBJECTS := \
   $(OBJDIR)/juce_Colours_89de9488.o \
   $(OBJDIR)/juce_EdgeTable_6a5fefda.o \
   $(OBJDIR)/juce_FillType_5805677e.o \
-  $(OBJDIR)/juce_Graphics_27754bac.o \
+  $(OBJDIR)/juce_GraphicsContext_119e43ed.o \
   $(OBJDIR)/juce_Justification_dc284c3b.o \
   $(OBJDIR)/juce_LowLevelGraphicsPostScriptRenderer_2e8a92a.o \
   $(OBJDIR)/juce_LowLevelGraphicsSoftwareRenderer_97263906.o \
@@ -1377,9 +1377,9 @@ $(OBJDIR)/juce_FillType_5805677e.o: ../../src/gui/graphics/contexts/juce_FillTyp
 	@echo "Compiling juce_FillType.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_Graphics_27754bac.o: ../../src/gui/graphics/contexts/juce_Graphics.cpp
+$(OBJDIR)/juce_GraphicsContext_119e43ed.o: ../../src/gui/graphics/contexts/juce_GraphicsContext.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_Graphics.cpp"
+	@echo "Compiling juce_GraphicsContext.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Justification_dc284c3b.o: ../../src/gui/graphics/contexts/juce_Justification.cpp

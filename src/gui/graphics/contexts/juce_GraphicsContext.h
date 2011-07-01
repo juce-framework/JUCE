@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__
-#define __JUCE_GRAPHICS_JUCEHEADER__
+#ifndef __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
+#define __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
 
 #include "../fonts/juce_Font.h"
 #include "../geometry/juce_Rectangle.h"
@@ -701,4 +701,4 @@ private:
 };
 
 
-#endif   // __JUCE_GRAPHICS_JUCEHEADER__
+#endif   // __JUCE_GRAPHICSCONTEXT_JUCEHEADER__

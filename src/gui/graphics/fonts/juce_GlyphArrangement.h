@@ -27,7 +27,7 @@
 #define __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
 
 #include "juce_Font.h"
-#include "../contexts/juce_Graphics.h"
+#include "../contexts/juce_GraphicsContext.h"
 
 
 //==============================================================================

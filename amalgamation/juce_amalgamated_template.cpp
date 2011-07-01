@@ -350,7 +350,7 @@
  #include "../src/gui/graphics/colour/juce_Colours.cpp"
  #include "../src/gui/graphics/contexts/juce_EdgeTable.cpp"
  #include "../src/gui/graphics/contexts/juce_FillType.cpp"
- #include "../src/gui/graphics/contexts/juce_Graphics.cpp"
+ #include "../src/gui/graphics/contexts/juce_GraphicsContext.cpp"
  #include "../src/gui/graphics/contexts/juce_Justification.cpp"
  #include "../src/gui/graphics/contexts/juce_LowLevelGraphicsPostScriptRenderer.cpp"
  #include "../src/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.cpp"

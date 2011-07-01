@@ -31,7 +31,7 @@
 #include "../../io/streams/juce_OutputStream.h"
 #include "../../events/juce_ChangeBroadcaster.h"
 #include "../../events/juce_Timer.h"
-#include "../../gui/graphics/contexts/juce_Graphics.h"
+#include "../../gui/graphics/contexts/juce_GraphicsContext.h"
 #include "juce_AudioFormatReader.h"
 #include "juce_AudioFormatManager.h"
 

@@ -29,6 +29,11 @@
 
 class NSViewComponentPeer;
 
+typedef void (*AppFocusChangeCallback)();
+extern AppFocusChangeCallback appFocusChangeCallback;
+typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
+extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
+
 //==============================================================================
 END_JUCE_NAMESPACE
 
@@ -304,6 +309,112 @@ public:
     static Array<int> keysCurrentlyDown;
 
 private:
+    static void appFocusChanged()
+    {
+        keysCurrentlyDown.clear();
+
+        if (isValidPeer (currentlyFocusedPeer))
+        {
+            if (Process::isForegroundProcess())
+            {
+                currentlyFocusedPeer->handleFocusGain();
+
+                ModalComponentManager::getInstance()->bringModalComponentsToFront();
+            }
+            else
+            {
+                currentlyFocusedPeer->handleFocusLoss();
+
+                // turn kiosk mode off if we lose focus..
+                Desktop::getInstance().setKioskModeComponent (nullptr);
+            }
+        }
+    }
+
+    static bool checkEventBlockedByModalComps (NSEvent* e)
+    {
+        if (Component::getNumCurrentlyModalComponents() == 0)
+            return false;
+
+        NSWindow* const w = [e window];
+        if (w == nil || [w worksWhenModal])
+            return false;
+
+        bool isKey = false, isInputAttempt = false;
+
+        switch ([e type])
+        {
+            case NSKeyDown:
+            case NSKeyUp:
+                isKey = isInputAttempt = true;
+                break;
+
+            case NSLeftMouseDown:
+            case NSRightMouseDown:
+            case NSOtherMouseDown:
+                isInputAttempt = true;
+                break;
+
+            case NSLeftMouseDragged:
+            case NSRightMouseDragged:
+            case NSLeftMouseUp:
+            case NSRightMouseUp:
+            case NSOtherMouseUp:
+            case NSOtherMouseDragged:
+                if (Desktop::getInstance().getDraggingMouseSource(0) != nullptr)
+                    return false;
+                break;
+
+            case NSMouseMoved:
+            case NSMouseEntered:
+            case NSMouseExited:
+            case NSCursorUpdate:
+            case NSScrollWheel:
+            case NSTabletPoint:
+            case NSTabletProximity:
+                break;
+
+            default:
+                return false;
+        }
+
+        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+        {
+            ComponentPeer* const peer = ComponentPeer::getPeer (i);
+            NSView* const compView = (NSView*) peer->getNativeHandle();
+
+            if ([compView window] == w)
+            {
+                if (isKey)
+                {
+                    if (compView == [w firstResponder])
+                        return false;
+                }
+                else
+                {
+                    NSViewComponentPeer* nsViewPeer = dynamic_cast<NSViewComponentPeer*> (peer);
+
+                    if ((nsViewPeer == nullptr || ! nsViewPeer->isSharedWindow)
+                            ? NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height))
+                            : NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil], [compView bounds]))
+                        return false;
+                }
+            }
+        }
+
+        if (isInputAttempt)
+        {
+            if (! [NSApp isActive])
+                [NSApp activateIgnoringOtherApps: YES];
+
+            Component* const modal = Component::getCurrentlyModalComponent (0);
+            if (modal != nullptr)
+                modal->inputAttemptWhenModal();
+        }
+
+        return true;
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer);
 };
 
@@ -821,6 +932,9 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
      #endif
       recursiveToFrontCall (false)
 {
+    appFocusChangeCallback = appFocusChanged;
+    isEventBlockedByModalComps = checkEventBlockedByModalComps;
+
     NSRect r = NSMakeRect (0, 0, (CGFloat) component->getWidth(), (CGFloat) component->getHeight());
 
     view = [[JuceNSView alloc] initWithOwner: this withFrame: r];
@@ -1223,28 +1337,6 @@ void NSViewComponentPeer::viewFocusLoss()
     {
         currentlyFocusedPeer = nullptr;
         handleFocusLoss();
-    }
-}
-
-void juce_HandleProcessFocusChange()
-{
-    NSViewComponentPeer::keysCurrentlyDown.clear();
-
-    if (NSViewComponentPeer::isValidPeer (NSViewComponentPeer::currentlyFocusedPeer))
-    {
-        if (Process::isForegroundProcess())
-        {
-            NSViewComponentPeer::currentlyFocusedPeer->handleFocusGain();
-
-            ModalComponentManager::getInstance()->bringModalComponentsToFront();
-        }
-        else
-        {
-            NSViewComponentPeer::currentlyFocusedPeer->handleFocusLoss();
-
-            // turn kiosk mode off if we lose focus..
-            Desktop::getInstance().setKioskModeComponent (nullptr);
-        }
     }
 }
 

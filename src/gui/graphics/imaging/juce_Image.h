@@ -27,7 +27,7 @@
 #define __JUCE_IMAGE_JUCEHEADER__
 
 #include "../colour/juce_Colour.h"
-#include "../contexts/juce_Graphics.h"
+#include "../contexts/juce_GraphicsContext.h"
 #include "../../../containers/juce_Variant.h"
 #include "../../../containers/juce_NamedValueSet.h"
 

@@ -124,10 +124,6 @@
 #if JUCE_MSVC
   #include <malloc.h>
   #pragma warning (pop)
-
-  #if ! JUCE_PUBLIC_INCLUDES
-    #pragma warning (4: 4511 4512 4100)  // (enable some warnings that are turned off in VC8)
-  #endif
 #endif
 
 #if JUCE_ANDROID

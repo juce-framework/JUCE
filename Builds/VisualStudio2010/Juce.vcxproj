@@ -320,7 +320,7 @@
     <ClCompile Include="..\..\src\gui\graphics\colour\juce_Colours.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\contexts\juce_EdgeTable.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\contexts\juce_FillType.cpp"/>
-    <ClCompile Include="..\..\src\gui\graphics\contexts\juce_Graphics.cpp"/>
+    <ClCompile Include="..\..\src\gui\graphics\contexts\juce_GraphicsContext.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\contexts\juce_Justification.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.cpp"/>
     <ClCompile Include="..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.cpp"/>
@@ -710,7 +710,7 @@
     <ClInclude Include="..\..\src\gui\graphics\colour\juce_PixelFormats.h"/>
     <ClInclude Include="..\..\src\gui\graphics\contexts\juce_EdgeTable.h"/>
     <ClInclude Include="..\..\src\gui\graphics\contexts\juce_FillType.h"/>
-    <ClInclude Include="..\..\src\gui\graphics\contexts\juce_Graphics.h"/>
+    <ClInclude Include="..\..\src\gui\graphics\contexts\juce_GraphicsContext.h"/>
     <ClInclude Include="..\..\src\gui\graphics\contexts\juce_Justification.h"/>
     <ClInclude Include="..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsContext.h"/>
     <ClInclude Include="..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.h"/>

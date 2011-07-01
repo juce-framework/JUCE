@@ -27,6 +27,12 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+typedef void (*AppFocusChangeCallback)();
+AppFocusChangeCallback appFocusChangeCallback = nullptr;
+
+typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
+CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
 //==============================================================================
 /* When you use multiple DLLs which share similarly-named obj-c classes - like
@@ -91,7 +97,8 @@ public:
 
     virtual void focusChanged()
     {
-        juce_HandleProcessFocusChange();
+        if (appFocusChangeCallback != nullptr)
+            (*appFocusChangeCallback)();
     }
 
     struct CallbackMessagePayload
@@ -328,93 +335,6 @@ void MessageManager::stopDispatchLoop()
     [NSEvent startPeriodicEventsAfterDelay: 0 withPeriod: 0.1];
 }
 
-namespace
-{
-    bool isEventBlockedByModalComps (NSEvent* e)
-    {
-        if (Component::getNumCurrentlyModalComponents() == 0)
-            return false;
-
-        NSWindow* const w = [e window];
-        if (w == nil || [w worksWhenModal])
-            return false;
-
-        bool isKey = false, isInputAttempt = false;
-
-        switch ([e type])
-        {
-            case NSKeyDown:
-            case NSKeyUp:
-                isKey = isInputAttempt = true;
-                break;
-
-            case NSLeftMouseDown:
-            case NSRightMouseDown:
-            case NSOtherMouseDown:
-                isInputAttempt = true;
-                break;
-
-            case NSLeftMouseDragged:
-            case NSRightMouseDragged:
-            case NSLeftMouseUp:
-            case NSRightMouseUp:
-            case NSOtherMouseUp:
-            case NSOtherMouseDragged:
-                if (Desktop::getInstance().getDraggingMouseSource(0) != nullptr)
-                    return false;
-                break;
-
-            case NSMouseMoved:
-            case NSMouseEntered:
-            case NSMouseExited:
-            case NSCursorUpdate:
-            case NSScrollWheel:
-            case NSTabletPoint:
-            case NSTabletProximity:
-                break;
-
-            default:
-                return false;
-        }
-
-        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-        {
-            ComponentPeer* const peer = ComponentPeer::getPeer (i);
-            NSView* const compView = (NSView*) peer->getNativeHandle();
-
-            if ([compView window] == w)
-            {
-                if (isKey)
-                {
-                    if (compView == [w firstResponder])
-                        return false;
-                }
-                else
-                {
-                    NSViewComponentPeer* nsViewPeer = dynamic_cast<NSViewComponentPeer*> (peer);
-
-                    if ((nsViewPeer == nullptr || ! nsViewPeer->isSharedWindow)
-                            ? NSPointInRect ([e locationInWindow], NSMakeRect (0, 0, [w frame].size.width, [w frame].size.height))
-                            : NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil], [compView bounds]))
-                        return false;
-                }
-            }
-        }
-
-        if (isInputAttempt)
-        {
-            if (! [NSApp isActive])
-                [NSApp activateIgnoringOtherApps: YES];
-
-            Component* const modal = Component::getCurrentlyModalComponent (0);
-            if (modal != nullptr)
-                modal->inputAttemptWhenModal();
-        }
-
-        return true;
-    }
-}
-
 #if JUCE_MODAL_LOOPS_PERMITTED
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
@@ -433,7 +353,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
                                            inMode: NSDefaultRunLoopMode
                                           dequeue: YES];
 
-        if (e != nil && ! isEventBlockedByModalComps (e))
+        if (e != nil && (isEventBlockedByModalComps == nullptr || ! (*isEventBlockedByModalComps) (e)))
             [NSApp sendEvent: e];
 
         if (Time::getMillisecondCounter() >= endTime)

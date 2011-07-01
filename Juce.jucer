@@ -1026,10 +1026,10 @@
                   file="src/gui/graphics/contexts/juce_FillType.cpp"/>
             <FILE id="Xxhmuibx3" name="juce_FillType.h" compile="0" resource="0"
                   file="src/gui/graphics/contexts/juce_FillType.h"/>
-            <FILE id="Sd5zuwpAa" name="juce_Graphics.cpp" compile="1" resource="0"
-                  file="src/gui/graphics/contexts/juce_Graphics.cpp"/>
-            <FILE id="EPJbCrSdq" name="juce_Graphics.h" compile="0" resource="0"
-                  file="src/gui/graphics/contexts/juce_Graphics.h"/>
+            <FILE id="Sd5zuwpAa" name="juce_GraphicsContext.cpp" compile="1" resource="0"
+                  file="src/gui/graphics/contexts/juce_GraphicsContext.cpp"/>
+            <FILE id="EPJbCrSdq" name="juce_GraphicsContext.h" compile="0" resource="0"
+                  file="src/gui/graphics/contexts/juce_GraphicsContext.h"/>
             <FILE id="vLJIp7a4o" name="juce_Justification.cpp" compile="1" resource="0"
                   file="src/gui/graphics/contexts/juce_Justification.cpp"/>
             <FILE id="xlTND5UsD" name="juce_Justification.h" compile="0" resource="0"

@@ -28,7 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_TextLayout.h"
-#include "../contexts/juce_Graphics.h"
+#include "../contexts/juce_GraphicsContext.h"
 
 
 //==============================================================================

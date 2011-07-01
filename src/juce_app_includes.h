@@ -179,9 +179,7 @@
 #ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
  #include "audio/plugin_host/formats/juce_LADSPAPluginFormat.h"
 #endif
-#ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
- #include "audio/plugin_host/formats/juce_VSTMidiEventList.h"
-#endif
+#include "audio/plugin_host/formats/juce_VSTMidiEventList.h"
 #ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
  #include "audio/plugin_host/formats/juce_VSTPluginFormat.h"
 #endif
@@ -671,8 +669,8 @@
 #ifndef __JUCE_FILLTYPE_JUCEHEADER__
  #include "gui/graphics/contexts/juce_FillType.h"
 #endif
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__
- #include "gui/graphics/contexts/juce_Graphics.h"
+#ifndef __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
+ #include "gui/graphics/contexts/juce_GraphicsContext.h"
 #endif
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
  #include "gui/graphics/contexts/juce_Justification.h"

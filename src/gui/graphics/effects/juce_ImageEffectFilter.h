@@ -26,7 +26,7 @@
 #ifndef __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
 #define __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
 
-#include "../../graphics/contexts/juce_Graphics.h"
+#include "../../graphics/contexts/juce_GraphicsContext.h"
 
 
 //==============================================================================

@@ -817,7 +817,7 @@
     <ClCompile Include="..\..\src\gui\graphics\contexts\juce_FillType.cpp">
       <Filter>Juce\Source\gui\graphics\contexts</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gui\graphics\contexts\juce_Graphics.cpp">
+    <ClCompile Include="..\..\src\gui\graphics\contexts\juce_GraphicsContext.cpp">
       <Filter>Juce\Source\gui\graphics\contexts</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\graphics\contexts\juce_Justification.cpp">
@@ -2061,7 +2061,7 @@
     <ClInclude Include="..\..\src\gui\graphics\contexts\juce_FillType.h">
       <Filter>Juce\Source\gui\graphics\contexts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gui\graphics\contexts\juce_Graphics.h">
+    <ClInclude Include="..\..\src\gui\graphics\contexts\juce_GraphicsContext.h">
       <Filter>Juce\Source\gui\graphics\contexts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\graphics\contexts\juce_Justification.h">

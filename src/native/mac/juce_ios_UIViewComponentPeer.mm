@@ -831,26 +831,6 @@ void UIViewComponentPeer::viewFocusLoss()
     }
 }
 
-void juce_HandleProcessFocusChange()
-{
-    if (ComponentPeer::isValidPeer (currentlyFocusedPeer))
-    {
-        if (Process::isForegroundProcess())
-        {
-            currentlyFocusedPeer->handleFocusGain();
-
-            ModalComponentManager::getInstance()->bringModalComponentsToFront();
-        }
-        else
-        {
-            currentlyFocusedPeer->handleFocusLoss();
-
-            // turn kiosk mode off if we lose focus..
-            Desktop::getInstance().setKioskModeComponent (nullptr);
-        }
-    }
-}
-
 bool UIViewComponentPeer::isFocused() const
 {
     return isSharedWindow ? this == currentlyFocusedPeer

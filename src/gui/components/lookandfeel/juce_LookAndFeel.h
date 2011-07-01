@@ -26,7 +26,7 @@
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
 #define __JUCE_LOOKANDFEEL_JUCEHEADER__
 
-#include "../../graphics/contexts/juce_Graphics.h"
+#include "../../graphics/contexts/juce_GraphicsContext.h"
 #include "../../graphics/effects/juce_DropShadowEffect.h"
 #include "../controls/juce_Slider.h"
 #include "../layout/juce_TabbedComponent.h"
