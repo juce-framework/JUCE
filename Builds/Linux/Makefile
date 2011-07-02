@@ -304,6 +304,7 @@ OBJECTS := \
   $(OBJDIR)/juce_linux_Midi_4bad86cb.o \
   $(OBJDIR)/juce_linux_NativeCode_8a61cd0e.o \
   $(OBJDIR)/juce_linux_Network_f47a1c4e.o \
+  $(OBJDIR)/juce_linux_OpenGLComponent_ba2f042e.o \
   $(OBJDIR)/juce_linux_SystemStats_9f6d6b50.o \
   $(OBJDIR)/juce_linux_Threads_dc4a4049.o \
   $(OBJDIR)/juce_linux_WebBrowserComponent_358c0a49.o \
@@ -1709,6 +1710,11 @@ $(OBJDIR)/juce_linux_NativeCode_8a61cd0e.o: ../../src/native/linux/juce_linux_Na
 $(OBJDIR)/juce_linux_Network_f47a1c4e.o: ../../src/native/linux/juce_linux_Network.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_linux_Network.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_OpenGLComponent_ba2f042e.o: ../../src/native/linux/juce_linux_OpenGLComponent.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_linux_OpenGLComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_SystemStats_9f6d6b50.o: ../../src/native/linux/juce_linux_SystemStats.cpp

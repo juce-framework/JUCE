@@ -115,6 +115,7 @@ BEGIN_JUCE_NAMESPACE
  #include "juce_linux_Messaging.cpp"
  #include "juce_linux_Fonts.cpp"
  #include "juce_linux_Windowing.cpp"
+ #include "juce_linux_OpenGLComponent.cpp"
  #include "juce_linux_Audio.cpp"
  #include "juce_linux_JackAudio.cpp"
  #include "juce_linux_Midi.cpp"

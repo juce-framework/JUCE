@@ -49,7 +49,7 @@ namespace pnglibNamespace
 {
   using namespace zlibNamespace;
 
-#if JUCE_INCLUDE_PNGLIB_CODE
+#if JUCE_INCLUDE_PNGLIB_CODE || ! defined (JUCE_INCLUDE_PNGLIB_CODE)
 
   #if _MSC_VER != 1310
    using ::calloc; // (causes conflict in VS.NET 2003)

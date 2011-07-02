@@ -387,6 +387,7 @@
     <ClCompile Include="..\..\src\native\linux\juce_linux_Midi.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_NativeCode.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Network.cpp"/>
+    <ClCompile Include="..\..\src\native\linux\juce_linux_OpenGLComponent.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_SystemStats.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_Threads.cpp"/>
     <ClCompile Include="..\..\src\native\linux\juce_linux_WebBrowserComponent.cpp"/>

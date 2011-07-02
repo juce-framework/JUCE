@@ -39,6 +39,11 @@ BEGIN_JUCE_NAMESPACE
 namespace OggVorbisNamespace
 {
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
+ #if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable : 4995)
+ #endif
+
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
  #include "oggvorbis/vorbisfile.h"
@@ -66,6 +71,10 @@ namespace OggVorbisNamespace
  #include "oggvorbis/libvorbis-1.3.2/lib/vorbisenc.c"
  #include "oggvorbis/libvorbis-1.3.2/lib/vorbisfile.c"
  #include "oggvorbis/libvorbis-1.3.2/lib/window.c"
+
+ #if JUCE_MSVC
+  #pragma warning (pop)
+ #endif
 #else
  #include <vorbis/vorbisenc.h>
  #include <vorbis/codec.h>

@@ -875,6 +875,7 @@
             <File RelativePath="..\..\src\native\linux\juce_linux_NativeCode.cpp"/>
             <File RelativePath="..\..\src\native\linux\juce_linux_NativeIncludes.h"/>
             <File RelativePath="..\..\src\native\linux\juce_linux_Network.cpp"/>
+            <File RelativePath="..\..\src\native\linux\juce_linux_OpenGLComponent.cpp"/>
             <File RelativePath="..\..\src\native\linux\juce_linux_SystemStats.cpp"/>
             <File RelativePath="..\..\src\native\linux\juce_linux_Threads.cpp"/>
             <File RelativePath="..\..\src\native\linux\juce_linux_WebBrowserComponent.cpp"/>

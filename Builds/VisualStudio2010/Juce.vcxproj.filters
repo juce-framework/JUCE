@@ -1018,6 +1018,9 @@
     <ClCompile Include="..\..\src\native\linux\juce_linux_Network.cpp">
       <Filter>Juce\Source\native\linux</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\native\linux\juce_linux_OpenGLComponent.cpp">
+      <Filter>Juce\Source\native\linux</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\native\linux\juce_linux_SystemStats.cpp">
       <Filter>Juce\Source\native\linux</Filter>
     </ClCompile>

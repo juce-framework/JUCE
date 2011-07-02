@@ -1328,6 +1328,8 @@
                 resource="0" file="src/native/linux/juce_linux_NativeIncludes.h"/>
           <FILE id="TSc8pcu6K" name="juce_linux_Network.cpp" compile="1" resource="0"
                 file="src/native/linux/juce_linux_Network.cpp"/>
+          <FILE id="XGgVZm" name="juce_linux_OpenGLComponent.cpp" compile="1"
+                resource="0" file="src/native/linux/juce_linux_OpenGLComponent.cpp"/>
           <FILE id="CPGUq08Ug" name="juce_linux_SystemStats.cpp" compile="1"
                 resource="0" file="src/native/linux/juce_linux_SystemStats.cpp"/>
           <FILE id="DkSVMnKnI" name="juce_linux_Threads.cpp" compile="1" resource="0"
