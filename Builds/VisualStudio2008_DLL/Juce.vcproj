@@ -307,7 +307,6 @@
             <File RelativePath="..\..\src\audio\plugin_host\juce_AudioPluginFormat.h"/>
             <File RelativePath="..\..\src\audio\plugin_host\juce_AudioPluginFormatManager.cpp"/>
             <File RelativePath="..\..\src\audio\plugin_host\juce_AudioPluginFormatManager.h"/>
-            <File RelativePath="..\..\src\audio\plugin_host\juce_AudioPluginInstance.cpp"/>
             <File RelativePath="..\..\src\audio\plugin_host\juce_AudioPluginInstance.h"/>
             <File RelativePath="..\..\src\audio\plugin_host\juce_KnownPluginList.cpp"/>
             <File RelativePath="..\..\src\audio\plugin_host\juce_KnownPluginList.h"/>
@@ -930,6 +929,7 @@
             <File RelativePath="..\..\src\native\windows\juce_win32_FileChooser.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Files.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Fonts.cpp"/>
+            <File RelativePath="..\..\src\native\windows\juce_win32_HiddenMessageWindow.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Messaging.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Midi.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Misc.cpp"/>

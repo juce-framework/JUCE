@@ -62,11 +62,19 @@ END_JUCE_NAMESPACE
 
 BEGIN_JUCE_NAMESPACE
 
+extern Image juce_createImageFromCIImage (CIImage* im, int w, int h);
+
 //==============================================================================
 class QTCameraDeviceInteral
 {
 public:
-    QTCameraDeviceInteral (CameraDevice* owner, int index)
+    QTCameraDeviceInteral (CameraDevice* owner, const int index)
+        : input (nil),
+          audioDevice (nil),
+          audioInput (nil),
+          session (nil),
+          fileOutput (nil),
+          imageOutput (nil)
     {
         JUCE_AUTORELEASEPOOL
 
@@ -74,11 +82,6 @@ public:
 
         NSArray* devs = [QTCaptureDevice inputDevicesWithMediaType: QTMediaTypeVideo];
         device = (QTCaptureDevice*) [devs objectAtIndex: index];
-        input = nil;
-        audioInput = nil;
-        audioDevice = nil;
-        fileOutput = nil;
-        imageOutput = nil;
         callbackDelegate = [[QTCaptureCallbackDelegate alloc] initWithOwner: owner
                                                                 internalDev: this];
 
@@ -88,7 +91,7 @@ public:
 
         if (err == nil)
         {
-            input = [[QTCaptureDeviceInput alloc] initWithDevice: device];
+            input      = [[QTCaptureDeviceInput alloc] initWithDevice: device];
             audioInput = [[QTCaptureDeviceInput alloc] initWithDevice: device];
 
             [session addInput: input error: &err];
@@ -181,12 +184,7 @@ public:
 
     void callListeners (CIImage* frame, int w, int h)
     {
-        CoreGraphicsImage* cgImage = new CoreGraphicsImage (Image::ARGB, w, h, false);
-        Image image (cgImage);
-
-        CIContext* cic = [CIContext contextWithCGContext: cgImage->context options: nil];
-        [cic drawImage: frame inRect: CGRectMake (0, 0, w, h) fromRect: CGRectMake (0, 0, w, h)];
-        CGContextFlush (cgImage->context);
+        Image image (juce_createImageFromCIImage (frame, w, h));
 
         const ScopedLock sl (listenerLock);
 

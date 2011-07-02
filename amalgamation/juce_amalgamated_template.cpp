@@ -207,7 +207,6 @@
  #include "../src/audio/midi/juce_MidiMessageSequence.cpp"
  #include "../src/audio/plugin_host/juce_AudioPluginFormat.cpp"
  #include "../src/audio/plugin_host/juce_AudioPluginFormatManager.cpp"
- #include "../src/audio/plugin_host/juce_AudioPluginInstance.cpp"
  #include "../src/audio/plugin_host/juce_KnownPluginList.cpp"
  #include "../src/audio/plugin_host/juce_PluginDescription.cpp"
  #include "../src/audio/plugin_host/juce_PluginDirectoryScanner.cpp"

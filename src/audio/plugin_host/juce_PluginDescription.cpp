@@ -117,18 +117,18 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
 {
     if (xml.hasTagName ("PLUGIN"))
     {
-        name = xml.getStringAttribute ("name");
-        descriptiveName = xml.getStringAttribute ("name", name);
-        pluginFormatName = xml.getStringAttribute ("format");
-        category = xml.getStringAttribute ("category");
-        manufacturerName = xml.getStringAttribute ("manufacturer");
-        version = xml.getStringAttribute ("version");
-        fileOrIdentifier = xml.getStringAttribute ("file");
-        uid = xml.getStringAttribute ("uid").getHexValue32();
-        isInstrument = xml.getBoolAttribute ("isInstrument", false);
-        lastFileModTime = Time (xml.getStringAttribute ("fileTime").getHexValue64());
-        numInputChannels = xml.getIntAttribute ("numInputs");
-        numOutputChannels = xml.getIntAttribute ("numOutputs");
+        name                = xml.getStringAttribute ("name");
+        descriptiveName     = xml.getStringAttribute ("descriptiveName", name);
+        pluginFormatName    = xml.getStringAttribute ("format");
+        category            = xml.getStringAttribute ("category");
+        manufacturerName    = xml.getStringAttribute ("manufacturer");
+        version             = xml.getStringAttribute ("version");
+        fileOrIdentifier    = xml.getStringAttribute ("file");
+        uid                 = xml.getStringAttribute ("uid").getHexValue32();
+        isInstrument        = xml.getBoolAttribute ("isInstrument", false);
+        lastFileModTime     = Time (xml.getStringAttribute ("fileTime").getHexValue64());
+        numInputChannels    = xml.getIntAttribute ("numInputs");
+        numOutputChannels   = xml.getIntAttribute ("numOutputs");
 
         return true;
     }

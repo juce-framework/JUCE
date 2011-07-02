@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	13
+#define JUCE_BUILDNUMBER	14
 
 /** Current Juce version number.
 
@@ -102,6 +102,14 @@ namespace JuceDummyNamespace {}
 	- Either JUCE_GCC or JUCE_MSVC
 */
 
+/* This line is here as a sanity-check to catch syntax errors caused by mistakes in 3rd-party
+   header files that have been included before this one. If you hit an error at this line, there
+   must be some kind of syntax problem in whatever code immediately precedes this header.
+
+   It also causes an error if you attempt to build using a C or obj-C compiler rather than a C++ one.
+*/
+namespace JuceDummyNamespace {}
+
 #if (defined (_WIN32) || defined (_WIN64))
   #define	   JUCE_WIN32 1
   #define	   JUCE_WINDOWS 1
@@ -111,7 +119,9 @@ namespace JuceDummyNamespace {}
 #elif defined (LINUX) || defined (__linux__)
   #define	 JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
+  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
+  #undef Point
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 	#define	 JUCE_IPHONE 1
@@ -848,10 +858,6 @@ namespace JuceDummyNamespace {}
 #if JUCE_MSVC
   #include <malloc.h>
   #pragma warning (pop)
-
-  #if ! JUCE_PUBLIC_INCLUDES
-	#pragma warning (4: 4511 4512 4100)  // (enable some warnings that are turned off in VC8)
-  #endif
 #endif
 
 #if JUCE_ANDROID
@@ -25129,9 +25135,9 @@ public:
 #define __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
 
 
-/*** Start of inlined file: juce_Graphics.h ***/
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__
-#define __JUCE_GRAPHICS_JUCEHEADER__
+/*** Start of inlined file: juce_GraphicsContext.h ***/
+#ifndef __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
+#define __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
 
 
 /*** Start of inlined file: juce_Font.h ***/
@@ -29627,9 +29633,9 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Graphics);
 };
 
-#endif   // __JUCE_GRAPHICS_JUCEHEADER__
+#endif   // __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
 
-/*** End of inlined file: juce_Graphics.h ***/
+/*** End of inlined file: juce_GraphicsContext.h ***/
 
 /**
 	A graphical effect filter that can be applied to components.
@@ -43362,7 +43368,7 @@ public:
 		Make sure that you delete any UI components that belong to this plugin before
 		deleting the plugin.
 	*/
-	virtual ~AudioPluginInstance();
+	virtual ~AudioPluginInstance() {}
 
 	/** Fills-in the appropriate parts of this plugin description object.
 	*/
@@ -43373,11 +43379,11 @@ public:
 		E.g. For a VST, this value can be cast to an AEffect*. For an AudioUnit, it can be
 		cast to an AudioUnit handle.
 	*/
-	virtual void* getPlatformSpecificData();
+	virtual void* getPlatformSpecificData()	 { return nullptr; }
 
 protected:
 
-	AudioPluginInstance();
+	AudioPluginInstance() {}
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginInstance);
 };
@@ -43582,7 +43588,6 @@ private:
 
 
 #endif
-#ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
 
 /*** Start of inlined file: juce_VSTMidiEventList.h ***/
 #ifdef __aeffect__
@@ -43747,7 +43752,6 @@ private:
 /*** End of inlined file: juce_VSTMidiEventList.h ***/
 
 
-#endif
 #ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
 
 /*** Start of inlined file: juce_VSTPluginFormat.h ***/
@@ -67170,7 +67174,7 @@ private:
 
 
 #endif
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__
+#ifndef __JUCE_GRAPHICSCONTEXT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__

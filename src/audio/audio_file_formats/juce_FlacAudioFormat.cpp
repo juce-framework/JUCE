@@ -38,14 +38,14 @@ BEGIN_JUCE_NAMESPACE
 
 namespace FlacNamespace
 {
-#if JUCE_INCLUDE_FLAC_CODE
+#if JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE)
  #if JUCE_MSVC
-   #pragma warning (disable: 4505 181 111)
-#endif
+  #pragma warning (disable: 4505 181 111)
+ #endif
 
  #define FLAC__NO_DLL 1
 
- #if ! defined (SIZE_MAX)
+ #ifndef SIZE_MAX
   #define SIZE_MAX 0xffffffff
  #endif
 

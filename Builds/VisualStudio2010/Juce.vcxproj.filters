@@ -355,9 +355,6 @@
     <ClCompile Include="..\..\src\audio\plugin_host\juce_AudioPluginFormatManager.cpp">
       <Filter>Juce\Source\audio\plugin_host</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\audio\plugin_host\juce_AudioPluginInstance.cpp">
-      <Filter>Juce\Source\audio\plugin_host</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\audio\plugin_host\juce_KnownPluginList.cpp">
       <Filter>Juce\Source\audio\plugin_host</Filter>
     </ClCompile>
@@ -2305,6 +2302,9 @@
       <Filter>Juce\Source\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\native\windows\juce_win32_ComSmartPtr.h">
+      <Filter>Juce\Source\native\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\native\windows\juce_win32_HiddenMessageWindow.h">
       <Filter>Juce\Source\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\native\windows\juce_win32_NativeIncludes.h">

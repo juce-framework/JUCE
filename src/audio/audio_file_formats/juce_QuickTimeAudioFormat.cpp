@@ -46,11 +46,13 @@
     Alternatively, if you don't need any QuickTime services, just turn off the JUCE_QUICKTIME
     flag in juce_Config.h
  */
+ #undef SIZE_MAX
  #include <Movies.h>
  #include <QTML.h>
  #include <QuickTimeComponents.h>
  #include <MediaHandlers.h>
  #include <ImageCodec.h>
+ #undef SIZE_MAX
 
  #if JUCE_MSVC
   #pragma warning (pop)

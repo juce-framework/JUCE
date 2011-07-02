@@ -1377,5 +1377,6 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_DirectSound()
 }
 
 #undef log
+#undef logError
 
 #endif

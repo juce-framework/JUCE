@@ -294,8 +294,6 @@
                 resource="0" file="src/audio/plugin_host/juce_AudioPluginFormatManager.cpp"/>
           <FILE id="B5LxiQ" name="juce_AudioPluginFormatManager.h" compile="0"
                 resource="0" file="src/audio/plugin_host/juce_AudioPluginFormatManager.h"/>
-          <FILE id="VKCA5h" name="juce_AudioPluginInstance.cpp" compile="1" resource="0"
-                file="src/audio/plugin_host/juce_AudioPluginInstance.cpp"/>
           <FILE id="eUQAKu" name="juce_AudioPluginInstance.h" compile="0" resource="0"
                 file="src/audio/plugin_host/juce_AudioPluginInstance.h"/>
           <FILE id="Wvtvb" name="juce_KnownPluginList.cpp" compile="1" resource="0"
@@ -1434,6 +1432,8 @@
                 file="src/native/windows/juce_win32_Files.cpp"/>
           <FILE id="qEVAjzrrR" name="juce_win32_Fonts.cpp" compile="1" resource="0"
                 file="src/native/windows/juce_win32_Fonts.cpp"/>
+          <FILE id="EnTTYs" name="juce_win32_HiddenMessageWindow.h" compile="0"
+                resource="0" file="src/native/windows/juce_win32_HiddenMessageWindow.h"/>
           <FILE id="Nqhr3WLUE" name="juce_win32_Messaging.cpp" compile="1" resource="0"
                 file="src/native/windows/juce_win32_Messaging.cpp"/>
           <FILE id="P25j5MUtL" name="juce_win32_Midi.cpp" compile="1" resource="0"

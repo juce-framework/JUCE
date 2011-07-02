@@ -922,4 +922,15 @@ Image juce_loadWithCoreImage (InputStream& input)
 }
 #endif
 
+Image juce_createImageFromCIImage (CIImage* im, int w, int h)
+{
+    CoreGraphicsImage* cgImage = new CoreGraphicsImage (Image::ARGB, w, h, false);
+
+    CIContext* cic = [CIContext contextWithCGContext: cgImage->context options: nil];
+    [cic drawImage: im inRect: CGRectMake (0, 0, w, h) fromRect: CGRectMake (0, 0, w, h)];
+    CGContextFlush (cgImage->context);
+
+    return Image (cgImage);
+}
+
 #endif

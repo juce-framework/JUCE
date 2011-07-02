@@ -83,7 +83,6 @@ OBJECTS := \
   $(OBJDIR)/juce_VSTPluginFormat_af341d6.o \
   $(OBJDIR)/juce_AudioPluginFormat_5dc1eec2.o \
   $(OBJDIR)/juce_AudioPluginFormatManager_c336c715.o \
-  $(OBJDIR)/juce_AudioPluginInstance_96637ee0.o \
   $(OBJDIR)/juce_KnownPluginList_cadece16.o \
   $(OBJDIR)/juce_PluginDescription_d9c0f10b.o \
   $(OBJDIR)/juce_PluginDirectoryScanner_c7652cec.o \
@@ -605,11 +604,6 @@ $(OBJDIR)/juce_AudioPluginFormat_5dc1eec2.o: ../../src/audio/plugin_host/juce_Au
 $(OBJDIR)/juce_AudioPluginFormatManager_c336c715.o: ../../src/audio/plugin_host/juce_AudioPluginFormatManager.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_AudioPluginFormatManager.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_AudioPluginInstance_96637ee0.o: ../../src/audio/plugin_host/juce_AudioPluginInstance.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_AudioPluginInstance.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_KnownPluginList_cadece16.o: ../../src/audio/plugin_host/juce_KnownPluginList.cpp

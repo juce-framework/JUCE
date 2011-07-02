@@ -106,6 +106,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_win32_Registry.cpp"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+ #include "juce_win32_HiddenMessageWindow.h"
  #include "juce_win32_Messaging.cpp"
  #include "juce_win32_Fonts.cpp"
  #include "juce_win32_Direct2DGraphicsContext.cpp"

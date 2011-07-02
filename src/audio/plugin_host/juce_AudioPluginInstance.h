@@ -48,7 +48,7 @@ public:
         Make sure that you delete any UI components that belong to this plugin before
         deleting the plugin.
     */
-    virtual ~AudioPluginInstance();
+    virtual ~AudioPluginInstance() {}
 
     //==============================================================================
     /** Fills-in the appropriate parts of this plugin description object.
@@ -60,11 +60,11 @@ public:
         E.g. For a VST, this value can be cast to an AEffect*. For an AudioUnit, it can be
         cast to an AudioUnit handle.
     */
-    virtual void* getPlatformSpecificData();
+    virtual void* getPlatformSpecificData()         { return nullptr; }
 
 protected:
     //==============================================================================
-    AudioPluginInstance();
+    AudioPluginInstance() {}
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginInstance);
 };

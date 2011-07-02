@@ -166,7 +166,6 @@
     <ClCompile Include="..\..\src\audio\plugin_host\formats\juce_VSTPluginFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\plugin_host\juce_AudioPluginFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\plugin_host\juce_AudioPluginFormatManager.cpp"/>
-    <ClCompile Include="..\..\src\audio\plugin_host\juce_AudioPluginInstance.cpp"/>
     <ClCompile Include="..\..\src\audio\plugin_host\juce_KnownPluginList.cpp"/>
     <ClCompile Include="..\..\src\audio\plugin_host\juce_PluginDescription.cpp"/>
     <ClCompile Include="..\..\src\audio\plugin_host\juce_PluginDirectoryScanner.cpp"/>
@@ -792,6 +791,7 @@
     <ClInclude Include="..\..\src\native\mac\juce_osx_ObjCHelpers.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_AutoLinkLibraries.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_ComSmartPtr.h"/>
+    <ClInclude Include="..\..\src\native\windows\juce_win32_HiddenMessageWindow.h"/>
     <ClInclude Include="..\..\src\native\windows\juce_win32_NativeIncludes.h"/>
     <ClInclude Include="..\..\src\native\android\juce_android_NativeIncludes.h"/>
     <ClInclude Include="..\..\src\text\juce_CharacterFunctions.h"/>

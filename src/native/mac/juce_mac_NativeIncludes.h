@@ -43,6 +43,7 @@
   #include <OpenGLES/ES1/glext.h>
  #endif
 #else
+ #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
  #import <Cocoa/Cocoa.h>
  #import <CoreAudio/HostTime.h>
  #if JUCE_BUILD_NATIVE
@@ -61,6 +62,7 @@
         || ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
   #include <Carbon/Carbon.h>
  #endif
+ #undef Point
  #include <sys/dir.h>
 #endif
 

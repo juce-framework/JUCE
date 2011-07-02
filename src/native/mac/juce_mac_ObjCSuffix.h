@@ -23,6 +23,9 @@
   ==============================================================================
 */
 
+#ifndef __JUCE_MAC_OBJCSUFFIX_JUCEHEADER__
+#define __JUCE_MAC_OBJCSUFFIX_JUCEHEADER__
+
 /** This suffix is used for naming all Obj-C classes that are used inside juce.
 
     Because of the flat naming structure used by Obj-C, you can get horrible situations where
@@ -43,5 +46,7 @@
 #ifndef DOXYGEN
  #define appendMacro1(a, b, c, d, e) a ## _ ## b ## _ ## c ## _ ## d ## _ ## e
  #define appendMacro2(a, b, c, d, e) appendMacro1(a, b, c, d, e)
- #define MakeObjCClassName(rootName)  appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JUCE_BUILDNUMBER, JUCE_ObjCExtraSuffix)
+ #define MakeObjCClassName(rootName) appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JUCE_BUILDNUMBER, JUCE_ObjCExtraSuffix)
 #endif
+
+#endif   // __JUCE_MAC_OBJCSUFFIX_JUCEHEADER__

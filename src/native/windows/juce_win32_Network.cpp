@@ -291,12 +291,11 @@ private:
                 request = FtpOpenFile (connection, uc.lpszUrlPath, GENERIC_READ,
                                        FTP_TRANSFER_TYPE_BINARY | INTERNET_FLAG_NEED_FILE, 0);
             else
-                openHTTPConnection (uc, sessionHandle, progressCallback, progressCallbackContext);
+                openHTTPConnection (uc, progressCallback, progressCallbackContext);
         }
     }
 
-    void openHTTPConnection (URL_COMPONENTS& uc, HINTERNET sessionHandle,
-                             URL::OpenStreamProgressCallback* progressCallback,
+    void openHTTPConnection (URL_COMPONENTS& uc, URL::OpenStreamProgressCallback* progressCallback,
                              void* progressCallbackContext)
     {
         const TCHAR* mimeTypes[] = { _T("*/*"), 0 };
