@@ -894,7 +894,6 @@
             <File RelativePath="..\..\src\native\mac\juce_mac_CoreAudio.cpp"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_CoreGraphicsContext.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_CoreMidi.cpp"/>
-            <File RelativePath="..\..\src\native\mac\juce_mac_Debugging.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_FileChooser.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_Files.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_Fonts.mm"/>
@@ -933,7 +932,6 @@
             <File RelativePath="..\..\src\native\windows\juce_win32_HiddenMessageWindow.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Messaging.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Midi.cpp"/>
-            <File RelativePath="..\..\src\native\windows\juce_win32_Misc.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_NativeCode.cpp"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_NativeIncludes.h"/>
             <File RelativePath="..\..\src\native\windows\juce_win32_Network.cpp"/>

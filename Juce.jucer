@@ -1364,8 +1364,6 @@
                 resource="0" file="src/native/mac/juce_mac_CoreGraphicsContext.mm"/>
           <FILE id="Rcaxxc1OE" name="juce_mac_CoreMidi.cpp" compile="1" resource="0"
                 file="src/native/mac/juce_mac_CoreMidi.cpp"/>
-          <FILE id="PXsBYpcvN" name="juce_mac_Debugging.mm" compile="1" resource="0"
-                file="src/native/mac/juce_mac_Debugging.mm"/>
           <FILE id="Wsa2HHU0P" name="juce_mac_FileChooser.mm" compile="1" resource="0"
                 file="src/native/mac/juce_mac_FileChooser.mm"/>
           <FILE id="QwSNNEs9e" name="juce_mac_Files.mm" compile="1" resource="0"
@@ -1440,8 +1438,6 @@
                 file="src/native/windows/juce_win32_Messaging.cpp"/>
           <FILE id="P25j5MUtL" name="juce_win32_Midi.cpp" compile="1" resource="0"
                 file="src/native/windows/juce_win32_Midi.cpp"/>
-          <FILE id="9ucc62F3e" name="juce_win32_Misc.cpp" compile="1" resource="0"
-                file="src/native/windows/juce_win32_Misc.cpp"/>
           <FILE id="kUKTKh" name="juce_win32_NativeCode.cpp" compile="1" resource="0"
                 file="src/native/windows/juce_win32_NativeCode.cpp"/>
           <FILE id="nI5Yz3BGi" name="juce_win32_NativeIncludes.h" compile="0"

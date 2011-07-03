@@ -286,8 +286,28 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
     return juce_isRunningUnderDebugger();
 }
 
+String JUCE_CALLTYPE Process::getCurrentCommandLineParams()
+{
+    return CharacterFunctions::findEndOfToken (CharPointer_UTF16 (GetCommandLineW()),
+                                               CharPointer_UTF16 (L" "),
+                                               CharPointer_UTF16 (L"\"")).findEndOfWhitespace();
+}
 
-//==============================================================================
+static void* currentModuleHandle = nullptr;
+
+void* Process::getCurrentModuleInstanceHandle() noexcept
+{
+    if (currentModuleHandle == nullptr)
+        currentModuleHandle = GetModuleHandle (0);
+
+    return currentModuleHandle;
+}
+
+void Process::setCurrentModuleInstanceHandle (void* const newHandle) noexcept
+{
+    currentModuleHandle = newHandle;
+}
+
 void Process::raisePrivilege()
 {
     jassertfalse; // xxx not implemented
@@ -306,6 +326,12 @@ void Process::terminate()
 
     // bullet in the head in case there's a problem shutting down..
     ExitProcess (0);
+}
+
+bool juce_IsRunningInWine()
+{
+    HMODULE ntdll = GetModuleHandle (_T("ntdll.dll"));
+    return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != 0;
 }
 
 //==============================================================================

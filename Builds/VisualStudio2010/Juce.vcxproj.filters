@@ -1066,9 +1066,6 @@
     <ClCompile Include="..\..\src\native\mac\juce_mac_CoreMidi.cpp">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\native\mac\juce_mac_Debugging.mm">
-      <Filter>Juce\Source\native\mac</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\native\mac\juce_mac_FileChooser.mm">
       <Filter>Juce\Source\native\mac</Filter>
     </ClCompile>
@@ -1154,9 +1151,6 @@
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Midi.cpp">
-      <Filter>Juce\Source\native\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\native\windows\juce_win32_Misc.cpp">
       <Filter>Juce\Source\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\native\windows\juce_win32_NativeCode.cpp">

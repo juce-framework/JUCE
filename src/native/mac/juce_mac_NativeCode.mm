@@ -113,7 +113,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_mac_Threads.mm"
 #include "../common/juce_posix_SharedCode.h"
 #include "juce_mac_Files.mm"
-#include "juce_mac_Debugging.mm"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
   #include "juce_osx_MessageQueue.h"

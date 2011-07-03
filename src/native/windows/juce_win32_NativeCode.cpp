@@ -112,7 +112,6 @@ BEGIN_JUCE_NAMESPACE
  #include "juce_win32_Direct2DGraphicsContext.cpp"
  #include "juce_win32_Windowing.cpp"
  #include "juce_win32_FileChooser.cpp"
- #include "juce_win32_Misc.cpp"
  #include "juce_win32_ActiveXComponent.cpp"
  #include "juce_win32_QuickTimeMovieComponent.cpp"
  #include "juce_win32_DirectShowComponent.cpp"

@@ -476,9 +476,9 @@ public:
             dropTarget = nullptr;
         }
 
-      #if JUCE_DIRECT2D
+       #if JUCE_DIRECT2D
         direct2DContext = nullptr;
-      #endif
+       #endif
     }
 
     //==============================================================================
@@ -1112,14 +1112,9 @@ private:
         else
             exstyle |= WS_EX_APPWINDOW;
 
-        if ((styleFlags & windowHasMinimiseButton) != 0)
-            type |= WS_MINIMIZEBOX;
-
-        if ((styleFlags & windowHasMaximiseButton) != 0)
-            type |= WS_MAXIMIZEBOX;
-
-        if ((styleFlags & windowIgnoresMouseClicks) != 0)
-            exstyle |= WS_EX_TRANSPARENT;
+        if ((styleFlags & windowHasMinimiseButton) != 0)    type |= WS_MINIMIZEBOX;
+        if ((styleFlags & windowHasMaximiseButton) != 0)    type |= WS_MAXIMIZEBOX;
+        if ((styleFlags & windowIgnoresMouseClicks) != 0)   exstyle |= WS_EX_TRANSPARENT;
 
         if ((styleFlags & windowIsSemiTransparent) != 0 && Desktop::canUseSemiTransparentWindows())
             exstyle |= WS_EX_LAYERED;
@@ -1668,20 +1663,20 @@ private:
         {
             switch (virtualScanCode)  // check for a numeric keypad scan-code
             {
-            case 0x52:
-            case 0x4f:
-            case 0x50:
-            case 0x51:
-            case 0x4b:
-            case 0x4c:
-            case 0x4d:
-            case 0x47:
-            case 0x48:
-            case 0x49:
-                key = (key - '0') + KeyPress::numberPad0;
-                break;
-            default:
-                break;
+                case 0x52:
+                case 0x4f:
+                case 0x50:
+                case 0x51:
+                case 0x4b:
+                case 0x4c:
+                case 0x4d:
+                case 0x47:
+                case 0x48:
+                case 0x49:
+                    key = (key - '0') + KeyPress::numberPad0;
+                    break;
+                default:
+                    break;
             }
         }
         else
@@ -1751,10 +1746,10 @@ private:
 
             constrainer->checkBounds (pos, windowBorder.addedTo (component->getBounds()),
                                       Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                      wParam == WMSZ_TOP || wParam == WMSZ_TOPLEFT || wParam == WMSZ_TOPRIGHT,
-                                      wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT,
+                                      wParam == WMSZ_TOP    || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_TOPRIGHT,
+                                      wParam == WMSZ_LEFT   || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_BOTTOMLEFT,
                                       wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
-                                      wParam == WMSZ_RIGHT || wParam == WMSZ_TOPRIGHT || wParam == WMSZ_BOTTOMRIGHT);
+                                      wParam == WMSZ_RIGHT  || wParam == WMSZ_TOPRIGHT   || wParam == WMSZ_BOTTOMRIGHT);
             r->left = pos.getX();
             r->top = pos.getY();
             r->right = pos.getRight();

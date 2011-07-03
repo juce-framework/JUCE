@@ -39,6 +39,12 @@ ScopedAutoReleasePool::~ScopedAutoReleasePool()
 }
 
 //==============================================================================
+void Logger::outputDebugString (const String& text)
+{
+    std::cerr << text << std::endl;
+}
+
+//==============================================================================
 namespace SystemStatsHelpers
 {
    #if JUCE_INTEL

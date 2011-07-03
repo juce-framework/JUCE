@@ -407,7 +407,6 @@
     <ClCompile Include="..\..\src\native\windows\juce_win32_Fonts.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Messaging.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Midi.cpp"/>
-    <ClCompile Include="..\..\src\native\windows\juce_win32_Misc.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_NativeCode.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_Network.cpp"/>
     <ClCompile Include="..\..\src\native\windows\juce_win32_OpenGLComponent.cpp"/>

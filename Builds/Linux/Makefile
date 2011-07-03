@@ -324,7 +324,6 @@ OBJECTS := \
   $(OBJDIR)/juce_win32_Fonts_e695d7fc.o \
   $(OBJDIR)/juce_win32_Messaging_926ab77c.o \
   $(OBJDIR)/juce_win32_Midi_fac3cfb3.o \
-  $(OBJDIR)/juce_win32_Misc_1407f3fe.o \
   $(OBJDIR)/juce_win32_NativeCode_c247c7f6.o \
   $(OBJDIR)/juce_win32_Network_6c84a66.o \
   $(OBJDIR)/juce_win32_OpenGLComponent_d0d99a46.o \
@@ -1810,11 +1809,6 @@ $(OBJDIR)/juce_win32_Messaging_926ab77c.o: ../../src/native/windows/juce_win32_M
 $(OBJDIR)/juce_win32_Midi_fac3cfb3.o: ../../src/native/windows/juce_win32_Midi.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_win32_Midi.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_win32_Misc_1407f3fe.o: ../../src/native/windows/juce_win32_Misc.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_win32_Misc.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_NativeCode_c247c7f6.o: ../../src/native/windows/juce_win32_NativeCode.cpp
