@@ -45,7 +45,7 @@ public:
     NewCppFileWizard() {}
     ~NewCppFileWizard() {}
 
-    const String getName()  { return "CPP File"; }
+    String getName()  { return "CPP File"; }
 
     void createNewFile (Project::Item parent)
     {
@@ -75,7 +75,7 @@ public:
     NewHeaderFileWizard() {}
     ~NewHeaderFileWizard() {}
 
-    const String getName()  { return "Header File"; }
+    String getName()  { return "Header File"; }
 
     void createNewFile (Project::Item parent)
     {
@@ -105,7 +105,7 @@ public:
     NewCppAndHeaderFileWizard() {}
     ~NewCppAndHeaderFileWizard() {}
 
-    const String getName()  { return "CPP & Header File"; }
+    String getName()  { return "CPP & Header File"; }
 
     void createNewFile (Project::Item parent)
     {
@@ -127,8 +127,8 @@ void NewFileWizard::Type::showFailedToWriteMessage (const File& file)
                                  "Couldn't write to the file: " + file.getFullPathName());
 }
 
-const File NewFileWizard::Type::askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
-                                                               const Project::Item& projectGroupToAddTo)
+File NewFileWizard::Type::askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
+                                                  const Project::Item& projectGroupToAddTo)
 {
     FileChooser fc ("Select File to Create",
                     projectGroupToAddTo.determineGroupFolder()

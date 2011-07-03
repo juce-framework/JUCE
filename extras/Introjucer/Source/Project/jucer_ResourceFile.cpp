@@ -99,13 +99,13 @@ void ResourceFile::addFile (const File& file)
     variableNames.add (variableName);
 }
 
-const String ResourceFile::getDataVariableFor (const File& file) const
+String ResourceFile::getDataVariableFor (const File& file) const
 {
     jassert (files.indexOf (file) >= 0);
     return variableNames [files.indexOf (file)];
 }
 
-const String ResourceFile::getSizeVariableFor (const File& file) const
+String ResourceFile::getSizeVariableFor (const File& file) const
 {
     jassert (files.indexOf (file) >= 0);
     return variableNames [files.indexOf (file)] + "Size";

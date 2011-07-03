@@ -30,25 +30,25 @@
 //==============================================================================
 namespace CodeHelpers
 {
-    const String indent (const String& code, const int numSpaces, bool indentFirstLine);
-    const String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates);
-    const String addEscapeChars (const String& text);
-    const String createIncludeStatement (const File& includeFile, const File& targetFile);
-    const String makeHeaderGuardName (const File& file);
-    const String makeBinaryDataIdentifierName (const File& file);
+    String indent (const String& code, const int numSpaces, bool indentFirstLine);
+    String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates);
+    String addEscapeChars (const String& text);
+    String createIncludeStatement (const File& includeFile, const File& targetFile);
+    String makeHeaderGuardName (const File& file);
+    String makeBinaryDataIdentifierName (const File& file);
 
-    const String stringLiteral (const String& text);
-    const String stringLiteralIfNotEmpty (const String& text); // if the string's empty, this returns an empty string
-    const String boolLiteral (bool b);
-    const String floatLiteral (float v);
-    const String doubleLiteral (double v);
+    String stringLiteral (const String& text);
+    String stringLiteralIfNotEmpty (const String& text); // if the string's empty, this returns an empty string
+    String boolLiteral (bool b);
+    String floatLiteral (float v);
+    String doubleLiteral (double v);
 
-    const String colourToCode (const Colour& col);
-    const String justificationToCode (const Justification& justification);
-    const String castToFloat (const String& expression);
-    const String castToInt (const String& expression);
-    const String fontToCode (const Font& font);
-    const String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
+    String colourToCode (const Colour& col);
+    String justificationToCode (const Justification& justification);
+    String castToFloat (const String& expression);
+    String castToInt (const String& expression);
+    String fontToCode (const Font& font);
+    String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
 
     void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out);
 

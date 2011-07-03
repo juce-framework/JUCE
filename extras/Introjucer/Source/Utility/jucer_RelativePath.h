@@ -59,13 +59,13 @@ public:
 
     RootFolder getRoot() const                              { return root; }
 
-    const String toUnixStyle() const                        { return FileHelpers::unixStylePath (path); }
-    const String toWindowsStyle() const                     { return FileHelpers::windowsStylePath (path); }
+    String toUnixStyle() const                              { return FileHelpers::unixStylePath (path); }
+    String toWindowsStyle() const                           { return FileHelpers::windowsStylePath (path); }
 
-    const String getFileName() const                        { return getFakeFile().getFileName(); }
-    const String getFileNameWithoutExtension() const        { return getFakeFile().getFileNameWithoutExtension(); }
+    String getFileName() const                              { return getFakeFile().getFileName(); }
+    String getFileNameWithoutExtension() const              { return getFakeFile().getFileNameWithoutExtension(); }
 
-    const String getFileExtension() const                   { return getFakeFile().getFileExtension(); }
+    String getFileExtension() const                         { return getFakeFile().getFileExtension(); }
     bool hasFileExtension (const String& extension) const   { return getFakeFile().hasFileExtension (extension); }
     bool isAbsolute() const                                 { return isAbsolute (path); }
 
@@ -74,7 +74,7 @@ public:
         return RelativePath (path.upToLastOccurrenceOf (".", ! extension.startsWithChar ('.'), false) + extension, root);
     }
 
-    const RelativePath getParentDirectory() const
+    RelativePath getParentDirectory() const
     {
         String p (path);
         if (path.endsWithChar ('/'))
@@ -83,7 +83,7 @@ public:
         return RelativePath (p.upToLastOccurrenceOf ("/", false, false), root);
     }
 
-    const RelativePath getChildFile (const String& subpath) const
+    RelativePath getChildFile (const String& subpath) const
     {
         if (isAbsolute (subpath))
             return RelativePath (subpath, root);
@@ -95,7 +95,7 @@ public:
         return RelativePath (p + subpath, root);
     }
 
-    const RelativePath rebased (const File& originalRoot, const File& newRoot, const RootFolder newRootType) const
+    RelativePath rebased (const File& originalRoot, const File& newRoot, const RootFolder newRootType) const
     {
         if (isAbsolute())
             return RelativePath (path, newRootType);
@@ -108,7 +108,7 @@ private:
     String path;
     RootFolder root;
 
-    const File getFakeFile() const
+    File getFakeFile() const
     {
         return File::getCurrentWorkingDirectory().getChildFile (path);
     }

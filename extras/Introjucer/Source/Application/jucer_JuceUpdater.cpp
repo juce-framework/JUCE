@@ -80,14 +80,14 @@ void JuceUpdater::paint (Graphics& g)
     g.fillAll (Colours::white);
 }
 
-const String findVersionNum (const String& file, const String& token)
+String findVersionNum (const String& file, const String& token)
 {
     return file.fromFirstOccurrenceOf (token, false, false)
                .upToFirstOccurrenceOf ("\n", false, false)
                .trim();
 }
 
-const String JuceUpdater::getCurrentVersion()
+String JuceUpdater::getCurrentVersion()
 {
     const String header (filenameComp.getCurrentFile()
                             .getChildFile ("src/core/juce_StandardHeader.h").loadFileAsString());

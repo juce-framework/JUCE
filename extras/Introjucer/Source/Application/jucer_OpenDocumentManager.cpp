@@ -60,8 +60,8 @@ public:
     bool isForFile (const File& file) const             { return modDetector.getFile() == file; }
     bool isForNode (const ValueTree& node) const        { return false; }
     bool refersToProject (Project& project) const       { return false; }
-    const String getName() const                        { return modDetector.getFile().getFileName(); }
-    const String getType() const                        { return modDetector.getFile().getFileExtension() + " file"; }
+    String getName() const                              { return modDetector.getFile().getFileName(); }
+    String getType() const                              { return modDetector.getFile().getFileExtension() + " file"; }
     bool needsSaving() const                            { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
     bool hasFileBeenModifiedExternally()                { return modDetector.hasBeenModified(); }
     void fileHasBeenRenamed (const File& newFile)       { modDetector.fileHasBeenRenamed (newFile); }
@@ -142,12 +142,12 @@ public:
     bool save()                                     { return true; }
     bool hasFileBeenModifiedExternally()            { return fileModificationTime != file.getLastModificationTime(); }
     void reloadFromFile()                           { fileModificationTime = file.getLastModificationTime(); }
-    const String getName() const                    { return file.getFileName(); }
+    String getName() const                          { return file.getFileName(); }
     Component* createEditor()                       { return new ItemPreviewComponent (file); }
     Component* createViewer()                       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile)   { file = newFile; }
 
-    const String getType() const
+    String getType() const
     {
         if (file.getFileExtension().isNotEmpty())
             return file.getFileExtension() + " file";

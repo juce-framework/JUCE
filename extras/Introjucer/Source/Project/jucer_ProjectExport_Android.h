@@ -246,7 +246,7 @@ private:
             << "include $(BUILD_SHARED_LIBRARY)" << newLine;
     }
 
-    const String createCPPFlags (bool forDebug)
+    String createCPPFlags (bool forDebug)
     {
         String flags ("-fsigned-char -fexceptions -frtti");
 

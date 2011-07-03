@@ -79,7 +79,7 @@ protected:
     File rcFile, iconFile;
     bool hasIcon;
 
-    const File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
+    File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
     Value getLibraryType() const        { return getSetting (Ids::libraryType); }
     bool isLibraryDLL() const           { return project.isLibrary() && getLibraryType() == 2; }
@@ -105,12 +105,12 @@ protected:
         return s;
     }
 
-    const String getIntermediatesPath (const Project::BuildConfiguration& config) const
+    String getIntermediatesPath (const Project::BuildConfiguration& config) const
     {
         return ".\\" + File::createLegalFileName (config.getName().toString().trim());
     }
 
-    const String getConfigTargetPath (const Project::BuildConfiguration& config) const
+    String getConfigTargetPath (const Project::BuildConfiguration& config) const
     {
         const String binaryPath (config.getTargetBinaryRelativePath().toString().trim());
         if (binaryPath.isEmpty())
@@ -121,7 +121,7 @@ protected:
                              .toWindowsStyle();
     }
 
-    const String getTargetBinarySuffix() const
+    String getTargetBinarySuffix() const
     {
         if (project.isLibrary())
             return ".lib";
@@ -133,7 +133,7 @@ protected:
         return ".exe";
     }
 
-    const String getPreprocessorDefs (const Project::BuildConfiguration& config, const String& joinString) const
+    String getPreprocessorDefs (const Project::BuildConfiguration& config, const String& joinString) const
     {
         StringPairArray defines;
         defines.set ("WIN32", "");
@@ -225,7 +225,7 @@ protected:
         return searchPaths;
     }
 
-    const String getBinaryFileForConfig (const Project::BuildConfiguration& config) const
+    String getBinaryFileForConfig (const Project::BuildConfiguration& config) const
     {
         const String targetBinary (getSetting (config.isDebug().getValue() ? Ids::libraryName_Debug : Ids::libraryName_Release).toString().trim());
         if (targetBinary.isNotEmpty())
@@ -234,7 +234,7 @@ protected:
         return config.getTargetBinaryName().toString() + getTargetBinarySuffix();
     }
 
-    static const String createConfigName (const Project::BuildConfiguration& config)
+    static String createConfigName (const Project::BuildConfiguration& config)
     {
         return config.getName().toString() + "|Win32";
     }
@@ -474,11 +474,11 @@ public:
     }
 
 protected:
-    virtual const String getProjectVersionString() const    { return "9.00"; }
-    virtual const String getSolutionVersionString() const   { return "10.00" + newLine + "# Visual C++ Express 2008"; }
+    virtual String getProjectVersionString() const    { return "9.00"; }
+    virtual String getSolutionVersionString() const   { return "10.00" + newLine + "# Visual C++ Express 2008"; }
 
-    const File getVCProjFile() const    { return getProjectFile (".vcproj"); }
-    const File getSLNFile() const       { return getProjectFile (".sln"); }
+    File getVCProjFile() const    { return getProjectFile (".vcproj"); }
+    File getSLNFile() const       { return getProjectFile (".sln"); }
 
     //==============================================================================
     void fillInProjectXml (XmlElement& projectXml)
@@ -803,8 +803,8 @@ public:
     }
 
 protected:
-    const String getProjectVersionString() const    { return "8.00"; }
-    const String getSolutionVersionString() const   { return "8.00" + newLine + "# Visual C++ Express 2005"; }
+    String getProjectVersionString() const    { return "8.00"; }
+    String getSolutionVersionString() const   { return "8.00" + newLine + "# Visual C++ Express 2005"; }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2005);
 };
@@ -860,11 +860,11 @@ public:
     }
 
 private:
-    const File getDSPFile() const       { return getProjectFile (".dsp"); }
-    const File getDSWFile() const       { return getProjectFile (".dsw"); }
+    File getDSPFile() const       { return getProjectFile (".dsp"); }
+    File getDSWFile() const       { return getProjectFile (".dsw"); }
 
     //==============================================================================
-    const String createConfigName (const Project::BuildConfiguration& config) const
+    String createConfigName (const Project::BuildConfiguration& config) const
     {
         return project.getProjectName().toString() + " - Win32 " + config.getName().toString();
     }
@@ -1138,11 +1138,11 @@ public:
     }
 
 protected:
-    const File getVCProjFile() const            { return getProjectFile (".vcxproj"); }
-    const File getVCProjFiltersFile() const     { return getProjectFile (".vcxproj.filters"); }
-    const File getSLNFile() const               { return getProjectFile (".sln"); }
+    File getVCProjFile() const            { return getProjectFile (".vcxproj"); }
+    File getVCProjFiltersFile() const     { return getProjectFile (".vcxproj.filters"); }
+    File getSLNFile() const               { return getProjectFile (".sln"); }
 
-    static const String createConfigName (const Project::BuildConfiguration& config)
+    static String createConfigName (const Project::BuildConfiguration& config)
     {
         return config.getName().toString() + "|Win32";
     }
@@ -1367,7 +1367,7 @@ protected:
         }
     }
 
-    const String getProjectType() const
+    String getProjectType() const
     {
         if (project.isGUIApplication() || project.isCommandLineApp())   return "Application";
         else if (project.isAudioPlugin() || project.isBrowserPlugin())  return "DynamicLibrary";

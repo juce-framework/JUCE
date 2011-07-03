@@ -33,8 +33,8 @@ public:
     GUIAppWizard()  {}
     ~GUIAppWizard() {}
 
-    const String getName()          { return "GUI Application"; }
-    const String getDescription()   { return "Creates a standard application"; }
+    String getName()          { return "GUI Application"; }
+    String getDescription()   { return "Creates a standard application"; }
 
     void addItemsToAlertWindow (AlertWindow& aw)
     {
@@ -45,7 +45,7 @@ public:
         aw.addComboBox ("files", StringArray (fileOptions), "Files to Auto-Generate");
     }
 
-    const String processResultsFromAlertWindow (AlertWindow& aw)
+    String processResultsFromAlertWindow (AlertWindow& aw)
     {
         createMainCpp = createWindow = false;
 
@@ -142,8 +142,8 @@ public:
     ConsoleAppWizard()  {}
     ~ConsoleAppWizard() {}
 
-    const String getName()          { return "Console Application"; }
-    const String getDescription()   { return "Creates a command-line application with no GUI features"; }
+    String getName()          { return "Console Application"; }
+    String getDescription()   { return "Creates a command-line application with no GUI features"; }
 
     void addItemsToAlertWindow (AlertWindow& aw)
     {
@@ -153,7 +153,7 @@ public:
         aw.addComboBox ("files", StringArray (fileOptions), "Files to Auto-Generate");
     }
 
-    const String processResultsFromAlertWindow (AlertWindow& aw)
+    String processResultsFromAlertWindow (AlertWindow& aw)
     {
         createMainCpp = false;
 
@@ -210,14 +210,14 @@ public:
     AudioPluginAppWizard()  {}
     ~AudioPluginAppWizard() {}
 
-    const String getName()          { return "Audio Plug-In"; }
-    const String getDescription()   { return "Creates an audio plugin project"; }
+    String getName()          { return "Audio Plug-In"; }
+    String getDescription()   { return "Creates an audio plugin project"; }
 
     void addItemsToAlertWindow (AlertWindow& aw)
     {
     }
 
-    const String processResultsFromAlertWindow (AlertWindow& aw)
+    String processResultsFromAlertWindow (AlertWindow& aw)
     {
         return String::empty;
     }
@@ -300,14 +300,14 @@ public:
     BrowserPluginAppWizard()  {}
     ~BrowserPluginAppWizard() {}
 
-    const String getName()          { return "Browser Plug-In"; }
-    const String getDescription()   { return "Creates an audio plugin project"; }
+    String getName()          { return "Browser Plug-In"; }
+    String getDescription()   { return "Creates an audio plugin project"; }
 
     void addItemsToAlertWindow (AlertWindow& aw)
     {
     }
 
-    const String processResultsFromAlertWindow (AlertWindow& aw)
+    String processResultsFromAlertWindow (AlertWindow& aw)
     {
         return String::empty;
     }

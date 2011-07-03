@@ -80,17 +80,17 @@ namespace FileHelpers
         return false;
     }
 
-    const String unixStylePath (const String& path)
+    String unixStylePath (const String& path)
     {
         return path.replaceCharacter ('\\', '/');
     }
 
-    const String windowsStylePath (const String& path)
+    String windowsStylePath (const String& path)
     {
         return path.replaceCharacter ('/', '\\');
     }
 
-    const String appendPath (const String& path, const String& subpath)
+    String appendPath (const String& path, const String& subpath)
     {
         if (File::isAbsolutePath (subpath)
              || subpath.startsWithChar ('$')
@@ -132,7 +132,7 @@ namespace FileHelpers
                  && folder.getChildFile ("juce_Config.h").exists();
     }
 
-    static const File lookInFolderForJuceFolder (const File& folder)
+    static File lookInFolderForJuceFolder (const File& folder)
     {
         for (DirectoryIterator di (folder, false, "*juce*", File::findDirectories); di.next();)
         {
@@ -143,7 +143,7 @@ namespace FileHelpers
         return File::nonexistent;
     }
 
-    const File findParentJuceFolder (const File& file)
+    File findParentJuceFolder (const File& file)
     {
         File f (file);
 
@@ -162,7 +162,7 @@ namespace FileHelpers
         return File::nonexistent;
     }
 
-    const File findDefaultJuceFolder()
+    File findDefaultJuceFolder()
     {
         File f = findParentJuceFolder (File::getSpecialLocation (File::currentApplicationFile));
 

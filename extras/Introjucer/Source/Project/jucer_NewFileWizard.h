@@ -48,13 +48,13 @@ public:
         virtual ~Type()  {}
 
         //==============================================================================
-        virtual const String getName() = 0;
+        virtual String getName() = 0;
         virtual void createNewFile (Project::Item projectGroupToAddTo) = 0;
 
     protected:
         //==============================================================================
-        const File askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
-                                           const Project::Item& projectGroupToAddTo);
+        File askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
+                                     const Project::Item& projectGroupToAddTo);
 
         static void showFailedToWriteMessage (const File& file);
     };

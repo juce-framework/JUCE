@@ -49,8 +49,8 @@ public:
     void itemClicked (const MouseEvent& e);
 
     //==============================================================================
-    virtual const String getRenamingName() const = 0;
-    virtual const String getDisplayName() const = 0;
+    virtual String getRenamingName() const = 0;
+    virtual String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
     virtual const Drawable* getIcon() const = 0;

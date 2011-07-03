@@ -153,7 +153,7 @@ private:
     int64 projectIDSalt;
     const bool iPhone;
 
-    static const String sanitisePath (const String& path)
+    static String sanitisePath (const String& path)
     {
         if (path.startsWithChar ('~'))
             return "$(HOME)" + path.substring (1);
@@ -161,10 +161,10 @@ private:
         return path;
     }
 
-    const File getProjectBundle() const         { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (".xcodeproj"); }
+    File getProjectBundle() const                 { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (".xcodeproj"); }
 
-    bool hasPList() const                               { return ! (project.isLibrary() || project.isCommandLineApp()); }
-    const String getAudioPluginBundleExtension() const  { return "component"; }
+    bool hasPList() const                         { return ! (project.isLibrary() || project.isCommandLineApp()); }
+    String getAudioPluginBundleExtension() const  { return "component"; }
 
     //==============================================================================
     void createObjects()
@@ -227,7 +227,7 @@ private:
         addProjectObject();
     }
 
-    static const Image fixMacIconImageSize (Image& image)
+    static Image fixMacIconImageSize (Image& image)
     {
         const int w = image.getWidth();
         const int h = image.getHeight();
@@ -760,7 +760,7 @@ private:
         xml->createNewChildElement (value ? "true" : "false");
     }
 
-    const String addBuildFile (const RelativePath& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings)
+    String addBuildFile (const RelativePath& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings)
     {
         String fileID (createID (path.toUnixStyle() + "buildref"));
 
@@ -778,7 +778,7 @@ private:
         return fileID;
     }
 
-    const String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings)
+    String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings)
     {
         return addBuildFile (path, createID (path), addToSourceBuildPhase, inhibitWarnings);
     }
@@ -794,7 +794,7 @@ private:
         pbxFileReferences.add (v);
     }
 
-    const String addFileReference (const RelativePath& path)
+    String addFileReference (const RelativePath& path)
     {
         const String fileRefID (createID (path));
 
@@ -805,7 +805,7 @@ private:
         return fileRefID;
     }
 
-    static const String getFileType (const RelativePath& file)
+    static String getFileType (const RelativePath& file)
     {
         if (file.hasFileExtension ("cpp;cc;cxx"))                return "sourcecode.cpp.cpp";
         else if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
@@ -825,7 +825,7 @@ private:
         return "file" + file.getFileExtension();
     }
 
-    const String addFile (const RelativePath& path, bool shouldBeCompiled, bool inhibitWarnings)
+    String addFile (const RelativePath& path, bool shouldBeCompiled, bool inhibitWarnings)
     {
         if (shouldBeCompiled)
             addBuildFile (path, true, inhibitWarnings);
@@ -835,7 +835,7 @@ private:
         return addFileReference (path);
     }
 
-    const String addProjectItem (const Project::Item& projectItem)
+    String addProjectItem (const Project::Item& projectItem)
     {
         if (projectItem.isGroup())
         {
@@ -881,7 +881,7 @@ private:
         groups.add (v);
     }
 
-    const String createGroup (const Array<RelativePath>& files, const String& groupName, const String& groupIDName, bool inhibitWarnings)
+    String createGroup (const Array<RelativePath>& files, const String& groupName, const String& groupIDName, bool inhibitWarnings)
     {
         StringArray fileIDs;
 
@@ -896,7 +896,7 @@ private:
         return groupID;
     }
 
-    const String addGroup (const Project::Item& item, StringArray& childIDs)
+    String addGroup (const Project::Item& item, StringArray& childIDs)
     {
         String groupName (item.getName().toString());
 
@@ -1068,7 +1068,7 @@ private:
     }
 
     //==============================================================================
-    static const String indentList (const StringArray& list, const String& separator)
+    static String indentList (const StringArray& list, const String& separator)
     {
         if (list.size() == 0)
             return " ";
@@ -1077,12 +1077,12 @@ private:
                   + (separator == ";" ? separator : String::empty);
     }
 
-    const String createID (const RelativePath& path) const
+    String createID (const RelativePath& path) const
     {
         return createID (path.toUnixStyle());
     }
 
-    const String createID (const String& rootString) const
+    String createID (const String& rootString) const
     {
         static const char digits[] = "0123456789ABCDEF";
         char n[24];
@@ -1094,7 +1094,7 @@ private:
         return String (n, numElementsInArray (n));
     }
 
-    const String getIDForGroup (const Project::Item& item) const
+    String getIDForGroup (const Project::Item& item) const
     {
         return createID (item.getID());
     }
@@ -1125,7 +1125,7 @@ private:
         return s;
     }
 
-    const String createAUWrappersGroup()
+    String createAUWrappersGroup()
     {
         Array<RelativePath> auWrappers;
 

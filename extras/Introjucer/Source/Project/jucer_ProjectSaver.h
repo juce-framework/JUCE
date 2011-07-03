@@ -531,7 +531,7 @@ private:
         }
     }
 
-    const File getSourceWrapperCpp (int fileIndex) const
+    File getSourceWrapperCpp (int fileIndex) const
     {
         return project.getWrapperFolder().getChildFile (project.getJuceSourceFilenameRoot() + (fileIndex != 0 ? String (fileIndex) : String::empty))
                                          .withFileExtension (".cpp");

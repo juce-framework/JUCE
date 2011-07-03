@@ -237,7 +237,7 @@ void Project::valueTreeParentChanged (ValueTree& tree)
 }
 
 //==============================================================================
-const File Project::resolveFilename (String filename) const
+File Project::resolveFilename (String filename) const
 {
     if (filename.isEmpty())
         return File::nonexistent;
@@ -251,7 +251,7 @@ const File Project::resolveFilename (String filename) const
     return getFile().getSiblingFile (filename);
 }
 
-const String Project::getRelativePathForFile (const File& file) const
+String Project::getRelativePathForFile (const File& file) const
 {
     String filename (file.getFullPathName());
 
@@ -300,7 +300,7 @@ const char* const Project::useAmalgamatedJuce                       = "amalg_big
 const char* const Project::useAmalgamatedJuceViaSingleTemplate      = "amalg_template";
 const char* const Project::useAmalgamatedJuceViaMultipleTemplates   = "amalg_multi";
 
-const File Project::getLocalJuceFolder()
+File Project::getLocalJuceFolder()
 {
     ScopedPointer <ProjectExporter> exp (ProjectExporter::createPlatformDefaultExporter (*this));
 
@@ -429,7 +429,7 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.getUnchecked(i)->setPreferredHeight (22);
 }
 
-const Image Project::getBigIcon()
+Image Project::getBigIcon()
 {
     Item icon (getMainGroup().findItemWithID (getBigIconImageItemID().toString()));
 
@@ -439,7 +439,7 @@ const Image Project::getBigIcon()
     return Image();
 }
 
-const Image Project::getSmallIcon()
+Image Project::getSmallIcon()
 {
     Item icon (getMainGroup().findItemWithID (getSmallIconImageItemID().toString()));
 
@@ -449,7 +449,7 @@ const Image Project::getSmallIcon()
     return Image();
 }
 
-const Image Project::getBestIconForSize (int size, bool returnNullIfNothingBigEnough)
+Image Project::getBestIconForSize (int size, bool returnNullIfNothingBigEnough)
 {
     Image im;
 
@@ -486,7 +486,7 @@ const Image Project::getBestIconForSize (int size, bool returnNullIfNothingBigEn
 }
 
 
-const StringPairArray Project::getPreprocessorDefs() const
+StringPairArray Project::getPreprocessorDefs() const
 {
     return parsePreprocessorDefs (getProjectPreprocessorDefs().toString());
 }
@@ -555,8 +555,8 @@ Project::Item::~Item()
 {
 }
 
-const String Project::Item::getID() const               { return node [Ids::id_]; }
-const String Project::Item::getImageFileID() const      { return "id:" + getID(); }
+String Project::Item::getID() const               { return node [Ids::id_]; }
+String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
 bool Project::Item::isFile() const          { return node.hasType (Tags::file); }
 bool Project::Item::isGroup() const         { return node.hasType (Tags::group) || isMainGroup(); }
@@ -618,7 +618,7 @@ Value Project::Item::getShouldAddToResourceValue() const
     return node.getPropertyAsValue (Ids::resource, getUndoManager());
 }
 
-const File Project::Item::getFile() const
+File Project::Item::getFile() const
 {
     if (isFile())
         return project->resolveFilename (node [Ids::file].toString());
@@ -668,7 +668,7 @@ Project::Item Project::Item::findItemForFile (const File& file) const
     return Item (*project, ValueTree::invalid);
 }
 
-const File Project::Item::determineGroupFolder() const
+File Project::Item::determineGroupFolder() const
 {
     jassert (isGroup());
     File f;
@@ -907,7 +907,7 @@ bool Project::hasConfigurationNamed (const String& name) const
     return false;
 }
 
-const String Project::getUniqueConfigName (String name) const
+String Project::getUniqueConfigName (String name) const
 {
     String nameRoot (name);
     while (CharacterFunctions::isDigit (nameRoot.getLastCharacter()))
@@ -990,7 +990,7 @@ Project::BuildConfiguration::~BuildConfiguration()
 {
 }
 
-const String Project::BuildConfiguration::getGCCOptimisationFlag() const
+String Project::BuildConfiguration::getGCCOptimisationFlag() const
 {
     const int level = (int) getOptimisationLevel().getValue();
     return String (level <= 1 ? "0" : (level == 2 ? "s" : "3"));
@@ -1060,7 +1060,7 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
         props.getUnchecked(i)->setPreferredHeight (22);
 }
 
-const StringPairArray Project::BuildConfiguration::getAllPreprocessorDefs() const
+StringPairArray Project::BuildConfiguration::getAllPreprocessorDefs() const
 {
     return mergePreprocessorDefs (project->getPreprocessorDefs(),
                                   parsePreprocessorDefs (getBuildConfigPreprocessorDefs().toString()));
@@ -1122,7 +1122,7 @@ void Project::createDefaultExporters()
 }
 
 //==============================================================================
-const String Project::getFileTemplate (const String& templateName)
+String Project::getFileTemplate (const String& templateName)
 {
     int dataSize;
     const char* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize);

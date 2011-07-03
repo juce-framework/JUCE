@@ -45,11 +45,11 @@ public:
     void setJuceHeaderToInclude (const File& header);
 
     void setClassName (const String& className);
-    const String getClassName() const       { return className; }
+    String getClassName() const       { return className; }
 
     void addFile (const File& file);
-    const String getDataVariableFor (const File& file) const;
-    const String getSizeVariableFor (const File& file) const;
+    String getDataVariableFor (const File& file) const;
+    String getSizeVariableFor (const File& file) const;
 
     int getNumFiles() const                 { return files.size(); }
     int64 getTotalDataSize() const;

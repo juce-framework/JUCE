@@ -40,7 +40,7 @@ ProjectTreeViewBase::~ProjectTreeViewBase()
 }
 
 //==============================================================================
-const String ProjectTreeViewBase::getDisplayName() const
+String ProjectTreeViewBase::getDisplayName() const
 {
     return item.getName().toString();
 }
@@ -54,7 +54,7 @@ void ProjectTreeViewBase::setName (const String& newName)
 }
 
 //==============================================================================
-const File ProjectTreeViewBase::getFile() const
+File ProjectTreeViewBase::getFile() const
 {
     return item.getFile();
 }

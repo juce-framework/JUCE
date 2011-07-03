@@ -56,7 +56,7 @@ private:
     ListBox availableVersionsList;
 
     XmlElement* downloadVersionList();
-    const String getCurrentVersion();
+    String getCurrentVersion();
     bool isAlreadyUpToDate();
 
     struct VersionInfo

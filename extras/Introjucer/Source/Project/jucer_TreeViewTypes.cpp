@@ -164,12 +164,12 @@ SourceFileTreeViewItem::~SourceFileTreeViewItem()
 {
 }
 
-const String SourceFileTreeViewItem::getDisplayName() const
+String SourceFileTreeViewItem::getDisplayName() const
 {
     return getFile().getFileName();
 }
 
-static const File findCorrespondingHeaderOrCpp (const File& f)
+static File findCorrespondingHeaderOrCpp (const File& f)
 {
     if (f.hasFileExtension (sourceFileExtensions))
         return f.withFileExtension (".h");

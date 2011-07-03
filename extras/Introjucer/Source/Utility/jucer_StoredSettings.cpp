@@ -143,7 +143,7 @@ void StoredSettings::setLastProjects (const Array<File>& files)
     props->setValue ("lastProjects", s.joinIntoString ("|"));
 }
 
-const File StoredSettings::getLastKnownJuceFolder() const
+File StoredSettings::getLastKnownJuceFolder() const
 {
     File defaultJuceFolder (FileHelpers::findDefaultJuceFolder());
     File f (props->getValue ("lastJuceFolder", defaultJuceFolder.getFullPathName()));
@@ -168,7 +168,7 @@ const StringArray& StoredSettings::getFontNames()
     return fontNames;
 }
 
-const Image StoredSettings::getFallbackImage()
+Image StoredSettings::getFallbackImage()
 {
     if (fallbackImage.isNull())
         fallbackImage = ImageFileFormat::loadFrom (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);

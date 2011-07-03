@@ -74,7 +74,7 @@ public:
 private:
     ScopedPointer <Project> currentProject;
 
-    const String getProjectWindowPosName() const
+    String getProjectWindowPosName() const
     {
         jassert (currentProject != nullptr);
         if (currentProject == nullptr)

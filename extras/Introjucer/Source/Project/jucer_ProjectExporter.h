@@ -58,8 +58,8 @@ public:
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
 
     //==============================================================================
-    const String getName() const            { return name; }
-    const File getTargetFolder() const;
+    String getName() const                  { return name; }
+    File getTargetFolder() const;
 
     const ValueTree& getSettings() const                { return settings; }
     Value getSetting (const Identifier& name_) const    { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
@@ -81,17 +81,17 @@ public:
     Value getExporterPreprocessorDefs() const   { return getSetting (Ids::extraDefs); }
 
     // includes exporter, project + config defs
-    const StringPairArray getAllPreprocessorDefs (const Project::BuildConfiguration& config) const;
+    StringPairArray getAllPreprocessorDefs (const Project::BuildConfiguration& config) const;
     // includes exporter + project defs..
-    const StringPairArray getAllPreprocessorDefs() const;
+    StringPairArray getAllPreprocessorDefs() const;
 
-    const String replacePreprocessorTokens (const Project::BuildConfiguration& config,
-                                            const String& sourceString) const;
+    String replacePreprocessorTokens (const Project::BuildConfiguration& config,
+                                      const String& sourceString) const;
 
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
-    const String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
+    String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
 
-    const String getExporterIdentifierMacro() const
+    String getExporterIdentifierMacro() const
     {
         return "JUCER_" + settings.getType().toString() + "_"
                 + String::toHexString (settings [Ids::targetFolder].toString().hashCode()).toUpperCase();
@@ -122,11 +122,11 @@ protected:
 
     const RelativePath getJucePathFromTargetFolder() const;
 
-    static const String getDefaultBuildsRootFolder()            { return "Builds/"; }
+    static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
     const Array<RelativePath> getVSTFilesRequired() const;
 
-    static const String getLibbedFilename (String name)
+    static String getLibbedFilename (String name)
     {
         if (! name.startsWith ("lib"))
             name = "lib" + name;

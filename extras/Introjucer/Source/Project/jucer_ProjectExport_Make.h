@@ -320,7 +320,7 @@ private:
         out << "-include $(OBJECTS:%.o=%.d)" << newLine;
     }
 
-    const String getObjectFileFor (const RelativePath& file) const
+    String getObjectFileFor (const RelativePath& file) const
     {
         return file.getFileNameWithoutExtension()
                 + "_" + String::toHexString (file.toUnixStyle().hashCode()) + ".o";

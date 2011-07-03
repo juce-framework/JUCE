@@ -123,12 +123,12 @@ ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& projec
     return best.release();
 }
 
-const File ProjectExporter::getTargetFolder() const
+File ProjectExporter::getTargetFolder() const
 {
     return project.resolveFilename (getTargetLocation().toString());
 }
 
-const String ProjectExporter::getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const
+String ProjectExporter::getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const
 {
     String juceFolderPath (getJuceFolder().toString());
 
@@ -212,7 +212,7 @@ const Array<RelativePath> ProjectExporter::getVSTFilesRequired() const
     return s;
 }
 
-const StringPairArray ProjectExporter::getAllPreprocessorDefs (const Project::BuildConfiguration& config) const
+StringPairArray ProjectExporter::getAllPreprocessorDefs (const Project::BuildConfiguration& config) const
 {
     StringPairArray defs (mergePreprocessorDefs (config.getAllPreprocessorDefs(),
                                                  parsePreprocessorDefs (getExporterPreprocessorDefs().toString())));
@@ -220,7 +220,7 @@ const StringPairArray ProjectExporter::getAllPreprocessorDefs (const Project::Bu
     return defs;
 }
 
-const StringPairArray ProjectExporter::getAllPreprocessorDefs() const
+StringPairArray ProjectExporter::getAllPreprocessorDefs() const
 {
     StringPairArray defs (mergePreprocessorDefs (project.getPreprocessorDefs(),
                                                  parsePreprocessorDefs (getExporterPreprocessorDefs().toString())));
@@ -228,7 +228,7 @@ const StringPairArray ProjectExporter::getAllPreprocessorDefs() const
     return defs;
 }
 
-const String ProjectExporter::replacePreprocessorTokens (const Project::BuildConfiguration& config, const String& sourceString) const
+String ProjectExporter::replacePreprocessorTokens (const Project::BuildConfiguration& config, const String& sourceString) const
 {
     return replacePreprocessorDefs (getAllPreprocessorDefs (config), sourceString);
 }

@@ -39,15 +39,15 @@ namespace FileHelpers
 
     bool containsAnyNonHiddenFiles (const File& folder);
 
-    const String unixStylePath (const String& path);
-    const String windowsStylePath (const String& path);
+    String unixStylePath (const String& path);
+    String windowsStylePath (const String& path);
 
     bool shouldPathsBeRelative (String path1, String path2);
 
     //==============================================================================
     bool isJuceFolder (const File& folder);
-    const File findParentJuceFolder (const File& file);
-    const File findDefaultJuceFolder();
+    File findParentJuceFolder (const File& file);
+    File findDefaultJuceFolder();
 }
 
 //==============================================================================

@@ -42,7 +42,7 @@ public:
     void createLeftEdgeComponents (Array<Component*>& components)           {}
     void showDocument();
     void showPopupMenu();
-    const String getDisplayName() const;
+    String getDisplayName() const;
     void setName (const String& newName);
 };
 

@@ -49,11 +49,11 @@ public:
     virtual bool acceptsDragItems (const OwnedArray <Project::Item>& selectedNodes) = 0;
 
     //==============================================================================
-    virtual const String getDisplayName() const;
-    virtual const String getRenamingName() const        { return getDisplayName(); }
+    virtual String getDisplayName() const;
+    virtual String getRenamingName() const              { return getDisplayName(); }
     virtual void setName (const String& newName);
     virtual bool isMissing()                            { return isFileMissing; }
-    virtual const File getFile() const;
+    virtual File getFile() const;
 
     virtual void deleteItem();
     virtual void deleteAllSelectedItems();

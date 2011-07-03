@@ -83,7 +83,7 @@ const String escapeSpaces (const String& s)
 }
 
 //==============================================================================
-const StringPairArray parsePreprocessorDefs (const String& text)
+StringPairArray parsePreprocessorDefs (const String& text)
 {
     StringPairArray result;
     String::CharPointerType s (text.getCharPointer());
@@ -126,7 +126,7 @@ const StringPairArray parsePreprocessorDefs (const String& text)
     return result;
 }
 
-const StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs)
+StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs)
 {
     for (int i = 0; i < overridingDefs.size(); ++i)
         inheritedDefs.set (overridingDefs.getAllKeys()[i], overridingDefs.getAllValues()[i]);

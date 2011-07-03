@@ -51,13 +51,13 @@ public:
     //==============================================================================
     ValueTree getProjectRoot() const                    { return projectRoot; }
     Value getProjectName()                              { return getMainGroup().getName(); }
-    const String getProjectFilenameRoot()               { return File::createLegalFileName (getDocumentTitle()); }
-    const String getProjectUID() const                  { return projectRoot [Ids::id_]; }
+    String getProjectFilenameRoot()                     { return File::createLegalFileName (getDocumentTitle()); }
+    String getProjectUID() const                        { return projectRoot [Ids::id_]; }
 
     //==============================================================================
     bool shouldBeAddedToBinaryResourcesByDefault (const File& file);
-    const File resolveFilename (String filename) const;
-    const String getRelativePathForFile (const File& file) const;
+    File resolveFilename (String filename) const;
+    String getRelativePathForFile (const File& file) const;
 
     //==============================================================================
     // Creates editors for the project settings
@@ -92,7 +92,7 @@ public:
     static const char* const useAmalgamatedJuceViaMultipleTemplates;
 
     Value getJuceLinkageModeValue() const               { return getProjectValue ("juceLinkage"); }
-    const String getJuceLinkageMode() const             { return getJuceLinkageModeValue().toString(); }
+    String getJuceLinkageMode() const                   { return getJuceLinkageModeValue().toString(); }
 
     bool isUsingWrapperFiles() const                    { return isUsingFullyAmalgamatedFile() || isUsingSingleTemplateFile() || isUsingMultipleTemplateFiles(); }
     bool isUsingFullyAmalgamatedFile() const            { return getJuceLinkageMode() == useAmalgamatedJuce; }
@@ -103,13 +103,13 @@ public:
     Value getProjectValue (const Identifier& name) const       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
 
     Value getProjectPreprocessorDefs() const            { return getProjectValue (Ids::defines); }
-    const StringPairArray getPreprocessorDefs() const;
+    StringPairArray getPreprocessorDefs() const;
 
     Value getBigIconImageItemID() const                 { return getProjectValue ("bigIcon"); }
     Value getSmallIconImageItemID() const               { return getProjectValue ("smallIcon"); }
-    const Image getBigIcon();
-    const Image getSmallIcon();
-    const Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough);
+    Image getBigIcon();
+    Image getSmallIcon();
+    Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough);
 
     Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
     Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }
@@ -133,21 +133,21 @@ public:
     Value getPluginRTASCategory() const                 { return getProjectValue ("pluginRTASCategory"); }
 
     //==============================================================================
-    const File getAppIncludeFile() const                { return getWrapperFolder().getChildFile (getJuceSourceHFilename()); }
-    const File getWrapperFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
-    const File getPluginCharacteristicsFile() const     { return getWrapperFolder().getChildFile (getPluginCharacteristicsFilename()); }
+    File getAppIncludeFile() const                { return getWrapperFolder().getChildFile (getJuceSourceHFilename()); }
+    File getWrapperFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
+    File getPluginCharacteristicsFile() const     { return getWrapperFolder().getChildFile (getPluginCharacteristicsFilename()); }
 
     //==============================================================================
-    const String getAmalgamatedHeaderFileName() const       { return "juce_amalgamated.h"; }
-    const String getAmalgamatedMMFileName() const           { return "juce_amalgamated.mm"; }
-    const String getAmalgamatedCppFileName() const          { return "juce_amalgamated.cpp"; }
+    String getAmalgamatedHeaderFileName() const         { return "juce_amalgamated.h"; }
+    String getAmalgamatedMMFileName() const             { return "juce_amalgamated.mm"; }
+    String getAmalgamatedCppFileName() const            { return "juce_amalgamated.cpp"; }
 
-    const String getAppConfigFilename() const               { return "AppConfig.h"; }
-    const String getJuceSourceFilenameRoot() const          { return "JuceLibraryCode"; }
-    int getNumSeparateAmalgamatedFiles() const              { return 4; }
-    const String getJuceSourceHFilename() const             { return "JuceHeader.h"; }
-    const String getJuceCodeGroupName() const               { return "Juce Library Code"; }
-    const String getPluginCharacteristicsFilename() const   { return "JucePluginCharacteristics.h"; }
+    String getAppConfigFilename() const                 { return "AppConfig.h"; }
+    String getJuceSourceFilenameRoot() const            { return "JuceLibraryCode"; }
+    int getNumSeparateAmalgamatedFiles() const          { return 4; }
+    String getJuceSourceHFilename() const               { return "JuceHeader.h"; }
+    String getJuceCodeGroupName() const                 { return "Juce Library Code"; }
+    String getPluginCharacteristicsFilename() const     { return "JucePluginCharacteristics.h"; }
 
     //==============================================================================
     class Item
@@ -175,15 +175,15 @@ public:
         bool isMainGroup() const;
         bool isImageFile() const;
 
-        const String getID() const;
+        String getID() const;
         Item findItemWithID (const String& targetId) const; // (recursive search)
-        const String getImageFileID() const;
+        String getImageFileID() const;
 
         //==============================================================================
         Value getName() const;
-        const File getFile() const;
+        File getFile() const;
         void setFile (const File& file);
-        const File determineGroupFolder() const;
+        File determineGroupFolder() const;
         bool renameFile (const File& newFile);
 
         bool shouldBeAddedToTargetProject() const;
@@ -240,9 +240,9 @@ public:
         // the path relative to the build folder in which the binary should go
         Value getTargetBinaryRelativePath() const           { return getValue (Ids::binaryPath); }
         Value getOptimisationLevel() const                  { return getValue (Ids::optimisation); }
-        const String getGCCOptimisationFlag() const;
+        String getGCCOptimisationFlag() const;
         Value getBuildConfigPreprocessorDefs() const        { return getValue (Ids::defines); }
-        const StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
+        StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
         Value getHeaderSearchPath() const                   { return getValue (Ids::headerPath); }
         const StringArray getHeaderSearchPaths() const;
 
@@ -277,7 +277,7 @@ public:
     void addNewConfiguration (BuildConfiguration* configToCopy);
     void deleteConfiguration (int index);
     bool hasConfigurationNamed (const String& name) const;
-    const String getUniqueConfigName (String name) const;
+    String getUniqueConfigName (String name) const;
 
     //==============================================================================
     ValueTree getExporters();
@@ -302,7 +302,7 @@ public:
     Value getJuceConfigFlag (const String& name);
 
     //==============================================================================
-    const String getFileTemplate (const String& templateName);
+    String getFileTemplate (const String& templateName);
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);
@@ -325,7 +325,7 @@ private:
     static File lastDocumentOpened;
     DrawableImage mainProjectIcon;
 
-    const File getLocalJuceFolder();
+    File getLocalJuceFolder();
     void updateProjectSettings();
     void setMissingDefaultValues();
     ValueTree getConfigurations() const;
