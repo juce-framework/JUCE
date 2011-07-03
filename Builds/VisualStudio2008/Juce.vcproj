@@ -951,6 +951,7 @@
             <File RelativePath="..\..\src\native\android\juce_android_Files.cpp"/>
             <File RelativePath="..\..\src\native\android\juce_android_Fonts.cpp"/>
             <File RelativePath="..\..\src\native\android\juce_android_GraphicsContext.cpp"/>
+            <File RelativePath="..\..\src\native\android\juce_android_JNIHelpers.h"/>
             <File RelativePath="..\..\src\native\android\juce_android_Messaging.cpp"/>
             <File RelativePath="..\..\src\native\android\juce_android_Midi.cpp"/>
             <File RelativePath="..\..\src\native\android\juce_android_Misc.cpp"/>

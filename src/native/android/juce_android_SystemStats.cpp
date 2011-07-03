@@ -28,12 +28,233 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
+JNIClassBase::JNIClassBase (const char* classPath_)
+    : classPath (classPath_), classRef (0)
+{
+    getClasses().add (this);
+}
+
+JNIClassBase::~JNIClassBase()
+{
+    getClasses().removeValue (this);
+}
+
+Array<JNIClassBase*>& JNIClassBase::getClasses()
+{
+    static Array<JNIClassBase*> classes;
+    return classes;
+}
+
+void JNIClassBase::initialise (JNIEnv* env)
+{
+    classRef = (jclass) env->NewGlobalRef (env->FindClass (classPath));
+    jassert (classRef != 0);
+
+    initialiseFields (env);
+}
+
+void JNIClassBase::release (JNIEnv* env)
+{
+    env->DeleteGlobalRef (classRef);
+}
+
+void JNIClassBase::initialiseAllClasses (JNIEnv* env)
+{
+    Array<JNIClassBase*>& classes = getClasses();
+    for (int i = classes.size(); --i >= 0;)
+        classes.getUnchecked(i)->initialise (env);
+}
+
+void JNIClassBase::releaseAllClasses (JNIEnv* env)
+{
+    Array<JNIClassBase*>& classes = getClasses();
+    for (int i = classes.size(); --i >= 0;)
+        classes.getUnchecked(i)->release (env);
+}
+
+jmethodID JNIClassBase::resolveMethod (JNIEnv* env, const char* methodName, const char* params)
+{
+    jmethodID m = env->GetMethodID (classRef, methodName, params);
+    jassert (m != 0);
+    return m;
+}
+
+jmethodID JNIClassBase::resolveStaticMethod (JNIEnv* env, const char* methodName, const char* params)
+{
+    jmethodID m = env->GetStaticMethodID (classRef, methodName, params);
+    jassert (m != 0);
+    return m;
+}
+
+jfieldID JNIClassBase::resolveField (JNIEnv* env, const char* fieldName, const char* signature)
+{
+    jfieldID f = env->GetFieldID (classRef, fieldName, signature);
+    jassert (f != 0);
+    return f;
+}
+
+jfieldID JNIClassBase::resolveStaticField (JNIEnv* env, const char* fieldName, const char* signature)
+{
+    jfieldID f = env->GetStaticFieldID (classRef, fieldName, signature);
+    jassert (f != 0);
+    return f;
+}
+
+//==============================================================================
+class ThreadLocalJNIEnvHolder
+{
+public:
+    ThreadLocalJNIEnvHolder()
+        : jvm (nullptr)
+    {
+        zeromem (threads, sizeof (threads));
+        zeromem (envs, sizeof (envs));
+    }
+
+    void initialise (JNIEnv* env)
+    {
+        env->GetJavaVM (&jvm);
+        addEnv (env);
+    }
+
+    void attach()
+    {
+        JNIEnv* env = nullptr;
+        jvm->AttachCurrentThread (&env, 0);
+
+        if (env != 0)
+            addEnv (env);
+    }
+
+    void detach()
+    {
+        jvm->DetachCurrentThread();
+
+        const pthread_t thisThread = pthread_self();
+
+        SpinLock::ScopedLockType sl (addRemoveLock);
+        for (int i = 0; i < maxThreads; ++i)
+            if (threads[i] == thisThread)
+                threads[i] = 0;
+    }
+
+    JNIEnv* get() const noexcept
+    {
+        const pthread_t thisThread = pthread_self();
+
+        for (int i = 0; i < maxThreads; ++i)
+            if (threads[i] == thisThread)
+                return envs[i];
+
+        return nullptr;
+    }
+
+    enum { maxThreads = 16 };
+
+private:
+    JavaVM* jvm;
+    pthread_t threads [maxThreads];
+    JNIEnv* envs [maxThreads];
+    SpinLock addRemoveLock;
+
+    void addEnv (JNIEnv* env)
+    {
+        SpinLock::ScopedLockType sl (addRemoveLock);
+
+        if (get() == nullptr)
+        {
+            const pthread_t thisThread = pthread_self();
+
+            for (int i = 0; i < maxThreads; ++i)
+            {
+                if (threads[i] == 0)
+                {
+                    envs[i] = env;
+                    threads[i] = thisThread;
+                    return;
+                }
+            }
+        }
+
+        jassertfalse; // too many threads!
+    }
+};
+
+static ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
+
+JNIEnv* getEnv() noexcept
+{
+    return threadLocalJNIEnvHolder.get();
+}
+
+//==============================================================================
+AndroidSystem::AndroidSystem() : screenWidth (0), screenHeight (0)
+{
+}
+
+void AndroidSystem::initialise (JNIEnv* env, jobject activity_,
+                                jstring appFile_, jstring appDataDir_)
+{
+    JNIClassBase::initialiseAllClasses (env);
+
+    threadLocalJNIEnvHolder.initialise (env);
+    activity = GlobalRef (activity_);
+    appFile = juceString (env, appFile_);
+    appDataDir = juceString (env, appDataDir_);
+}
+
+void AndroidSystem::shutdown (JNIEnv* env)
+{
+    activity.clear();
+    JNIClassBase::releaseAllClasses (env);
+}
+
+jobject AndroidSystem::createPaint (Graphics::ResamplingQuality quality)
+{
+    jint constructorFlags = 1 /*ANTI_ALIAS_FLAG*/
+                            | 4 /*DITHER_FLAG*/
+                            | 128 /*SUBPIXEL_TEXT_FLAG*/;
+
+    if (quality > Graphics::lowResamplingQuality)
+        constructorFlags |= 2; /*FILTER_BITMAP_FLAG*/
+
+    return getEnv()->NewObject (Paint, Paint.constructor, constructorFlags);
+}
+
+const jobject AndroidSystem::createMatrix (JNIEnv* env, const AffineTransform& t)
+{
+    jobject m = env->NewObject (Matrix, Matrix.constructor);
+
+    jfloat values[9] = { t.mat00, t.mat01, t.mat02,
+                         t.mat10, t.mat11, t.mat12,
+                         0.0f, 0.0f, 1.0f };
+
+    jfloatArray javaArray = env->NewFloatArray (9);
+    env->SetFloatArrayRegion (javaArray, 0, 9, values);
+
+    env->CallVoidMethod (m, Matrix.setValues, javaArray);
+    env->DeleteLocalRef (javaArray);
+
+    return m;
+}
+
+AndroidSystem android;
+
+//==============================================================================
 namespace AndroidStatsHelpers
 {
+    //==============================================================================
+    #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+     STATICMETHOD (getProperty, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;")
+
+    DECLARE_JNI_CLASS (SystemClass, "java/lang/System");
+    #undef JNI_CLASS_MEMBERS
+
+    //==============================================================================
     String getSystemProperty (const String& name)
     {
-        return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (android.systemClass,
-                                                                                          android.getProperty,
+        return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (SystemClass,
+                                                                                          SystemClass.getProperty,
                                                                                           javaString (name).get())));
     }
 }
@@ -51,11 +272,11 @@ String SystemStats::getOperatingSystemName()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-  #if JUCE_64BIT
+   #if JUCE_64BIT
     return true;
-  #else
+   #else
     return false;
-  #endif
+   #endif
 }
 
 String SystemStats::getCpuVendor()
@@ -70,13 +291,11 @@ int SystemStats::getCpuSpeedInMegaherz()
 
 int SystemStats::getMemorySizeInMegabytes()
 {
-    // xxx they forgot to implement sysinfo in the library, dammit! Should put this stuff back when they fix it.
-/*    struct sysinfo sysi;
+    struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
         return (sysi.totalram * sysi.mem_unit / (1024 * 1024));
- */
-    DBG ("warning! memory size is unavailable due to an Android bug!");
+
     return 0;
 }
 
@@ -159,5 +378,10 @@ bool Time::setSystemTimeToThisTime() const
     return false;
 }
 
+//==============================================================================
+// This is an unsatisfactory workaround for a linker warning that appeared in NDK5c.
+// If anyone actually understands what this symbol is for and why the linker gets confused by it,
+// please let me know!
+extern "C" { void* __dso_handle = 0; }
 
 #endif

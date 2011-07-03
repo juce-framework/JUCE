@@ -776,6 +776,12 @@ void* threadEntryProc (void* userData)
     JUCE_AUTORELEASEPOOL
 
    #if JUCE_ANDROID
+    struct AndroidThreadScope
+    {
+        AndroidThreadScope()   { threadLocalJNIEnvHolder.attach(); }
+        ~AndroidThreadScope()  { threadLocalJNIEnvHolder.detach(); }
+    };
+
     const AndroidThreadScope androidEnv;
    #endif
 

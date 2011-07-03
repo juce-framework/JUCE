@@ -28,6 +28,107 @@
 #if JUCE_INCLUDED_FILE
 
 #if USE_ANDROID_CANVAS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (constructor,    "<init>",          "(Landroid/graphics/Bitmap;)V") \
+ METHOD (drawRect,       "drawRect",        "(FFFFLandroid/graphics/Paint;)V") \
+ METHOD (translate,      "translate",       "(FF)V") \
+ METHOD (clipPath,       "clipPath",        "(Landroid/graphics/Path;)Z") \
+ METHOD (clipRect,       "clipRect",        "(FFFF)Z") \
+ METHOD (clipRegion,     "clipRegion",      "(Landroid/graphics/Region;)Z") \
+ METHOD (concat,         "concat",          "(Landroid/graphics/Matrix;)V") \
+ METHOD (drawBitmap,     "drawBitmap",      "(Landroid/graphics/Bitmap;Landroid/graphics/Matrix;Landroid/graphics/Paint;)V") \
+ METHOD (drawBitmapAt,   "drawBitmap",      "(Landroid/graphics/Bitmap;FFLandroid/graphics/Paint;)V") \
+ METHOD (drawMemoryBitmap, "drawBitmap",    "([IIIFFIIZLandroid/graphics/Paint;)V") \
+ METHOD (drawLine,       "drawLine",        "(FFFFLandroid/graphics/Paint;)V") \
+ METHOD (drawPath,       "drawPath",        "(Landroid/graphics/Path;Landroid/graphics/Paint;)V") \
+ METHOD (drawText,       "drawText",        "(Ljava/lang/String;FFLandroid/graphics/Paint;)V") \
+ METHOD (getClipBounds,  "getClipBounds",   "(Landroid/graphics/Rect;)Z") \
+ METHOD (getClipBounds2, "getClipBounds",   "()Landroid/graphics/Rect;") \
+ METHOD (getMatrix,      "getMatrix",       "()Landroid/graphics/Matrix;") \
+ METHOD (save,           "save",            "()I") \
+ METHOD (restore,        "restore",         "()V") \
+ METHOD (saveLayerAlpha, "saveLayerAlpha",  "(FFFFII)I")
+
+DECLARE_JNI_CLASS (Canvas, "android/graphics/Canvas");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (constructor,   "<init>",        "()V") \
+ METHOD (moveTo,        "moveTo",        "(FF)V") \
+ METHOD (lineTo,        "lineTo",        "(FF)V") \
+ METHOD (quadTo,        "quadTo",        "(FFFF)V") \
+ METHOD (cubicTo,       "cubicTo",       "(FFFFFF)V") \
+ METHOD (closePath,     "close",         "()V") \
+ METHOD (computeBounds, "computeBounds", "(Landroid/graphics/RectF;Z)V") \
+
+DECLARE_JNI_CLASS (PathClass, "android/graphics/Path");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (constructor, "<init>", "()V"); \
+ METHOD (regionUnion, "union",  "(Landroid/graphics/Rect;)Z"); \
+
+DECLARE_JNI_CLASS (RegionClass, "android/graphics/Region");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICMETHOD (createBitmap, "createBitmap", "(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;") \
+ METHOD (bitmapCopy, "copy",      "(Landroid/graphics/Bitmap$Config;Z)Landroid/graphics/Bitmap;") \
+ METHOD (getPixels, "getPixels",  "([IIIIIII)V") \
+ METHOD (setPixels, "setPixels",  "([IIIIIII)V") \
+ METHOD (recycle, "recycle",      "()V") \
+
+DECLARE_JNI_CLASS (BitmapClass, "android/graphics/Bitmap");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICFIELD (ARGB_8888, "ARGB_8888", "Landroid/graphics/Bitmap$Config;") \
+ STATICFIELD (ALPHA_8,   "ALPHA_8",   "Landroid/graphics/Bitmap$Config;") \
+
+DECLARE_JNI_CLASS (BitmapConfig, "android/graphics/Bitmap$Config");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (constructor, "<init>", "(Landroid/graphics/Bitmap;Landroid/graphics/Shader$TileMode;Landroid/graphics/Shader$TileMode;)V")
+
+DECLARE_JNI_CLASS (BitmapShader, "android/graphics/BitmapShader");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (setLocalMatrix, "setLocalMatrix", "(Landroid/graphics/Matrix;)V")
+
+DECLARE_JNI_CLASS (ShaderClass, "android/graphics/Shader");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICFIELD (CLAMP, "CLAMP", "Landroid/graphics/Shader$TileMode;")
+
+DECLARE_JNI_CLASS (ShaderTileMode, "android/graphics/Shader$TileMode");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (constructor, "<init>", "(FFFF[I[FLandroid/graphics/Shader$TileMode;)V") \
+
+DECLARE_JNI_CLASS (LinearGradientClass, "android/graphics/LinearGradient");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (constructor, "<init>", "(FFF[I[FLandroid/graphics/Shader$TileMode;)V") \
+
+DECLARE_JNI_CLASS (RadialGradientClass, "android/graphics/RadialGradient");
+#undef JNI_CLASS_MEMBERS
+
 //==============================================================================
 class AndroidImage  : public Image::SharedImage
 {
@@ -48,7 +149,7 @@ public:
     ~AndroidImage()
     {
         if (bitmap != 0)
-            bitmap.callVoidMethod (android.recycle);
+            bitmap.callVoidMethod (BitmapClass.recycle);
     }
 
     Image::ImageType getType() const    { return Image::NativeImage; }
@@ -65,8 +166,8 @@ public:
     SharedImage* clone()
     {
         JNIEnv* env = getEnv();
-        jobject mode = env->GetStaticObjectField (android.bitmapConfigClass, android.ARGB_8888);
-        GlobalRef newCopy (bitmap.callObjectMethod (android.bitmapCopy, mode, true));
+        jobject mode = env->GetStaticObjectField (BitmapConfig, BitmapConfig.ARGB_8888);
+        GlobalRef newCopy (bitmap.callObjectMethod (BitmapClass.bitmapCopy, mode, true));
         env->DeleteLocalRef (mode);
 
         return new AndroidImage (width, height, newCopy);
@@ -75,8 +176,9 @@ public:
     static jobject createBitmap (int width, int height, bool asSingleChannel)
     {
         JNIEnv* env = getEnv();
-        jobject mode = env->GetStaticObjectField (android.bitmapConfigClass, asSingleChannel ? android.ALPHA_8 : android.ARGB_8888);
-        jobject result = env->CallStaticObjectMethod (android.bitmapClass, android.createBitmap, width, height, mode);
+        jobject mode = env->GetStaticObjectField (BitmapConfig, asSingleChannel ? BitmapConfig.ALPHA_8
+                                                                                : BitmapConfig.ARGB_8888);
+        jobject result = env->CallStaticObjectMethod (BitmapClass, BitmapClass.createBitmap, width, height, mode);
         env->DeleteLocalRef (mode);
         return result;
     }
@@ -97,7 +199,7 @@ private:
             intArray = env->NewIntArray (bitmapData.width * bitmapData.height);
 
             if (mode != Image::BitmapData::writeOnly)
-                owner_.bitmap.callVoidMethod (android.getPixels, intArray, 0, bitmapData.width, x_, y_,
+                owner_.bitmap.callVoidMethod (BitmapClass.getPixels, intArray, 0, bitmapData.width, x_, y_,
                                               bitmapData.width, bitmapData.height);
 
             bitmapData.data = (uint8*) env->GetIntArrayElements (intArray, 0);
@@ -132,7 +234,7 @@ private:
             env->ReleaseIntArrayElements (intArray, (jint*) bitmapData.data, 0);
 
             if (mode != Image::BitmapData::readOnly)
-                owner.bitmap.callVoidMethod (android.setPixels, intArray, 0, bitmapData.width, x, y,
+                owner.bitmap.callVoidMethod (BitmapClass.setPixels, intArray, 0, bitmapData.width, x, y,
                                              bitmapData.width, bitmapData.height);
 
             env->DeleteLocalRef (intArray);
@@ -187,12 +289,12 @@ public:
     //==============================================================================
     void setOrigin (int x, int y)
     {
-        getCanvas().callVoidMethod (android.translate, (float) x, (float) y);
+        getCanvas().callVoidMethod (Canvas.translate, (float) x, (float) y);
     }
 
     void addTransform (const AffineTransform& transform)
     {
-        getCanvas().callVoidMethod (android.concat, createMatrixRef (getEnv(), transform).get());
+        getCanvas().callVoidMethod (Canvas.concat, createMatrixRef (getEnv(), transform).get());
     }
 
     float getScaleFactor()
@@ -202,7 +304,7 @@ public:
 
     bool clipToRectangle (const Rectangle<int>& r)
     {
-        return getCanvas().callBooleanMethod (android.clipRect, (float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
+        return getCanvas().callBooleanMethod (Canvas.clipRect, (float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
     }
 
     bool clipToRectangleList (const RectangleList& clipRegion)
@@ -218,13 +320,13 @@ public:
 
     void excludeClipRectangle (const Rectangle<int>& r)
     {
-        android.activity.callVoidMethod (android.excludeClipRegion, getCanvas().get(),
+        android.activity.callVoidMethod (JuceAppActivity.excludeClipRegion, getCanvas().get(),
                                          (float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
     }
 
     void clipToPath (const Path& path, const AffineTransform& transform)
     {
-        (void) getCanvas().callBooleanMethod (android.clipPath, createPath (getEnv(), path, transform).get());
+        (void) getCanvas().callBooleanMethod (Canvas.clipPath, createPath (getEnv(), path, transform).get());
     }
 
     void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform)
@@ -241,14 +343,14 @@ public:
         Rectangle<int> bounds (getClipBounds());
 
         jobject temporaryLayerBitmap = AndroidImage::createBitmap (bounds.getWidth(), bounds.getHeight(), false);
-        jobject temporaryCanvas = env->NewObject (android.canvasClass, android.canvasBitmapConstructor, temporaryLayerBitmap);
+        jobject temporaryCanvas = env->NewObject (Canvas, Canvas.constructor, temporaryLayerBitmap);
 
         setFill (Colours::red);
-        env->CallVoidMethod (temporaryCanvas, android.drawRect,
+        env->CallVoidMethod (temporaryCanvas, Canvas.drawRect,
                              (jfloat) 20, (jfloat) 20, (jfloat) 300, (jfloat) 200,
                                     getCurrentPaint());
 
-        env->CallVoidMethod (temporaryCanvas, android.translate,
+        env->CallVoidMethod (temporaryCanvas, Canvas.translate,
                              (jfloat) -bounds.getX(), (jfloat) -bounds.getY());
 
         Image maskImage (Image::SingleChannel, bounds.getWidth(), bounds.getHeight(), true);
@@ -273,12 +375,12 @@ public:
     const Rectangle<int> getClipBounds() const
     {
         JNIEnv* env = getEnv();
-        jobject rect = getCanvas().callObjectMethod (android.getClipBounds2);
+        jobject rect = getCanvas().callObjectMethod (Canvas.getClipBounds2);
 
-        const int left = env->GetIntField (rect, android.rectLeft);
-        const int top = env->GetIntField (rect, android.rectTop);
-        const int right = env->GetIntField (rect, android.rectRight);
-        const int bottom = env->GetIntField (rect, android.rectBottom);
+        const int left   = env->GetIntField (rect, RectClass.left);
+        const int top    = env->GetIntField (rect, RectClass.top);
+        const int right  = env->GetIntField (rect, RectClass.right);
+        const int bottom = env->GetIntField (rect, RectClass.bottom);
         env->DeleteLocalRef (rect);
 
         return Rectangle<int> (left, top, right - left, bottom - top);
@@ -286,8 +388,8 @@ public:
 
     bool isClipEmpty() const
     {
-        LocalRef<jobject> tempRect (getEnv()->NewObject (android.rectClass, android.rectConstructor, 0, 0, 0, 0));
-        return ! getCanvas().callBooleanMethod (android.getClipBounds, tempRect.get());
+        LocalRef<jobject> tempRect (getEnv()->NewObject (RectClass, RectClass.constructor, 0, 0, 0, 0));
+        return ! getCanvas().callBooleanMethod (Canvas.getClipBounds, tempRect.get());
     }
 
     //==============================================================================
@@ -309,14 +411,14 @@ public:
     //==============================================================================
     void fillRect (const Rectangle<int>& r, bool replaceExistingContents)
     {
-        getCanvas().callVoidMethod (android.drawRect,
+        getCanvas().callVoidMethod (Canvas.drawRect,
                                     (float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom(),
                                     getCurrentPaint());
     }
 
     void fillPath (const Path& path, const AffineTransform& transform)
     {
-        getCanvas().callVoidMethod (android.drawPath, createPath (getEnv(), path, transform).get(),
+        getCanvas().callVoidMethod (Canvas.drawPath, createPath (getEnv(), path, transform).get(),
                                     getCurrentPaint());
     }
 
@@ -327,7 +429,7 @@ public:
         if (androidImage != 0)
         {
             JNIEnv* env = getEnv();
-            getCanvas().callVoidMethod (android.drawBitmap, androidImage->bitmap.get(),
+            getCanvas().callVoidMethod (Canvas.drawBitmap, androidImage->bitmap.get(),
                                         createMatrixRef (env, transform).get(), getImagePaint());
         }
         else
@@ -362,7 +464,7 @@ public:
 
                     env->ReleaseIntArrayElements (imageData, dest, 0);
 
-                    getCanvas().callVoidMethod (android.drawMemoryBitmap, imageData, 0, bm.width,
+                    getCanvas().callVoidMethod (Canvas.drawMemoryBitmap, imageData, 0, bm.width,
                                                 transform.getTranslationX(), transform.getTranslationY(),
                                                 bm.width, bm.height, true, getImagePaint());
                     env->DeleteLocalRef (imageData);
@@ -380,18 +482,18 @@ public:
 
     void drawLine (const Line <float>& line)
     {
-        getCanvas().callVoidMethod (android.drawLine, line.getStartX(), line.getStartY(),
+        getCanvas().callVoidMethod (Canvas.drawLine, line.getStartX(), line.getStartY(),
                                     line.getEndX(), line.getEndY(), getCurrentPaint());
     }
 
     void drawVerticalLine (int x, float top, float bottom)
     {
-        getCanvas().callVoidMethod (android.drawRect, (float) x, top, x + 1.0f, bottom, getCurrentPaint());
+        getCanvas().callVoidMethod (Canvas.drawRect, (float) x, top, x + 1.0f, bottom, getCurrentPaint());
     }
 
     void drawHorizontalLine (int y, float left, float right)
     {
-        getCanvas().callVoidMethod (android.drawRect, left, (float) y, right, y + 1.0f, getCurrentPaint());
+        getCanvas().callVoidMethod (Canvas.drawRect, left, (float) y, right, y + 1.0f, getCurrentPaint());
     }
 
     void setFont (const Font& newFont)
@@ -412,7 +514,7 @@ public:
     {
         if (transform.isOnlyTranslation())
         {
-            getCanvas().callVoidMethod (android.drawText, javaStringFromChar ((juce_wchar) glyphNumber).get(),
+            getCanvas().callVoidMethod (Canvas.drawText, javaStringFromChar ((juce_wchar) glyphNumber).get(),
                                         transform.getTranslationX(), transform.getTranslationY(),
                                         currentState->getPaintForTypeface());
         }
@@ -428,7 +530,7 @@ public:
     //==============================================================================
     void saveState()
     {
-        (void) getCanvas().callIntMethod (android.save);
+        (void) getCanvas().callIntMethod (Canvas.save);
         stateStack.add (new SavedState (*currentState));
     }
 
@@ -448,14 +550,14 @@ public:
             jassertfalse; // trying to pop with an empty stack!
         }
 
-        getCanvas().callVoidMethod (android.restore);
+        getCanvas().callVoidMethod (Canvas.restore);
     }
 
     void beginTransparencyLayer (float opacity)
     {
         Rectangle<int> clip (getClipBounds());
 
-        (void) getCanvas().callIntMethod (android.saveLayerAlpha,
+        (void) getCanvas().callIntMethod (Canvas.saveLayerAlpha,
                                           (float) clip.getX(),
                                           (float) clip.getY(),
                                           (float) clip.getRight(),
@@ -520,8 +622,8 @@ public:
 
                 if (fillType.isColour())
                 {
-                    env->DeleteLocalRef (paint.callObjectMethod (android.setShader, (jobject) 0));
-                    paint.callVoidMethod (android.setColor, colourToInt (fillType.colour));
+                    env->DeleteLocalRef (paint.callObjectMethod (Paint.setShader, (jobject) 0));
+                    paint.callVoidMethod (Paint.setColor, colourToInt (fillType.colour));
                 }
                 else if (fillType.isGradient())
                 {
@@ -547,13 +649,13 @@ public:
                         env->SetFloatArrayRegion (positionsArray, 0, numColours, positions.getData());
                     }
 
-                    jobject tileMode = env->GetStaticObjectField (android.shaderTileModeClass, android.clampMode);
+                    jobject tileMode = env->GetStaticObjectField (ShaderTileMode, ShaderTileMode.CLAMP);
 
                     jobject shader;
                     if (fillType.gradient->isRadial)
                     {
-                        shader = env->NewObject (android.radialGradientClass,
-                                                 android.radialGradientConstructor,
+                        shader = env->NewObject (RadialGradientClass,
+                                                 RadialGradientClass.constructor,
                                                  p1.getX(), p1.getY(),
                                                  p1.getDistanceFrom (p2),
                                                  coloursArray, positionsArray,
@@ -561,8 +663,8 @@ public:
                     }
                     else
                     {
-                        shader = env->NewObject (android.linearGradientClass,
-                                                 android.linearGradientConstructor,
+                        shader = env->NewObject (LinearGradientClass,
+                                                 LinearGradientClass.constructor,
                                                  p1.getX(), p1.getY(), p2.getX(), p2.getY(),
                                                  coloursArray, positionsArray,
                                                  tileMode);
@@ -572,8 +674,8 @@ public:
                     env->DeleteLocalRef (coloursArray);
                     env->DeleteLocalRef (positionsArray);
 
-                    env->CallVoidMethod (shader, android.setLocalMatrix, createMatrixRef (env, fillType.transform).get());
-                    env->DeleteLocalRef (paint.callObjectMethod (android.setShader, shader));
+                    env->CallVoidMethod (shader, ShaderClass.setLocalMatrix, createMatrixRef (env, fillType.transform).get());
+                    env->DeleteLocalRef (paint.callObjectMethod (Paint.setShader, shader));
 
                     env->DeleteLocalRef (shader);
                 }
@@ -598,17 +700,17 @@ public:
 
                 if (atf != 0)
                 {
-                    paint.callObjectMethod (android.setTypeface, atf->typeface.get());
-                    paint.callVoidMethod (android.setTextSize, font.getHeight());
+                    paint.callObjectMethod (Paint.setTypeface, atf->typeface.get());
+                    paint.callVoidMethod (Paint.setTextSize, font.getHeight());
 
                     const float hScale = font.getHorizontalScale();
 
                     if (hScale < 0.99f || hScale > 1.01f)
-                        paint.callVoidMethod (android.setTextScaleX, hScale);
+                        paint.callVoidMethod (Paint.setTextScaleX, hScale);
                 }
 
                 fillNeedsUpdate = true;
-                paint.callVoidMethod (android.setAlpha, (jint) fillType.colour.getAlpha());
+                paint.callVoidMethod (Paint.setAlpha, (jint) fillType.colour.getAlpha());
             }
 
             return p;
@@ -617,7 +719,7 @@ public:
         jobject getImagePaint()
         {
             jobject p = getPaint();
-            paint.callVoidMethod (android.setAlpha, (jint) fillType.colour.getAlpha());
+            paint.callVoidMethod (Paint.setAlpha, (jint) fillType.colour.getAlpha());
             fillNeedsUpdate = true;
             return p;
         }
@@ -630,27 +732,27 @@ public:
             {
                 JNIEnv* env = getEnv();
 
-                jobject tileMode = env->GetStaticObjectField (android.shaderTileModeClass, android.clampMode);
-                jobject shader = env->NewObject (android.bitmapShaderClass, android.bitmapShaderConstructor,
+                jobject tileMode = env->GetStaticObjectField (ShaderTileMode, ShaderTileMode.CLAMP);
+                jobject shader = env->NewObject (BitmapShader, BitmapShader.constructor,
                                                  temporaryLayerBitmap.get(), tileMode, tileMode);
                 env->DeleteLocalRef (tileMode);
 
                 jobject compositingPaint = android.createPaint (quality);
-                env->CallObjectMethod (compositingPaint, android.setShader, shader);
+                env->CallObjectMethod (compositingPaint, Paint.setShader, shader);
                 env->DeleteLocalRef (shader);
 
                 LocalRef<jobject> maskBitmap (createAlphaBitmap (env, maskImage));
                 maskImage = Image::null;
 
-                env->CallVoidMethod (previousCanvas, android.drawBitmapAt,
+                env->CallVoidMethod (previousCanvas, Canvas.drawBitmapAt,
                                      maskBitmap.get(), (jfloat) maskLayerX, (jfloat) maskLayerY, compositingPaint);
 
                 env->DeleteLocalRef (compositingPaint);
 
                 canvas = GlobalRef (previousCanvas);
 
-                env->CallVoidMethod (temporaryLayerBitmap.get(), android.recycle);
-                env->CallVoidMethod (maskBitmap.get(), android.recycle);
+                env->CallVoidMethod (temporaryLayerBitmap.get(), BitmapClass.recycle);
+                env->CallVoidMethod (maskBitmap.get(), BitmapClass.recycle);
 
                 temporaryLayerBitmap.clear();
             }
@@ -693,7 +795,7 @@ public:
             }
 
             env->ReleaseIntArrayElements (intArray, (jint*) dest, 0);
-            env->CallVoidMethod (bitmap, android.setPixels, intArray, 0, bm.width, 0, 0, bm.width, bm.height);
+            env->CallVoidMethod (bitmap, BitmapClass.setPixels, intArray, 0, bm.width, 0, 0, bm.width, bm.height);
             env->DeleteLocalRef (intArray);
             return bitmap;
         }
@@ -720,9 +822,9 @@ private:
     jobject getCurrentPaint() const     { return currentState->getPaint(); }
     jobject getImagePaint() const       { return currentState->getImagePaint(); }
 
-    static const LocalRef<jobject> createPath (JNIEnv* env, const Path& path)
+    static LocalRef<jobject> createPath (JNIEnv* env, const Path& path)
     {
-        jobject p = env->NewObject (android.pathClass, android.pathClassConstructor);
+        jobject p = env->NewObject (PathClass, PathClass.constructor);
 
         Path::Iterator i (path);
 
@@ -730,11 +832,11 @@ private:
         {
             switch (i.elementType)
             {
-                case Path::Iterator::startNewSubPath:  env->CallVoidMethod (p, android.moveTo, i.x1, i.y1); break;
-                case Path::Iterator::lineTo:           env->CallVoidMethod (p, android.lineTo, i.x1, i.y1); break;
-                case Path::Iterator::quadraticTo:      env->CallVoidMethod (p, android.quadTo, i.x1, i.y1, i.x2, i.y2); break;
-                case Path::Iterator::cubicTo:          env->CallVoidMethod (p, android.cubicTo, i.x1, i.y1, i.x2, i.y2, i.x3, i.y3); break;
-                case Path::Iterator::closePath:        env->CallVoidMethod (p, android.closePath); break;
+                case Path::Iterator::startNewSubPath:  env->CallVoidMethod (p, PathClass.moveTo, i.x1, i.y1); break;
+                case Path::Iterator::lineTo:           env->CallVoidMethod (p, PathClass.lineTo, i.x1, i.y1); break;
+                case Path::Iterator::quadraticTo:      env->CallVoidMethod (p, PathClass.quadTo, i.x1, i.y1, i.x2, i.y2); break;
+                case Path::Iterator::cubicTo:          env->CallVoidMethod (p, PathClass.cubicTo, i.x1, i.y1, i.x2, i.y2, i.x3, i.y3); break;
+                case Path::Iterator::closePath:        env->CallVoidMethod (p, PathClass.closePath); break;
                 default:                               jassertfalse; break;
             }
         }
@@ -742,7 +844,7 @@ private:
         return LocalRef<jobject> (p);
     }
 
-    static const LocalRef<jobject> createPath (JNIEnv* env, const Path& path, const AffineTransform& transform)
+    static LocalRef<jobject> createPath (JNIEnv* env, const Path& path, const AffineTransform& transform)
     {
         if (transform.isIdentity())
             return createPath (env, path);
@@ -752,25 +854,25 @@ private:
         return createPath (env, tempPath);
     }
 
-    static const LocalRef<jobject> createMatrixRef (JNIEnv* env, const AffineTransform& t)
+    static LocalRef<jobject> createMatrixRef (JNIEnv* env, const AffineTransform& t)
     {
-        return LocalRef<jobject> (android.createMatrix (*env, t));
+        return LocalRef<jobject> (android.createMatrix (env, t));
     }
 
-    static const LocalRef<jobject> createRect (JNIEnv* env, const Rectangle<int>& r)
+    static LocalRef<jobject> createRect (JNIEnv* env, const Rectangle<int>& r)
     {
-        return LocalRef<jobject> (env->NewObject (android.rectClass, android.rectConstructor,
+        return LocalRef<jobject> (env->NewObject (RectClass, RectClass.constructor,
                                                   r.getX(), r.getY(), r.getRight(), r.getBottom()));
     }
 
-    static const LocalRef<jobject> createRegion (JNIEnv* env, const RectangleList& list)
+    static LocalRef<jobject> createRegion (JNIEnv* env, const RectangleList& list)
     {
-        jobject region = env->NewObject (android.regionClass, android.regionConstructor);
+        jobject region = env->NewObject (RegionClass, RegionClass.constructor);
 
         const int numRects = list.getNumRectangles();
 
         for (int i = 0; i < numRects; ++i)
-            env->CallBooleanMethod (region, android.regionUnion, createRect (env, list.getRectangle(i)).get());
+            env->CallBooleanMethod (region, RegionClass.regionUnion, createRect (env, list.getRectangle(i)).get());
 
         return LocalRef<jobject> (region);
     }
@@ -795,7 +897,7 @@ private:
 
 LowLevelGraphicsContext* AndroidImage::createLowLevelContext()
 {
-    jobject canvas = getEnv()->NewObject (android.canvasClass, android.canvasBitmapConstructor, bitmap.get());
+    jobject canvas = getEnv()->NewObject (Canvas, Canvas.constructor, bitmap.get());
     return new AndroidLowLevelGraphicsContext (canvas);
 }
 #endif

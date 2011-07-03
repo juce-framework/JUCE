@@ -1045,6 +1045,7 @@
 		59C46E289F86C80D4341EAA3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Files.cpp"; path = "../../src/native/android/juce_android_Files.cpp"; sourceTree = "SOURCE_ROOT"; };
 		FA82460758BDCB2DCCE1EAAA = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Fonts.cpp"; path = "../../src/native/android/juce_android_Fonts.cpp"; sourceTree = "SOURCE_ROOT"; };
 		CE06EEED7426AA45C27B629C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_GraphicsContext.cpp"; path = "../../src/native/android/juce_android_GraphicsContext.cpp"; sourceTree = "SOURCE_ROOT"; };
+		F439E6C4B2D2AF19645252C0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_android_JNIHelpers.h"; path = "../../src/native/android/juce_android_JNIHelpers.h"; sourceTree = "SOURCE_ROOT"; };
 		1D74C9567283836ECC70E48B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Messaging.cpp"; path = "../../src/native/android/juce_android_Messaging.cpp"; sourceTree = "SOURCE_ROOT"; };
 		40216CE846A54CE706131A23 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Midi.cpp"; path = "../../src/native/android/juce_android_Midi.cpp"; sourceTree = "SOURCE_ROOT"; };
 		E646726910F110DC34DD1662 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Misc.cpp"; path = "../../src/native/android/juce_android_Misc.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1889,6 +1890,7 @@
 				59C46E289F86C80D4341EAA3,
 				FA82460758BDCB2DCCE1EAAA,
 				CE06EEED7426AA45C27B629C,
+				F439E6C4B2D2AF19645252C0,
 				1D74C9567283836ECC70E48B,
 				40216CE846A54CE706131A23,
 				E646726910F110DC34DD1662,

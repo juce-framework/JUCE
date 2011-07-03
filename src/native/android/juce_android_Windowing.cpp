@@ -27,6 +27,34 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (drawBitmap,       "drawBitmap",    "([IIIFFIIZLandroid/graphics/Paint;)V") \
+ METHOD (getClipBounds,    "getClipBounds", "()Landroid/graphics/Rect;")
+
+DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (setViewName,   "setViewName",      "(Ljava/lang/String;)V") \
+ METHOD (layout,        "layout",           "(IIII)V") \
+ METHOD (getLeft,       "getLeft",          "()I") \
+ METHOD (getTop,        "getTop",           "()I") \
+ METHOD (getWidth,      "getWidth",         "()I") \
+ METHOD (getHeight,     "getHeight",        "()I") \
+ METHOD (getLocationOnScreen, "getLocationOnScreen", "([I)V") \
+ METHOD (bringToFront,  "bringToFront",     "()V") \
+ METHOD (requestFocus,  "requestFocus",     "()Z") \
+ METHOD (setVisible,    "setVisible",       "(Z)V") \
+ METHOD (isVisible,     "isVisible",        "()Z") \
+ METHOD (hasFocus,      "hasFocus",         "()Z") \
+ METHOD (invalidate,    "invalidate",       "(IIII)V") \
+ METHOD (containsPoint, "containsPoint",    "(II)Z") \
+
+DECLARE_JNI_CLASS (ComponentPeerView, "com/juce/ComponentPeerView");
+#undef JNI_CLASS_MEMBERS
+
 
 //==============================================================================
 class AndroidComponentPeer  : public ComponentPeer
@@ -35,7 +63,7 @@ public:
     //==============================================================================
     AndroidComponentPeer (Component* const component, const int windowStyleFlags)
         : ComponentPeer (component, windowStyleFlags),
-          view (android.activity.callObjectMethod (android.createNewView, component->isOpaque())),
+          view (android.activity.callObjectMethod (JuceAppActivity.createNewView, component->isOpaque())),
           usingAndroidGraphics (false),
           fullScreen (false),
           sizeAllocated (0)
@@ -48,7 +76,7 @@ public:
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            android.activity.callVoidMethod (android.deleteView, view.get());
+            android.activity.callVoidMethod (JuceAppActivity.deleteView, view.get());
         }
         else
         {
@@ -63,7 +91,7 @@ public:
 
                 void messageCallback()
                 {
-                    android.activity.callVoidMethod (android.deleteView, view.get());
+                    android.activity.callVoidMethod (JuceAppActivity.deleteView, view.get());
                 }
 
             private:
@@ -85,7 +113,7 @@ public:
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            view.callVoidMethod (android.setVisible, shouldBeVisible);
+            view.callVoidMethod (ComponentPeerView.setVisible, shouldBeVisible);
         }
         else
         {
@@ -100,7 +128,7 @@ public:
 
                 void messageCallback()
                 {
-                    view.callVoidMethod (android.setVisible, shouldBeVisible);
+                    view.callVoidMethod (ComponentPeerView.setVisible, shouldBeVisible);
                 }
 
             private:
@@ -114,7 +142,7 @@ public:
 
     void setTitle (const String& title)
     {
-        view.callVoidMethod (android.setViewName, javaString (title).get());
+        view.callVoidMethod (ComponentPeerView.setViewName, javaString (title).get());
     }
 
     void setPosition (int x, int y)
@@ -137,7 +165,7 @@ public:
             w = jmax (0, w);
             h = jmax (0, h);
 
-            view.callVoidMethod (android.layout, x, y, x + w, y + h);
+            view.callVoidMethod (ComponentPeerView.layout, x, y, x + w, y + h);
         }
         else
         {
@@ -152,7 +180,7 @@ public:
 
                 void messageCallback()
                 {
-                    view.callVoidMethod (android.layout, x, y, x + w, y + h);
+                    view.callVoidMethod (ComponentPeerView.layout, x, y, x + w, y + h);
                 }
 
             private:
@@ -166,16 +194,16 @@ public:
 
     const Rectangle<int> getBounds() const
     {
-        return Rectangle<int> (view.callIntMethod (android.getLeft),
-                               view.callIntMethod (android.getTop),
-                               view.callIntMethod (android.getWidth),
-                               view.callIntMethod (android.getHeight));
+        return Rectangle<int> (view.callIntMethod (ComponentPeerView.getLeft),
+                               view.callIntMethod (ComponentPeerView.getTop),
+                               view.callIntMethod (ComponentPeerView.getWidth),
+                               view.callIntMethod (ComponentPeerView.getHeight));
     }
 
     const Point<int> getScreenPosition() const
     {
-        return Point<int> (view.callIntMethod (android.getLeft),
-                           view.callIntMethod (android.getTop));
+        return Point<int> (view.callIntMethod (ComponentPeerView.getLeft),
+                           view.callIntMethod (ComponentPeerView.getTop));
     }
 
     const Point<int> localToGlobal (const Point<int>& relativePosition)
@@ -227,7 +255,8 @@ public:
     {
         return isPositiveAndBelow (position.getX(), component->getWidth())
             && isPositiveAndBelow (position.getY(), component->getHeight())
-            && ((! trueIfInAChildWindow) || view.callBooleanMethod (android.containsPoint, position.getX(), position.getY()));
+            && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
+                                                                    position.getX(), position.getY()));
     }
 
     const BorderSize<int> getFrameSize() const
@@ -244,7 +273,7 @@ public:
 
     void toFront (bool makeActive)
     {
-        view.callVoidMethod (android.bringToFront);
+        view.callVoidMethod (ComponentPeerView.bringToFront);
 
         if (makeActive)
             grabFocus();
@@ -283,12 +312,12 @@ public:
     //==============================================================================
     bool isFocused() const
     {
-        return view.callBooleanMethod (android.hasFocus);
+        return view.callBooleanMethod (ComponentPeerView.hasFocus);
     }
 
     void grabFocus()
     {
-        view.callBooleanMethod (android.requestFocus);
+        view.callBooleanMethod (ComponentPeerView.requestFocus);
     }
 
     void handleFocusChangeCallback (bool hasFocus)
@@ -307,20 +336,20 @@ public:
     //==============================================================================
     void handlePaintCallback (JNIEnv* env, jobject canvas)
     {
-#if USE_ANDROID_CANVAS
+       #if USE_ANDROID_CANVAS
         if (usingAndroidGraphics)
         {
             AndroidLowLevelGraphicsContext g (canvas);
             handlePaint (g);
         }
         else
-#endif
+       #endif
         {
-            jobject rect = env->CallObjectMethod (canvas, android.getClipBounds2);
-            const int left = env->GetIntField (rect, android.rectLeft);
-            const int top = env->GetIntField (rect, android.rectTop);
-            const int right = env->GetIntField (rect, android.rectRight);
-            const int bottom = env->GetIntField (rect, android.rectBottom);
+            jobject rect = env->CallObjectMethod (canvas, CanvasMinimal.getClipBounds);
+            const int left   = env->GetIntField (rect, RectClass.left);
+            const int top    = env->GetIntField (rect, RectClass.top);
+            const int right  = env->GetIntField (rect, RectClass.right);
+            const int bottom = env->GetIntField (rect, RectClass.bottom);
             env->DeleteLocalRef (rect);
 
             const Rectangle<int> clip (left, top, right - left, bottom - top);
@@ -350,7 +379,7 @@ public:
 
                 env->ReleaseIntArrayElements ((jintArray) buffer.get(), dest, 0);
 
-                env->CallVoidMethod (canvas, android.drawMemoryBitmap, (jintArray) buffer.get(), 0, clip.getWidth(),
+                env->CallVoidMethod (canvas, CanvasMinimal.drawBitmap, (jintArray) buffer.get(), 0, clip.getWidth(),
                                      (jfloat) clip.getX(), (jfloat) clip.getY(),
                                      clip.getWidth(), clip.getHeight(), true, (jobject) 0);
             }
@@ -361,7 +390,7 @@ public:
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            view.callVoidMethod (android.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
+            view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
         }
         else
         {
@@ -376,7 +405,7 @@ public:
 
                 void messageCallback()
                 {
-                    view.callVoidMethod (android.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
+                    view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
                 }
 
             private:
@@ -511,25 +540,16 @@ Point<int> AndroidComponentPeer::lastMousePos;
   JUCE_JNI_CALLBACK (ComponentPeerView, javaMethodName, returnType, params) \
   { \
       AndroidComponentPeer* const peer = AndroidComponentPeer::findPeerForJavaView (view); \
-      if (peer != 0) \
+      if (peer != nullptr) \
           peer->juceMethodInvocation; \
   }
 
-JUCE_VIEW_CALLBACK (void, handlePaint, (JNIEnv* env, jobject view, jobject canvas),
-                    handlePaintCallback (env, canvas))
-
-JUCE_VIEW_CALLBACK (void, handleMouseDown, (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),
-                    handleMouseDownCallback ((float) x, (float) y, (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseDrag, (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),
-                    handleMouseDragCallback ((float) x, (float) y, (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseUp,   (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),
-                    handleMouseUpCallback ((float) x, (float) y, (int64) time))
-
-JUCE_VIEW_CALLBACK (void, viewSizeChanged, (JNIEnv*, jobject view),
-                    handleMovedOrResized())
-
-JUCE_VIEW_CALLBACK (void, focusChanged, (JNIEnv*, jobject view, jboolean hasFocus),
-                    handleFocusChangeCallback (hasFocus))
+JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject view, jobject canvas),                handlePaintCallback (env, canvas))
+JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),    handleMouseDownCallback ((float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),    handleMouseDragCallback ((float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv*, jobject view, jfloat x, jfloat y, jlong time),    handleMouseUpCallback ((float) x, (float) y, (int64) time))
+JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv*, jobject view),                                    handleMovedOrResized())
+JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv*, jobject view, jboolean hasFocus),                 handleFocusChangeCallback (hasFocus))
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
@@ -596,7 +616,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
                                                           const String& title, const String& message,
                                                           Component* associatedComponent)
 {
-    android.activity.callVoidMethod (android.showMessageBox, javaString (title).get(), javaString (message).get(), (jlong) 0);
+    android.activity.callVoidMethod (JuceAppActivity.showMessageBox, javaString (title).get(), javaString (message).get(), (jlong) 0);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
@@ -606,7 +626,7 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
 {
     jassert (callback != 0); // on android, all alerts must be non-modal!!
 
-    android.activity.callVoidMethod (android.showOkCancelBox, javaString (title).get(), javaString (message).get(),
+    android.activity.callVoidMethod (JuceAppActivity.showOkCancelBox, javaString (title).get(), javaString (message).get(),
                                      (jlong) (pointer_sized_int) callback);
     return false;
 }
@@ -618,7 +638,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 {
     jassert (callback != 0); // on android, all alerts must be non-modal!!
 
-    android.activity.callVoidMethod (android.showYesNoCancelBox, javaString (title).get(), javaString (message).get(),
+    android.activity.callVoidMethod (JuceAppActivity.showYesNoCancelBox, javaString (title).get(), javaString (message).get(),
                                      (jlong) (pointer_sized_int) callback);
     return 0;
 }

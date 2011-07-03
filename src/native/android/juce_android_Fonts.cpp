@@ -27,6 +27,14 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICMETHOD (create,          "create",           "(Ljava/lang/String;I)Landroid/graphics/Typeface;") \
+ STATICMETHOD (createFromFile,  "createFromFile",   "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
+
+DECLARE_JNI_CLASS (TypefaceClass, "android/graphics/Typeface");
+#undef JNI_CLASS_MEMBERS
+
 
 //==============================================================================
 StringArray Font::findAllTypefaceNames()
@@ -68,21 +76,21 @@ public:
         File fontFile (File ("/system/fonts").getChildFile (name).withFileExtension (".ttf"));
 
         if (fontFile.exists())
-            typeface = GlobalRef (env->CallStaticObjectMethod (android.typefaceClass, android.createFromFile,
+            typeface = GlobalRef (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.createFromFile,
                                                                javaString (fontFile.getFullPathName()).get()));
         else
-            typeface = GlobalRef (env->CallStaticObjectMethod (android.typefaceClass, android.create,
+            typeface = GlobalRef (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.create,
                                                                javaString (getName()).get(), flags));
 
-        rect = GlobalRef (env->NewObject (android.rectClass, android.rectConstructor, 0, 0, 0, 0));
+        rect = GlobalRef (env->NewObject (RectClass, RectClass.constructor, 0, 0, 0, 0));
 
         paint = GlobalRef (android.createPaint (Graphics::highResamplingQuality));
-        const LocalRef<jobject> ignored (paint.callObjectMethod (android.setTypeface, typeface.get()));
+        const LocalRef<jobject> ignored (paint.callObjectMethod (Paint.setTypeface, typeface.get()));
 
         const float standardSize = 256.0f;
-        paint.callVoidMethod (android.setTextSize, standardSize);
-        ascent = std::abs (paint.callFloatMethod (android.ascent)) / standardSize;
-        descent = paint.callFloatMethod (android.descent) / standardSize;
+        paint.callVoidMethod (Paint.setTextSize, standardSize);
+        ascent = std::abs (paint.callFloatMethod (Paint.ascent)) / standardSize;
+        descent = paint.callFloatMethod (Paint.descent) / standardSize;
 
         const float height = ascent + descent;
         unitsToHeightScaleFactor = 1.0f / 256.0f;//(height * standardSize);
@@ -97,7 +105,7 @@ public:
         const int numChars = text.length();
         jfloatArray widths = env->NewFloatArray (numChars);
 
-        const int numDone = paint.callIntMethod (android.getTextWidths, javaString (text).get(), widths);
+        const int numDone = paint.callIntMethod (Paint.getTextWidths, javaString (text).get(), widths);
 
         HeapBlock<jfloat> localWidths (numDone);
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
@@ -116,7 +124,7 @@ public:
         const int numChars = text.length();
         jfloatArray widths = env->NewFloatArray (numChars);
 
-        const int numDone = paint.callIntMethod (android.getTextWidths, javaString (text).get(), widths);
+        const int numDone = paint.callIntMethod (Paint.getTextWidths, javaString (text).get(), widths);
 
         HeapBlock<jfloat> localWidths (numDone);
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
@@ -145,14 +153,14 @@ public:
         JNIEnv* env = getEnv();
 
         jobject matrix = android.createMatrix (env, AffineTransform::scale (unitsToHeightScaleFactor, unitsToHeightScaleFactor).followedBy (t));
-        jintArray maskData = (jintArray) android.activity.callObjectMethod (android.renderGlyph, (jchar) glyphNumber, paint.get(), matrix, rect.get());
+        jintArray maskData = (jintArray) android.activity.callObjectMethod (JuceAppActivity.renderGlyph, (jchar) glyphNumber, paint.get(), matrix, rect.get());
 
         env->DeleteLocalRef (matrix);
 
-        const int left = env->GetIntField (rect.get(), android.rectLeft);
-        const int top = env->GetIntField (rect.get(), android.rectTop);
-        const int right = env->GetIntField (rect.get(), android.rectRight);
-        const int bottom = env->GetIntField (rect.get(), android.rectBottom);
+        const int left   = env->GetIntField (rect.get(), RectClass.left);
+        const int top    = env->GetIntField (rect.get(), RectClass.top);
+        const int right  = env->GetIntField (rect.get(), RectClass.right);
+        const int bottom = env->GetIntField (rect.get(), RectClass.bottom);
 
         const Rectangle<int> bounds (left, top, right - left, bottom - top);
 

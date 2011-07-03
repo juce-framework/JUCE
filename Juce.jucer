@@ -1478,6 +1478,8 @@
                 file="src/native/android/juce_android_Fonts.cpp"/>
           <FILE id="VFjwst" name="juce_android_GraphicsContext.cpp" compile="1"
                 resource="0" file="src/native/android/juce_android_GraphicsContext.cpp"/>
+          <FILE id="HolDOi" name="juce_android_JNIHelpers.h" compile="0" resource="0"
+                file="src/native/android/juce_android_JNIHelpers.h"/>
           <FILE id="TV84om" name="juce_android_Messaging.cpp" compile="1" resource="0"
                 file="src/native/android/juce_android_Messaging.cpp"/>
           <FILE id="mJh1wV" name="juce_android_Midi.cpp" compile="1" resource="0"

@@ -2313,6 +2313,9 @@
     <ClInclude Include="..\..\src\native\windows\juce_win32_NativeIncludes.h">
       <Filter>Juce\Source\native\windows</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\native\android\juce_android_JNIHelpers.h">
+      <Filter>Juce\Source\native\android</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\native\android\juce_android_NativeIncludes.h">
       <Filter>Juce\Source\native\android</Filter>
     </ClInclude>

@@ -28,6 +28,32 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICMETHOD (getMinBufferSize,            "getMinBufferSize",             "(III)I") \
+ STATICMETHOD (getNativeOutputSampleRate,   "getNativeOutputSampleRate",    "(I)I") \
+ METHOD (constructor,   "<init>",   "(IIIIII)V") \
+ METHOD (play,          "play",     "()V") \
+ METHOD (stop,          "stop",     "()V") \
+ METHOD (release,       "release",  "()V") \
+ METHOD (flush,         "flush",    "()V") \
+ METHOD (write,         "write",    "([SII)I") \
+
+DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICMETHOD (getMinBufferSize, "getMinBufferSize", "(III)I") \
+ METHOD (constructor,       "<init>",           "(IIIII)V"); \
+ METHOD (startRecording,    "startRecording",   "()V"); \
+ METHOD (stop,              "stop",             "()V"); \
+ METHOD (read,              "read",             "([SII)I"); \
+ METHOD (release,           "release",          "()V"); \
+
+DECLARE_JNI_CLASS (AudioRecord, "android/media/AudioRecord");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
 #define CHANNEL_OUT_STEREO  ((jint) 12)
 #define CHANNEL_IN_STEREO   ((jint) 12)
 #define CHANNEL_IN_MONO     ((jint) 16)
@@ -53,14 +79,14 @@ public:
           inputChannelBuffer (1, 1)
     {
         JNIEnv* env = getEnv();
-        sampleRate = env->CallStaticIntMethod (android.audioTrackClass, android.getNativeOutputSampleRate, MODE_STREAM);
+        sampleRate = env->CallStaticIntMethod (AudioTrack, AudioTrack.getNativeOutputSampleRate, MODE_STREAM);
 
-        const jint outMinBuffer = env->CallStaticIntMethod (android.audioTrackClass, android.getMinBufferSize, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT);
+        const jint outMinBuffer = env->CallStaticIntMethod (AudioTrack, AudioTrack.getMinBufferSize, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT);
 
-        jint inMinBuffer = env->CallStaticIntMethod (android.audioRecordClass, android.getMinRecordBufferSize, sampleRate, CHANNEL_IN_STEREO, ENCODING_PCM_16BIT);
+        jint inMinBuffer = env->CallStaticIntMethod (AudioRecord, AudioRecord.getMinBufferSize, sampleRate, CHANNEL_IN_STEREO, ENCODING_PCM_16BIT);
         if (inMinBuffer <= 0)
         {
-            inMinBuffer = env->CallStaticIntMethod (android.audioRecordClass, android.getMinRecordBufferSize, sampleRate, CHANNEL_IN_MONO, ENCODING_PCM_16BIT);
+            inMinBuffer = env->CallStaticIntMethod (AudioRecord, AudioRecord.getMinBufferSize, sampleRate, CHANNEL_IN_MONO, ENCODING_PCM_16BIT);
 
             if (inMinBuffer > 0)
                 numDeviceInputChannelsAvailable = 1;
@@ -146,7 +172,7 @@ public:
         if (numClientOutputChannels > 0)
         {
             numDeviceOutputChannels = 2;
-            outputDevice = GlobalRef (env->NewObject (android.audioTrackClass, android.audioTrackConstructor,
+            outputDevice = GlobalRef (env->NewObject (AudioTrack, AudioTrack.constructor,
                                                       STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
                                                       (jint) (actualBufferSize * numDeviceOutputChannels * sizeof (float)), MODE_STREAM));
             isRunning = true;
@@ -155,7 +181,7 @@ public:
         if (numClientInputChannels > 0 && numDeviceInputChannelsAvailable > 0)
         {
             numDeviceInputChannels = jmin (numClientInputChannels, numDeviceInputChannelsAvailable);
-            inputDevice = GlobalRef (env->NewObject (android.audioRecordClass, android.audioRecordConstructor,
+            inputDevice = GlobalRef (env->NewObject (AudioRecord, AudioRecord.constructor,
                                                      0 /* (default audio source) */, sampleRate,
                                                      numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
                                                      ENCODING_PCM_16BIT,
@@ -166,10 +192,10 @@ public:
         if (isRunning)
         {
             if (outputDevice != nullptr)
-                env->CallVoidMethod (outputDevice, android.audioTrackPlay);
+                env->CallVoidMethod (outputDevice, AudioTrack.play);
 
             if (inputDevice != nullptr)
-                env->CallVoidMethod (inputDevice, android.startRecording);
+                env->CallVoidMethod (inputDevice, AudioRecord.startRecording);
 
             startThread (8);
         }
@@ -240,7 +266,7 @@ public:
         {
             if (inputDevice != nullptr)
             {
-                jint numRead = env->CallIntMethod (inputDevice, android.audioRecordRead, audioBuffer, 0, actualBufferSize * numDeviceInputChannels);
+                jint numRead = env->CallIntMethod (inputDevice, AudioRecord.read, audioBuffer, 0, actualBufferSize * numDeviceInputChannels);
 
                 if (numRead < actualBufferSize * numDeviceInputChannels)
                 {
@@ -292,7 +318,7 @@ public:
                 }
 
                 env->ReleaseShortArrayElements (audioBuffer, dest, 0);
-                jint numWritten = env->CallIntMethod (outputDevice, android.audioTrackWrite, audioBuffer, 0, actualBufferSize * numDeviceOutputChannels);
+                jint numWritten = env->CallIntMethod (outputDevice, AudioTrack.write, audioBuffer, 0, actualBufferSize * numDeviceOutputChannels);
 
                 if (numWritten < actualBufferSize * numDeviceOutputChannels)
                 {
@@ -320,15 +346,15 @@ private:
     {
         if (outputDevice != nullptr)
         {
-            outputDevice.callVoidMethod (android.audioTrackStop);
-            outputDevice.callVoidMethod (android.audioTrackRelease);
+            outputDevice.callVoidMethod (AudioTrack.stop);
+            outputDevice.callVoidMethod (AudioTrack.release);
             outputDevice.clear();
         }
 
         if (inputDevice != nullptr)
         {
-            inputDevice.callVoidMethod (android.stopRecording);
-            inputDevice.callVoidMethod (android.audioRecordRelease);
+            inputDevice.callVoidMethod (AudioRecord.stop);
+            inputDevice.callVoidMethod (AudioRecord.release);
             inputDevice.clear();
         }
     }

@@ -27,6 +27,26 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (constructor, "<init>", "()V") \
+ METHOD (toString, "toString", "()Ljava/lang/String;") \
+
+DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (release, "release", "()V") \
+ METHOD (read, "read", "([BI)I") \
+ METHOD (getPosition, "getPosition", "()J") \
+ METHOD (getTotalLength, "getTotalLength", "()J") \
+ METHOD (isExhausted, "isExhausted", "()Z") \
+ METHOD (setPosition, "setPosition", "(J)Z") \
+
+DECLARE_JNI_CLASS (HTTPStream, "com/juce/JuceAppActivity$HTTPStream");
+#undef JNI_CLASS_MEMBERS
+
 
 //==============================================================================
 void MACAddress::findAllAddresses (Array<MACAddress>& result)
@@ -67,10 +87,10 @@ public:
             env->SetByteArrayRegion (postDataArray, 0, postData.getSize(), (const jbyte*) postData.getData());
         }
 
-        LocalRef<jobject> responseHeaderBuffer (env->NewObject (android.stringBufferClass, android.stringBufferConstructor));
+        LocalRef<jobject> responseHeaderBuffer (env->NewObject (StringBuffer, StringBuffer.constructor));
 
-        stream = GlobalRef (env->CallStaticObjectMethod (android.activityClass,
-                                                         android.createHTTPStream,
+        stream = GlobalRef (env->CallStaticObjectMethod (JuceAppActivity,
+                                                         JuceAppActivity.createHTTPStream,
                                                          javaString (address).get(),
                                                          (jboolean) isPost,
                                                          postDataArray,
@@ -87,8 +107,8 @@ public:
 
             {
                 LocalRef<jstring> headersString ((jstring) env->CallObjectMethod (responseHeaderBuffer.get(),
-                                                                                  android.stringBufferToString));
-                headerLines.addLines (juceString (headersString));
+                                                                                  StringBuffer.toString));
+                headerLines.addLines (juceString (env, headersString));
             }
 
             if (responseHeaders != 0)
@@ -109,14 +129,14 @@ public:
     ~WebInputStream()
     {
         if (stream != 0)
-            stream.callVoidMethod (android.httpStreamRelease);
+            stream.callVoidMethod (HTTPStream.release);
     }
 
     //==============================================================================
-    bool isExhausted()                  { return stream != nullptr && stream.callBooleanMethod (android.isExhausted); }
-    int64 getTotalLength()              { return stream != nullptr ? stream.callLongMethod (android.getTotalLength) : 0; }
-    int64 getPosition()                 { return stream != nullptr ? stream.callLongMethod (android.getPosition) : 0; }
-    bool setPosition (int64 wantedPos)  { return stream != nullptr && stream.callBooleanMethod (android.setPosition, (jlong) wantedPos); }
+    bool isExhausted()                  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.isExhausted); }
+    int64 getTotalLength()              { return stream != nullptr ? stream.callLongMethod (HTTPStream.getTotalLength) : 0; }
+    int64 getPosition()                 { return stream != nullptr ? stream.callLongMethod (HTTPStream.getPosition) : 0; }
+    bool setPosition (int64 wantedPos)  { return stream != nullptr && stream.callBooleanMethod (HTTPStream.setPosition, (jlong) wantedPos); }
 
     int read (void* buffer, int bytesToRead)
     {
@@ -127,7 +147,7 @@ public:
 
         jbyteArray javaArray = env->NewByteArray (bytesToRead);
 
-        int numBytes = stream.callIntMethod (android.httpStreamRead, javaArray, (jint) bytesToRead);
+        int numBytes = stream.callIntMethod (HTTPStream.read, javaArray, (jint) bytesToRead);
 
         if (numBytes > 0)
             env->GetByteArrayRegion (javaArray, 0, numBytes, static_cast <jbyte*> (buffer));
