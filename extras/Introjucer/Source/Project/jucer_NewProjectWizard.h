@@ -37,7 +37,7 @@ public:
     virtual ~NewProjectWizard();
 
     //==============================================================================
-    static const StringArray getWizards();
+    static StringArray getWizards();
     static int getNumWizards();
     static NewProjectWizard* createWizard (int index);
 

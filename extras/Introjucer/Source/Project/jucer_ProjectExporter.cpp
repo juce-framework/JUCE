@@ -46,7 +46,7 @@ int ProjectExporter::getNumExporters()
     return 6;
 }
 
-const StringArray ProjectExporter::getExporterNames()
+StringArray ProjectExporter::getExporterNames()
 {
     StringArray s;
     s.add (XCodeProjectExporter::getNameMac());
@@ -150,12 +150,12 @@ String ProjectExporter::getIncludePathForFileInJuceFolder (const String& pathFro
     }
 }
 
-const RelativePath ProjectExporter::getJucePathFromTargetFolder() const
+RelativePath ProjectExporter::getJucePathFromTargetFolder() const
 {
     return rebaseFromProjectFolderToBuildTarget (RelativePath (getJuceFolder().toString(), RelativePath::projectFolder));
 }
 
-const RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const
+RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const
 {
     return path.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder);
 }
@@ -173,7 +173,7 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     props.add (new TextPropertyComponent (getJuceFolder(), "Juce Location", 1024, false));
     props.getLast()->setTooltip ("The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
 
-    if (project.isAudioPlugin())
+    if (project.getProjectType().isAudioPlugin())
     {
         if (project.shouldAddVSTFolderToPath())
         {

@@ -33,6 +33,7 @@
 		379C4FA4F9F4F856A245D8F1 = { isa = PBXBuildFile; fileRef = 296E0498784BF03FA18B164B; };
 		A70571C45ECEB18061181367 = { isa = PBXBuildFile; fileRef = 6746790735D492AB157E5F26; };
 		7B65A9D3D6D5798649D90FA0 = { isa = PBXBuildFile; fileRef = EB49FFAB3424D162D2105B2D; };
+		257C8841AC7634499B0B3D0A = { isa = PBXBuildFile; fileRef = 1328E38A600B515CD2CFBB7A; };
 		85572197E35546BB69861758 = { isa = PBXBuildFile; fileRef = 41C18D8743BCACB15D27EE21; };
 		0E22757B983B4F600F1B7916 = { isa = PBXBuildFile; fileRef = 7D678D4FD5505D7FCE7DCC7F; };
 		1501CEE9D0FD3C1185F6413B = { isa = PBXBuildFile; fileRef = 169DB589B861F57CDF896A02; };
@@ -86,17 +87,19 @@
 		8CD4ABA478205AA127FB9BE1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_Project.h"; path = "../../Source/Project/jucer_Project.h"; sourceTree = "SOURCE_ROOT"; };
 		8E44AB32AEDABC7E1D3FC49F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ProjectContentComponent.cpp"; path = "../../Source/Project/jucer_ProjectContentComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F2F98DA41146390D05A44EAD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectContentComponent.h"; path = "../../Source/Project/jucer_ProjectContentComponent.h"; sourceTree = "SOURCE_ROOT"; };
-		296E0498784BF03FA18B164B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ProjectExporter.cpp"; path = "../../Source/Project/jucer_ProjectExporter.cpp"; sourceTree = "SOURCE_ROOT"; };
-		5DE419991013E7C0F203E99F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectExporter.h"; path = "../../Source/Project/jucer_ProjectExporter.h"; sourceTree = "SOURCE_ROOT"; };
 		AB9EE4734D894FBF1CF62C5F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectExport_Android.h"; path = "../../Source/Project/jucer_ProjectExport_Android.h"; sourceTree = "SOURCE_ROOT"; };
 		889715B0152919B2EAA1F5F9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectExport_Make.h"; path = "../../Source/Project/jucer_ProjectExport_Make.h"; sourceTree = "SOURCE_ROOT"; };
 		907F302BB89308CDB2C5FD0E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectExport_MSVC.h"; path = "../../Source/Project/jucer_ProjectExport_MSVC.h"; sourceTree = "SOURCE_ROOT"; };
 		D250274734D729D2E0389A20 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectExport_XCode.h"; path = "../../Source/Project/jucer_ProjectExport_XCode.h"; sourceTree = "SOURCE_ROOT"; };
+		296E0498784BF03FA18B164B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ProjectExporter.cpp"; path = "../../Source/Project/jucer_ProjectExporter.cpp"; sourceTree = "SOURCE_ROOT"; };
+		5DE419991013E7C0F203E99F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectExporter.h"; path = "../../Source/Project/jucer_ProjectExporter.h"; sourceTree = "SOURCE_ROOT"; };
 		6746790735D492AB157E5F26 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ProjectInformationComponent.cpp"; path = "../../Source/Project/jucer_ProjectInformationComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		4727C2C16D17BE642A3F5838 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectInformationComponent.h"; path = "../../Source/Project/jucer_ProjectInformationComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		ADF962F14A1FCBB05B499E6C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectSaver.h"; path = "../../Source/Project/jucer_ProjectSaver.h"; sourceTree = "SOURCE_ROOT"; };
 		EB49FFAB3424D162D2105B2D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ProjectTreeViewBase.cpp"; path = "../../Source/Project/jucer_ProjectTreeViewBase.cpp"; sourceTree = "SOURCE_ROOT"; };
 		27D0B6991943D6AD88E42FE5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectTreeViewBase.h"; path = "../../Source/Project/jucer_ProjectTreeViewBase.h"; sourceTree = "SOURCE_ROOT"; };
+		1328E38A600B515CD2CFBB7A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ProjectType.cpp"; path = "../../Source/Project/jucer_ProjectType.cpp"; sourceTree = "SOURCE_ROOT"; };
+		D39F212C819794FECD373008 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectType.h"; path = "../../Source/Project/jucer_ProjectType.h"; sourceTree = "SOURCE_ROOT"; };
 		41C18D8743BCACB15D27EE21 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ResourceFile.cpp"; path = "../../Source/Project/jucer_ResourceFile.cpp"; sourceTree = "SOURCE_ROOT"; };
 		05564317BD19EBC8416976DD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ResourceFile.h"; path = "../../Source/Project/jucer_ResourceFile.h"; sourceTree = "SOURCE_ROOT"; };
 		7D678D4FD5505D7FCE7DCC7F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_TreeViewTypes.cpp"; path = "../../Source/Project/jucer_TreeViewTypes.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -166,17 +169,19 @@
 				8CD4ABA478205AA127FB9BE1,
 				8E44AB32AEDABC7E1D3FC49F,
 				F2F98DA41146390D05A44EAD,
-				296E0498784BF03FA18B164B,
-				5DE419991013E7C0F203E99F,
 				AB9EE4734D894FBF1CF62C5F,
 				889715B0152919B2EAA1F5F9,
 				907F302BB89308CDB2C5FD0E,
 				D250274734D729D2E0389A20,
+				296E0498784BF03FA18B164B,
+				5DE419991013E7C0F203E99F,
 				6746790735D492AB157E5F26,
 				4727C2C16D17BE642A3F5838,
 				ADF962F14A1FCBB05B499E6C,
 				EB49FFAB3424D162D2105B2D,
 				27D0B6991943D6AD88E42FE5,
+				1328E38A600B515CD2CFBB7A,
+				D39F212C819794FECD373008,
 				41C18D8743BCACB15D27EE21,
 				05564317BD19EBC8416976DD,
 				7D678D4FD5505D7FCE7DCC7F,
@@ -332,6 +337,7 @@
 				379C4FA4F9F4F856A245D8F1,
 				A70571C45ECEB18061181367,
 				7B65A9D3D6D5798649D90FA0,
+				257C8841AC7634499B0B3D0A,
 				85572197E35546BB69861758,
 				0E22757B983B4F600F1B7916,
 				1501CEE9D0FD3C1185F6413B,

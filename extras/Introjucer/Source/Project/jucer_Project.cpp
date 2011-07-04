@@ -24,6 +24,7 @@
 */
 
 #include "jucer_Project.h"
+#include "jucer_ProjectType.h"
 #include "jucer_ProjectExporter.h"
 #include "jucer_ResourceFile.h"
 #include "jucer_ProjectSaver.h"
@@ -105,7 +106,7 @@ void Project::setMissingDefaultValues()
         setTitle ("Juce Project");
 
     if (! projectRoot.hasProperty (Ids::projectType))
-        getProjectType() = application;
+        getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
 
     if (! projectRoot.hasProperty (Ids::version))
         getVersion() = "1.0.0";
@@ -211,7 +212,7 @@ void Project::setLastDocumentOpened (const File& file)
 //==============================================================================
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
-    if (isLibrary())
+    if (getProjectType().isLibrary())
         getJuceLinkageModeValue() = notLinkedToJuce;
 
     changed();
@@ -281,18 +282,26 @@ bool Project::shouldBeAddedToBinaryResourcesByDefault (const File& file)
     return ! file.hasFileExtension (sourceOrHeaderFileExtensions);
 }
 
-//==============================================================================
-const char* const Project::application      = "guiapp";
-const char* const Project::commandLineApp   = "consoleapp";
-const char* const Project::audioPlugin      = "audioplug";
-const char* const Project::library          = "library";
-const char* const Project::browserPlugin    = "browserplug";
+bool Project::shouldAddVSTFolderToPath()
+{
+    return (getProjectType().isAudioPlugin()
+            && (bool) shouldBuildVST().getValue()) || getJuceConfigFlag ("JUCE_PLUGINHOST_VST").toString() == configFlagEnabled;
+}
 
-bool Project::isLibrary() const                 { return getProjectType().toString() == library; }
-bool Project::isGUIApplication() const          { return getProjectType().toString() == application; }
-bool Project::isCommandLineApp() const          { return getProjectType().toString() == commandLineApp; }
-bool Project::isAudioPlugin() const             { return getProjectType().toString() == audioPlugin; }
-bool Project::isBrowserPlugin() const           { return getProjectType().toString() == browserPlugin; }
+//==============================================================================
+const ProjectType& Project::getProjectType() const
+{
+    const ProjectType* type = ProjectType::findType (getProjectTypeValue().toString());
+    jassert (type != nullptr);
+
+    if (type == nullptr)
+    {
+        type = ProjectType::findType (ProjectType_GUIApp::getTypeName());
+        jassert (type != nullptr);
+    }
+
+    return *type;
+}
 
 const char* const Project::notLinkedToJuce                          = "none";
 const char* const Project::useLinkedJuce                            = "static";
@@ -324,9 +333,20 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
     props.add (new TextPropertyComponent (getVersion(), "Project Version", 16, false));
     props.getLast()->setTooltip ("The project's version number, This should be in the format major.minor.point");
 
-    const char* projectTypes[] = { "Application (GUI)", "Application (Non-GUI)", "Audio Plug-in", "Static Library", 0 };
-    const char* projectTypeValues[] = { application, commandLineApp, audioPlugin, library, 0 };
-    props.add (new ChoicePropertyComponent (getProjectType(), "Project Type", StringArray (projectTypes), Array<var> (projectTypeValues)));
+    {
+        StringArray projectTypeNames;
+        Array<var> projectTypeCodes;
+
+        const Array<ProjectType*>& types = ProjectType::getAllTypes();
+
+        for (int i = 0; i < types.size(); ++i)
+        {
+            projectTypeNames.add (types.getUnchecked(i)->getDescription());
+            projectTypeCodes.add (types.getUnchecked(i)->getType());
+        }
+
+        props.add (new ChoicePropertyComponent (getProjectTypeValue(), "Project Type", projectTypeNames, projectTypeCodes));
+    }
 
     const char* linkageTypes[] = { "Not linked to Juce", "Linked to Juce Static Library", "Include Juce Amalgamated Files", "Include Juce Source Code Directly (In a single file)", "Include Juce Source Code Directly (Split across several files)", 0 };
     const char* linkageTypeValues[] = { notLinkedToJuce, useLinkedJuce, useAmalgamatedJuce, useAmalgamatedJuceViaSingleTemplate, useAmalgamatedJuceViaMultipleTemplates, 0 };
@@ -361,7 +381,7 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.getLast()->setTooltip ("Sets an icon to use for the executable.");
     }
 
-    if (isAudioPlugin())
+    if (getProjectType().isAudioPlugin())
     {
         props.add (new BooleanPropertyComponent (shouldBuildVST(), "Build VST", "Enabled"));
         props.getLast()->setTooltip ("Whether the project should produce a VST plugin.");
@@ -371,7 +391,7 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.getLast()->setTooltip ("Whether the project should produce an RTAS plugin.");
     }
 
-    if (isAudioPlugin())
+    if (getProjectType().isAudioPlugin())
     {
         props.add (new TextPropertyComponent (getPluginName(), "Plugin Name", 128, false));
         props.getLast()->setTooltip ("The name of your plugin (keep it short!)");
@@ -497,24 +517,6 @@ Project::Item Project::getMainGroup()
     return Item (*this, projectRoot.getChildWithName (Tags::projectMainGroup));
 }
 
-Project::Item Project::createNewGroup()
-{
-    Item item (*this, ValueTree (Tags::group));
-    item.initialiseNodeValues();
-    item.getName() = "New Group";
-    return item;
-}
-
-Project::Item Project::createNewItem (const File& file)
-{
-    Item item (*this, ValueTree (Tags::file));
-    item.initialiseNodeValues();
-    item.getName() = file.getFileName();
-    item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m;cc;cxx");
-    item.getShouldAddToResourceValue() = shouldBeAddedToBinaryResourcesByDefault (file);
-    return item;
-}
-
 static void findImages (const Project::Item& item, OwnedArray<Project::Item>& found)
 {
     if (item.isImageFile())
@@ -621,7 +623,7 @@ Value Project::Item::getShouldAddToResourceValue() const
 File Project::Item::getFile() const
 {
     if (isFile())
-        return project->resolveFilename (node [Ids::file].toString());
+        return getProject().resolveFilename (node [Ids::file].toString());
     else
         return File::nonexistent;
 }
@@ -629,7 +631,7 @@ File Project::Item::getFile() const
 void Project::Item::setFile (const File& file)
 {
     jassert (isFile());
-    node.setProperty (Ids::file, project->getRelativePathForFile (file), getUndoManager());
+    node.setProperty (Ids::file, getProject().getRelativePathForFile (file), getUndoManager());
     node.setProperty (Ids::name, file.getFileName(), getUndoManager());
 
     jassert (getFile() == file);
@@ -665,7 +667,7 @@ Project::Item Project::Item::findItemForFile (const File& file) const
         }
     }
 
-    return Item (*project, ValueTree::invalid);
+    return Item (getProject(), ValueTree::invalid);
 }
 
 File Project::Item::determineGroupFolder() const
@@ -691,7 +693,7 @@ File Project::Item::determineGroupFolder() const
     }
     else
     {
-        f = project->getFile().getParentDirectory();
+        f = getProject().getFile().getParentDirectory();
 
         if (f.getChildFile ("Source").isDirectory())
             f = f.getChildFile ("Source");
@@ -736,7 +738,7 @@ Project::Item Project::Item::getParent() const
     if (isMainGroup() || ! isGroup())
         return *this;
 
-    return Item (*project, node.getParent());
+    return Item (getProject(), node.getParent());
 }
 
 struct ItemSorter
@@ -753,6 +755,17 @@ void Project::Item::sortAlphabetically()
     node.sort (sorter, getUndoManager(), true);
 }
 
+Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex)
+{
+    Item group (getProject(), ValueTree (Tags::group));
+    group.initialiseNodeValues();
+    group.getName() = name;
+
+    jassert (canContain (group));
+    addChild (group, insertIndex);
+    return group;
+}
+
 bool Project::Item::addFile (const File& file, int insertIndex)
 {
     if (file == File::nonexistent || file.isHidden() || file.getFileName().startsWithChar ('.'))
@@ -760,18 +773,12 @@ bool Project::Item::addFile (const File& file, int insertIndex)
 
     if (file.isDirectory())
     {
-        Item group (project->createNewGroup());
-        group.getName() = file.getFileNameWithoutExtension();
-
-        jassert (canContain (group));
-
-        addChild (group, insertIndex);
-        //group.setFile (file);
+        Item group (addNewSubGroup (file.getFileNameWithoutExtension(), insertIndex));
 
         DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories);
         while (iter.next())
         {
-            if (! project->getMainGroup().findItemForFile (iter.getFile()).isValid())
+            if (! getProject().getMainGroup().findItemForFile (iter.getFile()).isValid())
                 group.addFile (iter.getFile(), -1);
         }
 
@@ -779,9 +786,13 @@ bool Project::Item::addFile (const File& file, int insertIndex)
     }
     else if (file.existsAsFile())
     {
-        if (! project->getMainGroup().findItemForFile (file).isValid())
+        if (! getProject().getMainGroup().findItemForFile (file).isValid())
         {
-            Item item (project->createNewItem (file));
+            Item item (getProject(), ValueTree (Tags::file));
+            item.initialiseNodeValues();
+            item.getName() = file.getFileName();
+            item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m;cc;cxx");
+            item.getShouldAddToResourceValue() = getProject().shouldBeAddedToBinaryResourcesByDefault (file);
 
             if (canContain (item))
             {
@@ -1066,7 +1077,7 @@ StringPairArray Project::BuildConfiguration::getAllPreprocessorDefs() const
                                   parsePreprocessorDefs (getBuildConfigPreprocessorDefs().toString()));
 }
 
-const StringArray Project::BuildConfiguration::getHeaderSearchPaths() const
+StringArray Project::BuildConfiguration::getHeaderSearchPaths() const
 {
     StringArray s;
     s.addTokens (getHeaderSearchPath().toString(), ";", String::empty);

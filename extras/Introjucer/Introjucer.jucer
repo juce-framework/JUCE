@@ -88,10 +88,6 @@
             resource="0" file="Source/Project/jucer_ProjectContentComponent.cpp"/>
       <FILE id="mIJMR08" name="jucer_ProjectContentComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_ProjectContentComponent.h"/>
-      <FILE id="h6J3UPy" name="jucer_ProjectExporter.cpp" compile="1" resource="0"
-            file="Source/Project/jucer_ProjectExporter.cpp"/>
-      <FILE id="KFY4Re5" name="jucer_ProjectExporter.h" compile="0" resource="0"
-            file="Source/Project/jucer_ProjectExporter.h"/>
       <FILE id="N0uQAr" name="jucer_ProjectExport_Android.h" compile="0"
             resource="0" file="Source/Project/jucer_ProjectExport_Android.h"/>
       <FILE id="b8ouh7s" name="jucer_ProjectExport_Make.h" compile="0" resource="0"
@@ -100,6 +96,10 @@
             file="Source/Project/jucer_ProjectExport_MSVC.h"/>
       <FILE id="ymhtjf" name="jucer_ProjectExport_XCode.h" compile="0" resource="0"
             file="Source/Project/jucer_ProjectExport_XCode.h"/>
+      <FILE id="h6J3UPy" name="jucer_ProjectExporter.cpp" compile="1" resource="0"
+            file="Source/Project/jucer_ProjectExporter.cpp"/>
+      <FILE id="KFY4Re5" name="jucer_ProjectExporter.h" compile="0" resource="0"
+            file="Source/Project/jucer_ProjectExporter.h"/>
       <FILE id="5I09Gpe" name="jucer_ProjectInformationComponent.cpp" compile="1"
             resource="0" file="Source/Project/jucer_ProjectInformationComponent.cpp"/>
       <FILE id="nvEyCt5" name="jucer_ProjectInformationComponent.h" compile="0"
@@ -110,6 +110,10 @@
             resource="0" file="Source/Project/jucer_ProjectTreeViewBase.cpp"/>
       <FILE id="UwhAsi1" name="jucer_ProjectTreeViewBase.h" compile="0" resource="0"
             file="Source/Project/jucer_ProjectTreeViewBase.h"/>
+      <FILE id="WQ6fWQ" name="jucer_ProjectType.cpp" compile="1" resource="0"
+            file="Source/Project/jucer_ProjectType.cpp"/>
+      <FILE id="davId" name="jucer_ProjectType.h" compile="0" resource="0"
+            file="Source/Project/jucer_ProjectType.h"/>
       <FILE id="pIeJPuR" name="jucer_ResourceFile.cpp" compile="1" resource="0"
             file="Source/Project/jucer_ResourceFile.cpp"/>
       <FILE id="Bvb3uEg" name="jucer_ResourceFile.h" compile="0" resource="0"

@@ -60,7 +60,7 @@ public:
     {
         ProjectExporter::createPropertyEditors (props);
 
-        if (project.isLibrary())
+        if (project.getProjectType().isLibrary())
         {
             const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
             const int libTypeValues[] = { 1, 2, 0 };
@@ -82,7 +82,7 @@ protected:
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
     Value getLibraryType() const        { return getSetting (Ids::libraryType); }
-    bool isLibraryDLL() const           { return project.isLibrary() && getLibraryType() == 2; }
+    bool isLibraryDLL() const           { return project.getProjectType().isLibrary() && getLibraryType() == 2; }
 
     //==============================================================================
     const Array<RelativePath> getRTASFilesRequired() const
@@ -123,11 +123,11 @@ protected:
 
     String getTargetBinarySuffix() const
     {
-        if (project.isLibrary())
+        if (project.getProjectType().isLibrary())
             return ".lib";
         else if (isRTAS())
             return ".dpm";
-        else if (project.isAudioPlugin() || project.isBrowserPlugin())
+        else if (project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin())
             return ".dll";
 
         return ".exe";
@@ -149,10 +149,10 @@ protected:
             defines.set ("NDEBUG", "");
         }
 
-        if (project.isCommandLineApp())
+        if (project.getProjectType().isCommandLineApp())
             defines.set ("_CONSOLE", "");
 
-        if (project.isLibrary())
+        if (project.getProjectType().isLibrary())
             defines.set ("_LIB", "");
 
         if (isRTAS())
@@ -179,14 +179,14 @@ protected:
         return result.joinIntoString (joinString);
     }
 
-    const StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config) const
+    StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config) const
     {
         StringArray searchPaths (config.getHeaderSearchPaths());
 
         if (project.shouldAddVSTFolderToPath() && getVSTFolder().toString().isNotEmpty())
             searchPaths.add (rebaseFromProjectFolderToBuildTarget (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)).toWindowsStyle());
 
-        if (project.isAudioPlugin())
+        if (project.getProjectType().isAudioPlugin())
             searchPaths.add (juceWrapperFolder.toWindowsStyle());
 
         if (isRTAS())
@@ -599,8 +599,8 @@ protected:
         xml.setAttribute ("Name", createConfigName (config));
         xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (binariesPath));
         xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (intermediatesPath));
-        xml.setAttribute ("ConfigurationType", (project.isAudioPlugin() || project.isBrowserPlugin() || isLibraryDLL())
-                                                    ? "2" : (project.isLibrary() ? "4" : "1"));
+        xml.setAttribute ("ConfigurationType", (project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin() || isLibraryDLL())
+                                                    ? "2" : (project.getProjectType().isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
         xml.setAttribute ("CharacterSet", "2");
@@ -623,7 +623,7 @@ protected:
         createToolElement (xml, "VCXMLDataGeneratorTool");
         createToolElement (xml, "VCWebServiceProxyGeneratorTool");
 
-        if (! project.isLibrary())
+        if (! project.getProjectType().isLibrary())
         {
             XmlElement* midl = createToolElement (xml, "VCMIDLTool");
             midl->setAttribute ("PreprocessorDefinitions", isDebug ? "_DEBUG" : "NDEBUG");
@@ -643,7 +643,7 @@ protected:
             if (isDebug)
             {
                 compiler->setAttribute ("BufferSecurityCheck", "");
-                compiler->setAttribute ("DebugInformationFormat", project.isLibrary() ? "3" : "4");
+                compiler->setAttribute ("DebugInformationFormat", project.getProjectType().isLibrary() ? "3" : "4");
             }
             else
             {
@@ -680,7 +680,7 @@ protected:
 
         const String outputFileName (getBinaryFileForConfig (config));
 
-        if (! project.isLibrary())
+        if (! project.getProjectType().isLibrary())
         {
             XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
@@ -693,7 +693,7 @@ protected:
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
             linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
-            linker->setAttribute ("SubSystem", project.isCommandLineApp() ? "1" : "2");
+            linker->setAttribute ("SubSystem", project.getProjectType().isCommandLineApp() ? "1" : "2");
 
             if (! isDebug)
             {
@@ -752,7 +752,7 @@ protected:
 
         createToolElement (xml, "VCFxCopTool");
 
-        if (! project.isLibrary())
+        if (! project.getProjectType().isLibrary())
             createToolElement (xml, "VCAppVerifierTool");
 
         createToolElement (xml, "VCPostBuildEventTool");
@@ -873,13 +873,13 @@ private:
     {
         const String defaultConfigName (createConfigName (project.getConfiguration (0)));
 
-        const bool isDLL = project.isAudioPlugin() || project.isBrowserPlugin();
+        const bool isDLL = project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin();
         String targetType, targetCode;
 
-        if (isDLL)                              { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
-        else if (project.isLibrary())           { targetType = "\"Win32 (x86) Static Library\"";        targetCode = "0x0104"; }
-        else if (project.isCommandLineApp())    { targetType = "\"Win32 (x86) Console Application\"";   targetCode = "0x0103"; }
-        else                                    { targetType = "\"Win32 (x86) Application\"";           targetCode = "0x0101"; }
+        if (isDLL)                                              { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
+        else if (project.getProjectType().isLibrary())          { targetType = "\"Win32 (x86) Static Library\"";        targetCode = "0x0104"; }
+        else if (project.getProjectType().isCommandLineApp())   { targetType = "\"Win32 (x86) Console Application\"";   targetCode = "0x0103"; }
+        else                                                    { targetType = "\"Win32 (x86) Application\"";           targetCode = "0x0101"; }
 
         out << "# Microsoft Developer Studio Project File - Name=\"" << project.getProjectName()
             << "\" - Package Owner=<4>" << newLine
@@ -950,7 +950,7 @@ private:
             if (! isDebug)
                 out << "# SUBTRACT CPP /YX" << newLine;
 
-            if (! project.isLibrary())
+            if (! project.getProjectType().isLibrary())
                 out << "# ADD BASE MTL /nologo /D " << defines << " /mktyplib203 /win32" << newLine
                     << "# ADD MTL /nologo /D " << defines << " /mktyplib203 /win32" << newLine;
 
@@ -960,7 +960,7 @@ private:
                 << "# ADD BASE BSC32 /nologo" << newLine
                 << "# ADD BSC32 /nologo" << newLine;
 
-            if (project.isLibrary())
+            if (project.getProjectType().isLibrary())
             {
                 out << "LIB32=link.exe -lib" << newLine
                     << "# ADD BASE LIB32 /nologo" << newLine
@@ -974,8 +974,8 @@ private:
                     << "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "
                     << (isDebug ? " /debug" : "")
                     << " /nologo /machine:I386 /out:\"" << targetBinary << "\" "
-                    << (isDLL ? "/dll" : (project.isCommandLineApp() ? "/subsystem:console "
-                                                                     : "/subsystem:windows "))
+                    << (isDLL ? "/dll" : (project.getProjectType().isCommandLineApp() ? "/subsystem:console "
+                                                                                      : "/subsystem:windows "))
                     << replacePreprocessorTokens (config, getExtraLinkerFlags().toString()).trim() << newLine;
             }
         }
@@ -1309,7 +1309,7 @@ protected:
                                                                                                         : "%(IgnoreSpecificDefaultLibraries)");
                 link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
                 link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
-                link->createNewChildElement ("SubSystem")->addTextElement (project.isCommandLineApp() ? "Console" : "Windows");
+                link->createNewChildElement ("SubSystem")->addTextElement (project.getProjectType().isCommandLineApp() ? "Console" : "Windows");
                 link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
                 if (! isDebug)
@@ -1369,9 +1369,9 @@ protected:
 
     String getProjectType() const
     {
-        if (project.isGUIApplication() || project.isCommandLineApp())   return "Application";
-        else if (project.isAudioPlugin() || project.isBrowserPlugin())  return "DynamicLibrary";
-        else if (project.isLibrary())                                   return "StaticLibrary";
+        if (project.getProjectType().isGUIApplication() || project.getProjectType().isCommandLineApp())   return "Application";
+        else if (project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin())  return "DynamicLibrary";
+        else if (project.getProjectType().isLibrary())                                                    return "StaticLibrary";
 
         jassertfalse;
         return String::empty;

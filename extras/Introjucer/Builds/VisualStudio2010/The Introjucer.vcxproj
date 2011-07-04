@@ -137,6 +137,7 @@
     <ClCompile Include="..\..\Source\Project\jucer_ProjectExporter.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectInformationComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp"/>
+    <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ResourceFile.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_TreeViewTypes.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp"/>
@@ -166,14 +167,15 @@
     <ClInclude Include="..\..\Source\Project\jucer_NewProjectWizard.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_Project.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExporter.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Android.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Make.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_MSVC.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_XCode.h"/>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectExporter.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectInformationComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectSaver.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTreeViewBase.h"/>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ResourceFile.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_TreeViewTypes.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h"/>

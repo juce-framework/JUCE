@@ -122,7 +122,7 @@ void StoredSettings::flush()
     }
 }
 
-const Array<File> StoredSettings::getLastProjects() const
+Array<File> StoredSettings::getLastProjects() const
 {
     StringArray s;
     s.addTokens (props->getValue ("lastProjects"), "|", "");

@@ -164,7 +164,7 @@ private:
     {
         out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)";
 
-        if (project.isAudioPlugin())
+        if (project.getProjectType().isAudioPlugin())
             out << " -shared";
 
         {
@@ -214,7 +214,7 @@ private:
         if (config.isDebug().getValue())
             out << " -g -ggdb";
 
-        if (project.isAudioPlugin())
+        if (project.getProjectType().isAudioPlugin())
             out << " -fPIC";
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
@@ -231,14 +231,14 @@ private:
 
         String targetName (config.getTargetBinaryName().getValue().toString());
 
-        if (project.isLibrary())
+        if (project.getProjectType().isLibrary())
             targetName = getLibbedFilename (targetName);
         else if (isVST())
             targetName = targetName.upToLastOccurrenceOf (".", false, false) + ".so";
 
         out << "  TARGET := " << escapeSpaces (targetName) << newLine;
 
-        if (project.isLibrary())
+        if (project.getProjectType().isLibrary())
             out << "  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)" << newLine;
         else
             out << "  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
@@ -268,7 +268,7 @@ private:
             << "endif" << newLine
             << newLine;
 
-        if (! project.isLibrary())
+        if (! project.getProjectType().isLibrary())
             out << "ifeq ($(TARGET_ARCH),)" << newLine
                 << "  TARGET_ARCH := -march=native" << newLine
                 << "endif"  << newLine << newLine;

@@ -248,13 +248,13 @@ void ProjectInformationComponent::rebuildConfigTabs()
         }
     }
 
-    lastProjectType = project.getProjectType().getValue();
+    lastProjectType = project.getProjectTypeValue().getValue();
 }
 
 void ProjectInformationComponent::updateConfigTabs()
 {
     if (configTabBox.getNumTabs() != project.getNumConfigurations() + project.getNumExporters() + 2
-         || lastProjectType != project.getProjectType().getValue())
+         || lastProjectType != project.getProjectTypeValue().getValue())
     {
         rebuildConfigTabs();
     }

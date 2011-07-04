@@ -28,6 +28,7 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_Project.h"
+#include "jucer_ProjectType.h"
 
 
 //==============================================================================
@@ -41,7 +42,7 @@ public:
     virtual ~ProjectExporter();
 
     static int getNumExporters();
-    static const StringArray getExporterNames();
+    static StringArray getExporterNames();
     static ProjectExporter* createNewExporter (Project& project, const int index);
 
     static ProjectExporter* createExporter (Project& project, const ValueTree& settings);
@@ -71,9 +72,9 @@ public:
     Value getRTASFolder() const             { return getSetting (Ids::rtasFolder); }
     Value getAUFolder() const               { return getSetting (Ids::auFolder); }
 
-    bool isVST() const                      { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildVST().getValue(); }
-    bool isRTAS() const                     { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildRTAS().getValue(); }
-    bool isAU() const                       { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildAU().getValue(); }
+    bool isVST() const                      { return (bool) project.getProjectType().isAudioPlugin() && (bool) project.shouldBuildVST().getValue(); }
+    bool isRTAS() const                     { return (bool) project.getProjectType().isAudioPlugin() && (bool) project.shouldBuildRTAS().getValue(); }
+    bool isAU() const                       { return (bool) project.getProjectType().isAudioPlugin() && (bool) project.shouldBuildAU().getValue(); }
 
     Value getExtraCompilerFlags() const     { return getSetting (Ids::extraCompilerFlags); }
     Value getExtraLinkerFlags() const       { return getSetting (Ids::extraLinkerFlags); }
@@ -120,7 +121,7 @@ protected:
     ValueTree settings;
     String name;
 
-    const RelativePath getJucePathFromTargetFolder() const;
+    RelativePath getJucePathFromTargetFolder() const;
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
@@ -135,7 +136,7 @@ protected:
         return name;
     }
 
-    const RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
+    RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
 
     //==============================================================================
     static void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)

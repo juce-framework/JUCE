@@ -27,12 +27,12 @@
 
 
 //==============================================================================
-const int64 hashCode64 (const String& s)
+int64 hashCode64 (const String& s)
 {
     return s.hashCode64() + s.length() * s.hashCode() + s.toUpperCase().hashCode();
 }
 
-const String createAlphaNumericUID()
+String createAlphaNumericUID()
 {
     String uid;
     static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -49,7 +49,7 @@ const String createAlphaNumericUID()
     return uid;
 }
 
-const String randomHexString (Random& random, int numChars)
+String randomHexString (Random& random, int numChars)
 {
     String s;
     const char hexChars[] = "0123456789ABCDEF";
@@ -60,12 +60,12 @@ const String randomHexString (Random& random, int numChars)
     return s;
 }
 
-const String hexString8Digits (int value)
+String hexString8Digits (int value)
 {
     return String::toHexString (value).paddedLeft ('0', 8);
 }
 
-const String createGUID (const String& seed)
+String createGUID (const String& seed)
 {
     String guid;
     Random r (hashCode64 (seed + "_jucersalt"));
@@ -77,7 +77,7 @@ const String createGUID (const String& seed)
     return guid;
 }
 
-const String escapeSpaces (const String& s)
+String escapeSpaces (const String& s)
 {
     return s.replace (" ", "\\ ");
 }
@@ -134,7 +134,7 @@ StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const Stri
     return inheritedDefs;
 }
 
-const String createGCCPreprocessorFlags (const StringPairArray& defs)
+String createGCCPreprocessorFlags (const StringPairArray& defs)
 {
     String s;
 
@@ -151,7 +151,7 @@ const String createGCCPreprocessorFlags (const StringPairArray& defs)
     return s;
 }
 
-const String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString)
+String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString)
 {
     for (int i = 0; i < definitions.size(); ++i)
     {
@@ -287,7 +287,7 @@ void PropertyPanelWithTooltips::timerCallback()
     }
 }
 
-const String PropertyPanelWithTooltips::findTip (Component* c)
+String PropertyPanelWithTooltips::findTip (Component* c)
 {
     while (c != nullptr && c != this)
     {

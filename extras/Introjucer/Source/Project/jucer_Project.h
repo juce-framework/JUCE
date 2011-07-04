@@ -28,6 +28,7 @@
 
 #include "../jucer_Headers.h"
 class ProjectExporter;
+class ProjectType;
 
 //==============================================================================
 class Project  : public FileBasedDocument,
@@ -65,19 +66,8 @@ public:
 
     //==============================================================================
     // project types
-    static const char* const application;
-    static const char* const commandLineApp;
-    static const char* const audioPlugin;
-    static const char* const library;
-    static const char* const browserPlugin;
-
-    Value getProjectType() const                        { return getProjectValue ("projectType"); }
-
-    bool isLibrary() const;
-    bool isGUIApplication() const;
-    bool isCommandLineApp() const;
-    bool isAudioPlugin() const;
-    bool isBrowserPlugin() const;
+    const ProjectType& getProjectType() const;
+    Value getProjectTypeValue() const                   { return getProjectValue ("projectType"); }
 
     Value getVersion() const                            { return getProjectValue ("version"); }
     Value getBundleIdentifier() const                   { return getProjectValue ("bundleIdentifier"); }
@@ -100,7 +90,7 @@ public:
     bool isUsingMultipleTemplateFiles() const           { return getJuceLinkageMode() == useAmalgamatedJuceViaMultipleTemplates; }
 
     //==============================================================================
-    Value getProjectValue (const Identifier& name) const       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
+    Value getProjectValue (const Identifier& name) const  { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
 
     Value getProjectPreprocessorDefs() const            { return getProjectValue (Ids::defines); }
     StringPairArray getPreprocessorDefs() const;
@@ -114,7 +104,7 @@ public:
     Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
     Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }
     Value shouldBuildAU() const                         { return getProjectValue ("buildAU"); }
-    bool shouldAddVSTFolderToPath()                     { return (isAudioPlugin() && (bool) shouldBuildVST().getValue()) || getJuceConfigFlag ("JUCE_PLUGINHOST_VST").toString() == configFlagEnabled; }
+    bool shouldAddVSTFolderToPath();
 
     Value getPluginName() const                         { return getProjectValue ("pluginName"); }
     Value getPluginDesc() const                         { return getProjectValue ("pluginDesc"); }
@@ -133,9 +123,9 @@ public:
     Value getPluginRTASCategory() const                 { return getProjectValue ("pluginRTASCategory"); }
 
     //==============================================================================
-    File getAppIncludeFile() const                { return getWrapperFolder().getChildFile (getJuceSourceHFilename()); }
-    File getWrapperFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
-    File getPluginCharacteristicsFile() const     { return getWrapperFolder().getChildFile (getPluginCharacteristicsFilename()); }
+    File getAppIncludeFile() const                      { return getWrapperFolder().getChildFile (getJuceSourceHFilename()); }
+    File getWrapperFolder() const                       { return getFile().getSiblingFile ("JuceLibraryCode"); }
+    File getPluginCharacteristicsFile() const           { return getWrapperFolder().getChildFile (getPluginCharacteristicsFilename()); }
 
     //==============================================================================
     String getAmalgamatedHeaderFileName() const         { return "juce_amalgamated.h"; }
@@ -195,7 +185,9 @@ public:
         //==============================================================================
         bool canContain (const Item& child) const;
         int getNumChildren() const                      { return node.getNumChildren(); }
-        Item getChild (int index) const                 { return Item (*project, node.getChild (index)); }
+        Item getChild (int index) const                 { return Item (getProject(), node.getChild (index)); }
+
+        Item addNewSubGroup (const String& name, int insertIndex);
         void addChild (const Item& newChild, int insertIndex);
         bool addFile (const File& file, int insertIndex);
         void removeItemFromProject();
@@ -211,12 +203,10 @@ public:
         Project* project;
         ValueTree node;
 
-        UndoManager* getUndoManager() const              { return project->getUndoManagerFor (node); }
+        UndoManager* getUndoManager() const              { return getProject().getUndoManagerFor (node); }
     };
 
     Item getMainGroup();
-    Item createNewGroup();
-    Item createNewItem (const File& file);
 
     void findAllImageItems (OwnedArray<Item>& items);
 
@@ -244,7 +234,7 @@ public:
         Value getBuildConfigPreprocessorDefs() const        { return getValue (Ids::defines); }
         StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
         Value getHeaderSearchPath() const                   { return getValue (Ids::headerPath); }
-        const StringArray getHeaderSearchPaths() const;
+        StringArray getHeaderSearchPaths() const;
 
         static const char* const osxVersionDefault;
         static const char* const osxVersion10_4;

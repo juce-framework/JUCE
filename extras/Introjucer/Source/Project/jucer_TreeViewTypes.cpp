@@ -43,9 +43,8 @@ GroupTreeViewItem::~GroupTreeViewItem()
 
 void GroupTreeViewItem::addNewGroup()
 {
-    Project::Item group (item.getProject().createNewGroup());
-    item.addChild (group, 0);
-    triggerAsyncRename (group);
+    Project::Item newGroup (item.addNewSubGroup ("New Group", 0));
+    triggerAsyncRename (newGroup);
 }
 
 bool GroupTreeViewItem::acceptsDragItems (const OwnedArray <Project::Item>& selectedNodes)

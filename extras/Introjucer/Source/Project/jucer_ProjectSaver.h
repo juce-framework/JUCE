@@ -36,7 +36,7 @@ public:
     {
     }
 
-    const String save()
+    String save()
     {
         const File oldFile (project.getFile());
         project.setFile (projectFile);
@@ -45,7 +45,7 @@ public:
 
         if (linkageMode == Project::notLinkedToJuce)
         {
-            hasAppHeaderFile = ! project.isLibrary();
+            hasAppHeaderFile = ! project.getProjectType().isLibrary();
             hasAppConfigFile = false;
             numJuceSourceFiles = 0;
         }
@@ -303,7 +303,7 @@ private:
         return maxVal;
     }
 
-    static const String createVersionCode (const String& version)
+    static String createVersionCode (const String& version)
     {
         StringArray configs;
         configs.addTokens (version, ",.", String::empty);
@@ -410,7 +410,7 @@ private:
             binaryDataCpp.withFileExtension ("h").deleteFile();
         }
 
-        if (project.isLibrary())
+        if (project.getProjectType().isLibrary())
             return;
 
         if (! wrapperFolder.createDirectory())
@@ -430,7 +430,7 @@ private:
             appConfigFile.deleteFile();
         }
 
-        if (project.isAudioPlugin())
+        if (project.getProjectType().isAudioPlugin())
         {
             MemoryOutputStream mem;
             writePluginCharacteristics (mem);
@@ -512,7 +512,7 @@ private:
                     }
                 }
 
-                if (project.isAudioPlugin())
+                if (project.getProjectType().isAudioPlugin())
                     exporter->juceWrapperFiles.add (RelativePath (pluginCharacteristicsFile, targetFolder, RelativePath::buildTargetFolder));
 
                 try

@@ -74,7 +74,7 @@ public:
        #endif
     }
 
-    bool isPossibleForCurrentProject()          { return project.isGUIApplication(); }
+    bool isPossibleForCurrentProject()          { return project.getProjectType().isGUIApplication(); }
     bool usesMMFiles() const                    { return false; }
 
     void launchProject()

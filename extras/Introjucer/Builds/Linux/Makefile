@@ -58,6 +58,7 @@ OBJECTS := \
   $(OBJDIR)/jucer_ProjectExporter_eed6e04b.o \
   $(OBJDIR)/jucer_ProjectInformationComponent_4746e69b.o \
   $(OBJDIR)/jucer_ProjectTreeViewBase_63c2bdbe.o \
+  $(OBJDIR)/jucer_ProjectType_1bc27a24.o \
   $(OBJDIR)/jucer_ResourceFile_7e7734e3.o \
   $(OBJDIR)/jucer_TreeViewTypes_4a765287.o \
   $(OBJDIR)/jucer_CodeHelpers_c317179c.o \
@@ -159,6 +160,11 @@ $(OBJDIR)/jucer_ProjectInformationComponent_4746e69b.o: ../../Source/Project/juc
 $(OBJDIR)/jucer_ProjectTreeViewBase_63c2bdbe.o: ../../Source/Project/jucer_ProjectTreeViewBase.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_ProjectTreeViewBase.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_ProjectType_1bc27a24.o: ../../Source/Project/jucer_ProjectType.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_ProjectType.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ResourceFile_7e7734e3.o: ../../Source/Project/jucer_ResourceFile.cpp

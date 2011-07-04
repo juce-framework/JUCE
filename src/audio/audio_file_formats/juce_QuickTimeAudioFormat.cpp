@@ -29,11 +29,13 @@
 #if JUCE_QUICKTIME && ! (JUCE_64BIT || JUCE_IOS)
 
 #if ! JUCE_WINDOWS
+ #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
  #include <QuickTime/Movies.h>
  #include <QuickTime/QTML.h>
  #include <QuickTime/QuickTimeComponents.h>
  #include <QuickTime/MediaHandlers.h>
  #include <QuickTime/ImageCodec.h>
+ #undef Point
 #else
  #if JUCE_MSVC
   #pragma warning (push)

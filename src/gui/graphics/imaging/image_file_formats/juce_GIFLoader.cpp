@@ -372,6 +372,7 @@ private:
 
         const Image::BitmapData destData (image, Image::BitmapData::writeOnly);
         uint8* p = destData.getPixelPointer (0, 0);
+        const bool hasAlpha = image.hasAlphaChannel();
 
         for (;;)
         {
@@ -379,7 +380,7 @@ private:
             if (index < 0)
                 break;
 
-            if (transparent >= 0)
+            if (hasAlpha)
                 ((PixelARGB*) p)->set (palette [index]);
             else
                 ((PixelRGB*)  p)->set (palette [index]);

@@ -75,10 +75,13 @@ namespace CppTokeniser
               "friend", "inline", "not_eq", "public", "sizeof", "static", "signed",
               "switch", "typeid", "wchar_t", "xor_eq", 0};
 
+        static const char* const keywords7Char[] =
+            { "default", "mutable", "private", "typedef", "nullptr", "virtual", 0 };
+
         static const char* const keywordsOther[] =
-            { "const_cast", "continue", "default", "explicit", "mutable", "namespace",
-              "operator", "private", "protected", "register", "reinterpret_cast", "static_cast",
-              "template", "typedef", "typename", "unsigned", "virtual", "volatile",
+            { "noexcept", "const_cast", "continue", "explicit", "namespace",
+              "operator", "protected", "register", "reinterpret_cast", "static_cast",
+              "template", "typename", "unsigned", "volatile", "constexpr",
               "@implementation", "@interface", "@end", "@synthesize", "@dynamic", "@public",
               "@private", "@property", "@protected", "@class", 0 };
 
@@ -91,6 +94,7 @@ namespace CppTokeniser
             case 4:     k = keywords4Char; break;
             case 5:     k = keywords5Char; break;
             case 6:     k = keywords6Char; break;
+            case 7:     k = keywords7Char; break;
 
             default:
                 if (tokenLength < 2 || tokenLength > 16)

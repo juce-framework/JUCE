@@ -47,7 +47,7 @@ public:
     //==============================================================================
     RecentlyOpenedFilesList recentFiles;
 
-    const Array<File> getLastProjects() const;
+    Array<File> getLastProjects() const;
     void setLastProjects (const Array<File>& files);
 
     File getLastKnownJuceFolder() const;

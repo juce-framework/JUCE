@@ -26,19 +26,19 @@
 
 //==============================================================================
 // String::hashCode64 actually hit some dupes, so this is a more powerful version.
-const int64 hashCode64 (const String& s);
-const String randomHexString (Random& random, int numChars);
-const String hexString8Digits (int value);
+int64 hashCode64 (const String& s);
+String randomHexString (Random& random, int numChars);
+String hexString8Digits (int value);
 
-const String createAlphaNumericUID();
-const String createGUID (const String& seed); // Turns a seed into a windows GUID
+String createAlphaNumericUID();
+String createGUID (const String& seed); // Turns a seed into a windows GUID
 
-const String escapeSpaces (const String& text); // replaces spaces with blackslash-space
+String escapeSpaces (const String& text); // replaces spaces with blackslash-space
 
 StringPairArray parsePreprocessorDefs (const String& defs);
 StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs);
-const String createGCCPreprocessorFlags (const StringPairArray& defs);
-const String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString);
+String createGCCPreprocessorFlags (const StringPairArray& defs);
+String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString);
 
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);
@@ -69,7 +69,7 @@ private:
     Component* lastComp;
     String lastTip;
 
-    const String findTip (Component* c);
+    String findTip (Component* c);
 };
 
 //==============================================================================

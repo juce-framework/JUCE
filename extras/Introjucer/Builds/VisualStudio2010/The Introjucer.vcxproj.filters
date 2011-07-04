@@ -70,6 +70,9 @@
     <ClCompile Include="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp">
+      <Filter>The Introjucer\Project</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_ResourceFile.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
@@ -180,9 +183,6 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExporter.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Android.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
@@ -195,6 +195,9 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_XCode.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectExporter.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectInformationComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
@@ -202,6 +205,9 @@
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTreeViewBase.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ResourceFile.h">

@@ -24,14 +24,13 @@
 */
 
 #include "jucer_NewProjectWizard.h"
-
+#include "jucer_ProjectType.h"
 
 //==============================================================================
 class GUIAppWizard   : public NewProjectWizard
 {
 public:
     GUIAppWizard()  {}
-    ~GUIAppWizard() {}
 
     String getName()          { return "GUI Application"; }
     String getDescription()   { return "Creates a standard application"; }
@@ -70,11 +69,9 @@ public:
         File mainWindowH = mainWindowCpp.withFileExtension (".h");
         String windowClassName = "MainAppWindow";
 
-        project.getProjectType() = Project::application;
+        project.getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
 
-        Project::Item group (project.createNewGroup());
-        project.getMainGroup().addChild (group, 0);
-        group.getName() = "Source";
+        Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
 
         for (int i = project.getNumConfigurations(); --i >= 0;)
             project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
@@ -104,8 +101,8 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainWindowCpp, windowCpp))
                 failedFiles.add (mainWindowCpp.getFullPathName());
 
-            group.addFile (mainWindowCpp, -1);
-            group.addFile (mainWindowH, -1);
+            sourceGroup.addFile (mainWindowCpp, -1);
+            sourceGroup.addFile (mainWindowH, -1);
         }
 
         if (createMainCpp)
@@ -125,7 +122,7 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
-            group.addFile (mainCppFile, -1);
+            sourceGroup.addFile (mainCppFile, -1);
         }
 
         return true;
@@ -140,7 +137,6 @@ class ConsoleAppWizard   : public NewProjectWizard
 {
 public:
     ConsoleAppWizard()  {}
-    ~ConsoleAppWizard() {}
 
     String getName()          { return "Console Application"; }
     String getDescription()   { return "Creates a command-line application with no GUI features"; }
@@ -174,11 +170,9 @@ public:
 
         File mainCppFile = getSourceFilesFolder().getChildFile ("Main.cpp");
 
-        project.getProjectType() = Project::commandLineApp;
+        project.getProjectTypeValue() = ProjectType_ConsoleApp::getTypeName();
 
-        Project::Item group (project.createNewGroup());
-        project.getMainGroup().addChild (group, 0);
-        group.getName() = "Source";
+        Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
 
         for (int i = project.getNumConfigurations(); --i >= 0;)
             project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
@@ -193,7 +187,7 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
-            group.addFile (mainCppFile, -1);
+            sourceGroup.addFile (mainCppFile, -1);
         }
 
         return true;
@@ -208,7 +202,6 @@ class AudioPluginAppWizard   : public NewProjectWizard
 {
 public:
     AudioPluginAppWizard()  {}
-    ~AudioPluginAppWizard() {}
 
     String getName()          { return "Audio Plug-In"; }
     String getDescription()   { return "Creates an audio plugin project"; }
@@ -236,11 +229,9 @@ public:
         File editorCppFile = getSourceFilesFolder().getChildFile ("PluginEditor.cpp");
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
-        project.getProjectType() = Project::audioPlugin;
+        project.getProjectTypeValue() = ProjectType_AudioPlugin::getTypeName();
 
-        Project::Item group (project.createNewGroup());
-        project.getMainGroup().addChild (group, 0);
-        group.getName() = "Source";
+        Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
         project.getJuceConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
 
         for (int i = project.getNumConfigurations(); --i >= 0;)
@@ -284,10 +275,10 @@ public:
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
             failedFiles.add (editorHFile.getFullPathName());
 
-        group.addFile (filterCppFile, -1);
-        group.addFile (filterHFile, -1);
-        group.addFile (editorCppFile, -1);
-        group.addFile (editorHFile, -1);
+        sourceGroup.addFile (filterCppFile, -1);
+        sourceGroup.addFile (filterHFile, -1);
+        sourceGroup.addFile (editorCppFile, -1);
+        sourceGroup.addFile (editorHFile, -1);
 
         return true;
     }
@@ -328,7 +319,7 @@ NewProjectWizard::~NewProjectWizard()
 {
 }
 
-const StringArray NewProjectWizard::getWizards()
+StringArray NewProjectWizard::getWizards()
 {
     StringArray s;
 

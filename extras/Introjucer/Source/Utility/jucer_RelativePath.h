@@ -69,7 +69,7 @@ public:
     bool hasFileExtension (const String& extension) const   { return getFakeFile().hasFileExtension (extension); }
     bool isAbsolute() const                                 { return isAbsolute (path); }
 
-    const RelativePath withFileExtension (const String& extension) const
+    RelativePath withFileExtension (const String& extension) const
     {
         return RelativePath (path.upToLastOccurrenceOf (".", ! extension.startsWithChar ('.'), false) + extension, root);
     }
