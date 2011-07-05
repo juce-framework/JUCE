@@ -58,9 +58,16 @@ public:
     virtual void create() = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
 
+    virtual bool isXcode() const            { return false; }
+    virtual bool isVisualStudio() const     { return false; }
+    virtual bool isLinux() const            { return false; }
+
     //==============================================================================
     String getName() const                  { return name; }
     File getTargetFolder() const;
+
+    Project& getProject() noexcept              { return project; }
+    const Project& getProject() const noexcept  { return project; }
 
     const ValueTree& getSettings() const                { return settings; }
     Value getSetting (const Identifier& name_) const    { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
@@ -92,14 +99,15 @@ public:
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
     String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
 
+    RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
+
     String getExporterIdentifierMacro() const
     {
         return "JUCER_" + settings.getType().toString() + "_"
                 + String::toHexString (settings [Ids::targetFolder].toString().hashCode()).toUpperCase();
     }
 
-    Array<RelativePath> juceWrapperFiles;
-    RelativePath juceWrapperFolder;
+    Project::Item libraryFilesGroup;
 
     // An exception that can be thrown by the create() method.
     class SaveError
@@ -115,6 +123,8 @@ public:
         String message;
     };
 
+    Project::Item& getMainGroup();
+
 protected:
     //==============================================================================
     Project& project;
@@ -122,10 +132,12 @@ protected:
     String name;
 
     RelativePath getJucePathFromTargetFolder() const;
+    RelativePath getJucePathFromProjectFolder() const;
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
-    const Array<RelativePath> getVSTFilesRequired() const;
+    Project::Item createVSTGroup (bool forOSX) const;
+    Project::Item createRTASGroup (bool forOSX) const;
 
     static String getLibbedFilename (String name)
     {
@@ -135,8 +147,6 @@ protected:
             name = name + ".a";
         return name;
     }
-
-    RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
 
     //==============================================================================
     static void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)

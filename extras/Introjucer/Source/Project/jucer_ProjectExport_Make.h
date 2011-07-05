@@ -71,6 +71,7 @@ public:
 
     bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
+    bool isLinux() const                        { return true; }
 
     void launchProject()
     {
@@ -87,14 +88,10 @@ public:
     {
         Array<RelativePath> files;
         findAllFilesToCompile (project.getMainGroup(), files);
+        findAllFilesToCompile (libraryFilesGroup, files);
 
-        for (int i = 0; i < juceWrapperFiles.size(); ++i)
-            if (shouldFileBeCompiledByDefault (juceWrapperFiles.getReference(i)))
-                files.add (juceWrapperFiles.getReference(i));
-
-        const Array<RelativePath> vstFiles (getVSTFilesRequired());
-        for (int i = 0; i < vstFiles.size(); i++)
-            files.add (vstFiles.getReference(i));
+        if (isVST())
+            findAllFilesToCompile (createVSTGroup (false), files);
 
         MemoryOutputStream mo;
         writeMakefile (mo, files);
@@ -142,11 +139,7 @@ private:
         headerPaths.insert (0, "/usr/include/freetype2");
         headerPaths.insert (0, "/usr/include");
 
-        if (project.shouldAddVSTFolderToPath() && getVSTFolder().toString().isNotEmpty())
-            headerPaths.insert (0, rebaseFromProjectFolderToBuildTarget (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)).toUnixStyle());
-
-        if (isVST())
-            headerPaths.insert (0, juceWrapperFolder.toUnixStyle());
+        project.getProjectType().addExtraSearchPaths (*this, headerPaths);
 
         for (int i = 0; i < headerPaths.size(); ++i)
             out << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, headerPaths[i])).quoted();

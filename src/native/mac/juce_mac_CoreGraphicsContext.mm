@@ -922,6 +922,7 @@ Image juce_loadWithCoreImage (InputStream& input)
 }
 #endif
 
+#if JUCE_MAC
 Image juce_createImageFromCIImage (CIImage* im, int w, int h)
 {
     CoreGraphicsImage* cgImage = new CoreGraphicsImage (Image::ARGB, w, h, false);
@@ -932,5 +933,6 @@ Image juce_createImageFromCIImage (CIImage* im, int w, int h)
 
     return Image (cgImage);
 }
+#endif
 
 #endif

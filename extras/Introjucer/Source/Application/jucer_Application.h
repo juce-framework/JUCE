@@ -59,7 +59,6 @@ public:
 
         menuModel = new MainMenuModel();
 
-        MainWindow* main = createNewMainWindow (false);
         doExtraInitialisation();
 
         ImageCache::setCacheTimeout (30 * 1000);
@@ -76,11 +75,12 @@ public:
                 openFile (projects.getReference(i));
         }
 
+        if (mainWindows.size() == 0)
+            createNewMainWindow()->makeVisible();
+
       #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel);
       #endif
-
-        main->setVisible (true);
     }
 
     void shutdown()
@@ -273,7 +273,10 @@ public:
             else if (menuItemID >= 300 && menuItemID < 400)
             {
                 OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument (menuItemID - 300);
-                getApp()->getOrCreateFrontmostWindow (true)->getProjectContentComponent()->showDocument (doc);
+
+                MainWindow* w = getApp()->getOrCreateFrontmostWindow();
+                w->makeVisible();
+                w->getProjectContentComponent()->showDocument (doc);
             }
         }
 
@@ -362,13 +365,13 @@ public:
 
     void createNewProject()
     {
-        MainWindow* mw = createNewMainWindow (false);
+        MainWindow* mw = createNewMainWindow();
         ScopedPointer <Project> newProj (NewProjectWizard::runNewProjectWizard (mw));
 
         if (newProj != nullptr)
         {
             mw->setProject (newProj.release());
-            mw->setVisible (true);
+            mw->makeVisible();
         }
         else
         {
@@ -400,19 +403,21 @@ public:
         {
             ScopedPointer <Project> newDoc (new Project (file));
 
-            if (file == File::nonexistent ? newDoc->loadFromUserSpecifiedFile (true)
-                                          : newDoc->loadFrom (file, true))
+            if (newDoc->loadFrom (file, true))
             {
-                MainWindow* w = getOrCreateEmptyWindow (false);
+                MainWindow* w = getOrCreateEmptyWindow();
                 w->setProject (newDoc.release());
-                w->restoreWindowPosition();
-                w->setVisible (true);
+                w->makeVisible();
                 return true;
             }
         }
         else if (file.exists())
         {
-            return getOrCreateFrontmostWindow (true)->openFile (file);
+            MainWindow* w = getOrCreateFrontmostWindow();
+
+            const bool ok = w->openFile (file);
+            w->makeVisible();
+            return ok;
         }
 
         return false;
@@ -454,7 +459,7 @@ public:
 private:
     OwnedArray <MainWindow> mainWindows;
 
-    MainWindow* createNewMainWindow (bool makeVisible)
+    MainWindow* createNewMainWindow()
     {
         MainWindow* mw = new MainWindow();
 
@@ -463,18 +468,14 @@ private:
                 mw->setBounds (mw->getBounds().translated (20, 20));
 
         mainWindows.add (mw);
-
-        if (makeVisible)
-            mw->setVisible (true);
-
         mw->restoreWindowPosition();
         return mw;
     }
 
-    MainWindow* getOrCreateFrontmostWindow (bool makeVisible)
+    MainWindow* getOrCreateFrontmostWindow()
     {
         if (mainWindows.size() == 0)
-            return createNewMainWindow (makeVisible);
+            return createNewMainWindow();
 
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
         {
@@ -486,10 +487,10 @@ private:
         return mainWindows.getLast();
     }
 
-    MainWindow* getOrCreateEmptyWindow (bool makeVisible)
+    MainWindow* getOrCreateEmptyWindow()
     {
         if (mainWindows.size() == 0)
-            return createNewMainWindow (makeVisible);
+            return createNewMainWindow();
 
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
         {
@@ -498,7 +499,7 @@ private:
                 return mw;
         }
 
-        return createNewMainWindow (makeVisible);
+        return createNewMainWindow();
     }
 };
 

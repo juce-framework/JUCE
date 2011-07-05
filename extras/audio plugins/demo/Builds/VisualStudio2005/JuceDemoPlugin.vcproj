@@ -145,7 +145,7 @@
       <File RelativePath="..\..\JuceLibraryCode\JucePluginCharacteristics.h"/>
     </Filter>
     <Filter Name="Juce VST Wrapper">
-      <File RelativePath="..\..\..\..\..\..\juce\src\audio\plugin_client\VST\juce_VST_Wrapper.cpp"/>
+      <File RelativePath="..\..\..\..\..\src\audio\plugin_client\VST\juce_VST_Wrapper.cpp"/>
     </Filter>
   </Files>
   <Globals/>

@@ -47,7 +47,7 @@ MessageListener::~MessageListener()
         MessageManager::instance->messageListeners.removeValue (this);
 }
 
-void MessageListener::postMessage (Message* const message) const noexcept
+void MessageListener::postMessage (Message* const message) const
 {
     message->messageRecipient = const_cast <MessageListener*> (this);
 

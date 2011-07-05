@@ -277,18 +277,6 @@ String Project::getRelativePathForFile (const File& file) const
 }
 
 //==============================================================================
-bool Project::shouldBeAddedToBinaryResourcesByDefault (const File& file)
-{
-    return ! file.hasFileExtension (sourceOrHeaderFileExtensions);
-}
-
-bool Project::shouldAddVSTFolderToPath()
-{
-    return (getProjectType().isAudioPlugin()
-            && (bool) shouldBuildVST().getValue()) || getJuceConfigFlag ("JUCE_PLUGINHOST_VST").toString() == configFlagEnabled;
-}
-
-//==============================================================================
 const ProjectType& Project::getProjectType() const
 {
     const ProjectType* type = ProjectType::findType (getProjectTypeValue().toString());
@@ -560,6 +548,14 @@ Project::Item::~Item()
 String Project::Item::getID() const               { return node [Ids::id_]; }
 String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
+Project::Item Project::Item::createGroup (Project& project, const String& name)
+{
+    Item group (project, ValueTree (Tags::group));
+    group.initialiseNodeValues();
+    group.getName() = name;
+    return group;
+}
+
 bool Project::Item::isFile() const          { return node.hasType (Tags::file); }
 bool Project::Item::isGroup() const         { return node.hasType (Tags::group) || isMainGroup(); }
 bool Project::Item::isMainGroup() const     { return node.hasType (Tags::projectMainGroup); }
@@ -630,11 +626,16 @@ File Project::Item::getFile() const
 
 void Project::Item::setFile (const File& file)
 {
-    jassert (isFile());
-    node.setProperty (Ids::file, getProject().getRelativePathForFile (file), getUndoManager());
-    node.setProperty (Ids::name, file.getFileName(), getUndoManager());
-
+    setFile (RelativePath (getProject().getRelativePathForFile (file), RelativePath::projectFolder));
     jassert (getFile() == file);
+}
+
+void Project::Item::setFile (const RelativePath& file)
+{
+    jassert (file.getRoot() == RelativePath::projectFolder);
+    jassert (isFile());
+    node.setProperty (Ids::file, file.toUnixStyle(), getUndoManager());
+    node.setProperty (Ids::name, file.getFileName(), getUndoManager());
 }
 
 bool Project::Item::renameFile (const File& newFile)
@@ -757,9 +758,7 @@ void Project::Item::sortAlphabetically()
 
 Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex)
 {
-    Item group (getProject(), ValueTree (Tags::group));
-    group.initialiseNodeValues();
-    group.getName() = name;
+    Item group (createGroup (getProject(), name));
 
     jassert (canContain (group));
     addChild (group, insertIndex);
@@ -809,6 +808,24 @@ bool Project::Item::addFile (const File& file, int insertIndex)
     return true;
 }
 
+bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex)
+{
+    Item item (getProject(), ValueTree (Tags::file));
+    item.initialiseNodeValues();
+    item.getName() = file.getFileName();
+    item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m;cc;cxx");
+    item.getShouldAddToResourceValue() = getProject().shouldBeAddedToBinaryResourcesByDefault (file);
+
+    if (canContain (item))
+    {
+        item.setFile (file);
+        addChild (item, insertIndex);
+        return true;
+    }
+
+    return false;
+}
+
 const Drawable* Project::Item::getIcon() const
 {
     if (isFile())
@@ -829,15 +846,7 @@ const Drawable* Project::Item::getIcon() const
 //==============================================================================
 ValueTree Project::getJuceConfigNode()
 {
-    ValueTree configNode = projectRoot.getChildWithName (Tags::configGroup);
-
-    if (! configNode.isValid())
-    {
-        configNode = ValueTree (Tags::configGroup);
-        projectRoot.addChild (configNode, -1, 0);
-    }
-
-    return configNode;
+    return projectRoot.getOrCreateChildWithName (Tags::configGroup, nullptr);
 }
 
 void Project::getJuceConfigFlags (OwnedArray <JuceConfigFlag>& flags)
@@ -889,6 +898,11 @@ Value Project::getJuceConfigFlag (const String& name)
         v = configFlagDefault;
 
     return v;
+}
+
+bool Project::isJuceConfigFlagEnabled (const String& name) const
+{
+    return projectRoot.getChildWithName (Tags::configGroup).getProperty (name) == configFlagEnabled;
 }
 
 //==============================================================================

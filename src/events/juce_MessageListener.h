@@ -72,7 +72,7 @@ public:
                             references to it after calling this method.
         @see handleMessage
     */
-    void postMessage (Message* message) const noexcept;
+    void postMessage (Message* message) const;
 
     //==============================================================================
     /** Checks whether this MessageListener has been deleted.

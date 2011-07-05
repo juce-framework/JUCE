@@ -32,7 +32,9 @@
 
 //==============================================================================
 ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
-    : project (project_), settings (settings_)
+    : libraryFilesGroup (Project::Item::createGroup (project_, project_.getJuceCodeGroupName())),
+      project (project_),
+      settings (settings_)
 {
 }
 
@@ -66,14 +68,14 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
 
     switch (index)
     {
-        case 0:     exp = new XCodeProjectExporter (project, ValueTree (XCodeProjectExporter::getValueTreeTypeName (false)), false); break;
-        case 1:     exp = new XCodeProjectExporter (project, ValueTree (XCodeProjectExporter::getValueTreeTypeName (true)), true); break;
-        case 2:     exp = new MSVCProjectExporterVC6 (project, ValueTree (MSVCProjectExporterVC6::getValueTreeTypeName())); break;
+        case 0:     exp = new XCodeProjectExporter      (project, ValueTree (XCodeProjectExporter::getValueTreeTypeName (false)), false); break;
+        case 1:     exp = new XCodeProjectExporter      (project, ValueTree (XCodeProjectExporter::getValueTreeTypeName (true)), true); break;
+        case 2:     exp = new MSVCProjectExporterVC6    (project, ValueTree (MSVCProjectExporterVC6::getValueTreeTypeName())); break;
         case 3:     exp = new MSVCProjectExporterVC2005 (project, ValueTree (MSVCProjectExporterVC2005::getValueTreeTypeName())); break;
         case 4:     exp = new MSVCProjectExporterVC2008 (project, ValueTree (MSVCProjectExporterVC2008::getValueTreeTypeName())); break;
         case 5:     exp = new MSVCProjectExporterVC2010 (project, ValueTree (MSVCProjectExporterVC2010::getValueTreeTypeName())); break;
-        case 6:     exp = new MakefileProjectExporter (project, ValueTree (MakefileProjectExporter::getValueTreeTypeName())); break;
-        case 7:     exp = new AndroidProjectExporter (project, ValueTree (AndroidProjectExporter::getValueTreeTypeName())); break;
+        case 6:     exp = new MakefileProjectExporter   (project, ValueTree (MakefileProjectExporter::getValueTreeTypeName())); break;
+        case 7:     exp = new AndroidProjectExporter    (project, ValueTree (AndroidProjectExporter::getValueTreeTypeName())); break;
         default:    jassertfalse; return 0;
     }
 
@@ -150,9 +152,14 @@ String ProjectExporter::getIncludePathForFileInJuceFolder (const String& pathFro
     }
 }
 
+RelativePath ProjectExporter::getJucePathFromProjectFolder() const
+{
+    return RelativePath (getJuceFolder().toString(), RelativePath::projectFolder);
+}
+
 RelativePath ProjectExporter::getJucePathFromTargetFolder() const
 {
-    return rebaseFromProjectFolderToBuildTarget (RelativePath (getJuceFolder().toString(), RelativePath::projectFolder));
+    return rebaseFromProjectFolderToBuildTarget (getJucePathFromProjectFolder());
 }
 
 RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const
@@ -173,20 +180,7 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     props.add (new TextPropertyComponent (getJuceFolder(), "Juce Location", 1024, false));
     props.getLast()->setTooltip ("The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
 
-    if (project.getProjectType().isAudioPlugin())
-    {
-        if (project.shouldAddVSTFolderToPath())
-        {
-            props.add (new TextPropertyComponent (getVSTFolder(), "VST Folder", 1024, false));
-            props.getLast()->setTooltip ("If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
-        }
-
-        if (isRTAS())
-        {
-            props.add (new TextPropertyComponent (getRTASFolder(), "RTAS Folder", 1024, false));
-            props.getLast()->setTooltip ("If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
-        }
-    }
+    project.getProjectType().createPropertyEditors (*this, props);
 
     props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false));
     props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -197,19 +191,47 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     props.getLast()->setTooltip ("Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 }
 
-const Array<RelativePath> ProjectExporter::getVSTFilesRequired() const
+Project::Item ProjectExporter::createVSTGroup (bool forOSX) const
 {
-    Array<RelativePath> s;
-    if (isVST())
-    {
-        const char* files[] = { JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.cpp",
-                                JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.mm" };
+    jassert (isVST());
 
-        for (int i = 0; i < numElementsInArray (files); ++i)
-            s.add (getJucePathFromTargetFolder().getChildFile (files[i]));
-    }
+    Project::Item group (Project::Item::createGroup (project, "Juce VST Wrapper"));
 
-    return s;
+    const char* osxFiles[] = { JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.cpp",
+                               JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.mm", 0 };
+
+    const char* winFiles[] = { JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.cpp", 0};
+
+    for (const char** f = (forOSX ? osxFiles : winFiles); *f != 0; ++f)
+        group.addRelativeFile (getJucePathFromProjectFolder().getChildFile (*f), -1);
+
+    return group;
+}
+
+Project::Item ProjectExporter::createRTASGroup (bool forOSX) const
+{
+    jassert (isRTAS());
+    Project::Item group (Project::Item::createGroup (project, "Juce RTAS Wrapper"));
+
+    const char* osxFiles[] = { JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode1.cpp",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode2.cpp",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode3.cpp",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode_Header.h",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_MacResources.r",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_MacUtilities.mm",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_Wrapper.cpp", 0 };
+
+    const char* winFiles[] = { JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode1.cpp",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode2.cpp",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode3.cpp",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode_Header.h",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinUtilities.cpp",
+                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_Wrapper.cpp" , 0};
+
+    for (const char** f = (forOSX ? osxFiles : winFiles); *f != 0; ++f)
+        group.addRelativeFile (getJucePathFromProjectFolder().getChildFile (*f), -1);
+
+    return group;
 }
 
 StringPairArray ProjectExporter::getAllPreprocessorDefs (const Project::BuildConfiguration& config) const

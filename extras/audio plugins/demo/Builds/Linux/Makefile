@@ -49,7 +49,7 @@ OBJECTS := \
   $(OBJDIR)/JuceLibraryCode2_683aaa00.o \
   $(OBJDIR)/JuceLibraryCode3_6848c181.o \
   $(OBJDIR)/JuceLibraryCode4_6856d902.o \
-  $(OBJDIR)/juce_VST_Wrapper_f1303484.o \
+  $(OBJDIR)/juce_VST_Wrapper_812bffb1.o \
 
 .PHONY: clean
 
@@ -96,7 +96,7 @@ $(OBJDIR)/JuceLibraryCode4_6856d902.o: ../../JuceLibraryCode/JuceLibraryCode4.cp
 	@echo "Compiling JuceLibraryCode4.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_VST_Wrapper_f1303484.o: ../../../../../../juce/src/audio/plugin_client/VST/juce_VST_Wrapper.cpp
+$(OBJDIR)/juce_VST_Wrapper_812bffb1.o: ../../../../../src/audio/plugin_client/VST/juce_VST_Wrapper.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_VST_Wrapper.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

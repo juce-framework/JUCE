@@ -60,7 +60,7 @@ static int numDOWID = 0, numJuceSO = 0;
 
 //==============================================================================
 static void juceVarToVariant (const var& v, VARIANT& dest);
-static const var variantTojuceVar (const VARIANT& v);
+static var variantTojuceVar (const VARIANT& v);
 
 //==============================================================================
 // Takes care of the logic in invoking var methods from IDispatch callbacks.
@@ -389,7 +389,7 @@ void juceVarToVariant (const var& v, VARIANT& dest)
     }
 }
 
-const var variantTojuceVar (const VARIANT& v)
+var variantTojuceVar (const VARIANT& v)
 {
     if ((v.vt & VT_ARRAY) != 0)
     {
@@ -460,7 +460,7 @@ public:
             child->setBounds (0, 0, getWidth(), getHeight());
     }
 
-    const var getObject()   { return child->getJavascriptObject(); }
+    var getObject()   { return child->getJavascriptObject(); }
 
     void setWindow (IOleInPlaceSite* site)
     {
@@ -511,7 +511,7 @@ public:
             site->OnInPlaceActivate();
     }
 
-    const String getBrowserURL() const
+    String getBrowserURL() const
     {
         if (browser == nullptr)
             return String::empty;
@@ -531,14 +531,14 @@ private:
 //==============================================================================
 extern String browserVersionDesc;
 
-static const String getExePath()
+static String getExePath()
 {
     TCHAR moduleFile [2048] = { 0 };
     GetModuleFileName (0, moduleFile, 2048);
     return moduleFile;
 }
 
-static const String getExeVersion (const String& exeFileName, const String& fieldName)
+static String getExeVersion (const String& exeFileName, const String& fieldName)
 {
     String resultString;
     DWORD pointlessWin32Variable;
@@ -821,7 +821,7 @@ extern "C" BOOL WINAPI DllMain (HANDLE instance, DWORD reason, LPVOID)
     return TRUE;
 }
 
-static const String CLSIDToJuceString (REFCLSID clsid)
+static String CLSIDToJuceString (REFCLSID clsid)
 {
     LPWSTR s = nullptr;
     StringFromIID (clsid, &s);
@@ -866,7 +866,7 @@ STDAPI DllCanUnloadNow()
 }
 
 //==============================================================================
-static const String makeLegalRegistryName (const String& s)
+static String makeLegalRegistryName (const String& s)
 {
     return s.retainCharacters ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.");
 }

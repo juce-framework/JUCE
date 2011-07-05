@@ -106,7 +106,7 @@ private:
 
         if (xml != nullptr)
         {
-            #if JUCE_DEBUG
+           #if JUCE_DEBUG
             {
                 MemoryOutputStream mo;
                 project.getProjectRoot().writeToStream (mo);
@@ -118,7 +118,7 @@ private:
                 // This bit just tests that ValueTree save/load works reliably.. Let me know if this asserts for you!
                 jassert (xml->isEquivalentTo (xml2, true));
             }
-            #endif
+           #endif
 
             MemoryOutputStream mo;
             xml->writeToStream (mo, String::empty);
@@ -480,19 +480,18 @@ private:
 
             if (targetFolder.createDirectory())
             {
-                exporter->juceWrapperFolder = RelativePath (project.getWrapperFolder(), targetFolder, RelativePath::buildTargetFolder);
+                Project::Item& libraryFiles = exporter->libraryFilesGroup;
 
                 if (hasAppConfigFile)
-                    exporter->juceWrapperFiles.add (RelativePath (appConfigFile, targetFolder, RelativePath::buildTargetFolder));
+                    libraryFiles.addFile (appConfigFile, -1);
 
                 if (hasAppHeaderFile)
-                    exporter->juceWrapperFiles.add (RelativePath (juceHeaderFile, targetFolder, RelativePath::buildTargetFolder));
+                    libraryFiles.addFile (juceHeaderFile, -1);
 
                 if (hasResources)
                 {
-                    exporter->juceWrapperFiles.add (RelativePath (binaryDataCpp, targetFolder, RelativePath::buildTargetFolder));
-                    exporter->juceWrapperFiles.add (RelativePath (binaryDataCpp, targetFolder, RelativePath::buildTargetFolder)
-                                                        .withFileExtension (".h"));
+                    libraryFiles.addFile (binaryDataCpp, -1);
+                    libraryFiles.addFile (binaryDataCpp.withFileExtension (".h"), -1);
                 }
 
                 if (numJuceSourceFiles > 0)
@@ -505,15 +504,15 @@ private:
                         if ((j == 0 && numJuceSourceFiles == 1) || (j != 0 && numJuceSourceFiles > 1))
                         {
                             if (exporter->usesMMFiles())
-                                exporter->juceWrapperFiles.add (RelativePath (sourceWrapperMM, targetFolder, RelativePath::buildTargetFolder));
+                                libraryFiles.addFile (sourceWrapperMM, -1);
                             else
-                                exporter->juceWrapperFiles.add (RelativePath (sourceWrapperCpp, targetFolder, RelativePath::buildTargetFolder));
+                                libraryFiles.addFile (sourceWrapperCpp, -1);
                         }
                     }
                 }
 
                 if (project.getProjectType().isAudioPlugin())
-                    exporter->juceWrapperFiles.add (RelativePath (pluginCharacteristicsFile, targetFolder, RelativePath::buildTargetFolder));
+                    libraryFiles.addFile (pluginCharacteristicsFile, -1);
 
                 try
                 {

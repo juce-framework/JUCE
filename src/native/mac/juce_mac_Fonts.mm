@@ -336,6 +336,13 @@ public:
 
         fontRef = CGFontCreateWithFontName ((CFStringRef) fontName);
 
+        if (fontRef == 0)
+        {
+            // Sometimes, UIFont manages to handle names that CGFontCreateWithFontName fails on...
+            UIFont* uiFont = [UIFont fontWithName: fontName size: 12];
+            fontRef = CGFontCreateWithFontName ((CFStringRef) uiFont.fontName);
+        }
+
         const int ascender = abs (CGFontGetAscent (fontRef));
         const float totalHeight = ascender + abs (CGFontGetDescent (fontRef));
         ascent = ascender / totalHeight;

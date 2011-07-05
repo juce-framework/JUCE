@@ -55,6 +55,7 @@ public:
     //==============================================================================
     bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
+    bool isVisualStudio() const                 { return true; }
 
     void createPropertyEditors (Array <PropertyComponent*>& props)
     {
@@ -85,26 +86,6 @@ protected:
     bool isLibraryDLL() const           { return project.getProjectType().isLibrary() && getLibraryType() == 2; }
 
     //==============================================================================
-    const Array<RelativePath> getRTASFilesRequired() const
-    {
-        Array<RelativePath> s;
-
-        if (isRTAS())
-        {
-            static const char* files[] = { JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode1.cpp",
-                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode2.cpp",
-                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode3.cpp",
-                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode_Header.h",
-                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinUtilities.cpp",
-                                           JUCE_PLUGINS_PATH_RTAS "juce_RTAS_Wrapper.cpp" };
-
-            for (int i = 0; i < numElementsInArray (files); ++i)
-                s.add (getJucePathFromTargetFolder().getChildFile (files[i]));
-        }
-
-        return s;
-    }
-
     String getIntermediatesPath (const Project::BuildConfiguration& config) const
     {
         return ".\\" + File::createLegalFileName (config.getName().toString().trim());
@@ -183,44 +164,7 @@ protected:
     {
         StringArray searchPaths (config.getHeaderSearchPaths());
 
-        if (project.shouldAddVSTFolderToPath() && getVSTFolder().toString().isNotEmpty())
-            searchPaths.add (rebaseFromProjectFolderToBuildTarget (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)).toWindowsStyle());
-
-        if (project.getProjectType().isAudioPlugin())
-            searchPaths.add (juceWrapperFolder.toWindowsStyle());
-
-        if (isRTAS())
-        {
-            static const char* rtasIncludePaths[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses/Interfaces",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/Utilities",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/RTASP_Adapt",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/CoreClasses",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/Controls",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/Meters",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/ViewClasses",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/DSPClasses",
-                                                      "AlturaPorts/TDMPlugins/PluginLibrary/Interfaces",
-                                                      "AlturaPorts/TDMPlugins/common",
-                                                      "AlturaPorts/TDMPlugins/common/Platform",
-                                                      "AlturaPorts/TDMPlugins/SignalProcessing/Public",
-                                                      "AlturaPorts/TDMPlugIns/DSPManager/Interfaces",
-                                                      "AlturaPorts/SADriver/Interfaces",
-                                                      "AlturaPorts/DigiPublic/Interfaces",
-                                                      "AlturaPorts/Fic/Interfaces/DAEClient",
-                                                      "AlturaPorts/NewFileLibs/Cmn",
-                                                      "AlturaPorts/NewFileLibs/DOA",
-                                                      "AlturaPorts/AlturaSource/PPC_H",
-                                                      "AlturaPorts/AlturaSource/AppSupport",
-                                                      "AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc",
-                                                      "xplat/AVX/avx2/avx2sdk/inc" };
-
-            RelativePath sdkFolder (getRTASFolder().toString(), RelativePath::projectFolder);
-
-            for (int i = 0; i < numElementsInArray (rtasIncludePaths); ++i)
-                searchPaths.add (rebaseFromProjectFolderToBuildTarget (sdkFolder.getChildFile (rtasIncludePaths[i])).toWindowsStyle());
-        }
+        project.getProjectType().addExtraSearchPaths (*this, searchPaths);
 
         return searchPaths;
     }
@@ -455,8 +399,11 @@ public:
 
         if (hasIcon)
         {
-            juceWrapperFiles.add (RelativePath (iconFile.getFileName(), RelativePath::buildTargetFolder));
-            juceWrapperFiles.add (RelativePath (rcFile.getFileName(), RelativePath::buildTargetFolder));
+            libraryFilesGroup.addFile (iconFile, -1);
+            libraryFilesGroup.addFile (rcFile, -1);
+
+            libraryFilesGroup.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
+            libraryFilesGroup.findItemForFile (rcFile).getShouldAddToResourceValue() = false;
         }
 
         {
@@ -537,14 +484,14 @@ protected:
         return filter;
     }
 
-    void addFiles (const Project::Item& projectItem, XmlElement& parent)
+    void addFiles (const Project::Item& projectItem, XmlElement& parent, const bool useStdcall)
     {
         if (projectItem.isGroup())
         {
             XmlElement* filter = createGroup (projectItem.getName().toString(), parent);
 
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addFiles (projectItem.getChild(i), *filter);
+                addFiles (projectItem.getChild(i), *filter, useStdcall);
         }
         else
         {
@@ -554,7 +501,7 @@ protected:
 
                 addFile (path, parent,
                          projectItem.shouldBeAddedToBinaryResources() || (shouldFileBeCompiledByDefault (path) && ! projectItem.shouldBeCompiled()),
-                         false);
+                         useStdcall);
             }
         }
     }
@@ -574,11 +521,13 @@ protected:
 
     void createFiles (XmlElement& files)
     {
-        addFiles (project.getMainGroup(), files);
+        addFiles (project.getMainGroup(), files, false);
 
-        addGroup (files, project.getJuceCodeGroupName(), juceWrapperFiles, false);
-        addGroup (files, "Juce VST Wrapper", getVSTFilesRequired(), false);
-        addGroup (files, "Juce RTAS Wrapper", getRTASFilesRequired(), true);
+        if (libraryFilesGroup.getNumChildren() > 0)
+            addFiles (libraryFilesGroup, files, false);
+
+        if (isVST())   addFiles (createVSTGroup (false), files, false);
+        if (isRTAS())  addFiles (createRTASGroup (false), files, true);
     }
 
     //==============================================================================
@@ -985,8 +934,12 @@ private:
             << targetList;
 
         writeFiles (out, project.getMainGroup());
-        writeGroup (out, project.getJuceCodeGroupName(), juceWrapperFiles);
-        writeGroup (out, "Juce VST Wrapper", getVSTFilesRequired());
+
+        if (libraryFilesGroup.getNumChildren() > 0)
+            writeFiles (out, libraryFilesGroup);
+
+        if (isVST())
+            writeFiles (out, createVSTGroup (false));
 
         out << "# End Target" << newLine
             << "# End Project" << newLine;
@@ -1335,10 +1288,16 @@ protected:
             XmlElement* cppFiles = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* headerFiles = projectXml.createNewChildElement ("ItemGroup");
 
-            addFilesToCompile (project.getMainGroup(), *cppFiles, *headerFiles);
-            addFilesToCompile (juceWrapperFiles, *cppFiles, *headerFiles, false);
-            addFilesToCompile (getVSTFilesRequired(), *cppFiles, *headerFiles, false);
-            addFilesToCompile (getRTASFilesRequired(), *cppFiles, *headerFiles, true);
+            addFilesToCompile (project.getMainGroup(), *cppFiles, *headerFiles, false);
+
+            if (libraryFilesGroup.getNumChildren() > 0)
+                addFilesToCompile (libraryFilesGroup, *cppFiles, *headerFiles, false);
+
+            if (isVST())
+                addFilesToCompile (createVSTGroup (false), *cppFiles, *headerFiles, false);
+
+            if (isRTAS())
+                addFilesToCompile (createRTASGroup (false), *cppFiles, *headerFiles, true);
         }
 
         if (hasIcon)
@@ -1404,16 +1363,15 @@ protected:
     void addFilesToCompile (const Array<RelativePath>& files, XmlElement& cpps, XmlElement& headers, bool useStdCall)
     {
         for (int i = 0; i < files.size(); ++i)
-            addFileToCompile (files.getReference(i), cpps, headers, false,
-                              useStdCall && shouldFileBeCompiledByDefault (files.getReference(i)));
+            addFileToCompile (files.getReference(i), cpps, headers, false, useStdCall);
     }
 
-    void addFilesToCompile (const Project::Item& projectItem, XmlElement& cpps, XmlElement& headers)
+    void addFilesToCompile (const Project::Item& projectItem, XmlElement& cpps, XmlElement& headers, bool useStdCall)
     {
         if (projectItem.isGroup())
         {
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addFilesToCompile (projectItem.getChild(i), cpps, headers);
+                addFilesToCompile (projectItem.getChild(i), cpps, headers, useStdCall);
         }
         else
         {
@@ -1422,7 +1380,7 @@ protected:
                 const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
                 if (path.hasFileExtension (headerFileExtensions) || (path.hasFileExtension ("cpp;cc;c;cxx") && projectItem.shouldBeCompiled()))
-                    addFileToCompile (path, cpps, headers, false, false);
+                    addFileToCompile (path, cpps, headers, false, useStdCall);
             }
         }
     }
@@ -1486,15 +1444,26 @@ protected:
         filterXml.setAttribute ("ToolsVersion", "4.0");
         filterXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
 
-        XmlElement* groups = filterXml.createNewChildElement ("ItemGroup");
-        XmlElement* cpps = filterXml.createNewChildElement ("ItemGroup");
+        XmlElement* groups  = filterXml.createNewChildElement ("ItemGroup");
+        XmlElement* cpps    = filterXml.createNewChildElement ("ItemGroup");
         XmlElement* headers = filterXml.createNewChildElement ("ItemGroup");
 
         addFilesToFilter (project.getMainGroup(), project.getProjectName().toString(), *cpps, *headers, *groups);
 
-        addFilesToFilter (juceWrapperFiles, project.getJuceCodeGroupName(), *cpps, *headers, *groups);
-        addFilesToFilter (getVSTFilesRequired(), "Juce VST Wrapper", *cpps, *headers, *groups);
-        addFilesToFilter (getRTASFilesRequired(), "Juce RTAS Wrapper", *cpps, *headers, *groups);
+        if (libraryFilesGroup.getNumChildren() > 0)
+            addFilesToFilter (libraryFilesGroup, project.getJuceCodeGroupName(), *cpps, *headers, *groups);
+
+        if (isVST())
+        {
+            Project::Item vstGroup (createVSTGroup (false));
+            addFilesToFilter (vstGroup, vstGroup.getName().toString(), *cpps, *headers, *groups);
+        }
+
+        if (isRTAS())
+        {
+            Project::Item rtasGroup (createRTASGroup (false));
+            addFilesToFilter (rtasGroup, rtasGroup.getName().toString(), *cpps, *headers, *groups);
+        }
 
         if (iconFile.exists())
         {

@@ -26,8 +26,8 @@
 		9551342606A895BB5BA07F2E = { isa = PBXBuildFile; fileRef = 6AE52580AD24BD551DB99758; };
 		A1E844C7D2636CC38585B429 = { isa = PBXBuildFile; fileRef = B31CFE8BBA103078E19D1B97; };
 		BD7E5458BE2F33DBBF5AF834 = { isa = PBXBuildFile; fileRef = FD33B687C6FBA3ABC581AFD7; };
-		CC853B9E0B1F2B01A3CBE51D = { isa = PBXBuildFile; fileRef = E57935A1B395EC0D476DADFC; };
-		2B0B523A4C3265DA5568C523 = { isa = PBXBuildFile; fileRef = 8FF96124366EA3FF2462CB5D; };
+		3DFA294CC79D06F066723396 = { isa = PBXBuildFile; fileRef = 94A977DEE6BE2081CA0213FE; };
+		7C5B1DFA35A2EA8DFB2A40C9 = { isa = PBXBuildFile; fileRef = 00E2C89A148A2491288DF242; };
 		37A5CEF9F9B523B2580D3C1E = { isa = PBXBuildFile; fileRef = A2C6C4FD1DCE5EFAA2163E5C; };
 		EB107FBF3FCD101D37454F1E = { isa = PBXBuildFile; fileRef = 7BA88B94922B5480855DD012; };
 		B7D2D2868983939B35532885 = { isa = PBXBuildFile; fileRef = 6C254919C15224D13FE6D174; settings = {COMPILER_FLAGS = "-w"; }; };
@@ -79,8 +79,8 @@
 		B31CFE8BBA103078E19D1B97 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode3.mm; path = ../../JuceLibraryCode/JuceLibraryCode3.mm; sourceTree = "SOURCE_ROOT"; };
 		FD33B687C6FBA3ABC581AFD7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode4.mm; path = ../../JuceLibraryCode/JuceLibraryCode4.mm; sourceTree = "SOURCE_ROOT"; };
 		DF8AD10F6B21858C3378B63F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JucePluginCharacteristics.h; path = ../../JuceLibraryCode/JucePluginCharacteristics.h; sourceTree = "SOURCE_ROOT"; };
-		E57935A1B395EC0D476DADFC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_VST_Wrapper.cpp"; path = "../../../../../../juce/src/audio/plugin_client/VST/juce_VST_Wrapper.cpp"; sourceTree = "SOURCE_ROOT"; };
-		8FF96124366EA3FF2462CB5D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_VST_Wrapper.mm"; path = "../../../../../../juce/src/audio/plugin_client/VST/juce_VST_Wrapper.mm"; sourceTree = "SOURCE_ROOT"; };
+		94A977DEE6BE2081CA0213FE = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_VST_Wrapper.cpp"; path = "../../../../../src/audio/plugin_client/VST/juce_VST_Wrapper.cpp"; sourceTree = "SOURCE_ROOT"; };
+		00E2C89A148A2491288DF242 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_VST_Wrapper.mm"; path = "../../../../../src/audio/plugin_client/VST/juce_VST_Wrapper.mm"; sourceTree = "SOURCE_ROOT"; };
 		A2C6C4FD1DCE5EFAA2163E5C = { isa = PBXFileReference; lastKnownFileType = file.r; name = "juce_AU_Resources.r"; path = "../../../../../../juce/src/audio/plugin_client/AU/juce_AU_Resources.r"; sourceTree = "SOURCE_ROOT"; };
 		7BA88B94922B5480855DD012 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_AU_Wrapper.mm"; path = "../../../../../../juce/src/audio/plugin_client/AU/juce_AU_Wrapper.mm"; sourceTree = "SOURCE_ROOT"; };
 		70DC3C63DDDFB1C5A22A8C36 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CADebugMacros.h; path = Extras/CoreAudio/PublicUtility/CADebugMacros.h; sourceTree = "DEVELOPER_DIR"; };
@@ -147,8 +147,8 @@
 				FD33B687C6FBA3ABC581AFD7,
 				DF8AD10F6B21858C3378B63F ); name = "Juce Library Code"; sourceTree = "<group>"; };
 		B7F037957C49AE7943C354C9 = { isa = PBXGroup; children = (
-				E57935A1B395EC0D476DADFC,
-				8FF96124366EA3FF2462CB5D ); name = "Juce VST Wrapper"; sourceTree = "<group>"; };
+				94A977DEE6BE2081CA0213FE,
+				00E2C89A148A2491288DF242 ); name = "Juce VST Wrapper"; sourceTree = "<group>"; };
 		17A9711DC035377B969B90C2 = { isa = PBXGroup; children = (
 				70DC3C63DDDFB1C5A22A8C36,
 				6C254919C15224D13FE6D174,
@@ -317,8 +317,8 @@
 				9551342606A895BB5BA07F2E,
 				A1E844C7D2636CC38585B429,
 				BD7E5458BE2F33DBBF5AF834,
-				CC853B9E0B1F2B01A3CBE51D,
-				2B0B523A4C3265DA5568C523,
+				3DFA294CC79D06F066723396,
+				7C5B1DFA35A2EA8DFB2A40C9,
 				EB107FBF3FCD101D37454F1E,
 				B7D2D2868983939B35532885,
 				3723101DD64447FE9A530323,

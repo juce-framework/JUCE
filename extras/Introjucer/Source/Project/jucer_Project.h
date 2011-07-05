@@ -56,7 +56,12 @@ public:
     String getProjectUID() const                        { return projectRoot [Ids::id_]; }
 
     //==============================================================================
-    bool shouldBeAddedToBinaryResourcesByDefault (const File& file);
+    template <class FileType>
+    bool shouldBeAddedToBinaryResourcesByDefault (const FileType& file)
+    {
+        return ! file.hasFileExtension (sourceOrHeaderFileExtensions);
+    }
+
     File resolveFilename (String filename) const;
     String getRelativePathForFile (const File& file) const;
 
@@ -104,7 +109,6 @@ public:
     Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
     Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }
     Value shouldBuildAU() const                         { return getProjectValue ("buildAU"); }
-    bool shouldAddVSTFolderToPath();
 
     Value getPluginName() const                         { return getProjectValue ("pluginName"); }
     Value getPluginDesc() const                         { return getProjectValue ("pluginDesc"); }
@@ -149,6 +153,7 @@ public:
         Item& operator= (const Item& other);
         ~Item();
 
+        static Item createGroup (Project& project, const String& name);
         void initialiseNodeValues();
 
         //==============================================================================
@@ -173,6 +178,7 @@ public:
         Value getName() const;
         File getFile() const;
         void setFile (const File& file);
+        void setFile (const RelativePath& file);
         File determineGroupFolder() const;
         bool renameFile (const File& newFile);
 
@@ -190,6 +196,7 @@ public:
         Item addNewSubGroup (const String& name, int insertIndex);
         void addChild (const Item& newChild, int insertIndex);
         bool addFile (const File& file, int insertIndex);
+        bool addRelativeFile (const RelativePath& file, int insertIndex);
         void removeItemFromProject();
         void sortAlphabetically();
         Item findItemForFile (const File& file) const;
@@ -290,6 +297,7 @@ public:
     static const char* const configFlagEnabled;
     static const char* const configFlagDisabled;
     Value getJuceConfigFlag (const String& name);
+    bool isJuceConfigFlagEnabled (const String& name) const;
 
     //==============================================================================
     String getFileTemplate (const String& templateName);

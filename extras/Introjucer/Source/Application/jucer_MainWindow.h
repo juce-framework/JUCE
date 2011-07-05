@@ -52,6 +52,7 @@ public:
     void setProject (Project* newProject);
     Project* getProject() const                 { return currentProject; }
 
+    void makeVisible();
     void restoreWindowPosition();
     bool closeProject (Project* project);
     bool closeCurrentProject();

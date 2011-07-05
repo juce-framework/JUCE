@@ -28,6 +28,7 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_Project.h"
+class ProjectExporter;
 
 
 //==============================================================================
@@ -51,8 +52,9 @@ public:
     virtual bool isAudioPlugin() const          { return false; }
     virtual bool isBrowserPlugin() const        { return false; }
 
-    virtual Result createRequiredFiles (Project::Item& projectRoot,
-                                        Array<File>& filesCreated) const = 0;
+    virtual Result createRequiredFiles (Project::Item& projectRoot, Array<File>& filesCreated) const;
+    virtual void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const;
+    virtual void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const;
 
 protected:
     ProjectType (const String& type, const String& desc);
@@ -100,11 +102,13 @@ public:
 class ProjectType_AudioPlugin  : public ProjectType
 {
 public:
-    static const char* getTypeName() noexcept    { return "library"; }
+    static const char* getTypeName() noexcept    { return "audioplug"; }
     ProjectType_AudioPlugin()    : ProjectType (getTypeName(), "Audio Plug-in") {}
 
     bool isAudioPlugin() const      { return true; }
     Result createRequiredFiles (Project::Item& projectRoot, Array<File>& filesCreated) const;
+    void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const;
+    void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const;
 };
 
 

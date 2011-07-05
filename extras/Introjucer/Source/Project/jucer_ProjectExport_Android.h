@@ -209,10 +209,7 @@ private:
     {
         Array<RelativePath> files;
         findAllFilesToCompile (project.getMainGroup(), files);
-
-        for (int i = 0; i < juceWrapperFiles.size(); ++i)
-            if (shouldFileBeCompiledByDefault (juceWrapperFiles.getReference(i)))
-                files.add (juceWrapperFiles.getReference(i));
+        findAllFilesToCompile (libraryFilesGroup, files);
 
         MemoryOutputStream mo;
         writeAndroidMk (mo, files);

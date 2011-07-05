@@ -78,11 +78,6 @@ MainWindow::MainWindow()
 
     //getPeer()->setCurrentRenderingEngine (0);
     getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-
-    setVisible (true);
-    addToDesktop();
-
-    getContentComponent()->grabKeyboardFocus();
 }
 
 MainWindow::~MainWindow()
@@ -99,6 +94,15 @@ MainWindow::~MainWindow()
 
     clearContentComponent();
     currentProject = nullptr;
+}
+
+void MainWindow::makeVisible()
+{
+    setVisible (true);
+    restoreWindowPosition();
+    addToDesktop();
+
+    getContentComponent()->grabKeyboardFocus();
 }
 
 ProjectContentComponent* MainWindow::getProjectContentComponent() const
@@ -181,14 +185,11 @@ bool MainWindow::openFile (const File& file)
     {
         ScopedPointer <Project> newDoc (new Project (file));
 
-        if (file == File::nonexistent ? newDoc->loadFromUserSpecifiedFile (true)
-                                      : newDoc->loadFrom (file, true))
+        if (newDoc->loadFrom (file, true)
+             && closeCurrentProject())
         {
-            if (closeCurrentProject())
-            {
-                setProject (newDoc.release());
-                return true;
-            }
+            setProject (newDoc.release());
+            return true;
         }
     }
     else if (file.exists())

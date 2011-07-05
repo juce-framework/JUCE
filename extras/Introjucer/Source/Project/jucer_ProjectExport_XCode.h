@@ -93,6 +93,7 @@ public:
 
     bool isPossibleForCurrentProject()      { return project.getProjectType().isGUIApplication() || ! iPhone; }
     bool usesMMFiles() const                { return true; }
+    bool isXcode() const                    { return true; }
 
     void createPropertyEditors (Array <PropertyComponent*>& props)
     {
@@ -196,7 +197,7 @@ private:
             resourceFileRefs.add (createID (iconPath));
         }
 
-        addProjectItem (project.getMainGroup());
+        addProjectItem (project.getMainGroup(), String::empty, false);
 
         for (int i = 0; i < project.getNumConfigurations(); ++i)
         {
@@ -401,57 +402,7 @@ private:
     {
         StringArray searchPaths (config.getHeaderSearchPaths());
 
-        if (project.shouldAddVSTFolderToPath() && getVSTFolder().toString().isNotEmpty())
-            searchPaths.add (rebaseFromProjectFolderToBuildTarget (RelativePath (getVSTFolder().toString(), RelativePath::projectFolder)).toUnixStyle());
-
-        if (project.getProjectType().isAudioPlugin())
-        {
-            if (isAU())
-            {
-                searchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility");
-                searchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility");
-            }
-
-            if (isRTAS())
-            {
-                searchPaths.add ("/Developer/Headers/FlatCarbon");
-
-                static const char* rtasIncludePaths[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/DSPClasses",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/Meters",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses/Interfaces",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/RTASP_Adapt",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/Utilities",
-                                                          "AlturaPorts/TDMPlugIns/PlugInLibrary/ViewClasses",
-                                                          "AlturaPorts/TDMPlugIns/DSPManager/**",
-                                                          "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption",
-                                                          "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions",
-                                                          "AlturaPorts/TDMPlugIns/common",
-                                                          "AlturaPorts/TDMPlugIns/common/PI_LibInterface",
-                                                          "AlturaPorts/TDMPlugIns/PACEProtection/**",
-                                                          "AlturaPorts/TDMPlugIns/SignalProcessing/**",
-                                                          "AlturaPorts/OMS/Headers",
-                                                          "AlturaPorts/Fic/Interfaces/**",
-                                                          "AlturaPorts/Fic/Source/SignalNets",
-                                                          "AlturaPorts/DSIPublicInterface/PublicHeaders",
-                                                          "DAEWin/Include",
-                                                          "AlturaPorts/DigiPublic/Interfaces",
-                                                          "AlturaPorts/DigiPublic",
-                                                          "AlturaPorts/NewFileLibs/DOA",
-                                                          "AlturaPorts/NewFileLibs/Cmn",
-                                                          "xplat/AVX/avx2/avx2sdk/inc",
-                                                          "xplat/AVX/avx2/avx2sdk/utils" };
-
-                RelativePath sdkFolder (getRTASFolder().toString(), RelativePath::projectFolder);
-
-                for (int i = 0; i < numElementsInArray (rtasIncludePaths); ++i)
-                    searchPaths.add (rebaseFromProjectFolderToBuildTarget (sdkFolder.getChildFile (rtasIncludePaths[i])).toUnixStyle());
-            }
-        }
+        project.getProjectType().addExtraSearchPaths (*this, searchPaths);
 
         return searchPaths;
     }
@@ -835,27 +786,27 @@ private:
         return addFileReference (path);
     }
 
-    String addProjectItem (const Project::Item& projectItem)
+    String addProjectItem (const Project::Item& projectItem, const String& groupID, bool inhibitWarnings)
     {
         if (projectItem.isGroup())
         {
             StringArray childIDs;
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
             {
-                const String childID (addProjectItem (projectItem.getChild(i)));
+                const String childID (addProjectItem (projectItem.getChild(i), String::empty, inhibitWarnings));
 
                 if (childID.isNotEmpty())
                     childIDs.add (childID);
             }
 
-            return addGroup (projectItem, childIDs);
+            return addGroup (projectItem, childIDs, groupID);
         }
         else
         {
             if (projectItem.shouldBeAddedToTargetProject())
             {
                 const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
-                return addFile (path, projectItem.shouldBeCompiled(), false);
+                return addFile (path, projectItem.shouldBeCompiled(), inhibitWarnings);
             }
         }
 
@@ -881,22 +832,7 @@ private:
         groups.add (v);
     }
 
-    String createGroup (const Array<RelativePath>& files, const String& groupName, const String& groupIDName, bool inhibitWarnings)
-    {
-        StringArray fileIDs;
-
-        for (int i = 0; i < files.size(); ++i)
-        {
-            addFile (files.getReference(i), shouldFileBeCompiledByDefault (files.getReference(i)), inhibitWarnings);
-            fileIDs.add (createID (files.getReference(i)));
-        }
-
-        const String groupID (createID (groupIDName));
-        addGroup (groupID, groupName, fileIDs);
-        return groupID;
-    }
-
-    String addGroup (const Project::Item& item, StringArray& childIDs)
+    String addGroup (const Project::Item& item, StringArray& childIDs, String groupID)
     {
         String groupName (item.getName().toString());
 
@@ -904,18 +840,17 @@ private:
         {
             groupName = "Source";
 
-            // Add 'Juce Library Code' group
-            if (juceWrapperFiles.size() > 0)
-                childIDs.add (createGroup (juceWrapperFiles, project.getJuceCodeGroupName(), "__jucelibfiles", false));
+            if (libraryFilesGroup.getNumChildren() > 0)
+                childIDs.add (addProjectItem (libraryFilesGroup, createID ("__jucelibfiles"), false));
 
             if (isVST())
-                childIDs.add (createGroup (getVSTFilesRequired(), "Juce VST Wrapper", "__jucevstfiles", false));
+                childIDs.add (addProjectItem (createVSTGroup (true), createID ("__jucevstfiles"), false));
 
             if (isAU())
                 childIDs.add (createAUWrappersGroup());
 
             if (isRTAS())
-                childIDs.add (createGroup (getRTASFilesRequired(), "Juce RTAS Wrapper", "__jucertasfiles", true));
+                childIDs.add (addProjectItem (createRTASGroup (true), createID ("__jucertasfiles"), true));
 
             { // Add 'resources' group
                 String resourcesGroupID (createID ("__resources"));
@@ -938,7 +873,9 @@ private:
             }
         }
 
-        String groupID (getIDForGroup (item));
+        if (groupID.isEmpty())
+            groupID = getIDForGroup (item);
+
         addGroup (groupID, groupName, childIDs);
         return groupID;
     }
@@ -1105,26 +1042,6 @@ private:
     }
 
     //==============================================================================
-    const Array<RelativePath> getRTASFilesRequired() const
-    {
-        Array<RelativePath> s;
-        if (isRTAS())
-        {
-            const char* files[] = { JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode1.cpp",
-                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode2.cpp",
-                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode3.cpp",
-                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode_Header.h",
-                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_MacResources.r",
-                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_MacUtilities.mm",
-                                    JUCE_PLUGINS_PATH_RTAS "juce_RTAS_Wrapper.cpp" };
-
-            for (int i = 0; i < numElementsInArray (files); ++i)
-                s.add (getJucePathFromTargetFolder().getChildFile (files[i]));
-        }
-
-        return s;
-    }
-
     String createAUWrappersGroup()
     {
         Array<RelativePath> auWrappers;
@@ -1135,56 +1052,59 @@ private:
         for (i = 0; i < numElementsInArray (files); ++i)
             auWrappers.add (getJucePathFromTargetFolder().getChildFile (files[i]));
 
-        const char* appleAUFiles[] = {  "Extras/CoreAudio/PublicUtility/CADebugMacros.h",
-                                        "Extras/CoreAudio/PublicUtility/CAAUParameter.cpp",
-                                        "Extras/CoreAudio/PublicUtility/CAAUParameter.h",
-                                        "Extras/CoreAudio/PublicUtility/CAAudioChannelLayout.cpp",
-                                        "Extras/CoreAudio/PublicUtility/CAAudioChannelLayout.h",
-                                        "Extras/CoreAudio/PublicUtility/CAMutex.cpp",
-                                        "Extras/CoreAudio/PublicUtility/CAMutex.h",
-                                        "Extras/CoreAudio/PublicUtility/CAStreamBasicDescription.cpp",
-                                        "Extras/CoreAudio/PublicUtility/CAStreamBasicDescription.h",
-                                        "Extras/CoreAudio/PublicUtility/CAVectorUnitTypes.h",
-                                        "Extras/CoreAudio/PublicUtility/CAVectorUnit.cpp",
-                                        "Extras/CoreAudio/PublicUtility/CAVectorUnit.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUViewBase/AUViewLocalizedStringKeys.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewDispatch.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewControl.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewControl.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUBase.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUBase.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUDispatch.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUDispatch.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUInputElement.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUInputElement.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUOutputElement.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUOutputElement.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUResources.r",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUScopeElement.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/AUScopeElement.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/ComponentBase.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/AUBase/ComponentBase.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/AUMIDIBase.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/AUMIDIBase.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/AUMIDIEffectBase.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/AUMIDIEffectBase.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/AUOutputBase.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/AUOutputBase.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/AUEffectBase.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/OtherBases/AUEffectBase.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUBuffer.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUBuffer.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUDebugDispatcher.cpp",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUDebugDispatcher.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUInputFormatConverter.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUSilentTimeout.h",
-                                        "Extras/CoreAudio/AudioUnits/AUPublic/Utility/AUTimestampGenerator.h" };
+        #define JUCE_AU_PUBLICUTILITY   "Extras/CoreAudio/PublicUtility/"
+        #define JUCE_AU_PUBLIC          "Extras/CoreAudio/AudioUnits/AUPublic/"
+
+        const char* appleAUFiles[] = {  JUCE_AU_PUBLICUTILITY "CADebugMacros.h",
+                                        JUCE_AU_PUBLICUTILITY "CAAUParameter.cpp",
+                                        JUCE_AU_PUBLICUTILITY "CAAUParameter.h",
+                                        JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.cpp",
+                                        JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.h",
+                                        JUCE_AU_PUBLICUTILITY "CAMutex.cpp",
+                                        JUCE_AU_PUBLICUTILITY "CAMutex.h",
+                                        JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.cpp",
+                                        JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.h",
+                                        JUCE_AU_PUBLICUTILITY "CAVectorUnitTypes.h",
+                                        JUCE_AU_PUBLICUTILITY "CAVectorUnit.cpp",
+                                        JUCE_AU_PUBLICUTILITY "CAVectorUnit.h",
+                                        JUCE_AU_PUBLIC "AUViewBase/AUViewLocalizedStringKeys.h",
+                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewDispatch.cpp",
+                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.cpp",
+                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.h",
+                                        JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.cpp",
+                                        JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.h",
+                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.cpp",
+                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.h",
+                                        JUCE_AU_PUBLIC "AUBase/AUBase.cpp",
+                                        JUCE_AU_PUBLIC "AUBase/AUBase.h",
+                                        JUCE_AU_PUBLIC "AUBase/AUDispatch.cpp",
+                                        JUCE_AU_PUBLIC "AUBase/AUDispatch.h",
+                                        JUCE_AU_PUBLIC "AUBase/AUInputElement.cpp",
+                                        JUCE_AU_PUBLIC "AUBase/AUInputElement.h",
+                                        JUCE_AU_PUBLIC "AUBase/AUOutputElement.cpp",
+                                        JUCE_AU_PUBLIC "AUBase/AUOutputElement.h",
+                                        JUCE_AU_PUBLIC "AUBase/AUResources.r",
+                                        JUCE_AU_PUBLIC "AUBase/AUScopeElement.cpp",
+                                        JUCE_AU_PUBLIC "AUBase/AUScopeElement.h",
+                                        JUCE_AU_PUBLIC "AUBase/ComponentBase.cpp",
+                                        JUCE_AU_PUBLIC "AUBase/ComponentBase.h",
+                                        JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.cpp",
+                                        JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.h",
+                                        JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.cpp",
+                                        JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.h",
+                                        JUCE_AU_PUBLIC "OtherBases/AUOutputBase.cpp",
+                                        JUCE_AU_PUBLIC "OtherBases/AUOutputBase.h",
+                                        JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.cpp",
+                                        JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.h",
+                                        JUCE_AU_PUBLIC "OtherBases/AUEffectBase.cpp",
+                                        JUCE_AU_PUBLIC "OtherBases/AUEffectBase.h",
+                                        JUCE_AU_PUBLIC "Utility/AUBuffer.cpp",
+                                        JUCE_AU_PUBLIC "Utility/AUBuffer.h",
+                                        JUCE_AU_PUBLIC "Utility/AUDebugDispatcher.cpp",
+                                        JUCE_AU_PUBLIC "Utility/AUDebugDispatcher.h",
+                                        JUCE_AU_PUBLIC "Utility/AUInputFormatConverter.h",
+                                        JUCE_AU_PUBLIC "Utility/AUSilentTimeout.h",
+                                        JUCE_AU_PUBLIC "Utility/AUTimestampGenerator.h" };
 
         StringArray fileIDs, appleFileIDs;
 
