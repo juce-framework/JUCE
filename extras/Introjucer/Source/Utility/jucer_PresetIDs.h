@@ -98,6 +98,7 @@ namespace Ids
     DECLARE_ID (buildVST);
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (compile);
+    DECLARE_ID (noWarnings);
     DECLARE_ID (resource);
     DECLARE_ID (className);
     DECLARE_ID (classDesc);

@@ -88,10 +88,9 @@ public:
     {
         Array<RelativePath> files;
         findAllFilesToCompile (project.getMainGroup(), files);
-        findAllFilesToCompile (libraryFilesGroup, files);
 
-        if (isVST())
-            findAllFilesToCompile (createVSTGroup (false), files);
+        for (int i = 0; i < generatedGroups.size(); ++i)
+            findAllFilesToCompile (generatedGroups.getReference(i), files);
 
         MemoryOutputStream mo;
         writeMakefile (mo, files);
@@ -139,7 +138,8 @@ private:
         headerPaths.insert (0, "/usr/include/freetype2");
         headerPaths.insert (0, "/usr/include");
 
-        project.getProjectType().addExtraSearchPaths (*this, headerPaths);
+        for (int i = 0; i < libraryModules.size(); ++i)
+            libraryModules.getUnchecked(i)->addExtraSearchPaths (*this, headerPaths);
 
         for (int i = 0; i < headerPaths.size(); ++i)
             out << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, headerPaths[i])).quoted();

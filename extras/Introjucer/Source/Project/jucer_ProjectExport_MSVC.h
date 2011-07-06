@@ -164,7 +164,8 @@ protected:
     {
         StringArray searchPaths (config.getHeaderSearchPaths());
 
-        project.getProjectType().addExtraSearchPaths (*this, searchPaths);
+        for (int i = 0; i < libraryModules.size(); ++i)
+            libraryModules.getUnchecked(i)->addExtraSearchPaths (*this, searchPaths);
 
         return searchPaths;
     }
@@ -399,11 +400,11 @@ public:
 
         if (hasIcon)
         {
-            libraryFilesGroup.addFile (iconFile, -1);
-            libraryFilesGroup.addFile (rcFile, -1);
+            generatedGroups.getReference(0).addFile (iconFile, -1);
+            generatedGroups.getReference(0).addFile (rcFile, -1);
 
-            libraryFilesGroup.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
-            libraryFilesGroup.findItemForFile (rcFile).getShouldAddToResourceValue() = false;
+            generatedGroups.getReference(0).findItemForFile (iconFile).getShouldAddToResourceValue() = false;
+            generatedGroups.getReference(0).findItemForFile (rcFile).getShouldAddToResourceValue() = false;
         }
 
         {
@@ -523,11 +524,9 @@ protected:
     {
         addFiles (project.getMainGroup(), files, false);
 
-        if (libraryFilesGroup.getNumChildren() > 0)
-            addFiles (libraryFilesGroup, files, false);
-
-        if (isVST())   addFiles (createVSTGroup (false), files, false);
-        if (isRTAS())  addFiles (createRTASGroup (false), files, true);
+        for (int i = 0; i < generatedGroups.size(); ++i)
+            if (generatedGroups.getReference(i).getNumChildren() > 0)
+                addFiles (generatedGroups.getReference(i), files, false);
     }
 
     //==============================================================================
@@ -935,11 +934,9 @@ private:
 
         writeFiles (out, project.getMainGroup());
 
-        if (libraryFilesGroup.getNumChildren() > 0)
-            writeFiles (out, libraryFilesGroup);
-
-        if (isVST())
-            writeFiles (out, createVSTGroup (false));
+        for (int i = 0; i < generatedGroups.size(); ++i)
+            if (generatedGroups.getReference(i).getNumChildren() > 0)
+                writeFiles (out, generatedGroups.getReference(i));
 
         out << "# End Target" << newLine
             << "# End Project" << newLine;
@@ -1290,14 +1287,9 @@ protected:
 
             addFilesToCompile (project.getMainGroup(), *cppFiles, *headerFiles, false);
 
-            if (libraryFilesGroup.getNumChildren() > 0)
-                addFilesToCompile (libraryFilesGroup, *cppFiles, *headerFiles, false);
-
-            if (isVST())
-                addFilesToCompile (createVSTGroup (false), *cppFiles, *headerFiles, false);
-
-            if (isRTAS())
-                addFilesToCompile (createRTASGroup (false), *cppFiles, *headerFiles, true);
+            for (int i = 0; i < generatedGroups.size(); ++i)
+                if (generatedGroups.getReference(i).getNumChildren() > 0)
+                    addFilesToCompile (generatedGroups.getReference(i), *cppFiles, *headerFiles, false);
         }
 
         if (hasIcon)
@@ -1450,20 +1442,9 @@ protected:
 
         addFilesToFilter (project.getMainGroup(), project.getProjectName().toString(), *cpps, *headers, *groups);
 
-        if (libraryFilesGroup.getNumChildren() > 0)
-            addFilesToFilter (libraryFilesGroup, project.getJuceCodeGroupName(), *cpps, *headers, *groups);
-
-        if (isVST())
-        {
-            Project::Item vstGroup (createVSTGroup (false));
-            addFilesToFilter (vstGroup, vstGroup.getName().toString(), *cpps, *headers, *groups);
-        }
-
-        if (isRTAS())
-        {
-            Project::Item rtasGroup (createRTASGroup (false));
-            addFilesToFilter (rtasGroup, rtasGroup.getName().toString(), *cpps, *headers, *groups);
-        }
+        for (int i = 0; i < generatedGroups.size(); ++i)
+            if (generatedGroups.getReference(i).getNumChildren() > 0)
+                addFilesToFilter (generatedGroups.getReference(i), project.getJuceCodeGroupName(), *cpps, *headers, *groups);
 
         if (iconFile.exists())
         {

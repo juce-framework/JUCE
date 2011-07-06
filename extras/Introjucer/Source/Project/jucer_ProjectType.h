@@ -30,6 +30,19 @@
 #include "jucer_Project.h"
 class ProjectExporter;
 
+//==============================================================================
+class LibraryModule
+{
+public:
+    LibraryModule();
+    virtual ~LibraryModule() {}
+
+    virtual void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const = 0;
+    virtual void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const = 0;
+    virtual void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const = 0;
+    virtual void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) = 0;
+};
+
 
 //==============================================================================
 class ProjectType
@@ -52,9 +65,11 @@ public:
     virtual bool isAudioPlugin() const          { return false; }
     virtual bool isBrowserPlugin() const        { return false; }
 
-    virtual Result createRequiredFiles (Project::Item& projectRoot, Array<File>& filesCreated) const;
-    virtual void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const;
-    virtual void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const;
+    static const char* getGUIAppTypeName();
+    static const char* getConsoleAppTypeName();
+    static const char* getAudioPluginTypeName();
+
+    virtual void createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const;
 
 protected:
     ProjectType (const String& type, const String& desc);
@@ -63,52 +78,6 @@ private:
     const String type, desc;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectType);
-};
-
-//==============================================================================
-class ProjectType_GUIApp  : public ProjectType
-{
-public:
-    static const char* getTypeName() noexcept    { return "guiapp"; }
-    ProjectType_GUIApp()    : ProjectType (getTypeName(), "Application (GUI)") {}
-
-    bool isGUIApplication() const   { return true; }
-    Result createRequiredFiles (Project::Item& projectRoot, Array<File>& filesCreated) const;
-};
-
-//==============================================================================
-class ProjectType_ConsoleApp  : public ProjectType
-{
-public:
-    static const char* getTypeName() noexcept    { return "consoleapp"; }
-    ProjectType_ConsoleApp()    : ProjectType (getTypeName(), "Application (Non-GUI)") {}
-
-    Result createRequiredFiles (Project::Item& projectRoot, Array<File>& filesCreated) const;
-    bool isCommandLineApp() const   { return true; }
-};
-
-//==============================================================================
-class ProjectType_StaticLibrary  : public ProjectType
-{
-public:
-    static const char* getTypeName() noexcept    { return "library"; }
-    ProjectType_StaticLibrary()    : ProjectType (getTypeName(), "Static Library") {}
-
-    bool isLibrary() const          { return true; }
-    Result createRequiredFiles (Project::Item& projectRoot, Array<File>& filesCreated) const;
-};
-
-//==============================================================================
-class ProjectType_AudioPlugin  : public ProjectType
-{
-public:
-    static const char* getTypeName() noexcept    { return "audioplug"; }
-    ProjectType_AudioPlugin()    : ProjectType (getTypeName(), "Audio Plug-in") {}
-
-    bool isAudioPlugin() const      { return true; }
-    Result createRequiredFiles (Project::Item& projectRoot, Array<File>& filesCreated) const;
-    void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const;
-    void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const;
 };
 
 

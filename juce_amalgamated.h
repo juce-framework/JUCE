@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	16
+#define JUCE_BUILDNUMBER	17
 
 /** Current Juce version number.
 
@@ -21339,9 +21339,6 @@ private:
 	A random number generator.
 
 	You can create a Random object and use it to generate a sequence of random numbers.
-	As a handy shortcut to avoid having to create and seed one yourself, you can call
-	Random::getSystemRandom() to return a global RNG that is seeded randomly when the
-	app launches.
 */
 class JUCE_API  Random
 {
@@ -21372,7 +21369,7 @@ public:
 	int nextInt() noexcept;
 
 	/** Returns the next random number, limited to a given range.
-
+		The maxValue parameter may not be negative, or zero.
 		@returns a random integer between 0 (inclusive) and maxValue (exclusive).
 	*/
 	int nextInt (int maxValue) noexcept;
@@ -21408,14 +21405,6 @@ public:
 	/** Sets a range of bits in a BigInteger to random values. */
 	void fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numBits);
 
-	/** To avoid the overhead of having to create a new Random object whenever
-		you need a number, this is a shared application-wide object that
-		can be used.
-
-		It's not thread-safe though, so threads should use their own Random object.
-	*/
-	static Random& getSystemRandom() noexcept;
-
 	/** Resets this Random object to a given seed value. */
 	void setSeed (int64 newSeed) noexcept;
 
@@ -21432,6 +21421,14 @@ public:
 		it repeatedly will increase the randomness of the final result.
 	*/
 	void setSeedRandomly();
+
+	/** The overhead of creating a new Random object is fairly small, but if you want to avoid
+		it, you can call this method to get a global shared Random object.
+
+		It's not thread-safe though, so threads should use their own Random object, otherwise
+		you run the risk of your random numbers becoming.. erm.. randomly corrupted..
+	*/
+	static Random& getSystemRandom() noexcept;
 
 private:
 

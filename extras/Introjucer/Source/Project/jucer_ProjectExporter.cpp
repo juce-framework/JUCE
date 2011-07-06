@@ -32,8 +32,7 @@
 
 //==============================================================================
 ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
-    : libraryFilesGroup (Project::Item::createGroup (project_, project_.getJuceCodeGroupName())),
-      project (project_),
+    : project (project_),
       settings (settings_)
 {
 }
@@ -87,6 +86,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     else
         exp->getJuceFolder() = juceFolder.getFullPathName();
 
+    exp->createLibraryModules();
     return exp;
 }
 
@@ -101,6 +101,7 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     if (exp == nullptr)    exp = AndroidProjectExporter::createForSettings (project, settings);
 
     jassert (exp != nullptr);
+    exp->createLibraryModules();
     return exp;
 }
 
@@ -123,6 +124,12 @@ ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& projec
     }
 
     return best.release();
+}
+
+void ProjectExporter::createLibraryModules()
+{
+    libraryModules.clear();
+    project.getProjectType().createRequiredModules (project, libraryModules);
 }
 
 File ProjectExporter::getTargetFolder() const
@@ -180,7 +187,8 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     props.add (new TextPropertyComponent (getJuceFolder(), "Juce Location", 1024, false));
     props.getLast()->setTooltip ("The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
 
-    project.getProjectType().createPropertyEditors (*this, props);
+    for (int i = 0; i < libraryModules.size(); ++i)
+        libraryModules.getUnchecked(i)->createPropertyEditors (*this, props);
 
     props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false));
     props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -189,49 +197,6 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     props.getLast()->setTooltip ("Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
     props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, false));
     props.getLast()->setTooltip ("Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
-}
-
-Project::Item ProjectExporter::createVSTGroup (bool forOSX) const
-{
-    jassert (isVST());
-
-    Project::Item group (Project::Item::createGroup (project, "Juce VST Wrapper"));
-
-    const char* osxFiles[] = { JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.cpp",
-                               JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.mm", 0 };
-
-    const char* winFiles[] = { JUCE_PLUGINS_PATH_VST "juce_VST_Wrapper.cpp", 0};
-
-    for (const char** f = (forOSX ? osxFiles : winFiles); *f != 0; ++f)
-        group.addRelativeFile (getJucePathFromProjectFolder().getChildFile (*f), -1);
-
-    return group;
-}
-
-Project::Item ProjectExporter::createRTASGroup (bool forOSX) const
-{
-    jassert (isRTAS());
-    Project::Item group (Project::Item::createGroup (project, "Juce RTAS Wrapper"));
-
-    const char* osxFiles[] = { JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode1.cpp",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode2.cpp",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode3.cpp",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode_Header.h",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_MacResources.r",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_MacUtilities.mm",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_Wrapper.cpp", 0 };
-
-    const char* winFiles[] = { JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode1.cpp",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode2.cpp",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode3.cpp",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_DigiCode_Header.h",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinUtilities.cpp",
-                               JUCE_PLUGINS_PATH_RTAS "juce_RTAS_Wrapper.cpp" , 0};
-
-    for (const char** f = (forOSX ? osxFiles : winFiles); *f != 0; ++f)
-        group.addRelativeFile (getJucePathFromProjectFolder().getChildFile (*f), -1);
-
-    return group;
 }
 
 StringPairArray ProjectExporter::getAllPreprocessorDefs (const Project::BuildConfiguration& config) const

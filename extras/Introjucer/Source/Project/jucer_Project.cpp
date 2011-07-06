@@ -91,7 +91,7 @@ void Project::updateProjectSettings()
 void Project::setMissingDefaultValues()
 {
     if (! projectRoot.hasProperty (Ids::id_))
-        projectRoot.setProperty (Ids::id_, createAlphaNumericUID(), 0);
+        projectRoot.setProperty (Ids::id_, createAlphaNumericUID(), nullptr);
 
     // Create main file group if missing
     if (! projectRoot.getChildWithName (Tags::projectMainGroup).isValid())
@@ -106,7 +106,7 @@ void Project::setMissingDefaultValues()
         setTitle ("Juce Project");
 
     if (! projectRoot.hasProperty (Ids::projectType))
-        getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
+        getProjectTypeValue() = ProjectType::getGUIAppTypeName();
 
     if (! projectRoot.hasProperty (Ids::version))
         getVersion() = "1.0.0";
@@ -183,8 +183,8 @@ const String Project::saveDocument (const File& file)
 
     {
         // (getting these forces the values to be sanitised)
-        OwnedArray <Project::JuceConfigFlag> flags;
-        getJuceConfigFlags (flags);
+        OwnedArray <Project::ConfigFlag> flags;
+        getAllConfigFlags (flags);
     }
 
     if (FileHelpers::isJuceFolder (getLocalJuceFolder()))
@@ -284,7 +284,7 @@ const ProjectType& Project::getProjectType() const
 
     if (type == nullptr)
     {
-        type = ProjectType::findType (ProjectType_GUIApp::getTypeName());
+        type = ProjectType::findType (ProjectType::getGUIAppTypeName());
         jassert (type != nullptr);
     }
 
@@ -437,6 +437,21 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.getUnchecked(i)->setPreferredHeight (22);
 }
 
+String Project::getVersionAsHex() const
+{
+    StringArray configs;
+    configs.addTokens (getVersion().toString(), ",.", String::empty);
+    configs.trim();
+    configs.removeEmptyStrings();
+
+    int value = (configs[0].getIntValue() << 16) + (configs[1].getIntValue() << 8) + configs[2].getIntValue();
+
+    if (configs.size() >= 4)
+        value = (value << 8) + configs[3].getIntValue();
+
+    return "0x" + String::toHexString (value);
+}
+
 Image Project::getBigIcon()
 {
     Item icon (getMainGroup().findItemWithID (getBigIconImageItemID().toString()));
@@ -546,6 +561,8 @@ Project::Item::~Item()
 }
 
 String Project::Item::getID() const               { return node [Ids::id_]; }
+void Project::Item::setID (const String& newID)   { node.setProperty (Ids::id_, newID, nullptr); }
+
 String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
 Project::Item Project::Item::createGroup (Project& project, const String& name)
@@ -596,24 +613,20 @@ bool Project::Item::shouldBeAddedToTargetProject() const
     return isFile();
 }
 
-bool Project::Item::shouldBeCompiled() const
-{
-    return getShouldCompileValue().getValue();
-}
+bool Project::Item::shouldBeCompiled() const        { return getShouldCompileValue().getValue(); }
+Value Project::Item::getShouldCompileValue() const  { return node.getPropertyAsValue (Ids::compile, getUndoManager()); }
 
-Value Project::Item::getShouldCompileValue() const
-{
-    return node.getPropertyAsValue (Ids::compile, getUndoManager());
-}
+bool Project::Item::shouldBeAddedToBinaryResources() const  { return getShouldAddToResourceValue().getValue(); }
+Value Project::Item::getShouldAddToResourceValue() const    { return node.getPropertyAsValue (Ids::resource, getUndoManager()); }
 
-bool Project::Item::shouldBeAddedToBinaryResources() const
-{
-    return getShouldAddToResourceValue().getValue();
-}
+Value Project::Item::getShouldInhibitWarningsValue() const  { return node.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
 
-Value Project::Item::getShouldAddToResourceValue() const
+String Project::Item::getFilePath() const
 {
-    return node.getPropertyAsValue (Ids::resource, getUndoManager());
+    if (isFile())
+        return node [Ids::file].toString();
+    else
+        return String::empty;
 }
 
 File Project::Item::getFile() const
@@ -706,7 +719,7 @@ File Project::Item::determineGroupFolder() const
 void Project::Item::initialiseNodeValues()
 {
     if (! node.hasProperty (Ids::id_))
-        node.setProperty (Ids::id_, createAlphaNumericUID(), 0);
+        setID (createAlphaNumericUID());
 
     if (isFile())
     {
@@ -808,12 +821,12 @@ bool Project::Item::addFile (const File& file, int insertIndex)
     return true;
 }
 
-bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex)
+bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile)
 {
     Item item (getProject(), ValueTree (Tags::file));
     item.initialiseNodeValues();
     item.getName() = file.getFileName();
-    item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m;cc;cxx");
+    item.getShouldCompileValue() = shouldCompile;
     item.getShouldAddToResourceValue() = getProject().shouldBeAddedToBinaryResourcesByDefault (file);
 
     if (canContain (item))
@@ -844,54 +857,31 @@ const Drawable* Project::Item::getIcon() const
 }
 
 //==============================================================================
-ValueTree Project::getJuceConfigNode()
+ValueTree Project::getConfigNode()
 {
     return projectRoot.getOrCreateChildWithName (Tags::configGroup, nullptr);
 }
 
-void Project::getJuceConfigFlags (OwnedArray <JuceConfigFlag>& flags)
+void Project::getAllConfigFlags (OwnedArray <ConfigFlag>& flags)
 {
-    ValueTree configNode (getJuceConfigNode());
+    OwnedArray<LibraryModule> modules;
+    getProjectType().createRequiredModules (*this, modules);
 
-    StringArray lines;
-    getLocalJuceFolder().getChildFile ("juce_Config.h").readLines (lines);
+    int i;
+    for (i = 0; i < modules.size(); ++i)
+        modules.getUnchecked(i)->getConfigFlags (*this, flags);
 
-    for (int i = 0; i < lines.size(); ++i)
-    {
-        String line (lines[i].trim());
-
-        if (line.startsWith ("/** ") && line.containsChar (':'))
-        {
-            ScopedPointer <JuceConfigFlag> config (new JuceConfigFlag());
-            config->symbol = line.substring (4).upToFirstOccurrenceOf (":", false, false).trim();
-
-            if (config->symbol.length() > 4)
-            {
-                config->description = line.fromFirstOccurrenceOf (":", false, false).trimStart();
-                ++i;
-                while (! (lines[i].contains ("*/") || lines[i].contains ("@see")))
-                {
-                    if (lines[i].trim().isNotEmpty())
-                        config->description = config->description.trim() + " " + lines[i].trim();
-
-                    ++i;
-                }
-
-                config->description = config->description.upToFirstOccurrenceOf ("*/", false, false);
-                config->value.referTo (getJuceConfigFlag (config->symbol));
-                flags.add (config.release());
-            }
-        }
-    }
+    for (i = 0; i < flags.size(); ++i)
+        flags.getUnchecked(i)->value.referTo (getConfigFlag (flags.getUnchecked(i)->symbol));
 }
 
 const char* const Project::configFlagDefault = "default";
 const char* const Project::configFlagEnabled = "enabled";
 const char* const Project::configFlagDisabled = "disabled";
 
-Value Project::getJuceConfigFlag (const String& name)
+Value Project::getConfigFlag (const String& name)
 {
-    const ValueTree configNode (getJuceConfigNode());
+    const ValueTree configNode (getConfigNode());
     Value v (configNode.getPropertyAsValue (name, getUndoManagerFor (configNode)));
 
     if (v.getValue().toString().isEmpty())
@@ -900,7 +890,7 @@ Value Project::getJuceConfigFlag (const String& name)
     return v;
 }
 
-bool Project::isJuceConfigFlagEnabled (const String& name) const
+bool Project::isConfigFlagEnabled (const String& name) const
 {
     return projectRoot.getChildWithName (Tags::configGroup).getProperty (name) == configFlagEnabled;
 }

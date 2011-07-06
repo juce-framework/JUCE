@@ -75,6 +75,7 @@ public:
     Value getProjectTypeValue() const                   { return getProjectValue ("projectType"); }
 
     Value getVersion() const                            { return getProjectValue ("version"); }
+    String getVersionAsHex() const;
     Value getBundleIdentifier() const                   { return getProjectValue ("bundleIdentifier"); }
     void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
 
@@ -127,9 +128,10 @@ public:
     Value getPluginRTASCategory() const                 { return getProjectValue ("pluginRTASCategory"); }
 
     //==============================================================================
-    File getAppIncludeFile() const                      { return getWrapperFolder().getChildFile (getJuceSourceHFilename()); }
-    File getWrapperFolder() const                       { return getFile().getSiblingFile ("JuceLibraryCode"); }
-    File getPluginCharacteristicsFile() const           { return getWrapperFolder().getChildFile (getPluginCharacteristicsFilename()); }
+    File getAppIncludeFile() const                      { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
+    File getGeneratedCodeFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
+    File getPluginCharacteristicsFile() const           { return getGeneratedCodeFolder().getChildFile (getPluginCharacteristicsFilename()); }
+    File getLocalJuceFolder();
 
     //==============================================================================
     String getAmalgamatedHeaderFileName() const         { return "juce_amalgamated.h"; }
@@ -173,10 +175,12 @@ public:
         String getID() const;
         Item findItemWithID (const String& targetId) const; // (recursive search)
         String getImageFileID() const;
+        void setID (const String& newID);
 
         //==============================================================================
         Value getName() const;
         File getFile() const;
+        String getFilePath() const;
         void setFile (const File& file);
         void setFile (const RelativePath& file);
         File determineGroupFolder() const;
@@ -187,6 +191,7 @@ public:
         Value getShouldCompileValue() const;
         bool shouldBeAddedToBinaryResources() const;
         Value getShouldAddToResourceValue() const;
+        Value getShouldInhibitWarningsValue() const;
 
         //==============================================================================
         bool canContain (const Item& child) const;
@@ -196,7 +201,7 @@ public:
         Item addNewSubGroup (const String& name, int insertIndex);
         void addChild (const Item& newChild, int insertIndex);
         bool addFile (const File& file, int insertIndex);
-        bool addRelativeFile (const RelativePath& file, int insertIndex);
+        bool addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile);
         void removeItemFromProject();
         void sortAlphabetically();
         Item findItemForFile (const File& file) const;
@@ -285,19 +290,19 @@ public:
     void createDefaultExporters();
 
     //==============================================================================
-    struct JuceConfigFlag
+    struct ConfigFlag
     {
         String symbol, description;
         Value value;   // 1 = true, 2 = false, anything else = use default
     };
 
-    void getJuceConfigFlags (OwnedArray <JuceConfigFlag>& flags);
+    void getAllConfigFlags (OwnedArray <ConfigFlag>& flags);
 
     static const char* const configFlagDefault;
     static const char* const configFlagEnabled;
     static const char* const configFlagDisabled;
-    Value getJuceConfigFlag (const String& name);
-    bool isJuceConfigFlagEnabled (const String& name) const;
+    Value getConfigFlag (const String& name);
+    bool isConfigFlagEnabled (const String& name) const;
 
     //==============================================================================
     String getFileTemplate (const String& templateName);
@@ -323,12 +328,11 @@ private:
     static File lastDocumentOpened;
     DrawableImage mainProjectIcon;
 
-    File getLocalJuceFolder();
     void updateProjectSettings();
     void setMissingDefaultValues();
     ValueTree getConfigurations() const;
     void createDefaultConfigs();
-    ValueTree getJuceConfigNode();
+    ValueTree getConfigNode();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project);
 };

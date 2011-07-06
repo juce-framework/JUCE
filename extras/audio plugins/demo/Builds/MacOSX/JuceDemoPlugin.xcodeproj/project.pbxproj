@@ -28,8 +28,8 @@
 		BD7E5458BE2F33DBBF5AF834 = { isa = PBXBuildFile; fileRef = FD33B687C6FBA3ABC581AFD7; };
 		3DFA294CC79D06F066723396 = { isa = PBXBuildFile; fileRef = 94A977DEE6BE2081CA0213FE; };
 		7C5B1DFA35A2EA8DFB2A40C9 = { isa = PBXBuildFile; fileRef = 00E2C89A148A2491288DF242; };
-		37A5CEF9F9B523B2580D3C1E = { isa = PBXBuildFile; fileRef = A2C6C4FD1DCE5EFAA2163E5C; };
-		EB107FBF3FCD101D37454F1E = { isa = PBXBuildFile; fileRef = 7BA88B94922B5480855DD012; };
+		6FC7ABF9C15FE51D4073E3D2 = { isa = PBXBuildFile; fileRef = 4751785A8DF8E6DA39550E63; };
+		CC35AB7C8D157D7211320179 = { isa = PBXBuildFile; fileRef = 3EF0D861DF9DE96DDAAE0951; };
 		B7D2D2868983939B35532885 = { isa = PBXBuildFile; fileRef = 6C254919C15224D13FE6D174; settings = {COMPILER_FLAGS = "-w"; }; };
 		3723101DD64447FE9A530323 = { isa = PBXBuildFile; fileRef = 38E2002644D5BBC2E88ACB70; settings = {COMPILER_FLAGS = "-w"; }; };
 		EBBDC594F4DF0EF42E017C64 = { isa = PBXBuildFile; fileRef = 616DF8861CA45D7FFE92CA35; settings = {COMPILER_FLAGS = "-w"; }; };
@@ -81,8 +81,8 @@
 		DF8AD10F6B21858C3378B63F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JucePluginCharacteristics.h; path = ../../JuceLibraryCode/JucePluginCharacteristics.h; sourceTree = "SOURCE_ROOT"; };
 		94A977DEE6BE2081CA0213FE = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_VST_Wrapper.cpp"; path = "../../../../../src/audio/plugin_client/VST/juce_VST_Wrapper.cpp"; sourceTree = "SOURCE_ROOT"; };
 		00E2C89A148A2491288DF242 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_VST_Wrapper.mm"; path = "../../../../../src/audio/plugin_client/VST/juce_VST_Wrapper.mm"; sourceTree = "SOURCE_ROOT"; };
-		A2C6C4FD1DCE5EFAA2163E5C = { isa = PBXFileReference; lastKnownFileType = file.r; name = "juce_AU_Resources.r"; path = "../../../../../../juce/src/audio/plugin_client/AU/juce_AU_Resources.r"; sourceTree = "SOURCE_ROOT"; };
-		7BA88B94922B5480855DD012 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_AU_Wrapper.mm"; path = "../../../../../../juce/src/audio/plugin_client/AU/juce_AU_Wrapper.mm"; sourceTree = "SOURCE_ROOT"; };
+		4751785A8DF8E6DA39550E63 = { isa = PBXFileReference; lastKnownFileType = file.r; name = "juce_AU_Resources.r"; path = "../../../../../src/audio/plugin_client/AU/juce_AU_Resources.r"; sourceTree = "SOURCE_ROOT"; };
+		3EF0D861DF9DE96DDAAE0951 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_AU_Wrapper.mm"; path = "../../../../../src/audio/plugin_client/AU/juce_AU_Wrapper.mm"; sourceTree = "SOURCE_ROOT"; };
 		70DC3C63DDDFB1C5A22A8C36 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CADebugMacros.h; path = Extras/CoreAudio/PublicUtility/CADebugMacros.h; sourceTree = "DEVELOPER_DIR"; };
 		6C254919C15224D13FE6D174 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CAAUParameter.cpp; path = Extras/CoreAudio/PublicUtility/CAAUParameter.cpp; sourceTree = "DEVELOPER_DIR"; };
 		AEDBCF2FF9E1FBD5B9958FB4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CAAUParameter.h; path = Extras/CoreAudio/PublicUtility/CAAUParameter.h; sourceTree = "DEVELOPER_DIR"; };
@@ -201,8 +201,8 @@
 				B50242715BF944E7711A5939,
 				F2595F2DC0235F848F9474E8 ); name = "Apple AU Files"; sourceTree = "<group>"; };
 		5180919A8096CFD082284336 = { isa = PBXGroup; children = (
-				A2C6C4FD1DCE5EFAA2163E5C,
-				7BA88B94922B5480855DD012,
+				4751785A8DF8E6DA39550E63,
+				3EF0D861DF9DE96DDAAE0951,
 				17A9711DC035377B969B90C2 ); name = "Juce AU Wrapper"; sourceTree = "<group>"; };
 		7756687B5FD0903C5F83BB9E = { isa = PBXGroup; children = (
 				81567EBA449466A95492511B ); name = Resources; sourceTree = "<group>"; };
@@ -309,7 +309,7 @@
 				F4B05B483343A2F3C923C6B4 ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
 		145D936BBD5425D74172B206 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (  ); runOnlyForDeploymentPostprocessing = 0; };
 		A79C4026C596A99BB0ADC224 = { isa = PBXRezBuildPhase; buildActionMask = 2147483647; files = (
-				37A5CEF9F9B523B2580D3C1E ); runOnlyForDeploymentPostprocessing = 0; };
+				6FC7ABF9C15FE51D4073E3D2 ); runOnlyForDeploymentPostprocessing = 0; };
 		F0F39FCA8C402F34BB74F6B3 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 				5AF66C048A4815F5A8ECDDCD,
 				209FB8C7F7BE85A70E5D98D7,
@@ -319,7 +319,7 @@
 				BD7E5458BE2F33DBBF5AF834,
 				3DFA294CC79D06F066723396,
 				7C5B1DFA35A2EA8DFB2A40C9,
-				EB107FBF3FCD101D37454F1E,
+				CC35AB7C8D157D7211320179,
 				B7D2D2868983939B35532885,
 				3723101DD64447FE9A530323,
 				EBBDC594F4DF0EF42E017C64,

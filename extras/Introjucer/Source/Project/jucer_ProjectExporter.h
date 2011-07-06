@@ -107,8 +107,6 @@ public:
                 + String::toHexString (settings [Ids::targetFolder].toString().hashCode()).toUpperCase();
     }
 
-    Project::Item libraryFilesGroup;
-
     // An exception that can be thrown by the create() method.
     class SaveError
     {
@@ -125,19 +123,21 @@ public:
 
     Project::Item& getMainGroup();
 
+    RelativePath getJucePathFromTargetFolder() const;
+    RelativePath getJucePathFromProjectFolder() const;
+
+    Array<Project::Item> generatedGroups;
+    OwnedArray<LibraryModule> libraryModules;
+
+    void createLibraryModules();
+
 protected:
     //==============================================================================
     Project& project;
     ValueTree settings;
     String name;
 
-    RelativePath getJucePathFromTargetFolder() const;
-    RelativePath getJucePathFromProjectFolder() const;
-
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
-
-    Project::Item createVSTGroup (bool forOSX) const;
-    Project::Item createRTASGroup (bool forOSX) const;
 
     static String getLibbedFilename (String name)
     {

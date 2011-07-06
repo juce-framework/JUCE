@@ -36,7 +36,7 @@ String createAlphaNumericUID()
 {
     String uid;
     static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    Random r (Random::getSystemRandom().nextInt64());
+    Random r;
 
     uid << chars [r.nextInt (52)]; // make sure the first character is always a letter
 
@@ -55,7 +55,7 @@ String randomHexString (Random& random, int numChars)
     const char hexChars[] = "0123456789ABCDEF";
 
     while (--numChars >= 0)
-        s << hexChars [random.nextInt (16)];
+        s << hexChars [random.nextInt() & 15];
 
     return s;
 }

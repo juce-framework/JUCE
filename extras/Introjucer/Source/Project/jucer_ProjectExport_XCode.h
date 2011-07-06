@@ -185,19 +185,19 @@ private:
         if (hasPList())
         {
             RelativePath plistPath (infoPlistFile, getTargetFolder(), RelativePath::buildTargetFolder);
-            addFileReference (plistPath);
+            addFileReference (plistPath.toUnixStyle());
             resourceFileRefs.add (createID (plistPath));
         }
 
         if (iconFile.exists())
         {
             RelativePath iconPath (iconFile, getTargetFolder(), RelativePath::buildTargetFolder);
-            addFileReference (iconPath);
+            addFileReference (iconPath.toUnixStyle());
             resourceIDs.add (addBuildFile (iconPath, false, false));
             resourceFileRefs.add (createID (iconPath));
         }
 
-        addProjectItem (project.getMainGroup(), String::empty, false);
+        addProjectItem (project.getMainGroup());
 
         for (int i = 0; i < project.getNumConfigurations(); ++i)
         {
@@ -402,7 +402,8 @@ private:
     {
         StringArray searchPaths (config.getHeaderSearchPaths());
 
-        project.getProjectType().addExtraSearchPaths (*this, searchPaths);
+        for (int i = 0; i < libraryModules.size(); ++i)
+            libraryModules.getUnchecked(i)->addExtraSearchPaths (*this, searchPaths);
 
         return searchPaths;
     }
@@ -650,7 +651,7 @@ private:
 
             if (isAU())
                 s.addTokens ("AudioUnit CoreAudioKit AudioToolbox", false);
-            else if (project.getJuceConfigFlag ("JUCE_PLUGINHOST_AU").toString() == Project::configFlagEnabled)
+            else if (project.getConfigFlag ("JUCE_PLUGINHOST_AU").toString() == Project::configFlagEnabled)
                 s.addTokens ("AudioUnit CoreAudioKit", false);
         }
 
@@ -711,9 +712,9 @@ private:
         xml->createNewChildElement (value ? "true" : "false");
     }
 
-    String addBuildFile (const RelativePath& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings)
+    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings)
     {
-        String fileID (createID (path.toUnixStyle() + "buildref"));
+        String fileID (createID (path + "buildref"));
 
         if (addToSourceBuildPhase)
             sourceIDs.add (fileID);
@@ -731,27 +732,33 @@ private:
 
     String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings)
     {
-        return addBuildFile (path, createID (path), addToSourceBuildPhase, inhibitWarnings);
+        return addBuildFile (path.toUnixStyle(), createID (path), addToSourceBuildPhase, inhibitWarnings);
     }
 
-    void addFileReference (const RelativePath& path, const String& sourceTree, const String& lastKnownFileType, const String& fileRefID)
+    String addFileReference (String pathString)
     {
+        String sourceTree ("SOURCE_ROOT");
+        RelativePath path (pathString, RelativePath::unknown);
+
+        if (pathString.startsWith ("${"))
+        {
+            sourceTree = pathString.substring (2).upToFirstOccurrenceOf ("}", false, false);
+            pathString = pathString.fromFirstOccurrenceOf ("}/", false, false);
+        }
+        else if (path.isAbsolute())
+        {
+            sourceTree = "<absolute>";
+        }
+
+        const String fileRefID (createID (pathString));
+
         ValueTree* v = new ValueTree (fileRefID);
         v->setProperty ("isa", "PBXFileReference", 0);
-        v->setProperty ("lastKnownFileType", lastKnownFileType, 0);
-        v->setProperty (Ids::name, path.getFileName(), 0);
-        v->setProperty ("path", sanitisePath (path.toUnixStyle()), 0);
+        v->setProperty ("lastKnownFileType", getFileType (path), 0);
+        v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), 0);
+        v->setProperty ("path", sanitisePath (pathString), 0);
         v->setProperty ("sourceTree", sourceTree, 0);
         pbxFileReferences.add (v);
-    }
-
-    String addFileReference (const RelativePath& path)
-    {
-        const String fileRefID (createID (path));
-
-        jassert (path.isAbsolute() || path.getRoot() == RelativePath::buildTargetFolder);
-        addFileReference (path, path.isAbsolute() ? "<absolute>" : "SOURCE_ROOT",
-                          getFileType (path), fileRefID);
 
         return fileRefID;
     }
@@ -779,34 +786,48 @@ private:
     String addFile (const RelativePath& path, bool shouldBeCompiled, bool inhibitWarnings)
     {
         if (shouldBeCompiled)
-            addBuildFile (path, true, inhibitWarnings);
-        else if (path.hasFileExtension (".r"))
-            rezFileIDs.add (addBuildFile (path, false, inhibitWarnings));
+        {
+            if (path.hasFileExtension (".r"))
+                rezFileIDs.add (addBuildFile (path, false, inhibitWarnings));
+            else
+                addBuildFile (path, true, inhibitWarnings);
+        }
 
-        return addFileReference (path);
+        return addFileReference (path.toUnixStyle());
     }
 
-    String addProjectItem (const Project::Item& projectItem, const String& groupID, bool inhibitWarnings)
+    String addProjectItem (const Project::Item& projectItem)
     {
         if (projectItem.isGroup())
         {
             StringArray childIDs;
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
             {
-                const String childID (addProjectItem (projectItem.getChild(i), String::empty, inhibitWarnings));
+                const String childID (addProjectItem (projectItem.getChild(i)));
 
                 if (childID.isNotEmpty())
                     childIDs.add (childID);
             }
 
-            return addGroup (projectItem, childIDs, groupID);
+            return addGroup (projectItem, childIDs);
         }
         else
         {
             if (projectItem.shouldBeAddedToTargetProject())
             {
-                const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
-                return addFile (path, projectItem.shouldBeCompiled(), inhibitWarnings);
+                String itemPath (projectItem.getFilePath());
+                bool inhibitWarnings = projectItem.getShouldInhibitWarningsValue().getValue();
+
+                if (itemPath.startsWith ("${"))
+                {
+                    const RelativePath path (itemPath, RelativePath::unknown);
+                    return addFile (path, projectItem.shouldBeCompiled(), inhibitWarnings);
+                }
+                else
+                {
+                    const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+                    return addFile (path, projectItem.shouldBeCompiled(), inhibitWarnings);
+                }
             }
         }
 
@@ -815,9 +836,9 @@ private:
 
     void addFramework (const String& frameworkName)
     {
-        const RelativePath path ("System/Library/Frameworks/" + frameworkName + ".framework", RelativePath::unknown);
+        const String path ("System/Library/Frameworks/" + frameworkName + ".framework");
         const String fileRefID (createID (path));
-        addFileReference (path, "SDKROOT", getFileType (path), fileRefID);
+        addFileReference ("${SDKROOT}/" + path);
         frameworkIDs.add (addBuildFile (path, fileRefID, false, false));
         frameworkFileIDs.add (fileRefID);
     }
@@ -832,7 +853,7 @@ private:
         groups.add (v);
     }
 
-    String addGroup (const Project::Item& item, StringArray& childIDs, String groupID)
+    String addGroup (const Project::Item& item, StringArray& childIDs)
     {
         String groupName (item.getName().toString());
 
@@ -840,17 +861,9 @@ private:
         {
             groupName = "Source";
 
-            if (libraryFilesGroup.getNumChildren() > 0)
-                childIDs.add (addProjectItem (libraryFilesGroup, createID ("__jucelibfiles"), false));
-
-            if (isVST())
-                childIDs.add (addProjectItem (createVSTGroup (true), createID ("__jucevstfiles"), false));
-
-            if (isAU())
-                childIDs.add (createAUWrappersGroup());
-
-            if (isRTAS())
-                childIDs.add (addProjectItem (createRTASGroup (true), createID ("__jucertasfiles"), true));
+            for (int i = 0; i < generatedGroups.size(); ++i)
+                if (generatedGroups.getReference(i).getNumChildren() > 0)
+                    childIDs.add (addProjectItem (generatedGroups.getReference(i)));
 
             { // Add 'resources' group
                 String resourcesGroupID (createID ("__resources"));
@@ -873,9 +886,7 @@ private:
             }
         }
 
-        if (groupID.isEmpty())
-            groupID = getIDForGroup (item);
-
+        const String groupID (getIDForGroup (item));
         addGroup (groupID, groupName, childIDs);
         return groupID;
     }
@@ -1019,14 +1030,17 @@ private:
         return createID (path.toUnixStyle());
     }
 
-    String createID (const String& rootString) const
+    String createID (String rootString) const
     {
+        if (rootString.startsWith ("${"))
+            rootString = rootString.fromFirstOccurrenceOf ("}/", false, false);
+
         static const char digits[] = "0123456789ABCDEF";
         char n[24];
         Random ran (projectIDSalt + hashCode64 (rootString));
 
         for (int i = 0; i < numElementsInArray (n); ++i)
-            n[i] = digits [ran.nextInt (16)];
+            n[i] = digits [ran.nextInt() & 15];
 
         return String (n, numElementsInArray (n));
     }
@@ -1039,101 +1053,6 @@ private:
     bool shouldFileBeCompiledByDefault (const RelativePath& file) const
     {
         return file.hasFileExtension (sourceFileExtensions);
-    }
-
-    //==============================================================================
-    String createAUWrappersGroup()
-    {
-        Array<RelativePath> auWrappers;
-
-        const char* files[] = { JUCE_PLUGINS_PATH_AU "juce_AU_Resources.r",
-                                JUCE_PLUGINS_PATH_AU "juce_AU_Wrapper.mm" };
-        int i;
-        for (i = 0; i < numElementsInArray (files); ++i)
-            auWrappers.add (getJucePathFromTargetFolder().getChildFile (files[i]));
-
-        #define JUCE_AU_PUBLICUTILITY   "Extras/CoreAudio/PublicUtility/"
-        #define JUCE_AU_PUBLIC          "Extras/CoreAudio/AudioUnits/AUPublic/"
-
-        const char* appleAUFiles[] = {  JUCE_AU_PUBLICUTILITY "CADebugMacros.h",
-                                        JUCE_AU_PUBLICUTILITY "CAAUParameter.cpp",
-                                        JUCE_AU_PUBLICUTILITY "CAAUParameter.h",
-                                        JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.cpp",
-                                        JUCE_AU_PUBLICUTILITY "CAAudioChannelLayout.h",
-                                        JUCE_AU_PUBLICUTILITY "CAMutex.cpp",
-                                        JUCE_AU_PUBLICUTILITY "CAMutex.h",
-                                        JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.cpp",
-                                        JUCE_AU_PUBLICUTILITY "CAStreamBasicDescription.h",
-                                        JUCE_AU_PUBLICUTILITY "CAVectorUnitTypes.h",
-                                        JUCE_AU_PUBLICUTILITY "CAVectorUnit.cpp",
-                                        JUCE_AU_PUBLICUTILITY "CAVectorUnit.h",
-                                        JUCE_AU_PUBLIC "AUViewBase/AUViewLocalizedStringKeys.h",
-                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewDispatch.cpp",
-                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.cpp",
-                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewControl.h",
-                                        JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.cpp",
-                                        JUCE_AU_PUBLIC "AUCarbonViewBase/CarbonEventHandler.h",
-                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.cpp",
-                                        JUCE_AU_PUBLIC "AUCarbonViewBase/AUCarbonViewBase.h",
-                                        JUCE_AU_PUBLIC "AUBase/AUBase.cpp",
-                                        JUCE_AU_PUBLIC "AUBase/AUBase.h",
-                                        JUCE_AU_PUBLIC "AUBase/AUDispatch.cpp",
-                                        JUCE_AU_PUBLIC "AUBase/AUDispatch.h",
-                                        JUCE_AU_PUBLIC "AUBase/AUInputElement.cpp",
-                                        JUCE_AU_PUBLIC "AUBase/AUInputElement.h",
-                                        JUCE_AU_PUBLIC "AUBase/AUOutputElement.cpp",
-                                        JUCE_AU_PUBLIC "AUBase/AUOutputElement.h",
-                                        JUCE_AU_PUBLIC "AUBase/AUResources.r",
-                                        JUCE_AU_PUBLIC "AUBase/AUScopeElement.cpp",
-                                        JUCE_AU_PUBLIC "AUBase/AUScopeElement.h",
-                                        JUCE_AU_PUBLIC "AUBase/ComponentBase.cpp",
-                                        JUCE_AU_PUBLIC "AUBase/ComponentBase.h",
-                                        JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.cpp",
-                                        JUCE_AU_PUBLIC "OtherBases/AUMIDIBase.h",
-                                        JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.cpp",
-                                        JUCE_AU_PUBLIC "OtherBases/AUMIDIEffectBase.h",
-                                        JUCE_AU_PUBLIC "OtherBases/AUOutputBase.cpp",
-                                        JUCE_AU_PUBLIC "OtherBases/AUOutputBase.h",
-                                        JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.cpp",
-                                        JUCE_AU_PUBLIC "OtherBases/MusicDeviceBase.h",
-                                        JUCE_AU_PUBLIC "OtherBases/AUEffectBase.cpp",
-                                        JUCE_AU_PUBLIC "OtherBases/AUEffectBase.h",
-                                        JUCE_AU_PUBLIC "Utility/AUBuffer.cpp",
-                                        JUCE_AU_PUBLIC "Utility/AUBuffer.h",
-                                        JUCE_AU_PUBLIC "Utility/AUDebugDispatcher.cpp",
-                                        JUCE_AU_PUBLIC "Utility/AUDebugDispatcher.h",
-                                        JUCE_AU_PUBLIC "Utility/AUInputFormatConverter.h",
-                                        JUCE_AU_PUBLIC "Utility/AUSilentTimeout.h",
-                                        JUCE_AU_PUBLIC "Utility/AUTimestampGenerator.h" };
-
-        StringArray fileIDs, appleFileIDs;
-
-        for (i = 0; i < auWrappers.size(); ++i)
-        {
-            addFile (auWrappers.getReference(i), shouldFileBeCompiledByDefault (auWrappers.getReference(i)), false);
-            fileIDs.add (createID (auWrappers.getReference(i)));
-        }
-
-        for (i = 0; i < numElementsInArray (appleAUFiles); ++i)
-        {
-            RelativePath file (appleAUFiles[i], RelativePath::unknown);
-            const String fileRefID (createID (file));
-
-            addFileReference (file, "DEVELOPER_DIR", getFileType (file), fileRefID);
-
-            if (shouldFileBeCompiledByDefault (file))
-                addBuildFile (file, fileRefID, true, true);
-
-            appleFileIDs.add (fileRefID);
-        }
-
-        const String appleGroupID (createID ("__juceappleaufiles"));
-        addGroup (appleGroupID, "Apple AU Files", appleFileIDs);
-        fileIDs.add (appleGroupID);
-
-        const String groupID (createID ("__juceaufiles"));
-        addGroup (groupID, "Juce AU Wrapper", fileIDs);
-        return groupID;
     }
 };
 

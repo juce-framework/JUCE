@@ -45,8 +45,8 @@ public:
         else if (tabIndex == 1)
         {
             // The Juce options tab...
-            OwnedArray <Project::JuceConfigFlag> flags;
-            project.getJuceConfigFlags (flags);
+            OwnedArray <Project::ConfigFlag> flags;
+            project.getAllConfigFlags (flags);
 
             StringArray possibleValues;
             possibleValues.add ("(Use default from juce_Config.h)");

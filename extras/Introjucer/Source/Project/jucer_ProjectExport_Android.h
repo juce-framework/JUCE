@@ -209,7 +209,9 @@ private:
     {
         Array<RelativePath> files;
         findAllFilesToCompile (project.getMainGroup(), files);
-        findAllFilesToCompile (libraryFilesGroup, files);
+
+        for (int i = 0; i < generatedGroups.size(); ++i)
+            findAllFilesToCompile (generatedGroups.getReference(i), files);
 
         MemoryOutputStream mo;
         writeAndroidMk (mo, files);
