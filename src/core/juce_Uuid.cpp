@@ -33,42 +33,36 @@ BEGIN_JUCE_NAMESPACE
 #include "../io/network/juce_MACAddress.h"
 #include "../memory/juce_MemoryBlock.h"
 
+namespace
+{
+    int64 getRandomSeedFromMACAddresses()
+    {
+        Array<MACAddress> result;
+        MACAddress::findAllAddresses (result);
+
+        Random r;
+        for (int i = 0; i < result.size(); ++i)
+            r.combineSeed (result[i].toInt64());
+
+        return r.nextInt64();
+    }
+}
 
 //==============================================================================
 Uuid::Uuid()
 {
-    // Mix up any available MAC addresses with some time-based pseudo-random numbers
-    // to make it very very unlikely that two UUIDs will ever be the same..
+    // The normal random seeding is pretty good, but we'll throw some MAC addresses
+    // into the mix too, to make it very very unlikely that two UUIDs will ever be the same..
 
-    static int64 macAddresses[2];
-    static bool hasCheckedMacAddresses = false;
+    static Random r1 (getRandomSeedFromMACAddresses());
 
-    if (! hasCheckedMacAddresses)
-    {
-        hasCheckedMacAddresses = true;
+    value.asInt64[0] = r1.nextInt64();
+    value.asInt64[1] = r1.nextInt64();
 
-        Array<MACAddress> result;
-        MACAddress::findAllAddresses (result);
-
-        for (int i = 0; i < numElementsInArray (macAddresses); ++i)
-            macAddresses[i] = result[i].toInt64();
-    }
-
-    value.asInt64[0] = macAddresses[0];
-    value.asInt64[1] = macAddresses[1];
-
-    // We'll use both a local RNG that is re-seeded, plus the shared RNG,
-    // whose seed will carry over between calls to this method.
-
-    Random r (macAddresses[0] ^ macAddresses[1]
-                ^ Random::getSystemRandom().nextInt64());
+    Random r2;
 
     for (int i = 4; --i >= 0;)
-    {
-        r.setSeedRandomly(); // calling this repeatedly improves randomness
-        value.asInt[i] ^= r.nextInt();
-        value.asInt[i] ^= Random::getSystemRandom().nextInt();
-    }
+        value.asInt[i] ^= r2.nextInt();
 }
 
 Uuid::~Uuid() noexcept

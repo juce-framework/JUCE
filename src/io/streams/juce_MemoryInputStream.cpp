@@ -113,10 +113,11 @@ public:
     void runTest()
     {
         beginTest ("Basics");
+        Random r;
 
-        int randomInt = Random::getSystemRandom().nextInt();
-        int64 randomInt64 = Random::getSystemRandom().nextInt64();
-        double randomDouble = Random::getSystemRandom().nextDouble();
+        int randomInt = r.nextInt();
+        int64 randomInt64 = r.nextInt64();
+        double randomDouble = r.nextDouble();
         String randomString (createRandomWideCharString());
 
         MemoryOutputStream mo;
@@ -146,16 +147,16 @@ public:
 
         for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
         {
-            if (Random::getSystemRandom().nextBool())
+            if (r.nextBool())
             {
                 do
                 {
-                    buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0x10ffff - 1));
+                    buffer[i] = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
                 }
                 while (! CharPointer_UTF16::canRepresent (buffer[i]));
             }
             else
-                buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0xff));
+                buffer[i] = (juce_wchar) (1 + r.nextInt (0xff));
         }
 
         return CharPointer_UTF32 (buffer);

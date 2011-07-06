@@ -2161,19 +2161,20 @@ public:
     static String createRandomWideCharString()
     {
         juce_wchar buffer[50] = { 0 };
+        Random r;
 
         for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
         {
-            if (Random::getSystemRandom().nextBool())
+            if (r.nextBool())
             {
                 do
                 {
-                    buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0x10ffff - 1));
+                    buffer[i] = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
                 }
                 while (! CharPointer_UTF16::canRepresent (buffer[i]));
             }
             else
-                buffer[i] = (juce_wchar) (1 + Random::getSystemRandom().nextInt (0xff));
+                buffer[i] = (juce_wchar) (1 + r.nextInt (0xff));
         }
 
         return CharPointer_UTF32 (buffer);

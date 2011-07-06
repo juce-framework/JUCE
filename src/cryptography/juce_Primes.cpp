@@ -171,14 +171,14 @@ BigInteger Primes::createProbablePrime (const int bitLength,
     {
         randomSeeds = defaultSeeds;
         numRandomSeeds = numElementsInArray (defaultSeeds);
-        Random r;
+        Random r1, r2;
 
         for (int j = 10; --j >= 0;)
         {
-            r.setSeedRandomly();
+            r1.setSeedRandomly();
 
             for (int i = numRandomSeeds; --i >= 0;)
-                defaultSeeds[i] ^= r.nextInt() ^ Random::getSystemRandom().nextInt();
+                defaultSeeds[i] ^= r1.nextInt() ^ r2.nextInt();
         }
     }
 

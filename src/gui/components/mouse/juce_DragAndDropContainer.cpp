@@ -359,6 +359,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
 
             Point<int> relPos (sourceComponent->getLocalPoint (nullptr, lastMouseDown));
             Point<int> clipped (dragImage.getBounds().getConstrainedPoint (relPos));
+            Random random;
 
             for (int y = dragImage.getHeight(); --y >= 0;)
             {
@@ -373,7 +374,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
                     {
                         const float alpha = (distance > hi) ? 0
                                                             : (hi - distance) / (float) (hi - lo)
-                                                               + Random::getSystemRandom().nextFloat() * 0.008f;
+                                                               + random.nextFloat() * 0.008f;
 
                         dragImage.multiplyAlphaAt (x, y, alpha);
                     }

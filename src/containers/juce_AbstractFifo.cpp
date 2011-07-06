@@ -165,10 +165,11 @@ public:
         void run()
         {
             int n = 0;
+            Random r;
 
             while (! threadShouldExit())
             {
-                int num = Random::getSystemRandom().nextInt (2000) + 1;
+                int num = r.nextInt (2000) + 1;
 
                 int start1, size1, start2, size2;
                 fifo.prepareToWrite (num, start1, size1, start2, size2);
@@ -203,10 +204,11 @@ public:
         WriteThread writer (fifo, buffer);
 
         int n = 0;
+        Random r;
 
         for (int count = 1000000; --count >= 0;)
         {
-            int num = Random::getSystemRandom().nextInt (6000) + 1;
+            int num = r.nextInt (6000) + 1;
 
             int start1, size1, start2, size2;
             fifo.prepareToRead (num, start1, size1, start2, size2);

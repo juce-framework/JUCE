@@ -504,6 +504,7 @@ public:
         {
             const int numSamples = 2048;
             int32 original [numSamples], converted [numSamples], reversed [numSamples];
+            Random r;
 
             {
                 AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst> d (original);
@@ -511,13 +512,13 @@ public:
 
                 for (int i = 0; i < numSamples / 2; ++i)
                 {
-                    d.setAsFloat (Random::getSystemRandom().nextFloat() * 2.2f - 1.1f);
+                    d.setAsFloat (r.nextFloat() * 2.2f - 1.1f);
 
                     if (! d.isFloatingPoint())
                         clippingFailed = d.getAsFloat() > 1.0f || d.getAsFloat() < -1.0f || clippingFailed;
 
                     ++d;
-                    d.setAsInt32 (Random::getSystemRandom().nextInt());
+                    d.setAsInt32 (r.nextInt());
                     ++d;
                 }
 

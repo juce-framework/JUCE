@@ -59,11 +59,14 @@ void Random::combineSeed (const int64 seedValue) noexcept
 
 void Random::setSeedRandomly()
 {
-    combineSeed ((int64) (pointer_sized_int) this);
+    static int64 globalSeed = 0;
+
+    combineSeed (globalSeed ^ (int64) (pointer_sized_int) this);
     combineSeed (Time::getMillisecondCounter());
     combineSeed (Time::getHighResolutionTicks());
     combineSeed (Time::getHighResolutionTicksPerSecond());
     combineSeed (Time::currentTimeMillis());
+    globalSeed ^= seed;
 }
 
 Random& Random::getSystemRandom() noexcept
@@ -83,7 +86,7 @@ int Random::nextInt() noexcept
 int Random::nextInt (const int maxValue) noexcept
 {
     jassert (maxValue > 0);
-    return (nextInt() & 0x7fffffff) % maxValue;
+    return (((unsigned int) nextInt()) * (uint64) maxValue) >> 32;
 }
 
 int64 Random::nextInt64() noexcept

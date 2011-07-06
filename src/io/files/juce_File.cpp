@@ -890,7 +890,7 @@ String File::getRelativePathFrom (const File& dir)  const
 File File::createTempFile (const String& fileNameEnding)
 {
     const File tempFile (getSpecialLocation (tempDirectory)
-                            .getChildFile ("temp_" + String (Random::getSystemRandom().nextInt()))
+                            .getChildFile ("temp_" + String::toHexString (Random::getSystemRandom().nextInt()))
                             .withFileExtension (fileNameEnding));
 
     if (tempFile.exists())

@@ -135,9 +135,11 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     // clearly when things are being repainted.
     g.restoreState();
 
-    g.fillAll (Colour ((uint8) Random::getSystemRandom().nextInt (255),
-                       (uint8) Random::getSystemRandom().nextInt (255),
-                       (uint8) Random::getSystemRandom().nextInt (255),
+    static Random rng;
+
+    g.fillAll (Colour ((uint8) rng.nextInt (255),
+                       (uint8) rng.nextInt (255),
+                       (uint8) rng.nextInt (255),
                        (uint8) 0x50));
    #endif
 
