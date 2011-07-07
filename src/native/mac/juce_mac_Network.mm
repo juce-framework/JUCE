@@ -429,7 +429,7 @@ private:
         if (req == nil)
             return nil;
 
-        [req setHTTPMethod: isPost ? @"POST" : @"GET"];
+        [req setHTTPMethod: nsStringLiteral (isPost ? "POST" : "GET")];
         //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
 
         StringArray headerLines;

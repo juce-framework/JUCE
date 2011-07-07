@@ -74,7 +74,7 @@ public:
        #endif
     }
 
-    bool isPossibleForCurrentProject()          { return project.getProjectType().isGUIApplication(); }
+    bool isPossibleForCurrentProject()          { return projectType.isGUIApplication(); }
     bool usesMMFiles() const                    { return false; }
 
     void launchProject()
@@ -208,7 +208,7 @@ private:
     void writeAndroidMk (const File& file)
     {
         Array<RelativePath> files;
-        findAllFilesToCompile (project.getMainGroup(), files);
+        findAllFilesToCompile (getMainGroup(), files);
 
         for (int i = 0; i < generatedGroups.size(); ++i)
             findAllFilesToCompile (generatedGroups.getReference(i), files);
@@ -265,9 +265,9 @@ private:
             defines.set ("NDEBUG", "1");
         }
 
-        for (int i = 0; i < project.getNumConfigurations(); ++i)
+        for (int i = 0; i < configs.size(); ++i)
         {
-            Project::BuildConfiguration config (project.getConfiguration(i));
+            const Project::BuildConfiguration& config = configs.getReference(i);
 
             if (config.isDebug() == forDebug)
             {
@@ -285,7 +285,7 @@ private:
     XmlElement* createAntBuildXML()
     {
         XmlElement* proj = new XmlElement ("project");
-        proj->setAttribute ("name", project.getProjectName().toString());
+        proj->setAttribute ("name", projectName);
         proj->setAttribute ("default", "debug");
 
         proj->createNewChildElement ("property")->setAttribute ("file", "local.properties");
@@ -376,7 +376,7 @@ private:
 
     void writeIcon (const File& file, int size)
     {
-        Image im (project.getBestIconForSize (size, false));
+        Image im (getBestIconForSize (size, false));
 
         if (im.isValid())
         {
@@ -395,7 +395,7 @@ private:
         XmlElement strings ("resources");
         XmlElement* name = strings.createNewChildElement ("string");
         name->setAttribute ("name", "app_name");
-        name->addTextElement (project.getProjectName().toString());
+        name->addTextElement (projectName);
 
         writeXmlOrThrow (strings, file, "utf-8", 100);
     }

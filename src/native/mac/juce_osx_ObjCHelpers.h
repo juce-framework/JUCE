@@ -42,6 +42,16 @@ namespace
     {
         return [NSString stringWithUTF8String: s.toUTF8()];
     }
+
+    NSString* nsStringLiteral (const char* const s) noexcept
+    {
+        return [NSString stringWithUTF8String: s];
+    }
+
+    NSString* nsEmptyString() noexcept
+    {
+        return [NSString string];
+    }
 }
 
 

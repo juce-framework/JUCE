@@ -61,7 +61,7 @@ public:
     {
         ProjectExporter::createPropertyEditors (props);
 
-        if (project.getProjectType().isLibrary())
+        if (projectType.isLibrary())
         {
             const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
             const int libTypeValues[] = { 1, 2, 0 };
@@ -83,7 +83,7 @@ protected:
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
     Value getLibraryType() const        { return getSetting (Ids::libraryType); }
-    bool isLibraryDLL() const           { return project.getProjectType().isLibrary() && getLibraryType() == 2; }
+    bool isLibraryDLL() const           { return projectType.isLibrary() && getLibraryType() == 2; }
 
     //==============================================================================
     String getIntermediatesPath (const Project::BuildConfiguration& config) const
@@ -98,17 +98,17 @@ protected:
             return getIntermediatesPath (config);
 
         return ".\\" + RelativePath (binaryPath, RelativePath::projectFolder)
-                             .rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder)
+                             .rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder)
                              .toWindowsStyle();
     }
 
     String getTargetBinarySuffix() const
     {
-        if (project.getProjectType().isLibrary())
+        if (projectType.isLibrary())
             return ".lib";
         else if (isRTAS())
             return ".dpm";
-        else if (project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin())
+        else if (projectType.isAudioPlugin() || projectType.isBrowserPlugin())
             return ".dll";
 
         return ".exe";
@@ -130,10 +130,10 @@ protected:
             defines.set ("NDEBUG", "");
         }
 
-        if (project.getProjectType().isCommandLineApp())
+        if (projectType.isCommandLineApp())
             defines.set ("_CONSOLE", "");
 
-        if (project.getProjectType().isLibrary())
+        if (projectType.isLibrary())
             defines.set ("_LIB", "");
 
         if (isRTAS())
@@ -188,25 +188,25 @@ protected:
     void writeSolutionFile (OutputStream& out, const String& versionString, const File& vcProject)
     {
         out << "Microsoft Visual Studio Solution File, Format Version " << versionString << newLine
-            << "Project(\"" << createGUID (project.getProjectName().toString() + "sln_guid") << "\") = \"" << project.getProjectName().toString() << "\", \""
+            << "Project(\"" << createGUID (projectName + "sln_guid") << "\") = \"" << projectName << "\", \""
             << vcProject.getFileName() << "\", \"" << projectGUID << '"' << newLine
             << "EndProject" << newLine
             << "Global" << newLine
             << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution" << newLine;
 
         int i;
-        for (i = 0; i < project.getNumConfigurations(); ++i)
+        for (i = 0; i < configs.size(); ++i)
         {
-            Project::BuildConfiguration config (project.getConfiguration (i));
+            const Project::BuildConfiguration& config = configs.getReference(i);
             out << "\t\t" << createConfigName (config) << " = " << createConfigName (config) << newLine;
         }
 
         out << "\tEndGlobalSection" << newLine
             << "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution" << newLine;
 
-        for (i = 0; i < project.getNumConfigurations(); ++i)
+        for (i = 0; i < configs.size(); ++i)
         {
-            Project::BuildConfiguration config (project.getConfiguration (i));
+            const Project::BuildConfiguration& config = configs.getReference(i);
             out << "\t\t" << projectGUID << "." << createConfigName (config) << ".ActiveCfg = " << createConfigName (config) << newLine;
             out << "\t\t" << projectGUID << "." << createConfigName (config) << ".Build.0 = " << createConfigName (config) << newLine;
         }
@@ -326,19 +326,19 @@ protected:
     {
         Array<Image> images;
 
-        Image im (project.getBestIconForSize (16, true));
+        Image im (getBestIconForSize (16, true));
         if (im.isValid())
             images.add (im);
 
-        im = project.getBestIconForSize (32, true);
+        im = getBestIconForSize (32, true);
         if (im.isValid())
             images.add (im);
 
-        im = project.getBestIconForSize (48, true);
+        im = getBestIconForSize (48, true);
         if (im.isValid())
             images.add (im);
 
-        im = project.getBestIconForSize (128, true);
+        im = getBestIconForSize (128, true);
         if (im.isValid())
             images.add (im);
 
@@ -433,7 +433,7 @@ protected:
     {
         projectXml.setAttribute ("ProjectType", "Visual C++");
         projectXml.setAttribute ("Version", getProjectVersionString());
-        projectXml.setAttribute ("Name", project.getProjectName().toString());
+        projectXml.setAttribute ("Name", projectName);
         projectXml.setAttribute ("ProjectGUID", projectGUID);
         projectXml.setAttribute ("TargetFrameworkVersion", "131072");
 
@@ -460,9 +460,9 @@ protected:
 
         if (excludeFromBuild || useStdcall)
         {
-            for (int i = 0; i < project.getNumConfigurations(); ++i)
+            for (int i = 0; i < configs.size(); ++i)
             {
-                Project::BuildConfiguration config (project.getConfiguration (i));
+                const Project::BuildConfiguration& config = configs.getReference(i);
 
                 XmlElement* fileConfig = fileXml->createNewChildElement ("FileConfiguration");
                 fileConfig->setAttribute ("Name", createConfigName (config));
@@ -522,7 +522,7 @@ protected:
 
     void createFiles (XmlElement& files)
     {
-        addFiles (project.getMainGroup(), files, false);
+        addFiles (getMainGroup(), files, false);
 
         for (int i = 0; i < generatedGroups.size(); ++i)
             if (generatedGroups.getReference(i).getNumChildren() > 0)
@@ -547,8 +547,8 @@ protected:
         xml.setAttribute ("Name", createConfigName (config));
         xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (binariesPath));
         xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (intermediatesPath));
-        xml.setAttribute ("ConfigurationType", (project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin() || isLibraryDLL())
-                                                    ? "2" : (project.getProjectType().isLibrary() ? "4" : "1"));
+        xml.setAttribute ("ConfigurationType", (projectType.isAudioPlugin() || projectType.isBrowserPlugin() || isLibraryDLL())
+                                                    ? "2" : (projectType.isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
         xml.setAttribute ("CharacterSet", "2");
@@ -571,7 +571,7 @@ protected:
         createToolElement (xml, "VCXMLDataGeneratorTool");
         createToolElement (xml, "VCWebServiceProxyGeneratorTool");
 
-        if (! project.getProjectType().isLibrary())
+        if (! projectType.isLibrary())
         {
             XmlElement* midl = createToolElement (xml, "VCMIDLTool");
             midl->setAttribute ("PreprocessorDefinitions", isDebug ? "_DEBUG" : "NDEBUG");
@@ -591,7 +591,7 @@ protected:
             if (isDebug)
             {
                 compiler->setAttribute ("BufferSecurityCheck", "");
-                compiler->setAttribute ("DebugInformationFormat", project.getProjectType().isLibrary() ? "3" : "4");
+                compiler->setAttribute ("DebugInformationFormat", projectType.isLibrary() ? "3" : "4");
             }
             else
             {
@@ -628,7 +628,7 @@ protected:
 
         const String outputFileName (getBinaryFileForConfig (config));
 
-        if (! project.getProjectType().isLibrary())
+        if (! projectType.isLibrary())
         {
             XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
@@ -641,7 +641,7 @@ protected:
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
             linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
-            linker->setAttribute ("SubSystem", project.getProjectType().isCommandLineApp() ? "1" : "2");
+            linker->setAttribute ("SubSystem", projectType.isCommandLineApp() ? "1" : "2");
 
             if (! isDebug)
             {
@@ -700,19 +700,16 @@ protected:
 
         createToolElement (xml, "VCFxCopTool");
 
-        if (! project.getProjectType().isLibrary())
+        if (! projectType.isLibrary())
             createToolElement (xml, "VCAppVerifierTool");
 
         createToolElement (xml, "VCPostBuildEventTool");
     }
 
-    void createConfigs (XmlElement& configs)
+    void createConfigs (XmlElement& xml)
     {
-        for (int i = 0; i < project.getNumConfigurations(); ++i)
-        {
-            Project::BuildConfiguration config (project.getConfiguration (i));
-            createConfig (*configs.createNewChildElement ("Configuration"), config);
-        }
+        for (int i = 0; i < configs.size(); ++i)
+            createConfig (*xml.createNewChildElement ("Configuration"), configs.getReference(i));
     }
 
     //==============================================================================
@@ -814,22 +811,22 @@ private:
     //==============================================================================
     String createConfigName (const Project::BuildConfiguration& config) const
     {
-        return project.getProjectName().toString() + " - Win32 " + config.getName().toString();
+        return projectName + " - Win32 " + config.getName().toString();
     }
 
     void writeProject (OutputStream& out)
     {
-        const String defaultConfigName (createConfigName (project.getConfiguration (0)));
+        const String defaultConfigName (createConfigName (configs.getReference(0)));
 
-        const bool isDLL = project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin();
+        const bool isDLL = projectType.isAudioPlugin() || projectType.isBrowserPlugin();
         String targetType, targetCode;
 
-        if (isDLL)                                              { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
-        else if (project.getProjectType().isLibrary())          { targetType = "\"Win32 (x86) Static Library\"";        targetCode = "0x0104"; }
-        else if (project.getProjectType().isCommandLineApp())   { targetType = "\"Win32 (x86) Console Application\"";   targetCode = "0x0103"; }
-        else                                                    { targetType = "\"Win32 (x86) Application\"";           targetCode = "0x0101"; }
+        if (isDLL)                                 { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
+        else if (projectType.isLibrary())          { targetType = "\"Win32 (x86) Static Library\"";        targetCode = "0x0104"; }
+        else if (projectType.isCommandLineApp())   { targetType = "\"Win32 (x86) Console Application\"";   targetCode = "0x0103"; }
+        else                                       { targetType = "\"Win32 (x86) Application\"";           targetCode = "0x0101"; }
 
-        out << "# Microsoft Developer Studio Project File - Name=\"" << project.getProjectName()
+        out << "# Microsoft Developer Studio Project File - Name=\"" << projectName
             << "\" - Package Owner=<4>" << newLine
             << "# Microsoft Developer Studio Generated Build File, Format Version 6.00" << newLine
             << "# ** DO NOT EDIT **" << newLine
@@ -838,19 +835,19 @@ private:
             << "!MESSAGE This is not a valid makefile. To build this project using NMAKE," << newLine
             << "!MESSAGE use the Export Makefile command and run" << newLine
             << "!MESSAGE " << newLine
-            << "!MESSAGE NMAKE /f \"" << project.getProjectName() << ".mak.\"" << newLine
+            << "!MESSAGE NMAKE /f \"" << projectName << ".mak.\"" << newLine
             << "!MESSAGE " << newLine
             << "!MESSAGE You can specify a configuration when running NMAKE" << newLine
             << "!MESSAGE by defining the macro CFG on the command line. For example:" << newLine
             << "!MESSAGE " << newLine
-            << "!MESSAGE NMAKE /f \"" << project.getProjectName() << ".mak\" CFG=\"" << defaultConfigName << '"' << newLine
+            << "!MESSAGE NMAKE /f \"" << projectName << ".mak\" CFG=\"" << defaultConfigName << '"' << newLine
             << "!MESSAGE " << newLine
             << "!MESSAGE Possible choices for configuration are:" << newLine
             << "!MESSAGE " << newLine;
 
         int i;
-        for (i = 0; i < project.getNumConfigurations(); ++i)
-            out << "!MESSAGE \"" << createConfigName (project.getConfiguration (i)) << "\" (based on " << targetType << ")" << newLine;
+        for (i = 0; i < configs.size(); ++i)
+            out << "!MESSAGE \"" << createConfigName (configs.getReference (i)) << "\" (based on " << targetType << ")" << newLine;
 
         out << "!MESSAGE " << newLine
             << "# Begin Project" << newLine
@@ -863,9 +860,9 @@ private:
 
         String targetList;
 
-        for (i = 0; i < project.getNumConfigurations(); ++i)
+        for (i = 0; i < configs.size(); ++i)
         {
-            const Project::BuildConfiguration config (project.getConfiguration (i));
+            const Project::BuildConfiguration& config = configs.getReference(i);
             const String configName (createConfigName (config));
             targetList << "# Name \"" << configName << '"' << newLine;
 
@@ -898,7 +895,7 @@ private:
             if (! isDebug)
                 out << "# SUBTRACT CPP /YX" << newLine;
 
-            if (! project.getProjectType().isLibrary())
+            if (! projectType.isLibrary())
                 out << "# ADD BASE MTL /nologo /D " << defines << " /mktyplib203 /win32" << newLine
                     << "# ADD MTL /nologo /D " << defines << " /mktyplib203 /win32" << newLine;
 
@@ -908,7 +905,7 @@ private:
                 << "# ADD BASE BSC32 /nologo" << newLine
                 << "# ADD BSC32 /nologo" << newLine;
 
-            if (project.getProjectType().isLibrary())
+            if (projectType.isLibrary())
             {
                 out << "LIB32=link.exe -lib" << newLine
                     << "# ADD BASE LIB32 /nologo" << newLine
@@ -922,8 +919,8 @@ private:
                     << "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "
                     << (isDebug ? " /debug" : "")
                     << " /nologo /machine:I386 /out:\"" << targetBinary << "\" "
-                    << (isDLL ? "/dll" : (project.getProjectType().isCommandLineApp() ? "/subsystem:console "
-                                                                                      : "/subsystem:windows "))
+                    << (isDLL ? "/dll" : (projectType.isCommandLineApp() ? "/subsystem:console "
+                                                                         : "/subsystem:windows "))
                     << replacePreprocessorTokens (config, getExtraLinkerFlags().toString()).trim() << newLine;
             }
         }
@@ -932,7 +929,7 @@ private:
             << "# Begin Target"  << newLine
             << targetList;
 
-        writeFiles (out, project.getMainGroup());
+        writeFiles (out, getMainGroup());
 
         for (int i = 0; i < generatedGroups.size(); ++i)
             if (generatedGroups.getReference(i).getNumChildren() > 0)
@@ -1002,7 +999,7 @@ private:
                 << "}}}" << newLine;
         }
 
-        out << "Project: \"" << project.getProjectName() << "\" = .\\" << getDSPFile().getFileName() << " - Package Owner=<4>" << newLine
+        out << "Project: \"" << projectName << "\" = .\\" << getDSPFile().getFileName() << " - Package Owner=<4>" << newLine
             << "Package=<5>" << newLine
             << "{{{" << newLine
             << "}}}" << newLine
@@ -1113,9 +1110,9 @@ protected:
             XmlElement* configsGroup = projectXml.createNewChildElement ("ItemGroup");
             configsGroup->setAttribute ("Label", "ProjectConfigurations");
 
-            for (int i = 0; i < project.getNumConfigurations(); ++i)
+            for (int i = 0; i < configs.size(); ++i)
             {
-                Project::BuildConfiguration config (project.getConfiguration (i));
+                const Project::BuildConfiguration& config = configs.getReference(i);
 
                 XmlElement* e = configsGroup->createNewChildElement ("ProjectConfiguration");
                 e->setAttribute ("Include", createConfigName (config));
@@ -1135,9 +1132,9 @@ protected:
             imports->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
         }
 
-        for (int i = 0; i < project.getNumConfigurations(); ++i)
+        for (int i = 0; i < configs.size(); ++i)
         {
-            Project::BuildConfiguration config (project.getConfiguration (i));
+            const Project::BuildConfiguration& config = configs.getReference(i);
 
             XmlElement* e = projectXml.createNewChildElement ("PropertyGroup");
             setConditionAttribute (*e, config);
@@ -1178,9 +1175,9 @@ protected:
             XmlElement* props = projectXml.createNewChildElement ("PropertyGroup");
             props->createNewChildElement ("_ProjectFileVersion")->addTextElement ("10.0.30319.1");
 
-            for (int i = 0; i < project.getNumConfigurations(); ++i)
+            for (int i = 0; i < configs.size(); ++i)
             {
-                Project::BuildConfiguration config (project.getConfiguration (i));
+                const Project::BuildConfiguration& config = configs.getReference(i);
 
                 XmlElement* outdir = props->createNewChildElement ("OutDir");
                 setConditionAttribute (*outdir, config);
@@ -1196,9 +1193,9 @@ protected:
             }
         }
 
-        for (int i = 0; i < project.getNumConfigurations(); ++i)
+        for (int i = 0; i < configs.size(); ++i)
         {
-            Project::BuildConfiguration config (project.getConfiguration (i));
+            const Project::BuildConfiguration& config = configs.getReference(i);
             String binariesPath (getConfigTargetPath (config));
             String intermediatesPath (getIntermediatesPath (config));
             const bool isDebug = (bool) config.isDebug().getValue();
@@ -1259,7 +1256,7 @@ protected:
                                                                                                         : "%(IgnoreSpecificDefaultLibraries)");
                 link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
                 link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
-                link->createNewChildElement ("SubSystem")->addTextElement (project.getProjectType().isCommandLineApp() ? "Console" : "Windows");
+                link->createNewChildElement ("SubSystem")->addTextElement (projectType.isCommandLineApp() ? "Console" : "Windows");
                 link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
                 if (! isDebug)
@@ -1285,7 +1282,7 @@ protected:
             XmlElement* cppFiles = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* headerFiles = projectXml.createNewChildElement ("ItemGroup");
 
-            addFilesToCompile (project.getMainGroup(), *cppFiles, *headerFiles, false);
+            addFilesToCompile (getMainGroup(), *cppFiles, *headerFiles, false);
 
             for (int i = 0; i < generatedGroups.size(); ++i)
                 if (generatedGroups.getReference(i).getNumChildren() > 0)
@@ -1320,9 +1317,9 @@ protected:
 
     String getProjectType() const
     {
-        if (project.getProjectType().isGUIApplication() || project.getProjectType().isCommandLineApp())   return "Application";
-        else if (project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin())  return "DynamicLibrary";
-        else if (project.getProjectType().isLibrary())                                                    return "StaticLibrary";
+        if (projectType.isGUIApplication() || projectType.isCommandLineApp())   return "Application";
+        else if (projectType.isAudioPlugin() || projectType.isBrowserPlugin())  return "DynamicLibrary";
+        else if (projectType.isLibrary())                                       return "StaticLibrary";
 
         jassertfalse;
         return String::empty;
@@ -1440,7 +1437,7 @@ protected:
         XmlElement* cpps    = filterXml.createNewChildElement ("ItemGroup");
         XmlElement* headers = filterXml.createNewChildElement ("ItemGroup");
 
-        addFilesToFilter (project.getMainGroup(), project.getProjectName().toString(), *cpps, *headers, *groups);
+        addFilesToFilter (getMainGroup(), projectName, *cpps, *headers, *groups);
 
         for (int i = 0; i < generatedGroups.size(); ++i)
             if (generatedGroups.getReference(i).getNumChildren() > 0)

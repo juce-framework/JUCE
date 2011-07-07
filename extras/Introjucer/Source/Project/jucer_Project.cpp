@@ -459,7 +459,7 @@ Image Project::getBigIcon()
     if (icon.isValid())
         return ImageCache::getFromFile (icon.getFile());
 
-    return Image();
+    return Image::null;
 }
 
 Image Project::getSmallIcon()
@@ -469,45 +469,8 @@ Image Project::getSmallIcon()
     if (icon.isValid())
         return ImageCache::getFromFile (icon.getFile());
 
-    return Image();
+    return Image::null;
 }
-
-Image Project::getBestIconForSize (int size, bool returnNullIfNothingBigEnough)
-{
-    Image im;
-
-    const Image im1 (getSmallIcon());
-    const Image im2 (getBigIcon());
-
-    if (im1.isValid() && im2.isValid())
-    {
-        if (im1.getWidth() >= size && im2.getWidth() >= size)
-            im = im1.getWidth() < im2.getWidth() ? im1 : im2;
-        else if (im1.getWidth() >= size)
-            im = im1;
-        else if (im2.getWidth() >= size)
-            im = im2;
-        else
-            return Image();
-    }
-    else
-    {
-        im = im1.isValid() ? im1 : im2;
-    }
-
-    if (size == im.getWidth() && size == im.getHeight())
-        return im;
-
-    if (returnNullIfNothingBigEnough && im.getWidth() < size && im.getHeight() < size)
-        return Image::null;
-
-    Image newIm (Image::ARGB, size, size, true, Image::SoftwareImage);
-    Graphics g (newIm);
-    g.drawImageWithin (im, 0, 0, size, size,
-                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
-    return newIm;
-}
-
 
 StringPairArray Project::getPreprocessorDefs() const
 {

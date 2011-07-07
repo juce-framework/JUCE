@@ -123,7 +123,7 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
             movie = [QTMovie movieWithDataReference: [QTDataReference dataReferenceWithReferenceToData: [NSData dataWithBytes: temp.getData()
                                                                                                                        length: temp.getSize()]
                                                                                                   name: [NSString stringWithUTF8String: suffixesToTry[i]]
-                                                                                              MIMEType: @""]
+                                                                                              MIMEType: nsEmptyString()]
                                               error: nil];
 
             if (movie != 0)

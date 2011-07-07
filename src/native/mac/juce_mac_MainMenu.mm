@@ -96,7 +96,7 @@ public:
     {
         NSMenuItem* item = [parent addItemWithTitle: juceStringToNS (name)
                                              action: nil
-                                      keyEquivalent: @""];
+                                      keyEquivalent: nsEmptyString()];
         [item setTag: tag];
 
         NSMenu* sub = createMenu (child, name, menuId, tag);
@@ -200,7 +200,7 @@ public:
         NSString* text = juceStringToNS (iter.itemName.upToFirstOccurrenceOf ("<end>", false, true));
 
         if (text == nil)
-            text = @"";
+            text = nsEmptyString();
 
         if (iter.isSeparator)
         {
@@ -210,7 +210,7 @@ public:
         {
             NSMenuItem* item = [menuToAddTo addItemWithTitle: text
                                                       action: nil
-                                               keyEquivalent: @""];
+                                               keyEquivalent: nsEmptyString()];
 
             [item setEnabled: false];
         }
@@ -218,7 +218,7 @@ public:
         {
             NSMenuItem* item = [menuToAddTo addItemWithTitle: text
                                                       action: nil
-                                               keyEquivalent: @""];
+                                               keyEquivalent: nsEmptyString()];
 
             [item setTag: iter.itemId];
             [item setEnabled: iter.isEnabled];
@@ -232,7 +232,7 @@ public:
         {
             NSMenuItem* item = [menuToAddTo addItemWithTitle: text
                                                       action: @selector (menuItemInvoked:)
-                                               keyEquivalent: @""];
+                                               keyEquivalent: nsEmptyString()];
 
             [item setTag: iter.itemId];
             [item setEnabled: iter.isEnabled];
@@ -315,7 +315,7 @@ private:
 
     static void flashMenuBar (NSMenu* menu)
     {
-        if ([[menu title] isEqualToString: @"Apple"])
+        if ([[menu title] isEqualToString: nsStringLiteral ("Apple")])
             return;
 
         [menu retain];
@@ -323,7 +323,7 @@ private:
         const unichar f35Key = NSF35FunctionKey;
         NSString* f35String = [NSString stringWithCharacters: &f35Key length: 1];
 
-        NSMenuItem* item = [[NSMenuItem alloc] initWithTitle: @"x"
+        NSMenuItem* item = [[NSMenuItem alloc] initWithTitle: nsStringLiteral ("x")
                                                       action: nil
                                                keyEquivalent: f35String];
         [item setTarget: nil];
@@ -480,11 +480,11 @@ namespace MainMenuHelpers
         NSMenuItem* item;
 
         // Services...
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (@"Services", nil)
-                                          action: nil  keyEquivalent: @""];
+        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Services"), nil)
+                                          action: nil  keyEquivalent: nsEmptyString()];
         [menu addItem: item];
         [item release];
-        NSMenu* servicesMenu = [[NSMenu alloc] initWithTitle: @"Services"];
+        NSMenu* servicesMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Services")];
         [menu setSubmenu: servicesMenu forItem: item];
         [NSApp setServicesMenu: servicesMenu];
         [servicesMenu release];
@@ -492,20 +492,20 @@ namespace MainMenuHelpers
 
         // Hide + Show stuff...
         item = [[NSMenuItem alloc] initWithTitle: juceStringToNS ("Hide " + appName)
-                                          action: @selector (hide:)  keyEquivalent: @"h"];
+                                          action: @selector (hide:)  keyEquivalent: nsStringLiteral ("h")];
         [item setTarget: NSApp];
         [menu addItem: item];
         [item release];
 
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (@"Hide Others", nil)
-                                          action: @selector (hideOtherApplications:)  keyEquivalent: @"h"];
+        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Hide Others"), nil)
+                                          action: @selector (hideOtherApplications:)  keyEquivalent: nsStringLiteral ("h")];
         [item setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
         [item setTarget: NSApp];
         [menu addItem: item];
         [item release];
 
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (@"Show All", nil)
-                                          action: @selector (unhideAllApplications:)  keyEquivalent: @""];
+        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Show All"), nil)
+                                          action: @selector (unhideAllApplications:)  keyEquivalent: nsEmptyString()];
         [item setTarget: NSApp];
         [menu addItem: item];
         [item release];
@@ -514,7 +514,7 @@ namespace MainMenuHelpers
 
         // Quit item....
         item = [[NSMenuItem alloc] initWithTitle: juceStringToNS ("Quit " + appName)
-                                          action: @selector (terminate:)  keyEquivalent: @"q"];
+                                          action: @selector (terminate:)  keyEquivalent: nsStringLiteral ("q")];
 
         [item setTarget: NSApp];
         [menu addItem: item];
@@ -533,10 +533,10 @@ namespace MainMenuHelpers
         {
             JUCE_AUTORELEASEPOOL
 
-            NSMenu* mainMenu = [[NSMenu alloc] initWithTitle: @"MainMenu"];
-            NSMenuItem* item = [mainMenu addItemWithTitle: @"Apple" action: nil keyEquivalent: @""];
+            NSMenu* mainMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("MainMenu")];
+            NSMenuItem* item = [mainMenu addItemWithTitle: nsStringLiteral ("Apple") action: nil keyEquivalent: nsEmptyString()];
 
-            NSMenu* appMenu = [[NSMenu alloc] initWithTitle: @"Apple"];
+            NSMenu* appMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Apple")];
 
             [NSApp performSelector: @selector (setAppleMenu:) withObject: appMenu];
             [mainMenu setSubmenu: appMenu forItem: item];

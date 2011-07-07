@@ -285,7 +285,7 @@ using namespace JUCE_NAMESPACE;
 - (void) broadcastMessageCallback: (NSNotification*) n
 {
     NSDictionary* dict = (NSDictionary*) [n userInfo];
-    const String messageString (nsStringToJuce ((NSString*) [dict valueForKey: @"message"]));
+    const String messageString (nsStringToJuce ((NSString*) [dict valueForKey: nsStringLiteral ("message")]));
     MessageManager::getInstance()->deliverBroadcastMessage (messageString);
 }
 
@@ -406,7 +406,7 @@ bool MessageManager::postMessageToSystemQueue (Message* message)
 void MessageManager::broadcastMessage (const String& message)
 {
     NSDictionary* info = [NSDictionary dictionaryWithObject: juceStringToNS (message)
-                                                     forKey: @"message"];
+                                                     forKey: nsStringLiteral ("message")];
 
     [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegateRedirector::getBroacastEventName()
                                                                    object: nil

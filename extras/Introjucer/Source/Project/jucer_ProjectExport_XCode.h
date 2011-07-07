@@ -91,7 +91,7 @@ public:
        #endif
     }
 
-    bool isPossibleForCurrentProject()      { return project.getProjectType().isGUIApplication() || ! iPhone; }
+    bool isPossibleForCurrentProject()      { return projectType.isGUIApplication() || ! iPhone; }
     bool usesMMFiles() const                { return true; }
     bool isXcode() const                    { return true; }
 
@@ -103,7 +103,7 @@ public:
         props.getLast()->setTooltip ("Because objective-C linkage is done by string-matching, you can get horrible linkage mix-ups when different modules containing the "
                                      "same class-names are loaded simultaneously. This setting lets you provide a unique string that will be used in naming the obj-C classes in your executable to avoid this.");
 
-        if (project.getProjectType().isGUIApplication() && ! iPhone)
+        if (projectType.isGUIApplication() && ! iPhone)
         {
             props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false));
             props.getLast()->setTooltip ("A comma-separated list of file extensions for documents that your app can open.");
@@ -164,22 +164,22 @@ private:
 
     File getProjectBundle() const                 { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (".xcodeproj"); }
 
-    bool hasPList() const                         { return ! (project.getProjectType().isLibrary() || project.getProjectType().isCommandLineApp()); }
+    bool hasPList() const                         { return ! (projectType.isLibrary() || projectType.isCommandLineApp()); }
     String getAudioPluginBundleExtension() const  { return "component"; }
 
     //==============================================================================
     void createObjects()
     {
-        if (! project.getProjectType().isLibrary())
+        if (! projectType.isLibrary())
             addFrameworks();
 
-        const String productName (project.getConfiguration (0).getTargetBinaryName().toString());
+        const String productName (configs.getReference(0).getTargetBinaryName().toString());
 
-        if (project.getProjectType().isGUIApplication())         addBuildProduct ("wrapper.application", productName + ".app");
-        else if (project.getProjectType().isCommandLineApp())    addBuildProduct ("compiled.mach-o.executable", productName);
-        else if (project.getProjectType().isLibrary())           addBuildProduct ("archive.ar", getLibbedFilename (productName));
-        else if (project.getProjectType().isAudioPlugin())       addBuildProduct ("wrapper.cfbundle", productName + "." + getAudioPluginBundleExtension());
-        else if (project.getProjectType().isBrowserPlugin())     addBuildProduct ("wrapper.cfbundle", productName + ".plugin");
+        if (projectType.isGUIApplication())         addBuildProduct ("wrapper.application", productName + ".app");
+        else if (projectType.isCommandLineApp())    addBuildProduct ("compiled.mach-o.executable", productName);
+        else if (projectType.isLibrary())           addBuildProduct ("archive.ar", getLibbedFilename (productName));
+        else if (projectType.isAudioPlugin())       addBuildProduct ("wrapper.cfbundle", productName + "." + getAudioPluginBundleExtension());
+        else if (projectType.isBrowserPlugin())     addBuildProduct ("wrapper.cfbundle", productName + ".plugin");
         else jassert (productName.isEmpty());
 
         if (hasPList())
@@ -197,20 +197,20 @@ private:
             resourceFileRefs.add (createID (iconPath));
         }
 
-        addProjectItem (project.getMainGroup());
+        addProjectItem (getMainGroup());
 
-        for (int i = 0; i < project.getNumConfigurations(); ++i)
+        for (int i = 0; i < configs.size(); ++i)
         {
-            Project::BuildConfiguration config (project.getConfiguration (i));
+            const Project::BuildConfiguration& config = configs.getReference(i);
 
             addProjectConfig (config.getName().getValue(), getProjectSettings (config));
-            addTargetConfig (config.getName().getValue(), getTargetSettings (config));
+            addTargetConfig  (config.getName().getValue(), getTargetSettings (config));
         }
 
         addConfigList (projectConfigs, createID ("__projList"));
         addConfigList (targetConfigs, createID ("__configList"));
 
-        if (! project.getProjectType().isLibrary())
+        if (! projectType.isLibrary())
             addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
         if (rezFileIDs.size() > 0)
@@ -218,10 +218,10 @@ private:
 
         addBuildPhase ("PBXSourcesBuildPhase", sourceIDs);
 
-        if (! project.getProjectType().isLibrary())
+        if (! projectType.isLibrary())
             addBuildPhase ("PBXFrameworksBuildPhase", frameworkIDs);
 
-        if (project.getProjectType().isAudioPlugin())
+        if (projectType.isAudioPlugin())
             addPluginShellScriptPhase();
 
         addTargetObject();
@@ -345,9 +345,9 @@ private:
         addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
         addPlistDictionaryKey (dict, "CFBundleIconFile",            iconFile.exists() ? iconFile.getFileName() : String::empty);
         addPlistDictionaryKey (dict, "CFBundleIdentifier",          project.getBundleIdentifier().toString());
-        addPlistDictionaryKey (dict, "CFBundleName",                project.getProjectName().toString());
+        addPlistDictionaryKey (dict, "CFBundleName",                projectName);
 
-        if (project.getProjectType().isAudioPlugin())
+        if (projectType.isAudioPlugin())
         {
             addPlistDictionaryKey (dict, "CFBundlePackageType",     "TDMw");
             addPlistDictionaryKey (dict, "CFBundleSignature",       "PTul");
@@ -423,7 +423,7 @@ private:
 
     void getLinkerFlags (const Project::BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths)
     {
-        if (project.getProjectType().isAudioPlugin())
+        if (projectType.isAudioPlugin())
         {
             flags.add ("-bundle");
 
@@ -461,7 +461,7 @@ private:
         s.add ("WARNING_CFLAGS = -Wreorder");
         s.add ("GCC_MODEL_TUNING = G5");
 
-        if (project.getProjectType().isLibrary() || project.getJuceLinkageMode() == Project::useLinkedJuce)
+        if (projectType.isLibrary() || project.getJuceLinkageMode() == Project::useLinkedJuce)
         {
             s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = NO");
             s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = NO");
@@ -506,11 +506,11 @@ private:
         if (extraFlags.isNotEmpty())
             s.add ("OTHER_CPLUSPLUSFLAGS = " + extraFlags);
 
-        if (project.getProjectType().isGUIApplication())
+        if (projectType.isGUIApplication())
         {
             s.add ("INSTALL_PATH = \"$(HOME)/Applications\"");
         }
-        else if (project.getProjectType().isAudioPlugin())
+        else if (projectType.isAudioPlugin())
         {
             s.add ("LIBRARY_STYLE = Bundle");
             s.add ("INSTALL_PATH = \"$(HOME)/Library/Audio/Plug-Ins/Components/\"");
@@ -520,17 +520,17 @@ private:
                    " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
                    " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\"\"");
         }
-        else if (project.getProjectType().isBrowserPlugin())
+        else if (projectType.isBrowserPlugin())
         {
             s.add ("LIBRARY_STYLE = Bundle");
             s.add ("INSTALL_PATH = \"/Library/Internet Plug-Ins/\"");
         }
-        else if (project.getProjectType().isLibrary())
+        else if (projectType.isLibrary())
         {
             if (config.getTargetBinaryRelativePath().toString().isNotEmpty())
             {
                 RelativePath binaryPath (config.getTargetBinaryRelativePath().toString(), RelativePath::projectFolder);
-                binaryPath = binaryPath.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder);
+                binaryPath = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder);
 
                 s.add ("DSTROOT = " + sanitisePath (binaryPath.toUnixStyle()));
                 s.add ("SYMROOT = " + sanitisePath (binaryPath.toUnixStyle()));
@@ -539,7 +539,7 @@ private:
             s.add ("CONFIGURATION_BUILD_DIR = \"$(BUILD_DIR)\"");
             s.add ("DEPLOYMENT_LOCATION = YES");
         }
-        else if (project.getProjectType().isCommandLineApp())
+        else if (projectType.isCommandLineApp())
         {
         }
         else
@@ -960,26 +960,26 @@ private:
         v->setProperty ("buildPhases", "(" + indentList (buildPhaseIDs, ",") + " )", 0);
         v->setProperty ("buildRules", "( )", 0);
         v->setProperty ("dependencies", "( )", 0);
-        v->setProperty (Ids::name, project.getDocumentTitle(), 0);
-        v->setProperty ("productName", project.getDocumentTitle(), 0);
+        v->setProperty (Ids::name, projectName, 0);
+        v->setProperty ("productName", projectName, 0);
         v->setProperty ("productReference", createID ("__productFileID"), 0);
 
-        if (project.getProjectType().isGUIApplication())
+        if (projectType.isGUIApplication())
         {
             v->setProperty ("productInstallPath", "$(HOME)/Applications", 0);
             v->setProperty ("productType", "com.apple.product-type.application", 0);
         }
-        else if (project.getProjectType().isCommandLineApp())
+        else if (projectType.isCommandLineApp())
         {
             v->setProperty ("productInstallPath", "/usr/bin", 0);
             v->setProperty ("productType", "com.apple.product-type.tool", 0);
         }
-        else if (project.getProjectType().isAudioPlugin() || project.getProjectType().isBrowserPlugin())
+        else if (projectType.isAudioPlugin() || projectType.isBrowserPlugin())
         {
             v->setProperty ("productInstallPath", "$(HOME)/Library/Audio/Plug-Ins/Components/", 0);
             v->setProperty ("productType", "com.apple.product-type.bundle", 0);
         }
-        else if (project.getProjectType().isLibrary())
+        else if (projectType.isLibrary())
         {
             v->setProperty ("productType", "com.apple.product-type.library.static", 0);
         }
@@ -996,7 +996,7 @@ private:
         v->setProperty ("buildConfigurationList", createID ("__projList"), 0);
         v->setProperty ("compatibilityVersion", "Xcode 3.1", 0);
         v->setProperty ("hasScannedForEncodings", (int) 0, 0);
-        v->setProperty ("mainGroup", getIDForGroup (project.getMainGroup()), 0);
+        v->setProperty ("mainGroup", getIDForGroup (getMainGroup()), 0);
         v->setProperty ("projectDirPath", "\"\"", 0);
         v->setProperty ("projectRoot", "\"\"", 0);
         v->setProperty ("targets", "( " + createID ("__target") + " )", 0);

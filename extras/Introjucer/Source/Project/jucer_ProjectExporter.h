@@ -121,7 +121,7 @@ public:
         String message;
     };
 
-    Project::Item& getMainGroup();
+    Project::Item getMainGroup()           { return project.getMainGroup(); }
 
     RelativePath getJucePathFromTargetFolder() const;
     RelativePath getJucePathFromProjectFolder() const;
@@ -133,9 +133,13 @@ public:
 
 protected:
     //==============================================================================
-    Project& project;
-    ValueTree settings;
     String name;
+    Project& project;
+    const ProjectType& projectType;
+    const String projectName;
+    const File projectFolder;
+    Array<Project::BuildConfiguration> configs;
+    ValueTree settings;
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
@@ -147,6 +151,8 @@ protected:
             name = name + ".a";
         return name;
     }
+
+    Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough);
 
     //==============================================================================
     static void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)

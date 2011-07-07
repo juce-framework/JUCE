@@ -254,7 +254,7 @@ END_JUCE_NAMESPACE
    #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
     NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: QTSampleBufferHostTimeAttribute];
    #else
-    NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: @"hostTime"];
+    NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: nsStringLiteral ("hostTime")];
    #endif
 
     int64 presentationTime = (hosttime != nil)
@@ -353,10 +353,10 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
 
         if ([mediaType isEqualToString: QTMediaTypeVideo])
             options = [QTCompressionOptions compressionOptionsWithIdentifier:
-                            quality >= 1 ? @"QTCompressionOptionsSD480SizeH264Video"
-                                         : @"QTCompressionOptions240SizeH264Video"];
+                            quality >= 1 ? nsStringLiteral ("QTCompressionOptionsSD480SizeH264Video")_
+                                           nsStringLiteral ("QTCompressionOptions240SizeH264Video")];
         else if ([mediaType isEqualToString: QTMediaTypeSound])
-            options = [QTCompressionOptions compressionOptionsWithIdentifier: @"QTCompressionOptionsHighQualityAACAudio"];
+            options = [QTCompressionOptions compressionOptionsWithIdentifier: nsStringLiteral ("QTCompressionOptionsHighQualityAACAudio")];
 
         [d->fileOutput setCompressionOptions: options forConnection: connection];
     }

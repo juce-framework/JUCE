@@ -87,7 +87,7 @@ public:
     void create()
     {
         Array<RelativePath> files;
-        findAllFilesToCompile (project.getMainGroup(), files);
+        findAllFilesToCompile (getMainGroup(), files);
 
         for (int i = 0; i < generatedGroups.size(); ++i)
             findAllFilesToCompile (generatedGroups.getReference(i), files);
@@ -157,7 +157,7 @@ private:
     {
         out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)";
 
-        if (project.getProjectType().isAudioPlugin())
+        if (projectType.isAudioPlugin())
             out << " -shared";
 
         {
@@ -191,7 +191,7 @@ private:
         if (config.getTargetBinaryRelativePath().toString().isNotEmpty())
         {
             RelativePath binaryPath (config.getTargetBinaryRelativePath().toString(), RelativePath::projectFolder);
-            outputDir = binaryPath.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
+            outputDir = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
         }
 
         out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName().toString()) << ")" << newLine;
@@ -207,7 +207,7 @@ private:
         if (config.isDebug().getValue())
             out << " -g -ggdb";
 
-        if (project.getProjectType().isAudioPlugin())
+        if (projectType.isAudioPlugin())
             out << " -fPIC";
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
@@ -224,14 +224,14 @@ private:
 
         String targetName (config.getTargetBinaryName().getValue().toString());
 
-        if (project.getProjectType().isLibrary())
+        if (projectType.isLibrary())
             targetName = getLibbedFilename (targetName);
         else if (isVST())
             targetName = targetName.upToLastOccurrenceOf (".", false, false) + ".so";
 
         out << "  TARGET := " << escapeSpaces (targetName) << newLine;
 
-        if (project.getProjectType().isLibrary())
+        if (projectType.isLibrary())
             out << "  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)" << newLine;
         else
             out << "  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)" << newLine;
@@ -257,11 +257,11 @@ private:
             << newLine;
 
         out << "ifndef CONFIG" << newLine
-            << "  CONFIG=" << escapeSpaces (project.getConfiguration(0).getName().toString()) << newLine
+            << "  CONFIG=" << escapeSpaces (configs.getReference(0).getName().toString()) << newLine
             << "endif" << newLine
             << newLine;
 
-        if (! project.getProjectType().isLibrary())
+        if (! projectType.isLibrary())
             out << "ifeq ($(TARGET_ARCH),)" << newLine
                 << "  TARGET_ARCH := -march=native" << newLine
                 << "endif"  << newLine << newLine;
@@ -271,8 +271,8 @@ private:
             << newLine;
 
         int i;
-        for (i = 0; i < project.getNumConfigurations(); ++i)
-            writeConfig (out, project.getConfiguration(i));
+        for (i = 0; i < configs.size(); ++i)
+            writeConfig (out, configs.getReference(i));
 
         writeObjects (out, files);
 
@@ -280,7 +280,7 @@ private:
             << newLine;
 
         out << "$(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)" << newLine
-            << "\t@echo Linking " << project.getProjectName() << newLine
+            << "\t@echo Linking " << projectName << newLine
             << "\t-@mkdir -p $(BINDIR)" << newLine
             << "\t-@mkdir -p $(LIBDIR)" << newLine
             << "\t-@mkdir -p $(OUTDIR)" << newLine
@@ -288,7 +288,7 @@ private:
             << newLine;
 
         out << "clean:" << newLine
-            << "\t@echo Cleaning " << project.getProjectName() << newLine
+            << "\t@echo Cleaning " << projectName << newLine
             << "\t-@rm -f $(OUTDIR)/$(TARGET)" << newLine
             << "\t-@rm -rf $(OBJDIR)/*" << newLine
             << "\t-@rm -rf $(OBJDIR)" << newLine

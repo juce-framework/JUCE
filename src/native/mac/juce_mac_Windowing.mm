@@ -104,7 +104,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
                                                      const String& title, const String& message,
                                                      Component* associatedComponent)
 {
-    OSXMessageBox box (iconType, title, message, @"OK", nil, nil, 0, false);
+    OSXMessageBox box (iconType, title, message, nsStringLiteral ("OK"), nil, nil, 0, false);
     (void) box.getResult();
 }
 
@@ -112,7 +112,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
                                                           const String& title, const String& message,
                                                           Component* associatedComponent)
 {
-    new OSXMessageBox (iconType, title, message, @"OK", nil, nil, 0, true);
+    new OSXMessageBox (iconType, title, message, nsStringLiteral ("OK"), nil, nil, 0, true);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
@@ -121,7 +121,9 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
                                                       ModalComponentManager::Callback* callback)
 {
     ScopedPointer<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message,
-                                                        @"OK", @"Cancel", nil, callback, callback != nullptr));
+                                                        nsStringLiteral ("OK"),
+                                                        nsStringLiteral ("Cancel"),
+                                                        nil, callback, callback != nullptr));
     if (callback == nullptr)
         return mb->getResult() == 1;
 
@@ -135,7 +137,10 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
                                                         ModalComponentManager::Callback* callback)
 {
     ScopedPointer<OSXMessageBox> mb (new OSXMessageBox (iconType, title, message,
-                                                        @"Yes", @"Cancel", @"No", callback, callback != nullptr));
+                                                        nsStringLiteral ("Yes"),
+                                                        nsStringLiteral ("Cancel"),
+                                                        nsStringLiteral ("No"),
+                                                        callback, callback != nullptr));
     if (callback == nullptr)
         return mb->getResult();
 

@@ -67,7 +67,7 @@ END_JUCE_NAMESPACE
     (void) request;
     (void) frame;
 
-    NSURL* url = [actionInformation valueForKey: @"WebActionOriginalURLKey"];
+    NSURL* url = [actionInformation valueForKey: nsStringLiteral ("WebActionOriginalURLKey")];
 
     if (ownerComponent->pageAboutToLoad (nsStringToJuce ([url absoluteString])))
         [listener use];
@@ -86,8 +86,8 @@ public:
     WebBrowserComponentInternal (WebBrowserComponent* owner)
     {
         webView = [[WebView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
-                                       frameName: @""
-                                       groupName: @""];
+                                       frameName: nsEmptyString()
+                                       groupName: nsEmptyString()];
         setView (webView);
 
         clickListener = [[DownloadClickDetector alloc] initWithWebBrowserOwner: owner];
@@ -112,7 +112,7 @@ public:
 
         if (postData != nullptr && postData->getSize() > 0)
         {
-            [r setHTTPMethod: @"POST"];
+            [r setHTTPMethod: nsStringLiteral ("POST")];
             [r setHTTPBody: [NSData dataWithBytes: postData->getData()
                                            length: postData->getSize()]];
         }

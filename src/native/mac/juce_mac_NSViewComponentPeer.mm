@@ -1543,7 +1543,7 @@ BOOL NSViewComponentPeer::sendDragCallback (const int type, id <NSDraggingInfo> 
     NSPasteboard* pasteBoard = [sender draggingPasteboard];
     StringArray files;
 
-    NSString* iTunesPasteboardType = @"CorePasteboardFlavorType 0x6974756E"; // 'itun'
+    NSString* iTunesPasteboardType = nsStringLiteral ("CorePasteboardFlavorType 0x6974756E"); // 'itun'
 
     if (bestType == NSFilesPromisePboardType
          && [[pasteBoard types] containsObject: iTunesPasteboardType])
@@ -1553,13 +1553,13 @@ BOOL NSViewComponentPeer::sendDragCallback (const int type, id <NSDraggingInfo> 
         if ([list isKindOfClass: [NSDictionary class]])
         {
             NSDictionary* iTunesDictionary = (NSDictionary*) list;
-            NSArray* tracks = [iTunesDictionary valueForKey: @"Tracks"];
+            NSArray* tracks = [iTunesDictionary valueForKey: nsStringLiteral ("Tracks")];
             NSEnumerator* enumerator = [tracks objectEnumerator];
             NSDictionary* track;
 
             while ((track = [enumerator nextObject]) != nil)
             {
-                NSURL* url = [NSURL URLWithString: [track valueForKey: @"Location"]];
+                NSURL* url = [NSURL URLWithString: [track valueForKey: nsStringLiteral ("Location")]];
 
                 if ([url isFileURL])
                     files.add (nsStringToJuce ([url path]));

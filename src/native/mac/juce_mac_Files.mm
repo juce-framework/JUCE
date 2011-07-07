@@ -264,7 +264,7 @@ String File::getVersion() const
 
         if (info != nil)
         {
-            NSString* name = [info valueForKey: @"CFBundleShortVersionString"];
+            NSString* name = [info valueForKey: nsStringLiteral ("CFBundleShortVersionString")];
 
             if (name != nil)
                 result = nsStringToJuce (name);
@@ -307,7 +307,7 @@ bool File::moveToTrash() const
     return [[NSWorkspace sharedWorkspace]
                 performFileOperation: NSWorkspaceRecycleOperation
                               source: [p stringByDeletingLastPathComponent]
-                         destination: @""
+                         destination: nsEmptyString()
                                files: [NSArray arrayWithObject: [p lastPathComponent]]
                                  tag: nil ];
   #endif
@@ -433,7 +433,7 @@ void File::revealToUser() const
 {
   #if ! JUCE_IOS
     if (exists())
-        [[NSWorkspace sharedWorkspace] selectFile: juceStringToNS (getFullPathName()) inFileViewerRootedAtPath: @""];
+        [[NSWorkspace sharedWorkspace] selectFile: juceStringToNS (getFullPathName()) inFileViewerRootedAtPath: nsEmptyString()];
     else if (getParentDirectory().exists())
         getParentDirectory().revealToUser();
   #endif

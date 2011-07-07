@@ -31,17 +31,6 @@
 
 
 //==============================================================================
-ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
-    : project (project_),
-      settings (settings_)
-{
-}
-
-ProjectExporter::~ProjectExporter()
-{
-}
-
-//==============================================================================
 int ProjectExporter::getNumExporters()
 {
     return 6;
@@ -124,6 +113,22 @@ ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& projec
     }
 
     return best.release();
+}
+
+//==============================================================================
+ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
+    : project (project_),
+      projectType (project_.getProjectType()),
+      projectName (project_.getProjectName().toString()),
+      projectFolder (project_.getFile().getParentDirectory()),
+      settings (settings_)
+{
+    for (int i = 0; i < jmax (1, project.getNumConfigurations()); ++i)
+        configs.add (project.getConfiguration (i));
+}
+
+ProjectExporter::~ProjectExporter()
+{
 }
 
 void ProjectExporter::createLibraryModules()
@@ -218,4 +223,40 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs() const
 String ProjectExporter::replacePreprocessorTokens (const Project::BuildConfiguration& config, const String& sourceString) const
 {
     return replacePreprocessorDefs (getAllPreprocessorDefs (config), sourceString);
+}
+
+Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBigEnough)
+{
+    Image im;
+
+    const Image im1 (project.getSmallIcon());
+    const Image im2 (project.getBigIcon());
+
+    if (im1.isValid() && im2.isValid())
+    {
+        if (im1.getWidth() >= size && im2.getWidth() >= size)
+            im = im1.getWidth() < im2.getWidth() ? im1 : im2;
+        else if (im1.getWidth() >= size)
+            im = im1;
+        else if (im2.getWidth() >= size)
+            im = im2;
+        else
+            return Image::null;
+    }
+    else
+    {
+        im = im1.isValid() ? im1 : im2;
+    }
+
+    if (size == im.getWidth() && size == im.getHeight())
+        return im;
+
+    if (returnNullIfNothingBigEnough && im.getWidth() < size && im.getHeight() < size)
+        return Image::null;
+
+    Image newIm (Image::ARGB, size, size, true, Image::SoftwareImage);
+    Graphics g (newIm);
+    g.drawImageWithin (im, 0, 0, size, size,
+                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
+    return newIm;
 }
