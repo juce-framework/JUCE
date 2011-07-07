@@ -126,9 +126,7 @@ private:
 
             MemoryOutputStream mo;
             xml->writeToStream (mo, String::empty);
-
-            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (projectFile, mo))
-                errors.add ("Couldn't write to the target file!");
+            replaceFileIfDifferent (projectFile, mo);
         }
     }
 
@@ -278,17 +276,6 @@ private:
         }
     }
 
-    bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
-    {
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (f, newData))
-        {
-            errors.add ("Can't write to file: " + f.getFullPathName());
-            return false;
-        }
-
-        return true;
-    }
-
     void writeBinaryDataFiles()
     {
         binaryDataCpp = project.getGeneratedCodeFolder().getChildFile ("BinaryData.cpp");
@@ -323,9 +310,7 @@ private:
             ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
             std::cout << "Writing files for: " << exporter->getName() << std::endl;
 
-            const File targetFolder (exporter->getTargetFolder());
-
-            if (targetFolder.createDirectory())
+            if (exporter->getTargetFolder().createDirectory())
             {
                 // start with a copy of the basic files, as each exporter may modify it.
                 const ValueTree generatedGroupCopy (generatedFilesGroup.getNode().createCopy());
@@ -357,11 +342,15 @@ private:
         }
     }
 
-    File getSourceWrapperCpp (int fileIndex) const
+    bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
     {
-        return project.getGeneratedCodeFolder()
-                      .getChildFile (project.getJuceSourceFilenameRoot() + (fileIndex != 0 ? String (fileIndex) : String::empty))
-                      .withFileExtension (".cpp");
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (f, newData))
+        {
+            errors.add ("Can't write to file: " + f.getFullPathName());
+            return false;
+        }
+
+        return true;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSaver);

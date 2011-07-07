@@ -229,6 +229,9 @@
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.cpp">
       <Filter>Juce\Source\audio\audio_file_formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\audio\audio_file_formats\juce_CoreAudioFormat.cpp">
+      <Filter>Juce\Source\audio\audio_file_formats</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_FlacAudioFormat.cpp">
       <Filter>Juce\Source\audio\audio_file_formats</Filter>
     </ClCompile>
@@ -1339,6 +1342,9 @@
       <Filter>Juce\Source\audio\audio_file_formats</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.h">
+      <Filter>Juce\Source\audio\audio_file_formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\audio\audio_file_formats\juce_CoreAudioFormat.h">
       <Filter>Juce\Source\audio\audio_file_formats</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\audio\audio_file_formats\juce_FlacAudioFormat.h">

@@ -136,6 +136,7 @@
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioThumbnail.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.cpp"/>
+    <ClCompile Include="..\..\src\audio\audio_file_formats\juce_CoreAudioFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_FlacAudioFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_OggVorbisAudioFormat.cpp"/>
     <ClCompile Include="..\..\src\audio\audio_file_formats\juce_QuickTimeAudioFormat.cpp"/>
@@ -471,6 +472,7 @@
     <ClInclude Include="..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.h"/>
     <ClInclude Include="..\..\src\audio\audio_file_formats\juce_AudioThumbnail.h"/>
     <ClInclude Include="..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.h"/>
+    <ClInclude Include="..\..\src\audio\audio_file_formats\juce_CoreAudioFormat.h"/>
     <ClInclude Include="..\..\src\audio\audio_file_formats\juce_FlacAudioFormat.h"/>
     <ClInclude Include="..\..\src\audio\audio_file_formats\juce_OggVorbisAudioFormat.h"/>
     <ClInclude Include="..\..\src\audio\audio_file_formats\juce_QuickTimeAudioFormat.h"/>

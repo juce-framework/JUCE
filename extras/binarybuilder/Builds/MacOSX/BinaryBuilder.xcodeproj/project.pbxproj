@@ -17,6 +17,7 @@
 		489C322518A3C4F4DC8E8FE4 = { isa = PBXBuildFile; fileRef = 9088DD545C3708EA053CC371; };
 		008367830DF5DB21FBAAA93F = { isa = PBXBuildFile; fileRef = 94105561197974333B7BD632; };
 		9B12BA0402DA13494DFAE588 = { isa = PBXBuildFile; fileRef = 36A58EE4FBF01289682D7DAD; };
+		8C9019232ED599839765DF56 = { isa = PBXBuildFile; fileRef = C25FAADEC95C14D468751DD4; };
 		707392A801368BCEE86E5256 = { isa = PBXBuildFile; fileRef = 9049BFDEB4FA33D1BAC82FAC; };
 		D51982959E41125E4F4E92FA = { isa = PBXBuildFile; fileRef = 8B9506611F425243DD224A90; };
 		7119161802FA9887683494D0 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -30,6 +31,7 @@
 		9088DD545C3708EA053CC371 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		94105561197974333B7BD632 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		36A58EE4FBF01289682D7DAD = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
+		C25FAADEC95C14D468751DD4 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		7FABD4A9FCB57F9C63BD5D34 = { isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BinaryBuilder; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		9049BFDEB4FA33D1BAC82FAC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
 		351908352BAB95A544A300F2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
@@ -53,7 +55,8 @@
 				DBDAB8F811D84F6C055C78DA,
 				9088DD545C3708EA053CC371,
 				94105561197974333B7BD632,
-				36A58EE4FBF01289682D7DAD ); name = Frameworks; sourceTree = "<group>"; };
+				36A58EE4FBF01289682D7DAD,
+				C25FAADEC95C14D468751DD4 ); name = Frameworks; sourceTree = "<group>"; };
 		8532B0CC7DC2F05D888E79F2 = { isa = PBXGroup; children = (
 				7FABD4A9FCB57F9C63BD5D34 ); name = Products; sourceTree = "<group>"; };
 		07E3546C6DFA9084D23A33E9 = { isa = PBXGroup; children = (
@@ -141,7 +144,8 @@
 				0735D492AB157E5F26F2293A,
 				489C322518A3C4F4DC8E8FE4,
 				008367830DF5DB21FBAAA93F,
-				9B12BA0402DA13494DFAE588 ); runOnlyForDeploymentPostprocessing = 0; };
+				9B12BA0402DA13494DFAE588,
+				8C9019232ED599839765DF56 ); runOnlyForDeploymentPostprocessing = 0; };
 		495DDE27E308E15C44991018 = { isa = PBXNativeTarget; buildConfigurationList = 195657633D555407C2EA0CE8; buildPhases = (
 				F485685C969D78B9212B61AD,
 				C02C54CA659982168A3DA559,

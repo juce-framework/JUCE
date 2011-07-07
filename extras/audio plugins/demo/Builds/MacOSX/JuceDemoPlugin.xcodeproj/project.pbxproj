@@ -17,6 +17,7 @@
 		68746D242F6A6102FDD5D03D = { isa = PBXBuildFile; fileRef = B050085463EEB5F8367314CB; };
 		205AA28314AC784F2CF1FA98 = { isa = PBXBuildFile; fileRef = B4F88060202011416CB3278B; };
 		CBE9E6042991B0677E3136D2 = { isa = PBXBuildFile; fileRef = 678CC9E413A7CF979964CEF7; };
+		AC674433358C3691C8AC20AF = { isa = PBXBuildFile; fileRef = E226D5DEE103B1E298BD6E3E; };
 		5B83F34400A1B5844680E1CE = { isa = PBXBuildFile; fileRef = DBC6733A66786D64D63E7016; };
 		E504A4E425435E78197183F3 = { isa = PBXBuildFile; fileRef = 2307ABAB0264959E640E9E37; };
 		AC674433358C3691C8AC20AF = { isa = PBXBuildFile; fileRef = E226D5DEE103B1E298BD6E3E; };
@@ -63,6 +64,7 @@
 		B050085463EEB5F8367314CB = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		B4F88060202011416CB3278B = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		678CC9E413A7CF979964CEF7 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
+		E226D5DEE103B1E298BD6E3E = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		DBC6733A66786D64D63E7016 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		2307ABAB0264959E640E9E37 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		E226D5DEE103B1E298BD6E3E = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -218,6 +220,7 @@
 				B050085463EEB5F8367314CB,
 				B4F88060202011416CB3278B,
 				678CC9E413A7CF979964CEF7,
+				E226D5DEE103B1E298BD6E3E,
 				DBC6733A66786D64D63E7016,
 				2307ABAB0264959E640E9E37,
 				E226D5DEE103B1E298BD6E3E ); name = Frameworks; sourceTree = "<group>"; };
@@ -354,6 +357,7 @@
 				68746D242F6A6102FDD5D03D,
 				205AA28314AC784F2CF1FA98,
 				CBE9E6042991B0677E3136D2,
+				AC674433358C3691C8AC20AF,
 				5B83F34400A1B5844680E1CE,
 				E504A4E425435E78197183F3,
 				AC674433358C3691C8AC20AF ); runOnlyForDeploymentPostprocessing = 0; };

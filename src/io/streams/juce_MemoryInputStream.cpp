@@ -144,6 +144,7 @@ public:
     static String createRandomWideCharString()
     {
         juce_wchar buffer [50] = { 0 };
+        Random r;
 
         for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
         {

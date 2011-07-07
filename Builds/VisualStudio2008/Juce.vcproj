@@ -134,6 +134,8 @@
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioThumbnail.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.h"/>
+            <File RelativePath="..\..\src\audio\audio_file_formats\juce_CoreAudioFormat.cpp"/>
+            <File RelativePath="..\..\src\audio\audio_file_formats\juce_CoreAudioFormat.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_FlacAudioFormat.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_FlacAudioFormat.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_OggVorbisAudioFormat.cpp"/>

@@ -20,6 +20,7 @@
 		FB21B7E6A7CE55D3C0E3C37E = { isa = PBXBuildFile; fileRef = 59597FA0A88A08937801D198; };
 		C1147D03F1F4D697CC30DD22 = { isa = PBXBuildFile; fileRef = 27C3C51DF2519B519B76E2EE; };
 		C5CFF5508299C26380465290 = { isa = PBXBuildFile; fileRef = CB32D4EE59D5CA9DB12F944D; };
+		0ACCAC5ABDE686B0CA42BFED = { isa = PBXBuildFile; fileRef = 203AC66FFB20EAD2E7A594BD; };
 		2171BD82DA3A6744260CDE58 = { isa = PBXBuildFile; fileRef = E00781B15E47C9CB9E94869D; };
 		3C22C15ACEEF0454171D231B = { isa = PBXBuildFile; fileRef = DA868174D4D2059AC1BE7E71; };
 		6D421F7B7EE3A149389653C2 = { isa = PBXBuildFile; fileRef = 7CF036906034FABB44D2108F; };
@@ -395,6 +396,8 @@
 		7B34E897026857C84399A09C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioThumbnail.h"; path = "../../src/audio/audio_file_formats/juce_AudioThumbnail.h"; sourceTree = "SOURCE_ROOT"; };
 		CB32D4EE59D5CA9DB12F944D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AudioThumbnailCache.cpp"; path = "../../src/audio/audio_file_formats/juce_AudioThumbnailCache.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3442FA257104DC3F43E7F870 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AudioThumbnailCache.h"; path = "../../src/audio/audio_file_formats/juce_AudioThumbnailCache.h"; sourceTree = "SOURCE_ROOT"; };
+		203AC66FFB20EAD2E7A594BD = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CoreAudioFormat.cpp"; path = "../../src/audio/audio_file_formats/juce_CoreAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
+		C9F1015CA457A61082398E34 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CoreAudioFormat.h"; path = "../../src/audio/audio_file_formats/juce_CoreAudioFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		E00781B15E47C9CB9E94869D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_FlacAudioFormat.cpp"; path = "../../src/audio/audio_file_formats/juce_FlacAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
 		7C06BD13BF7E0097EB0A8D08 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_FlacAudioFormat.h"; path = "../../src/audio/audio_file_formats/juce_FlacAudioFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		DA868174D4D2059AC1BE7E71 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_OggVorbisAudioFormat.cpp"; path = "../../src/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1145,6 +1148,8 @@
 				7B34E897026857C84399A09C,
 				CB32D4EE59D5CA9DB12F944D,
 				3442FA257104DC3F43E7F870,
+				203AC66FFB20EAD2E7A594BD,
+				C9F1015CA457A61082398E34,
 				E00781B15E47C9CB9E94869D,
 				7C06BD13BF7E0097EB0A8D08,
 				DA868174D4D2059AC1BE7E71,
@@ -2082,6 +2087,7 @@
 				FB21B7E6A7CE55D3C0E3C37E,
 				C1147D03F1F4D697CC30DD22,
 				C5CFF5508299C26380465290,
+				0ACCAC5ABDE686B0CA42BFED,
 				2171BD82DA3A6744260CDE58,
 				3C22C15ACEEF0454171D231B,
 				6D421F7B7EE3A149389653C2,

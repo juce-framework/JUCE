@@ -17,6 +17,7 @@
 		0344374EE00EBC906608CCB7 = { isa = PBXBuildFile; fileRef = 4C20D27E2491F086AEA71044; };
 		CB3A6CACC45FC3DD9525E611 = { isa = PBXBuildFile; fileRef = 4FC85A8AE0D46CDFD5E61304; };
 		57CAAF2DDA340BF5E764325B = { isa = PBXBuildFile; fileRef = F25D830DC35A0A240297BA70; };
+		48371E4CE630812E31DF1C28 = { isa = PBXBuildFile; fileRef = 8D069FF891B70C7001E05AB7; };
 		F653CD6DB1550002BFB3EE47 = { isa = PBXBuildFile; fileRef = 77964D54171CB8F24F616C9F; };
 		71D47E0ED5F6A90682A5707C = { isa = PBXBuildFile; fileRef = BFD865C4B317E01BDD319AB0; };
 		A778E9C39DD11828306AF2E8 = { isa = PBXBuildFile; fileRef = 178E79E571E8D29BCC89FDD8; };
@@ -39,6 +40,7 @@
 		4C20D27E2491F086AEA71044 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		4FC85A8AE0D46CDFD5E61304 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
 		F25D830DC35A0A240297BA70 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
+		8D069FF891B70C7001E05AB7 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		77964D54171CB8F24F616C9F = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		BFD865C4B317E01BDD319AB0 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		3B43D9C2C41077380D379A07 = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Plugin Host.app"; sourceTree = "BUILT_PRODUCTS_DIR"; };
@@ -89,6 +91,7 @@
 				4C20D27E2491F086AEA71044,
 				4FC85A8AE0D46CDFD5E61304,
 				F25D830DC35A0A240297BA70,
+				8D069FF891B70C7001E05AB7,
 				77964D54171CB8F24F616C9F,
 				BFD865C4B317E01BDD319AB0 ); name = Frameworks; sourceTree = "<group>"; };
 		31DAB5E5452DF8F91208B6C4 = { isa = PBXGroup; children = (
@@ -190,6 +193,7 @@
 				0344374EE00EBC906608CCB7,
 				CB3A6CACC45FC3DD9525E611,
 				57CAAF2DDA340BF5E764325B,
+				48371E4CE630812E31DF1C28,
 				F653CD6DB1550002BFB3EE47,
 				71D47E0ED5F6A90682A5707C ); runOnlyForDeploymentPostprocessing = 0; };
 		04F5D340BA63D9F8DE145DFB = { isa = PBXNativeTarget; buildConfigurationList = D4FE5C8CF4B04CB35C5449CB; buildPhases = (

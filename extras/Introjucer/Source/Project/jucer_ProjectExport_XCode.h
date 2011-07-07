@@ -647,7 +647,7 @@ private:
         }
         else
         {
-            s.addTokens ("Cocoa Carbon IOKit CoreAudio CoreMIDI WebKit DiscRecording OpenGL QuartzCore QTKit QuickTime", false);
+            s.addTokens ("Cocoa Carbon IOKit CoreAudio CoreMIDI WebKit DiscRecording OpenGL QuartzCore QTKit QuickTime AudioToolbox", false);
 
             if (isAU())
                 s.addTokens ("AudioUnit CoreAudioKit AudioToolbox", false);

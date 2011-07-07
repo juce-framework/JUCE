@@ -53,6 +53,7 @@ OBJECTS := \
   $(OBJDIR)/juce_AudioSubsectionReader_65f61a0a.o \
   $(OBJDIR)/juce_AudioThumbnail_cb99b4b4.o \
   $(OBJDIR)/juce_AudioThumbnailCache_89a7c678.o \
+  $(OBJDIR)/juce_CoreAudioFormat_1ce243da.o \
   $(OBJDIR)/juce_FlacAudioFormat_19c048f1.o \
   $(OBJDIR)/juce_OggVorbisAudioFormat_3f214fc9.o \
   $(OBJDIR)/juce_QuickTimeAudioFormat_8ad67271.o \
@@ -454,6 +455,11 @@ $(OBJDIR)/juce_AudioThumbnail_cb99b4b4.o: ../../src/audio/audio_file_formats/juc
 $(OBJDIR)/juce_AudioThumbnailCache_89a7c678.o: ../../src/audio/audio_file_formats/juce_AudioThumbnailCache.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_AudioThumbnailCache.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_CoreAudioFormat_1ce243da.o: ../../src/audio/audio_file_formats/juce_CoreAudioFormat.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_CoreAudioFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FlacAudioFormat_19c048f1.o: ../../src/audio/audio_file_formats/juce_FlacAudioFormat.cpp

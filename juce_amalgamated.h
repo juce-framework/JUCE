@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	17
+#define JUCE_BUILDNUMBER	18
 
 /** Current Juce version number.
 
@@ -36941,7 +36941,7 @@ public:
 										int qualityOptionIndex);
 
 private:
-	JUCE_LEAK_DETECTOR (AiffAudioFormat);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AiffAudioFormat);
 };
 
 #endif   // __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
@@ -37726,6 +37726,58 @@ private:
 
 
 #endif
+#ifndef __JUCE_COREAUDIOFORMAT_JUCEHEADER__
+
+/*** Start of inlined file: juce_CoreAudioFormat.h ***/
+#ifndef __JUCE_COREAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_COREAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_MAC || JUCE_IOS
+
+/**
+	OSX and iOS only - This uses the AudioToolbox framework to read any audio
+	format that the system has a codec for.
+
+	This should be able to understand formats such as mp3, m4a, etc.
+
+	@see AudioFormat
+ */
+class JUCE_API  CoreAudioFormat	 : public AudioFormat
+{
+public:
+
+	/** Creates a format object. */
+	CoreAudioFormat();
+
+	/** Destructor. */
+	~CoreAudioFormat();
+
+	const Array <int> getPossibleSampleRates();
+	const Array <int> getPossibleBitDepths();
+	bool canDoStereo();
+	bool canDoMono();
+
+	AudioFormatReader* createReaderFor (InputStream* sourceStream,
+										bool deleteStreamIfOpeningFails);
+
+	AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+										double sampleRateToUse,
+										unsigned int numberOfChannels,
+										int bitsPerSample,
+										const StringPairArray& metadataValues,
+										int qualityOptionIndex);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioFormat);
+};
+
+#endif
+#endif   // __JUCE_COREAUDIOFORMAT_JUCEHEADER__
+
+/*** End of inlined file: juce_CoreAudioFormat.h ***/
+
+
+#endif
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 
 /*** Start of inlined file: juce_FlacAudioFormat.h ***/
@@ -37767,7 +37819,7 @@ public:
 										const StringPairArray& metadataValues,
 										int qualityOptionIndex);
 private:
-	JUCE_LEAK_DETECTOR (FlacAudioFormat);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacAudioFormat);
 };
 
 #endif
@@ -37829,7 +37881,7 @@ public:
 										int qualityOptionIndex);
 
 private:
-	JUCE_LEAK_DETECTOR (OggVorbisAudioFormat);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggVorbisAudioFormat);
 };
 
 #endif
@@ -37881,7 +37933,7 @@ public:
 										int qualityOptionIndex);
 
 private:
-	JUCE_LEAK_DETECTOR (QuickTimeAudioFormat);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuickTimeAudioFormat);
 };
 
 #endif
@@ -38007,7 +38059,7 @@ public:
 	bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
 
 private:
-	JUCE_LEAK_DETECTOR (WavAudioFormat);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormat);
 };
 
 #endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__

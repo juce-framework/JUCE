@@ -74,6 +74,9 @@
 #ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioThumbnailCache.h"
 #endif
+#ifndef __JUCE_COREAUDIOFORMAT_JUCEHEADER__
+ #include "audio/audio_file_formats/juce_CoreAudioFormat.h"
+#endif
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_FlacAudioFormat.h"
 #endif

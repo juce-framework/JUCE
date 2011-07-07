@@ -101,6 +101,10 @@
                 resource="0" file="src/audio/audio_file_formats/juce_AudioThumbnailCache.cpp"/>
           <FILE id="h91HebVw" name="juce_AudioThumbnailCache.h" compile="0" resource="0"
                 file="src/audio/audio_file_formats/juce_AudioThumbnailCache.h"/>
+          <FILE id="VcGrF" name="juce_CoreAudioFormat.cpp" compile="1" resource="0"
+                file="src/audio/audio_file_formats/juce_CoreAudioFormat.cpp"/>
+          <FILE id="DNxcBz" name="juce_CoreAudioFormat.h" compile="0" resource="0"
+                file="src/audio/audio_file_formats/juce_CoreAudioFormat.h"/>
           <FILE id="SW79IqLvV" name="juce_FlacAudioFormat.cpp" compile="1" resource="0"
                 file="src/audio/audio_file_formats/juce_FlacAudioFormat.cpp"/>
           <FILE id="h5CmmFWmC" name="juce_FlacAudioFormat.h" compile="0" resource="0"

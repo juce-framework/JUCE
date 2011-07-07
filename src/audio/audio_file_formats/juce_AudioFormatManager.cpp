@@ -32,6 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_WavAudioFormat.h"
 #include "juce_FlacAudioFormat.h"
 #include "juce_OggVorbisAudioFormat.h"
+#include "juce_CoreAudioFormat.h"
 #include "../../io/files/juce_FileInputStream.h"
 #include "../../memory/juce_ScopedPointer.h"
 
@@ -75,6 +76,7 @@ void AudioFormatManager::registerBasicFormats()
   #if JUCE_MAC
     registerFormat (new AiffAudioFormat(), true);
     registerFormat (new WavAudioFormat(), false);
+    registerFormat (new CoreAudioFormat(), false);
   #else
     registerFormat (new WavAudioFormat(), true);
     registerFormat (new AiffAudioFormat(), false);
