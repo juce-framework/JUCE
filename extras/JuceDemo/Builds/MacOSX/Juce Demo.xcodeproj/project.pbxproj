@@ -97,9 +97,9 @@
 		3369CDF7AFD79D6F3B3744B1 = { isa = PBXFileReference; lastKnownFileType = image.png; name = "juce_icon.png"; path = "../../Binary Data/juce_icon.png"; sourceTree = "SOURCE_ROOT"; };
 		C7327AD5191A22C1FBD4F5F9 = { isa = PBXFileReference; lastKnownFileType = file.xml; name = treedemo.xml; path = "../../Binary Data/treedemo.xml"; sourceTree = "SOURCE_ROOT"; };
 		EE37A0ECE471A928C6170F9B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
-		A6B37799E63CCE882A3383FB = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		E6EF5CE04768BA5B10050D51 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = "SOURCE_ROOT"; };
 		CC7EB9777A4DE3408705625C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../JuceLibraryCode/BinaryData.h; sourceTree = "SOURCE_ROOT"; };
+		A6B37799E63CCE882A3383FB = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		BA05C84C3258A1978AF3D357 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode1.mm; path = ../../JuceLibraryCode/JuceLibraryCode1.mm; sourceTree = "SOURCE_ROOT"; };
 		F42C91375F3314CA6EE65697 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode2.mm; path = ../../JuceLibraryCode/JuceLibraryCode2.mm; sourceTree = "SOURCE_ROOT"; };
 		4D526A336B2E97ED42CADAD7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode3.mm; path = ../../JuceLibraryCode/JuceLibraryCode3.mm; sourceTree = "SOURCE_ROOT"; };
@@ -148,9 +148,9 @@
 				7B2518B268DCBBF7B74F2B1D ); name = Source; sourceTree = "<group>"; };
 		4C2E644EAC72C263D09C74BB = { isa = PBXGroup; children = (
 				EE37A0ECE471A928C6170F9B,
-				A6B37799E63CCE882A3383FB,
 				E6EF5CE04768BA5B10050D51,
 				CC7EB9777A4DE3408705625C,
+				A6B37799E63CCE882A3383FB,
 				BA05C84C3258A1978AF3D357,
 				F42C91375F3314CA6EE65697,
 				4D526A336B2E97ED42CADAD7,

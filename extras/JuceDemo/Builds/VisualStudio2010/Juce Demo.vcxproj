@@ -161,8 +161,8 @@
     <ClInclude Include="..\..\Source\demos\AudioDemoTabComponent.h"/>
     <ClInclude Include="..\..\Source\demos\RenderingTestComponent.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>
-    <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h"/>
+    <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
     <None Include=".\icon.ico"/>

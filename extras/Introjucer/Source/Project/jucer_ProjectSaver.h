@@ -26,62 +26,42 @@
 #ifndef __JUCER_PROJECTSAVER_JUCEHEADER__
 #define __JUCER_PROJECTSAVER_JUCEHEADER__
 
+#include "jucer_ResourceFile.h"
+
 
 //==============================================================================
 class ProjectSaver
 {
 public:
     ProjectSaver (Project& project_, const File& projectFile_)
-        : project (project_), projectFile (projectFile_), resourceFile (project_),
-          generatedCodeFolder (project.getGeneratedCodeFolder())
+        : project (project_), projectFile (projectFile_),
+          generatedFilesGroup (Project::Item::createGroup (project, project.getJuceCodeGroupName()))
     {
+          generatedFilesGroup.setID ("__jucelibfiles");
     }
+
+    Project& getProject() noexcept      { return project; }
 
     String save()
     {
+        jassert (generatedFilesGroup.getNumChildren() == 0); // this method can't be called more than once!
+
         const File oldFile (project.getFile());
         project.setFile (projectFile);
 
-        const String linkageMode (project.getJuceLinkageMode());
-
-        if (linkageMode == Project::notLinkedToJuce)
-        {
-            hasAppHeaderFile = ! project.getProjectType().isLibrary();
-            numJuceSourceFiles = 0;
-        }
-        else if (linkageMode == Project::useAmalgamatedJuce
-                 || linkageMode == Project::useAmalgamatedJuceViaSingleTemplate)
-        {
-            hasAppHeaderFile = true;
-            numJuceSourceFiles = 1;
-        }
-        else if (linkageMode == Project::useAmalgamatedJuceViaMultipleTemplates)
-        {
-            hasAppHeaderFile = true;
-            numJuceSourceFiles = project.getNumSeparateAmalgamatedFiles();
-        }
-        else if (linkageMode == Project::useLinkedJuce)
-        {
-            hasAppHeaderFile = true;
-            numJuceSourceFiles = 0;
-        }
-        else
-        {
-            jassertfalse;
-        }
-
-        hasResources = (resourceFile.getNumFiles() > 0);
-
         writeMainProjectFile();
 
-        if (! generatedCodeFolder.createDirectory())
-            errors.add ("Couldn't create folder: " + generatedCodeFolder.getFullPathName());
+        if (! project.getGeneratedCodeFolder().createDirectory())
+            errors.add ("Couldn't create folder: " + project.getGeneratedCodeFolder().getFullPathName());
 
         if (errors.size() == 0)
             writeAppConfigFile();
 
         if (errors.size() == 0)
-            writeJuceSourceWrappers();
+            writeBinaryDataFiles();
+
+        if (errors.size() == 0)
+            writeAppHeader();
 
         if (errors.size() == 0)
             writeProjects();
@@ -94,19 +74,34 @@ public:
 
     bool saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData)
     {
-        return replaceFileIfDifferent (generatedCodeFolder.getChildFile (filePath), newData);
+        const File file (project.getGeneratedCodeFolder().getChildFile (filePath));
+
+        if (replaceFileIfDifferent (file, newData))
+        {
+            if (! generatedFilesGroup.findItemForFile (file).isValid())
+                generatedFilesGroup.addFile (file, -1);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    static void writeAutoGenWarningComment (OutputStream& out)
+    {
+        out << "/*" << newLine << newLine
+            << "    IMPORTANT! This file is auto-generated each time you save your" << newLine
+            << "    project - if you alter its contents, your changes may be overwritten!" << newLine
+            << newLine;
     }
 
 private:
     Project& project;
-    const File& projectFile;
-    ResourceFile resourceFile;
-    File generatedCodeFolder;
+    const File projectFile;
+    Project::Item generatedFilesGroup;
     StringArray errors;
 
-    File appConfigFile, juceHeaderFile, binaryDataCpp, pluginCharacteristicsFile;
-    bool hasAppHeaderFile, hasResources;
-    int numJuceSourceFiles;
+    File appConfigFile, binaryDataCpp;
 
     void writeMainProjectFile()
     {
@@ -137,17 +132,9 @@ private:
         }
     }
 
-    static void writeJucerComment (OutputStream& out)
-    {
-        out << "/*" << newLine << newLine
-            << "    IMPORTANT! This file is auto-generated each time you save your" << newLine
-            << "    project - if you alter its contents, your changes may be overwritten!" << newLine
-            << newLine;
-    }
-
     bool writeAppConfig (OutputStream& out)
     {
-        writeJucerComment (out);
+        writeAutoGenWarningComment (out);
         out << "    If you want to change any of these values, use the Introjucer to do so, rather than" << newLine
             << "    editing this file directly!" << newLine
             << newLine
@@ -192,29 +179,21 @@ private:
         return flags.size() > 0;
     }
 
-    void writeSourceWrapper (OutputStream& out, int fileNumber)
+    void writeAppConfigFile()
     {
-        writeJucerComment (out);
-        out << "    This file pulls in all the Juce source code, and builds it using the settings" << newLine
-            << "    defined in " << appConfigFile.getFileName() << "." << newLine
-            << newLine
-            << "    If you want to change the method by which Juce is linked into your app, use the" << newLine
-            << "    Jucer to change it, rather than trying to edit this file directly." << newLine
-            << newLine
-            << "*/"
-            << newLine << newLine
-            << CodeHelpers::createIncludeStatement (appConfigFile, appConfigFile) << newLine;
+        appConfigFile = project.getGeneratedCodeFolder().getChildFile (project.getAppConfigFilename());
 
-        if (fileNumber == 0)
-            writeInclude (out, project.isUsingFullyAmalgamatedFile() ? "juce_amalgamated.cpp"
-                                                                     : "amalgamation/juce_amalgamated_template.cpp");
+        MemoryOutputStream mem;
+        if (writeAppConfig (mem))
+            saveGeneratedFile (project.getAppConfigFilename(), mem);
         else
-            writeInclude (out, "amalgamation/juce_amalgamated" + String (fileNumber) + ".cpp");
+            appConfigFile.deleteFile();
     }
 
     void writeAppHeader (OutputStream& out)
     {
-        writeJucerComment (out);
+        writeAutoGenWarningComment (out);
+
         out << "    This is the header file that your files should include in order to get all the" << newLine
             << "    Juce library headers. You should NOT include juce.h or juce_amalgamated.h directly in" << newLine
             << "    your own source files, because that wouldn't pick up the correct Juce configuration" << newLine
@@ -222,20 +201,52 @@ private:
             << newLine
             << "*/" << newLine << newLine;
 
-        String headerGuard ("__APPHEADERFILE_" + String::toHexString (juceHeaderFile.hashCode()).toUpperCase() + "__");
+        String headerGuard ("__APPHEADERFILE_" + project.getProjectUID().toUpperCase() + "__");
         out << "#ifndef " << headerGuard << newLine
             << "#define " << headerGuard << newLine << newLine;
 
         if (appConfigFile.exists())
-            out << CodeHelpers::createIncludeStatement (appConfigFile, appConfigFile) << newLine;
+            out << CodeHelpers::createIncludeStatement (project.getAppConfigFilename()) << newLine;
 
-        if (project.getJuceLinkageMode() != Project::notLinkedToJuce)
         {
-            writeInclude (out, (project.isUsingSingleTemplateFile() || project.isUsingMultipleTemplateFiles())
-                                   ? "juce_amalgamated.h"  // could use "amalgamation/juce_amalgamated_template.h", but it's slower..
-                                   : (project.isUsingFullyAmalgamatedFile()
-                                        ? "juce_amalgamated.h"
-                                        : "juce.h"));
+            OwnedArray<LibraryModule> modules;
+            project.getProjectType().createRequiredModules (project, modules);
+
+            StringArray paths, guards;
+
+            for (int i = 0; i < modules.size(); ++i)
+                modules.getUnchecked(i)->getHeaderFiles (project, paths, guards);
+
+            StringArray uniquePaths (paths);
+            uniquePaths.removeDuplicates (false);
+
+            if (uniquePaths.size() == 1)
+            {
+                out << "#include " << paths[0] << newLine;
+            }
+            else
+            {
+                int i = paths.size();
+                for (; --i >= 0;)
+                {
+                    for (int j = i; --j >= 0;)
+                    {
+                        if (paths[i] == paths[j] && guards[i] == guards[j])
+                        {
+                            paths.remove (i);
+                            guards.remove (i);
+                        }
+                    }
+                }
+
+                for (i = 0; i < paths.size(); ++i)
+                {
+                    out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
+                        << " #include " << paths[i] << newLine;
+                }
+
+                out << "#endif" << newLine;
+            }
         }
 
         if (binaryDataCpp.exists())
@@ -252,117 +263,19 @@ private:
             << "#endif   // " << headerGuard << newLine;
     }
 
-    void writeInclude (OutputStream& out, const String& pathFromJuceFolder)
+    void writeAppHeader()
     {
-        StringArray paths, guards;
-
-        for (int i = project.getNumExporters(); --i >= 0;)
+        if (project.getJuceLinkageMode() != Project::notLinkedToJuce
+             || ! project.getProjectType().isLibrary())
         {
-            ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
-
-            if (exporter != nullptr)
-            {
-                paths.add (exporter->getIncludePathForFileInJuceFolder (pathFromJuceFolder, juceHeaderFile));
-                guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");
-            }
-        }
-
-        StringArray uniquePaths (paths);
-        uniquePaths.removeDuplicates (false);
-
-        if (uniquePaths.size() == 1)
-        {
-            out << "#include " << paths[0] << newLine;
+            MemoryOutputStream mem;
+            writeAppHeader (mem);
+            saveGeneratedFile (project.getJuceSourceHFilename(), mem);
         }
         else
         {
-            int i = paths.size();
-            for (; --i >= 0;)
-            {
-                for (int j = i; --j >= 0;)
-                {
-                    if (paths[i] == paths[j] && guards[i] == guards[j])
-                    {
-                        paths.remove (i);
-                        guards.remove (i);
-                    }
-                }
-            }
-
-            for (i = 0; i < paths.size(); ++i)
-            {
-                out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
-                    << " #include " << paths[i] << newLine;
-            }
-
-            out << "#endif" << newLine;
+            project.getAppIncludeFile().deleteFile();
         }
-    }
-
-    static int countMaxPluginChannels (const String& configString, bool isInput)
-    {
-        StringArray configs;
-        configs.addTokens (configString, ", {}", String::empty);
-        configs.trim();
-        configs.removeEmptyStrings();
-        jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
-
-        int maxVal = 0;
-        for (int i = (isInput ? 0 : 1); i < configs.size(); i += 2)
-            maxVal = jmax (maxVal, configs[i].getIntValue());
-
-        return maxVal;
-    }
-
-    static void writePluginCharacteristics (const File& destFile, Project& project, OutputStream& out)
-    {
-        String headerGuard ("__PLUGINCHARACTERISTICS_" + String::toHexString (destFile.hashCode()).toUpperCase() + "__");
-
-        writeJucerComment (out);
-        out << "    This header file contains configuration options for the plug-in. If you need to change any of" << newLine
-            << "    these, it'd be wise to do so using the Jucer, rather than editing this file directly..." << newLine
-            << newLine
-            << "*/" << newLine
-            << newLine
-            << "#ifndef " << headerGuard << newLine
-            << "#define " << headerGuard << newLine
-            << newLine
-            << "#define JucePlugin_Build_VST    " << ((bool) project.shouldBuildVST().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
-            << "#define JucePlugin_Build_AU     " << ((bool) project.shouldBuildAU().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
-            << "#define JucePlugin_Build_RTAS   " << ((bool) project.shouldBuildRTAS().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
-            << newLine
-            << "#define JucePlugin_Name                 " << project.getPluginName().toString().quoted() << newLine
-            << "#define JucePlugin_Desc                 " << project.getPluginDesc().toString().quoted() << newLine
-            << "#define JucePlugin_Manufacturer         " << project.getPluginManufacturer().toString().quoted() << newLine
-            << "#define JucePlugin_ManufacturerCode     '" << project.getPluginManufacturerCode().toString().trim().substring (0, 4) << "'" << newLine
-            << "#define JucePlugin_PluginCode           '" << project.getPluginCode().toString().trim().substring (0, 4) << "'" << newLine
-            << "#define JucePlugin_MaxNumInputChannels  " << countMaxPluginChannels (project.getPluginChannelConfigs().toString(), true) << newLine
-            << "#define JucePlugin_MaxNumOutputChannels " << countMaxPluginChannels (project.getPluginChannelConfigs().toString(), false) << newLine
-            << "#define JucePlugin_PreferredChannelConfigurations   " << project.getPluginChannelConfigs().toString() << newLine
-            << "#define JucePlugin_IsSynth              " << ((bool) project.getPluginIsSynth().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_WantsMidiInput       " << ((bool) project.getPluginWantsMidiInput().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_ProducesMidiOutput   " << ((bool) project.getPluginProducesMidiOut().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_SilenceInProducesSilenceOut  " << ((bool) project.getPluginSilenceInProducesSilenceOut().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_TailLengthSeconds    " << (double) project.getPluginTailLengthSeconds().getValue() << newLine
-            << "#define JucePlugin_EditorRequiresKeyboardFocus  " << ((bool) project.getPluginEditorNeedsKeyFocus().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_VersionCode          " << project.getVersionAsHex() << newLine
-            << "#define JucePlugin_VersionString        " << project.getVersion().toString().quoted() << newLine
-            << "#define JucePlugin_VSTUniqueID          JucePlugin_PluginCode" << newLine
-            << "#define JucePlugin_VSTCategory          " << ((bool) project.getPluginIsSynth().getValue() ? "kPlugCategSynth" : "kPlugCategEffect") << newLine
-            << "#define JucePlugin_AUMainType           " << ((bool) project.getPluginIsSynth().getValue() ? "kAudioUnitType_MusicDevice" : "kAudioUnitType_Effect") << newLine
-            << "#define JucePlugin_AUSubType            JucePlugin_PluginCode" << newLine
-            << "#define JucePlugin_AUExportPrefix       " << project.getPluginAUExportPrefix().toString() << newLine
-            << "#define JucePlugin_AUExportPrefixQuoted " << project.getPluginAUExportPrefix().toString().quoted() << newLine
-            << "#define JucePlugin_AUManufacturerCode   JucePlugin_ManufacturerCode" << newLine
-            << "#define JucePlugin_CFBundleIdentifier   " << project.getBundleIdentifier().toString() << newLine
-            << "#define JucePlugin_AUCocoaViewClassName " << project.getPluginAUCocoaViewClassName().toString() << newLine
-            << "#define JucePlugin_RTASCategory         " << ((bool) project.getPluginIsSynth().getValue() ? "ePlugInCategory_SWGenerators" : "ePlugInCategory_None") << newLine
-            << "#define JucePlugin_RTASManufacturerCode JucePlugin_ManufacturerCode" << newLine
-            << "#define JucePlugin_RTASProductId        JucePlugin_PluginCode" << newLine;
-
-        out << "#define JUCE_USE_VSTSDK_2_4             1" << newLine
-            << newLine
-            << "#endif   // " << headerGuard << newLine;
     }
 
     bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
@@ -376,117 +289,31 @@ private:
         return true;
     }
 
-    void writeAppConfigFile()
+    void writeBinaryDataFiles()
     {
-        appConfigFile = project.getGeneratedCodeFolder().getChildFile (project.getAppConfigFilename());
+        binaryDataCpp = project.getGeneratedCodeFolder().getChildFile ("BinaryData.cpp");
 
-        MemoryOutputStream mem;
-        if (writeAppConfig (mem))
-            replaceFileIfDifferent (appConfigFile, mem);
-        else
-            appConfigFile.deleteFile();
-    }
-
-    void writeJuceSourceWrappers()
-    {
-        juceHeaderFile = project.getAppIncludeFile();
-        binaryDataCpp = generatedCodeFolder.getChildFile ("BinaryData.cpp");
+        ResourceFile resourceFile (project);
 
         if (resourceFile.getNumFiles() > 0)
         {
-            //resourceFile.setJuceHeaderToInclude (juceHeaderFile);
             resourceFile.setClassName ("BinaryData");
 
-            if (! resourceFile.write (binaryDataCpp))
+            if (resourceFile.write (binaryDataCpp))
+            {
+                generatedFilesGroup.addFile (binaryDataCpp, -1);
+                generatedFilesGroup.addFile (binaryDataCpp.withFileExtension (".h"), -1);
+            }
+            else
+            {
                 errors.add ("Can't create binary resources file: " + binaryDataCpp.getFullPathName());
+            }
         }
         else
         {
             binaryDataCpp.deleteFile();
             binaryDataCpp.withFileExtension ("h").deleteFile();
         }
-
-        if (project.getProjectType().isLibrary())
-            return;
-
-        if (project.getProjectType().isAudioPlugin())
-        {
-            MemoryOutputStream mem;
-            pluginCharacteristicsFile = generatedCodeFolder.getChildFile (project.getPluginCharacteristicsFilename());
-            writePluginCharacteristics (pluginCharacteristicsFile, project, mem);
-            replaceFileIfDifferent (pluginCharacteristicsFile, mem);
-        }
-
-        for (int i = 0; i <= project.getNumSeparateAmalgamatedFiles(); ++i)
-        {
-            const File sourceWrapperCpp (getSourceWrapperCpp (i));
-            const File sourceWrapperMM (sourceWrapperCpp.withFileExtension (".mm"));
-
-            if (numJuceSourceFiles > 0
-                 && ((i == 0 && numJuceSourceFiles == 1) || (i != 0 && numJuceSourceFiles > 1)))
-            {
-                MemoryOutputStream mem;
-                writeSourceWrapper (mem, i);
-                replaceFileIfDifferent (sourceWrapperCpp, mem);
-                replaceFileIfDifferent (sourceWrapperMM, mem);
-            }
-            else
-            {
-                sourceWrapperMM.deleteFile();
-                sourceWrapperCpp.deleteFile();
-            }
-        }
-
-        if (hasAppHeaderFile)
-        {
-            MemoryOutputStream mem;
-            writeAppHeader (mem);
-            replaceFileIfDifferent (juceHeaderFile, mem);
-        }
-        else
-        {
-            juceHeaderFile.deleteFile();
-        }
-    }
-
-    Project::Item createLibraryFilesGroup (ProjectExporter& exporter)
-    {
-        Project::Item libraryFiles (Project::Item::createGroup (project, project.getJuceCodeGroupName()));
-
-        if (appConfigFile.exists())
-            libraryFiles.addFile (appConfigFile, -1);
-
-        if (hasAppHeaderFile)
-            libraryFiles.addFile (juceHeaderFile, -1);
-
-        if (hasResources)
-        {
-            libraryFiles.addFile (binaryDataCpp, -1);
-            libraryFiles.addFile (binaryDataCpp.withFileExtension (".h"), -1);
-        }
-
-        if (numJuceSourceFiles > 0)
-        {
-            for (int j = 0; j <= project.getNumSeparateAmalgamatedFiles(); ++j)
-            {
-                const File sourceWrapperCpp (getSourceWrapperCpp (j));
-                const File sourceWrapperMM (sourceWrapperCpp.withFileExtension (".mm"));
-
-                if ((j == 0 && numJuceSourceFiles == 1) || (j != 0 && numJuceSourceFiles > 1))
-                {
-                    if (exporter.usesMMFiles())
-                        libraryFiles.addFile (sourceWrapperMM, -1);
-                    else
-                        libraryFiles.addFile (sourceWrapperCpp, -1);
-                }
-            }
-        }
-
-        if (project.getProjectType().isAudioPlugin())
-            libraryFiles.addFile (pluginCharacteristicsFile, -1);
-
-        libraryFiles.setID ("__jucelibfiles");
-        return libraryFiles;
     }
 
     void writeProjects()
@@ -500,9 +327,16 @@ private:
 
             if (targetFolder.createDirectory())
             {
-                exporter->generatedGroups.add (createLibraryFilesGroup (*exporter));
+                // start with a copy of the basic files, as each exporter may modify it.
+                const ValueTree generatedGroupCopy (generatedFilesGroup.getNode().createCopy());
 
-                for (int j = 0; j < exporter->libraryModules.size(); ++j)
+                int j;
+                for (j = 0; j < exporter->libraryModules.size(); ++j)
+                    exporter->libraryModules.getUnchecked(j)->createFiles (*exporter, *this);
+
+                exporter->generatedGroups.add (generatedFilesGroup);
+
+                for (j = 0; j < exporter->libraryModules.size(); ++j)
                     exporter->libraryModules.getUnchecked(j)->addExtraCodeGroups (*exporter, exporter->generatedGroups);
 
                 try
@@ -513,6 +347,8 @@ private:
                 {
                     errors.add (error.message);
                 }
+
+                generatedFilesGroup.getNode() = generatedGroupCopy;
             }
             else
             {

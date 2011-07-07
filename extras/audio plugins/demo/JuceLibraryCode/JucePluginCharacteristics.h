@@ -8,8 +8,8 @@
 
 */
 
-#ifndef __PLUGINCHARACTERISTICS_D4EFFF1A__
-#define __PLUGINCHARACTERISTICS_D4EFFF1A__
+#ifndef __PLUGINCHARACTERISTICS_0NRD9LLGO__
+#define __PLUGINCHARACTERISTICS_0NRD9LLGO__
 
 #define JucePlugin_Build_VST    1  // (If you change this value, you'll also need to re-export the projects using the Jucer)
 #define JucePlugin_Build_AU     1  // (If you change this value, you'll also need to re-export the projects using the Jucer)
@@ -45,4 +45,4 @@
 #define JucePlugin_RTASProductId        JucePlugin_PluginCode
 #define JUCE_USE_VSTSDK_2_4             1
 
-#endif   // __PLUGINCHARACTERISTICS_D4EFFF1A__
+#endif   // __PLUGINCHARACTERISTICS_0NRD9LLGO__

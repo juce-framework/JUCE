@@ -175,7 +175,12 @@ namespace CodeHelpers
 
     String createIncludeStatement (const File& includeFile, const File& targetFile)
     {
-        return "#include \"" + FileHelpers::unixStylePath (includeFile.getRelativePathFrom (targetFile.getParentDirectory())) + "\"";
+        return createIncludeStatement (FileHelpers::unixStylePath (includeFile.getRelativePathFrom (targetFile.getParentDirectory())));
+    }
+
+    String createIncludeStatement (const String& includePath)
+    {
+        return "#include \"" + includePath + "\"";
     }
 
     String makeHeaderGuardName (const File& file)

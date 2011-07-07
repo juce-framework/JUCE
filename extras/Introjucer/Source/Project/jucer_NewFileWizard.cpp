@@ -27,23 +27,28 @@
 
 
 //==============================================================================
-static bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
+namespace
 {
-    String s = item.getProject().getFileTemplate (templateName)
-                  .replace ("FILENAME", file.getFileName(), false)
-                  .replace ("DATE", Time::getCurrentTime().toString (true, true, true), false)
-                  .replace ("AUTHOR", SystemStats::getFullUserName(), false)
-                  .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (file), false);
+    bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
+    {
+        String s = item.getProject().getFileTemplate (templateName)
+                      .replace ("FILENAME", file.getFileName(), false)
+                      .replace ("DATE", Time::getCurrentTime().toString (true, true, true), false)
+                      .replace ("AUTHOR", SystemStats::getFullUserName(), false)
+                      .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (file), false);
 
-    return FileHelpers::overwriteFileWithNewDataIfDifferent (file, s);
+        return FileHelpers::overwriteFileWithNewDataIfDifferent (file, s);
+    }
+
+    const int menuBaseID = 0x12d83f0;
 }
+
 
 //==============================================================================
 class NewCppFileWizard  : public NewFileWizard::Type
 {
 public:
     NewCppFileWizard() {}
-    ~NewCppFileWizard() {}
 
     String getName()  { return "CPP File"; }
 
@@ -73,7 +78,6 @@ class NewHeaderFileWizard  : public NewFileWizard::Type
 {
 public:
     NewHeaderFileWizard() {}
-    ~NewHeaderFileWizard() {}
 
     String getName()  { return "Header File"; }
 
@@ -103,7 +107,6 @@ class NewCppAndHeaderFileWizard  : public NewFileWizard::Type
 {
 public:
     NewCppAndHeaderFileWizard() {}
-    ~NewCppAndHeaderFileWizard() {}
 
     String getName()  { return "CPP & Header File"; }
 
@@ -156,8 +159,6 @@ NewFileWizard::~NewFileWizard()
 }
 
 juce_ImplementSingleton_SingleThreaded (NewFileWizard)
-
-static const int menuBaseID = 0x12d83f0;
 
 void NewFileWizard::addWizardsToMenu (PopupMenu& m) const
 {

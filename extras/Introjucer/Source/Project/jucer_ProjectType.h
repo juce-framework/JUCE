@@ -29,6 +29,7 @@
 #include "../jucer_Headers.h"
 #include "jucer_Project.h"
 class ProjectExporter;
+class ProjectSaver;
 
 //==============================================================================
 class LibraryModule
@@ -38,6 +39,8 @@ public:
     virtual ~LibraryModule() {}
 
     virtual void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const = 0;
+    virtual void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const = 0;
+    virtual void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards) = 0;
     virtual void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const = 0;
     virtual void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const = 0;
     virtual void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) = 0;

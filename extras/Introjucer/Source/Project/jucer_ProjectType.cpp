@@ -25,6 +25,8 @@
 
 #include "jucer_ProjectType.h"
 #include "jucer_ProjectExporter.h"
+#include "jucer_ProjectSaver.h"
+
 
 //==============================================================================
 LibraryModule::LibraryModule()
@@ -54,6 +56,80 @@ namespace
         props.add (new TextPropertyComponent (exporter.getVSTFolder(), "VST Folder", 1024, false));
         props.getLast()->setTooltip ("If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
     }
+
+    static int countMaxPluginChannels (const String& configString, bool isInput)
+    {
+        StringArray configs;
+        configs.addTokens (configString, ", {}", String::empty);
+        configs.trim();
+        configs.removeEmptyStrings();
+        jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
+
+        int maxVal = 0;
+        for (int i = (isInput ? 0 : 1); i < configs.size(); i += 2)
+            maxVal = jmax (maxVal, configs[i].getIntValue());
+
+        return maxVal;
+    }
+
+    static void writePluginCharacteristics (Project& project, OutputStream& out)
+    {
+        String headerGuard ("__PLUGINCHARACTERISTICS_" + project.getProjectUID().toUpperCase() + "__");
+
+        ProjectSaver::writeAutoGenWarningComment (out);
+
+        out << "    This header file contains configuration options for the plug-in. If you need to change any of" << newLine
+            << "    these, it'd be wise to do so using the Jucer, rather than editing this file directly..." << newLine
+            << newLine
+            << "*/" << newLine
+            << newLine
+            << "#ifndef " << headerGuard << newLine
+            << "#define " << headerGuard << newLine
+            << newLine
+            << "#define JucePlugin_Build_VST    " << ((bool) project.shouldBuildVST().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
+            << "#define JucePlugin_Build_AU     " << ((bool) project.shouldBuildAU().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
+            << "#define JucePlugin_Build_RTAS   " << ((bool) project.shouldBuildRTAS().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
+            << newLine
+            << "#define JucePlugin_Name                 " << project.getPluginName().toString().quoted() << newLine
+            << "#define JucePlugin_Desc                 " << project.getPluginDesc().toString().quoted() << newLine
+            << "#define JucePlugin_Manufacturer         " << project.getPluginManufacturer().toString().quoted() << newLine
+            << "#define JucePlugin_ManufacturerCode     '" << project.getPluginManufacturerCode().toString().trim().substring (0, 4) << "'" << newLine
+            << "#define JucePlugin_PluginCode           '" << project.getPluginCode().toString().trim().substring (0, 4) << "'" << newLine
+            << "#define JucePlugin_MaxNumInputChannels  " << countMaxPluginChannels (project.getPluginChannelConfigs().toString(), true) << newLine
+            << "#define JucePlugin_MaxNumOutputChannels " << countMaxPluginChannels (project.getPluginChannelConfigs().toString(), false) << newLine
+            << "#define JucePlugin_PreferredChannelConfigurations   " << project.getPluginChannelConfigs().toString() << newLine
+            << "#define JucePlugin_IsSynth              " << ((bool) project.getPluginIsSynth().getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_WantsMidiInput       " << ((bool) project.getPluginWantsMidiInput().getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_ProducesMidiOutput   " << ((bool) project.getPluginProducesMidiOut().getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_SilenceInProducesSilenceOut  " << ((bool) project.getPluginSilenceInProducesSilenceOut().getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_TailLengthSeconds    " << (double) project.getPluginTailLengthSeconds().getValue() << newLine
+            << "#define JucePlugin_EditorRequiresKeyboardFocus  " << ((bool) project.getPluginEditorNeedsKeyFocus().getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_VersionCode          " << project.getVersionAsHex() << newLine
+            << "#define JucePlugin_VersionString        " << project.getVersion().toString().quoted() << newLine
+            << "#define JucePlugin_VSTUniqueID          JucePlugin_PluginCode" << newLine
+            << "#define JucePlugin_VSTCategory          " << ((bool) project.getPluginIsSynth().getValue() ? "kPlugCategSynth" : "kPlugCategEffect") << newLine
+            << "#define JucePlugin_AUMainType           " << ((bool) project.getPluginIsSynth().getValue() ? "kAudioUnitType_MusicDevice" : "kAudioUnitType_Effect") << newLine
+            << "#define JucePlugin_AUSubType            JucePlugin_PluginCode" << newLine
+            << "#define JucePlugin_AUExportPrefix       " << project.getPluginAUExportPrefix().toString() << newLine
+            << "#define JucePlugin_AUExportPrefixQuoted " << project.getPluginAUExportPrefix().toString().quoted() << newLine
+            << "#define JucePlugin_AUManufacturerCode   JucePlugin_ManufacturerCode" << newLine
+            << "#define JucePlugin_CFBundleIdentifier   " << project.getBundleIdentifier().toString() << newLine
+            << "#define JucePlugin_AUCocoaViewClassName " << project.getPluginAUCocoaViewClassName().toString() << newLine
+            << "#define JucePlugin_RTASCategory         " << ((bool) project.getPluginIsSynth().getValue() ? "ePlugInCategory_SWGenerators" : "ePlugInCategory_None") << newLine
+            << "#define JucePlugin_RTASManufacturerCode JucePlugin_ManufacturerCode" << newLine
+            << "#define JucePlugin_RTASProductId        JucePlugin_PluginCode" << newLine;
+
+        out << "#define JUCE_USE_VSTSDK_2_4             1" << newLine
+            << newLine
+            << "#endif   // " << headerGuard << newLine;
+    }
+
+    void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
+    {
+        MemoryOutputStream mem;
+        writePluginCharacteristics (projectSaver.getProject(), mem);
+        projectSaver.saveGeneratedFile (projectSaver.getProject().getPluginCharacteristicsFilename(), mem);
+    }
 }
 
 
@@ -62,6 +138,64 @@ class JuceLibraryModule  : public LibraryModule
 {
 public:
     JuceLibraryModule() {}
+
+    void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards)
+    {
+        if (project.getJuceLinkageMode() != Project::notLinkedToJuce)
+        {
+            if (project.isUsingSingleTemplateFile()
+                 || project.isUsingMultipleTemplateFiles()
+                 || project.isUsingFullyAmalgamatedFile())
+                createMultipleIncludes (project, "juce_amalgamated.h", includePaths, headerGuards);
+            else
+                createMultipleIncludes (project, "juce.h", includePaths, headerGuards);
+        }
+    }
+
+    void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const
+    {
+        const Project& project = exporter.getProject();
+
+        const String linkageMode (project.getJuceLinkageMode());
+        int numJuceSourceFiles = 0;
+
+        if (linkageMode == Project::useAmalgamatedJuce
+              || linkageMode == Project::useAmalgamatedJuceViaSingleTemplate)
+        {
+            numJuceSourceFiles = 1;
+        }
+        else if (linkageMode == Project::useAmalgamatedJuceViaMultipleTemplates)
+        {
+            numJuceSourceFiles = project.getNumSeparateAmalgamatedFiles();
+        }
+        else
+        {
+            jassert (linkageMode == Project::notLinkedToJuce
+                      || linkageMode == Project::useLinkedJuce);
+        }
+
+        for (int i = 0; i <= project.getNumSeparateAmalgamatedFiles(); ++i)
+        {
+            String sourceWrapper (project.getJuceSourceFilenameRoot());
+
+            if (i != 0)
+                sourceWrapper << i;
+
+            sourceWrapper << (exporter.usesMMFiles() ? ".mm" : ".cpp");
+
+            if (numJuceSourceFiles > 0
+                 && ((i == 0 && numJuceSourceFiles == 1) || (i != 0 && numJuceSourceFiles > 1)))
+            {
+                MemoryOutputStream mem;
+                writeSourceWrapper (mem, const_cast<Project&> (project), i);
+                projectSaver.saveGeneratedFile (sourceWrapper, mem);
+            }
+            else
+            {
+                project.getGeneratedCodeFolder().getChildFile (sourceWrapper).deleteFile();
+            }
+        }
+    }
 
     void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const
     {
@@ -114,6 +248,83 @@ public:
             }
         }
     }
+
+private:
+    static void writeSourceWrapper (OutputStream& out, Project& project, int fileNumber)
+    {
+        const String appConfigFileName (project.getAppConfigFilename());
+
+        ProjectSaver::writeAutoGenWarningComment (out);
+
+        out << "    This file pulls in all the Juce source code, and builds it using the settings" << newLine
+            << "    defined in " << appConfigFileName << "." << newLine
+            << newLine
+            << "    If you want to change the method by which Juce is linked into your app, use the" << newLine
+            << "    Jucer to change it, rather than trying to edit this file directly." << newLine
+            << newLine
+            << "*/"
+            << newLine
+            << newLine
+            << CodeHelpers::createIncludeStatement (appConfigFileName) << newLine;
+
+        if (fileNumber == 0)
+            writeInclude (project, out, project.isUsingFullyAmalgamatedFile() ? "juce_amalgamated.cpp"
+                                                                              : "amalgamation/juce_amalgamated_template.cpp");
+        else
+            writeInclude (project, out, "amalgamation/juce_amalgamated" + String (fileNumber) + ".cpp");
+    }
+
+    static void createMultipleIncludes (Project& project, const String& pathFromLibraryFolder,
+                                        StringArray& paths, StringArray& guards)
+    {
+        for (int i = project.getNumExporters(); --i >= 0;)
+        {
+            ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
+
+            if (exporter != nullptr)
+            {
+                paths.add (exporter->getIncludePathForFileInJuceFolder (pathFromLibraryFolder, project.getAppIncludeFile()));
+                guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");
+            }
+        }
+    }
+
+    static void writeInclude (Project& project, OutputStream& out, const String& pathFromJuceFolder)
+    {
+        StringArray paths, guards;
+        createMultipleIncludes (project, pathFromJuceFolder, paths, guards);
+
+        StringArray uniquePaths (paths);
+        uniquePaths.removeDuplicates (false);
+
+        if (uniquePaths.size() == 1)
+        {
+            out << "#include " << paths[0] << newLine;
+        }
+        else
+        {
+            int i = paths.size();
+            for (; --i >= 0;)
+            {
+                for (int j = i; --j >= 0;)
+                {
+                    if (paths[i] == paths[j] && guards[i] == guards[j])
+                    {
+                        paths.remove (i);
+                        guards.remove (i);
+                    }
+                }
+            }
+
+            for (i = 0; i < paths.size(); ++i)
+            {
+                out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
+                    << " #include " << paths[i] << newLine;
+            }
+
+            out << "#endif" << newLine;
+        }
+    }
 };
 
 //==============================================================================
@@ -121,6 +332,15 @@ class VSTLibraryModule  : public LibraryModule
 {
 public:
     VSTLibraryModule() {}
+
+    void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const
+    {
+        writePluginCharacteristicsFile (projectSaver);
+    }
+
+    void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards)
+    {
+    }
 
     void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const
     {
@@ -166,6 +386,15 @@ class RTASLibraryModule  : public LibraryModule
 {
 public:
     RTASLibraryModule() {}
+
+    void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const
+    {
+        writePluginCharacteristicsFile (projectSaver);
+    }
+
+    void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards)
+    {
+    }
 
     void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const
     {
@@ -296,6 +525,15 @@ class AULibraryModule  : public LibraryModule
 {
 public:
     AULibraryModule() {}
+
+    void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const
+    {
+        writePluginCharacteristicsFile (projectSaver);
+    }
+
+    void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards)
+    {
+    }
 
     void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const
     {

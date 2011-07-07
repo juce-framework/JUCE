@@ -10,8 +10,8 @@
 
 */
 
-#ifndef __APPHEADERFILE_BD73378F__
-#define __APPHEADERFILE_BD73378F__
+#ifndef __APPHEADERFILE_M70QFTRRK__
+#define __APPHEADERFILE_M70QFTRRK__
 
 #include "AppConfig.h"
 #include "../../../juce_amalgamated.h"
@@ -24,4 +24,4 @@ namespace ProjectInfo
     const int          versionNumber  = 0x30000;
 }
 
-#endif   // __APPHEADERFILE_BD73378F__
+#endif   // __APPHEADERFILE_M70QFTRRK__

@@ -132,9 +132,9 @@
 		1C26D9DA0B2D0FF8F2CEC721 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_WindowTemplate.h"; path = "../../Source/BinaryData/jucer_WindowTemplate.h"; sourceTree = "SOURCE_ROOT"; };
 		31B5EB3CEA43BE4B473DCC85 = { isa = PBXFileReference; lastKnownFileType = image.png; name = "juce_icon.png"; path = "../../Source/BinaryData/juce_icon.png"; sourceTree = "SOURCE_ROOT"; };
 		C86084A495B96EA215958914 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
-		8FEC5B519774920289A1FD73 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		D02830A908A07FD46F7387DA = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = "SOURCE_ROOT"; };
 		A6A79D303B85B7C9D673ECD5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../JuceLibraryCode/BinaryData.h; sourceTree = "SOURCE_ROOT"; };
+		8FEC5B519774920289A1FD73 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		933DADF4F3906510EA714CC0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode1.mm; path = ../../JuceLibraryCode/JuceLibraryCode1.mm; sourceTree = "SOURCE_ROOT"; };
 		DD6476FF0F8BE833CD54C01F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode2.mm; path = ../../JuceLibraryCode/JuceLibraryCode2.mm; sourceTree = "SOURCE_ROOT"; };
 		268B4FFB1C675B679138545F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode3.mm; path = ../../JuceLibraryCode/JuceLibraryCode3.mm; sourceTree = "SOURCE_ROOT"; };
@@ -217,9 +217,9 @@
 				31B5EB3CEA43BE4B473DCC85 ); name = BinaryData; sourceTree = "<group>"; };
 		265749F75DBA86EC3F19FE34 = { isa = PBXGroup; children = (
 				C86084A495B96EA215958914,
-				8FEC5B519774920289A1FD73,
 				D02830A908A07FD46F7387DA,
 				A6A79D303B85B7C9D673ECD5,
+				8FEC5B519774920289A1FD73,
 				933DADF4F3906510EA714CC0,
 				DD6476FF0F8BE833CD54C01F,
 				268B4FFB1C675B679138545F,

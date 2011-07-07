@@ -34,6 +34,7 @@ namespace CodeHelpers
     String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates);
     String addEscapeChars (const String& text);
     String createIncludeStatement (const File& includeFile, const File& targetFile);
+    String createIncludeStatement (const String& includePath);
     String makeHeaderGuardName (const File& file);
     String makeBinaryDataIdentifierName (const File& file);
 
