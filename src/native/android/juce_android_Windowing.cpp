@@ -578,7 +578,7 @@ void Desktop::createMouseInputSources()
         mouseSources.add (new MouseInputSource (i, false));
 }
 
-const Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentMousePosition()
 {
     return AndroidComponentPeer::lastMousePos;
 }
@@ -600,7 +600,7 @@ void ModifierKeys::updateCurrentModifiers() noexcept
     currentModifiers = AndroidComponentPeer::currentModifiers;
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
+ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     return AndroidComponentPeer::currentModifiers;
 }

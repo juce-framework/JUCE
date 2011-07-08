@@ -286,7 +286,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 
 ModifierKeys UIViewComponentPeer::currentModifiers;
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
+ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     return UIViewComponentPeer::currentModifiers;
 }

@@ -217,7 +217,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
-const Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentMousePosition()
 {
     JUCE_AUTORELEASEPOOL
     const NSPoint p ([NSEvent mouseLocation]);

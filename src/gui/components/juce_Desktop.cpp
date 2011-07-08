@@ -352,6 +352,22 @@ void Desktop::handleAsyncUpdate()
 }
 
 //==============================================================================
+void Desktop::resetTimer()
+{
+    if (mouseListeners.size() == 0)
+        stopTimer();
+    else
+        startTimer (100);
+
+    lastFakeMouseMove = getMousePosition();
+}
+
+ListenerList <MouseListener>& Desktop::getMouseListeners()
+{
+    resetTimer();
+    return mouseListeners;
+}
+
 void Desktop::addGlobalMouseListener (MouseListener* const listener)
 {
     mouseListeners.add (listener);
@@ -395,16 +411,6 @@ void Desktop::sendMouseMove()
                 mouseListeners.callChecked (checker, &MouseListener::mouseMove, me);
         }
     }
-}
-
-void Desktop::resetTimer()
-{
-    if (mouseListeners.size() == 0)
-        stopTimer();
-    else
-        startTimer (100);
-
-    lastFakeMouseMove = getMousePosition();
 }
 
 //==============================================================================

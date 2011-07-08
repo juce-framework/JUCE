@@ -49,7 +49,7 @@ ModifierKeys& ModifierKeys::operator= (const ModifierKeys& other) noexcept
 
 ModifierKeys ModifierKeys::currentModifiers;
 
-const ModifierKeys ModifierKeys::getCurrentModifiers() noexcept
+ModifierKeys ModifierKeys::getCurrentModifiers() noexcept
 {
     return currentModifiers;
 }

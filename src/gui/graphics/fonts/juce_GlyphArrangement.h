@@ -67,7 +67,7 @@ public:
     /** Returns the y position of the bottom of the glyph. */
     float getBottom() const                     { return y + font.getDescent(); }
     /** Returns the bounds of the glyph. */
-    const Rectangle<float> getBounds() const    { return Rectangle<float> (x, getTop(), w, font.getHeight()); }
+    Rectangle<float> getBounds() const          { return Rectangle<float> (x, getTop(), w, font.getHeight()); }
 
     //==============================================================================
     /** Shifts the glyph's position by a relative amount. */
@@ -255,7 +255,7 @@ public:
         @param includeWhitespace        if true, the extent of any whitespace characters will also
                                         be taken into account
     */
-    const Rectangle<float> getBoundingBox (int startIndex, int numGlyphs, bool includeWhitespace) const;
+    Rectangle<float> getBoundingBox (int startIndex, int numGlyphs, bool includeWhitespace) const;
 
     /** Shifts a set of glyphs by a given amount.
 

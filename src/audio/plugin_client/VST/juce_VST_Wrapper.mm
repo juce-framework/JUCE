@@ -229,12 +229,15 @@ void checkWindowVisibility (void* nsWindow, Component* comp)
    #endif
 }
 
-void forwardCurrentKeyEventToHost (Component* comp)
+bool forwardCurrentKeyEventToHost (Component* comp)
 {
-   #if ! JUCE_64BIT
+   #if JUCE_64BIT
+    return false;
+   #else
     NSWindow* win = [(NSView*) comp->getWindowHandle() window];
     [[win parentWindow] makeKeyWindow];
     [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+    return true;
    #endif
 }
 

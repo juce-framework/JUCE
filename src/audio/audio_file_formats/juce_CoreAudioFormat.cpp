@@ -135,6 +135,21 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
     {
+        jassert (destSamples != nullptr);
+        const int64 samplesAvailable = lengthInSamples - startSampleInFile;
+
+        if (samplesAvailable < numSamples)
+        {
+            for (int i = numDestChannels; --i >= 0;)
+                if (destSamples[i] != nullptr)
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
+
+            numSamples = (int) samplesAvailable;
+        }
+
+        if (numSamples <= 0)
+            return true;
+
         OSStatus status = ExtAudioFileSeek (audioFileRef, startSampleInFile);
         if (status != noErr)
             return false;

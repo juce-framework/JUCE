@@ -2575,7 +2575,7 @@ void ModifierKeys::updateCurrentModifiers() noexcept
     currentModifiers = Win32ComponentPeer::currentModifiers;
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
+ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     Win32ComponentPeer::updateKeyModifiers();
 
@@ -2785,7 +2785,7 @@ void Desktop::createMouseInputSources()
     mouseSources.add (new MouseInputSource (0, true));
 }
 
-const Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentMousePosition()
 {
     POINT mousePos;
     GetCursorPos (&mousePos);

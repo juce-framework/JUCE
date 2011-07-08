@@ -128,21 +128,21 @@ public:
         /** Middle mouse button flag. */
         middleButtonModifier                    = 64,
 
-#if JUCE_MAC
+       #if JUCE_MAC
         /** Command key flag - on windows this is the same as the CTRL key flag. */
         commandModifier                         = 8,
 
         /** Popup menu flag - on windows this is the same as rightButtonModifier, on the
             Mac it's the same as (rightButtonModifier | ctrlModifier). */
         popupMenuClickModifier                  = rightButtonModifier | ctrlModifier,
-#else
+       #else
         /** Command key flag - on windows this is the same as the CTRL key flag. */
         commandModifier                         = ctrlModifier,
 
         /** Popup menu flag - on windows this is the same as rightButtonModifier, on the
             Mac it's the same as (rightButtonModifier | ctrlModifier). */
         popupMenuClickModifier                  = rightButtonModifier,
-#endif
+       #endif
 
         /** Represents a combination of all the shift, alt, ctrl and command key modifiers. */
         allKeyboardModifiers                    = shiftModifier | ctrlModifier | altModifier | commandModifier,
@@ -153,10 +153,10 @@ public:
 
     //==============================================================================
     /** Returns a copy of only the mouse-button flags */
-    const ModifierKeys withOnlyMouseButtons() const noexcept            { return ModifierKeys (flags & allMouseButtonModifiers); }
+    ModifierKeys withOnlyMouseButtons() const noexcept                  { return ModifierKeys (flags & allMouseButtonModifiers); }
 
     /** Returns a copy of only the non-mouse flags */
-    const ModifierKeys withoutMouseButtons() const noexcept             { return ModifierKeys (flags & ~allMouseButtonModifiers); }
+    ModifierKeys withoutMouseButtons() const noexcept                   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
 
     bool operator== (const ModifierKeys& other) const noexcept          { return flags == other.flags; }
     bool operator!= (const ModifierKeys& other) const noexcept          { return flags != other.flags; }
@@ -180,7 +180,7 @@ public:
 
         @see getCurrentModifiersRealtime
     */
-    static const ModifierKeys getCurrentModifiers() noexcept;
+    static ModifierKeys getCurrentModifiers() noexcept;
 
     /** Creates a ModifierKeys object to represent the current state of the
         keyboard and mouse buttons.
@@ -196,7 +196,7 @@ public:
         update the value returned by getCurrentModifiers(), which could cause subtle changes
         in the behaviour of some components.
     */
-    static const ModifierKeys getCurrentModifiersRealtime() noexcept;
+    static ModifierKeys getCurrentModifiersRealtime() noexcept;
 
 
 private:

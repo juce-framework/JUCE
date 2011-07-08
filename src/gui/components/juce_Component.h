@@ -1769,7 +1769,7 @@ public:
 
         @see isMouseButtonDownAnywhere, isMouseOver, isMouseOverOrDragging
     */
-    bool isMouseButtonDown() const noexcept;
+    bool isMouseButtonDown() const;
 
     /** True if the mouse is over this component, or if it's being dragged in this component.
 
@@ -1777,7 +1777,7 @@ public:
 
         @see isMouseOver, isMouseButtonDown, isMouseButtonDownAnywhere
     */
-    bool isMouseOverOrDragging() const noexcept;
+    bool isMouseOverOrDragging() const;
 
     /** Returns true if a mouse button is currently down.
 
@@ -2271,9 +2271,6 @@ private:
         bool bufferToImageFlag          : 1;
         bool bringToFrontOnClickFlag    : 1;
         bool repaintOnMouseActivityFlag : 1;
-        bool mouseDownFlag              : 1;
-        bool mouseOverFlag              : 1;
-        bool mouseInsideFlag            : 1;
         bool currentlyModalFlag         : 1;
         bool isDisabledFlag             : 1;
         bool childCompFocusedFlag       : 1;

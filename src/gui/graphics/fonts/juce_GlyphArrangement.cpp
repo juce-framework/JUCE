@@ -623,7 +623,7 @@ void GlyphArrangement::stretchRangeOfGlyphs (int startIndex, int num,
     }
 }
 
-const Rectangle<float> GlyphArrangement::getBoundingBox (int startIndex, int num, const bool includeWhitespace) const
+Rectangle<float> GlyphArrangement::getBoundingBox (int startIndex, int num, const bool includeWhitespace) const
 {
     jassert (startIndex >= 0);
 

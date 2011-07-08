@@ -392,6 +392,7 @@ private:
 
     void timerCallback();
     void resetTimer();
+    ListenerList <MouseListener>& getMouseListeners();
 
     int getNumDisplayMonitors() const noexcept;
     const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const noexcept;

@@ -59,7 +59,7 @@ public:
         return static_cast <Component*> (componentUnderMouse);
     }
 
-    const ModifierKeys getCurrentModifiers() const
+    ModifierKeys getCurrentModifiers() const
     {
         return ModifierKeys::getCurrentModifiers().withoutMouseButtons().withFlags (buttonState.getRawFlags());
     }
@@ -89,7 +89,7 @@ public:
         return nullptr;
     }
 
-    const Point<int> getScreenPosition() const
+    Point<int> getScreenPosition() const
     {
         // This needs to return the live position if possible, but it mustn't update the lastScreenPos
         // value, because that can cause continuity problems.
@@ -197,8 +197,12 @@ public:
 
             if (current != nullptr)
             {
+                WeakReference<Component> safeOldComp (current);
                 setButtons (screenPos, time, ModifierKeys());
-                sendMouseExit (current, screenPos, time);
+
+                if (safeOldComp != nullptr)
+                    sendMouseExit (current, screenPos, time);
+
                 buttonState = originalButtonState;
             }
 
@@ -507,8 +511,8 @@ bool MouseInputSource::canHover() const                                 { return
 bool MouseInputSource::hasMouseWheel() const                            { return isMouse(); }
 int MouseInputSource::getIndex() const                                  { return pimpl->index; }
 bool MouseInputSource::isDragging() const                               { return pimpl->isDragging(); }
-const Point<int> MouseInputSource::getScreenPosition() const            { return pimpl->getScreenPosition(); }
-const ModifierKeys MouseInputSource::getCurrentModifiers() const        { return pimpl->getCurrentModifiers(); }
+Point<int> MouseInputSource::getScreenPosition() const                  { return pimpl->getScreenPosition(); }
+ModifierKeys MouseInputSource::getCurrentModifiers() const              { return pimpl->getCurrentModifiers(); }
 Component* MouseInputSource::getComponentUnderMouse() const             { return pimpl->getComponentUnderMouse(); }
 void MouseInputSource::triggerFakeMove() const                          { pimpl->triggerFakeMove(); }
 int MouseInputSource::getNumberOfMultipleClicks() const noexcept        { return pimpl->getNumberOfMultipleClicks(); }

@@ -620,12 +620,12 @@ public:
         This is only relevent for floating-point rectangles, of course.
         @see toFloat()
     */
-    const Rectangle<int> getSmallestIntegerContainer() const noexcept
+    Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
         const int x1 = (int) std::floor (static_cast<float> (x));
         const int y1 = (int) std::floor (static_cast<float> (y));
-        const int x2 = (int) std::ceil (static_cast<float> (x + w));
-        const int y2 = (int) std::ceil (static_cast<float> (y + h));
+        const int x2 = (int) std::ceil  (static_cast<float> (x + w));
+        const int y2 = (int) std::ceil  (static_cast<float> (y + h));
 
         return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
     }
@@ -656,7 +656,7 @@ public:
         Obviously this is mainly useful for rectangles that use integer types.
         @see getSmallestIntegerContainer
     */
-    const Rectangle<float> toFloat() const noexcept
+    Rectangle<float> toFloat() const noexcept
     {
         return Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
                                  static_cast<float> (w), static_cast<float> (h));

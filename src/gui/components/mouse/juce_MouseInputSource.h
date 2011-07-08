@@ -97,12 +97,12 @@ public:
     bool isDragging() const;
 
     /** Returns the last-known screen position of this source. */
-    const Point<int> getScreenPosition() const;
+    Point<int> getScreenPosition() const;
 
     /** Returns a set of modifiers that indicate which buttons are currently
         held down on this device.
     */
-    const ModifierKeys getCurrentModifiers() const;
+    ModifierKeys getCurrentModifiers() const;
 
     /** Returns the component that was last known to be under this pointer. */
     Component* getComponentUnderMouse() const;
@@ -180,7 +180,7 @@ private:
     friend class MouseInputSourceInternal;
     ScopedPointer<MouseInputSourceInternal> pimpl;
 
-    static const Point<int> getCurrentMousePosition();
+    static Point<int> getCurrentMousePosition();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource);
 };

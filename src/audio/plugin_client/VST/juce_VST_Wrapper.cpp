@@ -155,7 +155,7 @@ BEGIN_JUCE_NAMESPACE
   extern void detachComponentFromWindowRef (Component* component, void* nsWindow);
   extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight, const PluginHostType& host);
   extern void checkWindowVisibility (void* nsWindow, Component* component);
-  extern void forwardCurrentKeyEventToHost (Component* component);
+  extern bool forwardCurrentKeyEventToHost (Component* component);
  #endif
 
  #if JUCE_LINUX
@@ -1275,12 +1275,11 @@ public:
         }
 
        #if JUCE_MAC
-        bool keyPressed (const KeyPress& kp)
+        bool keyPressed (const KeyPress&)
         {
             // If we have an unused keypress, move the key-focus to a host window
             // and re-inject the event..
-            forwardCurrentKeyEventToHost (this);
-            return true;
+            return forwardCurrentKeyEventToHost (this);
         }
        #endif
 

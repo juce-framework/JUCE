@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	18
+#define JUCE_BUILDNUMBER	19
 
 /** Current Juce version number.
 
@@ -23937,21 +23937,21 @@ public:
 		/** Middle mouse button flag. */
 		middleButtonModifier			= 64,
 
-#if JUCE_MAC
+	   #if JUCE_MAC
 		/** Command key flag - on windows this is the same as the CTRL key flag. */
 		commandModifier			 = 8,
 
 		/** Popup menu flag - on windows this is the same as rightButtonModifier, on the
 			Mac it's the same as (rightButtonModifier | ctrlModifier). */
 		popupMenuClickModifier		  = rightButtonModifier | ctrlModifier,
-#else
+	   #else
 		/** Command key flag - on windows this is the same as the CTRL key flag. */
 		commandModifier			 = ctrlModifier,
 
 		/** Popup menu flag - on windows this is the same as rightButtonModifier, on the
 			Mac it's the same as (rightButtonModifier | ctrlModifier). */
 		popupMenuClickModifier		  = rightButtonModifier,
-#endif
+	   #endif
 
 		/** Represents a combination of all the shift, alt, ctrl and command key modifiers. */
 		allKeyboardModifiers			= shiftModifier | ctrlModifier | altModifier | commandModifier,
@@ -23961,10 +23961,10 @@ public:
 	};
 
 	/** Returns a copy of only the mouse-button flags */
-	const ModifierKeys withOnlyMouseButtons() const noexcept		{ return ModifierKeys (flags & allMouseButtonModifiers); }
+	ModifierKeys withOnlyMouseButtons() const noexcept		  { return ModifierKeys (flags & allMouseButtonModifiers); }
 
 	/** Returns a copy of only the non-mouse flags */
-	const ModifierKeys withoutMouseButtons() const noexcept		 { return ModifierKeys (flags & ~allMouseButtonModifiers); }
+	ModifierKeys withoutMouseButtons() const noexcept		   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
 
 	bool operator== (const ModifierKeys& other) const noexcept	  { return flags == other.flags; }
 	bool operator!= (const ModifierKeys& other) const noexcept	  { return flags != other.flags; }
@@ -23986,7 +23986,7 @@ public:
 
 		@see getCurrentModifiersRealtime
 	*/
-	static const ModifierKeys getCurrentModifiers() noexcept;
+	static ModifierKeys getCurrentModifiers() noexcept;
 
 	/** Creates a ModifierKeys object to represent the current state of the
 		keyboard and mouse buttons.
@@ -24002,7 +24002,7 @@ public:
 		update the value returned by getCurrentModifiers(), which could cause subtle changes
 		in the behaviour of some components.
 	*/
-	static const ModifierKeys getCurrentModifiersRealtime() noexcept;
+	static ModifierKeys getCurrentModifiersRealtime() noexcept;
 
 private:
 
@@ -26185,12 +26185,12 @@ public:
 		This is only relevent for floating-point rectangles, of course.
 		@see toFloat()
 	*/
-	const Rectangle<int> getSmallestIntegerContainer() const noexcept
+	Rectangle<int> getSmallestIntegerContainer() const noexcept
 	{
 		const int x1 = (int) std::floor (static_cast<float> (x));
 		const int y1 = (int) std::floor (static_cast<float> (y));
-		const int x2 = (int) std::ceil (static_cast<float> (x + w));
-		const int y2 = (int) std::ceil (static_cast<float> (y + h));
+		const int x2 = (int) std::ceil  (static_cast<float> (x + w));
+		const int y2 = (int) std::ceil  (static_cast<float> (y + h));
 
 		return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
 	}
@@ -26221,7 +26221,7 @@ public:
 		Obviously this is mainly useful for rectangles that use integer types.
 		@see getSmallestIntegerContainer
 	*/
-	const Rectangle<float> toFloat() const noexcept
+	Rectangle<float> toFloat() const noexcept
 	{
 		return Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
 								 static_cast<float> (w), static_cast<float> (h));
@@ -32500,7 +32500,7 @@ public:
 
 		@see isMouseButtonDownAnywhere, isMouseOver, isMouseOverOrDragging
 	*/
-	bool isMouseButtonDown() const noexcept;
+	bool isMouseButtonDown() const;
 
 	/** True if the mouse is over this component, or if it's being dragged in this component.
 
@@ -32508,7 +32508,7 @@ public:
 
 		@see isMouseOver, isMouseButtonDown, isMouseButtonDownAnywhere
 	*/
-	bool isMouseOverOrDragging() const noexcept;
+	bool isMouseOverOrDragging() const;
 
 	/** Returns true if a mouse button is currently down.
 
@@ -32989,9 +32989,6 @@ private:
 		bool bufferToImageFlag	  : 1;
 		bool bringToFrontOnClickFlag	: 1;
 		bool repaintOnMouseActivityFlag : 1;
-		bool mouseDownFlag		  : 1;
-		bool mouseOverFlag		  : 1;
-		bool mouseInsideFlag		: 1;
 		bool currentlyModalFlag	 : 1;
 		bool isDisabledFlag		 : 1;
 		bool childCompFocusedFlag	   : 1;
@@ -34462,6 +34459,7 @@ private:
 
 	void timerCallback();
 	void resetTimer();
+	ListenerList <MouseListener>& getMouseListeners();
 
 	int getNumDisplayMonitors() const noexcept;
 	const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const noexcept;
@@ -57762,7 +57760,7 @@ public:
 	/** Returns the y position of the bottom of the glyph. */
 	float getBottom() const			 { return y + font.getDescent(); }
 	/** Returns the bounds of the glyph. */
-	const Rectangle<float> getBounds() const	{ return Rectangle<float> (x, getTop(), w, font.getHeight()); }
+	Rectangle<float> getBounds() const	  { return Rectangle<float> (x, getTop(), w, font.getHeight()); }
 
 	/** Shifts the glyph's position by a relative amount. */
 	void moveBy (float deltaX, float deltaY);
@@ -57941,7 +57939,7 @@ public:
 		@param includeWhitespace	if true, the extent of any whitespace characters will also
 										be taken into account
 	*/
-	const Rectangle<float> getBoundingBox (int startIndex, int numGlyphs, bool includeWhitespace) const;
+	Rectangle<float> getBoundingBox (int startIndex, int numGlyphs, bool includeWhitespace) const;
 
 	/** Shifts a set of glyphs by a given amount.
 
@@ -62943,12 +62941,12 @@ public:
 	bool isDragging() const;
 
 	/** Returns the last-known screen position of this source. */
-	const Point<int> getScreenPosition() const;
+	Point<int> getScreenPosition() const;
 
 	/** Returns a set of modifiers that indicate which buttons are currently
 		held down on this device.
 	*/
-	const ModifierKeys getCurrentModifiers() const;
+	ModifierKeys getCurrentModifiers() const;
 
 	/** Returns the component that was last known to be under this pointer. */
 	Component* getComponentUnderMouse() const;
@@ -63025,7 +63023,7 @@ private:
 	friend class MouseInputSourceInternal;
 	ScopedPointer<MouseInputSourceInternal> pimpl;
 
-	static const Point<int> getCurrentMousePosition();
+	static Point<int> getCurrentMousePosition();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseInputSource);
 };

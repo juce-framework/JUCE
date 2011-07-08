@@ -2616,7 +2616,7 @@ void ModifierKeys::updateCurrentModifiers() noexcept
     currentModifiers = LinuxComponentPeer::currentModifiers;
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
+ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     Window root, child;
     int x, y, winx, winy;
@@ -2798,7 +2798,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
              && (matchedDepth == desiredDepth);
 }
 
-const Point<int> MouseInputSource::getCurrentMousePosition()
+Point<int> MouseInputSource::getCurrentMousePosition()
 {
     Window root, child;
     int x, y, winx, winy;

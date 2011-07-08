@@ -905,7 +905,7 @@ void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
     }
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
+ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     return NSViewComponentPeer::currentModifiers;
 }
