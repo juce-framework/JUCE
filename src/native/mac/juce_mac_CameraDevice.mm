@@ -353,8 +353,8 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
 
         if ([mediaType isEqualToString: QTMediaTypeVideo])
             options = [QTCompressionOptions compressionOptionsWithIdentifier:
-                            quality >= 1 ? nsStringLiteral ("QTCompressionOptionsSD480SizeH264Video")_
-                                           nsStringLiteral ("QTCompressionOptions240SizeH264Video")];
+                            quality >= 1 ? nsStringLiteral ("QTCompressionOptionsSD480SizeH264Video")
+                                         : nsStringLiteral ("QTCompressionOptions240SizeH264Video")];
         else if ([mediaType isEqualToString: QTMediaTypeSound])
             options = [QTCompressionOptions compressionOptionsWithIdentifier: nsStringLiteral ("QTCompressionOptionsHighQualityAACAudio")];
 

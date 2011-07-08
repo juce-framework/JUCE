@@ -47,6 +47,7 @@
  #import <Cocoa/Cocoa.h>
  #import <CoreAudio/HostTime.h>
  #if JUCE_BUILD_NATIVE
+  #include <AudioToolbox/AudioToolbox.h>
   #import <CoreAudio/AudioHardware.h>
   #import <CoreMIDI/MIDIServices.h>
   #import <QTKit/QTKit.h>
