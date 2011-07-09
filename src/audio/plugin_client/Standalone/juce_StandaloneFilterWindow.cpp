@@ -217,19 +217,6 @@ void StandaloneFilterWindow::loadState()
 }
 
 //==============================================================================
-PropertySet* StandaloneFilterWindow::getGlobalSettings()
-{
-    /* If you want this class to store the plugin's settings, you can set up an
-       ApplicationProperties object and use this method as it is, or override this
-       method to return your own custom PropertySet.
-
-       If using this method without changing it, you'll probably need to call
-       ApplicationProperties::setStorageParameters() in your plugin's constructor to
-       tell it where to save the file.
-    */
-    return ApplicationProperties::getInstance()->getUserSettings();
-}
-
 void StandaloneFilterWindow::showAudioSettingsDialog()
 {
     AudioDeviceSelectorComponent selectorComp (*deviceManager,

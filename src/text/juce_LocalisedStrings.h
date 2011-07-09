@@ -27,7 +27,6 @@
 #define __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
 
 #include "juce_StringPairArray.h"
-#include "../core/juce_Singleton.h"
 #include "../io/files/juce_File.h"
 
 

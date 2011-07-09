@@ -33,10 +33,6 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-juce_ImplementSingleton (ApplicationProperties)
-
-
-//==============================================================================
 ApplicationProperties::ApplicationProperties()
     : commonSettingsAreReadOnly (0)
 {
@@ -45,7 +41,6 @@ ApplicationProperties::ApplicationProperties()
 ApplicationProperties::~ApplicationProperties()
 {
     closeFiles();
-    clearSingletonInstance();
 }
 
 //==============================================================================

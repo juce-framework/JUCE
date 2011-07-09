@@ -42,7 +42,7 @@ namespace CommandIDs
 }
 
 extern ApplicationCommandManager* commandManager;
-
+extern ApplicationProperties* appProperties;
 
 //==============================================================================
 /**

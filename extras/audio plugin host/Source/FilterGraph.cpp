@@ -24,6 +24,7 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "MainHostWindow.h"
 #include "FilterGraph.h"
 #include "InternalFilters.h"
 #include "GraphEditorPanel.h"
@@ -265,7 +266,7 @@ const String FilterGraph::saveDocument (const File& file)
 const File FilterGraph::getLastDocumentOpened()
 {
     RecentlyOpenedFilesList recentFiles;
-    recentFiles.restoreFromString (ApplicationProperties::getInstance()->getUserSettings()
+    recentFiles.restoreFromString (appProperties->getUserSettings()
                                         ->getValue ("recentFilterGraphFiles"));
 
     return recentFiles.getFile (0);
@@ -274,12 +275,12 @@ const File FilterGraph::getLastDocumentOpened()
 void FilterGraph::setLastDocumentOpened (const File& file)
 {
     RecentlyOpenedFilesList recentFiles;
-    recentFiles.restoreFromString (ApplicationProperties::getInstance()->getUserSettings()
+    recentFiles.restoreFromString (appProperties->getUserSettings()
                                         ->getValue ("recentFilterGraphFiles"));
 
     recentFiles.addFile (file);
 
-    ApplicationProperties::getInstance()->getUserSettings()
+    appProperties->getUserSettings()
         ->setValue ("recentFilterGraphFiles", recentFiles.toString());
 }
 

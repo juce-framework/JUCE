@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	20
+#define JUCE_BUILDNUMBER	21
 
 /** Current Juce version number.
 
@@ -35029,8 +35029,7 @@ private:
 /**
 	Manages a collection of properties.
 
-	This is a slightly higher-level wrapper for PropertiesFile, which can be used
-	as a singleton.
+	This is a slightly higher-level wrapper for managing PropertiesFile objects.
 
 	It holds two different PropertiesFile objects internally, one for user-specific
 	settings (stored in your user directory), and one for settings that are common to
@@ -35040,13 +35039,13 @@ private:
 	getUserSettings() and getCommonSettings() methods. It also has a few handy
 	methods like testWriteAccess() to check that the files can be saved.
 
-	If you're using one of these as a singleton, then your app's start-up code should
-	first of all call setStorageParameters() to tell it the parameters to use to create
-	the properties files.
+	After creating an instance of an ApplicationProperties object, you should first
+	of all call setStorageParameters() to tell it the parameters to use to create
+	its files.
 
 	@see PropertiesFile
 */
-class JUCE_API  ApplicationProperties   : public DeletedAtShutdown
+class JUCE_API  ApplicationProperties
 {
 public:
 
@@ -35060,8 +35059,6 @@ public:
 
 	/** Destructor. */
 	~ApplicationProperties();
-
-	juce_DeclareSingleton (ApplicationProperties, false);
 
 	/** Gives the object the information it needs to create the appropriate properties files.
 		See the PropertiesFile::Options class for details about what options you need to set.
@@ -37272,9 +37269,8 @@ private:
 	A class for keeping a list of available audio formats, and for deciding which
 	one to use to open a given file.
 
-	You can either use this class as a singleton object, or create instances of it
-	yourself. Once created, use its registerFormat() method to tell it which
-	formats it should use.
+	After creating an AudioFormatManager object, you should call registerFormat()
+	or registerBasicFormats() to give it a list of format types that it can use.
 
 	@see AudioFormat
 */

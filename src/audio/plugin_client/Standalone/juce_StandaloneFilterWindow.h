@@ -60,11 +60,13 @@ public:
     /** Shows the audio properties dialog box modally. */
     virtual void showAudioSettingsDialog();
 
-    /** Returns the property set to use for storing the app's last state.
+    /** Implement this method to return the property set that should be used for storing
+        the plugin's state.
 
-        This will be used to store the audio set-up and the filter's last state.
+        This will be used to store the audio set-up and the filter's last state. You may want
+        to return an ApplicationProperties object.
     */
-    virtual PropertySet* getGlobalSettings();
+    virtual PropertySet* getGlobalSettings() = 0;
 
     //==============================================================================
     /** @internal */

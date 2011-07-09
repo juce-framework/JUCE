@@ -32,7 +32,8 @@
 #endif
 
 
-ApplicationCommandManager* commandManager = 0;
+ApplicationCommandManager* commandManager = nullptr;
+ApplicationProperties* appProperties = nullptr;
 
 
 //==============================================================================
@@ -41,10 +42,6 @@ class PluginHostApp  : public JUCEApplication
 public:
     //==============================================================================
     PluginHostApp()
-    {
-    }
-
-    ~PluginHostApp()
     {
     }
 
@@ -57,7 +54,8 @@ public:
         options.filenameSuffix      = "settings";
         options.osxLibrarySubFolder = "Preferences";
 
-        ApplicationProperties::getInstance()->setStorageParameters (options);
+        appProperties = new ApplicationProperties();
+        appProperties->setStorageParameters (options);
 
         commandManager = new ApplicationCommandManager();
 
@@ -85,9 +83,10 @@ public:
     void shutdown()
     {
         mainWindow = 0;
-        ApplicationProperties::getInstance()->closeFiles();
+        appProperties->closeFiles();
 
         deleteAndZero (commandManager);
+        deleteAndZero (appProperties);
     }
 
     void systemRequestedQuit()

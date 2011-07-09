@@ -52,11 +52,6 @@
 #else
  #include <Cocoa/Cocoa.h>
  #include <Carbon/Carbon.h>
-
- static bool makeFSRefFromPath (FSRef* destFSRef, const String& path)
- {
-     return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toUTF8().getAddress()), destFSRef, 0) == noErr;
- }
 #endif
 
 //==============================================================================
@@ -80,7 +75,14 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../application/juce_Application.h"
 
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
-#include "../../../native/mac/juce_mac_CarbonViewWrapperComponent.h"
+ #include "../../../native/mac/juce_mac_CarbonViewWrapperComponent.h"
+#endif
+
+#if JUCE_MAC
+ static bool makeFSRefFromPath (FSRef* destFSRef, const String& path)
+ {
+     return FSPathMakeRef (reinterpret_cast <const UInt8*> (path.toUTF8().getAddress()), destFSRef, 0) == noErr;
+ }
 #endif
 
 //==============================================================================
