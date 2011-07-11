@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	21
+#define JUCE_BUILDNUMBER	22
 
 /** Current Juce version number.
 
@@ -18901,6 +18901,81 @@ private:
 #endif   // __JUCE_RSAKEY_JUCEHEADER__
 
 /*** End of inlined file: juce_RSAKey.h ***/
+
+
+#endif
+#ifndef __JUCE_SHA256_JUCEHEADER__
+
+/*** Start of inlined file: juce_SHA256.h ***/
+#ifndef __JUCE_SHA256_JUCEHEADER__
+#define __JUCE_SHA256_JUCEHEADER__
+
+/**
+	SHA-256 secure hash generator.
+
+	Create one of these objects from a block of source data or a string, and it
+	represents the SHA-256 hash of that data.
+
+	You can retrieve the hash as a raw 32-byte block, or as a 64-digit hex string.
+*/
+class JUCE_API  SHA256
+{
+public:
+
+	/** Creates an empty SHA256 object.
+		The default constructor just creates a hash filled with zeros. (This is not
+		equal to the hash of an empty block of data).
+	*/
+	SHA256();
+
+	/** Destructor. */
+	~SHA256();
+
+	/** Creates a copy of another SHA256. */
+	SHA256 (const SHA256& other);
+
+	/** Copies another SHA256. */
+	SHA256& operator= (const SHA256& other);
+
+	/** Creates a hash from a block of raw data. */
+	explicit SHA256 (const MemoryBlock& data);
+
+	/** Creates a hash from a block of raw data. */
+	SHA256 (const void* data, size_t numBytes);
+
+	/** Creates a hash from the contents of a stream.
+
+		This will read from the stream until the stream is exhausted, or until
+		maxBytesToRead bytes have been read. If maxBytesToRead is negative, the entire
+		stream will be read.
+	*/
+	SHA256 (InputStream& input, int64 maxBytesToRead = -1);
+
+	/** Reads a file and generates the hash of its contents.
+		If the file can't be opened, the hash will be left uninitialised (i.e. full
+		of zeros).
+	*/
+	explicit SHA256 (const File& file);
+
+	/** Returns the hash as a 32-byte block of data. */
+	MemoryBlock getRawData() const;
+
+	/** Returns the checksum as a 64-digit hex string. */
+	String toHexString() const;
+
+	bool operator== (const SHA256& other) const noexcept;
+	bool operator!= (const SHA256& other) const noexcept;
+
+private:
+
+	uint8 result [32];
+
+	JUCE_LEAK_DETECTOR (SHA256);
+};
+
+#endif   // __JUCE_SHA256_JUCEHEADER__
+
+/*** End of inlined file: juce_SHA256.h ***/
 
 
 #endif

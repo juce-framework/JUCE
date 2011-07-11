@@ -30,6 +30,7 @@
 
 #include "../../core/juce_StandardHeader.h"
 
+#define Point CarbonDummyPointName
 #include <AudioToolbox/AudioToolbox.h>
 
 BEGIN_JUCE_NAMESPACE

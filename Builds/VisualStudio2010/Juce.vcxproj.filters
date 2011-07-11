@@ -448,6 +448,9 @@
     <ClCompile Include="..\..\src\cryptography\juce_RSAKey.cpp">
       <Filter>Juce\Source\cryptography</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cryptography\juce_SHA256.cpp">
+      <Filter>Juce\Source\cryptography</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\events\juce_ActionBroadcaster.cpp">
       <Filter>Juce\Source\events</Filter>
     </ClCompile>
@@ -1621,6 +1624,9 @@
       <Filter>Juce\Source\cryptography</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cryptography\juce_RSAKey.h">
+      <Filter>Juce\Source\cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cryptography\juce_SHA256.h">
       <Filter>Juce\Source\cryptography</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\events\juce_ActionBroadcaster.h">

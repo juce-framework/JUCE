@@ -197,6 +197,7 @@
     <ClCompile Include="..\..\src\cryptography\juce_MD5.cpp"/>
     <ClCompile Include="..\..\src\cryptography\juce_Primes.cpp"/>
     <ClCompile Include="..\..\src\cryptography\juce_RSAKey.cpp"/>
+    <ClCompile Include="..\..\src\cryptography\juce_SHA256.cpp"/>
     <ClCompile Include="..\..\src\events\juce_ActionBroadcaster.cpp"/>
     <ClCompile Include="..\..\src\events\juce_AsyncUpdater.cpp"/>
     <ClCompile Include="..\..\src\events\juce_ChangeBroadcaster.cpp"/>
@@ -565,6 +566,7 @@
     <ClInclude Include="..\..\src\cryptography\juce_MD5.h"/>
     <ClInclude Include="..\..\src\cryptography\juce_Primes.h"/>
     <ClInclude Include="..\..\src\cryptography\juce_RSAKey.h"/>
+    <ClInclude Include="..\..\src\cryptography\juce_SHA256.h"/>
     <ClInclude Include="..\..\src\events\juce_ActionBroadcaster.h"/>
     <ClInclude Include="..\..\src\events\juce_ActionListener.h"/>
     <ClInclude Include="..\..\src\events\juce_AppleRemote.h"/>

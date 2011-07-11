@@ -120,6 +120,7 @@
  #include "../src/maths/juce_Expression.cpp"
  #include "../src/cryptography/juce_BlowFish.cpp"
  #include "../src/cryptography/juce_MD5.cpp"
+ #include "../src/cryptography/juce_SHA256.cpp"
  #include "../src/cryptography/juce_Primes.cpp"
  #include "../src/cryptography/juce_RSAKey.cpp"
  #include "../src/io/streams/juce_InputStream.cpp"

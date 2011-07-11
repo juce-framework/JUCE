@@ -114,6 +114,7 @@ OBJECTS := \
   $(OBJDIR)/juce_MD5_56896819.o \
   $(OBJDIR)/juce_Primes_32e6603.o \
   $(OBJDIR)/juce_RSAKey_b60982ae.o \
+  $(OBJDIR)/juce_SHA256_cb4da0d6.o \
   $(OBJDIR)/juce_ActionBroadcaster_7f997786.o \
   $(OBJDIR)/juce_AsyncUpdater_a7e1cb89.o \
   $(OBJDIR)/juce_ChangeBroadcaster_3eb8fecc.o \
@@ -760,6 +761,11 @@ $(OBJDIR)/juce_Primes_32e6603.o: ../../src/cryptography/juce_Primes.cpp
 $(OBJDIR)/juce_RSAKey_b60982ae.o: ../../src/cryptography/juce_RSAKey.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_RSAKey.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_SHA256_cb4da0d6.o: ../../src/cryptography/juce_SHA256.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_SHA256.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ActionBroadcaster_7f997786.o: ../../src/events/juce_ActionBroadcaster.cpp

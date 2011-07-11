@@ -83,6 +83,7 @@
 		708060ED04ADF4E4FB8E2171 = { isa = PBXBuildFile; fileRef = EAFD8FAF365DFB32DC42D0E7; };
 		12E3CC31875A202D6B30F778 = { isa = PBXBuildFile; fileRef = E9E692847C14AD33CD5FB40B; };
 		CF51988743ED2CD823DFE0B5 = { isa = PBXBuildFile; fileRef = 7AE9331938549244E27A5D0E; };
+		4AAFC135B170CF02A40F0D51 = { isa = PBXBuildFile; fileRef = 4CBD301A08E9C3762F861FC3; };
 		659D9CD58B6914EB420E6AEC = { isa = PBXBuildFile; fileRef = 31D985CB8646B78460E9D5A7; };
 		55737E2F1817DE642AA7DA05 = { isa = PBXBuildFile; fileRef = 1617348BBF5D103619D76911; };
 		6D2C50B0A69855A7F8C062E7 = { isa = PBXBuildFile; fileRef = B80F8CD026033ACCCE11A1A4; };
@@ -562,6 +563,8 @@
 		22612DBDC6C689B605CC6B48 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Primes.h"; path = "../../src/cryptography/juce_Primes.h"; sourceTree = "SOURCE_ROOT"; };
 		7AE9331938549244E27A5D0E = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_RSAKey.cpp"; path = "../../src/cryptography/juce_RSAKey.cpp"; sourceTree = "SOURCE_ROOT"; };
 		16335266AFB4D19F25410E1D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RSAKey.h"; path = "../../src/cryptography/juce_RSAKey.h"; sourceTree = "SOURCE_ROOT"; };
+		4CBD301A08E9C3762F861FC3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_SHA256.cpp"; path = "../../src/cryptography/juce_SHA256.cpp"; sourceTree = "SOURCE_ROOT"; };
+		02CD7BA1750DE36237369F78 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SHA256.h"; path = "../../src/cryptography/juce_SHA256.h"; sourceTree = "SOURCE_ROOT"; };
 		31D985CB8646B78460E9D5A7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ActionBroadcaster.cpp"; path = "../../src/events/juce_ActionBroadcaster.cpp"; sourceTree = "SOURCE_ROOT"; };
 		09F7685D1EFF472ECB1F5EF1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ActionBroadcaster.h"; path = "../../src/events/juce_ActionBroadcaster.h"; sourceTree = "SOURCE_ROOT"; };
 		4EF8BD4BF46C4BCB39F96609 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ActionListener.h"; path = "../../src/events/juce_ActionListener.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1344,7 +1347,9 @@
 				E9E692847C14AD33CD5FB40B,
 				22612DBDC6C689B605CC6B48,
 				7AE9331938549244E27A5D0E,
-				16335266AFB4D19F25410E1D ); name = cryptography; sourceTree = "<group>"; };
+				16335266AFB4D19F25410E1D,
+				4CBD301A08E9C3762F861FC3,
+				02CD7BA1750DE36237369F78 ); name = cryptography; sourceTree = "<group>"; };
 		89F308FD85F378E278C98884 = { isa = PBXGroup; children = (
 				31D985CB8646B78460E9D5A7,
 				09F7685D1EFF472ECB1F5EF1,
@@ -2150,6 +2155,7 @@
 				708060ED04ADF4E4FB8E2171,
 				12E3CC31875A202D6B30F778,
 				CF51988743ED2CD823DFE0B5,
+				4AAFC135B170CF02A40F0D51,
 				659D9CD58B6914EB420E6AEC,
 				55737E2F1817DE642AA7DA05,
 				6D2C50B0A69855A7F8C062E7,

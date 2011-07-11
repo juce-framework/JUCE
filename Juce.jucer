@@ -456,6 +456,8 @@
               file="src/cryptography/juce_RSAKey.cpp"/>
         <FILE id="N9A7SATlN" name="juce_RSAKey.h" compile="0" resource="0"
               file="src/cryptography/juce_RSAKey.h"/>
+        <FILE id="WxPfqD" name="juce_SHA256.cpp" compile="1" resource="0" file="src/cryptography/juce_SHA256.cpp"/>
+        <FILE id="Ct2Ht" name="juce_SHA256.h" compile="0" resource="0" file="src/cryptography/juce_SHA256.h"/>
       </GROUP>
       <GROUP id="n5aLT2f0q" name="events">
         <FILE id="Ge3t3ydwz" name="juce_ActionBroadcaster.cpp" compile="1"

@@ -128,6 +128,9 @@
 #ifndef __JUCE_RSAKEY_JUCEHEADER__
  #include "cryptography/juce_RSAKey.h"
 #endif
+#ifndef __JUCE_SHA256_JUCEHEADER__
+ #include "cryptography/juce_SHA256.h"
+#endif
 #ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
  #include "io/files/juce_DirectoryIterator.h"
 #endif

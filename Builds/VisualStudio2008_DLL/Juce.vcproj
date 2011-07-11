@@ -398,6 +398,8 @@
           <File RelativePath="..\..\src\cryptography\juce_Primes.h"/>
           <File RelativePath="..\..\src\cryptography\juce_RSAKey.cpp"/>
           <File RelativePath="..\..\src\cryptography\juce_RSAKey.h"/>
+          <File RelativePath="..\..\src\cryptography\juce_SHA256.cpp"/>
+          <File RelativePath="..\..\src\cryptography\juce_SHA256.h"/>
         </Filter>
         <Filter Name="events">
           <File RelativePath="..\..\src\events\juce_ActionBroadcaster.cpp"/>
