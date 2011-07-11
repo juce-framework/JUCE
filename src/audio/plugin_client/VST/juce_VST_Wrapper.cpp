@@ -147,7 +147,7 @@ static bool recursionCheck = false;
 static JUCE_NAMESPACE::uint32 lastMasterIdleCall = 0;
 
 BEGIN_JUCE_NAMESPACE
- extern void juce_callAnyTimersSynchronously();
+ extern void JUCE_API juce_callAnyTimersSynchronously();
 
  #if JUCE_MAC
   extern void initialiseMac();

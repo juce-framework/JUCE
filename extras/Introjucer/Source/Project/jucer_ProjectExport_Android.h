@@ -208,10 +208,9 @@ private:
     void writeAndroidMk (const File& file)
     {
         Array<RelativePath> files;
-        findAllFilesToCompile (getMainGroup(), files);
 
-        for (int i = 0; i < generatedGroups.size(); ++i)
-            findAllFilesToCompile (generatedGroups.getReference(i), files);
+        for (int i = 0; i < groups.size(); ++i)
+            findAllFilesToCompile (groups.getReference(i), files);
 
         MemoryOutputStream mo;
         writeAndroidMk (mo, files);

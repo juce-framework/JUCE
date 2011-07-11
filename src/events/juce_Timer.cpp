@@ -319,7 +319,7 @@ private:
 InternalTimerThread* InternalTimerThread::instance = nullptr;
 InternalTimerThread::LockType InternalTimerThread::lock;
 
-void juce_callAnyTimersSynchronously()
+void JUCE_API juce_callAnyTimersSynchronously()
 {
     InternalTimerThread::callAnyTimersSynchronously();
 }

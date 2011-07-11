@@ -27,7 +27,7 @@
 #define __JUCER_PROJECTEXPORT_MSVC_JUCEHEADER__
 
 #include "jucer_ProjectExporter.h"
-
+#include "jucer_ProjectSaver.h"
 
 //==============================================================================
 class MSVCProjectExporterBase   : public ProjectExporter
@@ -102,21 +102,9 @@ protected:
                              .toWindowsStyle();
     }
 
-    String getTargetBinarySuffix() const
-    {
-        if (projectType.isLibrary())
-            return ".lib";
-        else if (isRTAS())
-            return ".dpm";
-        else if (projectType.isAudioPlugin() || projectType.isBrowserPlugin())
-            return ".dll";
-
-        return ".exe";
-    }
-
     String getPreprocessorDefs (const Project::BuildConfiguration& config, const String& joinString) const
     {
-        StringPairArray defines;
+        StringPairArray defines (msvcExtraPreprocessorDefs);
         defines.set ("WIN32", "");
         defines.set ("_WINDOWS", "");
 
@@ -128,19 +116,6 @@ protected:
         else
         {
             defines.set ("NDEBUG", "");
-        }
-
-        if (projectType.isCommandLineApp())
-            defines.set ("_CONSOLE", "");
-
-        if (projectType.isLibrary())
-            defines.set ("_LIB", "");
-
-        if (isRTAS())
-        {
-            RelativePath rtasFolder (getRTASFolder().toString(), RelativePath::unknown);
-            defines.set ("JucePlugin_WinBag_path", CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
-                                                                                .toWindowsStyle().quoted()));
         }
 
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
@@ -176,7 +151,7 @@ protected:
         if (targetBinary.isNotEmpty())
             return targetBinary;
 
-        return config.getTargetBinaryName().toString() + getTargetBinarySuffix();
+        return config.getTargetBinaryName().toString() + msvcTargetSuffix;
     }
 
     static String createConfigName (const Project::BuildConfiguration& config)
@@ -400,11 +375,20 @@ public:
 
         if (hasIcon)
         {
-            generatedGroups.getReference(0).addFile (iconFile, -1);
-            generatedGroups.getReference(0).addFile (rcFile, -1);
+            for (int i = 0; i < groups.size(); ++i)
+            {
+                Project::Item& group = groups.getReference(i);
 
-            generatedGroups.getReference(0).findItemForFile (iconFile).getShouldAddToResourceValue() = false;
-            generatedGroups.getReference(0).findItemForFile (rcFile).getShouldAddToResourceValue() = false;
+                if (group.getID() == ProjectSaver::getGeneratedGroupID())
+                {
+                    group.addFile (iconFile, -1);
+                    group.addFile (rcFile, -1);
+
+                    group.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
+                    group.findItemForFile (rcFile).getShouldAddToResourceValue() = false;
+                    break;
+                }
+            }
         }
 
         {
@@ -522,11 +506,9 @@ protected:
 
     void createFiles (XmlElement& files)
     {
-        addFiles (getMainGroup(), files, false);
-
-        for (int i = 0; i < generatedGroups.size(); ++i)
-            if (generatedGroups.getReference(i).getNumChildren() > 0)
-                addFiles (generatedGroups.getReference(i), files, false);
+        for (int i = 0; i < groups.size(); ++i)
+            if (groups.getReference(i).getNumChildren() > 0)
+                addFiles (groups.getReference(i), files, false);
     }
 
     //==============================================================================
@@ -547,8 +529,7 @@ protected:
         xml.setAttribute ("Name", createConfigName (config));
         xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (binariesPath));
         xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (intermediatesPath));
-        xml.setAttribute ("ConfigurationType", (projectType.isAudioPlugin() || projectType.isBrowserPlugin() || isLibraryDLL())
-                                                    ? "2" : (projectType.isLibrary() ? "4" : "1"));
+        xml.setAttribute ("ConfigurationType", (msvcIsDLL || isLibraryDLL()) ? "2" : (projectType.isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
         xml.setAttribute ("CharacterSet", "2");
@@ -560,13 +541,11 @@ protected:
 
         XmlElement* customBuild = createToolElement (xml, "VCCustomBuildTool");
 
-        if (isRTAS())
-        {
-            RelativePath rsrFile (getJucePathFromTargetFolder().getChildFile (JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinResources.rsr"));
+        if (msvcPostBuildCommand.isNotEmpty())
+            customBuild->setAttribute ("CommandLine", msvcPostBuildCommand);
 
-            customBuild->setAttribute ("CommandLine", "copy /Y \"" + rsrFile.toWindowsStyle() + "\" \"$(TargetPath)\".rsr");
-            customBuild->setAttribute ("Outputs", "\"$(TargetPath)\".rsr");
-        }
+        if (msvcPostBuildOutputs.isNotEmpty())
+            customBuild->setAttribute ("Outputs", msvcPostBuildOutputs);
 
         createToolElement (xml, "VCXMLDataGeneratorTool");
         createToolElement (xml, "VCWebServiceProxyGeneratorTool");
@@ -601,8 +580,8 @@ protected:
 
             compiler->setAttribute ("AdditionalIncludeDirectories", replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (";")));
             compiler->setAttribute ("PreprocessorDefinitions", getPreprocessorDefs (config, ";"));
-            compiler->setAttribute ("RuntimeLibrary", isRTAS() ? (isDebug ? 3 : 2) // MT DLL
-                                                               : (isDebug ? 1 : 0)); // MT static
+            compiler->setAttribute ("RuntimeLibrary", msvcNeedsDLLRuntimeLib ? (isDebug ? 3 : 2) // MT DLL
+                                                                             : (isDebug ? 1 : 0)); // MT static
             compiler->setAttribute ("RuntimeTypeInfo", "true");
             compiler->setAttribute ("UsePrecompiledHeader", "0");
             compiler->setAttribute ("PrecompiledHeaderFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pch"));
@@ -641,7 +620,7 @@ protected:
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
             linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
-            linker->setAttribute ("SubSystem", projectType.isCommandLineApp() ? "1" : "2");
+            linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
             if (! isDebug)
             {
@@ -652,16 +631,16 @@ protected:
 
             linker->setAttribute ("TargetMachine", "1"); // (64-bit build = 5)
 
+            if (msvcDelayLoadedDLLs.isNotEmpty())
+                linker->setAttribute ("DelayLoadDLLs", msvcDelayLoadedDLLs);
+
+            if (msvcModuleDefinitionFile.isNotEmpty())
+                linker->setAttribute ("ModuleDefinitionFile", msvcModuleDefinitionFile);
+
             String extraLinkerOptions (getExtraLinkerFlags().toString());
 
-            if (isRTAS())
-            {
-                extraLinkerOptions += " /FORCE:multiple";
-                linker->setAttribute ("DelayLoadDLLs", "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll");
-                linker->setAttribute ("ModuleDefinitionFile", getJucePathFromTargetFolder()
-                                            .getChildFile (JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinExports.def")
-                                            .toWindowsStyle());
-            }
+            if (msvcExtraLinkerOptions.isNotEmpty())
+                extraLinkerOptions << ' ' << msvcExtraLinkerOptions;
 
             if (extraLinkerOptions.isNotEmpty())
                 linker->setAttribute ("AdditionalOptions", replacePreprocessorTokens (config, extraLinkerOptions).trim());
@@ -818,10 +797,9 @@ private:
     {
         const String defaultConfigName (createConfigName (configs.getReference(0)));
 
-        const bool isDLL = projectType.isAudioPlugin() || projectType.isBrowserPlugin();
         String targetType, targetCode;
 
-        if (isDLL)                                 { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
+        if (msvcIsDLL)                             { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
         else if (projectType.isLibrary())          { targetType = "\"Win32 (x86) Static Library\"";        targetCode = "0x0104"; }
         else if (projectType.isCommandLineApp())   { targetType = "\"Win32 (x86) Console Application\"";   targetCode = "0x0103"; }
         else                                       { targetType = "\"Win32 (x86) Application\"";           targetCode = "0x0101"; }
@@ -919,8 +897,8 @@ private:
                     << "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "
                     << (isDebug ? " /debug" : "")
                     << " /nologo /machine:I386 /out:\"" << targetBinary << "\" "
-                    << (isDLL ? "/dll" : (projectType.isCommandLineApp() ? "/subsystem:console "
-                                                                         : "/subsystem:windows "))
+                    << (msvcIsDLL ? "/dll" : (msvcIsWindowsSubsystem ? "/subsystem:windows "
+                                                                     : "/subsystem:console "))
                     << replacePreprocessorTokens (config, getExtraLinkerFlags().toString()).trim() << newLine;
             }
         }
@@ -929,11 +907,9 @@ private:
             << "# Begin Target"  << newLine
             << targetList;
 
-        writeFiles (out, getMainGroup());
-
-        for (int i = 0; i < generatedGroups.size(); ++i)
-            if (generatedGroups.getReference(i).getNumChildren() > 0)
-                writeFiles (out, generatedGroups.getReference(i));
+        for (int i = 0; i < groups.size(); ++i)
+            if (groups.getReference(i).getNumChildren() > 0)
+                writeFiles (out, groups.getReference(i));
 
         out << "# End Target" << newLine
             << "# End Project" << newLine;
@@ -1227,8 +1203,8 @@ protected:
                 includePaths.add ("%(AdditionalIncludeDirectories)");
                 cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                 cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
-                cl->createNewChildElement ("RuntimeLibrary")->addTextElement (isRTAS() ? (isDebug ? "MultiThreadedDLLDebug" : "MultiThreadedDLL")
-                                                                                       : (isDebug ? "MultiThreadedDebug" : "MultiThreaded"));
+                cl->createNewChildElement ("RuntimeLibrary")->addTextElement (msvcNeedsDLLRuntimeLib ? (isDebug ? "MultiThreadedDLLDebug" : "MultiThreadedDLL")
+                                                                                                     : (isDebug ? "MultiThreadedDebug" : "MultiThreaded"));
                 cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
                 cl->createNewChildElement ("PrecompiledHeader");
                 cl->createNewChildElement ("AssemblerListingLocation")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
@@ -1256,7 +1232,7 @@ protected:
                                                                                                         : "%(IgnoreSpecificDefaultLibraries)");
                 link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
                 link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
-                link->createNewChildElement ("SubSystem")->addTextElement (projectType.isCommandLineApp() ? "Console" : "Windows");
+                link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
                 link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
                 if (! isDebug)
@@ -1282,11 +1258,9 @@ protected:
             XmlElement* cppFiles = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* headerFiles = projectXml.createNewChildElement ("ItemGroup");
 
-            addFilesToCompile (getMainGroup(), *cppFiles, *headerFiles, false);
-
-            for (int i = 0; i < generatedGroups.size(); ++i)
-                if (generatedGroups.getReference(i).getNumChildren() > 0)
-                    addFilesToCompile (generatedGroups.getReference(i), *cppFiles, *headerFiles, false);
+            for (int i = 0; i < groups.size(); ++i)
+                if (groups.getReference(i).getNumChildren() > 0)
+                    addFilesToCompile (groups.getReference(i), *cppFiles, *headerFiles, false);
         }
 
         if (hasIcon)
@@ -1318,7 +1292,7 @@ protected:
     String getProjectType() const
     {
         if (projectType.isGUIApplication() || projectType.isCommandLineApp())   return "Application";
-        else if (projectType.isAudioPlugin() || projectType.isBrowserPlugin())  return "DynamicLibrary";
+        else if (msvcIsDLL)                                                     return "DynamicLibrary";
         else if (projectType.isLibrary())                                       return "StaticLibrary";
 
         jassertfalse;
@@ -1433,15 +1407,13 @@ protected:
         filterXml.setAttribute ("ToolsVersion", "4.0");
         filterXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
 
-        XmlElement* groups  = filterXml.createNewChildElement ("ItemGroup");
-        XmlElement* cpps    = filterXml.createNewChildElement ("ItemGroup");
-        XmlElement* headers = filterXml.createNewChildElement ("ItemGroup");
+        XmlElement* groupsXml  = filterXml.createNewChildElement ("ItemGroup");
+        XmlElement* cpps       = filterXml.createNewChildElement ("ItemGroup");
+        XmlElement* headers    = filterXml.createNewChildElement ("ItemGroup");
 
-        addFilesToFilter (getMainGroup(), projectName, *cpps, *headers, *groups);
-
-        for (int i = 0; i < generatedGroups.size(); ++i)
-            if (generatedGroups.getReference(i).getNumChildren() > 0)
-                addFilesToFilter (generatedGroups.getReference(i), project.getJuceCodeGroupName(), *cpps, *headers, *groups);
+        for (int i = 0; i < groups.size(); ++i)
+            if (groups.getReference(i).getNumChildren() > 0)
+                addFilesToFilter (groups.getReference(i), groups.getReference(i).getName().toString(), *cpps, *headers, *groupsXml);
 
         if (iconFile.exists())
         {

@@ -122,7 +122,7 @@ BEGIN_JUCE_NAMESPACE
  static void _clearfp() {}
 #endif
 
-extern void juce_callAnyTimersSynchronously();
+extern void JUCE_API juce_callAnyTimersSynchronously();
 
 
 //==============================================================================

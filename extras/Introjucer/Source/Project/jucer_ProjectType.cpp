@@ -152,7 +152,7 @@ public:
         }
     }
 
-    void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const
+    void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
     {
         const Project& project = exporter.getProject();
 
@@ -195,10 +195,9 @@ public:
                 project.getGeneratedCodeFolder().getChildFile (sourceWrapper).deleteFile();
             }
         }
-    }
 
-    void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const
-    {
+        if (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_AU"))
+            exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
     }
 
     void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const
@@ -213,7 +212,7 @@ public:
             createVSTPathEditor (exporter, props);
     }
 
-    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags)
+    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const
     {
         if (project.getJuceLinkageMode() == Project::notLinkedToJuce)
             return;
@@ -328,22 +327,27 @@ private:
 };
 
 //==============================================================================
+#define JUCE_PLUGINS_ROOT       "src/audio/plugin_client/"
+#define JUCE_PLUGINS_PATH_VST   JUCE_PLUGINS_ROOT "VST/"
+#define JUCE_PLUGINS_PATH_RTAS  JUCE_PLUGINS_ROOT "RTAS/"
+#define JUCE_PLUGINS_PATH_AU    JUCE_PLUGINS_ROOT "AU/"
+
+//==============================================================================
 class VSTLibraryModule  : public LibraryModule
 {
 public:
     VSTLibraryModule() {}
 
-    void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const
-    {
-        writePluginCharacteristicsFile (projectSaver);
-    }
-
     void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards)
     {
     }
 
-    void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const
+    void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
     {
+        writePluginCharacteristicsFile (projectSaver);
+
+        exporter.makefileTargetSuffix = ".so";
+
         Project::Item group (Project::Item::createGroup (const_cast<ProjectExporter&> (exporter).getProject(), "Juce VST Wrapper"));
         group.setID ("__jucevstfiles");
 
@@ -355,7 +359,7 @@ public:
         for (const char** f = (exporter.isXcode() ? osxFiles : winFiles); *f != 0; ++f)
             group.addRelativeFile (exporter.getJucePathFromProjectFolder().getChildFile (*f), -1, true);
 
-        groups.add (group);
+        exporter.groups.add (group);
     }
 
     void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const
@@ -376,7 +380,7 @@ public:
         createVSTPathEditor (exporter, props);
     }
 
-    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags)
+    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const
     {
     }
 };
@@ -387,17 +391,39 @@ class RTASLibraryModule  : public LibraryModule
 public:
     RTASLibraryModule() {}
 
-    void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const
-    {
-        writePluginCharacteristicsFile (projectSaver);
-    }
-
     void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards)
     {
     }
 
-    void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const
+    void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
     {
+        exporter.xcodeCanUseDwarf = false;
+
+        exporter.msvcTargetSuffix = ".dpm";
+        exporter.msvcNeedsDLLRuntimeLib = true;
+
+        RelativePath rtasFolder (exporter.getRTASFolder().toString(), RelativePath::projectFolder);
+        exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
+                                                                                .toWindowsStyle().quoted()));
+
+        exporter.msvcExtraLinkerOptions = "/FORCE:multiple";
+        exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll";
+        exporter.msvcModuleDefinitionFile = exporter.getJucePathFromTargetFolder()
+                                                    .getChildFile (JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinExports.def")
+                                                    .toWindowsStyle();
+
+        exporter.msvcPostBuildOutputs = "\"$(TargetPath)\".rsr";
+        exporter.msvcPostBuildCommand = "copy /Y \"" + exporter.getJucePathFromTargetFolder()
+                                                               .getChildFile (JUCE_PLUGINS_PATH_RTAS "juce_RTAS_WinResources.rsr")
+                                                               .toWindowsStyle()
+                                           + "\" \"$(TargetPath)\".rsr";
+
+
+        exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
+        exporter.xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
+
+        writePluginCharacteristicsFile (projectSaver);
+
         if (exporter.isXcode() || exporter.isVisualStudio())
         {
             Project::Item group (Project::Item::createGroup (const_cast<ProjectExporter&> (exporter).getProject(), "Juce RTAS Wrapper"));
@@ -422,15 +448,16 @@ public:
             {
                 const RelativePath file (exporter.getJucePathFromProjectFolder().getChildFile (*f));
                 group.addRelativeFile (file, -1, file.hasFileExtension ("cpp;mm;r"));
+                group.getChild (group.getNumChildren() - 1).getShouldInhibitWarningsValue() = true;
             }
 
-            groups.add (group);
+            exporter.groups.add (group);
         }
     }
 
     void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const
     {
-        RelativePath sdkFolder (exporter.getRTASFolder().toString(), RelativePath::projectFolder);
+        RelativePath rtasFolder (exporter.getRTASFolder().toString(), RelativePath::projectFolder);
 
         if (exporter.isVisualStudio())
         {
@@ -465,7 +492,7 @@ public:
                                 "xplat/AVX/avx2/avx2sdk/inc" };
 
             for (int i = 0; i < numElementsInArray (p); ++i)
-                paths.add (exporter.rebaseFromProjectFolderToBuildTarget (sdkFolder.getChildFile (p[i])).toWindowsStyle());
+                paths.add (exporter.rebaseFromProjectFolderToBuildTarget (rtasFolder.getChildFile (p[i])).toWindowsStyle());
         }
         else if (exporter.isXcode())
         {
@@ -502,7 +529,7 @@ public:
                                 "xplat/AVX/avx2/avx2sdk/utils" };
 
             for (int i = 0; i < numElementsInArray (p); ++i)
-                paths.add (exporter.rebaseFromProjectFolderToBuildTarget (sdkFolder.getChildFile (p[i])).toUnixStyle());
+                paths.add (exporter.rebaseFromProjectFolderToBuildTarget (rtasFolder.getChildFile (p[i])).toUnixStyle());
         }
     }
 
@@ -515,7 +542,7 @@ public:
         }
     }
 
-    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags)
+    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const
     {
     }
 };
@@ -526,19 +553,18 @@ class AULibraryModule  : public LibraryModule
 public:
     AULibraryModule() {}
 
-    void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const
-    {
-        writePluginCharacteristicsFile (projectSaver);
-    }
-
     void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards)
     {
     }
 
-    void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const
+    void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
     {
+        writePluginCharacteristicsFile (projectSaver);
+
         if (exporter.isXcode())
         {
+            exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+
             Project::Item group (Project::Item::createGroup (const_cast<ProjectExporter&> (exporter).getProject(), "Juce AU Wrapper"));
             group.setID ("__juceaufiles");
 
@@ -616,7 +642,7 @@ public:
                 }
             }
 
-            groups.add (group);
+            exporter.groups.add (group);
         }
     }
 
@@ -633,7 +659,7 @@ public:
     {
     }
 
-    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags)
+    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const
     {
     }
 };
@@ -670,6 +696,10 @@ const ProjectType* ProjectType::findType (const String& typeCode)
     return nullptr;
 }
 
+void ProjectType::prepareExporter (ProjectExporter& exporter) const
+{
+}
+
 void ProjectType::createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const
 {
     modules.add (new JuceLibraryModule());
@@ -683,6 +713,20 @@ public:
 
     static const char* getTypeName() noexcept   { return "guiapp"; }
     bool isGUIApplication() const               { return true; }
+
+    void prepareExporter (ProjectExporter& exporter) const
+    {
+        exporter.xcodePackageType = "APPL";
+        exporter.xcodeBundleSignature = "????";
+        exporter.xcodeCreatePList = true;
+        exporter.xcodeFileType = "wrapper.application";
+        exporter.xcodeBundleExtension = ".app";
+        exporter.xcodeProductType = "com.apple.product-type.application";
+        exporter.xcodeProductInstallPath = "$(HOME)/Applications";
+
+        exporter.msvcIsWindowsSubsystem = true;
+        exporter.msvcTargetSuffix = ".exe";
+    }
 
     void createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const
     {
@@ -699,6 +743,19 @@ public:
     static const char* getTypeName() noexcept   { return "consoleapp"; }
     bool isCommandLineApp() const               { return true; }
 
+    void prepareExporter (ProjectExporter& exporter) const
+    {
+        exporter.xcodeCreatePList = false;
+        exporter.xcodeFileType = "compiled.mach-o.executable";
+        exporter.xcodeBundleExtension = String::empty;
+        exporter.xcodeProductType = "com.apple.product-type.tool";
+        exporter.xcodeProductInstallPath = "/usr/bin";
+
+        exporter.msvcIsWindowsSubsystem = false;
+        exporter.msvcTargetSuffix = ".exe";
+        exporter.msvcExtraPreprocessorDefs.set ("_CONSOLE", "");
+    }
+
     void createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const
     {
         ProjectType::createRequiredModules (project, modules);
@@ -714,6 +771,19 @@ public:
     static const char* getTypeName() noexcept   { return "library"; }
     bool isLibrary() const                      { return true; }
 
+    void prepareExporter (ProjectExporter& exporter) const
+    {
+        exporter.xcodeCreatePList = false;
+        exporter.xcodeFileType = "archive.ar";
+        exporter.xcodeProductType = "com.apple.product-type.library.static";
+        exporter.xcodeProductInstallPath = String::empty;
+
+        exporter.makefileTargetSuffix = ".so";
+
+        exporter.msvcTargetSuffix = ".lib";
+        exporter.msvcExtraPreprocessorDefs.set ("_LIB", "");
+    }
+
     void createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const
     {
         ProjectType::createRequiredModules (project, modules);
@@ -728,6 +798,30 @@ public:
 
     static const char* getTypeName() noexcept   { return "audioplug"; }
     bool isAudioPlugin() const                  { return true; }
+
+    void prepareExporter (ProjectExporter& exporter) const
+    {
+        exporter.xcodeIsBundle = true;
+        exporter.xcodeCreatePList = true;
+        exporter.xcodePackageType = "TDMw";
+        exporter.xcodeBundleSignature = "PTul";
+        exporter.xcodeFileType = "wrapper.cfbundle";
+        exporter.xcodeBundleExtension = ".component";
+        exporter.xcodeProductType = "com.apple.product-type.bundle";
+        exporter.xcodeProductInstallPath = "$(HOME)/Library/Audio/Plug-Ins/Components/";
+
+        exporter.xcodeShellScriptTitle = "Copy to the different plugin folders";
+        exporter.xcodeShellScript = String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt, BinaryData::AudioPluginXCodeScript_txtSize);
+
+        exporter.xcodeOtherRezFlags = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
+                                      " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
+                                      " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\"";
+
+        exporter.msvcTargetSuffix = ".dll";
+        exporter.msvcIsDLL = true;
+
+        exporter.makefileIsDLL = true;
+    }
 
     void createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const
     {
@@ -745,10 +839,40 @@ public:
 };
 
 //==============================================================================
-static ProjectType_GUIApp guiType;
-static ProjectType_ConsoleApp consoleType;
-static ProjectType_Library staticLibType;
-static ProjectType_AudioPlugin audioPluginType;
+class ProjectType_BrowserPlugin  : public ProjectType
+{
+public:
+    ProjectType_BrowserPlugin()  : ProjectType (getTypeName(), "Browser Plug-in") {}
+
+    static const char* getTypeName() noexcept   { return "browserplug"; }
+    bool isBrowserPlugin() const                { return true; }
+
+    void prepareExporter (ProjectExporter& exporter) const
+    {
+        exporter.xcodeIsBundle = true;
+        exporter.xcodeCreatePList = true;
+        exporter.xcodeFileType = "wrapper.cfbundle";
+        exporter.xcodeBundleExtension = ".plugin";
+        exporter.xcodeProductType = "com.apple.product-type.bundle";
+        exporter.xcodeProductInstallPath = "$(HOME)/Library/Internet Plug-Ins//";
+
+        exporter.msvcTargetSuffix = ".dll";
+        exporter.msvcIsDLL = true;
+
+        exporter.makefileIsDLL = true;
+    }
+
+    void createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const
+    {
+        ProjectType::createRequiredModules (project, modules);
+    }
+};
+
+//==============================================================================
+static ProjectType_GUIApp       guiType;
+static ProjectType_ConsoleApp   consoleType;
+static ProjectType_Library      libraryType;
+static ProjectType_AudioPlugin  audioPluginType;
 
 //==============================================================================
 const char* ProjectType::getGUIAppTypeName()        { return ProjectType_GUIApp::getTypeName(); }

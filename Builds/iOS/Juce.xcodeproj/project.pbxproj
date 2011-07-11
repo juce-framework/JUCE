@@ -1973,7 +1973,7 @@
 				ADE5F12AA5AD969E2C7002B3,
 				75700D13513346310CEAC30D,
 				AAC585C4648559DD713F28FE ); name = utilities; sourceTree = "<group>"; };
-		9AA3D660772E3D4C64EC7859 = { isa = PBXGroup; children = (
+		992526B83B6AA618A4FAECEB = { isa = PBXGroup; children = (
 				D443FD24B52106986FC8A531,
 				F2B0E44A08E127FD31184241,
 				1CC2889DB696E12FC34E3F50,
@@ -1989,13 +1989,13 @@
 				723AC5B999F1EC8F4A101AAF,
 				281D6856FAC3B07634AD1C32,
 				2FD5C998952BE08F8ED3F262,
-				01778F26212AECCBF2452804 ); name = Source; sourceTree = "<group>"; };
+				01778F26212AECCBF2452804 ); name = Juce; sourceTree = "<group>"; };
 		1076A9F8D71BFFF9E9975FB6 = { isa = PBXGroup; children = (  ); name = Resources; sourceTree = "<group>"; };
 		23256FCDBD84A2E259E40908 = { isa = PBXGroup; children = (  ); name = Frameworks; sourceTree = "<group>"; };
 		3E3A3D491CB40D2943E95E64 = { isa = PBXGroup; children = (
 				389351359BA78C682E1931A6 ); name = Products; sourceTree = "<group>"; };
-		992526B83B6AA618A4FAECEB = { isa = PBXGroup; children = (
-				9AA3D660772E3D4C64EC7859,
+		25F381A264FFB3735F124DCC = { isa = PBXGroup; children = (
+				992526B83B6AA618A4FAECEB,
 				1076A9F8D71BFFF9E9975FB6,
 				23256FCDBD84A2E259E40908,
 				3E3A3D491CB40D2943E95E64 ); name = Source; sourceTree = "<group>"; };
@@ -2440,7 +2440,7 @@
 				55EDB4D9B702B469DB4655C3 ); runOnlyForDeploymentPostprocessing = 0; };
 		01555BA382FAED280FF5F58A = { isa = PBXNativeTarget; buildConfigurationList = D14EC3F0DC5861E37D35E15A; buildPhases = (
 				8914D147048B9EE245989ACB ); buildRules = ( ); dependencies = ( ); name = Juce; productName = Juce; productReference = 389351359BA78C682E1931A6; productType = "com.apple.product-type.library.static"; };
-		FCFFEDFC83101B196BFA2AE2 = { isa = PBXProject; buildConfigurationList = 3A1CB6B5ECF4A79CDE35CC66; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = 992526B83B6AA618A4FAECEB; projectDirPath = ""; projectRoot = ""; targets = ( 01555BA382FAED280FF5F58A ); };
+		FCFFEDFC83101B196BFA2AE2 = { isa = PBXProject; buildConfigurationList = 3A1CB6B5ECF4A79CDE35CC66; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = 25F381A264FFB3735F124DCC; projectDirPath = ""; projectRoot = ""; targets = ( 01555BA382FAED280FF5F58A ); };
 	};
 	rootObject = FCFFEDFC83101B196BFA2AE2;
 }

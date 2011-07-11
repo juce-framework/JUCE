@@ -37,7 +37,7 @@ public:
         : project (project_), projectFile (projectFile_),
           generatedFilesGroup (Project::Item::createGroup (project, project.getJuceCodeGroupName()))
     {
-          generatedFilesGroup.setID ("__jucelibfiles");
+        generatedFilesGroup.setID (getGeneratedGroupID());
     }
 
     Project& getProject() noexcept      { return project; }
@@ -94,6 +94,8 @@ public:
             << "    project - if you alter its contents, your changes may be overwritten!" << newLine
             << newLine;
     }
+
+    static const char* getGeneratedGroupID() noexcept       { return "__jucelibfiles"; }
 
 private:
     Project& project;
@@ -312,17 +314,15 @@ private:
 
             if (exporter->getTargetFolder().createDirectory())
             {
+                project.getProjectType().prepareExporter (*exporter);
+
                 // start with a copy of the basic files, as each exporter may modify it.
                 const ValueTree generatedGroupCopy (generatedFilesGroup.getNode().createCopy());
 
-                int j;
-                for (j = 0; j < exporter->libraryModules.size(); ++j)
-                    exporter->libraryModules.getUnchecked(j)->createFiles (*exporter, *this);
+                for (int j = 0; j < exporter->libraryModules.size(); ++j)
+                    exporter->libraryModules.getUnchecked(j)->prepareExporter (*exporter, *this);
 
-                exporter->generatedGroups.add (generatedFilesGroup);
-
-                for (j = 0; j < exporter->libraryModules.size(); ++j)
-                    exporter->libraryModules.getUnchecked(j)->addExtraCodeGroups (*exporter, exporter->generatedGroups);
+                exporter->groups.add (generatedFilesGroup);
 
                 try
                 {

@@ -51,22 +51,22 @@
 
  #if JucePlugin_Build_VST
 
- #define DllMain DllMainRTAS
- #include <DLLMain.cpp>
- #undef DllMain
+  #define DllMain DllMainRTAS
+  #include <DLLMain.cpp>
+  #undef DllMain
 
- extern BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID);
+  extern BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID);
 
- // This overloaded DllMain can work as either an RTAS or a VST..
- extern "C" BOOL WINAPI DllMain (HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpReserved)
- {
-    if (GetModuleHandle (_T("DAE.DLL")) != 0)
-        return DllMainRTAS (hInstance, ul_reason_for_call, lpReserved);
-    else
-        return DllMainVST (hInstance, ul_reason_for_call, lpReserved);
- }
+  // This overloaded DllMain can work as either an RTAS or a VST..
+  extern "C" BOOL WINAPI DllMain (HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpReserved)
+  {
+     if (GetModuleHandleA ("DAE.DLL") != 0)
+         return DllMainRTAS (hInstance, ul_reason_for_call, lpReserved);
+     else
+         return DllMainVST (hInstance, ul_reason_for_call, lpReserved);
+  }
  #else
- #include <DLLMain.cpp>
+  #include <DLLMain.cpp>
  #endif
 
  #include <DefaultSwap.cpp>
@@ -80,8 +80,6 @@
 #else
 
 #if _MSC_VER
- // (defining these stubs just makes it easier to quickly turn off the RTAS build without removing
- // the exports table from your project settings)
  short __stdcall NewPlugIn (void*)                          { return 0; }
  short __stdcall _PI_GetRoutineDescriptor (long, void*)     { return 0; }
 #endif

@@ -128,17 +128,15 @@
   <References/>
   <Files>
     <Filter Name="Plugin Host">
-      <Filter Name="Source">
-        <File RelativePath="..\..\Source\FilterGraph.cpp"/>
-        <File RelativePath="..\..\Source\FilterGraph.h"/>
-        <File RelativePath="..\..\Source\GraphEditorPanel.cpp"/>
-        <File RelativePath="..\..\Source\GraphEditorPanel.h"/>
-        <File RelativePath="..\..\Source\HostStartup.cpp"/>
-        <File RelativePath="..\..\Source\InternalFilters.cpp"/>
-        <File RelativePath="..\..\Source\InternalFilters.h"/>
-        <File RelativePath="..\..\Source\MainHostWindow.cpp"/>
-        <File RelativePath="..\..\Source\MainHostWindow.h"/>
-      </Filter>
+      <File RelativePath="..\..\Source\FilterGraph.cpp"/>
+      <File RelativePath="..\..\Source\FilterGraph.h"/>
+      <File RelativePath="..\..\Source\GraphEditorPanel.cpp"/>
+      <File RelativePath="..\..\Source\GraphEditorPanel.h"/>
+      <File RelativePath="..\..\Source\HostStartup.cpp"/>
+      <File RelativePath="..\..\Source\InternalFilters.cpp"/>
+      <File RelativePath="..\..\Source\InternalFilters.h"/>
+      <File RelativePath="..\..\Source\MainHostWindow.cpp"/>
+      <File RelativePath="..\..\Source\MainHostWindow.h"/>
     </Filter>
     <Filter Name="Juce Library Code">
       <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>

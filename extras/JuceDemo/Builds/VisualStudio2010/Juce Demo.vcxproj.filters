@@ -5,14 +5,11 @@
     <Filter Include="Juce Demo">
       <UniqueIdentifier>{D3C1BE7C-161D-78D2-AA4A-AE5B28A49DC5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Juce Demo\Source">
-      <UniqueIdentifier>{D4BFDBA1-04DA-1AF7-BEDF-7A5C63D00D65}</UniqueIdentifier>
+    <Filter Include="Juce Demo\Demos">
+      <UniqueIdentifier>{0F706C6E-4C56-28CC-6E17-621CE5C94904}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Juce Demo\Source\Demos">
-      <UniqueIdentifier>{383A10E9-7C30-CC23-0554-D95AC593AAFC}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Juce Demo\Source\Binary Data">
-      <UniqueIdentifier>{6E0A4587-C5D5-BB9D-A788-42A182380C69}</UniqueIdentifier>
+    <Filter Include="Juce Demo\Binary Data">
+      <UniqueIdentifier>{2AA5AF01-B73D-17DA-570C-25BCC6A2DE34}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Library Code">
       <UniqueIdentifier>{F7048EA6-F4B2-F31B-E402-E05D678A1111}</UniqueIdentifier>
@@ -20,88 +17,88 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\ApplicationStartup.cpp">
-      <Filter>Juce Demo\Source</Filter>
+      <Filter>Juce Demo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\MainDemoWindow.cpp">
-      <Filter>Juce Demo\Source</Filter>
+      <Filter>Juce Demo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\AudioDemoLatencyPage.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\AudioDemoPlaybackPage.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\AudioDemoRecordPage.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\AudioDemoSetupPage.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\AudioDemoSynthPage.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\AudioDemoTabComponent.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\CameraDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\CodeEditorDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\DirectShowDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\DragAndDropDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\FontsAndTextDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\InterprocessCommsDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\OpenGLDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\QuickTimeDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\RenderingTestComponent.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\TableDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\ThreadingDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\TreeViewDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\WebBrowserDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\demos\WidgetsDemo.cpp">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Binary Data\cello.wav">
-      <Filter>Juce Demo\Source\Binary Data</Filter>
+      <Filter>Juce Demo\Binary Data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Binary Data\demo table data.xml">
-      <Filter>Juce Demo\Source\Binary Data</Filter>
+      <Filter>Juce Demo\Binary Data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Binary Data\icons.zip">
-      <Filter>Juce Demo\Source\Binary Data</Filter>
+      <Filter>Juce Demo\Binary Data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Binary Data\juce.png">
-      <Filter>Juce Demo\Source\Binary Data</Filter>
+      <Filter>Juce Demo\Binary Data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Binary Data\juce_icon.png">
-      <Filter>Juce Demo\Source\Binary Data</Filter>
+      <Filter>Juce Demo\Binary Data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Binary Data\treedemo.xml">
-      <Filter>Juce Demo\Source\Binary Data</Filter>
+      <Filter>Juce Demo\Binary Data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
       <Filter>Juce Library Code</Filter>
@@ -121,31 +118,31 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\MainDemoWindow.h">
-      <Filter>Juce Demo\Source</Filter>
+      <Filter>Juce Demo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\jucedemo_headers.h">
-      <Filter>Juce Demo\Source</Filter>
+      <Filter>Juce Demo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\demos\AudioDemoLatencyPage.h">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\demos\AudioDemoPlaybackPage.h">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\demos\AudioDemoRecordPage.h">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\demos\AudioDemoSetupPage.h">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\demos\AudioDemoSynthPage.h">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\demos\AudioDemoTabComponent.h">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\demos\RenderingTestComponent.h">
-      <Filter>Juce Demo\Source\Demos</Filter>
+      <Filter>Juce Demo\Demos</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
       <Filter>Juce Library Code</Filter>

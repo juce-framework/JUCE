@@ -206,6 +206,7 @@ public:
         Item findItemForFile (const File& file) const;
 
         Item getParent() const;
+        Item createCopy();
 
         const Drawable* getIcon() const;
 

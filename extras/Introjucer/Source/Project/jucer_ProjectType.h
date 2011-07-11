@@ -38,12 +38,11 @@ public:
     LibraryModule();
     virtual ~LibraryModule() {}
 
-    virtual void addExtraCodeGroups (const ProjectExporter& exporter, Array<Project::Item>& groups) const = 0;
-    virtual void createFiles (const ProjectExporter& exporter, ProjectSaver& projectSaver) const = 0;
+    virtual void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const = 0;
     virtual void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards) = 0;
     virtual void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const = 0;
     virtual void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const = 0;
-    virtual void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) = 0;
+    virtual void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const = 0;
 };
 
 
@@ -72,6 +71,7 @@ public:
     static const char* getConsoleAppTypeName();
     static const char* getAudioPluginTypeName();
 
+    virtual void prepareExporter (ProjectExporter& exporter) const;
     virtual void createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const;
 
 protected:

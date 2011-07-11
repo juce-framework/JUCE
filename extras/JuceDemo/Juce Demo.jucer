@@ -34,80 +34,78 @@
                    osxArchitecture="32BitUniversal"/>
   </CONFIGURATIONS>
   <MAINGROUP id="0bU7ypLe" name="Juce Demo">
-    <GROUP id="BEJsSEFfF" name="Source">
-      <FILE id="Bnqll1Mk0" name="ApplicationStartup.cpp" compile="1" resource="0"
-            file="Source/ApplicationStartup.cpp"/>
-      <FILE id="GQ8NUhTaA" name="MainDemoWindow.cpp" compile="1" resource="0"
-            file="Source/MainDemoWindow.cpp"/>
-      <FILE id="uZ5W4Yi3v" name="MainDemoWindow.h" compile="0" resource="0"
-            file="Source/MainDemoWindow.h"/>
-      <FILE id="2tLjAaxrV" name="jucedemo_headers.h" compile="0" resource="0"
-            file="Source/jucedemo_headers.h"/>
-      <GROUP id="p0ZeP0Wn6" name="Demos">
-        <FILE id="0K60nXdM0" name="AudioDemoLatencyPage.cpp" compile="1" resource="0"
-              file="Source/demos/AudioDemoLatencyPage.cpp"/>
-        <FILE id="gBbGRs0kH" name="AudioDemoLatencyPage.h" compile="0" resource="0"
-              file="Source/demos/AudioDemoLatencyPage.h"/>
-        <FILE id="xhvfKtgZG" name="AudioDemoPlaybackPage.cpp" compile="1" resource="0"
-              file="Source/demos/AudioDemoPlaybackPage.cpp"/>
-        <FILE id="29brslcz" name="AudioDemoPlaybackPage.h" compile="0" resource="0"
-              file="Source/demos/AudioDemoPlaybackPage.h"/>
-        <FILE id="YGjfPIjR" name="AudioDemoRecordPage.cpp" compile="1" resource="0"
-              file="Source/demos/AudioDemoRecordPage.cpp"/>
-        <FILE id="VM1ZV45Pm" name="AudioDemoRecordPage.h" compile="0" resource="0"
-              file="Source/demos/AudioDemoRecordPage.h"/>
-        <FILE id="EYUlG624y" name="AudioDemoSetupPage.cpp" compile="1" resource="0"
-              file="Source/demos/AudioDemoSetupPage.cpp"/>
-        <FILE id="MnvCR6oN" name="AudioDemoSetupPage.h" compile="0" resource="0"
-              file="Source/demos/AudioDemoSetupPage.h"/>
-        <FILE id="oAwxdfki8" name="AudioDemoSynthPage.cpp" compile="1" resource="0"
-              file="Source/demos/AudioDemoSynthPage.cpp"/>
-        <FILE id="oB7yiS4Hk" name="AudioDemoSynthPage.h" compile="0" resource="0"
-              file="Source/demos/AudioDemoSynthPage.h"/>
-        <FILE id="jzvMAq8mg" name="AudioDemoTabComponent.cpp" compile="1" resource="0"
-              file="Source/demos/AudioDemoTabComponent.cpp"/>
-        <FILE id="gP6sEczjE" name="AudioDemoTabComponent.h" compile="0" resource="0"
-              file="Source/demos/AudioDemoTabComponent.h"/>
-        <FILE id="obpkMZ2g" name="CameraDemo.cpp" compile="1" resource="0"
-              file="Source/demos/CameraDemo.cpp"/>
-        <FILE id="VrH9xEBt4" name="CodeEditorDemo.cpp" compile="1" resource="0"
-              file="Source/demos/CodeEditorDemo.cpp"/>
-        <FILE id="Biv7Wl" name="DirectShowDemo.cpp" compile="1" resource="0"
-              file="Source/demos/DirectShowDemo.cpp"/>
-        <FILE id="LQxkyT31Q" name="DragAndDropDemo.cpp" compile="1" resource="0"
-              file="Source/demos/DragAndDropDemo.cpp"/>
-        <FILE id="WlmBspVQo" name="FontsAndTextDemo.cpp" compile="1" resource="0"
-              file="Source/demos/FontsAndTextDemo.cpp"/>
-        <FILE id="5NTST47xi" name="InterprocessCommsDemo.cpp" compile="1" resource="0"
-              file="Source/demos/InterprocessCommsDemo.cpp"/>
-        <FILE id="xoi5BuVvv" name="OpenGLDemo.cpp" compile="1" resource="0"
-              file="Source/demos/OpenGLDemo.cpp"/>
-        <FILE id="WkWbYNoZ0" name="QuickTimeDemo.cpp" compile="1" resource="0"
-              file="Source/demos/QuickTimeDemo.cpp"/>
-        <FILE id="hzPv7BR9U" name="RenderingTestComponent.cpp" compile="1"
-              resource="0" file="Source/demos/RenderingTestComponent.cpp"/>
-        <FILE id="EQv4ZsR78" name="RenderingTestComponent.h" compile="0" resource="0"
-              file="Source/demos/RenderingTestComponent.h"/>
-        <FILE id="ReJoO2H9u" name="TableDemo.cpp" compile="1" resource="0"
-              file="Source/demos/TableDemo.cpp"/>
-        <FILE id="6MwRgCUkn" name="ThreadingDemo.cpp" compile="1" resource="0"
-              file="Source/demos/ThreadingDemo.cpp"/>
-        <FILE id="c5Wy6zXol" name="TreeViewDemo.cpp" compile="1" resource="0"
-              file="Source/demos/TreeViewDemo.cpp"/>
-        <FILE id="5ee1NoTnc" name="WebBrowserDemo.cpp" compile="1" resource="0"
-              file="Source/demos/WebBrowserDemo.cpp"/>
-        <FILE id="F6gqyNSim" name="WidgetsDemo.cpp" compile="1" resource="0"
-              file="Source/demos/WidgetsDemo.cpp"/>
-      </GROUP>
-      <GROUP id="BR14NOf0" name="Binary Data">
-        <FILE id="X5sIZFkN" name="cello.wav" compile="0" resource="1" file="Binary Data/cello.wav"/>
-        <FILE id="BAqnjOqfe" name="demo table data.xml" compile="0" resource="1"
-              file="Binary Data/demo table data.xml"/>
-        <FILE id="lEVfO5KTK" name="icons.zip" compile="0" resource="1" file="Binary Data/icons.zip"/>
-        <FILE id="Duj062Top" name="juce.png" compile="0" resource="1" file="Binary Data/juce.png"/>
-        <FILE id="f4hwldS" name="juce_icon.png" compile="0" resource="0" file="Binary Data/juce_icon.png"/>
-        <FILE id="UvweoM7iM" name="treedemo.xml" compile="0" resource="1" file="Binary Data/treedemo.xml"/>
-      </GROUP>
+    <FILE id="Bnqll1Mk0" name="ApplicationStartup.cpp" compile="1" resource="0"
+          file="Source/ApplicationStartup.cpp"/>
+    <FILE id="GQ8NUhTaA" name="MainDemoWindow.cpp" compile="1" resource="0"
+          file="Source/MainDemoWindow.cpp"/>
+    <FILE id="uZ5W4Yi3v" name="MainDemoWindow.h" compile="0" resource="0"
+          file="Source/MainDemoWindow.h"/>
+    <FILE id="2tLjAaxrV" name="jucedemo_headers.h" compile="0" resource="0"
+          file="Source/jucedemo_headers.h"/>
+    <GROUP id="p0ZeP0Wn6" name="Demos">
+      <FILE id="0K60nXdM0" name="AudioDemoLatencyPage.cpp" compile="1" resource="0"
+            file="Source/demos/AudioDemoLatencyPage.cpp"/>
+      <FILE id="gBbGRs0kH" name="AudioDemoLatencyPage.h" compile="0" resource="0"
+            file="Source/demos/AudioDemoLatencyPage.h"/>
+      <FILE id="xhvfKtgZG" name="AudioDemoPlaybackPage.cpp" compile="1" resource="0"
+            file="Source/demos/AudioDemoPlaybackPage.cpp"/>
+      <FILE id="29brslcz" name="AudioDemoPlaybackPage.h" compile="0" resource="0"
+            file="Source/demos/AudioDemoPlaybackPage.h"/>
+      <FILE id="YGjfPIjR" name="AudioDemoRecordPage.cpp" compile="1" resource="0"
+            file="Source/demos/AudioDemoRecordPage.cpp"/>
+      <FILE id="VM1ZV45Pm" name="AudioDemoRecordPage.h" compile="0" resource="0"
+            file="Source/demos/AudioDemoRecordPage.h"/>
+      <FILE id="EYUlG624y" name="AudioDemoSetupPage.cpp" compile="1" resource="0"
+            file="Source/demos/AudioDemoSetupPage.cpp"/>
+      <FILE id="MnvCR6oN" name="AudioDemoSetupPage.h" compile="0" resource="0"
+            file="Source/demos/AudioDemoSetupPage.h"/>
+      <FILE id="oAwxdfki8" name="AudioDemoSynthPage.cpp" compile="1" resource="0"
+            file="Source/demos/AudioDemoSynthPage.cpp"/>
+      <FILE id="oB7yiS4Hk" name="AudioDemoSynthPage.h" compile="0" resource="0"
+            file="Source/demos/AudioDemoSynthPage.h"/>
+      <FILE id="jzvMAq8mg" name="AudioDemoTabComponent.cpp" compile="1" resource="0"
+            file="Source/demos/AudioDemoTabComponent.cpp"/>
+      <FILE id="gP6sEczjE" name="AudioDemoTabComponent.h" compile="0" resource="0"
+            file="Source/demos/AudioDemoTabComponent.h"/>
+      <FILE id="obpkMZ2g" name="CameraDemo.cpp" compile="1" resource="0"
+            file="Source/demos/CameraDemo.cpp"/>
+      <FILE id="VrH9xEBt4" name="CodeEditorDemo.cpp" compile="1" resource="0"
+            file="Source/demos/CodeEditorDemo.cpp"/>
+      <FILE id="Biv7Wl" name="DirectShowDemo.cpp" compile="1" resource="0"
+            file="Source/demos/DirectShowDemo.cpp"/>
+      <FILE id="LQxkyT31Q" name="DragAndDropDemo.cpp" compile="1" resource="0"
+            file="Source/demos/DragAndDropDemo.cpp"/>
+      <FILE id="WlmBspVQo" name="FontsAndTextDemo.cpp" compile="1" resource="0"
+            file="Source/demos/FontsAndTextDemo.cpp"/>
+      <FILE id="5NTST47xi" name="InterprocessCommsDemo.cpp" compile="1" resource="0"
+            file="Source/demos/InterprocessCommsDemo.cpp"/>
+      <FILE id="xoi5BuVvv" name="OpenGLDemo.cpp" compile="1" resource="0"
+            file="Source/demos/OpenGLDemo.cpp"/>
+      <FILE id="WkWbYNoZ0" name="QuickTimeDemo.cpp" compile="1" resource="0"
+            file="Source/demos/QuickTimeDemo.cpp"/>
+      <FILE id="hzPv7BR9U" name="RenderingTestComponent.cpp" compile="1"
+            resource="0" file="Source/demos/RenderingTestComponent.cpp"/>
+      <FILE id="EQv4ZsR78" name="RenderingTestComponent.h" compile="0" resource="0"
+            file="Source/demos/RenderingTestComponent.h"/>
+      <FILE id="ReJoO2H9u" name="TableDemo.cpp" compile="1" resource="0"
+            file="Source/demos/TableDemo.cpp"/>
+      <FILE id="6MwRgCUkn" name="ThreadingDemo.cpp" compile="1" resource="0"
+            file="Source/demos/ThreadingDemo.cpp"/>
+      <FILE id="c5Wy6zXol" name="TreeViewDemo.cpp" compile="1" resource="0"
+            file="Source/demos/TreeViewDemo.cpp"/>
+      <FILE id="5ee1NoTnc" name="WebBrowserDemo.cpp" compile="1" resource="0"
+            file="Source/demos/WebBrowserDemo.cpp"/>
+      <FILE id="F6gqyNSim" name="WidgetsDemo.cpp" compile="1" resource="0"
+            file="Source/demos/WidgetsDemo.cpp"/>
+    </GROUP>
+    <GROUP id="BR14NOf0" name="Binary Data">
+      <FILE id="X5sIZFkN" name="cello.wav" compile="0" resource="1" file="Binary Data/cello.wav"/>
+      <FILE id="BAqnjOqfe" name="demo table data.xml" compile="0" resource="1"
+            file="Binary Data/demo table data.xml"/>
+      <FILE id="lEVfO5KTK" name="icons.zip" compile="0" resource="1" file="Binary Data/icons.zip"/>
+      <FILE id="Duj062Top" name="juce.png" compile="0" resource="1" file="Binary Data/juce.png"/>
+      <FILE id="f4hwldS" name="juce_icon.png" compile="0" resource="0" file="Binary Data/juce_icon.png"/>
+      <FILE id="UvweoM7iM" name="treedemo.xml" compile="0" resource="1" file="Binary Data/treedemo.xml"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default" JUCE_ASIO="default"

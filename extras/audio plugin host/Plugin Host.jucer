@@ -27,26 +27,24 @@
                    osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
   </CONFIGURATIONS>
   <MAINGROUP id="YdWL7hi7p" name="Plugin Host">
-    <GROUP id="uhHLubiaQ" name="Source">
-      <FILE id="8tLeuntR4" name="FilterGraph.cpp" compile="1" resource="0"
-            file="Source/FilterGraph.cpp"/>
-      <FILE id="auGSxnlTU" name="FilterGraph.h" compile="0" resource="0"
-            file="Source/FilterGraph.h"/>
-      <FILE id="2b09bSUt" name="GraphEditorPanel.cpp" compile="1" resource="0"
-            file="Source/GraphEditorPanel.cpp"/>
-      <FILE id="sj8Yug8cu" name="GraphEditorPanel.h" compile="0" resource="0"
-            file="Source/GraphEditorPanel.h"/>
-      <FILE id="nehnGjkrX" name="HostStartup.cpp" compile="1" resource="0"
-            file="Source/HostStartup.cpp"/>
-      <FILE id="J6HWWSQP1" name="InternalFilters.cpp" compile="1" resource="0"
-            file="Source/InternalFilters.cpp"/>
-      <FILE id="AplCcJ0La" name="InternalFilters.h" compile="0" resource="0"
-            file="Source/InternalFilters.h"/>
-      <FILE id="mFVSjbHfN" name="MainHostWindow.cpp" compile="1" resource="0"
-            file="Source/MainHostWindow.cpp"/>
-      <FILE id="h1kpxyzHi" name="MainHostWindow.h" compile="0" resource="0"
-            file="Source/MainHostWindow.h"/>
-    </GROUP>
+    <FILE id="8tLeuntR4" name="FilterGraph.cpp" compile="1" resource="0"
+          file="Source/FilterGraph.cpp"/>
+    <FILE id="auGSxnlTU" name="FilterGraph.h" compile="0" resource="0"
+          file="Source/FilterGraph.h"/>
+    <FILE id="2b09bSUt" name="GraphEditorPanel.cpp" compile="1" resource="0"
+          file="Source/GraphEditorPanel.cpp"/>
+    <FILE id="sj8Yug8cu" name="GraphEditorPanel.h" compile="0" resource="0"
+          file="Source/GraphEditorPanel.h"/>
+    <FILE id="nehnGjkrX" name="HostStartup.cpp" compile="1" resource="0"
+          file="Source/HostStartup.cpp"/>
+    <FILE id="J6HWWSQP1" name="InternalFilters.cpp" compile="1" resource="0"
+          file="Source/InternalFilters.cpp"/>
+    <FILE id="AplCcJ0La" name="InternalFilters.h" compile="0" resource="0"
+          file="Source/InternalFilters.h"/>
+    <FILE id="mFVSjbHfN" name="MainHostWindow.cpp" compile="1" resource="0"
+          file="Source/MainHostWindow.cpp"/>
+    <FILE id="h1kpxyzHi" name="MainHostWindow.h" compile="0" resource="0"
+          file="Source/MainHostWindow.h"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default" JUCE_ASIO="default"
                JUCE_WASAPI="enabled" JUCE_DIRECTSOUND="enabled" JUCE_ALSA="enabled"

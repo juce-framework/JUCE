@@ -87,10 +87,8 @@ public:
     void create()
     {
         Array<RelativePath> files;
-        findAllFilesToCompile (getMainGroup(), files);
-
-        for (int i = 0; i < generatedGroups.size(); ++i)
-            findAllFilesToCompile (generatedGroups.getReference(i), files);
+        for (int i = 0; i < groups.size(); ++i)
+            findAllFilesToCompile (groups.getReference(i), files);
 
         MemoryOutputStream mo;
         writeMakefile (mo, files);
@@ -157,7 +155,7 @@ private:
     {
         out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)";
 
-        if (projectType.isAudioPlugin())
+        if (makefileIsDLL)
             out << " -shared";
 
         {
@@ -207,7 +205,7 @@ private:
         if (config.isDebug().getValue())
             out << " -g -ggdb";
 
-        if (projectType.isAudioPlugin())
+        if (makefileIsDLL)
             out << " -fPIC";
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
@@ -226,8 +224,8 @@ private:
 
         if (projectType.isLibrary())
             targetName = getLibbedFilename (targetName);
-        else if (isVST())
-            targetName = targetName.upToLastOccurrenceOf (".", false, false) + ".so";
+        else
+            targetName = targetName.upToLastOccurrenceOf (".", false, false) + makefileTargetSuffix;
 
         out << "  TARGET := " << escapeSpaces (targetName) << newLine;
 

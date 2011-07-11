@@ -62,7 +62,7 @@ public:
     //==============================================================================
     /** This structure is filled-in by the AudioPlayHead::getCurrentPosition() method.
     */
-    struct CurrentPositionInfo
+    struct JUCE_API  CurrentPositionInfo
     {
         /** The tempo in BPM */
         double bpm;

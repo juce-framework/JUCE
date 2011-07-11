@@ -6,36 +6,36 @@
 	objectVersion = 45;
 	objects = {
 
-		3F902D2C41E0C1FFC90C2724 = { isa = PBXBuildFile; fileRef = C820D5B3DC8B4E486B13FF4A; };
+		D397D8CEF8663F449B4439C0 = { isa = PBXBuildFile; fileRef = 18665A7A93EDBA956B64774E; };
 		7BC4087FD54A2C1ED196C892 = { isa = PBXBuildFile; fileRef = 076655B982BD7FD33C52BAEE; };
-		C5E169F7107EC2306276438A = { isa = PBXBuildFile; fileRef = D9D2682DE4A5B07668895C2A; };
+		3F902D2C41E0C1FFC90C2724 = { isa = PBXBuildFile; fileRef = C820D5B3DC8B4E486B13FF4A; };
 		056513FD57B5879AEDB3FB4D = { isa = PBXBuildFile; fileRef = 772D78456EEEBC74C5D711AE; };
 		891256EECE8E8E7FAFCA1185 = { isa = PBXBuildFile; fileRef = AE08A72CF4EA4703C698EB57; };
-		A9F87921F5EF364874BF8D08 = { isa = PBXBuildFile; fileRef = 38D39096CD656A18BC6E6D85; };
 		EFF4A46CD8DC98212AF9F5A0 = { isa = PBXBuildFile; fileRef = 6866E587FFD01BF7EA2ADE1F; };
+		C5E169F7107EC2306276438A = { isa = PBXBuildFile; fileRef = D9D2682DE4A5B07668895C2A; };
 		6D3C942E85A6141029E184A4 = { isa = PBXBuildFile; fileRef = 22D27893FB59F52DF84AD344; };
-		9EA4F1C0E2356AB5C07CE95E = { isa = PBXBuildFile; fileRef = E6809DE026C8BEAB082B3DEB; };
 		569A272ED68671F2FE9903B8 = { isa = PBXBuildFile; fileRef = EA28150CE20A1AF43E5A30AB; };
+		9EA4F1C0E2356AB5C07CE95E = { isa = PBXBuildFile; fileRef = E6809DE026C8BEAB082B3DEB; };
 		E12A6AAFEC6BB91A41D85FF2 = { isa = PBXBuildFile; fileRef = 8DBD4D8FD571C84A6C0CD817; };
-		D397D8CEF8663F449B4439C0 = { isa = PBXBuildFile; fileRef = 18665A7A93EDBA956B64774E; };
+		A9F87921F5EF364874BF8D08 = { isa = PBXBuildFile; fileRef = 38D39096CD656A18BC6E6D85; };
 		C67B5243DBC7218FEC5DBCC0 = { isa = PBXBuildFile; fileRef = E7507E799D8BDA92BDB78915; };
 		9B11A7532637EC12F1DC4B2E = { isa = PBXBuildFile; fileRef = 0DB195C2B3538434D7D20B51; };
 		CFFBB821ECB7D85603624533 = { isa = PBXBuildFile; fileRef = 57FFE120531343D50B7D2D28; };
 		CB81C9C2C8729E6E3D47894E = { isa = PBXBuildFile; fileRef = 9025A92B6F0FB6F8EF51A168; };
 		D718D953943D6576572CCD49 = { isa = PBXBuildFile; fileRef = EA4C72277CEA392BC33435A7; };
 		D3AEE9F470093C7E82F10144 = { isa = PBXBuildFile; fileRef = 23634B2289D5AC4EA728B8F7; };
-		C820D5B3DC8B4E486B13FF4A = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		18665A7A93EDBA956B64774E = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		076655B982BD7FD33C52BAEE = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
-		D9D2682DE4A5B07668895C2A = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		C820D5B3DC8B4E486B13FF4A = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		772D78456EEEBC74C5D711AE = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		AE08A72CF4EA4703C698EB57 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
-		38D39096CD656A18BC6E6D85 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		6866E587FFD01BF7EA2ADE1F = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiscRecording.framework; path = System/Library/Frameworks/DiscRecording.framework; sourceTree = SDKROOT; };
+		D9D2682DE4A5B07668895C2A = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		22D27893FB59F52DF84AD344 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		E6809DE026C8BEAB082B3DEB = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		EA28150CE20A1AF43E5A30AB = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
+		E6809DE026C8BEAB082B3DEB = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		8DBD4D8FD571C84A6C0CD817 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
-		18665A7A93EDBA956B64774E = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		38D39096CD656A18BC6E6D85 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		D5A29444C637255D66ACB7AE = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloWorld.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		B786F246076E6F5D363A6A2C = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = "SOURCE_ROOT"; };
 		E7507E799D8BDA92BDB78915 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
@@ -51,6 +51,8 @@
 				E7507E799D8BDA92BDB78915,
 				0DB195C2B3538434D7D20B51,
 				A1E4765345FA980DAFA5BDE3 ); name = Source; sourceTree = "<group>"; };
+		4297D3C9A6348BA224516847 = { isa = PBXGroup; children = (
+				A0C5DD7F69DC35BF462718E4 ); name = HelloWorld; sourceTree = "<group>"; };
 		E9187C22BD3E64A16116DF8C = { isa = PBXGroup; children = (
 				8B21C8D0F53D4B6647916A6C,
 				43AD9F8DF7F760C6BBADDECC,
@@ -61,22 +63,22 @@
 		AE86EC0712AA99EF212AD4AE = { isa = PBXGroup; children = (
 				B786F246076E6F5D363A6A2C ); name = Resources; sourceTree = "<group>"; };
 		C134A2DBF8134BD791778F0F = { isa = PBXGroup; children = (
-				C820D5B3DC8B4E486B13FF4A,
+				18665A7A93EDBA956B64774E,
 				076655B982BD7FD33C52BAEE,
-				D9D2682DE4A5B07668895C2A,
+				C820D5B3DC8B4E486B13FF4A,
 				772D78456EEEBC74C5D711AE,
 				AE08A72CF4EA4703C698EB57,
-				38D39096CD656A18BC6E6D85,
 				6866E587FFD01BF7EA2ADE1F,
+				D9D2682DE4A5B07668895C2A,
 				22D27893FB59F52DF84AD344,
-				E6809DE026C8BEAB082B3DEB,
 				EA28150CE20A1AF43E5A30AB,
+				E6809DE026C8BEAB082B3DEB,
 				8DBD4D8FD571C84A6C0CD817,
-				18665A7A93EDBA956B64774E ); name = Frameworks; sourceTree = "<group>"; };
+				38D39096CD656A18BC6E6D85 ); name = Frameworks; sourceTree = "<group>"; };
 		DC3A70675753A61E8C7CD36B = { isa = PBXGroup; children = (
 				D5A29444C637255D66ACB7AE ); name = Products; sourceTree = "<group>"; };
-		4297D3C9A6348BA224516847 = { isa = PBXGroup; children = (
-				A0C5DD7F69DC35BF462718E4,
+		B3F3C4C19F8E5C6897A5B3C3 = { isa = PBXGroup; children = (
+				4297D3C9A6348BA224516847,
 				E9187C22BD3E64A16116DF8C,
 				AE86EC0712AA99EF212AD4AE,
 				C134A2DBF8134BD791778F0F,
@@ -156,23 +158,23 @@
 				D718D953943D6576572CCD49,
 				D3AEE9F470093C7E82F10144 ); runOnlyForDeploymentPostprocessing = 0; };
 		CB4944AF280662FF07FEFEC4 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
-				3F902D2C41E0C1FFC90C2724,
+				D397D8CEF8663F449B4439C0,
 				7BC4087FD54A2C1ED196C892,
-				C5E169F7107EC2306276438A,
+				3F902D2C41E0C1FFC90C2724,
 				056513FD57B5879AEDB3FB4D,
 				891256EECE8E8E7FAFCA1185,
-				A9F87921F5EF364874BF8D08,
 				EFF4A46CD8DC98212AF9F5A0,
+				C5E169F7107EC2306276438A,
 				6D3C942E85A6141029E184A4,
-				9EA4F1C0E2356AB5C07CE95E,
 				569A272ED68671F2FE9903B8,
+				9EA4F1C0E2356AB5C07CE95E,
 				E12A6AAFEC6BB91A41D85FF2,
-				D397D8CEF8663F449B4439C0 ); runOnlyForDeploymentPostprocessing = 0; };
+				A9F87921F5EF364874BF8D08 ); runOnlyForDeploymentPostprocessing = 0; };
 		9F559EB2CC99871D47887B82 = { isa = PBXNativeTarget; buildConfigurationList = 6F5E160F06E7FAD8B5C96752; buildPhases = (
 				4B8D17F77F2E2E7A2419CB17,
 				172414663F1A38D78D2B00C3,
 				CB4944AF280662FF07FEFEC4 ); buildRules = ( ); dependencies = ( ); name = HelloWorld; productName = HelloWorld; productReference = D5A29444C637255D66ACB7AE; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		9A0E300BBDAFA50EA37EA0D9 = { isa = PBXProject; buildConfigurationList = C71BF9C42683418116C8426E; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = 4297D3C9A6348BA224516847; projectDirPath = ""; projectRoot = ""; targets = ( 9F559EB2CC99871D47887B82 ); };
+		9A0E300BBDAFA50EA37EA0D9 = { isa = PBXProject; buildConfigurationList = C71BF9C42683418116C8426E; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = B3F3C4C19F8E5C6897A5B3C3; projectDirPath = ""; projectRoot = ""; targets = ( 9F559EB2CC99871D47887B82 ); };
 	};
 	rootObject = 9A0E300BBDAFA50EA37EA0D9;
 }

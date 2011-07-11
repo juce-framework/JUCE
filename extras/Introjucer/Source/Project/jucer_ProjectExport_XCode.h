@@ -147,7 +147,7 @@ public:
     }
 
 private:
-    OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, groups, misc, projectConfigs, targetConfigs;
+    OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, misc, projectConfigs, targetConfigs;
     StringArray buildPhaseIDs, resourceIDs, sourceIDs, frameworkIDs;
     StringArray frameworkFileIDs, rezFileIDs, resourceFileRefs;
     File infoPlistFile, iconFile;
@@ -164,25 +164,13 @@ private:
 
     File getProjectBundle() const                 { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (".xcodeproj"); }
 
-    bool hasPList() const                         { return ! (projectType.isLibrary() || projectType.isCommandLineApp()); }
-    String getAudioPluginBundleExtension() const  { return "component"; }
-
     //==============================================================================
     void createObjects()
     {
-        if (! projectType.isLibrary())
-            addFrameworks();
+        addFrameworks();
+        addMainBuildProduct();
 
-        const String productName (configs.getReference(0).getTargetBinaryName().toString());
-
-        if (projectType.isGUIApplication())         addBuildProduct ("wrapper.application", productName + ".app");
-        else if (projectType.isCommandLineApp())    addBuildProduct ("compiled.mach-o.executable", productName);
-        else if (projectType.isLibrary())           addBuildProduct ("archive.ar", getLibbedFilename (productName));
-        else if (projectType.isAudioPlugin())       addBuildProduct ("wrapper.cfbundle", productName + "." + getAudioPluginBundleExtension());
-        else if (projectType.isBrowserPlugin())     addBuildProduct ("wrapper.cfbundle", productName + ".plugin");
-        else jassert (productName.isEmpty());
-
-        if (hasPList())
+        if (xcodeCreatePList)
         {
             RelativePath plistPath (infoPlistFile, getTargetFolder(), RelativePath::buildTargetFolder);
             addFileReference (plistPath.toUnixStyle());
@@ -197,7 +185,35 @@ private:
             resourceFileRefs.add (createID (iconPath));
         }
 
-        addProjectItem (getMainGroup());
+        {
+            StringArray topLevelGroupIDs;
+
+            for (int i = 0; i < groups.size(); ++i)
+                if (groups.getReference(i).getNumChildren() > 0)
+                    topLevelGroupIDs.add (addProjectItem (groups.getReference(i)));
+
+            { // Add 'resources' group
+                String resourcesGroupID (createID ("__resources"));
+                addGroup (resourcesGroupID, "Resources", resourceFileRefs);
+                topLevelGroupIDs.add (resourcesGroupID);
+            }
+
+            { // Add 'frameworks' group
+                String frameworksGroupID (createID ("__frameworks"));
+                addGroup (frameworksGroupID, "Frameworks", frameworkFileIDs);
+                topLevelGroupIDs.add (frameworksGroupID);
+            }
+
+            { // Add 'products' group
+                String productsGroupID (createID ("__products"));
+                StringArray products;
+                products.add (createID ("__productFileID"));
+                addGroup (productsGroupID, "Products", products);
+                topLevelGroupIDs.add (productsGroupID);
+            }
+
+            addGroup (createID ("__mainsourcegroup"), "Source", topLevelGroupIDs);
+        }
 
         for (int i = 0; i < configs.size(); ++i)
         {
@@ -221,8 +237,7 @@ private:
         if (! projectType.isLibrary())
             addBuildPhase ("PBXFrameworksBuildPhase", frameworkIDs);
 
-        if (projectType.isAudioPlugin())
-            addPluginShellScriptPhase();
+        addShellScriptPhase();
 
         addTargetObject();
         addProjectObject();
@@ -333,7 +348,7 @@ private:
 
     void writeInfoPlistFile()
     {
-        if (! hasPList())
+        if (! xcodeCreatePList)
             return;
 
         XmlElement plist ("plist");
@@ -346,18 +361,8 @@ private:
         addPlistDictionaryKey (dict, "CFBundleIconFile",            iconFile.exists() ? iconFile.getFileName() : String::empty);
         addPlistDictionaryKey (dict, "CFBundleIdentifier",          project.getBundleIdentifier().toString());
         addPlistDictionaryKey (dict, "CFBundleName",                projectName);
-
-        if (projectType.isAudioPlugin())
-        {
-            addPlistDictionaryKey (dict, "CFBundlePackageType",     "TDMw");
-            addPlistDictionaryKey (dict, "CFBundleSignature",       "PTul");
-        }
-        else
-        {
-            addPlistDictionaryKey (dict, "CFBundlePackageType",     "APPL");
-            addPlistDictionaryKey (dict, "CFBundleSignature",       "????");
-        }
-
+        addPlistDictionaryKey (dict, "CFBundlePackageType",         xcodePackageType);
+        addPlistDictionaryKey (dict, "CFBundleSignature",           xcodeBundleSignature);
         addPlistDictionaryKey (dict, "CFBundleShortVersionString",  project.getVersion().toString());
         addPlistDictionaryKey (dict, "CFBundleVersion",             project.getVersion().toString());
 
@@ -408,7 +413,7 @@ private:
         return searchPaths;
     }
 
-    void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths)
+    static void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths)
     {
         jassert (library.getFileNameWithoutExtension().substring (0, 3) == "lib");
 
@@ -423,18 +428,14 @@ private:
 
     void getLinkerFlags (const Project::BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths)
     {
-        if (projectType.isAudioPlugin())
-        {
+        if (xcodeIsBundle)
             flags.add ("-bundle");
 
-            if (isRTAS() && getRTASFolder().toString().isNotEmpty())
-            {
-                getLinkerFlagsForStaticLibrary (RelativePath (getRTASFolder().toString(), RelativePath::buildTargetFolder)
-                                                    .getChildFile (config.isDebug().getValue() ? "MacBag/Libs/Debug/libPluginLibrary.a"
-                                                                                               : "MacBag/Libs/Release/libPluginLibrary.a"),
-                                                flags, librarySearchPaths);
-            }
-        }
+        const Array<RelativePath>& extraLibs = config.isDebug().getValue() ? xcodeExtraLibrariesDebug
+                                                                           : xcodeExtraLibrariesRelease;
+
+        for (int i = 0; i < extraLibs.size(); ++i)
+            getLinkerFlagsForStaticLibrary (extraLibs.getReference(i), flags, librarySearchPaths);
 
         if (project.getJuceLinkageMode() == Project::useLinkedJuce)
         {
@@ -480,7 +481,7 @@ private:
 
         s.add ("ZERO_LINK = NO");
 
-        if (! isRTAS())   // (dwarf seems to be incompatible with the RTAS libs)
+        if (xcodeCanUseDwarf)
             s.add ("DEBUG_INFORMATION_FORMAT = \"dwarf\"");
 
         s.add ("PRODUCT_NAME = \"" + config.getTargetBinaryName().toString() + "\"");
@@ -506,26 +507,20 @@ private:
         if (extraFlags.isNotEmpty())
             s.add ("OTHER_CPLUSPLUSFLAGS = " + extraFlags);
 
-        if (projectType.isGUIApplication())
-        {
-            s.add ("INSTALL_PATH = \"$(HOME)/Applications\"");
-        }
-        else if (projectType.isAudioPlugin())
+        if (xcodeProductInstallPath.isNotEmpty())
+            s.add ("INSTALL_PATH = \"" + xcodeProductInstallPath + "\"");
+
+        if (xcodeIsBundle)
         {
             s.add ("LIBRARY_STYLE = Bundle");
-            s.add ("INSTALL_PATH = \"$(HOME)/Library/Audio/Plug-Ins/Components/\"");
-            s.add ("WRAPPER_EXTENSION = " + getAudioPluginBundleExtension());
+            s.add ("WRAPPER_EXTENSION = " + xcodeBundleExtension.substring (1));
             s.add ("GENERATE_PKGINFO_FILE = YES");
-            s.add ("OTHER_REZFLAGS = \"-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
-                   " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-                   " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\"\"");
         }
-        else if (projectType.isBrowserPlugin())
-        {
-            s.add ("LIBRARY_STYLE = Bundle");
-            s.add ("INSTALL_PATH = \"/Library/Internet Plug-Ins/\"");
-        }
-        else if (projectType.isLibrary())
+
+        if (xcodeOtherRezFlags.isNotEmpty())
+            s.add ("OTHER_REZFLAGS = \"" + xcodeOtherRezFlags + "\"");
+
+        if (projectType.isLibrary())
         {
             if (config.getTargetBinaryRelativePath().toString().isNotEmpty())
             {
@@ -538,13 +533,6 @@ private:
 
             s.add ("CONFIGURATION_BUILD_DIR = \"$(BUILD_DIR)\"");
             s.add ("DEPLOYMENT_LOCATION = YES");
-        }
-        else if (projectType.isCommandLineApp())
-        {
-        }
-        else
-        {
-            jassertfalse;
         }
 
         if (! iPhone)
@@ -639,24 +627,19 @@ private:
 
     void addFrameworks()
     {
-        StringArray s;
-
-        if (iPhone)
+        if (! projectType.isLibrary())
         {
-            s.addTokens ("UIKit Foundation CoreGraphics CoreText AudioToolbox QuartzCore OpenGLES", false);
-        }
-        else
-        {
-            s.addTokens ("Cocoa Carbon IOKit CoreAudio CoreMIDI WebKit DiscRecording OpenGL QuartzCore QTKit QuickTime AudioToolbox", false);
+            StringArray s (xcodeFrameworks);
 
-            if (isAU())
-                s.addTokens ("AudioUnit CoreAudioKit AudioToolbox", false);
-            else if (project.getConfigFlag ("JUCE_PLUGINHOST_AU").toString() == Project::configFlagEnabled)
-                s.addTokens ("AudioUnit CoreAudioKit", false);
-        }
+            s.addTokens (iPhone ? "UIKit Foundation CoreGraphics CoreText AudioToolbox QuartzCore OpenGLES"
+                                : "Cocoa Carbon IOKit CoreAudio CoreMIDI WebKit DiscRecording OpenGL QuartzCore QTKit QuickTime AudioToolbox", false);
 
-        for (int i = 0; i < s.size(); ++i)
-            addFramework (s[i]);
+            s.removeDuplicates (true);
+            s.sort (true);
+
+            for (int i = 0; i < s.size(); ++i)
+                addFramework (s[i]);
+        }
     }
 
     //==============================================================================
@@ -671,7 +654,7 @@ private:
         Array <ValueTree*> objects;
         objects.addArray (pbxBuildFiles);
         objects.addArray (pbxFileReferences);
-        objects.addArray (groups);
+        objects.addArray (pbxGroups);
         objects.addArray (targetConfigs);
         objects.addArray (projectConfigs);
         objects.addArray (misc);
@@ -850,45 +833,29 @@ private:
         v->setProperty ("children", "(" + indentList (childIDs, ",") + " )", 0);
         v->setProperty (Ids::name, groupName, 0);
         v->setProperty ("sourceTree", "<group>", 0);
-        groups.add (v);
+        pbxGroups.add (v);
     }
 
     String addGroup (const Project::Item& item, StringArray& childIDs)
     {
-        String groupName (item.getName().toString());
-
-        if (item.isMainGroup())
-        {
-            groupName = "Source";
-
-            for (int i = 0; i < generatedGroups.size(); ++i)
-                if (generatedGroups.getReference(i).getNumChildren() > 0)
-                    childIDs.add (addProjectItem (generatedGroups.getReference(i)));
-
-            { // Add 'resources' group
-                String resourcesGroupID (createID ("__resources"));
-                addGroup (resourcesGroupID, "Resources", resourceFileRefs);
-                childIDs.add (resourcesGroupID);
-            }
-
-            { // Add 'frameworks' group
-                String frameworksGroupID (createID ("__frameworks"));
-                addGroup (frameworksGroupID, "Frameworks", frameworkFileIDs);
-                childIDs.add (frameworksGroupID);
-            }
-
-            { // Add 'products' group
-                String productsGroupID (createID ("__products"));
-                StringArray products;
-                products.add (createID ("__productFileID"));
-                addGroup (productsGroupID, "Products", products);
-                childIDs.add (productsGroupID);
-            }
-        }
-
+        const String groupName (item.getName().toString());
         const String groupID (getIDForGroup (item));
         addGroup (groupID, groupName, childIDs);
         return groupID;
+    }
+
+    void addMainBuildProduct()
+    {
+        jassert (xcodeFileType.isNotEmpty());
+        jassert (xcodeBundleExtension.isEmpty() || xcodeBundleExtension.startsWithChar('.'));
+        String productName (configs.getReference(0).getTargetBinaryName().toString());
+
+        if (xcodeFileType == "archive.ar")
+            productName = getLibbedFilename (productName);
+        else
+            productName += xcodeBundleExtension;
+
+        addBuildProduct (xcodeFileType, productName);
     }
 
     void addBuildProduct (const String& fileType, const String& binaryName)
@@ -954,7 +921,7 @@ private:
 
     void addTargetObject()
     {
-        ValueTree* v = new ValueTree (createID ("__target"));
+        ValueTree* const v = new ValueTree (createID ("__target"));
         v->setProperty ("isa", "PBXNativeTarget", 0);
         v->setProperty ("buildConfigurationList", createID ("__configList"), 0);
         v->setProperty ("buildPhases", "(" + indentList (buildPhaseIDs, ",") + " )", 0);
@@ -964,55 +931,41 @@ private:
         v->setProperty ("productName", projectName, 0);
         v->setProperty ("productReference", createID ("__productFileID"), 0);
 
-        if (projectType.isGUIApplication())
-        {
-            v->setProperty ("productInstallPath", "$(HOME)/Applications", 0);
-            v->setProperty ("productType", "com.apple.product-type.application", 0);
-        }
-        else if (projectType.isCommandLineApp())
-        {
-            v->setProperty ("productInstallPath", "/usr/bin", 0);
-            v->setProperty ("productType", "com.apple.product-type.tool", 0);
-        }
-        else if (projectType.isAudioPlugin() || projectType.isBrowserPlugin())
-        {
-            v->setProperty ("productInstallPath", "$(HOME)/Library/Audio/Plug-Ins/Components/", 0);
-            v->setProperty ("productType", "com.apple.product-type.bundle", 0);
-        }
-        else if (projectType.isLibrary())
-        {
-            v->setProperty ("productType", "com.apple.product-type.library.static", 0);
-        }
-        else
-            jassertfalse; //xxx
+        if (xcodeProductInstallPath.isNotEmpty())
+            v->setProperty ("productInstallPath", xcodeProductInstallPath, 0);
+
+        jassert (xcodeProductType.isNotEmpty());
+        v->setProperty ("productType", xcodeProductType, 0);
 
         misc.add (v);
     }
 
     void addProjectObject()
     {
-        ValueTree* v = new ValueTree (createID ("__root"));
+        ValueTree* const v = new ValueTree (createID ("__root"));
         v->setProperty ("isa", "PBXProject", 0);
         v->setProperty ("buildConfigurationList", createID ("__projList"), 0);
         v->setProperty ("compatibilityVersion", "Xcode 3.1", 0);
         v->setProperty ("hasScannedForEncodings", (int) 0, 0);
-        v->setProperty ("mainGroup", getIDForGroup (getMainGroup()), 0);
+        v->setProperty ("mainGroup", createID ("__mainsourcegroup"), 0);
         v->setProperty ("projectDirPath", "\"\"", 0);
         v->setProperty ("projectRoot", "\"\"", 0);
         v->setProperty ("targets", "( " + createID ("__target") + " )", 0);
         misc.add (v);
     }
 
-    void addPluginShellScriptPhase()
+    void addShellScriptPhase()
     {
-        ValueTree* v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
-        v->setProperty (Ids::name, "Copy to the different plugin folders", 0);
-        v->setProperty ("shellPath", "/bin/sh", 0);
-        v->setProperty ("shellScript", String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt, BinaryData::AudioPluginXCodeScript_txtSize)
-                                            .replace ("\\", "\\\\")
-                                            .replace ("\"", "\\\"")
-                                            .replace ("\r\n", "\\n")
-                                            .replace ("\n", "\\n"), 0);
+        if (xcodeShellScript.isNotEmpty())
+        {
+            ValueTree* const v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
+            v->setProperty (Ids::name, xcodeShellScriptTitle, 0);
+            v->setProperty ("shellPath", "/bin/sh", 0);
+            v->setProperty ("shellScript", xcodeShellScript.replace ("\\", "\\\\")
+                                                           .replace ("\"", "\\\"")
+                                                           .replace ("\r\n", "\\n")
+                                                           .replace ("\n", "\\n"), 0);
+        }
     }
 
     //==============================================================================

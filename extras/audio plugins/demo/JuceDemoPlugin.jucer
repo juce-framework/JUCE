@@ -25,16 +25,14 @@
                    osxSDK="default" osxCompatibility="default"/>
   </CONFIGURATIONS>
   <MAINGROUP id="dYAMo6Ykd" name="JuceDemoPlugin">
-    <GROUP id="enRTGyDMs" name="Source">
-      <FILE id="gFFr0hbSp" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="PkpMNdnIr" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
-      <FILE id="RCFlkTAef" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="Iif5nfHL" name="PluginEditor.h" compile="0" resource="0"
-            file="Source/PluginEditor.h"/>
-    </GROUP>
+    <FILE id="gFFr0hbSp" name="PluginProcessor.cpp" compile="1" resource="0"
+          file="Source/PluginProcessor.cpp"/>
+    <FILE id="PkpMNdnIr" name="PluginProcessor.h" compile="0" resource="0"
+          file="Source/PluginProcessor.h"/>
+    <FILE id="RCFlkTAef" name="PluginEditor.cpp" compile="1" resource="0"
+          file="Source/PluginEditor.cpp"/>
+    <FILE id="Iif5nfHL" name="PluginEditor.h" compile="0" resource="0"
+          file="Source/PluginEditor.h"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_QUICKTIME="disabled" JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default"
                JUCE_ASIO="default" JUCE_WASAPI="default" JUCE_DIRECTSOUND="default"

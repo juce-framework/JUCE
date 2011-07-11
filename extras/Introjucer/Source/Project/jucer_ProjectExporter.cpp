@@ -117,7 +117,14 @@ ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& projec
 
 //==============================================================================
 ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
-    : project (project_),
+    : xcodeIsBundle (false),
+      xcodeCreatePList (false),
+      xcodeCanUseDwarf (true),
+      makefileIsDLL (false),
+      msvcIsDLL (false),
+      msvcIsWindowsSubsystem (true),
+      msvcNeedsDLLRuntimeLib (false),
+      project (project_),
       projectType (project_.getProjectType()),
       projectName (project_.getProjectName().toString()),
       projectFolder (project_.getFile().getParentDirectory()),
@@ -125,6 +132,8 @@ ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
 {
     for (int i = 0; i < jmax (1, project.getNumConfigurations()); ++i)
         configs.add (project.getConfiguration (i));
+
+    groups.add (project.getMainGroup().createCopy());
 }
 
 ProjectExporter::~ProjectExporter()

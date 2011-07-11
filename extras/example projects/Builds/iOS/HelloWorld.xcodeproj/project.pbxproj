@@ -6,26 +6,26 @@
 	objectVersion = 45;
 	objects = {
 
-		BAEB975FAD8A99FA884DC593 = { isa = PBXBuildFile; fileRef = 6B236CD90C0803738D7B5235; };
-		D8DBAED4AB03622A655367C6 = { isa = PBXBuildFile; fileRef = 3DE047A554FB376BE3DA4C65; };
+		D397D8CEF8663F449B4439C0 = { isa = PBXBuildFile; fileRef = 18665A7A93EDBA956B64774E; };
 		1622BC343C98F98AC2AC0459 = { isa = PBXBuildFile; fileRef = AA21728A979A53287A0DEFED; };
 		2F1CDA747BD63008A80CB986 = { isa = PBXBuildFile; fileRef = B9E8EA7A70EBC92D121DD5EF; };
-		D397D8CEF8663F449B4439C0 = { isa = PBXBuildFile; fileRef = 18665A7A93EDBA956B64774E; };
-		9EA4F1C0E2356AB5C07CE95E = { isa = PBXBuildFile; fileRef = E6809DE026C8BEAB082B3DEB; };
+		D8DBAED4AB03622A655367C6 = { isa = PBXBuildFile; fileRef = 3DE047A554FB376BE3DA4C65; };
 		C37934E8A18A3A82637C1445 = { isa = PBXBuildFile; fileRef = 541D7BED72093B09E01E3FD1; };
+		9EA4F1C0E2356AB5C07CE95E = { isa = PBXBuildFile; fileRef = E6809DE026C8BEAB082B3DEB; };
+		BAEB975FAD8A99FA884DC593 = { isa = PBXBuildFile; fileRef = 6B236CD90C0803738D7B5235; };
 		C67B5243DBC7218FEC5DBCC0 = { isa = PBXBuildFile; fileRef = E7507E799D8BDA92BDB78915; };
 		9B11A7532637EC12F1DC4B2E = { isa = PBXBuildFile; fileRef = 0DB195C2B3538434D7D20B51; };
 		CFFBB821ECB7D85603624533 = { isa = PBXBuildFile; fileRef = 57FFE120531343D50B7D2D28; };
 		CB81C9C2C8729E6E3D47894E = { isa = PBXBuildFile; fileRef = 9025A92B6F0FB6F8EF51A168; };
 		D718D953943D6576572CCD49 = { isa = PBXBuildFile; fileRef = EA4C72277CEA392BC33435A7; };
 		D3AEE9F470093C7E82F10144 = { isa = PBXBuildFile; fileRef = 23634B2289D5AC4EA728B8F7; };
-		6B236CD90C0803738D7B5235 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		3DE047A554FB376BE3DA4C65 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		18665A7A93EDBA956B64774E = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		AA21728A979A53287A0DEFED = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		B9E8EA7A70EBC92D121DD5EF = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
-		18665A7A93EDBA956B64774E = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		E6809DE026C8BEAB082B3DEB = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		3DE047A554FB376BE3DA4C65 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		541D7BED72093B09E01E3FD1 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		E6809DE026C8BEAB082B3DEB = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		6B236CD90C0803738D7B5235 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D5A29444C637255D66ACB7AE = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloWorld.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		B786F246076E6F5D363A6A2C = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = "SOURCE_ROOT"; };
 		E7507E799D8BDA92BDB78915 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
@@ -41,6 +41,8 @@
 				E7507E799D8BDA92BDB78915,
 				0DB195C2B3538434D7D20B51,
 				A1E4765345FA980DAFA5BDE3 ); name = Source; sourceTree = "<group>"; };
+		4297D3C9A6348BA224516847 = { isa = PBXGroup; children = (
+				A0C5DD7F69DC35BF462718E4 ); name = HelloWorld; sourceTree = "<group>"; };
 		E9187C22BD3E64A16116DF8C = { isa = PBXGroup; children = (
 				8B21C8D0F53D4B6647916A6C,
 				43AD9F8DF7F760C6BBADDECC,
@@ -51,17 +53,17 @@
 		AE86EC0712AA99EF212AD4AE = { isa = PBXGroup; children = (
 				B786F246076E6F5D363A6A2C ); name = Resources; sourceTree = "<group>"; };
 		C134A2DBF8134BD791778F0F = { isa = PBXGroup; children = (
-				6B236CD90C0803738D7B5235,
-				3DE047A554FB376BE3DA4C65,
+				18665A7A93EDBA956B64774E,
 				AA21728A979A53287A0DEFED,
 				B9E8EA7A70EBC92D121DD5EF,
-				18665A7A93EDBA956B64774E,
+				3DE047A554FB376BE3DA4C65,
+				541D7BED72093B09E01E3FD1,
 				E6809DE026C8BEAB082B3DEB,
-				541D7BED72093B09E01E3FD1 ); name = Frameworks; sourceTree = "<group>"; };
+				6B236CD90C0803738D7B5235 ); name = Frameworks; sourceTree = "<group>"; };
 		DC3A70675753A61E8C7CD36B = { isa = PBXGroup; children = (
 				D5A29444C637255D66ACB7AE ); name = Products; sourceTree = "<group>"; };
-		4297D3C9A6348BA224516847 = { isa = PBXGroup; children = (
-				A0C5DD7F69DC35BF462718E4,
+		B3F3C4C19F8E5C6897A5B3C3 = { isa = PBXGroup; children = (
+				4297D3C9A6348BA224516847,
 				E9187C22BD3E64A16116DF8C,
 				AE86EC0712AA99EF212AD4AE,
 				C134A2DBF8134BD791778F0F,
@@ -145,18 +147,18 @@
 				D718D953943D6576572CCD49,
 				D3AEE9F470093C7E82F10144 ); runOnlyForDeploymentPostprocessing = 0; };
 		CB4944AF280662FF07FEFEC4 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
-				BAEB975FAD8A99FA884DC593,
-				D8DBAED4AB03622A655367C6,
+				D397D8CEF8663F449B4439C0,
 				1622BC343C98F98AC2AC0459,
 				2F1CDA747BD63008A80CB986,
-				D397D8CEF8663F449B4439C0,
+				D8DBAED4AB03622A655367C6,
+				C37934E8A18A3A82637C1445,
 				9EA4F1C0E2356AB5C07CE95E,
-				C37934E8A18A3A82637C1445 ); runOnlyForDeploymentPostprocessing = 0; };
+				BAEB975FAD8A99FA884DC593 ); runOnlyForDeploymentPostprocessing = 0; };
 		9F559EB2CC99871D47887B82 = { isa = PBXNativeTarget; buildConfigurationList = 6F5E160F06E7FAD8B5C96752; buildPhases = (
 				4B8D17F77F2E2E7A2419CB17,
 				172414663F1A38D78D2B00C3,
 				CB4944AF280662FF07FEFEC4 ); buildRules = ( ); dependencies = ( ); name = HelloWorld; productName = HelloWorld; productReference = D5A29444C637255D66ACB7AE; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		9A0E300BBDAFA50EA37EA0D9 = { isa = PBXProject; buildConfigurationList = C71BF9C42683418116C8426E; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = 4297D3C9A6348BA224516847; projectDirPath = ""; projectRoot = ""; targets = ( 9F559EB2CC99871D47887B82 ); };
+		9A0E300BBDAFA50EA37EA0D9 = { isa = PBXProject; buildConfigurationList = C71BF9C42683418116C8426E; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = B3F3C4C19F8E5C6897A5B3C3; projectDirPath = ""; projectRoot = ""; targets = ( 9F559EB2CC99871D47887B82 ); };
 	};
 	rootObject = 9A0E300BBDAFA50EA37EA0D9;
 }

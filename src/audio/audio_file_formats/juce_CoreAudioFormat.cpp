@@ -155,32 +155,40 @@ public:
         if (status != noErr)
             return false;
 
-        const int numBytes = numSamples * sizeof (float);
-        audioDataBlock.ensureSize (numBytes * numChannels, false);
-        float* data = static_cast<float*> (audioDataBlock.getData());
-
-        for (int j = numChannels; --j >= 0;)
+        while (numSamples > 0)
         {
-            bufferList->mBuffers[j].mNumberChannels = 1;
-            bufferList->mBuffers[j].mDataByteSize = numBytes;
-            bufferList->mBuffers[j].mData = data;
-            data += numSamples;
-        }
+            const int numThisTime = jmin (8192, numSamples);
+            const int numBytes = numThisTime * sizeof (float);
 
-        UInt32 numFramesToRead = numSamples;
-        status = ExtAudioFileRead (audioFileRef, &numFramesToRead, bufferList);
-        if (status != noErr)
-            return false;
+            audioDataBlock.ensureSize (numBytes * numChannels, false);
+            float* data = static_cast<float*> (audioDataBlock.getData());
 
-        for (int i = numDestChannels; --i >= 0;)
-        {
-            if (destSamples[i] != nullptr)
+            for (int j = numChannels; --j >= 0;)
             {
-                if (i < numChannels)
-                    memcpy (destSamples[i] + startOffsetInDestBuffer, bufferList->mBuffers[i].mData, numBytes);
-                else
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, numBytes);
+                bufferList->mBuffers[j].mNumberChannels = 1;
+                bufferList->mBuffers[j].mDataByteSize = numBytes;
+                bufferList->mBuffers[j].mData = data;
+                data += numThisTime;
             }
+
+            UInt32 numFramesToRead = numThisTime;
+            status = ExtAudioFileRead (audioFileRef, &numFramesToRead, bufferList);
+            if (status != noErr)
+                return false;
+
+            for (int i = numDestChannels; --i >= 0;)
+            {
+                if (destSamples[i] != nullptr)
+                {
+                    if (i < numChannels)
+                        memcpy (destSamples[i] + startOffsetInDestBuffer, bufferList->mBuffers[i].mData, numBytes);
+                    else
+                        zeromem (destSamples[i] + startOffsetInDestBuffer, numBytes);
+                }
+            }
+
+            startOffsetInDestBuffer += numThisTime;
+            numSamples -= numThisTime;
         }
 
         return true;

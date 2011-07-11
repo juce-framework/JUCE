@@ -85,6 +85,7 @@
 //==============================================================================
 #ifdef _MSC_VER
   #pragma pack (push, 8)
+  #pragma warning (disable: 4263 4264)
 #endif
 
 #include "../juce_PluginHeaders.h"

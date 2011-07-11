@@ -79,10 +79,6 @@ public:
     Value getRTASFolder() const             { return getSetting (Ids::rtasFolder); }
     Value getAUFolder() const               { return getSetting (Ids::auFolder); }
 
-    bool isVST() const                      { return (bool) project.getProjectType().isAudioPlugin() && (bool) project.shouldBuildVST().getValue(); }
-    bool isRTAS() const                     { return (bool) project.getProjectType().isAudioPlugin() && (bool) project.shouldBuildRTAS().getValue(); }
-    bool isAU() const                       { return (bool) project.getProjectType().isAudioPlugin() && (bool) project.shouldBuildAU().getValue(); }
-
     Value getExtraCompilerFlags() const     { return getSetting (Ids::extraCompilerFlags); }
     Value getExtraLinkerFlags() const       { return getSetting (Ids::extraLinkerFlags); }
 
@@ -121,14 +117,33 @@ public:
         String message;
     };
 
-    Project::Item getMainGroup()           { return project.getMainGroup(); }
-
     RelativePath getJucePathFromTargetFolder() const;
     RelativePath getJucePathFromProjectFolder() const;
 
-    Array<Project::Item> generatedGroups;
+    //==============================================================================
+    Array<Project::Item> groups;
     OwnedArray<LibraryModule> libraryModules;
 
+    //==============================================================================
+    String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
+    String xcodeProductType, xcodeProductInstallPath, xcodeFileType;
+    String xcodeShellScript, xcodeShellScriptTitle, xcodeOtherRezFlags;
+    bool xcodeIsBundle, xcodeCreatePList, xcodeCanUseDwarf;
+    StringArray xcodeFrameworks;
+    Array<RelativePath> xcodeExtraLibrariesDebug, xcodeExtraLibrariesRelease;
+
+    //==============================================================================
+    String makefileTargetSuffix;
+    bool makefileIsDLL;
+
+    //==============================================================================
+    String msvcTargetSuffix;
+    StringPairArray msvcExtraPreprocessorDefs;
+    bool msvcIsDLL, msvcIsWindowsSubsystem, msvcNeedsDLLRuntimeLib;
+    String msvcExtraLinkerOptions, msvcDelayLoadedDLLs, msvcModuleDefinitionFile;
+    String msvcPostBuildCommand, msvcPostBuildOutputs;
+
+    //==============================================================================
     void createLibraryModules();
 
 protected:

@@ -523,6 +523,8 @@ Project::Item::~Item()
 {
 }
 
+Project::Item Project::Item::createCopy()         { Item i (*this); i.node = i.node.createCopy(); return i; }
+
 String Project::Item::getID() const               { return node [Ids::id_]; }
 void Project::Item::setID (const String& newID)   { node.setProperty (Ids::id_, newID, nullptr); }
 
