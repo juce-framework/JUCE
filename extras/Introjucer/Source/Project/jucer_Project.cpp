@@ -506,6 +506,8 @@ bool Project::Item::shouldBeAddedToBinaryResources() const  { return getShouldAd
 Value Project::Item::getShouldAddToResourceValue() const    { return node.getPropertyAsValue (Ids::resource, getUndoManager()); }
 
 Value Project::Item::getShouldInhibitWarningsValue() const  { return node.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
+Value Project::Item::getShouldUseStdCallValue() const       { return node.getPropertyAsValue (Ids::useStdCall, nullptr); }
+
 
 String Project::Item::getFilePath() const
 {

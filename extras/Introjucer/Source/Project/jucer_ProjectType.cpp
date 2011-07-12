@@ -583,7 +583,10 @@ public:
             {
                 const RelativePath file (exporter.getJucePathFromProjectFolder().getChildFile (*f));
                 group.addRelativeFile (file, -1, file.hasFileExtension ("cpp;mm;r"));
-                group.getChild (group.getNumChildren() - 1).getShouldInhibitWarningsValue() = true;
+
+                const Project::Item& last = group.getChild (group.getNumChildren() - 1);
+                last.getShouldInhibitWarningsValue() = true;
+                last.getShouldUseStdCallValue() = true;
             }
 
             exporter.groups.add (group);

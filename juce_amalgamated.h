@@ -73,7 +73,7 @@ namespace JuceDummyNamespace {}
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  54
-#define JUCE_BUILDNUMBER	24
+#define JUCE_BUILDNUMBER	25
 
 /** Current Juce version number.
 
@@ -34923,7 +34923,7 @@ public:
 		storeAsXML
 	};
 
-	struct Options
+	struct JUCE_API  Options
 	{
 		/** Creates an empty Options structure.
 			You'll need to fill-in the data memebers appropriately before using this structure.

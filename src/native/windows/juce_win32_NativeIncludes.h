@@ -30,13 +30,6 @@
 #include "../../core/juce_TargetPlatform.h"
 #include "../../../juce_Config.h"
 
-#ifndef STRICT
- #define STRICT 1
-#endif
-
-#undef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN 1
-
 #if JUCE_MSVC
  #ifndef _CPPRTTI
   #error "You're compiling without RTTI enabled! This is needed for a lot of JUCE classes, please update your compiler settings!"
@@ -50,10 +43,16 @@
  #pragma warning (disable : 4100 4201 4514 4312 4995)
 #endif
 
+#undef  _WIN32_WINNT
 #define _WIN32_WINNT 0x0500
+#undef  STRICT
+#define STRICT 1
+#undef  WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#undef  _UNICODE
 #define _UNICODE 1
+#undef  UNICODE
 #define UNICODE 1
-
 #ifndef _WIN32_IE
  #define _WIN32_IE 0x0400
 #endif

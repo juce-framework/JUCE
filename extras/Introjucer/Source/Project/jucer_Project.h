@@ -171,6 +171,7 @@ public:
         bool shouldBeAddedToBinaryResources() const;
         Value getShouldAddToResourceValue() const;
         Value getShouldInhibitWarningsValue() const;
+        Value getShouldUseStdCallValue() const;
 
         //==============================================================================
         bool canContain (const Item& child) const;

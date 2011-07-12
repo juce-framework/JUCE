@@ -61,7 +61,7 @@ public:
     };
 
     //==============================================================================
-    struct Options
+    struct JUCE_API  Options
     {
         /** Creates an empty Options structure.
             You'll need to fill-in the data memebers appropriately before using this structure.

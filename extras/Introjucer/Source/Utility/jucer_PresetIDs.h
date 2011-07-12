@@ -117,6 +117,7 @@ namespace Ids
     DECLARE_ID (memberName);
     DECLARE_ID (focusOrder);
     DECLARE_ID (hidden);
+    DECLARE_ID (useStdCall);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);

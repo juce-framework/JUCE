@@ -24,10 +24,14 @@
 */
 
 #ifdef _MSC_VER
-  #pragma warning (disable : 4996 4100)
+ #pragma warning (disable : 4996 4100)
 #endif
 
 #ifdef _WIN32
+ #undef _WIN32_WINNT
+ #define _WIN32_WINNT 0x500
+ #undef STRICT
+ #define STRICT 1
  #include <windows.h>
 #elif defined (LINUX)
  #include <X11/Xlib.h>

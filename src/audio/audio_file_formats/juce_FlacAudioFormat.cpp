@@ -29,6 +29,10 @@
 #if JUCE_USE_FLAC
 
 #if JUCE_WINDOWS
+ #undef _WIN32_WINNT
+ #define _WIN32_WINNT 0x0500
+ #undef STRICT
+ #define STRICT
  #include <windows.h>
 #endif
 

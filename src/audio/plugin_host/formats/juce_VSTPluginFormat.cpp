@@ -32,7 +32,7 @@
  #undef _WIN32_WINNT
  #define _WIN32_WINNT 0x500
  #undef STRICT
- #define STRICT
+ #define STRICT 1
  #include <windows.h>
  #include <float.h>
  #pragma warning (disable : 4312 4355)

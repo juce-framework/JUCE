@@ -136,6 +136,7 @@ protected:
         for (int i = 0; i < libraryModules.size(); ++i)
             libraryModules.getUnchecked(i)->addExtraSearchPaths (*this, searchPaths);
 
+        searchPaths.removeDuplicates (false);
         return searchPaths;
     }
 
@@ -463,38 +464,22 @@ protected:
         return filter;
     }
 
-    void addFiles (const Project::Item& projectItem, XmlElement& parent, const bool useStdcall)
+    void addFiles (const Project::Item& projectItem, XmlElement& parent)
     {
         if (projectItem.isGroup())
         {
             XmlElement* filter = createGroup (projectItem.getName().toString(), parent);
 
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addFiles (projectItem.getChild(i), *filter, useStdcall);
+                addFiles (projectItem.getChild(i), *filter);
         }
-        else
+        else if (projectItem.shouldBeAddedToTargetProject())
         {
-            if (projectItem.shouldBeAddedToTargetProject())
-            {
-                const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+            const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-                addFile (path, parent,
-                         projectItem.shouldBeAddedToBinaryResources() || (shouldFileBeCompiledByDefault (path) && ! projectItem.shouldBeCompiled()),
-                         useStdcall);
-            }
-        }
-    }
-
-    void addGroup (XmlElement& parent, const String& groupName, const Array<RelativePath>& files, const bool useStdcall)
-    {
-        if (files.size() > 0)
-        {
-            XmlElement* const group = createGroup (groupName, parent);
-
-            for (int i = 0; i < files.size(); ++i)
-                if (files.getReference(i).hasFileExtension ("cpp;c;cc;cxx;h;hpp;hxx;rc;ico"))
-                    addFile (files.getReference(i), *group, false,
-                             useStdcall && shouldFileBeCompiledByDefault (files.getReference(i)));
+            addFile (path, parent,
+                     projectItem.shouldBeAddedToBinaryResources() || (shouldFileBeCompiledByDefault (path) && ! projectItem.shouldBeCompiled()),
+                     shouldFileBeCompiledByDefault (path) && (bool) projectItem.getShouldUseStdCallValue().getValue());
         }
     }
 
@@ -502,7 +487,7 @@ protected:
     {
         for (int i = 0; i < groups.size(); ++i)
             if (groups.getReference(i).getNumChildren() > 0)
-                addFiles (groups.getReference(i), files, false);
+                addFiles (groups.getReference(i), files);
     }
 
     //==============================================================================

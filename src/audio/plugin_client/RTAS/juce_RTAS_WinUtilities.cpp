@@ -29,6 +29,11 @@
 #if _MSC_VER
 
 #define _DO_NOT_DECLARE_INTERLOCKED_INTRINSICS_IN_MEMORY // (workaround for a VC build problem)
+
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0500
+#undef STRICT
+#define STRICT
 #include <intrin.h>
 #include <windows.h>
 
