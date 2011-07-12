@@ -40,12 +40,6 @@ public:
         if (getTargetLocation().toString().isEmpty())
             getTargetLocation() = getDefaultBuildsRootFolder() + folderName;
 
-        if (getVSTFolder().toString().isEmpty())
-            getVSTFolder() = "c:\\SDKs\\vstsdk2.4";
-
-        if (getRTASFolder().toString().isEmpty())
-            getRTASFolder() = "c:\\SDKs\\PT_80_SDK";
-
         if ((int) getLibraryType().getValue() <= 0)
             getLibraryType() = 1;
 

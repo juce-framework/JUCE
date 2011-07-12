@@ -106,26 +106,6 @@ public:
     Image getBigIcon();
     Image getSmallIcon();
 
-    Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
-    Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }
-    Value shouldBuildAU() const                         { return getProjectValue ("buildAU"); }
-
-    Value getPluginName() const                         { return getProjectValue ("pluginName"); }
-    Value getPluginDesc() const                         { return getProjectValue ("pluginDesc"); }
-    Value getPluginManufacturer() const                 { return getProjectValue ("pluginManufacturer"); }
-    Value getPluginManufacturerCode() const             { return getProjectValue ("pluginManufacturerCode"); }
-    Value getPluginCode() const                         { return getProjectValue ("pluginCode"); }
-    Value getPluginChannelConfigs() const               { return getProjectValue ("pluginChannelConfigs"); }
-    Value getPluginIsSynth() const                      { return getProjectValue ("pluginIsSynth"); }
-    Value getPluginWantsMidiInput() const               { return getProjectValue ("pluginWantsMidiIn"); }
-    Value getPluginProducesMidiOut() const              { return getProjectValue ("pluginProducesMidiOut"); }
-    Value getPluginSilenceInProducesSilenceOut() const  { return getProjectValue ("pluginSilenceInIsSilenceOut"); }
-    Value getPluginTailLengthSeconds() const            { return getProjectValue ("pluginTailLength"); }
-    Value getPluginEditorNeedsKeyFocus() const          { return getProjectValue ("pluginEditorRequiresKeys"); }
-    Value getPluginAUExportPrefix() const               { return getProjectValue ("pluginAUExportPrefix"); }
-    Value getPluginAUCocoaViewClassName() const         { return getProjectValue ("pluginAUViewClass"); }
-    Value getPluginRTASCategory() const                 { return getProjectValue ("pluginRTASCategory"); }
-
     //==============================================================================
     File getAppIncludeFile() const                      { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
     File getGeneratedCodeFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }

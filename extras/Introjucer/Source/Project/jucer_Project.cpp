@@ -126,30 +126,7 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.getChildWithName (Tags::exporters).isValid())
         createDefaultExporters();
 
-    const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false));
-
-    if (! projectRoot.hasProperty (Ids::buildVST))
-    {
-        shouldBuildVST() = true;
-        shouldBuildRTAS() = false;
-        shouldBuildAU() = true;
-
-        getPluginName() = getProjectName().toString();
-        getPluginDesc() = getProjectName().toString();
-        getPluginManufacturer() = "yourcompany";
-        getPluginManufacturerCode() = "Manu";
-        getPluginCode() = "Plug";
-        getPluginChannelConfigs() = "{1, 1}, {2, 2}";
-        getPluginIsSynth() = false;
-        getPluginWantsMidiInput() = false;
-        getPluginProducesMidiOut() = false;
-        getPluginSilenceInProducesSilenceOut() = false;
-        getPluginTailLengthSeconds() = 0;
-        getPluginEditorNeedsKeyFocus() = false;
-        getPluginAUExportPrefix() = sanitisedProjectName + "AU";
-        getPluginAUCocoaViewClassName() = sanitisedProjectName + "AU_V1";
-        getPluginRTASCategory() = String::empty;
-    }
+    getProjectType().setMissingProjectProperties (*this);
 
     if (! projectRoot.hasProperty (Ids::bundleIdentifier))
         setBundleIdentifierToDefault();
@@ -212,6 +189,9 @@ void Project::setLastDocumentOpened (const File& file)
 //==============================================================================
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
+    if (property == Ids::projectType)
+        setMissingDefaultValues();
+
     if (getProjectType().isLibrary())
         getJuceLinkageModeValue() = notLinkedToJuce;
 
@@ -369,66 +349,7 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.getLast()->setTooltip ("Sets an icon to use for the executable.");
     }
 
-    if (getProjectType().isAudioPlugin())
-    {
-        props.add (new BooleanPropertyComponent (shouldBuildVST(), "Build VST", "Enabled"));
-        props.getLast()->setTooltip ("Whether the project should produce a VST plugin.");
-        props.add (new BooleanPropertyComponent (shouldBuildAU(), "Build AudioUnit", "Enabled"));
-        props.getLast()->setTooltip ("Whether the project should produce an AudioUnit plugin.");
-        props.add (new BooleanPropertyComponent (shouldBuildRTAS(), "Build RTAS", "Enabled"));
-        props.getLast()->setTooltip ("Whether the project should produce an RTAS plugin.");
-    }
-
-    if (getProjectType().isAudioPlugin())
-    {
-        props.add (new TextPropertyComponent (getPluginName(), "Plugin Name", 128, false));
-        props.getLast()->setTooltip ("The name of your plugin (keep it short!)");
-        props.add (new TextPropertyComponent (getPluginDesc(), "Plugin Description", 256, false));
-        props.getLast()->setTooltip ("A short description of your plugin.");
-
-        props.add (new TextPropertyComponent (getPluginManufacturer(), "Plugin Manufacturer", 256, false));
-        props.getLast()->setTooltip ("The name of your company (cannot be blank).");
-        props.add (new TextPropertyComponent (getPluginManufacturerCode(), "Plugin Manufacturer Code", 4, false));
-        props.getLast()->setTooltip ("A four-character unique ID for your company. Note that for AU compatibility, this must contain at least one upper-case letter!");
-        props.add (new TextPropertyComponent (getPluginCode(), "Plugin Code", 4, false));
-        props.getLast()->setTooltip ("A four-character unique ID for your plugin. Note that for AU compatibility, this must contain at least one upper-case letter!");
-
-        props.add (new TextPropertyComponent (getPluginChannelConfigs(), "Plugin Channel Configurations", 256, false));
-        props.getLast()->setTooltip ("This is the set of input/output channel configurations that your plugin can handle.  The list is a comma-separated set of pairs of values in the form { numInputs, numOutputs }, and each "
-                                     "pair indicates a valid configuration that the plugin can handle. So for example, {1, 1}, {2, 2} means that the plugin can be used in just two configurations: either with 1 input "
-                                     "and 1 output, or with 2 inputs and 2 outputs.");
-
-        props.add (new BooleanPropertyComponent (getPluginIsSynth(), "Plugin is a Synth", "Is a Synth"));
-        props.getLast()->setTooltip ("Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");
-
-        props.add (new BooleanPropertyComponent (getPluginWantsMidiInput(), "Plugin Midi Input", "Plugin wants midi input"));
-        props.getLast()->setTooltip ("Enable this if you want your plugin to accept midi messages.");
-
-        props.add (new BooleanPropertyComponent (getPluginProducesMidiOut(), "Plugin Midi Output", "Plugin produces midi output"));
-        props.getLast()->setTooltip ("Enable this if your plugin is going to produce midi messages.");
-
-        props.add (new BooleanPropertyComponent (getPluginSilenceInProducesSilenceOut(), "Silence", "Silence in produces silence out"));
-        props.getLast()->setTooltip ("Enable this if your plugin has no tail - i.e. if passing a silent buffer to it will always result in a silent buffer being produced.");
-
-        props.add (new TextPropertyComponent (getPluginTailLengthSeconds(), "Tail Length (in seconds)", 12, false));
-        props.getLast()->setTooltip ("This indicates the length, in seconds, of the plugin's tail. This information may or may not be used by the host.");
-
-        props.add (new BooleanPropertyComponent (getPluginEditorNeedsKeyFocus(), "Key Focus", "Plugin editor requires keyboard focus"));
-        props.getLast()->setTooltip ("Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
-
-        props.add (new TextPropertyComponent (getPluginAUExportPrefix(), "Plugin AU Export Prefix", 64, false));
-        props.getLast()->setTooltip ("A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
-
-        props.add (new TextPropertyComponent (getPluginAUCocoaViewClassName(), "Plugin AU Cocoa View Name", 64, false));
-        props.getLast()->setTooltip ("In an AU, this is the name of Cocoa class that creates the UI. Some hosts bizarrely display the class-name, so you might want to make it reflect your plugin. But the name must be "
-                                     "UNIQUE to this exact version of your plugin, to avoid objective-C linkage mix-ups that happen when different plugins containing the same class-name are loaded simultaneously.");
-
-        props.add (new TextPropertyComponent (getPluginRTASCategory(), "Plugin RTAS Category", 64, false));
-        props.getLast()->setTooltip ("(Leave this blank if your plugin is a synth). This is one of the RTAS categories from FicPluginEnums.h, such as: ePlugInCategory_None, ePlugInCategory_EQ, ePlugInCategory_Dynamics, "
-                                     "ePlugInCategory_PitchShift, ePlugInCategory_Reverb, ePlugInCategory_Delay, "
-                                     "ePlugInCategory_Modulation, ePlugInCategory_Harmonic, ePlugInCategory_NoiseReduction, "
-                                     "ePlugInCategory_Dither, ePlugInCategory_SoundField");
-    }
+    getProjectType().createPropertyEditors(*this, props);
 
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, false));
     props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");

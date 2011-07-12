@@ -50,12 +50,6 @@ public:
         if (getTargetLocation().toString().isEmpty())
             getTargetLocation() = getDefaultBuildsRootFolder() + (iPhone ? "iOS" : "MacOSX");
 
-        if (getVSTFolder().toString().isEmpty())
-            getVSTFolder() = "~/SDKs/vstsdk2.4";
-
-        if (getRTASFolder().toString().isEmpty())
-            getRTASFolder() = "~/SDKs/PT_80_SDK";
-
         if (getSettings() ["objCExtraSuffix"].isVoid())
             getObjCSuffix() = createAlphaNumericUID();
     }

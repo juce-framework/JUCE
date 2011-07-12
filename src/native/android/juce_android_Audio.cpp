@@ -275,11 +275,19 @@ public:
 
                 jshort* const src = env->GetShortArrayElements (audioBuffer, 0);
 
-                for (int chan = 0; chan < numDeviceInputChannels; ++chan)
+                for (int chan = 0; chan < inputChannelBuffer.getNumChannels(); ++chan)
                 {
-                    AudioData::Pointer <AudioData::Int16, AudioData::NativeEndian, AudioData::Interleaved, AudioData::Const> s (src + chan, numDeviceInputChannels);
                     AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> d (inputChannelBuffer.getSampleData (chan));
-                    d.convertSamples (s, actualBufferSize);
+
+                    if (chan < numDeviceInputChannels)
+                    {
+                        AudioData::Pointer <AudioData::Int16, AudioData::NativeEndian, AudioData::Interleaved, AudioData::Const> s (src + chan, numDeviceInputChannels);
+                        d.convertSamples (s, actualBufferSize);
+                    }
+                    else
+                    {
+                        d.clearSamples (actualBufferSize);
+                    }
                 }
 
                 env->ReleaseShortArrayElements (audioBuffer, src, 0);
@@ -313,7 +321,9 @@ public:
                 for (int chan = 0; chan < numDeviceOutputChannels; ++chan)
                 {
                     AudioData::Pointer <AudioData::Int16, AudioData::NativeEndian, AudioData::Interleaved, AudioData::NonConst> d (dest + chan, numDeviceOutputChannels);
-                    AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> s (outputChannelBuffer.getSampleData (chan));
+
+                    const float* const sourceChanData = outputChannelBuffer.getSampleData (jmin (chan, outputChannelBuffer.getNumChannels() - 1));
+                    AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> s (sourceChanData);
                     d.convertSamples (s, actualBufferSize);
                 }
 

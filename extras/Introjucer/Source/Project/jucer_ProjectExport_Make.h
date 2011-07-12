@@ -54,9 +54,6 @@ public:
 
         if (getTargetLocation().toString().isEmpty())
             getTargetLocation() = getDefaultBuildsRootFolder() + "Linux";
-
-        if (getVSTFolder().toString().isEmpty())
-            getVSTFolder() = "~/SDKs/vstsdk2.4";
     }
 
     //==============================================================================

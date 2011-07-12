@@ -27,6 +27,104 @@
 #include "jucer_ProjectExporter.h"
 #include "jucer_ProjectSaver.h"
 
+//==============================================================================
+class JuceModule
+{
+public:
+    JuceModule (const File& file)
+        : moduleInfo (JSON::parse (file)),
+          moduleFolder (file.getParentDirectory())
+    {
+    }
+
+    static StringArray findAllModuleIDs()
+    {
+        StringArray ids;
+        DirectoryIterator iter (getModulesFolder(), false, "*", File::findDirectories);
+
+        while (iter.next())
+        {
+            const File moduleDef (iter.getFile().getChildFile ("juce_module.txt"));
+
+            if (moduleDef.exists())
+            {
+                ScopedPointer<JuceModule> m (new JuceModule (moduleDef));
+                jassert (m->isValid());
+
+                if (m->isValid())
+                    ids.add (m->getID());
+            }
+        }
+
+        return ids;
+    }
+
+    static JuceModule* createModuleForID (const String& moduleID)
+    {
+        DirectoryIterator iter (getModulesFolder(), false, "*", File::findDirectories);
+
+        while (iter.next())
+        {
+            const File moduleDef (iter.getFile().getChildFile ("juce_module.txt"));
+
+            if (moduleDef.exists())
+            {
+                ScopedPointer<JuceModule> m (new JuceModule (moduleDef));
+
+                if (m->getID() == moduleID)
+                    return m.release();
+            }
+        }
+
+        return nullptr;
+    }
+
+    String getID() const        { return moduleInfo ["id"]; }
+    bool isValid() const        { return getID().isNotEmpty(); }
+
+    void getDependencies (OwnedArray<JuceModule>& dependencies) const
+    {
+        const Array<var>* const deps = moduleInfo ["dependencies"].getArray();
+
+        if (deps != nullptr)
+        {
+            for (int i = 0; i < deps->size(); ++i)
+            {
+                const String requiredID (deps->getUnchecked(i) ["id"].toString());
+
+                if (requiredID.isNotEmpty()
+                      && ! containsModule (dependencies, requiredID))
+                {
+                    JuceModule* const m = createModuleForID (requiredID);
+
+                    if (m != nullptr)
+                        dependencies.add (m);
+                }
+            }
+        }
+    }
+
+    var moduleInfo;
+    File moduleFolder;
+
+private:
+    static bool containsModule (const OwnedArray<JuceModule>& modules, const String& requiredID)
+    {
+        for (int i = modules.size(); --i >= 0;)
+            if (modules.getUnchecked(i)->getID() == requiredID)
+                return true;
+
+        return false;
+    }
+
+    static File getModulesFolder()
+    {
+        return StoredSettings::getInstance()->getLastKnownJuceFolder().getChildFile ("modules");
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceModule);
+};
+
 
 //==============================================================================
 LibraryModule::LibraryModule()
@@ -36,9 +134,11 @@ LibraryModule::LibraryModule()
 //==============================================================================
 namespace
 {
+    Value getVSTFolder (const ProjectExporter& exporter)         { return exporter.getSetting (Ids::vstFolder); }
+
     void addVSTFolderToPath (const ProjectExporter& exporter, StringArray& searchPaths)
     {
-        const String vstFolder (exporter.getVSTFolder().toString());
+        const String vstFolder (getVSTFolder (exporter).toString());
 
         if (vstFolder.isNotEmpty())
         {
@@ -53,7 +153,7 @@ namespace
 
     void createVSTPathEditor (const ProjectExporter& exporter, Array <PropertyComponent*>& props)
     {
-        props.add (new TextPropertyComponent (exporter.getVSTFolder(), "VST Folder", 1024, false));
+        props.add (new TextPropertyComponent (getVSTFolder (exporter), "VST Folder", 1024, false));
         props.getLast()->setTooltip ("If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
     }
 
@@ -72,7 +172,27 @@ namespace
         return maxVal;
     }
 
-    static void writePluginCharacteristics (Project& project, OutputStream& out)
+    Value shouldBuildVST (const Project& project)                       { return project.getProjectValue ("buildVST"); }
+    Value shouldBuildRTAS (const Project& project)                      { return project.getProjectValue ("buildRTAS"); }
+    Value shouldBuildAU (const Project& project)                        { return project.getProjectValue ("buildAU"); }
+
+    Value getPluginName (const Project& project)                        { return project.getProjectValue ("pluginName"); }
+    Value getPluginDesc (const Project& project)                        { return project.getProjectValue ("pluginDesc"); }
+    Value getPluginManufacturer (const Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
+    Value getPluginManufacturerCode (const Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
+    Value getPluginCode (const Project& project)                        { return project.getProjectValue ("pluginCode"); }
+    Value getPluginChannelConfigs (const Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
+    Value getPluginIsSynth (const Project& project)                     { return project.getProjectValue ("pluginIsSynth"); }
+    Value getPluginWantsMidiInput (const Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
+    Value getPluginProducesMidiOut (const Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
+    Value getPluginSilenceInProducesSilenceOut (const Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
+    Value getPluginTailLengthSeconds (const Project& project)           { return project.getProjectValue ("pluginTailLength"); }
+    Value getPluginEditorNeedsKeyFocus (const Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
+    Value getPluginAUExportPrefix (const Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
+    Value getPluginAUCocoaViewClassName (const Project& project)        { return project.getProjectValue ("pluginAUViewClass"); }
+    Value getPluginRTASCategory (const Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
+
+    void writePluginCharacteristics (Project& project, OutputStream& out)
     {
         String headerGuard ("__PLUGINCHARACTERISTICS_" + project.getProjectUID().toUpperCase() + "__");
 
@@ -86,36 +206,36 @@ namespace
             << "#ifndef " << headerGuard << newLine
             << "#define " << headerGuard << newLine
             << newLine
-            << "#define JucePlugin_Build_VST    " << ((bool) project.shouldBuildVST().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
-            << "#define JucePlugin_Build_AU     " << ((bool) project.shouldBuildAU().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
-            << "#define JucePlugin_Build_RTAS   " << ((bool) project.shouldBuildRTAS().getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
+            << "#define JucePlugin_Build_VST    " << ((bool) shouldBuildVST (project).getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
+            << "#define JucePlugin_Build_AU     " << ((bool) shouldBuildAU (project).getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
+            << "#define JucePlugin_Build_RTAS   " << ((bool) shouldBuildRTAS (project).getValue() ? 1 : 0) << "  // (If you change this value, you'll also need to re-export the projects using the Jucer)" << newLine
             << newLine
-            << "#define JucePlugin_Name                 " << project.getPluginName().toString().quoted() << newLine
-            << "#define JucePlugin_Desc                 " << project.getPluginDesc().toString().quoted() << newLine
-            << "#define JucePlugin_Manufacturer         " << project.getPluginManufacturer().toString().quoted() << newLine
-            << "#define JucePlugin_ManufacturerCode     '" << project.getPluginManufacturerCode().toString().trim().substring (0, 4) << "'" << newLine
-            << "#define JucePlugin_PluginCode           '" << project.getPluginCode().toString().trim().substring (0, 4) << "'" << newLine
-            << "#define JucePlugin_MaxNumInputChannels  " << countMaxPluginChannels (project.getPluginChannelConfigs().toString(), true) << newLine
-            << "#define JucePlugin_MaxNumOutputChannels " << countMaxPluginChannels (project.getPluginChannelConfigs().toString(), false) << newLine
-            << "#define JucePlugin_PreferredChannelConfigurations   " << project.getPluginChannelConfigs().toString() << newLine
-            << "#define JucePlugin_IsSynth              " << ((bool) project.getPluginIsSynth().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_WantsMidiInput       " << ((bool) project.getPluginWantsMidiInput().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_ProducesMidiOutput   " << ((bool) project.getPluginProducesMidiOut().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_SilenceInProducesSilenceOut  " << ((bool) project.getPluginSilenceInProducesSilenceOut().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_TailLengthSeconds    " << (double) project.getPluginTailLengthSeconds().getValue() << newLine
-            << "#define JucePlugin_EditorRequiresKeyboardFocus  " << ((bool) project.getPluginEditorNeedsKeyFocus().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_VersionCode          " << project.getVersionAsHex() << newLine
-            << "#define JucePlugin_VersionString        " << project.getVersion().toString().quoted() << newLine
+            << "#define JucePlugin_Name                 "  << getPluginName (project).toString().quoted() << newLine
+            << "#define JucePlugin_Desc                 "  << getPluginDesc (project).toString().quoted() << newLine
+            << "#define JucePlugin_Manufacturer         "  << getPluginManufacturer (project).toString().quoted() << newLine
+            << "#define JucePlugin_ManufacturerCode     '" << getPluginManufacturerCode (project).toString().trim().substring (0, 4) << "'" << newLine
+            << "#define JucePlugin_PluginCode           '" << getPluginCode (project).toString().trim().substring (0, 4) << "'" << newLine
+            << "#define JucePlugin_MaxNumInputChannels  "  << countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true) << newLine
+            << "#define JucePlugin_MaxNumOutputChannels "  << countMaxPluginChannels (getPluginChannelConfigs (project).toString(), false) << newLine
+            << "#define JucePlugin_PreferredChannelConfigurations   " << getPluginChannelConfigs (project).toString() << newLine
+            << "#define JucePlugin_IsSynth              "  << ((bool) getPluginIsSynth (project).getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_WantsMidiInput       "  << ((bool) getPluginWantsMidiInput (project).getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_ProducesMidiOutput   "  << ((bool) getPluginProducesMidiOut (project).getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_SilenceInProducesSilenceOut  " << ((bool) getPluginSilenceInProducesSilenceOut (project).getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_TailLengthSeconds    "  << (double) getPluginTailLengthSeconds (project).getValue() << newLine
+            << "#define JucePlugin_EditorRequiresKeyboardFocus  " << ((bool) getPluginEditorNeedsKeyFocus (project).getValue() ? 1 : 0) << newLine
+            << "#define JucePlugin_VersionCode          "  << project.getVersionAsHex() << newLine
+            << "#define JucePlugin_VersionString        "  << project.getVersion().toString().quoted() << newLine
             << "#define JucePlugin_VSTUniqueID          JucePlugin_PluginCode" << newLine
-            << "#define JucePlugin_VSTCategory          " << ((bool) project.getPluginIsSynth().getValue() ? "kPlugCategSynth" : "kPlugCategEffect") << newLine
-            << "#define JucePlugin_AUMainType           " << ((bool) project.getPluginIsSynth().getValue() ? "kAudioUnitType_MusicDevice" : "kAudioUnitType_Effect") << newLine
+            << "#define JucePlugin_VSTCategory          "  << ((bool) getPluginIsSynth (project).getValue() ? "kPlugCategSynth" : "kPlugCategEffect") << newLine
+            << "#define JucePlugin_AUMainType           "  << ((bool) getPluginIsSynth (project).getValue() ? "kAudioUnitType_MusicDevice" : "kAudioUnitType_Effect") << newLine
             << "#define JucePlugin_AUSubType            JucePlugin_PluginCode" << newLine
-            << "#define JucePlugin_AUExportPrefix       " << project.getPluginAUExportPrefix().toString() << newLine
-            << "#define JucePlugin_AUExportPrefixQuoted " << project.getPluginAUExportPrefix().toString().quoted() << newLine
+            << "#define JucePlugin_AUExportPrefix       "  << getPluginAUExportPrefix (project).toString() << newLine
+            << "#define JucePlugin_AUExportPrefixQuoted "  << getPluginAUExportPrefix (project).toString().quoted() << newLine
             << "#define JucePlugin_AUManufacturerCode   JucePlugin_ManufacturerCode" << newLine
-            << "#define JucePlugin_CFBundleIdentifier   " << project.getBundleIdentifier().toString() << newLine
-            << "#define JucePlugin_AUCocoaViewClassName " << project.getPluginAUCocoaViewClassName().toString() << newLine
-            << "#define JucePlugin_RTASCategory         " << ((bool) project.getPluginIsSynth().getValue() ? "ePlugInCategory_SWGenerators" : "ePlugInCategory_None") << newLine
+            << "#define JucePlugin_CFBundleIdentifier   "  << project.getBundleIdentifier().toString() << newLine
+            << "#define JucePlugin_AUCocoaViewClassName "  << getPluginAUCocoaViewClassName (project).toString() << newLine
+            << "#define JucePlugin_RTASCategory         "  << ((bool) getPluginIsSynth (project).getValue() ? "ePlugInCategory_SWGenerators" : "ePlugInCategory_None") << newLine
             << "#define JucePlugin_RTASManufacturerCode JucePlugin_ManufacturerCode" << newLine
             << "#define JucePlugin_RTASProductId        JucePlugin_PluginCode" << newLine;
 
@@ -344,6 +464,7 @@ public:
 
     void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
     {
+        fixMissingValues (exporter);
         writePluginCharacteristicsFile (projectSaver);
 
         exporter.makefileTargetSuffix = ".so";
@@ -377,11 +498,23 @@ public:
 
     void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const
     {
+        fixMissingValues (exporter);
         createVSTPathEditor (exporter, props);
     }
 
     void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const
     {
+    }
+
+    static void fixMissingValues (const ProjectExporter& exporter)
+    {
+        if (getVSTFolder (exporter).toString().isEmpty())
+        {
+            if (exporter.isVisualStudio())
+                getVSTFolder (exporter) = "c:\\SDKs\\vstsdk2.4";
+            else
+                getVSTFolder (exporter) = "~/SDKs/vstsdk2.4";
+        }
     }
 };
 
@@ -397,12 +530,14 @@ public:
 
     void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
     {
+        fixMissingValues (exporter);
+
         exporter.xcodeCanUseDwarf = false;
 
         exporter.msvcTargetSuffix = ".dpm";
         exporter.msvcNeedsDLLRuntimeLib = true;
 
-        RelativePath rtasFolder (exporter.getRTASFolder().toString(), RelativePath::projectFolder);
+        RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
         exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
                                                                                 .toWindowsStyle().quoted()));
 
@@ -457,7 +592,7 @@ public:
 
     void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const
     {
-        RelativePath rtasFolder (exporter.getRTASFolder().toString(), RelativePath::projectFolder);
+        RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
 
         if (exporter.isVisualStudio())
         {
@@ -537,7 +672,9 @@ public:
     {
         if (exporter.isXcode() || exporter.isVisualStudio())
         {
-            props.add (new TextPropertyComponent (exporter.getRTASFolder(), "RTAS Folder", 1024, false));
+            fixMissingValues (exporter);
+
+            props.add (new TextPropertyComponent (getRTASFolder (exporter), "RTAS Folder", 1024, false));
             props.getLast()->setTooltip ("If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
         }
     }
@@ -545,6 +682,19 @@ public:
     void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const
     {
     }
+
+    static void fixMissingValues (const ProjectExporter& exporter)
+    {
+        if (getRTASFolder (exporter).toString().isEmpty())
+        {
+            if (exporter.isVisualStudio())
+                getRTASFolder (exporter) = "c:\\SDKs\\PT_80_SDK";
+            else
+                getRTASFolder (exporter) = "~/SDKs/PT_80_SDK";
+        }
+    }
+
+    static Value getRTASFolder (const ProjectExporter& exporter)        { return exporter.getSetting (Ids::rtasFolder); }
 };
 
 //==============================================================================
@@ -696,6 +846,14 @@ const ProjectType* ProjectType::findType (const String& typeCode)
     return nullptr;
 }
 
+void ProjectType::setMissingProjectProperties (Project&) const
+{
+}
+
+void ProjectType::createPropertyEditors (const Project& project, Array <PropertyComponent*>& props) const
+{
+}
+
 void ProjectType::prepareExporter (ProjectExporter& exporter) const
 {
 }
@@ -713,6 +871,14 @@ public:
 
     static const char* getTypeName() noexcept   { return "guiapp"; }
     bool isGUIApplication() const               { return true; }
+
+    void setMissingProjectProperties (Project&) const
+    {
+    }
+
+    void createPropertyEditors (const Project& project, Array <PropertyComponent*>& props) const
+    {
+    }
 
     void prepareExporter (ProjectExporter& exporter) const
     {
@@ -743,6 +909,14 @@ public:
     static const char* getTypeName() noexcept   { return "consoleapp"; }
     bool isCommandLineApp() const               { return true; }
 
+    void setMissingProjectProperties (Project&) const
+    {
+    }
+
+    void createPropertyEditors (const Project& project, Array <PropertyComponent*>& props) const
+    {
+    }
+
     void prepareExporter (ProjectExporter& exporter) const
     {
         exporter.xcodeCreatePList = false;
@@ -770,6 +944,14 @@ public:
 
     static const char* getTypeName() noexcept   { return "library"; }
     bool isLibrary() const                      { return true; }
+
+    void setMissingProjectProperties (Project&) const
+    {
+    }
+
+    void createPropertyEditors (const Project& project, Array <PropertyComponent*>& props) const
+    {
+    }
 
     void prepareExporter (ProjectExporter& exporter) const
     {
@@ -799,6 +981,92 @@ public:
     static const char* getTypeName() noexcept   { return "audioplug"; }
     bool isAudioPlugin() const                  { return true; }
 
+    void setMissingProjectProperties (Project& project) const
+    {
+        if (! project.getProjectRoot().hasProperty (Ids::buildVST))
+        {
+            const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (project.getProjectName().toString(), false, true, false));
+
+            shouldBuildVST (project) = true;
+            shouldBuildRTAS (project) = false;
+            shouldBuildAU (project) = true;
+
+            getPluginName (project) = project.getProjectName().toString();
+            getPluginDesc (project) = project.getProjectName().toString();
+            getPluginManufacturer (project) = "yourcompany";
+            getPluginManufacturerCode (project) = "Manu";
+            getPluginCode (project) = "Plug";
+            getPluginChannelConfigs (project) = "{1, 1}, {2, 2}";
+            getPluginIsSynth (project) = false;
+            getPluginWantsMidiInput (project) = false;
+            getPluginProducesMidiOut (project) = false;
+            getPluginSilenceInProducesSilenceOut (project) = false;
+            getPluginTailLengthSeconds (project) = 0;
+            getPluginEditorNeedsKeyFocus (project) = false;
+            getPluginAUExportPrefix (project) = sanitisedProjectName + "AU";
+            getPluginAUCocoaViewClassName (project) = sanitisedProjectName + "AU_V1";
+            getPluginRTASCategory (project) = String::empty;
+        }
+    }
+
+    void createPropertyEditors (const Project& project, Array <PropertyComponent*>& props) const
+    {
+        props.add (new BooleanPropertyComponent (shouldBuildVST (project), "Build VST", "Enabled"));
+        props.getLast()->setTooltip ("Whether the project should produce a VST plugin.");
+        props.add (new BooleanPropertyComponent (shouldBuildAU (project), "Build AudioUnit", "Enabled"));
+        props.getLast()->setTooltip ("Whether the project should produce an AudioUnit plugin.");
+        props.add (new BooleanPropertyComponent (shouldBuildRTAS (project), "Build RTAS", "Enabled"));
+        props.getLast()->setTooltip ("Whether the project should produce an RTAS plugin.");
+
+        props.add (new TextPropertyComponent (getPluginName (project), "Plugin Name", 128, false));
+        props.getLast()->setTooltip ("The name of your plugin (keep it short!)");
+        props.add (new TextPropertyComponent (getPluginDesc (project), "Plugin Description", 256, false));
+        props.getLast()->setTooltip ("A short description of your plugin.");
+
+        props.add (new TextPropertyComponent (getPluginManufacturer (project), "Plugin Manufacturer", 256, false));
+        props.getLast()->setTooltip ("The name of your company (cannot be blank).");
+        props.add (new TextPropertyComponent (getPluginManufacturerCode (project), "Plugin Manufacturer Code", 4, false));
+        props.getLast()->setTooltip ("A four-character unique ID for your company. Note that for AU compatibility, this must contain at least one upper-case letter!");
+        props.add (new TextPropertyComponent (getPluginCode (project), "Plugin Code", 4, false));
+        props.getLast()->setTooltip ("A four-character unique ID for your plugin. Note that for AU compatibility, this must contain at least one upper-case letter!");
+
+        props.add (new TextPropertyComponent (getPluginChannelConfigs (project), "Plugin Channel Configurations", 256, false));
+        props.getLast()->setTooltip ("This is the set of input/output channel configurations that your plugin can handle.  The list is a comma-separated set of pairs of values in the form { numInputs, numOutputs }, and each "
+                                     "pair indicates a valid configuration that the plugin can handle. So for example, {1, 1}, {2, 2} means that the plugin can be used in just two configurations: either with 1 input "
+                                     "and 1 output, or with 2 inputs and 2 outputs.");
+
+        props.add (new BooleanPropertyComponent (getPluginIsSynth (project), "Plugin is a Synth", "Is a Synth"));
+        props.getLast()->setTooltip ("Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");
+
+        props.add (new BooleanPropertyComponent (getPluginWantsMidiInput (project), "Plugin Midi Input", "Plugin wants midi input"));
+        props.getLast()->setTooltip ("Enable this if you want your plugin to accept midi messages.");
+
+        props.add (new BooleanPropertyComponent (getPluginProducesMidiOut (project), "Plugin Midi Output", "Plugin produces midi output"));
+        props.getLast()->setTooltip ("Enable this if your plugin is going to produce midi messages.");
+
+        props.add (new BooleanPropertyComponent (getPluginSilenceInProducesSilenceOut (project), "Silence", "Silence in produces silence out"));
+        props.getLast()->setTooltip ("Enable this if your plugin has no tail - i.e. if passing a silent buffer to it will always result in a silent buffer being produced.");
+
+        props.add (new TextPropertyComponent (getPluginTailLengthSeconds (project), "Tail Length (in seconds)", 12, false));
+        props.getLast()->setTooltip ("This indicates the length, in seconds, of the plugin's tail. This information may or may not be used by the host.");
+
+        props.add (new BooleanPropertyComponent (getPluginEditorNeedsKeyFocus (project), "Key Focus", "Plugin editor requires keyboard focus"));
+        props.getLast()->setTooltip ("Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
+
+        props.add (new TextPropertyComponent (getPluginAUExportPrefix (project), "Plugin AU Export Prefix", 64, false));
+        props.getLast()->setTooltip ("A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
+
+        props.add (new TextPropertyComponent (getPluginAUCocoaViewClassName (project), "Plugin AU Cocoa View Name", 64, false));
+        props.getLast()->setTooltip ("In an AU, this is the name of Cocoa class that creates the UI. Some hosts bizarrely display the class-name, so you might want to make it reflect your plugin. But the name must be "
+                                     "UNIQUE to this exact version of your plugin, to avoid objective-C linkage mix-ups that happen when different plugins containing the same class-name are loaded simultaneously.");
+
+        props.add (new TextPropertyComponent (getPluginRTASCategory (project), "Plugin RTAS Category", 64, false));
+        props.getLast()->setTooltip ("(Leave this blank if your plugin is a synth). This is one of the RTAS categories from FicPluginEnums.h, such as: ePlugInCategory_None, ePlugInCategory_EQ, ePlugInCategory_Dynamics, "
+                                     "ePlugInCategory_PitchShift, ePlugInCategory_Reverb, ePlugInCategory_Delay, "
+                                     "ePlugInCategory_Modulation, ePlugInCategory_Harmonic, ePlugInCategory_NoiseReduction, "
+                                     "ePlugInCategory_Dither, ePlugInCategory_SoundField");
+    }
+
     void prepareExporter (ProjectExporter& exporter) const
     {
         exporter.xcodeIsBundle = true;
@@ -827,14 +1095,9 @@ public:
     {
         ProjectType::createRequiredModules (project, modules);
 
-        if (project.shouldBuildVST().getValue())
-            modules.add (new VSTLibraryModule());
-
-        if (project.shouldBuildRTAS().getValue())
-            modules.add (new RTASLibraryModule());
-
-        if (project.shouldBuildAU().getValue())
-            modules.add (new AULibraryModule());
+        if (shouldBuildVST (project).getValue())    modules.add (new VSTLibraryModule());
+        if (shouldBuildRTAS (project).getValue())   modules.add (new RTASLibraryModule());
+        if (shouldBuildAU (project).getValue())     modules.add (new AULibraryModule());
     }
 };
 

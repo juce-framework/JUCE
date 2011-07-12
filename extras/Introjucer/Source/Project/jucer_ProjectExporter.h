@@ -75,10 +75,6 @@ public:
     Value getJuceFolder() const             { return getSetting (Ids::juceFolder); }
     Value getTargetLocation() const         { return getSetting (Ids::targetFolder); }
 
-    Value getVSTFolder() const              { return getSetting (Ids::vstFolder); }
-    Value getRTASFolder() const             { return getSetting (Ids::rtasFolder); }
-    Value getAUFolder() const               { return getSetting (Ids::auFolder); }
-
     Value getExtraCompilerFlags() const     { return getSetting (Ids::extraCompilerFlags); }
     Value getExtraLinkerFlags() const       { return getSetting (Ids::extraLinkerFlags); }
 

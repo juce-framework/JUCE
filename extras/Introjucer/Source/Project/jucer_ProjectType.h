@@ -38,11 +38,11 @@ public:
     LibraryModule();
     virtual ~LibraryModule() {}
 
-    virtual void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const = 0;
-    virtual void getHeaderFiles (Project& project, StringArray& includePaths, StringArray& headerGuards) = 0;
-    virtual void addExtraSearchPaths (const ProjectExporter& exporter, StringArray& paths) const = 0;
-    virtual void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const = 0;
-    virtual void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const = 0;
+    virtual void prepareExporter (ProjectExporter&, ProjectSaver&) const = 0;
+    virtual void getHeaderFiles (Project&, StringArray& includePaths, StringArray& headerGuards) = 0;
+    virtual void addExtraSearchPaths (const ProjectExporter&, StringArray& paths) const = 0;
+    virtual void createPropertyEditors (const ProjectExporter&, Array <PropertyComponent*>&) const = 0;
+    virtual void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>&) const = 0;
 };
 
 
@@ -71,8 +71,10 @@ public:
     static const char* getConsoleAppTypeName();
     static const char* getAudioPluginTypeName();
 
-    virtual void prepareExporter (ProjectExporter& exporter) const;
-    virtual void createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const;
+    virtual void setMissingProjectProperties (Project&) const;
+    virtual void createPropertyEditors (const Project&, Array <PropertyComponent*>&) const;
+    virtual void prepareExporter (ProjectExporter&) const;
+    virtual void createRequiredModules (Project&, OwnedArray<LibraryModule>& modules) const;
 
 protected:
     ProjectType (const String& type, const String& desc);
