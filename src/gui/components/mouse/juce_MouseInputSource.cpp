@@ -128,10 +128,10 @@ public:
         comp->internalMouseDrag (source, comp->getLocalPoint (nullptr, screenPos), time);
     }
 
-    void sendMouseUp (Component* const comp, const Point<int>& screenPos, const Time& time)
+    void sendMouseUp (Component* const comp, const Point<int>& screenPos, const Time& time, const ModifierKeys& oldMods)
     {
         //DBG ("Mouse " + String (source.getIndex()) + " up: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseUp (source, comp->getLocalPoint (nullptr, screenPos), time, getCurrentModifiers());
+        comp->internalMouseUp (source, comp->getLocalPoint (nullptr, screenPos), time, oldMods);
     }
 
     void sendMouseWheel (Component* const comp, const Point<int>& screenPos, const Time& time, float x, float y)
@@ -163,7 +163,12 @@ public:
             Component* const current = getComponentUnderMouse();
 
             if (current != nullptr)
-                sendMouseUp (current, screenPos + unboundedMouseOffset, time);
+            {
+                const ModifierKeys oldMods (getCurrentModifiers());
+                buttonState = newButtonState; // must change this before calling sendMouseUp, in case it runs a modal loop
+
+                sendMouseUp (current, screenPos + unboundedMouseOffset, time, oldMods);
+            }
 
             enableUnboundedMouseMovement (false, false);
         }
