@@ -263,14 +263,15 @@ class BrowserPluginHolderComponent    : public Component
 public:
     //==============================================================================
     BrowserPluginHolderComponent (NPP npp_)
-        : npp (npp_)
+        : npp (npp_),
+          isFirefox4 (false)
     {
         log ("BrowserPluginHolderComponent created");
        #if JUCE_WINDOWS
         parentHWND = 0;
         oldWinProc = 0;
        #else
-        currentParentView = 0;
+        currentParentView = nil;
        #endif
 
         setOpaque (true);
@@ -278,6 +279,12 @@ public:
 
         addAndMakeVisible (child = createBrowserPlugin());
         jassert (child != nullptr);   // You have to create one of these!
+
+       #if JUCE_MAC
+        const String browserVersion (child->getBrowserVersion());
+        isFirefox4 = browserVersion.containsIgnoreCase("firefox/")
+                        && browserVersion.fromFirstOccurrenceOf ("firefox/", false, true).getIntValue() >= 4;
+       #endif
     }
 
     ~BrowserPluginHolderComponent()
@@ -296,7 +303,7 @@ public:
 
     void resized()
     {
-        if (child != nullptr)
+        if (child != nullptr && ! isFirefox4)
             child->setBounds (getLocalBounds());
     }
 
@@ -310,6 +317,7 @@ public:
     ScopedPointer<BrowserPluginComponent> child;
 
 private:
+    bool isFirefox4;
 
     //==============================================================================
 #if JUCE_WINDOWS
@@ -449,9 +457,21 @@ public:
             || ([[v className] isEqualToString: @"ChildView"] && ([v frame].origin.x != 0 && [v frame].origin.y != 0));
     }
 
+    static bool contains (NSView* parent, NSView* child)
+    {
+        if (parent == child)
+            return true;
+
+        for (int i = [[parent subviews] count]; --i >= 0;)
+            if (contains ((NSView*) [[parent subviews] objectAtIndex: i], child))
+                return true;
+        
+        return false;
+    }
+
     void setWindow (NPWindow* window)
     {
-        const ScopedAutoReleasePool pool;
+        JUCE_AUTORELEASEPOOL;
 
         log ("setWindow");
 
@@ -474,8 +494,8 @@ public:
             log ("window: " + nsStringToJuce ([win description]));
 
             const Rectangle<int> clip (window->clipRect.left, window->clipRect.top,
-                                  window->clipRect.right - window->clipRect.left,
-                                  window->clipRect.bottom - window->clipRect.top);
+                                       window->clipRect.right - window->clipRect.left,
+                                       window->clipRect.bottom - window->clipRect.top);
             const Rectangle<int> target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
             const Rectangle<int> intersection (clip.getIntersection (target));
 
@@ -484,9 +504,10 @@ public:
             log ("plugin window target: " + target.toString());
             log ("plugin window intersection: " + intersection.toString());
 
+            NSView* content = [win contentView];
+
             if (! intersection.isEmpty())
             {
-                NSView* content = [win contentView];
                 log ("content: " + nsStringToJuce ([content description]));
 
                 float wx = (float) intersection.getCentreX();
@@ -495,8 +516,8 @@ public:
                 NSRect v = [content convertRect: [content frame] toView: nil];
                 NSRect w = [win frame];
 
-                log ("wx: " + Rectangle<int> (v.origin.x, v.origin.y, v.size.width, v.size.height).toString()
-                     + "   " + Rectangle<int> (w.origin.x, w.origin.y, w.size.width, w.size.height).toString());
+                log ("content: " + Rectangle<int> (v.origin.x, v.origin.y, v.size.width, v.size.height).toString()
+                     + "   frame: " + Rectangle<int> (w.origin.x, w.origin.y, w.size.width, w.size.height).toString());
 
                 // adjust the requested window pos to deal with the content view's origin within the window
                 wy -= w.size.height - (v.origin.y + v.size.height);
@@ -510,7 +531,9 @@ public:
             {
                 // Firefox can send lots of spurious resize messages when updating its pages, so this is a
                 // bodge to avoid flickering caused by repeatedly removing and re-adding the view..
-                parentView = currentParentView;
+
+                if (content != nil && contains (content, currentParentView))
+                    parentView = currentParentView;
             }
 
             log ("parent: " + nsStringToJuce ([parentView description]));
@@ -534,7 +557,30 @@ public:
         }
 
         if (window != nullptr)
-            setSize (window->width, window->height);
+        {
+            if (isFirefox4)
+            {
+                const Rectangle<int> clip (window->clipRect.left, window->clipRect.top,
+                                           window->clipRect.right - window->clipRect.left,
+                                           window->clipRect.bottom - window->clipRect.top);
+                const Rectangle<int> target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
+                const Rectangle<int> intersection (clip.getIntersection (target));
+
+                if (child != nullptr)
+                    child->setBounds (target.withPosition (target.getPosition() - clip.getPosition()));
+
+                // This voodoo is required to keep the plugin clipped to the correct region and
+                // to stop it overwriting the toolbars in FF4.
+                NSRect parentFrame = [parentView frame];
+                setBounds (parentFrame.origin.x + target.getWidth() - clip.getRight(),
+                           parentFrame.origin.y + target.getHeight() - clip.getBottom(),
+                           intersection.getWidth(), intersection.getHeight());
+            }
+            else
+            {
+                setSize (window->width, window->height);
+            }
+        }
     }
 #endif
 };
@@ -612,7 +658,7 @@ public:
 
     var invokeMethod (const var::identifier& methodName,
                       const var* parameters,
-                            int numParameters)
+                      int numParameters)
     {
         var returnVal;
 
@@ -887,14 +933,8 @@ public:
     //==============================================================================
     JucePluginInstance (NPP npp_)
         : npp (npp_),
-          holderComp (nullptr),
           scriptObject (nullptr)
     {
-    }
-
-    ~JucePluginInstance()
-    {
-        setWindow (nullptr);
     }
 
     bool setWindow (NPWindow* window)
@@ -908,7 +948,7 @@ public:
         }
         else
         {
-            deleteAndZero (holderComp);
+            holderComp = nullptr;
             scriptObject = nullptr;
         }
 
@@ -928,7 +968,7 @@ public:
 
     //==============================================================================
     NPP npp;
-    BrowserPluginHolderComponent* holderComp;
+    ScopedPointer<BrowserPluginHolderComponent> holderComp;
     NPObject* scriptObject;
 
 private:
