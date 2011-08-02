@@ -465,7 +465,7 @@ public:
         for (int i = [[parent subviews] count]; --i >= 0;)
             if (contains ((NSView*) [[parent subviews] objectAtIndex: i], child))
                 return true;
-        
+
         return false;
     }
 
@@ -560,21 +560,32 @@ public:
         {
             if (isFirefox4)
             {
+                // This voodoo is required to keep the plugin clipped to the correct region and
+                // to stop it overwriting the toolbars in FF4.
                 const Rectangle<int> clip (window->clipRect.left, window->clipRect.top,
                                            window->clipRect.right - window->clipRect.left,
                                            window->clipRect.bottom - window->clipRect.top);
                 const Rectangle<int> target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
-                const Rectangle<int> intersection (clip.getIntersection (target));
+
+                Point<int> clipToTargetOffset;
+
+                {
+                    NSView* contentView = [[parentView window] contentView];
+                    NSRect v = [contentView convertRect: [contentView frame] toView: nil];
+                    NSRect w = [[parentView window] frame];
+
+                    clipToTargetOffset.setX ((int) v.origin.x);
+                    clipToTargetOffset.setY ((int) (w.size.height - (v.origin.y + v.size.height)));
+                }
 
                 if (child != nullptr)
-                    child->setBounds (target.withPosition (target.getPosition() - clip.getPosition()));
+                    child->setBounds (target - clip.getPosition() - clipToTargetOffset);
 
-                // This voodoo is required to keep the plugin clipped to the correct region and
-                // to stop it overwriting the toolbars in FF4.
                 NSRect parentFrame = [parentView frame];
-                setBounds (parentFrame.origin.x + target.getWidth() - clip.getRight(),
-                           parentFrame.origin.y + target.getHeight() - clip.getBottom(),
-                           intersection.getWidth(), intersection.getHeight());
+
+                [(NSView*) getWindowHandle() setFrame: NSMakeRect (clip.getX() - parentFrame.origin.x,
+                                                                   clip.getY() - parentFrame.origin.y,
+                                                                   clip.getWidth(), clip.getHeight())];
             }
             else
             {
