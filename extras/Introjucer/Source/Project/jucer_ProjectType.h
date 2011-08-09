@@ -71,9 +71,9 @@ public:
     static const char* getConsoleAppTypeName();
     static const char* getAudioPluginTypeName();
 
-    virtual void setMissingProjectProperties (Project&) const;
-    virtual void createPropertyEditors (const Project&, Array <PropertyComponent*>&) const;
-    virtual void prepareExporter (ProjectExporter&) const;
+    virtual void setMissingProjectProperties (Project&) const = 0;
+    virtual void createPropertyEditors (const Project&, Array <PropertyComponent*>&) const = 0;
+    virtual void prepareExporter (ProjectExporter&) const = 0;
     virtual void createRequiredModules (Project&, OwnedArray<LibraryModule>& modules) const;
 
 protected:

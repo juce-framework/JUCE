@@ -82,6 +82,7 @@ QuickTimeMovieComponent::QuickTimeMovieComponent()
 
     QTMovieView* view = [[NonInterceptingQTMovieView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
     setView (view);
+    [view setWantsLayer: YES]; // prevents the view failing to redraw correctly when paused.
     [view release];
 }
 

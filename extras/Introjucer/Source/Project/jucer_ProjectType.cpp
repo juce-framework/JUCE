@@ -80,7 +80,39 @@ public:
     }
 
     String getID() const        { return moduleInfo ["id"]; }
+
     bool isValid() const        { return getID().isNotEmpty(); }
+
+    File getInclude() const
+    {
+        return getFileFromPath (moduleInfo ["include"]);
+    }
+
+    Array<File> getCompiledFiles() const
+    {
+        Array<File> result;
+        const Array<var>* const files = moduleInfo ["compile"].getArray();
+
+        if (files != nullptr)
+        {
+            for (int i = 0; i < files->size(); ++i)
+            {
+                const var& file = files->getReference(i);
+
+                String filename (file ["file"].toString());
+
+                if (filename.isNotEmpty())
+                    result.add (getFileFromPath (filename));
+            }
+        }
+
+        return result;
+    }
+
+    File getFileFromPath (const String& path) const
+    {
+        return moduleFolder.getChildFile (path);
+    }
 
     void getDependencies (OwnedArray<JuceModule>& dependencies) const
     {
@@ -119,7 +151,8 @@ private:
 
     static File getModulesFolder()
     {
-        return StoredSettings::getInstance()->getLastKnownJuceFolder().getChildFile ("modules");
+        return File ("/Volumes/CODE/code/juce2/modules");
+        //return StoredSettings::getInstance()->getLastKnownJuceFolder().getChildFile ("modules");
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceModule);
@@ -828,6 +861,8 @@ ProjectType::ProjectType (const String& type_, const String& desc_)
 
 ProjectType::~ProjectType()
 {
+    JuceModule::findAllModuleIDs();
+
     getAllTypes().removeValue (this);
 }
 
@@ -847,18 +882,6 @@ const ProjectType* ProjectType::findType (const String& typeCode)
 
     jassertfalse;
     return nullptr;
-}
-
-void ProjectType::setMissingProjectProperties (Project&) const
-{
-}
-
-void ProjectType::createPropertyEditors (const Project& project, Array <PropertyComponent*>& props) const
-{
-}
-
-void ProjectType::prepareExporter (ProjectExporter& exporter) const
-{
 }
 
 void ProjectType::createRequiredModules (Project& project, OwnedArray<LibraryModule>& modules) const

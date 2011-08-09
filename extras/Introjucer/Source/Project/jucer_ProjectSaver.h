@@ -51,9 +51,6 @@ public:
 
         writeMainProjectFile();
 
-        if (! project.getGeneratedCodeFolder().createDirectory())
-            errors.add ("Couldn't create folder: " + project.getGeneratedCodeFolder().getFullPathName());
-
         if (errors.size() == 0)
             writeAppConfigFile();
 
@@ -74,6 +71,12 @@ public:
 
     bool saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData)
     {
+        if (! project.getGeneratedCodeFolder().createDirectory())
+        {
+            errors.add ("Couldn't create folder: " + project.getGeneratedCodeFolder().getFullPathName());
+            return false;
+        }
+
         const File file (project.getGeneratedCodeFolder().getChildFile (filePath));
 
         if (replaceFileIfDifferent (file, newData))
