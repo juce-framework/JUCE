@@ -57,7 +57,7 @@ void TextButton::colourChanged()
     repaint();
 }
 
-const Font TextButton::getFont()
+Font TextButton::getFont()
 {
     return Font (jmin (15.0f, getHeight() * 0.6f));
 }

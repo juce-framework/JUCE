@@ -707,11 +707,11 @@ public:
     int getInputLatencyInSamples()                      { return latencyIn; }
     BigInteger getActiveOutputChannels() const          { return outputDevice != nullptr ? outputDevice->channels : BigInteger(); }
     BigInteger getActiveInputChannels() const           { return inputDevice != nullptr ? inputDevice->channels : BigInteger(); }
-    const String getLastError()                         { return lastError; }
+    String getLastError()                               { return lastError; }
 
 
-    const String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
-                       double sampleRate, int bufferSizeSamples)
+    String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
+                 double sampleRate, int bufferSizeSamples)
     {
         close();
         lastError = String::empty;

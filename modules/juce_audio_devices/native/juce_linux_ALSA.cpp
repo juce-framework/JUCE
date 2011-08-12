@@ -716,10 +716,10 @@ public:
         return n;
     }
 
-    const String open (const BigInteger& inputChannels,
-                       const BigInteger& outputChannels,
-                       double sampleRate,
-                       int bufferSizeSamples)
+    String open (const BigInteger& inputChannels,
+                 const BigInteger& outputChannels,
+                 double sampleRate,
+                 int bufferSizeSamples)
     {
         close();
 
@@ -754,7 +754,7 @@ public:
 
     bool isOpen()                           { return isOpen_; }
     bool isPlaying()                        { return isStarted && internal.error.isEmpty(); }
-    const String getLastError()             { return internal.error; }
+    String getLastError()                   { return internal.error; }
 
     int getCurrentBufferSizeSamples()       { return internal.bufferSize; }
     double getCurrentSampleRate()           { return internal.sampleRate; }

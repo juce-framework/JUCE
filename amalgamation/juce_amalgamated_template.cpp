@@ -87,5 +87,5 @@
 #if JUCE_BUILD_GUI
  #include "../modules/juce_gui_basics/juce_gui_basics.cpp"
  #include "../modules/juce_gui_extra/juce_gui_extra.cpp"
- #include "../modules/juce_gui_audio/juce_gui_audio.cpp"
+ #include "../modules/juce_audio_utils/juce_audio_utils.cpp"
 #endif

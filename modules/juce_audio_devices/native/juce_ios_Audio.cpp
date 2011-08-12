@@ -73,10 +73,10 @@ public:
     int getBufferSizeSamples (int index)    { return getDefaultBufferSize(); }
     int getDefaultBufferSize()              { return 1024; }
 
-    const String open (const BigInteger& inputChannels,
-                       const BigInteger& outputChannels,
-                       double sampleRate,
-                       int bufferSize)
+    String open (const BigInteger& inputChannels,
+                 const BigInteger& outputChannels,
+                 double sampleRate,
+                 int bufferSize)
     {
         close();
 
@@ -175,15 +175,8 @@ public:
         }
     }
 
-    bool isPlaying()
-    {
-        return isRunning && callback != nullptr;
-    }
-
-    const String getLastError()
-    {
-        return lastError;
-    }
+    bool isPlaying()            { return isRunning && callback != nullptr; }
+    String getLastError()       { return lastError; }
 
 private:
     //==================================================================================================

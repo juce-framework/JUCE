@@ -87,7 +87,7 @@ public:
 
         Note that you'll need to set the font's size appropriately, too.
     */
-    virtual const Font getFont();
+    virtual Font getFont();
 
 
 protected:

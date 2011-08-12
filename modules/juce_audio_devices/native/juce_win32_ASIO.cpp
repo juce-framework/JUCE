@@ -155,10 +155,10 @@ public:
     int getBufferSizeSamples (int index)        { return bufferSizes [index]; }
     int getDefaultBufferSize()                  { return preferredSize; }
 
-    const String open (const BigInteger& inputChannels,
-                       const BigInteger& outputChannels,
-                       double sr,
-                       int bufferSizeSamples)
+    String open (const BigInteger& inputChannels,
+                 const BigInteger& outputChannels,
+                 double sr,
+                 int bufferSizeSamples)
     {
         close();
         currentCallback = nullptr;
@@ -612,7 +612,7 @@ public:
             lastCallback->audioDeviceStopped();
     }
 
-    const String getLastError()     { return error; }
+    String getLastError()           { return error; }
     bool hasControlPanel() const    { return true; }
 
     bool showControlPanel()

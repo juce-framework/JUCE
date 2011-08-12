@@ -57,7 +57,7 @@
 #include "modules/juce_audio_devices/juce_audio_devices.h"
 #include "modules/juce_cryptography/juce_cryptography.h"
 #include "modules/juce_gui_extra/juce_gui_extra.h"
-#include "modules/juce_gui_audio/juce_gui_audio.h"
+#include "modules/juce_audio_utils/juce_audio_utils.h"
 
 
 //==============================================================================

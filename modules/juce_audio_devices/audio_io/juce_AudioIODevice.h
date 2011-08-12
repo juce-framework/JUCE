@@ -217,10 +217,10 @@ public:
                     opening the device
         @see close
     */
-    virtual const String open (const BigInteger& inputChannels,
-                               const BigInteger& outputChannels,
-                               double sampleRate,
-                               int bufferSizeSamples) = 0;
+    virtual String open (const BigInteger& inputChannels,
+                         const BigInteger& outputChannels,
+                         double sampleRate,
+                         int bufferSizeSamples) = 0;
 
     /** Closes and releases the device if it's open. */
     virtual void close() = 0;
@@ -256,7 +256,7 @@ public:
     virtual bool isPlaying() = 0;
 
     /** Returns the last error that happened if anything went wrong. */
-    virtual const String getLastError() = 0;
+    virtual String getLastError() = 0;
 
     //==============================================================================
     /** Returns the buffer size that the device is currently using.

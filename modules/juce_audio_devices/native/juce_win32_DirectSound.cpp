@@ -812,9 +812,9 @@ public:
         close();
     }
 
-    const String open (const BigInteger& inputChannels,
-                       const BigInteger& outputChannels,
-                       double sampleRate, int bufferSizeSamples)
+    String open (const BigInteger& inputChannels,
+                 const BigInteger& outputChannels,
+                 double sampleRate, int bufferSizeSamples)
     {
         lastError = openDevice (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
         isOpen_ = lastError.isEmpty();
@@ -916,7 +916,7 @@ public:
     }
 
     bool isPlaying()                { return isStarted && isOpen_ && isThreadRunning(); }
-    const String getLastError()     { return lastError; }
+    String getLastError()           { return lastError; }
 
     //==============================================================================
     StringArray inChannels, outChannels;

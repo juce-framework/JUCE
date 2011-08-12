@@ -201,8 +201,8 @@ public:
     int getBufferSizeSamples (int index)        { return getDefaultBufferSize(); }
     int getDefaultBufferSize()                  { return client != 0 ? JUCE_NAMESPACE::jack_get_buffer_size (client) : 0; }
 
-    const String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
-                       double sampleRate, int bufferSizeSamples)
+    String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
+                 double sampleRate, int bufferSizeSamples)
     {
         if (client == 0)
         {
@@ -312,7 +312,7 @@ public:
     int getCurrentBufferSizeSamples()       { return getBufferSizeSamples (0); }
     double getCurrentSampleRate()           { return getSampleRate (0); }
     int getCurrentBitDepth()                { return 32; }
-    const String getLastError()             { return lastError; }
+    String getLastError()                   { return lastError; }
 
     BigInteger getActiveOutputChannels() const
     {

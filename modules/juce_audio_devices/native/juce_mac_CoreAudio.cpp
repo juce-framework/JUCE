@@ -920,10 +920,10 @@ public:
         return 512;
     }
 
-    const String open (const BigInteger& inputChannels,
-                       const BigInteger& outputChannels,
-                       double sampleRate,
-                       int bufferSizeSamples)
+    String open (const BigInteger& inputChannels,
+                 const BigInteger& outputChannels,
+                 double sampleRate,
+                 int bufferSizeSamples)
     {
         isOpen_ = true;
 
@@ -1003,7 +1003,7 @@ public:
         return isStarted;
     }
 
-    const String getLastError()
+    String getLastError()
     {
         return lastError;
     }

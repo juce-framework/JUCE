@@ -133,10 +133,10 @@ public:
     int getNumBufferSizesAvailable()        { return 10; }
     int getBufferSizeSamples (int index)    { return getDefaultBufferSize() + index * 128; }
 
-    const String open (const BigInteger& inputChannels,
-                       const BigInteger& outputChannels,
-                       double requestedSampleRate,
-                       int bufferSize)
+    String open (const BigInteger& inputChannels,
+                 const BigInteger& outputChannels,
+                 double requestedSampleRate,
+                 int bufferSize)
     {
         close();
 
@@ -221,7 +221,7 @@ public:
     double getCurrentSampleRate()                       { return sampleRate; }
     BigInteger getActiveOutputChannels() const          { return activeOutputChans; }
     BigInteger getActiveInputChannels() const           { return activeInputChans; }
-    const String getLastError()                         { return lastError; }
+    String getLastError()                               { return lastError; }
     bool isPlaying()                                    { return isRunning && callback != 0; }
 
     void start (AudioIODeviceCallback* newCallback)
