@@ -30,29 +30,21 @@
  #pragma warning (disable: 4100 4505)
 #endif
 
-#define DONT_LIST_JUCE_AUTOLINKEDLIBS 1
-
-//==============================================================================
-#include "juce_AppConfig.h"
-#include "../../../juce_amalgamated.h"
-
 //==============================================================================
 #define JUCER_MAJOR_VERSION  1
 #define JUCER_MINOR_VERSION  12
 
 //==============================================================================
-#include "BinaryData.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "utility/jucer_StoredSettings.h"
 #include "utility/jucer_UtilityFunctions.h"
 #include "ui/jucer_CommandIDs.h"
 
 //==============================================================================
 const int editorEdgeGap = 4;
-
 const int numSwatchColours = 24;
 
 extern ApplicationCommandManager* commandManager;
-
 
 
 #endif   // __JUCER_HEADERS_JUCEHEADER__

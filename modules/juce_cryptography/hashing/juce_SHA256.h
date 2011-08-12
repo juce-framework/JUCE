@@ -31,10 +31,11 @@
 /**
     SHA-256 secure hash generator.
 
-    Create one of these objects from a block of source data or a string, and it
-    represents the SHA-256 hash of that data.
+    Create one of these objects from a block of source data or a stream, and it
+    calculates the SHA-256 hash of that data.
 
     You can retrieve the hash as a raw 32-byte block, or as a 64-digit hex string.
+    @see MD5
 */
 class JUCE_API  SHA256
 {

@@ -268,8 +268,8 @@ public:
                                  ComponentLayout& layout_,
                                  const bool newState_)
             : ComponentUndoableAction <ImageButton> (button, layout_),
-              layout (layout_),
-              newState (newState_)
+              newState (newState_),
+              layout (layout_)
         {
             oldState = ImageButtonHandler::doesImageKeepProportions (button);
         }
@@ -347,8 +347,8 @@ public:
                                const float newState_)
             : ComponentUndoableAction <ImageButton> (button, layout_),
               role (role_),
-              layout (layout_),
-              newState (newState_)
+              newState (newState_),
+              layout (layout_)
         {
             oldState = ImageButtonHandler::getImageOpacity (button, role_);
         }
@@ -431,8 +431,8 @@ public:
                               const Colour& newState_)
             : ComponentUndoableAction <ImageButton> (button, layout_),
               role (role_),
-              layout (layout_),
-              newState (newState_)
+              newState (newState_),
+              layout (layout_)
         {
             oldState = ImageButtonHandler::getImageColour (button, role_);
         }

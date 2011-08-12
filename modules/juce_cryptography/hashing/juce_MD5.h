@@ -30,10 +30,11 @@
 /**
     MD5 checksum class.
 
-    Create one of these with a block of source data or a string, and it calculates the
-    MD5 checksum of that data.
+    Create one of these with a block of source data or a stream, and it calculates
+    the MD5 checksum of that data.
 
     You can then retrieve this checksum as a 16-byte block, or as a hex string.
+    @see SHA256
 */
 class JUCE_API  MD5
 {

@@ -27,13 +27,13 @@
 #define __JUCE_STANDARDHEADER_JUCEHEADER__
 
 //==============================================================================
-/** Current Juce version number.
+/** Current JUCE version number.
 
     See also SystemStats::getJUCEVersion() for a string version.
 */
 #define JUCE_MAJOR_VERSION      2
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        0
+#define JUCE_BUILDNUMBER        1
 
 /** Current Juce version number.
 
