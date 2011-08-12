@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -101,8 +101,8 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainWindowCpp, windowCpp))
                 failedFiles.add (mainWindowCpp.getFullPathName());
 
-            sourceGroup.addFile (mainWindowCpp, -1);
-            sourceGroup.addFile (mainWindowH, -1);
+            sourceGroup.addFile (mainWindowCpp, -1, true);
+            sourceGroup.addFile (mainWindowH, -1, false);
         }
 
         if (createMainCpp)
@@ -122,7 +122,7 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
-            sourceGroup.addFile (mainCppFile, -1);
+            sourceGroup.addFile (mainCppFile, -1, true);
         }
 
         return true;
@@ -187,7 +187,7 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
-            sourceGroup.addFile (mainCppFile, -1);
+            sourceGroup.addFile (mainCppFile, -1, true);
         }
 
         return true;
@@ -230,6 +230,7 @@ public:
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
         project.getProjectTypeValue() = ProjectType::getAudioPluginTypeName();
+        project.addModule ("juce_audio_plugin_client");
 
         Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
         project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
@@ -238,7 +239,6 @@ public:
             project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
 
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), filterCppFile));
-        appHeaders << newLine << CodeHelpers::createIncludeStatement (project.getPluginCharacteristicsFile(), filterCppFile);
 
         String filterCpp = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_cpp")
                             .replace ("FILTERHEADERS", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
@@ -275,10 +275,10 @@ public:
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
             failedFiles.add (editorHFile.getFullPathName());
 
-        sourceGroup.addFile (filterCppFile, -1);
-        sourceGroup.addFile (filterHFile, -1);
-        sourceGroup.addFile (editorCppFile, -1);
-        sourceGroup.addFile (editorHFile, -1);
+        sourceGroup.addFile (filterCppFile, -1, true);
+        sourceGroup.addFile (filterHFile, -1, false);
+        sourceGroup.addFile (editorCppFile, -1, true);
+        sourceGroup.addFile (editorHFile, -1, false);
 
         return true;
     }
@@ -311,13 +311,8 @@ public:
 
 //==============================================================================
 //==============================================================================
-NewProjectWizard::NewProjectWizard()
-{
-}
-
-NewProjectWizard::~NewProjectWizard()
-{
-}
+NewProjectWizard::NewProjectWizard() {}
+NewProjectWizard::~NewProjectWizard() {}
 
 StringArray NewProjectWizard::getWizards()
 {
@@ -415,7 +410,7 @@ Project* NewProjectWizard::runWizard (Component* ownerWindow_)
     projectFile = targetFolder.getChildFile (File::createLegalFileName (appTitle))
                               .withFileExtension (Project::projectFileExtension);
 
-    ScopedPointer <Project> project (new Project (projectFile));
+    ScopedPointer<Project> project (new Project (projectFile));
 
     if (failedFiles.size() == 0)
     {

@@ -3,39 +3,35 @@
     IMPORTANT! This file is auto-generated each time you save your
     project - if you alter its contents, your changes may be overwritten!
 
-    If you want to change any of these values, use the Introjucer to do so, rather than
-    editing this file directly!
+    If you want to change any of these values, use the Introjucer to do so,
+    rather than editing this file directly!
 
-    Any commented-out settings will fall back to using the default values that
-    they are given in juce_Config.h
+    Any commented-out settings will assume their default values.
 
 */
 
+//==============================================================================
+// juce_core flags:
+
 //#define  JUCE_FORCE_DEBUG
 //#define  JUCE_LOG_ASSERTIONS
-#define    JUCE_ASIO 0
-#define    JUCE_WASAPI 0
-#define    JUCE_DIRECTSOUND 0
-//#define  JUCE_DIRECTSHOW
-//#define  JUCE_MEDIAFOUNDATION
-#define    JUCE_ALSA 0
-#define    JUCE_QUICKTIME 0
-#define    JUCE_OPENGL 0
-//#define  JUCE_DIRECT2D
-#define    JUCE_USE_FLAC 0
-#define    JUCE_USE_OGGVORBIS 0
-#define    JUCE_USE_CDBURNER 0
-#define    JUCE_USE_CDREADER 0
-#define    JUCE_USE_CAMERA 0
+//#define  JUCE_CHECK_MEMORY_LEAKS
+//#define  JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+
+//==============================================================================
+// juce_graphics flags:
+
+#define    JUCE_USE_COREIMAGE_LOADER 0
+
+//==============================================================================
+// juce_gui_basics flags:
+
 //#define  JUCE_ENABLE_REPAINT_DEBUGGING
-//#define  JUCE_USE_XINERAMA
 //#define  JUCE_USE_XSHM
 //#define  JUCE_USE_XRENDER
 //#define  JUCE_USE_XCURSOR
-#define    JUCE_PLUGINHOST_VST 0
-#define    JUCE_PLUGINHOST_AU 0
-//#define  JUCE_ONLY_BUILD_CORE_LIBRARY
+
+//==============================================================================
+// juce_gui_extra flags:
+
 //#define  JUCE_WEB_BROWSER
-//#define  JUCE_SUPPORT_CARBON
-//#define  JUCE_CHECK_MEMORY_LEAKS
-//#define  JUCE_CATCH_UNHANDLED_EXCEPTIONS

@@ -301,6 +301,7 @@ void AudioDemoPlaybackPage::loadFileIntoTransport (const File& audioFile)
         // ..and plug it into our transport source
         transportSource.setSource (currentAudioFileSource,
                                    32768, // tells it to buffer this many samples ahead
+                                   &thread, // this is the background thread to use for reading-ahead
                                    reader->sampleRate);
     }
 }

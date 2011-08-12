@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@
 
 //==============================================================================
 /**
-    A singleton to hold the jucer's persistent settings, and to save them in a
+    A singleton to hold persistent settings, and to save them in a
     suitable PropertiesFile.
 */
 class StoredSettings

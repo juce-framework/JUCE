@@ -68,11 +68,11 @@ MainWindow::MainWindow()
 
     setApplicationCommandManagerToWatch (commandManager);
 
-#if JUCE_MAC
+   #if JUCE_MAC
     setMacMainMenu (this);
-#else
+   #else
     setMenuBar (this);
-#endif
+   #endif
 
     setResizable (true, false);
 
@@ -107,19 +107,19 @@ MainWindow::MainWindow()
     // don't want the window to take focus when the title-bar is clicked..
     setWantsKeyboardFocus (false);
 
-#ifndef JUCE_DEBUG
+   #ifndef JUCE_DEBUG
     // scan for fonts before the app gets started rather than glitching later
     FontPropertyComponent::preloadAllFonts();
-#endif
+   #endif
 }
 
 MainWindow::~MainWindow()
 {
-#if JUCE_MAC
+   #if JUCE_MAC
     setMacMainMenu (0);
-#else
+   #else
     setMenuBar (0);
-#endif
+   #endif
 
     removeKeyListener (commandManager->getKeyMappings());
 

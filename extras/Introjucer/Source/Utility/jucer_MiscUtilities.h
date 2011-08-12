@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -22,7 +22,6 @@
 
   ==============================================================================
 */
-
 
 //==============================================================================
 // String::hashCode64 actually hit some dupes, so this is a more powerful version.

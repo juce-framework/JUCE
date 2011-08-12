@@ -148,7 +148,7 @@ public:
                 if (filename.isNotEmpty())
                     file = code.document->getFile().getSiblingFile (filename);
 
-                JucerDocument* doc = ObjectTypes::loadDocumentFromFile (file, false);
+                ScopedPointer<JucerDocument> doc (ObjectTypes::loadDocumentFromFile (file, false));
 
                 if (doc != 0)
                 {
@@ -157,7 +157,6 @@ public:
                                                 .replaceCharacter ('\\', '/'));
 
                     className = doc->getClassName();
-                    delete doc;
                 }
                 else
                 {

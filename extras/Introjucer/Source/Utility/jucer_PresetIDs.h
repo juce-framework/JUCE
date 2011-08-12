@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PRESETIDS_H_40E9E82E__
-#define __JUCER_PRESETIDS_H_40E9E82E__
+#ifndef __JUCER_PRESETIDS_JUCEHEADER__
+#define __JUCER_PRESETIDS_JUCEHEADER__
 
 
 // Handy list of static Identifiers..
@@ -118,6 +118,7 @@ namespace Ids
     DECLARE_ID (focusOrder);
     DECLARE_ID (hidden);
     DECLARE_ID (useStdCall);
+    DECLARE_ID (showAllCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
@@ -127,4 +128,4 @@ namespace Ids
     #undef DECLARE_ID
 }
 
-#endif  // __JUCER_PRESETIDS_H_40E9E82E__
+#endif   // __JUCER_PRESETIDS_JUCEHEADER__

@@ -24,32 +24,133 @@
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
-class PropertiesWithHelpComponent  : public PropertyPanelWithTooltips
+
+//==============================================================================
+class PanelBase   : public PropertyPanelWithTooltips
 {
 public:
-    PropertiesWithHelpComponent (Project& project_, int tabIndex_)
-        : project (project_), tabIndex (tabIndex_)
+    PanelBase (Project& project_) : project (project_) {}
+
+    virtual void rebuildProperties (Array <PropertyComponent*>& props) = 0;
+
+    void visibilityChanged()
     {
+        if (isVisible())
+            refreshAll();
     }
 
-    void rebuildProperties()
+    void refreshAll()
     {
         getPanel().clear();
         Array <PropertyComponent*> props;
+        rebuildProperties (props);
+        getPanel().addProperties (props);
+    }
 
-        if (tabIndex == 0)
+protected:
+    Project& project;
+};
+
+//==============================================================================
+class ProjectTab  : public PanelBase
+{
+public:
+    ProjectTab (Project& project_) : PanelBase (project_) {}
+
+    void rebuildProperties (Array <PropertyComponent*>& props)
+    {
+        project.createPropertyEditors (props);
+    }
+};
+
+//==============================================================================
+class ConfigTab  : public PanelBase
+{
+public:
+    ConfigTab (Project& project_, int configIndex_)
+        : PanelBase (project_), configIndex (configIndex_)
+    {
+    }
+
+    void rebuildProperties (Array <PropertyComponent*>& props)
+    {
+        project.getConfiguration (configIndex).createPropertyEditors (props);
+    }
+
+private:
+    int configIndex;
+};
+
+//==============================================================================
+class ExportTab  : public PanelBase
+{
+public:
+    ExportTab (Project& project_, int exporterIndex_)
+        : PanelBase (project_), exporterIndex (exporterIndex_)
+    {
+    }
+
+    void rebuildProperties (Array <PropertyComponent*>& props)
+    {
+        ScopedPointer <ProjectExporter> exp (project.createExporter (exporterIndex));
+
+        if (exp != nullptr)
+            exp->createPropertyEditors (props);
+
+        for (int i = props.size(); --i >= 0;)
+            props.getUnchecked(i)->setPreferredHeight (22);
+    }
+
+private:
+    int exporterIndex;
+};
+
+//==============================================================================
+static StringArray getExtraDependenciesNeeded (Project& project, const ModuleList::Module& m)
+{
+    StringArray dependencies, extraDepsNeeded;
+    ModuleList::getInstance().getDependencies (m.uid, dependencies);
+
+    for (int i = 0; i < dependencies.size(); ++i)
+        if ((! project.isModuleEnabled (dependencies[i])) && dependencies[i] != m.uid)
+            extraDepsNeeded.add (dependencies[i]);
+
+    return extraDepsNeeded;
+}
+
+//==============================================================================
+class ModuleSettingsPanel  : public PanelBase
+{
+public:
+    ModuleSettingsPanel (Project& project_, const String& moduleID_)
+        : PanelBase (project_), moduleID (moduleID_)
+    {
+        setBounds ("parent.width / 2 + 1, 3, parent.width - 3, parent.height - 3");
+    }
+
+    void rebuildProperties (Array <PropertyComponent*>& props)
+    {
+        ScopedPointer<LibraryModule> module (ModuleList::getInstance().loadModule (moduleID));
+
+        if (module != nullptr)
         {
-            // The main project tab...
-            project.createPropertyEditors (props);
-        }
-        else if (tabIndex == 1)
-        {
-            // The Juce options tab...
-            OwnedArray <Project::ConfigFlag> flags;
-            project.getAllConfigFlags (flags);
+            props.add (new ModuleInfoComponent (project, moduleID));
+
+            if (project.isModuleEnabled (moduleID))
+            {
+                const ModuleList::Module* m = ModuleList::getInstance().findModuleInfo (moduleID);
+                if (m != nullptr && getExtraDependenciesNeeded (project, *m).size() > 0)
+                    props.add (new MissingDependenciesComponent (project, moduleID));
+            }
+
+            props.add (new BooleanPropertyComponent (project.shouldShowAllModuleFilesInProject (moduleID),
+                                                     "Show All Code", "Add entire module tree to target projects"));
+            props.getLast()->setTooltip ("If this is enabled, then the entire source tree from this module will be shown inside your project, "
+                                         "making it easy to browse/edit the module's classes. If disabled, then only the minimum number of files "
+                                         "required to compile it will appear inside your project.");
 
             StringArray possibleValues;
-            possibleValues.add ("(Use default from juce_Config.h)");
+            possibleValues.add ("(Use Default)");
             possibleValues.add ("Enabled");
             possibleValues.add ("Disabled");
 
@@ -57,6 +158,9 @@ public:
             mappings.add (Project::configFlagDefault);
             mappings.add (Project::configFlagEnabled);
             mappings.add (Project::configFlagDisabled);
+
+            OwnedArray <Project::ConfigFlag> flags;
+            module->getConfigFlags (project, flags);
 
             for (int i = 0; i < flags.size(); ++i)
             {
@@ -66,36 +170,236 @@ public:
                 props.add (c);
             }
         }
-        else if (tabIndex < 2 + project.getNumConfigurations())
-        {
-            // A config tab..
-            project.getConfiguration (tabIndex - 2).createPropertyEditors (props);
-        }
-        else
-        {
-            // An export tab..
-            ScopedPointer <ProjectExporter> exp (project.createExporter (tabIndex - (2 + project.getNumConfigurations())));
 
-            if (exp != nullptr)
-                exp->createPropertyEditors (props);
-
-            for (int i = props.size(); --i >= 0;)
-                props.getUnchecked(i)->setPreferredHeight (22);
-        }
-
-        getPanel().addProperties (props);
+        setEnabled (project.isModuleEnabled (moduleID));
     }
 
-    void visibilityChanged()
+private:
+    String moduleID;
+
+    //==============================================================================
+    class ModuleInfoComponent  : public PropertyComponent
     {
-        if (isVisible())
-            rebuildProperties();
+    public:
+        ModuleInfoComponent (Project& project_, const String& moduleID_)
+            : PropertyComponent ("Module", 100),
+              project (project_), moduleID (moduleID_)
+        {
+        }
+
+        void refresh() {}
+
+        void paint (Graphics& g)
+        {
+            g.setColour (Colours::white.withAlpha (0.4f));
+            g.fillRect (0, 0, getWidth(), getHeight() - 1);
+
+            const ModuleList::Module* module = ModuleList::getInstance().findModuleInfo (moduleID);
+
+            if (module != nullptr)
+            {
+                String text;
+                text << module->name << newLine << newLine
+                     << module->description;
+
+                GlyphArrangement ga;
+                ga.addJustifiedText (Font (13.0f), text, 4.0f, 16.0f, getWidth() - 8.0f, Justification::topLeft);
+                g.setColour (Colours::black);
+                ga.draw (g);
+            }
+        }
+
+    private:
+        Project& project;
+        String moduleID;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleInfoComponent);
+    };
+
+    //==============================================================================
+    class MissingDependenciesComponent  : public PropertyComponent,
+                                          public Button::Listener
+    {
+    public:
+        MissingDependenciesComponent (Project& project_, const String& moduleID_)
+            : PropertyComponent ("Dependencies", 100),
+              project (project_), moduleID (moduleID_),
+              fixButton ("Enable Required Modules")
+        {
+            const ModuleList::Module* module = ModuleList::getInstance().findModuleInfo (moduleID);
+
+            if (module != nullptr)
+                missingDependencies = getExtraDependenciesNeeded (project, *module);
+
+            addAndMakeVisible (&fixButton);
+            fixButton.setColour (TextButton::buttonColourId, Colours::red);
+            fixButton.setColour (TextButton::textColourOffId, Colours::white);
+            fixButton.setBounds ("right - 160, parent.height - 26, parent.width - 8, top + 22");
+            fixButton.addListener (this);
+        }
+
+        void refresh() {}
+
+        void paint (Graphics& g)
+        {
+            g.setColour (Colours::white.withAlpha (0.4f));
+            g.fillRect (0, 0, getWidth(), getHeight() - 1);
+
+            String text ("This module requires the following dependencies:\n");
+            text << missingDependencies.joinIntoString (", ");
+
+            GlyphArrangement ga;
+            ga.addJustifiedText (Font (13.0f), text, 4.0f, 16.0f, getWidth() - 8.0f, Justification::topLeft);
+            g.setColour (Colours::red);
+            ga.draw (g);
+        }
+
+        void buttonClicked (Button*);
+
+    private:
+        Project& project;
+        String moduleID;
+        StringArray missingDependencies;
+        TextButton fixButton;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingDependenciesComponent);
+    };
+};
+
+
+//==============================================================================
+class ModulesPanel  : public Component,
+                      public ListBoxModel
+{
+public:
+    ModulesPanel (Project& project_)
+        : project (project_)
+    {
+        modulesList.setModel (this);
+        modulesList.setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.4f));
+        addAndMakeVisible (&modulesList);
+        modulesList.setBounds ("4, 3, parent.width / 2 - 4, parent.height - 3");
+    }
+
+    int getNumRows()
+    {
+        return ModuleList::getInstance().modules.size();
+    }
+
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
+    {
+        if (rowIsSelected)
+            g.fillAll (findColour (TextEditor::highlightColourId));
+
+        const ModuleList::Module* const m = ModuleList::getInstance().modules [rowNumber];
+
+        if (m != nullptr)
+        {
+            const float tickSize = height * 0.7f;
+
+            getLookAndFeel().drawTickBox (g, *this, (height - tickSize) / 2, (height - tickSize) / 2, tickSize, tickSize,
+                                          project.isModuleEnabled (m->uid), true, false, false);
+
+            if (project.isModuleEnabled (m->uid) && getExtraDependenciesNeeded (project, *m).size() > 0)
+                g.setColour (Colours::red);
+            else
+                g.setColour (Colours::black);
+
+            g.setFont (height * 0.7f, Font::bold);
+            g.drawFittedText (m->uid, height, 0, 200, height, Justification::centredLeft, 1);
+
+            g.setFont (height * 0.55f, Font::italic);
+            g.drawText (m->name, height + 200, 0, width - height - 200, height, Justification::centredLeft, true);
+        }
+    }
+
+    void flipRow (int row)
+    {
+        const ModuleList::Module* const m = ModuleList::getInstance().modules [row];
+
+        if (m != nullptr)
+        {
+            if (project.isModuleEnabled (m->uid))
+            {
+                project.removeModule (m->uid);
+            }
+            else
+            {
+                const StringArray extraDepsNeeded (getExtraDependenciesNeeded (project, *m));
+
+/*                if (extraDepsNeeded.size() > 0)
+                {
+                    if (AlertWindow::showOkCancelBox (AlertWindow::NoIcon,
+                                                      "Module Dependencies",
+                                                      "The '" + m->uid + "' module requires the following dependencies:\n"
+                                                        + extraDepsNeeded.joinIntoString (", ") + "\n\nDo you want to add all these to your project?"))
+                    {
+                        project.addModule (m->uid);
+
+                        for (int i = extraDepsNeeded.size(); --i >= 0;)
+                            project.addModule (extraDepsNeeded[i]);
+                    }
+                }
+                else*/
+                {
+                    project.addModule (m->uid);
+                }
+            }
+        }
+
+        refresh();
+    }
+
+    void listBoxItemClicked (int row, const MouseEvent& e)
+    {
+        if (e.x < modulesList.getRowHeight())
+            flipRow (row);
+    }
+
+    void listBoxItemDoubleClicked (int row, const MouseEvent& e)
+    {
+        flipRow (row);
+    }
+
+    void returnKeyPressed (int row)
+    {
+        flipRow (row);
+    }
+
+    void selectedRowsChanged (int lastRowSelected)
+    {
+        const ModuleList::Module* const m = ModuleList::getInstance().modules [lastRowSelected];
+
+        settings = nullptr;
+
+        if (m != nullptr)
+            addAndMakeVisible (settings = new ModuleSettingsPanel (project, m->uid));
+    }
+
+    void refresh()
+    {
+        modulesList.repaint();
+
+        if (settings != nullptr)
+            settings->refreshAll();
     }
 
 private:
     Project& project;
-    int tabIndex;
+    ListBox modulesList;
+    ScopedPointer<ModuleSettingsPanel> settings;
 };
+
+void ModuleSettingsPanel::MissingDependenciesComponent::buttonClicked (Button*)
+{
+    for (int i = missingDependencies.size(); --i >= 0;)
+        project.addModule (missingDependencies[i]);
+
+    ModulesPanel* mp = findParentComponentOfClass ((ModulesPanel*) 0);
+    if (mp != nullptr)
+        mp->refresh();
+}
+
 //[/MiscUserDefs]
 
 //==============================================================================
@@ -222,17 +526,13 @@ void ProjectInformationComponent::rebuildConfigTabs()
 {
     configTabBox.clearTabs();
 
-    int index = 0;
-    PropertiesWithHelpComponent* panel = new PropertiesWithHelpComponent (project, index++);
-    configTabBox.addTab ("Project Settings", Colours::lightslategrey, panel, true, -1);
-
-    panel = new PropertiesWithHelpComponent (project, index++);
-    configTabBox.addTab ("Juce Flags", Colours::lightblue, panel, true, -1);
+    configTabBox.addTab ("Project Settings", Colours::lightslategrey, new ProjectTab (project), true, -1);
+    configTabBox.addTab ("Modules", Colours::lightblue, new ModulesPanel (project), true, -1);
 
     int i;
     for (i = 0; i < project.getNumConfigurations(); ++i)
     {
-        panel = new PropertiesWithHelpComponent (project, index++);
+        Component* panel = new ConfigTab (project, i);
         Project::BuildConfiguration config (project.getConfiguration (i));
         configTabBox.addTab (config.getName().toString(), Colour::greyLevel (0.65f), panel, true, -1);
     }
@@ -243,7 +543,7 @@ void ProjectInformationComponent::rebuildConfigTabs()
 
         if (exp != nullptr)
         {
-            panel = new PropertiesWithHelpComponent (project, index++);
+            Component* panel = new ExportTab (project, i);
             configTabBox.addTab (exp->getName(), Colours::lightsteelblue, panel, true, -1);
         }
     }
@@ -330,7 +630,7 @@ void ProjectInformationComponent::showExporterMenu()
     if (r >= 20000)
         project.deleteExporter (r - 20000);
     else if (r >= 10000)
-        project.addNewExporter (r - 10000);
+        project.addNewExporter (exporters [r - 10000]);
 }
 
 void ProjectInformationComponent::changeListenerCallback (ChangeBroadcaster*)

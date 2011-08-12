@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_CODEUTILITIES_H_B86AA5D2__
-#define __JUCER_CODEUTILITIES_H_B86AA5D2__
+#ifndef __JUCER_CODEHELPERS_JUCEHEADER__
+#define __JUCER_CODEHELPERS_JUCEHEADER__
 
 
 //==============================================================================
@@ -59,4 +59,4 @@ namespace CodeHelpers
 }
 
 
-#endif  // __JUCER_CODEUTILITIES_H_B86AA5D2__
+#endif   // __JUCER_CODEHELPERS_JUCEHEADER__

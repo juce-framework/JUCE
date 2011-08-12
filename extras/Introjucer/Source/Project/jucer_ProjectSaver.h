@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -34,10 +34,21 @@ class ProjectSaver
 {
 public:
     ProjectSaver (Project& project_, const File& projectFile_)
-        : project (project_), projectFile (projectFile_),
-          generatedFilesGroup (Project::Item::createGroup (project, project.getJuceCodeGroupName()))
+        : project (project_),
+          projectFile (projectFile_),
+          generatedCodeFolder (project.getGeneratedCodeFolder()),
+          generatedFilesGroup (Project::Item::createGroup (project, getJuceCodeGroupName(), "__generatedcode__"))
     {
         generatedFilesGroup.setID (getGeneratedGroupID());
+
+        if (generatedCodeFolder.exists())
+        {
+            Array<File> subFiles;
+            generatedCodeFolder.findChildFiles (subFiles, File::findFilesAndDirectories, false);
+
+            for (int i = subFiles.size(); --i >= 0;)
+                subFiles.getReference(i).deleteRecursively();
+        }
     }
 
     Project& getProject() noexcept      { return project; }
@@ -63,31 +74,50 @@ public:
         if (errors.size() == 0)
             writeProjects();
 
+        if (errors.size() == 0)
+            writeAppConfigFile(); // (this is repeated in case the projects added anything to it)
+
+        if (generatedCodeFolder.exists() && errors.size() == 0)
+            writeReadmeFile();
+
         if (errors.size() > 0)
             project.setFile (oldFile);
 
         return errors[0];
     }
 
-    bool saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData)
+    Project::Item saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData)
     {
-        if (! project.getGeneratedCodeFolder().createDirectory())
+        if (! generatedCodeFolder.createDirectory())
         {
-            errors.add ("Couldn't create folder: " + project.getGeneratedCodeFolder().getFullPathName());
-            return false;
+            errors.add ("Couldn't create folder: " + generatedCodeFolder.getFullPathName());
+            return Project::Item (project, ValueTree::invalid);
         }
 
-        const File file (project.getGeneratedCodeFolder().getChildFile (filePath));
+        const File file (generatedCodeFolder.getChildFile (filePath));
 
         if (replaceFileIfDifferent (file, newData))
-        {
-            if (! generatedFilesGroup.findItemForFile (file).isValid())
-                generatedFilesGroup.addFile (file, -1);
+            return addFileToGeneratedGroup (file);
 
-            return true;
+        return Project::Item (project, ValueTree::invalid);
+    }
+
+    Project::Item addFileToGeneratedGroup (const File& file)
+    {
+        Project::Item item (generatedFilesGroup.findItemForFile (file));
+
+        if (! item.isValid())
+        {
+            generatedFilesGroup.addFile (file, -1, true);
+            item = generatedFilesGroup.findItemForFile (file);
         }
 
-        return false;
+        return item;
+    }
+
+    void setExtraAppConfigFileContent (const String& content)
+    {
+        extraAppConfigContent = content;
     }
 
     static void writeAutoGenWarningComment (OutputStream& out)
@@ -98,12 +128,50 @@ public:
             << newLine;
     }
 
+    static void writeGuardedInclude (OutputStream& out, StringArray paths, StringArray guards)
+    {
+        StringArray uniquePaths (paths);
+        uniquePaths.removeDuplicates (false);
+
+        if (uniquePaths.size() == 1)
+        {
+            out << "#include " << paths[0] << newLine;
+        }
+        else
+        {
+            int i = paths.size();
+            for (; --i >= 0;)
+            {
+                for (int j = i; --j >= 0;)
+                {
+                    if (paths[i] == paths[j] && guards[i] == guards[j])
+                    {
+                        paths.remove (i);
+                        guards.remove (i);
+                    }
+                }
+            }
+
+            for (i = 0; i < paths.size(); ++i)
+            {
+                out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
+                    << " #include " << paths[i] << newLine;
+            }
+
+            out << "#endif" << newLine;
+        }
+    }
+
     static const char* getGeneratedGroupID() noexcept       { return "__jucelibfiles"; }
+    Project::Item& getGeneratedCodeGroup()                  { return generatedFilesGroup; }
+
+    static String getJuceCodeGroupName()                    { return "Juce Library Code"; }
 
 private:
     Project& project;
-    const File projectFile;
+    const File projectFile, generatedCodeFolder;
     Project::Item generatedFilesGroup;
+    String extraAppConfigContent;
     StringArray errors;
 
     File appConfigFile, binaryDataCpp;
@@ -138,59 +206,69 @@ private:
     bool writeAppConfig (OutputStream& out)
     {
         writeAutoGenWarningComment (out);
-        out << "    If you want to change any of these values, use the Introjucer to do so, rather than" << newLine
-            << "    editing this file directly!" << newLine
+        out << "    If you want to change any of these values, use the Introjucer to do so," << newLine
+            << "    rather than editing this file directly!" << newLine
             << newLine
-            << "    Any commented-out settings will fall back to using the default values that" << newLine
-            << "    they are given in juce_Config.h" << newLine
+            << "    Any commented-out settings will assume their default values." << newLine
             << newLine
             << "*/" << newLine << newLine;
 
-        bool notActive = project.getJuceLinkageMode() == Project::useLinkedJuce
-                            || project.getJuceLinkageMode() == Project::notLinkedToJuce;
-        if (notActive)
-            out << "/* NOTE: These configs aren't available when you're linking to the juce library statically!" << newLine
-                << "         If you need to set a configuration that differs from the default, you'll need" << newLine
-                << "         to include the amalgamated Juce files." << newLine << newLine;
+        OwnedArray<LibraryModule> modules;
+        project.getProjectType().createRequiredModules (project, ModuleList::getInstance(), modules);
+        bool anyFlags = false;
 
-        OwnedArray <Project::ConfigFlag> flags;
-        project.getAllConfigFlags (flags);
-
-        for (int i = 0; i < flags.size(); ++i)
+        for (int j = 0; j < modules.size(); ++j)
         {
-            const Project::ConfigFlag* const f = flags[i];
-            const String value (f->value.toString());
+            LibraryModule* const m = modules.getUnchecked(j);
+            OwnedArray <Project::ConfigFlag> flags;
+            m->getConfigFlags (project, flags);
 
-            if (value != Project::configFlagEnabled && value != Project::configFlagDisabled)
-                out << "//#define  ";
-            else
-                out << "#define    ";
+            if (flags.size() > 0)
+            {
+                anyFlags = true;
 
-            out << f->symbol;
+                out << "//==============================================================================" << newLine
+                    << "// " << m->getID() << " flags:" << newLine
+                    << newLine;
 
-            if (value == Project::configFlagEnabled)
-                out << " 1";
-            else if (value == Project::configFlagDisabled)
-                out << " 0";
+                for (int i = 0; i < flags.size(); ++i)
+                {
+                    flags.getUnchecked(i)->value.referTo (project.getConfigFlag (flags.getUnchecked(i)->symbol));
 
-            out << newLine;
+                    const Project::ConfigFlag* const f = flags[i];
+                    const String value (project.getConfigFlag (f->symbol).toString());
+
+                    if (value == Project::configFlagEnabled)
+                        out << "#define    " << f->symbol << " 1";
+                    else if (value == Project::configFlagDisabled)
+                        out << "#define    " << f->symbol << " 0";
+                    else
+                        out << "//#define  " << f->symbol;
+
+                    out << newLine;
+                }
+
+                if (j < modules.size() - 1)
+                    out << newLine;
+            }
         }
 
-        if (notActive)
-            out << newLine << "*/" << newLine;
+        if (extraAppConfigContent.isNotEmpty())
+        {
+            out << newLine << extraAppConfigContent.trimEnd() << newLine;
+            return true;
+        }
 
-        return flags.size() > 0;
+        return anyFlags;
     }
 
     void writeAppConfigFile()
     {
-        appConfigFile = project.getGeneratedCodeFolder().getChildFile (project.getAppConfigFilename());
+        appConfigFile = generatedCodeFolder.getChildFile (project.getAppConfigFilename());
 
         MemoryOutputStream mem;
         if (writeAppConfig (mem))
             saveGeneratedFile (project.getAppConfigFilename(), mem);
-        else
-            appConfigFile.deleteFile();
     }
 
     void writeAppHeader (OutputStream& out)
@@ -198,8 +276,8 @@ private:
         writeAutoGenWarningComment (out);
 
         out << "    This is the header file that your files should include in order to get all the" << newLine
-            << "    Juce library headers. You should NOT include juce.h or juce_amalgamated.h directly in" << newLine
-            << "    your own source files, because that wouldn't pick up the correct Juce configuration" << newLine
+            << "    JUCE library headers. You should avoid including the JUCE headers directly in" << newLine
+            << "    your own source files, because that wouldn't pick up the correct configuration" << newLine
             << "    options for your app." << newLine
             << newLine
             << "*/" << newLine << newLine;
@@ -213,49 +291,22 @@ private:
 
         {
             OwnedArray<LibraryModule> modules;
-            project.getProjectType().createRequiredModules (project, modules);
-
-            StringArray paths, guards;
+            project.getProjectType().createRequiredModules (project, ModuleList::getInstance(), modules);
 
             for (int i = 0; i < modules.size(); ++i)
-                modules.getUnchecked(i)->getHeaderFiles (project, paths, guards);
-
-            StringArray uniquePaths (paths);
-            uniquePaths.removeDuplicates (false);
-
-            if (uniquePaths.size() == 1)
-            {
-                out << "#include " << paths[0] << newLine;
-            }
-            else
-            {
-                int i = paths.size();
-                for (; --i >= 0;)
-                {
-                    for (int j = i; --j >= 0;)
-                    {
-                        if (paths[i] == paths[j] && guards[i] == guards[j])
-                        {
-                            paths.remove (i);
-                            guards.remove (i);
-                        }
-                    }
-                }
-
-                for (i = 0; i < paths.size(); ++i)
-                {
-                    out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
-                        << " #include " << paths[i] << newLine;
-                }
-
-                out << "#endif" << newLine;
-            }
+                modules.getUnchecked(i)->writeIncludes (project, out);
         }
 
         if (binaryDataCpp.exists())
             out << CodeHelpers::createIncludeStatement (binaryDataCpp.withFileExtension (".h"), appConfigFile) << newLine;
 
         out << newLine
+            << "#if ! DONT_SET_USING_JUCE_NAMESPACE" << newLine
+            << " // If your code uses a lot of JUCE classes, then this will obviously save you" << newLine
+            << " // a lot of typing, but can be disabled by setting DONT_SET_USING_JUCE_NAMESPACE." << newLine
+            << " using namespace JUCE_NAMESPACE;" << newLine
+            << "#endif" << newLine
+            << newLine
             << "namespace ProjectInfo" << newLine
             << "{" << newLine
             << "    const char* const  projectName    = " << CodeHelpers::addEscapeChars (project.getProjectName().toString()).quoted() << ";" << newLine
@@ -268,22 +319,14 @@ private:
 
     void writeAppHeader()
     {
-        if (project.getJuceLinkageMode() != Project::notLinkedToJuce
-             || ! project.getProjectType().isLibrary())
-        {
-            MemoryOutputStream mem;
-            writeAppHeader (mem);
-            saveGeneratedFile (project.getJuceSourceHFilename(), mem);
-        }
-        else
-        {
-            project.getAppIncludeFile().deleteFile();
-        }
+        MemoryOutputStream mem;
+        writeAppHeader (mem);
+        saveGeneratedFile (project.getJuceSourceHFilename(), mem);
     }
 
     void writeBinaryDataFiles()
     {
-        binaryDataCpp = project.getGeneratedCodeFolder().getChildFile ("BinaryData.cpp");
+        binaryDataCpp = generatedCodeFolder.getChildFile ("BinaryData.cpp");
 
         ResourceFile resourceFile (project);
 
@@ -293,8 +336,8 @@ private:
 
             if (resourceFile.write (binaryDataCpp))
             {
-                generatedFilesGroup.addFile (binaryDataCpp, -1);
-                generatedFilesGroup.addFile (binaryDataCpp.withFileExtension (".h"), -1);
+                generatedFilesGroup.addFile (binaryDataCpp, -1, true);
+                generatedFilesGroup.addFile (binaryDataCpp.withFileExtension (".h"), -1, false);
             }
             else
             {
@@ -308,8 +351,41 @@ private:
         }
     }
 
+    void writeReadmeFile()
+    {
+        MemoryOutputStream out;
+        out << newLine
+            << " Important Note!!" << newLine
+            << " ================" << newLine
+            << newLine
+            << "The purpose of this folder is to contain files that are auto-generated by the Introjucer," << newLine
+            << "and ALL files in this folder will be mercilessly DELETED and completely re-written whenever" << newLine
+            << "the Introjucer saves your project." << newLine
+            << newLine
+            << "Therefore, it's a bad idea to make any manual changes to the files in here, or to" << newLine
+            << "put any of your own files in here if you don't want to lose them. (Of course you may choose" << newLine
+            << "to add the folder's contents to your version-control system so that you can re-merge your own" << newLine
+            << "modifications after the Introjucer has saved its changes)." << newLine;
+
+        replaceFileIfDifferent (generatedCodeFolder.getChildFile ("ReadMe.txt"), out);
+    }
+
+    static void sortGroupRecursively (Project::Item group)
+    {
+        group.sortAlphabetically (true);
+
+        for (int i = group.getNumChildren(); --i >= 0;)
+            sortGroupRecursively (group.getChild(i));
+    }
+
     void writeProjects()
     {
+        // keep a copy of the basic generated files group, as each exporter may modify it.
+        const ValueTree originalGeneratedGroup (generatedFilesGroup.getNode().createCopy());
+
+        OwnedArray<LibraryModule> modules;
+        project.getProjectType().createRequiredModules (project, ModuleList::getInstance(), modules);
+
         for (int i = project.getNumExporters(); --i >= 0;)
         {
             ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
@@ -317,13 +393,13 @@ private:
 
             if (exporter->getTargetFolder().createDirectory())
             {
+                generatedFilesGroup.getNode() = originalGeneratedGroup.createCopy();
                 project.getProjectType().prepareExporter (*exporter);
 
-                // start with a copy of the basic files, as each exporter may modify it.
-                const ValueTree generatedGroupCopy (generatedFilesGroup.getNode().createCopy());
+                for (int j = 0; j < modules.size(); ++j)
+                    modules.getUnchecked(j)->prepareExporter (*exporter, *this);
 
-                for (int j = 0; j < exporter->libraryModules.size(); ++j)
-                    exporter->libraryModules.getUnchecked(j)->prepareExporter (*exporter, *this);
+                sortGroupRecursively (generatedFilesGroup);
 
                 exporter->groups.add (generatedFilesGroup);
 
@@ -335,8 +411,6 @@ private:
                 {
                     errors.add (error.message);
                 }
-
-                generatedFilesGroup.getNode() = generatedGroupCopy;
             }
             else
             {
@@ -360,4 +434,4 @@ private:
 };
 
 
-#endif
+#endif   // __JUCER_PROJECTSAVER_JUCEHEADER__

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -50,6 +50,16 @@ StringArray ProjectExporter::getExporterNames()
     return s;
 }
 
+StringArray ProjectExporter::getDefaultExporters()
+{
+    StringArray s;
+    s.add (XCodeProjectExporter::getNameMac());
+    s.add (MSVCProjectExporterVC2008::getName());
+    s.add (MSVCProjectExporterVC2010::getName());
+    s.add (MakefileProjectExporter::getNameLinux());
+    return s;
+}
+
 ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int index)
 {
     ProjectExporter* exp = nullptr;
@@ -75,8 +85,12 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     else
         exp->getJuceFolder() = juceFolder.getFullPathName();
 
-    exp->createLibraryModules();
     return exp;
+}
+
+ProjectExporter* ProjectExporter::createNewExporter (Project& project, const String& name)
+{
+    return createNewExporter (project, getExporterNames().indexOf (name));
 }
 
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
@@ -90,7 +104,6 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     if (exp == nullptr)    exp = AndroidProjectExporter::createForSettings (project, settings);
 
     jassert (exp != nullptr);
-    exp->createLibraryModules();
     return exp;
 }
 
@@ -128,7 +141,8 @@ ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
       projectType (project_.getProjectType()),
       projectName (project_.getProjectName().toString()),
       projectFolder (project_.getFile().getParentDirectory()),
-      settings (settings_)
+      settings (settings_),
+      modulesGroup (nullptr)
 {
     for (int i = 0; i < jmax (1, project.getNumConfigurations()); ++i)
         configs.add (project.getConfiguration (i));
@@ -138,12 +152,6 @@ ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
 
 ProjectExporter::~ProjectExporter()
 {
-}
-
-void ProjectExporter::createLibraryModules()
-{
-    libraryModules.clear();
-    project.getProjectType().createRequiredModules (project, libraryModules);
 }
 
 File ProjectExporter::getTargetFolder() const
@@ -198,11 +206,13 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     props.add (new TextPropertyComponent (getTargetLocation(), "Target Project Folder", 1024, false));
     props.getLast()->setTooltip ("The location of the folder in which the " + name + " project will be created. This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
-    props.add (new TextPropertyComponent (getJuceFolder(), "Juce Location", 1024, false));
+    props.add (new TextPropertyComponent (getJuceFolder(), "Local JUCE folder", 1024, false));
     props.getLast()->setTooltip ("The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
 
-    for (int i = 0; i < libraryModules.size(); ++i)
-        libraryModules.getUnchecked(i)->createPropertyEditors (*this, props);
+    OwnedArray<LibraryModule> modules;
+    project.getProjectType().createRequiredModules (project, ModuleList::getInstance(), modules);
+    for (int i = 0; i < modules.size(); ++i)
+        modules.getUnchecked(i)->createPropertyEditors (*this, props);
 
     props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false));
     props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -268,4 +278,15 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
     g.drawImageWithin (im, 0, 0, size, size,
                        RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
     return newIm;
+}
+
+Project::Item& ProjectExporter::getModulesGroup()
+{
+    if (modulesGroup == nullptr)
+    {
+        groups.add (Project::Item::createGroup (project, "Juce Modules", "__modulesgroup__"));
+        modulesGroup = &(groups.getReference (groups.size() - 1));
+    }
+
+    return *modulesGroup;
 }

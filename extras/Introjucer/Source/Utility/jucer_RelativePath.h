@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -116,7 +116,7 @@ private:
     static bool isAbsolute (const String& path)
     {
         return File::isAbsolutePath (path)
-                || path.startsWithChar ('/') // (needed because File::isAbsolutePath will ignore forward-slashes on win32)
+                || path.startsWithChar ('/') // (needed because File::isAbsolutePath will ignore forward-slashes on Windows)
                 || path.startsWithChar ('$')
                 || path.startsWithChar ('~')
                 || (CharacterFunctions::isLetter (path[0]) && path[1] == ':')

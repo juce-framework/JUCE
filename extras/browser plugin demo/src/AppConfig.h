@@ -1,0 +1,2 @@
+
+#include "BrowserPluginCharacteristics.h"

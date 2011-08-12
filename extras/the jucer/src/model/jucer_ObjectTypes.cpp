@@ -107,33 +107,30 @@ JucerDocument* loadDocumentFromFile (const File& f, const bool showErrorMessage)
         file = fc.getResult();
     }
 
-    XmlElement* xml = JucerDocument::pullMetaDataFromCppFile (file.loadFileAsString());
+    ScopedPointer<XmlElement> xml (JucerDocument::pullMetaDataFromCppFile (file.loadFileAsString()));
 
-    if (xml == 0 || ! xml->hasTagName (JucerDocument::jucerCompXmlTag))
+    if (xml == nullptr || ! xml->hasTagName (JucerDocument::jucerCompXmlTag))
     {
         if (file != File::nonexistent && showErrorMessage)
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                          TRANS("Failed to open file..."),
                                          TRANS("This wasn't a valid Jucer .cpp file..."));
 
-        delete xml;
         return 0;
     }
 
     const String docType (xml->getStringAttribute ("documentType"));
-    delete xml;
 
     // (reverse order so ComponentDocument is default last-case)
     for (int i = numDocumentTypes; --i >= 0;)
     {
         if (docType.equalsIgnoreCase (documentTypeNames[i]) || i == 0)
         {
-            JucerDocument* doc = createNewDocument (i);
+            ScopedPointer<JucerDocument> doc (createNewDocument (i));
 
             if (doc->loadFrom (file, showErrorMessage))
-                return doc;
+                return doc.release();
 
-            delete doc;
             break;
         }
     }
@@ -195,7 +192,7 @@ PaintElement* createElementForXml (const XmlElement* const e, PaintRoutine* cons
 {
     jassert (e != 0);
 
-    PaintElement* pe = 0;
+    ScopedPointer<PaintElement> pe;
 
     if (e->hasTagName (PaintElementRectangle::getTagName()))
     {
@@ -226,13 +223,8 @@ PaintElement* createElementForXml (const XmlElement* const e, PaintRoutine* cons
         pe = new PaintElementGroup (owner);
     }
 
-    if (pe != 0)
-    {
-        if (pe->loadFromXml (*e))
-            return pe;
-
-        delete pe;
-    }
+    if (pe != nullptr && pe->loadFromXml (*e))
+        return pe.release();
 
     jassertfalse
     return 0;

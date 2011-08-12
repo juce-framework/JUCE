@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -76,24 +76,8 @@ public:
 
     Value getVersion() const                            { return getProjectValue ("version"); }
     String getVersionAsHex() const;
-    Value getBundleIdentifier() const                   { return getProjectValue ("bundleIdentifier"); }
+    Value getBundleIdentifier() const                   { return getProjectValue (Ids::bundleIdentifier); }
     void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
-
-    //==============================================================================
-    // linkage modes..
-    static const char* const notLinkedToJuce;
-    static const char* const useLinkedJuce;
-    static const char* const useAmalgamatedJuce;
-    static const char* const useAmalgamatedJuceViaSingleTemplate;
-    static const char* const useAmalgamatedJuceViaMultipleTemplates;
-
-    Value getJuceLinkageModeValue() const               { return getProjectValue ("juceLinkage"); }
-    String getJuceLinkageMode() const                   { return getJuceLinkageModeValue().toString(); }
-
-    bool isUsingWrapperFiles() const                    { return isUsingFullyAmalgamatedFile() || isUsingSingleTemplateFile() || isUsingMultipleTemplateFiles(); }
-    bool isUsingFullyAmalgamatedFile() const            { return getJuceLinkageMode() == useAmalgamatedJuce; }
-    bool isUsingSingleTemplateFile() const              { return getJuceLinkageMode() == useAmalgamatedJuceViaSingleTemplate; }
-    bool isUsingMultipleTemplateFiles() const           { return getJuceLinkageMode() == useAmalgamatedJuceViaMultipleTemplates; }
 
     //==============================================================================
     Value getProjectValue (const Identifier& name) const  { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
@@ -109,8 +93,6 @@ public:
     //==============================================================================
     File getAppIncludeFile() const                      { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
     File getGeneratedCodeFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
-    File getPluginCharacteristicsFile() const           { return getGeneratedCodeFolder().getChildFile (getPluginCharacteristicsFilename()); }
-    File getLocalJuceFolder();
 
     //==============================================================================
     String getAmalgamatedHeaderFileName() const         { return "juce_amalgamated.h"; }
@@ -121,8 +103,6 @@ public:
     String getJuceSourceFilenameRoot() const            { return "JuceLibraryCode"; }
     int getNumSeparateAmalgamatedFiles() const          { return 4; }
     String getJuceSourceHFilename() const               { return "JuceHeader.h"; }
-    String getJuceCodeGroupName() const                 { return "Juce Library Code"; }
-    String getPluginCharacteristicsFilename() const     { return "JucePluginCharacteristics.h"; }
 
     //==============================================================================
     class Item
@@ -134,7 +114,7 @@ public:
         Item& operator= (const Item& other);
         ~Item();
 
-        static Item createGroup (Project& project, const String& name);
+        static Item createGroup (Project& project, const String& name, const String& uid);
         void initialiseNodeValues();
 
         //==============================================================================
@@ -179,11 +159,12 @@ public:
         Item getChild (int index) const                 { return Item (getProject(), node.getChild (index)); }
 
         Item addNewSubGroup (const String& name, int insertIndex);
+        Item getOrCreateSubGroup (const String& name);
         void addChild (const Item& newChild, int insertIndex);
-        bool addFile (const File& file, int insertIndex);
+        bool addFile (const File& file, int insertIndex, bool shouldCompile);
         bool addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile);
         void removeItemFromProject();
-        void sortAlphabetically();
+        void sortAlphabetically (bool keepGroupsAtStart);
         Item findItemForFile (const File& file) const;
 
         Item getParent() const;
@@ -266,24 +247,29 @@ public:
     ValueTree getExporters();
     int getNumExporters();
     ProjectExporter* createExporter (int index);
-    void addNewExporter (int exporterIndex);
+    void addNewExporter (const String& exporterName);
     void deleteExporter (int index);
     void createDefaultExporters();
 
     //==============================================================================
     struct ConfigFlag
     {
-        String symbol, description;
+        String symbol, description, sourceModuleID;
         Value value;   // 1 = true, 2 = false, anything else = use default
     };
-
-    void getAllConfigFlags (OwnedArray <ConfigFlag>& flags);
 
     static const char* const configFlagDefault;
     static const char* const configFlagEnabled;
     static const char* const configFlagDisabled;
     Value getConfigFlag (const String& name);
     bool isConfigFlagEnabled (const String& name) const;
+
+    //==============================================================================
+    bool isModuleEnabled (const String& moduleID) const;
+    Value shouldShowAllModuleFilesInProject (const String& moduleID);
+
+    void addModule (const String& moduleID);
+    void removeModule (const String& moduleID);
 
     //==============================================================================
     String getFileTemplate (const String& templateName);
@@ -310,10 +296,12 @@ private:
     DrawableImage mainProjectIcon;
 
     void updateProjectSettings();
+    void sanitiseConfigFlags();
     void setMissingDefaultValues();
     ValueTree getConfigurations() const;
     void createDefaultConfigs();
     ValueTree getConfigNode();
+    ValueTree getModulesNode();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project);
 };

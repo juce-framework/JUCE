@@ -191,16 +191,15 @@ public:
 
             if (isTabUsingJucerComp (t, i))
             {
-                JucerDocument* doc
-                    = ObjectTypes::loadDocumentFromFile (code.document->getFile()
-                                                            .getSiblingFile (getTabJucerFile (t, i)), false);
+                ScopedPointer<JucerDocument> doc
+                    (ObjectTypes::loadDocumentFromFile (code.document->getFile()
+                                                            .getSiblingFile (getTabJucerFile (t, i)), false));
 
                 if (doc != 0)
                 {
                     code.includeFilesCPP.add (getTabJucerFile (t, i).replace (".cpp", ".h"));
 
                     contentClassName = doc->getClassName();
-                    delete doc;
                 }
             }
             else
@@ -734,15 +733,9 @@ private:
         public:
             RemoveTabAction (TabbedComponent* const comp, ComponentLayout& layout, int indexToRemove_)
                 : ComponentUndoableAction <TabbedComponent> (comp, layout),
-                  indexToRemove (indexToRemove_),
-                  previousState (0)
+                  indexToRemove (indexToRemove_)
             {
                 previousState = getTabState (comp, indexToRemove);
-            }
-
-            ~RemoveTabAction()
-            {
-                delete previousState;
             }
 
             bool perform()
@@ -767,7 +760,7 @@ private:
 
         private:
             int indexToRemove;
-            XmlElement* previousState;
+            ScopedPointer<XmlElement> previousState;
         };
     };
 
@@ -1209,13 +1202,12 @@ private:
             {
                 showCorrectTab();
 
-                XmlElement* const state = getTabState (getComponent(), from);
+                ScopedPointer<XmlElement> state (getTabState (getComponent(), from));
 
                 getComponent()->removeTab (from);
                 addNewTab (getComponent(), to);
 
                 restoreTabState (getComponent(), to, *state);
-                delete state;
 
                 layout.getDocument()->refreshAllPropertyComps();
                 changed();

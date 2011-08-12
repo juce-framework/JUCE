@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -56,12 +56,12 @@ MainWindow::MainWindow()
     {
         commandManager->registerAllCommandsForTarget (this);
 
-        // use a temporary one of these to harvest its commands..
-        ProjectContentComponent pcc;
-        commandManager->registerAllCommandsForTarget (&pcc);
-
+        // use some temporary objects to harvest their commands..
         DocumentEditorComponent dec (nullptr);
         commandManager->registerAllCommandsForTarget (&dec);
+
+        ProjectContentComponent pcc;
+        commandManager->registerAllCommandsForTarget (&pcc);
     }
 
     commandManager->getKeyMappings()->resetToDefaultMappings();

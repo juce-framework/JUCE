@@ -1,0 +1,17 @@
+{
+  "id":             "juce_opengl",
+  "name":           "JUCE OpenGL classes",
+  "version":        "2.0.0",
+  "description":    "Classes for rendering OpenGL in a JUCE window.",
+  "website":        "http://www.juce.com/juce",
+  "license":        "GPL/Commercial",
+
+  "dependencies":   [ { "id": "juce_gui_basics",        "version": "matching" } ],
+
+  "include":        "juce_opengl.h",
+
+  "compile":        [ { "file": "juce_opengl.cpp" } ],
+
+  "browse":         [ "opengl/*",
+                      "native/*" ]
+}

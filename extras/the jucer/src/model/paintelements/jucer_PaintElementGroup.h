@@ -42,8 +42,6 @@ public:
     {
     }
 
-    ~PaintElementGroup() {}
-
     //==============================================================================
     void ungroup (const bool undoable)
     {
@@ -54,12 +52,10 @@ public:
 
         for (int i = 0; i < subElements.size(); ++i)
         {
-            XmlElement* const xml = subElements.getUnchecked(i)->createXml();
+            ScopedPointer<XmlElement> xml (subElements.getUnchecked(i)->createXml());
 
             PaintElement* newOne = getOwner()->addElementFromXml (*xml, index, undoable);
             getOwner()->getSelectedElements().addToSelection (newOne);
-
-            delete xml;
         }
 
         getOwner()->removeElement (this, undoable);
@@ -77,13 +73,11 @@ public:
             {
                 if (routine->getSelectedElements().isSelected (routine->getElement (i)))
                 {
-                    XmlElement* xml = routine->getElement(i)->createXml();
+                    ScopedPointer<XmlElement> xml (routine->getElement(i)->createXml());
 
                     PaintElement* newOne = ObjectTypes::createElementForXml (xml, routine);
                     if (newOne != 0)
                         newGroup->subElements.add (newOne);
-
-                    delete xml;
 
                     if (i > frontIndex)
                         frontIndex = i;

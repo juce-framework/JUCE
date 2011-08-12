@@ -32,16 +32,9 @@ ApplicationCommandManager* commandManager = 0;
 //==============================================================================
 class JucerApplication : public JUCEApplication
 {
-    MainWindow* theMainWindow;
-
 public:
     //==============================================================================
     JucerApplication()
-        : theMainWindow (0)
-    {
-    }
-
-    ~JucerApplication()
     {
     }
 
@@ -62,8 +55,7 @@ public:
 
     void shutdown()
     {
-        delete theMainWindow;
-        theMainWindow = 0;
+        theMainWindow = nullptr;
 
         deleteAndZero (commandManager);
     }
@@ -71,12 +63,10 @@ public:
     //==============================================================================
     void systemRequestedQuit()
     {
-        if (theMainWindow == 0 || theMainWindow->closeAllDocuments())
+        if (theMainWindow == nullptr || theMainWindow->closeAllDocuments())
         {
-            deleteAndZero (theMainWindow);
-
+            theMainWindow = nullptr;
             StoredSettings::deleteInstance();
-
             quit();
         }
     }
@@ -94,18 +84,21 @@ public:
 
     bool moreThanOneInstanceAllowed()
     {
-#ifndef JUCE_LINUX
+       #ifndef JUCE_LINUX
         return false;
-#else
+       #else
         return true; //xxx should be false but doesn't work on linux..
-#endif
+       #endif
     }
 
     void anotherInstanceStarted (const String& commandLine)
     {
-        if (theMainWindow != 0 && commandLine.unquoted().isNotEmpty())
+        if (theMainWindow != nullptr && commandLine.unquoted().isNotEmpty())
             theMainWindow->openFile (commandLine.unquoted());
     }
+
+private:
+    ScopedPointer<MainWindow> theMainWindow;
 };
 
 

@@ -184,9 +184,8 @@ JucerDocument* ButtonDocument::createCopy()
     newOne->resources = resources;
     newOne->setFile (getFile());
 
-    XmlElement* const xml = createXml();
+    ScopedPointer<XmlElement> xml (createXml());
     newOne->loadFromXml (*xml);
-    delete xml;
 
     return newOne;
 }

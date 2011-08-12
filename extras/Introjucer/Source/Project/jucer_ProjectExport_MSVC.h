@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ protected:
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
     Value getLibraryType() const        { return getSetting (Ids::libraryType); }
-    bool isLibraryDLL() const           { return projectType.isLibrary() && getLibraryType() == 2; }
+    bool isLibraryDLL() const           { return msvcIsDLL || (projectType.isLibrary() && getLibraryType() == 2); }
 
     //==============================================================================
     String getIntermediatesPath (const Project::BuildConfiguration& config) const
@@ -131,11 +131,8 @@ protected:
 
     StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config) const
     {
-        StringArray searchPaths (config.getHeaderSearchPaths());
-
-        for (int i = 0; i < libraryModules.size(); ++i)
-            libraryModules.getUnchecked(i)->addExtraSearchPaths (*this, searchPaths);
-
+        StringArray searchPaths (extraSearchPaths);
+        searchPaths.addArray (config.getHeaderSearchPaths());
         searchPaths.removeDuplicates (false);
         return searchPaths;
     }
@@ -376,8 +373,8 @@ public:
 
                 if (group.getID() == ProjectSaver::getGeneratedGroupID())
                 {
-                    group.addFile (iconFile, -1);
-                    group.addFile (rcFile, -1);
+                    group.addFile (iconFile, -1, true);
+                    group.addFile (rcFile, -1, true);
 
                     group.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
                     group.findItemForFile (rcFile).getShouldAddToResourceValue() = false;
@@ -508,7 +505,7 @@ protected:
         xml.setAttribute ("Name", createConfigName (config));
         xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (binariesPath));
         xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (intermediatesPath));
-        xml.setAttribute ("ConfigurationType", (msvcIsDLL || isLibraryDLL()) ? "2" : (projectType.isLibrary() ? "4" : "1"));
+        xml.setAttribute ("ConfigurationType", isLibraryDLL() ? "2" : (projectType.isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
         xml.setAttribute ("CharacterSet", "2");
@@ -593,8 +590,8 @@ protected:
             linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
             linker->setAttribute ("SuppressStartupBanner", "true");
 
-            if (project.getJuceLinkageMode() == Project::useLinkedJuce)
-                linker->setAttribute ("AdditionalLibraryDirectories", getJucePathFromTargetFolder().getChildFile ("bin").toWindowsStyle());
+            //if (project.getJuceLinkageMode() == Project::useLinkedJuce)
+              //  linker->setAttribute ("AdditionalLibraryDirectories", getJucePathFromTargetFolder().getChildFile ("bin").toWindowsStyle());
 
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
@@ -778,7 +775,7 @@ private:
 
         String targetType, targetCode;
 
-        if (msvcIsDLL)                             { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
+        if (isLibraryDLL())                        { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
         else if (projectType.isLibrary())          { targetType = "\"Win32 (x86) Static Library\"";        targetCode = "0x0104"; }
         else if (projectType.isCommandLineApp())   { targetType = "\"Win32 (x86) Console Application\"";   targetCode = "0x0103"; }
         else                                       { targetType = "\"Win32 (x86) Application\"";           targetCode = "0x0101"; }
@@ -876,8 +873,8 @@ private:
                     << "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "
                     << (isDebug ? " /debug" : "")
                     << " /nologo /machine:I386 /out:\"" << targetBinary << "\" "
-                    << (msvcIsDLL ? "/dll" : (msvcIsWindowsSubsystem ? "/subsystem:windows "
-                                                                     : "/subsystem:console "))
+                    << (isLibraryDLL() ? "/dll" : (msvcIsWindowsSubsystem ? "/subsystem:windows "
+                                                                          : "/subsystem:console "))
                     << replacePreprocessorTokens (config, getExtraLinkerFlags().toString()).trim() << newLine;
             }
         }
@@ -943,7 +940,7 @@ private:
     {
         out << "Microsoft Developer Studio Workspace File, Format Version 6.00 " << newLine;
 
-        if (! project.isUsingWrapperFiles())
+        /*if (! project.isUsingWrapperFiles())
         {
             out << "Project: \"JUCE\"= ..\\JUCE.dsp - Package Owner=<4>" << newLine
                 << "Package=<5>" << newLine
@@ -952,7 +949,7 @@ private:
                 << "Package=<4>" << newLine
                 << "{{{" << newLine
                 << "}}}" << newLine;
-        }
+        }*/
 
         out << "Project: \"" << projectName << "\" = .\\" << getDSPFile().getFileName() << " - Package Owner=<4>" << newLine
             << "Package=<5>" << newLine
@@ -961,12 +958,12 @@ private:
             << "Package=<4>" << newLine
             << "{{{" << newLine;
 
-        if (! project.isUsingWrapperFiles())
+        /*if (! project.isUsingWrapperFiles())
         {
             out << "    Begin Project Dependency" << newLine
                 << "    Project_Dep_Name JUCE" << newLine
                 << "    End Project Dependency" << newLine;
-        }
+        }*/
 
         out << "}}}" << newLine
             << "Global:" << newLine
@@ -1271,7 +1268,7 @@ protected:
     String getProjectType() const
     {
         if (projectType.isGUIApplication() || projectType.isCommandLineApp())   return "Application";
-        else if (msvcIsDLL)                                                     return "DynamicLibrary";
+        else if (isLibraryDLL())                                                return "DynamicLibrary";
         else if (projectType.isLibrary())                                       return "StaticLibrary";
 
         jassertfalse;
@@ -1321,8 +1318,8 @@ protected:
             {
                 const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-                if (path.hasFileExtension (headerFileExtensions) || (path.hasFileExtension ("cpp;cc;c;cxx") && projectItem.shouldBeCompiled()))
-                    addFileToCompile (path, cpps, headers, false, useStdCall);
+                if (path.hasFileExtension (headerFileExtensions) || (path.hasFileExtension ("cpp;cc;c;cxx")))
+                    addFileToCompile (path, cpps, headers, ! projectItem.shouldBeCompiled(), useStdCall);
             }
         }
     }
@@ -1400,14 +1397,14 @@ protected:
                 XmlElement* iconGroup = filterXml.createNewChildElement ("ItemGroup");
                 XmlElement* e = iconGroup->createNewChildElement ("None");
                 e->setAttribute ("Include", ".\\" + iconFile.getFileName());
-                e->createNewChildElement ("Filter")->addTextElement (project.getJuceCodeGroupName());
+                e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
             }
 
             {
                 XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
                 XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
                 e->setAttribute ("Include", ".\\" + rcFile.getFileName());
-                e->createNewChildElement ("Filter")->addTextElement (project.getJuceCodeGroupName());
+                e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
             }
         }
     }

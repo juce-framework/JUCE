@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		842C606C13C308A6008CA875 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 842C606B13C308A6008CA875 /* QuartzCore.framework */; };
+		84386C5713EC6D5B007F6FB0 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84386C5613EC6D5B007F6FB0 /* AudioToolbox.framework */; };
 		846C10D40DE33F4D00E8CCE8 /* juce_LibrarySource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 846C10D30DE33F4D00E8CCE8 /* juce_LibrarySource.mm */; };
 		846C10ED0DE33FA100E8CCE8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846C10DF0DE33FA100E8CCE8 /* Cocoa.framework */; };
 		846C10EE0DE33FA100E8CCE8 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846C10E00DE33FA100E8CCE8 /* CoreAudio.framework */; };
@@ -50,12 +51,11 @@
 		84F555CF0A22381100A8311C /* Jucer To Do list.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84F5556A0A22381000A8311C /* Jucer To Do list.txt */; };
 		84F555D30A22381100A8311C /* BinaryData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F555700A22381000A8311C /* BinaryData.cpp */; };
 		84F555D40A22381100A8311C /* jucer_Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F555730A22381000A8311C /* jucer_Main.cpp */; };
-		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0867D6ABFE840B52C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		842C606B13C308A6008CA875 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
+		84386C5613EC6D5B007F6FB0 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		846C10D20DE33F4D00E8CCE8 /* juce_AppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_AppConfig.h; path = ../../src/juce_AppConfig.h; sourceTree = SOURCE_ROOT; };
 		846C10D30DE33F4D00E8CCE8 /* juce_LibrarySource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_LibrarySource.mm; path = ../../src/juce_LibrarySource.mm; sourceTree = SOURCE_ROOT; };
 		846C10DF0DE33FA100E8CCE8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -186,6 +186,7 @@
 				8497845610355CE30020003B /* Carbon.framework in Frameworks */,
 				8497863010355E320020003B /* IOKit.framework in Frameworks */,
 				842C606C13C308A6008CA875 /* QuartzCore.framework in Frameworks */,
+				84386C5713EC6D5B007F6FB0 /* AudioToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,7 +236,6 @@
 			children = (
 				84F43CC50A2B5F3700284072 /* jucer_icon.icns */,
 				8D0C4E960486CD37000505A6 /* Info.plist */,
-				0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -243,6 +243,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				84386C5613EC6D5B007F6FB0 /* AudioToolbox.framework */,
 				846C10DF0DE33FA100E8CCE8 /* Cocoa.framework */,
 				846C10E10DE33FA100E8CCE8 /* CoreFoundation.framework */,
 				8497845510355CE30020003B /* Carbon.framework */,
@@ -467,7 +468,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */,
 				84F555CF0A22381100A8311C /* Jucer To Do list.txt in Resources */,
 				84F43CC60A2B5F3700284072 /* jucer_icon.icns in Resources */,
 			);
@@ -517,17 +517,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				0867D6ABFE840B52C02AAC07 /* English */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		C0E91AC608A95435008D54AB /* Debug */ = {

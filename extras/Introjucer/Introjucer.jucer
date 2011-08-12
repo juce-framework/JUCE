@@ -68,10 +68,17 @@
             file="Source/Code Editor/jucer_SourceCodeEditor.h"/>
     </GROUP>
     <GROUP id="vGFZIJg" name="Project">
+      <FILE id="a9a1b" name="jucer_AudioPluginModule.h" compile="0" resource="0"
+            file="Source/Project/jucer_AudioPluginModule.h"/>
       <FILE id="Wx7kXq7" name="jucer_GroupInformationComponent.cpp" compile="1"
             resource="0" file="Source/Project/jucer_GroupInformationComponent.cpp"/>
       <FILE id="sQjHbVN" name="jucer_GroupInformationComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_GroupInformationComponent.h"/>
+      <FILE id="HXGcY" name="jucer_JuceLibraryModule.h" compile="0" resource="0"
+            file="Source/Project/jucer_JuceLibraryModule.h"/>
+      <FILE id="MJkOAX" name="jucer_Module.cpp" compile="1" resource="0"
+            file="Source/Project/jucer_Module.cpp"/>
+      <FILE id="VZmQQ6" name="jucer_Module.h" compile="0" resource="0" file="Source/Project/jucer_Module.h"/>
       <FILE id="Vf0IGtm" name="jucer_NewFileWizard.cpp" compile="1" resource="0"
             file="Source/Project/jucer_NewFileWizard.cpp"/>
       <FILE id="VRwC9Js" name="jucer_NewFileWizard.h" compile="0" resource="0"
@@ -183,13 +190,19 @@
   </MAINGROUP>
   <JUCEOPTIONS JUCE_ASIO="disabled" JUCE_WASAPI="disabled" JUCE_DIRECTSOUND="disabled"
                JUCE_ALSA="disabled" JUCE_QUICKTIME="disabled" JUCE_OPENGL="disabled"
-               JUCE_USE_FLAC="disabled" JUCE_USE_OGGBVORBIS="2" JUCE_USE_CDBURNER="disabled"
-               JUCE_USE_CDREADER="disabled" JUCE_USE_CAMERA="disabled" JUCE_PLUGINHOST_VST="disabled"
-               JUCE_PLUGINHOST_AU="disabled" JUCE_USE_OGGVORBIS="disabled" JUCE_FORCE_DEBUG="default"
-               JUCE_LOG_ASSERTIONS="default" JUCE_ENABLE_REPAINT_DEBUGGING="default"
-               JUCE_USE_XINERAMA="default" JUCE_USE_XSHM="default" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
-               JUCE_WEB_BROWSER="default" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
-               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"
-               JUCE_USE_XRENDER="default" JUCE_USE_XCURSOR="default" JUCE_DIRECT2D="default"
-               JUCE_DIRECTSHOW="default" JUCE_MEDIAFOUNDATION="default"/>
+               JUCE_USE_FLAC="disabled" JUCE_USE_CDBURNER="disabled" JUCE_USE_CDREADER="disabled"
+               JUCE_USE_CAMERA="disabled" JUCE_PLUGINHOST_VST="disabled" JUCE_PLUGINHOST_AU="disabled"
+               JUCE_USE_OGGVORBIS="disabled" JUCE_USE_COREIMAGE_LOADER="disabled"/>
+  <MODULES>
+    <MODULE id="juce_core" showAllCode="1"/>
+    <MODULE id="juce_events" showAllCode="1"/>
+    <MODULE id="juce_graphics" showAllCode="1"/>
+    <MODULE id="juce_gui" showAllCode="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1"/>
+    <MODULE id="juce_audio" showAllCode="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1"/>
+    <MODULE id="juce_audio_basics" showAllCode="1"/>
+  </MODULES>
 </JUCERPROJECT>

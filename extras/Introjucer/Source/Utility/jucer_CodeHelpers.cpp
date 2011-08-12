@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -180,7 +180,10 @@ namespace CodeHelpers
 
     String createIncludeStatement (const String& includePath)
     {
-        return "#include \"" + includePath + "\"";
+        if (includePath.startsWithChar ('<') || includePath.startsWithChar ('"'))
+            return "#include " + includePath;
+        else
+            return "#include \"" + includePath + "\"";
     }
 
     String makeHeaderGuardName (const File& file)

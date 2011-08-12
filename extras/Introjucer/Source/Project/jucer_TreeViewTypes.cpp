@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ void GroupTreeViewItem::addFiles (const StringArray& files, int insertIndex)
     {
         const File file (files[i]);
 
-        if (item.addFile (file, insertIndex))
+        if (item.addFile (file, insertIndex, true))
             ++insertIndex;
     }
 }
@@ -125,7 +125,7 @@ void GroupTreeViewItem::showPopupMenu()
     {
         case 1:     triggerAsyncRename (item); break;
         case 2:     deleteAllSelectedItems(); break;
-        case 3:     item.sortAlphabetically(); break;
+        case 3:     item.sortAlphabetically (false); break;
         default:    processCreateFileMenuItem (res); break;
     }
 }

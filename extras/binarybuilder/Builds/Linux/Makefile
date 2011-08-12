@@ -1,5 +1,5 @@
-# Automatically generated makefile, created by the Jucer
-# Don't edit this file! Your changes will be overwritten when you re-save the Jucer project!
+# Automatically generated makefile, created by the Introjucer
+# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!
 
 ifndef CONFIG
   CONFIG=Debug
@@ -44,7 +44,7 @@ endif
 
 OBJECTS := \
   $(OBJDIR)/Main_90ebc5c2.o \
-  $(OBJDIR)/JuceLibraryCode_9800db7c.o \
+  $(OBJDIR)/juce_core_wrapper_b07ed786.o \
 
 .PHONY: clean
 
@@ -66,9 +66,9 @@ $(OBJDIR)/Main_90ebc5c2.o: ../../Source/Main.cpp
 	@echo "Compiling Main.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode_9800db7c.o: ../../JuceLibraryCode/JuceLibraryCode.cpp
+$(OBJDIR)/juce_core_wrapper_b07ed786.o: ../../JuceLibraryCode/juce_core_wrapper.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling JuceLibraryCode.cpp"
+	@echo "Compiling juce_core_wrapper.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

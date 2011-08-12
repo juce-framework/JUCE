@@ -61,13 +61,10 @@ Component* ComponentTypeHandler::createCopyOf (JucerDocument* document, Componen
     jassert (getHandlerFor (existing) == this);
 
     Component* const newOne = createNewComponent (document);
-    XmlElement* const xml = createXmlFor (&existing, document->getComponentLayout());
+    ScopedPointer<XmlElement> xml (createXmlFor (&existing, document->getComponentLayout()));
 
-    if (xml != 0)
-    {
+    if (xml != nullptr)
         restoreFromXml (*xml, newOne, document->getComponentLayout());
-        delete xml;
-    }
 
     return newOne;
 }

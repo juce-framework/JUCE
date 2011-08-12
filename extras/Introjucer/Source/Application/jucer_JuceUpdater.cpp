@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -139,7 +139,7 @@ void JuceUpdater::buttonClicked (Button*)
     if (! xml->hasTagName ("JUCEVERSIONS"))
     {
         AlertWindow::showMessageBox (AlertWindow::WarningIcon, "Update Problems...",
-                                     "This version of the Jucer may be too old to receive automatic updates!\n\n"
+                                     "This version of the Introjucer may be too old to receive automatic updates!\n\n"
                                      "Please visit www.rawmaterialsoftware.com and get the latest version manually!");
         return;
     }

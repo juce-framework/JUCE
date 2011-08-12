@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -42,6 +42,8 @@ namespace Tags
     const Identifier configuration     ("CONFIGURATION");
     const Identifier exporters         ("EXPORTFORMATS");
     const Identifier configGroup       ("JUCEOPTIONS");
+    const Identifier modulesGroup      ("MODULES");
+    const Identifier module            ("MODULE");
 }
 
 const char* Project::projectFileExtension = ".jucer";
@@ -111,11 +113,6 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.hasProperty (Ids::version))
         getVersion() = "1.0.0";
 
-    if (! projectRoot.hasProperty (Ids::juceLinkage))
-        getJuceLinkageModeValue() = useAmalgamatedJuceViaMultipleTemplates;
-
-    const String juceFolderPath (getRelativePathForFile (StoredSettings::getInstance()->getLastKnownJuceFolder()));
-
     // Create configs group
     if (! projectRoot.getChildWithName (Tags::configurations).isValid())
     {
@@ -130,6 +127,28 @@ void Project::setMissingDefaultValues()
 
     if (! projectRoot.hasProperty (Ids::bundleIdentifier))
         setBundleIdentifierToDefault();
+
+    if (! projectRoot.getChildWithName (Tags::modulesGroup).isValid())
+    {
+        addModule ("juce_core");
+
+        if (! isConfigFlagEnabled ("JUCE_ONLY_BUILD_CORE_LIBRARY"))
+        {
+            addModule ("juce_events");
+            addModule ("juce_graphics");
+            addModule ("juce_data_structures");
+            addModule ("juce_gui_basics");
+            addModule ("juce_gui_extra");
+            addModule ("juce_gui_audio");
+            addModule ("juce_cryptography");
+            addModule ("juce_video");
+            addModule ("juce_opengl");
+            addModule ("juce_audio_basics");
+            addModule ("juce_audio_devices");
+            addModule ("juce_audio_formats");
+            addModule ("juce_audio_processors");
+        }
+    }
 }
 
 //==============================================================================
@@ -157,15 +176,19 @@ const String Project::loadDocument (const File& file)
 const String Project::saveDocument (const File& file)
 {
     updateProjectSettings();
+    sanitiseConfigFlags();
 
     {
-        // (getting these forces the values to be sanitised)
-        OwnedArray <Project::ConfigFlag> flags;
-        getAllConfigFlags (flags);
-    }
+        ScopedPointer <ProjectExporter> exp (ProjectExporter::createPlatformDefaultExporter (*this));
 
-    if (FileHelpers::isJuceFolder (getLocalJuceFolder()))
-        StoredSettings::getInstance()->setLastKnownJuceFolder (getLocalJuceFolder().getFullPathName());
+        if (exp != nullptr)
+        {
+            File f (resolveFilename (exp->getJuceFolder().toString()));
+
+            if (FileHelpers::isJuceFolder (f))
+                StoredSettings::getInstance()->setLastKnownJuceFolder (f.getFullPathName());
+        }
+    }
 
     StoredSettings::getInstance()->recentFiles.addFile (file);
 
@@ -191,9 +214,6 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
 {
     if (property == Ids::projectType)
         setMissingDefaultValues();
-
-    if (getProjectType().isLibrary())
-        getJuceLinkageModeValue() = notLinkedToJuce;
 
     changed();
 }
@@ -271,27 +291,6 @@ const ProjectType& Project::getProjectType() const
     return *type;
 }
 
-const char* const Project::notLinkedToJuce                          = "none";
-const char* const Project::useLinkedJuce                            = "static";
-const char* const Project::useAmalgamatedJuce                       = "amalg_big";
-const char* const Project::useAmalgamatedJuceViaSingleTemplate      = "amalg_template";
-const char* const Project::useAmalgamatedJuceViaMultipleTemplates   = "amalg_multi";
-
-File Project::getLocalJuceFolder()
-{
-    ScopedPointer <ProjectExporter> exp (ProjectExporter::createPlatformDefaultExporter (*this));
-
-    if (exp != nullptr)
-    {
-        File f (resolveFilename (exp->getJuceFolder().toString()));
-
-        if (FileHelpers::isJuceFolder (f))
-            return f;
-    }
-
-    return StoredSettings::getInstance()->getLastKnownJuceFolder();
-}
-
 //==============================================================================
 void Project::createPropertyEditors (Array <PropertyComponent*>& props)
 {
@@ -315,11 +314,6 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
 
         props.add (new ChoicePropertyComponent (getProjectTypeValue(), "Project Type", projectTypeNames, projectTypeCodes));
     }
-
-    const char* linkageTypes[] = { "Not linked to Juce", "Linked to Juce Static Library", "Include Juce Amalgamated Files", "Include Juce Source Code Directly (In a single file)", "Include Juce Source Code Directly (Split across several files)", 0 };
-    const char* linkageTypeValues[] = { notLinkedToJuce, useLinkedJuce, useAmalgamatedJuce, useAmalgamatedJuceViaSingleTemplate, useAmalgamatedJuceViaMultipleTemplates, 0 };
-    props.add (new ChoicePropertyComponent (getJuceLinkageModeValue(), "Juce Linkage Method", StringArray (linkageTypes), Array<var> (linkageTypeValues)));
-    props.getLast()->setTooltip ("The method by which your project will be linked to Juce.");
 
     props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false));
     props.getLast()->setTooltip ("A unique identifier for this product, mainly for use in Mac builds. It should be something like 'com.yourcompanyname.yourproductname'");
@@ -451,9 +445,10 @@ void Project::Item::setID (const String& newID)   { node.setProperty (Ids::id_, 
 
 String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
-Project::Item Project::Item::createGroup (Project& project, const String& name)
+Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid)
 {
     Item group (project, ValueTree (Tags::group));
+    group.setID (uid);
     group.initialiseNodeValues();
     group.getName() = name;
     return group;
@@ -651,22 +646,56 @@ struct ItemSorter
     }
 };
 
-void Project::Item::sortAlphabetically()
+struct ItemSorterWithGroupsAtStart
 {
-    ItemSorter sorter;
-    node.sort (sorter, getUndoManager(), true);
+    static int compareElements (const ValueTree& first, const ValueTree& second)
+    {
+        const bool firstIsGroup = first.hasType (Tags::group);
+        const bool secondIsGroup = second.hasType (Tags::group);
+
+        if (firstIsGroup == secondIsGroup)
+            return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
+        else
+            return firstIsGroup ? -1 : 1;
+    }
+};
+
+void Project::Item::sortAlphabetically (bool keepGroupsAtStart)
+{
+    if (keepGroupsAtStart)
+    {
+        ItemSorterWithGroupsAtStart sorter;
+        node.sort (sorter, getUndoManager(), true);
+    }
+    else
+    {
+        ItemSorter sorter;
+        node.sort (sorter, getUndoManager(), true);
+    }
+}
+
+Project::Item Project::Item::getOrCreateSubGroup (const String& name)
+{
+    for (int i = node.getNumChildren(); --i >= 0;)
+    {
+        const ValueTree child (node.getChild (i));
+        if (child.getProperty (Ids::name) == name && child.hasType (Tags::group))
+            return Item (getProject(), child);
+    }
+
+    return addNewSubGroup (name, -1);
 }
 
 Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex)
 {
-    Item group (createGroup (getProject(), name));
+    Item group (createGroup (getProject(), name, createGUID (getID() + name + String (getNumChildren()))));
 
     jassert (canContain (group));
     addChild (group, insertIndex);
     return group;
 }
 
-bool Project::Item::addFile (const File& file, int insertIndex)
+bool Project::Item::addFile (const File& file, int insertIndex, const bool shouldCompile)
 {
     if (file == File::nonexistent || file.isHidden() || file.getFileName().startsWithChar ('.'))
         return false;
@@ -679,10 +708,10 @@ bool Project::Item::addFile (const File& file, int insertIndex)
         while (iter.next())
         {
             if (! getProject().getMainGroup().findItemForFile (iter.getFile()).isValid())
-                group.addFile (iter.getFile(), -1);
+                group.addFile (iter.getFile(), -1, shouldCompile);
         }
 
-        group.sortAlphabetically();
+        group.sortAlphabetically (false);
     }
     else if (file.existsAsFile())
     {
@@ -691,7 +720,7 @@ bool Project::Item::addFile (const File& file, int insertIndex)
             Item item (getProject(), ValueTree (Tags::file));
             item.initialiseNodeValues();
             item.getName() = file.getFileName();
-            item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m;cc;cxx");
+            item.getShouldCompileValue() = shouldCompile && file.hasFileExtension ("cpp;mm;c;m;cc;cxx;r");
             item.getShouldAddToResourceValue() = getProject().shouldBeAddedToBinaryResourcesByDefault (file);
 
             if (canContain (item))
@@ -750,19 +779,6 @@ ValueTree Project::getConfigNode()
     return projectRoot.getOrCreateChildWithName (Tags::configGroup, nullptr);
 }
 
-void Project::getAllConfigFlags (OwnedArray <ConfigFlag>& flags)
-{
-    OwnedArray<LibraryModule> modules;
-    getProjectType().createRequiredModules (*this, modules);
-
-    int i;
-    for (i = 0; i < modules.size(); ++i)
-        modules.getUnchecked(i)->getConfigFlags (*this, flags);
-
-    for (i = 0; i < flags.size(); ++i)
-        flags.getUnchecked(i)->value.referTo (getConfigFlag (flags.getUnchecked(i)->symbol));
-}
-
 const char* const Project::configFlagDefault = "default";
 const char* const Project::configFlagEnabled = "enabled";
 const char* const Project::configFlagDisabled = "disabled";
@@ -781,6 +797,65 @@ Value Project::getConfigFlag (const String& name)
 bool Project::isConfigFlagEnabled (const String& name) const
 {
     return projectRoot.getChildWithName (Tags::configGroup).getProperty (name) == configFlagEnabled;
+}
+
+void Project::sanitiseConfigFlags()
+{
+    ValueTree configNode (getConfigNode());
+
+    for (int i = configNode.getNumProperties(); --i >= 0;)
+    {
+        const var value (configNode [configNode.getPropertyName(i)]);
+
+        if (value != configFlagEnabled && value != configFlagDisabled)
+            configNode.removeProperty (configNode.getPropertyName(i), getUndoManagerFor (configNode));
+    }
+}
+
+//==============================================================================
+ValueTree Project::getModulesNode()
+{
+    return projectRoot.getOrCreateChildWithName (Tags::modulesGroup, nullptr);
+}
+
+bool Project::isModuleEnabled (const String& moduleID) const
+{
+    ValueTree modules (projectRoot.getChildWithName (Tags::modulesGroup));
+
+    for (int i = 0; i < modules.getNumChildren(); ++i)
+        if (modules.getChild(i) [Ids::id_] == moduleID)
+            return true;
+
+    return false;
+}
+
+Value Project::shouldShowAllModuleFilesInProject (const String& moduleID)
+{
+    return getModulesNode().getChildWithProperty (Ids::id_, moduleID)
+                           .getPropertyAsValue (Ids::showAllCode, getUndoManagerFor (getModulesNode()));
+}
+
+void Project::addModule (const String& moduleID)
+{
+    if (! isModuleEnabled (moduleID))
+    {
+        ValueTree module (Tags::module);
+        module.setProperty (Ids::id_, moduleID, nullptr);
+
+        ValueTree modules (getModulesNode());
+        modules.addChild (module, -1, getUndoManagerFor (modules));
+
+        shouldShowAllModuleFilesInProject (moduleID) = true;
+    }
+}
+
+void Project::removeModule (const String& moduleID)
+{
+    ValueTree modules (getModulesNode());
+
+    for (int i = 0; i < modules.getNumChildren(); ++i)
+        if (modules.getChild(i) [Ids::id_] == moduleID)
+            modules.removeChild (i, getUndoManagerFor (modules));
 }
 
 //==============================================================================
@@ -1001,9 +1076,9 @@ ProjectExporter* Project::createExporter (int index)
     return ProjectExporter::createExporter (*this, getExporters().getChild (index));
 }
 
-void Project::addNewExporter (int exporterIndex)
+void Project::addNewExporter (const String& exporterName)
 {
-    ScopedPointer<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterIndex));
+    ScopedPointer<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
 
     ValueTree exporters (getExporters());
     exporters.addChild (exp->getSettings(), -1, getUndoManagerFor (exporters));
@@ -1020,8 +1095,10 @@ void Project::createDefaultExporters()
     ValueTree exporters (getExporters());
     exporters.removeAllChildren (getUndoManagerFor (exporters));
 
-    for (int i = 0; i < ProjectExporter::getNumExporters(); ++i)
-        addNewExporter (i);
+    const StringArray exporterNames (ProjectExporter::getDefaultExporters());
+
+    for (int i = 0; i < exporterNames.size(); ++i)
+        addNewExporter (exporterNames[i]);
 }
 
 //==============================================================================
@@ -1062,7 +1139,7 @@ void Project::resaveJucerFile (const File& file)
         return;
     }
 
-    std::cout << "The Jucer - Re-saving file: " << file.getFullPathName() << std::endl;
+    std::cout << "The Introjucer - Re-saving file: " << file.getFullPathName() << std::endl;
     String error (newDoc.saveDocument (file));
 
     if (error.isNotEmpty())

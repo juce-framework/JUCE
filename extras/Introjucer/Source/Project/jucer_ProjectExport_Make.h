@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -129,15 +129,16 @@ private:
 
     void writeHeaderPathFlags (OutputStream& out, const Project::BuildConfiguration& config)
     {
-        StringArray headerPaths (config.getHeaderSearchPaths());
-        headerPaths.insert (0, "/usr/include/freetype2");
-        headerPaths.insert (0, "/usr/include");
+        StringArray searchPaths (extraSearchPaths);
+        searchPaths.addArray (config.getHeaderSearchPaths());
 
-        for (int i = 0; i < libraryModules.size(); ++i)
-            libraryModules.getUnchecked(i)->addExtraSearchPaths (*this, headerPaths);
+        searchPaths.insert (0, "/usr/include/freetype2");
+        searchPaths.insert (0, "/usr/include");
 
-        for (int i = 0; i < headerPaths.size(); ++i)
-            out << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, headerPaths[i])).quoted();
+        searchPaths.removeDuplicates (false);
+
+        for (int i = 0; i < searchPaths.size(); ++i)
+            out << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])).quoted();
     }
 
     void writeCppFlags (OutputStream& out, const Project::BuildConfiguration& config)
@@ -166,9 +167,6 @@ private:
 
         const char* defaultLibs[] = { "freetype", "pthread", "rt", "X11", "GL", "GLU", "Xinerama", "asound", 0 };
         StringArray libs (defaultLibs);
-
-        if (project.getJuceLinkageMode() == Project::useLinkedJuce)
-            libs.add ("juce");
 
         for (int i = 0; i < libs.size(); ++i)
             out << " -l" << libs[i];
@@ -247,8 +245,8 @@ private:
 
     void writeMakefile (OutputStream& out, const Array<RelativePath>& files)
     {
-        out << "# Automatically generated makefile, created by the Jucer" << newLine
-            << "# Don't edit this file! Your changes will be overwritten when you re-save the Jucer project!" << newLine
+        out << "# Automatically generated makefile, created by the Introjucer" << newLine
+            << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
             << newLine;
 
         out << "ifndef CONFIG" << newLine

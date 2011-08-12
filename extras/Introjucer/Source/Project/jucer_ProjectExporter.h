@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -44,9 +44,11 @@ public:
     static int getNumExporters();
     static StringArray getExporterNames();
     static ProjectExporter* createNewExporter (Project& project, const int index);
+    static ProjectExporter* createNewExporter (Project& project, const String& name);
 
     static ProjectExporter* createExporter (Project& project, const ValueTree& settings);
     static ProjectExporter* createPlatformDefaultExporter (Project& project);
+    static StringArray getDefaultExporters();
 
     //=============================================================================
     // return 0 if this can't be opened in the current OS, or a higher value, where higher numbers are more preferable.
@@ -118,7 +120,7 @@ public:
 
     //==============================================================================
     Array<Project::Item> groups;
-    OwnedArray<LibraryModule> libraryModules;
+    Project::Item& getModulesGroup();
 
     //==============================================================================
     String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
@@ -140,7 +142,7 @@ public:
     String msvcPostBuildCommand, msvcPostBuildOutputs;
 
     //==============================================================================
-    void createLibraryModules();
+    StringArray extraSearchPaths;
 
 protected:
     //==============================================================================
@@ -151,6 +153,7 @@ protected:
     const File projectFolder;
     Array<Project::BuildConfiguration> configs;
     ValueTree settings;
+    Project::Item* modulesGroup;
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
