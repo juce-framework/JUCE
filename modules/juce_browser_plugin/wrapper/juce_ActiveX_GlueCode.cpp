@@ -39,7 +39,7 @@
 #pragma warning (disable:4584)
 
 #include "../juce_browser_plugin.h"
-using namespace JUCE_NAMESPACE;
+using namespace juce;
 
 #include "juce_BrowserPluginComponent.h"
 

@@ -292,7 +292,7 @@ void ModifierKeys::updateCurrentModifiers() noexcept
     currentModifiers = UIViewComponentPeer::currentModifiers;
 }
 
-JUCE_NAMESPACE::Point<int> juce_lastMousePos;
+juce::Point<int> juce_lastMousePos;
 
 //==============================================================================
 - (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event
@@ -917,7 +917,7 @@ void UIViewComponentPeer::drawRect (CGRect r)
 
 bool UIViewComponentPeer::canBecomeKeyWindow()
 {
-    return (getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowIgnoresKeyPresses) == 0;
+    return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
 }
 
 bool UIViewComponentPeer::windowShouldClose()

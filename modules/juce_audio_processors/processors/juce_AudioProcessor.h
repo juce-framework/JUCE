@@ -486,7 +486,7 @@ public:
 
         @see getCurrentProgramStateInformation
     */
-    virtual void getStateInformation (JUCE_NAMESPACE::MemoryBlock& destData) = 0;
+    virtual void getStateInformation (juce::MemoryBlock& destData) = 0;
 
     /** The host will call this method if it wants to save the state of just the filter's
         current program.
@@ -499,7 +499,7 @@ public:
 
         @see getStateInformation, setCurrentProgramStateInformation
     */
-    virtual void getCurrentProgramStateInformation (JUCE_NAMESPACE::MemoryBlock& destData);
+    virtual void getCurrentProgramStateInformation (juce::MemoryBlock& destData);
 
     /** This must restore the filter's state from a block of data previously created
         using getStateInformation().
@@ -559,7 +559,7 @@ protected:
         from a binary blob.
     */
     static void copyXmlToBinary (const XmlElement& xml,
-                                 JUCE_NAMESPACE::MemoryBlock& destData);
+                                 juce::MemoryBlock& destData);
 
     /** Retrieves an XML element that was stored as binary with the copyXmlToBinary() method.
 

@@ -138,7 +138,7 @@
 // END_AUTOINCLUDE
 
 //==============================================================================
-using namespace JUCE_NAMESPACE;
+using namespace juce;
 
 BEGIN_JUCE_NAMESPACE
 

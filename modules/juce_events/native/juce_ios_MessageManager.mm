@@ -49,7 +49,7 @@ END_JUCE_NAMESPACE
 {
     if ([info isKindOfClass: [NSData class]])
     {
-        JUCE_NAMESPACE::CallbackMessagePayload* pl = (JUCE_NAMESPACE::CallbackMessagePayload*) [((NSData*) info) bytes];
+        juce::CallbackMessagePayload* pl = (juce::CallbackMessagePayload*) [((NSData*) info) bytes];
 
         if (pl != nullptr)
         {

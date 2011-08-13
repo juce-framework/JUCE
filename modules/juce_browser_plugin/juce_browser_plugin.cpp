@@ -43,7 +43,7 @@
 #endif
 
 #include "juce_browser_plugin.h"
-using namespace JUCE_NAMESPACE;
+using namespace juce;
 
 #if JUCE_BUILD_NPAPI
  #define JUCE_NPAPI_WRAPPED_IN_MM 1

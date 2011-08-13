@@ -100,7 +100,7 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
 //==============================================================================
 END_JUCE_NAMESPACE
 
-using namespace JUCE_NAMESPACE;
+using namespace juce;
 
 //==============================================================================
 #define JuceURLConnection MakeObjCClassName(JuceURLConnection)

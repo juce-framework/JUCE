@@ -26,7 +26,7 @@
 class JuceMainMenuHandler;
 
 END_JUCE_NAMESPACE
-using namespace JUCE_NAMESPACE;
+using namespace juce;
 
 #define JuceMenuCallback MakeObjCClassName(JuceMenuCallback)
 
@@ -423,9 +423,9 @@ END_JUCE_NAMESPACE
         NSEvent* e = [NSApp currentEvent];
         if ([e type] == NSKeyDown || [e type] == NSKeyUp)
         {
-            if (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent() != nullptr)
+            if (juce::Component::getCurrentlyFocusedComponent() != nullptr)
             {
-                JUCE_NAMESPACE::NSViewComponentPeer* peer = dynamic_cast <JUCE_NAMESPACE::NSViewComponentPeer*> (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent()->getPeer());
+                juce::NSViewComponentPeer* peer = dynamic_cast <juce::NSViewComponentPeer*> (juce::Component::getCurrentlyFocusedComponent()->getPeer());
 
                 if (peer != nullptr)
                 {

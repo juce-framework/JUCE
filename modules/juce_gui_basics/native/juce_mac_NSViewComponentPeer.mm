@@ -669,7 +669,7 @@ END_JUCE_NAMESPACE
 - (NSRect) firstRectForCharacterRange: (NSRange) theRange
 {
     (void) theRange;
-    JUCE_NAMESPACE::Component* const comp = dynamic_cast <JUCE_NAMESPACE::Component*> (owner->findCurrentTextInputTarget());
+    juce::Component* const comp = dynamic_cast <juce::Component*> (owner->findCurrentTextInputTarget());
 
     if (comp == 0)
         return NSMakeRect (0, 0, 0, 0);
@@ -820,10 +820,10 @@ END_JUCE_NAMESPACE
     if (owner != nullptr)
         frameRect = owner->constrainRect (frameRect);
 
-    if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != nullptr
+    if (juce::Component::getCurrentlyModalComponent() != nullptr
           && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
           && owner->hasNativeTitleBar())
-        JUCE_NAMESPACE::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+        juce::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
 
     return frameRect.size;
 }
@@ -841,10 +841,10 @@ END_JUCE_NAMESPACE
 {
     (void) notification;
 
-    if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != nullptr
+    if (juce::Component::getCurrentlyModalComponent() != nullptr
           && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
           && owner->hasNativeTitleBar())
-        JUCE_NAMESPACE::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+        juce::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
 }
 
 @end
@@ -1685,7 +1685,7 @@ void NSViewComponentPeer::setCurrentRenderingEngine (int index)
 
 bool NSViewComponentPeer::canBecomeKeyWindow()
 {
-    return (getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowIgnoresKeyPresses) == 0;
+    return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
 }
 
 void NSViewComponentPeer::becomeKeyWindow()

@@ -89,7 +89,7 @@
 
 class JuceVSTWrapper;
 static bool recursionCheck = false;
-static JUCE_NAMESPACE::uint32 lastMasterIdleCall = 0;
+static juce::uint32 lastMasterIdleCall = 0;
 
 BEGIN_JUCE_NAMESPACE
  extern void JUCE_API juce_callAnyTimersSynchronously();
@@ -559,7 +559,7 @@ public:
             outgoingEvents.ensureSize (numEvents);
             outgoingEvents.clear();
 
-            const JUCE_NAMESPACE::uint8* midiEventData;
+            const juce::uint8* midiEventData;
             int midiEventSize, midiEventPosition;
             MidiBuffer::Iterator i (midiEvents);
 
@@ -869,7 +869,7 @@ public:
 
         // because the chunk is only needed temporarily by the host (or at least you'd
         // hope so) we'll give it a while and then free it in the timer callback.
-        chunkMemoryTime = JUCE_NAMESPACE::Time::getApproximateMillisecondCounter();
+        chunkMemoryTime = juce::Time::getApproximateMillisecondCounter();
 
         return (VstInt32) chunkMemory.getSize();
     }
@@ -902,7 +902,7 @@ public:
         }
 
         if (chunkMemoryTime > 0
-             && chunkMemoryTime < JUCE_NAMESPACE::Time::getApproximateMillisecondCounter() - 2000
+             && chunkMemoryTime < juce::Time::getApproximateMillisecondCounter() - 2000
              && ! recursionCheck)
         {
             chunkMemoryTime = 0;
@@ -921,7 +921,7 @@ public:
     {
         if (Component::isMouseButtonDownAnywhere() && ! recursionCheck)
         {
-            const JUCE_NAMESPACE::uint32 now = JUCE_NAMESPACE::Time::getMillisecondCounter();
+            const juce::uint32 now = juce::Time::getMillisecondCounter();
 
             if (now > lastMasterIdleCall + 20 && editorComp != nullptr)
             {
@@ -1291,8 +1291,8 @@ public:
     //==============================================================================
 private:
     AudioProcessor* filter;
-    JUCE_NAMESPACE::MemoryBlock chunkMemory;
-    JUCE_NAMESPACE::uint32 chunkMemoryTime;
+    juce::MemoryBlock chunkMemory;
+    juce::uint32 chunkMemoryTime;
     ScopedPointer<EditorCompWrapper> editorComp;
     ERect editorSize;
     MidiBuffer midiEvents;

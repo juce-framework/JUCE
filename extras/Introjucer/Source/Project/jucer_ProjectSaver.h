@@ -305,7 +305,7 @@ private:
             << "#if ! DONT_SET_USING_JUCE_NAMESPACE" << newLine
             << " // If your code uses a lot of JUCE classes, then this will obviously save you" << newLine
             << " // a lot of typing, but can be disabled by setting DONT_SET_USING_JUCE_NAMESPACE." << newLine
-            << " using namespace JUCE_NAMESPACE;" << newLine
+            << " using namespace juce;" << newLine
             << "#endif" << newLine
             << newLine
             << "namespace ProjectInfo" << newLine

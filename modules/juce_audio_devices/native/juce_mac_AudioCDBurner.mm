@@ -39,8 +39,8 @@ END_JUCE_NAMESPACE
 
 - (OpenDiskDevice*) initWithDRDevice: (DRDevice*) device;
 - (void) dealloc;
-- (void) addSourceTrack: (JUCE_NAMESPACE::AudioSource*) source numSamples: (int) numSamples_;
-- (void) burn: (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener*) listener  errorString: (JUCE_NAMESPACE::String*) error
+- (void) addSourceTrack: (juce::AudioSource*) source numSamples: (int) numSamples_;
+- (void) burn: (juce::AudioCDBurner::BurnProgressListener*) listener  errorString: (juce::String*) error
          ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting speed: (int) burnSpeed;
 @end
 
@@ -49,12 +49,12 @@ END_JUCE_NAMESPACE
 
 @interface AudioTrackProducer   : NSObject
 {
-    JUCE_NAMESPACE::AudioSource* source;
+    juce::AudioSource* source;
     int readPosition, lengthInFrames;
 }
 
 - (AudioTrackProducer*) init: (int) lengthInFrames;
-- (AudioTrackProducer*) initWithAudioSource: (JUCE_NAMESPACE::AudioSource*) source numSamples: (int) lengthInSamples;
+- (AudioTrackProducer*) initWithAudioSource: (juce::AudioSource*) source numSamples: (int) lengthInSamples;
 - (void) dealloc;
 - (void) setupTrackProperties: (DRTrack*) track;
 
@@ -99,7 +99,7 @@ END_JUCE_NAMESPACE
     [super dealloc];
 }
 
-- (void) addSourceTrack: (JUCE_NAMESPACE::AudioSource*) source_ numSamples: (int) numSamples_
+- (void) addSourceTrack: (juce::AudioSource*) source_ numSamples: (int) numSamples_
 {
     AudioTrackProducer* p = [[AudioTrackProducer alloc] initWithAudioSource: source_ numSamples: numSamples_];
     DRTrack* t = [[DRTrack alloc] initWithProducer: p];
@@ -111,7 +111,7 @@ END_JUCE_NAMESPACE
     [p release];
 }
 
-- (void) burn: (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener*) listener errorString: (JUCE_NAMESPACE::String*) error
+- (void) burn: (juce::AudioCDBurner::BurnProgressListener*) listener errorString: (juce::String*) error
          ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting speed: (int) burnSpeed
 {
     DRBurn* burn = [DRBurn burnForDevice: device];
@@ -131,7 +131,7 @@ END_JUCE_NAMESPACE
     [d setObject: (shouldEject ? DRBurnCompletionActionEject : DRBurnCompletionActionMount) forKey: DRBurnCompletionActionKey];
 
     if (burnSpeed > 0)
-        [d setObject: [NSNumber numberWithFloat: burnSpeed * JUCE_NAMESPACE::kilobytesPerSecond1x] forKey: DRBurnRequestedSpeedKey];
+        [d setObject: [NSNumber numberWithFloat: burnSpeed * juce::kilobytesPerSecond1x] forKey: DRBurnRequestedSpeedKey];
 
     if (! underrunProtection)
         [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnUnderrunProtectionKey];
@@ -142,7 +142,7 @@ END_JUCE_NAMESPACE
 
     for (;;)
     {
-        JUCE_NAMESPACE::Thread::sleep (300);
+        juce::Thread::sleep (300);
         float progress = [[[burn status] objectForKey: DRStatusPercentCompleteKey] floatValue];
 
         if (listener != nullptr && listener->audioCDBurnProgress (progress))
@@ -167,7 +167,7 @@ END_JUCE_NAMESPACE
 
         if ([err length] > 0)
         {
-            *error = JUCE_NAMESPACE::CharPointer_UTF8 ([err UTF8String]);
+            *error = juce::CharPointer_UTF8 ([err UTF8String]);
             break;
         }
     }
@@ -202,7 +202,7 @@ END_JUCE_NAMESPACE
     [p release];
 }
 
-- (AudioTrackProducer*) initWithAudioSource: (JUCE_NAMESPACE::AudioSource*) source_ numSamples: (int) lengthInSamples
+- (AudioTrackProducer*) initWithAudioSource: (juce::AudioSource*) source_ numSamples: (int) lengthInSamples
 {
     AudioTrackProducer* s = [self init: (lengthInSamples + 587) / 588];
 
@@ -269,28 +269,28 @@ END_JUCE_NAMESPACE
 
     if (source != nullptr)
     {
-        const int numSamples = JUCE_NAMESPACE::jmin ((int) bufferLength / 4, (lengthInFrames * (44100 / 75)) - readPosition);
+        const int numSamples = juce::jmin ((int) bufferLength / 4, (lengthInFrames * (44100 / 75)) - readPosition);
 
         if (numSamples > 0)
         {
-            JUCE_NAMESPACE::AudioSampleBuffer tempBuffer (2, numSamples);
+            juce::AudioSampleBuffer tempBuffer (2, numSamples);
 
-            JUCE_NAMESPACE::AudioSourceChannelInfo info;
+            juce::AudioSourceChannelInfo info;
             info.buffer = &tempBuffer;
             info.startSample = 0;
             info.numSamples = numSamples;
 
             source->getNextAudioBlock (info);
 
-            typedef JUCE_NAMESPACE::AudioData::Pointer <JUCE_NAMESPACE::AudioData::Int16,
-                                                        JUCE_NAMESPACE::AudioData::LittleEndian,
-                                                        JUCE_NAMESPACE::AudioData::Interleaved,
-                                                        JUCE_NAMESPACE::AudioData::NonConst> CDSampleFormat;
+            typedef juce::AudioData::Pointer <juce::AudioData::Int16,
+                                              juce::AudioData::LittleEndian,
+                                              juce::AudioData::Interleaved,
+                                              juce::AudioData::NonConst> CDSampleFormat;
 
-            typedef JUCE_NAMESPACE::AudioData::Pointer <JUCE_NAMESPACE::AudioData::Float32,
-                                                        JUCE_NAMESPACE::AudioData::NativeEndian,
-                                                        JUCE_NAMESPACE::AudioData::NonInterleaved,
-                                                        JUCE_NAMESPACE::AudioData::Const> SourceSampleFormat;
+            typedef juce::AudioData::Pointer <juce::AudioData::Float32,
+                                              juce::AudioData::NativeEndian,
+                                              juce::AudioData::NonInterleaved,
+                                              juce::AudioData::Const> SourceSampleFormat;
             CDSampleFormat left (buffer, 2);
             left.convertSamples (SourceSampleFormat (tempBuffer.getSampleData (0)), numSamples);
             CDSampleFormat right (buffer + 2, 2);
@@ -538,7 +538,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamps)
     return false;
 }
 
-String AudioCDBurner::burn (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener* listener,
+String AudioCDBurner::burn (juce::AudioCDBurner::BurnProgressListener* listener,
                             bool ejectDiscAfterwards,
                             bool performFakeBurnForTesting,
                             int writeSpeed)

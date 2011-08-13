@@ -308,7 +308,7 @@ public:
 
         if (juceFilter != nullptr)
         {
-            JUCE_NAMESPACE::MemoryBlock state;
+            juce::MemoryBlock state;
             juceFilter->getCurrentProgramStateInformation (state);
 
             if (state.getSize() > 0)
@@ -339,7 +339,7 @@ public:
                 if (data != 0)
                 {
                     const int numBytes = (int) CFDataGetLength (data);
-                    const JUCE_NAMESPACE::uint8* const rawBytes = CFDataGetBytePtr (data);
+                    const juce::uint8* const rawBytes = CFDataGetBytePtr (data);
 
                     if (numBytes > 0)
                         juceFilter->setCurrentProgramStateInformation (rawBytes, numBytes);
@@ -777,7 +777,7 @@ public:
             if (! midiEvents.isEmpty())
             {
                #if JucePlugin_ProducesMidiOutput
-                const JUCE_NAMESPACE::uint8* midiEventData;
+                const juce::uint8* midiEventData;
                 int midiEventSize, midiEventPosition;
                 MidiBuffer::Iterator i (midiEvents);
 
@@ -842,9 +842,9 @@ protected:
     {
        #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
-        const JUCE_NAMESPACE::uint8 data[] = { (JUCE_NAMESPACE::uint8) (nStatus | inChannel),
-                                               (JUCE_NAMESPACE::uint8) inData1,
-                                               (JUCE_NAMESPACE::uint8) inData2 };
+        const juce::uint8 data[] = { (juce::uint8) (nStatus | inChannel),
+                                     (juce::uint8) inData1,
+                                     (juce::uint8) inData2 };
 
         incomingEvents.addEvent (data, 3, inStartFrame);
        #endif
@@ -926,7 +926,7 @@ private:
     SMPTETime lastSMPTETime;
     AUChannelInfo channelInfo [numChannelConfigs];
     AudioUnitEvent auEvent;
-    mutable JUCE_NAMESPACE::MemoryBlock presetsArray;
+    mutable juce::MemoryBlock presetsArray;
     CriticalSection incomingMidiLock;
 
     JUCE_DECLARE_NON_COPYABLE (JuceAU);

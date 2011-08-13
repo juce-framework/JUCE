@@ -29,10 +29,10 @@ END_JUCE_NAMESPACE
 
 @interface DownloadClickDetector   : NSObject
 {
-    JUCE_NAMESPACE::WebBrowserComponent* ownerComponent;
+    juce::WebBrowserComponent* ownerComponent;
 }
 
-- (DownloadClickDetector*) initWithWebBrowserOwner: (JUCE_NAMESPACE::WebBrowserComponent*) ownerComponent;
+- (DownloadClickDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent;
 
 - (void) webView: (WebView*) webView decidePolicyForNavigationAction: (NSDictionary*) actionInformation
                                                              request: (NSURLRequest*) request
@@ -43,7 +43,7 @@ END_JUCE_NAMESPACE
 //==============================================================================
 @implementation DownloadClickDetector
 
-- (DownloadClickDetector*) initWithWebBrowserOwner: (JUCE_NAMESPACE::WebBrowserComponent*) ownerComponent_
+- (DownloadClickDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent_
 {
     [super init];
     ownerComponent = ownerComponent_;

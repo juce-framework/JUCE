@@ -1332,7 +1332,7 @@ bool AudioProcessorGraph::isInputChannelStereoPair (int /*index*/) const    { re
 bool AudioProcessorGraph::isOutputChannelStereoPair (int /*index*/) const   { return true; }
 bool AudioProcessorGraph::acceptsMidi() const   { return true; }
 bool AudioProcessorGraph::producesMidi() const  { return true; }
-void AudioProcessorGraph::getStateInformation (JUCE_NAMESPACE::MemoryBlock& /*destData*/)   {}
+void AudioProcessorGraph::getStateInformation (juce::MemoryBlock& /*destData*/)   {}
 void AudioProcessorGraph::setStateInformation (const void* /*data*/, int /*sizeInBytes*/)   {}
 
 
@@ -1495,7 +1495,7 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setCurrentProgram (int)        
 const String AudioProcessorGraph::AudioGraphIOProcessor::getProgramName (int)       { return String::empty; }
 void AudioProcessorGraph::AudioGraphIOProcessor::changeProgramName (int, const String&) {}
 
-void AudioProcessorGraph::AudioGraphIOProcessor::getStateInformation (JUCE_NAMESPACE::MemoryBlock&) {}
+void AudioProcessorGraph::AudioGraphIOProcessor::getStateInformation (juce::MemoryBlock&) {}
 void AudioProcessorGraph::AudioGraphIOProcessor::setStateInformation (const void*, int) {}
 
 void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorGraph* const newGraph)

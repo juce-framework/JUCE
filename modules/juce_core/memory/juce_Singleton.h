@@ -89,13 +89,13 @@
 #define juce_DeclareSingleton(classname, doNotRecreateAfterDeletion) \
 \
     static classname* _singletonInstance;  \
-    static JUCE_NAMESPACE::CriticalSection _singletonLock; \
+    static juce::CriticalSection _singletonLock; \
 \
     static classname* JUCE_CALLTYPE getInstance() \
     { \
         if (_singletonInstance == nullptr) \
         {\
-            const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
+            const juce::ScopedLock sl (_singletonLock); \
 \
             if (_singletonInstance == nullptr) \
             { \
@@ -126,7 +126,7 @@
 \
     static void JUCE_CALLTYPE deleteInstance() \
     { \
-        const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
+        const juce::ScopedLock sl (_singletonLock); \
         if (_singletonInstance != nullptr) \
         { \
             classname* const old = _singletonInstance; \
@@ -151,7 +151,7 @@
 #define juce_ImplementSingleton(classname) \
 \
     classname* classname::_singletonInstance = nullptr; \
-    JUCE_NAMESPACE::CriticalSection classname::_singletonLock;
+    juce::CriticalSection classname::_singletonLock;
 
 
 //==============================================================================

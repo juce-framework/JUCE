@@ -112,14 +112,14 @@
 
 //==============================================================================
 #if JUCE_WINDOWS
-  extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, JUCE_NAMESPACE::Component* comp);
-  extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, JUCE_NAMESPACE::Component* comp);
+  extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, juce::Component* comp);
+  extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, juce::Component* comp);
  #if ! JucePlugin_EditorRequiresKeyboardFocus
   extern void JUCE_CALLTYPE passFocusToHostWindow (void* hostWindow);
  #endif
 #else
-  extern void* attachSubWindow (void* hostWindowRef, JUCE_NAMESPACE::Component* comp);
-  extern void removeSubWindow (void* nsWindow, JUCE_NAMESPACE::Component* comp);
+  extern void* attachSubWindow (void* hostWindowRef, juce::Component* comp);
+  extern void removeSubWindow (void* nsWindow, juce::Component* comp);
   extern void forwardCurrentKeyEventToHostWindow();
 #endif
 
@@ -232,7 +232,7 @@ public:
 
         void timerCallback()
         {
-            if (! JUCE_NAMESPACE::Component::isMouseButtonDownAnywhere())
+            if (! juce::Component::isMouseButtonDownAnywhere())
             {
                 stopTimer();
 
@@ -287,7 +287,7 @@ public:
     private:
         AudioProcessor* const filter;
         JucePlugInProcess* const process;
-        ScopedPointer<JUCE_NAMESPACE::Component> wrapper;
+        ScopedPointer<juce::Component> wrapper;
         ScopedPointer<AudioProcessorEditor> editorComp;
 
         void deleteEditorComp()
@@ -297,7 +297,7 @@ public:
                 JUCE_AUTORELEASEPOOL
                 PopupMenu::dismissAllActiveMenus();
 
-                JUCE_NAMESPACE::Component* const modalComponent = JUCE_NAMESPACE::Component::getCurrentlyModalComponent();
+                juce::Component* const modalComponent = juce::Component::getCurrentlyModalComponent();
                 if (modalComponent != nullptr)
                     modalComponent->exitModalState (0);
 
@@ -311,7 +311,7 @@ public:
         //==============================================================================
         // A component to hold the AudioProcessorEditor, and cope with some housekeeping
         // chores when it changes or repaints.
-        class EditorCompWrapper  : public JUCE_NAMESPACE::Component
+        class EditorCompWrapper  : public juce::Component
                                  #if ! JUCE_MAC
                                    , public FocusChangeListener
                                  #endif
@@ -364,7 +364,7 @@ public:
 
             void resized()
             {
-                JUCE_NAMESPACE::Component* const c = getChildComponent (0);
+                juce::Component* const c = getChildComponent (0);
 
                 if (c != nullptr)
                     c->setBounds (0, 0, getWidth(), getHeight());
@@ -373,7 +373,7 @@ public:
             }
 
            #if JUCE_WINDOWS
-            void globalFocusChanged (JUCE_NAMESPACE::Component*)
+            void globalFocusChanged (juce::Component*)
             {
                #if ! JucePlugin_EditorRequiresKeyboardFocus
                 if (hasKeyboardFocus (true))
@@ -382,7 +382,7 @@ public:
             }
            #endif
 
-            void childBoundsChanged (JUCE_NAMESPACE::Component* child)
+            void childBoundsChanged (juce::Component* child)
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
@@ -605,7 +605,7 @@ protected:
         if (! midiEvents.isEmpty())
         {
            #if JucePlugin_ProducesMidiOutput
-            const JUCE_NAMESPACE::uint8* midiEventData;
+            const juce::uint8* midiEventData;
             int midiEventSize, midiEventPosition;
             MidiBuffer::Iterator i (midiEvents);
 
@@ -798,7 +798,7 @@ private:
 
     ScopedPointer<InternalAsyncUpdater> asyncUpdater;
 
-    JUCE_NAMESPACE::MemoryBlock tempFilterData;
+    juce::MemoryBlock tempFilterData;
     HeapBlock <float*> channels;
     bool prepared;
     double sampleRate;

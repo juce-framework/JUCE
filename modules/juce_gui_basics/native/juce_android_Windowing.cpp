@@ -24,7 +24,7 @@
 */
 
 END_JUCE_NAMESPACE
-extern JUCE_NAMESPACE::JUCEApplicationBase* juce_CreateApplication(); // (from START_JUCE_APPLICATION)
+extern juce::JUCEApplicationBase* juce_CreateApplication(); // (from START_JUCE_APPLICATION)
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================

@@ -114,12 +114,12 @@ public:
             {
                 if (e->type == kVstMidiType)
                 {
-                    dest.addEvent ((const JUCE_NAMESPACE::uint8*) ((const VstMidiEvent*) e)->midiData,
+                    dest.addEvent ((const juce::uint8*) ((const VstMidiEvent*) e)->midiData,
                                    4, e->deltaFrames);
                 }
                 else if (e->type == kVstSysExType)
                 {
-                    dest.addEvent ((const JUCE_NAMESPACE::uint8*) ((const VstMidiSysexEvent*) e)->sysexDump,
+                    dest.addEvent ((const juce::uint8*) ((const VstMidiSysexEvent*) e)->sysexDump,
                                    (int) ((const VstMidiSysexEvent*) e)->dumpBytes,
                                    e->deltaFrames);
                 }

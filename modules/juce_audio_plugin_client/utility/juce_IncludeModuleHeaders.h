@@ -25,9 +25,9 @@
 
 #include "../juce_audio_plugin_client.h"
 
-using namespace JUCE_NAMESPACE;
+using namespace juce;
 
 #if JUCE_MAC
- #define Point JUCE_NAMESPACE::Point
- #define Component JUCE_NAMESPACE::Component
+ #define Point     juce::Point
+ #define Component juce::Component
 #endif

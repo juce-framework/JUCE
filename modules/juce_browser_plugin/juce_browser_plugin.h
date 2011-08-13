@@ -140,7 +140,7 @@ END_JUCE_NAMESPACE
     Obviously multiple instances may be used simultaneously, so be VERY cautious
     in your use of static variables!
 */
-JUCE_NAMESPACE::BrowserPluginComponent* JUCE_CALLTYPE createBrowserPlugin();
+juce::BrowserPluginComponent* JUCE_CALLTYPE createBrowserPlugin();
 
 
 #endif   // __JUCE_BROWSER_PLUGIN_JUCEHEADER__

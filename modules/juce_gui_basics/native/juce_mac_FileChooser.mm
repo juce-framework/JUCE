@@ -27,7 +27,7 @@
 
 //==============================================================================
 END_JUCE_NAMESPACE
-using namespace JUCE_NAMESPACE;
+using namespace juce;
 
 #define JuceFileChooserDelegate MakeObjCClassName(JuceFileChooserDelegate)
 

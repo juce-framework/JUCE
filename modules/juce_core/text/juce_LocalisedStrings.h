@@ -37,7 +37,7 @@
     @see LocalisedStrings
 */
 #define TRANS(stringLiteral) \
-    JUCE_NAMESPACE::LocalisedStrings::translateWithCurrentMappings (stringLiteral)
+    juce::LocalisedStrings::translateWithCurrentMappings (stringLiteral)
 
 
 

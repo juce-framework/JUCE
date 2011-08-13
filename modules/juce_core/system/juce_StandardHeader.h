@@ -50,11 +50,9 @@
 #include "juce_TargetPlatform.h"  // (sets up the various JUCE_WINDOWS, JUCE_MAC, etc flags)
 
 //==============================================================================
-#ifndef JUCE_NAMESPACE
- #define JUCE_NAMESPACE juce
-#endif
+#define JUCE_NAMESPACE juce
 
-#define BEGIN_JUCE_NAMESPACE    namespace JUCE_NAMESPACE {
+#define BEGIN_JUCE_NAMESPACE    namespace juce {
 #define END_JUCE_NAMESPACE      }
 
 //==============================================================================
@@ -202,7 +200,7 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
  };
 
  /** A macro that can be used to easily declare a local ScopedAutoReleasePool object for RAII-based obj-C autoreleasing. */
- #define JUCE_AUTORELEASEPOOL  const JUCE_NAMESPACE::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
+ #define JUCE_AUTORELEASEPOOL  const juce::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
 
 #else
  #define JUCE_AUTORELEASEPOOL

@@ -87,14 +87,14 @@
       This is only compiled in a debug build.
       @see Logger::outputDebugString
   */
-  #define DBG(dbgtext)              { JUCE_NAMESPACE::String tempDbgBuf; tempDbgBuf << dbgtext; JUCE_NAMESPACE::Logger::outputDebugString (tempDbgBuf); }
+  #define DBG(dbgtext)              { juce::String tempDbgBuf; tempDbgBuf << dbgtext; juce::Logger::outputDebugString (tempDbgBuf); }
 
   //==============================================================================
   /** This will always cause an assertion failure.
       It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled for your build).
       @see jassert
   */
-  #define jassertfalse              { juce_LogCurrentAssertion; if (JUCE_NAMESPACE::juce_isRunningUnderDebugger()) juce_breakDebugger; }
+  #define jassertfalse              { juce_LogCurrentAssertion; if (juce::juce_isRunningUnderDebugger()) juce_breakDebugger; }
 
   //==============================================================================
   /** Platform-independent assertion macro.
@@ -134,7 +134,7 @@
     message that the compiler generates may be completely bizarre and seem to have no relation to
     the place where you put the static_assert though!)
 */
-#define static_jassert(expression)      JUCE_NAMESPACE::JuceStaticAssert<expression>::dummy();
+#define static_jassert(expression)      juce::JuceStaticAssert<expression>::dummy();
 
 /** This is a shorthand macro for declaring stubs for a class's copy constructor and operator=.
 

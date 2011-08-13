@@ -66,10 +66,10 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 #if JUCE_LINUX
- #define Font       JUCE_NAMESPACE::Font
- #define KeyPress   JUCE_NAMESPACE::KeyPress
- #define Drawable   JUCE_NAMESPACE::Drawable
- #define Time       JUCE_NAMESPACE::Time
+ #define Font       juce::Font
+ #define KeyPress   juce::KeyPress
+ #define Drawable   juce::Drawable
+ #define Time       juce::Time
 #endif
 
 #include "juce_VSTMidiEventList.h"
@@ -1386,7 +1386,7 @@ private:
 
         setSize (w, h);
 
-        startTimer (18 + JUCE_NAMESPACE::Random::getSystemRandom().nextInt (5));
+        startTimer (18 + juce::Random::getSystemRandom().nextInt (5));
         repaint();
     }
 
@@ -1500,7 +1500,7 @@ private:
         checkPluginWindowSize();
        #endif
 
-        startTimer (18 + JUCE_NAMESPACE::Random::getSystemRandom().nextInt (5));
+        startTimer (18 + juce::Random::getSystemRandom().nextInt (5));
         repaint();
     }
 #endif

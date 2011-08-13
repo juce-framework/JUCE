@@ -237,7 +237,7 @@ AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 }
 
 //==============================================================================
-void AudioProcessor::getCurrentProgramStateInformation (JUCE_NAMESPACE::MemoryBlock& destData)
+void AudioProcessor::getCurrentProgramStateInformation (juce::MemoryBlock& destData)
 {
     getStateInformation (destData);
 }
@@ -251,8 +251,7 @@ void AudioProcessor::setCurrentProgramStateInformation (const void* data, int si
 // magic number to identify memory blocks that we've stored as XML
 const uint32 magicXmlNumber = 0x21324356;
 
-void AudioProcessor::copyXmlToBinary (const XmlElement& xml,
-                                      JUCE_NAMESPACE::MemoryBlock& destData)
+void AudioProcessor::copyXmlToBinary (const XmlElement& xml, juce::MemoryBlock& destData)
 {
     const String xmlString (xml.createDocument (String::empty, true, false));
     const int stringLength = xmlString.getNumBytesAsUTF8();
