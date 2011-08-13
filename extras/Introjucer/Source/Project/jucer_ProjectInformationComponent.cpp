@@ -18,6 +18,7 @@
 
 //[CppHeaders] You can add your own extra header files here...
 #include "jucer_ProjectExporter.h"
+#include "jucer_Module.h"
 //[/CppHeaders]
 
 #include "jucer_ProjectInformationComponent.h"

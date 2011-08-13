@@ -59,13 +59,6 @@ const ProjectType* ProjectType::findType (const String& typeCode)
     return nullptr;
 }
 
-void ProjectType::createRequiredModules (Project& project, const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const
-{
-    for (int i = 0; i < availableModules.modules.size(); ++i)
-        if (project.isModuleEnabled (availableModules.modules.getUnchecked(i)->uid))
-            modules.add (availableModules.modules.getUnchecked(i)->create());
-}
-
 //==============================================================================
 class ProjectType_GUIApp  : public ProjectType
 {

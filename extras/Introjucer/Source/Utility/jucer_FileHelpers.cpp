@@ -30,6 +30,16 @@
 //==============================================================================
 namespace FileHelpers
 {
+    int64 calculateMemoryHashCode (const void* data, const int numBytes)
+    {
+        int64 t = 0;
+
+        for (int i = 0; i < numBytes; ++i)
+            t = t * 65599 + static_cast <const uint8*> (data)[i];
+
+        return t;
+    }
+
     int64 calculateStreamHashCode (InputStream& in)
     {
         int64 t = 0;
@@ -60,18 +70,14 @@ namespace FileHelpers
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, int numBytes)
     {
-        if (file.getSize() == numBytes)
-        {
-            MemoryInputStream newStream (data, numBytes, false);
+        if (file.getSize() == numBytes
+              && calculateMemoryHashCode (data, numBytes) == calculateFileHashCode (file))
+            return true;
 
-            if (calculateStreamHashCode (newStream) == calculateFileHashCode (file))
-                return true;
-        }
-
-        TemporaryFile temp (file);
-
-        return temp.getFile().appendData (data, numBytes)
-                 && temp.overwriteTargetFileWithTemporary();
+        if (file.exists())
+            return file.replaceWithData (data, numBytes);
+        else
+            return file.appendData (data, numBytes);
     }
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData)
@@ -144,8 +150,7 @@ namespace FileHelpers
     bool isJuceFolder (const File& folder)
     {
         return folder.getFileName().containsIgnoreCase ("juce")
-                 && folder.getChildFile ("juce.h").exists()
-                 && folder.getChildFile ("modules").exists();
+                 && folder.getChildFile ("modules").isDirectory();
     }
 
     static File lookInFolderForJuceFolder (const File& folder)

@@ -29,6 +29,8 @@
 #include "../jucer_Headers.h"
 class ProjectExporter;
 class ProjectType;
+class ModuleList;
+class LibraryModule;
 
 //==============================================================================
 class Project  : public FileBasedDocument,
@@ -162,6 +164,7 @@ public:
         Item getOrCreateSubGroup (const String& name);
         void addChild (const Item& newChild, int insertIndex);
         bool addFile (const File& file, int insertIndex, bool shouldCompile);
+        void addFileUnchecked (const File& file, int insertIndex, bool shouldCompile);
         bool addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile);
         void removeItemFromProject();
         void sortAlphabetically (bool keepGroupsAtStart);
@@ -270,6 +273,8 @@ public:
 
     void addModule (const String& moduleID);
     void removeModule (const String& moduleID);
+
+    void createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const;
 
     //==============================================================================
     String getFileTemplate (const String& templateName);

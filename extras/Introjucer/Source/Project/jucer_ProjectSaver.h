@@ -27,6 +27,7 @@
 #define __JUCER_PROJECTSAVER_JUCEHEADER__
 
 #include "jucer_ResourceFile.h"
+#include "jucer_Module.h"
 
 
 //==============================================================================
@@ -214,7 +215,7 @@ private:
             << "*/" << newLine << newLine;
 
         OwnedArray<LibraryModule> modules;
-        project.getProjectType().createRequiredModules (project, ModuleList::getInstance(), modules);
+        project.createRequiredModules (ModuleList::getInstance(), modules);
         bool anyFlags = false;
 
         for (int j = 0; j < modules.size(); ++j)
@@ -291,7 +292,7 @@ private:
 
         {
             OwnedArray<LibraryModule> modules;
-            project.getProjectType().createRequiredModules (project, ModuleList::getInstance(), modules);
+            project.createRequiredModules (ModuleList::getInstance(), modules);
 
             for (int i = 0; i < modules.size(); ++i)
                 modules.getUnchecked(i)->writeIncludes (project, out);
@@ -384,7 +385,7 @@ private:
         const ValueTree originalGeneratedGroup (generatedFilesGroup.getNode().createCopy());
 
         OwnedArray<LibraryModule> modules;
-        project.getProjectType().createRequiredModules (project, ModuleList::getInstance(), modules);
+        project.createRequiredModules (ModuleList::getInstance(), modules);
 
         for (int i = project.getNumExporters(); --i >= 0;)
         {
@@ -400,7 +401,6 @@ private:
                     modules.getUnchecked(j)->prepareExporter (*exporter, *this);
 
                 sortGroupRecursively (generatedFilesGroup);
-
                 exporter->groups.add (generatedFilesGroup);
 
                 try

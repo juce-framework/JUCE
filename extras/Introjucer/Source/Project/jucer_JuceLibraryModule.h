@@ -133,6 +133,8 @@ public:
     File moduleFile, moduleFolder;
 
 private:
+    mutable Array<File> sourceFiles;
+
     File getInclude() const
     {
         return moduleFolder.getChildFile (moduleInfo ["include"]);
@@ -171,11 +173,10 @@ private:
 
         Array<File> tempList;
 
-        while (iter.next())
-            tempList.add (iter.getFile());
-
         FileSorter sorter;
-        tempList.sort (sorter);
+        while (iter.next())
+            tempList.addSorted (sorter, iter.getFile());
+
         result.addArray (tempList);
     }
 
@@ -202,7 +203,7 @@ private:
         else
         {
             if (! group.findItemForFile (file).isValid())
-                group.addFile (file, -1, false);
+                group.addFileUnchecked (file, -1, false);
         }
     }
 
@@ -255,15 +256,15 @@ private:
 
     void addIncludedCode (ProjectExporter& exporter, const Array<File>& compiled) const
     {
-        Array<File> files;
-        getAllSourceFiles (files);
+        if (sourceFiles.size() == 0)
+            getAllSourceFiles (sourceFiles);
 
         Project::Item sourceGroup (Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID()));
 
         int i;
-        for (i = 0; i < files.size(); ++i)
-            addFileWithGroups (sourceGroup, files.getReference(i),
-                               files.getReference(i).getRelativePathFrom (moduleFolder));
+        for (i = 0; i < sourceFiles.size(); ++i)
+            addFileWithGroups (sourceGroup, sourceFiles.getReference(i),
+                               sourceFiles.getReference(i).getRelativePathFrom (moduleFolder));
 
         sourceGroup.addFile (moduleFile, -1, false);
         sourceGroup.addFile (getInclude(), -1, false);

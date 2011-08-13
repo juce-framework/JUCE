@@ -210,7 +210,7 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     props.getLast()->setTooltip ("The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
 
     OwnedArray<LibraryModule> modules;
-    project.getProjectType().createRequiredModules (project, ModuleList::getInstance(), modules);
+    project.createRequiredModules (ModuleList::getInstance(), modules);
     for (int i = 0; i < modules.size(); ++i)
         modules.getUnchecked(i)->createPropertyEditors (*this, props);
 

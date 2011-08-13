@@ -27,8 +27,8 @@
 #define __JUCER_PROJECTTYPE_JUCEHEADER__
 
 #include "../jucer_Headers.h"
-#include "jucer_Module.h"
-
+class Project;
+class ProjectExporter;
 
 //==============================================================================
 class ProjectType
@@ -58,8 +58,6 @@ public:
     virtual void setMissingProjectProperties (Project&) const = 0;
     virtual void createPropertyEditors (const Project&, Array <PropertyComponent*>&) const = 0;
     virtual void prepareExporter (ProjectExporter&) const = 0;
-    virtual void createRequiredModules (Project&, const ModuleList& availableModules,
-                                        OwnedArray<LibraryModule>& modules) const;
 
 protected:
     ProjectType (const String& type, const String& desc);

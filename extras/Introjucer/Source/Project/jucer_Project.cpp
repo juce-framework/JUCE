@@ -716,19 +716,7 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
     else if (file.existsAsFile())
     {
         if (! getProject().getMainGroup().findItemForFile (file).isValid())
-        {
-            Item item (getProject(), ValueTree (Tags::file));
-            item.initialiseNodeValues();
-            item.getName() = file.getFileName();
-            item.getShouldCompileValue() = shouldCompile && file.hasFileExtension ("cpp;mm;c;m;cc;cxx;r");
-            item.getShouldAddToResourceValue() = getProject().shouldBeAddedToBinaryResourcesByDefault (file);
-
-            if (canContain (item))
-            {
-                item.setFile (file);
-                addChild (item, insertIndex);
-            }
-        }
+            addFileUnchecked (file, insertIndex, shouldCompile);
     }
     else
     {
@@ -736,6 +724,21 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
     }
 
     return true;
+}
+
+void Project::Item::addFileUnchecked (const File& file, int insertIndex, const bool shouldCompile)
+{
+    Item item (getProject(), ValueTree (Tags::file));
+    item.initialiseNodeValues();
+    item.getName() = file.getFileName();
+    item.getShouldCompileValue() = shouldCompile && file.hasFileExtension ("cpp;mm;c;m;cc;cxx;r");
+    item.getShouldAddToResourceValue() = getProject().shouldBeAddedToBinaryResourcesByDefault (file);
+
+    if (canContain (item))
+    {
+        item.setFile (file);
+        addChild (item, insertIndex);
+    }
 }
 
 bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile)
@@ -856,6 +859,14 @@ void Project::removeModule (const String& moduleID)
     for (int i = 0; i < modules.getNumChildren(); ++i)
         if (modules.getChild(i) [Ids::id_] == moduleID)
             modules.removeChild (i, getUndoManagerFor (modules));
+}
+
+
+void Project::createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const
+{
+    for (int i = 0; i < availableModules.modules.size(); ++i)
+        if (isModuleEnabled (availableModules.modules.getUnchecked(i)->uid))
+            modules.add (availableModules.modules.getUnchecked(i)->create());
 }
 
 //==============================================================================

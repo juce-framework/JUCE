@@ -689,12 +689,10 @@ bool File::appendData (const void* const dataToAppend,
 {
     if (numberOfBytes > 0)
     {
-        const ScopedPointer <FileOutputStream> out (createOutputStream());
+        FileOutputStream out (*this, 8192);
 
-        if (out == 0)
-            return false;
-
-        out->write (dataToAppend, numberOfBytes);
+        return (! out.failedToOpen())
+                 && out.write (dataToAppend, numberOfBytes);
     }
 
     return true;
