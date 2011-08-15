@@ -10,7 +10,8 @@
 
   "include":        "juce_video.h",
 
-  "compile":        [ { "file": "juce_video.cpp" } ],
+  "compile":        [ { "file": "juce_video.cpp", "target": "! xcode" },
+                      { "file": "juce_video.mm",  "target": "xcode" } ],
 
   "browse":         [ "playback/*",
                       "capture/*",

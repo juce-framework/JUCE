@@ -32,7 +32,7 @@
             Optimization="0"
             BufferSecurityCheck=""
             DebugInformationFormat="4"
-            AdditionalIncludeDirectories="c:\SDKs\vstsdk2.4;..\..\JuceLibraryCode"
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode;c:\SDKs\vstsdk2.4"
             PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2005_78A5003=1"
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
@@ -88,7 +88,7 @@
             Optimization="2"
             InlineFunctionExpansion="1"
             StringPooling="true"
-            AdditionalIncludeDirectories="c:\SDKs\vstsdk2.4;..\..\JuceLibraryCode"
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode;c:\SDKs\vstsdk2.4"
             PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;JUCER_VS2005_78A5003=1"
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
@@ -4014,17 +4014,17 @@
     </Filter>
     <Filter Name="Juce Library Code">
       <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_basics_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_devices_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_formats_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_processors_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_utils_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_core_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_data_structures_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_events_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_graphics_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_gui_basics_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_RTAS_DigiCode1_wrapper.cpp">
+      <File RelativePath="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_devices\juce_audio_devices.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_formats\juce_audio_formats.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_core\juce_core.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_events\juce_events.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode1.cpp">
         <FileConfiguration Name="Debug|Win32">
           <Tool Name="VCCLCompilerTool"
                 CallingConvention="2"/>
@@ -4034,7 +4034,7 @@
                 CallingConvention="2"/>
         </FileConfiguration>
       </File>
-      <File RelativePath="..\..\JuceLibraryCode\juce_RTAS_DigiCode2_wrapper.cpp">
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode2.cpp">
         <FileConfiguration Name="Debug|Win32">
           <Tool Name="VCCLCompilerTool"
                 CallingConvention="2"/>
@@ -4044,7 +4044,7 @@
                 CallingConvention="2"/>
         </FileConfiguration>
       </File>
-      <File RelativePath="..\..\JuceLibraryCode\juce_RTAS_DigiCode3_wrapper.cpp">
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode3.cpp">
         <FileConfiguration Name="Debug|Win32">
           <Tool Name="VCCLCompilerTool"
                 CallingConvention="2"/>
@@ -4064,7 +4064,7 @@
           <Tool Name="VCCLCompilerTool"/>
         </FileConfiguration>
       </File>
-      <File RelativePath="..\..\JuceLibraryCode\juce_RTAS_WinUtilities_wrapper.cpp">
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_WinUtilities.cpp">
         <FileConfiguration Name="Debug|Win32">
           <Tool Name="VCCLCompilerTool"
                 CallingConvention="2"/>
@@ -4074,7 +4074,7 @@
                 CallingConvention="2"/>
         </FileConfiguration>
       </File>
-      <File RelativePath="..\..\JuceLibraryCode\juce_RTAS_Wrapper_wrapper.cpp">
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_Wrapper.cpp">
         <FileConfiguration Name="Debug|Win32">
           <Tool Name="VCCLCompilerTool"
                 CallingConvention="2"/>
@@ -4084,7 +4084,7 @@
                 CallingConvention="2"/>
         </FileConfiguration>
       </File>
-      <File RelativePath="..\..\JuceLibraryCode\juce_VST_Wrapper_wrapper.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
     </Filter>
   </Files>

@@ -256,14 +256,20 @@ void PropertyPanelWithTooltips::paint (Graphics& g)
     if (tl.getNumLines() > 3)
         tl.layout (getWidth() - 10, Justification::left, false); // too big, so just squash it in..
 
-    tl.drawWithin (g, 5, panel.getBottom() + 2, getWidth() - 10,
-                   getHeight() - panel.getBottom() - 4,
-                   Justification::centredLeft);
+    Rectangle<int> r (getTipArea());
+    tl.drawWithin (g, r.getX(), r.getY(), r.getWidth(), r.getHeight(),
+                   Justification::bottomLeft);
 }
 
 void PropertyPanelWithTooltips::resized()
 {
     panel.setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
+}
+
+Rectangle<int> PropertyPanelWithTooltips::getTipArea() const
+{
+    return Rectangle<int> (5, panel.getBottom() - 50, getWidth() - 10,
+                           getHeight() - (panel.getBottom() - 50) - 4);
 }
 
 void PropertyPanelWithTooltips::timerCallback()
@@ -282,7 +288,7 @@ void PropertyPanelWithTooltips::timerCallback()
         if (newTip != lastTip)
         {
             lastTip = newTip;
-            repaint (0, panel.getBottom(), getWidth(), getHeight());
+            repaint (getTipArea());
         }
     }
 }

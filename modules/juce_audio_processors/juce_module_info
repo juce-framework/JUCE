@@ -11,7 +11,8 @@
 
   "include":        "juce_audio_processors.h",
 
-  "compile":        [ { "file": "juce_audio_processors.cpp" } ],
+  "compile":        [ { "file": "juce_audio_processors.cpp", "target": "! xcode" },
+                      { "file": "juce_audio_processors.mm",  "target": "xcode" } ],
 
   "browse":         [ "processors/*",
                       "format/*",

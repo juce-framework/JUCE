@@ -54,7 +54,7 @@
 #define forEachXmlChildElement(parentXmlElement, childElementVariableName) \
 \
     for (juce::XmlElement* childElementVariableName = (parentXmlElement).getFirstChildElement(); \
-         childElementVariableName != 0; \
+         childElementVariableName != nullptr; \
          childElementVariableName = childElementVariableName->getNextElement())
 
 /** A macro that makes it easy to iterate all the child elements of an XmlElement
@@ -83,7 +83,7 @@
 #define forEachXmlChildElementWithTagName(parentXmlElement, childElementVariableName, requiredTagName) \
 \
     for (juce::XmlElement* childElementVariableName = (parentXmlElement).getChildByName (requiredTagName); \
-         childElementVariableName != 0; \
+         childElementVariableName != nullptr; \
          childElementVariableName = childElementVariableName->getNextElementWithTagName (requiredTagName))
 
 
@@ -424,7 +424,7 @@ public:
 
         @see forEachXmlChildElement
     */
-    XmlElement* getFirstChildElement() const noexcept   { return firstChildElement; }
+    XmlElement* getFirstChildElement() const noexcept       { return firstChildElement; }
 
     /** Returns the next of this element's siblings.
 
@@ -689,20 +689,20 @@ public:
 private:
     struct XmlAttributeNode
     {
-        XmlAttributeNode (const XmlAttributeNode& other) noexcept;
+        XmlAttributeNode (const XmlAttributeNode&) noexcept;
         XmlAttributeNode (const String& name, const String& value) noexcept;
 
         LinkedListPointer<XmlAttributeNode> nextListItem;
         String name, value;
 
-        bool hasName (const String& name) const noexcept;
+        bool hasName (const String&) const noexcept;
 
     private:
         XmlAttributeNode& operator= (const XmlAttributeNode&);
     };
 
     friend class XmlDocument;
-    friend class LinkedListPointer<XmlAttributeNode>;
+    friend class LinkedListPointer <XmlAttributeNode>;
     friend class LinkedListPointer <XmlElement>;
     friend class LinkedListPointer <XmlElement>::Appender;
 
@@ -712,8 +712,8 @@ private:
     String tagName;
 
     XmlElement (int) noexcept;
-    void copyChildrenAndAttributesFrom (const XmlElement& other);
-    void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
+    void copyChildrenAndAttributesFrom (const XmlElement&);
+    void writeElementAsText (OutputStream&, int indentationLevel, int lineWrapLength) const;
     void getChildElementsAsArray (XmlElement**) const noexcept;
     void reorderChildElements (XmlElement**, int) noexcept;
 

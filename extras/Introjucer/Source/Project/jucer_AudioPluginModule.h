@@ -226,7 +226,7 @@ namespace RTASHelpers
                                 "xplat/AVX/avx2/avx2sdk/inc" };
 
             for (int i = 0; i < numElementsInArray (p); ++i)
-                exporter.extraSearchPaths.add (exporter.rebaseFromProjectFolderToBuildTarget (rtasFolder.getChildFile (p[i])).toWindowsStyle());
+                exporter.addToExtraSearchPaths (rtasFolder.getChildFile (p[i]));
         }
         else if (exporter.isXcode())
         {
@@ -263,7 +263,7 @@ namespace RTASHelpers
                                 "xplat/AVX/avx2/avx2sdk/utils" };
 
             for (int i = 0; i < numElementsInArray (p); ++i)
-                exporter.extraSearchPaths.add (exporter.rebaseFromProjectFolderToBuildTarget (rtasFolder.getChildFile (p[i])).toUnixStyle());
+                exporter.addToExtraSearchPaths (rtasFolder.getChildFile (p[i]));
         }
     }
 

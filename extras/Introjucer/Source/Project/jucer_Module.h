@@ -35,14 +35,47 @@ class ProjectSaver;
 class LibraryModule
 {
 public:
-    LibraryModule() {}
-    virtual ~LibraryModule() {}
+    LibraryModule (const File& file);
 
-    virtual String getID() const = 0;
-    virtual void prepareExporter (ProjectExporter&, ProjectSaver&) const = 0;
-    virtual void writeIncludes (Project&, OutputStream& out) = 0;
-    virtual void createPropertyEditors (const ProjectExporter&, Array <PropertyComponent*>&) const = 0;
-    virtual void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>&) const = 0;
+    String getID() const; 
+    bool isValid() const;
+
+    void writeIncludes (ProjectSaver& projectSaver, OutputStream& out);
+    void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const;
+    void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const;
+    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const;
+
+    var moduleInfo;
+
+private:
+    File moduleFile, moduleFolder;
+    mutable Array<File> sourceFiles;
+
+    File getInclude (const File& folder) const;
+    File getModuleTargetFolder (ProjectSaver& projectSaver) const;
+    String getPathToModuleFile (ProjectSaver& projectSaver, const File& file) const;
+    static bool fileTargetMatches (ProjectExporter& exporter, const String& target);
+
+    struct FileSorter
+    {
+        static int compareElements (const File& f1, const File& f2)
+        {
+            return f1.getFileName().compareIgnoreCase (f2.getFileName());
+        }
+    };
+
+    void findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const;
+    void addFileWithGroups (Project::Item& group, const File& file, const String& path) const;
+    void findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& localModuleFolder, Array<File>& result) const;
+    void addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const;
+
+    static void writeSourceWrapper (OutputStream& out, Project& project, const String& pathFromJuceFolder);
+    static void createMultipleIncludes (Project& project, const String& pathFromLibraryFolder, StringArray& paths, StringArray& guards);
+    static void writeInclude (Project& project, OutputStream& out, const String& pathFromJuceFolder);
+
+    bool isPluginClient() const;
+    bool isAUPluginHost (const Project& project) const;
+    bool isVSTPluginHost (const Project& project) const;
 };
 
 //==============================================================================

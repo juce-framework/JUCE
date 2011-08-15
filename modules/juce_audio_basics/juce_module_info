@@ -10,7 +10,8 @@
 
   "include":        "juce_audio_basics.h",
 
-  "compile":        [ { "file": "juce_audio_basics.cpp" } ],
+  "compile":        [ { "file": "juce_audio_basics.cpp", "target": "! xcode" },
+                      { "file": "juce_audio_basics.mm",  "target": "xcode" } ],
 
   "browse":         [ "buffers/*",
                       "midi/*",

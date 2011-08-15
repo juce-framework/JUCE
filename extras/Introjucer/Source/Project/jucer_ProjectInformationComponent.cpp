@@ -145,11 +145,17 @@ public:
             }
 
             props.add (new BooleanPropertyComponent (project.shouldShowAllModuleFilesInProject (moduleID),
-                                                     "Show All Code", "Add entire module tree to target projects"));
+                                                     "Add source to project", "Make module files browsable in projects"));
             props.getLast()->setTooltip ("If this is enabled, then the entire source tree from this module will be shown inside your project, "
                                          "making it easy to browse/edit the module's classes. If disabled, then only the minimum number of files "
                                          "required to compile it will appear inside your project.");
 
+            props.add (new BooleanPropertyComponent (project.shouldCopyModuleFilesLocally (moduleID),
+                                                     "Create local copy", "Copy the module into the project folder"));
+            props.getLast()->setTooltip ("If this is enabled, then a local copy of the entire module will be made inside your project (in the auto-generated JuceLibraryFiles folder), "
+                                         "so that your project will be self-contained, and won't need to contain any references to files in other folders. "
+                                         "This also means that you can check the module into your source-control system to make sure it is always in sync with your own code.");
+    
             StringArray possibleValues;
             possibleValues.add ("(Use Default)");
             possibleValues.add ("Enabled");

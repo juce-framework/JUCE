@@ -10,7 +10,8 @@
 
   "include":        "juce_opengl.h",
 
-  "compile":        [ { "file": "juce_opengl.cpp" } ],
+  "compile":        [ { "file": "juce_opengl.cpp", "target": "! xcode" },
+                      { "file": "juce_opengl.mm",  "target": "xcode" } ],
 
   "browse":         [ "opengl/*",
                       "native/*" ]

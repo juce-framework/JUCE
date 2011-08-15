@@ -13,7 +13,8 @@
 
   "include":        "juce_gui_basics.h",
 
-  "compile":        [ { "file": "juce_gui_basics.cpp" } ],
+  "compile":        [ { "file": "juce_gui_basics.cpp", "target": "! xcode" },
+                      { "file": "juce_gui_basics.mm",  "target": "xcode" } ],
 
   "browse":         [ "components/*",
                       "mouse/*",

@@ -494,15 +494,14 @@ bool Project::Item::shouldBeAddedToTargetProject() const
     return isFile();
 }
 
-bool Project::Item::shouldBeCompiled() const        { return getShouldCompileValue().getValue(); }
-Value Project::Item::getShouldCompileValue() const  { return node.getPropertyAsValue (Ids::compile, getUndoManager()); }
+bool Project::Item::shouldBeCompiled() const                { return getShouldCompileValue().getValue(); }
+Value Project::Item::getShouldCompileValue() const          { return node.getPropertyAsValue (Ids::compile, getUndoManager()); }
 
 bool Project::Item::shouldBeAddedToBinaryResources() const  { return getShouldAddToResourceValue().getValue(); }
 Value Project::Item::getShouldAddToResourceValue() const    { return node.getPropertyAsValue (Ids::resource, getUndoManager()); }
 
 Value Project::Item::getShouldInhibitWarningsValue() const  { return node.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
 Value Project::Item::getShouldUseStdCallValue() const       { return node.getPropertyAsValue (Ids::useStdCall, nullptr); }
-
 
 String Project::Item::getFilePath() const
 {
@@ -836,6 +835,12 @@ Value Project::shouldShowAllModuleFilesInProject (const String& moduleID)
 {
     return getModulesNode().getChildWithProperty (Ids::id_, moduleID)
                            .getPropertyAsValue (Ids::showAllCode, getUndoManagerFor (getModulesNode()));
+}
+
+Value Project::shouldCopyModuleFilesLocally (const String& moduleID)
+{
+    return getModulesNode().getChildWithProperty (Ids::id_, moduleID)
+                           .getPropertyAsValue (Ids::useLocalCopy, getUndoManagerFor (getModulesNode()));
 }
 
 void Project::addModule (const String& moduleID)

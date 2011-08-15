@@ -725,7 +725,7 @@ private:
             sourceTree = "<absolute>";
         }
 
-        const String fileRefID (createID (pathString));
+        const String fileRefID (createFileRefID (pathString));
 
         ValueTree* v = new ValueTree (fileRefID);
         v->setProperty ("isa", "PBXFileReference", 0);
@@ -734,7 +734,7 @@ private:
         v->setProperty ("path", sanitisePath (pathString), 0);
         v->setProperty ("sourceTree", sourceTree, 0);
         pbxFileReferences.add (v);
-
+        
         return fileRefID;
     }
 
@@ -760,15 +760,18 @@ private:
 
     String addFile (const RelativePath& path, bool shouldBeCompiled, bool inhibitWarnings)
     {
+        const String pathAsString (path.toUnixStyle());
+        const String refID (addFileReference (path.toUnixStyle()));
+
         if (shouldBeCompiled)
         {
             if (path.hasFileExtension (".r"))
-                rezFileIDs.add (addBuildFile (path, false, inhibitWarnings));
+                rezFileIDs.add (addBuildFile (pathAsString, refID, false, inhibitWarnings));
             else
-                addBuildFile (path, true, inhibitWarnings);
+                addBuildFile (pathAsString, refID, true, inhibitWarnings);
         }
 
-        return addFileReference (path.toUnixStyle());
+        return refID;
     }
 
     String addProjectItem (const Project::Item& projectItem)
@@ -812,7 +815,7 @@ private:
     void addFramework (const String& frameworkName)
     {
         const String path ("System/Library/Frameworks/" + frameworkName + ".framework");
-        const String fileRefID (createID (path));
+        const String fileRefID (createFileRefID (path));
         addFileReference ("${SDKROOT}/" + path);
         frameworkIDs.add (addBuildFile (path, fileRefID, false, false));
         frameworkFileIDs.add (fileRefID);
@@ -990,6 +993,11 @@ private:
         return String (n, numElementsInArray (n));
     }
 
+    String createFileRefID (const String& path)
+    {
+        return createID ("__fileref_" + path);
+    }
+    
     String getIDForGroup (const Project::Item& item) const
     {
         return createID (item.getID());

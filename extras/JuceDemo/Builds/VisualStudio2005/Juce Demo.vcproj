@@ -32,7 +32,7 @@
             Optimization="0"
             BufferSecurityCheck=""
             DebugInformationFormat="4"
-            AdditionalIncludeDirectories=""
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode"
             PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_UNIT_TESTS=1;JUCER_VS2005_78A5003=1"
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
@@ -88,7 +88,7 @@
             Optimization="2"
             InlineFunctionExpansion="1"
             StringPooling="true"
-            AdditionalIncludeDirectories=""
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode"
             PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;JUCE_UNIT_TESTS=1;JUCER_VS2005_78A5003=1"
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
@@ -4464,20 +4464,20 @@
       <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>
       <File RelativePath="..\..\JuceLibraryCode\BinaryData.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\BinaryData.h"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_basics_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_devices_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_formats_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_processors_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_audio_utils_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_core_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_cryptography_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_data_structures_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_events_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_graphics_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_gui_basics_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_gui_extra_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_opengl_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_video_wrapper.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_devices\juce_audio_devices.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_formats\juce_audio_formats.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_core\juce_core.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_cryptography\juce_cryptography.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_events\juce_events.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_opengl\juce_opengl.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_video\juce_video.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
       <File RelativePath="icon.ico"/>
       <File RelativePath="resources.rc"/>

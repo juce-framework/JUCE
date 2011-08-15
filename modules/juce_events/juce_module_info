@@ -10,7 +10,8 @@
 
   "include":        "juce_events.h",
 
-  "compile":        [ { "file": "juce_events.cpp" } ],
+  "compile":        [ { "file": "juce_events.cpp", "target": "! xcode" },
+                      { "file": "juce_events.mm",  "target": "xcode" } ],
 
   "browse":         [ "messages/*",
                       "timers/*",

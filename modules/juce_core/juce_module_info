@@ -10,7 +10,8 @@
 
   "include":        "juce_core.h",
 
-  "compile":        [ { "file": "juce_core.cpp" } ],
+  "compile":        [ { "file": "juce_core.cpp", "target": "! xcode" },
+                      { "file": "juce_core.mm",  "target": "xcode" } ],
 
   "browse":         [ "text/*",
                       "maths/*",

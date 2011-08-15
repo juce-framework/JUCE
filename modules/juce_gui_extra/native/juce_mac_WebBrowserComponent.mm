@@ -113,7 +113,7 @@ public:
         {
             for (int i = 0; i < headers->size(); ++i)
             {
-                const String headerName ((*headers)[i].upToFirstOccurrenceOf (":", false, false).trim());
+                const String headerName  ((*headers)[i].upToFirstOccurrenceOf (":", false, false).trim());
                 const String headerValue ((*headers)[i].fromFirstOccurrenceOf (":", false, false).trim());
 
                 [r setValue: juceStringToNS (headerValue)
@@ -125,32 +125,17 @@ public:
         [[webView mainFrame] loadRequest: r];
     }
 
-    void goBack()
-    {
-        [webView goBack];
-    }
-
-    void goForward()
-    {
-        [webView goForward];
-    }
-
-    void stop()
-    {
-        [webView stopLoading: nil];
-    }
-
-    void refresh()
-    {
-        [webView reload: nil];
-    }
+    void goBack()       { [webView goBack]; }
+    void goForward()    { [webView goForward]; }
+    void stop()         { [webView stopLoading: nil]; }
+    void refresh()      { [webView reload: nil]; }
 
     void mouseMove (const MouseEvent&)
     {
         // WebKit doesn't capture mouse-moves itself, so it seems the only way to make
         // them work is to push them via this non-public method..
         if ([webView respondsToSelector: @selector (_updateMouseoverWithFakeEvent)])
-            [webView performSelector: @selector (_updateMouseoverWithFakeEvent)];
+            [webView performSelector:    @selector (_updateMouseoverWithFakeEvent)];
     }
 
 private:

@@ -10,7 +10,8 @@
 
   "include":        "juce_audio_formats.h",
 
-  "compile":        [ { "file": "juce_audio_formats.cpp" } ],
+  "compile":        [ { "file": "juce_audio_formats.cpp", "target": "! xcode" },
+                      { "file": "juce_audio_formats.mm",  "target": "xcode" } ],
 
   "browse":         [ "format/*",
                       "codecs/*",

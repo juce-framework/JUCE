@@ -32,7 +32,7 @@
             Optimization="0"
             BufferSecurityCheck=""
             DebugInformationFormat="4"
-            AdditionalIncludeDirectories=""
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode"
             PreprocessorDefinitions="WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2008_78A5006=1"
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
@@ -88,7 +88,7 @@
             Optimization="2"
             InlineFunctionExpansion="1"
             StringPooling="true"
-            AdditionalIncludeDirectories=""
+            AdditionalIncludeDirectories="..\..\JuceLibraryCode"
             PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;JUCER_VS2008_78A5006=1"
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
@@ -3250,12 +3250,12 @@
     </Filter>
     <Filter Name="Juce Library Code">
       <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_core_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_data_structures_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_events_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_graphics_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_gui_basics_wrapper.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\juce_gui_extra_wrapper.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_core\juce_core.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_events\juce_events.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
     </Filter>
   </Files>

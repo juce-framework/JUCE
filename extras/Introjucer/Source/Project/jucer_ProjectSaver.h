@@ -63,20 +63,23 @@ public:
 
         writeMainProjectFile();
 
+        OwnedArray<LibraryModule> modules;
+        project.createRequiredModules (ModuleList::getInstance(), modules);
+
         if (errors.size() == 0)
-            writeAppConfigFile();
+            writeAppConfigFile (modules);
 
         if (errors.size() == 0)
             writeBinaryDataFiles();
 
         if (errors.size() == 0)
-            writeAppHeader();
+            writeAppHeader (modules);
 
         if (errors.size() == 0)
-            writeProjects();
+            writeProjects (modules);
 
         if (errors.size() == 0)
-            writeAppConfigFile(); // (this is repeated in case the projects added anything to it)
+            writeAppConfigFile (modules); // (this is repeated in case the projects added anything to it)
 
         if (generatedCodeFolder.exists() && errors.size() == 0)
             writeReadmeFile();
@@ -168,6 +171,8 @@ public:
 
     static String getJuceCodeGroupName()                    { return "Juce Library Code"; }
 
+    File getGeneratedCodeFolder() const                     { return generatedCodeFolder; }
+    
 private:
     Project& project;
     const File projectFile, generatedCodeFolder;
@@ -204,7 +209,17 @@ private:
         }
     }
 
-    bool writeAppConfig (OutputStream& out)
+    static int findLongestModuleName (const OwnedArray<LibraryModule>& modules)
+    {
+        int longest = 0;
+
+        for (int i = modules.size(); --i >= 0;)
+            longest = jmax (longest, modules.getUnchecked(i)->getID().length());
+        
+        return longest;
+    }
+    
+    bool writeAppConfig (OutputStream& out, const OwnedArray<LibraryModule>& modules)
     {
         writeAutoGenWarningComment (out);
         out << "    If you want to change any of these values, use the Introjucer to do so," << newLine
@@ -214,9 +229,20 @@ private:
             << newLine
             << "*/" << newLine << newLine;
 
-        OwnedArray<LibraryModule> modules;
-        project.createRequiredModules (ModuleList::getInstance(), modules);
         bool anyFlags = false;
+
+        out << "//==============================================================================" << newLine;
+
+        const int longestName = findLongestModuleName (modules);
+
+        for (int k = 0; k < modules.size(); ++k)
+        {
+            LibraryModule* const m = modules.getUnchecked(k);
+            out << "#define JUCE_MODULE_AVAILABLE_" << m->getID() 
+                << String::repeatedString (" ", longestName + 5 - m->getID().length()) << " 1" << newLine;
+        }
+        
+        out << newLine;
 
         for (int j = 0; j < modules.size(); ++j)
         {
@@ -263,16 +289,16 @@ private:
         return anyFlags;
     }
 
-    void writeAppConfigFile()
+    void writeAppConfigFile (const OwnedArray<LibraryModule>& modules)
     {
         appConfigFile = generatedCodeFolder.getChildFile (project.getAppConfigFilename());
 
         MemoryOutputStream mem;
-        if (writeAppConfig (mem))
+        if (writeAppConfig (mem, modules))
             saveGeneratedFile (project.getAppConfigFilename(), mem);
     }
 
-    void writeAppHeader (OutputStream& out)
+    void writeAppHeader (OutputStream& out, const OwnedArray<LibraryModule>& modules)
     {
         writeAutoGenWarningComment (out);
 
@@ -290,13 +316,8 @@ private:
         if (appConfigFile.exists())
             out << CodeHelpers::createIncludeStatement (project.getAppConfigFilename()) << newLine;
 
-        {
-            OwnedArray<LibraryModule> modules;
-            project.createRequiredModules (ModuleList::getInstance(), modules);
-
-            for (int i = 0; i < modules.size(); ++i)
-                modules.getUnchecked(i)->writeIncludes (project, out);
-        }
+        for (int i = 0; i < modules.size(); ++i)
+            modules.getUnchecked(i)->writeIncludes (*this, out);
 
         if (binaryDataCpp.exists())
             out << CodeHelpers::createIncludeStatement (binaryDataCpp.withFileExtension (".h"), appConfigFile) << newLine;
@@ -318,10 +339,10 @@ private:
             << "#endif   // " << headerGuard << newLine;
     }
 
-    void writeAppHeader()
+    void writeAppHeader (const OwnedArray<LibraryModule>& modules)
     {
         MemoryOutputStream mem;
-        writeAppHeader (mem);
+        writeAppHeader (mem, modules);
         saveGeneratedFile (project.getJuceSourceHFilename(), mem);
     }
 
@@ -379,13 +400,10 @@ private:
             sortGroupRecursively (group.getChild(i));
     }
 
-    void writeProjects()
+    void writeProjects (const OwnedArray<LibraryModule>& modules)
     {
         // keep a copy of the basic generated files group, as each exporter may modify it.
         const ValueTree originalGeneratedGroup (generatedFilesGroup.getNode().createCopy());
-
-        OwnedArray<LibraryModule> modules;
-        project.createRequiredModules (ModuleList::getInstance(), modules);
 
         for (int i = project.getNumExporters(); --i >= 0;)
         {
@@ -394,6 +412,8 @@ private:
 
             if (exporter->getTargetFolder().createDirectory())
             {
+                exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
+
                 generatedFilesGroup.getNode() = originalGeneratedGroup.createCopy();
                 project.getProjectType().prepareExporter (*exporter);
 

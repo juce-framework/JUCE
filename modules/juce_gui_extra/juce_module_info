@@ -10,7 +10,8 @@
 
   "include":        "juce_gui_extra.h",
 
-  "compile":        [ { "file": "juce_gui_extra.cpp" } ],
+  "compile":        [ { "file": "juce_gui_extra.cpp", "target": "! xcode" },
+                      { "file": "juce_gui_extra.mm",  "target": "xcode" } ],
 
   "browse":         [ "code_editor/*",
                       "documents/*",

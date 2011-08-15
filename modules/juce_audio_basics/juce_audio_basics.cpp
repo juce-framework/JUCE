@@ -32,6 +32,10 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
+// Your project must contain an AppConfig.h file with your project-specific settings in it, 
+// and your header search path must make it accessible to the module's files.
+#include "AppConfig.h"
+
 #include "juce_audio_basics.h"
 
 // START_AUTOINCLUDE buffers/*.cpp, effects/*.cpp, midi/*.cpp, sources/*.cpp, synthesisers/*.cpp

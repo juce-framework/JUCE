@@ -17,12 +17,12 @@ ifeq ($(CONFIG),Debug)
   LIBDIR := build
   OBJDIR := build/intermediate/Debug
   OUTDIR := build
-  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2" -I "~/SDKs/vstsdk2.4"
+  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2" -I "~/SDKs/vstsdk2.4" -I "../../JuceLibraryCode"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -ggdb -O0
   CXXFLAGS += $(CFLAGS) 
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -L"/usr/X11R6/lib/" -L"../../../../../juce/bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound 
   LDDEPS :=
-  RESFLAGS :=  -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2" -I "~/SDKs/vstsdk2.4"
+  RESFLAGS :=  -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2" -I "~/SDKs/vstsdk2.4" -I "../../JuceLibraryCode"
   TARGET := Plugin\ Host
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
@@ -32,12 +32,12 @@ ifeq ($(CONFIG),Release)
   LIBDIR := build
   OBJDIR := build/intermediate/Release
   OUTDIR := build
-  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2" -I "~/SDKs/vstsdk2.4"
+  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2" -I "~/SDKs/vstsdk2.4" -I "../../JuceLibraryCode"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -Os
   CXXFLAGS += $(CFLAGS) 
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -L"/usr/X11R6/lib/" -L"../../../../../juce/bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound 
   LDDEPS :=
-  RESFLAGS :=  -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2" -I "~/SDKs/vstsdk2.4"
+  RESFLAGS :=  -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I "/usr/include" -I "/usr/include/freetype2" -I "~/SDKs/vstsdk2.4" -I "../../JuceLibraryCode"
   TARGET := Plugin\ Host
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
@@ -48,19 +48,19 @@ OBJECTS := \
   $(OBJDIR)/HostStartup_5ce96f96.o \
   $(OBJDIR)/InternalFilters_beb54bdf.o \
   $(OBJDIR)/MainHostWindow_e920295a.o \
-  $(OBJDIR)/juce_audio_basics_wrapper_e4aa31f5.o \
-  $(OBJDIR)/juce_audio_devices_wrapper_845aeedf.o \
-  $(OBJDIR)/juce_audio_formats_wrapper_994a82de.o \
-  $(OBJDIR)/juce_audio_processors_wrapper_a34d7091.o \
-  $(OBJDIR)/juce_core_wrapper_b07ed786.o \
-  $(OBJDIR)/juce_cryptography_wrapper_8b556353.o \
-  $(OBJDIR)/juce_data_structures_wrapper_4f7fd480.o \
-  $(OBJDIR)/juce_events_wrapper_a8dc8280.o \
-  $(OBJDIR)/juce_graphics_wrapper_a0e77172.o \
-  $(OBJDIR)/juce_gui_basics_wrapper_e00f2ff0.o \
-  $(OBJDIR)/juce_gui_extra_wrapper_b6e18277.o \
-  $(OBJDIR)/juce_opengl_wrapper_74bbb916.o \
-  $(OBJDIR)/juce_video_wrapper_fcc67966.o \
+  $(OBJDIR)/juce_audio_basics_399a455e.o \
+  $(OBJDIR)/juce_audio_devices_c1c9ba9c.o \
+  $(OBJDIR)/juce_audio_formats_f04b043c.o \
+  $(OBJDIR)/juce_audio_processors_eb9ae116.o \
+  $(OBJDIR)/juce_core_1ee54a40.o \
+  $(OBJDIR)/juce_cryptography_3b1f489a.o \
+  $(OBJDIR)/juce_data_structures_84790dfc.o \
+  $(OBJDIR)/juce_events_584896b4.o \
+  $(OBJDIR)/juce_graphics_f9afc18.o \
+  $(OBJDIR)/juce_gui_basics_90929794.o \
+  $(OBJDIR)/juce_gui_extra_b81d9e1c.o \
+  $(OBJDIR)/juce_opengl_1890bee0.o \
+  $(OBJDIR)/juce_video_86a19d3c.o \
 
 .PHONY: clean
 
@@ -102,69 +102,69 @@ $(OBJDIR)/MainHostWindow_e920295a.o: ../../Source/MainHostWindow.cpp
 	@echo "Compiling MainHostWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_basics_wrapper_e4aa31f5.o: ../../JuceLibraryCode/juce_audio_basics_wrapper.cpp
+$(OBJDIR)/juce_audio_basics_399a455e.o: ../../../../modules/juce_audio_basics/juce_audio_basics.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_basics_wrapper.cpp"
+	@echo "Compiling juce_audio_basics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_devices_wrapper_845aeedf.o: ../../JuceLibraryCode/juce_audio_devices_wrapper.cpp
+$(OBJDIR)/juce_audio_devices_c1c9ba9c.o: ../../../../modules/juce_audio_devices/juce_audio_devices.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_devices_wrapper.cpp"
+	@echo "Compiling juce_audio_devices.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_formats_wrapper_994a82de.o: ../../JuceLibraryCode/juce_audio_formats_wrapper.cpp
+$(OBJDIR)/juce_audio_formats_f04b043c.o: ../../../../modules/juce_audio_formats/juce_audio_formats.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_formats_wrapper.cpp"
+	@echo "Compiling juce_audio_formats.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_processors_wrapper_a34d7091.o: ../../JuceLibraryCode/juce_audio_processors_wrapper.cpp
+$(OBJDIR)/juce_audio_processors_eb9ae116.o: ../../../../modules/juce_audio_processors/juce_audio_processors.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_processors_wrapper.cpp"
+	@echo "Compiling juce_audio_processors.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_core_wrapper_b07ed786.o: ../../JuceLibraryCode/juce_core_wrapper.cpp
+$(OBJDIR)/juce_core_1ee54a40.o: ../../../../modules/juce_core/juce_core.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_core_wrapper.cpp"
+	@echo "Compiling juce_core.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_cryptography_wrapper_8b556353.o: ../../JuceLibraryCode/juce_cryptography_wrapper.cpp
+$(OBJDIR)/juce_cryptography_3b1f489a.o: ../../../../modules/juce_cryptography/juce_cryptography.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_cryptography_wrapper.cpp"
+	@echo "Compiling juce_cryptography.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_data_structures_wrapper_4f7fd480.o: ../../JuceLibraryCode/juce_data_structures_wrapper.cpp
+$(OBJDIR)/juce_data_structures_84790dfc.o: ../../../../modules/juce_data_structures/juce_data_structures.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_data_structures_wrapper.cpp"
+	@echo "Compiling juce_data_structures.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_events_wrapper_a8dc8280.o: ../../JuceLibraryCode/juce_events_wrapper.cpp
+$(OBJDIR)/juce_events_584896b4.o: ../../../../modules/juce_events/juce_events.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_events_wrapper.cpp"
+	@echo "Compiling juce_events.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_graphics_wrapper_a0e77172.o: ../../JuceLibraryCode/juce_graphics_wrapper.cpp
+$(OBJDIR)/juce_graphics_f9afc18.o: ../../../../modules/juce_graphics/juce_graphics.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_graphics_wrapper.cpp"
+	@echo "Compiling juce_graphics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_gui_basics_wrapper_e00f2ff0.o: ../../JuceLibraryCode/juce_gui_basics_wrapper.cpp
+$(OBJDIR)/juce_gui_basics_90929794.o: ../../../../modules/juce_gui_basics/juce_gui_basics.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_gui_basics_wrapper.cpp"
+	@echo "Compiling juce_gui_basics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_gui_extra_wrapper_b6e18277.o: ../../JuceLibraryCode/juce_gui_extra_wrapper.cpp
+$(OBJDIR)/juce_gui_extra_b81d9e1c.o: ../../../../modules/juce_gui_extra/juce_gui_extra.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_gui_extra_wrapper.cpp"
+	@echo "Compiling juce_gui_extra.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_opengl_wrapper_74bbb916.o: ../../JuceLibraryCode/juce_opengl_wrapper.cpp
+$(OBJDIR)/juce_opengl_1890bee0.o: ../../../../modules/juce_opengl/juce_opengl.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_opengl_wrapper.cpp"
+	@echo "Compiling juce_opengl.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_video_wrapper_fcc67966.o: ../../JuceLibraryCode/juce_video_wrapper.cpp
+$(OBJDIR)/juce_video_86a19d3c.o: ../../../../modules/juce_video/juce_video.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_video_wrapper.cpp"
+	@echo "Compiling juce_video.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

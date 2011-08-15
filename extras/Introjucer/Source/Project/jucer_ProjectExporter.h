@@ -94,6 +94,7 @@ public:
     String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
 
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
+    void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder);
 
     String getExporterIdentifierMacro() const
     {

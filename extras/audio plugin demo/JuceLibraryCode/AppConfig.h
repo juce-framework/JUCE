@@ -11,6 +11,19 @@
 */
 
 //==============================================================================
+#define JUCE_MODULE_AVAILABLE_juce_audio_basics             1
+#define JUCE_MODULE_AVAILABLE_juce_audio_devices            1
+#define JUCE_MODULE_AVAILABLE_juce_audio_formats            1
+#define JUCE_MODULE_AVAILABLE_juce_audio_plugin_client      1
+#define JUCE_MODULE_AVAILABLE_juce_audio_processors         1
+#define JUCE_MODULE_AVAILABLE_juce_audio_utils              1
+#define JUCE_MODULE_AVAILABLE_juce_core                     1
+#define JUCE_MODULE_AVAILABLE_juce_data_structures          1
+#define JUCE_MODULE_AVAILABLE_juce_events                   1
+#define JUCE_MODULE_AVAILABLE_juce_graphics                 1
+#define JUCE_MODULE_AVAILABLE_juce_gui_basics               1
+
+//==============================================================================
 // juce_audio_devices flags:
 
 //#define  JUCE_ASIO

@@ -74,8 +74,6 @@
             resource="0" file="Source/Project/jucer_GroupInformationComponent.cpp"/>
       <FILE id="sQjHbVN" name="jucer_GroupInformationComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_GroupInformationComponent.h"/>
-      <FILE id="HXGcY" name="jucer_JuceLibraryModule.h" compile="0" resource="0"
-            file="Source/Project/jucer_JuceLibraryModule.h"/>
       <FILE id="MJkOAX" name="jucer_Module.cpp" compile="1" resource="0"
             file="Source/Project/jucer_Module.cpp"/>
       <FILE id="VZmQQ6" name="jucer_Module.h" compile="0" resource="0" file="Source/Project/jucer_Module.h"/>

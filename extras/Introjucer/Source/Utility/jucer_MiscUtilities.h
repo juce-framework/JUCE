@@ -68,6 +68,7 @@ private:
     Component* lastComp;
     String lastTip;
 
+    Rectangle<int> getTipArea() const;
     String findTip (Component* c);
 };
 

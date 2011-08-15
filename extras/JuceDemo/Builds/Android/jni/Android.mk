@@ -31,20 +31,20 @@ LOCAL_SRC_FILES := \
   ../../../Source/demos/WebBrowserDemo.cpp\
   ../../../Source/demos/WidgetsDemo.cpp\
   ../../../JuceLibraryCode/BinaryData.cpp\
-  ../../../JuceLibraryCode/juce_audio_basics_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_audio_devices_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_audio_formats_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_audio_processors_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_audio_utils_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_core_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_cryptography_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_data_structures_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_events_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_graphics_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_gui_basics_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_gui_extra_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_opengl_wrapper.cpp\
-  ../../../JuceLibraryCode/juce_video_wrapper.cpp\
+  ../../../../../modules/juce_audio_basics/juce_audio_basics.cpp\
+  ../../../../../modules/juce_audio_devices/juce_audio_devices.cpp\
+  ../../../../../modules/juce_audio_formats/juce_audio_formats.cpp\
+  ../../../../../modules/juce_audio_processors/juce_audio_processors.cpp\
+  ../../../../../modules/juce_audio_utils/juce_audio_utils.cpp\
+  ../../../../../modules/juce_core/juce_core.cpp\
+  ../../../../../modules/juce_cryptography/juce_cryptography.cpp\
+  ../../../../../modules/juce_data_structures/juce_data_structures.cpp\
+  ../../../../../modules/juce_events/juce_events.cpp\
+  ../../../../../modules/juce_graphics/juce_graphics.cpp\
+  ../../../../../modules/juce_gui_basics/juce_gui_basics.cpp\
+  ../../../../../modules/juce_gui_extra/juce_gui_extra.cpp\
+  ../../../../../modules/juce_opengl/juce_opengl.cpp\
+  ../../../../../modules/juce_video/juce_video.cpp\
 
 ifeq ($(CONFIG),Debug)
   LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -g -O0 -D "JUCE_ANDROID=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1"

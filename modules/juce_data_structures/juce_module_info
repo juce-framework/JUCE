@@ -11,7 +11,8 @@
 
   "include":        "juce_data_structures.h",
 
-  "compile":        [ { "file": "juce_data_structures.cpp" } ],
+  "compile":        [ { "file": "juce_data_structures.cpp", "target": "! xcode" },
+                      { "file": "juce_data_structures.mm",  "target": "xcode" } ],
 
   "browse":         [ "values/*",
                       "undomanager/*",

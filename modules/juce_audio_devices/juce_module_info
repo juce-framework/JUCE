@@ -12,7 +12,8 @@
 
   "include":        "juce_audio_devices.h",
 
-  "compile":        [ { "file": "juce_audio_devices.cpp" } ],
+  "compile":        [ { "file": "juce_audio_devices.cpp", "target": "! xcode" },
+                      { "file": "juce_audio_devices.mm",  "target": "xcode" } ],
 
   "browse":         [ "audio_io/*",
                       "midi_io/*",

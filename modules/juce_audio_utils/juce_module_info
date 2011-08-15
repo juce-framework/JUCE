@@ -13,7 +13,8 @@
 
   "include":        "juce_audio_utils.h",
 
-  "compile":        [ { "file": "juce_audio_utils.cpp" } ],
+  "compile":        [ { "file": "juce_audio_utils.cpp", "target": "! xcode" },
+                      { "file": "juce_audio_utils.mm",  "target": "xcode" } ],
 
   "browse":         [ "gui/*",
                       "players/*" ]

@@ -45,21 +45,21 @@ endif
 OBJECTS := \
   $(OBJDIR)/PluginProcessor_a059e380.o \
   $(OBJDIR)/PluginEditor_94d4fb09.o \
-  $(OBJDIR)/juce_audio_basics_wrapper_e4aa31f5.o \
-  $(OBJDIR)/juce_audio_devices_wrapper_845aeedf.o \
-  $(OBJDIR)/juce_audio_formats_wrapper_994a82de.o \
-  $(OBJDIR)/juce_audio_processors_wrapper_a34d7091.o \
-  $(OBJDIR)/juce_audio_utils_wrapper_e9783ef3.o \
-  $(OBJDIR)/juce_core_wrapper_b07ed786.o \
-  $(OBJDIR)/juce_data_structures_wrapper_4f7fd480.o \
-  $(OBJDIR)/juce_events_wrapper_a8dc8280.o \
-  $(OBJDIR)/juce_graphics_wrapper_a0e77172.o \
-  $(OBJDIR)/juce_gui_basics_wrapper_e00f2ff0.o \
-  $(OBJDIR)/juce_RTAS_DigiCode1_wrapper_6c4cad39.o \
-  $(OBJDIR)/juce_RTAS_DigiCode2_wrapper_5acfb3ba.o \
-  $(OBJDIR)/juce_RTAS_DigiCode3_wrapper_4952ba3b.o \
-  $(OBJDIR)/juce_RTAS_Wrapper_wrapper_1df0fd8f.o \
-  $(OBJDIR)/juce_VST_Wrapper_wrapper_da6c54d6.o \
+  $(OBJDIR)/juce_audio_basics_399a455e.o \
+  $(OBJDIR)/juce_audio_devices_c1c9ba9c.o \
+  $(OBJDIR)/juce_audio_formats_f04b043c.o \
+  $(OBJDIR)/juce_audio_processors_eb9ae116.o \
+  $(OBJDIR)/juce_audio_utils_cf18005c.o \
+  $(OBJDIR)/juce_core_1ee54a40.o \
+  $(OBJDIR)/juce_data_structures_84790dfc.o \
+  $(OBJDIR)/juce_events_584896b4.o \
+  $(OBJDIR)/juce_graphics_f9afc18.o \
+  $(OBJDIR)/juce_gui_basics_90929794.o \
+  $(OBJDIR)/juce_RTAS_DigiCode1_6dea9489.o \
+  $(OBJDIR)/juce_RTAS_DigiCode2_6df8ac0a.o \
+  $(OBJDIR)/juce_RTAS_DigiCode3_6e06c38b.o \
+  $(OBJDIR)/juce_RTAS_Wrapper_67ed73df.o \
+  $(OBJDIR)/juce_VST_Wrapper_8aa348b1.o \
 
 .PHONY: clean
 
@@ -86,79 +86,79 @@ $(OBJDIR)/PluginEditor_94d4fb09.o: ../../Source/PluginEditor.cpp
 	@echo "Compiling PluginEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_basics_wrapper_e4aa31f5.o: ../../JuceLibraryCode/juce_audio_basics_wrapper.cpp
+$(OBJDIR)/juce_audio_basics_399a455e.o: ../../../../modules/juce_audio_basics/juce_audio_basics.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_basics_wrapper.cpp"
+	@echo "Compiling juce_audio_basics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_devices_wrapper_845aeedf.o: ../../JuceLibraryCode/juce_audio_devices_wrapper.cpp
+$(OBJDIR)/juce_audio_devices_c1c9ba9c.o: ../../../../modules/juce_audio_devices/juce_audio_devices.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_devices_wrapper.cpp"
+	@echo "Compiling juce_audio_devices.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_formats_wrapper_994a82de.o: ../../JuceLibraryCode/juce_audio_formats_wrapper.cpp
+$(OBJDIR)/juce_audio_formats_f04b043c.o: ../../../../modules/juce_audio_formats/juce_audio_formats.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_formats_wrapper.cpp"
+	@echo "Compiling juce_audio_formats.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_processors_wrapper_a34d7091.o: ../../JuceLibraryCode/juce_audio_processors_wrapper.cpp
+$(OBJDIR)/juce_audio_processors_eb9ae116.o: ../../../../modules/juce_audio_processors/juce_audio_processors.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_processors_wrapper.cpp"
+	@echo "Compiling juce_audio_processors.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_audio_utils_wrapper_e9783ef3.o: ../../JuceLibraryCode/juce_audio_utils_wrapper.cpp
+$(OBJDIR)/juce_audio_utils_cf18005c.o: ../../../../modules/juce_audio_utils/juce_audio_utils.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_utils_wrapper.cpp"
+	@echo "Compiling juce_audio_utils.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_core_wrapper_b07ed786.o: ../../JuceLibraryCode/juce_core_wrapper.cpp
+$(OBJDIR)/juce_core_1ee54a40.o: ../../../../modules/juce_core/juce_core.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_core_wrapper.cpp"
+	@echo "Compiling juce_core.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_data_structures_wrapper_4f7fd480.o: ../../JuceLibraryCode/juce_data_structures_wrapper.cpp
+$(OBJDIR)/juce_data_structures_84790dfc.o: ../../../../modules/juce_data_structures/juce_data_structures.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_data_structures_wrapper.cpp"
+	@echo "Compiling juce_data_structures.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_events_wrapper_a8dc8280.o: ../../JuceLibraryCode/juce_events_wrapper.cpp
+$(OBJDIR)/juce_events_584896b4.o: ../../../../modules/juce_events/juce_events.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_events_wrapper.cpp"
+	@echo "Compiling juce_events.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_graphics_wrapper_a0e77172.o: ../../JuceLibraryCode/juce_graphics_wrapper.cpp
+$(OBJDIR)/juce_graphics_f9afc18.o: ../../../../modules/juce_graphics/juce_graphics.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_graphics_wrapper.cpp"
+	@echo "Compiling juce_graphics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_gui_basics_wrapper_e00f2ff0.o: ../../JuceLibraryCode/juce_gui_basics_wrapper.cpp
+$(OBJDIR)/juce_gui_basics_90929794.o: ../../../../modules/juce_gui_basics/juce_gui_basics.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_gui_basics_wrapper.cpp"
+	@echo "Compiling juce_gui_basics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_RTAS_DigiCode1_wrapper_6c4cad39.o: ../../JuceLibraryCode/juce_RTAS_DigiCode1_wrapper.cpp
+$(OBJDIR)/juce_RTAS_DigiCode1_6dea9489.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode1.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RTAS_DigiCode1_wrapper.cpp"
+	@echo "Compiling juce_RTAS_DigiCode1.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_RTAS_DigiCode2_wrapper_5acfb3ba.o: ../../JuceLibraryCode/juce_RTAS_DigiCode2_wrapper.cpp
+$(OBJDIR)/juce_RTAS_DigiCode2_6df8ac0a.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode2.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RTAS_DigiCode2_wrapper.cpp"
+	@echo "Compiling juce_RTAS_DigiCode2.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_RTAS_DigiCode3_wrapper_4952ba3b.o: ../../JuceLibraryCode/juce_RTAS_DigiCode3_wrapper.cpp
+$(OBJDIR)/juce_RTAS_DigiCode3_6e06c38b.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode3.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RTAS_DigiCode3_wrapper.cpp"
+	@echo "Compiling juce_RTAS_DigiCode3.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_RTAS_Wrapper_wrapper_1df0fd8f.o: ../../JuceLibraryCode/juce_RTAS_Wrapper_wrapper.cpp
+$(OBJDIR)/juce_RTAS_Wrapper_67ed73df.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_Wrapper.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RTAS_Wrapper_wrapper.cpp"
+	@echo "Compiling juce_RTAS_Wrapper.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_VST_Wrapper_wrapper_da6c54d6.o: ../../JuceLibraryCode/juce_VST_Wrapper_wrapper.cpp
+$(OBJDIR)/juce_VST_Wrapper_8aa348b1.o: ../../../../modules/juce_audio_plugin_client/VST/juce_VST_Wrapper.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_VST_Wrapper_wrapper.cpp"
+	@echo "Compiling juce_VST_Wrapper.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

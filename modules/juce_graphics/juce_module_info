@@ -11,7 +11,8 @@
 
   "include":        "juce_graphics.h",
 
-  "compile":        [ { "file": "juce_graphics.cpp" } ],
+  "compile":        [ { "file": "juce_graphics.cpp", "target": "! xcode" },
+                      { "file": "juce_graphics.mm",  "target": "xcode" } ],
 
   "browse":         [ "colour/*",
                       "contexts/*",
