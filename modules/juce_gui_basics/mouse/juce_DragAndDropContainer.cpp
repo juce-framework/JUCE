@@ -193,7 +193,7 @@ public:
 
         //if (newX != getX() || newY != getY())
         {
-            setTopLeftPosition (newPos.getX(), newPos.getY());
+            setTopLeftPosition (newPos);
 
             Point<int> relPos;
             DragAndDropTarget* const newTarget = findTarget (screenPos, relPos);

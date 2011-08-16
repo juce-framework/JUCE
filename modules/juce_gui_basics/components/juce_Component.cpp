@@ -593,7 +593,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
             removeFromDesktop();
 
-            setTopLeftPosition (topLeft.getX(), topLeft.getY());
+            setTopLeftPosition (topLeft);
         }
 
         if (parentComponent != nullptr)
@@ -1061,6 +1061,11 @@ void Component::setSize (const int w, const int h)
 void Component::setTopLeftPosition (const int x, const int y)
 {
     setBounds (x, y, getWidth(), getHeight());
+}
+
+void Component::setTopLeftPosition (const Point<int>& pos)
+{
+    setBounds (pos.getX(), pos.getY(), getWidth(), getHeight());
 }
 
 void Component::setTopRightPosition (const int x, const int y)

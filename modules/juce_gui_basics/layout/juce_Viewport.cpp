@@ -88,7 +88,7 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
         if (contentComp != nullptr)
         {
             contentHolder.addAndMakeVisible (contentComp);
-            setViewPosition (0, 0);
+            setViewPosition (Point<int>());
             contentComp->addComponentListener (this);
         }
 
@@ -99,22 +99,28 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
 int Viewport::getMaximumVisibleWidth() const    { return contentHolder.getWidth(); }
 int Viewport::getMaximumVisibleHeight() const   { return contentHolder.getHeight(); }
 
+Point<int> Viewport::viewportPosToCompPos (const Point<int>& pos) const
+{
+    jassert (contentComp != nullptr);
+    return Point<int> (jmax (jmin (0, contentHolder.getWidth()  - contentComp->getWidth()),  jmin (0, -pos.getX())),
+                       jmax (jmin (0, contentHolder.getHeight() - contentComp->getHeight()), jmin (0, -pos.getY())));
+}
+
 void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset)
 {
-    if (contentComp != nullptr)
-        contentComp->setTopLeftPosition (jmax (jmin (0, contentHolder.getWidth() - contentComp->getWidth()), jmin (0, -xPixelsOffset)),
-                                         jmax (jmin (0, contentHolder.getHeight() - contentComp->getHeight()), jmin (0, -yPixelsOffset)));
+    setViewPosition (Point<int> (xPixelsOffset, yPixelsOffset));
 }
 
 void Viewport::setViewPosition (const Point<int>& newPosition)
 {
-    setViewPosition (newPosition.getX(), newPosition.getY());
+    if (contentComp != nullptr)
+        contentComp->setTopLeftPosition (viewportPosToCompPos (newPosition));
 }
 
 void Viewport::setViewPositionProportionately (const double x, const double y)
 {
     if (contentComp != nullptr)
-        setViewPosition (jmax (0, roundToInt (x * (contentComp->getWidth() - getWidth()))),
+        setViewPosition (jmax (0, roundToInt (x * (contentComp->getWidth()  - getWidth()))),
                          jmax (0, roundToInt (y * (contentComp->getHeight() - getHeight()))));
 }
 
@@ -247,20 +253,27 @@ void Viewport::updateVisibleArea()
     horizontalScrollBar.setVisible (hBarVisible);
     verticalScrollBar.setVisible (vBarVisible);
 
-    setViewPosition (visibleOrigin);
+    const Point<int> newContentCompPos (viewportPosToCompPos (visibleOrigin));
 
-    const Rectangle<int> visibleArea (visibleOrigin.getX(), visibleOrigin.getY(),
-                                      jmin (contentBounds.getWidth() - visibleOrigin.getX(),  contentArea.getWidth()),
-                                      jmin (contentBounds.getHeight() - visibleOrigin.getY(), contentArea.getHeight()));
-
-    if (lastVisibleArea != visibleArea)
+    if (contentComp != nullptr && contentComp->getBounds().getPosition() != newContentCompPos)
     {
-        lastVisibleArea = visibleArea;
-        visibleAreaChanged (visibleArea);
+        contentComp->setTopLeftPosition (newContentCompPos);  // (this will re-entrantly call updateVisibleArea again)
     }
+    else
+    {
+        const Rectangle<int> visibleArea (visibleOrigin.getX(), visibleOrigin.getY(),
+                                          jmin (contentBounds.getWidth() - visibleOrigin.getX(),  contentArea.getWidth()),
+                                          jmin (contentBounds.getHeight() - visibleOrigin.getY(), contentArea.getHeight()));
 
-    horizontalScrollBar.handleUpdateNowIfNeeded();
-    verticalScrollBar.handleUpdateNowIfNeeded();
+        if (lastVisibleArea != visibleArea)
+        {
+            lastVisibleArea = visibleArea;
+            visibleAreaChanged (visibleArea);
+        }
+
+        horizontalScrollBar.handleUpdateNowIfNeeded();
+        verticalScrollBar.handleUpdateNowIfNeeded();
+    }
 }
 
 //==============================================================================

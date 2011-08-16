@@ -273,7 +273,7 @@ public:
             items.add (new PopupMenu::ItemComponent (*menu.items.getUnchecked(i), standardItemHeight, this));
 
         calculateWindowPos (target, alignToRectangle);
-        setTopLeftPosition (windowPos.getX(), windowPos.getY());
+        setTopLeftPosition (windowPos.getPosition());
         updateYPositions();
 
         if (itemIdThatMustBeVisible != 0)

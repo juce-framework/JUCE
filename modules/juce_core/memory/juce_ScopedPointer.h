@@ -47,7 +47,7 @@
 
     If you need to get a pointer out of a ScopedPointer without it being deleted, you
     can use the release() method.
- 
+
     Something to note is the main difference between this class and the std::auto_ptr class,
     which is that ScopedPointer provides a cast-to-object operator, wheras std::auto_ptr
     requires that you always call get() to retrieve the pointer. The advantages of providing

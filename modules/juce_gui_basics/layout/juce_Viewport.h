@@ -263,6 +263,7 @@ private:
     Component contentHolder;
     ScrollBar verticalScrollBar;
     ScrollBar horizontalScrollBar;
+    Point<int> viewportPosToCompPos (const Point<int>&) const;
 
     void updateVisibleArea();
     void deleteContentComp();
