@@ -19,5 +19,8 @@
                       "midi_io/*",
                       "sources/*",
                       "audio_cd/*",
-                      "native/*" ]
+                      "native/*" ],
+
+  "OSXFrameworks":  "CoreAudio CoreMIDI DiscRecording",
+  "iOSFrameworks":  "AudioToolbox"
 }

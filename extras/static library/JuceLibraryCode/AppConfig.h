@@ -10,6 +10,9 @@
 
 */
 
+#ifndef __JUCE_APPCONFIG_IVABE4__
+#define __JUCE_APPCONFIG_IVABE4__
+
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics          1
 #define JUCE_MODULE_AVAILABLE_juce_audio_devices         1
@@ -81,3 +84,5 @@
 //#define  JUCE_MEDIAFOUNDATION
 //#define  JUCE_QUICKTIME
 //#define  JUCE_USE_CAMERA
+
+#endif  // __JUCE_APPCONFIG_IVABE4__

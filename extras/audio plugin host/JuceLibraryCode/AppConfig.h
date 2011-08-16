@@ -10,6 +10,9 @@
 
 */
 
+#ifndef __JUCE_APPCONFIG_NTE0XB0IJ__
+#define __JUCE_APPCONFIG_NTE0XB0IJ__
+
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics          1
 #define JUCE_MODULE_AVAILABLE_juce_audio_devices         1
@@ -81,3 +84,5 @@
 //#define  JUCE_MEDIAFOUNDATION
 #define    JUCE_QUICKTIME 0
 #define    JUCE_USE_CAMERA 0
+
+#endif  // __JUCE_APPCONFIG_NTE0XB0IJ__

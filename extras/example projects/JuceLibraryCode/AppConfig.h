@@ -10,6 +10,9 @@
 
 */
 
+#ifndef __JUCE_APPCONFIG_TTAKTK1S__
+#define __JUCE_APPCONFIG_TTAKTK1S__
+
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_core                 1
 #define JUCE_MODULE_AVAILABLE_juce_data_structures      1
@@ -43,3 +46,5 @@
 // juce_gui_extra flags:
 
 //#define  JUCE_WEB_BROWSER
+
+#endif  // __JUCE_APPCONFIG_TTAKTK1S__

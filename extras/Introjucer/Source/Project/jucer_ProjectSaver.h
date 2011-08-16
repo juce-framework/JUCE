@@ -132,47 +132,24 @@ public:
             << newLine;
     }
 
-    static void writeGuardedInclude (OutputStream& out, StringArray paths, StringArray guards)
-    {
-        StringArray uniquePaths (paths);
-        uniquePaths.removeDuplicates (false);
-
-        if (uniquePaths.size() == 1)
-        {
-            out << "#include " << paths[0] << newLine;
-        }
-        else
-        {
-            int i = paths.size();
-            for (; --i >= 0;)
-            {
-                for (int j = i; --j >= 0;)
-                {
-                    if (paths[i] == paths[j] && guards[i] == guards[j])
-                    {
-                        paths.remove (i);
-                        guards.remove (i);
-                    }
-                }
-            }
-
-            for (i = 0; i < paths.size(); ++i)
-            {
-                out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
-                    << " #include " << paths[i] << newLine;
-            }
-
-            out << "#endif" << newLine;
-        }
-    }
-
     static const char* getGeneratedGroupID() noexcept       { return "__jucelibfiles"; }
     Project::Item& getGeneratedCodeGroup()                  { return generatedFilesGroup; }
 
     static String getJuceCodeGroupName()                    { return "Juce Library Code"; }
 
     File getGeneratedCodeFolder() const                     { return generatedCodeFolder; }
-    
+
+    bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
+    {
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (f, newData))
+        {
+            errors.add ("Can't write to file: " + f.getFullPathName());
+            return false;
+        }
+
+        return true;
+    }
+
 private:
     Project& project;
     const File projectFile, generatedCodeFolder;
@@ -215,11 +192,11 @@ private:
 
         for (int i = modules.size(); --i >= 0;)
             longest = jmax (longest, modules.getUnchecked(i)->getID().length());
-        
+
         return longest;
     }
-    
-    bool writeAppConfig (OutputStream& out, const OwnedArray<LibraryModule>& modules)
+
+    void writeAppConfig (OutputStream& out, const OwnedArray<LibraryModule>& modules)
     {
         writeAutoGenWarningComment (out);
         out << "    If you want to change any of these values, use the Introjucer to do so," << newLine
@@ -227,9 +204,13 @@ private:
             << newLine
             << "    Any commented-out settings will assume their default values." << newLine
             << newLine
-            << "*/" << newLine << newLine;
+            << "*/" << newLine
+            << newLine;
 
-        bool anyFlags = false;
+        const String headerGuard ("__JUCE_APPCONFIG_" + project.getProjectUID().toUpperCase() + "__");
+        out << "#ifndef " << headerGuard << newLine
+            << "#define " << headerGuard << newLine
+            << newLine;
 
         out << "//==============================================================================" << newLine;
 
@@ -238,10 +219,10 @@ private:
         for (int k = 0; k < modules.size(); ++k)
         {
             LibraryModule* const m = modules.getUnchecked(k);
-            out << "#define JUCE_MODULE_AVAILABLE_" << m->getID() 
+            out << "#define JUCE_MODULE_AVAILABLE_" << m->getID()
                 << String::repeatedString (" ", longestName + 5 - m->getID().length()) << " 1" << newLine;
         }
-        
+
         out << newLine;
 
         for (int j = 0; j < modules.size(); ++j)
@@ -252,8 +233,6 @@ private:
 
             if (flags.size() > 0)
             {
-                anyFlags = true;
-
                 out << "//==============================================================================" << newLine
                     << "// " << m->getID() << " flags:" << newLine
                     << newLine;
@@ -281,12 +260,10 @@ private:
         }
 
         if (extraAppConfigContent.isNotEmpty())
-        {
             out << newLine << extraAppConfigContent.trimEnd() << newLine;
-            return true;
-        }
 
-        return anyFlags;
+        out << newLine
+            << "#endif  // " << headerGuard << newLine;
     }
 
     void writeAppConfigFile (const OwnedArray<LibraryModule>& modules)
@@ -294,8 +271,8 @@ private:
         appConfigFile = generatedCodeFolder.getChildFile (project.getAppConfigFilename());
 
         MemoryOutputStream mem;
-        if (writeAppConfig (mem, modules))
-            saveGeneratedFile (project.getAppConfigFilename(), mem);
+        writeAppConfig (mem, modules);
+        saveGeneratedFile (project.getAppConfigFilename(), mem);
     }
 
     void writeAppHeader (OutputStream& out, const OwnedArray<LibraryModule>& modules)
@@ -413,6 +390,7 @@ private:
             if (exporter->getTargetFolder().createDirectory())
             {
                 exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
+                //exporter->addToExtraSearchPaths (RelativePath (exporter->getJuceFolder().toString(), RelativePath::projectFolder).getChildFile ("modules"));
 
                 generatedFilesGroup.getNode() = originalGeneratedGroup.createCopy();
                 project.getProjectType().prepareExporter (*exporter);
@@ -437,17 +415,6 @@ private:
                 errors.add ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
             }
         }
-    }
-
-    bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
-    {
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (f, newData))
-        {
-            errors.add ("Can't write to file: " + f.getFullPathName());
-            return false;
-        }
-
-        return true;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSaver);

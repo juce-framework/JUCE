@@ -10,6 +10,9 @@
 
 */
 
+#ifndef __JUCE_APPCONFIG_M70QFTRRK__
+#define __JUCE_APPCONFIG_M70QFTRRK__
+
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics         1
 #define JUCE_MODULE_AVAILABLE_juce_core                 1
@@ -45,3 +48,5 @@
 // juce_gui_extra flags:
 
 //#define  JUCE_WEB_BROWSER
+
+#endif  // __JUCE_APPCONFIG_M70QFTRRK__

@@ -63,6 +63,7 @@ public:
     virtual bool isXcode() const            { return false; }
     virtual bool isVisualStudio() const     { return false; }
     virtual bool isLinux() const            { return false; }
+    virtual bool isOSX() const              { return false; }
 
     //==============================================================================
     String getName() const                  { return name; }

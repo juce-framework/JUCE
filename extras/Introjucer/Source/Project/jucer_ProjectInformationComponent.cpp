@@ -155,7 +155,7 @@ public:
             props.getLast()->setTooltip ("If this is enabled, then a local copy of the entire module will be made inside your project (in the auto-generated JuceLibraryFiles folder), "
                                          "so that your project will be self-contained, and won't need to contain any references to files in other folders. "
                                          "This also means that you can check the module into your source-control system to make sure it is always in sync with your own code.");
-    
+
             StringArray possibleValues;
             possibleValues.add ("(Use Default)");
             possibleValues.add ("Enabled");

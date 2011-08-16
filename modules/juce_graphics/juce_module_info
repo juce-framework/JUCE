@@ -22,5 +22,8 @@
                       "placement/*",
                       "fonts/*",
                       "effects/*",
-                      "native/*" ]
+                      "native/*" ],
+
+  "OSXFrameworks":  "Cocoa",
+  "iOSFrameworks":  "CoreGraphics CoreText"
 }

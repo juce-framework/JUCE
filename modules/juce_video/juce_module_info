@@ -15,5 +15,7 @@
 
   "browse":         [ "playback/*",
                       "capture/*",
-                      "native/*" ]
+                      "native/*" ],
+
+  "OSXFrameworks":  "QTKit QuickTime"
 }

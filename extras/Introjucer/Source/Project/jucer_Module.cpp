@@ -169,26 +169,121 @@ bool LibraryModule::isPluginClient() const                          { return get
 bool LibraryModule::isAUPluginHost (const Project& project) const   { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_AU"); }
 bool LibraryModule::isVSTPluginHost (const Project& project) const  { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"); }
 
-void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out)
+File LibraryModule::getLocalIncludeFolder (ProjectSaver& projectSaver) const
 {
-    File header (getInclude (getModuleTargetFolder (projectSaver)));
-
-    StringArray paths, guards;
-    createMultipleIncludes (projectSaver.getProject(), getPathToModuleFile (projectSaver, header),
-                            paths, guards);
-
-    ProjectSaver::writeGuardedInclude (out, paths, guards);
+    return projectSaver.getGeneratedCodeFolder().getChildFile ("modules").getChildFile (getID());
 }
 
+File LibraryModule::getInclude (const File& folder) const
+{
+    return folder.getChildFile (moduleInfo ["include"]);
+}
+
+RelativePath LibraryModule::getModuleRelativeToProject (ProjectExporter& exporter) const
+{
+    return RelativePath (exporter.getJuceFolder().toString(), RelativePath::projectFolder)
+                .getChildFile ("modules")
+                .getChildFile (getID());
+}
+
+//==============================================================================
+void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out)
+{
+    const File localModuleFolder (getLocalIncludeFolder (projectSaver));
+    const File localHeader (getInclude (localModuleFolder));
+
+    if (projectSaver.getProject().shouldCopyModuleFilesLocally (getID()).getValue())
+    {
+        moduleFolder.copyDirectoryTo (localModuleFolder);
+    }
+    else
+    {
+        localModuleFolder.createDirectory();
+        createLocalHeaderWrapper (projectSaver, getInclude (moduleFolder), localHeader);
+    }
+
+    out << CodeHelpers::createIncludeStatement (localHeader, projectSaver.getGeneratedCodeFolder().getChildFile ("AppConfig.h")) << newLine;
+}
+
+static void writeGuardedInclude (OutputStream& out, StringArray paths, StringArray guards)
+{
+    StringArray uniquePaths (paths);
+    uniquePaths.removeDuplicates (false);
+
+    if (uniquePaths.size() == 1)
+    {
+        out << "#include " << paths[0] << newLine;
+    }
+    else
+    {
+        int i = paths.size();
+        for (; --i >= 0;)
+        {
+            for (int j = i; --j >= 0;)
+            {
+                if (paths[i] == paths[j] && guards[i] == guards[j])
+                {
+                    paths.remove (i);
+                    guards.remove (i);
+                }
+            }
+        }
+
+        for (i = 0; i < paths.size(); ++i)
+        {
+            out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
+                << " #include " << paths[i] << newLine;
+        }
+
+        out << "#else" << newLine
+            << " #error \"This file is designed to be used in an Introjucer-generated project!\"" << newLine
+            << "#endif" << newLine;
+    }
+}
+
+void LibraryModule::createLocalHeaderWrapper (ProjectSaver& projectSaver, const File& originalHeader, const File& localHeader) const
+{
+    Project& project = projectSaver.getProject();
+
+    MemoryOutputStream out;
+
+    out << "// This is an auto-generated file to redirect any included" << newLine
+        << "// module headers to the correct external folder." << newLine
+        << newLine;
+
+    StringArray paths, guards;
+    for (int i = project.getNumExporters(); --i >= 0;)
+    {
+        ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
+
+        if (exporter != nullptr)
+        {
+            const RelativePath headerFromProject (getModuleRelativeToProject (*exporter)
+                                                   .getChildFile (originalHeader.getFileName()));
+
+            const RelativePath fileFromHere (headerFromProject.rebased (project.getFile().getParentDirectory(),
+                                                                        localHeader.getParentDirectory(), RelativePath::unknown));
+
+            paths.add (fileFromHere.toUnixStyle().quoted());
+            guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");
+        }
+    }
+
+    writeGuardedInclude (out, paths, guards);
+    out << newLine;
+
+    projectSaver.replaceFileIfDifferent (localHeader, out);
+}
+
+//==============================================================================
 void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
 {
     Project& project = exporter.getProject();
 
-    File localFolder (getModuleTargetFolder (projectSaver));
+    File localFolder (moduleFolder);
+    if (project.shouldCopyModuleFilesLocally (getID()).getValue())
+        localFolder = getLocalIncludeFolder (projectSaver);
 
-    if (localFolder != moduleFolder && ! localFolder.isDirectory())
-        moduleFolder.copyDirectoryTo (localFolder);
-    
     {
         Array<File> compiled;
         findAndAddCompiledCode (exporter, projectSaver, localFolder, compiled);
@@ -200,8 +295,14 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
     if (isVSTPluginHost (project))
         VSTHelpers::addVSTFolderToPath (exporter, exporter.extraSearchPaths);
 
-    if (isAUPluginHost (project))
-        exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+    if (exporter.isXcode())
+    {
+        if (isAUPluginHost (project))
+            exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+
+        const String frameworks (moduleInfo [exporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
+        exporter.xcodeFrameworks.addTokens (frameworks, ", ", String::empty);
+    }
 
     if (isPluginClient())
     {
@@ -261,29 +362,12 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
     }
 }
 
-File LibraryModule::getModuleTargetFolder (ProjectSaver& projectSaver) const
-{
-    if (projectSaver.getProject().shouldCopyModuleFilesLocally (getID()).getValue())
-        return projectSaver.getGeneratedCodeFolder().getChildFile (getID());
-    
-    return moduleFolder;
-}
-
-File LibraryModule::getInclude (const File& folder) const
-{
-    return folder.getChildFile (moduleInfo ["include"]);
-}
-
-String LibraryModule::getPathToModuleFile (ProjectSaver& projectSaver, const File& file) const
-{
-    return file.getRelativePathFrom (getModuleTargetFolder (projectSaver).getParentDirectory().getParentDirectory());
-}
-
+//==============================================================================
 bool LibraryModule::fileTargetMatches (ProjectExporter& exporter, const String& target)
 {
     if (target.startsWithChar ('!'))
         return ! fileTargetMatches (exporter, target.substring (1).trim());
-        
+
     if (target == "xcode")  return exporter.isXcode();
     if (target == "msvc")   return exporter.isVisualStudio();
     if (target == "linux")  return exporter.isLinux();
@@ -306,7 +390,7 @@ void LibraryModule::findWildcardMatches (const File& localModuleFolder, const St
     result.addArray (tempList);
 }
 
-void LibraryModule::addFileWithGroups (Project::Item& group, const File& file, const String& path) const
+void LibraryModule::addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path) const
 {
     const int slash = path.indexOfChar ('/');
 
@@ -320,12 +404,12 @@ void LibraryModule::addFileWithGroups (Project::Item& group, const File& file, c
     }
     else
     {
-        if (! group.findItemForFile (file).isValid())
-            group.addFileUnchecked (file, -1, false);
+        if (! group.containsChildForFile (file))
+            group.addRelativeFile (file, -1, false);
     }
 }
 
-void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver, 
+void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver,
                                             const File& localModuleFolder, Array<File>& result) const
 {
     const var compileArray (moduleInfo ["compile"]); // careful to keep this alive while the array is in use!
@@ -369,88 +453,19 @@ void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<Fil
 
     Project::Item sourceGroup (Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID()));
 
-    int i;
-    for (i = 0; i < sourceFiles.size(); ++i)
-        addFileWithGroups (sourceGroup, sourceFiles.getReference(i),
-                           sourceFiles.getReference(i).getRelativePathFrom (localModuleFolder));
+    const RelativePath moduleFromProject (getModuleRelativeToProject (exporter));
+
+    for (int i = 0; i < sourceFiles.size(); ++i)
+    {
+        const String pathWithinModule (sourceFiles.getReference(i).getRelativePathFrom (localModuleFolder));
+
+        addFileWithGroups (sourceGroup,
+                           moduleFromProject.getChildFile (pathWithinModule),
+                           pathWithinModule);
+    }
 
     sourceGroup.addFile (localModuleFolder.getChildFile (moduleFile.getRelativePathFrom (moduleFolder)), -1, false);
     sourceGroup.addFile (getInclude (localModuleFolder), -1, false);
 
-    for (i = 0; i < compiled.size(); ++i)
-        addFileWithGroups (sourceGroup, compiled.getReference(i),
-                           compiled.getReference(i).getRelativePathFrom (localModuleFolder));
-
     exporter.getModulesGroup().getNode().addChild (sourceGroup.getNode().createCopy(), -1, nullptr);
-}
-
-void LibraryModule::writeSourceWrapper (OutputStream& out, Project& project, const String& pathFromJuceFolder)
-{
-    const String appConfigFileName (project.getAppConfigFilename());
-
-    ProjectSaver::writeAutoGenWarningComment (out);
-
-    out << "    This file pulls in a module's source code, and builds it using the settings" << newLine
-        << "    defined in " << appConfigFileName << "." << newLine
-        << newLine
-        << "*/"
-        << newLine
-        << newLine
-        << "#define JUCE_WRAPPED_FILE 1" << newLine
-        << newLine
-        << CodeHelpers::createIncludeStatement (appConfigFileName) << newLine;
-
-    writeInclude (project, out, pathFromJuceFolder);
-}
-
-void LibraryModule::createMultipleIncludes (Project& project, const String& pathFromLibraryFolder,
-                                            StringArray& paths, StringArray& guards)
-{
-    for (int i = project.getNumExporters(); --i >= 0;)
-    {
-        ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
-
-        if (exporter != nullptr)
-        {
-            paths.add (exporter->getIncludePathForFileInJuceFolder (pathFromLibraryFolder, project.getAppIncludeFile()));
-            guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");
-        }
-    }
-}
-
-void LibraryModule::writeInclude (Project& project, OutputStream& out, const String& pathFromJuceFolder)
-{
-    StringArray paths, guards;
-    createMultipleIncludes (project, pathFromJuceFolder, paths, guards);
-
-    StringArray uniquePaths (paths);
-    uniquePaths.removeDuplicates (false);
-
-    if (uniquePaths.size() == 1)
-    {
-        out << "#include " << paths[0] << newLine;
-    }
-    else
-    {
-        int i = paths.size();
-        for (; --i >= 0;)
-        {
-            for (int j = i; --j >= 0;)
-            {
-                if (paths[i] == paths[j] && guards[i] == guards[j])
-                {
-                    paths.remove (i);
-                    guards.remove (i);
-                }
-            }
-        }
-
-        for (i = 0; i < paths.size(); ++i)
-        {
-            out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
-                << " #include " << paths[i] << newLine;
-        }
-
-        out << "#endif" << newLine;
-    }
 }

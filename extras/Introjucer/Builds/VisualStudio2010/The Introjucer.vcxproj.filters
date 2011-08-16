@@ -394,9 +394,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\juce_module_info">
       <Filter>Juce Modules\juce_audio_basics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp">
-      <Filter>Juce Modules\juce_audio_basics</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
       <Filter>Juce Modules\juce_core\text</Filter>
     </ClCompile>
@@ -616,9 +613,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\juce_module_info">
       <Filter>Juce Modules\juce_core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\juce_core.cpp">
-      <Filter>Juce Modules\juce_core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_cryptography\encryption\juce_BlowFish.cpp">
       <Filter>Juce Modules\juce_cryptography\encryption</Filter>
     </ClCompile>
@@ -637,9 +631,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_cryptography\juce_module_info">
       <Filter>Juce Modules\juce_cryptography</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_cryptography\juce_cryptography.cpp">
-      <Filter>Juce Modules\juce_cryptography</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_Value.cpp">
       <Filter>Juce Modules\juce_data_structures\values</Filter>
     </ClCompile>
@@ -656,9 +647,6 @@
       <Filter>Juce Modules\juce_data_structures\app_properties</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_module_info">
-      <Filter>Juce Modules\juce_data_structures</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp">
       <Filter>Juce Modules\juce_data_structures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_ApplicationBase.cpp">
@@ -713,9 +701,6 @@
       <Filter>Juce Modules\juce_events\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\juce_module_info">
-      <Filter>Juce Modules\juce_events</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_events\juce_events.cpp">
       <Filter>Juce Modules\juce_events</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\colour\juce_Colour.cpp">
@@ -827,9 +812,6 @@
       <Filter>Juce Modules\juce_graphics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_module_info">
-      <Filter>Juce Modules\juce_graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics.cpp">
       <Filter>Juce Modules\juce_graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\components\juce_Component.cpp">
@@ -1201,9 +1183,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_module_info">
       <Filter>Juce Modules\juce_gui_basics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp">
-      <Filter>Juce Modules\juce_gui_basics</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeDocument.cpp">
       <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
@@ -1274,9 +1253,6 @@
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\juce_module_info">
-      <Filter>Juce Modules\juce_gui_extra</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp">
       <Filter>Juce Modules\juce_gui_extra</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">

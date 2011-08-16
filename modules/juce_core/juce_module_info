@@ -29,5 +29,8 @@
                       "zip/*",
                       "unit_tests/*",
                       "misc/*",
-                      "native/*" ]
+                      "native/*" ],
+
+  "OSXFrameworks":  "Cocoa IOKit",
+  "iOSFrameworks":  "Foundation"
 }

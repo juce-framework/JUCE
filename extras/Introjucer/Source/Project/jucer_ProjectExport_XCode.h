@@ -36,19 +36,19 @@ public:
     //==============================================================================
     static const char* getNameMac()                         { return "XCode (MacOSX)"; }
     static const char* getNameiOS()                         { return "XCode (iOS)"; }
-    static const char* getValueTreeTypeName (bool iPhone)   { return iPhone ? "XCODE_IPHONE" : "XCODE_MAC"; }
+    static const char* getValueTreeTypeName (bool iOS)      { return iOS ? "XCODE_IPHONE" : "XCODE_MAC"; }
 
     //==============================================================================
-    XCodeProjectExporter (Project& project_, const ValueTree& settings_, const bool iPhone_)
+    XCodeProjectExporter (Project& project_, const ValueTree& settings_, const bool iOS_)
         : ProjectExporter (project_, settings_),
-          iPhone (iPhone_)
+          iOS (iOS_)
     {
-        name = iPhone ? getNameiOS() : getNameMac();
+        name = iOS ? getNameiOS() : getNameMac();
 
         projectIDSalt = hashCode64 (project.getProjectUID());
 
         if (getTargetLocation().toString().isEmpty())
-            getTargetLocation() = getDefaultBuildsRootFolder() + (iPhone ? "iOS" : "MacOSX");
+            getTargetLocation() = getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX");
 
         if (getSettings() ["objCExtraSuffix"].isVoid())
             getObjCSuffix() = createAlphaNumericUID();
@@ -70,7 +70,7 @@ public:
     int getLaunchPreferenceOrderForCurrentOS()
     {
        #if JUCE_MAC
-        return iPhone ? 1 : 2;
+        return iOS ? 1 : 2;
        #else
         return 0;
        #endif
@@ -85,9 +85,10 @@ public:
        #endif
     }
 
-    bool isPossibleForCurrentProject()      { return projectType.isGUIApplication() || ! iPhone; }
+    bool isPossibleForCurrentProject()      { return projectType.isGUIApplication() || ! iOS; }
     bool usesMMFiles() const                { return true; }
     bool isXcode() const                    { return true; }
+    bool isOSX() const                      { return ! iOS; }
 
     void createPropertyEditors (Array <PropertyComponent*>& props)
     {
@@ -97,12 +98,12 @@ public:
         props.getLast()->setTooltip ("Because objective-C linkage is done by string-matching, you can get horrible linkage mix-ups when different modules containing the "
                                      "same class-names are loaded simultaneously. This setting lets you provide a unique string that will be used in naming the obj-C classes in your executable to avoid this.");
 
-        if (projectType.isGUIApplication() && ! iPhone)
+        if (projectType.isGUIApplication() && ! iOS)
         {
             props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false));
             props.getLast()->setTooltip ("A comma-separated list of file extensions for documents that your app can open.");
         }
-        else if (iPhone)
+        else if (iOS)
         {
             props.add (new BooleanPropertyComponent (getSetting ("UIFileSharingEnabled"), "File Sharing Enabled", "Enabled"));
             props.getLast()->setTooltip ("Enable this to expose your app's files to iTunes.");
@@ -146,7 +147,7 @@ private:
     StringArray frameworkFileIDs, rezFileIDs, resourceFileRefs;
     File infoPlistFile, iconFile;
     int64 projectIDSalt;
-    const bool iPhone;
+    const bool iOS;
 
     static String sanitisePath (const String& path)
     {
@@ -168,7 +169,7 @@ private:
         {
             RelativePath plistPath (infoPlistFile, getTargetFolder(), RelativePath::buildTargetFolder);
             addFileReference (plistPath.toUnixStyle());
-            resourceFileRefs.add (createID (plistPath));
+            resourceFileRefs.add (createFileRefID (plistPath));
         }
 
         if (iconFile.exists())
@@ -176,7 +177,7 @@ private:
             RelativePath iconPath (iconFile, getTargetFolder(), RelativePath::buildTargetFolder);
             addFileReference (iconPath.toUnixStyle());
             resourceIDs.add (addBuildFile (iconPath, false, false));
-            resourceFileRefs.add (createID (iconPath));
+            resourceFileRefs.add (createFileRefID (iconPath));
         }
 
         {
@@ -348,7 +349,7 @@ private:
         XmlElement plist ("plist");
         XmlElement* dict = plist.createNewChildElement ("dict");
 
-        if (iPhone)
+        if (iOS)
             addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
 
         addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
@@ -464,7 +465,7 @@ private:
             s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
         }
 
-        if (iPhone)
+        if (iOS)
         {
             s.add ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"iPhone Developer\"");
             s.add ("SDKROOT = iphoneos");
@@ -527,7 +528,7 @@ private:
             s.add ("DEPLOYMENT_LOCATION = YES");
         }
 
-        if (! iPhone)
+        if (! iOS)
         {
             const String sdk (config.getMacSDKVersion().toString());
             const String sdkCompat (config.getMacCompatibilityVersion().toString());
@@ -622,10 +623,7 @@ private:
         if (! projectType.isLibrary())
         {
             StringArray s (xcodeFrameworks);
-
-            s.addTokens (iPhone ? "UIKit Foundation CoreGraphics CoreText AudioToolbox QuartzCore OpenGLES"
-                                : "Cocoa Carbon IOKit CoreAudio CoreMIDI WebKit DiscRecording OpenGL QuartzCore QTKit QuickTime AudioToolbox", false);
-
+            s.trim();
             s.removeDuplicates (true);
             s.sort (true);
 
@@ -707,7 +705,7 @@ private:
 
     String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings)
     {
-        return addBuildFile (path.toUnixStyle(), createID (path), addToSourceBuildPhase, inhibitWarnings);
+        return addBuildFile (path.toUnixStyle(), createFileRefID (path), addToSourceBuildPhase, inhibitWarnings);
     }
 
     String addFileReference (String pathString)
@@ -734,7 +732,7 @@ private:
         v->setProperty ("path", sanitisePath (pathString), 0);
         v->setProperty ("sourceTree", sourceTree, 0);
         pbxFileReferences.add (v);
-        
+
         return fileRefID;
     }
 
@@ -973,11 +971,6 @@ private:
                   + (separator == ";" ? separator : String::empty);
     }
 
-    String createID (const RelativePath& path) const
-    {
-        return createID (path.toUnixStyle());
-    }
-
     String createID (String rootString) const
     {
         if (rootString.startsWith ("${"))
@@ -993,11 +986,16 @@ private:
         return String (n, numElementsInArray (n));
     }
 
-    String createFileRefID (const String& path)
+    String createFileRefID (const RelativePath& path) const
+    {
+        return createFileRefID (path.toUnixStyle());
+    }
+
+    String createFileRefID (const String& path) const
     {
         return createID ("__fileref_" + path);
     }
-    
+
     String getIDForGroup (const Project::Item& item) const
     {
         return createID (item.getID());

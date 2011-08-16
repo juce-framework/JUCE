@@ -10,6 +10,9 @@
 
 */
 
+#ifndef __JUCE_APPCONFIG_0NRD9LLGO__
+#define __JUCE_APPCONFIG_0NRD9LLGO__
+
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics             1
 #define JUCE_MODULE_AVAILABLE_juce_audio_devices            1
@@ -102,3 +105,5 @@
 #define JucePlugin_RTASCategory         ePlugInCategory_None
 #define JucePlugin_RTASManufacturerCode JucePlugin_ManufacturerCode
 #define JucePlugin_RTASProductId        JucePlugin_PluginCode
+
+#endif  // __JUCE_APPCONFIG_0NRD9LLGO__

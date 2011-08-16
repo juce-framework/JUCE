@@ -18,5 +18,7 @@
                       "embedding/*",
                       "lookandfeel/*",
                       "misc/*",
-                      "native/*" ]
+                      "native/*" ],
+
+  "OSXFrameworks":  "WebKit"
 }

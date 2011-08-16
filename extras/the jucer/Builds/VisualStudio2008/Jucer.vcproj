@@ -1123,16 +1123,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_core\juce_core.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_core\juce_core.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_data_structures">
         <Filter Name="values">
@@ -1208,16 +1198,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_data_structures\juce_data_structures.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_events">
         <Filter Name="messages">
@@ -1412,16 +1392,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_events\juce_events.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_events\juce_events.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_graphics">
         <Filter Name="colour">
@@ -1830,16 +1800,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_gui_basics">
         <Filter Name="components">
@@ -3164,16 +3124,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_gui_extra">
         <Filter Name="code_editor">
@@ -3403,16 +3353,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
     </Filter>
     <Filter Name="Juce Library Code">

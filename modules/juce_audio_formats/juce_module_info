@@ -15,5 +15,8 @@
 
   "browse":         [ "format/*",
                       "codecs/*",
-                      "sampler/*" ]
+                      "sampler/*" ],
+
+  "OSXFrameworks":  "CoreAudio CoreMIDI QuartzCore AudioToolbox",
+  "iOSFrameworks":  "AudioToolbox QuartzCore"
 }

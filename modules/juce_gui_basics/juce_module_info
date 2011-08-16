@@ -32,5 +32,8 @@
                       "commands/*",
                       "misc/*",
                       "application/*",
-                      "native/*" ]
+                      "native/*" ],
+
+  "OSXFrameworks":  "Cocoa Carbon QuartzCore",
+  "iOSFrameworks":  "UIKit"
 }

@@ -336,16 +336,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_audio_devices">
         <Filter Name="audio_io">
@@ -612,16 +602,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_audio_devices\juce_audio_devices.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_audio_devices\juce_audio_devices.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_audio_formats">
         <Filter Name="format">
@@ -784,16 +764,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_audio_formats\juce_audio_formats.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_audio_formats\juce_audio_formats.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_audio_plugin_client">
         <Filter Name="AU">
@@ -852,16 +822,6 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_MacUtilities.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode_Header.h"/>
-          <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_WinResources.rsr">
-            <FileConfiguration Name="Debug|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-            <FileConfiguration Name="Release|Win32"
-                               ExcludedFromBuild="true">
-              <Tool Name="VCCLCompilerTool"/>
-            </FileConfiguration>
-          </File>
         </Filter>
         <Filter Name="VST">
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp">
@@ -1045,16 +1005,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_audio_utils">
         <Filter Name="gui">
@@ -1127,16 +1077,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_core">
         <Filter Name="text">
@@ -1959,16 +1899,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_core\juce_core.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_core\juce_core.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_data_structures">
         <Filter Name="values">
@@ -2044,16 +1974,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_data_structures\juce_data_structures.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_events">
         <Filter Name="messages">
@@ -2248,16 +2168,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_events\juce_events.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_events\juce_events.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_graphics">
         <Filter Name="colour">
@@ -2666,16 +2576,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
       <Filter Name="juce_gui_basics">
         <Filter Name="components">
@@ -4000,16 +3900,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.h"/>
-        <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
     </Filter>
     <Filter Name="Juce Library Code">

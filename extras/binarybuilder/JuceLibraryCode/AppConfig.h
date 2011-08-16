@@ -10,6 +10,9 @@
 
 */
 
+#ifndef __JUCE_APPCONFIG_3T6YQETY1__
+#define __JUCE_APPCONFIG_3T6YQETY1__
+
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_core      1
 
@@ -20,3 +23,5 @@
 //#define  JUCE_LOG_ASSERTIONS
 //#define  JUCE_CHECK_MEMORY_LEAKS
 //#define  JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+
+#endif  // __JUCE_APPCONFIG_3T6YQETY1__

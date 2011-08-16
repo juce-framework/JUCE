@@ -547,6 +547,11 @@ bool Project::Item::renameFile (const File& newFile)
     return false;
 }
 
+bool Project::Item::containsChildForFile (const RelativePath& file) const
+{
+    return node.getChildWithProperty (Ids::file, file.toUnixStyle()).isValid();
+}
+
 Project::Item Project::Item::findItemForFile (const File& file) const
 {
     if (getFile() == file)

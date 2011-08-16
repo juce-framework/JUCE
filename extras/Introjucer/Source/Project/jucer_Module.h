@@ -37,7 +37,7 @@ class LibraryModule
 public:
     LibraryModule (const File& file);
 
-    String getID() const; 
+    String getID() const;
     bool isValid() const;
 
     void writeIncludes (ProjectSaver& projectSaver, OutputStream& out);
@@ -52,8 +52,7 @@ private:
     mutable Array<File> sourceFiles;
 
     File getInclude (const File& folder) const;
-    File getModuleTargetFolder (ProjectSaver& projectSaver) const;
-    String getPathToModuleFile (ProjectSaver& projectSaver, const File& file) const;
+    File getLocalIncludeFolder (ProjectSaver& projectSaver) const;
     static bool fileTargetMatches (ProjectExporter& exporter, const String& target);
 
     struct FileSorter
@@ -65,13 +64,11 @@ private:
     };
 
     void findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const;
-    void addFileWithGroups (Project::Item& group, const File& file, const String& path) const;
+    void addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path) const;
     void findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& localModuleFolder, Array<File>& result) const;
     void addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const;
-
-    static void writeSourceWrapper (OutputStream& out, Project& project, const String& pathFromJuceFolder);
-    static void createMultipleIncludes (Project& project, const String& pathFromLibraryFolder, StringArray& paths, StringArray& guards);
-    static void writeInclude (Project& project, OutputStream& out, const String& pathFromJuceFolder);
+    void createLocalHeaderWrapper (ProjectSaver& projectSaver, const File& originalHeader, const File& localHeader) const;
+    RelativePath getModuleRelativeToProject (ProjectExporter& exporter) const;
 
     bool isPluginClient() const;
     bool isAUPluginHost (const Project& project) const;

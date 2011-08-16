@@ -18,5 +18,8 @@
                       "format/*",
                       "format_types/*",
                       "scanning/*" 
-                    ]
+                    ],
+
+  "OSXFrameworks":  "CoreAudio CoreMIDI AudioToolbox",
+  "iOSFrameworks":  "AudioToolbox"
 }

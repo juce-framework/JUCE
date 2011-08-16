@@ -169,6 +169,7 @@ public:
         void removeItemFromProject();
         void sortAlphabetically (bool keepGroupsAtStart);
         Item findItemForFile (const File& file) const;
+        bool containsChildForFile (const RelativePath& file) const;
 
         Item getParent() const;
         Item createCopy();
