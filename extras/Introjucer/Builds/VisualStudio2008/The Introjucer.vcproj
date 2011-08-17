@@ -131,6 +131,8 @@
       <Filter Name="Application">
         <File RelativePath="..\..\Source\Application\jucer_Application.h"/>
         <File RelativePath="..\..\Source\Application\jucer_CommandIDs.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_CommandLine.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_CommandLine.h"/>
         <File RelativePath="..\..\Source\Application\jucer_CommonHeaders.h"/>
         <File RelativePath="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
@@ -144,10 +146,6 @@
         <File RelativePath="..\..\Source\Application\jucer_MainWindow.h"/>
         <File RelativePath="..\..\Source\Application\jucer_OpenDocumentManager.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_OpenDocumentManager.h"/>
-      </Filter>
-      <Filter Name="Code Editor">
-        <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
-        <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
       </Filter>
       <Filter Name="Project">
         <File RelativePath="..\..\Source\Project\jucer_AudioPluginModule.h"/>
@@ -163,23 +161,25 @@
         <File RelativePath="..\..\Source\Project\jucer_Project.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectExport_Android.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectExport_Make.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectExport_MSVC.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectExport_XCode.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectExporter.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectExporter.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectInformationComponent.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectInformationComponent.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectSaver.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ResourceFile.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_ResourceFile.h"/>
         <File RelativePath="..\..\Source\Project\jucer_TreeViewTypes.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_TreeViewTypes.h"/>
+      </Filter>
+      <Filter Name="Project Saving">
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExporter.cpp"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectExporter.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ProjectSaver.h"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ResourceFile.cpp"/>
+        <File RelativePath="..\..\Source\Project Saving\jucer_ResourceFile.h"/>
       </Filter>
       <Filter Name="Utility">
         <File RelativePath="..\..\Source\Utility\jucer_CodeHelpers.cpp"/>
@@ -196,6 +196,10 @@
         <File RelativePath="..\..\Source\Utility\jucer_StoredSettings.cpp"/>
         <File RelativePath="..\..\Source\Utility\jucer_StoredSettings.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_ValueSourceHelpers.h"/>
+      </Filter>
+      <Filter Name="Code Editor">
+        <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
+        <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
       </Filter>
       <Filter Name="BinaryData">
         <File RelativePath="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">

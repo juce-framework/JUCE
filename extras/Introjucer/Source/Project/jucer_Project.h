@@ -294,8 +294,6 @@ public:
     //==============================================================================
     static const char* projectFileExtension;
 
-    static void resaveJucerFile (const File& file);
-
 private:
     friend class Item;
     ValueTree projectRoot;

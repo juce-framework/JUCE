@@ -43,30 +43,31 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
+  $(OBJDIR)/jucer_CommandLine_f35de107.o \
   $(OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o \
   $(OBJDIR)/jucer_FilePreviewComponent_55512f53.o \
   $(OBJDIR)/jucer_JuceUpdater_cf7865c4.o \
   $(OBJDIR)/jucer_Main_f8488f5b.o \
   $(OBJDIR)/jucer_MainWindow_1e163aeb.o \
   $(OBJDIR)/jucer_OpenDocumentManager_4c72d210.o \
-  $(OBJDIR)/jucer_SourceCodeEditor_461f5487.o \
   $(OBJDIR)/jucer_GroupInformationComponent_631ccf01.o \
   $(OBJDIR)/jucer_Module_3f7666a5.o \
   $(OBJDIR)/jucer_NewFileWizard_b8a19ef8.o \
   $(OBJDIR)/jucer_NewProjectWizard_7a15bf5d.o \
   $(OBJDIR)/jucer_Project_c131864a.o \
   $(OBJDIR)/jucer_ProjectContentComponent_60de0eee.o \
-  $(OBJDIR)/jucer_ProjectExporter_eed6e04b.o \
   $(OBJDIR)/jucer_ProjectInformationComponent_4746e69b.o \
   $(OBJDIR)/jucer_ProjectTreeViewBase_63c2bdbe.o \
   $(OBJDIR)/jucer_ProjectType_1bc27a24.o \
-  $(OBJDIR)/jucer_ResourceFile_7e7734e3.o \
   $(OBJDIR)/jucer_TreeViewTypes_4a765287.o \
+  $(OBJDIR)/jucer_ProjectExporter_eefe2e5b.o \
+  $(OBJDIR)/jucer_ResourceFile_6af120d3.o \
   $(OBJDIR)/jucer_CodeHelpers_c317179c.o \
   $(OBJDIR)/jucer_FileHelpers_f98ed0ad.o \
   $(OBJDIR)/jucer_JucerTreeViewBase_d043309d.o \
   $(OBJDIR)/jucer_MiscUtilities_25b68c82.o \
   $(OBJDIR)/jucer_StoredSettings_26078d2c.o \
+  $(OBJDIR)/jucer_SourceCodeEditor_461f5487.o \
   $(OBJDIR)/BinaryData_ce4232d4.o \
   $(OBJDIR)/juce_audio_basics_399a455e.o \
   $(OBJDIR)/juce_core_1ee54a40.o \
@@ -91,6 +92,11 @@ clean:
 	-@rm -f $(OUTDIR)/$(TARGET)
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
+
+$(OBJDIR)/jucer_CommandLine_f35de107.o: ../../Source/Application/jucer_CommandLine.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_CommandLine.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o: ../../Source/Application/jucer_DocumentEditorComponent.cpp
 	-@mkdir -p $(OBJDIR)
@@ -120,11 +126,6 @@ $(OBJDIR)/jucer_MainWindow_1e163aeb.o: ../../Source/Application/jucer_MainWindow
 $(OBJDIR)/jucer_OpenDocumentManager_4c72d210.o: ../../Source/Application/jucer_OpenDocumentManager.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_OpenDocumentManager.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_SourceCodeEditor_461f5487.o: ../../Source/Code\ Editor/jucer_SourceCodeEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_SourceCodeEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_GroupInformationComponent_631ccf01.o: ../../Source/Project/jucer_GroupInformationComponent.cpp
@@ -157,11 +158,6 @@ $(OBJDIR)/jucer_ProjectContentComponent_60de0eee.o: ../../Source/Project/jucer_P
 	@echo "Compiling jucer_ProjectContentComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ProjectExporter_eed6e04b.o: ../../Source/Project/jucer_ProjectExporter.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ProjectExporter.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/jucer_ProjectInformationComponent_4746e69b.o: ../../Source/Project/jucer_ProjectInformationComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_ProjectInformationComponent.cpp"
@@ -177,14 +173,19 @@ $(OBJDIR)/jucer_ProjectType_1bc27a24.o: ../../Source/Project/jucer_ProjectType.c
 	@echo "Compiling jucer_ProjectType.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ResourceFile_7e7734e3.o: ../../Source/Project/jucer_ResourceFile.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ResourceFile.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/jucer_TreeViewTypes_4a765287.o: ../../Source/Project/jucer_TreeViewTypes.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_TreeViewTypes.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_ProjectExporter_eefe2e5b.o: ../../Source/Project\ Saving/jucer_ProjectExporter.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_ProjectExporter.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_ResourceFile_6af120d3.o: ../../Source/Project\ Saving/jucer_ResourceFile.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_ResourceFile.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_CodeHelpers_c317179c.o: ../../Source/Utility/jucer_CodeHelpers.cpp
@@ -210,6 +211,11 @@ $(OBJDIR)/jucer_MiscUtilities_25b68c82.o: ../../Source/Utility/jucer_MiscUtiliti
 $(OBJDIR)/jucer_StoredSettings_26078d2c.o: ../../Source/Utility/jucer_StoredSettings.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_StoredSettings.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_SourceCodeEditor_461f5487.o: ../../Source/Code\ Editor/jucer_SourceCodeEditor.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_SourceCodeEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp

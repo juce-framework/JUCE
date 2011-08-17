@@ -8,14 +8,17 @@
     <Filter Include="The Introjucer\Application">
       <UniqueIdentifier>{5AFE9176-C481-3BD6-B1A2-E344873B906D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="The Introjucer\Code Editor">
-      <UniqueIdentifier>{7D1B95A0-4E50-DD4E-402D-840BD601DCF8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="The Introjucer\Project">
       <UniqueIdentifier>{B5B5C922-2604-DF83-A0B9-259C3DBA1AF6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="The Introjucer\Project Saving">
+      <UniqueIdentifier>{28F8ABD7-5DC8-5828-4095-01A26A4B2718}</UniqueIdentifier>
+    </Filter>
     <Filter Include="The Introjucer\Utility">
       <UniqueIdentifier>{647FC3C6-4A06-A9FA-2C82-8F8744A223EE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="The Introjucer\Code Editor">
+      <UniqueIdentifier>{7D1B95A0-4E50-DD4E-402D-840BD601DCF8}</UniqueIdentifier>
     </Filter>
     <Filter Include="The Introjucer\BinaryData">
       <UniqueIdentifier>{8CE77BC0-4FCD-C9EA-C5D2-4E2ED36FDAAD}</UniqueIdentifier>
@@ -244,6 +247,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp">
+      <Filter>The Introjucer\Application</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
@@ -261,9 +267,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp">
       <Filter>The Introjucer\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp">
-      <Filter>The Introjucer\Code Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_GroupInformationComponent.cpp">
       <Filter>The Introjucer\Project</Filter>
@@ -283,9 +286,6 @@
     <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ProjectExporter.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectInformationComponent.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
@@ -295,11 +295,14 @@
     <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ResourceFile.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_TreeViewTypes.cpp">
       <Filter>The Introjucer\Project</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp">
+      <Filter>The Introjucer\Project Saving</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp">
       <Filter>The Introjucer\Utility</Filter>
@@ -315,6 +318,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_StoredSettings.cpp">
       <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp">
+      <Filter>The Introjucer\Code Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
       <Filter>The Introjucer\BinaryData</Filter>
@@ -1290,6 +1296,9 @@
     <ClInclude Include="..\..\Source\Application\jucer_CommandIDs.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Application\jucer_CommandLine.h">
+      <Filter>The Introjucer\Application</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>
@@ -1310,9 +1319,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_OpenDocumentManager.h">
       <Filter>The Introjucer\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h">
-      <Filter>The Introjucer\Code Editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_AudioPluginModule.h">
       <Filter>The Introjucer\Project</Filter>
@@ -1335,25 +1341,7 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Android.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Make.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_MSVC.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_XCode.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExporter.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectInformationComponent.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectSaver.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTreeViewBase.h">
@@ -1362,11 +1350,29 @@
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ResourceFile.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_TreeViewTypes.h">
       <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExporter.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectSaver.h">
+      <Filter>The Introjucer\Project Saving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ResourceFile.h">
+      <Filter>The Introjucer\Project Saving</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
@@ -1394,6 +1400,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h">
+      <Filter>The Introjucer\Code Editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>

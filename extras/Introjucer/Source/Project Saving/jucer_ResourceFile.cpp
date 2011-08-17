@@ -24,7 +24,7 @@
 */
 
 #include "jucer_ResourceFile.h"
-#include "jucer_ProjectTreeViewBase.h"
+#include "../Project/jucer_ProjectTreeViewBase.h"
 #include "../Application/jucer_OpenDocumentManager.h"
 
 static const char* resourceFileIdentifierString = "JUCER_BINARY_RESOURCE";

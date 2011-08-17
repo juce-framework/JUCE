@@ -122,30 +122,31 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_FilePreviewComponent.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_JuceUpdater.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp"/>
-    <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_GroupInformationComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_NewFileWizard.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_NewProjectWizard.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_Project.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
-    <ClCompile Include="..\..\Source\Project\jucer_ProjectExporter.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectInformationComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectType.cpp"/>
-    <ClCompile Include="..\..\Source\Project\jucer_ResourceFile.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_TreeViewTypes.cpp"/>
+    <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp"/>
+    <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_FileHelpers.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_MiscUtilities.cpp"/>
     <ClCompile Include="..\..\Source\Utility\jucer_StoredSettings.cpp"/>
+    <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1002,6 +1003,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\Source\Application\jucer_Application.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_CommandIDs.h"/>
+    <ClInclude Include="..\..\Source\Application\jucer_CommandLine.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h"/>
@@ -1009,7 +1011,6 @@
     <ClInclude Include="..\..\Source\Application\jucer_JuceUpdater.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_OpenDocumentManager.h"/>
-    <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_AudioPluginModule.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_Module.h"/>
@@ -1017,17 +1018,17 @@
     <ClInclude Include="..\..\Source\Project\jucer_NewProjectWizard.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_Project.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Android.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Make.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_MSVC.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_XCode.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectExporter.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectInformationComponent.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectSaver.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTreeViewBase.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_ResourceFile.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_TreeViewTypes.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExporter.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectSaver.h"/>
+    <ClInclude Include="..\..\Source\Project Saving\jucer_ResourceFile.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_Colours.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h"/>
@@ -1037,6 +1038,7 @@
     <ClInclude Include="..\..\Source\Utility\jucer_RelativePath.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h"/>
     <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h"/>
+    <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h"/>

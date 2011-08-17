@@ -30,6 +30,7 @@
 #include "jucer_MainWindow.h"
 #include "jucer_JuceUpdater.h"
 #include "../Project/jucer_NewProjectWizard.h"
+#include "jucer_CommandLine.h"
 
 
 //==============================================================================
@@ -43,15 +44,16 @@ public:
     //==============================================================================
     void initialise (const String& commandLine)
     {
-        /* Running a command-line of the form "Jucer --resave foobar.jucer" will try to load that
-           jucer file and re-export all of its projects.
-        */
-        if (commandLine.startsWithIgnoreCase ("-resave ") || commandLine.startsWithIgnoreCase ("--resave "))
+        if (commandLine.isNotEmpty())
         {
-            Project::resaveJucerFile (File::getCurrentWorkingDirectory()
-                                        .getChildFile (commandLine.fromFirstOccurrenceOf (" ", false, false).unquoted()));
-            quit();
-            return;
+            const int appReturnCode = performCommandLine (commandLine);
+
+            if (appReturnCode != commandLineNotPerformed)
+            {
+                setApplicationReturnValue (appReturnCode);
+                quit();
+                return;
+            }
         }
 
         commandManager = new ApplicationCommandManager();

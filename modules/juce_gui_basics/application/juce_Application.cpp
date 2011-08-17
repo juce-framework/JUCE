@@ -250,7 +250,13 @@ int JUCEApplication::main (int argc, const char* argv[])
    #else
     String cmd;
     for (int i = 1; i < argc; ++i)
-        cmd << argv[i] << ' ';
+    {
+        String arg (argv[i]);
+        if (arg.containsChar (' ') && ! arg.isQuotedString())
+            arg = arg.quoted ('"');
+
+        cmd << arg << ' ';
+    }
 
     return JUCEApplication::main (cmd);
    #endif

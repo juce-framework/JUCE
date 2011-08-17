@@ -29,7 +29,7 @@
 #include "../jucer_Headers.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 #include "jucer_Project.h"
-#include "jucer_ResourceFile.h"
+#include "../Project Saving/jucer_ResourceFile.h"
 #include "jucer_ProjectContentComponent.h"
 
 

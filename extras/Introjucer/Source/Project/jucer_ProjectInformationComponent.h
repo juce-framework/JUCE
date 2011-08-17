@@ -20,7 +20,7 @@
 #define __JUCER_PROJECTINFORMATIONCOMPONENT_H_2F89B0AC__
 
 //[Headers]     -- You can add your own extra header files here --
-#include "jucer_ProjectExporter.h"
+#include "jucer_Project.h"
 //[/Headers]
 
 

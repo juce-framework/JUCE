@@ -25,8 +25,8 @@
 
 #include "jucer_Module.h"
 #include "jucer_ProjectType.h"
-#include "jucer_ProjectExporter.h"
-#include "jucer_ProjectSaver.h"
+#include "../Project Saving/jucer_ProjectExporter.h"
+#include "../Project Saving/jucer_ProjectSaver.h"
 #include "jucer_AudioPluginModule.h"
 
 

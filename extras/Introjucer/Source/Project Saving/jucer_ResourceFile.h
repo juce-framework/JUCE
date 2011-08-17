@@ -27,7 +27,7 @@
 #define __JUCER_RESOURCEFILE_JUCEHEADER__
 
 #include "../jucer_Headers.h"
-#include "jucer_Project.h"
+#include "../Project/jucer_Project.h"
 
 
 //==============================================================================

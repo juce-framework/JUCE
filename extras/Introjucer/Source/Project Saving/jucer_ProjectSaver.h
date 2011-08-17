@@ -27,7 +27,8 @@
 #define __JUCER_PROJECTSAVER_JUCEHEADER__
 
 #include "jucer_ResourceFile.h"
-#include "jucer_Module.h"
+#include "../Project/jucer_Module.h"
+#include "jucer_ProjectExporter.h"
 
 
 //==============================================================================

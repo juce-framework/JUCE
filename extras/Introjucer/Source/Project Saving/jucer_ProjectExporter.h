@@ -27,8 +27,8 @@
 #define __JUCER_PROJECTEXPORTER_JUCEHEADER__
 
 #include "../jucer_Headers.h"
-#include "jucer_Project.h"
-#include "jucer_ProjectType.h"
+#include "../Project/jucer_Project.h"
+#include "../Project/jucer_ProjectType.h"
 
 
 //==============================================================================

@@ -35,6 +35,10 @@
             file="Source/Application/jucer_Application.h"/>
       <FILE id="lHd3UQJ" name="jucer_CommandIDs.h" compile="0" resource="0"
             file="Source/Application/jucer_CommandIDs.h"/>
+      <FILE id="MyVf4S" name="jucer_CommandLine.cpp" compile="1" resource="0"
+            file="Source/Application/jucer_CommandLine.cpp"/>
+      <FILE id="SuOWc2" name="jucer_CommandLine.h" compile="0" resource="0"
+            file="Source/Application/jucer_CommandLine.h"/>
       <FILE id="vXhFyvd" name="jucer_CommonHeaders.h" compile="0" resource="0"
             file="Source/Application/jucer_CommonHeaders.h"/>
       <FILE id="YNZhhqp" name="jucer_DocumentEditorComponent.cpp" compile="1"
@@ -60,12 +64,6 @@
             resource="0" file="Source/Application/jucer_OpenDocumentManager.cpp"/>
       <FILE id="NYEknlp" name="jucer_OpenDocumentManager.h" compile="0" resource="0"
             file="Source/Application/jucer_OpenDocumentManager.h"/>
-    </GROUP>
-    <GROUP id="i1s14uV" name="Code Editor">
-      <FILE id="36CkPUf" name="jucer_SourceCodeEditor.cpp" compile="1" resource="0"
-            file="Source/Code Editor/jucer_SourceCodeEditor.cpp"/>
-      <FILE id="CygyGGA" name="jucer_SourceCodeEditor.h" compile="0" resource="0"
-            file="Source/Code Editor/jucer_SourceCodeEditor.h"/>
     </GROUP>
     <GROUP id="vGFZIJg" name="Project">
       <FILE id="a9a1b" name="jucer_AudioPluginModule.h" compile="0" resource="0"
@@ -93,24 +91,10 @@
             resource="0" file="Source/Project/jucer_ProjectContentComponent.cpp"/>
       <FILE id="mIJMR08" name="jucer_ProjectContentComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_ProjectContentComponent.h"/>
-      <FILE id="N0uQAr" name="jucer_ProjectExport_Android.h" compile="0"
-            resource="0" file="Source/Project/jucer_ProjectExport_Android.h"/>
-      <FILE id="b8ouh7s" name="jucer_ProjectExport_Make.h" compile="0" resource="0"
-            file="Source/Project/jucer_ProjectExport_Make.h"/>
-      <FILE id="lbo8KcG" name="jucer_ProjectExport_MSVC.h" compile="0" resource="0"
-            file="Source/Project/jucer_ProjectExport_MSVC.h"/>
-      <FILE id="ymhtjf" name="jucer_ProjectExport_XCode.h" compile="0" resource="0"
-            file="Source/Project/jucer_ProjectExport_XCode.h"/>
-      <FILE id="h6J3UPy" name="jucer_ProjectExporter.cpp" compile="1" resource="0"
-            file="Source/Project/jucer_ProjectExporter.cpp"/>
-      <FILE id="KFY4Re5" name="jucer_ProjectExporter.h" compile="0" resource="0"
-            file="Source/Project/jucer_ProjectExporter.h"/>
       <FILE id="5I09Gpe" name="jucer_ProjectInformationComponent.cpp" compile="1"
             resource="0" file="Source/Project/jucer_ProjectInformationComponent.cpp"/>
       <FILE id="nvEyCt5" name="jucer_ProjectInformationComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_ProjectInformationComponent.h"/>
-      <FILE id="grlWO2E" name="jucer_ProjectSaver.h" compile="0" resource="0"
-            file="Source/Project/jucer_ProjectSaver.h"/>
       <FILE id="TL3snCb" name="jucer_ProjectTreeViewBase.cpp" compile="1"
             resource="0" file="Source/Project/jucer_ProjectTreeViewBase.cpp"/>
       <FILE id="UwhAsi1" name="jucer_ProjectTreeViewBase.h" compile="0" resource="0"
@@ -119,14 +103,30 @@
             file="Source/Project/jucer_ProjectType.cpp"/>
       <FILE id="davId" name="jucer_ProjectType.h" compile="0" resource="0"
             file="Source/Project/jucer_ProjectType.h"/>
-      <FILE id="pIeJPuR" name="jucer_ResourceFile.cpp" compile="1" resource="0"
-            file="Source/Project/jucer_ResourceFile.cpp"/>
-      <FILE id="Bvb3uEg" name="jucer_ResourceFile.h" compile="0" resource="0"
-            file="Source/Project/jucer_ResourceFile.h"/>
       <FILE id="JTbTiIc" name="jucer_TreeViewTypes.cpp" compile="1" resource="0"
             file="Source/Project/jucer_TreeViewTypes.cpp"/>
       <FILE id="WaT0B16" name="jucer_TreeViewTypes.h" compile="0" resource="0"
             file="Source/Project/jucer_TreeViewTypes.h"/>
+    </GROUP>
+    <GROUP id="{579C9644-D5C2-8469-9439-F91C81337531}" name="Project Saving">
+      <FILE id="TtXohM" name="jucer_ProjectExport_Android.h" compile="0"
+            resource="0" file="Source/Project Saving/jucer_ProjectExport_Android.h"/>
+      <FILE id="mVXrLi" name="jucer_ProjectExport_Make.h" compile="0" resource="0"
+            file="Source/Project Saving/jucer_ProjectExport_Make.h"/>
+      <FILE id="ILeTrs" name="jucer_ProjectExport_MSVC.h" compile="0" resource="0"
+            file="Source/Project Saving/jucer_ProjectExport_MSVC.h"/>
+      <FILE id="qGukX7" name="jucer_ProjectExport_XCode.h" compile="0" resource="0"
+            file="Source/Project Saving/jucer_ProjectExport_XCode.h"/>
+      <FILE id="IhUUL3" name="jucer_ProjectExporter.cpp" compile="1" resource="0"
+            file="Source/Project Saving/jucer_ProjectExporter.cpp"/>
+      <FILE id="DDuG44" name="jucer_ProjectExporter.h" compile="0" resource="0"
+            file="Source/Project Saving/jucer_ProjectExporter.h"/>
+      <FILE id="ASAH0z" name="jucer_ProjectSaver.h" compile="0" resource="0"
+            file="Source/Project Saving/jucer_ProjectSaver.h"/>
+      <FILE id="EEyV81" name="jucer_ResourceFile.cpp" compile="1" resource="0"
+            file="Source/Project Saving/jucer_ResourceFile.cpp"/>
+      <FILE id="dCnNH" name="jucer_ResourceFile.h" compile="0" resource="0"
+            file="Source/Project Saving/jucer_ResourceFile.h"/>
     </GROUP>
     <GROUP id="Ga8fLmv" name="Utility">
       <FILE id="mceJWJc" name="jucer_CodeHelpers.cpp" compile="1" resource="0"
@@ -157,6 +157,12 @@
             file="Source/Utility/jucer_StoredSettings.h"/>
       <FILE id="lZ9s99o" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_ValueSourceHelpers.h"/>
+    </GROUP>
+    <GROUP id="i1s14uV" name="Code Editor">
+      <FILE id="36CkPUf" name="jucer_SourceCodeEditor.cpp" compile="1" resource="0"
+            file="Source/Code Editor/jucer_SourceCodeEditor.cpp"/>
+      <FILE id="CygyGGA" name="jucer_SourceCodeEditor.h" compile="0" resource="0"
+            file="Source/Code Editor/jucer_SourceCodeEditor.h"/>
     </GROUP>
     <GROUP id="KPIRFfz" name="BinaryData">
       <FILE id="RSJcrRl" name="AudioPluginXCodeScript.txt" compile="0" resource="1"
