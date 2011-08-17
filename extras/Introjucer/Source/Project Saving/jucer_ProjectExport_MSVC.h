@@ -91,9 +91,13 @@ protected:
         if (binaryPath.isEmpty())
             return getIntermediatesPath (config);
 
-        return ".\\" + RelativePath (binaryPath, RelativePath::projectFolder)
-                             .rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder)
-                             .toWindowsStyle();
+        RelativePath binaryRelPath (binaryPath, RelativePath::projectFolder);
+    
+        if (binaryRelPath.isAbsolute())
+            return binaryRelPath.toWindowsStyle();
+
+        return ".\\" + binaryRelPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder)
+                                    .toWindowsStyle();
     }
 
     String getPreprocessorDefs (const Project::BuildConfiguration& config, const String& joinString) const
