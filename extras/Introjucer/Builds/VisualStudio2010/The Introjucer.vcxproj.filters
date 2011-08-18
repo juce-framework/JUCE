@@ -26,24 +26,6 @@
     <Filter Include="Juce Modules">
       <UniqueIdentifier>{F842EDF7-A721-5611-7D34-D687130DB5AF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Juce Modules\juce_audio_basics">
-      <UniqueIdentifier>{7DC92EF2-E271-9A9D-670B-D20E3BB1A433}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Juce Modules\juce_audio_basics\buffers">
-      <UniqueIdentifier>{953A48F2-5B19-40DB-D4D9-68702D2B7E55}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Juce Modules\juce_audio_basics\midi">
-      <UniqueIdentifier>{876A26AF-3F56-0869-028E-BE6C40A1A182}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Juce Modules\juce_audio_basics\effects">
-      <UniqueIdentifier>{0C3A88A6-68D6-21C8-3D84-1E4572BED74B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Juce Modules\juce_audio_basics\sources">
-      <UniqueIdentifier>{F310E954-1312-0901-03F2-DB22605C8D01}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Juce Modules\juce_audio_basics\synthesisers">
-      <UniqueIdentifier>{C78E3776-E6F7-3E8C-B749-98CBDDCE9B0E}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Juce Modules\juce_core">
       <UniqueIdentifier>{0950B058-AE5B-9D46-7088-E03C444D0F06}</UniqueIdentifier>
     </Filter>
@@ -348,57 +330,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\juce_icon.png">
       <Filter>The Introjucer\BinaryData</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
-      <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.cpp">
-      <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.cpp">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiFile.cpp">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiKeyboardState.cpp">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessage.cpp">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessageSequence.cpp">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\effects\juce_IIRFilter.cpp">
-      <Filter>Juce Modules\juce_audio_basics\effects</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_BufferingAudioSource.cpp">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ChannelRemappingAudioSource.cpp">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_IIRFilterAudioSource.cpp">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_MixerAudioSource.cpp">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ResamplingAudioSource.cpp">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ReverbAudioSource.cpp">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ToneGeneratorAudioSource.cpp">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.cpp">
-      <Filter>Juce Modules\juce_audio_basics\synthesisers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\juce_module_info">
-      <Filter>Juce Modules\juce_audio_basics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
       <Filter>Juce Modules\juce_core\text</Filter>
@@ -1264,9 +1195,6 @@
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp">
-      <Filter>Juce Library Code</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\juce_core.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
@@ -1415,69 +1343,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_WindowTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h">
-      <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.h">
-      <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.h">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiFile.h">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiKeyboardState.h">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessage.h">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessageSequence.h">
-      <Filter>Juce Modules\juce_audio_basics\midi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Decibels.h">
-      <Filter>Juce Modules\juce_audio_basics\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_IIRFilter.h">
-      <Filter>Juce Modules\juce_audio_basics\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Reverb.h">
-      <Filter>Juce Modules\juce_audio_basics\effects</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_AudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_BufferingAudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ChannelRemappingAudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_IIRFilterAudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_MixerAudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_PositionableAudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ResamplingAudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ReverbAudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ToneGeneratorAudioSource.h">
-      <Filter>Juce Modules\juce_audio_basics\sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.h">
-      <Filter>Juce Modules\juce_audio_basics\synthesisers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h">
-      <Filter>Juce Modules\juce_audio_basics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h">
       <Filter>Juce Modules\juce_core\text</Filter>

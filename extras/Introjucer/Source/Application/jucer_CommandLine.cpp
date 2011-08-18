@@ -180,6 +180,22 @@ namespace
 
         return 0;
     }
+
+    int listModules()
+    {
+        std::cout << "Downloading list of available modules..." << std::endl;
+        ModuleList list;
+        list.loadFromWebsite();
+
+        for (int i = 0; i < list.modules.size(); ++i)
+        {
+            ModuleList::Module* m = list.modules.getUnchecked(i);
+
+            std::cout << m->uid << ": " << m->version << std::endl;
+        }
+
+        return 0;
+    }
 }
 
 //==============================================================================
@@ -197,6 +213,9 @@ int performCommandLine (const String& commandLine)
 
     if (tokens[0] == "buildallmodules")
         return buildModules (tokens, true);
+
+    if (tokens[0] == "listmodules")
+        return listModules();
 
     return commandLineNotPerformed;
 }

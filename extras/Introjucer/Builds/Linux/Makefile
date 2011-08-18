@@ -69,7 +69,6 @@ OBJECTS := \
   $(OBJDIR)/jucer_StoredSettings_26078d2c.o \
   $(OBJDIR)/jucer_SourceCodeEditor_461f5487.o \
   $(OBJDIR)/BinaryData_ce4232d4.o \
-  $(OBJDIR)/juce_audio_basics_399a455e.o \
   $(OBJDIR)/juce_core_1ee54a40.o \
   $(OBJDIR)/juce_cryptography_3b1f489a.o \
   $(OBJDIR)/juce_data_structures_84790dfc.o \
@@ -221,11 +220,6 @@ $(OBJDIR)/jucer_SourceCodeEditor_461f5487.o: ../../Source/Code\ Editor/jucer_Sou
 $(OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling BinaryData.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_audio_basics_399a455e.o: ../../../../modules/juce_audio_basics/juce_audio_basics.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_audio_basics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_core_1ee54a40.o: ../../../../modules/juce_core/juce_core.cpp

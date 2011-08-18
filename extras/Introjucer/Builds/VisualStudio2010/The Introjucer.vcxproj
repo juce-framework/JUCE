@@ -165,54 +165,6 @@
     <ClCompile Include="..\..\Source\BinaryData\jucer_WindowTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiFile.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiKeyboardState.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessage.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessageSequence.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\effects\juce_IIRFilter.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_BufferingAudioSource.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ChannelRemappingAudioSource.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_IIRFilterAudioSource.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_MixerAudioSource.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ResamplingAudioSource.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ReverbAudioSource.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ToneGeneratorAudioSource.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -991,7 +943,6 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp"/>
     <ClCompile Include="..\..\..\..\modules\juce_core\juce_core.cpp"/>
     <ClCompile Include="..\..\..\..\modules\juce_cryptography\juce_cryptography.cpp"/>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp"/>
@@ -1043,27 +994,6 @@
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\jucer_WindowTemplate.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiFile.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiKeyboardState.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessage.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessageSequence.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Decibels.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_IIRFilter.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\effects\juce_Reverb.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_AudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_BufferingAudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ChannelRemappingAudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_IIRFilterAudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_MixerAudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_PositionableAudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ResamplingAudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ReverbAudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ToneGeneratorAudioSource.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_ASCII.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16.h"/>

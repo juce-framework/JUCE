@@ -14,7 +14,6 @@
 #define __APPHEADERFILE_M70QFTRRK__
 
 #include "AppConfig.h"
-#include "modules/juce_audio_basics/juce_audio_basics.h"
 #include "modules/juce_core/juce_core.h"
 #include "modules/juce_cryptography/juce_cryptography.h"
 #include "modules/juce_data_structures/juce_data_structures.h"

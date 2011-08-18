@@ -88,7 +88,7 @@ void ModuleList::loadFromWebsite()
     modules.clear();
 
     URL baseURL ("http://www.rawmaterialsoftware.com/juce/modules");
-    URL url (baseURL.getChildURL ("modulelist"));
+    URL url (baseURL.getChildURL ("modulelist.php"));
 
     var infoList (JSON::parse (url.readEntireTextStream (false)));
 

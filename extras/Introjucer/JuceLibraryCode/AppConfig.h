@@ -14,7 +14,6 @@
 #define __JUCE_APPCONFIG_M70QFTRRK__
 
 //==============================================================================
-#define JUCE_MODULE_AVAILABLE_juce_audio_basics         1
 #define JUCE_MODULE_AVAILABLE_juce_core                 1
 #define JUCE_MODULE_AVAILABLE_juce_cryptography         1
 #define JUCE_MODULE_AVAILABLE_juce_data_structures      1

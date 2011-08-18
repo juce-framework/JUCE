@@ -207,6 +207,5 @@
     <MODULE id="juce_audio" showAllCode="1"/>
     <MODULE id="juce_gui_basics" showAllCode="1"/>
     <MODULE id="juce_gui_extra" showAllCode="1"/>
-    <MODULE id="juce_audio_basics" showAllCode="1"/>
   </MODULES>
 </JUCERPROJECT>
