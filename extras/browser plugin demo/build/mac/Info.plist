@@ -1,3 +1,5 @@
+#include "../../src/BrowserPluginCharacteristics.h"
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -23,6 +25,8 @@
 	<key>CFBundleDisplayName</key>
 	<string>JuceBrowserPlugin_Desc</string>
 	<key>CFBundleShortVersionString</key>
+	<string>JuceBrowserPlugin_Version</string>
+	<key>WebPluginName</key>
 	<string>JuceBrowserPlugin_Name</string>
 </dict>
 </plist>
