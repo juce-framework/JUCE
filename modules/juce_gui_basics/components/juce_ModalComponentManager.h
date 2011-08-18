@@ -139,9 +139,9 @@ private:
     friend class OwnedArray <ModalItem>;
     OwnedArray <ModalItem> stack;
 
-    void startModal (Component* component);
-    void endModal (Component* component, int returnValue);
-    void endModal (Component* component);
+    void startModal (Component*);
+    void endModal (Component*, int returnValue);
+    void endModal (Component*);
 
     JUCE_DECLARE_NON_COPYABLE (ModalComponentManager);
 };

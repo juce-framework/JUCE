@@ -51,6 +51,9 @@ public:
 
     /** Callback when the user double-clicks on a file in the browser. */
     virtual void fileDoubleClicked (const File& file) = 0;
+
+    /** Callback when the browser's root folder changes. */
+    virtual void browserRootChanged (const File& newRoot) = 0;
 };
 
 

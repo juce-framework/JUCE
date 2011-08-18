@@ -138,15 +138,17 @@ public:
 
     //==============================================================================
     /** @internal */
-    void buttonClicked (Button* button);
+    void buttonClicked (Button*);
     /** @internal */
     void closeButtonPressed();
     /** @internal */
     void selectionChanged();
     /** @internal */
-    void fileClicked (const File& file, const MouseEvent& e);
+    void fileClicked (const File&, const MouseEvent&);
     /** @internal */
-    void fileDoubleClicked (const File& file);
+    void fileDoubleClicked (const File&);
+    /** @internal */
+    void browserRootChanged (const File&);
 
 private:
     class ContentComponent;

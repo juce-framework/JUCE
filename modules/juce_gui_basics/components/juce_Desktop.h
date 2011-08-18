@@ -391,13 +391,13 @@ private:
 
     int getNumDisplayMonitors() const noexcept;
     const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const noexcept;
-    static void getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea);
+    static void getCurrentMonitorPositions (Array <Rectangle<int> >&, const bool clipToWorkArea);
 
-    void addDesktopComponent (Component* c);
-    void removeDesktopComponent (Component* c);
-    void componentBroughtToFront (Component* c);
+    void addDesktopComponent (Component*);
+    void removeDesktopComponent (Component*);
+    void componentBroughtToFront (Component*);
 
-    static void setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars);
+    static void setKioskComponent (Component*, bool enableOrDisable, bool allowMenusAndBars);
 
     void triggerFocusCallback();
     void handleAsyncUpdate();

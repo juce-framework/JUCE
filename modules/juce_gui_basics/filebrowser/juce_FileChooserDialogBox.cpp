@@ -190,15 +190,14 @@ void FileChooserDialogBox::selectionChanged()
                                           && content->chooserComponent.getRoot().isDirectory());
 }
 
-void FileChooserDialogBox::fileClicked (const File&, const MouseEvent&)
-{
-}
-
 void FileChooserDialogBox::fileDoubleClicked (const File&)
 {
     selectionChanged();
     content->okButton.triggerClick();
 }
+
+void FileChooserDialogBox::fileClicked (const File&, const MouseEvent&) {}
+void FileChooserDialogBox::browserRootChanged (const File&) {}
 
 void FileChooserDialogBox::okToOverwriteFileCallback (int result, FileChooserDialogBox* box)
 {

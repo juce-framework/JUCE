@@ -205,8 +205,11 @@ const File& FileBrowserComponent::getRoot() const
 
 void FileBrowserComponent::setRoot (const File& newRootDirectory)
 {
+    bool callListeners = false;
+
     if (currentRoot != newRootDirectory)
     {
+        callListeners = true;
         fileListComponent->scrollToTop();
 
         String path (newRootDirectory.getFullPathName());
@@ -246,6 +249,12 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
 
     goUpButton->setEnabled (currentRoot.getParentDirectory().isDirectory()
                              && currentRoot.getParentDirectory() != currentRoot);
+
+    if (callListeners)
+    {
+        Component::BailOutChecker checker (this);
+        listeners.callChecked (checker, &FileBrowserListener::browserRootChanged, currentRoot);
+    }
 }
 
 void FileBrowserComponent::resetRecentPaths()
@@ -366,6 +375,8 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
         listeners.callChecked (checker, &FileBrowserListener::fileDoubleClicked, f);
     }
 }
+
+void FileBrowserComponent::browserRootChanged (const File&) {}
 
 bool FileBrowserComponent::keyPressed (const KeyPress& key)
 {

@@ -177,27 +177,29 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    void buttonClicked (Button* b);
+    void buttonClicked (Button*);
     /** @internal */
     void comboBoxChanged (ComboBox*);
     /** @internal */
-    void textEditorTextChanged (TextEditor& editor);
+    void textEditorTextChanged (TextEditor&);
     /** @internal */
-    void textEditorReturnKeyPressed (TextEditor& editor);
+    void textEditorReturnKeyPressed (TextEditor&);
     /** @internal */
-    void textEditorEscapeKeyPressed (TextEditor& editor);
+    void textEditorEscapeKeyPressed (TextEditor&);
     /** @internal */
-    void textEditorFocusLost (TextEditor& editor);
+    void textEditorFocusLost (TextEditor&);
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&);
     /** @internal */
     void selectionChanged();
     /** @internal */
-    void fileClicked (const File& f, const MouseEvent& e);
+    void fileClicked (const File&, const MouseEvent&);
     /** @internal */
-    void fileDoubleClicked (const File& f);
+    void fileDoubleClicked (const File&);
     /** @internal */
-    bool isFileSuitable (const File& file) const;
+    void browserRootChanged (const File&);
+    /** @internal */
+    bool isFileSuitable (const File&) const;
     /** @internal */
     bool isDirectorySuitable (const File&) const;
 
