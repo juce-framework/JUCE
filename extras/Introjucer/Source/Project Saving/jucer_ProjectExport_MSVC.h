@@ -92,7 +92,7 @@ protected:
             return getIntermediatesPath (config);
 
         RelativePath binaryRelPath (binaryPath, RelativePath::projectFolder);
-    
+
         if (binaryRelPath.isAbsolute())
             return binaryRelPath.toWindowsStyle();
 

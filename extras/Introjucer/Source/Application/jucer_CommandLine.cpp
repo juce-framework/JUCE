@@ -24,6 +24,7 @@
 */
 
 #include "../Project/jucer_Project.h"
+#include "../Project/jucer_Module.h"
 #include "jucer_CommandLine.h"
 
 
@@ -74,8 +75,108 @@ namespace
     }
 
     //==============================================================================
-    int buildModule (const StringArray& tokens)
+    String getModulePackageName (const LibraryModule& module)
     {
+        return module.getID() + ".jucemodule";
+    }
+
+    int zipModule (const File& targetFolder, const File& moduleFolder)
+    {
+        jassert (targetFolder.isDirectory());
+
+        const File moduleFolderParent (moduleFolder.getParentDirectory());
+        LibraryModule module (moduleFolder.getChildFile (LibraryModule::getInfoFileName()));
+
+        if (! module.isValid())
+        {
+            std::cout << moduleFolder.getFullPathName() << " is not a valid module folder!" << std::endl;
+            return 1;
+        }
+
+        const File targetFile (targetFolder.getChildFile (getModulePackageName (module)));
+
+        ZipFile::Builder zip;
+
+        {
+            DirectoryIterator i (moduleFolder, true, "*", File::findFiles);
+
+            while (i.next())
+                if (! i.getFile().isHidden())
+                    zip.addFile (i.getFile(), 9, i.getFile().getRelativePathFrom (moduleFolderParent));
+        }
+
+        std::cout << "Writing: " << targetFile.getFullPathName() << std::endl;
+
+        TemporaryFile temp (targetFile);
+        ScopedPointer<FileOutputStream> out (temp.getFile().createOutputStream());
+
+        bool ok = out != nullptr && zip.writeToStream (*out);
+        out = nullptr;
+        ok = ok && temp.overwriteTargetFileWithTemporary();
+
+        if (! ok)
+        {
+            std::cout << "Failed to write to the target file: " << targetFile.getFullPathName() << std::endl;
+            return 1;
+        }
+
+        return 0;
+    }
+
+    int buildModules (const StringArray& tokens, const bool buildAllWithIndex)
+    {
+        if (tokens.size() < 3)
+        {
+            std::cout << "Not enough arguments!" << std::endl;
+            return 1;
+        }
+
+        const File targetFolder (getFile (tokens[1]));
+
+        if (! targetFolder.isDirectory())
+        {
+            std::cout << "The first argument must be the directory to put the result." << std::endl;
+            return 1;
+        }
+
+        if (buildAllWithIndex)
+        {
+            const File folderToSearch (getFile (tokens[2]));
+            DirectoryIterator i (folderToSearch, false, "*", File::findDirectories);
+            var infoList;
+
+            while (i.next())
+            {
+                LibraryModule module (i.getFile().getChildFile (LibraryModule::getInfoFileName()));
+
+                if (module.isValid())
+                {
+                    const int result = zipModule (targetFolder, i.getFile());
+
+                    if (result != 0)
+                        return result;
+
+                    var moduleInfo (new DynamicObject());
+                    moduleInfo.getDynamicObject()->setProperty ("file", getModulePackageName (module));
+                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo);
+                    infoList.append (moduleInfo);
+                }
+            }
+
+            const File indexFile (targetFolder.getChildFile ("modulelist"));
+            std::cout << "Writing: " << indexFile.getFullPathName() << std::endl;
+            indexFile.replaceWithText (JSON::toString (infoList), false, false);
+        }
+        else
+        {
+            for (int i = 2; i < tokens.size(); ++i)
+            {
+                const int result = zipModule (targetFolder, getFile (tokens[i]));
+
+                if (result != 0)
+                    return result;
+            }
+        }
 
         return 0;
     }
@@ -92,7 +193,10 @@ int performCommandLine (const String& commandLine)
         return resaveProject (getFile (tokens[1]));
 
     if (tokens[0] == "buildmodule")
-        return buildModule (tokens);
+        return buildModules (tokens, false);
+
+    if (tokens[0] == "buildallmodules")
+        return buildModules (tokens, true);
 
     return commandLineNotPerformed;
 }

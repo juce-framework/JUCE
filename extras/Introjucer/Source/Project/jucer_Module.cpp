@@ -36,12 +36,6 @@ ModuleList::ModuleList()
     rescan();
 }
 
-ModuleList& ModuleList::getInstance()
-{
-    static ModuleList list;
-    return list;
-}
-
 struct ModuleSorter
 {
     static int compareElements (const ModuleList::Module* m1, const ModuleList::Module* m2)
@@ -50,38 +44,84 @@ struct ModuleSorter
     }
 };
 
+void ModuleList::sort()
+{
+    ModuleSorter sorter;
+    modules.sort (sorter);
+}
+
 void ModuleList::rescan()
 {
     modules.clear();
-
     moduleFolder = StoredSettings::getInstance()->getLastKnownJuceFolder().getChildFile ("modules");
 
     DirectoryIterator iter (moduleFolder, false, "*", File::findDirectories);
 
     while (iter.next())
     {
-        const File moduleDef (iter.getFile().getChildFile ("juce_module_info"));
+        const File moduleDef (iter.getFile().getChildFile (LibraryModule::getInfoFileName()));
 
         if (moduleDef.exists())
         {
-            ScopedPointer<LibraryModule> m (new LibraryModule (moduleDef));
-            jassert (m->isValid());
+            LibraryModule m (moduleDef);
+            jassert (m.isValid());
 
-            if (m->isValid())
+            if (m.isValid())
             {
                 Module* info = new Module();
                 modules.add (info);
 
-                info->uid = m->getID();
-                info->name = m->moduleInfo ["name"];
-                info->description = m->moduleInfo ["description"];
+                info->uid = m.getID();
+                info->version = m.getVersion();
+                info->name = m.moduleInfo ["name"];
+                info->description = m.moduleInfo ["description"];
                 info->file = moduleDef;
             }
         }
     }
 
-    ModuleSorter sorter;
-    modules.sort (sorter);
+    sort();
+}
+
+void ModuleList::loadFromWebsite()
+{
+    modules.clear();
+
+    URL baseURL ("http://www.rawmaterialsoftware.com/juce/modules");
+    URL url (baseURL.getChildURL ("modulelist"));
+
+    var infoList (JSON::parse (url.readEntireTextStream (false)));
+
+    if (infoList.isArray())
+    {
+        const Array<var>* moduleList = infoList.getArray();
+
+        for (int i = 0; i < moduleList->size(); ++i)
+        {
+            const var& m = moduleList->getReference(i);
+            const String file (m ["file"].toString());
+
+            if (file.isNotEmpty())
+            {
+                var moduleInfo (m ["info"]);
+                LibraryModule lm (moduleInfo);
+
+                if (lm.isValid())
+                {
+                    Module* info = new Module();
+                    modules.add (info);
+
+                    info->uid = lm.getID();
+                    info->version = lm.getVersion();
+                    info->name = lm.getName();
+                    info->description = lm.getDescription();
+                    info->url = baseURL.getChildURL (file);
+                }
+            }
+        }
+    }
+
+    sort();
 }
 
 LibraryModule* ModuleList::Module::create() const
@@ -162,8 +202,12 @@ LibraryModule::LibraryModule (const File& file)
     jassert (isValid());
 }
 
-String LibraryModule::getID() const    { return moduleInfo ["id"].toString(); };
-bool LibraryModule::isValid() const    { return getID().isNotEmpty(); }
+LibraryModule::LibraryModule (const var& moduleInfo_)
+    : moduleInfo (moduleInfo_)
+{
+}
+
+bool LibraryModule::isValid() const         { return getID().isNotEmpty(); }
 
 bool LibraryModule::isPluginClient() const                          { return getID() == "juce_audio_plugin_client"; }
 bool LibraryModule::isAUPluginHost (const Project& project) const   { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_AU"); }

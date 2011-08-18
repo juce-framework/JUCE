@@ -94,7 +94,20 @@ public:
         E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
         "bar", it'll return "http://www.xyz.com/bar?x=1".
     */
-    const URL withNewSubPath (const String& newPath) const;
+    URL withNewSubPath (const String& newPath) const;
+
+    /** Returns a new URL that refers to a sub-path relative to this one.
+
+        E.g. if the URL is "http://www.xyz.com/foo" and you call this with
+        "bar", it'll return "http://www.xyz.com/foo/bar". Note that there's no way for
+        this method to know whether the original URL is a file or directory, so it's
+        up to you to make sure it's a directory. It also won't attempt to be smart about
+        the content of the childPath string, so if this string is an absolute URL, it'll
+        still just get bolted onto the end of the path.
+
+        @see File::getChildFile
+    */
+    URL getChildURL (const String& subPath) const;
 
     //==============================================================================
     /** Returns a copy of this URL, with a GET or POST parameter added to the end.
@@ -105,8 +118,8 @@ public:
         would produce a new url whose toString(true) method would return
         "www.fish.com?amount=some+fish".
     */
-    const URL withParameter (const String& parameterName,
-                             const String& parameterValue) const;
+    URL withParameter (const String& parameterName,
+                       const String& parameterValue) const;
 
     /** Returns a copy of this URl, with a file-upload type parameter added to it.
 
@@ -116,9 +129,9 @@ public:
         Note that the filename is stored, but the file itself won't actually be read
         until this URL is later used to create a network input stream.
     */
-    const URL withFileToUpload (const String& parameterName,
-                                const File& fileToUpload,
-                                const String& mimeType) const;
+    URL withFileToUpload (const String& parameterName,
+                          const File& fileToUpload,
+                          const String& mimeType) const;
 
     /** Returns a set of all the parameters encoded into the url.
 
@@ -154,7 +167,7 @@ public:
         This data will only be used if you specify a post operation when you call
         createInputStream().
     */
-    const URL withPOSTData (const String& postData) const;
+    URL withPOSTData (const String& postData) const;
 
     /** Returns the data that was set using withPOSTData().
     */

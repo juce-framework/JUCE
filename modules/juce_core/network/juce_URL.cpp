@@ -173,6 +173,17 @@ namespace URLHelpers
                     << (int) postData.getSize() << "\r\n";
         }
     }
+
+    void concatenatePaths (String& path, const String& suffix)
+    {
+        if (! path.endsWithChar ('/'))
+            path << '/';
+
+        if (suffix.startsWithChar ('/'))
+            path += suffix.substring (1);
+        else
+            path += suffix;
+    }
 }
 
 String URL::toString (const bool includeGetParameters) const
@@ -221,7 +232,7 @@ String URL::getScheme() const
     return url.substring (0, URLHelpers::findStartOfDomain (url) - 1);
 }
 
-const URL URL::withNewSubPath (const String& newPath) const
+URL URL::withNewSubPath (const String& newPath) const
 {
     int start = URLHelpers::findStartOfDomain (url);
     while (url[start] == '/')
@@ -234,14 +245,14 @@ const URL URL::withNewSubPath (const String& newPath) const
     if (startOfPath > 0)
         u.url = url.substring (0, startOfPath);
 
-    if (! u.url.endsWithChar ('/'))
-        u.url << '/';
+    URLHelpers::concatenatePaths (u.url, newPath);
+    return u;
+}
 
-    if (newPath.startsWithChar ('/'))
-        u.url << newPath.substring (1);
-    else
-        u.url << newPath;
-
+URL URL::getChildURL (const String& subPath) const
+{
+    URL u (*this);
+    URLHelpers::concatenatePaths (u.url, subPath);
     return u;
 }
 
@@ -328,17 +339,17 @@ XmlElement* URL::readEntireXmlStream (const bool usePostCommand) const
 }
 
 //==============================================================================
-const URL URL::withParameter (const String& parameterName,
-                              const String& parameterValue) const
+URL URL::withParameter (const String& parameterName,
+                        const String& parameterValue) const
 {
     URL u (*this);
     u.parameters.set (parameterName, parameterValue);
     return u;
 }
 
-const URL URL::withFileToUpload (const String& parameterName,
-                                 const File& fileToUpload,
-                                 const String& mimeType) const
+URL URL::withFileToUpload (const String& parameterName,
+                           const File& fileToUpload,
+                           const String& mimeType) const
 {
     jassert (mimeType.isNotEmpty()); // You need to supply a mime type!
 
@@ -348,7 +359,7 @@ const URL URL::withFileToUpload (const String& parameterName,
     return u;
 }
 
-const URL URL::withPOSTData (const String& postData_) const
+URL URL::withPOSTData (const String& postData_) const
 {
     URL u (*this);
     u.postData = postData_;

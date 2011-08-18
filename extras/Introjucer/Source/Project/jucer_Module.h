@@ -36,14 +36,21 @@ class LibraryModule
 {
 public:
     LibraryModule (const File& file);
+    LibraryModule (const var& moduleInfo);
 
-    String getID() const;
     bool isValid() const;
+
+    String getID() const                { return moduleInfo ["id"].toString(); }
+    String getVersion() const           { return moduleInfo ["version"].toString(); }
+    String getName() const              { return moduleInfo ["name"].toString(); }
+    String getDescription() const       { return moduleInfo ["description"].toString(); }
 
     void writeIncludes (ProjectSaver& projectSaver, OutputStream& out);
     void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const;
     void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const;
     void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const;
+
+    static String getInfoFileName()           { return "juce_module_info"; }
 
     var moduleInfo;
 
@@ -81,10 +88,10 @@ class ModuleList
 public:
     ModuleList();
 
-    static ModuleList& getInstance();
-
     //==============================================================================
     void rescan();
+    void loadFromWebsite();
+
     LibraryModule* loadModule (const String& uid) const;
 
     void getDependencies (const String& moduleID, StringArray& dependencies) const;
@@ -95,8 +102,9 @@ public:
     {
         LibraryModule* create() const;
 
-        String uid, name, description;
+        String uid, version, name, description;
         File file;
+        URL url;
     };
 
     const Module* findModuleInfo (const String& uid) const;
@@ -105,6 +113,8 @@ public:
 
 private:
     File moduleFolder;
+
+    void sort();
 };
 
 

@@ -39,7 +39,6 @@ public:
 class ZipFile::ZipInputStream  : public InputStream
 {
 public:
-    //==============================================================================
     ZipInputStream (ZipFile& file_, ZipFile::ZipEntryInfo& zei)
         : file (file_),
           zipEntryInfo (zei),
@@ -127,9 +126,7 @@ public:
         return true;
     }
 
-
 private:
-    //==============================================================================
     ZipFile& file;
     ZipEntryInfo zipEntryInfo;
     int64 pos;

@@ -65,7 +65,11 @@ public:
         writeMainProjectFile();
 
         OwnedArray<LibraryModule> modules;
-        project.createRequiredModules (ModuleList::getInstance(), modules);
+
+        {
+            ModuleList moduleList;
+            project.createRequiredModules (moduleList, modules);
+        }
 
         if (errors.size() == 0)
             writeAppConfigFile (modules);

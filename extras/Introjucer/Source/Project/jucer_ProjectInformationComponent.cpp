@@ -107,10 +107,10 @@ private:
 };
 
 //==============================================================================
-static StringArray getExtraDependenciesNeeded (Project& project, const ModuleList::Module& m)
+static StringArray getExtraDependenciesNeeded (Project& project, ModuleList& moduleList, const ModuleList::Module& m)
 {
     StringArray dependencies, extraDepsNeeded;
-    ModuleList::getInstance().getDependencies (m.uid, dependencies);
+    moduleList.getDependencies (m.uid, dependencies);
 
     for (int i = 0; i < dependencies.size(); ++i)
         if ((! project.isModuleEnabled (dependencies[i])) && dependencies[i] != m.uid)
@@ -123,25 +123,25 @@ static StringArray getExtraDependenciesNeeded (Project& project, const ModuleLis
 class ModuleSettingsPanel  : public PanelBase
 {
 public:
-    ModuleSettingsPanel (Project& project_, const String& moduleID_)
-        : PanelBase (project_), moduleID (moduleID_)
+    ModuleSettingsPanel (Project& project_, ModuleList& moduleList_, const String& moduleID_)
+        : PanelBase (project_), moduleList (moduleList_), moduleID (moduleID_)
     {
         setBounds ("parent.width / 2 + 1, 3, parent.width - 3, parent.height - 3");
     }
 
     void rebuildProperties (Array <PropertyComponent*>& props)
     {
-        ScopedPointer<LibraryModule> module (ModuleList::getInstance().loadModule (moduleID));
+        ScopedPointer<LibraryModule> module (moduleList.loadModule (moduleID));
 
         if (module != nullptr)
         {
-            props.add (new ModuleInfoComponent (project, moduleID));
+            props.add (new ModuleInfoComponent (project, moduleList, moduleID));
 
             if (project.isModuleEnabled (moduleID))
             {
-                const ModuleList::Module* m = ModuleList::getInstance().findModuleInfo (moduleID);
-                if (m != nullptr && getExtraDependenciesNeeded (project, *m).size() > 0)
-                    props.add (new MissingDependenciesComponent (project, moduleID));
+                const ModuleList::Module* m = moduleList.findModuleInfo (moduleID);
+                if (m != nullptr && getExtraDependenciesNeeded (project, moduleList, *m).size() > 0)
+                    props.add (new MissingDependenciesComponent (project, moduleList, moduleID));
             }
 
             props.add (new BooleanPropertyComponent (project.shouldShowAllModuleFilesInProject (moduleID),
@@ -182,15 +182,16 @@ public:
     }
 
 private:
+    ModuleList& moduleList;
     String moduleID;
 
     //==============================================================================
     class ModuleInfoComponent  : public PropertyComponent
     {
     public:
-        ModuleInfoComponent (Project& project_, const String& moduleID_)
+        ModuleInfoComponent (Project& project_, ModuleList& moduleList_, const String& moduleID_)
             : PropertyComponent ("Module", 100),
-              project (project_), moduleID (moduleID_)
+              project (project_), moduleList (moduleList_), moduleID (moduleID_)
         {
         }
 
@@ -201,7 +202,7 @@ private:
             g.setColour (Colours::white.withAlpha (0.4f));
             g.fillRect (0, 0, getWidth(), getHeight() - 1);
 
-            const ModuleList::Module* module = ModuleList::getInstance().findModuleInfo (moduleID);
+            const ModuleList::Module* module = moduleList.findModuleInfo (moduleID);
 
             if (module != nullptr)
             {
@@ -218,6 +219,7 @@ private:
 
     private:
         Project& project;
+        ModuleList& moduleList;
         String moduleID;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModuleInfoComponent);
@@ -228,15 +230,15 @@ private:
                                           public Button::Listener
     {
     public:
-        MissingDependenciesComponent (Project& project_, const String& moduleID_)
+        MissingDependenciesComponent (Project& project_, ModuleList& moduleList_, const String& moduleID_)
             : PropertyComponent ("Dependencies", 100),
-              project (project_), moduleID (moduleID_),
+              project (project_), moduleList (moduleList), moduleID (moduleID_),
               fixButton ("Enable Required Modules")
         {
-            const ModuleList::Module* module = ModuleList::getInstance().findModuleInfo (moduleID);
+            const ModuleList::Module* module = moduleList.findModuleInfo (moduleID);
 
             if (module != nullptr)
-                missingDependencies = getExtraDependenciesNeeded (project, *module);
+                missingDependencies = getExtraDependenciesNeeded (project, moduleList, *module);
 
             addAndMakeVisible (&fixButton);
             fixButton.setColour (TextButton::buttonColourId, Colours::red);
@@ -265,6 +267,7 @@ private:
 
     private:
         Project& project;
+        ModuleList& moduleList;
         String moduleID;
         StringArray missingDependencies;
         TextButton fixButton;
@@ -290,7 +293,7 @@ public:
 
     int getNumRows()
     {
-        return ModuleList::getInstance().modules.size();
+        return moduleList.modules.size();
     }
 
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
@@ -298,7 +301,7 @@ public:
         if (rowIsSelected)
             g.fillAll (findColour (TextEditor::highlightColourId));
 
-        const ModuleList::Module* const m = ModuleList::getInstance().modules [rowNumber];
+        const ModuleList::Module* const m = moduleList.modules [rowNumber];
 
         if (m != nullptr)
         {
@@ -307,7 +310,7 @@ public:
             getLookAndFeel().drawTickBox (g, *this, (height - tickSize) / 2, (height - tickSize) / 2, tickSize, tickSize,
                                           project.isModuleEnabled (m->uid), true, false, false);
 
-            if (project.isModuleEnabled (m->uid) && getExtraDependenciesNeeded (project, *m).size() > 0)
+            if (project.isModuleEnabled (m->uid) && getExtraDependenciesNeeded (project, moduleList, *m).size() > 0)
                 g.setColour (Colours::red);
             else
                 g.setColour (Colours::black);
@@ -322,7 +325,7 @@ public:
 
     void flipRow (int row)
     {
-        const ModuleList::Module* const m = ModuleList::getInstance().modules [row];
+        const ModuleList::Module* const m = moduleList.modules [row];
 
         if (m != nullptr)
         {
@@ -332,7 +335,7 @@ public:
             }
             else
             {
-                const StringArray extraDepsNeeded (getExtraDependenciesNeeded (project, *m));
+                const StringArray extraDepsNeeded (getExtraDependenciesNeeded (project, moduleList, *m));
 
 /*                if (extraDepsNeeded.size() > 0)
                 {
@@ -375,12 +378,12 @@ public:
 
     void selectedRowsChanged (int lastRowSelected)
     {
-        const ModuleList::Module* const m = ModuleList::getInstance().modules [lastRowSelected];
+        const ModuleList::Module* const m = moduleList.modules [lastRowSelected];
 
         settings = nullptr;
 
         if (m != nullptr)
-            addAndMakeVisible (settings = new ModuleSettingsPanel (project, m->uid));
+            addAndMakeVisible (settings = new ModuleSettingsPanel (project, moduleList, m->uid));
     }
 
     void refresh()
@@ -393,6 +396,7 @@ public:
 
 private:
     Project& project;
+    ModuleList moduleList;
     ListBox modulesList;
     ScopedPointer<ModuleSettingsPanel> settings;
 };
