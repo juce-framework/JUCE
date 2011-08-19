@@ -27,5 +27,6 @@
 #define JUCE_BUILD_MISC     0
 #define JUCE_BUILD_GUI      1
 #define JUCE_BUILD_NATIVE   0
+#define JUCE_BUILD_AMALGAMATION 1
 
 #include "juce_amalgamated_template.cpp"
