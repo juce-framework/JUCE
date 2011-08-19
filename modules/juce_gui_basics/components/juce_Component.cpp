@@ -1646,7 +1646,7 @@ void Component::setMouseCursor (const MouseCursor& newCursor)
     }
 }
 
-const MouseCursor Component::getMouseCursor()
+MouseCursor Component::getMouseCursor()
 {
     return cursor;
 }

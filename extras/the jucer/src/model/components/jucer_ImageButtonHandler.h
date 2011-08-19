@@ -501,7 +501,7 @@ public:
             setImageColour (layout, owner, role, newColour, true);
         }
 
-        const Colour getColour() const
+        Colour getColour() const
         {
             return getImageColour (owner, role);
         }

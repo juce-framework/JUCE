@@ -576,7 +576,7 @@ private:
                               "Change Viewport content class");
         }
 
-        const String getText() const
+        String getText() const
         {
             return getViewportGenericComponentClass (component);
         }
@@ -629,7 +629,7 @@ private:
                               "Change Viewport content constructor params");
         }
 
-        const String getText() const
+        String getText() const
         {
             return getViewportConstructorParams (component);
         }

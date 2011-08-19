@@ -547,7 +547,7 @@ public:
 
         @see getClipRegion, clipRegionIntersects
     */
-    const Rectangle<int> getClipBounds() const;
+    Rectangle<int> getClipBounds() const;
 
     /** Checks whether a rectangle overlaps the context's clipping region.
 

@@ -227,7 +227,7 @@ FileTreeComponent::~FileTreeComponent()
 }
 
 //==============================================================================
-const File FileTreeComponent::getSelectedFile (const int index) const
+File FileTreeComponent::getSelectedFile (const int index) const
 {
     const FileListTreeItem* const item = dynamic_cast <const FileListTreeItem*> (getSelectedItem (index));
 

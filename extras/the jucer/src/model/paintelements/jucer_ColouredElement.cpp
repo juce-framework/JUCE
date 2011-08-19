@@ -179,7 +179,7 @@ public:
             owner->setStrokeFill (fill, true);
     }
 
-    const Colour getColour() const
+    Colour getColour() const
     {
         const JucerFillType fill (isForStroke ? owner->getStrokeType().fill
                                               : owner->getFillType());

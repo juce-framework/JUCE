@@ -1406,7 +1406,7 @@ public:
 
         @see MouseCursor
     */
-    virtual const MouseCursor getMouseCursor();
+    virtual MouseCursor getMouseCursor();
 
     /** Forces the current mouse cursor to be updated.
 

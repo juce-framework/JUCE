@@ -160,7 +160,7 @@ public:
         return currentState->clipRect.intersects (r2);
     }
 
-    const Rectangle<int> getClipBounds() const
+    Rectangle<int> getClipBounds() const
     {
         // xxx could this take into account complex clip regions?
         return currentState->clipRect - currentState->origin;

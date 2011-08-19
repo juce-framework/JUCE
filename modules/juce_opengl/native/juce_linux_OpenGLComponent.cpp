@@ -132,7 +132,7 @@ public:
         return glXGetCurrentContext() == renderContext;
     }
 
-    const OpenGLPixelFormat getPixelFormat() const
+    OpenGLPixelFormat getPixelFormat() const
     {
         return pixelFormat;
     }

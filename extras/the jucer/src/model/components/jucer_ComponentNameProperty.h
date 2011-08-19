@@ -53,7 +53,7 @@ public:
                           "Change component name");
     }
 
-    const String getText() const
+    String getText() const
     {
         return component->getName();
     }
@@ -113,7 +113,7 @@ public:
                           "Change component member name");
     }
 
-    const String getText() const
+    String getText() const
     {
         return document.getComponentLayout()->getComponentMemberVariableName (component);
     }
@@ -172,7 +172,7 @@ public:
                           "Change component virtual class name");
     }
 
-    const String getText() const
+    String getText() const
     {
         return document.getComponentLayout()->getComponentVirtualClassName (component);
     }

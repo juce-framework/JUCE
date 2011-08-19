@@ -123,7 +123,7 @@ bool Graphics::isClipEmpty() const
     return context->isClipEmpty();
 }
 
-const Rectangle<int> Graphics::getClipBounds() const
+Rectangle<int> Graphics::getClipBounds() const
 {
     return context->getClipBounds();
 }

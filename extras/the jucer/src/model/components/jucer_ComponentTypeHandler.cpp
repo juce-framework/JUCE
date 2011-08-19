@@ -268,7 +268,7 @@ public:
     {
     }
 
-    const String getText() const
+    String getText() const
     {
         SettableTooltipClient* ttc = dynamic_cast <SettableTooltipClient*> (component);
         return ttc->getTooltip();
@@ -372,7 +372,7 @@ public:
     {
     }
 
-    const String getText() const
+    String getText() const
     {
         return String (component->getExplicitFocusOrder());
     }

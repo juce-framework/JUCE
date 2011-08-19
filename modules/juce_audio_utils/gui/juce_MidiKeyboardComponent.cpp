@@ -527,7 +527,7 @@ void MidiKeyboardComponent::setOctaveForMiddleC (const int octaveNumForMiddleC_)
     repaint();
 }
 
-const String MidiKeyboardComponent::getWhiteNoteText (const int midiNoteNumber)
+String MidiKeyboardComponent::getWhiteNoteText (const int midiNoteNumber)
 {
     if (keyWidth > 14.0f && midiNoteNumber % 12 == 0)
         return MidiMessage::getMidiNoteName (midiNoteNumber, true, true, octaveNumForMiddleC);

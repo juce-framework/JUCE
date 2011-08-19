@@ -272,7 +272,7 @@ bool CoreGraphicsContext::clipRegionIntersects (const Rectangle<int>& r)
     return getClipBounds().intersects (r);
 }
 
-const Rectangle<int> CoreGraphicsContext::getClipBounds() const
+Rectangle<int> CoreGraphicsContext::getClipBounds() const
 {
     if (! lastClipRectIsValid)
     {

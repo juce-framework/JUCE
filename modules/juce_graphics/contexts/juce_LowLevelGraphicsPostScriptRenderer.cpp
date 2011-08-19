@@ -153,7 +153,7 @@ bool LowLevelGraphicsPostScriptRenderer::clipRegionIntersects (const Rectangle<i
     return stateStack.getLast()->clip.intersectsRectangle (r.translated (stateStack.getLast()->xOffset, stateStack.getLast()->yOffset));
 }
 
-const Rectangle<int> LowLevelGraphicsPostScriptRenderer::getClipBounds() const
+Rectangle<int> LowLevelGraphicsPostScriptRenderer::getClipBounds() const
 {
     return stateStack.getLast()->clip.getBounds().translated (-stateStack.getLast()->xOffset,
                                                               -stateStack.getLast()->yOffset);

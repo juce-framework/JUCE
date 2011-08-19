@@ -156,7 +156,7 @@ private:
                               "Change generic component class");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->actualClassName;
         }
@@ -206,7 +206,7 @@ private:
                               "Change generic component class");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->constructorParams;
         }

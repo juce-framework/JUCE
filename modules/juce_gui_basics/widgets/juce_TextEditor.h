@@ -335,7 +335,7 @@ public:
     String getText() const;
 
     /** Returns a section of the contents of the editor. */
-    const String getTextInRange (const Range<int>& textRange) const;
+    String getTextInRange (const Range<int>& textRange) const;
 
     /** Returns true if there are no characters in the editor.
 
@@ -428,7 +428,7 @@ public:
         The rectangle returned is relative to the component's top-left corner.
         @see scrollEditorToPositionCaret
     */
-    const Rectangle<int> getCaretRectangle();
+    Rectangle<int> getCaretRectangle();
 
     /** Selects a section of the text. */
     void setHighlightedRegion (const Range<int>& newSelection);
@@ -437,7 +437,7 @@ public:
         If nothing is selected, this will return an empty range.
         @see setHighlightedRegion
     */
-    const Range<int> getHighlightedRegion() const                   { return selection; }
+    Range<int> getHighlightedRegion() const                   { return selection; }
 
     /** Returns the section of text that is currently selected. */
     String getHighlightedText() const;

@@ -89,10 +89,10 @@ public:
     int getNumColumnsOnScreen() const noexcept                  { return columnsOnScreen; }
 
     /** Returns the current caret position. */
-    const CodeDocument::Position getCaretPos() const            { return caretPos; }
+    CodeDocument::Position getCaretPos() const                  { return caretPos; }
 
     /** Returns the position of the caret, relative to the editor's origin. */
-    const Rectangle<int> getCaretRectangle();
+    Rectangle<int> getCaretRectangle();
 
     /** Moves the caret.
         If selecting is true, the section of the document between the current
@@ -104,12 +104,12 @@ public:
     /** Returns the on-screen position of a character in the document.
         The rectangle returned is relative to this component's top-left origin.
     */
-    const Rectangle<int> getCharacterBounds (const CodeDocument::Position& pos) const;
+    Rectangle<int> getCharacterBounds (const CodeDocument::Position& pos) const;
 
     /** Finds the character at a given on-screen position.
         The co-ordinates are relative to this component's top-left origin.
     */
-    const CodeDocument::Position getPositionAt (int x, int y);
+    CodeDocument::Position getPositionAt (int x, int y);
 
     //==============================================================================
     bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
@@ -144,9 +144,9 @@ public:
     void insertTabAtCaret();
 
     //==============================================================================
-    const Range<int> getHighlightedRegion() const;
+    Range<int> getHighlightedRegion() const;
     void setHighlightedRegion (const Range<int>& newRange);
-    const String getTextInRange (const Range<int>& range) const;
+    String getTextInRange (const Range<int>& range) const;
 
     //==============================================================================
     /** Changes the current tab settings.

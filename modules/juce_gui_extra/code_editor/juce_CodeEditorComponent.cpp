@@ -306,7 +306,7 @@ void CodeEditorComponent::setTemporaryUnderlining (const Array <Range<int> >&)
     jassertfalse; // TODO Windows IME not yet supported for this comp..
 }
 
-const Rectangle<int> CodeEditorComponent::getCaretRectangle()
+Rectangle<int> CodeEditorComponent::getCaretRectangle()
 {
     return getLocalArea (caret, caret->getLocalBounds());
 }
@@ -568,7 +568,7 @@ void CodeEditorComponent::scrollToKeepCaretOnScreen()
         scrollToColumn (column);
 }
 
-const Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const
+Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const
 {
     return Rectangle<int> (roundToInt ((gutter - xOffset * charWidth) + indexToColumn (pos.getLineNumber(), pos.getIndexInLine()) * charWidth),
                            (pos.getLineNumber() - firstLineOnScreen) * lineHeight,
@@ -576,7 +576,7 @@ const Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument
                            lineHeight);
 }
 
-const CodeDocument::Position CodeEditorComponent::getPositionAt (int x, int y)
+CodeDocument::Position CodeEditorComponent::getPositionAt (int x, int y)
 {
     const int line = y / lineHeight + firstLineOnScreen;
     const int column = roundToInt ((x - (gutter - xOffset * charWidth)) / charWidth);
@@ -879,7 +879,7 @@ void CodeEditorComponent::timerCallback()
 }
 
 //==============================================================================
-const Range<int> CodeEditorComponent::getHighlightedRegion() const
+Range<int> CodeEditorComponent::getHighlightedRegion() const
 {
     return Range<int> (selectionStart.getPosition(), selectionEnd.getPosition());
 }
@@ -890,7 +890,7 @@ void CodeEditorComponent::setHighlightedRegion (const Range<int>& newRange)
     moveCaretTo (CodeDocument::Position (&document, newRange.getEnd()), true);
 }
 
-const String CodeEditorComponent::getTextInRange (const Range<int>& range) const
+String CodeEditorComponent::getTextInRange (const Range<int>& range) const
 {
     return document.getTextBetween (CodeDocument::Position (&document, range.getStart()),
                                     CodeDocument::Position (&document, range.getEnd()));

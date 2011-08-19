@@ -86,7 +86,7 @@ public:
     }
 
     //==============================================================================
-    const Colour getColour() const
+    Colour getColour() const
     {
         return component->findColour (colourId);
     }

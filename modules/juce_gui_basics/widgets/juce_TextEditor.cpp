@@ -892,7 +892,7 @@ public:
         owner.timerCallbackInt();
     }
 
-    const MouseCursor getMouseCursor()
+    MouseCursor getMouseCursor()
     {
         return owner.getMouseCursor();
     }
@@ -1417,7 +1417,7 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
     viewport->setViewPosition (vx, vy);
 }
 
-const Rectangle<int> TextEditor::getCaretRectangle()
+Rectangle<int> TextEditor::getCaretRectangle()
 {
     float cursorX, cursorY;
     float cursorHeight = currentFont.getHeight(); // (in case the text is empty and the call below doesn't set this value)
@@ -2462,7 +2462,7 @@ String TextEditor::getText() const
     return mo.toString();
 }
 
-const String TextEditor::getTextInRange (const Range<int>& range) const
+String TextEditor::getTextInRange (const Range<int>& range) const
 {
     if (range.isEmpty())
         return String::empty;

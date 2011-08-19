@@ -410,7 +410,7 @@ public:
         static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
         static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
 
-        const PixelFormat getPixelFormat() const noexcept   { return format; }
+        PixelFormat getPixelFormat() const noexcept         { return format; }
         int getWidth() const noexcept                       { return width; }
         int getHeight() const noexcept                      { return height; }
 

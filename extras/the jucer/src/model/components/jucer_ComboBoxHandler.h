@@ -301,7 +301,7 @@ private:
                               "Change combo box items");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getProperties() ["items"];
         }
@@ -354,7 +354,7 @@ private:
                               "Change combo box text when nothing selected");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getTextWhenNothingSelected();
         }
@@ -405,7 +405,7 @@ private:
                               "Change combo box 'no items' text");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getTextWhenNoChoicesAvailable();
         }

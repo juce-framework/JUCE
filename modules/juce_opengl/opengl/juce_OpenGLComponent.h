@@ -78,7 +78,7 @@ public:
     void setPixelFormat (const OpenGLPixelFormat& formatToUse);
 
     /** Returns the pixel format that this component is currently using. */
-    const OpenGLPixelFormat getPixelFormat() const;
+    OpenGLPixelFormat getPixelFormat() const;
 
     /** Specifies an OpenGL context which should be shared with the one that this
         component is using.

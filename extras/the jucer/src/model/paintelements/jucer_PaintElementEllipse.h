@@ -153,7 +153,7 @@ private:
             element->convertToPath();
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "convert to a path";
         }

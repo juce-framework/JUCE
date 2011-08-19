@@ -142,7 +142,7 @@ public:
     /** Override this to get the chance to swap a component's mouse cursor for a
         customised one.
     */
-    virtual const MouseCursor getMouseCursorFor (Component& component);
+    virtual MouseCursor getMouseCursorFor (Component& component);
 
     //==============================================================================
     /** Draws the lozenge-shaped background for a standard button. */

@@ -47,7 +47,7 @@ int FileListComponent::getNumSelectedFiles() const
     return getNumSelectedRows();
 }
 
-const File FileListComponent::getSelectedFile (int index) const
+File FileListComponent::getSelectedFile (int index) const
 {
     return fileList.getFile (getSelectedRow (index));
 }

@@ -112,7 +112,7 @@ public:
         return [EAGLContext currentContext] == context;
     }
 
-    const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
+    OpenGLPixelFormat getPixelFormat() const        { return pixelFormat; }
     void* getRawContext() const noexcept            { return glLayer; }
 
     void updateWindowPosition (const Rectangle<int>& bounds)

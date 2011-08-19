@@ -60,7 +60,7 @@ public:
     /** Returns a suggested syntax highlighting colour for a specified
         token type.
     */
-    virtual const Colour getDefaultColour (int tokenType) = 0;
+    virtual Colour getDefaultColour (int tokenType) = 0;
 
 
 private:

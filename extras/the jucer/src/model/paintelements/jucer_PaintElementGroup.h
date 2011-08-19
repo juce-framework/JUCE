@@ -240,7 +240,7 @@ private:
             element->ungroup (true);
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "Ungroup";
         }

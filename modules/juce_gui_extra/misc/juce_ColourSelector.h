@@ -78,7 +78,7 @@ public:
 
         @see setCurrentColour
     */
-    const Colour getCurrentColour() const;
+    Colour getCurrentColour() const;
 
     /** Changes the colour that is currently being shown.
     */
@@ -101,7 +101,7 @@ public:
         setSwatchColour(), to return the number of colours you want, and to set and retrieve
         their values.
     */
-    virtual const Colour getSwatchColour (int index) const;
+    virtual Colour getSwatchColour (int index) const;
 
     /** Called by the selector when the user puts a new colour into one of the swatches.
 

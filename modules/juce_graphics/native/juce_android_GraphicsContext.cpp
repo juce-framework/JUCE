@@ -400,7 +400,7 @@ public:
         return getClipBounds().intersects (r);
     }
 
-    const Rectangle<int> getClipBounds() const
+    Rectangle<int> getClipBounds() const
     {
         JNIEnv* env = getEnv();
         jobject rect = getCanvas().callObjectMethod (Canvas.getClipBounds2);

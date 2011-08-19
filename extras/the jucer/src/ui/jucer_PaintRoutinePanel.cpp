@@ -54,7 +54,7 @@ public:
     }
 
     void setColour (const Colour& newColour)    { routine.setBackgroundColour (newColour); }
-    const Colour getColour() const              { return routine.getBackgroundColour(); }
+    Colour getColour() const                    { return routine.getBackgroundColour(); }
 
     void resetToDefault()
     {

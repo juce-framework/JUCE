@@ -64,7 +64,7 @@ public:
 
         If you need to change this string, call refresh() to update the component.
     */
-    virtual const String getButtonText() const = 0;
+    virtual String getButtonText() const = 0;
 
     //==============================================================================
     /** @internal */

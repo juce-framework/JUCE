@@ -65,7 +65,7 @@ public:
     void endTransparencyLayer();
 
     bool clipRegionIntersects (const Rectangle<int>& r);
-    const Rectangle<int> getClipBounds() const;
+    Rectangle<int> getClipBounds() const;
     bool isClipEmpty() const;
 
     //==============================================================================

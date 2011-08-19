@@ -333,7 +333,7 @@ protected:
 
         @see setOctaveForMiddleC
     */
-    virtual const String getWhiteNoteText (const int midiNoteNumber);
+    virtual String getWhiteNoteText (const int midiNoteNumber);
 
     /** Draws the up and down buttons that change the base note. */
     virtual void drawUpDownButton (Graphics& g, int w, int h,

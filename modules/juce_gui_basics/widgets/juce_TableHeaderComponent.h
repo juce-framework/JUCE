@@ -389,7 +389,7 @@ public:
     /** @internal */
     void mouseUp (const MouseEvent&);
     /** @internal */
-    const MouseCursor getMouseCursor();
+    MouseCursor getMouseCursor();
 
     /** Can be overridden for more control over the pop-up menu behaviour. */
     virtual void showColumnChooserMenu (int columnIdClicked);

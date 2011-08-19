@@ -653,7 +653,7 @@ private:
                               "Add a new tab");
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "Create a new tab";
         }
@@ -719,7 +719,7 @@ private:
             }
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "Delete a tab...";
         }
@@ -780,7 +780,7 @@ private:
                               "Change tab name");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getTabNames() [tabIndex];
         }
@@ -848,7 +848,7 @@ private:
                               "Change tab colour");
         }
 
-        const Colour getColour() const
+        Colour getColour() const
         {
             return component->getTabBackgroundColour (tabIndex);
         }
@@ -1047,7 +1047,7 @@ private:
                               "Change TabbedComponent content class");
         }
 
-        const String getText() const
+        String getText() const
         {
             return getTabClassName (component, tabIndex);
         }
@@ -1105,7 +1105,7 @@ private:
                               "Change TabbedComponent content constructor param");
         }
 
-        const String getText() const
+        String getText() const
         {
             return getTabConstructorParams (component, tabIndex);
         }
@@ -1177,7 +1177,7 @@ private:
             }
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "Move this tab...";
         }

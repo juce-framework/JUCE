@@ -57,7 +57,7 @@ public:
         The index should be in the range 0 to (getNumSelectedFiles() - 1).
         @see getNumSelectedFiles
     */
-    virtual const File getSelectedFile (int index) const = 0;
+    virtual File getSelectedFile (int index) const = 0;
 
     /** Deselects any selected files. */
     virtual void deselectAllFiles() = 0;

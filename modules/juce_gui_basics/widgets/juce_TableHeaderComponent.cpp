@@ -779,7 +779,7 @@ void TableHeaderComponent::mouseUp (const MouseEvent& e)
     dragOverlayComp = nullptr;
 }
 
-const MouseCursor TableHeaderComponent::getMouseCursor()
+MouseCursor TableHeaderComponent::getMouseCursor()
 {
     if (columnIdBeingResized != 0 || (getResizeDraggerAt (getMouseXYRelative().getX()) != 0 && ! isMouseButtonDown()))
         return MouseCursor (MouseCursor::LeftRightResizeCursor);

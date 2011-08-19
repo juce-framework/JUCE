@@ -360,7 +360,7 @@ ColourSelector::~ColourSelector()
 }
 
 //==============================================================================
-const Colour ColourSelector::getCurrentColour() const
+Colour ColourSelector::getCurrentColour() const
 {
     return ((flags & showAlphaChannel) != 0) ? colour
                                              : colour.withAlpha ((uint8) 0xff);
@@ -570,7 +570,7 @@ int ColourSelector::getNumSwatches() const
     return 0;
 }
 
-const Colour ColourSelector::getSwatchColour (const int) const
+Colour ColourSelector::getSwatchColour (const int) const
 {
     jassertfalse; // if you've overridden getNumSwatches(), you also need to implement this method
     return Colours::black;

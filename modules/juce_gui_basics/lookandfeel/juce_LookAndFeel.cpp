@@ -327,7 +327,7 @@ void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 }
 
 //==============================================================================
-const MouseCursor LookAndFeel::getMouseCursorFor (Component& component)
+MouseCursor LookAndFeel::getMouseCursorFor (Component& component)
 {
     return component.getMouseCursor();
 }

@@ -582,7 +582,7 @@ StringArray CPlusPlusCodeTokeniser::getTokenTypes()
     return StringArray (types);
 }
 
-const Colour CPlusPlusCodeTokeniser::getDefaultColour (const int tokenType)
+Colour CPlusPlusCodeTokeniser::getDefaultColour (const int tokenType)
 {
     const uint32 colours[] =
     {

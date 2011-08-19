@@ -205,7 +205,7 @@ public:
         return [NSOpenGLContext currentContext] == renderContext;
     }
 
-    const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
+    OpenGLPixelFormat getPixelFormat() const        { return pixelFormat; }
     void* getRawContext() const noexcept            { return renderContext; }
 
     void updateWindowPosition (const Rectangle<int>&) {}

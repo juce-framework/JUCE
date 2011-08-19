@@ -77,7 +77,7 @@ public:
 
     /** Returns the text that should be shown in the text editor.
     */
-    virtual const String getText() const;
+    virtual String getText() const;
 
 
     //==============================================================================

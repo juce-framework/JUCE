@@ -50,7 +50,7 @@ public:
 
     //==============================================================================
     virtual void setColour (const Colour& newColour) = 0;
-    virtual const Colour getColour() const = 0;
+    virtual Colour getColour() const = 0;
     virtual void resetToDefault() = 0;
 
     void refresh()
@@ -77,7 +77,7 @@ private:
             owner->setColour (newColour);
         }
 
-        const Colour getColour() const
+        Colour getColour() const
         {
             return owner->getColour();
         }

@@ -217,7 +217,7 @@ private:
                 mw->openFile (component->findFile());
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "Open file for editing";
         }
@@ -241,7 +241,7 @@ private:
                               "Change Viewport content constructor params");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getConstructorParams();
         }

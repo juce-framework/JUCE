@@ -70,7 +70,7 @@ public:
 
     //==============================================================================
     /** Returns the pixel format being used by this context. */
-    virtual const OpenGLPixelFormat getPixelFormat() const = 0;
+    virtual OpenGLPixelFormat getPixelFormat() const = 0;
 
     /** For windowed contexts, this moves the context within the bounds of
         its parent window.

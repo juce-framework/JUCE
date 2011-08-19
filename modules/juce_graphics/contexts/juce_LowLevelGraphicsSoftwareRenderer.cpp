@@ -2281,7 +2281,7 @@ bool LowLevelGraphicsSoftwareRenderer::clipRegionIntersects (const Rectangle<int
     return currentState->clipRegionIntersects (r);
 }
 
-const Rectangle<int> LowLevelGraphicsSoftwareRenderer::getClipBounds() const
+Rectangle<int> LowLevelGraphicsSoftwareRenderer::getClipBounds() const
 {
     return currentState->getClipBounds();
 }

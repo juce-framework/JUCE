@@ -68,7 +68,7 @@ public:
         The index should be in the range 0 to (getNumSelectedFiles() - 1).
         @see getNumSelectedFiles
     */
-    const File getSelectedFile (int index = 0) const;
+    File getSelectedFile (int index = 0) const;
 
     /** Deselects any files that are currently selected. */
     void deselectAllFiles();

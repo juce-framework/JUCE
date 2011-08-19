@@ -122,7 +122,7 @@ public:
                                                 const Point<int>& position);
 
         /** Returns an appropriate mouse-cursor for this resize zone. */
-        const MouseCursor getMouseCursor() const noexcept;
+        MouseCursor getMouseCursor() const noexcept;
 
         /** Returns true if dragging this zone will move the enire object without resizing it. */
         bool isDraggingWholeObject() const noexcept     { return zone == centre; }

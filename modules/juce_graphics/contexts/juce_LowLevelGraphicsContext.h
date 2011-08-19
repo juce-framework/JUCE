@@ -76,7 +76,7 @@ public:
     virtual void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform) = 0;
 
     virtual bool clipRegionIntersects (const Rectangle<int>& r) = 0;
-    virtual const Rectangle<int> getClipBounds() const = 0;
+    virtual Rectangle<int> getClipBounds() const = 0;
     virtual bool isClipEmpty() const = 0;
 
     virtual void saveState() = 0;

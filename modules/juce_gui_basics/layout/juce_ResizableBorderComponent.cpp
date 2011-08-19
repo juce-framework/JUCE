@@ -68,7 +68,7 @@ const ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositio
     return Zone (z);
 }
 
-const MouseCursor ResizableBorderComponent::Zone::getMouseCursor() const noexcept
+MouseCursor ResizableBorderComponent::Zone::getMouseCursor() const noexcept
 {
     MouseCursor::StandardCursorType mc = MouseCursor::NormalCursor;
 

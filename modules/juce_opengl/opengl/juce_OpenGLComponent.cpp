@@ -241,7 +241,7 @@ OpenGLComponent::~OpenGLComponent()
     componentWatcher = nullptr;
 }
 
-const OpenGLPixelFormat OpenGLComponent::getPixelFormat() const
+OpenGLPixelFormat OpenGLComponent::getPixelFormat() const
 {
     OpenGLPixelFormat pf;
 

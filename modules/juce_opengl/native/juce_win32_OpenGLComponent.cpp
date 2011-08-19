@@ -143,7 +143,7 @@ public:
         return wglGetCurrentContext() == renderContext;
     }
 
-    const OpenGLPixelFormat getPixelFormat() const
+    OpenGLPixelFormat getPixelFormat() const
     {
         OpenGLPixelFormat pf;
 

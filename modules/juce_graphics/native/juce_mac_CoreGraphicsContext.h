@@ -45,7 +45,7 @@ public:
     void clipToPath (const Path& path, const AffineTransform& transform);
     void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform);
     bool clipRegionIntersects (const Rectangle<int>& r);
-    const Rectangle<int> getClipBounds() const;
+    Rectangle<int> getClipBounds() const;
     bool isClipEmpty() const;
 
     //==============================================================================

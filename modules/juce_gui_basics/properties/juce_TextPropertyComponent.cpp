@@ -96,7 +96,7 @@ void TextPropertyComponent::setText (const String& newText)
     textEditor->setText (newText, true);
 }
 
-const String TextPropertyComponent::getText() const
+String TextPropertyComponent::getText() const
 {
     return textEditor->getText();
 }

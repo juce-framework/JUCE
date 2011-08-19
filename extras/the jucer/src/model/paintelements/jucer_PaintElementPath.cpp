@@ -1379,7 +1379,7 @@ public:
         owner->addPoint (index, true);
     }
 
-    const String getButtonText() const      { return "Add new point"; }
+    String getButtonText() const      { return "Add new point"; }
 
 private:
     PaintElementPath* const owner;
