@@ -44,13 +44,7 @@ public:
         generatedFilesGroup.setID (getGeneratedGroupID());
 
         if (generatedCodeFolder.exists())
-        {
-            Array<File> subFiles;
-            generatedCodeFolder.findChildFiles (subFiles, File::findFilesAndDirectories, false);
-
-            for (int i = subFiles.size(); --i >= 0;)
-                subFiles.getReference(i).deleteRecursively();
-        }
+            deleteNonHiddenFilesIn (generatedCodeFolder);
     }
 
     Project& getProject() noexcept      { return project; }
@@ -164,6 +158,47 @@ private:
 
     File appConfigFile, binaryDataCpp;
 
+    // Recursively clears out a folder's contents, but leaves behind any folders 
+    // containing hidden files used by version-control systems.
+    static bool deleteNonHiddenFilesIn (const File& parent)
+    {
+        bool folderIsNowEmpty = true;
+        DirectoryIterator i (parent, false, "*", File::findFilesAndDirectories);
+        Array<File> filesToDelete;
+
+        bool isFolder;
+        while (i.next (&isFolder, nullptr, nullptr, nullptr, nullptr, nullptr))
+        {
+            const File f (i.getFile());
+
+            if (shouldFileBeKept (f.getFileName()))
+            {
+                folderIsNowEmpty = false;
+            }
+            else if (isFolder)
+            {
+                if (deleteNonHiddenFilesIn (f))
+                    filesToDelete.add (f);
+                else
+                    folderIsNowEmpty = false;
+            }
+            else
+            {
+                filesToDelete.add (f);
+            }
+        }
+
+        for (int j = filesToDelete.size(); --j >= 0;)
+            filesToDelete.getReference(j).deleteRecursively();
+
+        return folderIsNowEmpty;
+    }
+    
+    static bool shouldFileBeKept (const String& filename)
+    {
+        return filename == ".svn" || filename == ".cvs";
+    }
+    
     void writeMainProjectFile()
     {
         ScopedPointer <XmlElement> xml (project.getProjectRoot().createXml());
