@@ -37,7 +37,7 @@ namespace FlacNamespace
  #define FLAC__NO_DLL 1
 
  #if JUCE_MSVC
-  #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312 4505 4365 181 111)
+  #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312 4505 4365 4005 4334 181 111)
  #endif
 
  #if JUCE_MAC

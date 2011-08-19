@@ -54,6 +54,7 @@ public:
     void selectionChanged();
     void fileClicked (const File& file, const MouseEvent& e);
     void fileDoubleClicked (const File& file);
+    void browserRootChanged (const File&) {}
     void showFile (const File& file);
     //[/UserMethods]
 

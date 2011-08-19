@@ -87,7 +87,7 @@ public:
         if (headerSize <= 0)
             return 0;
 
-        howMany = (int) jmin ((int64) howMany, zipEntryInfo.compressedSize - pos);
+        howMany = (int) jmin ((int64) howMany, (int64) (zipEntryInfo.compressedSize - pos));
 
         if (inputStream == nullptr)
             return 0;
@@ -112,7 +112,7 @@ public:
 
     bool isExhausted()
     {
-        return headerSize <= 0 || pos >= zipEntryInfo.compressedSize;
+        return headerSize <= 0 || pos >= (int64) zipEntryInfo.compressedSize;
     }
 
     int64 getPosition()
