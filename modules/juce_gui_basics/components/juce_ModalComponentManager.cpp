@@ -29,9 +29,10 @@ BEGIN_JUCE_NAMESPACE
 class ModalComponentManager::ModalItem  : public ComponentMovementWatcher
 {
 public:
-    ModalItem (Component* const comp)
+    ModalItem (Component* const comp, const bool autoDelete_)
         : ComponentMovementWatcher (comp),
-          component (comp), returnValue (0), isActive (true)
+          component (comp), returnValue (0),
+          isActive (true), autoDelete (autoDelete_)
     {
         jassert (comp != nullptr);
     }
@@ -55,7 +56,10 @@ public:
         ComponentMovementWatcher::componentBeingDeleted (comp);
 
         if (component == &comp || comp.isParentOf (component))
+        {
+            autoDelete = false;
             cancel();
+        }
     }
 
     void cancel()
@@ -70,7 +74,7 @@ public:
     Component* component;
     OwnedArray<Callback> callbacks;
     int returnValue;
-    bool isActive;
+    bool isActive, autoDelete;
 
 private:
     JUCE_DECLARE_NON_COPYABLE (ModalItem);
@@ -90,10 +94,10 @@ juce_ImplementSingleton_SingleThreaded (ModalComponentManager);
 
 
 //==============================================================================
-void ModalComponentManager::startModal (Component* component)
+void ModalComponentManager::startModal (Component* component, bool autoDelete)
 {
     if (component != nullptr)
-        stack.add (new ModalItem (component));
+        stack.add (new ModalItem (component, autoDelete));
 }
 
 void ModalComponentManager::attachCallback (Component* component, Callback* callback)
@@ -191,9 +195,12 @@ void ModalComponentManager::handleAsyncUpdate()
         if (! item->isActive)
         {
             ScopedPointer<ModalItem> deleter (stack.removeAndReturn (i));
+            Component::SafePointer<Component> compToDelete (item->autoDelete ? item->component : nullptr);
 
             for (int j = item->callbacks.size(); --j >= 0;)
                 item->callbacks.getUnchecked(j)->modalStateFinished (item->returnValue);
+
+            compToDelete.deleteAndZero();
         }
     }
 }

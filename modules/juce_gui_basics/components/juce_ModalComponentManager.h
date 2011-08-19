@@ -139,7 +139,7 @@ private:
     friend class OwnedArray <ModalItem>;
     OwnedArray <ModalItem> stack;
 
-    void startModal (Component*);
+    void startModal (Component*, bool autoDelete);
     void endModal (Component*, int returnValue);
     void endModal (Component*);
 

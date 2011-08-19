@@ -143,7 +143,10 @@ public:
     const Rectangle<int> getComponentDestination (Component* component);
 
     /** Returns true if the specified component is currently being animated. */
-    bool isAnimating (Component* component) const;
+    bool isAnimating (Component* component) const noexcept;
+
+    /** Returns true if any components are currently being animated. */
+    bool isAnimating() const noexcept;
 
 private:
     //==============================================================================
@@ -151,7 +154,7 @@ private:
     OwnedArray <AnimationTask> tasks;
     uint32 lastTime;
 
-    AnimationTask* findTaskFor (Component* component) const;
+    AnimationTask* findTaskFor (Component* component) const noexcept;
     void timerCallback();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentAnimator);

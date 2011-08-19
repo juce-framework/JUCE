@@ -206,7 +206,7 @@ ComponentAnimator::~ComponentAnimator()
 }
 
 //==============================================================================
-ComponentAnimator::AnimationTask* ComponentAnimator::findTaskFor (Component* const component) const
+ComponentAnimator::AnimationTask* ComponentAnimator::findTaskFor (Component* const component) const noexcept
 {
     for (int i = tasks.size(); --i >= 0;)
         if (component == tasks.getUnchecked(i)->component.get())
@@ -308,9 +308,14 @@ const Rectangle<int> ComponentAnimator::getComponentDestination (Component* cons
     return component->getBounds();
 }
 
-bool ComponentAnimator::isAnimating (Component* component) const
+bool ComponentAnimator::isAnimating (Component* component) const noexcept
 {
     return findTaskFor (component) != nullptr;
+}
+
+bool ComponentAnimator::isAnimating() const noexcept
+{
+    return tasks.size() != 0;
 }
 
 void ComponentAnimator::timerCallback()

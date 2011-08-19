@@ -158,7 +158,7 @@ private:
 
     File appConfigFile, binaryDataCpp;
 
-    // Recursively clears out a folder's contents, but leaves behind any folders 
+    // Recursively clears out a folder's contents, but leaves behind any folders
     // containing hidden files used by version-control systems.
     static bool deleteNonHiddenFilesIn (const File& parent)
     {
@@ -193,12 +193,18 @@ private:
 
         return folderIsNowEmpty;
     }
-    
+
     static bool shouldFileBeKept (const String& filename)
     {
-        return filename == ".svn" || filename == ".cvs";
+        const char* filesToKeep = { ".svn", ".cvs", "CMakeLists.txt" };
+
+        for (int i = 0; i < numElementsInArray (filesToKeep); ++i)
+            if (filename == filesToKeep[i])
+                return true;
+
+        return false;
     }
-    
+
     void writeMainProjectFile()
     {
         ScopedPointer <XmlElement> xml (project.getProjectRoot().createXml());

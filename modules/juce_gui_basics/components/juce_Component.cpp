@@ -1538,24 +1538,6 @@ int Component::runModalLoop()
 #endif
 
 //==============================================================================
-class ModalAutoDeleteCallback   : public ModalComponentManager::Callback
-{
-public:
-    ModalAutoDeleteCallback (Component* const comp_)
-        : comp (comp_)
-    {}
-
-    void modalStateFinished (int)
-    {
-        delete comp.get();
-    }
-
-private:
-    WeakReference<Component> comp;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModalAutoDeleteCallback);
-};
-
 void Component::enterModalState (const bool shouldTakeKeyboardFocus,
                                  ModalComponentManager::Callback* callback,
                                  const bool deleteWhenDismissed)
@@ -1571,11 +1553,8 @@ void Component::enterModalState (const bool shouldTakeKeyboardFocus,
     if (! isCurrentlyModal())
     {
         ModalComponentManager* const mcm = ModalComponentManager::getInstance();
-        mcm->startModal (this);
+        mcm->startModal (this, deleteWhenDismissed);
         mcm->attachCallback (this, callback);
-
-        if (deleteWhenDismissed)
-            mcm->attachCallback (this, new ModalAutoDeleteCallback (this));
 
         flags.currentlyModalFlag = true;
         setVisible (true);
