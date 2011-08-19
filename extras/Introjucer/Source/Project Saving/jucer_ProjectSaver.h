@@ -196,7 +196,7 @@ private:
 
     static bool shouldFileBeKept (const String& filename)
     {
-        const char* filesToKeep = { ".svn", ".cvs", "CMakeLists.txt" };
+        const char* filesToKeep[] = { ".svn", ".cvs", "CMakeLists.txt" };
 
         for (int i = 0; i < numElementsInArray (filesToKeep); ++i)
             if (filename == filesToKeep[i])
@@ -256,9 +256,8 @@ private:
         const String headerGuard ("__JUCE_APPCONFIG_" + project.getProjectUID().toUpperCase() + "__");
         out << "#ifndef " << headerGuard << newLine
             << "#define " << headerGuard << newLine
-            << newLine;
-
-        out << "//==============================================================================" << newLine;
+            << newLine
+            << "//==============================================================================" << newLine;
 
         const int longestName = findLongestModuleName (modules);
 

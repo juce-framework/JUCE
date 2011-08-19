@@ -36,6 +36,17 @@ namespace
         return File::getCurrentWorkingDirectory().getChildFile (filename.unquoted());
     }
 
+    bool checkArgumentCount (const StringArray& tokens, int minNumArgs)
+    {
+        if (tokens.size() < minNumArgs)
+        {
+            std::cout << "Not enough arguments!" << std::endl;
+            return false;
+        }
+
+        return true;
+    }
+
     //==============================================================================
     /* Running a command-line of the form "introjucer --resave foobar.jucer" will try to load
        that project and re-export all of its targets.
@@ -125,11 +136,8 @@ namespace
 
     int buildModules (const StringArray& tokens, const bool buildAllWithIndex)
     {
-        if (tokens.size() < 3)
-        {
-            std::cout << "Not enough arguments!" << std::endl;
+        if (! checkArgumentCount (tokens, 3))
             return 1;
-        }
 
         const File targetFolder (getFile (tokens[1]));
 
@@ -196,6 +204,37 @@ namespace
 
         return 0;
     }
+
+    int showStatus (const StringArray& tokens)
+    {
+        if (! checkArgumentCount (tokens, 2))
+            return 1;
+
+        const File projectFile (getFile (tokens[1]));
+
+        Project proj (projectFile);
+
+        if (proj.loadDocument (projectFile).isNotEmpty())
+        {
+            std::cout << "Failed to load project: " << projectFile.getFullPathName() << std::endl;
+            return 1;
+        }
+
+        std::cout << "Project file: " << projectFile.getFullPathName() << std::endl
+                  << "Name: " << proj.getProjectName().toString() << std::endl
+                  << "UID: " << proj.getProjectUID() << std::endl;
+
+        const int numModules = proj.getNumModules();
+        if (numModules > 0)
+        {
+            std::cout << "Modules:" << std::endl;
+
+            for (int i = 0; i < numModules; ++i)
+                std::cout << "  " << proj.getModuleID (i) << std::endl;
+        }
+
+        return 0;
+    }
 }
 
 //==============================================================================
@@ -216,6 +255,9 @@ int performCommandLine (const String& commandLine)
 
     if (tokens[0] == "listmodules")
         return listModules();
+
+    if (tokens[0] == "status")
+        return showStatus (tokens);
 
     return commandLineNotPerformed;
 }

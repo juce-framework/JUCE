@@ -878,6 +878,16 @@ void Project::createRequiredModules (const ModuleList& availableModules, OwnedAr
             modules.add (availableModules.modules.getUnchecked(i)->create());
 }
 
+int Project::getNumModules() const
+{
+    return projectRoot.getChildWithName (Tags::modulesGroup).getNumChildren();
+}
+
+String Project::getModuleID (int index) const
+{
+    return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [Ids::id_].toString();
+}
+
 //==============================================================================
 ValueTree Project::getConfigurations() const
 {

@@ -275,6 +275,8 @@ public:
 
     void addModule (const String& moduleID);
     void removeModule (const String& moduleID);
+    int getNumModules() const;
+    String getModuleID (int index) const;
 
     void createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const;
 
