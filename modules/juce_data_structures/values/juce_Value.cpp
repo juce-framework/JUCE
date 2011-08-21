@@ -122,6 +122,19 @@ Value& Value::operator= (const Value& other)
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+Value::Value (Value&& other) noexcept
+    : value (static_cast <ReferenceCountedObjectPtr <ValueSource>&&> (other.value))
+{
+}
+
+Value& Value::operator= (Value&& other) noexcept
+{
+    value = static_cast <ReferenceCountedObjectPtr <ValueSource>&&> (other.value);
+    return *this;
+}
+#endif
+
 Value::~Value()
 {
     if (listeners.size() > 0)

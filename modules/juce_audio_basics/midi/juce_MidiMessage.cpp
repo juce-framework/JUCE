@@ -80,13 +80,30 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) noexcept
 }
 
 //==============================================================================
+inline void MidiMessage::setToUseInternalData() noexcept
+{
+    data = static_cast <uint8*> (preallocatedData.asBytes);
+}
+
+inline bool MidiMessage::usesAllocatedData() const noexcept
+{
+    return data != static_cast <const uint8*> (preallocatedData.asBytes);
+}
+
+inline void MidiMessage::freeData() noexcept
+{
+    if (usesAllocatedData())
+        delete[] data;
+}
+
+//==============================================================================
 MidiMessage::MidiMessage() noexcept
    : timeStamp (0),
      data (static_cast<uint8*> (preallocatedData.asBytes)),
      size (2)
 {
-    data[0] = 0xf0;
-    data[1] = 0xf7;
+    preallocatedData.asBytes[0] = 0xf0;
+    preallocatedData.asBytes[1] = 0xf7;
 }
 
 MidiMessage::MidiMessage (const void* const d, const int dataSize, const double t)
@@ -96,7 +113,7 @@ MidiMessage::MidiMessage (const void* const d, const int dataSize, const double 
     jassert (dataSize > 0);
 
     if (dataSize <= 4)
-        data = static_cast<uint8*> (preallocatedData.asBytes);
+        setToUseInternalData();
     else
         data = new uint8 [dataSize];
 
@@ -111,7 +128,7 @@ MidiMessage::MidiMessage (const int byte1, const double t) noexcept
      data (static_cast<uint8*> (preallocatedData.asBytes)),
      size (1)
 {
-    data[0] = (uint8) byte1;
+    preallocatedData.asBytes[0] = (uint8) byte1;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 1);
@@ -122,8 +139,8 @@ MidiMessage::MidiMessage (const int byte1, const int byte2, const double t) noex
      data (static_cast<uint8*> (preallocatedData.asBytes)),
      size (2)
 {
-    data[0] = (uint8) byte1;
-    data[1] = (uint8) byte2;
+    preallocatedData.asBytes[0] = (uint8) byte1;
+    preallocatedData.asBytes[1] = (uint8) byte2;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 2);
@@ -134,9 +151,9 @@ MidiMessage::MidiMessage (const int byte1, const int byte2, const int byte3, con
      data (static_cast<uint8*> (preallocatedData.asBytes)),
      size (3)
 {
-    data[0] = (uint8) byte1;
-    data[1] = (uint8) byte2;
-    data[2] = (uint8) byte3;
+    preallocatedData.asBytes[0] = (uint8) byte1;
+    preallocatedData.asBytes[1] = (uint8) byte2;
+    preallocatedData.asBytes[2] = (uint8) byte3;
 
     // check that the length matches the data..
     jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 3);
@@ -146,14 +163,14 @@ MidiMessage::MidiMessage (const MidiMessage& other)
    : timeStamp (other.timeStamp),
      size (other.size)
 {
-    if (other.data != static_cast <const uint8*> (other.preallocatedData.asBytes))
+    if (other.usesAllocatedData())
     {
         data = new uint8 [size];
         memcpy (data, other.data, size);
     }
     else
     {
-        data = static_cast<uint8*> (preallocatedData.asBytes);
+        setToUseInternalData();
         preallocatedData.asInt32 = other.preallocatedData.asInt32;
     }
 }
@@ -162,14 +179,14 @@ MidiMessage::MidiMessage (const MidiMessage& other, const double newTimeStamp)
    : timeStamp (newTimeStamp),
      size (other.size)
 {
-    if (other.data != static_cast <const uint8*> (other.preallocatedData.asBytes))
+    if (other.usesAllocatedData())
     {
         data = new uint8 [size];
         memcpy (data, other.data, size);
     }
     else
     {
-        data = static_cast<uint8*> (preallocatedData.asBytes);
+        setToUseInternalData();
         preallocatedData.asInt32 = other.preallocatedData.asInt32;
     }
 }
@@ -268,17 +285,16 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
         timeStamp = other.timeStamp;
         size = other.size;
 
-        if (data != static_cast <const uint8*> (preallocatedData.asBytes))
-            delete[] data;
+        freeData();
 
-        if (other.data != static_cast <const uint8*> (other.preallocatedData.asBytes))
+        if (other.usesAllocatedData())
         {
             data = new uint8 [size];
             memcpy (data, other.data, size);
         }
         else
         {
-            data = static_cast<uint8*> (preallocatedData.asBytes);
+            setToUseInternalData();
             preallocatedData.asInt32 = other.preallocatedData.asInt32;
         }
     }
@@ -286,10 +302,51 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+MidiMessage::MidiMessage (MidiMessage&& other) noexcept
+   : timeStamp (other.timeStamp),
+     size (other.size)
+{
+    if (other.usesAllocatedData())
+    {
+        data = other.data;
+        other.setToUseInternalData();
+    }
+    else
+    {
+        setToUseInternalData();
+        preallocatedData.asInt32 = other.preallocatedData.asInt32;
+    }
+}
+
+MidiMessage& MidiMessage::operator= (MidiMessage&& other) noexcept
+{
+    if (this != &other)
+    {
+        timeStamp = other.timeStamp;
+        size = other.size;
+
+        freeData();
+
+        if (other.usesAllocatedData())
+        {
+            data = other.data;
+            other.setToUseInternalData();
+        }
+        else
+        {
+            setToUseInternalData();
+            preallocatedData.asInt32 = other.preallocatedData.asInt32;
+        }
+    }
+
+    return *this;
+}
+#endif
+
 MidiMessage::~MidiMessage()
 {
-    if (data != static_cast <const uint8*> (preallocatedData.asBytes))
-        delete[] data;
+    freeData();
 }
 
 int MidiMessage::getChannel() const noexcept

@@ -57,6 +57,21 @@ public:
     {
     }
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    ArrayAllocationBase (ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&& other) noexcept
+        : elements (static_cast <HeapBlock <ElementType>&&> (other.elements)),
+          numAllocated (other.numAllocated)
+    {
+    }
+
+    ArrayAllocationBase& operator= (ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&& other) noexcept
+    {
+        elements = static_cast <HeapBlock <ElementType>&&> (other.elements);
+        numAllocated = other.numAllocated;
+        return *this;
+    }
+   #endif
+
     //==============================================================================
     /** Changes the amount of storage allocated.
 

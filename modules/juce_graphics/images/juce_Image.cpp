@@ -168,6 +168,19 @@ Image& Image::operator= (const Image& other)
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+Image::Image (Image&& other) noexcept
+    : image (static_cast <ReferenceCountedObjectPtr<SharedImage>&&> (other.image))
+{
+}
+
+Image& Image::operator= (Image&& other) noexcept
+{
+    image = static_cast <ReferenceCountedObjectPtr<SharedImage>&&> (other.image);
+    return *this;
+}
+#endif
+
 Image::~Image()
 {
 }

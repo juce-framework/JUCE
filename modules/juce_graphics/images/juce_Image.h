@@ -113,6 +113,11 @@ public:
     */
     Image& operator= (const Image&);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    Image (Image&& other) noexcept;
+    Image& operator= (Image&&) noexcept;
+   #endif
+
     /** Destructor. */
     ~Image();
 

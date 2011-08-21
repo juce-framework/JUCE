@@ -78,6 +78,25 @@ public:
         return *this;
     }
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    LinkedListPointer (LinkedListPointer&& other) noexcept
+        : item (other.item)
+    {
+        other.item = nullptr;
+    }
+
+    LinkedListPointer& operator= (LinkedListPointer&& other) noexcept
+    {
+        if (this != &other)
+        {
+            item = other.item;
+            other.item = nullptr;
+        }
+
+        return *this;
+    }
+   #endif
+
     //==============================================================================
     /** Returns the item which this pointer points to. */
     inline operator ObjectType*() const noexcept

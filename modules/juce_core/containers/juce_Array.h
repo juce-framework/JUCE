@@ -83,6 +83,14 @@ public:
             new (data.elements + i) ElementType (other.data.elements[i]);
     }
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    Array (Array<ElementType, TypeOfCriticalSectionToUse>&& other) noexcept
+        : data (static_cast <ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data)),
+          numUsed (other.numUsed)
+    {
+    }
+   #endif
+
     /** Initalises from a null-terminated C array of values.
 
         @param values   the array to copy from
@@ -113,8 +121,7 @@ public:
     /** Destructor. */
     ~Array()
     {
-        for (int i = 0; i < numUsed; ++i)
-            data.elements[i].~ElementType();
+        deleteAllElements();
     }
 
     /** Copies another array.
@@ -130,6 +137,21 @@ public:
 
         return *this;
     }
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    Array& operator= (Array&& other) noexcept
+    {
+        if (this != &other)
+        {
+            deleteAllElements();
+
+            data = static_cast <ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data);
+            numUsed = other.numUsed;
+        }
+
+        return *this;
+    }
+   #endif
 
     //==============================================================================
     /** Compares this array to another one.
@@ -175,10 +197,7 @@ public:
     void clear()
     {
         const ScopedLockType lock (getLock());
-
-        for (int i = 0; i < numUsed; ++i)
-            data.elements[i].~ElementType();
-
+        deleteAllElements();
         data.setAllocatedSize (0);
         numUsed = 0;
     }
@@ -190,10 +209,7 @@ public:
     void clearQuick()
     {
         const ScopedLockType lock (getLock());
-
-        for (int i = 0; i < numUsed; ++i)
-            data.elements[i].~ElementType();
-
+        deleteAllElements();
         numUsed = 0;
     }
 
@@ -1011,6 +1027,12 @@ private:
     //==============================================================================
     ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse> data;
     int numUsed;
+
+    inline void deleteAllElements()
+    {
+        for (int i = 0; i < numUsed; ++i)
+            data.elements[i].~ElementType();
+    }
 };
 
 

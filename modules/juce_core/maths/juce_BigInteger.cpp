@@ -78,6 +78,25 @@ BigInteger::BigInteger (const BigInteger& other)
     memcpy (values, other.values, sizeof (uint32) * (numValues + 1));
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+BigInteger::BigInteger (BigInteger&& other) noexcept
+    : values (static_cast <HeapBlock <uint32>&&> (other.values)),
+      numValues (other.numValues),
+      highestBit (other.highestBit),
+      negative (other.negative)
+{
+}
+
+BigInteger& BigInteger::operator= (BigInteger&& other) noexcept
+{
+    values = static_cast <HeapBlock <uint32>&&> (other.values);
+    numValues = other.numValues;
+    highestBit = other.highestBit;
+    negative = other.negative;
+    return *this;
+}
+#endif
+
 BigInteger::~BigInteger()
 {
 }
@@ -556,7 +575,7 @@ BigInteger& BigInteger::operator&= (const BigInteger& other)
     // this operation doesn't take into account negative values..
     jassert (isNegative() == other.isNegative());
 
-    size_t n = numValues;
+    int n = (int) numValues;
 
     while (n > other.numValues)
         values[--n] = 0;

@@ -106,6 +106,11 @@ public:
     /** Copies this message from another one. */
     MidiMessage& operator= (const MidiMessage& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    MidiMessage (MidiMessage&& other) noexcept;
+    MidiMessage& operator= (MidiMessage&& other) noexcept;
+   #endif
+
     //==============================================================================
     /** Returns a pointer to the raw midi data.
 
@@ -926,6 +931,10 @@ private:
         uint32 asInt32;
     } preallocatedData;
    #endif
+
+    void freeData() noexcept;
+    void setToUseInternalData() noexcept;
+    bool usesAllocatedData() const noexcept;
 };
 
 #endif   // __JUCE_MIDIMESSAGE_JUCEHEADER__

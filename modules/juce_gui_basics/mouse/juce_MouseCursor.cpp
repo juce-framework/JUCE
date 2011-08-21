@@ -148,6 +148,20 @@ MouseCursor& MouseCursor::operator= (const MouseCursor& other)
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+MouseCursor::MouseCursor (MouseCursor&& other) noexcept
+    : cursorHandle (other.cursorHandle)
+{
+    other.cursorHandle = nullptr;
+}
+
+MouseCursor& MouseCursor::operator= (MouseCursor&& other) noexcept
+{
+    std::swap (cursorHandle, other.cursorHandle);
+    return *this;
+}
+#endif
+
 bool MouseCursor::operator== (const MouseCursor& other) const noexcept
 {
     return getHandle() == other.getHandle();

@@ -47,6 +47,23 @@ NamedValueSet::NamedValue& NamedValueSet::NamedValue::operator= (const NamedValu
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+NamedValueSet::NamedValue::NamedValue (NamedValue&& other) noexcept
+    : nextListItem (static_cast <LinkedListPointer<NamedValue>&&> (other.nextListItem)),
+      name (static_cast <Identifier&&> (other.name)),
+      value (static_cast <var&&> (other.value))
+{
+}
+
+NamedValueSet::NamedValue& NamedValueSet::NamedValue::operator= (NamedValue&& other) noexcept
+{
+    nextListItem = static_cast <LinkedListPointer<NamedValue>&&> (other.nextListItem);
+    name = static_cast <Identifier&&> (other.name);
+    value = static_cast <var&&> (other.value);
+    return *this;
+}
+#endif
+
 bool NamedValueSet::NamedValue::operator== (const NamedValueSet::NamedValue& other) const noexcept
 {
     return name == other.name && value == other.value;
@@ -68,6 +85,21 @@ NamedValueSet& NamedValueSet::operator= (const NamedValueSet& other)
     values.addCopyOfList (other.values);
     return *this;
 }
+
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+NamedValueSet::NamedValueSet (NamedValueSet&& other) noexcept
+    : values (static_cast <LinkedListPointer<NamedValue>&&> (other.values))
+{
+}
+
+NamedValueSet& NamedValueSet::operator= (NamedValueSet&& other) noexcept
+{
+    if (this != &other)
+        values = static_cast <LinkedListPointer<NamedValue>&&> (other.values);
+
+    return *this;
+}
+#endif
 
 NamedValueSet::~NamedValueSet()
 {

@@ -71,6 +71,10 @@ public:
     /** Creates a copy of another string. */
     String (const String& other) noexcept;
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    String (String&& other) noexcept;
+   #endif
+
     /** Creates a string from a zero-terminated ascii text string.
 
         The string passed-in must not contain any characters with a value above 127, because
@@ -200,6 +204,10 @@ public:
 
     /** Replaces this string's contents with another string. */
     String& operator= (const String& other) noexcept;
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    String& operator= (String&& other) noexcept;
+   #endif
 
     /** Appends another string at the end of this one. */
     String& operator+= (const String& stringToAppend);

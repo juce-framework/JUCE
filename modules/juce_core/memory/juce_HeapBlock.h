@@ -119,6 +119,20 @@ public:
         ::free (data);
     }
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    HeapBlock (HeapBlock&& other) noexcept
+        : data (other.data)
+    {
+        other.data = nullptr;
+    }
+
+    HeapBlock& operator= (HeapBlock&& other) noexcept
+    {
+        std::swap (data, other.data);
+        return *this;
+    }
+   #endif
+
     //==============================================================================
     /** Returns a raw pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been

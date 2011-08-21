@@ -91,6 +91,11 @@ public:
     /** Copies this menu from another one. */
     PopupMenu& operator= (const PopupMenu& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    PopupMenu (PopupMenu&& other) noexcept;
+    PopupMenu& operator= (PopupMenu&& other) noexcept;
+   #endif
+
     //==============================================================================
     /** Resets the menu, removing all its items. */
     void clear();

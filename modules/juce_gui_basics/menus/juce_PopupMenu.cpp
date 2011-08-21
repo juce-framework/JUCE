@@ -1169,7 +1169,7 @@ PopupMenu::PopupMenu()
 
 PopupMenu::PopupMenu (const PopupMenu& other)
     : lookAndFeel (other.lookAndFeel),
-      separatorPending (false)
+      separatorPending (other.separatorPending)
 {
     items.addCopiesOf (other.items);
 }
@@ -1186,6 +1186,28 @@ PopupMenu& PopupMenu::operator= (const PopupMenu& other)
 
     return *this;
 }
+
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+PopupMenu::PopupMenu (PopupMenu&& other) noexcept
+    : lookAndFeel (other.lookAndFeel),
+      separatorPending (other.separatorPending)
+{
+    items.swapWithArray (other.items);
+}
+
+PopupMenu& PopupMenu::operator= (PopupMenu&& other) noexcept
+{
+    if (this != &other)
+    {
+        items.swapWithArray (other.items);
+        lookAndFeel = other.lookAndFeel;
+        separatorPending = other.separatorPending;
+    }
+
+    return *this;
+}
+#endif
+
 
 PopupMenu::~PopupMenu()
 {

@@ -214,19 +214,27 @@ public:
 
         This will increment the object's reference-count (if it is non-null).
     */
-    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) noexcept
+    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr& other) noexcept
         : referencedObject (other.referencedObject)
     {
         if (referencedObject != nullptr)
             referencedObject->incReferenceCount();
     }
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    inline ReferenceCountedObjectPtr (ReferenceCountedObjectPtr&& other) noexcept
+        : referencedObject (other.referencedObject)
+    {
+        other.referencedObject = nullptr;
+    }
+   #endif
+
     /** Changes this pointer to point at a different object.
 
         The reference count of the old object is decremented, and it might be
         deleted if it hits zero. The new object's count is incremented.
     */
-    ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
+    ReferenceCountedObjectPtr& operator= (const ReferenceCountedObjectPtr& other)
     {
         ReferenceCountedObjectClass* const newObject = other.referencedObject;
 
@@ -245,12 +253,28 @@ public:
         return *this;
     }
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    ReferenceCountedObjectPtr& operator= (ReferenceCountedObjectPtr&& other)
+    {
+        if (this != &other)
+        {
+            if (referencedObject != nullptr)
+                referencedObject->decReferenceCount();
+
+            referencedObject = other.referencedObject;
+            other.referencedObject = nullptr;
+        }
+
+        return *this;
+    }
+   #endif
+
     /** Changes this pointer to point at a different object.
 
         The reference count of the old object is decremented, and it might be
         deleted if it hits zero. The new object's count is incremented.
     */
-    ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
+    ReferenceCountedObjectPtr& operator= (ReferenceCountedObjectClass* const newObject)
     {
         if (referencedObject != newObject)
         {

@@ -114,6 +114,31 @@ Path& Path::operator= (const Path& other)
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+Path::Path (Path&& other) noexcept
+    : data (static_cast <ArrayAllocationBase <float, DummyCriticalSection>&&> (other.data)),
+      numElements (other.numElements),
+      pathXMin (other.pathXMin),
+      pathXMax (other.pathXMax),
+      pathYMin (other.pathYMin),
+      pathYMax (other.pathYMax),
+      useNonZeroWinding (other.useNonZeroWinding)
+{
+}
+
+Path& Path::operator= (Path&& other) noexcept
+{
+    data = static_cast <ArrayAllocationBase <float, DummyCriticalSection>&&> (other.data);
+    numElements = other.numElements;
+    pathXMin = other.pathXMin;
+    pathXMax = other.pathXMax;
+    pathYMin = other.pathYMin;
+    pathYMax = other.pathYMax;
+    useNonZeroWinding = other.useNonZeroWinding;
+    return *this;
+}
+#endif
+
 bool Path::operator== (const Path& other) const noexcept
 {
     return ! operator!= (other);

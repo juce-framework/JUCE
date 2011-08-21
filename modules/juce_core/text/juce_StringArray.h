@@ -46,6 +46,10 @@ public:
     /** Creates a copy of another string array */
     StringArray (const StringArray& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    StringArray (StringArray&& other) noexcept;
+   #endif
+
     /** Creates an array containing a single string. */
     explicit StringArray (const String& firstValue);
 
@@ -81,6 +85,10 @@ public:
 
     /** Copies the contents of another string array into this one */
     StringArray& operator= (const StringArray& other);
+
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    StringArray& operator= (StringArray&& other) noexcept;
+   #endif
 
     //==============================================================================
     /** Compares two arrays.

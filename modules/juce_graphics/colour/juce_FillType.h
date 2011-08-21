@@ -68,6 +68,11 @@ public:
     /** Makes a copy of another FillType. */
     FillType& operator= (const FillType& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    FillType (FillType&& other) noexcept;
+    FillType& operator= (FillType&& other) noexcept;
+   #endif
+
     /** Destructor. */
     ~FillType() noexcept;
 

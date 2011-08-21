@@ -91,6 +91,11 @@ public:
     */
     Font();
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    Font (Font&& other) noexcept;
+    Font& operator= (Font&& other) noexcept;
+   #endif
+
     /** Copies this font from another one. */
     Font& operator= (const Font& other) noexcept;
 

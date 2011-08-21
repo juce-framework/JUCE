@@ -60,6 +60,11 @@ public:
     /** Creates a Value that is set to the specified value. */
     explicit Value (const var& initialValue);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    Value (Value&& other) noexcept;
+    Value& operator= (Value&& other) noexcept;
+   #endif
+
     /** Destructor. */
     ~Value();
 

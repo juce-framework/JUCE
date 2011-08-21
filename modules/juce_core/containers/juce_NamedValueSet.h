@@ -52,6 +52,11 @@ public:
     /** Replaces this set with a copy of another set. */
     NamedValueSet& operator= (const NamedValueSet& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    NamedValueSet (NamedValueSet&& other) noexcept;
+    NamedValueSet& operator= (NamedValueSet&& other) noexcept;
+   #endif
+
     /** Destructor. */
     ~NamedValueSet();
 
@@ -128,6 +133,10 @@ private:
         NamedValue (const NamedValue&);
         NamedValue (const Identifier& name, const var& value);
         NamedValue& operator= (const NamedValue&);
+       #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+        NamedValue (NamedValue&&) noexcept;
+        NamedValue& operator= (NamedValue&&) noexcept;
+       #endif
         bool operator== (const NamedValue& other) const noexcept;
 
         LinkedListPointer<NamedValue> nextListItem;

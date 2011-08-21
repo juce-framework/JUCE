@@ -84,6 +84,11 @@ public:
     /** Copies this path from another one. */
     Path& operator= (const Path& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    Path (Path&& other) noexcept;
+    Path& operator= (Path&& other) noexcept;
+   #endif
+
     bool operator== (const Path& other) const noexcept;
     bool operator!= (const Path& other) const noexcept;
 

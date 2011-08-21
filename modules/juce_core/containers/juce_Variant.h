@@ -90,6 +90,11 @@ public:
     const var& operator= (ReferenceCountedObject* object);
     const var& operator= (MethodFunction method);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    var (var&& other) noexcept;
+    var& operator= (var&& other) noexcept;
+   #endif
+
     void swapWith (var& other) noexcept;
 
     operator int() const noexcept;

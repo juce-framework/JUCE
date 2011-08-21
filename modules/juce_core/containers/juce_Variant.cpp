@@ -411,6 +411,28 @@ const var& var::operator= (const Array<var>& v)        { var v2 (v); swapWith (v
 const var& var::operator= (ReferenceCountedObject* v)  { var v2 (v); swapWith (v2); return *this; }
 const var& var::operator= (MethodFunction v)           { var v2 (v); swapWith (v2); return *this; }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+var::var (var&& other) noexcept
+    : type (other.type),
+      value (other.value)
+{
+    other.type = &VariantType_Void::instance;
+}
+
+var& var::operator= (var&& other) noexcept
+{
+    if (this != &other)
+    {
+        type->cleanUp (value);
+        type = other.type;
+        value = other.value;
+        other.type = &VariantType_Void::instance;
+    }
+
+    return *this;
+}
+#endif
+
 //==============================================================================
 bool var::equals (const var& other) const noexcept
 {

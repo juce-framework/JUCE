@@ -65,6 +65,11 @@ public:
     /** Copies another expression. */
     Expression& operator= (const Expression& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    Expression (Expression&& other) noexcept;
+    Expression& operator= (Expression&& other) noexcept;
+   #endif
+
     /** Creates an expression by parsing a string.
         If there's a syntax error in the string, this will throw a ParseError exception.
         @throws ParseError

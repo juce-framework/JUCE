@@ -605,6 +605,19 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+ValueTree::ValueTree (ValueTree&& other) noexcept
+    : object (static_cast <SharedObjectPtr&&> (other.object))
+{
+}
+
+ValueTree& ValueTree::operator= (ValueTree&& other) noexcept
+{
+    object = static_cast <SharedObjectPtr&&> (other.object);
+    return *this;
+}
+#endif
+
 ValueTree::~ValueTree()
 {
     if (listeners.size() > 0 && object != nullptr)

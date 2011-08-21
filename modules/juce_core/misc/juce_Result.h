@@ -99,6 +99,11 @@ public:
     Result (const Result& other);
     Result& operator= (const Result& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    Result (Result&& other) noexcept;
+    Result& operator= (Result&& other) noexcept;
+   #endif
+
     bool operator== (const Result& other) const noexcept;
     bool operator!= (const Result& other) const noexcept;
 

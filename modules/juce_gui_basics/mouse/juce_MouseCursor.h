@@ -99,6 +99,11 @@ public:
     /** Destructor. */
     ~MouseCursor();
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    MouseCursor (MouseCursor&& other) noexcept;
+    MouseCursor& operator= (MouseCursor&& other) noexcept;
+   #endif
+
     /** Checks whether two mouse cursors are the same.
 
         For custom cursors, two cursors created from the same image won't be
