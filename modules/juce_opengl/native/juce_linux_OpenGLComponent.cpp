@@ -23,6 +23,10 @@
   ==============================================================================
 */
 
+extern Display* display;
+extern XContext windowHandleXContext;
+
+//==============================================================================
 class WindowedGLContext   : public OpenGLContext
 {
 public:
@@ -35,7 +39,7 @@ public:
           swapInterval (0)
     {
         jassert (component != nullptr);
-        LinuxComponentPeer* const peer = dynamic_cast <LinuxComponentPeer*> (component->getTopLevelComponent()->getPeer());
+        ComponentPeer* const peer = component->getTopLevelComponent()->getPeer();
         if (peer == nullptr)
             return;
 
@@ -180,7 +184,6 @@ private:
     OpenGLPixelFormat pixelFormat;
     int swapInterval;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
 };
 
