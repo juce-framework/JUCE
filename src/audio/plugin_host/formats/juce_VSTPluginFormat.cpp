@@ -1822,8 +1822,12 @@ private:
 
         void removeView (HIViewRef)
         {
-            owner->dispatch (effEditClose, 0, 0, 0, 0);
-            owner->dispatch (effEditSleep, 0, 0, 0, 0);
+            if (owner->isOpen)
+            {
+                owner->isOpen = false;
+                owner->dispatch (effEditClose, 0, 0, 0, 0);
+                owner->dispatch (effEditSleep, 0, 0, 0, 0);
+            }
         }
 
         bool getEmbeddedViewSize (int& w, int& h)

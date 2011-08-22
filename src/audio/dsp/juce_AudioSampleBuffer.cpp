@@ -171,17 +171,20 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             HeapBlock <char> newData;
             newData.allocate (newTotalBytes, clearExtraSpace);
 
-            const int numChansToCopy = jmin (numChannels, newNumChannels);
             const size_t numBytesToCopy = sizeof (float) * jmin (newNumSamples, size);
 
             float** const newChannels = reinterpret_cast <float**> (newData.getData());
             float* newChan = reinterpret_cast <float*> (newData + channelListSize);
-            for (int i = 0; i < numChansToCopy; ++i)
+
+            for (int j = 0; j < newNumChannels; ++j)
             {
-                memcpy (newChan, channels[i], numBytesToCopy);
-                newChannels[i] = newChan;
+                newChannels[j] = newChan;
                 newChan += newNumSamples;
             }
+
+            const int numChansToCopy = jmin (numChannels, newNumChannels);
+            for (int i = 0; i < numChansToCopy; ++i)
+                memcpy (newChannels[i], channels[i], numBytesToCopy);
 
             allocatedData.swapWith (newData);
             allocatedBytes = (int) newTotalBytes;
