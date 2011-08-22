@@ -80,16 +80,16 @@ public:
         if (mainWindows.size() == 0)
             createNewMainWindow()->makeVisible();
 
-      #if JUCE_MAC
+       #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel);
-      #endif
+       #endif
     }
 
     void shutdown()
     {
-      #if JUCE_MAC
+       #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
-      #endif
+       #endif
         menuModel = nullptr;
 
         StoredSettings::deleteInstance();

@@ -43,6 +43,11 @@ public:
     RelativeCoordinate (const RelativeCoordinate& other);
     RelativeCoordinate& operator= (const RelativeCoordinate& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    RelativeCoordinate (RelativeCoordinate&& other) noexcept;
+    RelativeCoordinate& operator= (RelativeCoordinate&& other) noexcept;
+   #endif
+
     /** Creates an absolute position from the parent origin on either the X or Y axis.
 
         @param absoluteDistanceFromOrigin   the distance from the origin

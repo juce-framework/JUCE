@@ -577,7 +577,7 @@ BigInteger& BigInteger::operator&= (const BigInteger& other)
 
     int n = (int) numValues;
 
-    while (n > other.numValues)
+    while (n > (int) other.numValues)
         values[--n] = 0;
 
     while (--n >= 0)

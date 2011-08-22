@@ -322,6 +322,12 @@ public:
             *destArray++ = i;
     }
 
+    /** Swaps this pointer with another one */
+    void swapWith (LinkedListPointer& other) noexcept
+    {
+        std::swap (item, other.item);
+    }
+
     //==============================================================================
     /**
         Allows efficient repeated insertions into a list.

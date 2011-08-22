@@ -232,7 +232,7 @@ private:
     public:
         MissingDependenciesComponent (Project& project_, ModuleList& moduleList_, const String& moduleID_)
             : PropertyComponent ("Dependencies", 100),
-              project (project_), moduleList (moduleList), moduleID (moduleID_),
+              project (project_), moduleList (moduleList_), moduleID (moduleID_),
               fixButton ("Enable Required Modules")
         {
             const ModuleList::Module* module = moduleList.findModuleInfo (moduleID);

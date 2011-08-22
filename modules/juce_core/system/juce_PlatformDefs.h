@@ -270,16 +270,21 @@
 #endif
 
 //==============================================================================
-// Here, we'll check for C++2011 compiler support, and if it's not available, define
-// a few workarounds, so that we can still use a few of the newer language features.
+// Here, we'll check for C++11 compiler support, and if it's not available, define
+// a few workarounds, so that we can still use some of the newer language features.
 #if defined (__GXX_EXPERIMENTAL_CXX0X__) && defined (__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
- #define JUCE_COMPILER_SUPPORTS_CXX2011 1
+ #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
+ #define JUCE_COMPILER_SUPPORTS_NULLPTR 1
  #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
 #endif
 
 #if defined (__clang__) && defined (__has_feature)
- #if __has_feature (cxx_noexcept) // (NB: do not add this test to the previous line)
-  #define JUCE_COMPILER_SUPPORTS_CXX2011 1
+ #if __has_feature (cxx_nullptr)
+  #define JUCE_COMPILER_SUPPORTS_NULLPTR 1
+ #endif
+
+ #if __has_feature (cxx_noexcept)
+  #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
  #endif
 
  #if __has_feature (cxx_rvalue_references)
@@ -288,13 +293,19 @@
 #endif
 
 #if defined (_MSC_VER) && _MSC_VER >= 1600
- //#define JUCE_COMPILER_SUPPORTS_CXX2011 1
- //#define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
+ #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 0
+ #define JUCE_COMPILER_SUPPORTS_NULLPTR 1
+ #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
 #endif
 
-#if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_CXX2011)
- #define noexcept  throw()  // for c++98 compilers, we can fake these newer language features.
- #define nullptr   (0)
+//==============================================================================
+// Declare some fake versions of nullptr and noexcept, for older compilers:
+#if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_NOEXCEPT)
+ #define noexcept  throw()
+#endif
+
+#if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_NULLPTR)
+ #define nullptr (0)
 #endif
 
 #endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__

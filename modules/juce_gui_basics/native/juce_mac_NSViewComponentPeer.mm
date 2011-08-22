@@ -1749,7 +1749,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
     {
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
     }
-   #else
+   #elif JUCE_SUPPORT_CARBON
     if (enableOrDisable)
     {
         SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
@@ -1759,6 +1759,10 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
     {
         SetSystemUIMode (kUIModeNormal, 0);
     }
+   #else
+    // If you're targeting OSes earlier than 10.6 and want to use this feature,
+    // you'll need to enable JUCE_SUPPORT_CARBON.
+    jassertfalse;
    #endif
 }
 

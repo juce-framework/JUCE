@@ -47,6 +47,19 @@ RectangleList& RectangleList::operator= (const RectangleList& other)
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+RectangleList::RectangleList (RectangleList&& other) noexcept
+    : rects (static_cast <Array <Rectangle<int> >&&> (other.rects))
+{
+}
+
+RectangleList& RectangleList::operator= (RectangleList&& other) noexcept
+{
+    rects = static_cast <Array <Rectangle<int> >&&> (other.rects);
+    return *this;
+}
+#endif
+
 RectangleList::~RectangleList()
 {
 }

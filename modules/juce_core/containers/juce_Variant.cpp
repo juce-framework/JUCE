@@ -421,14 +421,7 @@ var::var (var&& other) noexcept
 
 var& var::operator= (var&& other) noexcept
 {
-    if (this != &other)
-    {
-        type->cleanUp (value);
-        type = other.type;
-        value = other.value;
-        other.type = &VariantType_Void::instance;
-    }
-
+    swapWith (other);
     return *this;
 }
 #endif

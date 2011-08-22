@@ -56,6 +56,11 @@ public:
     /** Copies this list from another one. */
     RectangleList& operator= (const RectangleList& other);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    RectangleList (RectangleList&& other) noexcept;
+    RectangleList& operator= (RectangleList&& other) noexcept;
+   #endif
+
     /** Destructor. */
     ~RectangleList();
 

@@ -94,9 +94,7 @@ NamedValueSet::NamedValueSet (NamedValueSet&& other) noexcept
 
 NamedValueSet& NamedValueSet::operator= (NamedValueSet&& other) noexcept
 {
-    if (this != &other)
-        values = static_cast <LinkedListPointer<NamedValue>&&> (other.values);
-
+    other.values.swapWith (values);
     return *this;
 }
 #endif

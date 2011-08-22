@@ -71,6 +71,19 @@ RelativeCoordinate& RelativeCoordinate::operator= (const RelativeCoordinate& oth
     return *this;
 }
 
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+RelativeCoordinate::RelativeCoordinate (RelativeCoordinate&& other) noexcept
+    : term (static_cast <Expression&&> (other.term))
+{
+}
+
+RelativeCoordinate& RelativeCoordinate::operator= (RelativeCoordinate&& other) noexcept
+{
+    term = static_cast <Expression&&> (other.term);
+    return *this;
+}
+#endif
+
 RelativeCoordinate::RelativeCoordinate (const double absoluteDistanceFromOrigin)
     : term (absoluteDistanceFromOrigin)
 {
@@ -82,7 +95,7 @@ RelativeCoordinate::RelativeCoordinate (const String& s)
     {
         term = Expression (s);
     }
-    catch (...)
+    catch (Expression::ParseError&)
     {}
 }
 
@@ -109,7 +122,7 @@ double RelativeCoordinate::resolve (const Expression::Scope* scope) const
         else
             return term.evaluate();
     }
-    catch (...)
+    catch (Expression::ParseError&)
     {}
 
     return 0.0;
@@ -124,7 +137,7 @@ bool RelativeCoordinate::isRecursive (const Expression::Scope* scope) const
         else
             term.evaluate();
     }
-    catch (...)
+    catch (Expression::ParseError&)
     {
         return true;
     }
@@ -146,7 +159,7 @@ void RelativeCoordinate::moveToAbsolute (double newPos, const Expression::Scope*
             term = term.adjustedToGiveNewResult (newPos, defaultScope);
         }
     }
-    catch (...)
+    catch (Expression::ParseError&)
     {}
 }
 
@@ -159,7 +172,5 @@ String RelativeCoordinate::toString() const
 {
     return term.toString();
 }
-
-
 
 END_JUCE_NAMESPACE

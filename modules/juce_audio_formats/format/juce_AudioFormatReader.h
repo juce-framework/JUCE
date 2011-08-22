@@ -118,7 +118,7 @@ public:
         and the buffer.
     */
     void read (AudioSampleBuffer* buffer,
-               int startSample,
+               int startSampleInDestBuffer,
                int numSamples,
                int64 readerStartSample,
                bool useReaderLeftChan,
