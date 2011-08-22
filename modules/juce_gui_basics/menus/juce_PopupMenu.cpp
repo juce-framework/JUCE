@@ -270,7 +270,12 @@ public:
         setOpaque (getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque() || ! Desktop::canUseSemiTransparentWindows());
 
         for (int i = 0; i < menu.items.size(); ++i)
-            items.add (new PopupMenu::ItemComponent (*menu.items.getUnchecked(i), standardItemHeight, this));
+        {
+            PopupMenu::Item* const item = menu.items.getUnchecked(i);
+
+            if (i < menu.items.size() - 1 || ! item->isSeparator)
+                items.add (new PopupMenu::ItemComponent (*item, standardItemHeight, this));
+        }
 
         calculateWindowPos (target, alignToRectangle);
         setTopLeftPosition (windowPos.getPosition());
@@ -667,7 +672,7 @@ private:
     bool isOver, hasBeenOver, isDown, needsToScroll;
     bool dismissOnMouseUp, hideOnExit, disableMouseMoves, hasAnyJuceCompHadFocus;
     int numColumns, contentHeight, childYOffset;
-    Array <int> columnWidths;
+    Array<int> columnWidths;
     uint32 menuCreationTime, lastFocused, lastScroll, lastMouseMoveTime, timeEnteredCurrentChildComp;
     double scrollAcceleration;
 
@@ -1162,14 +1167,12 @@ private:
 
 //==============================================================================
 PopupMenu::PopupMenu()
-    : lookAndFeel (nullptr),
-      separatorPending (false)
+    : lookAndFeel (nullptr)
 {
 }
 
 PopupMenu::PopupMenu (const PopupMenu& other)
-    : lookAndFeel (other.lookAndFeel),
-      separatorPending (other.separatorPending)
+    : lookAndFeel (other.lookAndFeel)
 {
     items.addCopiesOf (other.items);
 }
@@ -1189,8 +1192,7 @@ PopupMenu& PopupMenu::operator= (const PopupMenu& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 PopupMenu::PopupMenu (PopupMenu&& other) noexcept
-    : lookAndFeel (other.lookAndFeel),
-      separatorPending (other.separatorPending)
+    : lookAndFeel (other.lookAndFeel)
 {
     items.swapWithArray (other.items);
 }
@@ -1201,34 +1203,19 @@ PopupMenu& PopupMenu::operator= (PopupMenu&& other) noexcept
     {
         items.swapWithArray (other.items);
         lookAndFeel = other.lookAndFeel;
-        separatorPending = other.separatorPending;
     }
 
     return *this;
 }
 #endif
 
-
 PopupMenu::~PopupMenu()
 {
-    clear();
 }
 
 void PopupMenu::clear()
 {
     items.clear();
-    separatorPending = false;
-}
-
-void PopupMenu::addSeparatorIfPending()
-{
-    if (separatorPending)
-    {
-        separatorPending = false;
-
-        if (items.size() > 0)
-            items.add (new Item());
-    }
 }
 
 void PopupMenu::addItem (const int itemResultId, const String& itemText,
@@ -1237,8 +1224,6 @@ void PopupMenu::addItem (const int itemResultId, const String& itemText,
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
                                     // for an item..
-
-    addSeparatorIfPending();
 
     items.add (new Item (itemResultId, itemText, isActive, isTicked, iconToUse,
                          Colours::black, false, 0, 0, 0));
@@ -1256,8 +1241,6 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
     {
         ApplicationCommandInfo info (*registeredInfo);
         ApplicationCommandTarget* const target = commandManager->getTargetForCommand (commandID, info);
-
-        addSeparatorIfPending();
 
         items.add (new Item (commandID,
                              displayName.isNotEmpty() ? displayName
@@ -1283,8 +1266,6 @@ void PopupMenu::addColouredItem (const int itemResultId,
                                     // didn't pick anything, so you shouldn't use it as the id
                                     // for an item..
 
-    addSeparatorIfPending();
-
     items.add (new Item (itemResultId, itemText, isActive, isTicked, iconToUse,
                          itemTextColour, true, 0, 0, 0));
 }
@@ -1295,8 +1276,6 @@ void PopupMenu::addCustomItem (const int itemResultId, CustomComponent* const cu
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
                                     // for an item..
-
-    addSeparatorIfPending();
 
     items.add (new Item (itemResultId, String::empty, true, false, Image::null,
                          Colours::black, false, customComponent, 0, 0));
@@ -1348,17 +1327,15 @@ void PopupMenu::addSubMenu (const String& subMenuName,
                             const Image& iconToUse,
                             const bool isTicked)
 {
-    addSeparatorIfPending();
-
     items.add (new Item (0, subMenuName, isActive && (subMenu.getNumItems() > 0), isTicked,
                          iconToUse, Colours::black, false, 0, &subMenu, 0));
 }
 
 void PopupMenu::addSeparator()
 {
-    separatorPending = true;
+    if (items.size() > 0 && ! items.getLast()->isSeparator)
+        items.add (new Item());
 }
-
 
 //==============================================================================
 class HeaderItemComponent  : public PopupMenu::CustomComponent
@@ -1627,10 +1604,10 @@ bool PopupMenu::containsCommandItem (const int commandID) const
 {
     for (int i = items.size(); --i >= 0;)
     {
-        const Item* mi = items.getUnchecked (i);
+        const Item* const mi = items.getUnchecked (i);
 
         if ((mi->itemId == commandID && mi->commandManager != nullptr)
-            || (mi->subMenu != nullptr && mi->subMenu->containsCommandItem (commandID)))
+             || (mi->subMenu != nullptr && mi->subMenu->containsCommandItem (commandID)))
         {
             return true;
         }

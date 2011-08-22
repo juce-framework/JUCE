@@ -487,9 +487,7 @@ private:
 
     OwnedArray <Item> items;
     LookAndFeel* lookAndFeel;
-    bool separatorPending;
 
-    void addSeparatorIfPending();
     Component* createWindow (const Options&, ApplicationCommandManager**) const;
     int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
 

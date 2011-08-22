@@ -1779,8 +1779,12 @@ private:
 
         void removeView (HIViewRef)
         {
-            owner->dispatch (effEditClose, 0, 0, 0, 0);
-            owner->dispatch (effEditSleep, 0, 0, 0, 0);
+            if (owner->isOpen)
+            {
+                owner->isOpen = false;
+                owner->dispatch (effEditClose, 0, 0, 0, 0);
+                owner->dispatch (effEditSleep, 0, 0, 0, 0);
+            }
         }
 
         bool getEmbeddedViewSize (int& w, int& h)
@@ -1992,11 +1996,11 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
 
     if (usesChunks())
     {
+        MemoryBlock chunk;
+        getChunkData (chunk, ! isFXB, maxSizeMB);
+
         if (isFXB)
         {
-            MemoryBlock chunk;
-            getChunkData (chunk, false, maxSizeMB);
-
             const size_t totalLen = sizeof (fxChunkSet) + chunk.getSize() - 8;
             dest.setSize (totalLen, true);
 
@@ -2014,9 +2018,6 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
         }
         else
         {
-            MemoryBlock chunk;
-            getChunkData (chunk, true, maxSizeMB);
-
             const size_t totalLen = sizeof (fxProgramSet) + chunk.getSize() - 8;
             dest.setSize (totalLen, true);
 
