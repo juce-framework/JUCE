@@ -142,8 +142,7 @@ bool MessageManager::postMessageToSystemQueue (Message* message)
     return PostMessage (juce_messageWindowHandle, WindowsMessageHelpers::specialId, 0, (LPARAM) message) != 0;
 }
 
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback,
-                                                   void* userData)
+void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* userData)
 {
     if (MessageManager::getInstance()->isThisTheMessageThread())
     {

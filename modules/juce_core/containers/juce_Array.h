@@ -225,7 +225,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the array)
         @see getUnchecked, getFirst, getLast
     */
-    const ElementType operator[] (const int index) const
+    ElementType operator[] (const int index) const
     {
         const ScopedLockType lock (getLock());
         return isPositiveAndBelow (index, numUsed) ? data.elements [index]
@@ -241,7 +241,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the array)
         @see operator[], getFirst, getLast
     */
-    inline const ElementType getUnchecked (const int index) const
+    inline ElementType getUnchecked (const int index) const
     {
         const ScopedLockType lock (getLock());
         jassert (isPositiveAndBelow (index, numUsed));
@@ -1022,7 +1022,7 @@ private:
     ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse> data;
     int numUsed;
 
-    inline void deleteAllElements()
+    inline void deleteAllElements() noexcept
     {
         for (int i = 0; i < numUsed; ++i)
             data.elements[i].~ElementType();

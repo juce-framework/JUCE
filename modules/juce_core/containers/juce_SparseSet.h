@@ -146,7 +146,7 @@ public:
     /** Returns the range between the lowest and highest values in the set.
         @see getRange
     */
-    const Range<Type> getTotalRange() const
+    Range<Type> getTotalRange() const
     {
         if (values.size() > 0)
         {

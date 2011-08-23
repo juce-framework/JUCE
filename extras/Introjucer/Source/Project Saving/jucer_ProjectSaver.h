@@ -435,7 +435,6 @@ private:
             if (exporter->getTargetFolder().createDirectory())
             {
                 exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
-                //exporter->addToExtraSearchPaths (RelativePath (exporter->getJuceFolder().toString(), RelativePath::projectFolder).getChildFile ("modules"));
 
                 generatedFilesGroup.getNode() = originalGeneratedGroup.createCopy();
                 project.getProjectType().prepareExporter (*exporter);

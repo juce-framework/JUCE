@@ -55,6 +55,11 @@ NamedValueSet::NamedValue::NamedValue (NamedValue&& other) noexcept
 {
 }
 
+inline NamedValueSet::NamedValue::NamedValue (const Identifier& name_, var&& value_)
+    : name (name_), value (static_cast <var&&> (value_))
+{
+}
+
 NamedValueSet::NamedValue& NamedValueSet::NamedValue::operator= (NamedValue&& other) noexcept
 {
     nextListItem = static_cast <LinkedListPointer<NamedValue>&&> (other.nextListItem);
@@ -159,6 +164,32 @@ var* NamedValueSet::getVarPointer (const Identifier& name) const noexcept
 
     return nullptr;
 }
+
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+bool NamedValueSet::set (const Identifier& name, var&& newValue)
+{
+    LinkedListPointer<NamedValue>* i = &values;
+
+    while (i->get() != nullptr)
+    {
+        NamedValue* const v = i->get();
+
+        if (v->name == name)
+        {
+            if (v->value.equalsWithSameType (newValue))
+                return false;
+
+            v->value = static_cast <var&&> (newValue);
+            return true;
+        }
+
+        i = &(v->nextListItem);
+    }
+
+    i->insertNext (new NamedValue (name, static_cast <var&&> (newValue)));
+    return true;
+}
+#endif
 
 bool NamedValueSet::set (const Identifier& name, const var& newValue)
 {

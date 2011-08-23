@@ -361,7 +361,7 @@ public:
         if (settings.hasType (getValueTreeTypeName()))
             return new MSVCProjectExporterVC2008 (project, settings);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -594,9 +594,6 @@ protected:
             linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
             linker->setAttribute ("SuppressStartupBanner", "true");
 
-            //if (project.getJuceLinkageMode() == Project::useLinkedJuce)
-              //  linker->setAttribute ("AdditionalLibraryDirectories", getJucePathFromTargetFolder().getChildFile ("bin").toWindowsStyle());
-
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
             linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
@@ -744,7 +741,7 @@ public:
         if (settings.hasType (getValueTreeTypeName()))
             return new MSVCProjectExporterVC6 (project, settings);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -1012,7 +1009,7 @@ public:
         if (settings.hasType (getValueTreeTypeName()))
             return new MSVCProjectExporterVC2010 (project, settings);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -1192,6 +1189,7 @@ protected:
                 cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
                 cl->createNewChildElement ("WarningLevel")->addTextElement ("Level4");
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
+                cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
 
                 const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim());
                 if (extraFlags.isNotEmpty())

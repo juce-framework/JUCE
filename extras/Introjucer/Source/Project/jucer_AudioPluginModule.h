@@ -278,7 +278,7 @@ namespace RTASHelpers
 
         RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
         exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
-                                                                                .toWindowsStyle().quoted()));
+                                                                                                                 .toWindowsStyle().quoted()));
 
         String msvcPathToRTASFolder (exporter.getJucePathFromTargetFolder()
                                              .getChildFile ("modules/juce_audio_plugin_client/RTAS")

@@ -51,7 +51,8 @@ void Value::ValueSource::sendChangeMessage (const bool synchronous)
     }
     else
     {
-        triggerAsyncUpdate();
+        if (valuesWithListeners.size() > 0)
+            triggerAsyncUpdate();
     }
 }
 

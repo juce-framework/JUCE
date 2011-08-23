@@ -402,7 +402,7 @@ public:
         /** Returns the current item's key.
             This should only be called when a call to next() has just returned true.
         */
-        const KeyType getKey() const
+        KeyType getKey() const
         {
             return entry != nullptr ? entry->key : KeyType();
         }
@@ -410,7 +410,7 @@ public:
         /** Returns the current item's value.
             This should only be called when a call to next() has just returned true.
         */
-        const ValueType getValue() const
+        ValueType getValue() const
         {
             return entry != nullptr ? entry->value : ValueType();
         }

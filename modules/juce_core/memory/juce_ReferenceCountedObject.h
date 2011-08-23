@@ -256,15 +256,7 @@ public:
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     ReferenceCountedObjectPtr& operator= (ReferenceCountedObjectPtr&& other)
     {
-        if (this != &other)
-        {
-            if (referencedObject != nullptr)
-                referencedObject->decReferenceCount();
-
-            referencedObject = other.referencedObject;
-            other.referencedObject = nullptr;
-        }
-
+        std::swap (referencedObject, other.referencedObject);
         return *this;
     }
    #endif

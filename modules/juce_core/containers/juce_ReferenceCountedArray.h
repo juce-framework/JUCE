@@ -128,7 +128,7 @@ public:
 
         @see getUnchecked
     */
-    inline const ObjectClassPtr operator[] (const int index) const noexcept
+    inline ObjectClassPtr operator[] (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
         return isPositiveAndBelow (index, numUsed) ? data.elements [index]
@@ -140,7 +140,7 @@ public:
         This is a faster and less safe version of operator[] which doesn't check the index passed in, so
         it can be used when you're sure the index if always going to be legal.
     */
-    inline const ObjectClassPtr getUnchecked (const int index) const noexcept
+    inline ObjectClassPtr getUnchecked (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
         jassert (isPositiveAndBelow (index, numUsed));
@@ -152,7 +152,7 @@ public:
         This will return a null pointer if the array's empty.
         @see getLast
     */
-    inline const ObjectClassPtr getFirst() const noexcept
+    inline ObjectClassPtr getFirst() const noexcept
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [0]
@@ -164,7 +164,7 @@ public:
         This will return a null pointer if the array's empty.
         @see getFirst
     */
-    inline const ObjectClassPtr getLast() const noexcept
+    inline ObjectClassPtr getLast() const noexcept
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [numUsed - 1]
@@ -466,7 +466,7 @@ public:
         @param indexToRemove    the index of the element to remove
         @see remove, removeObject, removeRange
     */
-    const ObjectClassPtr removeAndReturn (const int indexToRemove)
+    ObjectClassPtr removeAndReturn (const int indexToRemove)
     {
         ObjectClassPtr removedItem;
         const ScopedLockType lock (getLock());

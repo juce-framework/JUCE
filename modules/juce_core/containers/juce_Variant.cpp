@@ -399,17 +399,17 @@ void var::swapWith (var& other) noexcept
     std::swap (value, other.value);
 }
 
-const var& var::operator= (const var& v)               { type->cleanUp (value); type = v.type; type->createCopy (value, v.value); return *this; }
-const var& var::operator= (const int v)                { type->cleanUp (value); type = &VariantType_Int::instance; value.intValue = v; return *this; }
-const var& var::operator= (const int64 v)              { type->cleanUp (value); type = &VariantType_Int64::instance; value.int64Value = v; return *this; }
-const var& var::operator= (const bool v)               { type->cleanUp (value); type = &VariantType_Bool::instance; value.boolValue = v; return *this; }
-const var& var::operator= (const double v)             { type->cleanUp (value); type = &VariantType_Double::instance; value.doubleValue = v; return *this; }
-const var& var::operator= (const char* const v)        { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
-const var& var::operator= (const wchar_t* const v)     { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
-const var& var::operator= (const String& v)            { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
-const var& var::operator= (const Array<var>& v)        { var v2 (v); swapWith (v2); return *this; }
-const var& var::operator= (ReferenceCountedObject* v)  { var v2 (v); swapWith (v2); return *this; }
-const var& var::operator= (MethodFunction v)           { var v2 (v); swapWith (v2); return *this; }
+var& var::operator= (const var& v)               { type->cleanUp (value); type = v.type; type->createCopy (value, v.value); return *this; }
+var& var::operator= (const int v)                { type->cleanUp (value); type = &VariantType_Int::instance; value.intValue = v; return *this; }
+var& var::operator= (const int64 v)              { type->cleanUp (value); type = &VariantType_Int64::instance; value.int64Value = v; return *this; }
+var& var::operator= (const bool v)               { type->cleanUp (value); type = &VariantType_Bool::instance; value.boolValue = v; return *this; }
+var& var::operator= (const double v)             { type->cleanUp (value); type = &VariantType_Double::instance; value.doubleValue = v; return *this; }
+var& var::operator= (const char* const v)        { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
+var& var::operator= (const wchar_t* const v)     { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
+var& var::operator= (const String& v)            { type->cleanUp (value); type = &VariantType_String::instance; new (value.stringValue) String (v); return *this; }
+var& var::operator= (const Array<var>& v)        { var v2 (v); swapWith (v2); return *this; }
+var& var::operator= (ReferenceCountedObject* v)  { var v2 (v); swapWith (v2); return *this; }
+var& var::operator= (MethodFunction v)           { var v2 (v); swapWith (v2); return *this; }
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 var::var (var&& other) noexcept
@@ -422,6 +422,19 @@ var::var (var&& other) noexcept
 var& var::operator= (var&& other) noexcept
 {
     swapWith (other);
+    return *this;
+}
+
+var::var (String&& value_)  : type (&VariantType_String::instance)
+{
+    new (value.stringValue) String (static_cast<String&&> (value_));
+}
+
+var& var::operator= (String&& v)
+{
+    type->cleanUp (value);
+    type = &VariantType_String::instance;
+    new (value.stringValue) String (static_cast<String&&> (v));
     return *this;
 }
 #endif

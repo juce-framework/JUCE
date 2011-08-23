@@ -84,6 +84,14 @@ public:
     */
     bool set (const Identifier& name, const var& newValue);
 
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Changes or adds a named value.
+        @returns    true if a value was changed or added; false if the
+                    value was already set the the value passed-in.
+    */
+    bool set (const Identifier& name, var&& newValue);
+   #endif
+
     /** Returns true if the set contains an item with the specified name. */
     bool contains (const Identifier& name) const;
 
@@ -135,6 +143,7 @@ private:
         NamedValue& operator= (const NamedValue&);
        #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
         NamedValue (NamedValue&&) noexcept;
+        NamedValue (const Identifier& name, var&& value);
         NamedValue& operator= (NamedValue&&) noexcept;
        #endif
         bool operator== (const NamedValue& other) const noexcept;

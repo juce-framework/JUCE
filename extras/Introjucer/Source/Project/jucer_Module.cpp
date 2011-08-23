@@ -429,14 +429,15 @@ void LibraryModule::findWildcardMatches (const File& localModuleFolder, const St
 
     DirectoryIterator iter (localModuleFolder.getChildFile (path), false, wildCard);
     while (iter.next())
-        tempList.addSorted (sorter, iter.getFile());
+        if (! iter.getFile().isHidden())
+            tempList.addSorted (sorter, iter.getFile());
 
     result.addArray (tempList);
 }
 
 void LibraryModule::addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path) const
 {
-    const int slash = path.indexOfChar ('/');
+    const int slash = path.indexOfChar (File::separator);
 
     if (slash >= 0)
     {
