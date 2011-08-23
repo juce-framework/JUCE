@@ -603,9 +603,19 @@ public:
                 for (; i < numIn; ++i)
                     channels[i] = inputs[i];
 
-                AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
+                {
+                    AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
+                    filter->processBlock (chans, midiEvents);
+                }
 
-                filter->processBlock (chans, midiEvents);
+                // copy back any temp channels that may have been used..
+                for (i = 0; i < numOut; ++i)
+                {
+                    const float* const chan = tempChannels.getUnchecked(i);
+
+                    if (chan != nullptr)
+                        memcpy (outputs[i], chan, sizeof (float) * numSamples);
+                }
             }
         }
 
