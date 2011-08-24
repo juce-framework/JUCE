@@ -163,7 +163,7 @@ public:
                 [menu performSelector: @selector (cancelTracking)];
         }
 
-        if (Time::getMillisecondCounter() > lastUpdateTime + 500)
+        if (Time::getMillisecondCounter() > lastUpdateTime + 100)
             (new AsyncMenuUpdater())->post();
     }
 

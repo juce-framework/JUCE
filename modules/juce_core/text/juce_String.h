@@ -33,8 +33,8 @@
 #endif
 
 #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4514 4996)
+ #pragma warning (push)
+ #pragma warning (disable: 4514 4996)
 #endif
 
 #include "../memory/juce_Atomic.h"
@@ -44,7 +44,7 @@
 #include "juce_CharPointer_ASCII.h"
 
 #if JUCE_MSVC
-  #pragma warning (pop)
+ #pragma warning (pop)
 #endif
 
 class OutputStream;

@@ -430,7 +430,7 @@ namespace NumberToStringConverters
         return dp;
     }
 
-    char* doubleToString (char* buffer, int numChars, double n, int numDecPlaces, size_t& len) noexcept
+    char* doubleToString (char* buffer, const int numChars, double n, int numDecPlaces, size_t& len) noexcept
     {
         if (numDecPlaces > 0 && n > -1.0e20 && n < 1.0e20)
         {
@@ -983,76 +983,50 @@ bool String::containsWholeWordIgnoreCase (const String& wordToLookFor) const noe
 }
 
 //==============================================================================
-namespace WildCardHelpers
+template <typename CharPointer>
+struct WildCardMatcher
 {
-    int indexOfMatch (const String::CharPointerType& wildcard,
-                      String::CharPointerType test,
-                      const bool ignoreCase) noexcept
+    static bool matches (CharPointer wildcard, CharPointer test, const bool ignoreCase) noexcept
     {
-        int start = 0;
+        for (;;)
+        {
+            const juce_wchar wc = *wildcard;
+            const juce_wchar tc = *test;
 
+            if (wc == tc
+                 || (ignoreCase && CharacterFunctions::toLowerCase (wc) == CharacterFunctions::toLowerCase (tc))
+                 || (wc == '?' && tc != 0))
+            {
+                if (wc == 0)
+                    return true;
+
+                ++test;
+                ++wildcard;
+            }
+            else
+            {
+                return wc == '*' && (wildcard[1] == 0 || matchesAnywhere (wildcard + 1, test, ignoreCase));
+            }
+        }
+    }
+
+    static bool matchesAnywhere (const CharPointer& wildcard, CharPointer test, const bool ignoreCase) noexcept
+    {
         while (! test.isEmpty())
         {
-            String::CharPointerType t (test);
-            String::CharPointerType w (wildcard);
+            if (matches (wildcard, test, ignoreCase))
+                return true;
 
-            for (;;)
-            {
-                const juce_wchar wc = *w;
-                const juce_wchar tc = *t;
-
-                if (wc == tc
-                     || (ignoreCase && w.toLowerCase() == t.toLowerCase())
-                     || (wc == '?' && tc != 0))
-                {
-                    if (wc == 0)
-                        return start;
-
-                    ++t;
-                    ++w;
-                }
-                else
-                {
-                    if (wc == '*' && (w[1] == 0 || indexOfMatch (w + 1, t, ignoreCase) >= 0))
-                        return start;
-
-                    break;
-                }
-            }
-
-            ++start;
             ++test;
         }
 
-        return -1;
+        return false;
     }
-}
+};
 
 bool String::matchesWildcard (const String& wildcard, const bool ignoreCase) const noexcept
 {
-    CharPointerType w (wildcard.text);
-    CharPointerType t (text);
-
-    for (;;)
-    {
-        const juce_wchar wc = *w;
-        const juce_wchar tc = *t;
-
-        if (wc == tc
-             || (ignoreCase && w.toLowerCase() == t.toLowerCase())
-             || (wc == '?' && tc != 0))
-        {
-            if (wc == 0)
-                return true;
-
-            ++w;
-            ++t;
-        }
-        else
-        {
-            return wc == '*' && (w[1] == 0 || WildCardHelpers::indexOfMatch (w + 1, t, ignoreCase) >= 0);
-        }
-    }
+    return WildCardMatcher<CharPointerType>::matches (wildcard.text, text, ignoreCase);
 }
 
 //==============================================================================
@@ -2090,7 +2064,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 }
 
 #if JUCE_MSVC
-  #pragma warning (pop)
+ #pragma warning (pop)
 #endif
 
 //==============================================================================
