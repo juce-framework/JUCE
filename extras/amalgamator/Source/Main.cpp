@@ -253,8 +253,22 @@ static bool parseFile (const File& rootFolder,
 }
 
 //==============================================================================
+class NullOutputStream  : public OutputStream
+{
+public:
+    NullOutputStream() {}
+    void flush() {}
+    int64 getPosition() { return 0; }
+    bool setPosition (int64) { return false; }
+    bool write (const void*, int) { return true; }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NullOutputStream);
+};
+
 static bool munge (const File& templateFile, const File& targetFile, const String& wildcard,
-                   StringArray& alreadyIncludedFiles, const StringArray& includesToIgnore)
+                   StringArray& alreadyIncludedFiles, const StringArray& includesToIgnore,
+                   bool produceOutputFile = true)
 {
     if (! templateFile.existsAsFile())
     {
@@ -269,42 +283,60 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
 
     std::cout << "Building: " << targetFile.getFullPathName() << "...\n";
 
-    TemporaryFile temp (targetFile);
-    ScopedPointer <FileOutputStream> out (temp.getFile().createOutputStream (1024 * 128));
-
-    if (out == 0)
+    if (produceOutputFile)
     {
-        std::cout << "\n!! ERROR - couldn't write to the target file: "
-                  << temp.getFile().getFullPathName() << "\n\n";
-        return false;
+        TemporaryFile temp (targetFile);
+        ScopedPointer <FileOutputStream> out (temp.getFile().createOutputStream (1024 * 128));
+
+        if (out == 0)
+        {
+            std::cout << "\n!! ERROR - couldn't write to the target file: "
+                      << temp.getFile().getFullPathName() << "\n\n";
+            return false;
+        }
+
+        out->setNewLineString ("\n");
+
+        if (! parseFile (targetFile.getParentDirectory(),
+                         targetFile,
+                         *out, templateFile,
+                         alreadyIncludedFiles,
+                         includesToIgnore,
+                         wildcards,
+                         true, false))
+        {
+            return false;
+        }
+
+        out = 0;
+
+        if (calculateFileHashCode (targetFile) == calculateFileHashCode (temp.getFile()))
+        {
+            std::cout << " -- No need to write - new file is identical\n";
+            return true;
+        }
+
+        if (! temp.overwriteTargetFileWithTemporary())
+        {
+            std::cout << "\n!! ERROR - couldn't write to the target file: "
+                      << targetFile.getFullPathName() << "\n\n";
+            return false;
+        }
     }
-
-    out->setNewLineString ("\n");
-
-    if (! parseFile (targetFile.getParentDirectory(),
-                     targetFile,
-                     *out, templateFile,
-                     alreadyIncludedFiles,
-                     includesToIgnore,
-                     wildcards,
-                     true, false))
+    else
     {
-        return false;
-    }
+        NullOutputStream out;
+        if (! parseFile (targetFile.getParentDirectory(),
+                         targetFile,
+                         out, templateFile,
+                         alreadyIncludedFiles,
+                         includesToIgnore,
+                         wildcards,
+                         true, false))
+        {
+            return false;
+        }
 
-    out = 0;
-
-    if (calculateFileHashCode (targetFile) == calculateFileHashCode (temp.getFile()))
-    {
-        std::cout << " -- No need to write - new file is identical\n";
-        return true;
-    }
-
-    if (! temp.overwriteTargetFileWithTemporary())
-    {
-        std::cout << "\n!! ERROR - couldn't write to the target file: "
-                  << targetFile.getFullPathName() << "\n\n";
-        return false;
     }
 
     return true;
@@ -361,20 +393,51 @@ static void mungeJuce (const File& juceFolder)
     findAllFilesIncludedIn (hppTemplate, alreadyIncludedFiles);
     includesToIgnore.add (hppTarget.getFileName());
 
+    std::cout << alreadyIncludedFiles.joinIntoString (";") << "\n";
     munge (cppTemplate, cppTarget, "*.cpp;*.c;*.h;*.mm;*.m", alreadyIncludedFiles, includesToIgnore);
 }
 
 //==============================================================================
+const String defaultWildcard ("*.cpp;*.c;*.h;*.mm;*.m");
+
 int main (int argc, char* argv[])
 {
-    std::cout << "\n*** The C++ Amalgamator! Written for Juce - www.rawmaterialsoftware.com\n";
+    std::cout << "\n*** The C++ Amalgamator! Written for Juce - www.rawmaterialsoftware.com\n\n";
 
-    if (argc == 4)
+    if (argc == 5)
+    {
+        const File templateHeader (File::getCurrentWorkingDirectory().getChildFile (String (argv[1]).unquoted()));
+        const File templateFile (File::getCurrentWorkingDirectory().getChildFile (String (argv[2]).unquoted()));
+        const File targetFile (File::getCurrentWorkingDirectory().getChildFile (String (argv[3]).unquoted()));
+
+        std::cout << "using " << templateHeader.getFileName() << "\n";
+
+        String wildcard (String (argv[4]).unquoted());
+        if (wildcard == "-d")
+            wildcard = defaultWildcard;
+
+        StringArray alreadyIncludedFiles, includesToIgnore;
+
+        if (! munge (templateHeader, String::empty, "*.h", alreadyIncludedFiles, includesToIgnore, false))
+        {
+            return 1;
+        }
+
+        findAllFilesIncludedIn (templateHeader, alreadyIncludedFiles);
+        includesToIgnore.add ("juce_amalgamated.h");
+
+        std::cout << alreadyIncludedFiles.joinIntoString (";") << "\n";
+        munge (templateFile, targetFile, wildcard, alreadyIncludedFiles, includesToIgnore);
+    }
+    else if (argc == 4)
     {
         const File templateFile (File::getCurrentWorkingDirectory().getChildFile (String (argv[1]).unquoted()));
         const File targetFile (File::getCurrentWorkingDirectory().getChildFile (String (argv[2]).unquoted()));
-        const String wildcard (String (argv[3]).unquoted());
         StringArray alreadyIncludedFiles, includesToIgnore;
+
+        String wildcard (String (argv[3]).unquoted());
+        if (wildcard == "-d")
+            wildcard = defaultWildcard;
 
         munge (templateFile, targetFile, wildcard, alreadyIncludedFiles, includesToIgnore);
     }
@@ -385,16 +448,44 @@ int main (int argc, char* argv[])
     }
     else
     {
-        std::cout << " Usage: amalgamator TemplateFile TargetFile \"FileToReplaceWildcard\"\n\n"
-                     " amalgamator will run through a C++ file and replace any\n"
-                     " #include statements with the contents of the file they refer to.\n"
-                     " It'll only do this for files that are within the same parent\n"
-                     " directory as the target file, and will ignore include statements\n"
-                     " that use '<>' instead of quotes. It'll also only include a file once,\n"
-                     " ignoring any repeated instances of it.\n\n"
-                     " The wildcard lets you specify what kind of files will be replaced, so\n"
-                     " \"*.cpp;*.h\" would replace only includes that reference a .cpp or .h file.\n\n"
-                     " Or: just run 'amalgamator YourJuceDirectory' to rebuild the juce files.";
+        String usage;
+
+        usage << "Usage: " << argv[0] << " juce_directory\n";
+        usage << "       " << argv[0] << " template_file target_file ( -d | {wildcard_list} )\n";
+        usage << "       " << argv[0] << " template_header template_file target_file ( -d | {wildcard_list} )\n";
+        usage << "\n";
+        usage << "In the first form, this command will recreate the single-file amalgamation "
+              << "inside the root of the juce source tree specified by juce_directory. The output files "
+                 "are called juce_amalgamated.h and juce_amalgamated.cpp\n";
+        usage << "\n";
+        usage << "In the second form, the file specified by template_file will be processed, and "
+                 "any #include statements will be replaced by inserting the contents of the file "
+                 "they refer to. This replacement will only occur for files that are within the "
+                 "same parent directory as the target file, and will ignore include statements in "
+                 "angle brackets ('<' and '>') instead of double quotes. This replacement will only "
+                 "happen once - if the same include file is found again it will be replaced with an "
+                 "empty line.\n";
+        usage << "\n";
+        usage << "In the third form, the header file specified by template_header is processed "
+                 "internally without creating an output file, and then target_file is produced from "
+                 "template_file. However, #includes which appear in template_header are not replaced in "
+                 "the template_file when creating the target_file. This form is used to create "
+                 "amalgamations split into multiple source files sharing a common amalgamated header, "
+                 "for compilers which have trouble compiling a large single amalgamation. For creating "
+                 "a split amalgamation for juce, template_header is usually the path to "
+                 "juce_amalgamated_template.h. The resulting amalgamation will typically use "
+                 "a previously generated juce_amalgamated.h for the header, and multiple .cpp for the sources\n";
+        usage << "\n";
+        usage << "{wildcard_list} is a semicolon delimited list of expressions used to match #include "
+                 "filenames to determine if they are a candidate for replacement. For example, a "
+                 "wildcard_list of \"*.cpp;*.h\" would replace only those #include lines which referenced "
+                 "files ending in .cpp or .h\n";
+        usage << "\n";
+        usage << "The -d option can be used in place of wildcard_list to use the default list of wildcards, "
+                 "which is equal to \"*.cpp;*.c;*.h;*.mm;*.m\".\n";
+        usage << "\n";
+
+        std::cout << usage;
     }
 
     std::cout << "\n";
