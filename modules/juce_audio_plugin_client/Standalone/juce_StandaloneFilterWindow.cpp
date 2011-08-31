@@ -35,10 +35,12 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 //==============================================================================
 StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
-                                                const Colour& backgroundColour)
+                                                const Colour& backgroundColour,
+                                                PropertySet* settingsToUse)
     : DocumentWindow (title, backgroundColour,
                       DocumentWindow::minimiseButton
                        | DocumentWindow::closeButton),
+      settings (settingsToUse),
       optionsButton ("options")
 {
     setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
@@ -63,8 +65,6 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
                                   JucePlugin_MaxNumOutputChannels,
                                   44100, 512);
 
-    PropertySet* const globalSettings = getGlobalSettings();
-
     deviceManager = new AudioDeviceManager();
     deviceManager->addAudioCallback (&player);
     deviceManager->addMidiInputCallback (String::empty, &player);
@@ -73,19 +73,19 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 
     ScopedPointer<XmlElement> savedState;
 
-    if (globalSettings != nullptr)
-        savedState = globalSettings->getXmlValue ("audioSetup");
+    if (settings != nullptr)
+        savedState = settings->getXmlValue ("audioSetup");
 
     deviceManager->initialise (filter->getNumInputChannels(),
                                filter->getNumOutputChannels(),
                                savedState,
                                true);
 
-    if (globalSettings != nullptr)
+    if (settings != nullptr)
     {
         MemoryBlock data;
 
-        if (data.fromBase64Encoding (globalSettings->getValue ("filterState"))
+        if (data.fromBase64Encoding (settings->getValue ("filterState"))
              && data.getSize() > 0)
         {
             filter->setStateInformation (data.getData(), data.getSize());
@@ -94,28 +94,33 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 
     setContentOwned (filter->createEditorIfNeeded(), true);
 
-    const int x = globalSettings->getIntValue ("windowX", -100);
-    const int y = globalSettings->getIntValue ("windowY", -100);
+    if (settings != nullptr)
+    {
+        const int x = settings->getIntValue ("windowX", -100);
+        const int y = settings->getIntValue ("windowY", -100);
 
-    if (x != -100 && y != -100)
-        setBoundsConstrained (Rectangle<int> (x, y, getWidth(), getHeight()));
+        if (x != -100 && y != -100)
+            setBoundsConstrained (Rectangle<int> (x, y, getWidth(), getHeight()));
+        else
+            centreWithSize (getWidth(), getHeight());
+    }
     else
+    {
         centreWithSize (getWidth(), getHeight());
+    }
 }
 
 StandaloneFilterWindow::~StandaloneFilterWindow()
 {
-    PropertySet* const globalSettings = getGlobalSettings();
-
-    if (globalSettings != nullptr)
+    if (settings != nullptr)
     {
-        globalSettings->setValue ("windowX", getX());
-        globalSettings->setValue ("windowY", getY());
+        settings->setValue ("windowX", getX());
+        settings->setValue ("windowY", getY());
 
         if (deviceManager != nullptr)
         {
             ScopedPointer<XmlElement> xml (deviceManager->createStateXml());
-            globalSettings->setValue ("audioSetup", xml);
+            settings->setValue ("audioSetup", xml);
         }
     }
 
@@ -123,12 +128,12 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
     deviceManager->removeAudioCallback (&player);
     deviceManager = nullptr;
 
-    if (globalSettings != nullptr && filter != nullptr)
+    if (settings != nullptr && filter != nullptr)
     {
         MemoryBlock data;
         filter->getStateInformation (data);
 
-        globalSettings->setValue ("filterState", data.toBase64Encoding());
+        settings->setValue ("filterState", data.toBase64Encoding());
     }
 
     deleteFilter();
@@ -162,20 +167,16 @@ void StandaloneFilterWindow::resetFilter()
         setContentOwned (filter->createEditorIfNeeded(), true);
     }
 
-    PropertySet* const globalSettings = getGlobalSettings();
-
-    if (globalSettings != nullptr)
-        globalSettings->removeValue ("filterState");
+    if (settings != nullptr)
+        settings->removeValue ("filterState");
 }
 
 //==============================================================================
 void StandaloneFilterWindow::saveState()
 {
-    PropertySet* const globalSettings = getGlobalSettings();
-
     FileChooser fc (TRANS("Save current state"),
-                    globalSettings != nullptr ? File (globalSettings->getValue ("lastStateFile"))
-                                              : File::nonexistent);
+                    settings != nullptr ? File (settings->getValue ("lastStateFile"))
+                                        : File::nonexistent);
 
     if (fc.browseForFileToSave (true))
     {
@@ -193,11 +194,9 @@ void StandaloneFilterWindow::saveState()
 
 void StandaloneFilterWindow::loadState()
 {
-    PropertySet* const globalSettings = getGlobalSettings();
-
     FileChooser fc (TRANS("Load a saved state"),
-                    globalSettings != nullptr ? File (globalSettings->getValue ("lastStateFile"))
-                                              : File::nonexistent);
+                    settings != nullptr ? File (settings->getValue ("lastStateFile"))
+                                        : File::nonexistent);
 
     if (fc.browseForFileToOpen())
     {
@@ -228,7 +227,8 @@ void StandaloneFilterWindow::showAudioSettingsDialog()
 
     selectorComp.setSize (500, 450);
 
-    DialogWindow::showModalDialog (TRANS("Audio Settings"), &selectorComp, this, Colours::lightgrey, true, false, false);
+    DialogWindow::showModalDialog (TRANS("Audio Settings"), &selectorComp, this,
+                                   Colours::lightgrey, true, false, false);
 }
 
 //==============================================================================

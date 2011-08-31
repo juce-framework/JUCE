@@ -227,7 +227,7 @@ private:
 
     //==============================================================================
     class MissingDependenciesComponent  : public PropertyComponent,
-                                          public Button::Listener
+                                          public ButtonListener
     {
     public:
         MissingDependenciesComponent (Project& project_, ModuleList& moduleList_, const String& moduleID_)

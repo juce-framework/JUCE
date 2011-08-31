@@ -229,7 +229,13 @@ void ResizableWindow::resized()
     }
 
     if (contentComponent != nullptr)
+    {
+        // The window expects to be able to be able to manage the size and position
+        // of its content component, so you can't arbitrarily add a transform to it!
+        jassert (! contentComponent->isTransformed());
+
         contentComponent->setBoundsInset (getContentComponentBorder());
+    }
 
     updateLastPos();
 

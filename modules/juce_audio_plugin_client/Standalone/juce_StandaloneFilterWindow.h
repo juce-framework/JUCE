@@ -42,8 +42,14 @@ class StandaloneFilterWindow    : public DocumentWindow,
 {
 public:
     //==============================================================================
+    /** Creates a window with a given title and colour.
+        The settings object can be a PropertySet that the class should use to
+        store its settings - the object that is passed-in will be owned by this
+        class and deleted automatically when no longer needed. (It can also be null)
+    */
     StandaloneFilterWindow (const String& title,
-                            const Colour& backgroundColour);
+                            const Colour& backgroundColour,
+                            PropertySet* settingsToUse);
 
     ~StandaloneFilterWindow();
 
@@ -60,14 +66,6 @@ public:
     /** Shows the audio properties dialog box modally. */
     virtual void showAudioSettingsDialog();
 
-    /** Implement this method to return the property set that should be used for storing
-        the plugin's state.
-
-        This will be used to store the audio set-up and the filter's last state. You may want
-        to return an ApplicationProperties object.
-    */
-    virtual PropertySet* getGlobalSettings() = 0;
-
     //==============================================================================
     /** @internal */
     void closeButtonPressed();
@@ -77,6 +75,7 @@ public:
     void resized();
 
 private:
+    ScopedPointer<PropertySet> settings;
     ScopedPointer<AudioProcessor> filter;
     ScopedPointer<AudioDeviceManager> deviceManager;
     AudioProcessorPlayer player;

@@ -2147,7 +2147,7 @@ int VSTPluginInstance::dispatch (const int opcode, const int index, const int va
 //==============================================================================
 namespace
 {
-    static const int defaultVSTSampleRateValue = 16384;
+    static const int defaultVSTSampleRateValue = 44100;
     static const int defaultVSTBlockSizeValue = 512;
 
     // handles non plugin-specific callbacks..
@@ -2409,7 +2409,7 @@ const String VSTPluginInstance::getCategory() const
     {
         case kPlugCategEffect:      result = "Effect"; break;
         case kPlugCategSynth:       result = "Synth"; break;
-        case kPlugCategAnalysis:    result = "Anaylsis"; break;
+        case kPlugCategAnalysis:    result = "Analysis"; break;
         case kPlugCategMastering:   result = "Mastering"; break;
         case kPlugCategSpacializer: result = "Spacial"; break;
         case kPlugCategRoomFx:      result = "Reverb"; break;
