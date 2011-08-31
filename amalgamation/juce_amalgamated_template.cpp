@@ -344,7 +344,8 @@
  #include "../src/gui/components/positioning/juce_RelativeCoordinatePositioner.cpp"
 #endif
 
-#if JUCE_BUILD_MISC  // (put these in misc to balance the file sizes and avoid problems in iphone build)
+// (put these in misc to balance the file sizes and avoid problems in iphone build)
+#if JUCE_BUILD_MISC
  #include "../src/gui/graphics/colour/juce_Colour.cpp"
  #include "../src/gui/graphics/colour/juce_ColourGradient.cpp"
  #include "../src/gui/graphics/colour/juce_Colours.cpp"
@@ -396,7 +397,8 @@
  #include "../src/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp"
 #endif
 
-#if JUCE_BUILD_CORE && ! JUCE_ONLY_BUILD_CORE_LIBRARY // do these in the core section to help balance the sizes
+// do these in the core section to help balance the sizes
+#if JUCE_BUILD_CORE && ! JUCE_ONLY_BUILD_CORE_LIBRARY
  #include "../src/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp"
  #include "../src/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp"
 #endif
