@@ -393,7 +393,6 @@ static void mungeJuce (const File& juceFolder)
     findAllFilesIncludedIn (hppTemplate, alreadyIncludedFiles);
     includesToIgnore.add (hppTarget.getFileName());
 
-    std::cout << alreadyIncludedFiles.joinIntoString (";") << "\n";
     munge (cppTemplate, cppTarget, "*.cpp;*.c;*.h;*.mm;*.m", alreadyIncludedFiles, includesToIgnore);
 }
 
@@ -426,7 +425,6 @@ int main (int argc, char* argv[])
         findAllFilesIncludedIn (templateHeader, alreadyIncludedFiles);
         includesToIgnore.add ("juce_amalgamated.h");
 
-        std::cout << alreadyIncludedFiles.joinIntoString (";") << "\n";
         munge (templateFile, targetFile, wildcard, alreadyIncludedFiles, includesToIgnore);
     }
     else if (argc == 4)
