@@ -37,7 +37,7 @@ DirectoryContentsList::DirectoryContentsList (const FileFilter* const fileFilter
 
 DirectoryContentsList::~DirectoryContentsList()
 {
-    clear();
+    stopSearching();
 }
 
 void DirectoryContentsList::setIgnoresHiddenFiles (const bool shouldIgnoreHiddenFiles)
@@ -88,12 +88,16 @@ void DirectoryContentsList::setTypeFlags (const int newFlags)
     }
 }
 
-void DirectoryContentsList::clear()
+void DirectoryContentsList::stopSearching()
 {
     shouldStop = true;
     thread.removeTimeSliceClient (this);
-
     fileFindHandle = nullptr;
+}
+
+void DirectoryContentsList::clear()
+{
+    stopSearching();
 
     if (files.size() > 0)
     {

@@ -200,6 +200,7 @@ private:
     ScopedPointer <DirectoryIterator> fileFindHandle;
     bool volatile shouldStop;
 
+    void stopSearching();
     void changed();
     bool checkNextFile (bool& hasChanged);
     bool addFile (const File& file, bool isDir,

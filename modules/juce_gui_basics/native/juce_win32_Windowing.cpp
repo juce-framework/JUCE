@@ -2874,13 +2874,20 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
 }
 
 //==============================================================================
+static HICON extractFileHICON (const File& file)
+{
+    WORD iconNum = 0;
+    WCHAR name [MAX_PATH * 2];
+    file.getFullPathName().copyToUTF16 (name, sizeof (name));
+
+    return ExtractAssociatedIcon ((HINSTANCE) Process::getCurrentModuleInstanceHandle(),
+                                  name, &iconNum);
+}
+
 Image juce_createIconForFile (const File& file)
 {
     Image image;
-    WORD iconNum = 0;
-
-    HICON icon = ExtractAssociatedIcon ((HINSTANCE) Process::getCurrentModuleInstanceHandle(),
-                                        const_cast <WCHAR*> (file.getFullPathName().toWideCharPointer()), &iconNum);
+    HICON icon = extractFileHICON (file);
 
     if (icon != 0)
     {
