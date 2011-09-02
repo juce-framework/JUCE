@@ -431,7 +431,7 @@ String URL::addEscapeChars (const String& s, const bool isParameter)
             }
             else
             {
-                static const char* const hexDigits = "0123456789abcdef";
+                static const char hexDigits[] = "0123456789abcdef";
 
                 utf8.set (i, '%');
                 utf8.insert (++i, hexDigits [((uint8) c) >> 4]);

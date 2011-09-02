@@ -905,7 +905,7 @@ String BigInteger::toString (const int base, const int minimumNumCharacters) con
     if (base == 2 || base == 8 || base == 16)
     {
         const int bits = (base == 2) ? 1 : (base == 8 ? 3 : 4);
-        static const char* const hexDigits = "0123456789abcdef";
+        static const char hexDigits[] = "0123456789abcdef";
 
         for (;;)
         {

@@ -86,6 +86,8 @@
 		EF68F092DAC017371B6454B4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SparseSet.h"; path = "../../../../modules/juce_core/containers/juce_SparseSet.h"; sourceTree = "SOURCE_ROOT"; };
 		21CD3EBA3C464526D9E89004 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Variant.cpp"; path = "../../../../modules/juce_core/containers/juce_Variant.cpp"; sourceTree = "SOURCE_ROOT"; };
 		4B1D4FFCFC3CF72289959650 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Variant.h"; path = "../../../../modules/juce_core/containers/juce_Variant.h"; sourceTree = "SOURCE_ROOT"; };
+		92EFCC3611899AF97808479F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ChildProcess.cpp"; path = "../../../../modules/juce_core/threads/juce_ChildProcess.cpp"; sourceTree = "SOURCE_ROOT"; };
+		C0BFB9B0BDAF4870D2748462 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ChildProcess.h"; path = "../../../../modules/juce_core/threads/juce_ChildProcess.h"; sourceTree = "SOURCE_ROOT"; };
 		CE5C1AD8AA624461B97F359B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CriticalSection.h"; path = "../../../../modules/juce_core/threads/juce_CriticalSection.h"; sourceTree = "SOURCE_ROOT"; };
 		E6A50EBB9B5AF418F913DB41 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DynamicLibrary.h"; path = "../../../../modules/juce_core/threads/juce_DynamicLibrary.h"; sourceTree = "SOURCE_ROOT"; };
 		5B15FE26C55D0BCABFF070C9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_InterProcessLock.h"; path = "../../../../modules/juce_core/threads/juce_InterProcessLock.h"; sourceTree = "SOURCE_ROOT"; };
@@ -691,6 +693,8 @@
 				21CD3EBA3C464526D9E89004,
 				4B1D4FFCFC3CF72289959650 ); name = containers; sourceTree = "<group>"; };
 		EFF4A6D8F1ED2FF9BE1F86D1 = { isa = PBXGroup; children = (
+				92EFCC3611899AF97808479F,
+				C0BFB9B0BDAF4870D2748462,
 				CE5C1AD8AA624461B97F359B,
 				E6A50EBB9B5AF418F913DB41,
 				5B15FE26C55D0BCABFF070C9,

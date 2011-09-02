@@ -1033,7 +1033,7 @@ bool String::matchesWildcard (const String& wildcard, const bool ignoreCase) con
 String String::repeatedString (const String& stringToRepeat, int numberOfTimesToRepeat)
 {
     if (numberOfTimesToRepeat <= 0)
-        return String::empty;
+        return empty;
 
     String result (PreallocationBytes (stringToRepeat.getByteOffsetOfEnd() * numberOfTimesToRepeat));
     CharPointerType n (result.text);
@@ -1953,7 +1953,7 @@ String String::createStringFromData (const void* const data_, const int size)
 }
 
 //==============================================================================
-static juce_wchar emptyChar = 0;
+static const juce_wchar emptyChar = 0;
 
 template <class CharPointerType_Src, class CharPointerType_Dest>
 struct StringEncodingConverter
@@ -2011,7 +2011,7 @@ CharPointer_UTF32 String::toUTF32() const { return StringEncodingConverter <Char
 
 const wchar_t* String::toWideCharPointer() const
 {
-    return (const wchar_t*) StringEncodingConverter <CharPointerType, CharPointer_wchar_t>::convert (*this).getAddress();
+    return StringEncodingConverter <CharPointerType, CharPointer_wchar_t>::convert (*this).getAddress();
 }
 
 //==============================================================================

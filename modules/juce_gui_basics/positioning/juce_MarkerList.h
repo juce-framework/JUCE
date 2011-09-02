@@ -179,6 +179,8 @@ private:
     OwnedArray<Marker> markers;
     ListenerList<Listener> listeners;
 
+    Marker* getMarkerByName (const String& name) const noexcept;
+
     JUCE_LEAK_DETECTOR (MarkerList);
 };
 

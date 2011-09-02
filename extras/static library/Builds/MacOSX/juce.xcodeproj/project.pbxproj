@@ -215,6 +215,8 @@
 		A4F1CA6B07A550F9E78F82C6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SparseSet.h"; path = "../../../../modules/juce_core/containers/juce_SparseSet.h"; sourceTree = "SOURCE_ROOT"; };
 		E6550782791B9FE9A603CD27 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Variant.cpp"; path = "../../../../modules/juce_core/containers/juce_Variant.cpp"; sourceTree = "SOURCE_ROOT"; };
 		0FA528C43A0141E466B0C463 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Variant.h"; path = "../../../../modules/juce_core/containers/juce_Variant.h"; sourceTree = "SOURCE_ROOT"; };
+		5777950E4F5ED4BB442275A1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ChildProcess.cpp"; path = "../../../../modules/juce_core/threads/juce_ChildProcess.cpp"; sourceTree = "SOURCE_ROOT"; };
+		75479288EB748232AFAFB285 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ChildProcess.h"; path = "../../../../modules/juce_core/threads/juce_ChildProcess.h"; sourceTree = "SOURCE_ROOT"; };
 		73E4E4A1E8378E23859A63BE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CriticalSection.h"; path = "../../../../modules/juce_core/threads/juce_CriticalSection.h"; sourceTree = "SOURCE_ROOT"; };
 		9B3DD783D92F4DDBC54E0964 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DynamicLibrary.h"; path = "../../../../modules/juce_core/threads/juce_DynamicLibrary.h"; sourceTree = "SOURCE_ROOT"; };
 		00AEC7FE0322458C9C2BAEEC = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_InterProcessLock.h"; path = "../../../../modules/juce_core/threads/juce_InterProcessLock.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1032,6 +1034,8 @@
 				E6550782791B9FE9A603CD27,
 				0FA528C43A0141E466B0C463 ); name = containers; sourceTree = "<group>"; };
 		948C7FA03FC278BC8B3AC4E4 = { isa = PBXGroup; children = (
+				5777950E4F5ED4BB442275A1,
+				75479288EB748232AFAFB285,
 				73E4E4A1E8378E23859A63BE,
 				9B3DD783D92F4DDBC54E0964,
 				00AEC7FE0322458C9C2BAEEC,

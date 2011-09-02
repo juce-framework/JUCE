@@ -207,8 +207,7 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
         {
             // give up and use the hex code..
             const int hexCode = desc.fromFirstOccurrenceOf ("#", false, false)
-                                    .toLowerCase()
-                                    .retainCharacters ("0123456789abcdef")
+                                    .retainCharacters ("0123456789abcdefABCDEF")
                                     .getHexValue32();
 
             if (hexCode > 0)

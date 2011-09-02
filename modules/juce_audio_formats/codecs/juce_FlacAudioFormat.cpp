@@ -375,7 +375,7 @@ public:
                     destData[j] = (samplesToWrite[i][j] >> bitsToShift);
             }
 
-            samplesToWrite = const_cast<const int**> (channels.getData());
+            samplesToWrite = const_cast <const int**> (channels.getData());
         }
 
         return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, numSamples) != 0;

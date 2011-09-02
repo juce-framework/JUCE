@@ -244,12 +244,34 @@ private:
             << "include $(BUILD_SHARED_LIBRARY)" << newLine;
     }
 
+    String createIncludePathFlags (const Project::BuildConfiguration& config)
+    {
+        String flags;
+        StringArray searchPaths (extraSearchPaths);
+        searchPaths.addArray (config.getHeaderSearchPaths());
+        searchPaths.removeDuplicates (false);
+
+        for (int i = 0; i < searchPaths.size(); ++i)
+            flags << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])).quoted();
+
+        return flags;
+    }
+
     String createCPPFlags (bool forDebug)
     {
         String flags ("-fsigned-char -fexceptions -frtti");
 
         if (forDebug)
             flags << " -g";
+
+        for (int i = 0; i < configs.size(); ++i)
+        {
+            if (configs.getReference(i).isDebug() == forDebug)
+            {
+                flags << createIncludePathFlags (configs.getReference(i));
+                break;
+            }
+        }
 
         StringPairArray defines;
         defines.set ("JUCE_ANDROID", "1");

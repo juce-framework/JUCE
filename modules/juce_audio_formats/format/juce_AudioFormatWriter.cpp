@@ -101,7 +101,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
             }
         }
 
-        if (! write (const_cast<const int**> (buffers), numToDo))
+        if (! write (const_cast <const int**> (buffers), numToDo))
             return false;
 
         numSamplesToRead -= numToDo;

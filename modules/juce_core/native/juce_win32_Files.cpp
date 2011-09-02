@@ -30,6 +30,11 @@
 //==============================================================================
 namespace WindowsFileHelpers
 {
+    DWORD getAtts (const String& path)
+    {
+        return GetFileAttributes (path.toWideCharPointer());
+    }
+
     int64 fileTimeToTime (const FILETIME* const ft)
     {
         static_jassert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME)); // tell me if this fails!
@@ -46,13 +51,14 @@ namespace WindowsFileHelpers
     {
         if (path.isNotEmpty() && path[1] == ':' && path[2] == 0)
             path << '\\';
-        else
-            path = (path + " ").dropLastCharacters(1);  // (mess with the string to make sure it's not sharing its internal storage)
 
-        WCHAR* p = const_cast <WCHAR*> (path.toWideCharPointer());
+        const int numBytes = CharPointer_UTF16::getBytesRequiredFor (path.getCharPointer()) + 4;
+        HeapBlock<WCHAR> pathCopy;
+        pathCopy.calloc (numBytes, 1);
+        path.copyToUTF16 (pathCopy, numBytes);
 
-        if (PathStripToRoot (p))
-            return String ((const WCHAR*) p);
+        if (PathStripToRoot (pathCopy))
+            path = static_cast <const WCHAR*> (pathCopy);
 
         return path;
     }
@@ -104,25 +110,25 @@ const String File::separatorString ("\\");
 bool File::exists() const
 {
     return fullPath.isNotEmpty()
-            && GetFileAttributes (fullPath.toWideCharPointer()) != INVALID_FILE_ATTRIBUTES;
+            && WindowsFileHelpers::getAtts (fullPath) != INVALID_FILE_ATTRIBUTES;
 }
 
 bool File::existsAsFile() const
 {
     return fullPath.isNotEmpty()
-            && (GetFileAttributes (fullPath.toWideCharPointer()) & FILE_ATTRIBUTE_DIRECTORY) == 0;
+            && (WindowsFileHelpers::getAtts (fullPath) & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
 bool File::isDirectory() const
 {
-    const DWORD attr = GetFileAttributes (fullPath.toWideCharPointer());
+    const DWORD attr = WindowsFileHelpers::getAtts (fullPath);
     return ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) && (attr != INVALID_FILE_ATTRIBUTES);
 }
 
 bool File::hasWriteAccess() const
 {
     if (exists())
-        return (GetFileAttributes (fullPath.toWideCharPointer()) & FILE_ATTRIBUTE_READONLY) == 0;
+        return (WindowsFileHelpers::getAtts (fullPath) & FILE_ATTRIBUTE_READONLY) == 0;
 
     // on windows, it seems that even read-only directories can still be written into,
     // so checking the parent directory's permissions would return the wrong result..
@@ -131,25 +137,20 @@ bool File::hasWriteAccess() const
 
 bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
 {
-    DWORD attr = GetFileAttributes (fullPath.toWideCharPointer());
+    const DWORD oldAtts = WindowsFileHelpers::getAtts (fullPath);
 
-    if (attr == INVALID_FILE_ATTRIBUTES)
+    if (oldAtts == INVALID_FILE_ATTRIBUTES)
         return false;
 
-    if (shouldBeReadOnly == ((attr & FILE_ATTRIBUTE_READONLY) != 0))
-        return true;
-
-    if (shouldBeReadOnly)
-        attr |= FILE_ATTRIBUTE_READONLY;
-    else
-        attr &= ~FILE_ATTRIBUTE_READONLY;
-
-    return SetFileAttributes (fullPath.toWideCharPointer(), attr) != FALSE;
+    const DWORD newAtts = shouldBeReadOnly ? (oldAtts |  FILE_ATTRIBUTE_READONLY)
+                                           : (oldAtts & ~FILE_ATTRIBUTE_READONLY);
+    return newAtts == oldAtts
+            || SetFileAttributes (fullPath.toWideCharPointer(), newAtts) != FALSE;
 }
 
 bool File::isHidden() const
 {
-    return (GetFileAttributes (getFullPathName().toWideCharPointer()) & FILE_ATTRIBUTE_HIDDEN) != 0;
+    return (WindowsFileHelpers::getAtts (fullPath) & FILE_ATTRIBUTE_HIDDEN) != 0;
 }
 
 //==============================================================================
@@ -170,12 +171,13 @@ bool File::moveToTrash() const
     SHFILEOPSTRUCT fos = { 0 };
 
     // The string we pass in must be double null terminated..
-    String doubleNullTermPath (getFullPathName() + " ");
-    WCHAR* const p = const_cast <WCHAR*> (doubleNullTermPath.toWideCharPointer());
-    p [getFullPathName().length()] = 0;
+    const int numBytes = CharPointer_UTF16::getBytesRequiredFor (fullPath.getCharPointer()) + 8;
+    HeapBlock<WCHAR> doubleNullTermPath;
+    doubleNullTermPath.calloc (numBytes, 1);
+    fullPath.copyToUTF16 (doubleNullTermPath, numBytes);
 
     fos.wFunc = FO_DELETE;
-    fos.pFrom = p;
+    fos.pFrom = doubleNullTermPath;
     fos.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_SILENT | FOF_NOCONFIRMATION
                    | FOF_NOCONFIRMMKDIR | FOF_RENAMEONCOLLISION;
 

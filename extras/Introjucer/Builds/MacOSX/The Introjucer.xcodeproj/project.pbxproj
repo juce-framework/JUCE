@@ -188,6 +188,8 @@
 		2BA7CD667A4D3962F968735B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SparseSet.h"; path = "../../../../modules/juce_core/containers/juce_SparseSet.h"; sourceTree = "SOURCE_ROOT"; };
 		6E0B0A8EDCC37862B7ECBEBC = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Variant.cpp"; path = "../../../../modules/juce_core/containers/juce_Variant.cpp"; sourceTree = "SOURCE_ROOT"; };
 		875C1BC09CB8295D6799B5F8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Variant.h"; path = "../../../../modules/juce_core/containers/juce_Variant.h"; sourceTree = "SOURCE_ROOT"; };
+		DF2E980AB106BC34560B6636 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ChildProcess.cpp"; path = "../../../../modules/juce_core/threads/juce_ChildProcess.cpp"; sourceTree = "SOURCE_ROOT"; };
+		0CFE85845D2C6ABBA077A319 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ChildProcess.h"; path = "../../../../modules/juce_core/threads/juce_ChildProcess.h"; sourceTree = "SOURCE_ROOT"; };
 		0A8AE7AC4AEF66AD97735443 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CriticalSection.h"; path = "../../../../modules/juce_core/threads/juce_CriticalSection.h"; sourceTree = "SOURCE_ROOT"; };
 		23E4DA8F3BD72654C717FAF9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DynamicLibrary.h"; path = "../../../../modules/juce_core/threads/juce_DynamicLibrary.h"; sourceTree = "SOURCE_ROOT"; };
 		9854BAFA65D92D059DF49F71 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_InterProcessLock.h"; path = "../../../../modules/juce_core/threads/juce_InterProcessLock.h"; sourceTree = "SOURCE_ROOT"; };
@@ -891,6 +893,8 @@
 				6E0B0A8EDCC37862B7ECBEBC,
 				875C1BC09CB8295D6799B5F8 ); name = containers; sourceTree = "<group>"; };
 		2C3262AC916A51359D03A579 = { isa = PBXGroup; children = (
+				DF2E980AB106BC34560B6636,
+				0CFE85845D2C6ABBA077A319,
 				0A8AE7AC4AEF66AD97735443,
 				23E4DA8F3BD72654C717FAF9,
 				9854BAFA65D92D059DF49F71,

@@ -305,6 +305,8 @@
 		427FE8BEB90565F99AEAF9E3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SparseSet.h"; path = "../../../../modules/juce_core/containers/juce_SparseSet.h"; sourceTree = "SOURCE_ROOT"; };
 		85D325D62B8AA3E9586E4533 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Variant.cpp"; path = "../../../../modules/juce_core/containers/juce_Variant.cpp"; sourceTree = "SOURCE_ROOT"; };
 		AE233608DB7055E4081B3C70 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Variant.h"; path = "../../../../modules/juce_core/containers/juce_Variant.h"; sourceTree = "SOURCE_ROOT"; };
+		F5F5B442F0CEF8BBF78DECBE = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ChildProcess.cpp"; path = "../../../../modules/juce_core/threads/juce_ChildProcess.cpp"; sourceTree = "SOURCE_ROOT"; };
+		23C5A1CC9CE4A632410A3A91 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ChildProcess.h"; path = "../../../../modules/juce_core/threads/juce_ChildProcess.h"; sourceTree = "SOURCE_ROOT"; };
 		215202E499A7A22438F5DACA = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CriticalSection.h"; path = "../../../../modules/juce_core/threads/juce_CriticalSection.h"; sourceTree = "SOURCE_ROOT"; };
 		4ABBF6D78A8F52DB78A97171 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DynamicLibrary.h"; path = "../../../../modules/juce_core/threads/juce_DynamicLibrary.h"; sourceTree = "SOURCE_ROOT"; };
 		BE2CD642B591698C3E8615F8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_InterProcessLock.h"; path = "../../../../modules/juce_core/threads/juce_InterProcessLock.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1181,6 +1183,8 @@
 				85D325D62B8AA3E9586E4533,
 				AE233608DB7055E4081B3C70 ); name = containers; sourceTree = "<group>"; };
 		420A8DE4E0228CBC3D953B00 = { isa = PBXGroup; children = (
+				F5F5B442F0CEF8BBF78DECBE,
+				23C5A1CC9CE4A632410A3A91,
 				215202E499A7A22438F5DACA,
 				4ABBF6D78A8F52DB78A97171,
 				BE2CD642B591698C3E8615F8,

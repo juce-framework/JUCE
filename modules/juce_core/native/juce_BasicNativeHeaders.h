@@ -199,6 +199,7 @@
  #include <pwd.h>
  #include <dirent.h>
  #include <fnmatch.h>
+ #include <sys/wait.h>
 #endif
 
 // Need to clear various moronic redefinitions made by system headers..

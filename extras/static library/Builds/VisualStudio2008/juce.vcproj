@@ -1096,6 +1096,17 @@
           <File RelativePath="..\..\..\..\modules\juce_core\containers\juce_Variant.h"/>
         </Filter>
         <Filter Name="threads">
+          <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_ChildProcess.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_ChildProcess.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_CriticalSection.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_DynamicLibrary.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_InterProcessLock.h"/>

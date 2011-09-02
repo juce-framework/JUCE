@@ -326,6 +326,9 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_STRINGPOOL_JUCEHEADER__
  #include "text/juce_StringPool.h"
 #endif
+#ifndef __JUCE_CHILDPROCESS_JUCEHEADER__
+ #include "threads/juce_ChildProcess.h"
+#endif
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
  #include "threads/juce_CriticalSection.h"
 #endif

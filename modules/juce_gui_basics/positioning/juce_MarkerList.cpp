@@ -89,9 +89,14 @@ const MarkerList::Marker* MarkerList::getMarker (const int index) const noexcept
 
 const MarkerList::Marker* MarkerList::getMarker (const String& name) const noexcept
 {
+    return getMarkerByName (name);
+}
+
+MarkerList::Marker* MarkerList::getMarkerByName (const String& name) const noexcept
+{
     for (int i = 0; i < markers.size(); ++i)
     {
-        const Marker* const m = markers.getUnchecked(i);
+        Marker* const m = markers.getUnchecked(i);
 
         if (m->name == name)
             return m;
@@ -102,7 +107,7 @@ const MarkerList::Marker* MarkerList::getMarker (const String& name) const noexc
 
 void MarkerList::setMarker (const String& name, const RelativeCoordinate& position)
 {
-    Marker* const m = const_cast <Marker*> (getMarker (name));
+    Marker* const m = getMarkerByName (name);
 
     if (m != nullptr)
     {

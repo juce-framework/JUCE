@@ -390,14 +390,14 @@ public:
 
             switch (WaitForSingleObject (handle, timeOutMillisecs < 0 ? INFINITE : timeOutMillisecs))
             {
-            case WAIT_OBJECT_0:
-            case WAIT_ABANDONED:
-                break;
+                case WAIT_OBJECT_0:
+                case WAIT_ABANDONED:
+                    break;
 
-            case WAIT_TIMEOUT:
-            default:
-                close();
-                break;
+                case WAIT_TIMEOUT:
+                default:
+                    close();
+                    break;
             }
         }
     }
@@ -458,4 +458,114 @@ void InterProcessLock::exit()
 
     if (pimpl != nullptr && --(pimpl->refCount) == 0)
         pimpl = nullptr;
+}
+
+//==============================================================================
+class ChildProcess::ActiveProcess
+{
+public:
+    ActiveProcess (const String& command)
+        : ok (false), readPipe (0), writePipe (0)
+    {
+        SECURITY_ATTRIBUTES securityAtts = { 0 };
+        securityAtts.nLength = sizeof (securityAtts);
+        securityAtts.bInheritHandle = TRUE;
+
+        if (CreatePipe (&readPipe, &writePipe, &securityAtts, 0)
+             && SetHandleInformation (readPipe, HANDLE_FLAG_INHERIT, 0))
+        {
+            STARTUPINFOW startupInfo = { 0 };
+            startupInfo.cb = sizeof (startupInfo);
+            startupInfo.hStdError  = writePipe;
+            startupInfo.hStdOutput = writePipe;
+            startupInfo.dwFlags = STARTF_USESTDHANDLES;
+
+            ok = CreateProcess (nullptr, const_cast <LPWSTR> (command.toWideCharPointer()),
+                                nullptr, nullptr, TRUE, CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
+                                nullptr, nullptr, &startupInfo, &processInfo) != FALSE;
+        }
+    }
+
+    ~ActiveProcess()
+    {
+        if (ok)
+        {
+            CloseHandle (processInfo.hThread);
+            CloseHandle (processInfo.hProcess);
+        }
+
+        if (readPipe != 0)
+            CloseHandle (readPipe);
+
+        if (writePipe != 0)
+            CloseHandle (writePipe);
+    }
+
+    bool isRunning() const
+    {
+        return WaitForSingleObject (processInfo.hProcess, 0) != WAIT_OBJECT_0;
+    }
+
+    int read (void* dest, int numNeeded) const
+    {
+        int total = 0;
+
+        while (ok && numNeeded > 0)
+        {
+            DWORD available = 0;
+
+            if (! PeekNamedPipe ((HANDLE) readPipe, nullptr, 0, nullptr, &available, nullptr))
+                break;
+
+            const int numToDo = jmin ((int) available, numNeeded);
+
+            if (available == 0)
+            {
+                if (! isRunning())
+                    break;
+
+                Thread::yield();
+            }
+            else
+            {
+                DWORD numRead = 0;
+                if (! ReadFile ((HANDLE) readPipe, dest, numToDo, &numRead, nullptr))
+                    break;
+
+                total += numRead;
+                dest = addBytesToPointer (dest, numRead);
+                numNeeded -= numRead;
+            }
+        }
+
+        return total;
+    }
+
+    bool ok;
+
+private:
+    HANDLE readPipe, writePipe;
+    PROCESS_INFORMATION processInfo;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveProcess);
+};
+
+bool ChildProcess::start (const String& command)
+{
+    activeProcess = new ActiveProcess (command);
+
+    if (! activeProcess->ok)
+        activeProcess = nullptr;
+
+    return activeProcess != nullptr;
+}
+
+bool ChildProcess::isRunning() const
+{
+    return activeProcess != nullptr && activeProcess->isRunning();
+}
+
+int ChildProcess::readProcessOutput (void* dest, int numBytes)
+{
+    return activeProcess != nullptr ? activeProcess->read (dest, numBytes) : 0;
 }

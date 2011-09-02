@@ -919,3 +919,116 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
 {
     return handle != nullptr ? dlsym (handle, functionName.toUTF8()) : nullptr;
 }
+
+
+
+//==============================================================================
+class ChildProcess::ActiveProcess
+{
+public:
+    ActiveProcess (const StringArray& arguments)
+        : childPID (0), pipeHandle (0), readHandle (0)
+    {
+        int pipeHandles[2] = { 0 };
+
+        if (pipe (pipeHandles) == 0)
+        {
+            const int result = fork();
+
+            if (result < 0)
+            {
+                close (pipeHandles[0]);
+                close (pipeHandles[1]);
+            }
+            else if (result == 0)
+            {
+                // we're the child process..
+                close (pipeHandles[0]);   // close the read handle
+                dup2 (pipeHandles[1], 1); // turns the pipe into stdout
+
+                Array<char*> argv;
+                for (int i = 0; i < arguments.size(); ++i)
+                    argv.add (arguments[i].toUTF8().getAddress());
+
+                argv.add (nullptr);
+
+                execvp (argv[0], argv.getRawDataPointer());
+                exit (-1);
+            }
+            else
+            {
+                // we're the parent process..
+                childPID = result;
+                pipeHandle = pipeHandles[0];
+                close (pipeHandles[1]); // close the write handle
+            }
+        }
+    }
+
+    ~ActiveProcess()
+    {
+        if (readHandle != 0)
+            fclose (readHandle);
+
+        if (pipeHandle != 0)
+            close (pipeHandle);
+    }
+
+    bool isRunning() const
+    {
+        if (childPID != 0)
+        {
+            int childState;
+            const int pid = waitpid (childPID, &childState, WNOHANG);
+            return pid > 0 && ! (WIFEXITED (childState) || WIFSIGNALED (childState));
+        }
+
+        return false;
+    }
+
+    int read (void* const dest, const int numBytes)
+    {
+        if (readHandle == 0 && childPID != 0)
+            readHandle = fdopen (pipeHandle, "r");
+
+        if (readHandle != 0)
+            return fread (dest, 1, numBytes, readHandle);
+
+        return 0;
+    }
+
+    int childPID;
+
+private:
+    int pipeHandle;
+    FILE* readHandle;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveProcess);
+};
+
+bool ChildProcess::start (const String& command)
+{
+    StringArray tokens;
+    tokens.addTokens (command, true);
+    tokens.removeEmptyStrings (true);
+
+    if (tokens.size() == 0)
+        return false;
+
+    activeProcess = new ActiveProcess (tokens);
+
+    if (activeProcess->childPID == 0)
+        activeProcess = nullptr;
+
+    return activeProcess != nullptr;
+}
+
+bool ChildProcess::isRunning() const
+{
+    return activeProcess != nullptr && activeProcess->isRunning();
+}
+
+int ChildProcess::readProcessOutput (void* dest, int numBytes)
+{
+    return activeProcess != nullptr ? activeProcess->read (dest, numBytes) : 0;
+}

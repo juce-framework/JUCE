@@ -298,7 +298,7 @@ public:
     {
     public:
         typedef const void VoidType;
-        static inline void* toVoidPtr (VoidType* v) noexcept { return const_cast<void*> (v); }
+        static inline void* toVoidPtr (VoidType* v) noexcept { return const_cast <void*> (v); }
         enum { isConst = 1 };
     };
   #endif
