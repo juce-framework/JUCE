@@ -65,5 +65,6 @@
     <MODULE id="juce_audio_devices" showAllCode="1"/>
     <MODULE id="juce_audio_formats" showAllCode="1"/>
     <MODULE id="juce_audio_processors" showAllCode="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1"/>
   </MODULES>
 </JUCERPROJECT>

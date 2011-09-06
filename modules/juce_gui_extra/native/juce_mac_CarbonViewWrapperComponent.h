@@ -90,10 +90,9 @@ public:
                 return;
 
             carbonWindow = [[NSWindow alloc] initWithWindowRef: wrapperWindow];
-            NSWindow* ownerWindow = [((NSView*) getWindowHandle()) window];
 
-            [ownerWindow addChildWindow: carbonWindow
-                                ordered: NSWindowAbove];
+            [getOwnerWindow() addChildWindow: carbonWindow
+                                     ordered: NSWindowAbove];
 
             embeddedView = attachView (wrapperWindow, HIViewGetRoot (wrapperWindow));
 
@@ -130,6 +129,14 @@ public:
 
         if (wrapperWindow != 0)
         {
+            NSWindow* ownerWindow = getOwnerWindow();
+
+            if ([[ownerWindow childWindows] count] > 0)
+            {
+                [ownerWindow removeChildWindow: carbonWindow];
+                [carbonWindow close];
+            }
+
             RemoveEventHandler (eventHandlerRef);
             DisposeWindow (wrapperWindow);
             wrapperWindow = 0;
@@ -275,6 +282,8 @@ protected:
     Time creationTime;
 
     EventHandlerRef eventHandlerRef;
+
+    NSWindow* getOwnerWindow() const    { return [((NSView*) getWindowHandle()) window]; }
 };
 
 #endif   // __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__

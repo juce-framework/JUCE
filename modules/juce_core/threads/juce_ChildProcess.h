@@ -34,9 +34,10 @@
     This class lets you launch an executable, and read its output. You can also
     use it to check whether the child process has finished.
 */
-class ChildProcess
+class JUCE_API  ChildProcess
 {
 public:
+    //==============================================================================
     /** Creates a process object.
         To actually launch the process, use start().
     */

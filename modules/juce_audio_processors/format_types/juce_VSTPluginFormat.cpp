@@ -802,8 +802,8 @@ private:
     bool saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB);
 
     int getVersionNumber() const noexcept   { return effect != nullptr ? effect->version : 0; }
-    const String getVersion() const;
-    const String getCategory() const;
+    String getVersion() const;
+    String getCategory() const;
 
     void setPower (const bool on);
 
@@ -1138,7 +1138,7 @@ public:
         pluginWindow = None;
         pluginProc = None;
        #else
-        addAndMakeVisible (innerWrapper = new InnerWrapperComponent (this));
+        addAndMakeVisible (innerWrapper = new InnerWrapperComponent (*this));
        #endif
 
         activeVSTWindows.add (this);
@@ -1752,15 +1752,15 @@ private:
 #endif
 
 #if JUCE_MAC
-
-#if ! JUCE_SUPPORT_CARBON
- #error "To build VSTs, you need to enable the JUCE_SUPPORT_CARBON flag in your config!"
-#endif
+    //==============================================================================
+   #if ! JUCE_SUPPORT_CARBON
+    #error "To build VSTs, you need to enable the JUCE_SUPPORT_CARBON flag in your config!"
+   #endif
 
     class InnerWrapperComponent   : public CarbonViewWrapperComponent
     {
     public:
-        InnerWrapperComponent (VSTPluginWindow* const owner_)
+        InnerWrapperComponent (VSTPluginWindow& owner_)
             : owner (owner_),
               alreadyInside (false)
         {
@@ -1773,24 +1773,24 @@ private:
 
         HIViewRef attachView (WindowRef windowRef, HIViewRef rootView)
         {
-            owner->openPluginWindow (windowRef);
+            owner.openPluginWindow (windowRef);
             return 0;
         }
 
         void removeView (HIViewRef)
         {
-            if (owner->isOpen)
+            if (owner.isOpen)
             {
-                owner->isOpen = false;
-                owner->dispatch (effEditClose, 0, 0, 0, 0);
-                owner->dispatch (effEditSleep, 0, 0, 0, 0);
+                owner.isOpen = false;
+                owner.dispatch (effEditClose, 0, 0, 0, 0);
+                owner.dispatch (effEditSleep, 0, 0, 0, 0);
             }
         }
 
         bool getEmbeddedViewSize (int& w, int& h)
         {
             ERect* rect = nullptr;
-            owner->dispatch (effEditGetRect, 0, 0, &rect, 0);
+            owner.dispatch (effEditGetRect, 0, 0, &rect, 0);
             w = rect->right - rect->left;
             h = rect->bottom - rect->top;
             return true;
@@ -1802,7 +1802,7 @@ private:
             {
                 alreadyInside = true;
                 getTopLevelComponent()->toFront (true);
-                owner->dispatch (effEditMouse, x, y, 0, 0);
+                owner.dispatch (effEditMouse, x, y, 0, 0);
                 alreadyInside = false;
             }
             else
@@ -1824,13 +1824,15 @@ private:
                 r.top = pos.getY();
                 r.bottom = r.top + getHeight();
 
-                owner->dispatch (effEditDraw, 0, 0, &r, 0);
+                owner.dispatch (effEditDraw, 0, 0, &r, 0);
             }
         }
 
     private:
-        VSTPluginWindow* const owner;
+        VSTPluginWindow& owner;
         bool alreadyInside;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent);
     };
 
     friend class InnerWrapperComponent;
@@ -1838,7 +1840,8 @@ private:
 
     void resized()
     {
-        innerWrapper->setSize (getWidth(), getHeight());
+        if (innerWrapper != nullptr)
+            innerWrapper->setSize (getWidth(), getHeight());
     }
 #endif
 
@@ -2357,7 +2360,7 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 }
 
 //==============================================================================
-const String VSTPluginInstance::getVersion() const
+String VSTPluginInstance::getVersion() const
 {
     unsigned int v = dispatch (effGetVendorVersion, 0, 0, 0, 0);
 
@@ -2401,7 +2404,7 @@ int VSTPluginInstance::getUID() const
     return uid;
 }
 
-const String VSTPluginInstance::getCategory() const
+String VSTPluginInstance::getCategory() const
 {
     const char* result = nullptr;
 

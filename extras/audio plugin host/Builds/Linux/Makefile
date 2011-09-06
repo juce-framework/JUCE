@@ -52,6 +52,7 @@ OBJECTS := \
   $(OBJDIR)/juce_audio_devices_c1c9ba9c.o \
   $(OBJDIR)/juce_audio_formats_f04b043c.o \
   $(OBJDIR)/juce_audio_processors_eb9ae116.o \
+  $(OBJDIR)/juce_audio_utils_cf18005c.o \
   $(OBJDIR)/juce_core_1ee54a40.o \
   $(OBJDIR)/juce_cryptography_3b1f489a.o \
   $(OBJDIR)/juce_data_structures_84790dfc.o \
@@ -120,6 +121,11 @@ $(OBJDIR)/juce_audio_formats_f04b043c.o: ../../../../modules/juce_audio_formats/
 $(OBJDIR)/juce_audio_processors_eb9ae116.o: ../../../../modules/juce_audio_processors/juce_audio_processors.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_audio_processors.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_audio_utils_cf18005c.o: ../../../../modules/juce_audio_utils/juce_audio_utils.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_audio_utils.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_core_1ee54a40.o: ../../../../modules/juce_core/juce_core.cpp

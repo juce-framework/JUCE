@@ -142,6 +142,9 @@ public:
     inline operator ObjectType*() const noexcept                                    { return object; }
 
     /** Returns the object that this ScopedPointer refers to. */
+    inline ObjectType* get() const noexcept                                         { return object; }
+
+    /** Returns the object that this ScopedPointer refers to. */
     inline ObjectType& operator*() const noexcept                                   { return *object; }
 
     /** Lets you access methods and properties of the object that this ScopedPointer refers to. */

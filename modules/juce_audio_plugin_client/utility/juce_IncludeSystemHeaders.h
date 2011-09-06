@@ -55,6 +55,10 @@
 
  #include <Cocoa/Cocoa.h>
  #if JUCE_SUPPORT_CARBON
+  #define Point CarbonDummyPointName
+  #define Component CarbonDummyCompName
   #include <Carbon/Carbon.h>
+  #undef Point
+  #undef Component
  #endif
 #endif
