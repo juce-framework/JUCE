@@ -696,7 +696,7 @@ void Path::addBubble (float x, float y,
         if (whichSide == 0)
         {
             const float halfArrowW = jmin (arrowWidth, w - cs2) * 0.5f;
-            const float arrowX1 = x + cs + jmax (0.0f, (w - cs2) * arrowPos - halfArrowW);
+            const float arrowX1 = x + cs + jmax (0.0f, (w - cs2 - arrowWidth)) * arrowPos - halfArrowW);
             lineTo (arrowX1, y);
             lineTo (tipX, tipY);
             lineTo (arrowX1 + halfArrowW * 2.0f, y);
@@ -710,7 +710,7 @@ void Path::addBubble (float x, float y,
         if (whichSide == 3)
         {
             const float halfArrowH = jmin (arrowWidth, h - cs2) * 0.5f;
-            const float arrowY1 = y + cs + jmax (0.0f, (h - cs2) * arrowPos - halfArrowH);
+            const float arrowY1 = y + cs + jmax (0.0f, (h - cs2 - arrowWidth) * arrowPos - halfArrowH);
             lineTo (x + w, arrowY1);
             lineTo (tipX, tipY);
             lineTo (x + w, arrowY1 + halfArrowH * 2.0f);
@@ -724,7 +724,7 @@ void Path::addBubble (float x, float y,
         if (whichSide == 2)
         {
             const float halfArrowW = jmin (arrowWidth, w - cs2) * 0.5f;
-            const float arrowX1 = x + cs + jmax (0.0f, (w - cs2) * arrowPos - halfArrowW);
+            const float arrowX1 = x + cs + jmax (0.0f, (w - cs2 - arrowWidth) * arrowPos - halfArrowW);
             lineTo (arrowX1 + halfArrowW * 2.0f, y + h);
             lineTo (tipX, tipY);
             lineTo (arrowX1, y + h);
@@ -738,7 +738,7 @@ void Path::addBubble (float x, float y,
         if (whichSide == 1)
         {
             const float halfArrowH = jmin (arrowWidth, h - cs2) * 0.5f;
-            const float arrowY1 = y + cs + jmax (0.0f, (h - cs2) * arrowPos - halfArrowH);
+            const float arrowY1 = y + cs + jmax (0.0f, (h - cs2 - arrowWidth) * arrowPos - halfArrowH);
             lineTo (x, arrowY1 + halfArrowH * 2.0f);
             lineTo (tipX, tipY);
             lineTo (x, arrowY1);

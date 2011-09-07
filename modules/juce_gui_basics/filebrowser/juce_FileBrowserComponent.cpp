@@ -304,6 +304,11 @@ FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const noexcept
     return previewComp;
 }
 
+DirectoryContentsDisplayComponent* FileBrowserComponent::getDisplayComponent() const noexcept
+{
+    return fileListComponent;
+}
+
 //==============================================================================
 void FileBrowserComponent::resized()
 {

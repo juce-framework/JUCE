@@ -206,6 +206,9 @@ public:
     /** @internal */
     FilePreviewComponent* getPreviewComponent() const noexcept;
 
+    /** @internal */
+    DirectoryContentsDisplayComponent* getDisplayComponent() const noexcept;
+
 protected:
     /** Returns a list of names and paths for the default places the user might want to look.
         Use an empty string to indicate a section break.

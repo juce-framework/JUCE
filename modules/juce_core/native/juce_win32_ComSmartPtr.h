@@ -66,6 +66,7 @@ public:
        #ifndef __MINGW32__
         return ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
        #else
+        jassertfalse; // need to find a mingw equivalent of __uuidof to make this possible
         return E_NOTIMPL;
        #endif
     }
@@ -82,7 +83,12 @@ public:
     template <class OtherComClass>
     HRESULT QueryInterface (ComSmartPtr<OtherComClass>& destObject) const
     {
+       #ifndef __MINGW32__
         return this->QueryInterface (__uuidof (OtherComClass), destObject);
+       #else
+        jassertfalse; // need to find a mingw equivalent of __uuidof to make this possible
+        return E_NOTIMPL;
+       #endif
     }
 
 private:
