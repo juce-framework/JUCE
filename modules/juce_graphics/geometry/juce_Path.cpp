@@ -696,7 +696,7 @@ void Path::addBubble (float x, float y,
         if (whichSide == 0)
         {
             const float halfArrowW = jmin (arrowWidth, w - cs2) * 0.5f;
-            const float arrowX1 = x + cs + jmax (0.0f, (w - cs2 - arrowWidth)) * arrowPos - halfArrowW);
+            const float arrowX1 = x + cs + jmax (0.0f, (w - cs2 - arrowWidth) * arrowPos - halfArrowW);
             lineTo (arrowX1, y);
             lineTo (tipX, tipY);
             lineTo (arrowX1 + halfArrowW * 2.0f, y);
