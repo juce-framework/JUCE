@@ -28,6 +28,7 @@
 
 #if JUCE_PLUGINHOST_AU && ! (JUCE_LINUX || JUCE_WINDOWS)
 
+#define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
 #include <AudioUnit/AudioUnit.h>
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
@@ -36,6 +37,7 @@
 #include <AudioToolbox/AudioUnitUtilities.h>
 #include <AudioUnit/AudioUnitCarbonView.h>
 #endif
+#undef Point
 
 #include "../../../core/juce_StandardHeader.h"
 
