@@ -97,6 +97,9 @@ public:
     */
     String toString() const;
 
+    /** Returns the memory block that is being used internally to hold the data. */
+    const MemoryBlock& getMemoryBlock() const noexcept;
+
     //==============================================================================
     /** If the stream is writing to a user-supplied MemoryBlock, this will trim any excess
         capacity off the block, so that its length matches the amount of actual data that

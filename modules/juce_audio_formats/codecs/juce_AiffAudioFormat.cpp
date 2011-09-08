@@ -629,21 +629,21 @@ private:
         {
             output->writeInt (chunkName ("MARK"));
             output->writeIntBigEndian ((int) markChunk.getSize());
-            output->write (markChunk.getData(), (int) markChunk.getSize());
+            *output << markChunk;
         }
 
         if (comtChunk.getSize() > 0)
         {
             output->writeInt (chunkName ("COMT"));
             output->writeIntBigEndian ((int) comtChunk.getSize());
-            output->write (comtChunk.getData(), (int) comtChunk.getSize());
+            *output << comtChunk;
         }
 
         if (instChunk.getSize() > 0)
         {
             output->writeInt (chunkName ("INST"));
             output->writeIntBigEndian ((int) instChunk.getSize());
-            output->write (instChunk.getData(), (int) instChunk.getSize());
+            *output << instChunk;
         }
 
         output->writeInt (chunkName ("SSND"));

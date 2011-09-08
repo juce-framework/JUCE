@@ -2325,18 +2325,15 @@ private:
             if ((lParam & GCS_RESULTSTR) != 0) // (composition has finished)
             {
                 replaceCurrentSelection (target, getCompositionString (hImc, GCS_RESULTSTR),
-                                         Range<int>::emptyRange (compositionRange.getEnd()));
+                                         Range<int>::emptyRange (-1));
 
+                reset();
                 target->setTemporaryUnderlining (Array<Range<int> >());
-
-                compositionInProgress = false;
             }
             else if ((lParam & GCS_COMPSTR) != 0) // (composition is still in-progress)
             {
-                const String newContent (getCompositionString (hImc, GCS_COMPSTR));
-                const Range<int> selection (getCompositionSelection (hImc, lParam));
-
-                replaceCurrentSelection (target, newContent, selection);
+                replaceCurrentSelection (target, getCompositionString (hImc, GCS_COMPSTR),
+                                         getCompositionSelection (hImc, lParam));
 
                 target->setTemporaryUnderlining (getCompositionUnderlines (hImc, lParam));
                 compositionInProgress = true;
@@ -2425,11 +2422,16 @@ private:
             return Range<int> (selectionStart, selectionEnd) + compositionRange.getStart();
         }
 
-        void replaceCurrentSelection (TextInputTarget* const target, const String& newContent, const Range<int>& newSelection)
+        void replaceCurrentSelection (TextInputTarget* const target, const String& newContent, Range<int> newSelection)
         {
-            target->setHighlightedRegion (compositionRange);
+            if (compositionInProgress)
+                target->setHighlightedRegion (compositionRange);
+
             target->insertTextAtCaret (newContent);
             compositionRange.setLength (newContent.length());
+
+            if (newSelection.getStart() < 0)
+                newSelection = Range<int>::emptyRange (compositionRange.getEnd());
 
             target->setHighlightedRegion (newSelection);
         }

@@ -103,14 +103,17 @@ void MemoryOutputStream::writeRepeatedByte (uint8 byte, int howMany)
     }
 }
 
+const MemoryBlock& MemoryOutputStream::getMemoryBlock() const noexcept
+{
+    if (data.getSize() > size)
+        static_cast <char*> (data.getData()) [size] = 0;
+
+    return data;
+}
+
 const void* MemoryOutputStream::getData() const noexcept
 {
-    void* const d = data.getData();
-
-    if (data.getSize() > size)
-        static_cast <char*> (d) [size] = 0;
-
-    return d;
+    return getMemoryBlock().getData();
 }
 
 bool MemoryOutputStream::setPosition (int64 newPosition)
@@ -157,8 +160,7 @@ String MemoryOutputStream::toString() const
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead)
 {
-    stream.write (streamToRead.getData(), (int) streamToRead.getDataSize());
-    return stream;
+    return stream << streamToRead.getMemoryBlock();
 }
 
 END_JUCE_NAMESPACE

@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-#include <Cocoa/Cocoa.h>
-
 #if JUCE_WINDOWS
  #undef _WIN32_WINNT
  #define _WIN32_WINNT 0x500
@@ -49,11 +47,12 @@
  #undef Time
 
 #else
+  #include <Cocoa/Cocoa.h>
+
  #ifndef JUCE_SUPPORT_CARBON
   #define JUCE_SUPPORT_CARBON 1
  #endif
 
- #include <Cocoa/Cocoa.h>
  #if JUCE_SUPPORT_CARBON
   #define Point CarbonDummyPointName
   #define Component CarbonDummyCompName

@@ -936,28 +936,28 @@ private:
         {
             output->writeInt (chunkName ("bext"));
             output->writeInt ((int) bwavChunk.getSize());
-            output->write (bwavChunk.getData(), (int) bwavChunk.getSize());
+            *output << bwavChunk;
         }
 
         if (smplChunk.getSize() > 0)
         {
             output->writeInt (chunkName ("smpl"));
             output->writeInt ((int) smplChunk.getSize());
-            output->write (smplChunk.getData(), (int) smplChunk.getSize());
+            *output << smplChunk;
         }
 
         if (instChunk.getSize() > 0)
         {
             output->writeInt (chunkName ("inst"));
             output->writeInt (7);
-            output->write (instChunk.getData(), (int) instChunk.getSize());
+            *output << instChunk;
         }
 
         if (cueChunk.getSize() > 0)
         {
             output->writeInt (chunkName ("cue "));
             output->writeInt ((int) cueChunk.getSize());
-            output->write (cueChunk.getData(), (int) cueChunk.getSize());
+            *output << cueChunk;
         }
 
         if (listChunk.getSize() > 0)
@@ -965,7 +965,7 @@ private:
             output->writeInt (chunkName ("LIST"));
             output->writeInt ((int) listChunk.getSize() + 4);
             output->writeInt (chunkName ("adtl"));
-            output->write (listChunk.getData(), (int) listChunk.getSize());
+            *output << listChunk;
         }
 
         output->writeInt (chunkName ("data"));
@@ -1069,7 +1069,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 
     if (reader != nullptr)
     {
-        const int64 bwavPos = reader->bwavChunkStart;
+        const int64 bwavPos  = reader->bwavChunkStart;
         const int64 bwavSize = reader->bwavSize;
         reader = nullptr;
 
@@ -1085,7 +1085,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
                 {
                     ScopedPointer <FileOutputStream> out (wavFile.createOutputStream());
                     out->setPosition (bwavPos);
-                    out->write (chunk.getData(), (int) chunk.getSize());
+                    *out << chunk;
                     out->setPosition (oldSize);
                 }
 

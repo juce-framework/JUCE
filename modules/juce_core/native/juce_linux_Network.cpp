@@ -67,7 +67,6 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
 class WebInputStream  : public InputStream
 {
 public:
-    //==============================================================================
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
@@ -333,35 +332,34 @@ private:
         return String::empty;
     }
 
+    static void writeValueIfNotPresent (MemoryOutputStream& dest, const String& headers, const String& key, const String& value)
+    {
+        if (! headers.containsIgnoreCase (key))
+            dest << "\r\n" << key << ' ' << value;
+    }
+
     static MemoryBlock createRequestHeader (const String& hostName, const int hostPort,
                                             const String& proxyName, const int proxyPort,
                                             const String& hostPath, const String& originalURL,
                                             const String& headers, const MemoryBlock& postData,
                                             const bool isPost)
     {
-        String header (isPost ? "POST " : "GET ");
+        MemoryOutputStream header;
+
+        header << (isPost ? "POST " : "GET ");
 
         if (proxyName.isEmpty())
-        {
-            header << hostPath << " HTTP/1.0\r\nHost: "
-                   << hostName << ':' << hostPort;
-        }
+            header << hostPath    << " HTTP/1.0\r\nHost: " << hostName << ':' << hostPort;
         else
-        {
-            header << originalURL << " HTTP/1.0\r\nHost: "
-                   << proxyName << ':' << proxyPort;
-        }
+            header << originalURL << " HTTP/1.0\r\nHost: " << proxyName << ':' << proxyPort;
 
-        header << "\r\nUser-Agent: JUCE/" << JUCE_MAJOR_VERSION << '.' << JUCE_MINOR_VERSION
-               << "\r\nConnection: Close\r\nContent-Length: "
-               << (int) postData.getSize() << "\r\n"
-               << headers << "\r\n";
+        writeValueIfNotPresent (header, headers, "User-Agent:", "JUCE/" + String (JUCE_MAJOR_VERSION) + "." + String (JUCE_MINOR_VERSION));
+        writeValueIfNotPresent (header, headers, "Connection:", "Close");
+        writeValueIfNotPresent (header, headers, "Content-Length:", String ((int) postData.getSize()));
+        header << "\r\n" << headers
+               << "\r\n" << postData;
 
-        MemoryBlock mb;
-        mb.append (header.toUTF8(), (int) strlen (header.toUTF8()));
-        mb.append (postData.getData(), postData.getSize());
-
-        return mb;
+        return header.getMemoryBlock();
     }
 
     static bool sendHeader (int socketHandle, const MemoryBlock& requestHeader, const uint32 timeOutTime,
