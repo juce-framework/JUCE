@@ -182,14 +182,20 @@
 
 //==============================================================================
 #if ! DOXYGEN
- #define JUCE_JOIN_MACRO_HELPER(a, b)  a ## b
+ #define JUCE_JOIN_MACRO_HELPER(a, b) a ## b
+ #define JUCE_STRINGIFY_MACRO_HELPER(a) #a
 #endif
 
 /** A good old-fashioned C macro concatenation helper.
     This combines two items (which may themselves be macros) into a single string,
     avoiding the pitfalls of the ## macro operator.
 */
-#define JUCE_JOIN_MACRO(a, b)  JUCE_JOIN_MACRO_HELPER (a, b)
+#define JUCE_JOIN_MACRO(item1, item2)  JUCE_JOIN_MACRO_HELPER (item1, item2)
+
+/** A handy C macro for stringifying any symbol, rather than just a macro parameter.
+*/
+#define JUCE_STRINGIFY(item)  JUCE_STRINGIFY_MACRO_HELPER (item)
+
 
 //==============================================================================
 #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
@@ -212,7 +218,7 @@
       } \
       catch (...) \
       { \
-          JUCEApplication::sendUnhandledException (0, __FILE__, __LINE__); \
+          JUCEApplication::sendUnhandledException (nullptr, __FILE__, __LINE__); \
       }
   #endif
 

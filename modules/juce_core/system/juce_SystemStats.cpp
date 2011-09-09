@@ -46,16 +46,9 @@ String SystemStats::getJUCEVersion()
     static_jassert (sizeof (int64) == 8);
     static_jassert (sizeof (uint64) == 8);
 
-    // (these confusing macros convert numbers into a single string literal)
-    #define JUCE_STRINGIFYVERSION2(a) #a
-    #define JUCE_STRINGIFYVERSION(a) JUCE_STRINGIFYVERSION2(a)
-
-    return "JUCE v" JUCE_STRINGIFYVERSION(JUCE_MAJOR_VERSION)
-                "." JUCE_STRINGIFYVERSION(JUCE_MINOR_VERSION)
-                "." JUCE_STRINGIFYVERSION(JUCE_BUILDNUMBER);
-
-    #undef JUCE_STRINGIFYVERSION
-    #undef JUCE_STRINGIFYVERSION2
+    return "JUCE v" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
+                "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
+                "." JUCE_STRINGIFY(JUCE_BUILDNUMBER);
 }
 
 #if JUCE_DEBUG && ! JUCE_ANDROID

@@ -338,25 +338,34 @@ private:
             dest << "\r\n" << key << ' ' << value;
     }
 
+    static void writeHost (MemoryOutputStream& dest, const bool isPost, const String& path, const String& host, const int port)
+    {
+        dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.1\r\nHost: " << host;
+
+        if (port > 0)
+            dest << ':' << port;
+    }
+
     static MemoryBlock createRequestHeader (const String& hostName, const int hostPort,
                                             const String& proxyName, const int proxyPort,
                                             const String& hostPath, const String& originalURL,
-                                            const String& headers, const MemoryBlock& postData,
+                                            const String& userHeaders, const MemoryBlock& postData,
                                             const bool isPost)
     {
         MemoryOutputStream header;
 
-        header << (isPost ? "POST " : "GET ");
-
         if (proxyName.isEmpty())
-            header << hostPath    << " HTTP/1.0\r\nHost: " << hostName << ':' << hostPort;
+            writeHost (header, isPost, hostPath, hostName, hostPort);
         else
-            header << originalURL << " HTTP/1.0\r\nHost: " << proxyName << ':' << proxyPort;
+            writeHost (header, isPost, originalURL, proxyName, proxyPort);
 
-        writeValueIfNotPresent (header, headers, "User-Agent:", "JUCE/" + String (JUCE_MAJOR_VERSION) + "." + String (JUCE_MINOR_VERSION));
-        writeValueIfNotPresent (header, headers, "Connection:", "Close");
-        writeValueIfNotPresent (header, headers, "Content-Length:", String ((int) postData.getSize()));
-        header << "\r\n" << headers
+        writeValueIfNotPresent (header, userHeaders, "User-Agent:", "JUCE/" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
+                                                                        "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
+                                                                        "." JUCE_STRINGIFY(JUCE_BUILDNUMBER));
+        writeValueIfNotPresent (header, userHeaders, "Connection:", "Close");
+        writeValueIfNotPresent (header, userHeaders, "Content-Length:", String ((int) postData.getSize()));
+
+        header << "\r\n" << userHeaders
                << "\r\n" << postData;
 
         return header.getMemoryBlock();
@@ -407,7 +416,7 @@ private:
         }
         else
         {
-            port = 80;
+            port = 0; // indicates the default port
 
             if (nextSlash >= 0)
                 host = url.substring (7, nextSlash);
