@@ -50,8 +50,10 @@
  #undef Drawable
  #undef Time
 #else
+ #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
  #include <Cocoa/Cocoa.h>
  #include <Carbon/Carbon.h>
+ #undef Point
 #endif
 
 //==============================================================================
