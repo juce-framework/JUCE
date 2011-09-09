@@ -23,33 +23,153 @@
   ==============================================================================
 */
 
-#ifdef _WIN32
- #include <windows.h>
-#endif
-
 #include "../jucedemo_headers.h"
 
 #if JUCE_OPENGL
 
-#if JUCE_WINDOWS
- #include <gl/gl.h>
- #include <gl/glu.h>
-#elif JUCE_LINUX
- #include <GL/gl.h>
- #include <GL/glut.h>
- #undef KeyPress
-#elif JUCE_IOS
- #include <OpenGLES/ES1/gl.h>
- #include <OpenGLES/ES1/glext.h>
-#elif JUCE_MAC
- #include <GLUT/glut.h>
-#elif JUCE_IOS
- //#include <GL/glut.h>
-#endif
+//==============================================================================
+// Simple wrapper for an openGL texture..
+class OpenGLTexture
+{
+public:
+    OpenGLTexture()
+        : textureID (0), width (0), height (0)
+    {
+    }
 
-#ifndef GL_BGRA_EXT
- #define GL_BGRA_EXT 0x80e1
-#endif
+    ~OpenGLTexture()
+    {
+        release();
+    }
+
+    void load (const Image& image)
+    {
+        release();
+
+        width  = image.getWidth();
+        height = image.getHeight();
+
+        jassert (BitArray (width).countNumberOfSetBits() == 1); // these dimensions must be a power-of-two
+        jassert (BitArray (height).countNumberOfSetBits() == 1);
+
+        glGenTextures (1, &textureID);
+        glBindTexture (GL_TEXTURE_2D, textureID);
+
+        glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+       #if ! JUCE_OPENGL_ES
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+       #endif
+
+        glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
+
+        Image::BitmapData srcData (image, Image::BitmapData::readOnly);
+
+        glTexImage2D (GL_TEXTURE_2D, 0, internalFormat,
+                      width, height, 0,
+                      image.getFormat() == Image::RGB ? GL_RGB : GL_BGRA_EXT,
+                      GL_UNSIGNED_BYTE, srcData.data);
+    }
+
+    void release()
+    {
+        if (textureID != 0)
+        {
+            glDeleteTextures (1, &textureID);
+            textureID = 0;
+            width = 0;
+            height = 0;
+        }
+    }
+
+    void bind() const
+    {
+        glBindTexture (GL_TEXTURE_2D, textureID);
+    }
+
+    void draw2D (float x1, float y1,
+                 float x2, float y2,
+                 float x3, float y3,
+                 float x4, float y4,
+                 float alpha) const
+    {
+        bind();
+        glColor4f (1.0f, 1.0f, 1.0f, alpha);
+
+       #if JUCE_OPENGL_ES
+        const GLfloat vertices[]      = { x1, y1, x2, y2, x4, y4, x3, y3 };
+        const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
+
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glVertexPointer (2, GL_FLOAT, 0, vertices);
+
+        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+        glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
+
+        glDisableClientState (GL_COLOR_ARRAY);
+        glDisableClientState (GL_NORMAL_ARRAY);
+
+        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+
+       #else
+        glBegin (GL_QUADS);
+        glTexCoord2i (0, 0); glVertex2f (x1, y1);
+        glTexCoord2i (1, 0); glVertex2f (x2, y2);
+        glTexCoord2i (1, 1); glVertex2f (x3, y3);
+        glTexCoord2i (0, 1); glVertex2f (x4, y4);
+        glEnd();
+       #endif
+    }
+
+    void draw3D (float x1, float y1, float z1,
+                 float x2, float y2, float z2,
+                 float x3, float y3, float z3,
+                 float x4, float y4, float z4,
+                 float alpha) const
+    {
+        bind();
+        glColor4f (1.0f, 1.0f, 1.0f, alpha);
+
+       #if JUCE_OPENGL_ES
+        const GLfloat vertices[]      = { x1, y1, z1, x2, y2, z2, x4, y4, z4, x3, y3, z3 };
+        const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
+
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glVertexPointer (3, GL_FLOAT, 0, vertices);
+
+        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+        glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
+
+        glDisableClientState (GL_COLOR_ARRAY);
+        glDisableClientState (GL_NORMAL_ARRAY);
+
+        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+
+       #else
+        glBegin (GL_QUADS);
+        glTexCoord2i (0, 0); glVertex3f (x1, y1, z1);
+        glTexCoord2i (1, 0); glVertex3f (x2, y2, z2);
+        glTexCoord2i (1, 1); glVertex3f (x3, y3, z3);
+        glTexCoord2i (0, 1); glVertex3f (x4, y4, z4);
+        glEnd();
+       #endif
+    }
+
+private:
+    GLuint textureID;
+    int width, height;
+
+   #if JUCE_OPENGL_ES
+    enum { internalFormat = GL_RGBA };
+   #else
+    enum { internalFormat = 4 };
+   #endif
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTexture);
+};
 
 //==============================================================================
 class DemoOpenGLCanvas  : public OpenGLComponent,
@@ -60,18 +180,6 @@ public:
         : rotation (0.0f),
           delta (1.0f)
     {
-#if JUCE_IOS
-        // (On the iPhone, choose a format without a depth buffer)
-        setPixelFormat (OpenGLPixelFormat (8, 8, 0, 0));
-#endif
-
-        image = Image (Image::RGB, 512, 512, true, Image::SoftwareImage);
-        Graphics g (image);
-
-        g.fillAll (Colours::white);
-        g.drawImageWithin (ImageFileFormat::loadFrom (BinaryData::juce_png, BinaryData::juce_pngSize),
-                           0, 0, 512, 512, RectanglePlacement::stretchToFit);
-
         startTimer (20);
 
         // Just for demo purposes, let's dump a list of all the available pixel formats..
@@ -82,38 +190,32 @@ public:
         {
             const OpenGLPixelFormat* const pixFormat = availablePixelFormats[i];
 
-            String formatDescription;
-            formatDescription
-              << i << ": RGBA=(" << pixFormat->redBits
-              << ", " << pixFormat->greenBits
-              << ", " << pixFormat->blueBits
-              << ", " << pixFormat->alphaBits
-              << "), depth=" << pixFormat->depthBufferBits
-              << ", stencil=" << pixFormat->stencilBufferBits
-              << ", accum RGBA=(" << pixFormat->accumulationBufferRedBits
-              << ", " << pixFormat->accumulationBufferGreenBits
-              << ", " << pixFormat->accumulationBufferBlueBits
-              << ", " << pixFormat->accumulationBufferAlphaBits
-              << "), full-scene AA="
-              << (int) pixFormat->fullSceneAntiAliasingNumSamples;
-
-            Logger::outputDebugString (formatDescription);
+            DBG (i << ": RGBA=(" << pixFormat->redBits
+                   << ", " << pixFormat->greenBits
+                   << ", " << pixFormat->blueBits
+                   << ", " << pixFormat->alphaBits
+                   << "), depth=" << pixFormat->depthBufferBits
+                   << ", stencil=" << pixFormat->stencilBufferBits
+                   << ", accum RGBA=(" << pixFormat->accumulationBufferRedBits
+                   << ", " << pixFormat->accumulationBufferGreenBits
+                   << ", " << pixFormat->accumulationBufferBlueBits
+                   << ", " << pixFormat->accumulationBufferAlphaBits
+                   << "), full-scene AA="
+                   << (int) pixFormat->fullSceneAntiAliasingNumSamples);
         }
-    }
-
-    ~DemoOpenGLCanvas()
-    {
     }
 
     // when the component creates a new internal context, this is called, and
     // we'll use the opportunity to create the textures needed.
     void newOpenGLContextCreated()
     {
-#if ! JUCE_IOS
         // (no need to call makeCurrentContextActive(), as that will have
         // been done for us before the method call).
         glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+
+       #if ! JUCE_OPENGL_ES
         glClearDepth (1.0);
+       #endif
 
         glDepthFunc (GL_LESS);
         glEnable (GL_DEPTH_TEST);
@@ -121,23 +223,12 @@ public:
         glEnable (GL_BLEND);
         glShadeModel (GL_SMOOTH);
 
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
-
-        Image::BitmapData srcData (image, Image::BitmapData::readOnly);
-
-        glTexImage2D (GL_TEXTURE_2D, 0, 4, image.getWidth(), image.getHeight(),
-                      0, GL_RGB,
-                      GL_UNSIGNED_BYTE, srcData.data);
-
         glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
         glHint (GL_POINT_SMOOTH_HINT, GL_NICEST);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-#endif
+
+        texture1.load (createImage1());
+        texture2.load (createImage2());
     }
 
     void mouseDrag (const MouseEvent& e)
@@ -154,111 +245,94 @@ public:
         glMatrixMode (GL_PROJECTION);
         glLoadIdentity();
 
-#if JUCE_IOS
-        const GLfloat vertices[] = { -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,  0.5f, 0.5f, 0.5f };
-        const GLubyte colours[] = { 255, 255, 0, 255, 0, 255, 255, 255, 0, 0, 0, 0, 255, 0, 255, 255 };
-
-        glOrthof (-1.0f, 1.0f, -1.5f, 1.5f, -1.0f, 1.0f);
-        glMatrixMode (GL_MODELVIEW);
-        glPushMatrix();
-        glRotatef (rotation, 0.0f, 0.0f, 1.0f);
-
-        glVertexPointer (2, GL_FLOAT, 0, vertices);
-        glEnableClientState (GL_VERTEX_ARRAY);
-        glColorPointer (4, GL_UNSIGNED_BYTE, 0, colours);
-        glEnableClientState (GL_COLOR_ARRAY);
-
-        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
-        glPopMatrix();
-#else
-
+       #if JUCE_OPENGL_ES
+        glOrthof (0.0f, (float) getWidth(), 0.0f, (float) getHeight(), 0.0f, 1.0f);
+       #else
         glOrtho (0.0, getWidth(), 0.0, getHeight(), 0, 1);
+       #endif
 
-        glColor4f (1.0f, 1.0f, 1.0f, fabsf (::sinf (rotation / 100.0f)));
-        glBegin (GL_QUADS);
-            glTexCoord2i (0, 0); glVertex2f (50.0f, getHeight() - 50.0f);
-            glTexCoord2i (1, 0); glVertex2f (getWidth() - 50.0f, getHeight() - 50.0f);
-            glTexCoord2i (1, 1); glVertex2f (getWidth() - 50.0f, 50.0f);
-            glTexCoord2i (0, 1); glVertex2f (50.0f, 50.0f);
-        glEnd();
+        texture1.draw2D (50.0f, getHeight() - 50.0f,
+                         getWidth() - 50.0f, getHeight() - 50.0f,
+                         getWidth() - 50.0f, 50.0f,
+                         50.0f, 50.0f,
+                         fabsf (::sinf (rotation / 100.0f)));
 
-        glMatrixMode (GL_PROJECTION);
         glLoadIdentity();
-
         glClear (GL_DEPTH_BUFFER_BIT);
-        gluPerspective (45.0f,
-                        getWidth() / (GLfloat) getHeight(),
-                        0.1f,
-                        100.0f);
+
+        setPerspective (45.0, getWidth() / (double) getHeight(), 0.1, 100.0);
 
         glMatrixMode (GL_MODELVIEW);
 
-        glLoadIdentity();
         glPushMatrix();
+        glTranslatef (0.0f, 0.0f, -5.0f);
+        glRotatef (rotation, 0.5f, 1.0f, 0.0f);
 
-            glTranslatef (0.0f, 0.0f, -5.0f);
-            glRotatef (rotation, 0.5f, 1.0f, 0.0f);
-
-            glBegin (GL_QUADS);
-
-                glColor3f (0.0f, 1.0f, 0.0f);
-
-                glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
-                glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
-                glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
-                glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
-
-                glColor3f (1.0f, 0.0f, 0.0f);
-
-                glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-                glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
-                glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
-                glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
-
-                glColor3f (0.0f, 0.0f, 1.0f);
-
-                glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
-                glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
-                glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
-                glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
-
-                glColor3f (1.0f, 1.0f, 0.0f);
-
-                glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-                glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
-                glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
-                glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
-
-                glColor3f (0.0f, 1.0f, 1.0f);
-
-                glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
-                glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
-                glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
-                glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
-
-                glColor3f (1.0f, 0.0f, 1.0f);
-
-                glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-                glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
-                glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
-                glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
-
-            glEnd();
+        // this draws the sides of our spinning cube..
+        texture1.draw3D (-1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, 1.0f);
+        texture1.draw3D (-1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, 1.0f);
+        texture1.draw3D (-1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 1.0f);
+        texture2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, 1.0f);
+        texture2.draw3D ( 1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f, 1.0f);
+        texture2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, 1.0f);
 
         glPopMatrix();
-#endif
     }
 
     void timerCallback()
     {
         rotation += delta;
-
         repaint();
     }
 
 private:
+    OpenGLTexture texture1, texture2;
     float rotation, delta;
-    Image image;
+
+    // Utility function to do the same job as gluPerspective()
+    static void setPerspective (double fovy, double aspect, double zNear, double zFar)
+    {
+        const double ymax = zNear * tan (fovy * double_Pi / 360.0);
+        const double ymin = -ymax;
+
+       #if JUCE_OPENGL_ES
+        glFrustumf (ymin * aspect, ymax * aspect, ymin, ymax, zNear, zFar);
+       #else
+        glFrustum  (ymin * aspect, ymax * aspect, ymin, ymax, zNear, zFar);
+       #endif
+    }
+
+    // Functions to create a couple of images to use as textures..
+    static Image createImage1()
+    {
+        Image image (Image::ARGB, 256, 256, true, Image::SoftwareImage);
+
+        Graphics g (image);
+
+        g.fillAll (Colours::white.withAlpha (0.7f));
+        g.drawImageWithin (ImageFileFormat::loadFrom (BinaryData::juce_png, BinaryData::juce_pngSize),
+                           0, 0, image.getWidth(), image.getHeight(), RectanglePlacement::stretchToFit);
+
+        return image;
+    }
+
+    static Image createImage2()
+    {
+        Image image (Image::ARGB, 128, 128, true, Image::SoftwareImage);
+
+        Graphics g (image);
+        g.fillAll (Colours::darkred.withAlpha (0.7f));
+
+        Path p;
+        p.addStar (image.getBounds().getCentre().toFloat(), 11, image.getWidth() * 0.3f, image.getWidth() * 0.5f);
+
+        g.setGradientFill (ColourGradient (Colours::blue,  image.getWidth() * 0.5f, image.getHeight() * 0.5f,
+                                           Colours::green, image.getWidth() * 0.2f, image.getHeight() * 0.2f,
+                                           true));
+        g.fillPath (p);
+
+        return image;
+    }
 };
 
 
@@ -266,11 +340,9 @@ private:
 class OpenGLDemo  : public Component
 {
 public:
-    //==============================================================================
     OpenGLDemo()
+        : Component ("OpenGL")
     {
-        setName ("OpenGL");
-
         addAndMakeVisible (&canvas);
     }
 
@@ -282,10 +354,8 @@ public:
 private:
     DemoOpenGLCanvas canvas;
 
-    OpenGLDemo (const OpenGLDemo&);
-    OpenGLDemo& operator= (const OpenGLDemo&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLDemo);
 };
-
 
 //==============================================================================
 Component* createOpenGLDemo()

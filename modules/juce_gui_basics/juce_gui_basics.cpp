@@ -49,12 +49,6 @@
  #undef Point
  #undef Component
 
-#elif JUCE_IOS
- #if JUCE_OPENGL
-  #include <OpenGLES/ES1/gl.h>
-  #include <OpenGLES/ES1/glext.h>
- #endif
-
 //==============================================================================
 #elif JUCE_WINDOWS
  #include <windowsx.h>
@@ -72,8 +66,6 @@
  #endif
 
  #if JUCE_OPENGL
-  #include <gl/gl.h>
-
   #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
    #pragma comment(lib, "OpenGL32.Lib")
    #pragma comment(lib, "GlU32.Lib")

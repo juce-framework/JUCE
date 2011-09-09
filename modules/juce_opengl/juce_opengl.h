@@ -29,8 +29,45 @@
 #include "../juce_gui_extra/juce_gui_extra.h"
 
 #undef JUCE_OPENGL
+
 #if ! JUCE_ANDROID
  #define JUCE_OPENGL 1
+#endif
+
+#if JUCE_IOS || JUCE_ANDROID
+ #define JUCE_OPENGL_ES 1
+#endif
+
+#if JUCE_WINDOWS
+ #ifndef APIENTRY
+  #define APIENTRY __stdcall
+  #define CLEAR_TEMP_APIENTRY 1
+ #endif
+ #ifndef WINGDIAPI
+  #define WINGDIAPI __declspec(dllimport)
+  #define CLEAR_TEMP_WINGDIAPI 1
+ #endif
+ #include <gl/gl.h>
+ #ifdef CLEAR_TEMP_WINGDIAPI
+  #undef WINGDIAPI
+  #undef CLEAR_TEMP_WINGDIAPI
+ #endif
+ #ifdef CLEAR_TEMP_APIENTRY
+  #undef APIENTRY
+  #undef CLEAR_TEMP_APIENTRY
+ #endif
+#elif JUCE_LINUX
+ #include <GL/gl.h>
+ #undef KeyPress
+#elif JUCE_IOS
+ #include <OpenGLES/ES1/gl.h>
+ #include <OpenGLES/ES1/glext.h>
+#elif JUCE_MAC
+ #include <OpenGL/gl.h>
+#endif
+
+#ifndef GL_BGRA_EXT
+ #define GL_BGRA_EXT 0x80e1
 #endif
 
 //=============================================================================

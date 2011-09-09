@@ -117,8 +117,10 @@ public:
 
     void updateWindowPosition (const Rectangle<int>& bounds)
     {
+        // For some strange reason, the view seems to fail unless its width is a multiple of 8...
         view.frame = CGRectMake ((CGFloat) bounds.getX(), (CGFloat) bounds.getY(),
-                                 (CGFloat) bounds.getWidth(), (CGFloat) bounds.getHeight());
+                                 (CGFloat) (bounds.getWidth() & ~7),
+                                 (CGFloat) bounds.getHeight());
 
         if (lastWidth != bounds.getWidth() || lastHeight != bounds.getHeight())
         {

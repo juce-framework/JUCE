@@ -43,8 +43,6 @@
 //==============================================================================
 #if JUCE_IOS
  #import <QuartzCore/QuartzCore.h>
- #include <OpenGLES/ES1/gl.h>
- #include <OpenGLES/ES1/glext.h>
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -61,8 +59,6 @@
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
  #endif
-
- #include <gl/gl.h>
 
  #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment(lib, "OpenGL32.Lib")
