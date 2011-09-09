@@ -47,8 +47,6 @@
  #undef Time
 
 #else
-  #include <Cocoa/Cocoa.h>
-
  #ifndef JUCE_SUPPORT_CARBON
   #define JUCE_SUPPORT_CARBON 1
  #endif
@@ -56,8 +54,11 @@
  #if JUCE_SUPPORT_CARBON
   #define Point CarbonDummyPointName
   #define Component CarbonDummyCompName
+  #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>
   #undef Point
   #undef Component
+ #else
+  #include <Cocoa/Cocoa.h>
  #endif
 #endif

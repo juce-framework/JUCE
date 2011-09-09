@@ -40,8 +40,15 @@
 #include <AudioUnit/AUCocoaUIView.h>
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
+
+#if JUCE_SUPPORT_CARBON
+ #define Point CarbonDummyPointName
+ #define Component CarbonDummyCompName
+#endif
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
+#undef Point
+#undef Component
 
 /** The BUILD_AU_CARBON_UI flag lets you specify whether old-school carbon hosts are supported as
     well as ones that can open a cocoa view. If this is enabled, you'll need to also add the AUCarbonBase
@@ -57,7 +64,9 @@
 
 #if BUILD_AU_CARBON_UI
  #undef Button
+ #define Point CarbonDummyPointName
  #include "AUCarbonViewBase.h"
+ #undef Point
  class JuceAUView;
 #endif
 
