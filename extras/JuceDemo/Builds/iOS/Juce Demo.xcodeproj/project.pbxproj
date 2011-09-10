@@ -849,7 +849,13 @@
 		55AFFB566D49AABFA9C0EE6C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_OpenGLComponent.cpp"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		FE8A9052DF38CAA1BCEE9589 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLComponent.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		1763C4B21169FE19DCB32BBD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLContext.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLContext.h"; sourceTree = "SOURCE_ROOT"; };
+		F48B07E649829B7DD1B30973 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_OpenGLFrameBuffer.cpp"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLFrameBuffer.cpp"; sourceTree = "SOURCE_ROOT"; };
+		A3DBAB79ACA02B91073A455E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLFrameBuffer.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLFrameBuffer.h"; sourceTree = "SOURCE_ROOT"; };
+		41759B5EE970815764327159 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_OpenGLHelpers.cpp"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLHelpers.cpp"; sourceTree = "SOURCE_ROOT"; };
+		92B6936D8E84EAA3D0A7991E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLHelpers.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLHelpers.h"; sourceTree = "SOURCE_ROOT"; };
 		E71DA1FF4A1EC5392D753995 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLPixelFormat.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLPixelFormat.h"; sourceTree = "SOURCE_ROOT"; };
+		CC06C483804C31304E6F5C63 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_OpenGLTexture.cpp"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLTexture.cpp"; sourceTree = "SOURCE_ROOT"; };
+		0AB715CCB75AC3DA98E10E74 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLTexture.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLTexture.h"; sourceTree = "SOURCE_ROOT"; };
 		E4EEF3C8CDB9A7997EF0A71C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_OpenGLComponent.cpp"; path = "../../../../modules/juce_opengl/native/juce_android_OpenGLComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		60CD67623F8F48E5169CDC3C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_ios_OpenGLComponent.mm"; path = "../../../../modules/juce_opengl/native/juce_ios_OpenGLComponent.mm"; sourceTree = "SOURCE_ROOT"; };
 		6B7A8DD046F87B9E64B36FB0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_linux_OpenGLComponent.cpp"; path = "../../../../modules/juce_opengl/native/juce_linux_OpenGLComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1848,7 +1854,13 @@
 				55AFFB566D49AABFA9C0EE6C,
 				FE8A9052DF38CAA1BCEE9589,
 				1763C4B21169FE19DCB32BBD,
-				E71DA1FF4A1EC5392D753995 ); name = opengl; sourceTree = "<group>"; };
+				F48B07E649829B7DD1B30973,
+				A3DBAB79ACA02B91073A455E,
+				41759B5EE970815764327159,
+				92B6936D8E84EAA3D0A7991E,
+				E71DA1FF4A1EC5392D753995,
+				CC06C483804C31304E6F5C63,
+				0AB715CCB75AC3DA98E10E74 ); name = opengl; sourceTree = "<group>"; };
 		8BACFE9F54494195BA7FF7D8 = { isa = PBXGroup; children = (
 				E4EEF3C8CDB9A7997EF0A71C,
 				60CD67623F8F48E5169CDC3C,

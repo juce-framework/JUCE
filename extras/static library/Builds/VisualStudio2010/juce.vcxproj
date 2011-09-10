@@ -1096,6 +1096,15 @@
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLHelpers.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\native\juce_android_OpenGLComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1512,7 +1521,10 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLPixelFormat.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\juce_opengl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_DirectShowComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_QuickTimeMovieComponent.h"/>

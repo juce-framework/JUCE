@@ -271,11 +271,6 @@ void* OpenGLComponent::getNativeWindowHandle() const
                               : nullptr;
 }
 
-void juce_glViewport (const int w, const int h)
-{
-    glViewport (0, 0, w, h);
-}
-
 static int getPixelFormatAttribute (NSOpenGLPixelFormat* p, NSOpenGLPixelFormatAttribute att)
 {
     GLint val = 0;

@@ -47,7 +47,7 @@
   #define WINGDIAPI __declspec(dllimport)
   #define CLEAR_TEMP_WINGDIAPI 1
  #endif
- #include <gl/gl.h>
+ #include <gl/GL.h>
  #ifdef CLEAR_TEMP_WINGDIAPI
   #undef WINGDIAPI
   #undef CLEAR_TEMP_WINGDIAPI
@@ -64,10 +64,19 @@
  #include <OpenGLES/ES1/glext.h>
 #elif JUCE_MAC
  #include <OpenGL/gl.h>
+ #include "OpenGL/glext.h"
 #endif
 
 #ifndef GL_BGRA_EXT
  #define GL_BGRA_EXT 0x80e1
+#endif
+
+#ifndef GL_CLAMP_TO_EDGE
+ #define GL_CLAMP_TO_EDGE 0x812f
+#endif
+
+#ifndef GL_DEPTH_COMPONENT16
+ #define GL_DEPTH_COMPONENT16 0x81a5
 #endif
 
 //=============================================================================
@@ -80,8 +89,17 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_OPENGLCONTEXT_JUCEHEADER__
  #include "opengl/juce_OpenGLContext.h"
 #endif
+#ifndef __JUCE_OPENGLFRAMEBUFFER_JUCEHEADER__
+ #include "opengl/juce_OpenGLFrameBuffer.h"
+#endif
+#ifndef __JUCE_OPENGLHELPERS_JUCEHEADER__
+ #include "opengl/juce_OpenGLHelpers.h"
+#endif
 #ifndef __JUCE_OPENGLPIXELFORMAT_JUCEHEADER__
  #include "opengl/juce_OpenGLPixelFormat.h"
+#endif
+#ifndef __JUCE_OPENGLTEXTURE_JUCEHEADER__
+ #include "opengl/juce_OpenGLTexture.h"
 #endif
 // END_AUTOINCLUDE
 

@@ -196,11 +196,6 @@ OpenGLContext* OpenGLComponent::createContext()
     return (c->renderContext != 0) ? c.release() : nullptr;
 }
 
-void juce_glViewport (const int w, const int h)
-{
-    glViewport (0, 0, w, h);
-}
-
 void OpenGLPixelFormat::getAvailablePixelFormats (Component* component, OwnedArray <OpenGLPixelFormat>& results)
 {
     results.add (new OpenGLPixelFormat()); // xxx

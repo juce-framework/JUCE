@@ -25,9 +25,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
-extern void juce_glViewport (const int w, const int h);
-
 
 //==============================================================================
 OpenGLPixelFormat::OpenGLPixelFormat (const int bitsPerRGBComponent,
@@ -425,7 +422,7 @@ bool OpenGLComponent::renderAndSwapBuffers()
         if (needToUpdateViewport)
         {
             needToUpdateViewport = false;
-            juce_glViewport (getWidth(), getHeight());
+            glViewport (0, 0, getWidth(), getHeight());
         }
 
         renderOpenGL();

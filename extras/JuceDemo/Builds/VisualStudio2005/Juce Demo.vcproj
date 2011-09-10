@@ -4218,7 +4218,40 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLComponent.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLHelpers.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLHelpers.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLPixelFormat.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.h"/>
         </Filter>
         <Filter Name="native">
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_android_OpenGLComponent.cpp">

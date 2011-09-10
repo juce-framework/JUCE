@@ -234,8 +234,3 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
                                                   OwnedArray <OpenGLPixelFormat>& /*results*/)
 {
 }
-
-void juce_glViewport (const int w, const int h)
-{
-    glViewport (0, 0, w, h);
-}

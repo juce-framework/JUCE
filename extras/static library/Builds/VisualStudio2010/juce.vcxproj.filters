@@ -1375,6 +1375,15 @@
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLComponent.cpp">
       <Filter>Juce Modules\juce_opengl\opengl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.cpp">
+      <Filter>Juce Modules\juce_opengl\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLHelpers.cpp">
+      <Filter>Juce Modules\juce_opengl\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.cpp">
+      <Filter>Juce Modules\juce_opengl\opengl</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\native\juce_android_OpenGLComponent.cpp">
       <Filter>Juce Modules\juce_opengl\native</Filter>
     </ClCompile>
@@ -2595,7 +2604,16 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.h">
       <Filter>Juce Modules\juce_opengl\opengl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.h">
+      <Filter>Juce Modules\juce_opengl\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLHelpers.h">
+      <Filter>Juce Modules\juce_opengl\opengl</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLPixelFormat.h">
+      <Filter>Juce Modules\juce_opengl\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.h">
       <Filter>Juce Modules\juce_opengl\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\juce_opengl.h">

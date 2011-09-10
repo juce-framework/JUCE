@@ -498,11 +498,6 @@ void* OpenGLComponent::getNativeWindowHandle() const
     return context != nullptr ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle() : nullptr;
 }
 
-void juce_glViewport (const int w, const int h)
-{
-    glViewport (0, 0, w, h);
-}
-
 void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
                                                   OwnedArray <OpenGLPixelFormat>& results)
 {

@@ -31,7 +31,8 @@
 
 #if JucePlugin_Build_AU
 
-#if JUCE_64BIT
+#if __LP64__
+ #undef JUCE_SUPPORT_CARBON
  #define JUCE_SUPPORT_CARBON 0
 #endif
 

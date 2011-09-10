@@ -31,6 +31,7 @@ ReadWriteLock::ReadWriteLock() noexcept
       numWriters (0),
       writerThreadId (0)
 {
+    readerThreads.ensureStorageAllocated (16);
 }
 
 ReadWriteLock::~ReadWriteLock() noexcept
