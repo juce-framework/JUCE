@@ -153,6 +153,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
                                  const bool avoidReallocating) noexcept
 {
     jassert (newNumChannels > 0);
+    jassert (newNumSamples >= 0);
 
     if (newNumSamples != size || newNumChannels != numChannels)
     {

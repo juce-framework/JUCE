@@ -63,7 +63,7 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
         if (source == nullptr)
             return;
 
-        setSource (0, 0, 0); // deselect and reselect to avoid releasing resources wrongly
+        setSource (nullptr, 0, nullptr); // deselect and reselect to avoid releasing resources wrongly
     }
 
     readAheadBufferSize = readAheadBufferSize_;

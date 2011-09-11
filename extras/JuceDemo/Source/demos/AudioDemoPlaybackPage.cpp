@@ -186,8 +186,8 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
 AudioDemoPlaybackPage::~AudioDemoPlaybackPage()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
-    transportSource.setSource (0);
-    audioSourcePlayer.setSource (0);
+    transportSource.setSource (nullptr);
+    audioSourcePlayer.setSource (nullptr);
 
     deviceManager.removeAudioCallback (&audioSourcePlayer);
     fileTreeComp->removeListener (this);
@@ -285,8 +285,8 @@ void AudioDemoPlaybackPage::loadFileIntoTransport (const File& audioFile)
 {
     // unload the previous file source and delete it..
     transportSource.stop();
-    transportSource.setSource (0);
-    currentAudioFileSource = 0;
+    transportSource.setSource (nullptr);
+    currentAudioFileSource = nullptr;
 
     // get a format manager and set it up with the basic types (wav and aiff).
     AudioFormatManager formatManager;
@@ -294,7 +294,7 @@ void AudioDemoPlaybackPage::loadFileIntoTransport (const File& audioFile)
 
     AudioFormatReader* reader = formatManager.createReaderFor (audioFile);
 
-    if (reader != 0)
+    if (reader != nullptr)
     {
         currentAudioFileSource = new AudioFormatReaderSource (reader, true);
 

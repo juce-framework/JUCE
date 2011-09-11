@@ -39,7 +39,8 @@ BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* source_,
       bufferValidStart (0),
       bufferValidEnd (0),
       nextPlayPos (0),
-      wasSourceLooping (false)
+      wasSourceLooping (false),
+      isPrepared (false)
 {
     jassert (source_ != nullptr);
 
@@ -55,28 +56,39 @@ BufferingAudioSource::~BufferingAudioSource()
 //==============================================================================
 void BufferingAudioSource::prepareToPlay (int samplesPerBlockExpected, double sampleRate_)
 {
-    source->prepareToPlay (samplesPerBlockExpected, sampleRate_);
+    const int bufferSizeNeeded = jmax (samplesPerBlockExpected * 2, numberOfSamplesToBuffer);
 
-    sampleRate = sampleRate_;
-
-    buffer.setSize (numberOfChannels, jmax (samplesPerBlockExpected * 2, numberOfSamplesToBuffer));
-    buffer.clear();
-
-    bufferValidStart = 0;
-    bufferValidEnd = 0;
-
-    backgroundThread.addTimeSliceClient (this);
-
-    while (bufferValidEnd - bufferValidStart < jmin (((int) sampleRate_) / 4,
-                                                     buffer.getNumSamples() / 2))
+    if (sampleRate_ != sampleRate
+         || bufferSizeNeeded != buffer.getNumSamples()
+         || ! isPrepared)
     {
+        backgroundThread.removeTimeSliceClient (this);
+
+        isPrepared = true;
+        sampleRate = sampleRate_;
+
+        source->prepareToPlay (samplesPerBlockExpected, sampleRate_);
+
+        buffer.setSize (numberOfChannels, bufferSizeNeeded);
+        buffer.clear();
+
+        bufferValidStart = 0;
+        bufferValidEnd = 0;
+
         backgroundThread.addTimeSliceClient (this);
-        Thread::sleep (5);
+
+        while (bufferValidEnd - bufferValidStart < jmin (((int) sampleRate_) / 4,
+                                                         buffer.getNumSamples() / 2))
+        {
+            backgroundThread.addTimeSliceClient (this);
+            Thread::sleep (5);
+        }
     }
 }
 
 void BufferingAudioSource::releaseResources()
 {
+    isPrepared = false;
     backgroundThread.removeTimeSliceClient (this);
 
     buffer.setSize (numberOfChannels, 0);
@@ -108,8 +120,9 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
         {
             for (int chan = jmin (numberOfChannels, info.buffer->getNumChannels()); --chan >= 0;)
             {
+                jassert (buffer.getNumSamples() > 0);
                 const int startBufferIndex = (int) ((validStart + nextPlayPos) % buffer.getNumSamples());
-                const int endBufferIndex = (int) ((validEnd + nextPlayPos) % buffer.getNumSamples());
+                const int endBufferIndex   = (int) ((validEnd + nextPlayPos)   % buffer.getNumSamples());
 
                 if (startBufferIndex < endBufferIndex)
                 {
@@ -144,6 +157,7 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
 int64 BufferingAudioSource::getNextReadPosition() const
 {
+    jassert (source->getTotalLength() > 0);
     return (source->isLooping() && nextPlayPos > 0)
                     ? nextPlayPos % source->getTotalLength()
                     : nextPlayPos;
@@ -204,8 +218,9 @@ bool BufferingAudioSource::readNextBufferChunk()
 
     if (sectionToReadStart != sectionToReadEnd)
     {
+        jassert (buffer.getNumSamples() > 0);
         const int bufferIndexStart = (int) (sectionToReadStart % buffer.getNumSamples());
-        const int bufferIndexEnd = (int) (sectionToReadEnd % buffer.getNumSamples());
+        const int bufferIndexEnd   = (int) (sectionToReadEnd   % buffer.getNumSamples());
 
         if (bufferIndexStart < bufferIndexEnd)
         {

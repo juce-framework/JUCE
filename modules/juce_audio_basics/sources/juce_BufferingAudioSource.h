@@ -101,7 +101,7 @@ private:
     CriticalSection bufferStartPosLock;
     int64 volatile bufferValidStart, bufferValidEnd, nextPlayPos;
     double volatile sampleRate;
-    bool wasSourceLooping;
+    bool wasSourceLooping, isPrepared;
 
     friend class SharedBufferingAudioSourceThread;
     bool readNextBufferChunk();

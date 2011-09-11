@@ -54,7 +54,6 @@ namespace
 class CoreAudioReader : public AudioFormatReader
 {
 public:
-    //==============================================================================
     CoreAudioReader (InputStream* const inp)
         : AudioFormatReader (inp, TRANS (coreAudioFormatName)),
           ok (false), lastReadPosition (0)
