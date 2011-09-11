@@ -29,7 +29,12 @@
 //==============================================================================
 int64 hashCode64 (const String& s)
 {
-    return s.hashCode64() + s.length() * s.hashCode() + s.toUpperCase().hashCode();
+    CharPointer_UTF8 utf8 (s.toUTF8());
+
+    MD5 md5 (utf8, utf8.sizeInBytes());
+    const uint64* const m = reinterpret_cast <const uint64*> (md5.getChecksumDataArray());
+
+    return (int64) ByteOrder::swapIfBigEndian (m[0] ^ m[1]);
 }
 
 String createAlphaNumericUID()

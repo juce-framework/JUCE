@@ -84,6 +84,9 @@ public:
     /** Returns the checksum as a 16-byte block of data. */
     MemoryBlock getRawChecksumData() const;
 
+    /** Returns a pointer to the 16-byte array of result data. */
+    const uint8* getChecksumDataArray() const noexcept      { return result; }
+
     /** Returns the checksum as a 32-digit hex string. */
     String toHexString() const;
 

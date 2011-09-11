@@ -725,17 +725,35 @@ private:
 
         const String fileRefID (createFileRefID (pathString));
 
-        ValueTree* v = new ValueTree (fileRefID);
+        ScopedPointer<ValueTree> v (new ValueTree (fileRefID));
         v->setProperty ("isa", "PBXFileReference", 0);
         v->setProperty ("lastKnownFileType", getFileType (path), 0);
         v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), 0);
         v->setProperty ("path", sanitisePath (pathString), 0);
         v->setProperty ("sourceTree", sourceTree, 0);
-        pbxFileReferences.add (v);
+
+        const int existing = pbxFileReferences.indexOfSorted (*this, v);
+
+        if (existing >= 0)
+        {
+            // If this fails, there's either a string hash collision, or the same file is being added twice (incorrectly)
+            jassert (pbxFileReferences.getUnchecked (existing)->isEquivalentTo (*v));
+        }
+        else
+        {
+            pbxFileReferences.addSorted (*this, v.release());
+        }
 
         return fileRefID;
     }
 
+public:
+    static int compareElements (const ValueTree* first, const ValueTree* second)
+    {
+        return first->getType().toString().compare (second->getType().toString());
+    }
+
+private:
     static String getFileType (const RelativePath& file)
     {
         if (file.hasFileExtension ("cpp;cc;cxx"))                return "sourcecode.cpp.cpp";

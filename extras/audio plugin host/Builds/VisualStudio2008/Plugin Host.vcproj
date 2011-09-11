@@ -3,7 +3,7 @@
 <VisualStudioProject ProjectType="Visual C++"
                      Version="9.00"
                      Name="Plugin Host"
-                     ProjectGUID="{7CD310E8-9077-342C-EB06-869D4775A4F4}"
+                     ProjectGUID="{C4552C7B-E81A-5BE7-147B-4773C0138510}"
                      TargetFrameworkVersion="131072">
   <Platforms>
     <Platform Name="Win32"/>
