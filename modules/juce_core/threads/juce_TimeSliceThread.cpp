@@ -70,6 +70,17 @@ void TimeSliceThread::removeTimeSliceClient (TimeSliceClient* const client)
     }
 }
 
+void TimeSliceThread::moveToFrontOfQueue (TimeSliceClient* client)
+{
+    const ScopedLock sl (listLock);
+
+    if (clients.contains (client))
+    {
+        client->nextCallTime = Time::getCurrentTime();
+        notify();
+    }
+}
+
 int TimeSliceThread::getNumClients() const
 {
     return clients.size();

@@ -80,7 +80,7 @@ void BufferingAudioSource::prepareToPlay (int samplesPerBlockExpected, double sa
         while (bufferValidEnd - bufferValidStart < jmin (((int) sampleRate_) / 4,
                                                          buffer.getNumSamples() / 2))
         {
-            backgroundThread.addTimeSliceClient (this);
+            backgroundThread.moveToFrontOfQueue (this);
             Thread::sleep (5);
         }
     }
@@ -168,8 +168,7 @@ void BufferingAudioSource::setNextReadPosition (int64 newPosition)
     const ScopedLock sl (bufferStartPosLock);
 
     nextPlayPos = newPosition;
-
-    backgroundThread.addTimeSliceClient (this);
+    backgroundThread.moveToFrontOfQueue (this);
 }
 
 bool BufferingAudioSource::readNextBufferChunk()
