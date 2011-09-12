@@ -1141,26 +1141,26 @@ bool AudioProcessorGraph::disconnectNode (const uint32 nodeId)
     return doneAnything;
 }
 
+bool AudioProcessorGraph::isConnectionLegal (Connection* const c) const
+{
+    const Node* const source = getNodeForId (c->sourceNodeId);
+    const Node* const dest   = getNodeForId (c->destNodeId);
+
+    return source != nullptr
+        && dest != nullptr
+        && (c->sourceChannelIndex != midiChannelIndex ? isPositiveAndBelow (c->sourceChannelIndex, source->processor->getNumOutputChannels())
+                                                      : source->processor->producesMidi())
+        && (c->destChannelIndex   != midiChannelIndex ? isPositiveAndBelow (c->destChannelIndex, dest->processor->getNumInputChannels())
+                                                      : dest->processor->acceptsMidi());
+}
+
 bool AudioProcessorGraph::removeIllegalConnections()
 {
     bool doneAnything = false;
 
     for (int i = connections.size(); --i >= 0;)
     {
-        const Connection* const c = connections.getUnchecked(i);
-
-        const Node* const source = getNodeForId (c->sourceNodeId);
-        const Node* const dest = getNodeForId (c->destNodeId);
-
-        if (source == nullptr || dest == nullptr
-             || (c->sourceChannelIndex != midiChannelIndex
-                  && ! isPositiveAndBelow (c->sourceChannelIndex, source->processor->getNumOutputChannels()))
-             || (c->sourceChannelIndex == midiChannelIndex
-                  && ! source->processor->producesMidi())
-             || (c->destChannelIndex != midiChannelIndex
-                   && ! isPositiveAndBelow (c->destChannelIndex, dest->processor->getNumInputChannels()))
-             || (c->destChannelIndex == midiChannelIndex
-                   && ! dest->processor->acceptsMidi()))
+        if (! isConnectionLegal (connections.getUnchecked(i)))
         {
             removeConnection (i);
             doneAnything = true;

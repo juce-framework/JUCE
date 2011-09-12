@@ -990,7 +990,7 @@ struct WildCardMatcher
     {
         for (;;)
         {
-            const juce_wchar wc = *wildcard;
+            const juce_wchar wc = wildcard.getAndAdvance();
             const juce_wchar tc = *test;
 
             if (wc == tc
@@ -1001,11 +1001,10 @@ struct WildCardMatcher
                     return true;
 
                 ++test;
-                ++wildcard;
             }
             else
             {
-                return wc == '*' && (wildcard[1] == 0 || matchesAnywhere (wildcard + 1, test, ignoreCase));
+                return wc == '*' && (wildcard.isEmpty() || matchesAnywhere (wildcard, test, ignoreCase));
             }
         }
     }

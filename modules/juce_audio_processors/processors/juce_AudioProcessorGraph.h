@@ -245,6 +245,13 @@ public:
     */
     bool disconnectNode (uint32 nodeId);
 
+    /** Returns true if the given connection's channel numbers map on to valid
+        channels at each end.
+        Even if a connection is valid when created, its status could change if
+        a node changes its channel config.
+    */
+    bool isConnectionLegal (Connection* connection) const;
+
     /** Performs a sanity checks of all the connections.
 
         This might be useful if some of the processors are doing things like changing

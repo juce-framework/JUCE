@@ -340,7 +340,7 @@ private:
 
     static void writeHost (MemoryOutputStream& dest, const bool isPost, const String& path, const String& host, const int port)
     {
-        dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.1\r\nHost: " << host;
+        dest << (isPost ? "POST " : "GET ") << path << " HTTP/1.0\r\nHost: " << host;
 
         if (port > 0)
             dest << ':' << port;

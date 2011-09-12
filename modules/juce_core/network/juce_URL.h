@@ -58,6 +58,13 @@ public:
     /** Copies this URL from another one. */
     URL& operator= (const URL& other);
 
+    /** Compares two URLs.
+        All aspects of the URLs must be identical for them to match, including any parameters,
+        upload files, etc.
+    */
+    bool operator== (const URL&) const;
+    bool operator!= (const URL&) const;
+
     //==============================================================================
     /** Returns a string version of the URL.
 
@@ -309,7 +316,6 @@ private:
                                             OpenStreamProgressCallback* progressCallback,
                                             void* progressCallbackContext, const String& headers,
                                             const int timeOutMs, StringPairArray* responseHeaders);
-
     JUCE_LEAK_DETECTOR (URL);
 };
 

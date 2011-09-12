@@ -84,6 +84,20 @@ URL& URL::operator= (const URL& other)
     return *this;
 }
 
+bool URL::operator== (const URL& other) const
+{
+    return url == other.url
+        && postData == other.postData
+        && parameters == other.parameters
+        && filesToUpload == other.filesToUpload
+        && mimeTypes == other.mimeTypes;
+}
+
+bool URL::operator!= (const URL& other) const
+{
+    return ! operator== (other);
+}
+
 URL::~URL()
 {
 }
