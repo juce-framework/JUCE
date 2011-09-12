@@ -190,7 +190,7 @@ public:
             owner.getModel()->cellDoubleClicked (row, columnId, e);
     }
 
-    const String getTooltip()
+    String getTooltip()
     {
         const int columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 
@@ -480,7 +480,7 @@ void TableListBoxModel::returnKeyPressed (int)                          {}
 void TableListBoxModel::listWasScrolled()                               {}
 
 const String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String::empty; }
-const var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return var::null; }
+var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)                 { return var::null; }
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {

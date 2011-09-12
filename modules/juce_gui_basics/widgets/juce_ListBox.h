@@ -145,12 +145,12 @@ public:
 
         @see DragAndDropContainer::startDragging
     */
-    virtual const var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+    virtual var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
 
     /** You can override this to provide tool tips for specific rows.
         @see TooltipClient
     */
-    virtual const String getTooltipForRow (int row);
+    virtual String getTooltipForRow (int row);
 };
 
 

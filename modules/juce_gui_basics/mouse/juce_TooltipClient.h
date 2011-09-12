@@ -44,7 +44,7 @@ public:
     virtual ~TooltipClient()  {}
 
     /** Returns the string that this object wants to show as its tooltip. */
-    virtual const String getTooltip() = 0;
+    virtual String getTooltip() = 0;
 };
 
 
@@ -73,7 +73,7 @@ public:
     virtual void setTooltip (const String& newTooltip)              { tooltipString = newTooltip; }
 
     /** Returns the tooltip assigned to this object. */
-    virtual const String getTooltip()                               { return tooltipString; }
+    virtual String getTooltip()                                     { return tooltipString; }
 
 protected:
     SettableTooltipClient() {}

@@ -350,7 +350,7 @@ public:
     /** @internal */
     void handleAsyncUpdate();
     /** @internal */
-    const String getTooltip()                                       { return label->getTooltip(); }
+    String getTooltip()                                       { return label->getTooltip(); }
     /** @internal */
     void mouseDown (const MouseEvent&);
     /** @internal */

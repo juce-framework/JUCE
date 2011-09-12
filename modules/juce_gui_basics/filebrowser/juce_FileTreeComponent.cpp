@@ -34,7 +34,6 @@ class FileListTreeItem   : public TreeViewItem,
                            public ChangeListener
 {
 public:
-    //==============================================================================
     FileListTreeItem (FileTreeComponent& owner_,
                       DirectoryContentsList* const parentContentsList_,
                       const int indexInContentsList_,
@@ -70,10 +69,10 @@ public:
 
     //==============================================================================
     bool mightContainSubItems()                 { return isDirectory; }
-    const String getUniqueName() const          { return file.getFullPathName(); }
+    String getUniqueName() const                { return file.getFullPathName(); }
     int getItemHeight() const                   { return 22; }
 
-    const var getDragSourceDescription()        { return owner.getDragAndDropDescription(); }
+    var getDragSourceDescription()              { return owner.getDragAndDropDescription(); }
 
     void itemOpennessChanged (bool isNowOpen)
     {
@@ -133,12 +132,11 @@ public:
                 thread.addTimeSliceClient (this);
         }
 
-        owner.getLookAndFeel()
-            .drawFileBrowserRow (g, width, height,
-                                 file.getFileName(),
-                                 &icon, fileSize, modTime,
-                                 isDirectory, isSelected(),
-                                 indexInContentsList, owner);
+        owner.getLookAndFeel().drawFileBrowserRow (g, width, height,
+                                                   file.getFileName(),
+                                                   &icon, fileSize, modTime,
+                                                   isDirectory, isSelected(),
+                                                   indexInContentsList, owner);
     }
 
     void itemClicked (const MouseEvent& e)
@@ -179,8 +177,7 @@ private:
     bool isDirectory;
     TimeSliceThread& thread;
     Image icon;
-    String fileSize;
-    String modTime;
+    String fileSize, modTime;
 
     void updateIcon (const bool onlyUpdateIfCached)
     {

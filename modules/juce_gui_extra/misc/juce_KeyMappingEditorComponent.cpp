@@ -280,7 +280,7 @@ public:
     {
     }
 
-    const String getUniqueName() const          { return String ((int) commandID) + "_id"; }
+    String getUniqueName() const                { return String ((int) commandID) + "_id"; }
     bool mightContainSubItems()                 { return false; }
     int getItemHeight() const                   { return 20; }
 
@@ -306,7 +306,7 @@ public:
     {
     }
 
-    const String getUniqueName() const          { return categoryName + "_cat"; }
+    String getUniqueName() const                { return categoryName + "_cat"; }
     bool mightContainSubItems()                 { return true; }
     int getItemHeight() const                   { return 28; }
 
@@ -367,7 +367,7 @@ public:
     }
 
     bool mightContainSubItems()             { return true; }
-    const String getUniqueName() const      { return "keys"; }
+    String getUniqueName() const            { return "keys"; }
 
     void changeListenerCallback (ChangeBroadcaster*)
     {
@@ -484,7 +484,7 @@ bool KeyMappingEditorComponent::isCommandReadOnly (const CommandID commandID)
     return ci != nullptr && (ci->flags & ApplicationCommandInfo::readOnlyInKeyEditor) != 0;
 }
 
-const String KeyMappingEditorComponent::getDescriptionForKeyPress (const KeyPress& key)
+String KeyMappingEditorComponent::getDescriptionForKeyPress (const KeyPress& key)
 {
     return key.getTextDescription();
 }

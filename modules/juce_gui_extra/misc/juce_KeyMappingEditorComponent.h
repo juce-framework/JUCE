@@ -87,7 +87,7 @@ public:
         method, be sure to let the base class's method handle keys you're not
         interested in.
     */
-    virtual const String getDescriptionForKeyPress (const KeyPress& key);
+    virtual String getDescriptionForKeyPress (const KeyPress& key);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.

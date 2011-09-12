@@ -80,7 +80,6 @@ class FileListItemComponent  : public Component,
                                public AsyncUpdater
 {
 public:
-    //==============================================================================
     FileListItemComponent (FileListComponent& owner_, TimeSliceThread& thread_)
         : owner (owner_), thread (thread_), index (0), highlighted (false)
     {
@@ -226,11 +225,9 @@ Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, 
     }
 
     DirectoryContentsList::FileInfo fileInfo;
-
-    if (fileList.getFileInfo (row, fileInfo))
-        comp->update (fileList.getDirectory(), &fileInfo, row, isSelected);
-    else
-        comp->update (fileList.getDirectory(), nullptr, row, isSelected);
+    comp->update (fileList.getDirectory(),
+                  fileList.getFileInfo (row, fileInfo) ? &fileInfo : nullptr,
+                  row, isSelected);
 
     return comp;
 }

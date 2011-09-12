@@ -35,16 +35,12 @@ public:
     {
     }
 
-    ~TreeViewDemoItem()
-    {
-    }
-
     int getItemWidth() const
     {
         return xml.getIntAttribute ("width", -1);
     }
 
-    const String getUniqueName() const
+    String getUniqueName() const
     {
         return xml.getTagName();
     }
@@ -98,7 +94,7 @@ public:
         }
     }
 
-    const var getDragSourceDescription()
+    var getDragSourceDescription()
     {
         return "TreeView Items";
     }

@@ -126,7 +126,7 @@ public:
             customComponent->setBounds (getLocalBounds());
     }
 
-    const String getTooltip()
+    String getTooltip()
     {
         if (owner.getModel() != nullptr)
             return owner.getModel()->getTooltipForRow (row);
@@ -944,8 +944,8 @@ void ListBoxModel::selectedRowsChanged (int) {}
 void ListBoxModel::deleteKeyPressed (int) {}
 void ListBoxModel::returnKeyPressed (int) {}
 void ListBoxModel::listWasScrolled() {}
-const var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)    { return var::null; }
-const String ListBoxModel::getTooltipForRow (int)                           { return String::empty; }
+var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return var::null; }
+String ListBoxModel::getTooltipForRow (int)                             { return String::empty; }
 
 
 END_JUCE_NAMESPACE

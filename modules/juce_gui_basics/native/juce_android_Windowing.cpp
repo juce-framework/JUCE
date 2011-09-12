@@ -84,7 +84,6 @@ DECLARE_JNI_CLASS (ComponentPeerView, "com/juce/ComponentPeerView");
 class AndroidComponentPeer  : public ComponentPeer
 {
 public:
-    //==============================================================================
     AndroidComponentPeer (Component* const component, const int windowStyleFlags)
         : ComponentPeer (component, windowStyleFlags),
           view (android.activity.callObjectMethod (JuceAppActivity.createNewView, component->isOpaque())),

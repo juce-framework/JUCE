@@ -1089,7 +1089,6 @@ bool AudioProcessorGraph::addConnection (const uint32 sourceNodeId,
     connections.addSorted (sorter, new Connection (sourceNodeId, sourceChannelIndex,
                                                    destNodeId, destChannelIndex));
     triggerAsyncUpdate();
-
     return true;
 }
 
@@ -1115,7 +1114,6 @@ bool AudioProcessorGraph::removeConnection (const uint32 sourceNodeId, const int
         {
             removeConnection (i);
             doneAnything = true;
-            triggerAsyncUpdate();
         }
     }
 
@@ -1134,7 +1132,6 @@ bool AudioProcessorGraph::disconnectNode (const uint32 nodeId)
         {
             removeConnection (i);
             doneAnything = true;
-            triggerAsyncUpdate();
         }
     }
 
@@ -1164,7 +1161,6 @@ bool AudioProcessorGraph::removeIllegalConnections()
         {
             removeConnection (i);
             doneAnything = true;
-            triggerAsyncUpdate();
         }
     }
 
@@ -1172,14 +1168,22 @@ bool AudioProcessorGraph::removeIllegalConnections()
 }
 
 //==============================================================================
+static void deleteRenderOpArray (Array<void*>& ops)
+{
+    for (int i = ops.size(); --i >= 0;)
+        delete static_cast<GraphRenderingOps::AudioGraphRenderingOp*> (ops.getUnchecked(i));
+}
+
 void AudioProcessorGraph::clearRenderingSequence()
 {
-    const ScopedLock sl (renderLock);
+    Array<void*> oldOps;
 
-    for (int i = renderingOps.size(); --i >= 0;)
-        delete static_cast<GraphRenderingOps::AudioGraphRenderingOp*> (renderingOps.getUnchecked(i));
+    {
+        const ScopedLock sl (renderLock);
+        renderingOps.swapWithArray (oldOps);
+    }
 
-    renderingOps.clear();
+    deleteRenderOpArray (oldOps);
 }
 
 bool AudioProcessorGraph::isAnInputTo (const uint32 possibleInputId,
@@ -1237,8 +1241,6 @@ void AudioProcessorGraph::buildRenderingSequence()
         numMidiBuffersNeeded = calculator.getNumMidiBuffersNeeded();
     }
 
-    Array<void*> oldRenderingOps (renderingOps);
-
     {
         // swap over to the new rendering sequence..
         const ScopedLock sl (renderLock);
@@ -1252,11 +1254,11 @@ void AudioProcessorGraph::buildRenderingSequence()
         while (midiBuffers.size() < numMidiBuffersNeeded)
             midiBuffers.add (new MidiBuffer());
 
-        renderingOps = newRenderingOps;
+        renderingOps.swapWithArray (newRenderingOps);
     }
 
-    for (int i = oldRenderingOps.size(); --i >= 0;)
-        delete static_cast<GraphRenderingOps::AudioGraphRenderingOp*> (oldRenderingOps.getUnchecked(i));
+    // delete the old ones..
+    deleteRenderOpArray (newRenderingOps);
 }
 
 void AudioProcessorGraph::handleAsyncUpdate()

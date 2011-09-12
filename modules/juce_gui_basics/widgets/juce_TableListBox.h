@@ -183,7 +183,7 @@ public:
 
         @see getDragSourceCustomData, DragAndDropContainer::startDragging
     */
-    virtual const var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+    virtual var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
 };
 
 

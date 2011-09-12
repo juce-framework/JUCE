@@ -299,7 +299,7 @@ public:
     void setTooltip (const String& newTooltip);
 
     // (implementation of the TooltipClient method)
-    const String getTooltip();
+    String getTooltip();
 
 
     //==============================================================================

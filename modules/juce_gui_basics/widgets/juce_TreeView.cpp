@@ -303,7 +303,7 @@ public:
         owner.itemsChanged();
     }
 
-    const String getTooltip()
+    String getTooltip()
     {
         Rectangle<int> pos;
         TreeViewItem* const item = findItemAt (getMouseXYRelative().getY(), pos);
@@ -1150,7 +1150,7 @@ TreeViewItem::~TreeViewItem()
 {
 }
 
-const String TreeViewItem::getUniqueName() const
+String TreeViewItem::getUniqueName() const
 {
     return String::empty;
 }
@@ -1311,12 +1311,12 @@ void TreeViewItem::itemSelectionChanged (bool)
 {
 }
 
-const String TreeViewItem::getTooltip()
+String TreeViewItem::getTooltip()
 {
     return String::empty;
 }
 
-const var TreeViewItem::getDragSourceDescription()
+var TreeViewItem::getDragSourceDescription()
 {
     return var::null;
 }

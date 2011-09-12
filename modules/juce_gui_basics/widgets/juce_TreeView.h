@@ -190,7 +190,7 @@ public:
         If you're not going to store the state, then it's ok not to bother implementing
         this method.
     */
-    virtual const String getUniqueName() const;
+    virtual String getUniqueName() const;
 
     /** Called when an item is opened or closed.
 
@@ -333,7 +333,7 @@ public:
     /** The item can return a tool tip string here if it wants to.
         @see TooltipClient
     */
-    virtual const String getTooltip();
+    virtual String getTooltip();
 
     //==============================================================================
     /** To allow items from your treeview to be dragged-and-dropped, implement this method.
@@ -351,7 +351,7 @@ public:
 
         @see DragAndDropContainer::startDragging
     */
-    virtual const var getDragSourceDescription();
+    virtual var getDragSourceDescription();
 
     /** If you want your item to be able to have files drag-and-dropped onto it, implement this
         method and return true.

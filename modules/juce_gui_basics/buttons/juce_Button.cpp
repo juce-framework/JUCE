@@ -91,7 +91,7 @@ void Button::setTooltip (const String& newTooltip)
     generateTooltip = false;
 }
 
-const String Button::getTooltip()
+String Button::getTooltip()
 {
     if (generateTooltip && commandManagerToUse != nullptr && commandID != 0)
     {
