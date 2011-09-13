@@ -901,11 +901,6 @@ File File::createTempFile (const String& fileNameEnding)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-#include "../unit_tests/juce_UnitTest.h"
-#include "../maths/juce_Random.h"
-#include "juce_MemoryMappedFile.h"
-
-
 class FileTests  : public UnitTest
 {
 public:

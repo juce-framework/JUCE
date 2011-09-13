@@ -2095,10 +2095,6 @@ void String::Concatenator::append (const String& s)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-#include "../unit_tests/juce_UnitTest.h"
-#include "../maths/juce_Random.h"
-#include "juce_StringArray.h"
-
 class StringTests  : public UnitTest
 {
 public:

@@ -333,8 +333,6 @@ void SpinLock::enter() const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-#include "../unit_tests/juce_UnitTest.h"
-
 class AtomicTests  : public UnitTest
 {
 public:

@@ -195,4 +195,58 @@ bool GZIPCompressorOutputStream::setPosition (int64 /*newPosition*/)
     return false;
 }
 
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class GZIPTests  : public UnitTest
+{
+public:
+    GZIPTests()   : UnitTest ("GZIP") {}
+
+    void runTest()
+    {
+        beginTest ("GZIP");
+        Random rng;
+
+        for (int i = 100; --i >= 0;)
+        {
+            MemoryOutputStream original, compressed, uncompressed;
+
+            {
+                GZIPCompressorOutputStream zipper (&compressed, rng.nextInt (10), false);
+                
+                for (int j = rng.nextInt (100); --j >= 0;)
+                {
+                    MemoryBlock data (rng.nextInt (2000) + 1);
+                    
+                    for (int k = data.getSize(); --k >= 0;)
+                        data[k] = (char) rng.nextInt (255);
+
+                    original.write (data.getData(), data.getSize());
+                    zipper  .write (data.getData(), data.getSize());
+                }
+            }
+
+            {
+                MemoryInputStream compressedInput (compressed.getData(), compressed.getDataSize(), false);
+                GZIPDecompressorInputStream unzipper (compressedInput);
+
+                uncompressed.writeFromInputStream (unzipper, -1);
+            }
+            
+            expectEquals ((int) uncompressed.getDataSize(),
+                          (int) original.getDataSize());
+            
+            if (original.getDataSize() == uncompressed.getDataSize())
+                expect (memcmp (uncompressed.getData(),
+                                original.getData(),
+                                original.getDataSize()) == 0);
+        }
+    }
+};
+
+static GZIPTests gzipTests;
+
+#endif
+
 END_JUCE_NAMESPACE

@@ -79,14 +79,14 @@ public:
     //==============================================================================
     // TreeViewItem stuff..
     bool mightContainSubItems();
-    const String getUniqueName() const;
+    String getUniqueName() const;
     void itemOpennessChanged (bool isNowOpen);
     void refreshSubItems();
     bool canBeSelected() const                  { return true; }
     void itemDoubleClicked (const MouseEvent& e);
     void itemSelectionChanged (bool isNowSelected);
-    const String getTooltip();
-    const var getDragSourceDescription();
+    String getTooltip();
+    var getDragSourceDescription();
 
     //==============================================================================
     // Drag-and-drop stuff..

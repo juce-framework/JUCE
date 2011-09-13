@@ -146,7 +146,7 @@ public:
 
     /** Returns a tooltip for a particular cell in the table.
     */
-    virtual const String getCellTooltip (int rowNumber, int columnId);
+    virtual String getCellTooltip (int rowNumber, int columnId);
 
     //==============================================================================
     /** Override this to be informed when rows are selected or deselected.
@@ -275,8 +275,8 @@ public:
         If relativeToComponentTopLeft is false, the co-ords are relative to the
         top-left of the table's top-left cell.
     */
-    const Rectangle<int> getCellPosition (int columnId, int rowNumber,
-                                          bool relativeToComponentTopLeft) const;
+    Rectangle<int> getCellPosition (int columnId, int rowNumber,
+                                    bool relativeToComponentTopLeft) const;
 
     /** Returns the component that currently represents a given cell.
         If the component for this cell is off-screen or if the position is out-of-range,

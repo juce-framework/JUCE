@@ -63,8 +63,6 @@ String ChildProcess::readAllProcessOutput()
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-#include "../unit_tests/juce_UnitTest.h"
-
 class ChildProcessTests  : public UnitTest
 {
 public:

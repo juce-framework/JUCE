@@ -95,10 +95,6 @@ int64 MemoryInputStream::getPosition()
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-#include "../unit_tests/juce_UnitTest.h"
-#include "../maths/juce_Random.h"
-#include "juce_MemoryOutputStream.h"
-
 class MemoryStreamTests  : public UnitTest
 {
 public:

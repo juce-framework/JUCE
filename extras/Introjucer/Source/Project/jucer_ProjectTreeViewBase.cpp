@@ -406,7 +406,7 @@ bool ProjectTreeViewBase::mightContainSubItems()
     return item.getNumChildren() > 0;
 }
 
-const String ProjectTreeViewBase::getUniqueName() const
+String ProjectTreeViewBase::getUniqueName() const
 {
     jassert (item.getID().isNotEmpty());
     return item.getID();
@@ -487,12 +487,12 @@ void ProjectTreeViewBase::itemSelectionChanged (bool isNowSelected)
     }
 }
 
-const String ProjectTreeViewBase::getTooltip()
+String ProjectTreeViewBase::getTooltip()
 {
     return String::empty;
 }
 
-const var ProjectTreeViewBase::getDragSourceDescription()
+var ProjectTreeViewBase::getDragSourceDescription()
 {
     delayedSelectionTimer = nullptr;
     return projectItemDragType;

@@ -153,7 +153,7 @@ public:
         E.g. if browsing in "load file" mode, this will be "Open", if in "save file"
         mode, it'll be "Save", etc.
     */
-    virtual const String getActionVerb() const;
+    virtual String getActionVerb() const;
 
     /** Returns true if the saveMode flag was set when this component was created.
     */

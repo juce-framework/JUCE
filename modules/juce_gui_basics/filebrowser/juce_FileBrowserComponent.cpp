@@ -294,7 +294,7 @@ void FileBrowserComponent::setFileFilter (const FileFilter* const newFileFilter)
     }
 }
 
-const String FileBrowserComponent::getActionVerb() const
+String FileBrowserComponent::getActionVerb() const
 {
     return isSaveMode() ? TRANS("Save") : TRANS("Open");
 }

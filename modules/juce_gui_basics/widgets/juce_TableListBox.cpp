@@ -205,7 +205,6 @@ public:
         return columnComponents [owner.getHeader().getIndexOfColumnId (columnId, true)];
     }
 
-
 private:
     TableListBox& owner;
     OwnedArray<Component> columnComponents;
@@ -269,7 +268,6 @@ TableListBox::TableListBox (const String& name, TableListBoxModel* const model_)
 
 TableListBox::~TableListBox()
 {
-    header = nullptr;
 }
 
 void TableListBox::setModel (TableListBoxModel* const newModel)
@@ -332,8 +330,8 @@ bool TableListBox::isAutoSizeMenuOptionShown() const
     return autoSizeOptionsShown;
 }
 
-const Rectangle<int> TableListBox::getCellPosition (const int columnId, const int rowNumber,
-                                                    const bool relativeToComponentTopLeft) const
+Rectangle<int> TableListBox::getCellPosition (const int columnId, const int rowNumber,
+                                              const bool relativeToComponentTopLeft) const
 {
     Rectangle<int> headerCell (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
 
@@ -479,8 +477,8 @@ void TableListBoxModel::deleteKeyPressed (int)                          {}
 void TableListBoxModel::returnKeyPressed (int)                          {}
 void TableListBoxModel::listWasScrolled()                               {}
 
-const String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String::empty; }
-var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)                 { return var::null; }
+String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String::empty; }
+var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return var::null; }
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {
@@ -488,6 +486,5 @@ Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code the recycles the components
     return nullptr;
 }
-
 
 END_JUCE_NAMESPACE
