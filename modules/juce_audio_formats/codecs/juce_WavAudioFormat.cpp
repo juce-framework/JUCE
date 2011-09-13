@@ -1083,10 +1083,14 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
                 const int64 oldSize = wavFile.getSize();
 
                 {
-                    ScopedPointer <FileOutputStream> out (wavFile.createOutputStream());
-                    out->setPosition (bwavPos);
-                    *out << chunk;
-                    out->setPosition (oldSize);
+                    FileOutputStream out (wavFile);
+
+                    if (! out.failedToOpen())
+                    {
+                        out.setPosition (bwavPos);
+                        out << chunk;
+                        out.setPosition (oldSize);
+                    }
                 }
 
                 jassert (wavFile.getSize() == oldSize);

@@ -144,7 +144,6 @@ const int KeyPress::rewindKey               = 0x30003;
 class WindowsBitmapImage  : public Image::SharedImage
 {
 public:
-    //==============================================================================
     WindowsBitmapImage (const Image::PixelFormat format_,
                         const int w, const int h, const bool clearImage)
         : Image::SharedImage (format_, w, h)
@@ -155,24 +154,24 @@ public:
         lineStride = -((w * pixelStride + 3) & ~3);
 
         zerostruct (bitmapInfo);
-        bitmapInfo.bV4Size = sizeof (BITMAPV4HEADER);
-        bitmapInfo.bV4Width = w;
-        bitmapInfo.bV4Height = h;
-        bitmapInfo.bV4Planes = 1;
-        bitmapInfo.bV4CSType = 1;
+        bitmapInfo.bV4Size     = sizeof (BITMAPV4HEADER);
+        bitmapInfo.bV4Width    = w;
+        bitmapInfo.bV4Height   = h;
+        bitmapInfo.bV4Planes   = 1;
+        bitmapInfo.bV4CSType   = 1;
         bitmapInfo.bV4BitCount = (unsigned short) (pixelStride * 8);
 
         if (format_ == Image::ARGB)
         {
-            bitmapInfo.bV4AlphaMask        = 0xff000000;
-            bitmapInfo.bV4RedMask          = 0xff0000;
-            bitmapInfo.bV4GreenMask        = 0xff00;
-            bitmapInfo.bV4BlueMask         = 0xff;
-            bitmapInfo.bV4V4Compression    = BI_BITFIELDS;
+            bitmapInfo.bV4AlphaMask      = 0xff000000;
+            bitmapInfo.bV4RedMask        = 0xff0000;
+            bitmapInfo.bV4GreenMask      = 0xff00;
+            bitmapInfo.bV4BlueMask       = 0xff;
+            bitmapInfo.bV4V4Compression  = BI_BITFIELDS;
         }
         else
         {
-            bitmapInfo.bV4V4Compression    = BI_RGB;
+            bitmapInfo.bV4V4Compression  = BI_RGB;
         }
 
         HDC dc = GetDC (0);
@@ -1379,6 +1378,7 @@ private:
         if (! isMouseOver)
         {
             isMouseOver = true;
+            ModifierKeys::getCurrentModifiersRealtime(); // (This avoids a rare stuck-button problem when focus is lost unexpectedly)
             updateKeyModifiers();
 
             TRACKMOUSEEVENT tme;

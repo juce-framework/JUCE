@@ -52,7 +52,6 @@
         if (out != nullptr)
         {
             out->write ( ...etc )
-            out->flush();
             out = nullptr; // (deletes the stream)
 
             // ..now we've finished writing, this will rename the temp file to

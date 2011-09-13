@@ -214,11 +214,11 @@ public:
 
             {
                 GZIPCompressorOutputStream zipper (&compressed, rng.nextInt (10), false);
-                
+
                 for (int j = rng.nextInt (100); --j >= 0;)
                 {
                     MemoryBlock data (rng.nextInt (2000) + 1);
-                    
+
                     for (int k = data.getSize(); --k >= 0;)
                         data[k] = (char) rng.nextInt (255);
 
@@ -233,10 +233,10 @@ public:
 
                 uncompressed.writeFromInputStream (unzipper, -1);
             }
-            
+
             expectEquals ((int) uncompressed.getDataSize(),
                           (int) original.getDataSize());
-            
+
             if (original.getDataSize() == uncompressed.getDataSize())
                 expect (memcmp (uncompressed.getData(),
                                 original.getData(),
