@@ -361,6 +361,8 @@ public:
 
     int read (void* buffer, int bytesToRead)
     {
+        jassert (buffer != nullptr && bytesToRead >= 0);
+
         if (finished || isError())
         {
             return 0;

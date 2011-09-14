@@ -53,6 +53,8 @@ int64 FileInputStream::getTotalLength()
 
 int FileInputStream::read (void* buffer, int bytesToRead)
 {
+    jassert (buffer != nullptr && bytesToRead >= 0);
+
     if (needToSeek)
     {
         if (juce_fileSetPosition (fileHandle, currentPosition) < 0)

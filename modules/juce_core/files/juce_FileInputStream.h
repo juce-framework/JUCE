@@ -58,7 +58,18 @@ public:
         The result will be ok if the file opened successfully. If an error occurs while
         opening or reading from the file, this will contain an error message.
     */
-    Result getStatus() const                            { return status; }
+    const Result& getStatus() const noexcept            { return status; }
+
+    /** Returns true if the stream couldn't be opened for some reason.
+        @see getResult()
+    */
+    bool failedToOpen() const noexcept                  { return status.failed(); }
+
+    /** Returns true if the stream opened without problems.
+        @see getResult()
+    */
+    bool openedOk() const noexcept                      { return status.wasOk(); }
+
 
     //==============================================================================
     int64 getTotalLength();
@@ -66,7 +77,6 @@ public:
     bool isExhausted();
     int64 getPosition();
     bool setPosition (int64 pos);
-
 
 private:
     //==============================================================================

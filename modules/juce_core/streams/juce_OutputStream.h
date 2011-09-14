@@ -83,10 +83,12 @@ public:
         that needs to be overloaded - the base class has methods for writing other
         types of data which use this to do the work.
 
+        @param dataToWrite      the target buffer to receive the data. This must not be null.
+        @param numberOfBytes    the number of bytes to write. This must not be negative.
         @returns false if the write operation fails for some reason
     */
     virtual bool write (const void* dataToWrite,
-                        int howManyBytes) = 0;
+                        int numberOfBytes) = 0;
 
     //==============================================================================
     /** Writes a single byte to the stream.
@@ -242,6 +244,9 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock&
 
 /** Writes the contents of a file to a stream. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileToRead);
+
+/** Writes the complete contents of an input stream to an output stream. */
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, InputStream& streamToRead);
 
 /** Writes a new-line to a stream.
     You can use the predefined symbol 'newLine' to invoke this, e.g.

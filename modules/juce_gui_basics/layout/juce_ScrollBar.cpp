@@ -387,12 +387,12 @@ void ScrollBar::mouseWheelMove (const MouseEvent&,
                                 float wheelIncrementX,
                                 float wheelIncrementY)
 {
-    float increment = vertical ? wheelIncrementY : wheelIncrementX;
+    float increment = 10.0f * (vertical ? wheelIncrementY : wheelIncrementX);
 
     if (increment < 0)
-        increment = jmin (increment * 10.0f, -1.0f);
+        increment = jmin (increment, -1.0f);
     else if (increment > 0)
-        increment = jmax (increment * 10.0f, 1.0f);
+        increment = jmax (increment, 1.0f);
 
     setCurrentRange (visibleRange - singleStepSize * increment);
 }
@@ -419,20 +419,15 @@ bool ScrollBar::keyPressed (const KeyPress& key)
     if (! isVisible())
         return false;
 
-    if (key.isKeyCode (KeyPress::upKey) || key.isKeyCode (KeyPress::leftKey))
-        moveScrollbarInSteps (-1);
-    else if (key.isKeyCode (KeyPress::downKey) || key.isKeyCode (KeyPress::rightKey))
-        moveScrollbarInSteps (1);
-    else if (key.isKeyCode (KeyPress::pageUpKey))
-        moveScrollbarInPages (-1);
-    else if (key.isKeyCode (KeyPress::pageDownKey))
-        moveScrollbarInPages (1);
-    else if (key.isKeyCode (KeyPress::homeKey))
-        scrollToTop();
-    else if (key.isKeyCode (KeyPress::endKey))
-        scrollToBottom();
-    else
-        return false;
+    if (key.isKeyCode (KeyPress::upKey)
+         || key.isKeyCode (KeyPress::leftKey))          moveScrollbarInSteps (-1);
+    else if (key.isKeyCode (KeyPress::downKey)
+              || key.isKeyCode (KeyPress::rightKey))    moveScrollbarInSteps (1);
+    else if (key.isKeyCode (KeyPress::pageUpKey))       moveScrollbarInPages (-1);
+    else if (key.isKeyCode (KeyPress::pageDownKey))     moveScrollbarInPages (1);
+    else if (key.isKeyCode (KeyPress::homeKey))         scrollToTop();
+    else if (key.isKeyCode (KeyPress::endKey))          scrollToBottom();
+    else                                                return false;
 
     return true;
 }

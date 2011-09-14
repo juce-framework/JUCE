@@ -81,6 +81,8 @@ void MemoryOutputStream::prepareToWrite (int numBytes)
 
 bool MemoryOutputStream::write (const void* const buffer, int howMany)
 {
+    jassert (buffer != nullptr && howMany >= 0);
+
     if (howMany > 0)
     {
         prepareToWrite (howMany);

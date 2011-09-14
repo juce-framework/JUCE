@@ -145,6 +145,7 @@ public:
 
     int read (void* buffer, int bytesToRead)
     {
+        jassert (buffer != nullptr && bytesToRead >= 0);
         DWORD bytesRead = 0;
 
         if (! (finished || isError()))

@@ -51,9 +51,6 @@ public:
         use File::deleteFile() before opening the stream, or use setPosition(0)
         after it's opened (although this won't truncate the file).
 
-        It's better to use File::createOutputStream() to create one of these, rather
-        than using the class directly.
-
         @see TemporaryFile
     */
     FileOutputStream (const File& fileToWriteTo,
@@ -71,12 +68,17 @@ public:
         The result will be ok if the file opened successfully. If an error occurs while
         opening or writing to the file, this will contain an error message.
     */
-    Result getStatus() const                            { return status; }
+    const Result& getStatus() const noexcept            { return status; }
 
     /** Returns true if the stream couldn't be opened for some reason.
         @see getResult()
     */
-    bool failedToOpen() const                           { return status.failed(); }
+    bool failedToOpen() const noexcept                  { return status.failed(); }
+
+    /** Returns true if the stream opened without problems.
+        @see getResult()
+    */
+    bool openedOk() const noexcept                      { return status.wasOk(); }
 
     //==============================================================================
     void flush();

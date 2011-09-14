@@ -42,14 +42,12 @@ class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
     GZIPCompressorHelper (const int compressionLevel, const int windowBits)
-        : data (nullptr),
-          dataSize (0),
+        : buffer ((size_t) gzipCompBufferSize),
           compLevel (compressionLevel),
           strategy (0),
-          setParams (true),
+          isFirstDeflate (true),
           streamIsValid (false),
-          finished (false),
-          shouldFinish (false)
+          finished (false)
     {
         using namespace zlibNamespace;
         zerostruct (stream);
@@ -61,67 +59,74 @@ public:
 
     ~GZIPCompressorHelper()
     {
-        using namespace zlibNamespace;
         if (streamIsValid)
-            deflateEnd (&stream);
+            zlibNamespace::deflateEnd (&stream);
     }
 
-    bool needsInput() const noexcept
+    bool write (const uint8* data, int dataSize, OutputStream& destStream)
     {
-        return dataSize <= 0;
+        // When you call flush() on a gzip stream, the stream is closed, and you can
+        // no longer continue to write data to it!
+        jassert (! finished);
+
+        while (dataSize > 0)
+            if (! doNextBlock (data, dataSize, destStream, Z_NO_FLUSH))
+                return false;
+
+        return true;
     }
 
-    void setInput (const uint8* const newData, const size_t size) noexcept
+    void finish (OutputStream& destStream)
     {
-        data = newData;
-        dataSize = size;
+        const uint8* data = nullptr;
+        int dataSize = 0;
+
+        while (! finished)
+            doNextBlock (data, dataSize, destStream, Z_FINISH);
     }
 
-    int doNextBlock (uint8* const dest, const int destSize) noexcept
+private:
+    enum { gzipCompBufferSize = 32768 };
+
+    HeapBlock <zlibNamespace::Bytef> buffer;
+    zlibNamespace::z_stream stream;
+    int compLevel, strategy;
+    bool isFirstDeflate, streamIsValid, finished;
+
+    bool doNextBlock (const uint8*& data, int& dataSize, OutputStream& destStream, const int flushMode)
     {
         using namespace zlibNamespace;
         if (streamIsValid)
         {
-            stream.next_in = const_cast <uint8*> (data);
-            stream.next_out = dest;
-            stream.avail_in = (z_uInt) dataSize;
-            stream.avail_out = (z_uInt) destSize;
+            stream.next_in   = const_cast <uint8*> (data);
+            stream.next_out  = buffer;
+            stream.avail_in  = (z_uInt) dataSize;
+            stream.avail_out = (z_uInt) gzipCompBufferSize;
 
-            const int result = setParams ? deflateParams (&stream, compLevel, strategy)
-                                         : deflate (&stream, shouldFinish ? Z_FINISH : Z_NO_FLUSH);
-
-            setParams = false;
+            const int result = isFirstDeflate ? deflateParams (&stream, compLevel, strategy)
+                                              : deflate (&stream, flushMode);
+            isFirstDeflate = false;
 
             switch (result)
             {
-            case Z_STREAM_END:
-                finished = true;
-                // Deliberate fall-through..
-            case Z_OK:
-                data += dataSize - stream.avail_in;
-                dataSize = stream.avail_in;
+                case Z_STREAM_END:
+                    finished = true;
+                    // Deliberate fall-through..
+                case Z_OK:
+                {
+                    data += dataSize - stream.avail_in;
+                    dataSize = (int) stream.avail_in;
+                    const int bytesDone = (int) (gzipCompBufferSize - stream.avail_out);
+                    return bytesDone <= 0 || destStream.write (buffer, bytesDone);
+                }
 
-                return (int) (destSize - stream.avail_out);
-
-            default:
-                break;
+                default:
+                    break;
             }
         }
 
-        return 0;
+        return false;
     }
-
-    enum { gzipCompBufferSize = 32768 };
-
-private:
-    zlibNamespace::z_stream stream;
-    const uint8* data;
-    size_t dataSize;
-    int compLevel, strategy;
-    bool setParams, streamIsValid;
-
-public:
-    bool finished, shouldFinish;
 };
 
 //==============================================================================
@@ -129,9 +134,10 @@ GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const dest
                                                         int compressionLevel,
                                                         const bool deleteDestStream,
                                                         const int windowBits)
-  : destStream (destStream_, deleteDestStream),
-    buffer ((size_t) GZIPCompressorHelper::gzipCompBufferSize)
+    : destStream (destStream_, deleteDestStream)
 {
+    jassert (destStream_ != nullptr);
+
     if (compressionLevel < 1 || compressionLevel > 9)
         compressionLevel = -1;
 
@@ -140,48 +146,20 @@ GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const dest
 
 GZIPCompressorOutputStream::~GZIPCompressorOutputStream()
 {
-    flushInternal();
-}
-
-//==============================================================================
-void GZIPCompressorOutputStream::flushInternal()
-{
-    if (! helper->finished)
-    {
-        helper->shouldFinish = true;
-
-        while (! helper->finished)
-            doNextBlock();
-    }
-
-    destStream->flush();
+    flush();
 }
 
 void GZIPCompressorOutputStream::flush()
 {
-    flushInternal();
+    helper->finish (*destStream);
+    destStream->flush();
 }
 
 bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)
 {
-    if (! helper->finished)
-    {
-        helper->setInput (static_cast <const uint8*> (destBuffer), (size_t) howMany);
+    jassert (destBuffer != nullptr && howMany >= 0);
 
-        while (! helper->needsInput())
-        {
-            if (! doNextBlock())
-                return false;
-        }
-    }
-
-    return true;
-}
-
-bool GZIPCompressorOutputStream::doNextBlock()
-{
-    const int len = helper->doNextBlock (buffer, (int) GZIPCompressorHelper::gzipCompBufferSize);
-    return len <= 0 || destStream->write (buffer, len);
+    return helper->write (static_cast <const uint8*> (destBuffer), howMany, *destStream);
 }
 
 int64 GZIPCompressorOutputStream::getPosition()
@@ -231,7 +209,7 @@ public:
                 MemoryInputStream compressedInput (compressed.getData(), compressed.getDataSize(), false);
                 GZIPDecompressorInputStream unzipper (compressedInput);
 
-                uncompressed.writeFromInputStream (unzipper, -1);
+                uncompressed << unzipper;
             }
 
             expectEquals ((int) uncompressed.getDataSize(),

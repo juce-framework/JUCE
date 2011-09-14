@@ -827,8 +827,7 @@ private:
     int velocityModeThreshold;
     float rotaryStart, rotaryEnd;
     int numDecimalPlaces;
-    Point<int> mousePosWhenLastDragged;
-    int mouseDragStartX, mouseDragStartY;
+    Point<int> mouseDragStartPos, mousePosWhenLastDragged;
     int sliderRegionStart, sliderRegionSize;
     int sliderBeingDragged;
     int pixelsForFullDragExtent;
@@ -854,6 +853,11 @@ private:
     ScopedPointer <PopupDisplayComponent> popupDisplay;
     Component* parentForPopupDisplay;
 
+    void showPopupMenu();
+    int getThumbIndexAt (const MouseEvent&);
+    void handleRotaryDrag (const MouseEvent&);
+    void handleAbsoluteDrag (const MouseEvent&);
+    void handleVelocityDrag (const MouseEvent&);
     float getLinearSliderPos (double value);
     void restoreMouseIfHidden();
     void sendDragStart();

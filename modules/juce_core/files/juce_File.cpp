@@ -688,27 +688,21 @@ FileInputStream* File::createInputStream() const
 
 FileOutputStream* File::createOutputStream (const int bufferSize) const
 {
-    ScopedPointer <FileOutputStream> out (new FileOutputStream (*this, bufferSize));
+    ScopedPointer<FileOutputStream> out (new FileOutputStream (*this, bufferSize));
 
-    if (out->failedToOpen())
-        return nullptr;
-
-    return out.release();
+    return out->failedToOpen() ? nullptr
+                               : out.release();
 }
 
 //==============================================================================
 bool File::appendData (const void* const dataToAppend,
                        const int numberOfBytes) const
 {
-    if (numberOfBytes > 0)
-    {
-        FileOutputStream out (*this, 8192);
+    if (numberOfBytes <= 0)
+        return true;
 
-        return (! out.failedToOpen())
-                 && out.write (dataToAppend, numberOfBytes);
-    }
-
-    return true;
+    FileOutputStream out (*this, 8192);
+    return out.openedOk() && out.write (dataToAppend, numberOfBytes);
 }
 
 bool File::replaceWithData (const void* const dataToWrite,
@@ -728,15 +722,13 @@ bool File::appendText (const String& text,
                        const bool asUnicode,
                        const bool writeUnicodeHeaderBytes) const
 {
-    const ScopedPointer <FileOutputStream> out (createOutputStream());
+    FileOutputStream out (*this);
 
-    if (out != nullptr)
-    {
-        out->writeText (text, asUnicode, writeUnicodeHeaderBytes);
-        return true;
-    }
+    if (out.failedToOpen())
+        return false;
 
-    return false;
+    out.writeText (text, asUnicode, writeUnicodeHeaderBytes);
+    return true;
 }
 
 bool File::replaceWithText (const String& textToWrite,

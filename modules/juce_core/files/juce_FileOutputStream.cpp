@@ -84,6 +84,8 @@ void FileOutputStream::flush()
 
 bool FileOutputStream::write (const void* const src, const int numBytes)
 {
+    jassert (src != nullptr && numBytes >= 0);
+
     if (bytesInBuffer + numBytes < bufferSize)
     {
         memcpy (buffer + bytesInBuffer, src, (size_t) numBytes);

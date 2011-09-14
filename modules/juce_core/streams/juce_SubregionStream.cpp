@@ -61,6 +61,8 @@ bool SubregionStream::setPosition (int64 newPosition)
 
 int SubregionStream::read (void* destBuffer, int maxBytesToRead)
 {
+    jassert (destBuffer != nullptr && maxBytesToRead >= 0);
+
     if (lengthOfSourceStream < 0)
     {
         return source->read (destBuffer, maxBytesToRead);

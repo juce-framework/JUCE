@@ -192,52 +192,49 @@ int64 GZIPDecompressorInputStream::getTotalLength()
 
 int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 {
-    if ((howMany > 0) && ! isEof)
+    jassert (destBuffer != nullptr && howMany >= 0);
+
+    if (howMany > 0 && ! isEof)
     {
-        jassert (destBuffer != nullptr);
+        int numRead = 0;
+        uint8* d = static_cast <uint8*> (destBuffer);
 
-        if (destBuffer != nullptr)
+        while (! helper->error)
         {
-            int numRead = 0;
-            uint8* d = static_cast <uint8*> (destBuffer);
+            const int n = helper->doNextBlock (d, howMany);
+            currentPos += n;
 
-            while (! helper->error)
+            if (n == 0)
             {
-                const int n = helper->doNextBlock (d, howMany);
-                currentPos += n;
-
-                if (n == 0)
+                if (helper->finished || helper->needsDictionary)
                 {
-                    if (helper->finished || helper->needsDictionary)
+                    isEof = true;
+                    return numRead;
+                }
+
+                if (helper->needsInput())
+                {
+                    activeBufferSize = sourceStream->read (buffer, (int) GZIPDecompressHelper::gzipDecompBufferSize);
+
+                    if (activeBufferSize > 0)
+                    {
+                        helper->setInput (buffer, (size_t) activeBufferSize);
+                    }
+                    else
                     {
                         isEof = true;
                         return numRead;
                     }
-
-                    if (helper->needsInput())
-                    {
-                        activeBufferSize = sourceStream->read (buffer, (int) GZIPDecompressHelper::gzipDecompBufferSize);
-
-                        if (activeBufferSize > 0)
-                        {
-                            helper->setInput (buffer, (size_t) activeBufferSize);
-                        }
-                        else
-                        {
-                            isEof = true;
-                            return numRead;
-                        }
-                    }
                 }
-                else
-                {
-                    numRead += n;
-                    howMany -= n;
-                    d += n;
+            }
+            else
+            {
+                numRead += n;
+                howMany -= n;
+                d += n;
 
-                    if (howMany <= 0)
-                        return numRead;
-                }
+                if (howMany <= 0)
+                    return numRead;
             }
         }
     }

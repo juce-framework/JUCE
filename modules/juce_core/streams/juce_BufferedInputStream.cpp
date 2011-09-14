@@ -131,6 +131,8 @@ void BufferedInputStream::ensureBuffered()
 
 int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
 {
+    jassert (destBuffer != nullptr && maxBytesToRead >= 0);
+
     if (position >= bufferStart
          && position + maxBytesToRead <= lastReadPos)
     {

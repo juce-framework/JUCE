@@ -298,11 +298,13 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock&
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileToRead)
 {
-    const ScopedPointer<FileInputStream> in (fileToRead.createInputStream());
+    FileInputStream in (fileToRead);
+    return stream << in;
+}
 
-    if (in != nullptr)
-        stream.writeFromInputStream (*in, -1);
-
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, InputStream& streamToRead)
+{
+    stream.writeFromInputStream (streamToRead, -1);
     return stream;
 }
 

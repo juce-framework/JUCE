@@ -35,6 +35,10 @@
 /**
     A stream which uses zlib to compress the data written into it.
 
+    Important note: When you call flush() on a GZIPCompressorOutputStream,
+    the gzip data is closed - this means that no more data can be written to
+    it, and any subsequent attempts to call write() will cause an assertion.
+
     @see GZIPDecompressorInputStream
 */
 class JUCE_API  GZIPCompressorOutputStream  : public OutputStream
@@ -64,7 +68,13 @@ public:
     ~GZIPCompressorOutputStream();
 
     //==============================================================================
+    /** Flushes and closes the stream.
+        Note that unlike most streams, when you call flush() on a GZIPCompressorOutputStream,
+        the stream is closed - this means that no more data can be written to it, and any
+        subsequent attempts to call write() will cause an assertion.
+    */
     void flush();
+
     int64 getPosition();
     bool setPosition (int64 newPosition);
     bool write (const void* destBuffer, int howMany);
@@ -81,12 +91,10 @@ public:
 private:
     //==============================================================================
     OptionalScopedPointer<OutputStream> destStream;
-    HeapBlock <uint8> buffer;
+
     class GZIPCompressorHelper;
     friend class ScopedPointer <GZIPCompressorHelper>;
     ScopedPointer <GZIPCompressorHelper> helper;
-    bool doNextBlock();
-    void flushInternal();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPCompressorOutputStream);
 };

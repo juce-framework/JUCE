@@ -354,60 +354,65 @@ int ZipFile::findEndOfZipEntryTable (InputStream& input, int& numEntries)
     return 0;
 }
 
-bool ZipFile::uncompressTo (const File& targetDirectory,
-                            const bool shouldOverwriteFiles)
+Result ZipFile::uncompressTo (const File& targetDirectory,
+                              const bool shouldOverwriteFiles)
 {
     for (int i = 0; i < entries.size(); ++i)
-        if (! uncompressEntry (i, targetDirectory, shouldOverwriteFiles))
-            return false;
-
-    return true;
-}
-
-bool ZipFile::uncompressEntry (const int index,
-                               const File& targetDirectory,
-                               bool shouldOverwriteFiles)
-{
-    const ZipEntryInfo* zei = entries [index];
-
-    if (zei != nullptr)
     {
-        const File targetFile (targetDirectory.getChildFile (zei->entry.filename));
-
-        if (zei->entry.filename.endsWithChar ('/'))
-        {
-            return targetFile.createDirectory(); // (entry is a directory, not a file)
-        }
-        else
-        {
-            ScopedPointer<InputStream> in (createStreamForEntry (index));
-
-            if (in != nullptr)
-            {
-                if (shouldOverwriteFiles && ! targetFile.deleteFile())
-                    return false;
-
-                if ((! targetFile.exists()) && targetFile.getParentDirectory().createDirectory())
-                {
-                    ScopedPointer<FileOutputStream> out (targetFile.createOutputStream());
-
-                    if (out != nullptr)
-                    {
-                        out->writeFromInputStream (*in, -1);
-                        out = nullptr;
-
-                        targetFile.setCreationTime (zei->entry.fileTime);
-                        targetFile.setLastModificationTime (zei->entry.fileTime);
-                        targetFile.setLastAccessTime (zei->entry.fileTime);
-
-                        return true;
-                    }
-                }
-            }
-        }
+        Result result (uncompressEntry (i, targetDirectory, shouldOverwriteFiles));
+        if (result.failed())
+            return result;
     }
 
-    return false;
+    return Result::ok();
+}
+
+Result ZipFile::uncompressEntry (const int index,
+                                 const File& targetDirectory,
+                                 bool shouldOverwriteFiles)
+{
+    const ZipEntryInfo* zei = entries.getUnchecked (index);
+
+    const File targetFile (targetDirectory.getChildFile (zei->entry.filename));
+
+    if (zei->entry.filename.endsWithChar ('/'))
+    {
+        return targetFile.createDirectory(); // (entry is a directory, not a file)
+    }
+    else
+    {
+        ScopedPointer<InputStream> in (createStreamForEntry (index));
+
+        if (in == nullptr)
+            return Result::fail ("Failed to open the zip file for reading");
+
+        if (targetFile.exists())
+        {
+            if (! shouldOverwriteFiles)
+                return Result::ok();
+
+            if (! targetFile.deleteFile())
+                return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
+        }
+
+        if (! targetFile.getParentDirectory().createDirectory())
+            return Result::fail ("Failed to create target folder: " + targetFile.getParentDirectory().getFullPathName());
+
+        {
+            FileOutputStream out (targetFile);
+
+            if (out.failedToOpen())
+                return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
+
+            out << *in;
+        }
+
+        targetFile.setCreationTime (zei->entry.fileTime);
+        targetFile.setLastModificationTime (zei->entry.fileTime);
+        targetFile.setLastAccessTime (zei->entry.fileTime);
+
+        return Result::ok();
+    }
 }
 
 
@@ -485,17 +490,17 @@ private:
     bool writeSource (OutputStream& target)
     {
         checksum = 0;
-        ScopedPointer<FileInputStream> input (file.createInputStream());
+        FileInputStream input (file);
 
-        if (input == nullptr)
+        if (input.failedToOpen())
             return false;
 
         const int bufferSize = 2048;
         HeapBlock<unsigned char> buffer (bufferSize);
 
-        while (! input->isExhausted())
+        while (! input.isExhausted())
         {
-            const int bytesRead = input->read (buffer, bufferSize);
+            const int bytesRead = input.read (buffer, bufferSize);
 
             if (bytesRead < 0)
                 return false;

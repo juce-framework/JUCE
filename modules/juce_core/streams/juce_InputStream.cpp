@@ -208,7 +208,7 @@ int InputStream::readIntoMemoryBlock (MemoryBlock& block, int numBytes)
 String InputStream::readEntireStreamAsString()
 {
     MemoryOutputStream mo;
-    mo.writeFromInputStream (*this, -1);
+    mo << *this;
     return mo.toString();
 }
 

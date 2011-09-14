@@ -136,6 +136,8 @@ public:
 
     int read (void* buffer, int bytesToRead)
     {
+        jassert (buffer != nullptr && bytesToRead >= 0);
+
         if (stream == nullptr)
             return 0;
 

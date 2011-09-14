@@ -59,16 +59,16 @@ public:
     virtual bool isExhausted() = 0;
 
     //==============================================================================
-    /** Reads a set of bytes from the stream into a memory buffer.
+    /** Reads some data from the stream into a memory buffer.
 
         This is the only read method that subclasses actually need to implement, as the
         InputStream base class implements the other read methods in terms of this one (although
         it's often more efficient for subclasses to implement them directly).
 
-        @param destBuffer       the destination buffer for the data
+        @param destBuffer       the destination buffer for the data. This must not be null.
         @param maxBytesToRead   the maximum number of bytes to read - make sure the
                                 memory block passed in is big enough to contain this
-                                many bytes.
+                                many bytes. This value must not be negative.
 
         @returns    the actual number of bytes that were read, which may be less than
                     maxBytesToRead if the stream is exhausted before it gets that far

@@ -145,24 +145,25 @@ public:
 
         @param targetDirectory      the root folder to uncompress to
         @param shouldOverwriteFiles whether to overwrite existing files with similarly-named ones
-        @returns true if all the files are successfully unzipped
+        @returns success if the file is successfully unzipped
     */
-    bool uncompressTo (const File& targetDirectory,
-                       bool shouldOverwriteFiles = true);
+    Result uncompressTo (const File& targetDirectory,
+                         bool shouldOverwriteFiles = true);
 
     /** Uncompresses one of the entries from the zip file.
 
         This will expand the entry and write it in a target directory. The entry's path is used to
         determine which subfolder of the target should contain the new file.
 
-        @param index                the index of the entry to uncompress
+        @param index                the index of the entry to uncompress - this must be a valid index
+                                    between 0 and (getNumEntries() - 1).
         @param targetDirectory      the root folder to uncompress into
         @param shouldOverwriteFiles whether to overwrite existing files with similarly-named ones
-        @returns true if the files is successfully unzipped
+        @returns success if all the files are successfully unzipped
     */
-    bool uncompressEntry (int index,
-                          const File& targetDirectory,
-                          bool shouldOverwriteFiles = true);
+    Result uncompressEntry (int index,
+                            const File& targetDirectory,
+                            bool shouldOverwriteFiles = true);
 
 
     //==============================================================================

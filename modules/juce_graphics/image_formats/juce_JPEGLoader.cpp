@@ -241,7 +241,7 @@ Image JPEGImageFormat::decodeImage (InputStream& in)
     using namespace JPEGHelpers;
 
     MemoryOutputStream mb;
-    mb.writeFromInputStream (in, -1);
+    mb << in;
 
     Image image;
 

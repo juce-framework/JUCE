@@ -30,7 +30,6 @@ class Slider::PopupDisplayComponent  : public BubbleComponent,
                                        public Timer
 {
 public:
-    //==============================================================================
     PopupDisplayComponent (Slider& owner_)
         : owner (owner_),
           font (15.0f, Font::bold)
@@ -53,12 +52,7 @@ public:
 
     void updatePosition (const String& newText)
     {
-        if (text != newText)
-        {
-            text = newText;
-            repaint();
-        }
-
+        text = newText;
         BubbleComponent::setPosition (&owner);
         repaint();
     }
@@ -962,36 +956,18 @@ void Slider::resized()
 
         if (incDecButtonsSideBySide)
         {
-            decButton->setBounds (buttonRect.getX(),
-                                  buttonRect.getY(),
-                                  buttonRect.getWidth() / 2,
-                                  buttonRect.getHeight());
-
+            decButton->setBounds (buttonRect.removeFromLeft (buttonRect.getWidth() / 2));
             decButton->setConnectedEdges (Button::ConnectedOnRight);
-
-            incButton->setBounds (buttonRect.getCentreX(),
-                                  buttonRect.getY(),
-                                  buttonRect.getWidth() / 2,
-                                  buttonRect.getHeight());
-
             incButton->setConnectedEdges (Button::ConnectedOnLeft);
         }
         else
         {
-            incButton->setBounds (buttonRect.getX(),
-                                  buttonRect.getY(),
-                                  buttonRect.getWidth(),
-                                  buttonRect.getHeight() / 2);
-
-            incButton->setConnectedEdges (Button::ConnectedOnBottom);
-
-            decButton->setBounds (buttonRect.getX(),
-                                  buttonRect.getCentreY(),
-                                  buttonRect.getWidth(),
-                                  buttonRect.getHeight() / 2);
-
+            decButton->setBounds (buttonRect.removeFromBottom (buttonRect.getHeight() / 2));
             decButton->setConnectedEdges (Button::ConnectedOnTop);
+            incButton->setConnectedEdges (Button::ConnectedOnBottom);
         }
+
+        incButton->setBounds (buttonRect);
     }
 }
 
@@ -1000,52 +976,90 @@ void Slider::focusOfChildComponentChanged (FocusChangeType)
     repaint();
 }
 
-static void sliderMenuCallback (int result, Slider* slider)
+namespace SliderHelpers
 {
-    if (slider != nullptr)
+    double smallestAngleBetween (double a1, double a2) noexcept
     {
-        switch (result)
+        return jmin (std::abs (a1 - a2),
+                     std::abs (a1 + double_Pi * 2.0 - a2),
+                     std::abs (a2 + double_Pi * 2.0 - a1));
+    }
+
+    void sliderMenuCallback (int result, Slider* slider)
+    {
+        if (slider != nullptr)
         {
-            case 1: slider->setVelocityBasedMode (! slider->getVelocityBasedMode()); break;
-            case 2: slider->setSliderStyle (Slider::Rotary); break;
-            case 3: slider->setSliderStyle (Slider::RotaryHorizontalDrag); break;
-            case 4: slider->setSliderStyle (Slider::RotaryVerticalDrag); break;
-            default: break;
+            switch (result)
+            {
+                case 1: slider->setVelocityBasedMode (! slider->getVelocityBasedMode()); break;
+                case 2: slider->setSliderStyle (Slider::Rotary); break;
+                case 3: slider->setSliderStyle (Slider::RotaryHorizontalDrag); break;
+                case 4: slider->setSliderStyle (Slider::RotaryVerticalDrag); break;
+                default: break;
+            }
         }
     }
+}
+
+void Slider::showPopupMenu()
+{
+    menuShown = true;
+
+    PopupMenu m;
+    m.setLookAndFeel (&getLookAndFeel());
+    m.addItem (1, TRANS ("velocity-sensitive mode"), true, isVelocityBased);
+    m.addSeparator();
+
+    if (style == Rotary || style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
+    {
+        PopupMenu rotaryMenu;
+        rotaryMenu.addItem (2, TRANS ("use circular dragging"), true, style == Rotary);
+        rotaryMenu.addItem (3, TRANS ("use left-right dragging"), true, style == RotaryHorizontalDrag);
+        rotaryMenu.addItem (4, TRANS ("use up-down dragging"), true, style == RotaryVerticalDrag);
+
+        m.addSubMenu (TRANS ("rotary mode"), rotaryMenu);
+    }
+
+    m.showMenuAsync (PopupMenu::Options(),
+                     ModalCallbackFunction::forComponent (SliderHelpers::sliderMenuCallback, this));
+}
+
+int Slider::getThumbIndexAt (const MouseEvent& e)
+{
+    const bool isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
+    const bool isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
+
+    if (isTwoValue || isThreeValue)
+    {
+        const float mousePos = (float) (isVertical() ? e.y : e.x);
+
+        const float normalPosDistance = std::abs (getLinearSliderPos (currentValue.getValue()) - mousePos);
+        const float minPosDistance    = std::abs (getLinearSliderPos (valueMin.getValue()) - 0.1f - mousePos);
+        const float maxPosDistance    = std::abs (getLinearSliderPos (valueMax.getValue()) + 0.1f - mousePos);
+
+        if (isTwoValue)
+            return maxPosDistance <= minPosDistance ? 2 : 1;
+
+        if (normalPosDistance >= minPosDistance && maxPosDistance >= minPosDistance)
+            return 1;
+        else if (normalPosDistance >= maxPosDistance)
+            return 2;
+    }
+
+    return 0;
 }
 
 void Slider::mouseDown (const MouseEvent& e)
 {
     mouseWasHidden = false;
     incDecDragged = false;
-    mousePosWhenLastDragged = e.getPosition();
-    mouseDragStartX = e.getMouseDownX();
-    mouseDragStartY = e.getMouseDownY();
+    mouseDragStartPos = mousePosWhenLastDragged = e.getPosition();
 
     if (isEnabled())
     {
         if (e.mods.isPopupMenu() && menuEnabled)
         {
-            menuShown = true;
-
-            PopupMenu m;
-            m.setLookAndFeel (&getLookAndFeel());
-            m.addItem (1, TRANS ("velocity-sensitive mode"), true, isVelocityBased);
-            m.addSeparator();
-
-            if (style == Rotary || style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
-            {
-                PopupMenu rotaryMenu;
-                rotaryMenu.addItem (2, TRANS ("use circular dragging"), true, style == Rotary);
-                rotaryMenu.addItem (3, TRANS ("use left-right dragging"), true, style == RotaryHorizontalDrag);
-                rotaryMenu.addItem (4, TRANS ("use up-down dragging"), true, style == RotaryVerticalDrag);
-
-                m.addSubMenu (TRANS ("rotary mode"), rotaryMenu);
-            }
-
-            m.showMenuAsync (PopupMenu::Options(),
-                             ModalCallbackFunction::forComponent (sliderMenuCallback, this));
+            showPopupMenu();
         }
         else if (maximum > minimum)
         {
@@ -1054,44 +1068,16 @@ void Slider::mouseDown (const MouseEvent& e)
             if (valueBox != nullptr)
                 valueBox->hideEditor (true);
 
-            sliderBeingDragged = 0;
-
-            if (style == TwoValueHorizontal
-                 || style == TwoValueVertical
-                 || style == ThreeValueHorizontal
-                 || style == ThreeValueVertical)
-            {
-                const float mousePos = (float) (isVertical() ? e.y : e.x);
-
-                const float normalPosDistance = std::abs (getLinearSliderPos (currentValue.getValue()) - mousePos);
-                const float minPosDistance = std::abs (getLinearSliderPos (valueMin.getValue()) - 0.1f - mousePos);
-                const float maxPosDistance = std::abs (getLinearSliderPos (valueMax.getValue()) + 0.1f - mousePos);
-
-                if (style == TwoValueHorizontal || style == TwoValueVertical)
-                {
-                    if (maxPosDistance <= minPosDistance)
-                        sliderBeingDragged = 2;
-                    else
-                        sliderBeingDragged = 1;
-                }
-                else if (style == ThreeValueHorizontal || style == ThreeValueVertical)
-                {
-                    if (normalPosDistance >= minPosDistance && maxPosDistance >= minPosDistance)
-                        sliderBeingDragged = 1;
-                    else if (normalPosDistance >= maxPosDistance)
-                        sliderBeingDragged = 2;
-                }
-            }
+            sliderBeingDragged = getThumbIndexAt (e);
 
             minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
 
             lastAngle = rotaryStart + (rotaryEnd - rotaryStart)
                                         * valueToProportionOfLength (currentValue.getValue());
 
-            valueWhenLastDragged = ((sliderBeingDragged == 2) ? valueMax
-                                                              : ((sliderBeingDragged == 1) ? valueMin
-                                                                                           : currentValue)).getValue();
-
+            valueWhenLastDragged = (sliderBeingDragged == 2 ? valueMax
+                                                            : (sliderBeingDragged == 1 ? valueMin
+                                                                                       : currentValue)).getValue();
             valueOnMouseDown = valueWhenLastDragged;
 
             if (popupDisplayEnabled)
@@ -1108,7 +1094,6 @@ void Slider::mouseDown (const MouseEvent& e)
             }
 
             sendDragStart();
-
             mouseDrag (e);
         }
     }
@@ -1150,10 +1135,9 @@ void Slider::restoreMouseIfHidden()
         for (int i = Desktop::getInstance().getNumMouseSources(); --i >= 0;)
             Desktop::getInstance().getMouseSource(i)->enableUnboundedMouseMovement (false);
 
-        const double pos = (sliderBeingDragged == 2) ? getMaxValue()
-                                                     : ((sliderBeingDragged == 1) ? getMinValue()
-                                                                                  : (double) currentValue.getValue());
-
+        const double pos = sliderBeingDragged == 2 ? getMaxValue()
+                                                   : (sliderBeingDragged == 1 ? getMinValue()
+                                                                              : (double) currentValue.getValue());
         Point<int> mousePos;
 
         if (style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
@@ -1194,13 +1178,122 @@ void Slider::modifierKeysChanged (const ModifierKeys& modifiers)
     }
 }
 
-namespace SliderHelpers
+void Slider::handleRotaryDrag (const MouseEvent& e)
 {
-    double smallestAngleBetween (double a1, double a2) noexcept
+    const int dx = e.x - sliderRect.getCentreX();
+    const int dy = e.y - sliderRect.getCentreY();
+
+    if (dx * dx + dy * dy > 25)
     {
-        return jmin (std::abs (a1 - a2),
-                     std::abs (a1 + double_Pi * 2.0 - a2),
-                     std::abs (a2 + double_Pi * 2.0 - a1));
+        double angle = std::atan2 ((double) dx, (double) -dy);
+        while (angle < 0.0)
+            angle += double_Pi * 2.0;
+
+        if (rotaryStop && ! e.mouseWasClicked())
+        {
+            if (std::abs (angle - lastAngle) > double_Pi)
+            {
+                if (angle >= lastAngle)
+                    angle -= double_Pi * 2.0;
+                else
+                    angle += double_Pi * 2.0;
+            }
+
+            if (angle >= lastAngle)
+                angle = jmin (angle, (double) jmax (rotaryStart, rotaryEnd));
+            else
+                angle = jmax (angle, (double) jmin (rotaryStart, rotaryEnd));
+        }
+        else
+        {
+            while (angle < rotaryStart)
+                angle += double_Pi * 2.0;
+
+            if (angle > rotaryEnd)
+            {
+                if (SliderHelpers::smallestAngleBetween (angle, rotaryStart)
+                     <= SliderHelpers::smallestAngleBetween (angle, rotaryEnd))
+                    angle = rotaryStart;
+                else
+                    angle = rotaryEnd;
+            }
+        }
+
+        const double proportion = (angle - rotaryStart) / (rotaryEnd - rotaryStart);
+        valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, proportion));
+        lastAngle = angle;
+    }
+}
+
+void Slider::handleAbsoluteDrag (const MouseEvent& e)
+{
+    const int mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.x : e.y;
+
+    double scaledMousePos = (mousePos - sliderRegionStart) / (double) sliderRegionSize;
+
+    if (style == RotaryHorizontalDrag
+        || style == RotaryVerticalDrag
+        || style == IncDecButtons
+        || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar)
+            && ! snapsToMousePos))
+    {
+        const int mouseDiff = (style == RotaryHorizontalDrag
+                                 || style == LinearHorizontal
+                                 || style == LinearBar
+                                 || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
+                                ? e.x - mouseDragStartPos.getX()
+                                : mouseDragStartPos.getY() - e.y;
+
+        double newPos = valueToProportionOfLength (valueOnMouseDown)
+                           + mouseDiff * (1.0 / pixelsForFullDragExtent);
+
+        valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, newPos));
+
+        if (style == IncDecButtons)
+        {
+            incButton->setState (mouseDiff < 0 ? Button::buttonNormal : Button::buttonDown);
+            decButton->setState (mouseDiff > 0 ? Button::buttonNormal : Button::buttonDown);
+        }
+    }
+    else
+    {
+        if (isVertical())
+            scaledMousePos = 1.0 - scaledMousePos;
+
+        valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, scaledMousePos));
+    }
+}
+
+void Slider::handleVelocityDrag (const MouseEvent& e)
+{
+    const int mouseDiff = (isHorizontal() || style == RotaryHorizontalDrag
+                             || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
+                            ? e.x - mousePosWhenLastDragged.getX()
+                            : e.y - mousePosWhenLastDragged.getY();
+
+    const double maxSpeed = jmax (200, sliderRegionSize);
+    double speed = jlimit (0.0, maxSpeed, (double) abs (mouseDiff));
+
+    if (speed != 0)
+    {
+        speed = 0.2 * velocityModeSensitivity
+                  * (1.0 + std::sin (double_Pi * (1.5 + jmin (0.5, velocityModeOffset
+                                                                + jmax (0.0, (double) (speed - velocityModeThreshold))
+                                                                    / maxSpeed))));
+
+        if (mouseDiff < 0)
+            speed = -speed;
+
+        if (isVertical() || style == RotaryVerticalDrag
+             || (style == IncDecButtons && ! incDecDragDirectionIsHorizontal()))
+            speed = -speed;
+
+        const double currentPos = valueToProportionOfLength (valueWhenLastDragged);
+
+        valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + speed));
+
+        e.source.enableUnboundedMouseMovement (true, false);
+        mouseWasHidden = true;
     }
 }
 
@@ -1208,144 +1301,31 @@ void Slider::mouseDrag (const MouseEvent& e)
 {
     if (isEnabled()
          && (! menuShown)
-         && (maximum > minimum))
+         && (maximum > minimum)
+         && ! (style == LinearBar && e.mouseWasClicked() && valueBox != nullptr && valueBox->isEditable()))
     {
         if (style == Rotary)
         {
-            const int dx = e.x - sliderRect.getCentreX();
-            const int dy = e.y - sliderRect.getCentreY();
-
-            if (dx * dx + dy * dy > 25)
-            {
-                double angle = std::atan2 ((double) dx, (double) -dy);
-                while (angle < 0.0)
-                    angle += double_Pi * 2.0;
-
-                if (rotaryStop && ! e.mouseWasClicked())
-                {
-                    if (std::abs (angle - lastAngle) > double_Pi)
-                    {
-                        if (angle >= lastAngle)
-                            angle -= double_Pi * 2.0;
-                        else
-                            angle += double_Pi * 2.0;
-                    }
-
-                    if (angle >= lastAngle)
-                        angle = jmin (angle, (double) jmax (rotaryStart, rotaryEnd));
-                    else
-                        angle = jmax (angle, (double) jmin (rotaryStart, rotaryEnd));
-                }
-                else
-                {
-                    while (angle < rotaryStart)
-                        angle += double_Pi * 2.0;
-
-                    if (angle > rotaryEnd)
-                    {
-                        if (SliderHelpers::smallestAngleBetween (angle, rotaryStart)
-                             <= SliderHelpers::smallestAngleBetween (angle, rotaryEnd))
-                            angle = rotaryStart;
-                        else
-                            angle = rotaryEnd;
-                    }
-                }
-
-                const double proportion = (angle - rotaryStart) / (rotaryEnd - rotaryStart);
-
-                valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, proportion));
-
-                lastAngle = angle;
-            }
+            handleRotaryDrag (e);
         }
         else
         {
-            if (style == LinearBar && e.mouseWasClicked()
-                 && valueBox != nullptr && valueBox->isEditable())
-                return;
-
             if (style == IncDecButtons && ! incDecDragged)
             {
                 if (e.getDistanceFromDragStart() < 10 || e.mouseWasClicked())
                     return;
 
                 incDecDragged = true;
-                mouseDragStartX = e.x;
-                mouseDragStartY = e.y;
+                mouseDragStartPos = e.getPosition();
             }
 
-            if ((isVelocityBased == (userKeyOverridesVelocity ? e.mods.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier | ModifierKeys::altModifier)
-                                                              : false))
-                || ((maximum - minimum) / sliderRegionSize < interval))
-            {
-                const int mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.x : e.y;
-
-                double scaledMousePos = (mousePos - sliderRegionStart) / (double) sliderRegionSize;
-
-                if (style == RotaryHorizontalDrag
-                    || style == RotaryVerticalDrag
-                    || style == IncDecButtons
-                    || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar)
-                        && ! snapsToMousePos))
-                {
-                    const int mouseDiff = (style == RotaryHorizontalDrag
-                                             || style == LinearHorizontal
-                                             || style == LinearBar
-                                             || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                            ? e.x - mouseDragStartX
-                                            : mouseDragStartY - e.y;
-
-                    double newPos = valueToProportionOfLength (valueOnMouseDown)
-                                       + mouseDiff * (1.0 / pixelsForFullDragExtent);
-
-                    valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, newPos));
-
-                    if (style == IncDecButtons)
-                    {
-                        incButton->setState (mouseDiff < 0 ? Button::buttonNormal : Button::buttonDown);
-                        decButton->setState (mouseDiff > 0 ? Button::buttonNormal : Button::buttonDown);
-                    }
-                }
-                else
-                {
-                    if (isVertical())
-                        scaledMousePos = 1.0 - scaledMousePos;
-
-                    valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, scaledMousePos));
-                }
-            }
+            if (isVelocityBased == (userKeyOverridesVelocity && e.mods.testFlags (ModifierKeys::ctrlModifier
+                                                                                    | ModifierKeys::commandModifier
+                                                                                    | ModifierKeys::altModifier))
+                 || (maximum - minimum) / sliderRegionSize < interval)
+                handleAbsoluteDrag (e);
             else
-            {
-                const int mouseDiff = (isHorizontal() || style == RotaryHorizontalDrag
-                                         || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                        ? e.x - mousePosWhenLastDragged.getX()
-                                        : e.y - mousePosWhenLastDragged.getY();
-
-                const double maxSpeed = jmax (200, sliderRegionSize);
-                double speed = jlimit (0.0, maxSpeed, (double) abs (mouseDiff));
-
-                if (speed != 0)
-                {
-                    speed = 0.2 * velocityModeSensitivity
-                              * (1.0 + std::sin (double_Pi * (1.5 + jmin (0.5, velocityModeOffset
-                                                                            + jmax (0.0, (double) (speed - velocityModeThreshold))
-                                                                                / maxSpeed))));
-
-                    if (mouseDiff < 0)
-                        speed = -speed;
-
-                    if (isVertical() || style == RotaryVerticalDrag
-                         || (style == IncDecButtons && ! incDecDragDirectionIsHorizontal()))
-                        speed = -speed;
-
-                    const double currentPos = valueToProportionOfLength (valueWhenLastDragged);
-
-                    valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + speed));
-
-                    e.source.enableUnboundedMouseMovement (true, false);
-                    mouseWasHidden = true;
-                }
-            }
+                handleVelocityDrag (e);
         }
 
         valueWhenLastDragged = jlimit (minimum, maximum, valueWhenLastDragged);

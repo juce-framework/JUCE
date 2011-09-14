@@ -988,6 +988,8 @@ public:
 
     int read (void* const dest, const int numBytes)
     {
+        jassert (dest != nullptr);
+
         if (readHandle == 0 && childPID != 0)
             readHandle = fdopen (pipeHandle, "r");
 

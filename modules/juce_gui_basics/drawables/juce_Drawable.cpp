@@ -145,16 +145,16 @@ Drawable* Drawable::createFromImageData (const void* data, const size_t numBytes
 Drawable* Drawable::createFromImageDataStream (InputStream& dataSource)
 {
     MemoryOutputStream mo;
-    mo.writeFromInputStream (dataSource, -1);
+    mo << dataSource;
 
     return createFromImageData (mo.getData(), mo.getDataSize());
 }
 
 Drawable* Drawable::createFromImageFile (const File& file)
 {
-    const ScopedPointer <FileInputStream> fin (file.createInputStream());
+    FileInputStream fin (file);
 
-    return fin != nullptr ? createFromImageDataStream (*fin) : nullptr;
+    return fin.openedOk() ? createFromImageDataStream (fin) : nullptr;
 }
 
 //==============================================================================
