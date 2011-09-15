@@ -1345,10 +1345,8 @@ void Slider::mouseDrag (const MouseEvent& e)
             else
                 minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
         }
-        else
+        else if (sliderBeingDragged == 2)
         {
-            jassert (sliderBeingDragged == 2);
-
             setMaxValue (snapValue (valueWhenLastDragged, true),
                          ! sendChangeOnlyOnRelease, false, true);
 

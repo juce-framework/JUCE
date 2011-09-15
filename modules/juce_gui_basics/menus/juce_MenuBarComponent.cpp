@@ -30,9 +30,7 @@ MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
     : model (nullptr),
       itemUnderMouse (-1),
       currentPopupIndex (-1),
-      topLevelIndexClicked (0),
-      lastMouseX (0),
-      lastMouseY (0)
+      topLevelIndexClicked (0)
 {
     setRepaintsOnMouseActivity (true);
     setWantsKeyboardFocus (false);
@@ -115,11 +113,11 @@ void MenuBarComponent::resized()
     }
 }
 
-int MenuBarComponent::getItemAt (const int x, const int y)
+int MenuBarComponent::getItemAt (const Point<int>& p)
 {
     for (int i = 0; i < xPositions.size(); ++i)
-        if (x >= xPositions[i] && x < xPositions[i + 1])
-            return reallyContains (Point<int> (x, y), true) ? i : -1;
+        if (p.getX() >= xPositions[i] && p.getX() < xPositions[i + 1])
+            return reallyContains (p, true) ? i : -1;
 
     return -1;
 }
@@ -153,16 +151,18 @@ void MenuBarComponent::setOpenItem (int index)
         currentPopupIndex = index;
         repaintMenuItem (currentPopupIndex);
 
+        Desktop& desktop = Desktop::getInstance();
+
         if (index >= 0)
-            Desktop::getInstance().addGlobalMouseListener (this);
+            desktop.addGlobalMouseListener (this);
         else
-            Desktop::getInstance().removeGlobalMouseListener (this);
+            desktop.removeGlobalMouseListener (this);
     }
 }
 
-void MenuBarComponent::updateItemUnderMouse (int x, int y)
+void MenuBarComponent::updateItemUnderMouse (const Point<int>& p)
 {
-    setItemUnderMouse (getItemAt (x, y));
+    setItemUnderMouse (getItemAt (p));
 }
 
 void MenuBarComponent::showMenu (int index)
@@ -208,7 +208,7 @@ void MenuBarComponent::menuDismissed (int topLevelIndex, int itemId)
 void MenuBarComponent::handleCommandMessage (int commandId)
 {
     const Point<int> mousePos (getMouseXYRelative());
-    updateItemUnderMouse (mousePos.getX(), mousePos.getY());
+    updateItemUnderMouse (mousePos);
 
     if (currentPopupIndex == topLevelIndexClicked)
         setOpenItem (-1);
@@ -221,13 +221,13 @@ void MenuBarComponent::handleCommandMessage (int commandId)
 void MenuBarComponent::mouseEnter (const MouseEvent& e)
 {
     if (e.eventComponent == this)
-        updateItemUnderMouse (e.x, e.y);
+        updateItemUnderMouse (e.getPosition());
 }
 
 void MenuBarComponent::mouseExit (const MouseEvent& e)
 {
     if (e.eventComponent == this)
-        updateItemUnderMouse (e.x, e.y);
+        updateItemUnderMouse (e.getPosition());
 }
 
 void MenuBarComponent::mouseDown (const MouseEvent& e)
@@ -235,7 +235,7 @@ void MenuBarComponent::mouseDown (const MouseEvent& e)
     if (currentPopupIndex < 0)
     {
         const MouseEvent e2 (e.getEventRelativeTo (this));
-        updateItemUnderMouse (e2.x, e2.y);
+        updateItemUnderMouse (e2.getPosition());
 
         currentPopupIndex = -2;
         showMenu (itemUnderMouse);
@@ -245,7 +245,7 @@ void MenuBarComponent::mouseDown (const MouseEvent& e)
 void MenuBarComponent::mouseDrag (const MouseEvent& e)
 {
     const MouseEvent e2 (e.getEventRelativeTo (this));
-    const int item = getItemAt (e2.x, e2.y);
+    const int item = getItemAt (e2.getPosition());
 
     if (item >= 0)
         showMenu (item);
@@ -255,7 +255,7 @@ void MenuBarComponent::mouseUp (const MouseEvent& e)
 {
     const MouseEvent e2 (e.getEventRelativeTo (this));
 
-    updateItemUnderMouse (e2.x, e2.y);
+    updateItemUnderMouse (e2.getPosition());
 
     if (itemUnderMouse < 0 && getLocalBounds().contains (e2.x, e2.y))
     {
@@ -268,22 +268,21 @@ void MenuBarComponent::mouseMove (const MouseEvent& e)
 {
     const MouseEvent e2 (e.getEventRelativeTo (this));
 
-    if (lastMouseX != e2.x || lastMouseY != e2.y)
+    if (lastMousePos != e2.getPosition())
     {
         if (currentPopupIndex >= 0)
         {
-            const int item = getItemAt (e2.x, e2.y);
+            const int item = getItemAt (e2.getPosition());
 
             if (item >= 0)
                 showMenu (item);
         }
         else
         {
-            updateItemUnderMouse (e2.x, e2.y);
+            updateItemUnderMouse (e2.getPosition());
         }
 
-        lastMouseX = e2.x;
-        lastMouseY = e2.y;
+        lastMousePos = e2.getPosition();
     }
 }
 
@@ -344,9 +343,7 @@ void MenuBarComponent::menuCommandInvoked (MenuBarModel* /*menuBarModel*/,
 void MenuBarComponent::timerCallback()
 {
     stopTimer();
-
-    const Point<int> mousePos (getMouseXYRelative());
-    updateItemUnderMouse (mousePos.getX(), mousePos.getY());
+    updateItemUnderMouse (getMouseXYRelative());
 }
 
 

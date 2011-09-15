@@ -229,7 +229,6 @@ class PopupMenu::Window  : public Component,
                            private Timer
 {
 public:
-    //==============================================================================
     Window (const PopupMenu& menu, Window* const owner_, const Rectangle<int>& target,
             const bool alignToRectangle, const int itemIdThatMustBeVisible,
             const int minimumWidth_, const int maximumNumColumns_,
@@ -400,7 +399,7 @@ public:
             }
             else
             {
-                hide (0, false);
+                hide (nullptr, false);
             }
         }
     }
@@ -466,7 +465,7 @@ public:
         }
         else if (key.isKeyCode (KeyPress::escapeKey))
         {
-            dismissMenu (0);
+            dismissMenu (nullptr);
         }
         else
         {
@@ -501,7 +500,7 @@ public:
                 }
             }
 
-            dismissMenu (0);
+            dismissMenu (nullptr);
         }
     }
 
@@ -510,7 +509,7 @@ public:
         Component::handleCommandMessage (commandId);
 
         if (commandId == PopupMenuSettings::dismissCommandId)
-            dismissMenu (0);
+            dismissMenu (nullptr);
     }
 
     //==============================================================================
@@ -521,7 +520,7 @@ public:
 
         if (componentAttachedTo != componentAttachedToOriginal)
         {
-            dismissMenu (0);
+            dismissMenu (nullptr);
             return;
         }
 
@@ -623,7 +622,7 @@ public:
                 if (now > lastFocused + 10)
                 {
                     PopupMenuSettings::menuWasHiddenBecauseOfAppChange = true;
-                    dismissMenu (0);
+                    dismissMenu (nullptr);
 
                     return;  // may have been deleted by the previous call..
                 }
@@ -639,7 +638,7 @@ public:
                 }
                 else if ((hasBeenOver || ! dismissOnMouseUp) && ! isOverAny)
                 {
-                    dismissMenu (0);
+                    dismissMenu (nullptr);
                 }
 
                 return;  // may have been deleted by the previous calls..
@@ -1034,7 +1033,7 @@ private:
 
             if (activeSubMenu != nullptr)
             {
-                activeSubMenu->setVisible (true);
+                activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
                 activeSubMenu->enterModalState (false);
                 activeSubMenu->toFront (false);
                 return true;
@@ -1386,7 +1385,7 @@ PopupMenu::Options::Options()
     targetArea.setPosition (Desktop::getMousePosition());
 }
 
-const PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
+PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
 {
     Options o (*this);
     o.targetComponent = comp;
@@ -1397,35 +1396,35 @@ const PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* com
     return o;
 }
 
-const PopupMenu::Options PopupMenu::Options::withTargetScreenArea (const Rectangle<int>& area) const
+PopupMenu::Options PopupMenu::Options::withTargetScreenArea (const Rectangle<int>& area) const
 {
     Options o (*this);
     o.targetArea = area;
     return o;
 }
 
-const PopupMenu::Options PopupMenu::Options::withMinimumWidth (int w) const
+PopupMenu::Options PopupMenu::Options::withMinimumWidth (int w) const
 {
     Options o (*this);
     o.minWidth = w;
     return o;
 }
 
-const PopupMenu::Options PopupMenu::Options::withMaximumNumColumns (int cols) const
+PopupMenu::Options PopupMenu::Options::withMaximumNumColumns (int cols) const
 {
     Options o (*this);
     o.maxColumns = cols;
     return o;
 }
 
-const PopupMenu::Options PopupMenu::Options::withStandardItemHeight (int height) const
+PopupMenu::Options PopupMenu::Options::withStandardItemHeight (int height) const
 {
     Options o (*this);
     o.standardHeight = height;
     return o;
 }
 
-const PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemToBeVisible) const
+PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemToBeVisible) const
 {
     Options o (*this);
     o.visibleItemID = idOfItemToBeVisible;
@@ -1497,6 +1496,7 @@ int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentM
 
     callback->component = window;
 
+    window->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
     window->enterModalState (false, userCallbackDeleter.release());
     ModalComponentManager::getInstance()->attachCallback (window, callback.release());
 
@@ -1576,13 +1576,15 @@ int PopupMenu::showAt (Component* componentToAttachTo,
 
 bool JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
 {
-    const int numWindows = Window::getActiveWindows().size();
+    Array<Window*>& windows = Window::getActiveWindows();
+
+    const int numWindows = windows.size();
     for (int i = numWindows; --i >= 0;)
     {
-        Window* const pmw = Window::getActiveWindows()[i];
+        Window* const pmw = windows[i];
 
         if (pmw != nullptr)
-            pmw->dismissMenu (0);
+            pmw->dismissMenu (nullptr);
     }
 
     return numWindows > 0;

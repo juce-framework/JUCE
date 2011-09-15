@@ -104,14 +104,14 @@ private:
     MenuBarModel* model;
 
     StringArray menuNames;
-    Array <int> xPositions;
+    Array<int> xPositions;
+    Point<int> lastMousePos;
     int itemUnderMouse, currentPopupIndex, topLevelIndexClicked;
-    int lastMouseX, lastMouseY;
 
-    int getItemAt (int x, int y);
+    int getItemAt (const Point<int>&);
     void setItemUnderMouse (int index);
     void setOpenItem (int index);
-    void updateItemUnderMouse (int x, int y);
+    void updateItemUnderMouse (const Point<int>&);
     void timerCallback();
     void repaintMenuItem (int index);
     void menuDismissed (int topLevelIndex, int itemId);

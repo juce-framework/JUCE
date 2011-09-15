@@ -223,12 +223,12 @@ public:
     public:
         Options();
 
-        const Options withTargetComponent (Component* targetComponent) const;
-        const Options withTargetScreenArea (const Rectangle<int>& targetArea) const;
-        const Options withMinimumWidth (int minWidth) const;
-        const Options withMaximumNumColumns (int maxNumColumns) const;
-        const Options withStandardItemHeight (int standardHeight) const;
-        const Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
+        Options withTargetComponent (Component* targetComponent) const;
+        Options withTargetScreenArea (const Rectangle<int>& targetArea) const;
+        Options withMinimumWidth (int minWidth) const;
+        Options withMaximumNumColumns (int maxNumColumns) const;
+        Options withStandardItemHeight (int standardHeight) const;
+        Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
 
     private:
         friend class PopupMenu;

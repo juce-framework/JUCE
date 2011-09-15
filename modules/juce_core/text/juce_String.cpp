@@ -324,17 +324,17 @@ String::String (const char* const t, const size_t maxChars)
 }
 
 String::String (const wchar_t* const t)      : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t))) {}
-String::String (const CharPointer_UTF8& t)   : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const CharPointer_UTF8&  t)  : text (StringHolder::createFromCharPointer (t)) {}
 String::String (const CharPointer_UTF16& t)  : text (StringHolder::createFromCharPointer (t)) {}
 String::String (const CharPointer_UTF32& t)  : text (StringHolder::createFromCharPointer (t)) {}
 String::String (const CharPointer_ASCII& t)  : text (StringHolder::createFromCharPointer (t)) {}
 
-String::String (const CharPointer_UTF8& t, const size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
+String::String (const CharPointer_UTF8&  t, const size_t maxChars)  : text (StringHolder::createFromCharPointer (t, maxChars)) {}
 String::String (const CharPointer_UTF16& t, const size_t maxChars)  : text (StringHolder::createFromCharPointer (t, maxChars)) {}
 String::String (const CharPointer_UTF32& t, const size_t maxChars)  : text (StringHolder::createFromCharPointer (t, maxChars)) {}
 String::String (const wchar_t* const t, size_t maxChars)            : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
 
-String::String (const CharPointer_UTF8& start, const CharPointer_UTF8& end)   : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (const CharPointer_UTF8&  start, const CharPointer_UTF8&  end) : text (StringHolder::createFromCharPointer (start, end)) {}
 String::String (const CharPointer_UTF16& start, const CharPointer_UTF16& end) : text (StringHolder::createFromCharPointer (start, end)) {}
 String::String (const CharPointer_UTF32& start, const CharPointer_UTF32& end) : text (StringHolder::createFromCharPointer (start, end)) {}
 
