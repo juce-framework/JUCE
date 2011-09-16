@@ -325,7 +325,7 @@ public:
 
             for (int i = 1; i < numElementsInArray (mouseDowns); ++i)
             {
-                if (mouseDowns[0].canBePartOfMultipleClickWith (mouseDowns[i], (int) (MouseEvent::getDoubleClickTimeout() * (1.0 + 0.25 * (i - 1)))))
+                if (mouseDowns[0].canBePartOfMultipleClickWith (mouseDowns[i], MouseEvent::getDoubleClickTimeout() * jmin (i, 2)))
                     ++numClicks;
                 else
                     break;

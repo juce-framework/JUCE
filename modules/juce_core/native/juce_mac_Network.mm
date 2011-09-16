@@ -420,7 +420,7 @@ private:
                                          void* progressCallbackContext)
     {
         NSMutableURLRequest* req = [NSMutableURLRequest  requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
-                                                            cachePolicy: NSURLRequestUseProtocolCachePolicy
+                                                            cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
                                                         timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)];
 
         if (req == nil)

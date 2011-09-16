@@ -33,8 +33,72 @@ namespace ColourHelpers
         return (uint8) jlimit (0, 0xff, roundToInt (alpha * 255.0f));
     }
 
-    void convertHSBtoRGB (float h, float s, float v,
-                          uint8& r, uint8& g, uint8& b) noexcept
+    // This is an adjusted brightness value, based on the way the human eye responds to
+    // different colour channels..
+    float getPerceivedBrightness (float r, float g, float b) noexcept
+    {
+        return std::sqrt (r * r * 0.241f
+                           + g * g * 0.691f
+                           + b * b * 0.068f);
+    }
+}
+
+//==============================================================================
+struct HSB
+{
+    HSB (const Colour& col) noexcept
+    {
+        const int r = col.getRed();
+        const int g = col.getGreen();
+        const int b = col.getBlue();
+
+        const int hi = jmax (r, g, b);
+        const int lo = jmin (r, g, b);
+
+        if (hi != 0)
+        {
+            saturation = (hi - lo) / (float) hi;
+
+            if (saturation > 0)
+            {
+                const float invDiff = 1.0f / (hi - lo);
+
+                const float red   = (hi - r) * invDiff;
+                const float green = (hi - g) * invDiff;
+                const float blue  = (hi - b) * invDiff;
+
+                if (r == hi)
+                    hue = blue - green;
+                else if (g == hi)
+                    hue = 2.0f + red - blue;
+                else
+                    hue = 4.0f + green - red;
+
+                hue *= 1.0f / 6.0f;
+
+                if (hue < 0)
+                    ++hue;
+            }
+            else
+            {
+                hue = 0;
+            }
+        }
+        else
+        {
+            saturation = hue = 0;
+        }
+
+        brightness = hi / 255.0f;
+    }
+
+    Colour toColour (const Colour& original) const noexcept
+    {
+        return Colour (hue, saturation, brightness, original.getAlpha());
+    }
+
+    static void convertHSBtoRGB (float h, float s, float v,
+                                 uint8& r, uint8& g, uint8& b) noexcept
     {
         v = jlimit (0.0f, 1.0f, v);
         v *= 255.0f;
@@ -91,7 +155,9 @@ namespace ColourHelpers
             }
         }
     }
-}
+
+    float hue, saturation, brightness;
+};
 
 //==============================================================================
 Colour::Colour() noexcept
@@ -178,7 +244,7 @@ Colour::Colour (const float hue,
                 const float alpha) noexcept
 {
     uint8 r, g, b;
-    ColourHelpers::convertHSBtoRGB (hue, saturation, brightness, r, g, b);
+    HSB::convertHSBtoRGB (hue, saturation, brightness, r, g, b);
 
     argb.setARGB (ColourHelpers::floatAlphaToInt (alpha), r, g, b);
 }
@@ -197,7 +263,7 @@ Colour::Colour (const float hue,
                 const uint8 alpha) noexcept
 {
     uint8 r, g, b;
-    ColourHelpers::convertHSBtoRGB (hue, saturation, brightness, r, g, b);
+    HSB::convertHSBtoRGB (hue, saturation, brightness, r, g, b);
 
     argb.setARGB (alpha, r, g, b);
 }
@@ -300,149 +366,54 @@ Colour Colour::interpolatedWith (const Colour& other, float proportionOfOther) c
 }
 
 //==============================================================================
-float Colour::getFloatRed() const noexcept
-{
-    return getRed() / 255.0f;
-}
-
-float Colour::getFloatGreen() const noexcept
-{
-    return getGreen() / 255.0f;
-}
-
-float Colour::getFloatBlue() const noexcept
-{
-    return getBlue() / 255.0f;
-}
-
-float Colour::getFloatAlpha() const noexcept
-{
-    return getAlpha() / 255.0f;
-}
+float Colour::getFloatRed() const noexcept      { return getRed()   / 255.0f; }
+float Colour::getFloatGreen() const noexcept    { return getGreen() / 255.0f; }
+float Colour::getFloatBlue() const noexcept     { return getBlue()  / 255.0f; }
+float Colour::getFloatAlpha() const noexcept    { return getAlpha() / 255.0f; }
 
 //==============================================================================
 void Colour::getHSB (float& h, float& s, float& v) const noexcept
 {
-    const int r = getRed();
-    const int g = getGreen();
-    const int b = getBlue();
-
-    const int hi = jmax (r, g, b);
-    const int lo = jmin (r, g, b);
-
-    if (hi != 0)
-    {
-        s = (hi - lo) / (float) hi;
-
-        if (s > 0)
-        {
-            const float invDiff = 1.0f / (hi - lo);
-
-            const float red   = (hi - r) * invDiff;
-            const float green = (hi - g) * invDiff;
-            const float blue  = (hi - b) * invDiff;
-
-            if (r == hi)
-                h = blue - green;
-            else if (g == hi)
-                h = 2.0f + red - blue;
-            else
-                h = 4.0f + green - red;
-
-            h *= 1.0f / 6.0f;
-
-            if (h < 0)
-                ++h;
-        }
-        else
-        {
-            h = 0;
-        }
-    }
-    else
-    {
-        s = 0;
-        h = 0;
-    }
-
-    v = hi / 255.0f;
+    const HSB hsb (*this);
+    h = hsb.hue;
+    s = hsb.saturation;
+    v = hsb.brightness;
 }
 
 //==============================================================================
-float Colour::getHue() const noexcept
-{
-    float h, s, b;
-    getHSB (h, s, b);
-    return h;
-}
+float Colour::getHue() const noexcept           { return HSB (*this).hue; }
+float Colour::getSaturation() const noexcept    { return HSB (*this).saturation; }
+float Colour::getBrightness() const noexcept    { return HSB (*this).brightness; }
 
-Colour Colour::withHue (const float hue) const noexcept
-{
-    float h, s, b;
-    getHSB (h, s, b);
+Colour Colour::withHue (float h) const noexcept          { HSB hsb (*this); hsb.hue = h;        return hsb.toColour (*this); }
+Colour Colour::withSaturation (float s) const noexcept   { HSB hsb (*this); hsb.saturation = s; return hsb.toColour (*this); }
+Colour Colour::withBrightness (float v) const noexcept   { HSB hsb (*this); hsb.brightness = v; return hsb.toColour (*this); }
 
-    return Colour (hue, s, b, getAlpha());
-}
-
+//==============================================================================
 Colour Colour::withRotatedHue (const float amountToRotate) const noexcept
 {
-    float h, s, b;
-    getHSB (h, s, b);
-
-    return Colour (h + amountToRotate, s, b, getAlpha());
+    HSB hsb (*this);
+    hsb.hue += amountToRotate;
+    return hsb.toColour (*this);
 }
 
 //==============================================================================
-float Colour::getSaturation() const noexcept
-{
-    float h, s, b;
-    getHSB (h, s, b);
-    return s;
-}
-
-Colour Colour::withSaturation (const float saturation) const noexcept
-{
-    float h, s, b;
-    getHSB (h, s, b);
-
-    return Colour (h, saturation, b, getAlpha());
-}
-
 Colour Colour::withMultipliedSaturation (const float amount) const noexcept
 {
-    float h, s, b;
-    getHSB (h, s, b);
-
-    return Colour (h, jmin (1.0f, s * amount), b, getAlpha());
+    HSB hsb (*this);
+    hsb.saturation = jmin (1.0f, hsb.saturation * amount);
+    return hsb.toColour (*this);
 }
 
 //==============================================================================
-float Colour::getBrightness() const noexcept
-{
-    float h, s, b;
-    getHSB (h, s, b);
-    return b;
-}
-
-Colour Colour::withBrightness (const float brightness) const noexcept
-{
-    float h, s, b;
-    getHSB (h, s, b);
-
-    return Colour (h, s, brightness, getAlpha());
-}
-
 Colour Colour::withMultipliedBrightness (const float amount) const noexcept
 {
-    float h, s, b;
-    getHSB (h, s, b);
+    HSB hsb (*this);
+    hsb.brightness *= amount;
+    if (hsb.brightness > 1.0f)
+        hsb.brightness = 1.0f;
 
-    b *= amount;
-
-    if (b > 1.0f)
-        b = 1.0f;
-
-    return Colour (h, s, b, getAlpha());
+    return hsb.toColour (*this);
 }
 
 //==============================================================================
@@ -478,7 +449,7 @@ Colour Colour::greyLevel (const float brightness) noexcept
 //==============================================================================
 Colour Colour::contrasting (const float amount) const noexcept
 {
-    return overlaidWith ((((int) getRed() + (int) getGreen() + (int) getBlue() >= 3 * 128)
+   return overlaidWith ((ColourHelpers::getPerceivedBrightness (getFloatRed(), getFloatGreen(), getFloatBlue()) >= 0.5f
                             ? Colours::black
                             : Colours::white).withAlpha (amount));
 }
