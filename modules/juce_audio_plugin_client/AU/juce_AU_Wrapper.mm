@@ -1219,8 +1219,13 @@ private:
                aren't so careful) */
             jassert (Component::getCurrentlyModalComponent() == nullptr);
 
-            if (windowComp != nullptr && windowComp->getChildComponent(0) != nullptr)
-                juceFilter->editorBeingDeleted ((AudioProcessorEditor*) windowComp->getChildComponent(0));
+            EditorCompHolder* editorCompHolder = dynamic_cast <EditorCompHolder*> (windowComp->getChildComponent(0));
+            if (editorCompHolder != nullptr)
+            {
+                AudioProcessorEditor* audioProcessEditor = dynamic_cast <AudioProcessorEditor*> (editorCompHolder->getChildComponent(0));
+                if (audioProcessEditor != nullptr)
+                    juceFilter->editorBeingDeleted (audioProcessEditor);
+            }
 
             windowComp = nullptr;
         }
@@ -1231,7 +1236,6 @@ private:
     class ComponentInHIView  : public Component
     {
     public:
-        //==============================================================================
         ComponentInHIView (AudioProcessorEditor* const editor_, HIViewRef parentHIView)
             : parentView (parentHIView),
               editor (editor_),
@@ -1263,7 +1267,7 @@ private:
            #else
             addToDesktop (ComponentPeer::windowIsTemporary);
             setWantsKeyboardFocus (true);
-          #endif
+           #endif
 
             setVisible (true);
             toFront (false);
@@ -1287,7 +1291,7 @@ private:
             removeFromDesktop();
 
             [hostWindow release];
-            hostWindow = 0;
+            hostWindow = nil;
         }
 
         void updateWindowPos()
@@ -1362,7 +1366,6 @@ private:
         }
 
     private:
-        //==============================================================================
         HIViewRef parentView;
         NSWindow* hostWindow;
         EditorCompHolder editor;

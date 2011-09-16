@@ -175,16 +175,14 @@ namespace URLHelpers
             }
 
             data << "--\r\n";
-            data.flush();
         }
         else
         {
             data << getMangledParameters (url.getParameters()) << url.getPostData();
-            data.flush();
 
             // just a short text attachment, so use simple url encoding..
             headers << "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
-                    << (int) postData.getSize() << "\r\n";
+                    << (int) data.getDataSize() << "\r\n";
         }
     }
 

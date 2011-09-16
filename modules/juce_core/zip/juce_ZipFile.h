@@ -42,6 +42,9 @@
 class JUCE_API  ZipFile
 {
 public:
+    /** Creates a ZipFile based for a file. */
+    ZipFile (const File& file);
+
     //==============================================================================
     /** Creates a ZipFile for a given stream.
 
@@ -51,8 +54,11 @@ public:
     */
     ZipFile (InputStream* inputStream, bool deleteStreamWhenDestroyed);
 
-    /** Creates a ZipFile based for a file. */
-    ZipFile (const File& file);
+    /** Creates a ZipFile for a given stream.
+        The stream will not be owned or deleted by this class - if you want the ZipFile to
+        manage the stream's lifetime, use the other constructor.
+    */
+    ZipFile (InputStream& inputStream);
 
     /** Creates a ZipFile for an input source.
 
@@ -207,25 +213,29 @@ public:
 private:
     //==============================================================================
     class ZipInputStream;
-    class ZipFilenameComparator;
-    class ZipEntryInfo;
+    class ZipEntryHolder;
     friend class ZipInputStream;
-    friend class ZipFilenameComparator;
-    friend class ZipEntryInfo;
+    friend class ZipEntryHolder;
 
-    OwnedArray <ZipEntryInfo> entries;
+    OwnedArray <ZipEntryHolder> entries;
     CriticalSection lock;
     InputStream* inputStream;
     ScopedPointer <InputStream> streamToDelete;
     ScopedPointer <InputSource> inputSource;
 
    #if JUCE_DEBUG
-    int numOpenStreams;
+    struct OpenStreamCounter
+    {
+        OpenStreamCounter() : numOpenStreams (0) {}
+        ~OpenStreamCounter();
+
+        int numOpenStreams;
+    };
+
+    OpenStreamCounter streamCounter;
    #endif
 
     void init();
-    int findEndOfZipEntryTable (InputStream& input, int& numEntries);
-    static int compareElements (const ZipEntryInfo* first, const ZipEntryInfo* second);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipFile);
 };

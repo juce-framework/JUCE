@@ -352,8 +352,6 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     png_write_end (pngWriteStruct, pngInfoStruct);
     png_destroy_write_struct (&pngWriteStruct, &pngInfoStruct);
 
-    out.flush();
-
     return true;
 }
 

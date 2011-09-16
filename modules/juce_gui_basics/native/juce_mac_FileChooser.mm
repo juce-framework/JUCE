@@ -69,7 +69,24 @@ using namespace juce;
         if (f.getFileName().matchesWildcard ((*filters)[i], true))
             return true;
 
-    return f.isDirectory() && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: filename];
+   #if (! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7
+    NSError* error;
+    NSString* name = [[NSWorkspace sharedWorkspace] typeOfFile: filename error: &error];
+
+    if ([name isEqualToString: nsStringLiteral ("com.apple.alias-file")])
+    {
+        FSRef ref;
+        FSPathMakeRef ((const UInt8*) [filename fileSystemRepresentation], &ref, nullptr);
+
+        Boolean targetIsFolder = false, wasAliased = false;
+        FSResolveAliasFileWithMountFlags (&ref, true, &targetIsFolder, &wasAliased, 0);
+
+        return wasAliased && targetIsFolder;
+    }
+   #endif
+
+    return f.isDirectory()
+            && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: filename];
 }
 @end
 

@@ -26,22 +26,97 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-class ZipFile::ZipEntryInfo
+class ZipFile::ZipEntryHolder
 {
 public:
-    ZipFile::ZipEntry entry;
+    ZipEntryHolder (const char* const buffer, const int fileNameLen)
+    {
+        entry.filename = String::fromUTF8 (buffer + 46, fileNameLen);
+
+        const int time = ByteOrder::littleEndianShort (buffer + 12);
+        const int date = ByteOrder::littleEndianShort (buffer + 14);
+        entry.fileTime = getFileTimeFromRawEncodings (time, date);
+
+        compressed = ByteOrder::littleEndianShort (buffer + 10) != 0;
+        compressedSize = (size_t) ByteOrder::littleEndianInt (buffer + 20);
+        entry.uncompressedSize = ByteOrder::littleEndianInt (buffer + 24);
+
+        streamOffset = ByteOrder::littleEndianInt (buffer + 42);
+    }
+
+    struct FileNameComparator
+    {
+        static int compareElements (const ZipEntryHolder* first, const ZipEntryHolder* second)
+        {
+            return first->entry.filename.compare (second->entry.filename);
+        }
+    };
+
+    ZipEntry entry;
     size_t streamOffset;
     size_t compressedSize;
     bool compressed;
+
+private:
+    static Time getFileTimeFromRawEncodings (int time, int date)
+    {
+        const int year      = 1980 + (date >> 9);
+        const int month     = ((date >> 5) & 15) - 1;
+        const int day       = date & 31;
+        const int hours     = time >> 11;
+        const int minutes   = (time >> 5) & 63;
+        const int seconds   = (time & 31) << 1;
+
+        return Time (year, month, day, hours, minutes, seconds);
+    }
 };
+
+//==============================================================================
+namespace
+{
+    int findEndOfZipEntryTable (InputStream& input, int& numEntries)
+    {
+        BufferedInputStream in (input, 8192);
+
+        in.setPosition (in.getTotalLength());
+        int64 pos = in.getPosition();
+        const int64 lowestPos = jmax ((int64) 0, pos - 1024);
+
+        char buffer [32] = { 0 };
+
+        while (pos > lowestPos)
+        {
+            in.setPosition (pos - 22);
+            pos = in.getPosition();
+            memcpy (buffer + 22, buffer, 4);
+
+            if (in.read (buffer, 22) != 22)
+                return 0;
+
+            for (int i = 0; i < 22; ++i)
+            {
+                if (ByteOrder::littleEndianInt (buffer + i) == 0x06054b50)
+                {
+                    in.setPosition (pos + i);
+                    in.read (buffer, 22);
+                    numEntries = ByteOrder::littleEndianShort (buffer + 10);
+
+                    return (int) ByteOrder::littleEndianInt (buffer + 16);
+                }
+            }
+        }
+
+        return 0;
+    }
+}
 
 //==============================================================================
 class ZipFile::ZipInputStream  : public InputStream
 {
 public:
-    ZipInputStream (ZipFile& file_, ZipFile::ZipEntryInfo& zei)
+    ZipInputStream (ZipFile& file_, ZipFile::ZipEntryHolder& zei)
         : file (file_),
-          zipEntryInfo (zei),
+          zipEntryHolder (zei),
           pos (0),
           headerSize (0),
           inputStream (file_.inputStream)
@@ -53,7 +128,7 @@ public:
         else
         {
            #if JUCE_DEBUG
-            file_.numOpenStreams++;
+            file_.streamCounter.numOpenStreams++;
            #endif
         }
 
@@ -73,13 +148,13 @@ public:
     {
        #if JUCE_DEBUG
         if (inputStream != nullptr && inputStream == file.inputStream)
-            file.numOpenStreams--;
+            file.streamCounter.numOpenStreams--;
        #endif
     }
 
     int64 getTotalLength()
     {
-        return zipEntryInfo.compressedSize;
+        return zipEntryHolder.compressedSize;
     }
 
     int read (void* buffer, int howMany)
@@ -87,7 +162,7 @@ public:
         if (headerSize <= 0)
             return 0;
 
-        howMany = (int) jmin ((int64) howMany, (int64) (zipEntryInfo.compressedSize - pos));
+        howMany = (int) jmin ((int64) howMany, (int64) (zipEntryHolder.compressedSize - pos));
 
         if (inputStream == nullptr)
             return 0;
@@ -97,12 +172,12 @@ public:
         if (inputStream == file.inputStream)
         {
             const ScopedLock sl (file.lock);
-            inputStream->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
+            inputStream->setPosition (pos + zipEntryHolder.streamOffset + headerSize);
             num = inputStream->read (buffer, howMany);
         }
         else
         {
-            inputStream->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
+            inputStream->setPosition (pos + zipEntryHolder.streamOffset + headerSize);
             num = inputStream->read (buffer, howMany);
         }
 
@@ -112,7 +187,7 @@ public:
 
     bool isExhausted()
     {
-        return headerSize <= 0 || pos >= (int64) zipEntryInfo.compressedSize;
+        return headerSize <= 0 || pos >= (int64) zipEntryHolder.compressedSize;
     }
 
     int64 getPosition()
@@ -122,13 +197,13 @@ public:
 
     bool setPosition (int64 newPos)
     {
-        pos = jlimit ((int64) 0, (int64) zipEntryInfo.compressedSize, newPos);
+        pos = jlimit ((int64) 0, (int64) zipEntryHolder.compressedSize, newPos);
         return true;
     }
 
 private:
     ZipFile& file;
-    ZipEntryInfo zipEntryInfo;
+    ZipEntryHolder zipEntryHolder;
     int64 pos;
     int headerSize;
     InputStream* inputStream;
@@ -139,11 +214,8 @@ private:
 
 
 //==============================================================================
-ZipFile::ZipFile (InputStream* const source_, const bool deleteStreamWhenDestroyed)
-   : inputStream (source_)
-    #if JUCE_DEBUG
-     , numOpenStreams (0)
-    #endif
+ZipFile::ZipFile (InputStream* const stream, const bool deleteStreamWhenDestroyed)
+   : inputStream (stream)
 {
     if (deleteStreamWhenDestroyed)
         streamToDelete = inputStream;
@@ -151,39 +223,42 @@ ZipFile::ZipFile (InputStream* const source_, const bool deleteStreamWhenDestroy
     init();
 }
 
-ZipFile::ZipFile (const File& file)
-    : inputStream (nullptr)
-     #if JUCE_DEBUG
-      , numOpenStreams (0)
-     #endif
+ZipFile::ZipFile (InputStream& stream)
+   : inputStream (&stream)
 {
-    inputSource = new FileInputSource (file);
+    init();
+}
+
+ZipFile::ZipFile (const File& file)
+    : inputStream (nullptr),
+      inputSource (new FileInputSource (file))
+{
     init();
 }
 
 ZipFile::ZipFile (InputSource* const inputSource_)
     : inputStream (nullptr),
       inputSource (inputSource_)
-     #if JUCE_DEBUG
-      , numOpenStreams (0)
-     #endif
 {
     init();
 }
 
 ZipFile::~ZipFile()
 {
-   #if JUCE_DEBUG
     entries.clear();
+}
 
+#if JUCE_DEBUG
+ZipFile::OpenStreamCounter::~OpenStreamCounter()
+{
     /* If you hit this assertion, it means you've created a stream to read one of the items in the
        zipfile, but you've forgotten to delete that stream object before deleting the file..
        Streams can't be kept open after the file is deleted because they need to share the input
-       stream that the file uses to read itself.
+       stream that is managed by the ZipFile object.
     */
     jassert (numOpenStreams == 0);
-   #endif
 }
+#endif
 
 //==============================================================================
 int ZipFile::getNumEntries() const noexcept
@@ -193,7 +268,7 @@ int ZipFile::getNumEntries() const noexcept
 
 const ZipFile::ZipEntry* ZipFile::getEntry (const int index) const noexcept
 {
-    ZipEntryInfo* const zei = entries [index];
+    ZipEntryHolder* const zei = entries [index];
     return zei != nullptr ? &(zei->entry) : nullptr;
 }
 
@@ -213,7 +288,7 @@ const ZipFile::ZipEntry* ZipFile::getEntry (const String& fileName) const noexce
 
 InputStream* ZipFile::createStreamForEntry (const int index)
 {
-    ZipEntryInfo* const zei = entries[index];
+    ZipEntryHolder* const zei = entries[index];
     InputStream* stream = nullptr;
 
     if (zei != nullptr)
@@ -233,18 +308,9 @@ InputStream* ZipFile::createStreamForEntry (const int index)
     return stream;
 }
 
-class ZipFile::ZipFilenameComparator
-{
-public:
-    int compareElements (const ZipFile::ZipEntryInfo* first, const ZipFile::ZipEntryInfo* second)
-    {
-        return first->entry.filename.compare (second->entry.filename);
-    }
-};
-
 void ZipFile::sortEntriesByFilename()
 {
-    ZipFilenameComparator sorter;
+    ZipEntryHolder::FileNameComparator sorter;
     entries.sort (sorter);
 }
 
@@ -288,27 +354,7 @@ void ZipFile::init()
                     if (pos + 46 + fileNameLen > size)
                         break;
 
-                    ZipEntryInfo* const zei = new ZipEntryInfo();
-                    zei->entry.filename = String::fromUTF8 (buffer + 46, fileNameLen);
-
-                    const int time = ByteOrder::littleEndianShort (buffer + 12);
-                    const int date = ByteOrder::littleEndianShort (buffer + 14);
-
-                    const int year      = 1980 + (date >> 9);
-                    const int month     = ((date >> 5) & 15) - 1;
-                    const int day       = date & 31;
-                    const int hours     = time >> 11;
-                    const int minutes   = (time >> 5) & 63;
-                    const int seconds   = (time & 31) << 1;
-
-                    zei->entry.fileTime = Time (year, month, day, hours, minutes, seconds);
-
-                    zei->compressed = ByteOrder::littleEndianShort (buffer + 10) != 0;
-                    zei->compressedSize = (size_t) ByteOrder::littleEndianInt (buffer + 20);
-                    zei->entry.uncompressedSize = ByteOrder::littleEndianInt (buffer + 24);
-
-                    zei->streamOffset = ByteOrder::littleEndianInt (buffer + 42);
-                    entries.add (zei);
+                    entries.add (new ZipEntryHolder (buffer, fileNameLen));
 
                     pos += 46 + fileNameLen
                             + ByteOrder::littleEndianShort (buffer + 30)
@@ -317,41 +363,6 @@ void ZipFile::init()
             }
         }
     }
-}
-
-int ZipFile::findEndOfZipEntryTable (InputStream& input, int& numEntries)
-{
-    BufferedInputStream in (input, 8192);
-
-    in.setPosition (in.getTotalLength());
-    int64 pos = in.getPosition();
-    const int64 lowestPos = jmax ((int64) 0, pos - 1024);
-
-    char buffer [32] = { 0 };
-
-    while (pos > lowestPos)
-    {
-        in.setPosition (pos - 22);
-        pos = in.getPosition();
-        memcpy (buffer + 22, buffer, 4);
-
-        if (in.read (buffer, 22) != 22)
-            return 0;
-
-        for (int i = 0; i < 22; ++i)
-        {
-            if (ByteOrder::littleEndianInt (buffer + i) == 0x06054b50)
-            {
-                in.setPosition (pos + i);
-                in.read (buffer, 22);
-                numEntries = ByteOrder::littleEndianShort (buffer + 10);
-
-                return (int) ByteOrder::littleEndianInt (buffer + 16);
-            }
-        }
-    }
-
-    return 0;
 }
 
 Result ZipFile::uncompressTo (const File& targetDirectory,
@@ -371,48 +382,44 @@ Result ZipFile::uncompressEntry (const int index,
                                  const File& targetDirectory,
                                  bool shouldOverwriteFiles)
 {
-    const ZipEntryInfo* zei = entries.getUnchecked (index);
+    const ZipEntryHolder* zei = entries.getUnchecked (index);
 
     const File targetFile (targetDirectory.getChildFile (zei->entry.filename));
 
     if (zei->entry.filename.endsWithChar ('/'))
-    {
         return targetFile.createDirectory(); // (entry is a directory, not a file)
-    }
-    else
+
+    ScopedPointer<InputStream> in (createStreamForEntry (index));
+
+    if (in == nullptr)
+        return Result::fail ("Failed to open the zip file for reading");
+
+    if (targetFile.exists())
     {
-        ScopedPointer<InputStream> in (createStreamForEntry (index));
+        if (! shouldOverwriteFiles)
+            return Result::ok();
 
-        if (in == nullptr)
-            return Result::fail ("Failed to open the zip file for reading");
-
-        if (targetFile.exists())
-        {
-            if (! shouldOverwriteFiles)
-                return Result::ok();
-
-            if (! targetFile.deleteFile())
-                return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
-        }
-
-        if (! targetFile.getParentDirectory().createDirectory())
-            return Result::fail ("Failed to create target folder: " + targetFile.getParentDirectory().getFullPathName());
-
-        {
-            FileOutputStream out (targetFile);
-
-            if (out.failedToOpen())
-                return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
-
-            out << *in;
-        }
-
-        targetFile.setCreationTime (zei->entry.fileTime);
-        targetFile.setLastModificationTime (zei->entry.fileTime);
-        targetFile.setLastAccessTime (zei->entry.fileTime);
-
-        return Result::ok();
+        if (! targetFile.deleteFile())
+            return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
     }
+
+    if (! targetFile.getParentDirectory().createDirectory())
+        return Result::fail ("Failed to create target folder: " + targetFile.getParentDirectory().getFullPathName());
+
+    {
+        FileOutputStream out (targetFile);
+
+        if (out.failedToOpen())
+            return Result::fail ("Failed to write to target file: " + targetFile.getFullPathName());
+
+        out << *in;
+    }
+
+    targetFile.setCreationTime (zei->entry.fileTime);
+    targetFile.setLastModificationTime (zei->entry.fileTime);
+    targetFile.setLastAccessTime (zei->entry.fileTime);
+
+    return Result::ok();
 }
 
 
@@ -562,7 +569,6 @@ bool ZipFile::Builder::writeToStream (OutputStream& target) const
     target.writeInt ((int) (directoryEnd - directoryStart));
     target.writeInt ((int) (directoryStart - fileStart));
     target.writeShort (0);
-    target.flush();
 
     return true;
 }

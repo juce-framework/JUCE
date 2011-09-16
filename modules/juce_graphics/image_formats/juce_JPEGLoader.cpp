@@ -413,8 +413,6 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     jpeg_finish_compress (&jpegCompStruct);
     jpeg_destroy_compress (&jpegCompStruct);
 
-    out.flush();
-
     return true;
 }
 
