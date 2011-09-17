@@ -1093,7 +1093,7 @@ private:
 
         if (! isMovingTowardsMenu)
         {
-            Component* c = getComponentAt (localMousePos.getX(), localMousePos.getY());
+            Component* c = getComponentAt (localMousePos);
             if (c == this)
                 c = nullptr;
 

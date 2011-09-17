@@ -38,15 +38,15 @@ public:
                         const var& desc,
                         Component* const sourceComponent,
                         Component* const mouseDragSource_,
-                        DragAndDropContainer* const o,
+                        DragAndDropContainer& owner_,
                         const Point<int>& imageOffset_)
         : sourceDetails (desc, sourceComponent, Point<int>()),
           image (im),
+          owner (owner_),
           mouseDragSource (mouseDragSource_),
-          owner (o),
           imageOffset (imageOffset_),
           hasCheckedForExternalDrag (false),
-          drawImage (true)
+          isDoingExternalDrag (false)
     {
         setSize (im.getWidth(), im.getHeight());
 
@@ -63,8 +63,8 @@ public:
 
     ~DragImageComponent()
     {
-        if (owner->dragImageComponent == this)
-            owner->dragImageComponent.release();
+        if (owner.dragImageComponent == this)
+            owner.dragImageComponent.release();
 
         if (mouseDragSource != nullptr)
         {
@@ -82,26 +82,119 @@ public:
         if (isOpaque())
             g.fillAll (Colours::white);
 
-        if (drawImage)
+        g.setOpacity (1.0f);
+        g.drawImageAt (image, 0, 0);
+    }
+
+    void mouseUp (const MouseEvent& e)
+    {
+        if (e.originalComponent != this)
         {
-            g.setOpacity (1.0f);
-            g.drawImageAt (image, 0, 0);
+            if (mouseDragSource != nullptr)
+                mouseDragSource->removeMouseListener (this);
+
+            // (note: use a local copy of this in case the callback runs
+            // a modal loop and deletes this object before the method completes)
+            DragAndDropTarget::SourceDetails details (sourceDetails);
+            DragAndDropTarget* finalTarget = nullptr;
+
+            if (! isDoingExternalDrag)
+            {
+                const bool wasVisible = isVisible();
+                setVisible (false);
+                finalTarget = findTarget (e.getScreenPosition(), details.localPosition);
+
+                if (wasVisible) // fade the component and remove it - it'll be deleted later by the timer callback
+                    dismissWithAnimation (finalTarget == nullptr);
+            }
+
+            if (getParentComponent() != nullptr)
+                getParentComponent()->removeChildComponent (this);
+
+            if (finalTarget != nullptr)
+            {
+                currentlyOverComp = nullptr;
+                finalTarget->itemDropped (details);
+            }
+
+            // careful - this object could now be deleted..
         }
     }
 
-    DragAndDropTarget* findTarget (const Point<int>& screenPos, Point<int>& relativePos)
+    void mouseDrag (const MouseEvent& e)
+    {
+        if (e.originalComponent != this)
+            updateLocation (true, e.getScreenPosition());
+    }
+
+    void updateLocation (const bool canDoExternalDrag, const Point<int>& screenPos)
+    {
+        DragAndDropTarget::SourceDetails details (sourceDetails);
+
+        setNewScreenPos (screenPos);
+
+        DragAndDropTarget* const newTarget = findTarget (screenPos, details.localPosition);
+        Component* newTargetComp = dynamic_cast <Component*> (newTarget);
+
+        setVisible (newTarget == nullptr || newTarget->shouldDrawDragImageWhenOver());
+
+        if (newTargetComp != currentlyOverComp)
+        {
+            DragAndDropTarget* const lastTarget = getCurrentlyOver();
+
+            if (lastTarget != nullptr && details.sourceComponent != nullptr
+                  && lastTarget->isInterestedInDragSource (details))
+                lastTarget->itemDragExit (details);
+
+            currentlyOverComp = newTargetComp;
+
+            if (newTarget != nullptr
+                  && newTarget->isInterestedInDragSource (details))
+                newTarget->itemDragEnter (details);
+        }
+
+        sendDragMove (details);
+
+        if (canDoExternalDrag && getCurrentlyOver() == nullptr)
+            checkForExternalDrag (details, screenPos);
+    }
+
+    void timerCallback()
+    {
+        if (sourceDetails.sourceComponent == nullptr)
+        {
+            delete this;
+        }
+        else if (! isMouseButtonDownAnywhere())
+        {
+            if (mouseDragSource != nullptr)
+                mouseDragSource->removeMouseListener (this);
+
+            delete this;
+        }
+    }
+
+private:
+    DragAndDropTarget::SourceDetails sourceDetails;
+    Image image;
+    DragAndDropContainer& owner;
+    WeakReference<Component> mouseDragSource, currentlyOverComp;
+    const Point<int> imageOffset;
+    bool hasCheckedForExternalDrag, isDoingExternalDrag;
+
+    DragAndDropTarget* getCurrentlyOver() const noexcept
+    {
+        return dynamic_cast <DragAndDropTarget*> (currentlyOverComp.get());
+    }
+
+    DragAndDropTarget* findTarget (const Point<int>& screenPos, Point<int>& relativePos) const
     {
         Component* hit = getParentComponent();
 
         if (hit == nullptr)
-        {
             hit = Desktop::getInstance().findComponentAt (screenPos);
-        }
         else
-        {
-            const Point<int> relPos (hit->getLocalPoint (nullptr, screenPos));
-            hit = hit->getComponentAt (relPos.getX(), relPos.getY());
-        }
+            hit = hit->getComponentAt (hit->getLocalPoint (nullptr, screenPos));
 
         // (note: use a local copy of this in case the callback runs
         // a modal loop and deletes this object before the method completes)
@@ -123,174 +216,71 @@ public:
         return nullptr;
     }
 
-    void mouseUp (const MouseEvent& e)
+    void setNewScreenPos (const Point<int>& screenPos)
     {
-        if (e.originalComponent != this)
-        {
-            if (mouseDragSource != nullptr)
-                mouseDragSource->removeMouseListener (this);
-
-            bool dropAccepted = false;
-            DragAndDropTarget* ddt = nullptr;
-            Point<int> relPos;
-
-            if (isVisible())
-            {
-                setVisible (false);
-                ddt = findTarget (e.getScreenPosition(), relPos);
-
-                // fade this component and remove it - it'll be deleted later by the timer callback
-
-                dropAccepted = ddt != nullptr;
-
-                setVisible (true);
-
-                if (dropAccepted || sourceDetails.sourceComponent == nullptr)
-                {
-                    Desktop::getInstance().getAnimator().fadeOut (this, 120);
-                }
-                else
-                {
-                    const Point<int> target (sourceDetails.sourceComponent->localPointToGlobal (sourceDetails.sourceComponent->getLocalBounds().getCentre()));
-                    const Point<int> ourCentre (localPointToGlobal (getLocalBounds().getCentre()));
-
-                    Desktop::getInstance().getAnimator().animateComponent (this,
-                                                                           getBounds() + (target - ourCentre),
-                                                                           0.0f, 120,
-                                                                           true, 1.0, 1.0);
-                }
-            }
-
-            if (getParentComponent() != nullptr)
-                getParentComponent()->removeChildComponent (this);
-
-            if (dropAccepted && ddt != nullptr)
-            {
-                // (note: use a local copy of this in case the callback runs
-                // a modal loop and deletes this object before the method completes)
-                DragAndDropTarget::SourceDetails details (sourceDetails);
-                details.localPosition = relPos;
-
-                currentlyOverComp = nullptr;
-
-                ddt->itemDropped (details);
-            }
-
-            // careful - this object could now be deleted..
-        }
-    }
-
-    void updateLocation (const bool canDoExternalDrag, const Point<int>& screenPos)
-    {
-        // (note: use a local copy of this in case a callback runs a modal loop and deletes
-        // this object before it returns)
-        DragAndDropTarget::SourceDetails details (sourceDetails);
-
-        Point<int> newPos (screenPos + imageOffset);
+        Point<int> newPos (screenPos - imageOffset);
 
         if (getParentComponent() != nullptr)
             newPos = getParentComponent()->getLocalPoint (nullptr, newPos);
 
-        //if (newX != getX() || newY != getY())
+        setTopLeftPosition (newPos);
+    }
+
+    void sendDragMove (DragAndDropTarget::SourceDetails& details) const
+    {
+        DragAndDropTarget* const target = getCurrentlyOver();
+
+        if (target != nullptr && target->isInterestedInDragSource (details))
+            target->itemDragMove (details);
+    }
+
+    void checkForExternalDrag (DragAndDropTarget::SourceDetails& details, const Point<int>& screenPos)
+    {
+        if (! hasCheckedForExternalDrag)
         {
-            setTopLeftPosition (newPos);
-
-            Point<int> relPos;
-            DragAndDropTarget* const newTarget = findTarget (screenPos, relPos);
-            Component* newTargetComp = dynamic_cast <Component*> (newTarget);
-
-            drawImage = (newTarget == nullptr) || newTarget->shouldDrawDragImageWhenOver();
-
-            if (newTargetComp != currentlyOverComp)
+            if (Desktop::getInstance().findComponentAt (screenPos) == nullptr)
             {
-                DragAndDropTarget* const lastTarget = getCurrentlyOver();
+                hasCheckedForExternalDrag = true;
+                StringArray files;
+                bool canMoveFiles = false;
 
-                if (lastTarget != nullptr && details.sourceComponent != nullptr
-                      && lastTarget->isInterestedInDragSource (details))
-                    lastTarget->itemDragExit (details);
-
-                currentlyOverComp = newTargetComp;
-
-                if (newTarget != nullptr)
+                if (owner.shouldDropFilesWhenDraggedExternally (details, files, canMoveFiles)
+                     && files.size() > 0)
                 {
-                    details.localPosition = relPos;
+                    WeakReference<Component> thisWeakRef (this);
+                    setVisible (false);
+                    isDoingExternalDrag = true;
 
-                    if (newTarget->isInterestedInDragSource (details))
-                        newTarget->itemDragEnter (details);
-                }
-            }
+                    if (ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
+                        DragAndDropContainer::performExternalDragDropOfFiles (files, canMoveFiles);
 
-            {
-                DragAndDropTarget* const target = getCurrentlyOver();
-                if (target != nullptr)
-                {
-                    details.localPosition = relPos;
-
-                    if (target->isInterestedInDragSource (details))
-                        target->itemDragMove (details);
-                }
-            }
-
-            if (getCurrentlyOver() == nullptr && canDoExternalDrag && ! hasCheckedForExternalDrag)
-            {
-                if (Desktop::getInstance().findComponentAt (screenPos) == nullptr)
-                {
-                    hasCheckedForExternalDrag = true;
-                    StringArray files;
-                    bool canMoveFiles = false;
-
-                    if (owner->shouldDropFilesWhenDraggedExternally (details, files, canMoveFiles)
-                         && files.size() > 0)
-                    {
-                        WeakReference<Component> thisWeakRef (this);
-                        setVisible (false);
-
-                        if (ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
-                            DragAndDropContainer::performExternalDragDropOfFiles (files, canMoveFiles);
-
-                        delete thisWeakRef.get();
-                        return;
-                    }
+                    delete thisWeakRef.get();
+                    return;
                 }
             }
         }
     }
 
-    void mouseDrag (const MouseEvent& e)
+    void dismissWithAnimation (const bool shouldSnapBack)
     {
-        if (e.originalComponent != this)
-            updateLocation (true, e.getScreenPosition());
-    }
+        setVisible (true);
+        ComponentAnimator& animator = Desktop::getInstance().getAnimator();
 
-    void timerCallback()
-    {
-        if (sourceDetails.sourceComponent == nullptr)
+        if (shouldSnapBack && sourceDetails.sourceComponent != nullptr)
         {
-            delete this;
+            const Point<int> target (sourceDetails.sourceComponent->localPointToGlobal (sourceDetails.sourceComponent->getLocalBounds().getCentre()));
+            const Point<int> ourCentre (localPointToGlobal (getLocalBounds().getCentre()));
+
+            animator.animateComponent (this,
+                                       getBounds() + (target - ourCentre),
+                                       0.0f, 120,
+                                       true, 1.0, 1.0);
         }
-        else if (! isMouseButtonDownAnywhere())
+        else
         {
-            if (mouseDragSource != nullptr)
-                mouseDragSource->removeMouseListener (this);
-
-            delete this;
+            animator.fadeOut (this, 120);
         }
     }
-
-private:
-    DragAndDropTarget::SourceDetails sourceDetails;
-    Image image;
-    WeakReference<Component> mouseDragSource;
-    DragAndDropContainer* const owner;
-
-    WeakReference<Component> currentlyOverComp;
-    DragAndDropTarget* getCurrentlyOver()
-    {
-        return dynamic_cast <DragAndDropTarget*> (currentlyOverComp.get());
-    }
-
-    const Point<int> imageOffset;
-    bool hasCheckedForExternalDrag, drawImage;
 
     JUCE_DECLARE_NON_COPYABLE (DragImageComponent);
 };
@@ -369,18 +359,18 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
                 }
             }
 
-            imageOffset = -clipped;
+            imageOffset = clipped;
         }
         else
         {
             if (imageOffsetFromMouse == nullptr)
-                imageOffset = -dragImage.getBounds().getCentre();
+                imageOffset = dragImage.getBounds().getCentre();
             else
-                imageOffset = -(dragImage.getBounds().getConstrainedPoint (-*imageOffsetFromMouse));
+                imageOffset = dragImage.getBounds().getConstrainedPoint (-*imageOffsetFromMouse);
         }
 
         dragImageComponent = new DragImageComponent (dragImage, sourceDescription, sourceComponent,
-                                                     draggingSource->getComponentUnderMouse(), this, imageOffset);
+                                                     draggingSource->getComponentUnderMouse(), *this, imageOffset);
 
         currentDragDesc = sourceDescription;
 
@@ -396,7 +386,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
         else
             thisComp->addChildComponent (dragImageComponent);
 
-        static_cast <DragImageComponent*> (static_cast <Component*> (dragImageComponent))->updateLocation (false, lastMouseDown);
+        static_cast <DragImageComponent*> (dragImageComponent.get())->updateLocation (false, lastMouseDown);
         dragImageComponent->setVisible (true);
 
        #if JUCE_WINDOWS
