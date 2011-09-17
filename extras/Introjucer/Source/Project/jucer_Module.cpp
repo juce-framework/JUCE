@@ -31,9 +31,94 @@
 
 
 //==============================================================================
-ModuleList::ModuleList()
+ModuleList::ModuleList (const File& modulesFolder_)
 {
-    rescan();
+    rescan (modulesFolder_);
+}
+
+ModuleList::ModuleList (const ModuleList& other)
+    : moduleFolder (other.moduleFolder)
+{
+    modules.addCopiesOf (other.modules);
+}
+
+ModuleList& ModuleList::operator= (const ModuleList& other)
+{
+    moduleFolder = other.moduleFolder;
+    modules.clear();
+    modules.addCopiesOf (other.modules);
+
+    return *this;
+}
+
+bool ModuleList::operator== (const ModuleList& other) const
+{
+    if (modules.size() != other.modules.size())
+        return false;
+
+    for (int i = modules.size(); --i >= 0;)
+    {
+        const Module* m1 = modules.getUnchecked(i);
+        const Module* m2 = other.findModuleInfo (m1->uid);
+
+        if (m2 == nullptr || *m1 != *m2)
+            return false;
+    }
+
+    return true;
+}
+
+File ModuleList::getModulesFolderForJuceOrModulesFolder (const File& f)
+{
+    if (f.getFileName() != "modules" && f.isDirectory() && f.getChildFile ("modules").isDirectory())
+        return f.getChildFile ("modules");
+
+    return f;
+}
+
+File ModuleList::getDefaultModulesFolder (Project* project)
+{
+    if (project != nullptr)
+    {
+        ScopedPointer <ProjectExporter> exp (ProjectExporter::createPlatformDefaultExporter (*project));
+
+        if (exp != nullptr)
+        {
+            File f (project->resolveFilename (exp->getJuceFolder().toString()));
+            f = getModulesFolderForJuceOrModulesFolder (f);
+
+            if (FileHelpers::isModulesFolder (f))
+                return f;
+        }
+    }
+
+    return File::getSpecialLocation (File::userHomeDirectory)
+            .getChildFile ("juce")
+            .getChildFile ("modules");
+}
+
+File ModuleList::getLocalModulesFolder (Project* project)
+{
+    File defaultJuceFolder (getDefaultModulesFolder (project));
+
+    File f (StoredSettings::getInstance()->getProps().getValue ("lastJuceFolder", defaultJuceFolder.getFullPathName()));
+    f = getModulesFolderForJuceOrModulesFolder (f);
+
+    if ((! FileHelpers::isModulesFolder (f)) && FileHelpers::isModulesFolder (defaultJuceFolder))
+        f = defaultJuceFolder;
+
+    return f;
+}
+
+File ModuleList::getModuleFolder (const String& uid) const
+{
+    return getModulesFolder().getChildFile (uid);
+}
+
+void ModuleList::setLocalModulesFolder (const File& file)
+{
+    //jassert (FileHelpers::isJuceFolder (file));
+    StoredSettings::getInstance()->getProps().setValue ("lastJuceFolder", file.getFullPathName());
 }
 
 struct ModuleSorter
@@ -52,30 +137,38 @@ void ModuleList::sort()
 
 void ModuleList::rescan()
 {
+    rescan (moduleFolder);
+}
+
+void ModuleList::rescan (const File& newModulesFolder)
+{
     modules.clear();
-    moduleFolder = StoredSettings::getInstance()->getLastKnownJuceFolder().getChildFile ("modules");
+    moduleFolder = getModulesFolderForJuceOrModulesFolder (newModulesFolder);
 
-    DirectoryIterator iter (moduleFolder, false, "*", File::findDirectories);
-
-    while (iter.next())
+    if (moduleFolder.isDirectory())
     {
-        const File moduleDef (iter.getFile().getChildFile (LibraryModule::getInfoFileName()));
+        DirectoryIterator iter (moduleFolder, false, "*", File::findDirectories);
 
-        if (moduleDef.exists())
+        while (iter.next())
         {
-            LibraryModule m (moduleDef);
-            jassert (m.isValid());
+            const File moduleDef (iter.getFile().getChildFile (LibraryModule::getInfoFileName()));
 
-            if (m.isValid())
+            if (moduleDef.exists())
             {
-                Module* info = new Module();
-                modules.add (info);
+                LibraryModule m (moduleDef);
+                jassert (m.isValid());
 
-                info->uid = m.getID();
-                info->version = m.getVersion();
-                info->name = m.moduleInfo ["name"];
-                info->description = m.moduleInfo ["description"];
-                info->file = moduleDef;
+                if (m.isValid())
+                {
+                    Module* info = new Module();
+                    modules.add (info);
+
+                    info->uid = m.getID();
+                    info->version = m.getVersion();
+                    info->name = m.moduleInfo ["name"];
+                    info->description = m.moduleInfo ["description"];
+                    info->file = moduleDef;
+                }
             }
         }
     }
@@ -83,7 +176,7 @@ void ModuleList::rescan()
     sort();
 }
 
-void ModuleList::loadFromWebsite()
+bool ModuleList::loadFromWebsite()
 {
     modules.clear();
 
@@ -122,11 +215,27 @@ void ModuleList::loadFromWebsite()
     }
 
     sort();
+    return infoList.isArray();
 }
 
 LibraryModule* ModuleList::Module::create() const
 {
     return new LibraryModule (file);
+}
+
+bool ModuleList::Module::operator== (const Module& other) const
+{
+    return uid == other.uid
+             && version == other.version
+             && name == other.name
+             && description == other.description
+             && file == other.file
+             && url == other.url;
+}
+
+bool ModuleList::Module::operator!= (const Module& other) const
+{
+    return ! operator== (other);
 }
 
 LibraryModule* ModuleList::loadModule (const String& uid) const

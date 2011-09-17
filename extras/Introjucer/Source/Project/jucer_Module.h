@@ -86,11 +86,17 @@ private:
 class ModuleList
 {
 public:
-    ModuleList();
+    ModuleList (const File& modulesFolder);
+    ModuleList (const ModuleList&);
+    ModuleList& operator= (const ModuleList&);
 
     //==============================================================================
+    void rescan (const File& newModulesFolder);
     void rescan();
-    void loadFromWebsite();
+    File getModulesFolder() const     { return moduleFolder; }
+    File getModuleFolder (const String& uid) const;
+
+    bool loadFromWebsite();
 
     LibraryModule* loadModule (const String& uid) const;
 
@@ -105,10 +111,24 @@ public:
         String uid, version, name, description;
         File file;
         URL url;
+
+        bool operator== (const Module&) const;
+        bool operator!= (const Module&) const;
     };
 
     const Module* findModuleInfo (const String& uid) const;
 
+    bool operator== (const ModuleList&) const;
+
+    //==============================================================================
+    static File getDefaultModulesFolder (Project* project);
+
+    static File getLocalModulesFolder (Project* project);
+    static void setLocalModulesFolder (const File& newFile);
+
+    static File getModulesFolderForJuceOrModulesFolder (const File& f);
+
+    //==============================================================================
     OwnedArray<Module> modules;
 
 private:

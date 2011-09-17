@@ -50,9 +50,6 @@ public:
     Array<File> getLastProjects() const;
     void setLastProjects (const Array<File>& files);
 
-    File getLastKnownJuceFolder() const;
-    void setLastKnownJuceFolder (const File& file);
-
     const StringArray& getFontNames();
 
     //==============================================================================

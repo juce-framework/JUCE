@@ -25,6 +25,7 @@
 
 #include "jucer_NewProjectWizard.h"
 #include "jucer_ProjectType.h"
+#include "jucer_Module.h"
 
 //==============================================================================
 class GUIAppWizard   : public NewProjectWizard
@@ -451,7 +452,7 @@ Project* NewProjectWizard::runNewProjectWizard (Component* ownerWindow)
 
         aw.addComboBox ("type", getWizards(), "Project Type");
 
-        FilenameComponent juceFolderSelector ("Juce Library Location", StoredSettings::getInstance()->getLastKnownJuceFolder(),
+        FilenameComponent juceFolderSelector ("Juce Library Location", ModuleList::getLocalModulesFolder (nullptr),
                                               true, true, false, "*", String::empty, "(Please select the folder containing Juce!)");
         juceFolderSelector.setSize (350, 22);
 

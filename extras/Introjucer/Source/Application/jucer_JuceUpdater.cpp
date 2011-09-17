@@ -25,30 +25,45 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_JuceUpdater.h"
+#include "../Project/jucer_Module.h"
 
 
 //==============================================================================
-JuceUpdater::JuceUpdater()
-    : filenameComp ("Juce Folder", StoredSettings::getInstance()->getLastKnownJuceFolder(),
+JuceUpdater::JuceUpdater (ModuleList& moduleList_)
+    : moduleList (moduleList_),
+      latestList (File::nonexistent),
+      filenameComp ("Juce Folder", ModuleList::getLocalModulesFolder (nullptr),
                     true, true, false, "*", String::empty, "Select your Juce folder"),
-      checkNowButton ("Check Online for Available Updates...",
-                      "Contacts the website to see if this version is up-to-date")
+      checkNowButton ("Check for available updates on the JUCE website...",
+                      "Contacts the website to see if new modules are available"),
+      installButton ("Download and install selected modules..."),
+      selectAllButton ("Select/Deselect All")
 {
     addAndMakeVisible (&label);
+    addAndMakeVisible (&currentVersionLabel);
     addAndMakeVisible (&filenameComp);
     addAndMakeVisible (&checkNowButton);
-    addAndMakeVisible (&currentVersionLabel);
+    addAndMakeVisible (&installButton);
+    addAndMakeVisible (&selectAllButton);
     checkNowButton.addListener (this);
+    installButton.addListener (this);
+    selectAllButton.addListener (this);
     filenameComp.addListener (this);
 
     currentVersionLabel.setFont (Font (14.0f, Font::italic));
     label.setFont (Font (12.0f));
-    label.setText ("Destination folder:", false);
+    label.setText ("Local modules folder:", false);
 
     addAndMakeVisible (&availableVersionsList);
     availableVersionsList.setModel (this);
 
-    setSize (600, 300);
+    updateInstallButtonStatus();
+    versionsToDownload = ValueTree ("modules");
+    versionsToDownload.addListener (this);
+
+    setSize (600, 500);
+
+    checkNow();
 }
 
 JuceUpdater::~JuceUpdater()
@@ -57,12 +72,32 @@ JuceUpdater::~JuceUpdater()
     filenameComp.removeListener (this);
 }
 
-void JuceUpdater::show (Component* mainWindow)
+//==============================================================================
+class UpdateDialogWindow : public DialogWindow
 {
-    JuceUpdater updater;
-    DialogWindow::showModalDialog ("Juce Update...", &updater, mainWindow,
-                                   Colours::lightgrey,
-                                   true, false, false);
+public:
+    UpdateDialogWindow (JuceUpdater* updater, Component* componentToCentreAround)
+        : DialogWindow ("JUCE Module Updater",
+                        Colours::lightgrey, true, true)
+    {
+        setContentOwned (updater, true);
+        centreAroundComponent (componentToCentreAround, getWidth(), getHeight());
+        setResizable (true, true);
+    }
+
+    void closeButtonPressed()
+    {
+        setVisible (false);
+    }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (UpdateDialogWindow);
+};
+
+void JuceUpdater::show (ModuleList& moduleList, Component* mainWindow)
+{
+    UpdateDialogWindow w (new JuceUpdater (moduleList), mainWindow);
+    w.runModalLoop();
 }
 
 void JuceUpdater::resized()
@@ -70,9 +105,16 @@ void JuceUpdater::resized()
     filenameComp.setBounds (20, 40, getWidth() - 40, 22);
     label.setBounds (filenameComp.getX(), filenameComp.getY() - 18, filenameComp.getWidth(), 18);
     currentVersionLabel.setBounds (filenameComp.getX(), filenameComp.getBottom(), filenameComp.getWidth(), 25);
-    checkNowButton.changeWidthToFitText (20);
-    checkNowButton.setCentrePosition (getWidth() / 2, filenameComp.getBottom() + 40);
-    availableVersionsList.setBounds (filenameComp.getX(), checkNowButton.getBottom() + 20, filenameComp.getWidth(), getHeight() - (checkNowButton.getBottom() + 20));
+    checkNowButton.changeWidthToFitText (22);
+    checkNowButton.setCentrePosition (getWidth() / 2, filenameComp.getBottom() + 20);
+    availableVersionsList.setBounds (filenameComp.getX(), checkNowButton.getBottom() + 20,
+                                     filenameComp.getWidth(),
+                                     getHeight() - 30 - (checkNowButton.getBottom() + 20));
+    installButton.changeWidthToFitText (22);
+    installButton.setTopRightPosition (availableVersionsList.getRight(), getHeight() - 28);
+    selectAllButton.setBounds (availableVersionsList.getX(),
+                               availableVersionsList.getBottom() + 4,
+                               installButton.getX() - availableVersionsList.getX() - 20, 22);
 }
 
 void JuceUpdater::paint (Graphics& g)
@@ -80,247 +122,134 @@ void JuceUpdater::paint (Graphics& g)
     g.fillAll (Colours::white);
 }
 
-String findVersionNum (const String& file, const String& token)
+void JuceUpdater::buttonClicked (Button* b)
 {
-    return file.fromFirstOccurrenceOf (token, false, false)
-               .upToFirstOccurrenceOf ("\n", false, false)
-               .trim();
+    if (b == &installButton)
+        install();
+    else if (b == &selectAllButton)
+        selectAll();
+    else
+        checkNow();
 }
 
-String JuceUpdater::getCurrentVersion()
+void JuceUpdater::refresh()
 {
-    const String header (filenameComp.getCurrentFile()
-                            .getChildFile ("src/core/juce_StandardHeader.h").loadFileAsString());
-
-    const String v1 (findVersionNum (header, "JUCE_MAJOR_VERSION"));
-    const String v2 (findVersionNum (header, "JUCE_MINOR_VERSION"));
-    const String v3 (findVersionNum (header, "JUCE_BUILDNUMBER"));
-
-    if ((v1 + v2 + v3).isEmpty())
-        return String::empty;
-
-    return v1 + "." + v2 + "." + v3;
-}
-
-XmlElement* JuceUpdater::downloadVersionList()
-{
-    return URL ("http://www.rawmaterialsoftware.com/juce/downloads/juce_versions.php").readEntireXmlStream();
-}
-
-void JuceUpdater::updateVersions (const XmlElement& xml)
-{
-    availableVersions.clear();
-
-    forEachXmlChildElementWithTagName (xml, v, "VERSION")
-    {
-        VersionInfo* vi = new VersionInfo();
-        vi->url = URL (v->getStringAttribute ("url"));
-        vi->desc = v->getStringAttribute ("desc");
-        vi->version = v->getStringAttribute ("version");
-        vi->date = v->getStringAttribute ("date");
-        availableVersions.add (vi);
-    }
-
     availableVersionsList.updateContent();
+    availableVersionsList.repaint();
 }
 
-void JuceUpdater::buttonClicked (Button*)
-{
-    ScopedPointer<XmlElement> xml (downloadVersionList());
-
-    if (xml == nullptr || xml->hasTagName ("html"))
-    {
-        AlertWindow::showMessageBox (AlertWindow::WarningIcon, "Connection Problems...",
-                                     "Couldn't connect to the Raw Material Software website!");
-
-        return;
-    }
-
-    if (! xml->hasTagName ("JUCEVERSIONS"))
-    {
-        AlertWindow::showMessageBox (AlertWindow::WarningIcon, "Update Problems...",
-                                     "This version of the Introjucer may be too old to receive automatic updates!\n\n"
-                                     "Please visit www.rawmaterialsoftware.com and get the latest version manually!");
-        return;
-    }
-
-    const String currentVersion (getCurrentVersion());
-
-    OwnedArray<VersionInfo> versions;
-    updateVersions (*xml);
-}
-
-//==============================================================================
-class NewVersionDownloader  : public ThreadWithProgressWindow
+class WebsiteContacterThread  : public Thread,
+                                private AsyncUpdater
 {
 public:
-    NewVersionDownloader (const String& title, const URL& url_, const File& target_)
-        : ThreadWithProgressWindow (title, true, true),
-          url (url_), target (target_)
+    WebsiteContacterThread (JuceUpdater& owner_, const ModuleList& latestList)
+        : Thread ("Module updater"),
+          owner (owner_),
+          downloaded (latestList)
     {
+        startThread();
+    }
+
+    ~WebsiteContacterThread()
+    {
+        stopThread (10000);
     }
 
     void run()
     {
-        setStatusMessage ("Contacting website...");
-
-        ScopedPointer<InputStream> input (url.createInputStream (false));
-
-        if (input == nullptr)
-        {
-            error = "Couldn't connect to the website...";
-            return;
-        }
-
-        if (! target.deleteFile())
-        {
-            error = "Couldn't delete the destination file...";
-            return;
-        }
-
-        ScopedPointer<OutputStream> output (target.createOutputStream (32768));
-
-        if (output == nullptr)
-        {
-            error = "Couldn't write to the destination file...";
-            return;
-        }
-
-        setStatusMessage ("Downloading...");
-
-        int totalBytes = (int) input->getTotalLength();
-        int bytesSoFar = 0;
-
-        while (! (input->isExhausted() || threadShouldExit()))
-        {
-            HeapBlock<char> buffer (8192);
-            const int num = input->read (buffer, 8192);
-
-            if (num == 0)
-                break;
-
-            output->write (buffer, num);
-            bytesSoFar += num;
-
-            setProgress (totalBytes > 0 ? bytesSoFar / (double) totalBytes : -1.0);
-        }
+        if (downloaded.loadFromWebsite())
+            triggerAsyncUpdate();
+        else
+            AlertWindow::showMessageBox (AlertWindow::InfoIcon,
+                                         "Module Update",
+                                         "Couldn't connect to the website!");
     }
 
-    String error;
+    void handleAsyncUpdate()
+    {
+        owner.backgroundUpdateComplete (downloaded);
+    }
 
 private:
-    URL url;
-    File target;
+    JuceUpdater& owner;
+    ModuleList downloaded;
 };
 
-//==============================================================================
-class Unzipper  : public ThreadWithProgressWindow
+void JuceUpdater::checkNow()
 {
-public:
-    Unzipper (ZipFile& zipFile_, const File& targetDir_)
-        : ThreadWithProgressWindow ("Unzipping...", true, true),
-          worked (true), zipFile (zipFile_), targetDir (targetDir_)
-    {
-    }
+    websiteContacterThread = nullptr;
+    websiteContacterThread = new WebsiteContacterThread (*this, latestList);
+}
 
-    void run()
-    {
-        for (int i = 0; i < zipFile.getNumEntries(); ++i)
-        {
-            if (threadShouldExit())
-                break;
-
-            const ZipFile::ZipEntry* e = zipFile.getEntry (i);
-            setStatusMessage ("Unzipping " + e->filename + "...");
-            setProgress (i / (double) zipFile.getNumEntries());
-
-            worked = zipFile.uncompressEntry (i, targetDir, true) && worked;
-        }
-    }
-
-    bool worked;
-
-private:
-    ZipFile& zipFile;
-    File targetDir;
-};
-
-//==============================================================================
-void JuceUpdater::applyVersion (VersionInfo* version)
+void JuceUpdater::backgroundUpdateComplete (const ModuleList& newList)
 {
-    File destDir (filenameComp.getCurrentFile());
+    latestList = newList;
+    websiteContacterThread = nullptr;
 
-    const bool destDirExisted = destDir.isDirectory();
+    if (latestList == moduleList)
+        AlertWindow::showMessageBox (AlertWindow::InfoIcon,
+                                     "Module Update",
+                                     "No new modules are available");
+    refresh();
+}
 
-    if (destDirExisted && destDir.getNumberOfChildFiles (File::findFilesAndDirectories, "*") > 0)
-    {
-        int r = AlertWindow::showYesNoCancelBox (AlertWindow::WarningIcon, "Folder already exists",
-                                                 "The folder " + destDir.getFullPathName() + "\nalready contains some files...\n\n"
-                                                 "Do you want to delete everything in the folder and replace it entirely, or just merge the new files into the existing folder?",
-                                                 "Delete and replace entire folder",
-                                                 "Add and overwrite existing files",
-                                                 "Cancel");
+int JuceUpdater::getNumCheckedModules() const
+{
+    int numChecked = 0;
 
-        if (r == 0)
-            return;
+    for (int i = latestList.modules.size(); --i >= 0;)
+        if (versionsToDownload [latestList.modules.getUnchecked(i)->uid])
+            ++numChecked;
 
-        if (r == 1)
-        {
-            if (! destDir.deleteRecursively())
-            {
-                AlertWindow::showMessageBox (AlertWindow::WarningIcon, "Problems...",
-                                             "Couldn't delete the existing folder!");
-                return;
-            }
-        }
-    }
+    return numChecked;
+}
 
-    if (! (destDir.isDirectory() || destDir.createDirectory()))
-    {
-        AlertWindow::showMessageBox (AlertWindow::WarningIcon, "Problems...",
-                                     "Couldn't create that target folder..");
-        return;
-    }
+bool JuceUpdater::isLatestVersion (const String& moduleID) const
+{
+    const ModuleList::Module* m1 = moduleList.findModuleInfo (moduleID);
+    const ModuleList::Module* m2 = latestList.findModuleInfo (moduleID);
 
-    File zipFile (destDir.getNonexistentChildFile ("juce_download", ".tar.gz", false));
+    return m1 != nullptr && m2 != nullptr && m1->version == m2->version;
+}
 
-    bool worked = false;
-
-    {
-        NewVersionDownloader downloader ("Downloading Version " + version->version + "...",
-                                         version->url, zipFile);
-        worked = downloader.runThread();
-    }
-
-    if (worked)
-    {
-        ZipFile zip (zipFile);
-        Unzipper unzipper (zip, destDir);
-        worked = unzipper.runThread() && unzipper.worked;
-    }
-
-    zipFile.deleteFile();
-
-    if ((! destDirExisted) && (destDir.getNumberOfChildFiles (File::findFilesAndDirectories, "*") == 0 || ! worked))
-        destDir.deleteRecursively();
-
-    filenameComponentChanged (&filenameComp);
+void JuceUpdater::updateInstallButtonStatus()
+{
+    const int numChecked = getNumCheckedModules();
+    installButton.setEnabled (numChecked > 0);
+    selectAllButton.setToggleState (numChecked > latestList.modules.size() / 2, false);
 }
 
 void JuceUpdater::filenameComponentChanged (FilenameComponent*)
 {
-    const String version (getCurrentVersion());
+    moduleList.rescan (filenameComp.getCurrentFile());
+    filenameComp.setCurrentFile (moduleList.getModulesFolder(), true, false);
 
-    if (version.isEmpty())
+    if (! FileHelpers::isModulesFolder (moduleList.getModulesFolder()))
         currentVersionLabel.setText ("(Not a Juce folder)", false);
     else
-        currentVersionLabel.setText ("(Current version in this folder: " + version + ")", false);
+        currentVersionLabel.setText (String::empty, false);
+
+    refresh();
+}
+
+void JuceUpdater::selectAll()
+{
+    bool enable = getNumCheckedModules() < latestList.modules.size() / 2;
+
+    versionsToDownload.removeAllProperties (nullptr);
+
+    if (enable)
+    {
+        for (int i = latestList.modules.size(); --i >= 0;)
+            if (! isLatestVersion (latestList.modules.getUnchecked(i)->uid))
+                versionsToDownload.setProperty (latestList.modules.getUnchecked(i)->uid, true, nullptr);
+    }
 }
 
 //==============================================================================
 int JuceUpdater::getNumRows()
 {
-    return availableVersions.size();
+    return latestList.modules.size();
 }
 
 void JuceUpdater::paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
@@ -331,74 +260,192 @@ void JuceUpdater::paintListBoxItem (int rowNumber, Graphics& g, int width, int h
 
 Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate)
 {
-    class UpdateListComponent  : public Component,
-                                 public ButtonListener
+    class UpdateListComponent  : public Component
     {
     public:
         UpdateListComponent (JuceUpdater& updater_)
-            : updater (updater_),
-              version (nullptr),
-              applyButton ("Install this version...")
+            : updater (updater_)
         {
-            addAndMakeVisible (&applyButton);
-            applyButton.addListener (this);
+            addChildComponent (&toggle);
+            toggle.setBounds ("2, 2, parent.height - 2, parent.height - 2");
+            toggle.setWantsKeyboardFocus (false);
             setInterceptsMouseClicks (false, true);
         }
 
-        ~UpdateListComponent()
+        void setModule (const ModuleList::Module* newModule,
+                        const ModuleList::Module* existingModule,
+                        const Value& value)
         {
-            applyButton.removeListener (this);
-        }
-
-        void setVersion (VersionInfo* v)
-        {
-            if (version != v)
+            if (newModule != nullptr)
             {
-                version = v;
-                repaint();
-                resized();
+                toggle.getToggleStateValue().referTo (value);
+                toggle.setVisible (true);
+                toggle.setEnabled (true);
+
+                name = newModule->uid;
+                status = String::empty;
+
+                if (existingModule == nullptr)
+                {
+                    status << " (not currently installed)";
+                }
+                else if (existingModule->version != newModule->version)
+                {
+                    status << " installed: " << existingModule->version
+                           << ", available: " << newModule->version;
+                }
+                else
+                {
+                    status << " (latest version already installed)";
+                    toggle.setEnabled (false);
+                }
+            }
+            else
+            {
+                name = status = String::empty;
+                toggle.setVisible (false);
             }
         }
 
         void paint (Graphics& g)
         {
-            if (version != nullptr)
-            {
-                g.setColour (Colours::green.withAlpha (0.12f));
+            g.setColour (Colours::green.withAlpha (0.12f));
 
-                g.fillRect (0, 1, getWidth(), getHeight() - 2);
-                g.setColour (Colours::black);
-                g.setFont (getHeight() * 0.7f);
+            g.fillRect (0, 1, getWidth(), getHeight() - 2);
+            g.setColour (Colours::black);
+            g.setFont (getHeight() * 0.7f);
 
-                String s;
-                s << "Version " << version->version << " - " << version->desc << " - " << version->date;
+            g.drawText (name, toggle.getRight() + 4, 0, getWidth() / 2 - toggle.getRight() - 4, getHeight(),
+                        Justification::centredLeft, true);
 
-                g.drawText (s, 4, 0, applyButton.getX() - 4, getHeight(), Justification::centredLeft, true);
-            }
-        }
-
-        void resized()
-        {
-            applyButton.changeWidthToFitText (getHeight() - 4);
-            applyButton.setTopRightPosition (getWidth(), 2);
-            applyButton.setVisible (version != nullptr);
-        }
-
-        void buttonClicked (Button*)
-        {
-            updater.applyVersion (version);
+            g.drawText (status, getWidth() / 2, 0, getWidth() / 2, getHeight(),
+                        Justification::centredLeft, true);
         }
 
     private:
         JuceUpdater& updater;
-        VersionInfo* version;
-        TextButton applyButton;
+        ToggleButton toggle;
+        String name, status;
     };
 
     UpdateListComponent* c = dynamic_cast <UpdateListComponent*> (existingComponentToUpdate);
     if (c == nullptr)
         c = new UpdateListComponent (*this);
 
-    c->setVersion (availableVersions [rowNumber]);
+    ModuleList::Module* m = latestList.modules [rowNumber];
+
+    if (m != nullptr)
+        c->setModule (m,
+                      moduleList.findModuleInfo (m->uid),
+                      versionsToDownload.getPropertyAsValue (m->uid, nullptr));
+    else
+        c->setModule (nullptr, nullptr, Value());
+
     return c;
 }
+
+//==============================================================================
+class InstallThread   : public ThreadWithProgressWindow
+{
+public:
+    InstallThread (const ModuleList& targetList_,
+                   const ModuleList& list_, const StringArray& itemsToInstall_)
+        : ThreadWithProgressWindow ("Installing New Modules", true, true),
+          result (Result::ok()),
+          targetList (targetList_),
+          list (list_),
+          itemsToInstall (itemsToInstall_)
+    {
+    }
+
+    void run()
+    {
+        for (int i = 0; i < itemsToInstall.size(); ++i)
+        {
+            const ModuleList::Module* m = list.findModuleInfo (itemsToInstall[i]);
+
+            jassert (m != nullptr);
+            if (m != nullptr)
+            {
+                setProgress (i / (double) itemsToInstall.size());
+
+                MemoryBlock downloaded;
+                result = download (*m, downloaded);
+
+                if (result.failed())
+                    break;
+
+                if (threadShouldExit())
+                    break;
+
+                result = unzip (*m, downloaded);
+
+                if (result.failed())
+                    break;
+            }
+
+            if (threadShouldExit())
+                break;
+        }
+    }
+
+    Result download (const ModuleList::Module& m, MemoryBlock& dest)
+    {
+        setStatusMessage ("Downloading " + m.uid + "...");
+
+        if (m.url.readEntireBinaryStream (dest, false))
+            return Result::ok();
+
+        return Result::fail ("Failed to download from: " + m.url.toString (false));
+    }
+
+    Result unzip (const ModuleList::Module& m, const MemoryBlock& data)
+    {
+        setStatusMessage ("Installing " + m.uid + "...");
+
+        MemoryInputStream input (data, false);
+        ZipFile zip (input);
+
+        if (zip.getNumEntries() == 0)
+            return Result::fail ("The downloaded file wasn't a valid module file!");
+
+        return zip.uncompressTo (targetList.getModulesFolder(), true);
+    }
+
+    Result result;
+
+private:
+    ModuleList targetList, list;
+    StringArray itemsToInstall;
+};
+
+void JuceUpdater::install()
+{
+    if (! moduleList.getModulesFolder().createDirectory())
+    {
+        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                     "Module Update",
+                                     "Couldn't create the target folder!");
+        return;
+    }
+
+    StringArray itemsWanted;
+
+    for (int i = latestList.modules.size(); --i >= 0;)
+        if (versionsToDownload [latestList.modules.getUnchecked(i)->uid])
+            itemsWanted.add (latestList.modules.getUnchecked(i)->uid);
+
+    {
+        InstallThread thread (moduleList, latestList, itemsWanted);
+        thread.runThread();
+    }
+
+    moduleList.rescan();
+    refresh();
+}
+
+void JuceUpdater::valueTreePropertyChanged (ValueTree&, const Identifier&) { updateInstallButtonStatus(); }
+void JuceUpdater::valueTreeChildAdded (ValueTree&, ValueTree&) {}
+void JuceUpdater::valueTreeChildRemoved (ValueTree&, ValueTree&) {}
+void JuceUpdater::valueTreeChildOrderChanged (ValueTree&) {}
+void JuceUpdater::valueTreeParentChanged (ValueTree&) {}

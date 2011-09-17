@@ -61,7 +61,7 @@ public:
         OwnedArray<LibraryModule> modules;
 
         {
-            ModuleList moduleList;
+            ModuleList moduleList (ModuleList::getDefaultModulesFolder (&project));
             project.createRequiredModules (moduleList, modules);
         }
 

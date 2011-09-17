@@ -143,23 +143,6 @@ void StoredSettings::setLastProjects (const Array<File>& files)
     props->setValue ("lastProjects", s.joinIntoString ("|"));
 }
 
-File StoredSettings::getLastKnownJuceFolder() const
-{
-    File defaultJuceFolder (FileHelpers::findDefaultJuceFolder());
-    File f (props->getValue ("lastJuceFolder", defaultJuceFolder.getFullPathName()));
-
-    if ((! FileHelpers::isJuceFolder (f)) && FileHelpers::isJuceFolder (defaultJuceFolder))
-        f = defaultJuceFolder;
-
-    return f;
-}
-
-void StoredSettings::setLastKnownJuceFolder (const File& file)
-{
-    jassert (FileHelpers::isJuceFolder (file));
-    props->setValue ("lastJuceFolder", file.getFullPathName());
-}
-
 const StringArray& StoredSettings::getFontNames()
 {
     if (fontNames.size() == 0)

@@ -19,6 +19,7 @@
 //[CppHeaders] You can add your own extra header files here...
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "jucer_Module.h"
+#include "../Application/jucer_JuceUpdater.h"
 //[/CppHeaders]
 
 #include "jucer_ProjectInformationComponent.h"
@@ -126,7 +127,7 @@ public:
     ModuleSettingsPanel (Project& project_, ModuleList& moduleList_, const String& moduleID_)
         : PanelBase (project_), moduleList (moduleList_), moduleID (moduleID_)
     {
-        setBounds ("parent.width / 2 + 1, 3, parent.width - 3, parent.height - 3");
+        setBounds ("parent.width / 2 + 1, 31, parent.width - 3, parent.height - 3");
     }
 
     void rebuildProperties (Array <PropertyComponent*>& props)
@@ -207,7 +208,7 @@ private:
             if (module != nullptr)
             {
                 String text;
-                text << module->name << newLine << newLine
+                text << module->name << newLine << "Version: " << module->version << newLine << newLine
                      << module->description;
 
                 GlyphArrangement ga;
@@ -279,16 +280,34 @@ private:
 
 //==============================================================================
 class ModulesPanel  : public Component,
-                      public ListBoxModel
+                      public ListBoxModel,
+                      public FilenameComponentListener,
+                      public ButtonListener
 {
 public:
     ModulesPanel (Project& project_)
-        : project (project_)
+        : project (project_),
+          moduleList (ModuleList::getLocalModulesFolder (&project)),
+          modulesLocation ("modules", moduleList.getModulesFolder(),
+                           true, true, false, "*", String::empty,
+                           "Select a folder containing your JUCE modules..."),
+          modulesLabel (String::empty, "Module source folder:"),
+          updateModulesButton ("Check for module updates...")
     {
+        addAndMakeVisible (&modulesLocation);
+        modulesLocation.setBounds ("150, 3, parent.width - 180, 28");
+        modulesLocation.addListener (this);
+
+        modulesLabel.attachToComponent (&modulesLocation, true);
+
+        addAndMakeVisible (&updateModulesButton);
+        updateModulesButton.setBounds ("parent.width - 175, 3, parent.width - 4, 28");
+        updateModulesButton.addListener (this);
+
         modulesList.setModel (this);
         modulesList.setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.4f));
         addAndMakeVisible (&modulesList);
-        modulesList.setBounds ("4, 3, parent.width / 2 - 4, parent.height - 3");
+        modulesList.setBounds ("4, 31, parent.width / 2 - 4, parent.height - 3");
     }
 
     int getNumRows()
@@ -330,34 +349,27 @@ public:
         if (m != nullptr)
         {
             if (project.isModuleEnabled (m->uid))
-            {
                 project.removeModule (m->uid);
-            }
             else
-            {
-                const StringArray extraDepsNeeded (getExtraDependenciesNeeded (project, moduleList, *m));
-
-/*                if (extraDepsNeeded.size() > 0)
-                {
-                    if (AlertWindow::showOkCancelBox (AlertWindow::NoIcon,
-                                                      "Module Dependencies",
-                                                      "The '" + m->uid + "' module requires the following dependencies:\n"
-                                                        + extraDepsNeeded.joinIntoString (", ") + "\n\nDo you want to add all these to your project?"))
-                    {
-                        project.addModule (m->uid);
-
-                        for (int i = extraDepsNeeded.size(); --i >= 0;)
-                            project.addModule (extraDepsNeeded[i]);
-                    }
-                }
-                else*/
-                {
-                    project.addModule (m->uid);
-                }
-            }
+                project.addModule (m->uid);
         }
 
         refresh();
+    }
+
+    void filenameComponentChanged (FilenameComponent*)
+    {
+        moduleList.rescan (modulesLocation.getCurrentFile());
+        modulesLocation.setCurrentFile (moduleList.getModulesFolder(), false, false);
+        ModuleList::setLocalModulesFolder (moduleList.getModulesFolder());
+        modulesList.updateContent();
+    }
+
+    void buttonClicked (Button*)
+    {
+        JuceUpdater::show (moduleList, getTopLevelComponent());
+
+        filenameComponentChanged (nullptr);
     }
 
     void listBoxItemClicked (int row, const MouseEvent& e)
@@ -397,6 +409,9 @@ public:
 private:
     Project& project;
     ModuleList moduleList;
+    FilenameComponent modulesLocation;
+    Label modulesLabel;
+    TextButton updateModulesButton;
     ListBox modulesList;
     ScopedPointer<ModuleSettingsPanel> settings;
 };
@@ -440,16 +455,16 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
     //[UserPreSize]
     rebuildConfigTabs();
 
-#if JUCE_MAC || JUCE_WINDOWS
+   #if JUCE_MAC || JUCE_WINDOWS
     openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
     openProjectButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::openInIDE));
 
     saveAndOpenButton.setCommandToTrigger (commandManager, CommandIDs::saveAndOpenInIDE, true);
     saveAndOpenButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::saveAndOpenInIDE));
-#else
+   #else
     openProjectButton.setVisible (false);
     saveAndOpenButton.setVisible (false);
-#endif
+   #endif
     //[/UserPreSize]
 
     setSize (836, 427);

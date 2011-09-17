@@ -66,18 +66,18 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
 
     switch (index)
     {
-        case 0:     exp = new XCodeProjectExporter      (project, ValueTree (XCodeProjectExporter::getValueTreeTypeName (false)), false); break;
-        case 1:     exp = new XCodeProjectExporter      (project, ValueTree (XCodeProjectExporter::getValueTreeTypeName (true)), true); break;
-        case 2:     exp = new MSVCProjectExporterVC6    (project, ValueTree (MSVCProjectExporterVC6::getValueTreeTypeName())); break;
+        case 0:     exp = new XCodeProjectExporter      (project, ValueTree (XCodeProjectExporter     ::getValueTreeTypeName (false)), false); break;
+        case 1:     exp = new XCodeProjectExporter      (project, ValueTree (XCodeProjectExporter     ::getValueTreeTypeName (true)), true); break;
+        case 2:     exp = new MSVCProjectExporterVC6    (project, ValueTree (MSVCProjectExporterVC6   ::getValueTreeTypeName())); break;
         case 3:     exp = new MSVCProjectExporterVC2005 (project, ValueTree (MSVCProjectExporterVC2005::getValueTreeTypeName())); break;
         case 4:     exp = new MSVCProjectExporterVC2008 (project, ValueTree (MSVCProjectExporterVC2008::getValueTreeTypeName())); break;
         case 5:     exp = new MSVCProjectExporterVC2010 (project, ValueTree (MSVCProjectExporterVC2010::getValueTreeTypeName())); break;
-        case 6:     exp = new MakefileProjectExporter   (project, ValueTree (MakefileProjectExporter::getValueTreeTypeName())); break;
-        case 7:     exp = new AndroidProjectExporter    (project, ValueTree (AndroidProjectExporter::getValueTreeTypeName())); break;
+        case 6:     exp = new MakefileProjectExporter   (project, ValueTree (MakefileProjectExporter  ::getValueTreeTypeName())); break;
+        case 7:     exp = new AndroidProjectExporter    (project, ValueTree (AndroidProjectExporter   ::getValueTreeTypeName())); break;
         default:    jassertfalse; return 0;
     }
 
-    File juceFolder (StoredSettings::getInstance()->getLastKnownJuceFolder());
+    File juceFolder (ModuleList::getLocalModulesFolder (&project));
     File target (exp->getTargetFolder());
 
     if (FileHelpers::shouldPathsBeRelative (juceFolder.getFullPathName(), project.getFile().getFullPathName()))
@@ -95,13 +95,13 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const Str
 
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
 {
-    ProjectExporter* exp = MSVCProjectExporterVC6::createForSettings (project, settings);
+    ProjectExporter* exp = MSVCProjectExporterVC6         ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2005::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2008::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2010::createForSettings (project, settings);
-    if (exp == nullptr)    exp = XCodeProjectExporter::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MakefileProjectExporter::createForSettings (project, settings);
-    if (exp == nullptr)    exp = AndroidProjectExporter::createForSettings (project, settings);
+    if (exp == nullptr)    exp = XCodeProjectExporter     ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MakefileProjectExporter  ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = AndroidProjectExporter   ::createForSettings (project, settings);
 
     jassert (exp != nullptr);
     return exp;
@@ -115,7 +115,6 @@ ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& projec
     for (int i = 0; i < project.getNumExporters(); ++i)
     {
         ScopedPointer <ProjectExporter> exp (project.createExporter (i));
-
         const int pref = exp->getLaunchPreferenceOrderForCurrentOS();
 
         if (pref > bestPref)
@@ -210,7 +209,7 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     props.getLast()->setTooltip ("The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
 
     OwnedArray<LibraryModule> modules;
-    ModuleList moduleList;
+    ModuleList moduleList (ModuleList::getDefaultModulesFolder (&project));
     project.createRequiredModules (moduleList, modules);
     for (int i = 0; i < modules.size(); ++i)
         modules.getUnchecked(i)->createPropertyEditors (*this, props);

@@ -26,18 +26,21 @@
 #ifndef __JUCER_JUCEUPDATER_JUCEHEADER__
 #define __JUCER_JUCEUPDATER_JUCEHEADER__
 
+#include "../Project/jucer_Module.h"
+
 
 //==============================================================================
 class JuceUpdater  : public Component,
-                     public ButtonListener,
-                     public FilenameComponentListener,
-                     public ListBoxModel
+                     private ButtonListener,
+                     private FilenameComponentListener,
+                     private ListBoxModel,
+                     private ValueTree::Listener
 {
 public:
-    JuceUpdater();
+    JuceUpdater (ModuleList& moduleList);
     ~JuceUpdater();
 
-    static void show (Component* mainWindow);
+    static void show (ModuleList& moduleList, Component* mainWindow);
 
     //==============================================================================
     void resized();
@@ -49,29 +52,36 @@ public:
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
 
+    void backgroundUpdateComplete (const ModuleList& newList);
+
 private:
+    ModuleList& moduleList;
+    ModuleList latestList;
+
     Label label, currentVersionLabel;
     FilenameComponent filenameComp;
     TextButton checkNowButton;
     ListBox availableVersionsList;
+    ValueTree versionsToDownload;
+    TextButton installButton;
+    ToggleButton selectAllButton;
+    ScopedPointer<Thread> websiteContacterThread;
 
-    XmlElement* downloadVersionList();
-    String getCurrentVersion();
-    bool isAlreadyUpToDate();
+    void checkNow();
+    void install();
+    void updateInstallButtonStatus();
+    void refresh();
+    void selectAll();
+    int getNumCheckedModules() const;
+    bool isLatestVersion (const String& moduleID) const;
 
-    struct VersionInfo
-    {
-        URL url;
-        String desc;
-        String version;
-        String date;
-    };
+    void valueTreePropertyChanged (ValueTree&, const Identifier&);
+    void valueTreeChildAdded (ValueTree&, ValueTree&);
+    void valueTreeChildRemoved (ValueTree&, ValueTree&);
+    void valueTreeChildOrderChanged (ValueTree&);
+    void valueTreeParentChanged (ValueTree&);
 
-    OwnedArray<VersionInfo> availableVersions;
-
-    void updateVersions (const XmlElement& xml);
-    void applyVersion (VersionInfo* version);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceUpdater);
 };
-
 
 #endif   // __JUCER_JUCEUPDATER_JUCEHEADER__

@@ -46,8 +46,9 @@ namespace FileHelpers
 
     //==============================================================================
     bool isJuceFolder (const File& folder);
+    bool isModulesFolder (const File& folder);
     File findParentJuceFolder (const File& file);
-    File findDefaultJuceFolder();
+    File lookInFolderForJuceFolder (const File& folder);
 }
 
 //==============================================================================

@@ -30,7 +30,7 @@
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "../Project/jucer_NewProjectWizard.h"
 
-ApplicationCommandManager* commandManager = nullptr;
+ScopedPointer<ApplicationCommandManager> commandManager;
 
 
 //==============================================================================

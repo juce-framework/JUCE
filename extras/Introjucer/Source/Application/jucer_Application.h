@@ -38,7 +38,10 @@ class JucerApplication   : public JUCEApplication
 {
 public:
     //==============================================================================
-    JucerApplication()  {}
+    JucerApplication()
+    {
+    }
+
     ~JucerApplication() {}
 
     //==============================================================================
@@ -96,12 +99,18 @@ public:
         mainWindows.clear();
 
         OpenDocumentManager::deleteInstance();
-        deleteAndZero (commandManager);
+        commandManager = nullptr;
     }
 
     //==============================================================================
     void systemRequestedQuit()
     {
+        if (cancelAnyModalComponents())
+        {
+            new AsyncQuitRetrier();
+            return;
+        }
+
         while (mainWindows.size() > 0)
         {
             if (! mainWindows[0]->closeCurrentProject())
@@ -139,11 +148,11 @@ public:
 
     bool moreThanOneInstanceAllowed()
     {
-      #ifndef JUCE_LINUX
+       #ifndef JUCE_LINUX
         return false;
-      #else
+       #else
         return true; //xxx should be false but doesn't work on linux..
-      #endif
+       #endif
     }
 
     void anotherInstanceStarted (const String& commandLine)
@@ -352,7 +361,12 @@ public:
             case CommandIDs::showPrefs:         showPrefsPanel(); break;
             case CommandIDs::saveAll:           OpenDocumentManager::getInstance()->saveAll(); break;
             case CommandIDs::closeAllDocuments: closeAllDocuments (true); break;
-            case CommandIDs::showJuceVersion:   JuceUpdater::show (mainWindows[0]); break;
+            case CommandIDs::showJuceVersion:
+            {
+                ModuleList list (ModuleList::getDefaultModulesFolder (nullptr));
+                JuceUpdater::show (list, mainWindows[0]);
+                break;
+            }
             default:                            return JUCEApplication::perform (info);
         }
 
@@ -503,6 +517,35 @@ private:
 
         return createNewMainWindow();
     }
+
+    //==============================================================================
+    static bool cancelAnyModalComponents()
+    {
+        const int numModal = ModalComponentManager::getInstance()->getNumModalComponents();
+
+        for (int i = numModal; --i >= 0;)
+            if (ModalComponentManager::getInstance()->getModalComponent(i) != nullptr)
+                ModalComponentManager::getInstance()->getModalComponent(i)->exitModalState (0);
+
+        return numModal > 0;
+    }
+
+    class AsyncQuitRetrier  : public Timer
+    {
+    public:
+        AsyncQuitRetrier()   { startTimer (500); }
+
+        void timerCallback()
+        {
+            stopTimer();
+            delete this;
+
+            if (JUCEApplication::getInstance() != nullptr)
+                JUCEApplication::getInstance()->systemRequestedQuit();
+        }
+
+        JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier);
+    };
 };
 
 

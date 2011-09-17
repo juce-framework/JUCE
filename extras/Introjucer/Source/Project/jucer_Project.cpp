@@ -177,18 +177,6 @@ const String Project::saveDocument (const File& file)
     updateProjectSettings();
     sanitiseConfigFlags();
 
-    {
-        ScopedPointer <ProjectExporter> exp (ProjectExporter::createPlatformDefaultExporter (*this));
-
-        if (exp != nullptr)
-        {
-            File f (resolveFilename (exp->getJuceFolder().toString()));
-
-            if (FileHelpers::isJuceFolder (f))
-                StoredSettings::getInstance()->setLastKnownJuceFolder (f.getFullPathName());
-        }
-    }
-
     StoredSettings::getInstance()->recentFiles.addFile (file);
 
     ProjectSaver saver (*this, file);
