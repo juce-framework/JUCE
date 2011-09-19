@@ -352,14 +352,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE (BitmapData);
     };
 
-    /** Copies some pixel values to a rectangle of the image.
-
-        The format of the pixel data must match that of the image itself, and the
-        rectangle supplied must be within the image's bounds.
-    */
-    void setPixelData (int destX, int destY, int destW, int destH,
-                       const uint8* sourcePixelData, int sourceLineStride);
-
+    //==============================================================================
     /** Copies a section of the image to somewhere else within itself. */
     void moveImageSection (int destX, int destY,
                            int sourceX, int sourceY,

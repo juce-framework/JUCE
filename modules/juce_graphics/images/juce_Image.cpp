@@ -334,24 +334,6 @@ void Image::BitmapData::setPixelColour (const int x, const int y, const Colour& 
     }
 }
 
-void Image::setPixelData (int x, int y, int w, int h,
-                          const uint8* const sourcePixelData, const int sourceLineStride)
-{
-    jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= getWidth() && y + h <= getHeight());
-
-    if (Rectangle<int>::intersectRectangles (x, y, w, h, 0, 0, getWidth(), getHeight()))
-    {
-        const BitmapData dest (*this, x, y, w, h, BitmapData::writeOnly);
-
-        for (int i = 0; i < h; ++i)
-        {
-            memcpy (dest.getLinePointer(i),
-                    sourcePixelData + sourceLineStride * i,
-                    (size_t) (w * dest.pixelStride));
-        }
-    }
-}
-
 //==============================================================================
 void Image::clear (const Rectangle<int>& area, const Colour& colourToClearTo)
 {

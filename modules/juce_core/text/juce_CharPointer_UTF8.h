@@ -289,6 +289,7 @@ public:
     */
     size_t sizeInBytes() const noexcept
     {
+        jassert (data != nullptr);
         return strlen (data) + 1;
     }
 

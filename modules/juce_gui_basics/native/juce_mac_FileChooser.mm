@@ -125,6 +125,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         [openPanel setCanChooseDirectories: selectsDirectory];
         [openPanel setCanChooseFiles: selectsFiles];
         [openPanel setAllowsMultipleSelection: selectMultipleFiles];
+        [openPanel setResolvesAliases: YES];
     }
 
     [panel setDelegate: delegate];
@@ -156,6 +157,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         {
             NSOpenPanel* openPanel = (NSOpenPanel*) panel;
             NSArray* urls = [openPanel filenames];
+
             for (unsigned int i = 0; i < [urls count]; ++i)
             {
                 NSString* f = [urls objectAtIndex: i];

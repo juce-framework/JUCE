@@ -43,13 +43,13 @@ public:
     //==============================================================================
     void initialise (const String& /*commandLine*/)
     {
-      #if JUCE_IOS || JUCE_ANDROID
+       #if JUCE_IOS || JUCE_ANDROID
         theMainWindow.setVisible (true);
         theMainWindow.setFullScreen (true);
-      #else
+       #else
         theMainWindow.centreWithSize (700, 600);
         theMainWindow.setVisible (true);
-      #endif
+       #endif
 
         // this little function just demonstrates a few system info calls
         Logger::outputDebugString (collectSomeSystemInfo());
