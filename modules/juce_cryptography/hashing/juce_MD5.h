@@ -41,30 +41,20 @@ class JUCE_API  MD5
 public:
     //==============================================================================
     /** Creates a null MD5 object. */
-    MD5();
+    MD5() noexcept;
 
     /** Creates a copy of another MD5. */
-    MD5 (const MD5& other);
+    MD5 (const MD5& other) noexcept;
 
     /** Copies another MD5. */
-    MD5& operator= (const MD5& other);
+    MD5& operator= (const MD5& other) noexcept;
 
     //==============================================================================
     /** Creates a checksum for a block of binary data. */
-    explicit MD5 (const MemoryBlock& data);
+    explicit MD5 (const MemoryBlock& data) noexcept;
 
     /** Creates a checksum for a block of binary data. */
-    MD5 (const void* data, size_t numBytes);
-
-    /** Creates a checksum for a string.
-
-        Note that this operates on the string as a block of unicode characters, so the
-        result you get will differ from the value you'd get if the string was treated
-        as a block of utf8 or ascii. Bear this in mind if you're comparing the result
-        of this method with a checksum created by a different framework, which may have
-        used a different encoding.
-    */
-    explicit MD5 (const String& text);
+    MD5 (const void* data, size_t numBytes) noexcept;
 
     /** Creates a checksum for the input from a stream.
 
@@ -77,46 +67,46 @@ public:
     /** Creates a checksum for a file. */
     explicit MD5 (const File& file);
 
+    /** Creates a checksum from a UTF-8 buffer.
+        E.g.
+        @code MD5 checksum (myString.toUTF8());
+        @endcode
+    */
+    MD5 (const CharPointer_UTF8& utf8Text) noexcept;
+
     /** Destructor. */
-    ~MD5();
+    ~MD5() noexcept;
 
     //==============================================================================
     /** Returns the checksum as a 16-byte block of data. */
     MemoryBlock getRawChecksumData() const;
 
     /** Returns a pointer to the 16-byte array of result data. */
-    const uint8* getChecksumDataArray() const noexcept      { return result; }
+    const uint8* getChecksumDataArray() const noexcept          { return result; }
 
     /** Returns the checksum as a 32-digit hex string. */
     String toHexString() const;
 
+    /** Creates an MD5 from a little-endian UTF-32 encoded string.
+
+        Note that this method is provided for backwards-compatibility with the old
+        version of this class, which had a constructor that took a string and performed
+        this operation on it. In new code, you shouldn't use this, and are recommended to
+        use the constructor that takes a CharPointer_UTF8 instead.
+    */
+    static MD5 fromUTF32 (const String&);
 
     //==============================================================================
-    /** Compares this to another MD5. */
-    bool operator== (const MD5& other) const;
-
-    /** Compares this to another MD5. */
-    bool operator!= (const MD5& other) const;
+    bool operator== (const MD5&) const noexcept;
+    bool operator!= (const MD5&) const noexcept;
 
 
 private:
     //==============================================================================
     uint8 result [16];
 
-    struct ProcessContext
-    {
-        uint8 buffer [64];
-        uint32 state [4];
-        uint32 count [2];
-
-        ProcessContext();
-
-        void processBlock (const void* data, size_t dataSize);
-        void transform (const void* buffer);
-        void finish (void* result);
-    };
-
-    void processStream (InputStream&, int64 numBytesToRead);
+    void processData (const void*, size_t) noexcept;
+    void processStream (InputStream&, int64);
 
     JUCE_LEAK_DETECTOR (MD5);
 };

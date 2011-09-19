@@ -224,7 +224,7 @@ BlowFish::BlowFish (const BlowFish& other)
     operator= (other);
 }
 
-BlowFish& BlowFish::operator= (const BlowFish& other)
+BlowFish& BlowFish::operator= (const BlowFish& other) noexcept
 {
     memcpy (p, other.p, sizeof (p));
 
@@ -234,9 +234,7 @@ BlowFish& BlowFish::operator= (const BlowFish& other)
     return *this;
 }
 
-BlowFish::~BlowFish()
-{
-}
+BlowFish::~BlowFish() noexcept {}
 
 uint32 BlowFish::F (const uint32 x) const noexcept
 {

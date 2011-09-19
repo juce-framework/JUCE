@@ -156,19 +156,19 @@ private:
 };
 
 //==============================================================================
-SHA256::SHA256()
+SHA256::SHA256() noexcept
 {
     zerostruct (result);
 }
 
-SHA256::~SHA256() {}
+SHA256::~SHA256() noexcept {}
 
-SHA256::SHA256 (const SHA256& other)
+SHA256::SHA256 (const SHA256& other) noexcept
 {
     memcpy (result, other.result, sizeof (result));
 }
 
-SHA256& SHA256::operator= (const SHA256& other)
+SHA256& SHA256::operator= (const SHA256& other) noexcept
 {
     memcpy (result, other.result, sizeof (result));
     return *this;

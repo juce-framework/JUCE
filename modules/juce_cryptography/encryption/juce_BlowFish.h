@@ -46,10 +46,10 @@ public:
     BlowFish (const BlowFish& other);
 
     /** Copies another blowfish object. */
-    BlowFish& operator= (const BlowFish& other);
+    BlowFish& operator= (const BlowFish& other) noexcept;
 
     /** Destructor. */
-    ~BlowFish();
+    ~BlowFish() noexcept;
 
     //==============================================================================
     /** Encrypts a pair of 32-bit integers. */
@@ -64,7 +64,7 @@ private:
     uint32 p[18];
     HeapBlock <uint32> s[4];
 
-    uint32 F (uint32 x) const noexcept;
+    uint32 F (uint32) const noexcept;
 
     JUCE_LEAK_DETECTOR (BlowFish);
 };

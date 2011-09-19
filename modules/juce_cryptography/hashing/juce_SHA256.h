@@ -45,16 +45,16 @@ public:
         The default constructor just creates a hash filled with zeros. (This is not
         equal to the hash of an empty block of data).
     */
-    SHA256();
+    SHA256() noexcept;
 
     /** Destructor. */
-    ~SHA256();
+    ~SHA256() noexcept;
 
     /** Creates a copy of another SHA256. */
-    SHA256 (const SHA256& other);
+    SHA256 (const SHA256& other) noexcept;
 
     /** Copies another SHA256. */
-    SHA256& operator= (const SHA256& other);
+    SHA256& operator= (const SHA256& other) noexcept;
 
     //==============================================================================
     /** Creates a hash from a block of raw data. */
@@ -85,8 +85,8 @@ public:
     String toHexString() const;
 
     //==============================================================================
-    bool operator== (const SHA256& other) const noexcept;
-    bool operator!= (const SHA256& other) const noexcept;
+    bool operator== (const SHA256&) const noexcept;
+    bool operator!= (const SHA256&) const noexcept;
 
 
 private:
