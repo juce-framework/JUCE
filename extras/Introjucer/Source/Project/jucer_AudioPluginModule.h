@@ -378,8 +378,6 @@ namespace AUHelpers
                                                 JUCE_AU_PUBLIC "OtherBases/AUEffectBase.h",
                                                 JUCE_AU_PUBLIC "Utility/AUBuffer.cpp",
                                                 JUCE_AU_PUBLIC "Utility/AUBuffer.h",
-                                                JUCE_AU_PUBLIC "Utility/AUDebugDispatcher.cpp",
-                                                JUCE_AU_PUBLIC "Utility/AUDebugDispatcher.h",
                                                 JUCE_AU_PUBLIC "Utility/AUInputFormatConverter.h",
                                                 JUCE_AU_PUBLIC "Utility/AUSilentTimeout.h",
                                                 JUCE_AU_PUBLIC "Utility/AUTimestampGenerator.h", 0 };

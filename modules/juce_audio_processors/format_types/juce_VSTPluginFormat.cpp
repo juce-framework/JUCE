@@ -79,9 +79,6 @@ BEGIN_JUCE_NAMESPACE
  static void _clearfp() {}
 #endif
 
-extern void JUCE_API juce_callAnyTimersSynchronously();
-
-
 //==============================================================================
 const int fxbVersionNum = 1;
 
@@ -2247,7 +2244,7 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
                 dispatch (effEditIdle, 0, 0, 0, 0);
            #endif
 
-            juce_callAnyTimersSynchronously();
+            Timer::callPendingTimersSynchronously();
 
             handleUpdateNowIfNeeded();
 

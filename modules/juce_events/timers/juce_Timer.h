@@ -26,8 +26,6 @@
 #ifndef __JUCE_TIMER_JUCEHEADER__
 #define __JUCE_TIMER_JUCEHEADER__
 
-class InternalTimerThread;
-
 
 //==============================================================================
 /**
@@ -119,8 +117,14 @@ public:
 
 
     //==============================================================================
+    /** For internal use only: invokes any timers that need callbacks.
+        Don't call this unless you really know what you're doing!
+    */
+    static void JUCE_CALLTYPE callPendingTimersSynchronously();
+
 private:
-    friend class InternalTimerThread;
+    class TimerThread;
+    friend class TimerThread;
     int countdownMs, periodMs;
     Timer* previous;
     Timer* next;

@@ -96,8 +96,6 @@ static bool recursionCheck = false;
 static juce::uint32 lastMasterIdleCall = 0;
 
 BEGIN_JUCE_NAMESPACE
- extern void JUCE_API juce_callAnyTimersSynchronously();
-
  #if JUCE_MAC
   extern void initialiseMac();
   extern void* attachComponentToWindowRef (Component* component, void* windowRef);
@@ -947,7 +945,7 @@ public:
             recursionCheck = true;
 
             JUCE_AUTORELEASEPOOL
-            juce_callAnyTimersSynchronously();
+            Timer::callPendingTimersSynchronously();
 
             for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
                 ComponentPeer::getPeer (i)->performAnyPendingRepaintsNow();

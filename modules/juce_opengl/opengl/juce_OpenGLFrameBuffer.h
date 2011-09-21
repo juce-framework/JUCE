@@ -66,10 +66,12 @@ public:
 
     //==============================================================================
     /** Selects this buffer as the current OpenGL rendering target. */
-    void makeCurrentTarget();
+    bool makeCurrentTarget();
 
     /** Deselects this buffer as the current OpenGL rendering target. */
     void releaseCurrentTarget();
+
+    void clear (const Colour& colour);
 
 private:
     class Pimpl;

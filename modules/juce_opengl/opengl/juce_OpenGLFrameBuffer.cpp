@@ -164,8 +164,7 @@ public:
         glTexParameterf (textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf (textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        glFramebufferTexture2DEXT (GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                                   textureType, textureID, 0);
+        glFramebufferTexture2DEXT (GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, textureType, textureID, 0);
 
         if (wantsDepthBuffer || wantsStencilBuffer)
         {
@@ -221,25 +220,6 @@ public:
 
     bool bind()    { return bind (frameBufferHandle); }
     bool unbind()  { return bind (0); }
-
-    /*Image createImage()
-    {
-        Image im;
-
-        if (ok)
-        {
-            bind();
-
-            im = Image (Image::ARGB, width, height, true);
-            Image::BitmapData data (im, Image::BitmapData::writeOnly);
-
-            glReadPixels (0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data.data);
-
-            unbind();
-        }
-
-        return im;
-    }*/
 
     const int width, height;
     GLuint textureID, frameBufferHandle, depthOrStencilBuffer;
@@ -298,16 +278,24 @@ int OpenGLFrameBuffer::getWidth() const noexcept            { return pimpl != nu
 int OpenGLFrameBuffer::getHeight() const noexcept           { return pimpl != nullptr ? pimpl->height : 0; }
 GLuint OpenGLFrameBuffer::getTextureID() const noexcept     { return pimpl != nullptr ? pimpl->textureID : 0; }
 
-void OpenGLFrameBuffer::makeCurrentTarget()
+bool OpenGLFrameBuffer::makeCurrentTarget()
 {
-    if (pimpl != nullptr)
-        pimpl->bind();
+    return pimpl != nullptr && pimpl->bind();
 }
 
 void OpenGLFrameBuffer::releaseCurrentTarget()
 {
     if (pimpl != nullptr)
         pimpl->unbind();
+}
+
+void OpenGLFrameBuffer::clear (const Colour& colour)
+{
+    if (makeCurrentTarget())
+    {
+        OpenGLHelpers::clear (colour);
+        releaseCurrentTarget();
+    }
 }
 
 END_JUCE_NAMESPACE

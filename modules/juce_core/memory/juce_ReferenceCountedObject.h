@@ -105,6 +105,14 @@ protected:
         jassert (getReferenceCount() == 0);
     }
 
+    /** Resets the reference count to zero without deleting the object.
+        You should probably never need to use this!
+    */
+    void resetReferenceCount() noexcept
+    {
+        refCount = 0;
+    }
+
 private:
     //==============================================================================
     Atomic <int> refCount;

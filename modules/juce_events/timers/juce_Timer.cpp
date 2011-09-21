@@ -26,15 +26,15 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-class InternalTimerThread  : private Thread,
-                             private MessageListener,
-                             private DeletedAtShutdown,
-                             private AsyncUpdater
+class Timer::TimerThread  : private Thread,
+                            private MessageListener,
+                            private DeletedAtShutdown,
+                            private AsyncUpdater
 {
 public:
     typedef CriticalSection LockType; // (mysteriously, using a SpinLock here causes problems on some XP machines..)
 
-    InternalTimerThread()
+    TimerThread()
         : Thread ("Juce Timer"),
           firstTimer (nullptr),
           callbackNeeded (0)
@@ -42,7 +42,7 @@ public:
         triggerAsyncUpdate();
     }
 
-    ~InternalTimerThread() noexcept
+    ~TimerThread() noexcept
     {
         stopThread (4000);
 
@@ -158,16 +158,10 @@ public:
         callTimers();
     }
 
-    static void callAnyTimersSynchronously()
-    {
-        if (InternalTimerThread::instance != nullptr)
-            InternalTimerThread::instance->callTimersSynchronously();
-    }
-
     static inline void add (Timer* const tim) noexcept
     {
         if (instance == nullptr)
-            instance = new InternalTimerThread();
+            instance = new TimerThread();
 
         instance->addTimer (tim);
     }
@@ -194,10 +188,10 @@ public:
         }
     }
 
-private:
-    friend class Timer;
-    static InternalTimerThread* instance;
+    static TimerThread* instance;
     static LockType lock;
+
+private:
     Timer* volatile firstTimer;
     Atomic <int> callbackNeeded;
 
@@ -302,16 +296,11 @@ private:
         startThread (7);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalTimerThread);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimerThread);
 };
 
-InternalTimerThread* InternalTimerThread::instance = nullptr;
-InternalTimerThread::LockType InternalTimerThread::lock;
-
-void JUCE_API juce_callAnyTimersSynchronously()
-{
-    InternalTimerThread::callAnyTimersSynchronously();
-}
+Timer::TimerThread* Timer::TimerThread::instance = nullptr;
+Timer::TimerThread::LockType Timer::TimerThread::lock;
 
 //==============================================================================
 #if JUCE_DEBUG
@@ -325,7 +314,7 @@ Timer::Timer() noexcept
      next (nullptr)
 {
    #if JUCE_DEBUG
-    const InternalTimerThread::LockType::ScopedLockType sl (InternalTimerThread::lock);
+    const TimerThread::LockType::ScopedLockType sl (TimerThread::lock);
     activeTimers.add (this);
    #endif
 }
@@ -337,7 +326,7 @@ Timer::Timer (const Timer&) noexcept
      next (nullptr)
 {
    #if JUCE_DEBUG
-    const InternalTimerThread::LockType::ScopedLockType sl (InternalTimerThread::lock);
+    const TimerThread::LockType::ScopedLockType sl (TimerThread::lock);
     activeTimers.add (this);
    #endif
 }
@@ -353,7 +342,7 @@ Timer::~Timer()
 
 void Timer::startTimer (const int interval) noexcept
 {
-    const InternalTimerThread::LockType::ScopedLockType sl (InternalTimerThread::lock);
+    const TimerThread::LockType::ScopedLockType sl (TimerThread::lock);
 
    #if JUCE_DEBUG
     // this isn't a valid object! Your timer might be a dangling pointer or something..
@@ -364,17 +353,17 @@ void Timer::startTimer (const int interval) noexcept
     {
         countdownMs = interval;
         periodMs = jmax (1, interval);
-        InternalTimerThread::add (this);
+        TimerThread::add (this);
     }
     else
     {
-        InternalTimerThread::resetCounter (this, interval);
+        TimerThread::resetCounter (this, interval);
     }
 }
 
 void Timer::stopTimer() noexcept
 {
-    const InternalTimerThread::LockType::ScopedLockType sl (InternalTimerThread::lock);
+    const TimerThread::LockType::ScopedLockType sl (TimerThread::lock);
 
    #if JUCE_DEBUG
     // this isn't a valid object! Your timer might be a dangling pointer or something..
@@ -383,9 +372,15 @@ void Timer::stopTimer() noexcept
 
     if (periodMs > 0)
     {
-        InternalTimerThread::remove (this);
+        TimerThread::remove (this);
         periodMs = 0;
     }
+}
+
+void JUCE_CALLTYPE Timer::callPendingTimersSynchronously()
+{
+    if (TimerThread::instance != nullptr)
+        TimerThread::instance->callTimersSynchronously();
 }
 
 END_JUCE_NAMESPACE
