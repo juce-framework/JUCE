@@ -3,232 +3,232 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Jucer">
-      <UniqueIdentifier>{1EDAFBAA-CE86-EF45-C6A9-1DDCB3BC93BA}</UniqueIdentifier>
+      <UniqueIdentifier>{6BF3B324-863C-BD37-9EF5-0456FFF16D6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src">
-      <UniqueIdentifier>{2703AB61-D3BD-5BEF-208A-24004344F060}</UniqueIdentifier>
+      <UniqueIdentifier>{7FEE0020-4A85-6F17-53E-A5B7E8BE1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\model">
-      <UniqueIdentifier>{3CC658D4-FEFD-93FA-A59A-64815DB357F2}</UniqueIdentifier>
+      <UniqueIdentifier>{620CB546-F15E-C485-F757-8911B056EC3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\model\components">
-      <UniqueIdentifier>{F903A4F4-D3D8-9E21-78D9-CC1B1CF1174E}</UniqueIdentifier>
+      <UniqueIdentifier>{B529AD7A-6ABA-D0-9A16-746E87504BB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\model\documents">
-      <UniqueIdentifier>{613923E9-B67E-F1DF-231B-1B71A7D5BAB0}</UniqueIdentifier>
+      <UniqueIdentifier>{BF5392D6-5546-405D-07C8-EA6016FDB9F4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\model\paintelements">
-      <UniqueIdentifier>{1407E2C4-FCF4-6BF2-3E0E-5691D54E515A}</UniqueIdentifier>
+      <UniqueIdentifier>{7B2D005-1800-50B0-72D-236768AFC583}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\properties">
-      <UniqueIdentifier>{FC65C201-128F-9467-AE70-A704D9372B14}</UniqueIdentifier>
+      <UniqueIdentifier>{A967F8EF-2D75-8FB-DB88-23D29EB53689}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\templates">
-      <UniqueIdentifier>{67B3DD6C-03D4-260B-5C8D-2CC8905E693C}</UniqueIdentifier>
+      <UniqueIdentifier>{6EFB6A23-68EF-AD99-72-7F50E270A7B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\ui">
-      <UniqueIdentifier>{C55B19B0-60B4-E80D-2FCE-1D9850D4782F}</UniqueIdentifier>
+      <UniqueIdentifier>{43FFF852-CD68-066-FE2E-56FA68880C2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\utility">
-      <UniqueIdentifier>{AAF1F456-D1C8-BBF0-858E-CC76C32B3FC9}</UniqueIdentifier>
+      <UniqueIdentifier>{051F70-A65-FA2B-413A-A46B443343A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Jucer\src\binarydata">
-      <UniqueIdentifier>{F6EBF2DC-3300-F2A2-2495-83BBC40A150C}</UniqueIdentifier>
+      <UniqueIdentifier>{85121407-F864-E48C-FE79-1E0DE1AD238F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules">
-      <UniqueIdentifier>{690B82A0-8FB2-2F71-166A-4864872F2A4A}</UniqueIdentifier>
+      <UniqueIdentifier>{3E0AE5-EB70-09F4-72F-1D44436FA787}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core">
-      <UniqueIdentifier>{6236C1FE-848F-3118-B7FD-A2876FDFB2A5}</UniqueIdentifier>
+      <UniqueIdentifier>{D98CCFF-96A4-AAAD-8A2B-3EA87B4F50BF}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\text">
-      <UniqueIdentifier>{989A4F02-ED77-E644-8D49-5B2D2282716A}</UniqueIdentifier>
+      <UniqueIdentifier>{643747DD-0354-F652-A413-81A79D2C9630}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\maths">
-      <UniqueIdentifier>{A7F640EE-AD02-D938-90B6-E2CB2A836F55}</UniqueIdentifier>
+      <UniqueIdentifier>{634B908-8CEE-23E8-D49F-69A82C85D2F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\memory">
-      <UniqueIdentifier>{D0C8600C-F10C-80B4-A1AD-13CBE52387D0}</UniqueIdentifier>
+      <UniqueIdentifier>{FB04A57B-0AE-A570-6E4A-D4FA469512A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\containers">
-      <UniqueIdentifier>{1F3AEA01-47AD-43C0-662A-93AAE0E16929}</UniqueIdentifier>
+      <UniqueIdentifier>{E4A6BDAF-D35E-B652-068-4D42EAD348}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\threads">
-      <UniqueIdentifier>{6430392C-FAD1-5032-2F53-769F064C408D}</UniqueIdentifier>
+      <UniqueIdentifier>{425DE3F-9E0-1741-AA7-E9347AC75F7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\time">
-      <UniqueIdentifier>{EFFEC361-1E10-DC5C-E55A-0D494DB3F3D3}</UniqueIdentifier>
+      <UniqueIdentifier>{505EA106-222D-7F84-3BA6-7E81B855A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\files">
-      <UniqueIdentifier>{7CD49058-0A17-D262-BFE9-28A20BA55DCA}</UniqueIdentifier>
+      <UniqueIdentifier>{97FF9014-904E-C3B-77B4-4DD90E835D15}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\network">
-      <UniqueIdentifier>{E2B20B83-71B0-77FB-0F3C-3160BE41A507}</UniqueIdentifier>
+      <UniqueIdentifier>{6F281F00-AA9-9E7-327-A8197631CA4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\streams">
-      <UniqueIdentifier>{43577BAF-7CD5-DAFB-AB29-BEF0DCAE3D33}</UniqueIdentifier>
+      <UniqueIdentifier>{3E13B6B6-1CC1-40D3-3E73-97C9C5F8EF2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\logging">
-      <UniqueIdentifier>{6740CBDE-FCA0-C698-FD9C-9E466BDCD650}</UniqueIdentifier>
+      <UniqueIdentifier>{40630F-A30B-1190-A56-BB7F1C307C9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\system">
-      <UniqueIdentifier>{AC894CA7-1A88-B1DE-F921-BD775D65E555}</UniqueIdentifier>
+      <UniqueIdentifier>{34E0C1AD-9C0E-61-C264-E49F19A622B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\xml">
-      <UniqueIdentifier>{023D4A23-26D4-6EA1-5715-A0EA1B6E9E77}</UniqueIdentifier>
+      <UniqueIdentifier>{E4288A2-1866-5E2-5FF6-79DC63056C3B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\json">
-      <UniqueIdentifier>{60E2C17B-1408-20D9-B53C-689F5BFA11FB}</UniqueIdentifier>
+      <UniqueIdentifier>{00DAB03-9121-3A91-7EA3-60D686DD7ED}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\zip">
-      <UniqueIdentifier>{DD45CCCC-E7F9-BAEB-6463-6DA35A117F10}</UniqueIdentifier>
+      <UniqueIdentifier>{FB33B22-0550-57C-A435-4B67929F7E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\unit_tests">
-      <UniqueIdentifier>{964E7401-B639-FBD6-944E-27BC827853E8}</UniqueIdentifier>
+      <UniqueIdentifier>{19EC6E14-2BD4-E8F4-2F4-1C972F709D}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\misc">
-      <UniqueIdentifier>{27235210-14DF-A238-E8E5-4D124535961D}</UniqueIdentifier>
+      <UniqueIdentifier>{7851BBAB-650-0A67-72D6-08644EB0F94}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_core\native">
-      <UniqueIdentifier>{C73A2D05-F150-BFA1-8C41-F32AB172B388}</UniqueIdentifier>
+      <UniqueIdentifier>{EA4857-6B1A-A4E6-4F1A-EF0BAA9EA4F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_data_structures">
-      <UniqueIdentifier>{8A7D6690-418B-C793-C1A4-C83528AA45C9}</UniqueIdentifier>
+      <UniqueIdentifier>{DA1D3871-D2A-59DA-6FA-FCA076F324A6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_data_structures\values">
-      <UniqueIdentifier>{C2BC31C2-D631-E361-A4B0-BF514DD159FA}</UniqueIdentifier>
+      <UniqueIdentifier>{589B6C9-46A-10B6-9A9-989083AEF048}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_data_structures\undomanager">
-      <UniqueIdentifier>{D32EE37F-1AC2-0BE8-A18C-A6BB7403ECDA}</UniqueIdentifier>
+      <UniqueIdentifier>{638BD2-4A0A-EA38-5BF3-973F356D230}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_data_structures\app_properties">
-      <UniqueIdentifier>{B1DD6C78-850A-DDCF-4BBE-FEE5D5A6AEB1}</UniqueIdentifier>
+      <UniqueIdentifier>{01210851-33F9-5C06-53D1-B901BCF677FD}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_events">
-      <UniqueIdentifier>{8076F56D-4630-ECF0-298D-64E732C8F751}</UniqueIdentifier>
+      <UniqueIdentifier>{DBABEE56-74DA-EE5F-B384-20FE84AFC}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_events\messages">
-      <UniqueIdentifier>{4F134CB2-4A0F-8739-CEEB-80DD9709C7B2}</UniqueIdentifier>
+      <UniqueIdentifier>{3245F923-C806-9AFA-9B5F-DC3FDA2ECFC7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_events\timers">
-      <UniqueIdentifier>{00A4E5A3-6D15-7627-5980-CF8D865D358E}</UniqueIdentifier>
+      <UniqueIdentifier>{2E053DAA-D2DB-9686-AC8E-58A5C0B3582}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_events\broadcasters">
-      <UniqueIdentifier>{0AEAE1DC-E2A6-315B-830C-CCD3ED50ADB1}</UniqueIdentifier>
+      <UniqueIdentifier>{1B862C2-CC12-0891-A6FB-240A29A658A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_events\interprocess">
-      <UniqueIdentifier>{31C6F35F-558F-E2D7-E0FB-7266EC211DA4}</UniqueIdentifier>
+      <UniqueIdentifier>{A10BB06-939-7D35-050-2AA4E359389}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_events\native">
-      <UniqueIdentifier>{F5177B36-BFE3-DBE7-A30C-1AF525D16D70}</UniqueIdentifier>
+      <UniqueIdentifier>{A1E63814-E581-E61C-2909-E9659E7DA0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics">
-      <UniqueIdentifier>{45396B45-C1CB-B2FE-AA28-04D1E440E781}</UniqueIdentifier>
+      <UniqueIdentifier>{EAC3D42D-7C4E-8E8-A6F-FBE22A137ABC}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\colour">
-      <UniqueIdentifier>{924B1BED-5CBE-D0CA-A6EE-AA9A72A80AEC}</UniqueIdentifier>
+      <UniqueIdentifier>{83239991-500-DCC1-0B8A-7CB9BDE14BB0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\contexts">
-      <UniqueIdentifier>{2719DCC2-C095-6FCC-D437-33FBC66D5B71}</UniqueIdentifier>
+      <UniqueIdentifier>{471FB13C-9DB-7843-8773-2119B45B3228}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\images">
-      <UniqueIdentifier>{3CB58132-9A88-177F-91E2-1E31337859B0}</UniqueIdentifier>
+      <UniqueIdentifier>{9995D17D-396-AA64-5C3A-75DD67A5F830}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\image_formats">
-      <UniqueIdentifier>{A9722D05-B24B-F769-8FA3-D73FF6076693}</UniqueIdentifier>
+      <UniqueIdentifier>{2803DA17-8B1E-99EA-0AEF-29CE0B013D0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\geometry">
-      <UniqueIdentifier>{77062299-58ED-B1BA-A1A9-8F14982CCFEF}</UniqueIdentifier>
+      <UniqueIdentifier>{772A4E4-7DD-A35D-A92-055E965D834B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\placement">
-      <UniqueIdentifier>{B84ED7BC-D173-E9D8-AD57-6A8F3CB074C3}</UniqueIdentifier>
+      <UniqueIdentifier>{D121CE-5140-CF0A-130B-C640DD0F06B9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\fonts">
-      <UniqueIdentifier>{DE38FB2B-5B97-7826-B9D6-A8B5648EB8F2}</UniqueIdentifier>
+      <UniqueIdentifier>{1990A14-307-E84B-C8CE-835ACF22510}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\effects">
-      <UniqueIdentifier>{8E27D06E-51A0-3191-D7FF-56BB8454AD25}</UniqueIdentifier>
+      <UniqueIdentifier>{D2FC5747-9A37-D14B-5388-AF05A3CC0CCE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_graphics\native">
-      <UniqueIdentifier>{1E288815-F73F-13A9-874E-8B05A203BFF0}</UniqueIdentifier>
+      <UniqueIdentifier>{3DCFE62C-ED6E-D432-4B31-62BA114ACC6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics">
-      <UniqueIdentifier>{318A4389-6B05-0F2A-2E2D-4487EE41A01C}</UniqueIdentifier>
+      <UniqueIdentifier>{3D489EF5-9CD6-3014-3A77-F9BF6131644}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\components">
-      <UniqueIdentifier>{5C07A94E-7E2A-ED2F-0853-E6753A7D1175}</UniqueIdentifier>
+      <UniqueIdentifier>{1134A59A-8291-6F0F-B98-A3A367CA33}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\mouse">
-      <UniqueIdentifier>{BEA7F132-8ED1-3333-6FC7-55D65FFDE41E}</UniqueIdentifier>
+      <UniqueIdentifier>{6E6E9F77-708B-CE77-998-9DE8BC05C56}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\keyboard">
-      <UniqueIdentifier>{FCE5AE13-0B0A-214D-E27E-463096DDB61A}</UniqueIdentifier>
+      <UniqueIdentifier>{1A8DC1BE-A04A-E498-3C01-B52DEB9842A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\widgets">
-      <UniqueIdentifier>{984E421C-FD7E-8051-52A6-91C657B92058}</UniqueIdentifier>
+      <UniqueIdentifier>{5CD6996-FA12-B394-C286-2A2116196FD}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\windows">
-      <UniqueIdentifier>{B9662C5E-2814-A47A-D526-53D09FCD24CC}</UniqueIdentifier>
+      <UniqueIdentifier>{B530B91-C8A7-336C-85FE-030A6EE6131C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\menus">
-      <UniqueIdentifier>{D12D03B4-F7EA-4E25-87F6-8246867274C9}</UniqueIdentifier>
+      <UniqueIdentifier>{F176D6EE-CFEC-CC78-FD5-6F1CD5B105}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\layout">
-      <UniqueIdentifier>{2B508A1A-7DCB-31E8-4B28-5DA7B73C909D}</UniqueIdentifier>
+      <UniqueIdentifier>{CBFECCE1-01FF-C9B5-664D-1141FDEEA9A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\buttons">
-      <UniqueIdentifier>{9FD95443-82EA-5AA7-788C-34BCD70CB1EA}</UniqueIdentifier>
+      <UniqueIdentifier>{2EA4A7AA-E0B7-564-A2FE-F1FF506C2EB0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\positioning">
-      <UniqueIdentifier>{7C202080-6C12-B035-62C6-FA5E3AAEA197}</UniqueIdentifier>
+      <UniqueIdentifier>{DFD0F77F-A3A1-E744-6B81-905C041ECB0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\drawables">
-      <UniqueIdentifier>{BFF1CB08-B1DD-CE69-8D39-194670D6AA12}</UniqueIdentifier>
+      <UniqueIdentifier>{8321E70D-827-1FC8-927A-CDB09E2A4FB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\properties">
-      <UniqueIdentifier>{D850DDA0-3135-B447-6D36-E5A3E2B1015B}</UniqueIdentifier>
+      <UniqueIdentifier>{88EDC6-10AD-2C9-1D51-86EB75E43F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\lookandfeel">
-      <UniqueIdentifier>{7CF28B06-E0C2-55C6-180A-3EAFA890C4AD}</UniqueIdentifier>
+      <UniqueIdentifier>{F810C30F-D257-D30-58A-D351590B992E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\filebrowser">
-      <UniqueIdentifier>{1A87CC61-8AAD-98C7-C56A-C3E378361655}</UniqueIdentifier>
+      <UniqueIdentifier>{165A665-AEDC-6D8-45BD-928CA24C888E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\commands">
-      <UniqueIdentifier>{86101CB4-0F84-6CFA-E53C-2B8CAD1061D5}</UniqueIdentifier>
+      <UniqueIdentifier>{0D5F1E86-8EA1-C62-E2CD-EA80F9F1EE5D}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\misc">
-      <UniqueIdentifier>{ECC8109D-7B63-8A09-72D2-758BE9FB8BAC}</UniqueIdentifier>
+      <UniqueIdentifier>{E8702D1-119D-C8C-DA3A-33F353F73A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\application">
-      <UniqueIdentifier>{1C84E30F-7924-5675-B653-61F33C840E90}</UniqueIdentifier>
+      <UniqueIdentifier>{40C5546-F97-0DA2-7FA2-6849611E1A5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_basics\native">
-      <UniqueIdentifier>{AC1987A2-0E1E-F1F4-1727-E30775233303}</UniqueIdentifier>
+      <UniqueIdentifier>{ADE158-FFC8-320-2E90-9A664660D1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_extra">
-      <UniqueIdentifier>{430F0677-75E9-A723-B8B1-BB9F03F2CEF8}</UniqueIdentifier>
+      <UniqueIdentifier>{51010B42-48F0-CBE5-CB4D-210555165F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_extra\code_editor">
-      <UniqueIdentifier>{F53B80E8-13DF-48B0-7E64-9829B7DD1B30}</UniqueIdentifier>
+      <UniqueIdentifier>{FE2D45F-6D42-D286-BC75-CC35487DB2F8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_extra\documents">
-      <UniqueIdentifier>{10B4BFDA-DD68-ED3D-D1B1-634C71782865}</UniqueIdentifier>
+      <UniqueIdentifier>{60108-6A71-D7B4-CF07-CEDB38FBAAE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_extra\embedding">
-      <UniqueIdentifier>{34EF13A1-CB54-AC3D-311C-44A1F3B463A5}</UniqueIdentifier>
+      <UniqueIdentifier>{C3FD125-D28-3C29-6A54-9917F24AF04B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_extra\lookandfeel">
-      <UniqueIdentifier>{D82CD276-B075-D198-0E64-9CC3E1FF3909}</UniqueIdentifier>
+      <UniqueIdentifier>{38A572A-A0E7-EDF-EA5B-1695A3A414CF}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_extra\misc">
-      <UniqueIdentifier>{D5282A2D-694D-71F0-85DB-1B22670EC890}</UniqueIdentifier>
+      <UniqueIdentifier>{9A4DF558-0FE7-E607-BD2C-511589EF1A2A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_gui_extra\native">
-      <UniqueIdentifier>{2F636503-1048-5E1D-2CBB-40EEFA5185CB}</UniqueIdentifier>
+      <UniqueIdentifier>{E6DEDEF-E21-4364-C203-D61884EA24B9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Library Code">
-      <UniqueIdentifier>{F81E83D4-2B57-C122-436A-0634B6133AA5}</UniqueIdentifier>
+      <UniqueIdentifier>{45B6A3C4-1F83-4794-EB92-972D554B6A5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

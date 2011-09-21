@@ -3,7 +3,7 @@
 <VisualStudioProject ProjectType="Visual C++"
                      Version="8.00"
                      Name="HelloWorld"
-                     ProjectGUID="{BFD5C009-006E-3CF9-9AEB-640CFAC604D3}"
+                     ProjectGUID="{2A69546-828D-036E-38A-9DAF6AEBCD}"
                      TargetFrameworkVersion="131072">
   <Platforms>
     <Platform Name="Win32"/>

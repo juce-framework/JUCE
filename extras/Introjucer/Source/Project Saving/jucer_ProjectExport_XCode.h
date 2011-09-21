@@ -45,8 +45,6 @@ public:
     {
         name = iOS ? getNameiOS() : getNameMac();
 
-        projectIDSalt = hashCode64 (project.getProjectUID());
-
         if (getTargetLocation().toString().isEmpty())
             getTargetLocation() = getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX");
 
@@ -146,7 +144,6 @@ private:
     StringArray buildPhaseIDs, resourceIDs, sourceIDs, frameworkIDs;
     StringArray frameworkFileIDs, rezFileIDs, resourceFileRefs;
     File infoPlistFile, iconFile;
-    int64 projectIDSalt;
     const bool iOS;
 
     static String sanitisePath (const String& path)
@@ -994,14 +991,9 @@ private:
         if (rootString.startsWith ("${"))
             rootString = rootString.fromFirstOccurrenceOf ("}/", false, false);
 
-        static const char digits[] = "0123456789ABCDEF";
-        char n[24];
-        Random ran (projectIDSalt + hashCode64 (rootString));
+        rootString += project.getProjectUID();
 
-        for (int i = 0; i < numElementsInArray (n); ++i)
-            n[i] = digits [ran.nextInt() & 15];
-
-        return String (n, numElementsInArray (n));
+        return MD5 (rootString.toUTF8()).toHexString().substring (0, 24).toUpperCase();
     }
 
     String createFileRefID (const RelativePath& path) const

@@ -3,7 +3,7 @@
 <VisualStudioProject ProjectType="Visual C++"
                      Version="9.00"
                      Name="The Introjucer"
-                     ProjectGUID="{DB3627FF-7162-BD1B-B370-330A69D912C9}"
+                     ProjectGUID="{F984539-EE59-9317-6A0C-07815BA98D13}"
                      TargetFrameworkVersion="131072">
   <Platforms>
     <Platform Name="Win32"/>

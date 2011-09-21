@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
-Project("{99997DD2-28AB-571E-A521-0063ACB597FB}") = "juce", "juce.vcxproj", "{B76D3F84-38AE-6697-4050-E65272756CB1}"
+Project("{80173A8F-F2EF-F496-C879-AA73ADEA951A}") = "juce", "juce.vcxproj", "{2D21019-4422-3454-80D-3D6199B836E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -7,10 +7,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B76D3F84-38AE-6697-4050-E65272756CB1}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B76D3F84-38AE-6697-4050-E65272756CB1}.Debug|Win32.Build.0 = Debug|Win32
-		{B76D3F84-38AE-6697-4050-E65272756CB1}.Release|Win32.ActiveCfg = Release|Win32
-		{B76D3F84-38AE-6697-4050-E65272756CB1}.Release|Win32.Build.0 = Release|Win32
+		{2D21019-4422-3454-80D-3D6199B836E2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2D21019-4422-3454-80D-3D6199B836E2}.Debug|Win32.Build.0 = Debug|Win32
+		{2D21019-4422-3454-80D-3D6199B836E2}.Release|Win32.ActiveCfg = Release|Win32
+		{2D21019-4422-3454-80D-3D6199B836E2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

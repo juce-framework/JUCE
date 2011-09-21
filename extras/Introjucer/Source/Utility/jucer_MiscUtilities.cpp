@@ -29,9 +29,7 @@
 //==============================================================================
 int64 hashCode64 (const String& s)
 {
-    CharPointer_UTF8 utf8 (s.toUTF8());
-
-    MD5 md5 (utf8, utf8.sizeInBytes());
+    MD5 md5 (s.toUTF8());
     const uint64* const m = reinterpret_cast <const uint64*> (md5.getChecksumDataArray());
 
     return (int64) ByteOrder::swapIfBigEndian (m[0] ^ m[1]);
@@ -60,7 +58,7 @@ String randomHexString (Random& random, int numChars)
     const char hexChars[] = "0123456789ABCDEF";
 
     while (--numChars >= 0)
-        s << hexChars [random.nextInt() & 15];
+        s << hexChars [random.nextInt (numElementsInArray (hexChars))];
 
     return s;
 }

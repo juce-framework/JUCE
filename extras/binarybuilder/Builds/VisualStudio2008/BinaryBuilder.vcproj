@@ -3,7 +3,7 @@
 <VisualStudioProject ProjectType="Visual C++"
                      Version="9.00"
                      Name="BinaryBuilder"
-                     ProjectGUID="{AF1EBE7B-CED6-0FD1-6484-16BCB4435D42}"
+                     ProjectGUID="{BCCC2582-CD6B-8030-D71-C862688D3D3}"
                      TargetFrameworkVersion="131072">
   <Platforms>
     <Platform Name="Win32"/>

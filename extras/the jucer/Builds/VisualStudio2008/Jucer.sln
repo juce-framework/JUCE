@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
-Project("{BF9686B4-E254-2C58-0CDA-73A83A532B82}") = "Jucer", "Jucer.vcproj", "{678D2CF9-1175-30E5-64A0-8FE61AC0FEA9}"
+Project("{7ADF6F2-FB74-99DB-B376-5A71431B86E1}") = "Jucer", "Jucer.vcproj", "{7B2EE0B-9CF2-163F-290C-F45FD5F7B92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,10 +8,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{678D2CF9-1175-30E5-64A0-8FE61AC0FEA9}.Debug|Win32.ActiveCfg = Debug|Win32
-		{678D2CF9-1175-30E5-64A0-8FE61AC0FEA9}.Debug|Win32.Build.0 = Debug|Win32
-		{678D2CF9-1175-30E5-64A0-8FE61AC0FEA9}.Release|Win32.ActiveCfg = Release|Win32
-		{678D2CF9-1175-30E5-64A0-8FE61AC0FEA9}.Release|Win32.Build.0 = Release|Win32
+		{7B2EE0B-9CF2-163F-290C-F45FD5F7B92}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7B2EE0B-9CF2-163F-290C-F45FD5F7B92}.Debug|Win32.Build.0 = Debug|Win32
+		{7B2EE0B-9CF2-163F-290C-F45FD5F7B92}.Release|Win32.ActiveCfg = Release|Win32
+		{7B2EE0B-9CF2-163F-290C-F45FD5F7B92}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
