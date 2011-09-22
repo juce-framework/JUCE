@@ -202,7 +202,7 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new LowLevelGraphicsSoftwareRenderer (Image (this));
+        return new JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS (Image (this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
@@ -1302,7 +1302,7 @@ private:
 
                 updateCurrentModifiers();
 
-                LowLevelGraphicsSoftwareRenderer context (offscreenImage, -x, -y, contextClip);
+                JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS context (offscreenImage, -x, -y, contextClip);
                 handlePaint (context);
 
                 if (! dontRepaint)

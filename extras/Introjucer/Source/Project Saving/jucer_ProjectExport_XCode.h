@@ -488,7 +488,6 @@ private:
         else if (arch == Project::BuildConfiguration::osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
         else if (arch == Project::BuildConfiguration::osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
 
-        s.add ("PREBINDING = NO");
         s.add ("HEADER_SEARCH_PATHS = \"" + replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (" ")) + " $(inherited)\"");
         s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
         s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
@@ -578,7 +577,6 @@ private:
             s.add ("ONLY_ACTIVE_ARCH = YES");
             s.add ("COPY_PHASE_STRIP = NO");
             s.add ("GCC_DYNAMIC_NO_PIC = NO");
-            s.add ("GCC_ENABLE_FIX_AND_CONTINUE = NO");
         }
         else
         {

@@ -428,7 +428,6 @@
 				E28F51A0038F01E08E22F853,
 				70A875922C34E55D4F48A196 ); name = Source; sourceTree = "<group>"; };
 		3C712C667F851F9061100DD7 = { isa = XCBuildConfiguration; buildSettings = {
-				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = "../../JuceLibraryCode $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
@@ -437,14 +436,12 @@
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
 				"JUCE_ObjCExtraSuffix=OeJtJb",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		145C0C90E41D8DECE4DD66AD = { isa = XCBuildConfiguration; buildSettings = {
-				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = "../../JuceLibraryCode $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = Info.plist;

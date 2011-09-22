@@ -58,6 +58,9 @@ public:
         newState.width    = getCoordLength (xml.getStringAttribute ("width", String (newState.width)), viewBoxW);
         newState.height   = getCoordLength (xml.getStringAttribute ("height", String (newState.height)), viewBoxH);
 
+        if (newState.width <= 0)  newState.width  = 100;
+        if (newState.height <= 0) newState.height = 100;
+
         if (xml.hasAttribute ("viewBox"))
         {
             const String viewBoxAtt (xml.getStringAttribute ("viewBox"));

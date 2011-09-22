@@ -1641,7 +1641,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
 
         if (! clip.isEmpty())
         {
-            LowLevelGraphicsSoftwareRenderer context (temp, xOffset, yOffset, clip);
+            JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS context (temp, xOffset, yOffset, clip);
 
             insideDrawRect = true;
             handlePaint (context);

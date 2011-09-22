@@ -696,7 +696,6 @@
 		EE690110171E1648FF2118B8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_Application.h"; path = "../../Source/Application/jucer_Application.h"; sourceTree = "SOURCE_ROOT"; };
 		EE775C35756DC364728D4675 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_DynamicObject.cpp"; path = "../../../../modules/juce_core/containers/juce_DynamicObject.cpp"; sourceTree = "SOURCE_ROOT"; };
 		EE8504403714A7CE606B5F34 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Logger.h"; path = "../../../../modules/juce_core/logging/juce_Logger.h"; sourceTree = "SOURCE_ROOT"; };
-		EEC538BA073B56B58D43673B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Message.cpp"; path = "../../../../modules/juce_events/messages/juce_Message.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F03E2BDD36E6F4F53AB767A8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_Headers.h"; path = "../../Source/jucer_Headers.h"; sourceTree = "SOURCE_ROOT"; };
 		F07EA5078D6BB60B698F5E12 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_SystemStats.cpp"; path = "../../../../modules/juce_core/native/juce_android_SystemStats.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F08EB921DB62255A4B6DE85A = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RectangleList.h"; path = "../../../../modules/juce_graphics/geometry/juce_RectangleList.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1083,7 +1082,6 @@
 				DF7BB5B6B394EDEEF5F5B4B8,
 				FAC03FFD051FA5B34EE9BA15,
 				B7BE4498F5A592AAC43F0C93,
-				EEC538BA073B56B58D43673B,
 				CB36CD7F57D0F4231DC98686,
 				0F382FC6B16658EF02D2C4F0,
 				8FF39B6B0D9DEB5BBE388A6F,
@@ -1593,7 +1591,6 @@
 				0FFEF043CA89142B18C79ABE,
 				92ABB8016546F41128399E9D ); name = Source; sourceTree = "<group>"; };
 		EA0BCC969703B2D179089E55 = { isa = XCBuildConfiguration; buildSettings = {
-				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = "../../JuceLibraryCode $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
@@ -1602,7 +1599,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
@@ -1610,7 +1606,6 @@
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		B159CF4275B8A90122629FF4 = { isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				PREBINDING = NO;
 				HEADER_SEARCH_PATHS = "../../JuceLibraryCode $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 3;
 				INFOPLIST_FILE = Info.plist;

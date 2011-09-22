@@ -802,7 +802,8 @@ void LookAndFeel::drawScrollbar (Graphics& g,
     const Colour thumbColour (scrollbar.findColour (ScrollBar::thumbColourId));
     Colour trackColour1, trackColour2;
 
-    if (scrollbar.isColourSpecified (ScrollBar::trackColourId))
+    if (scrollbar.isColourSpecified (ScrollBar::trackColourId)
+         || isColourSpecified (ScrollBar::trackColourId))
     {
         trackColour1 = trackColour2 = scrollbar.findColour (ScrollBar::trackColourId);
     }

@@ -394,7 +394,7 @@ public:
                                                        dest, ! component->isOpaque()));
 
                     {
-                        LowLevelGraphicsSoftwareRenderer g (temp);
+                        JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS g (temp);
                         g.setOrigin (-clip.getX(), -clip.getY());
                         handlePaint (g);
                     }
@@ -524,7 +524,7 @@ private:
         }
 
         Image::ImageType getType() const                    { return Image::SoftwareImage; }
-        LowLevelGraphicsContext* createLowLevelContext()    { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
+        LowLevelGraphicsContext* createLowLevelContext()    { return new JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS (Image (this)); }
 
         void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
         {

@@ -553,9 +553,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_DeletedAtShutdown.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_Message.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_MessageListener.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>

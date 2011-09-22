@@ -886,9 +886,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_DeletedAtShutdown.cpp">
       <Filter>Juce Modules\juce_events\messages</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_Message.cpp">
-      <Filter>Juce Modules\juce_events\messages</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_MessageListener.cpp">
       <Filter>Juce Modules\juce_events\messages</Filter>
     </ClCompile>
