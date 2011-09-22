@@ -60,7 +60,6 @@
 // timers/*.cpp, interprocess/*.cpp
 #include "messages/juce_ApplicationBase.cpp"
 #include "messages/juce_DeletedAtShutdown.cpp"
-#include "messages/juce_Message.cpp"
 #include "messages/juce_MessageListener.cpp"
 #include "messages/juce_MessageManager.cpp"
 #include "broadcasters/juce_ActionBroadcaster.cpp"

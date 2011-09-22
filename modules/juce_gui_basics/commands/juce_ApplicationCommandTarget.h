@@ -234,24 +234,11 @@ public:
 
 private:
     //==============================================================================
-    // (for async invocation of commands)
-    class CommandTargetMessageInvoker  : public MessageListener
-    {
-    public:
-        CommandTargetMessageInvoker (ApplicationCommandTarget* owner);
-        ~CommandTargetMessageInvoker();
+    class MessageTarget;
+    friend class MessageTarget;
+    friend class ScopedPointer<MessageTarget>;
+    ScopedPointer<MessageTarget> messageInvoker;
 
-        void handleMessage (const Message& message);
-
-    private:
-        ApplicationCommandTarget* const owner;
-
-        JUCE_DECLARE_NON_COPYABLE (CommandTargetMessageInvoker);
-    };
-
-    ScopedPointer <CommandTargetMessageInvoker> messageInvoker;
-
-    friend class CommandTargetMessageInvoker;
     bool tryToInvoke (const InvocationInfo& info, bool async);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandTarget);

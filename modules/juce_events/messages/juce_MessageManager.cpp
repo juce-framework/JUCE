@@ -26,9 +26,28 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-MessageManager* MessageManager::instance = nullptr;
+Message::Message() noexcept   : messageRecipient (nullptr) {}
+Message::~Message() {}
 
-enum { quitMessageId = 0xfffff321 };
+//==============================================================================
+CallbackMessage::CallbackMessage() noexcept {}
+CallbackMessage::~CallbackMessage() {}
+
+void CallbackMessage::post()
+{
+    if (MessageManager::instance != nullptr)
+        MessageManager::instance->postMessageToQueue (this);
+}
+
+//==============================================================================
+struct QuitMessage   : public Message
+{
+    QuitMessage() noexcept {}
+};
+
+
+//==============================================================================
+MessageManager* MessageManager::instance = nullptr;
 
 MessageManager::MessageManager() noexcept
   : quitMessagePosted (false),
@@ -76,17 +95,6 @@ void MessageManager::postMessageToQueue (Message* const message)
 }
 
 //==============================================================================
-CallbackMessage::CallbackMessage() noexcept {}
-CallbackMessage::~CallbackMessage() {}
-
-void CallbackMessage::post()
-{
-    if (MessageManager::instance != nullptr)
-        MessageManager::instance->postMessageToQueue (this);
-}
-
-//==============================================================================
-// not for public use..
 void MessageManager::deliverMessage (Message* const message)
 {
     JUCE_TRY
@@ -101,7 +109,7 @@ void MessageManager::deliverMessage (Message* const message)
             {
                 callbackMessage->messageCallback();
             }
-            else if (message->intParameter1 == (int) quitMessageId)
+            else if (dynamic_cast <QuitMessage*> (message) != nullptr)
             {
                 quitMessageReceived = true;
             }
@@ -125,7 +133,7 @@ void MessageManager::runDispatchLoop()
 
 void MessageManager::stopDispatchLoop()
 {
-    postMessageToQueue (new Message ((int) quitMessageId, 0, 0, nullptr));
+    postMessageToQueue (new QuitMessage());
     quitMessagePosted = true;
 }
 

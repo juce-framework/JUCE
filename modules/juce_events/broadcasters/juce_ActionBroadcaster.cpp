@@ -26,17 +26,17 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-// special message of our own with a string in it
 class ActionMessage  : public Message
 {
 public:
     ActionMessage (const String& messageText, ActionListener* const listener_) noexcept
-        : message (messageText)
+        : message (messageText),
+          listener (listener_)
     {
-        pointerParameter = listener_;
     }
 
     const String message;
+    ActionListener* const listener;
 
 private:
     JUCE_DECLARE_NON_COPYABLE (ActionMessage);
@@ -47,10 +47,9 @@ ActionBroadcaster::CallbackReceiver::CallbackReceiver() {}
 void ActionBroadcaster::CallbackReceiver::handleMessage (const Message& message)
 {
     const ActionMessage& am = static_cast <const ActionMessage&> (message);
-    ActionListener* const target = static_cast <ActionListener*> (am.pointerParameter);
 
-    if (owner->actionListeners.contains (target))
-        target->actionListenerCallback (am.message);
+    if (owner->actionListeners.contains (am.listener))
+        am.listener->actionListenerCallback (am.message);
 }
 
 //==============================================================================

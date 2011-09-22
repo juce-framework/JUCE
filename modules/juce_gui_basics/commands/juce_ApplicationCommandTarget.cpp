@@ -25,6 +25,41 @@
 
 BEGIN_JUCE_NAMESPACE
 
+
+//==============================================================================
+class ApplicationCommandTarget::MessageTarget  : public MessageListener
+{
+public:
+    MessageTarget (ApplicationCommandTarget& owner_)
+        : owner (owner_)
+    {
+    }
+
+    void handleMessage (const Message& message)
+    {
+        jassert (dynamic_cast <const InvokedMessage*> (&message) != nullptr);
+
+        owner.tryToInvoke (dynamic_cast <const InvokedMessage&> (message).info, false);
+    }
+
+    struct InvokedMessage   : public Message
+    {
+        InvokedMessage (const InvocationInfo& info_)
+            : info (info_)
+        {}
+
+        const InvocationInfo info;
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE (InvokedMessage);
+    };
+
+private:
+    ApplicationCommandTarget& owner;
+
+    JUCE_DECLARE_NON_COPYABLE (MessageTarget);
+};
+
 //==============================================================================
 ApplicationCommandTarget::ApplicationCommandTarget()
 {
@@ -43,9 +78,9 @@ bool ApplicationCommandTarget::tryToInvoke (const InvocationInfo& info, const bo
         if (async)
         {
             if (messageInvoker == nullptr)
-                messageInvoker = new CommandTargetMessageInvoker (this);
+                messageInvoker = new MessageTarget (*this);
 
-            messageInvoker->postMessage (new Message (0, 0, 0, new ApplicationCommandTarget::InvocationInfo (info)));
+            messageInvoker->postMessage (new MessageTarget::InvokedMessage (info));
             return true;
         }
         else
@@ -172,22 +207,6 @@ ApplicationCommandTarget::InvocationInfo::InvocationInfo (const CommandID comman
       isKeyDown (false),
       millisecsSinceKeyPressed (0)
 {
-}
-
-//==============================================================================
-ApplicationCommandTarget::CommandTargetMessageInvoker::CommandTargetMessageInvoker (ApplicationCommandTarget* const owner_)
-    : owner (owner_)
-{
-}
-
-ApplicationCommandTarget::CommandTargetMessageInvoker::~CommandTargetMessageInvoker()
-{
-}
-
-void ApplicationCommandTarget::CommandTargetMessageInvoker::handleMessage (const Message& message)
-{
-    const ScopedPointer <InvocationInfo> info (static_cast <InvocationInfo*> (message.pointerParameter));
-    owner->tryToInvoke (*info, false);
 }
 
 

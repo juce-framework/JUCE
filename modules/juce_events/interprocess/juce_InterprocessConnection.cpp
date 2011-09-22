@@ -190,29 +190,44 @@ void InterprocessConnection::initialiseWithPipe (NamedPipe* const pipe_)
     startThread();
 }
 
-const int messageMagicNumber = 0xb734128b;
+//==============================================================================
+struct ConnectionStateMessage  : public Message
+{
+public:
+    ConnectionStateMessage (bool connectionMade_)
+        : connectionMade (connectionMade_)
+    {}
+
+    bool connectionMade;
+};
+
+struct DataDeliveryMessage  : public Message
+{
+public:
+    DataDeliveryMessage (const MemoryBlock& data_)
+        : data (data_)
+    {}
+
+    MemoryBlock data;
+};
 
 void InterprocessConnection::handleMessage (const Message& message)
 {
-    if (message.intParameter1 == messageMagicNumber)
+    const ConnectionStateMessage* m = dynamic_cast <const ConnectionStateMessage*> (&message);
+
+    if (m != nullptr)
     {
-        switch (message.intParameter2)
-        {
-        case 0:
-            {
-                ScopedPointer <MemoryBlock> data (static_cast <MemoryBlock*> (message.pointerParameter));
-                messageReceived (*data);
-                break;
-            }
-
-        case 1:
+        if (m->connectionMade)
             connectionMade();
-            break;
-
-        case 2:
+        else
             connectionLost();
-            break;
-        }
+    }
+    else
+    {
+        const DataDeliveryMessage* d = dynamic_cast <const DataDeliveryMessage*> (&message);
+
+        if (d != nullptr)
+            messageReceived (d->data);
     }
 }
 
@@ -223,7 +238,7 @@ void InterprocessConnection::connectionMadeInt()
         callbackConnectionState = true;
 
         if (useMessageThread)
-            postMessage (new Message (messageMagicNumber, 1, 0, 0));
+            postMessage (new ConnectionStateMessage (true));
         else
             connectionMade();
     }
@@ -236,7 +251,7 @@ void InterprocessConnection::connectionLostInt()
         callbackConnectionState = false;
 
         if (useMessageThread)
-            postMessage (new Message (messageMagicNumber, 2, 0, 0));
+            postMessage (new ConnectionStateMessage (false));
         else
             connectionLost();
     }
@@ -247,7 +262,7 @@ void InterprocessConnection::deliverDataInt (const MemoryBlock& data)
     jassert (callbackConnectionState);
 
     if (useMessageThread)
-        postMessage (new Message (messageMagicNumber, 0, 0, new MemoryBlock (data)));
+        postMessage (new DataDeliveryMessage (data));
     else
         messageReceived (data);
 }

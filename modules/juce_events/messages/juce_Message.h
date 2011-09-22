@@ -49,27 +49,8 @@ public:
     */
     Message() noexcept;
 
-    /** Creates a message object, filling in the member variables.
-
-        The corresponding public member variables will be set from the parameters
-        passed in.
-    */
-    Message (int intParameter1,
-             int intParameter2,
-             int intParameter3,
-             void* pointerParameter) noexcept;
-
     /** Destructor. */
     virtual ~Message();
-
-    //==============================================================================
-    // These values can be used for carrying simple data that the application needs to
-    // pass around. For more complex messages, just create a subclass.
-
-    int intParameter1;          /**< user-defined integer value. */
-    int intParameter2;          /**< user-defined integer value. */
-    int intParameter3;          /**< user-defined integer value. */
-    void* pointerParameter;     /**< user-defined pointer value. */
 
     /** A typedef for pointers to messages. */
     typedef ReferenceCountedObjectPtr <Message> Ptr;

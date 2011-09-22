@@ -53,7 +53,7 @@ void MessageListener::postMessage (Message* const message) const
 
 bool MessageListener::isValidMessageListener() const noexcept
 {
-    return (MessageManager::instance != nullptr)
+    return MessageManager::instance != nullptr
              && MessageManager::instance->messageListeners.contains (this);
 }
 
