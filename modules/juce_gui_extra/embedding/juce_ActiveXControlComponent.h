@@ -108,18 +108,12 @@ public:
     //==============================================================================
     /** @internal */
     void paint (Graphics& g);
-    /** @internal */
-    void* originalWndProc;
 
 private:
     class Pimpl;
-    friend class Pimpl;
     friend class ScopedPointer <Pimpl>;
     ScopedPointer <Pimpl> control;
     bool mouseEventsAllowed;
-
-    void setControlBounds (const Rectangle<int>& bounds) const;
-    void setControlVisible (bool b) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveXControlComponent);
 };

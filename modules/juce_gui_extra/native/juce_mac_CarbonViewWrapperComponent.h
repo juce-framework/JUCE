@@ -75,9 +75,9 @@ public:
         if (wrapperWindow == 0)
         {
             Rect r;
-            r.left = getScreenX();
-            r.top = getScreenY();
-            r.right = r.left + getWidth();
+            r.left   = getScreenX();
+            r.top    = getScreenY();
+            r.right  = r.left + getWidth();
             r.bottom = r.top + getHeight();
 
             CreateNewWindow (kDocumentWindowClass,
@@ -101,10 +101,10 @@ public:
                 { kEventClassWindow, kEventWindowGetClickActivation },
                 { kEventClassWindow, kEventWindowHandleDeactivate },
                 { kEventClassWindow, kEventWindowBoundsChanging },
-                { kEventClassMouse, kEventMouseDown },
-                { kEventClassMouse, kEventMouseMoved },
-                { kEventClassMouse, kEventMouseDragged },
-                { kEventClassMouse, kEventMouseUp},
+                { kEventClassMouse,  kEventMouseDown },
+                { kEventClassMouse,  kEventMouseMoved },
+                { kEventClassMouse,  kEventMouseDragged },
+                { kEventClassMouse,  kEventMouseUp},
                 { kEventClassWindow, kEventWindowDrawContent },
                 { kEventClassWindow, kEventWindowShown },
                 { kEventClassWindow, kEventWindowHidden }
@@ -179,7 +179,7 @@ public:
                 HIRect r;
                 r.origin.x = 0;
                 r.origin.y = 0;
-                r.size.width = (float) getWidth();
+                r.size.width  = (float) getWidth();
                 r.size.height = (float) getHeight();
                 HIViewSetFrame (embeddedView, &r);
             }
@@ -187,9 +187,9 @@ public:
             if (wrapperWindow != 0)
             {
                 Rect wr;
-                wr.left = getScreenX();
-                wr.top = getScreenY();
-                wr.right = wr.left + getWidth();
+                wr.left   = getScreenX();
+                wr.top    = getScreenY();
+                wr.right  = wr.left + getWidth();
                 wr.bottom = wr.top + getHeight();
 
                 SetWindowBounds (wrapperWindow, kWindowContentRgn, &wr);

@@ -25,7 +25,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 bool NamedPipe::openExisting (const String& pipeName)
 {
     currentPipeName = pipeName;

@@ -84,5 +84,4 @@ private:
 };
 
 #endif
-
 #endif   // __JUCE_UIVIEWCOMPONENT_JUCEHEADER__

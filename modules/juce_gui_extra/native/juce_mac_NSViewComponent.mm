@@ -40,7 +40,7 @@ public:
 
     ~Pimpl()
     {
-        [view removeFromSuperview];
+        removeFromParent();
         [view release];
     }
 
@@ -77,10 +77,7 @@ public:
 
         if (currentPeer != peer)
         {
-            if ([view superview] != nil)
-                [view removeFromSuperview]; // Must be careful not to call this unless it's required - e.g. some Apple AU views
-                                            // override the call and use it as a sign that they're being deleted, which breaks everything..
-
+            removeFromParent();
             currentPeer = peer;
 
             if (peer != nullptr)
@@ -110,6 +107,13 @@ public:
 private:
     Component& owner;
     ComponentPeer* currentPeer;
+
+    void removeFromParent()
+    {
+        if ([view superview] != nil)
+            [view removeFromSuperview]; // Must be careful not to call this unless it's required - e.g. some Apple AU views
+                                        // override the call and use it as a sign that they're being deleted, which breaks everything..
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
 };

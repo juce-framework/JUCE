@@ -205,14 +205,14 @@ namespace ActiveXHelpers
 class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
 {
 public:
-    //==============================================================================
     Pimpl (HWND hwnd, ActiveXControlComponent& owner_)
         : ComponentMovementWatcher (&owner_),
           owner (owner_),
           controlHWND (0),
           storage (new ActiveXHelpers::JuceIStorage()),
           clientSite (new ActiveXHelpers::JuceIOleClientSite (hwnd)),
-          control (nullptr)
+          control (nullptr),
+          originalWndProc (0)
     {
     }
 
@@ -228,16 +228,25 @@ public:
         storage->Release();
     }
 
+    void setControlBounds (const Rectangle<int>& bounds) const
+    {
+        if (controlHWND != 0)
+            MoveWindow (controlHWND, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), TRUE);
+    }
+
+    void setControlVisible (bool shouldBeVisible) const
+    {
+        if (controlHWND != 0)
+            ShowWindow (controlHWND, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
+    }
+
     //==============================================================================
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
         Component* const topComp = owner.getTopLevelComponent();
 
         if (topComp->getPeer() != nullptr)
-        {
-            const Point<int> pos (topComp->getLocalPoint (&owner, Point<int>()));
-            owner.setControlBounds (Rectangle<int> (pos.getX(), pos.getY(), owner.getWidth(), owner.getHeight()));
-        }
+            setControlBounds (topComp->getLocalArea (&owner, owner.getLocalBounds()));
     }
 
     void componentPeerChanged()
@@ -247,7 +256,7 @@ public:
 
     void componentVisibilityChanged()
     {
-        owner.setControlVisible (owner.isShowing());
+        setControlVisible (owner.isShowing());
         componentPeerChanged();
     }
 
@@ -290,7 +299,7 @@ public:
                     break;
                 }
 
-                return CallWindowProc ((WNDPROC) ax->originalWndProc, hwnd, message, wParam, lParam);
+                return CallWindowProc (ax->control->originalWndProc, hwnd, message, wParam, lParam);
             }
         }
 
@@ -305,12 +314,13 @@ public:
     IStorage* storage;
     IOleClientSite* clientSite;
     IOleObject* control;
+    WNDPROC originalWndProc;
+
 };
 
 //==============================================================================
 ActiveXControlComponent::ActiveXControlComponent()
-    : originalWndProc (0),
-      mouseEventsAllowed (true)
+    : mouseEventsAllowed (true)
 {
     ActiveXHelpers::activeXComps.add (this);
 }
@@ -337,7 +347,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
     if (peer != nullptr)
     {
-        const Point<int> pos (getTopLevelComponent()->getLocalPoint (this, Point<int>()));
+        const Rectangle<int> bounds (getTopLevelComponent()->getLocalArea (this, getLocalBounds()));
         HWND hwnd = (HWND) peer->getNativeHandle();
 
         ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, *this));
@@ -352,21 +362,21 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
             if (OleSetContainedObject (newControl->control, TRUE) == S_OK)
             {
                 RECT rect;
-                rect.left = pos.getX();
-                rect.top = pos.getY();
-                rect.right = pos.getX() + getWidth();
-                rect.bottom = pos.getY() + getHeight();
+                rect.left   = bounds.getX();
+                rect.top    = bounds.getY();
+                rect.right  = bounds.getRight();
+                rect.bottom = bounds.getBottom();
 
                 if (newControl->control->DoVerb (OLEIVERB_SHOW, 0, newControl->clientSite, 0, hwnd, &rect) == S_OK)
                 {
                     control = newControl;
-                    setControlBounds (Rectangle<int> (pos.getX(), pos.getY(), getWidth(), getHeight()));
-
                     control->controlHWND = ActiveXHelpers::getHWND (this);
 
                     if (control->controlHWND != 0)
                     {
-                        originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC);
+                        control->setControlBounds (bounds);
+
+                        control->originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC);
                         SetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC, (LONG_PTR) Pimpl::activeXHookWndProc);
                     }
 
@@ -382,7 +392,6 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 void ActiveXControlComponent::deleteControl()
 {
     control = nullptr;
-    originalWndProc = 0;
 }
 
 void* ActiveXControlComponent::queryInterface (const void* iid) const
@@ -394,18 +403,6 @@ void* ActiveXControlComponent::queryInterface (const void* iid) const
         return result;
 
     return nullptr;
-}
-
-void ActiveXControlComponent::setControlBounds (const Rectangle<int>& newBounds) const
-{
-    if (control->controlHWND != 0)
-        MoveWindow (control->controlHWND, newBounds.getX(), newBounds.getY(), newBounds.getWidth(), newBounds.getHeight(), TRUE);
-}
-
-void ActiveXControlComponent::setControlVisible (const bool shouldBeVisible) const
-{
-    if (control->controlHWND != 0)
-        ShowWindow (control->controlHWND, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
 }
 
 void ActiveXControlComponent::setMouseEventsAllowed (const bool eventsCanReachControl)

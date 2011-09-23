@@ -132,8 +132,8 @@ void Button::setToggleState (const bool shouldBeOn,
 {
     if (shouldBeOn != lastToggleState)
     {
-        if (isOn != shouldBeOn)  // this test means that if the value is void rather than explicitly set to
-            isOn = shouldBeOn;   // false, it won't be changed unless the required value is true.
+        if (getToggleState() != shouldBeOn)  // this test means that if the value is void rather than explicitly set to
+            isOn = shouldBeOn;               // false, it won't be changed unless the required value is true.
 
         lastToggleState = shouldBeOn;
         repaint();

@@ -346,11 +346,13 @@ Image juce_createIconForFile (const File& file)
 //==============================================================================
 void SystemClipboard::copyTextToClipboard (const String& text)
 {
-    [[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSStringPboardType]
-                                             owner: nil];
+    NSPasteboard* pb = [NSPasteboard generalPasteboard];
 
-    [[NSPasteboard generalPasteboard] setString: juceStringToNS (text)
-                                        forType: NSStringPboardType];
+    [pb declareTypes: [NSArray arrayWithObject: NSStringPboardType]
+               owner: nil];
+
+    [pb setString: juceStringToNS (text)
+          forType: NSStringPboardType];
 }
 
 String SystemClipboard::getTextFromClipboard()

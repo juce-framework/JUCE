@@ -1031,6 +1031,8 @@ public:
     {
         const bool wasValid = isValid();
 
+        wrapper.setVisible (false);
+        removeChildComponent (&wrapper);
         wrapper.setView (nil);
 
         if (wasValid)
