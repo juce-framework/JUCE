@@ -38,7 +38,7 @@ namespace FontValues
 }
 
 typedef Typeface::Ptr (*GetTypefaceForFont) (const Font&);
-GetTypefaceForFont juce_getTypefaceForFont = 0;
+GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
 //==============================================================================
 class TypefaceCache  : public DeletedAtShutdown
@@ -101,7 +101,7 @@ public:
         face.flags = flags;
         face.lastUsageCount = ++counter;
 
-        if (juce_getTypefaceForFont == 0)
+        if (juce_getTypefaceForFont == nullptr)
             face.typeface = Font::getDefaultTypefaceForFont (font);
         else
             face.typeface = juce_getTypefaceForFont (font);

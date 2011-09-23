@@ -142,6 +142,7 @@ public:
     bool msvcIsDLL, msvcIsWindowsSubsystem, msvcNeedsDLLRuntimeLib;
     String msvcExtraLinkerOptions, msvcDelayLoadedDLLs, msvcModuleDefinitionFile;
     String msvcPostBuildCommand, msvcPostBuildOutputs;
+    String msvcPreBuildDescription, msvcPreBuildCommand;
 
     //==============================================================================
     StringArray extraSearchPaths;

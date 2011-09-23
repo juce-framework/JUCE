@@ -80,14 +80,15 @@ static void initialiseFrameBufferFunctions()
         framebufferFunctionsInitialised = true;
 
        #if JUCE_LINUX
-        #define lookUpFunction(name) glXGetProcAddress ((const GLubyte*) name)
+        #define JUCE_LOOKUP_FUNCTION(name) glXGetProcAddress ((const GLubyte*) name)
        #else
-        #define lookUpFunction(name) wglGetProcAddress (name)
+        #define JUCE_LOOKUP_FUNCTION(name) wglGetProcAddress (name)
        #endif
 
-       #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) lookUpFunction (#name);
+       #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) JUCE_LOOKUP_FUNCTION (#name);
         FRAMEBUFFER_FUNCTION_LIST (FIND_FUNCTION)
        #undef FIND_FUNCTION
+       #undef JUCE_LOOKUP_FUNCTION
     }
 }
 
@@ -125,6 +126,7 @@ static void initialiseFrameBufferFunctions()
 #define GL_FRAMEBUFFER_COMPLETE_EXT                 GL_FRAMEBUFFER_COMPLETE_OES
 #define GL_FRAMEBUFFER_UNSUPPORTED_EXT              GL_FRAMEBUFFER_UNSUPPORTED_OES
 #define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT    GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES
+
 #endif
 
 //==============================================================================
@@ -150,7 +152,7 @@ public:
             return;
        #endif
 
-        resetGLErrorState();
+        OpenGLHelpers::resetErrorState();
 
         glGenFramebuffersEXT (1, &frameBufferHandle);
         glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferHandle);
@@ -159,8 +161,8 @@ public:
         glBindTexture (textureType, textureID);
         glTexImage2D (textureType, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
-        glTexParameterf (textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameterf (textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameterf (textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf (textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf (textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf (textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -243,11 +245,6 @@ private:
 
         return status == GL_NO_ERROR
             || status == GL_FRAMEBUFFER_COMPLETE_EXT;
-    }
-
-    static void resetGLErrorState()
-    {
-        while (glGetError() != GL_NO_ERROR) {}
     }
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl);

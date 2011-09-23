@@ -1086,8 +1086,10 @@ private:
                                       0, info, &dataSize) == noErr)
             {
                 NSString* viewClassName = (NSString*) (info->mCocoaAUViewClass[0]);
-                NSString* path = (NSString*) CFURLCopyPath (info->mCocoaAUViewBundleLocation);
-                NSBundle* viewBundle = [NSBundle bundleWithPath: [path autorelease]];
+                CFStringRef path = CFURLCopyPath (info->mCocoaAUViewBundleLocation);
+                NSString* unescapedPath = (NSString*) CFURLCreateStringByReplacingPercentEscapes (0, path, CFSTR (""));
+                CFRelease (path);
+                NSBundle* viewBundle = [NSBundle bundleWithPath: [unescapedPath autorelease]];
                 Class viewClass = [viewBundle classNamed: viewClassName];
 
                 if ([viewClass conformsToProtocol: @protocol (AUCocoaUIBase)]

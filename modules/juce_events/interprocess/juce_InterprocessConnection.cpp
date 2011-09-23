@@ -193,8 +193,7 @@ void InterprocessConnection::initialiseWithPipe (NamedPipe* const pipe_)
 //==============================================================================
 struct ConnectionStateMessage  : public Message
 {
-public:
-    ConnectionStateMessage (bool connectionMade_)
+    ConnectionStateMessage (bool connectionMade_) noexcept
         : connectionMade (connectionMade_)
     {}
 
@@ -203,7 +202,6 @@ public:
 
 struct DataDeliveryMessage  : public Message
 {
-public:
     DataDeliveryMessage (const MemoryBlock& data_)
         : data (data_)
     {}

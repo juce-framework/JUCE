@@ -25,6 +25,11 @@
 
 BEGIN_JUCE_NAMESPACE
 
+void OpenGLHelpers::resetErrorState()
+{
+    while (glGetError() != GL_NO_ERROR) {}
+}
+
 void OpenGLHelpers::clear (const Colour& colour)
 {
     glClearColor (colour.getFloatRed(), colour.getFloatGreen(),

@@ -517,7 +517,13 @@ protected:
         if (! isDebug)
             xml.setAttribute ("WholeProgramOptimization", "1");
 
-        createToolElement (xml, "VCPreBuildEventTool");
+        XmlElement* preBuildEvent = createToolElement (xml, "VCPreBuildEventTool");
+
+        if (msvcPreBuildDescription.isNotEmpty() || msvcPreBuildCommand.isNotEmpty())
+        {
+            preBuildEvent->setAttribute ("Description", msvcPreBuildDescription);
+            preBuildEvent->setAttribute ("CommandLine", msvcPreBuildCommand);
+        }
 
         XmlElement* customBuild = createToolElement (xml, "VCCustomBuildTool");
 

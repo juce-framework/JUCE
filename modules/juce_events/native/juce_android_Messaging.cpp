@@ -78,7 +78,7 @@ private:
     void* volatile result;
 
     AsyncFunctionCaller (MessageCallbackFunction* func_, void* parameter_)
-        : result (0), func (func_), parameter (parameter_)
+        : result (nullptr), func (func_), parameter (parameter_)
     {}
 
     JUCE_DECLARE_NON_COPYABLE (AsyncFunctionCaller);

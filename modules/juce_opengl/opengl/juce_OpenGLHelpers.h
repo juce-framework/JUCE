@@ -32,6 +32,9 @@
 class JUCE_API  OpenGLHelpers
 {
 public:
+    /** Clears the GL error state. */
+    static void resetErrorState();
+
     /** Clears the current context using the given colour. */
     static void clear (const Colour& colour);
 
