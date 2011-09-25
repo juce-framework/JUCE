@@ -29,7 +29,6 @@ BEGIN_JUCE_NAMESPACE
 class PopupMenu::Item
 {
 public:
-    //==============================================================================
     Item()
       : itemId (0), active (true), isSeparator (true), isTicked (false),
         usesColour (false), commandManager (nullptr)
@@ -98,7 +97,7 @@ public:
     }
 
     bool canBeTriggered() const noexcept    { return active && ! (isSeparator || (subMenu != nullptr)); }
-    bool hasActiveSubMenu() const noexcept  { return active && (subMenu != nullptr); }
+    bool hasActiveSubMenu() const noexcept  { return active && subMenu != nullptr && subMenu->items.size() > 0; }
 
     //==============================================================================
     const int itemId;
@@ -121,7 +120,6 @@ private:
 class PopupMenu::ItemComponent  : public Component
 {
 public:
-    //==============================================================================
     ItemComponent (const PopupMenu::Item& itemInfo_, int standardItemHeight, Component* const parent)
       : itemInfo (itemInfo_),
         isHighlighted (false)
@@ -176,17 +174,18 @@ public:
                                     itemInfo.active,
                                     isHighlighted,
                                     itemInfo.isTicked,
-                                    itemInfo.subMenu != 0,
+                                    itemInfo.subMenu != nullptr,
                                     mainText, endText,
-                                    itemInfo.image.isValid() ? &itemInfo.image : 0,
-                                    itemInfo.usesColour ? &(itemInfo.textColour) : 0);
+                                    itemInfo.image.isValid() ? &itemInfo.image : nullptr,
+                                    itemInfo.usesColour ? &(itemInfo.textColour) : nullptr);
         }
     }
 
     void resized()
     {
-        if (getNumChildComponents() > 0)
-            getChildComponent(0)->setBounds (2, 0, getWidth() - 4, getHeight());
+        Component* const child = getChildComponent (0);
+        if (child != nullptr)
+            child->setBounds (getLocalBounds().reduced (2, 0));
     }
 
     void setHighlighted (bool shouldBeHighlighted)
@@ -229,21 +228,17 @@ class PopupMenu::Window  : public Component,
                            private Timer
 {
 public:
-    Window (const PopupMenu& menu, Window* const owner_, const Rectangle<int>& target,
-            const bool alignToRectangle, const int itemIdThatMustBeVisible,
-            const int minimumWidth_, const int maximumNumColumns_,
-            const int standardItemHeight_, const bool dismissOnMouseUp_,
-            ApplicationCommandManager** const managerOfChosenCommand_,
-            Component* const componentAttachedTo_)
+    Window (const PopupMenu& menu, Window* const owner_,
+            const Options& options_,
+            const bool alignToRectangle,
+            const bool dismissOnMouseUp_,
+            ApplicationCommandManager** const managerOfChosenCommand_)
        : Component ("menu"),
          owner (owner_),
+         options (options_),
          activeSubMenu (nullptr),
          managerOfChosenCommand (managerOfChosenCommand_),
-         componentAttachedTo (componentAttachedTo_),
-         componentAttachedToOriginal (componentAttachedTo_),
-         minimumWidth (minimumWidth_),
-         maximumNumColumns (maximumNumColumns_),
-         standardItemHeight (standardItemHeight_),
+         componentAttachedTo (options.targetComponent),
          isOver (false),
          hasBeenOver (false),
          isDown (false),
@@ -260,7 +255,7 @@ public:
          timeEnteredCurrentChildComp (0),
          scrollAcceleration (1.0)
     {
-        lastFocused = lastScroll = menuCreationTime;
+        lastFocusedTime = lastScrollTime = menuCreationTime;
         setWantsKeyboardFocus (false);
         setMouseClickGrabsKeyboardFocus (false);
         setAlwaysOnTop (true);
@@ -273,17 +268,17 @@ public:
             PopupMenu::Item* const item = menu.items.getUnchecked(i);
 
             if (i < menu.items.size() - 1 || ! item->isSeparator)
-                items.add (new PopupMenu::ItemComponent (*item, standardItemHeight, this));
+                items.add (new PopupMenu::ItemComponent (*item, options.standardHeight, this));
         }
 
-        calculateWindowPos (target, alignToRectangle);
+        calculateWindowPos (options.targetArea, alignToRectangle);
         setTopLeftPosition (windowPos.getPosition());
         updateYPositions();
 
-        if (itemIdThatMustBeVisible != 0)
+        if (options.visibleItemID != 0)
         {
-            const int y = target.getY() - windowPos.getY();
-            ensureItemIsVisible (itemIdThatMustBeVisible,
+            const int y = options.targetArea.getY() - windowPos.getY();
+            ensureItemIsVisible (options.visibleItemID,
                                  isPositiveAndBelow (y, windowPos.getHeight()) ? y : -1);
         }
 
@@ -305,27 +300,6 @@ public:
     }
 
     //==============================================================================
-    static Window* create (const PopupMenu& menu,
-                           bool dismissOnMouseUp,
-                           Window* const owner_,
-                           const Rectangle<int>& target,
-                           int minimumWidth,
-                           int maximumNumColumns,
-                           int standardItemHeight,
-                           bool alignToRectangle,
-                           int itemIdThatMustBeVisible,
-                           ApplicationCommandManager** managerOfChosenCommand,
-                           Component* componentAttachedTo)
-    {
-        if (menu.items.size() > 0)
-            return new Window (menu, owner_, target, alignToRectangle, itemIdThatMustBeVisible,
-                               minimumWidth, maximumNumColumns, standardItemHeight, dismissOnMouseUp,
-                               managerOfChosenCommand, componentAttachedTo);
-
-        return nullptr;
-    }
-
-    //==============================================================================
     void paint (Graphics& g)
     {
         if (isOpaque())
@@ -336,26 +310,19 @@ public:
 
     void paintOverChildren (Graphics& g)
     {
-        if (isScrolling())
+        if (canScroll())
         {
             LookAndFeel& lf = getLookAndFeel();
 
-            if (isScrollZoneActive (false))
+            if (isTopScrollZoneActive())
                 lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, true);
 
-            if (isScrollZoneActive (true))
+            if (isBottomScrollZoneActive())
             {
                 g.setOrigin (0, getHeight() - PopupMenuSettings::scrollZone);
                 lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, false);
             }
         }
-    }
-
-    bool isScrollZoneActive (bool bottomOne) const
-    {
-        return isScrolling()
-                && (bottomOne ? childYOffset < contentHeight - windowPos.getHeight()
-                              : childYOffset > 0);
     }
 
     //==============================================================================
@@ -413,7 +380,7 @@ public:
     void mouseWheelMove (const MouseEvent&, float /*amountX*/, float amountY)
     {
         alterChildYPos (roundToInt (-10.0f * amountY * PopupMenuSettings::scrollZone));
-        lastMouse = Point<int> (-1, -1);
+        lastMousePos = Point<int> (-1, -1);
     }
 
     bool keyPressed (const KeyPress& key)
@@ -451,7 +418,7 @@ public:
 
             if (showSubMenuFor (currentChild))
             {
-                if (activeSubMenu != nullptr && activeSubMenu->isVisible())
+                if (isSubMenuVisible())
                     activeSubMenu->selectNextItem (1);
             }
             else if (componentAttachedTo != nullptr)
@@ -518,7 +485,7 @@ public:
         if (! isVisible())
             return;
 
-        if (componentAttachedTo != componentAttachedToOriginal)
+        if (componentAttachedTo != options.targetComponent)
         {
             dismissMenu (nullptr);
             return;
@@ -535,119 +502,33 @@ public:
         const Point<int> globalMousePos (Desktop::getMousePosition());
         const Point<int> localMousePos (getLocalPoint (nullptr, globalMousePos));
 
-        const uint32 now = Time::getMillisecondCounter();
+        const uint32 timeNow = Time::getMillisecondCounter();
 
-        if (now > timeEnteredCurrentChildComp + 100
+        if (timeNow > timeEnteredCurrentChildComp + 100
              && reallyContains (localMousePos, true)
              && currentChild != nullptr
-             && (! disableMouseMoves)
-             && ! (activeSubMenu != nullptr && activeSubMenu->isVisible()))
+             && ! (disableMouseMoves || isSubMenuVisible()))
         {
             showSubMenuFor (currentChild);
         }
 
-        if (globalMousePos != lastMouse || now > lastMouseMoveTime + 350)
-        {
-            highlightItemUnderMouse (globalMousePos, localMousePos);
-        }
+        highlightItemUnderMouse (globalMousePos, localMousePos, timeNow);
 
-        bool overScrollArea = false;
-
-        if (isScrolling()
-             && (isOver || (isDown && isPositiveAndBelow (localMousePos.getX(), getWidth())))
-             && ((isScrollZoneActive (false) && localMousePos.getY() < PopupMenuSettings::scrollZone)
-                  || (isScrollZoneActive (true) && localMousePos.getY() > getHeight() - PopupMenuSettings::scrollZone)))
-        {
-            if (now > lastScroll + 20)
-            {
-                scrollAcceleration = jmin (4.0, scrollAcceleration * 1.04);
-                int amount = 0;
-
-                for (int i = 0; i < items.size() && amount == 0; ++i)
-                    amount = ((int) scrollAcceleration) * items.getUnchecked(i)->getHeight();
-
-                alterChildYPos (localMousePos.getY() < PopupMenuSettings::scrollZone ? -amount : amount);
-
-                lastScroll = now;
-            }
-
-            overScrollArea = true;
-            lastMouse = Point<int> (-1, -1); // trigger a mouse-move
-        }
-        else
-        {
-            scrollAcceleration = 1.0;
-        }
-
+        const bool overScrollArea = scrollIfNecessary (localMousePos, timeNow);
         const bool wasDown = isDown;
+
         bool isOverAny = isOverAnyMenu();
 
-        if (hideOnExit && hasBeenOver && (! isOverAny) && activeSubMenu != nullptr)
+        if (activeSubMenu != nullptr && hideOnExit && hasBeenOver && ! isOverAny)
         {
             activeSubMenu->updateMouseOverStatus (globalMousePos);
             isOverAny = isOverAnyMenu();
         }
 
         if (hideOnExit && hasBeenOver && ! isOverAny)
-        {
             hide (0, true);
-        }
         else
-        {
-            isDown = hasBeenOver
-                        && (ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown()
-                            || ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown());
-
-            bool anyFocused = Process::isForegroundProcess();
-
-            if (anyFocused && Component::getCurrentlyFocusedComponent() == nullptr)
-            {
-                // because no component at all may have focus, our test here will
-                // only be triggered when something has focus and then loses it.
-                anyFocused = ! hasAnyJuceCompHadFocus;
-
-                for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                {
-                    if (ComponentPeer::getPeer (i)->isFocused())
-                    {
-                        anyFocused = true;
-                        hasAnyJuceCompHadFocus = true;
-                        break;
-                    }
-                }
-            }
-
-            if (! anyFocused)
-            {
-                if (now > lastFocused + 10)
-                {
-                    PopupMenuSettings::menuWasHiddenBecauseOfAppChange = true;
-                    dismissMenu (nullptr);
-
-                    return;  // may have been deleted by the previous call..
-                }
-            }
-            else if (wasDown && now > menuCreationTime + 250
-                       && ! (isDown || overScrollArea))
-            {
-                isOver = reallyContains (localMousePos, true);
-
-                if (isOver)
-                {
-                    triggerCurrentlyHighlightedItem();
-                }
-                else if ((hasBeenOver || ! dismissOnMouseUp) && ! isOverAny)
-                {
-                    dismissMenu (nullptr);
-                }
-
-                return;  // may have been deleted by the previous calls..
-            }
-            else
-            {
-                lastFocused = now;
-            }
-        }
+            checkButtonState (localMousePos, timeNow, wasDown, overScrollArea, isOverAny);
     }
 
     static Array<Window*>& getActiveWindows()
@@ -659,20 +540,19 @@ public:
     //==============================================================================
 private:
     Window* owner;
+    const Options options;
     OwnedArray <PopupMenu::ItemComponent> items;
     Component::SafePointer<PopupMenu::ItemComponent> currentChild;
     ScopedPointer <Window> activeSubMenu;
     ApplicationCommandManager** managerOfChosenCommand;
     WeakReference<Component> componentAttachedTo;
-    Component* componentAttachedToOriginal;
     Rectangle<int> windowPos;
-    Point<int> lastMouse;
-    int minimumWidth, maximumNumColumns, standardItemHeight;
+    Point<int> lastMousePos;
     bool isOver, hasBeenOver, isDown, needsToScroll;
     bool dismissOnMouseUp, hideOnExit, disableMouseMoves, hasAnyJuceCompHadFocus;
     int numColumns, contentHeight, childYOffset;
     Array<int> columnWidths;
-    uint32 menuCreationTime, lastFocused, lastScroll, lastMouseMoveTime, timeEnteredCurrentChildComp;
+    uint32 menuCreationTime, lastFocusedTime, lastScrollTime, lastMouseMoveTime, timeEnteredCurrentChildComp;
     double scrollAcceleration;
 
     //==============================================================================
@@ -696,8 +576,7 @@ private:
 
     void updateMouseOverStatus (const Point<int>& globalMousePos)
     {
-        const Point<int> relPos (getLocalPoint (nullptr, globalMousePos));
-        isOver = reallyContains (relPos, true);
+        isOver = reallyContains (getLocalPoint (nullptr, globalMousePos), true);
 
         if (activeSubMenu != nullptr)
             activeSubMenu->updateMouseOverStatus (globalMousePos);
@@ -719,6 +598,30 @@ private:
         }
 
         return false;
+    }
+
+    bool doesAnyJuceCompHaveFocus()
+    {
+        bool anyFocused = Process::isForegroundProcess();
+
+        if (anyFocused && Component::getCurrentlyFocusedComponent() == nullptr)
+        {
+            // because no component at all may have focus, our test here will
+            // only be triggered when something has focus and then loses it.
+            anyFocused = ! hasAnyJuceCompHadFocus;
+
+            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+            {
+                if (ComponentPeer::getPeer (i)->isFocused())
+                {
+                    anyFocused = true;
+                    hasAnyJuceCompHadFocus = true;
+                    break;
+                }
+            }
+        }
+
+        return anyFocused;
     }
 
     //==============================================================================
@@ -810,6 +713,8 @@ private:
         contentHeight = 0;
         int totalW;
 
+        const int maximumNumColumns = options.maxColumns > 0 ? options.maxColumns : 7;
+
         do
         {
             ++numColumns;
@@ -844,7 +749,7 @@ private:
 
         for (int col = 0; col < numColumns; ++col)
         {
-            int i, colW = standardItemHeight, colH = 0;
+            int i, colW = options.standardHeight, colH = 0;
 
             const int numChildren = jmin (items.size() - childNum,
                                           (items.size() + numColumns - 1) / numColumns);
@@ -864,9 +769,9 @@ private:
             childNum += numChildren;
         }
 
-        if (totalW < minimumWidth)
+        if (totalW < options.minWidth)
         {
-            totalW = minimumWidth;
+            totalW = options.minWidth;
 
             for (int col = 0; col < numColumns; ++col)
                 columnWidths.set (0, totalW / numColumns);
@@ -927,8 +832,7 @@ private:
 
         if (childYOffset < 0)
         {
-            r.setBounds (r.getX(), r.getY() - childYOffset,
-                         r.getWidth(), r.getHeight() + childYOffset);
+            r = r.withTop (r.getY() - childYOffset);
         }
         else if (childYOffset > 0)
         {
@@ -944,7 +848,7 @@ private:
 
     void alterChildYPos (const int delta)
     {
-        if (isScrolling())
+        if (canScroll())
         {
             childYOffset += delta;
 
@@ -997,11 +901,6 @@ private:
         return x;
     }
 
-    bool isScrolling() const noexcept
-    {
-        return childYOffset != 0 || needsToScroll;
-    }
-
     void setCurrentlyHighlightedChild (PopupMenu::ItemComponent* const child)
     {
         if (currentChild != nullptr)
@@ -1016,103 +915,137 @@ private:
         }
     }
 
+    bool isSubMenuVisible() const noexcept          { return activeSubMenu != nullptr && activeSubMenu->isVisible(); }
+
     bool showSubMenuFor (PopupMenu::ItemComponent* const childComp)
     {
         activeSubMenu = nullptr;
 
-        if (childComp != nullptr && childComp->itemInfo.hasActiveSubMenu())
+        if (childComp != nullptr
+             && childComp->itemInfo.hasActiveSubMenu())
         {
-            activeSubMenu = Window::create (*(childComp->itemInfo.subMenu),
-                                            dismissOnMouseUp,
-                                            this,
-                                            childComp->getScreenBounds(),
-                                            0, maximumNumColumns,
-                                            standardItemHeight,
-                                            false, 0, managerOfChosenCommand,
-                                            componentAttachedTo);
+            activeSubMenu = new Window (*(childComp->itemInfo.subMenu), this,
+                                        options.withTargetScreenArea (childComp->getScreenBounds())
+                                               .withMinimumWidth (0)
+                                               .withTargetComponent (nullptr),
+                                        false, dismissOnMouseUp, managerOfChosenCommand);
 
-            if (activeSubMenu != nullptr)
-            {
-                activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
-                activeSubMenu->enterModalState (false);
-                activeSubMenu->toFront (false);
-                return true;
-            }
+            activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
+            activeSubMenu->enterModalState (false);
+            activeSubMenu->toFront (false);
+            return true;
         }
 
         return false;
     }
 
-    void highlightItemUnderMouse (const Point<int>& globalMousePos, const Point<int>& localMousePos)
+    void highlightItemUnderMouse (const Point<int>& globalMousePos, const Point<int>& localMousePos, const uint32 timeNow)
     {
-        isOver = reallyContains (localMousePos, true);
-
-        if (isOver)
-            hasBeenOver = true;
-
-        if (lastMouse.getDistanceFrom (globalMousePos) > 2)
+        if (globalMousePos != lastMousePos || timeNow > lastMouseMoveTime + 350)
         {
-            lastMouseMoveTime = Time::getApproximateMillisecondCounter();
+            isOver = reallyContains (localMousePos, true);
 
-            if (disableMouseMoves && isOver)
-                disableMouseMoves = false;
+            if (isOver)
+                hasBeenOver = true;
+
+            if (lastMousePos.getDistanceFrom (globalMousePos) > 2)
+            {
+                lastMouseMoveTime = timeNow;
+
+                if (disableMouseMoves && isOver)
+                    disableMouseMoves = false;
+            }
+
+            if (disableMouseMoves || (activeSubMenu != nullptr && activeSubMenu->isOverChildren()))
+                return;
+
+            bool isMovingTowardsMenu = false;
+
+            if (isOver && (activeSubMenu != nullptr) && globalMousePos != lastMousePos)
+            {
+                // try to intelligently guess whether the user is moving the mouse towards a currently-open
+                // submenu. To do this, look at whether the mouse stays inside a triangular region that
+                // extends from the last mouse pos to the submenu's rectangle..
+
+                float subX = (float) activeSubMenu->getScreenX();
+
+                if (activeSubMenu->getX() > getX())
+                {
+                    lastMousePos -= Point<int> (2, 0);  // to enlarge the triangle a bit, in case the mouse only moves a couple of pixels
+                }
+                else
+                {
+                    lastMousePos += Point<int> (2, 0);
+                    subX += activeSubMenu->getWidth();
+                }
+
+                Path areaTowardsSubMenu;
+                areaTowardsSubMenu.addTriangle ((float) lastMousePos.getX(), (float) lastMousePos.getY(),
+                                                subX, (float) activeSubMenu->getScreenY(),
+                                                subX, (float) (activeSubMenu->getScreenY() + activeSubMenu->getHeight()));
+
+                isMovingTowardsMenu = areaTowardsSubMenu.contains (globalMousePos.toFloat());
+            }
+
+            lastMousePos = globalMousePos;
+
+            if (! isMovingTowardsMenu)
+            {
+                Component* c = getComponentAt (localMousePos);
+                if (c == this)
+                    c = nullptr;
+
+                PopupMenu::ItemComponent* itemUnderMouse = dynamic_cast <PopupMenu::ItemComponent*> (c);
+
+                if (itemUnderMouse == nullptr && c != nullptr)
+                    itemUnderMouse = c->findParentComponentOfClass ((PopupMenu::ItemComponent*) nullptr);
+
+                if (itemUnderMouse != currentChild
+                      && (isOver || (activeSubMenu == nullptr) || ! activeSubMenu->isVisible()))
+                {
+                    if (isOver && (c != nullptr) && (activeSubMenu != nullptr))
+                        activeSubMenu->hide (0, true);
+
+                    if (! isOver)
+                        itemUnderMouse = nullptr;
+
+                    setCurrentlyHighlightedChild (itemUnderMouse);
+                }
+            }
         }
+    }
 
-        if (disableMouseMoves || (activeSubMenu != nullptr && activeSubMenu->isOverChildren()))
-            return;
+    void checkButtonState (const Point<int>& localMousePos, const uint32 timeNow,
+                           const bool wasDown, const bool overScrollArea, const bool isOverAny)
+    {
+        isDown = hasBeenOver
+                    && (ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown()
+                         || ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown());
 
-        bool isMovingTowardsMenu = false;
-
-        if (isOver && (activeSubMenu != nullptr) && globalMousePos != lastMouse)
+        if (! doesAnyJuceCompHaveFocus())
         {
-            // try to intelligently guess whether the user is moving the mouse towards a currently-open
-            // submenu. To do this, look at whether the mouse stays inside a triangular region that
-            // extends from the last mouse pos to the submenu's rectangle..
-
-            float subX = (float) activeSubMenu->getScreenX();
-
-            if (activeSubMenu->getX() > getX())
+            if (timeNow > lastFocusedTime + 10)
             {
-                lastMouse -= Point<int> (2, 0);  // to enlarge the triangle a bit, in case the mouse only moves a couple of pixels
+                PopupMenuSettings::menuWasHiddenBecauseOfAppChange = true;
+                dismissMenu (nullptr);
+                // Note: this object may have been deleted by the previous call..
             }
-            else
-            {
-                lastMouse += Point<int> (2, 0);
-                subX += activeSubMenu->getWidth();
-            }
-
-            Path areaTowardsSubMenu;
-            areaTowardsSubMenu.addTriangle ((float) lastMouse.getX(), (float) lastMouse.getY(),
-                                            subX, (float) activeSubMenu->getScreenY(),
-                                            subX, (float) (activeSubMenu->getScreenY() + activeSubMenu->getHeight()));
-
-            isMovingTowardsMenu = areaTowardsSubMenu.contains ((float) globalMousePos.getX(), (float) globalMousePos.getY());
         }
-
-        lastMouse = globalMousePos;
-
-        if (! isMovingTowardsMenu)
+        else if (wasDown && timeNow > menuCreationTime + 250
+                   && ! (isDown || overScrollArea))
         {
-            Component* c = getComponentAt (localMousePos);
-            if (c == this)
-                c = nullptr;
+            isOver = reallyContains (localMousePos, true);
 
-            PopupMenu::ItemComponent* mic = dynamic_cast <PopupMenu::ItemComponent*> (c);
+            if (isOver)
+                triggerCurrentlyHighlightedItem();
+            else if ((hasBeenOver || ! dismissOnMouseUp) && ! isOverAny)
+                dismissMenu (nullptr);
 
-            if (mic == nullptr && c != nullptr)
-                mic = c->findParentComponentOfClass ((PopupMenu::ItemComponent*) nullptr);
-
-            if (mic != currentChild
-                 && (isOver || (activeSubMenu == nullptr) || ! activeSubMenu->isVisible()))
-            {
-                if (isOver && (c != nullptr) && (activeSubMenu != nullptr))
-                    activeSubMenu->hide (0, true);
-
-                if (! isOver)
-                    mic = nullptr;
-
-                setCurrentlyHighlightedChild (mic);
-            }
+            // Note: this object may have been deleted by the previous call..
+        }
+        else
+        {
+            lastFocusedTime = timeNow;
         }
     }
 
@@ -1158,6 +1091,44 @@ private:
 
         if (owner != nullptr)
             owner->disableTimerUntilMouseMoves();
+    }
+
+    bool canScroll() const noexcept                 { return childYOffset != 0 || needsToScroll; }
+    bool isTopScrollZoneActive() const noexcept     { return canScroll() && childYOffset > 0; }
+    bool isBottomScrollZoneActive() const noexcept  { return canScroll() && childYOffset < contentHeight - windowPos.getHeight(); }
+
+    bool scrollIfNecessary (const Point<int>& localMousePos, const uint32 timeNow)
+    {
+        if (canScroll()
+             && (isOver || (isDown && isPositiveAndBelow (localMousePos.getX(), getWidth()))))
+        {
+            if (isTopScrollZoneActive() && localMousePos.getY() < PopupMenuSettings::scrollZone)
+                return scroll (timeNow, -1);
+
+            if (isBottomScrollZoneActive() && localMousePos.getY() > getHeight() - PopupMenuSettings::scrollZone)
+                return scroll (timeNow, 1);
+        }
+
+        scrollAcceleration = 1.0;
+        return false;
+    }
+
+    bool scroll (const uint32 timeNow, const int direction)
+    {
+        if (timeNow > lastScrollTime + 20)
+        {
+            scrollAcceleration = jmin (4.0, scrollAcceleration * 1.04);
+            int amount = 0;
+
+            for (int i = 0; i < items.size() && amount == 0; ++i)
+                amount = ((int) scrollAcceleration) * items.getUnchecked(i)->getHeight();
+
+            alterChildYPos (amount * direction);
+            lastScrollTime = timeNow;
+        }
+
+        lastMousePos = Point<int> (-1, -1); // to trigger a mouse-move
+        return true;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Window);
@@ -1225,7 +1196,7 @@ void PopupMenu::addItem (const int itemResultId, const String& itemText,
                                     // for an item..
 
     items.add (new Item (itemResultId, itemText, isActive, isTicked, iconToUse,
-                         Colours::black, false, 0, 0, 0));
+                         Colours::black, false, nullptr, nullptr, nullptr));
 }
 
 void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
@@ -1249,7 +1220,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
                              Image::null,
                              Colours::black,
                              false,
-                             0, 0,
+                             nullptr, nullptr,
                              commandManager));
     }
 }
@@ -1266,7 +1237,7 @@ void PopupMenu::addColouredItem (const int itemResultId,
                                     // for an item..
 
     items.add (new Item (itemResultId, itemText, isActive, isTicked, iconToUse,
-                         itemTextColour, true, 0, 0, 0));
+                         itemTextColour, true, nullptr, nullptr, nullptr));
 }
 
 //==============================================================================
@@ -1277,7 +1248,7 @@ void PopupMenu::addCustomItem (const int itemResultId, CustomComponent* const cu
                                     // for an item..
 
     items.add (new Item (itemResultId, String::empty, true, false, Image::null,
-                         Colours::black, false, customComponent, 0, 0));
+                         Colours::black, false, customComponent, nullptr, nullptr));
 }
 
 class NormalComponentWrapper : public PopupMenu::CustomComponent
@@ -1327,7 +1298,7 @@ void PopupMenu::addSubMenu (const String& subMenuName,
                             const bool isTicked)
 {
     items.add (new Item (0, subMenuName, isActive && (subMenu.getNumItems() > 0), isTicked,
-                         iconToUse, Colours::black, false, 0, &subMenu, 0));
+                         iconToUse, Colours::black, false, nullptr, &subMenu, nullptr));
 }
 
 void PopupMenu::addSeparator()
@@ -1385,7 +1356,7 @@ PopupMenu::Options::Options()
     targetArea.setPosition (Desktop::getMousePosition());
 }
 
-PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
+PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const noexcept
 {
     Options o (*this);
     o.targetComponent = comp;
@@ -1396,35 +1367,35 @@ PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) con
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withTargetScreenArea (const Rectangle<int>& area) const
+PopupMenu::Options PopupMenu::Options::withTargetScreenArea (const Rectangle<int>& area) const noexcept
 {
     Options o (*this);
     o.targetArea = area;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withMinimumWidth (int w) const
+PopupMenu::Options PopupMenu::Options::withMinimumWidth (int w) const noexcept
 {
     Options o (*this);
     o.minWidth = w;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withMaximumNumColumns (int cols) const
+PopupMenu::Options PopupMenu::Options::withMaximumNumColumns (int cols) const noexcept
 {
     Options o (*this);
     o.maxColumns = cols;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withStandardItemHeight (int height) const
+PopupMenu::Options PopupMenu::Options::withStandardItemHeight (int height) const noexcept
 {
     Options o (*this);
     o.standardHeight = height;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemToBeVisible) const
+PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemToBeVisible) const noexcept
 {
     Options o (*this);
     o.visibleItemID = idOfItemToBeVisible;
@@ -1434,10 +1405,13 @@ PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemTo
 Component* PopupMenu::createWindow (const Options& options,
                                     ApplicationCommandManager** managerOfChosenCommand) const
 {
-    return Window::create (*this, ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown(),
-                           0, options.targetArea, options.minWidth, options.maxColumns > 0 ? options.maxColumns : 7,
-                           options.standardHeight, ! options.targetArea.isEmpty(), options.visibleItemID,
-                           managerOfChosenCommand, options.targetComponent);
+    if (items.size() > 0)
+        return new Window (*this, nullptr, options,
+                           ! options.targetArea.isEmpty(),
+                           ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown(),
+                           managerOfChosenCommand);
+
+    return nullptr;
 }
 
 //==============================================================================
@@ -1695,7 +1669,7 @@ PopupMenu::MenuItemIterator::MenuItemIterator (const PopupMenu& menu_)
       isEnabled (false),
       isCustomComponent (false),
       isSectionHeader (false),
-      customColour (0),
+      customColour (nullptr),
       menu (menu_),
       index (0)
 {
@@ -1713,18 +1687,17 @@ bool PopupMenu::MenuItemIterator::next()
     const Item* const item = menu.items.getUnchecked (index);
     ++index;
 
-    itemName = item->customComp != nullptr ? item->customComp->getName() : item->text;
-    subMenu = item->subMenu;
-    itemId = item->itemId;
-
-    isSeparator = item->isSeparator;
-    isTicked = item->isTicked;
-    isEnabled = item->active;
+    itemName        = item->customComp != nullptr ? item->customComp->getName() : item->text;
+    subMenu         = item->subMenu;
+    itemId          = item->itemId;
+    isSeparator     = item->isSeparator;
+    isTicked        = item->isTicked;
+    isEnabled       = item->active;
     isSectionHeader = dynamic_cast <HeaderItemComponent*> (static_cast <CustomComponent*> (item->customComp)) != nullptr;
     isCustomComponent = (! isSectionHeader) && item->customComp != nullptr;
-    customColour = item->usesColour ? &(item->textColour) : 0;
-    customImage = item->image;
-    commandManager = item->commandManager;
+    customColour    = item->usesColour ? &(item->textColour) : nullptr;
+    customImage     = item->image;
+    commandManager  = item->commandManager;
 
     return true;
 }

@@ -301,7 +301,7 @@ void Button::clicked (const ModifierKeys& /*modifiers*/)
     clicked();
 }
 
-static const int clickMessageId = 0x2f3f4f99;
+enum { clickMessageId = 0x2f3f4f99 };
 
 void Button::triggerClick()
 {

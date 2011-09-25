@@ -810,7 +810,7 @@ public:
     static HWNDComponentPeer* getOwnerOfWindow (HWND h) noexcept
     {
         if (h != 0 && JuceWindowIdentifier::isJUCEWindow (h))
-            return (HWNDComponentPeer*) (pointer_sized_int) GetWindowLongPtr (h, 8);
+            return (HWNDComponentPeer*) GetWindowLongPtr (h, 8);
 
         return nullptr;
     }

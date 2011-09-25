@@ -149,7 +149,7 @@ public:
         Pimpl* const p = getPimpl (hwnd);
 
         if (p != nullptr)
-            return p->windowProc (hwnd, message, wParam, lParam);
+            return p->windowProc  (hwnd, message, wParam, lParam);
         else
             return DefWindowProcW (hwnd, message, wParam, lParam);
    }

@@ -100,6 +100,7 @@ private:
     class Pimpl;
     ScopedPointer<Pimpl> pimpl;
     String currentPipeName;
+    CriticalSection lock;
 
     bool openInternal (const String& pipeName, const bool createPipe);
 

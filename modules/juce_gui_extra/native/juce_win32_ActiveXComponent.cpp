@@ -376,7 +376,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                     {
                         control->setControlBounds (bounds);
 
-                        control->originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC);
+                        control->originalWndProc = (WNDPROC) GetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC);
                         SetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC, (LONG_PTR) Pimpl::activeXHookWndProc);
                     }
 
