@@ -134,6 +134,11 @@ namespace FileChooserHelpers
 }
 
 //==============================================================================
+bool FileChooser::isPlatformDialogAvailable()
+{
+    return true;
+}
+
 void FileChooser::showPlatformDialog (Array<File>& results, const String& title_, const File& currentFileOrDirectory,
                                       const String& filter, bool selectsDirectory, bool /*selectsFiles*/,
                                       bool isSaveDialogue, bool warnAboutOverwritingExistingFiles,

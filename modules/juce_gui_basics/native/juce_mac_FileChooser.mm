@@ -93,6 +93,11 @@ using namespace juce;
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
+bool FileChooser::isPlatformDialogAvailable()
+{
+    return true;
+}
+
 void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,
@@ -172,6 +177,11 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 #else
 
 //==============================================================================
+bool FileChooser::isPlatformDialogAvailable()
+{
+    return false;
+}
+
 void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,

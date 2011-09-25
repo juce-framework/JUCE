@@ -48,9 +48,6 @@ public:
     {
         int ret = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, fd);
         (void) ret; jassert (ret == 0);
-
-        //setNonBlocking (fd[0]);
-        //setNonBlocking (fd[1]);
     }
 
     ~InternalMessageQueue()
@@ -132,18 +129,6 @@ public:
     }
 
     //==============================================================================
-    struct MessageThreadFuncCall
-    {
-        enum { uniqueID = 0x73774623 };
-
-        MessageCallbackFunction* func;
-        void* parameter;
-        void* result;
-        CriticalSection lock;
-        WaitableEvent event;
-    };
-
-    //==============================================================================
     juce_DeclareSingleton_SingleThreaded_Minimal (InternalMessageQueue);
 
 private:
@@ -212,20 +197,7 @@ private:
         if (msg == nullptr)
             return false;
 
-        if (msg->intParameter1 == MessageThreadFuncCall::uniqueID)
-        {
-            // Handle callback message
-            MessageThreadFuncCall* const call = (MessageThreadFuncCall*) msg->pointerParameter;
-
-            call->result = (*(call->func)) (call->parameter);
-            call->event.signal();
-        }
-        else
-        {
-            // Handle "normal" messages
-            MessageManager::getInstance()->deliverMessage (msg);
-        }
-
+        MessageManager::getInstance()->deliverMessage (msg);
         return true;
     }
 };
@@ -236,7 +208,6 @@ juce_ImplementSingleton_SingleThreaded (InternalMessageQueue);
 //==============================================================================
 namespace LinuxErrorHandling
 {
-    //==============================================================================
     static bool errorOccurred = false;
     static bool keyboardBreakOccurred = false;
     static XErrorHandler oldErrorHandler = (XErrorHandler) 0;
@@ -244,7 +215,7 @@ namespace LinuxErrorHandling
 
     //==============================================================================
     // Usually happens when client-server connection is broken
-    static int ioErrorHandler (Display* display)
+    int ioErrorHandler (Display* display)
     {
         DBG ("ERROR: connection to X server broken.. terminating.");
 
@@ -255,8 +226,7 @@ namespace LinuxErrorHandling
         return 0;
     }
 
-    // A protocol error has occurred
-    static int juce_XErrorHandler (Display* display, XErrorEvent* event)
+    int errorHandler (Display* display, XErrorEvent* event)
     {
        #if JUCE_DEBUG_XERRORS
         char errorStr[64] = { 0 };
@@ -270,13 +240,13 @@ namespace LinuxErrorHandling
         return 0;
     }
 
-    static void installXErrorHandlers()
+    void installXErrorHandlers()
     {
         oldIOErrorHandler = XSetIOErrorHandler (ioErrorHandler);
-        oldErrorHandler = XSetErrorHandler (juce_XErrorHandler);
+        oldErrorHandler = XSetErrorHandler (errorHandler);
     }
 
-    static void removeXErrorHandlers()
+    void removeXErrorHandlers()
     {
         if (JUCEApplicationBase::isStandaloneApp())
         {
@@ -289,13 +259,13 @@ namespace LinuxErrorHandling
     }
 
     //==============================================================================
-    static void keyboardBreakSignalHandler (int sig)
+    void keyboardBreakSignalHandler (int sig)
     {
         if (sig == SIGINT)
             keyboardBreakOccurred = true;
     }
 
-    static void installKeyboardBreakHandler()
+    void installKeyboardBreakHandler()
     {
         struct sigaction saction;
         sigset_t maskSet;
@@ -419,7 +389,7 @@ private:
     void* volatile result;
 
     AsyncFunctionCaller (MessageCallbackFunction* func_, void* parameter_)
-        : result (0), func (func_), parameter (parameter_)
+        : result (nullptr), func (func_), parameter (parameter_)
     {}
 
     JUCE_DECLARE_NON_COPYABLE (AsyncFunctionCaller);
@@ -448,13 +418,16 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
             break;
         }
 
-        if (InternalMessageQueue::getInstanceWithoutCreating()->dispatchNextEvent())
+        InternalMessageQueue* const queue = InternalMessageQueue::getInstanceWithoutCreating();
+        jassert (queue != nullptr);
+
+        if (queue->dispatchNextEvent())
             return true;
 
         if (returnIfNoPendingMessages)
             break;
 
-        InternalMessageQueue::getInstanceWithoutCreating()->sleepUntilEvent (2000);
+        queue->sleepUntilEvent (2000);
     }
 
     return false;

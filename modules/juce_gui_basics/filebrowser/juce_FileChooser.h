@@ -184,6 +184,7 @@ private:
                                     const String& filters, bool selectsDirectories, bool selectsFiles,
                                     bool isSave, bool warnAboutOverwritingExistingFiles, bool selectMultipleFiles,
                                     FilePreviewComponent* previewComponent);
+    static bool isPlatformDialogAvailable();
 
     JUCE_LEAK_DETECTOR (FileChooser);
 };

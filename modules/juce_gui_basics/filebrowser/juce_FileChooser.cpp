@@ -35,9 +35,12 @@ FileChooser::FileChooser (const String& chooserBoxTitle,
       startingFile (currentFileOrDirectory),
       useNativeDialogBox (useNativeDialogBox_)
 {
-   #if JUCE_LINUX
-    useNativeDialogBox = false;
-   #endif
+    if (useNativeDialogBox)
+    {
+        static bool canUseNativeBox = isPlatformDialogAvailable();
+        if (! canUseNativeBox)
+            useNativeDialogBox = false;
+    }
 
     if (! fileFilters.containsNonWhitespaceChars())
         filters = "*";
@@ -90,7 +93,7 @@ bool FileChooser::showDialog (const bool selectsDirectories,
 
    #if JUCE_WINDOWS
     if (useNativeDialogBox && ! (selectsFiles && selectsDirectories))
-   #elif JUCE_MAC
+   #elif JUCE_MAC || JUCE_LINUX
     if (useNativeDialogBox && (previewComponent == nullptr))
    #else
     if (false)

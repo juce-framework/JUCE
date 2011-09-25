@@ -38,3 +38,8 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
 
 }
+
+bool FileChooser::isPlatformDialogAvailable()
+{
+    return false;
+}

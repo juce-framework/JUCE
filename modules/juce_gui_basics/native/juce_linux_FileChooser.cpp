@@ -23,6 +23,16 @@
   ==============================================================================
 */
 
+bool FileChooser::isPlatformDialogAvailable()
+{
+    ChildProcess child;
+    const bool ok = child.start ("which zenity")
+                     && child.readAllProcessOutput().trim().isNotEmpty();
+
+    child.waitForProcessToFinish (60 * 1000);
+    return ok;
+}
+
 void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& file,
@@ -37,58 +47,28 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     const String separator (":");
     String command ("zenity --file-selection");
 
-    if (title.isNotEmpty())
-        command << " --title=\"" << title << "\"";
-
-    if (file != File::nonexistent)
-        command << " --filename=\"" << file.getFullPathName () << "\"";
-
-    if (isDirectory)
-        command << " --directory";
-
-    if (isSave)
-        command << " --save";
-
-    if (selectMultipleFiles)
-        command << " --multiple --separator=\"" << separator << "\"";
+    if (title.isNotEmpty())         command << " --title=\"" << title << "\"";
+    if (file != File::nonexistent)  command << " --filename=\"" << file.getFullPathName () << "\"";
+    if (isDirectory)                command << " --directory";
+    if (isSave)                     command << " --save";
+    if (selectMultipleFiles)        command << " --multiple --separator=" << separator;
 
     command << " 2>&1";
 
-    MemoryOutputStream result;
-    int status = -1;
-    FILE* stream = popen (command.toUTF8(), "r");
-
-    if (stream != 0)
+    ChildProcess child;
+    if (child.start (command))
     {
-        for (;;)
-        {
-            char buffer [1024];
-            const int bytesRead = fread (buffer, 1, sizeof (buffer), stream);
-
-            if (bytesRead <= 0)
-                break;
-
-            result.write (buffer, bytesRead);
-        }
-
-        status = pclose (stream);
-    }
-
-    if (status == 0)
-    {
+        const String result (child.readAllProcessOutput());
         StringArray tokens;
 
         if (selectMultipleFiles)
-            tokens.addTokens (result.toUTF8(), separator, String::empty);
+            tokens.addTokens (result, separator, "\"");
         else
-            tokens.add (result.toUTF8());
+            tokens.add (result);
 
         for (int i = 0; i < tokens.size(); i++)
             results.add (File (tokens[i]));
 
-        return;
+        child.waitForProcessToFinish (60 * 1000);
     }
-
-    //xxx ain't got one!
-    jassertfalse;
 }

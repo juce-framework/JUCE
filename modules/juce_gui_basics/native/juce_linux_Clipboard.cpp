@@ -34,7 +34,7 @@ namespace ClipboardHelpers
     static Atom   atom_TARGETS;
 
     //==============================================================================
-    static void initSelectionAtoms()
+    void initSelectionAtoms()
     {
         static bool isInitialised = false;
         if (! isInitialised)
@@ -48,7 +48,7 @@ namespace ClipboardHelpers
     //==============================================================================
     // Read the content of a window property as either a locale-dependent string or an utf8 string
     // works only for strings shorter than 1000000 bytes
-    static String readWindowProperty (Window window, Atom prop, Atom fmt)
+    String readWindowProperty (Window window, Atom prop, Atom fmt)
     {
         String returnData;
         char* clipData;
@@ -79,7 +79,7 @@ namespace ClipboardHelpers
 
     //==============================================================================
     // Send a SelectionRequest to the window owning the selection and waits for its answer (with a timeout) */
-    static bool requestSelectionContent (String& selectionContent, Atom selection, Atom requestedFormat)
+    bool requestSelectionContent (String& selectionContent, Atom selection, Atom requestedFormat)
     {
         Atom property_name = XInternAtom (display, "JUCE_SEL", false);
 
