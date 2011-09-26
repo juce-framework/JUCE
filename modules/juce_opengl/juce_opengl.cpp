@@ -122,6 +122,7 @@
 #include "opengl/juce_OpenGLComponent.cpp"
 #include "opengl/juce_OpenGLFrameBuffer.cpp"
 #include "opengl/juce_OpenGLHelpers.cpp"
+#include "opengl/juce_OpenGLImage.cpp"
 #include "opengl/juce_OpenGLTexture.cpp"
 // END_AUTOINCLUDE
 

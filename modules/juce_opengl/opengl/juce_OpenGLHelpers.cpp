@@ -48,6 +48,8 @@ void OpenGLHelpers::prepareFor2D (int width, int height)
    #else
     glOrtho (0.0, width, 0.0, height, 0, 1);
    #endif
+
+    glViewport (0, 0, width, height);
 }
 
 void OpenGLHelpers::setPerspective (double fovy, double aspect, double zNear, double zFar)

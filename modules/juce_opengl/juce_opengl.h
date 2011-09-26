@@ -95,6 +95,9 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_OPENGLHELPERS_JUCEHEADER__
  #include "opengl/juce_OpenGLHelpers.h"
 #endif
+#ifndef __JUCE_OPENGLIMAGE_JUCEHEADER__
+ #include "opengl/juce_OpenGLImage.h"
+#endif
 #ifndef __JUCE_OPENGLPIXELFORMAT_JUCEHEADER__
  #include "opengl/juce_OpenGLPixelFormat.h"
 #endif
