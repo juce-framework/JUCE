@@ -187,7 +187,7 @@ namespace JuceDummyNamespace {}
     #endif
   #endif
 
-  #if ! JUCE_VC7_OR_EARLIER
+  #if JUCE_64BIT || ! JUCE_VC7_OR_EARLIER
     #define JUCE_USE_INTRINSICS 1
   #endif
 #else

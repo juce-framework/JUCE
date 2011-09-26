@@ -77,7 +77,6 @@ private:
 class WebInputStream  : public InputStream
 {
 public:
-    //==============================================================================
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
@@ -373,25 +372,19 @@ namespace MACAddressHelpers
         DynamicLibrary dll ("iphlpapi.dll");
         JUCE_DLL_FUNCTION (GetAdaptersInfo, getAdaptersInfo, DWORD, dll, (PIP_ADAPTER_INFO, PULONG))
 
-        if (getAdaptersInfo != 0)
+        if (getAdaptersInfo != nullptr)
         {
             ULONG len = sizeof (IP_ADAPTER_INFO);
-            MemoryBlock mb;
-            PIP_ADAPTER_INFO adapterInfo = (PIP_ADAPTER_INFO) mb.getData();
+            HeapBlock<IP_ADAPTER_INFO> adapterInfo (1);
 
             if (getAdaptersInfo (adapterInfo, &len) == ERROR_BUFFER_OVERFLOW)
-            {
-                mb.setSize (len);
-                adapterInfo = (PIP_ADAPTER_INFO) mb.getData();
-            }
+                adapterInfo.malloc (len, 1);
 
             if (getAdaptersInfo (adapterInfo, &len) == NO_ERROR)
             {
-                for (PIP_ADAPTER_INFO adapter = adapterInfo; adapter != 0; adapter = adapter->Next)
-                {
+                for (PIP_ADAPTER_INFO adapter = adapterInfo; adapter != nullptr; adapter = adapter->Next)
                     if (adapter->AddressLength >= 6)
                         result.addIfNotAlreadyThere (MACAddress (adapter->Address));
-                }
             }
         }
     }

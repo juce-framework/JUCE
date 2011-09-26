@@ -30,7 +30,6 @@ namespace FontEnumerators
         if (lpelfe != nullptr && (type & RASTER_FONTTYPE) == 0)
         {
             const String fontName (lpelfe->elfLogFont.lfFaceName);
-
             ((StringArray*) lParam)->addIfNotAlreadyThere (fontName.removeCharacters ("@"));
         }
 
@@ -213,8 +212,9 @@ public:
             glyphNumber = defaultGlyph;
 
         GLYPHMETRICS gm;
-        const DWORD bufSize = GetGlyphOutline (dc, (UINT) glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX,
-                                               &gm, 0, 0, &identityMatrix);
+        // (although GetGlyphOutline returns a DWORD, it may be -1 on failure, so treat it as signed int..)
+        const int bufSize = (int) GetGlyphOutline (dc, (UINT) glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX,
+                                                   &gm, 0, 0, &identityMatrix);
 
         if (bufSize > 0)
         {
@@ -413,7 +413,6 @@ private:
 };
 
 const MAT2 WindowsTypeface::identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
-
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {

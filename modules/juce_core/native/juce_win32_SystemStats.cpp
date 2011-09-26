@@ -35,7 +35,7 @@ void Logger::outputDebugString (const String& text)
 #endif
 
 //==============================================================================
-#if JUCE_USE_INTRINSICS || JUCE_64BIT
+#if JUCE_USE_INTRINSICS
 
 // CPU info functions using intrinsics...
 

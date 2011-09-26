@@ -23,9 +23,10 @@
   ==============================================================================
 */
 
-namespace RegistryHelpers
+struct RegistryKeyWrapper
 {
-    HKEY findKeyForPath (String name, const bool createForWriting, String& valueName)
+    RegistryKeyWrapper (String name, const bool createForWriting)
+        : key (0), wideCharValueName (nullptr)
     {
         HKEY rootKey = 0;
 
@@ -39,111 +40,94 @@ namespace RegistryHelpers
 
             const int lastSlash = name.lastIndexOfChar ('\\');
             valueName = name.substring (lastSlash + 1);
-            name = name.substring (0, lastSlash);
+            wideCharValueName = valueName.toWideCharPointer();
 
-            HKEY key;
+            name = name.substring (0, lastSlash);
+            const wchar_t* const wideCharName = name.toWideCharPointer();
             DWORD result;
 
             if (createForWriting)
-            {
-                if (RegCreateKeyEx (rootKey, name.toWideCharPointer(), 0, 0, REG_OPTION_NON_VOLATILE,
-                                    (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result) == ERROR_SUCCESS)
-                    return key;
-            }
+                RegCreateKeyEx (rootKey, wideCharName, 0, 0, REG_OPTION_NON_VOLATILE,
+                                (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result);
             else
-            {
-                if (RegOpenKeyEx (rootKey, name.toWideCharPointer(), 0, KEY_READ, &key) == ERROR_SUCCESS)
-                    return key;
-            }
+                RegOpenKeyEx (rootKey, wideCharName, 0, KEY_READ, &key);
         }
-
-        return 0;
     }
-}
+
+    ~RegistryKeyWrapper()
+    {
+        if (key != 0)
+            RegCloseKey (key);
+    }
+
+    HKEY key;
+    const wchar_t* wideCharValueName;
+    String valueName;
+
+    JUCE_DECLARE_NON_COPYABLE (RegistryKeyWrapper);
+};
 
 String WindowsRegistry::getValue (const String& regValuePath, const String& defaultValue)
 {
-    String valueName, result (defaultValue);
-    HKEY k = RegistryHelpers::findKeyForPath (regValuePath, false, valueName);
+    const RegistryKeyWrapper key (regValuePath, false);
 
-    if (k != 0)
+    if (key.key != 0)
     {
         WCHAR buffer [2048];
         unsigned long bufferSize = sizeof (buffer);
         DWORD type = REG_SZ;
 
-        if (RegQueryValueEx (k, valueName.toWideCharPointer(), 0, &type, (LPBYTE) buffer, &bufferSize) == ERROR_SUCCESS)
+        if (RegQueryValueEx (key.key, key.wideCharValueName, 0, &type, (LPBYTE) buffer, &bufferSize) == ERROR_SUCCESS)
         {
             if (type == REG_SZ)
-                result = buffer;
+                return buffer;
             else if (type == REG_DWORD)
-                result = String ((int) *(DWORD*) buffer);
+                return String ((int) *(DWORD*) buffer);
         }
-
-        RegCloseKey (k);
     }
 
-    return result;
+    return defaultValue;
 }
 
 void WindowsRegistry::setValue (const String& regValuePath, const String& value)
 {
-    String valueName;
-    HKEY k = RegistryHelpers::findKeyForPath (regValuePath, true, valueName);
+    const RegistryKeyWrapper key (regValuePath, true);
 
-    if (k != 0)
-    {
-        RegSetValueEx (k, valueName.toWideCharPointer(), 0, REG_SZ,
+    if (key.key != 0)
+        RegSetValueEx (key.key, key.wideCharValueName, 0, REG_SZ,
                        (const BYTE*) value.toWideCharPointer(),
                        (DWORD) CharPointer_UTF16::getBytesRequiredFor (value.getCharPointer()));
-
-        RegCloseKey (k);
-    }
 }
 
 bool WindowsRegistry::valueExists (const String& regValuePath)
 {
-    bool exists = false;
-    String valueName;
-    HKEY k = RegistryHelpers::findKeyForPath (regValuePath, false, valueName);
+    const RegistryKeyWrapper key (regValuePath, false);
 
-    if (k != 0)
-    {
-        unsigned char buffer [2048];
-        unsigned long bufferSize = sizeof (buffer);
-        DWORD type = 0;
+    if (key.key == 0)
+        return false;
 
-        if (RegQueryValueEx (k, valueName.toWideCharPointer(), 0, &type, buffer, &bufferSize) == ERROR_SUCCESS)
-            exists = true;
+    unsigned char buffer [2048];
+    unsigned long bufferSize = sizeof (buffer);
+    DWORD type = 0;
 
-        RegCloseKey (k);
-    }
-
-    return exists;
+    return RegQueryValueEx (key.key, key.wideCharValueName,
+                            0, &type, buffer, &bufferSize) == ERROR_SUCCESS;
 }
 
 void WindowsRegistry::deleteValue (const String& regValuePath)
 {
-    String valueName;
-    HKEY k = RegistryHelpers::findKeyForPath (regValuePath, true, valueName);
+    const RegistryKeyWrapper key (regValuePath, true);
 
-    if (k != 0)
-    {
-        RegDeleteValue (k, valueName.toWideCharPointer());
-        RegCloseKey (k);
-    }
+    if (key.key != 0)
+        RegDeleteValue (key.key, key.wideCharValueName);
 }
 
 void WindowsRegistry::deleteKey (const String& regKeyPath)
 {
-    String valueName;
-    HKEY k = RegistryHelpers::findKeyForPath (regKeyPath, true, valueName);
+    const RegistryKeyWrapper key (regKeyPath, true);
 
-    if (k != 0)
-    {
-        RegDeleteKey (k, valueName.toWideCharPointer());
-        RegCloseKey (k);
-    }
+    if (key.key != 0)
+        RegDeleteKey (key.key, key.wideCharValueName);
 }
 
 void WindowsRegistry::registerFileAssociation (const String& fileExtension,
