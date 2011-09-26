@@ -265,7 +265,7 @@ private:
     friend class ReferenceCountedObjectPtr<Term>;
     ReferenceCountedObjectPtr<Term> term;
 
-    explicit Expression (Term* term);
+    explicit Expression (Term*);
 };
 
 #endif   // __JUCE_EXPRESSION_JUCEHEADER__

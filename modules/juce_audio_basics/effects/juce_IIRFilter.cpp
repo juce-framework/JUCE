@@ -25,6 +25,12 @@
 
 BEGIN_JUCE_NAMESPACE
 
+#if JUCE_INTEL
+ #define JUCE_SNAP_TO_ZERO(n)    if (! (n < -1.0e-8 || n > 1.0e-8)) n = 0;
+#else
+ #define JUCE_SNAP_TO_ZERO(n)
+#endif
+
 //==============================================================================
 IIRFilter::IIRFilter()
     : active (false)
@@ -63,10 +69,7 @@ float IIRFilter::processSingleSampleRaw (const float in) noexcept
                  - coefficients[4] * y1
                  - coefficients[5] * y2;
 
-   #if JUCE_INTEL
-    if (! (out < -1.0e-8 || out > 1.0e-8))
-        out = 0;
-   #endif
+    JUCE_SNAP_TO_ZERO (out);
 
     x2 = x1;
     x1 = in;
@@ -93,10 +96,7 @@ void IIRFilter::processSamples (float* const samples,
                          - coefficients[4] * y1
                          - coefficients[5] * y2;
 
-           #if JUCE_INTEL
-            if (! (out < -1.0e-8 || out > 1.0e-8))
-                out = 0;
-           #endif
+            JUCE_SNAP_TO_ZERO (out);
 
             x2 = x1;
             x1 = in;
@@ -251,5 +251,6 @@ void IIRFilter::setCoefficients (double c1, double c2, double c3,
     active = true;
 }
 
+#undef JUCE_SNAP_TO_ZERO
 
 END_JUCE_NAMESPACE

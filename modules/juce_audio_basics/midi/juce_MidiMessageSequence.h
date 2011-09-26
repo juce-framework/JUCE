@@ -264,17 +264,10 @@ public:
     /** Swaps this sequence with another one. */
     void swapWith (MidiMessageSequence& other) noexcept;
 
-    //==============================================================================
-    /** @internal */
-    static int compareElements (const MidiMessageSequence::MidiEventHolder* first,
-                                const MidiMessageSequence::MidiEventHolder* second) noexcept;
-
 private:
     //==============================================================================
     friend class MidiFile;
     OwnedArray <MidiEventHolder> list;
-
-    void sort();
 
     JUCE_LEAK_DETECTOR (MidiMessageSequence);
 };

@@ -52,11 +52,11 @@ public:
     struct Parameters
     {
         Parameters() noexcept
-          : roomSize (0.5f),
-            damping (0.5f),
-            wetLevel (0.33f),
-            dryLevel (0.4f),
-            width (1.0f),
+          : roomSize   (0.5f),
+            damping    (0.5f),
+            wetLevel   (0.33f),
+            dryLevel   (0.4f),
+            width      (1.0f),
             freezeMode (0)
         {}
 

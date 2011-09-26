@@ -319,10 +319,6 @@ private:
     void ensureSize (size_t numVals);
     void shiftLeft (int bits, int startBit);
     void shiftRight (int bits, int startBit);
-    static BigInteger simpleGCD (BigInteger* m, BigInteger* n);
-
-    static inline size_t bitToIndex (const int bit) noexcept    { return (size_t) (bit >> 5); }
-    static inline uint32 bitToMask (const int bit) noexcept     { return (uint32) 1 << (bit & 31); }
 
     JUCE_LEAK_DETECTOR (BigInteger);
 };

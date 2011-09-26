@@ -26,6 +26,13 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
+namespace
+{
+    inline size_t bitToIndex (const int bit) noexcept   { return (size_t) (bit >> 5); }
+    inline uint32 bitToMask  (const int bit) noexcept   { return (uint32) 1 << (bit & 31); }
+}
+
+//==============================================================================
 BigInteger::BigInteger()
     : numValues (4),
       highestBit (-1),
@@ -783,7 +790,7 @@ void BigInteger::shiftBits (int bits, const int startBit)
 }
 
 //==============================================================================
-BigInteger BigInteger::simpleGCD (BigInteger* m, BigInteger* n)
+static BigInteger simpleGCD (BigInteger* m, BigInteger* n)
 {
     while (! m->isZero())
     {

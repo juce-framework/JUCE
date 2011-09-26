@@ -25,17 +25,17 @@
 
 BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
+
 namespace MidiFileHelpers
 {
     void writeVariableLengthInt (OutputStream& out, unsigned int v)
     {
-        unsigned int buffer = v & 0x7F;
+        unsigned int buffer = v & 0x7f;
 
         while ((v >>= 7) != 0)
         {
             buffer <<= 8;
-            buffer |= ((v & 0x7F) | 0x80);
+            buffer |= ((v & 0x7f) | 0x80);
         }
 
         for (;;)
@@ -97,8 +97,7 @@ namespace MidiFileHelpers
     {
         if (timeFormat > 0)
         {
-            int numer = 4, denom = 4;
-            double tempoTime = 0.0, correctedTempoTime = 0.0;
+            double lastTime = 0.0, correctedTime = 0.0;
             const double tickLen = 1.0 / (timeFormat & 0x7fff);
             double secsPerTick = 0.5 * tickLen;
             const int numEvents = tempoEvents.getNumEvents();
@@ -106,47 +105,32 @@ namespace MidiFileHelpers
             for (int i = 0; i < numEvents; ++i)
             {
                 const MidiMessage& m = tempoEvents.getEventPointer(i)->message;
+                const double eventTime = m.getTimeStamp();
 
-                if (time <= m.getTimeStamp())
+                if (eventTime >= time)
                     break;
 
-                if (timeFormat > 0)
-                {
-                    correctedTempoTime = correctedTempoTime
-                                            + (m.getTimeStamp() - tempoTime) * secsPerTick;
-                }
-                else
-                {
-                    correctedTempoTime = tickLen * m.getTimeStamp() / (((timeFormat & 0x7fff) >> 8) * (timeFormat & 0xff));
-                }
-
-                tempoTime = m.getTimeStamp();
+                correctedTime += (eventTime - lastTime) * secsPerTick;
+                lastTime = eventTime;
 
                 if (m.isTempoMetaEvent())
                     secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
-                else if (m.isTimeSignatureMetaEvent())
-                    m.getTimeSignatureInfo (numer, denom);
 
                 while (i + 1 < numEvents)
                 {
                     const MidiMessage& m2 = tempoEvents.getEventPointer(i + 1)->message;
-                    if (m2.getTimeStamp() == tempoTime)
-                    {
-                        ++i;
 
-                        if (m2.isTempoMetaEvent())
-                            secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
-                        else if (m2.isTimeSignatureMetaEvent())
-                            m2.getTimeSignatureInfo (numer, denom);
-                    }
-                    else
-                    {
+                    if (m2.getTimeStamp() != eventTime)
                         break;
-                    }
+
+                    if (m2.isTempoMetaEvent())
+                        secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
+
+                    ++i;
                 }
             }
 
-            return correctedTempoTime + (time - tempoTime) * secsPerTick;
+            return correctedTime + (time - lastTime) * secsPerTick;
         }
         else
         {
@@ -180,7 +164,6 @@ MidiFile::MidiFile()
 
 MidiFile::~MidiFile()
 {
-    clear();
 }
 
 void MidiFile::clear()
@@ -296,9 +279,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
                     break;
 
                 if (chunkType == (int) ByteOrder::bigEndianInt ("MTrk"))
-                {
                     readNextTrack (d, chunkSize);
-                }
 
                 size -= chunkSize + 8;
                 d += chunkSize;
@@ -315,7 +296,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
 void MidiFile::readNextTrack (const uint8* data, int size)
 {
     double time = 0;
-    char lastStatusByte = 0;
+    uint8 lastStatusByte = 0;
 
     MidiMessageSequence result;
 
@@ -338,7 +319,7 @@ void MidiFile::readNextTrack (const uint8* data, int size)
 
         result.addEvent (mm);
 
-        const char firstByte = *(mm.getRawData());
+        const uint8 firstByte = *(mm.getRawData());
         if ((firstByte & 0xf0) != 0xf0)
             lastStatusByte = firstByte;
     }
@@ -361,7 +342,7 @@ void MidiFile::convertTimestampTicksToSeconds()
 
     for (int i = 0; i < tracks.size(); ++i)
     {
-        MidiMessageSequence& ms = *tracks.getUnchecked(i);
+        const MidiMessageSequence& ms = *tracks.getUnchecked(i);
 
         for (int j = ms.getNumEvents(); --j >= 0;)
         {
@@ -393,11 +374,10 @@ bool MidiFile::writeTo (OutputStream& out)
 void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
 {
     MemoryOutputStream out;
-
-    const MidiMessageSequence& ms = *tracks[trackNum];
+    const MidiMessageSequence& ms = *tracks.getUnchecked (trackNum);
 
     int lastTick = 0;
-    char lastStatusByte = 0;
+    uint8 lastStatusByte = 0;
 
     for (int i = 0; i < ms.getNumEvents(); ++i)
     {
@@ -408,27 +388,30 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
         MidiFileHelpers::writeVariableLengthInt (out, delta);
         lastTick = tick;
 
-        const char statusByte = *(mm.getRawData());
+        const uint8* data = mm.getRawData();
+        int dataSize = mm.getRawDataSize();
 
-        if ((statusByte == lastStatusByte)
-             && ((statusByte & 0xf0) != 0xf0)
-             && i > 0
-             && mm.getRawDataSize() > 1)
+        const uint8 statusByte = data[0];
+
+        if (statusByte == lastStatusByte
+             && (statusByte & 0xf0) != 0xf0
+             && dataSize > 1
+             && i > 0)
         {
-            out.write (mm.getRawData() + 1, mm.getRawDataSize() - 1);
-        }
-        else
-        {
-            out.write (mm.getRawData(), mm.getRawDataSize());
+            ++data;
+            --dataSize;
         }
 
+        out.write (data, dataSize);
         lastStatusByte = statusByte;
     }
 
     out.writeByte (0);
-    const MidiMessage m (MidiMessage::endOfTrack());
-    out.write (m.getRawData(),
-               m.getRawDataSize());
+
+    {
+        const MidiMessage m (MidiMessage::endOfTrack());
+        out.write (m.getRawData(), m.getRawDataSize());
+    }
 
     mainOut.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MTrk"));
     mainOut.writeIntBigEndian ((int) out.getDataSize());

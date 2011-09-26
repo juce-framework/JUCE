@@ -106,26 +106,18 @@ int MidiMessageSequence::getNextIndexAtTime (const double timeStamp) const
 //==============================================================================
 double MidiMessageSequence::getStartTime() const
 {
-    if (list.size() > 0)
-        return list.getUnchecked(0)->message.getTimeStamp();
-    else
-        return 0;
+    return getEventTime (0);
 }
 
 double MidiMessageSequence::getEndTime() const
 {
-    if (list.size() > 0)
-        return list.getLast()->message.getTimeStamp();
-    else
-        return 0;
+    return getEventTime (list.size() - 1);
 }
 
 double MidiMessageSequence::getEventTime (const int index) const
 {
-    if (isPositiveAndBelow (index, list.size()))
-        return list.getUnchecked (index)->message.getTimeStamp();
-
-    return 0.0;
+    const MidiEventHolder* const e = list [index];
+    return e != nullptr ? e->message.getTimeStamp() : 0.0;
 }
 
 //==============================================================================
@@ -157,6 +149,16 @@ void MidiMessageSequence::deleteEvent (const int index,
     }
 }
 
+struct MidiMessageSequenceSorter
+{
+    static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
+                                const MidiMessageSequence::MidiEventHolder* const second) noexcept
+    {
+        const double diff = first->message.getTimeStamp() - second->message.getTimeStamp();
+        return (diff > 0) - (diff < 0);
+    }
+};
+
 void MidiMessageSequence::addSequence (const MidiMessageSequence& other,
                                        double timeAdjustment,
                                        double firstAllowableTime,
@@ -179,22 +181,8 @@ void MidiMessageSequence::addSequence (const MidiMessageSequence& other,
         }
     }
 
-    sort();
-}
-
-//==============================================================================
-int MidiMessageSequence::compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                          const MidiMessageSequence::MidiEventHolder* const second) noexcept
-{
-    const double diff = first->message.getTimeStamp()
-                         - second->message.getTimeStamp();
-
-    return (diff > 0) - (diff < 0);
-}
-
-void MidiMessageSequence::sort()
-{
-    list.sort (*this, true);
+    MidiMessageSequenceSorter sorter;
+    list.sort (sorter, true);
 }
 
 //==============================================================================

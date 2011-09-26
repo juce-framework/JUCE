@@ -227,10 +227,7 @@ private:
     int bytesUsed;
 
     uint8* getData() const noexcept;
-    uint8* findEventAfter (uint8* d, int samplePosition) const noexcept;
-    static int getEventTime (const void* d) noexcept;
-    static uint16 getEventDataSize (const void* d) noexcept;
-    static uint16 getEventTotalSize (const void* d) noexcept;
+    uint8* findEventAfter (uint8*, int samplePosition) const noexcept;
 
     JUCE_LEAK_DETECTOR (MidiBuffer);
 };

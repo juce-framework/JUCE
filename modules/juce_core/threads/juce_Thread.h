@@ -288,7 +288,6 @@ private:
     bool volatile threadShouldExit_;
 
    #ifndef DOXYGEN
-    friend class MessageManager;
     friend void JUCE_API juce_threadEntryPoint (void*);
    #endif
 
@@ -296,7 +295,7 @@ private:
     void closeThreadHandle();
     void killThread();
     void threadEntryPoint();
-    static bool setThreadPriority (void* handle, int priority);
+    static bool setThreadPriority (void*, int priority);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread);
 };
