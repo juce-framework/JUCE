@@ -38,6 +38,9 @@ public:
     /** Clears the current context using the given colour. */
     static void clear (const Colour& colour);
 
+    /** Sets the current colour using a JUCE colour. */
+    static void setColour (const Colour& colour);
+
     /** Gives the current context an orthoganal rendering mode for 2D drawing into the given size. */
     static void prepareFor2D (int width, int height);
 

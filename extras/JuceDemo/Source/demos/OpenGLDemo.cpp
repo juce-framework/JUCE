@@ -65,14 +65,11 @@ public:
     // we'll use the opportunity to create the textures needed.
     void newOpenGLContextCreated()
     {
+        texture1 = createImage1();
+        texture2 = createImage2();
+
         // (no need to call makeCurrentContextActive(), as that will have
         // been done for us before the method call).
-        glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
-
-       #if ! JUCE_OPENGL_ES
-        glClearDepth (1.0);
-       #endif
-
         glDepthFunc (GL_LESS);
         glEnable (GL_DEPTH_TEST);
         glEnable (GL_TEXTURE_2D);
@@ -82,9 +79,6 @@ public:
         glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
         glHint (GL_POINT_SMOOTH_HINT, GL_NICEST);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        texture1.load (createImage1());
-        texture2.load (createImage2());
     }
 
     void mouseDrag (const MouseEvent& e)
@@ -96,37 +90,34 @@ public:
     void renderOpenGL()
     {
         OpenGLHelpers::clear (Colours::darkgrey.withAlpha (0.0f));
-
-        OpenGLHelpers::clear (Colours::darkblue);
-
         OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
 
-        texture1.draw2D (50.0f, getHeight() - 50.0f,
-                         getWidth() - 50.0f, getHeight() - 50.0f,
-                         getWidth() - 50.0f, 50.0f,
-                         50.0f, 50.0f,
-                         Colours::white.withAlpha (fabsf (::sinf (rotation / 100.0f))));
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glLoadIdentity();
+        OpenGLFrameBuffer& frameBuffer1 = dynamic_cast <OpenGLFrameBufferImage*> (texture1.getSharedImage())->frameBuffer;
+        OpenGLFrameBuffer& frameBuffer2 = dynamic_cast <OpenGLFrameBufferImage*> (texture2.getSharedImage())->frameBuffer;
+
+        frameBuffer1.draw2D (50.0f, getHeight() - 50.0f,
+                             getWidth() - 50.0f, getHeight() - 50.0f,
+                             getWidth() - 50.0f, 50.0f,
+                             50.0f, 50.0f,
+                             Colours::white.withAlpha (fabsf (::sinf (rotation / 100.0f))));
+
         glClear (GL_DEPTH_BUFFER_BIT);
 
         OpenGLHelpers::setPerspective (45.0, getWidth() / (double) getHeight(), 0.1, 100.0);
 
-        glMatrixMode (GL_MODELVIEW);
-
-        glPushMatrix();
         glTranslatef (0.0f, 0.0f, -5.0f);
         glRotatef (rotation, 0.5f, 1.0f, 0.0f);
 
         // this draws the sides of our spinning cube..
-        texture1.draw3D (-1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, Colours::white);
-        texture1.draw3D (-1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, Colours::white);
-        texture1.draw3D (-1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, Colours::white);
-        texture2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, Colours::white);
-        texture2.draw3D ( 1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f, Colours::white);
-        texture2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, Colours::white);
-
-        glPopMatrix();
+        frameBuffer1.draw3D (-1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, Colours::white);
+        frameBuffer1.draw3D (-1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, Colours::white);
+        frameBuffer1.draw3D (-1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, Colours::white);
+        frameBuffer2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, Colours::white);
+        frameBuffer2.draw3D ( 1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f, Colours::white);
+        frameBuffer2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, Colours::white);
     }
 
     void timerCallback()
@@ -136,13 +127,13 @@ public:
     }
 
 private:
-    OpenGLTexture texture1, texture2;
+    Image texture1, texture2;
     float rotation, delta;
 
     // Functions to create a couple of images to use as textures..
     static Image createImage1()
     {
-        Image image (Image::ARGB, 256, 256, true, Image::SoftwareImage);
+        Image image (new OpenGLFrameBufferImage (Image::ARGB, 256, 256));
 
         Graphics g (image);
 
@@ -150,12 +141,14 @@ private:
         g.drawImageWithin (ImageFileFormat::loadFrom (BinaryData::juce_png, BinaryData::juce_pngSize),
                            0, 0, image.getWidth(), image.getHeight(), RectanglePlacement::stretchToFit);
 
+        drawRandomStars (g, image.getWidth(), image.getHeight());
+
         return image;
     }
 
     static Image createImage2()
     {
-        Image image (Image::ARGB, 128, 128, true, Image::SoftwareImage);
+        Image image (new OpenGLFrameBufferImage (Image::ARGB, 128, 128));
 
         Graphics g (image);
         g.fillAll (Colours::darkred.withAlpha (0.7f));
@@ -168,7 +161,21 @@ private:
                                            true));
         g.fillPath (p);
 
+        drawRandomStars (g, image.getWidth(), image.getHeight());
+
         return image;
+    }
+
+    static void drawRandomStars (Graphics& g, int w, int h)
+    {
+        Random r;
+        for (int i = 10; --i >= 0;)
+        {
+            Path pp;
+            pp.addStar (Point<float> (r.nextInt (w), r.nextInt (h)), r.nextInt (8) + 3, 10, 20, 0);
+            g.setColour (Colours::pink.withAlpha (0.4f));
+            g.fillPath (pp);
+        }
     }
 };
 

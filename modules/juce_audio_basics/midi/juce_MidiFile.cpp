@@ -383,32 +383,34 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
     {
         const MidiMessage& mm = ms.getEventPointer(i)->message;
 
-        const int tick = roundToInt (mm.getTimeStamp());
-        const int delta = jmax (0, tick - lastTick);
-        MidiFileHelpers::writeVariableLengthInt (out, delta);
-        lastTick = tick;
-
-        const uint8* data = mm.getRawData();
-        int dataSize = mm.getRawDataSize();
-
-        const uint8 statusByte = data[0];
-
-        if (statusByte == lastStatusByte
-             && (statusByte & 0xf0) != 0xf0
-             && dataSize > 1
-             && i > 0)
+        if (! mm.isEndOfTrackMetaEvent())
         {
-            ++data;
-            --dataSize;
-        }
+            const int tick = roundToInt (mm.getTimeStamp());
+            const int delta = jmax (0, tick - lastTick);
+            MidiFileHelpers::writeVariableLengthInt (out, delta);
+            lastTick = tick;
 
-        out.write (data, dataSize);
-        lastStatusByte = statusByte;
+            const uint8* data = mm.getRawData();
+            int dataSize = mm.getRawDataSize();
+
+            const uint8 statusByte = data[0];
+
+            if (statusByte == lastStatusByte
+                 && (statusByte & 0xf0) != 0xf0
+                 && dataSize > 1
+                 && i > 0)
+            {
+                ++data;
+                --dataSize;
+            }
+
+            out.write (data, dataSize);
+            lastStatusByte = statusByte;
+        }
     }
 
-    out.writeByte (0);
-
     {
+        out.writeByte (0); // (tick delta)
         const MidiMessage m (MidiMessage::endOfTrack());
         out.write (m.getRawData(), m.getRawDataSize());
     }

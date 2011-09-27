@@ -25,7 +25,7 @@
 
 BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
+
 DirectoryIterator::DirectoryIterator (const File& directory,
                                       bool isRecursive_,
                                       const String& wildCard_,
@@ -74,13 +74,13 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
 
         if (! filename.containsOnly ("."))
         {
-            const File fileFound (path + filename, 0);
             bool matches = false;
 
             if (isDirectory)
             {
                 if (isRecursive && ((whatToLookFor & File::ignoreHiddenFiles) == 0 || ! isHidden))
-                    subIterator = new DirectoryIterator (fileFound, true, wildCard, whatToLookFor);
+                    subIterator = new DirectoryIterator (File::createFileWithoutCheckingPath (path + filename),
+                                                         true, wildCard, whatToLookFor);
 
                 matches = (whatToLookFor & File::findDirectories) != 0;
             }
@@ -98,7 +98,7 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
 
             if (matches)
             {
-                currentFile = fileFound;
+                currentFile = File::createFileWithoutCheckingPath (path + filename);
                 if (isHiddenResult != nullptr)     *isHiddenResult = isHidden;
                 if (isDirResult != nullptr)        *isDirResult = isDirectory;
 

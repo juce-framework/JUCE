@@ -948,19 +948,15 @@ private:
     //==============================================================================
     String fullPath;
 
-    // internal way of contructing a file without checking the path
-    friend class DirectoryIterator;
-    File (const String&, int);
+    static String parseAbsolutePath (const String&);
     String getPathUpToLastSlash() const;
 
-    Result createDirectoryInternal (const String& fileName) const;
-    bool copyInternal (const File& dest) const;
-    bool moveInternal (const File& dest) const;
+    Result createDirectoryInternal (const String&) const;
+    bool copyInternal (const File&) const;
+    bool moveInternal (const File&) const;
     bool setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const;
     void getFileTimesInternal (int64& modificationTime, int64& accessTime, int64& creationTime) const;
     bool setFileReadOnlyInternal (bool shouldBeReadOnly) const;
-
-    static String parseAbsolutePath (const String& path);
 
     JUCE_LEAK_DETECTOR (File);
 };

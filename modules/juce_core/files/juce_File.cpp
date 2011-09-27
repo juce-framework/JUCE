@@ -35,14 +35,11 @@ File::File (const String& fullPathName)
 {
 }
 
-File::File (const String& path, int)
-    : fullPath (path)
-{
-}
-
 File File::createFileWithoutCheckingPath (const String& path)
 {
-    return File (path, 0);
+    File f;
+    f.fullPath = path;
+    return f;
 }
 
 File::File (const File& other)
@@ -312,7 +309,9 @@ String File::getPathUpToLastSlash() const
 
 File File::getParentDirectory() const
 {
-    return File (getPathUpToLastSlash(), (int) 0);
+    File f;
+    f.fullPath = getPathUpToLastSlash();
+    return f;
 }
 
 //==============================================================================

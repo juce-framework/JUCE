@@ -71,7 +71,22 @@ public:
     /** Deselects this buffer as the current OpenGL rendering target. */
     void releaseCurrentTarget();
 
+    /** Clears the framebuffer with the specified colour. */
     void clear (const Colour& colour);
+
+    /** Draws this framebuffer onto the current context, with the specified corner positions. */
+    void draw2D (float x1, float y1,
+                 float x2, float y2,
+                 float x3, float y3,
+                 float x4, float y4,
+                 const Colour& colour) const;
+
+    /** Draws this framebuffer onto the current context, with the specified corner positions. */
+    void draw3D (float x1, float y1, float z1,
+                 float x2, float y2, float z2,
+                 float x3, float y3, float z3,
+                 float x4, float y4, float z4,
+                 const Colour& colour) const;
 
 private:
     class Pimpl;
