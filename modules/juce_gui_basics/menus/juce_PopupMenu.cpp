@@ -1687,6 +1687,9 @@ bool PopupMenu::MenuItemIterator::next()
     const Item* const item = menu.items.getUnchecked (index);
     ++index;
 
+    if (item->isSeparator && index >= menu.items.size()) // (avoid showing a separator at the end)
+        return false;
+
     itemName        = item->customComp != nullptr ? item->customComp->getName() : item->text;
     subMenu         = item->subMenu;
     itemId          = item->itemId;

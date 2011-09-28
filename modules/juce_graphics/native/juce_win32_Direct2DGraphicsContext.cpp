@@ -574,7 +574,7 @@ public:
         {
             // xxx The font shouldn't be managed by the graphics context.
             // The correct way to handle font lifetimes is to use a subclass of Typeface - see
-            // MacTypeface and WindowsTypeface classes. D2D support could probably just be added to the
+            // OSXTypeface and WindowsTypeface classes. D2D support could probably just be added to the
             // WindowsTypeface class.
 
             if (currentFontFace == 0)

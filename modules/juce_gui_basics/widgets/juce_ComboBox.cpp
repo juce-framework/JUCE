@@ -86,7 +86,7 @@ void ComboBox::setJustificationType (const Justification& justification)
     label->setJustificationType (justification);
 }
 
-const Justification ComboBox::getJustificationType() const noexcept
+Justification ComboBox::getJustificationType() const noexcept
 {
     return label->getJustificationType();
 }
@@ -119,6 +119,12 @@ void ComboBox::addItem (const String& newItemText, const int newItemId)
 
         items.add (new ItemInfo (newItemText, newItemId, true, false));
     }
+}
+
+void ComboBox::addItemList (const StringArray& items, const int firstItemIdOffset)
+{
+    for (int i = 0; i < items.size(); ++i)
+        addItem (items[i], i + firstItemIdOffset);
 }
 
 void ComboBox::addSeparator()

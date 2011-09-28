@@ -310,6 +310,10 @@ const String& Font::getFallbackFontName()
 void Font::setFallbackFontName (const String& name)
 {
     FontValues::fallbackFont = name;
+
+   #if JUCE_MAC || JUCE_IOS
+    jassertfalse; // Note that use of a fallback font isn't currently implemented in OSX..
+   #endif
 }
 
 //==============================================================================

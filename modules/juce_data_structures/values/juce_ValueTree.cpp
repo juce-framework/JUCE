@@ -766,7 +766,7 @@ private:
     const Identifier property;
     UndoManager* const undoManager;
 
-    ValueTreePropertyValueSource& operator= (const ValueTreePropertyValueSource&);
+    JUCE_DECLARE_NON_COPYABLE (ValueTreePropertyValueSource);
 };
 
 Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager) const

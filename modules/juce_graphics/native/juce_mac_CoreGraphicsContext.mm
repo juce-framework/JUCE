@@ -520,13 +520,13 @@ void CoreGraphicsContext::drawVerticalLine (const int x, float top, float bottom
 {
     if (state->fillType.isColour())
     {
-      #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
+       #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
         CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
-      #else
+       #else
         // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
         // the x co-ord slightly to trick it..
         CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - bottom, 1.0f + 1.0f / 256.0f, bottom - top));
-      #endif
+       #endif
     }
     else
     {
@@ -538,13 +538,13 @@ void CoreGraphicsContext::drawHorizontalLine (const int y, float left, float rig
 {
     if (state->fillType.isColour())
     {
-      #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
+       #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
         CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
-      #else
+       #else
         // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
         // the x co-ord slightly to trick it..
         CGContextFillRect (context, CGRectMake (left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), right - left, 1.0f + 1.0f / 256.0f));
-      #endif
+       #endif
     }
     else
     {
@@ -559,15 +559,15 @@ void CoreGraphicsContext::setFont (const Font& newFont)
         state->fontRef = 0;
         state->font = newFont;
 
-        MacTypeface* mf = dynamic_cast <MacTypeface*> (state->font.getTypeface());
+        OSXTypeface* osxTypeface = dynamic_cast <OSXTypeface*> (state->font.getTypeface());
 
-        if (mf != nullptr)
+        if (osxTypeface != nullptr)
         {
-            state->fontRef = mf->fontRef;
+            state->fontRef = osxTypeface->fontRef;
             CGContextSetFont (context, state->fontRef);
-            CGContextSetFontSize (context, state->font.getHeight() * mf->fontHeightToCGSizeFactor);
+            CGContextSetFontSize (context, state->font.getHeight() * osxTypeface->fontHeightToCGSizeFactor);
 
-            state->fontTransform = mf->renderingTransform;
+            state->fontTransform = osxTypeface->renderingTransform;
             state->fontTransform.a *= state->font.getHorizontalScale();
             CGContextSetTextMatrix (context, state->fontTransform);
         }

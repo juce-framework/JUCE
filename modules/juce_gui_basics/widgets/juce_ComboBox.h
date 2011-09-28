@@ -91,7 +91,7 @@ public:
     /** Returns the current justification for the text box.
         @see setJustificationType
     */
-    const Justification getJustificationType() const noexcept;
+    Justification getJustificationType() const noexcept;
 
     //==============================================================================
     /** Adds an item to be shown in the drop-down list.
@@ -104,6 +104,11 @@ public:
     */
     void addItem (const String& newItemText, int newItemId);
 
+    /** Adds an array of items to the drop-down list.
+        The item ID of each item will be its index in the StringArray + firstItemIdOffset.
+    */
+    void addItemList (const StringArray& items, int firstItemIdOffset);
+    
     /** Adds a separator line to the drop-down list.
 
         This is like adding a separator to a popup menu. See PopupMenu::addSeparator().

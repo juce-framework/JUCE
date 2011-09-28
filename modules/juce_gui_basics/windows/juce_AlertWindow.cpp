@@ -225,8 +225,7 @@ void AlertWindow::addComboBox (const String& name,
     comboBoxes.add (cb);
     allComps.add (cb);
 
-    for (int i = 0; i < items.size(); ++i)
-        cb->addItem (items[i], i + 1);
+    cb->addItemList (items, 1);
 
     addAndMakeVisible (cb);
     cb->setSelectedItemIndex (0);

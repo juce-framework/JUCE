@@ -339,20 +339,12 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
 
-    if (image.hasAlphaChannel())
-    {
-        // this method could fill the background in white and still save the image..
-        jassertfalse;
-        return true;
-    }
-
     struct jpeg_compress_struct jpegCompStruct;
+    jpeg_create_compress (&jpegCompStruct);
 
     struct jpeg_error_mgr jerr;
     setupSilentErrorHandler (jerr);
     jpegCompStruct.err = &jerr;
-
-    jpeg_create_compress (&jpegCompStruct);
 
     JuceJpegDest dest;
     jpegCompStruct.dest = &dest;
@@ -396,15 +388,29 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 
     while (jpegCompStruct.next_scanline < jpegCompStruct.image_height)
     {
-        const uint8* src = srcData.getLinePointer ((int) jpegCompStruct.next_scanline);
         uint8* dst = *buffer;
 
-        for (int i = (int) jpegCompStruct.image_width; --i >= 0;)
+        if (srcData.pixelFormat == Image::RGB)
         {
-            *dst++ = ((const PixelRGB*) src)->getRed();
-            *dst++ = ((const PixelRGB*) src)->getGreen();
-            *dst++ = ((const PixelRGB*) src)->getBlue();
-            src += srcData.pixelStride;
+            const uint8* src = srcData.getLinePointer ((int) jpegCompStruct.next_scanline);
+
+            for (int i = srcData.width; --i >= 0;)
+            {
+                *dst++ = ((const PixelRGB*) src)->getRed();
+                *dst++ = ((const PixelRGB*) src)->getGreen();
+                *dst++ = ((const PixelRGB*) src)->getBlue();
+                src += srcData.pixelStride;
+            }
+        }
+        else
+        {
+            for (int x = 0; x < srcData.width; ++x)
+            {
+                const Colour pixel (srcData.getPixelColour (x, (int) jpegCompStruct.next_scanline));
+                *dst++ = pixel.getRed();
+                *dst++ = pixel.getGreen();
+                *dst++ = pixel.getBlue();
+            }
         }
 
         jpeg_write_scanlines (&jpegCompStruct, buffer, 1);

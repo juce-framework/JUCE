@@ -309,8 +309,8 @@ const Colour Image::BitmapData::getPixelColour (const int x, const int y) const 
 
     switch (pixelFormat)
     {
-        case Image::ARGB:           return Colour (((const PixelARGB*) pixel)->getUnpremultipliedARGB());
-        case Image::RGB:            return Colour (((const PixelRGB*) pixel)->getUnpremultipliedARGB());
+        case Image::ARGB:           return Colour (((const PixelARGB*)  pixel)->getUnpremultipliedARGB());
+        case Image::RGB:            return Colour (((const PixelRGB*)   pixel)->getUnpremultipliedARGB());
         case Image::SingleChannel:  return Colour (((const PixelAlpha*) pixel)->getUnpremultipliedARGB());
         default:                    jassertfalse; break;
     }
@@ -328,7 +328,7 @@ void Image::BitmapData::setPixelColour (const int x, const int y, const Colour& 
     switch (pixelFormat)
     {
         case Image::ARGB:           ((PixelARGB*) pixel)->set (col); break;
-        case Image::RGB:            ((PixelRGB*) pixel)->set (col); break;
+        case Image::RGB:            ((PixelRGB*)  pixel)->set (col); break;
         case Image::SingleChannel:  *pixel = col.getAlpha(); break;
         default:                    jassertfalse; break;
     }

@@ -122,7 +122,7 @@ public:
     void setJustificationType (const Justification& justification);
 
     /** Returns the type of justification, as set in setJustificationType(). */
-    const Justification getJustificationType() const noexcept                   { return justification; }
+    Justification getJustificationType() const noexcept                         { return justification; }
 
     /** Changes the gap that is left between the edge of the component and the text.
         By default there's a small gap left at the sides of the component to allow for

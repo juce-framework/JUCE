@@ -32,11 +32,10 @@
 #if JUCE_CORETEXT_AVAILABLE
 
 //==============================================================================
-class MacTypeface  : public Typeface
+class OSXTypeface  : public Typeface
 {
 public:
-    //==============================================================================
-    MacTypeface (const Font& font)
+    OSXTypeface (const Font& font)
         : Typeface (font.getTypefaceName()),
           fontRef (nullptr),
           fontHeightToCGSizeFactor (1.0f),
@@ -46,7 +45,6 @@ public:
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
     {
-        JUCE_AUTORELEASEPOOL
         CFStringRef cfName = font.getTypefaceName().toCFString();
         ctFontRef = CTFontCreateWithName (cfName, 1024, nullptr);
         CFRelease (cfName);
@@ -112,7 +110,7 @@ public:
         }
     }
 
-    ~MacTypeface()
+    ~OSXTypeface()
     {
         if (attributedStringAtts != nullptr)
             CFRelease (attributedStringAtts);
@@ -256,7 +254,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MacTypeface);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface);
 };
 
 #else
@@ -282,11 +280,10 @@ private:
 #endif
 
 //==============================================================================
-class MacTypeface  : public Typeface
+class OSXTypeface  : public Typeface
 {
 public:
-    //==============================================================================
-    MacTypeface (const Font& font)
+    OSXTypeface (const Font& font)
         : Typeface (font.getTypefaceName())
     {
         JUCE_AUTORELEASEPOOL
@@ -415,7 +412,7 @@ public:
 #endif
     }
 
-    ~MacTypeface()
+    ~OSXTypeface()
     {
        #if ! JUCE_IOS
         [nsFont release];
@@ -425,15 +422,8 @@ public:
             CGFontRelease (fontRef);
     }
 
-    float getAscent() const
-    {
-        return ascent;
-    }
-
-    float getDescent() const
-    {
-        return 1.0f - ascent;
-    }
+    float getAscent() const    { return ascent; }
+    float getDescent() const   { return 1.0f - ascent; }
 
     float getStringWidth (const String& text)
     {
@@ -569,7 +559,7 @@ public:
             switch ([bez elementAtIndex: i associatedPoints: p])
             {
                 case NSMoveToBezierPathElement:     path.startNewSubPath ((float) p[0].x, (float) -p[0].y); break;
-                case NSLineToBezierPathElement:     path.lineTo ((float) p[0].x, (float) -p[0].y); break;
+                case NSLineToBezierPathElement:     path.lineTo  ((float) p[0].x, (float) -p[0].y); break;
                 case NSCurveToBezierPathElement:    path.cubicTo ((float) p[0].x, (float) -p[0].y,
                                                                   (float) p[1].x, (float) -p[1].y,
                                                                   (float) p[2].x, (float) -p[2].y); break;
@@ -725,7 +715,7 @@ private:
     ScopedPointer <CharToGlyphMapper> charToGlyphMapper;
 #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MacTypeface);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface);
 };
 
 #endif
@@ -733,7 +723,7 @@ private:
 //==============================================================================
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
-    return new MacTypeface (font);
+    return new OSXTypeface (font);
 }
 
 StringArray Font::findAllTypefaceNames()

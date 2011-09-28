@@ -112,7 +112,7 @@ namespace CodeHelpers
 
         for (int i = 0; i < numBytes || numBytes < 0; ++i)
         {
-            const char c = utf8[i];
+            const unsigned char c = (unsigned char) utf8[i];
             bool startNewLine = false;
 
             switch (c)
@@ -145,12 +145,12 @@ namespace CodeHelpers
                     if (c >= 32 && c < 127 && ! (lastWasHexEscapeCode  // (have to avoid following a hex escape sequence with a valid hex digit)
                                                    && CharacterFunctions::getHexDigitValue (c) >= 0))
                     {
-                        out << c;
+                        out << (char) c;
                         lastWasHexEscapeCode = false;
                     }
                     else
                     {
-                        out << (c < 16 ? "\\x0" : "\\x") << String::toHexString ((int) (unsigned int) c);
+                        out << (c < 16 ? "\\x0" : "\\x") << String::toHexString ((int) c);
                         lastWasHexEscapeCode = true;
                     }
 
@@ -372,7 +372,7 @@ namespace CodeHelpers
         {
             String s (expression.getFloatValue());
 
-            if (s.containsChar (T('.')))
+            if (s.containsChar ('.'))
                 return s + "f";
 
             return s + ".0f";
