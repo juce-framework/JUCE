@@ -36,7 +36,6 @@
 // and your header search path must make it accessible to the module's files.
 #include "AppConfig.h"
 
-#define JUCE_DONT_DEFINE_MACROS 1
 #include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_audio_devices.h"
 

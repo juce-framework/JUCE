@@ -37,7 +37,6 @@
 #include "AppConfig.h"
 
 #include "../juce_core/native/juce_BasicNativeHeaders.h"
-#define JUCE_DONT_DEFINE_MACROS 1
 #include "juce_graphics.h"
 
 //==============================================================================

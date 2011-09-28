@@ -65,6 +65,14 @@ public:
     {
     }
 
+    PixelARGB (const uint8 a, const uint8 r, const uint8 g, const uint8 b) noexcept
+    {
+        components.b = b;
+        components.g = g;
+        components.r = r;
+        components.a = a;
+    }
+
     forcedinline uint32 getARGB() const noexcept                { return argb; }
     forcedinline uint32 getUnpremultipliedARGB() const noexcept { PixelARGB p (argb); p.unpremultiply(); return p.getARGB(); }
 

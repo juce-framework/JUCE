@@ -48,21 +48,18 @@
  typedef uint32         juce_wchar;
 #endif
 
-/** This macro is deprecated, but preserved for compatibility with old code.*/
-#define JUCE_T(stringLiteral)          (L##stringLiteral)
+/** This macro is deprecated, but preserved for compatibility with old code. */
+#define JUCE_T(stringLiteral)   (L##stringLiteral)
 
-#if ! JUCE_DONT_DEFINE_MACROS
+#if JUCE_DEFINE_T_MACRO
  /** The 'T' macro is an alternative for using the "L" prefix in front of a string literal.
 
-     This macro is deprectated, but kept here for compatibility with old code. The best (i.e.
-     most portable) way to encode your string literals is just as standard 8-bit strings, but
-     using escaped utf-8 character codes for extended characters.
-
-     Because the 'T' symbol is occasionally used inside 3rd-party library headers which you
-     may need to include after juce.h, you can set the JUCE_DONT_DEFINE_MACROS flag to avoid
-     defining it.
+     This macro is deprecated, but available for compatibility with old code if you set
+     JUCE_DEFINE_T_MACRO = 1. The fastest, most portable and best way to write your string
+     literals is as standard char strings, using escaped utf-8 character sequences for extended
+     characters, rather than trying to store them as wide-char strings.
  */
- #define T(stringLiteral)            JUCE_T(stringLiteral)
+ #define T(stringLiteral)   JUCE_T(stringLiteral)
 #endif
 
 #undef max
