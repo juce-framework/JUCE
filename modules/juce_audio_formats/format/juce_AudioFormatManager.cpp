@@ -42,7 +42,7 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat, const bool make
 
     if (newFormat != nullptr)
     {
-      #if JUCE_DEBUG
+       #if JUCE_DEBUG
         for (int i = getNumKnownFormats(); --i >= 0;)
         {
             if (getKnownFormat (i)->getFormatName() == newFormat->getFormatName())
@@ -50,7 +50,7 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat, const bool make
                 jassertfalse; // trying to add the same format twice!
             }
         }
-      #endif
+       #endif
 
         if (makeThisTheDefaultFormat)
             defaultFormatIndex = getNumKnownFormats();
@@ -61,22 +61,20 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat, const bool make
 
 void AudioFormatManager::registerBasicFormats()
 {
-  #if JUCE_MAC
-    registerFormat (new AiffAudioFormat(), true);
-    registerFormat (new WavAudioFormat(), false);
-    registerFormat (new CoreAudioFormat(), false);
-  #else
     registerFormat (new WavAudioFormat(), true);
     registerFormat (new AiffAudioFormat(), false);
-  #endif
 
-  #if JUCE_USE_FLAC
+   #if JUCE_MAC || JUCE_IOS
+    registerFormat (new CoreAudioFormat(), false);
+   #endif
+
+   #if JUCE_USE_FLAC
     registerFormat (new FlacAudioFormat(), false);
-  #endif
+   #endif
 
-  #if JUCE_USE_OGGVORBIS
+   #if JUCE_USE_OGGVORBIS
     registerFormat (new OggVorbisAudioFormat(), false);
-  #endif
+   #endif
 }
 
 void AudioFormatManager::clearFormats()
@@ -102,12 +100,11 @@ AudioFormat* AudioFormatManager::getDefaultFormat() const
 
 AudioFormat* AudioFormatManager::findFormatForFileExtension (const String& fileExtension) const
 {
-    String e (fileExtension);
-    if (! e.startsWithChar ('.'))
-        e = "." + e;
+    if (! fileExtension.startsWithChar ('.'))
+        return findFormatForFileExtension ("." + fileExtension);
 
     for (int i = 0; i < getNumKnownFormats(); ++i)
-        if (getKnownFormat(i)->getFileExtensions().contains (e, true))
+        if (getKnownFormat(i)->getFileExtensions().contains (fileExtension, true))
             return getKnownFormat(i);
 
     return nullptr;
@@ -115,30 +112,20 @@ AudioFormat* AudioFormatManager::findFormatForFileExtension (const String& fileE
 
 String AudioFormatManager::getWildcardForAllFormats() const
 {
-    StringArray allExtensions;
+    StringArray extensions;
 
     int i;
     for (i = 0; i < getNumKnownFormats(); ++i)
-        allExtensions.addArray (getKnownFormat (i)->getFileExtensions());
+        extensions.addArray (getKnownFormat(i)->getFileExtensions());
 
-    allExtensions.trim();
-    allExtensions.removeEmptyStrings();
+    extensions.trim();
+    extensions.removeEmptyStrings();
 
-    String s;
-    for (i = 0; i < allExtensions.size(); ++i)
-    {
-        s << '*';
+    for (i = 0; i < extensions.size(); ++i)
+        extensions.set (i, (extensions[i].startsWithChar ('.') ? "*" : "*.") + extensions[i]);
 
-        if (! allExtensions[i].startsWithChar ('.'))
-            s << '.';
-
-        s << allExtensions[i];
-
-        if (i < allExtensions.size() - 1)
-            s << ';';
-    }
-
-    return s;
+    extensions.removeDuplicates (true);
+    return extensions.joinIntoString (";");
 }
 
 //==============================================================================

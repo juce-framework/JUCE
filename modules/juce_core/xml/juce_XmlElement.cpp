@@ -95,16 +95,15 @@ XmlElement::XmlElement (XmlElement&& other) noexcept
 
 XmlElement& XmlElement::operator= (XmlElement&& other) noexcept
 {
-    if (this != &other)
-    {
-        removeAllAttributes();
-        deleteAllChildElements();
+    jassert (this != &other); // hopefully the compiler should make this situation impossible!
 
-        nextListItem      = static_cast <LinkedListPointer <XmlElement>&&> (other.nextListItem);
-        firstChildElement = static_cast <LinkedListPointer <XmlElement>&&> (other.firstChildElement);
-        attributes        = static_cast <LinkedListPointer <XmlAttributeNode>&&> (other.attributes);
-        tagName           = static_cast <String&&> (other.tagName);
-    }
+    removeAllAttributes();
+    deleteAllChildElements();
+
+    nextListItem      = static_cast <LinkedListPointer <XmlElement>&&> (other.nextListItem);
+    firstChildElement = static_cast <LinkedListPointer <XmlElement>&&> (other.firstChildElement);
+    attributes        = static_cast <LinkedListPointer <XmlAttributeNode>&&> (other.attributes);
+    tagName           = static_cast <String&&> (other.tagName);
 
     return *this;
 }

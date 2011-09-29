@@ -108,7 +108,7 @@ public:
         The item ID of each item will be its index in the StringArray + firstItemIdOffset.
     */
     void addItemList (const StringArray& items, int firstItemIdOffset);
-    
+
     /** Adds a separator line to the drop-down list.
 
         This is like adding a separator to a popup menu. See PopupMenu::addSeparator().

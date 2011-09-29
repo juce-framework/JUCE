@@ -97,7 +97,7 @@ struct HSB
         return Colour (hue, saturation, brightness, original.getAlpha());
     }
 
-    static PixelARGB convertHSBtoRGB (float h, float s, float v, const uint8 alpha) noexcept
+    static PixelARGB toRGB (float h, float s, float v, const uint8 alpha) noexcept
     {
         v = jlimit (0.0f, 255.0f, v * 255.0f);
         const uint8 intV = (uint8) roundToInt (v);
@@ -178,7 +178,7 @@ Colour Colour::fromRGBAFloat (const uint8 red, const uint8 green, const uint8 bl
 }
 
 Colour::Colour (const float hue, const float saturation, const float brightness, const float alpha) noexcept
-    : argb (HSB::convertHSBtoRGB (hue, saturation, brightness, ColourHelpers::floatToUInt8 (alpha)))
+    : argb (HSB::toRGB (hue, saturation, brightness, ColourHelpers::floatToUInt8 (alpha)))
 {
 }
 
@@ -188,7 +188,7 @@ Colour Colour::fromHSV (const float hue, const float saturation, const float bri
 }
 
 Colour::Colour (const float hue, const float saturation, const float brightness, const uint8 alpha) noexcept
-    : argb (HSB::convertHSBtoRGB (hue, saturation, brightness, alpha))
+    : argb (HSB::toRGB (hue, saturation, brightness, alpha))
 {
 }
 

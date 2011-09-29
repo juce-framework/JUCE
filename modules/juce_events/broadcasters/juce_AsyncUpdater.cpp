@@ -26,7 +26,7 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-class AsyncUpdaterMessage  : public CallbackMessage
+class AsyncUpdater::AsyncUpdaterMessage  : public CallbackMessage
 {
 public:
     AsyncUpdaterMessage (AsyncUpdater& owner_)
@@ -52,11 +52,6 @@ AsyncUpdater::AsyncUpdater()
     message = new AsyncUpdaterMessage (*this);
 }
 
-inline Atomic<int>& AsyncUpdater::getDeliveryFlag() const noexcept
-{
-    return static_cast <AsyncUpdaterMessage*> (message.getObject())->shouldDeliver;
-}
-
 AsyncUpdater::~AsyncUpdater()
 {
     // You're deleting this object with a background thread while there's an update
@@ -65,18 +60,18 @@ AsyncUpdater::~AsyncUpdater()
     // deleting this object, or find some other way to avoid such a race condition.
     jassert ((! isUpdatePending()) || MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-    getDeliveryFlag().set (0);
+    message->shouldDeliver.set (0);
 }
 
 void AsyncUpdater::triggerAsyncUpdate()
 {
-    if (getDeliveryFlag().compareAndSetBool (1, 0))
+    if (message->shouldDeliver.compareAndSetBool (1, 0))
         message->post();
 }
 
 void AsyncUpdater::cancelPendingUpdate() noexcept
 {
-    getDeliveryFlag().set (0);
+    message->shouldDeliver.set (0);
 }
 
 void AsyncUpdater::handleUpdateNowIfNeeded()
@@ -84,13 +79,13 @@ void AsyncUpdater::handleUpdateNowIfNeeded()
     // This can only be called by the event thread.
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-    if (getDeliveryFlag().exchange (0) != 0)
+    if (message->shouldDeliver.exchange (0) != 0)
         handleAsyncUpdate();
 }
 
 bool AsyncUpdater::isUpdatePending() const noexcept
 {
-    return getDeliveryFlag().value != 0;
+    return message->shouldDeliver.value != 0;
 }
 
 

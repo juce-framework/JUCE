@@ -2382,8 +2382,8 @@ public:
             beginTest ("StringArray");
 
             StringArray s;
-            for (int i = 5; --i >= 0;)
-                s.add (String (i));
+            s.addTokens ("4,3,2,1,0", ";,", "x");
+            expectEquals (s.size(), 5);
 
             expectEquals (s.joinIntoString ("-"), String ("4-3-2-1-0"));
             s.remove (2);
@@ -2391,6 +2391,21 @@ public:
             expectEquals (s.joinIntoString (String::empty), String ("4310"));
             s.clear();
             expectEquals (s.joinIntoString ("x"), String::empty);
+
+            StringArray toks;
+            toks.addTokens ("x,,", ";,", "");
+            expectEquals (toks.size(), 3);
+            expectEquals (toks.joinIntoString ("-"), String ("x--"));
+            toks.clear();
+
+            toks.addTokens (",x,", ";,", "");
+            expectEquals (toks.size(), 3);
+            expectEquals (toks.joinIntoString ("-"), String ("-x-"));
+            toks.clear();
+
+            toks.addTokens ("x,'y,z',", ";,", "'");
+            expectEquals (toks.size(), 3);
+            expectEquals (toks.joinIntoString ("-"), String ("x-'y,z'-"));
         }
     }
 };

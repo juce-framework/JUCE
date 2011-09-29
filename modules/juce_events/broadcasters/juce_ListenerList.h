@@ -281,14 +281,14 @@ public:
     {
     public:
         //==============================================================================
-        Iterator (const ListType& list_)
+        Iterator (const ListType& list_) noexcept
             : list (list_), index (list_.size())
         {}
 
-        ~Iterator() {}
+        ~Iterator() noexcept {}
 
         //==============================================================================
-        bool next()
+        bool next() noexcept
         {
             if (index <= 0)
                 return false;
@@ -302,7 +302,7 @@ public:
             return index >= 0;
         }
 
-        bool next (const BailOutCheckerType& bailOutChecker)
+        bool next (const BailOutCheckerType& bailOutChecker) noexcept
         {
             return (! bailOutChecker.shouldBailOut()) && next();
         }

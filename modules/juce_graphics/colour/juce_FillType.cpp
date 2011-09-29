@@ -78,14 +78,12 @@ FillType::FillType (FillType&& other) noexcept
 
 FillType& FillType::operator= (FillType&& other) noexcept
 {
-    if (this != &other)
-    {
-        colour = other.colour;
-        gradient = other.gradient.release();
-        image = static_cast <Image&&> (other.image);
-        transform = other.transform;
-    }
+    jassert (this != &other); // hopefully the compiler should make this situation impossible!
 
+    colour = other.colour;
+    gradient = other.gradient.release();
+    image = static_cast <Image&&> (other.image);
+    transform = other.transform;
     return *this;
 }
 #endif

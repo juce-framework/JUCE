@@ -26,8 +26,6 @@
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
 #define __JUCE_ASYNCUPDATER_JUCEHEADER__
 
-#include "../messages/juce_CallbackMessage.h"
-
 
 //==============================================================================
 /**
@@ -102,8 +100,9 @@ public:
 
 private:
     //==============================================================================
-    ReferenceCountedObjectPtr<CallbackMessage> message;
-    Atomic<int>& getDeliveryFlag() const noexcept;
+    class AsyncUpdaterMessage;
+    friend class ReferenceCountedObjectPtr<AsyncUpdaterMessage>;
+    ReferenceCountedObjectPtr<AsyncUpdaterMessage> message;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncUpdater);
 };

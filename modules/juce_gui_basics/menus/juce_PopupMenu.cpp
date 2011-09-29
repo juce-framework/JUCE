@@ -1169,12 +1169,10 @@ PopupMenu::PopupMenu (PopupMenu&& other) noexcept
 
 PopupMenu& PopupMenu::operator= (PopupMenu&& other) noexcept
 {
-    if (this != &other)
-    {
-        items.swapWithArray (other.items);
-        lookAndFeel = other.lookAndFeel;
-    }
+    jassert (this != &other); // hopefully the compiler should make this situation impossible!
 
+    items.swapWithArray (other.items);
+    lookAndFeel = other.lookAndFeel;
     return *this;
 }
 #endif

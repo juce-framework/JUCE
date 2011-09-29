@@ -79,11 +79,11 @@ public:
                                         or saveMode, and canSelectFiles and/or canSelectDirectories.
         @param initialFileOrDirectory   The file or directory that should be selected when the component begins.
                                         If this is File::nonexistent, a default directory will be chosen.
-        @param fileFilter               an optional filter to use to determine which files are shown. 
+        @param fileFilter               an optional filter to use to determine which files are shown.
                                         If this is nullptr then all files are displayed. Note that a pointer
                                         is kept internally to this object, so make sure that it is not deleted
                                         before the FileBrowserComponent object is deleted.
-        @param previewComp              an optional preview component that will be used to show previews of 
+        @param previewComp              an optional preview component that will be used to show previews of
                                         files that the user selects
     */
     FileBrowserComponent (int flags,

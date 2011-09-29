@@ -87,12 +87,10 @@ public:
 
     LinkedListPointer& operator= (LinkedListPointer&& other) noexcept
     {
-        if (this != &other)
-        {
-            item = other.item;
-            other.item = nullptr;
-        }
+        jassert (this != &other); // hopefully the compiler should make this situation impossible!
 
+        item = other.item;
+        other.item = nullptr;
         return *this;
     }
    #endif

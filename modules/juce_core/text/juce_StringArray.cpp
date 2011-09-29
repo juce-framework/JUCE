@@ -279,15 +279,13 @@ void StringArray::trim()
 }
 
 //==============================================================================
-class InternalStringArrayComparator_CaseSensitive
+struct InternalStringArrayComparator_CaseSensitive
 {
-public:
     static int compareElements (String& first, String& second)      { return first.compare (second); }
 };
 
-class InternalStringArrayComparator_CaseInsensitive
+struct InternalStringArrayComparator_CaseInsensitive
 {
-public:
     static int compareElements (String& first, String& second)      { return first.compareIgnoreCase (second); }
 };
 
@@ -363,18 +361,21 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
     int num = 0;
     String::CharPointerType t (text.getCharPointer());
 
-    while (! t.isEmpty())
+    if (! t.isEmpty())
     {
-        String::CharPointerType tokenEnd (CharacterFunctions::findEndOfToken (t,
-                                                                              breakCharacters.getCharPointer(),
-                                                                              quoteCharacters.getCharPointer()));
-        add (String (t, tokenEnd));
-        ++num;
+        for (;;)
+        {
+            String::CharPointerType tokenEnd (CharacterFunctions::findEndOfToken (t,
+                                                                                  breakCharacters.getCharPointer(),
+                                                                                  quoteCharacters.getCharPointer()));
+            add (String (t, tokenEnd));
+            ++num;
 
-        if (tokenEnd.isEmpty())
-            break;
+            if (tokenEnd.isEmpty())
+                break;
 
-        t = ++tokenEnd;
+            t = ++tokenEnd;
+        }
     }
 
     return num;
