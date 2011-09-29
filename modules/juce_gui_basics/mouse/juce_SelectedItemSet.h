@@ -190,14 +190,10 @@ public:
                                     const ModifierKeys& modifiers)
     {
         if (isSelected (item))
-        {
             return ! modifiers.isPopupMenu();
-        }
-        else
-        {
-            addToSelectionBasedOnModifiers (item, modifiers);
-            return false;
-        }
+
+        addToSelectionBasedOnModifiers (item, modifiers);
+        return false;
     }
 
     /** Selects or deselects items that can also be dragged, based on a mouse-up event.

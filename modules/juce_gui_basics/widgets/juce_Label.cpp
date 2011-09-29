@@ -144,8 +144,7 @@ Component* Label::getAttachedComponent() const
     return static_cast<Component*> (ownerComponent);
 }
 
-void Label::attachToComponent (Component* owner,
-                               const bool onLeft)
+void Label::attachToComponent (Component* owner, const bool onLeft)
 {
     if (ownerComponent != nullptr)
         ownerComponent->removeComponentListener (this);
@@ -193,13 +192,10 @@ void Label::componentVisibilityChanged (Component& component)
 }
 
 //==============================================================================
-void Label::textWasEdited()
-{
-}
-
-void Label::textWasChanged()
-{
-}
+void Label::textWasEdited() {}
+void Label::textWasChanged() {}
+void Label::editorShown (TextEditor*) {}
+void Label::editorAboutToBeHidden (TextEditor*) {}
 
 void Label::showEditor()
 {
@@ -210,7 +206,6 @@ void Label::showEditor()
         editor->addListener (this);
         editor->grabKeyboardFocus();
         editor->setHighlightedRegion (Range<int> (0, textValue.toString().length()));
-        editor->addListener (this);
 
         resized();
         repaint();
@@ -220,14 +215,6 @@ void Label::showEditor()
         enterModalState (false);
         editor->grabKeyboardFocus();
     }
-}
-
-void Label::editorShown (TextEditor*)
-{
-}
-
-void Label::editorAboutToBeHidden (TextEditor*)
-{
 }
 
 bool Label::updateFromTextEditorContents (TextEditor& ed)

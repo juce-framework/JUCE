@@ -617,7 +617,7 @@ protected:
             {
                 //jassert (midiEventPosition >= 0 && midiEventPosition < (int) numSamples);
             }
-           #else
+           #elif JUCE_DEBUG || JUCE_LOG_ASSERTIONS
             // if your plugin creates midi messages, you'll need to set
             // the JucePlugin_ProducesMidiOutput macro to 1 in your
             // JucePluginCharacteristics.h file

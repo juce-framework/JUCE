@@ -25,42 +25,30 @@
 
 BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
-KeyboardFocusTraverser::KeyboardFocusTraverser()
-{
-}
-
-KeyboardFocusTraverser::~KeyboardFocusTraverser()
-{
-}
-
-//==============================================================================
 namespace KeyboardFocusHelpers
 {
     // This will sort a set of components, so that they are ordered in terms of
     // left-to-right and then top-to-bottom.
-    class ScreenPositionComparator
+    struct ScreenPositionComparator
     {
-    public:
-        ScreenPositionComparator() {}
-
         static int compareElements (const Component* const first, const Component* const second)
         {
-            int explicitOrder1 = first->getExplicitFocusOrder();
-            if (explicitOrder1 <= 0)
-                explicitOrder1 = std::numeric_limits<int>::max() / 2;
-
-            int explicitOrder2 = second->getExplicitFocusOrder();
-            if (explicitOrder2 <= 0)
-                explicitOrder2 = std::numeric_limits<int>::max() / 2;
+            const int explicitOrder1 = getOrder (first);
+            const int explicitOrder2 = getOrder (second);
 
             if (explicitOrder1 != explicitOrder2)
                 return explicitOrder1 - explicitOrder2;
 
-            const int diff = first->getY() - second->getY();
+            const int yDiff = first->getY() - second->getY();
 
-            return (diff == 0) ? first->getX() - second->getX()
-                               : diff;
+            return yDiff == 0 ? first->getX() - second->getX()
+                              : yDiff;
+        }
+
+        static int getOrder (const Component* const c)
+        {
+            const int order = c->getExplicitFocusOrder();
+            return order > 0 ? order : (std::numeric_limits<int>::max() / 2);
         }
     };
 
@@ -92,29 +80,31 @@ namespace KeyboardFocusHelpers
             }
         }
     }
-}
 
-namespace KeyboardFocusHelpers
-{
+    Component* findFocusContainer (Component* c)
+    {
+        c = c->getParentComponent();
+
+        if (c != nullptr)
+            while (c->getParentComponent() != nullptr && ! c->isFocusContainer())
+                c = c->getParentComponent();
+
+        return c;
+    }
+
     Component* getIncrementedComponent (Component* const current, const int delta)
     {
-        Component* focusContainer = current->getParentComponent();
+        Component* focusContainer = findFocusContainer (current);
 
         if (focusContainer != nullptr)
         {
-            while (focusContainer->getParentComponent() != nullptr && ! focusContainer->isFocusContainer())
-                focusContainer = focusContainer->getParentComponent();
+            Array <Component*> comps;
+            KeyboardFocusHelpers::findAllFocusableComponents (focusContainer, comps);
 
-            if (focusContainer != nullptr)
+            if (comps.size() > 0)
             {
-                Array <Component*> comps;
-                KeyboardFocusHelpers::findAllFocusableComponents (focusContainer, comps);
-
-                if (comps.size() > 0)
-                {
-                    const int index = comps.indexOf (current);
-                    return comps [(index + comps.size() + delta) % comps.size()];
-                }
+                const int index = comps.indexOf (current);
+                return comps [(index + comps.size() + delta) % comps.size()];
             }
         }
 
@@ -122,13 +112,19 @@ namespace KeyboardFocusHelpers
     }
 }
 
+//==============================================================================
+KeyboardFocusTraverser::KeyboardFocusTraverser() {}
+KeyboardFocusTraverser::~KeyboardFocusTraverser() {}
+
 Component* KeyboardFocusTraverser::getNextComponent (Component* current)
 {
+    jassert (current != nullptr);
     return KeyboardFocusHelpers::getIncrementedComponent (current, 1);
 }
 
 Component* KeyboardFocusTraverser::getPreviousComponent (Component* current)
 {
+    jassert (current != nullptr);
     return KeyboardFocusHelpers::getIncrementedComponent (current, -1);
 }
 

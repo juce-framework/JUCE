@@ -45,8 +45,8 @@ MouseEvent::MouseEvent (MouseInputSource& source_,
       source (source_),
       mouseDownPos (mouseDownPos_),
       mouseDownTime (mouseDownTime_),
-      numberOfClicks (numberOfClicks_),
-      wasMovedSinceMouseDown (mouseWasDragged)
+      numberOfClicks ((uint8) numberOfClicks_),
+      wasMovedSinceMouseDown ((uint8) (mouseWasDragged ? 1 : 0))
 {
 }
 
@@ -57,64 +57,25 @@ MouseEvent::~MouseEvent() noexcept
 //==============================================================================
 MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) const noexcept
 {
-    if (otherComponent == nullptr)
-    {
-        jassertfalse;
-        return *this;
-    }
+    jassert (otherComponent != nullptr);
 
     return MouseEvent (source, otherComponent->getLocalPoint (eventComponent, getPosition()),
                        mods, otherComponent, originalComponent, eventTime,
                        otherComponent->getLocalPoint (eventComponent, mouseDownPos),
-                       mouseDownTime, numberOfClicks, wasMovedSinceMouseDown);
+                       mouseDownTime, numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
 MouseEvent MouseEvent::withNewPosition (const Point<int>& newPosition) const noexcept
 {
     return MouseEvent (source, newPosition, mods, eventComponent, originalComponent,
                        eventTime, mouseDownPos, mouseDownTime,
-                       numberOfClicks, wasMovedSinceMouseDown);
+                       numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
 //==============================================================================
 bool MouseEvent::mouseWasClicked() const noexcept
 {
-    return ! wasMovedSinceMouseDown;
-}
-
-int MouseEvent::getMouseDownX() const noexcept
-{
-    return mouseDownPos.getX();
-}
-
-int MouseEvent::getMouseDownY() const noexcept
-{
-    return mouseDownPos.getY();
-}
-
-const Point<int> MouseEvent::getMouseDownPosition() const noexcept
-{
-    return mouseDownPos;
-}
-
-int MouseEvent::getDistanceFromDragStartX() const noexcept
-{
-    return x - mouseDownPos.getX();
-}
-
-int MouseEvent::getDistanceFromDragStartY() const noexcept
-{
-    return y - mouseDownPos.getY();
-}
-
-int MouseEvent::getDistanceFromDragStart() const noexcept
-{
-    return mouseDownPos.getDistanceFrom (getPosition());
-}
-
-const Point<int> MouseEvent::getOffsetFromDragStart() const noexcept
-{
-    return getPosition() - mouseDownPos;
+    return wasMovedSinceMouseDown == 0;
 }
 
 int MouseEvent::getLengthOfMousePress() const noexcept
@@ -126,52 +87,32 @@ int MouseEvent::getLengthOfMousePress() const noexcept
 }
 
 //==============================================================================
-const Point<int> MouseEvent::getPosition() const noexcept
-{
-    return Point<int> (x, y);
-}
+Point<int> MouseEvent::getPosition() const noexcept             { return Point<int> (x, y); }
+Point<int> MouseEvent::getScreenPosition() const                { return eventComponent->localPointToGlobal (getPosition()); }
 
-int MouseEvent::getScreenX() const
-{
-    return getScreenPosition().getX();
-}
+Point<int> MouseEvent::getMouseDownPosition() const noexcept    { return mouseDownPos; }
+Point<int> MouseEvent::getMouseDownScreenPosition() const       { return eventComponent->localPointToGlobal (mouseDownPos); }
 
-int MouseEvent::getScreenY() const
-{
-    return getScreenPosition().getY();
-}
+Point<int> MouseEvent::getOffsetFromDragStart() const noexcept  { return getPosition() - mouseDownPos; }
+int MouseEvent::getDistanceFromDragStart() const noexcept       { return mouseDownPos.getDistanceFrom (getPosition()); }
 
-const Point<int> MouseEvent::getScreenPosition() const
-{
-    return eventComponent->localPointToGlobal (Point<int> (x, y));
-}
+int MouseEvent::getMouseDownX() const noexcept                  { return mouseDownPos.getX(); }
+int MouseEvent::getMouseDownY() const noexcept                  { return mouseDownPos.getY(); }
 
-int MouseEvent::getMouseDownScreenX() const
-{
-    return getMouseDownScreenPosition().getX();
-}
+int MouseEvent::getDistanceFromDragStartX() const noexcept      { return x - mouseDownPos.getX(); }
+int MouseEvent::getDistanceFromDragStartY() const noexcept      { return y - mouseDownPos.getY(); }
 
-int MouseEvent::getMouseDownScreenY() const
-{
-    return getMouseDownScreenPosition().getY();
-}
+int MouseEvent::getScreenX() const                              { return getScreenPosition().getX(); }
+int MouseEvent::getScreenY() const                              { return getScreenPosition().getY(); }
 
-const Point<int> MouseEvent::getMouseDownScreenPosition() const
-{
-    return eventComponent->localPointToGlobal (mouseDownPos);
-}
+int MouseEvent::getMouseDownScreenX() const                     { return getMouseDownScreenPosition().getX(); }
+int MouseEvent::getMouseDownScreenY() const                     { return getMouseDownScreenPosition().getY(); }
 
 //==============================================================================
-int MouseEvent::doubleClickTimeOutMs = 400;
+static int doubleClickTimeOutMs = 400;
 
-void MouseEvent::setDoubleClickTimeout (const int newTime) noexcept
-{
-    doubleClickTimeOutMs = newTime;
-}
+int MouseEvent::getDoubleClickTimeout() noexcept                        { return doubleClickTimeOutMs; }
+void MouseEvent::setDoubleClickTimeout (const int newTime) noexcept     { doubleClickTimeOutMs = newTime; }
 
-int MouseEvent::getDoubleClickTimeout() noexcept
-{
-    return doubleClickTimeOutMs;
-}
 
 END_JUCE_NAMESPACE

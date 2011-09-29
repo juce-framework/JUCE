@@ -40,13 +40,16 @@ class JUCE_API  ModifierKeys
 {
 public:
     //==============================================================================
+    /** Creates a ModifierKeys object with no flags set. */
+    ModifierKeys() noexcept;
+
     /** Creates a ModifierKeys object from a raw set of flags.
 
         @param flags to represent the keys that are down
         @see    shiftModifier, ctrlModifier, altModifier, leftButtonModifier,
                 rightButtonModifier, commandModifier, popupMenuClickModifier
     */
-    ModifierKeys (int flags = 0) noexcept;
+    ModifierKeys (int flags) noexcept;
 
     /** Creates a copy of another object. */
     ModifierKeys (const ModifierKeys& other) noexcept;

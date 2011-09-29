@@ -28,7 +28,6 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 KeyPress::KeyPress() noexcept
     : keyCode (0),
-      mods (0),
       textCharacter (0)
 {
 }
@@ -170,6 +169,29 @@ namespace KeyPressHelpers
 
         return 0;
     }
+
+   #if JUCE_MAC
+    struct OSXSymbolReplacement
+    {
+        const char* text;
+        juce_wchar symbol;
+    };
+
+    const OSXSymbolReplacement osxSymbols[] =
+    {
+        { "shift + ",     0x21e7 },
+        { "command + ",   0x2318 },
+        { "option + ",    0x2325 },
+        { "ctrl + ",      0x2303 },
+        { "return",       0x23ce },
+        { "cursor left",  0x2190 },
+        { "cursor right", 0x2192 },
+        { "cursor up",    0x2191 },
+        { "cursor down",  0x2193 },
+        { "backspace",    0x232b },
+        { "delete",       0x2326 }
+    };
+   #endif
 }
 
 //==============================================================================
@@ -273,17 +295,13 @@ String KeyPress::getTextDescription() const
 String KeyPress::getTextDescriptionWithIcons() const
 {
    #if JUCE_MAC
-    return getTextDescription().replace ("shift + ", String::charToString (0x21e7))
-                               .replace ("command + ", String::charToString (0x2318))
-                               .replace ("option + ", String::charToString (0x2325))
-                               .replace ("ctrl + ", String::charToString (0x2303))
-                               .replace ("return", String::charToString (0x23ce))
-                               .replace ("cursor left", String::charToString (0x2190))
-                               .replace ("cursor right", String::charToString (0x2192))
-                               .replace ("cursor up", String::charToString (0x2191))
-                               .replace ("cursor down", String::charToString (0x2193))
-                               .replace ("backspace", String::charToString (0x232b))
-                               .replace ("delete", String::charToString (0x2326));
+    String s (getTextDescription());
+
+    for (int i = 0; i < numElementsInArray (KeyPressHelpers::osxSymbols); ++i)
+        s = s.replace (KeyPressHelpers::osxSymbols[i].text,
+                       String::charToString (KeyPressHelpers::osxSymbols[i].symbol));
+
+    return s;
    #else
     return getTextDescription();
    #endif

@@ -26,6 +26,11 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
+ModifierKeys::ModifierKeys() noexcept
+    : flags (0)
+{
+}
+
 ModifierKeys::ModifierKeys (const int flags_) noexcept
     : flags (flags_)
 {

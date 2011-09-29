@@ -573,7 +573,7 @@ public:
             }
 
             sendVstEventsToHost (outgoingEvents.events);
-           #else
+           #elif JUCE_DEBUG
             /*  This assertion is caused when you've added some events to the
                 midiMessages array in your processBlock() method, which usually means
                 that you're trying to send them somewhere. But in this case they're

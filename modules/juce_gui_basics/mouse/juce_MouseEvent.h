@@ -124,12 +124,10 @@ public:
     */
     Component* const originalComponent;
 
-    /** The time that this mouse-event occurred.
-    */
+    /** The time that this mouse-event occurred. */
     const Time eventTime;
 
-    /** The source device that generated this event.
-    */
+    /** The source device that generated this event. */
     MouseInputSource& source;
 
     //==============================================================================
@@ -155,7 +153,7 @@ public:
 
         @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasClicked
     */
-    const Point<int> getMouseDownPosition() const noexcept;
+    Point<int> getMouseDownPosition() const noexcept;
 
     /** Returns the straight-line distance between where the mouse is now and where it
         was the last time the button was pressed.
@@ -186,7 +184,7 @@ public:
 
         @see getDistanceFromDragStart
     */
-    const Point<int> getOffsetFromDragStart() const noexcept;
+    Point<int> getOffsetFromDragStart() const noexcept;
 
     /** Returns true if the mouse has just been clicked.
 
@@ -226,7 +224,7 @@ public:
         This position is relative to the top-left of the component to which the
         event applies (as indicated by the MouseEvent::eventComponent field).
     */
-    const Point<int> getPosition() const noexcept;
+    Point<int> getPosition() const noexcept;
 
     /** Returns the mouse x position of this event, in global screen co-ordinates.
 
@@ -250,7 +248,7 @@ public:
 
         @see getMouseDownScreenPosition
     */
-    const Point<int> getScreenPosition() const;
+    Point<int> getScreenPosition() const;
 
     /** Returns the x co-ordinate at which the mouse button was last pressed.
 
@@ -274,15 +272,16 @@ public:
 
         @see getScreenPosition
     */
-    const Point<int> getMouseDownScreenPosition() const;
+    Point<int> getMouseDownScreenPosition() const;
 
     //==============================================================================
     /** Creates a version of this event that is relative to a different component.
 
         The x and y positions of the event that is returned will have been
         adjusted to be relative to the new component.
+        The component pointer that is passed-in must not be null.
     */
-    MouseEvent getEventRelativeTo (Component* otherComponent) const noexcept;
+    MouseEvent getEventRelativeTo (Component* newComponent) const noexcept;
 
     /** Creates a copy of this event with a different position.
         All other members of the event object are the same, but the x and y are
@@ -314,9 +313,7 @@ private:
     //==============================================================================
     const Point<int> mouseDownPos;
     const Time mouseDownTime;
-    const int numberOfClicks;
-    const bool wasMovedSinceMouseDown;
-    static int doubleClickTimeOutMs;
+    const uint8 numberOfClicks, wasMovedSinceMouseDown;
 
     MouseEvent& operator= (const MouseEvent&);
 };
