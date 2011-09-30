@@ -991,33 +991,29 @@ struct WildCardMatcher
         for (;;)
         {
             const juce_wchar wc = wildcard.getAndAdvance();
-            const juce_wchar tc = *test;
 
-            if (wc == tc
-                 || (ignoreCase && CharacterFunctions::toLowerCase (wc) == CharacterFunctions::toLowerCase (tc))
-                 || (wc == '?' && tc != 0))
-            {
-                if (wc == 0)
-                    return true;
+            if (wc == '*')
+                return wildcard.isEmpty() || matchesAnywhere (wildcard, test, ignoreCase);
 
-                ++test;
-            }
-            else
-            {
-                return wc == '*' && (wildcard.isEmpty() || matchesAnywhere (wildcard, test, ignoreCase));
-            }
+            if (! characterMatches (wc, test.getAndAdvance(), ignoreCase))
+                return false;
+
+            if (wc == 0)
+                return true;
         }
+    }
+
+    static bool characterMatches (const juce_wchar wc, const juce_wchar tc, const bool ignoreCase) noexcept
+    {
+        return (wc == tc) || (wc == '?' && tc != 0)
+                || (ignoreCase && CharacterFunctions::toLowerCase (wc) == CharacterFunctions::toLowerCase (tc));
     }
 
     static bool matchesAnywhere (const CharPointer& wildcard, CharPointer test, const bool ignoreCase) noexcept
     {
-        while (! test.isEmpty())
-        {
+        for (; ! test.isEmpty(); ++test)
             if (matches (wildcard, test, ignoreCase))
                 return true;
-
-            ++test;
-        }
 
         return false;
     }
@@ -2305,6 +2301,15 @@ public:
             expect (s5.matchesWildcard (L"*word3", true));
             expect (s5.matchesWildcard ("*word?", true));
             expect (s5.matchesWildcard (L"Word*3", true));
+            expect (! s5.matchesWildcard (L"*34", true));
+            expect (String ("xx**y").matchesWildcard ("*y", true));
+            expect (String ("xx**y").matchesWildcard ("x*y", true));
+            expect (String ("xx**y").matchesWildcard ("xx*y", true));
+            expect (String ("xx**y").matchesWildcard ("xx*", true));
+            expect (String ("xx?y").matchesWildcard ("x??y", true));
+            expect (String ("xx?y").matchesWildcard ("xx?y", true));
+            expect (! String ("xx?y").matchesWildcard ("xx?y?", true));
+            expect (String ("xx?y").matchesWildcard ("xx??", true));
 
             expectEquals (s5.fromFirstOccurrenceOf (String::empty, true, false), s5);
             expectEquals (s5.fromFirstOccurrenceOf ("xword2", true, false), s5.substring (100));
