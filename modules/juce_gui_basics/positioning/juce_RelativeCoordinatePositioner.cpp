@@ -80,15 +80,7 @@ Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponen
     Component* const parent = component.getParentComponent();
 
     if (parent != nullptr)
-    {
-        for (int i = parent->getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = parent->getChildComponent(i);
-
-            if (c->getComponentID() == componentID)
-                return c;
-        }
-    }
+        return parent->findChildWithID (componentID);
 
     return nullptr;
 }

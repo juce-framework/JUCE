@@ -101,13 +101,13 @@ public:
     virtual void setName (const String& newName);
 
     /** Returns the ID string that was set by setComponentID().
-        @see setComponentID
+        @see setComponentID, findChildWithID
     */
     const String& getComponentID() const noexcept           { return componentID; }
 
     /** Sets the component's ID string.
         You can retrieve the ID using getComponentID().
-        @see getComponentID
+        @see getComponentID, findChildWithID
     */
     void setComponentID (const String& newID);
 
@@ -698,6 +698,11 @@ public:
         @see getNumChildComponents, getChildComponent, addChildComponent, toFront, toBack, toBehind
     */
     int getIndexOfChildComponent (const Component* child) const noexcept;
+
+    /** Looks for a child component with the specified ID.
+        @see setComponentID, getComponentID
+    */
+    Component* findChildWithID (const String& componentID) const noexcept;
 
     /** Adds a child component to this one.
 

@@ -1440,6 +1440,18 @@ int Component::getIndexOfChildComponent (const Component* const child) const noe
     return childComponentList.indexOf (const_cast <Component*> (child));
 }
 
+Component* Component::findChildWithID (const String& targetID) const noexcept
+{
+    for (int i = childComponentList.size(); --i >= 0;)
+    {
+        Component* const c = childComponentList.getUnchecked(i);
+        if (c->componentID == targetID)
+            return c;
+    }
+
+    return nullptr;
+}
+
 Component* Component::getTopLevelComponent() const noexcept
 {
     const Component* comp = this;
