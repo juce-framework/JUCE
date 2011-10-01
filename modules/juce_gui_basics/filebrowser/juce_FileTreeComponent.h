@@ -72,6 +72,10 @@ public:
     /** Scrolls the list to the top. */
     void scrollToTop();
 
+    /** If the specified file is in the list, it will become the only selected item
+        (and if the file isn't in the list, all other items will be deselected). */
+    void setSelectedFile (const File&);
+
     /** Setting a name for this allows tree items to be dragged.
 
         The string that you pass in here will be returned by the getDragSourceDescription()

@@ -65,6 +65,10 @@ public:
     /** Scrolls this view to the top. */
     virtual void scrollToTop() = 0;
 
+    /** If the specified file is in the list, it will become the only selected item
+        (and if the file isn't in the list, all other items will be deselected). */
+    virtual void setSelectedFile (const File&) = 0;
+
     //==============================================================================
     /** Adds a listener to be told when files are selected or clicked.
         @see removeListener

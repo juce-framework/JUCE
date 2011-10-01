@@ -135,7 +135,7 @@ public:
         the tree. If false, it is relative to the top-left of the topmost item in the
         tree (so this would be unaffected by scrolling the view).
     */
-    const Rectangle<int> getItemPosition (bool relativeToTreeViewTopLeft) const noexcept;
+    Rectangle<int> getItemPosition (bool relativeToTreeViewTopLeft) const noexcept;
 
     /** Sends a signal to the treeview to make it refresh itself.
 
@@ -545,8 +545,7 @@ private:
 class JUCE_API  TreeView  : public Component,
                             public SettableTooltipClient,
                             public FileDragAndDropTarget,
-                            public DragAndDropTarget,
-                            private AsyncUpdater
+                            public DragAndDropTarget
 {
 public:
     //==============================================================================
@@ -813,10 +812,10 @@ private:
     bool openCloseButtonsVisible : 1;
 
     void itemsChanged() noexcept;
-    void handleAsyncUpdate();
+    void recalculateIfNeeded();
     void moveSelectedRow (int delta);
-    void updateButtonUnderMouse (const MouseEvent& e);
-    void showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) noexcept;
+    void updateButtonUnderMouse (const MouseEvent&);
+    void showDragHighlight (TreeViewItem*, int insertIndex, int x, int y) noexcept;
     void hideDragHighlight() noexcept;
     void handleDrag (const StringArray& files, const SourceDetails&);
     void handleDrop (const StringArray& files, const SourceDetails&);

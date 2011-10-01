@@ -62,6 +62,20 @@ void FileListComponent::scrollToTop()
     getVerticalScrollBar()->setCurrentRangeStart (0);
 }
 
+void FileListComponent::setSelectedFile (const File& f)
+{
+    for (int i = fileList.getNumFiles(); --i >= 0;)
+    {
+        if (fileList.getFile(i) == f)
+        {
+            selectRow (i);
+            return;
+        }
+    }
+
+    deselectAllRows();
+}
+
 //==============================================================================
 void FileListComponent::changeListenerCallback (ChangeBroadcaster*)
 {

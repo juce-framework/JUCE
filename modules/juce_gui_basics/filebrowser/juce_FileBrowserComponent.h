@@ -136,6 +136,9 @@ public:
     /** Changes the directory that's being shown in the listbox. */
     void setRoot (const File& newRootDirectory);
 
+    /** Changes the name that is currently shown in the filename box. */
+    void setFileName (const String& newName);
+
     /** Equivalent to pressing the "up" button to browse the parent directory. */
     void goUp();
 
@@ -156,15 +159,19 @@ public:
     */
     bool isSaveMode() const noexcept;
 
+    /** Sets the label that will be displayed next to the filename entry box.
+        By default this is just "file", but you might want to change it to something more
+        appropriate for your app.
+    */
+    void setFilenameBoxLabel (const String& name);
+
     //==============================================================================
     /** Adds a listener to be told when the user selects and clicks on files.
-
         @see removeListener
     */
     void addListener (FileBrowserListener* listener);
 
     /** Removes a listener.
-
         @see addListener
     */
     void removeListener (FileBrowserListener* listener);

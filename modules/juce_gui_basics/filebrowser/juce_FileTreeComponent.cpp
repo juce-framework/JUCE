@@ -247,4 +247,20 @@ void FileTreeComponent::setDragAndDropDescription (const String& description)
     dragAndDropDescription = description;
 }
 
+void FileTreeComponent::setSelectedFile (const File& target)
+{
+    for (int i = getNumSelectedItems(); --i >= 0;)
+    {
+        FileListTreeItem* t = dynamic_cast <FileListTreeItem*> (getSelectedItem (i));
+
+        if (t != nullptr && t->file == target)
+        {
+            t->setSelected (true, true);
+            return;
+        }
+    }
+
+    clearSelectedItems();
+}
+
 END_JUCE_NAMESPACE

@@ -179,6 +179,9 @@ public:
     */
     const FileFilter* getFilter() const                     { return fileFilter; }
 
+    /** Returns true if the list contains the specified file. */
+    bool contains (const File&) const;
+
     //==============================================================================
     /** @internal */
     int useTimeSlice();

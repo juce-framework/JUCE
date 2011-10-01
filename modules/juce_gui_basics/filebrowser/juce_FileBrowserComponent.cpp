@@ -257,6 +257,13 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
     }
 }
 
+void FileBrowserComponent::setFileName (const String& newName)
+{
+    filenameBox.setText (newName, true);
+
+    fileListComponent->setSelectedFile (currentRoot.getChildFile (newName));
+}
+
 void FileBrowserComponent::resetRecentPaths()
 {
     currentPathBox.clear();
@@ -297,6 +304,11 @@ void FileBrowserComponent::setFileFilter (const FileFilter* const newFileFilter)
 String FileBrowserComponent::getActionVerb() const
 {
     return isSaveMode() ? TRANS("Save") : TRANS("Open");
+}
+
+void FileBrowserComponent::setFilenameBoxLabel (const String& name)
+{
+    fileLabel.setText (name, false);
 }
 
 FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const noexcept

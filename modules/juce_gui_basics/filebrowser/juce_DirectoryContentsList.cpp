@@ -150,6 +150,17 @@ File DirectoryContentsList::getFile (const int index) const
     return File::nonexistent;
 }
 
+bool DirectoryContentsList::contains (const File& targetFile) const
+{
+    const ScopedLock sl (fileListLock);
+
+    for (int i = files.size(); --i >= 0;)
+        if (root.getChildFile (files.getUnchecked(i)->filename) == targetFile)
+            return true;
+
+    return false;
+}
+
 bool DirectoryContentsList::isStillLoading() const
 {
     return fileFindHandle != nullptr;
