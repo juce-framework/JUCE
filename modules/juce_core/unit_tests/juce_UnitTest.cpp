@@ -76,12 +76,24 @@ void UnitTest::expect (const bool result, const String& failureMessage)
 
 //==============================================================================
 UnitTestRunner::UnitTestRunner()
-    : currentTest (nullptr), assertOnFailure (false)
+    : currentTest (nullptr),
+      assertOnFailure (false),
+      logPasses (false)
 {
 }
 
 UnitTestRunner::~UnitTestRunner()
 {
+}
+
+void UnitTestRunner::setAssertOnFailure (bool shouldAssert) noexcept
+{
+    assertOnFailure = shouldAssert;
+}
+
+void UnitTestRunner::setPassesAreLogged (bool shouldDisplayPasses) noexcept
+{
+    logPasses = shouldDisplayPasses;
 }
 
 int UnitTestRunner::getNumResults() const noexcept
@@ -98,10 +110,9 @@ void UnitTestRunner::resultsUpdated()
 {
 }
 
-void UnitTestRunner::runTests (const Array<UnitTest*>& tests, const bool assertOnFailure_)
+void UnitTestRunner::runTests (const Array<UnitTest*>& tests)
 {
     results.clear();
-    assertOnFailure = assertOnFailure_;
     resultsUpdated();
 
     for (int i = 0; i < tests.size(); ++i)
@@ -119,9 +130,9 @@ void UnitTestRunner::runTests (const Array<UnitTest*>& tests, const bool assertO
     endTest();
 }
 
-void UnitTestRunner::runAllTests (const bool assertOnFailure_)
+void UnitTestRunner::runAllTests()
 {
-    runTests (UnitTest::getAllTests(), assertOnFailure_);
+    runTests (UnitTest::getAllTests());
 }
 
 void UnitTestRunner::logMessage (const String& message)
@@ -135,11 +146,11 @@ void UnitTestRunner::beginNewTest (UnitTest* const test, const String& subCatego
     currentTest = test;
 
     TestResult* const r = new TestResult();
+    results.add (r);
     r->unitTestName = test->getName();
     r->subcategoryName = subCategory;
     r->passes = 0;
     r->failures = 0;
-    results.add (r);
 
     logMessage ("-----------------------------------------------------------------");
     logMessage ("Starting test: " + r->unitTestName + " / " + subCategory + "...");
@@ -180,9 +191,12 @@ void UnitTestRunner::addPass()
 
         r->passes++;
 
-        String message ("Test ");
-        message << (r->failures + r->passes) << " passed";
-        logMessage (message);
+        if (logPasses)
+        {
+            String message ("Test ");
+            message << (r->failures + r->passes) << " passed";
+            logMessage (message);
+        }
     }
 
     resultsUpdated();

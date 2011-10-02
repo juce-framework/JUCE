@@ -873,12 +873,12 @@ void BigInteger::inverseModulo (const BigInteger& modulus)
 
     while (! a2.isOne())
     {
-        BigInteger temp1, temp2, multiplier (a1);
+        BigInteger temp1, multiplier (a1);
         multiplier.divideBy (a2, temp1);
 
         temp1 = a2;
         temp1 *= multiplier;
-        temp2 = a1;
+        BigInteger temp2 (a1);
         temp2 -= temp1;
         a1 = a2;
         a2 = temp2;

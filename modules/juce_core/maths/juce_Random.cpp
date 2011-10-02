@@ -137,4 +137,42 @@ void Random::fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numB
         arrayToChange.setBit (startBit + numBits, nextBool());
 }
 
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class RandomTests  : public UnitTest
+{
+public:
+    RandomTests() : UnitTest ("Random") {}
+
+    void runTest()
+    {
+        beginTest ("Random");
+
+        for (int j = 10; --j >= 0;)
+        {
+            Random r;
+            r.setSeedRandomly();
+
+            for (int i = 20; --i >= 0;)
+            {
+                expect (r.nextDouble() >= 0.0 && r.nextDouble() < 1.0);
+                expect (r.nextFloat() >= 0.0f && r.nextFloat() < 1.0f);
+                expect (r.nextInt (5) >= 0 && r.nextInt (5) < 5);
+                expect (r.nextInt (1) == 0);
+
+                int n = r.nextInt (50) + 1;
+                expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
+
+                n = r.nextInt (0x7ffffffe) + 1;
+                expect (r.nextInt (n) >= 0 && r.nextInt (n) < n);
+            }
+        }
+    }
+};
+
+static RandomTests randomTests;
+
+#endif
+
 END_JUCE_NAMESPACE

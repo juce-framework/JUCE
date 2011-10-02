@@ -198,12 +198,22 @@ public:
         The tests are performed in order, and the results are logged. To run all the
         registered UnitTest objects that exist, use runAllTests().
     */
-    void runTests (const Array<UnitTest*>& tests, bool assertOnFailure);
+    void runTests (const Array<UnitTest*>& tests);
 
     /** Runs all the UnitTest objects that currently exist.
         This calls runTests() for all the objects listed in UnitTest::getAllTests().
     */
-    void runAllTests (bool assertOnFailure);
+    void runAllTests();
+
+    /** Sets a flag to indicate whether an assertion should be triggered if a test fails.
+        This is true by default.
+    */
+    void setAssertOnFailure (bool shouldAssert) noexcept;
+
+    /** Sets a flag to indicate whether successful tests should be logged.
+        By default, this is set to false, so that only failures will be displayed in the log.
+    */
+    void setPassesAreLogged (bool shouldDisplayPasses) noexcept;
 
     //==============================================================================
     /** Contains the results of a test.
@@ -257,7 +267,7 @@ private:
     UnitTest* currentTest;
     String currentSubCategory;
     OwnedArray <TestResult, CriticalSection> results;
-    bool assertOnFailure;
+    bool assertOnFailure, logPasses;
 
     void beginNewTest (UnitTest* test, const String& subCategory);
     void endTest();
