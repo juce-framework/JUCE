@@ -67,6 +67,233 @@ namespace ASIODebugging
 }
 
 //==============================================================================
+struct ASIOSampleFormat
+{
+    ASIOSampleFormat() noexcept {}
+
+    ASIOSampleFormat (const long type) noexcept
+        : bitDepth (24),
+          littleEndian (true),
+          formatIsFloat (false),
+          byteStride (4)
+    {
+        switch (type)
+        {
+            case ASIOSTInt16MSB:    byteStride = 2; littleEndian = false; bitDepth = 16; break;
+            case ASIOSTInt24MSB:    byteStride = 3; littleEndian = false; break;
+            case ASIOSTInt32MSB:    bitDepth = 32; littleEndian = false; break;
+            case ASIOSTFloat32MSB:  bitDepth = 32; littleEndian = false; formatIsFloat = true; break;
+            case ASIOSTFloat64MSB:  bitDepth = 64; byteStride = 8; littleEndian = false; break;
+            case ASIOSTInt32MSB16:  bitDepth = 16; littleEndian = false; break;
+            case ASIOSTInt32MSB18:  littleEndian = false; break;
+            case ASIOSTInt32MSB20:  littleEndian = false; break;
+            case ASIOSTInt32MSB24:  littleEndian = false; break;
+            case ASIOSTInt16LSB:    byteStride = 2; bitDepth = 16; break;
+            case ASIOSTInt24LSB:    byteStride = 3; break;
+            case ASIOSTInt32LSB:    bitDepth = 32; break;
+            case ASIOSTFloat32LSB:  bitDepth = 32; formatIsFloat = true; break;
+            case ASIOSTFloat64LSB:  bitDepth = 64; byteStride = 8; break;
+            case ASIOSTInt32LSB16:  bitDepth = 16; break;
+            case ASIOSTInt32LSB18:  break; // (unhandled)
+            case ASIOSTInt32LSB20:  break; // (unhandled)
+            case ASIOSTInt32LSB24:  break;
+
+            case ASIOSTDSDInt8LSB1: break; // (unhandled)
+            case ASIOSTDSDInt8MSB1: break; // (unhandled)
+            case ASIOSTDSDInt8NER8: break; // (unhandled)
+
+            default:
+                jassertfalse;  // (not a valid format code..)
+                break;
+        }
+    }
+
+    void convertToFloat (const void* const src, float* const dst, const int samps) const noexcept
+    {
+        if (formatIsFloat)
+        {
+            memcpy (dst, src, samps * sizeof (float));
+        }
+        else
+        {
+            switch (bitDepth)
+            {
+                case 16: convertInt16ToFloat (static_cast <const char*> (src), dst, byteStride, samps, littleEndian); break;
+                case 24: convertInt24ToFloat (static_cast <const char*> (src), dst, byteStride, samps, littleEndian); break;
+                case 32: convertInt32ToFloat (static_cast <const char*> (src), dst, byteStride, samps, littleEndian); break;
+                default: jassertfalse; break;
+            }
+        }
+    }
+
+    void convertFromFloat (const float* const src, void* const dst, const int samps) const noexcept
+    {
+        if (formatIsFloat)
+        {
+            memcpy (dst, src, samps * sizeof (float));
+        }
+        else
+        {
+            switch (bitDepth)
+            {
+                case 16: convertFloatToInt16 (src, static_cast <char*> (dst), byteStride, samps, littleEndian); break;
+                case 24: convertFloatToInt24 (src, static_cast <char*> (dst), byteStride, samps, littleEndian); break;
+                case 32: convertFloatToInt32 (src, static_cast <char*> (dst), byteStride, samps, littleEndian); break;
+                default: jassertfalse; break;
+            }
+        }
+    }
+
+    void clear (void* dst, const int numSamps) noexcept
+    {
+        if (dst != nullptr)
+            zeromem (dst, numSamps * byteStride);
+    }
+
+    int bitDepth, byteStride;
+    bool formatIsFloat, littleEndian;
+
+private:
+    static void convertInt16ToFloat (const char* src, float* dest, const int srcStrideBytes,
+                                     int numSamples, const bool littleEndian) noexcept
+    {
+        const double g = 1.0 / 32768.0;
+
+        if (littleEndian)
+        {
+            while (--numSamples >= 0)
+            {
+                *dest++ = (float) (g * (short) ByteOrder::littleEndianShort (src));
+                src += srcStrideBytes;
+            }
+        }
+        else
+        {
+            while (--numSamples >= 0)
+            {
+                *dest++ = (float) (g * (short) ByteOrder::bigEndianShort (src));
+                src += srcStrideBytes;
+            }
+        }
+    }
+
+    static void convertFloatToInt16 (const float* src, char* dest, const int dstStrideBytes,
+                                     int numSamples, const bool littleEndian) noexcept
+    {
+        const double maxVal = (double) 0x7fff;
+
+        if (littleEndian)
+        {
+            while (--numSamples >= 0)
+            {
+                *(uint16*) dest = ByteOrder::swapIfBigEndian ((uint16) (short) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                dest += dstStrideBytes;
+            }
+        }
+        else
+        {
+            while (--numSamples >= 0)
+            {
+                *(uint16*) dest = ByteOrder::swapIfLittleEndian ((uint16) (short) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                dest += dstStrideBytes;
+            }
+        }
+    }
+
+    static void convertInt24ToFloat (const char* src, float* dest, const int srcStrideBytes,
+                                     int numSamples, const bool littleEndian) noexcept
+    {
+        const double g = 1.0 / 0x7fffff;
+
+        if (littleEndian)
+        {
+            while (--numSamples >= 0)
+            {
+                *dest++ = (float) (g * ByteOrder::littleEndian24Bit (src));
+                src += srcStrideBytes;
+            }
+        }
+        else
+        {
+            while (--numSamples >= 0)
+            {
+                *dest++ = (float) (g * ByteOrder::bigEndian24Bit (src));
+                src += srcStrideBytes;
+            }
+        }
+    }
+
+    static void convertFloatToInt24 (const float* src, char* dest, const int dstStrideBytes,
+                                     int numSamples, const bool littleEndian) noexcept
+    {
+        const double maxVal = (double) 0x7fffff;
+
+        if (littleEndian)
+        {
+            while (--numSamples >= 0)
+            {
+                ByteOrder::littleEndian24BitToChars ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
+                dest += dstStrideBytes;
+            }
+        }
+        else
+        {
+            while (--numSamples >= 0)
+            {
+                ByteOrder::bigEndian24BitToChars ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
+                dest += dstStrideBytes;
+            }
+        }
+    }
+
+    static void convertInt32ToFloat (const char* src, float* dest, const int srcStrideBytes,
+                                     int numSamples, const bool littleEndian) noexcept
+    {
+        const double g = 1.0 / 0x7fffffff;
+
+        if (littleEndian)
+        {
+            while (--numSamples >= 0)
+            {
+                *dest++ = (float) (g * (int) ByteOrder::littleEndianInt (src));
+                src += srcStrideBytes;
+            }
+        }
+        else
+        {
+            while (--numSamples >= 0)
+            {
+                *dest++ = (float) (g * (int) ByteOrder::bigEndianInt (src));
+                src += srcStrideBytes;
+            }
+        }
+    }
+
+    static void convertFloatToInt32 (const float* src, char* dest, const int dstStrideBytes,
+                                     int numSamples, const bool littleEndian) noexcept
+    {
+        const double maxVal = (double) 0x7fffffff;
+
+        if (littleEndian)
+        {
+            while (--numSamples >= 0)
+            {
+                *(uint32*) dest = ByteOrder::swapIfBigEndian ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                dest += dstStrideBytes;
+            }
+        }
+        else
+        {
+            while (--numSamples >= 0)
+            {
+                *(uint32*) dest = ByteOrder::swapIfLittleEndian ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                dest += dstStrideBytes;
+            }
+        }
+    }
+};
+
+//==============================================================================
 class ASIOAudioIODevice;
 static ASIOAudioIODevice* volatile currentASIODev[3] = { 0 };
 
@@ -85,7 +312,7 @@ public:
          optionalDllForDirectLoading (optionalDllForDirectLoading_),
          currentBitDepth (16),
          currentSampleRate (0),
-         isOpen_ (false),
+         deviceIsOpen (false),
          isStarted (false),
          postOutput (true),
          insideControlPanelModalLoop (false),
@@ -407,14 +634,9 @@ public:
                         asioObject->getChannelInfo (&channelInfo);
 
                         types.addIfNotAlreadyThere (channelInfo.type);
-                        typeToFormatParameters (channelInfo.type,
-                                                inputChannelBitDepths[n],
-                                                inputChannelBytesPerSample[n],
-                                                inputChannelIsFloat[n],
-                                                inputChannelLittleEndian[n]);
+                        inputFormat[n] = ASIOSampleFormat (channelInfo.type);
 
-                        currentBitDepth = jmax (currentBitDepth, inputChannelBitDepths[n]);
-
+                        currentBitDepth = jmax (currentBitDepth, inputFormat[n].bitDepth);
                         ++n;
                     }
                 }
@@ -434,14 +656,9 @@ public:
                         asioObject->getChannelInfo (&channelInfo);
 
                         types.addIfNotAlreadyThere (channelInfo.type);
-                        typeToFormatParameters (channelInfo.type,
-                                                outputChannelBitDepths[n],
-                                                outputChannelBytesPerSample[n],
-                                                outputChannelIsFloat[n],
-                                                outputChannelLittleEndian[n]);
+                        outputFormat[n] = ASIOSampleFormat (channelInfo.type);
 
-                        currentBitDepth = jmax (currentBitDepth, outputChannelBitDepths[n]);
-
+                        currentBitDepth = jmax (currentBitDepth, outputFormat[n].bitDepth);
                         ++n;
                     }
                 }
@@ -457,18 +674,8 @@ public:
 
                 for (i = 0; i < numActiveOutputChans; ++i)
                 {
-                    const int size = currentBlockSizeSamples * (outputChannelBitDepths[i] >> 3);
-
-                    if (bufferInfos [numActiveInputChans + i].buffers[0] == 0
-                        || bufferInfos [numActiveInputChans + i].buffers[1] == 0)
-                    {
-                        log ("!! Null buffers");
-                    }
-                    else
-                    {
-                        zeromem (bufferInfos[numActiveInputChans + i].buffers[0], size);
-                        zeromem (bufferInfos[numActiveInputChans + i].buffers[1], size);
-                    }
+                    outputFormat[i].clear (bufferInfos [numActiveInputChans + i].buffers[0], currentBlockSizeSamples);
+                    outputFormat[i].clear (bufferInfos [numActiveInputChans + i].buffers[1], currentBlockSizeSamples);
                 }
 
                 inputLatency = outputLatency = 0;
@@ -482,7 +689,7 @@ public:
                     log ("ASIO latencies: " + String ((int) outputLatency) + ", " + String ((int) inputLatency));
                 }
 
-                isOpen_ = true;
+                deviceIsOpen = true;
 
                 log ("starting ASIO");
                 calledback = false;
@@ -490,7 +697,7 @@ public:
 
                 if (err != 0)
                 {
-                    isOpen_ = false;
+                    deviceIsOpen = false;
                     log ("ASIO - stop on failure");
                     Thread::sleep (10);
                     asioObject->stop();
@@ -533,7 +740,7 @@ public:
 
             Thread::sleep (20);
             isStarted = false;
-            isOpen_ = false;
+            deviceIsOpen = false;
 
             const String errorCopy (error);
             close(); // (this resets the error string)
@@ -552,11 +759,11 @@ public:
         stopTimer();
         stop();
 
-        if (isASIOOpen && isOpen_)
+        if (isASIOOpen && deviceIsOpen)
         {
             const ScopedLock sl (callbackLock);
 
-            isOpen_ = false;
+            deviceIsOpen = false;
             isStarted = false;
             needToReset = false;
             isReSync = false;
@@ -575,7 +782,7 @@ public:
         }
     }
 
-    bool isOpen()                       { return isOpen_ || insideControlPanelModalLoop; }
+    bool isOpen()                       { return deviceIsOpen || insideControlPanelModalLoop; }
     bool isPlaying()                    { return isASIOOpen && (currentCallback != nullptr); }
 
     int getCurrentBufferSizeSamples()   { return currentBlockSizeSamples; }
@@ -670,7 +877,7 @@ public:
             // used to cause a reset
             log ("! ASIO restart request!");
 
-            if (isOpen_)
+            if (deviceIsOpen)
             {
                 AudioIODeviceCallback* const oldCallback = currentCallback;
 
@@ -717,20 +924,14 @@ private:
     float* inBuffers [maxASIOChannels];
     float* outBuffers [maxASIOChannels];
 
-    int inputChannelBitDepths [maxASIOChannels];
-    int outputChannelBitDepths [maxASIOChannels];
-    int inputChannelBytesPerSample [maxASIOChannels];
-    int outputChannelBytesPerSample [maxASIOChannels];
-    bool inputChannelIsFloat [maxASIOChannels];
-    bool outputChannelIsFloat [maxASIOChannels];
-    bool inputChannelLittleEndian [maxASIOChannels];
-    bool outputChannelLittleEndian [maxASIOChannels];
+    ASIOSampleFormat inputFormat [maxASIOChannels];
+    ASIOSampleFormat outputFormat [maxASIOChannels];
 
     WaitableEvent event1;
     HeapBlock <float> tempBuffer;
     int volatile bufferIndex, numActiveInputChans, numActiveOutputChans;
 
-    bool isOpen_, isStarted;
+    bool deviceIsOpen, isStarted;
     bool volatile isASIOOpen;
     bool volatile calledback;
     bool volatile littleEndian, postOutput, needToReset, isReSync;
@@ -825,7 +1026,7 @@ private:
         bufferSizes.clear();
         sampleRates.clear();
         isASIOOpen = false;
-        isOpen_ = false;
+        deviceIsOpen = false;
         totalNumInputChans = 0;
         totalNumOutputChans = 0;
         numActiveInputChans = 0;
@@ -983,19 +1184,13 @@ private:
                             asioObject->getChannelInfo (&channelInfo);
 
                             outputChannelNames.add (String (channelInfo.name));
-
-                            typeToFormatParameters (channelInfo.type,
-                                                    outputChannelBitDepths[i],
-                                                    outputChannelBytesPerSample[i],
-                                                    outputChannelIsFloat[i],
-                                                    outputChannelLittleEndian[i]);
+                            outputFormat[i] = ASIOSampleFormat (channelInfo.type);
 
                             if (i < 2)
                             {
                                 // clear the channels that are used with the dummy stuff
-                                const int bytesPerBuffer = preferredSize * (outputChannelBitDepths[i] >> 3);
-                                zeromem (bufferInfos [outputBufferIndex + i].buffers[0], bytesPerBuffer);
-                                zeromem (bufferInfos [outputBufferIndex + i].buffers[1], bytesPerBuffer);
+                                outputFormat[i].clear (bufferInfos [outputBufferIndex + i].buffers[0], preferredSize);
+                                outputFormat[i].clear (bufferInfos [outputBufferIndex + i].buffers[1], preferredSize);
                             }
                         }
 
@@ -1048,7 +1243,7 @@ private:
             log ("ASIO device open");
         }
 
-        isOpen_ = false;
+        deviceIsOpen = false;
         needToReset = false;
         isReSync = false;
 
@@ -1103,41 +1298,8 @@ private:
                 int i;
                 for (i = 0; i < numActiveInputChans; ++i)
                 {
-                    float* const dst = inBuffers[i];
-                    jassert (dst != nullptr);
-
-                    const char* const src = (const char*) (infos[i].buffers[bi]);
-
-                    if (inputChannelIsFloat[i])
-                    {
-                        memcpy (dst, src, samps * sizeof (float));
-                    }
-                    else
-                    {
-                        jassert (dst == tempBuffer + (samps * i));
-
-                        switch (inputChannelBitDepths[i])
-                        {
-                        case 16:
-                            convertInt16ToFloat (src, dst, inputChannelBytesPerSample[i],
-                                                 samps, inputChannelLittleEndian[i]);
-                            break;
-
-                        case 24:
-                            convertInt24ToFloat (src, dst, inputChannelBytesPerSample[i],
-                                                 samps, inputChannelLittleEndian[i]);
-                            break;
-
-                        case 32:
-                            convertInt32ToFloat (src, dst, inputChannelBytesPerSample[i],
-                                                 samps, inputChannelLittleEndian[i]);
-                            break;
-
-                        case 64:
-                            jassertfalse;
-                            break;
-                        }
-                    }
+                    jassert (inBuffers[i]!= nullptr);
+                    inputFormat[i].convertToFloat (infos[i].buffers[bi], inBuffers[i], samps);
                 }
 
                 currentCallback->audioDeviceIOCallback ((const float**) inBuffers, numActiveInputChans,
@@ -1145,50 +1307,14 @@ private:
 
                 for (i = 0; i < numActiveOutputChans; ++i)
                 {
-                    float* const src = outBuffers[i];
-                    jassert (src != nullptr);
-
-                    char* const dst = (char*) (infos [numActiveInputChans + i].buffers[bi]);
-
-                    if (outputChannelIsFloat[i])
-                    {
-                        memcpy (dst, src, samps * sizeof (float));
-                    }
-                    else
-                    {
-                        jassert (src == tempBuffer + (samps * (numActiveInputChans + i)));
-
-                        switch (outputChannelBitDepths[i])
-                        {
-                        case 16:
-                            convertFloatToInt16 (src, dst, outputChannelBytesPerSample[i],
-                                                 samps, outputChannelLittleEndian[i]);
-                            break;
-
-                        case 24:
-                            convertFloatToInt24 (src, dst, outputChannelBytesPerSample[i],
-                                                 samps, outputChannelLittleEndian[i]);
-                            break;
-
-                        case 32:
-                            convertFloatToInt32 (src, dst, outputChannelBytesPerSample[i],
-                                                 samps, outputChannelLittleEndian[i]);
-                            break;
-
-                        case 64:
-                            jassertfalse;
-                            break;
-                        }
-                    }
+                    jassert (outBuffers[i] != nullptr);
+                    outputFormat[i].convertFromFloat (outBuffers[i], infos [numActiveInputChans + i].buffers[bi], samps);
                 }
             }
             else
             {
                 for (int i = 0; i < numActiveOutputChans; ++i)
-                {
-                    const int bytesPerBuffer = samps * (outputChannelBitDepths[i] >> 3);
-                    zeromem (infos[numActiveInputChans + i].buffers[bi], bytesPerBuffer);
-                }
+                     outputFormat[i].clear (infos[numActiveInputChans + i].buffers[bi], samps);
             }
         }
 
@@ -1282,269 +1408,6 @@ private:
 
     static void JUCE_ASIOCALLBACK sampleRateChangedCallback (ASIOSampleRate)
     {
-    }
-
-    //==============================================================================
-    static void convertInt16ToFloat (const char* src,
-                                     float* dest,
-                                     const int srcStrideBytes,
-                                     int numSamples,
-                                     const bool littleEndian) noexcept
-    {
-        const double g = 1.0 / 32768.0;
-
-        if (littleEndian)
-        {
-            while (--numSamples >= 0)
-            {
-                *dest++ = (float) (g * (short) ByteOrder::littleEndianShort (src));
-                src += srcStrideBytes;
-            }
-        }
-        else
-        {
-            while (--numSamples >= 0)
-            {
-                *dest++ = (float) (g * (short) ByteOrder::bigEndianShort (src));
-                src += srcStrideBytes;
-            }
-        }
-    }
-
-    static void convertFloatToInt16 (const float* src,
-                                     char* dest,
-                                     const int dstStrideBytes,
-                                     int numSamples,
-                                     const bool littleEndian) noexcept
-    {
-        const double maxVal = (double) 0x7fff;
-
-        if (littleEndian)
-        {
-            while (--numSamples >= 0)
-            {
-                *(uint16*) dest = ByteOrder::swapIfBigEndian ((uint16) (short) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
-                dest += dstStrideBytes;
-            }
-        }
-        else
-        {
-            while (--numSamples >= 0)
-            {
-                *(uint16*) dest = ByteOrder::swapIfLittleEndian ((uint16) (short) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
-                dest += dstStrideBytes;
-            }
-        }
-    }
-
-    static void convertInt24ToFloat (const char* src,
-                                     float* dest,
-                                     const int srcStrideBytes,
-                                     int numSamples,
-                                     const bool littleEndian) noexcept
-    {
-        const double g = 1.0 / 0x7fffff;
-
-        if (littleEndian)
-        {
-            while (--numSamples >= 0)
-            {
-                *dest++ = (float) (g * ByteOrder::littleEndian24Bit (src));
-                src += srcStrideBytes;
-            }
-        }
-        else
-        {
-            while (--numSamples >= 0)
-            {
-                *dest++ = (float) (g * ByteOrder::bigEndian24Bit (src));
-                src += srcStrideBytes;
-            }
-        }
-    }
-
-    static void convertFloatToInt24 (const float* src,
-                                     char* dest,
-                                     const int dstStrideBytes,
-                                     int numSamples,
-                                     const bool littleEndian) noexcept
-    {
-        const double maxVal = (double) 0x7fffff;
-
-        if (littleEndian)
-        {
-            while (--numSamples >= 0)
-            {
-                ByteOrder::littleEndian24BitToChars ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
-                dest += dstStrideBytes;
-            }
-        }
-        else
-        {
-            while (--numSamples >= 0)
-            {
-                ByteOrder::bigEndian24BitToChars ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
-                dest += dstStrideBytes;
-            }
-        }
-    }
-
-    static void convertInt32ToFloat (const char* src,
-                                     float* dest,
-                                     const int srcStrideBytes,
-                                     int numSamples,
-                                     const bool littleEndian) noexcept
-    {
-        const double g = 1.0 / 0x7fffffff;
-
-        if (littleEndian)
-        {
-            while (--numSamples >= 0)
-            {
-                *dest++ = (float) (g * (int) ByteOrder::littleEndianInt (src));
-                src += srcStrideBytes;
-            }
-        }
-        else
-        {
-            while (--numSamples >= 0)
-            {
-                *dest++ = (float) (g * (int) ByteOrder::bigEndianInt (src));
-                src += srcStrideBytes;
-            }
-        }
-    }
-
-    static void convertFloatToInt32 (const float* src,
-                                     char* dest,
-                                     const int dstStrideBytes,
-                                     int numSamples,
-                                     const bool littleEndian) noexcept
-    {
-        const double maxVal = (double) 0x7fffffff;
-
-        if (littleEndian)
-        {
-            while (--numSamples >= 0)
-            {
-                *(uint32*) dest = ByteOrder::swapIfBigEndian ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
-                dest += dstStrideBytes;
-            }
-        }
-        else
-        {
-            while (--numSamples >= 0)
-            {
-                *(uint32*) dest = ByteOrder::swapIfLittleEndian ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
-                dest += dstStrideBytes;
-            }
-        }
-    }
-
-    //==============================================================================
-    static void typeToFormatParameters (const long type,
-                                        int& bitDepth,
-                                        int& byteStride,
-                                        bool& formatIsFloat,
-                                        bool& littleEndian) noexcept
-    {
-        bitDepth = 0;
-        littleEndian = false;
-        formatIsFloat = false;
-
-        switch (type)
-        {
-            case ASIOSTInt16MSB:
-            case ASIOSTInt16LSB:
-            case ASIOSTInt32MSB16:
-            case ASIOSTInt32LSB16:
-                bitDepth = 16; break;
-
-            case ASIOSTFloat32MSB:
-            case ASIOSTFloat32LSB:
-                formatIsFloat = true;
-                bitDepth = 32; break;
-
-            case ASIOSTInt32MSB:
-            case ASIOSTInt32LSB:
-                bitDepth = 32; break;
-
-            case ASIOSTInt24MSB:
-            case ASIOSTInt24LSB:
-            case ASIOSTInt32MSB24:
-            case ASIOSTInt32LSB24:
-            case ASIOSTInt32MSB18:
-            case ASIOSTInt32MSB20:
-            case ASIOSTInt32LSB18:
-            case ASIOSTInt32LSB20:
-                bitDepth = 24; break;
-
-            case ASIOSTFloat64MSB:
-            case ASIOSTFloat64LSB:
-            default:
-                bitDepth = 64;
-                break;
-        }
-
-        switch (type)
-        {
-            case ASIOSTInt16MSB:
-            case ASIOSTInt32MSB16:
-            case ASIOSTFloat32MSB:
-            case ASIOSTFloat64MSB:
-            case ASIOSTInt32MSB:
-            case ASIOSTInt32MSB18:
-            case ASIOSTInt32MSB20:
-            case ASIOSTInt32MSB24:
-            case ASIOSTInt24MSB:
-                littleEndian = false; break;
-
-            case ASIOSTInt16LSB:
-            case ASIOSTInt32LSB16:
-            case ASIOSTFloat32LSB:
-            case ASIOSTFloat64LSB:
-            case ASIOSTInt32LSB:
-            case ASIOSTInt32LSB18:
-            case ASIOSTInt32LSB20:
-            case ASIOSTInt32LSB24:
-            case ASIOSTInt24LSB:
-                littleEndian = true; break;
-
-            default:
-                break;
-        }
-
-        switch (type)
-        {
-            case ASIOSTInt16LSB:
-            case ASIOSTInt16MSB:
-                byteStride = 2; break;
-
-            case ASIOSTInt24LSB:
-            case ASIOSTInt24MSB:
-                byteStride = 3; break;
-
-            case ASIOSTInt32MSB16:
-            case ASIOSTInt32LSB16:
-            case ASIOSTInt32MSB:
-            case ASIOSTInt32MSB18:
-            case ASIOSTInt32MSB20:
-            case ASIOSTInt32MSB24:
-            case ASIOSTInt32LSB:
-            case ASIOSTInt32LSB18:
-            case ASIOSTInt32LSB20:
-            case ASIOSTInt32LSB24:
-            case ASIOSTFloat32LSB:
-            case ASIOSTFloat32MSB:
-                byteStride = 4; break;
-
-            case ASIOSTFloat64MSB:
-            case ASIOSTFloat64LSB:
-                byteStride = 8; break;
-
-            default:
-                break;
-        }
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ASIOAudioIODevice);
@@ -1676,12 +1539,14 @@ private:
                     {
                         if (RegOpenKeyEx (subKey, _T("InprocServer32"), 0, KEY_READ, &pathKey) == ERROR_SUCCESS)
                         {
-                            TCHAR pathName [1024];
+                            TCHAR pathName [1024] = { 0 };
                             DWORD dtype = REG_SZ;
                             DWORD dsize = sizeof (pathName);
 
                             if (RegQueryValueEx (pathKey, 0, 0, &dtype, (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
-                                ok = File (pathName).exists();
+                                // In older code, this used to check for the existance of the file, but there are situations
+                                // where our process doesn't have access to it, but where the driver still loads ok..
+                                ok = (pathName[0] != 0);
 
                             RegCloseKey (pathKey);
                         }

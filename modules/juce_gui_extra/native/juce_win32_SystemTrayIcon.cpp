@@ -48,6 +48,15 @@ public:
         iconData.hIcon = hicon;
 
         Shell_NotifyIcon (NIM_ADD, &iconData);
+
+        // In order to receive the "TaskbarCreated" message, we need to request that it's not filtered out.
+        // (Need to load dynamically, as ChangeWindowMessageFilter is only available in Vista and later)
+        typedef BOOL (WINAPI* ChangeWindowMessageFilterType) (UINT, DWORD);
+        ChangeWindowMessageFilterType changeWindowMessageFilter
+            = (ChangeWindowMessageFilterType) getUser32Function ("ChangeWindowMessageFilter");
+
+        if (changeWindowMessageFilter != nullptr)
+            changeWindowMessageFilter (taskbarCreatedMessage, 1 /* MSGFLT_ADD */);
     }
 
     ~Pimpl()
@@ -64,7 +73,7 @@ public:
         HICON oldIcon = iconData.hIcon;
 
         iconData.hIcon = hicon;
-        iconData.uFlags = NIF_ICON;
+        iconData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
         Shell_NotifyIcon (NIM_MODIFY, &iconData);
 
         DestroyIcon (oldIcon);
@@ -175,6 +184,14 @@ private:
     WNDPROC originalWndProc;
     const DWORD taskbarCreatedMessage;
     enum { WM_TRAYNOTIFY = WM_USER + 100 };
+
+    static void* getUser32Function (const char* functionName)
+    {
+        HMODULE user32Mod = GetModuleHandle (_T("user32.dll"));
+        jassert (user32Mod != 0);
+
+        return GetProcAddress (user32Mod, functionName);
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
 };
