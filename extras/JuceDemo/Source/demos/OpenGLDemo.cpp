@@ -172,7 +172,7 @@ private:
         for (int i = 10; --i >= 0;)
         {
             Path pp;
-            pp.addStar (Point<float> (r.nextFloat() * w, r.nextFloat() * h), r.nextFloat() * 8 + 3, 10.0f, 20.0f, 0.0f);
+            pp.addStar (Point<float> (r.nextFloat() * w, r.nextFloat() * h), r.nextInt (8) + 3, 10.0f, 20.0f, 0.0f);
             g.setColour (Colours::pink.withAlpha (0.4f));
             g.fillPath (pp);
         }

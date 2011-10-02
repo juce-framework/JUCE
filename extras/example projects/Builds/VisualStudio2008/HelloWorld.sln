@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
-Project("{5DF01496-3BE3-EB46-C00-EC2282EB48B4}") = "HelloWorld", "HelloWorld.vcproj", "{2A69546-828D-036E-38A-9DAF6AEBCD}"
+Project("{5FF0139D-D865-F437-0399-F3B8D04FF3DC}") = "HelloWorld", "HelloWorld.vcproj", "{DE45EB49-4787-51B4-1A66-9F94E58BE282}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,10 +8,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2A69546-828D-036E-38A-9DAF6AEBCD}.Debug|Win32.ActiveCfg = Debug|Win32
-		{2A69546-828D-036E-38A-9DAF6AEBCD}.Debug|Win32.Build.0 = Debug|Win32
-		{2A69546-828D-036E-38A-9DAF6AEBCD}.Release|Win32.ActiveCfg = Release|Win32
-		{2A69546-828D-036E-38A-9DAF6AEBCD}.Release|Win32.Build.0 = Release|Win32
+		{DE45EB49-4787-51B4-1A66-9F94E58BE282}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DE45EB49-4787-51B4-1A66-9F94E58BE282}.Debug|Win32.Build.0 = Debug|Win32
+		{DE45EB49-4787-51B4-1A66-9F94E58BE282}.Release|Win32.ActiveCfg = Release|Win32
+		{DE45EB49-4787-51B4-1A66-9F94E58BE282}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

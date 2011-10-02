@@ -52,17 +52,6 @@ String createAlphaNumericUID()
     return uid;
 }
 
-String randomHexString (Random& random, int numChars)
-{
-    String s;
-    const char hexChars[] = "0123456789ABCDEF";
-
-    while (--numChars >= 0)
-        s << hexChars [random.nextInt (numElementsInArray (hexChars))];
-
-    return s;
-}
-
 String hexString8Digits (int value)
 {
     return String::toHexString (value).paddedLeft ('0', 8);
@@ -70,14 +59,14 @@ String hexString8Digits (int value)
 
 String createGUID (const String& seed)
 {
-    String guid;
-    Random r (hashCode64 (seed + "_jucersalt"));
-    guid << "{" << randomHexString (r, 8); // (written as separate statements to enforce the order of execution)
-    guid << "-" << randomHexString (r, 4);
-    guid << "-" << randomHexString (r, 4);
-    guid << "-" << randomHexString (r, 4);
-    guid << "-" << randomHexString (r, 12) << "}";
-    return guid;
+    const String hex (MD5 ((seed + "_guidsalt").toUTF8()).toHexString().toUpperCase());
+
+    return "{" + hex.substring (0, 8)
+         + "-" + hex.substring (8, 12)
+         + "-" + hex.substring (12, 16)
+         + "-" + hex.substring (16, 20)
+         + "-" + hex.substring (20, 32) 
+         + "}";
 }
 
 String escapeSpaces (const String& s)
@@ -362,4 +351,67 @@ void FloatingLabelComponent::paint (Graphics& g)
 
     g.setColour (colour);
     glyphs.draw (g, AffineTransform::translation (1.0f, 1.0f));
+}
+
+
+//==============================================================================
+class UTF8Component  : public Component,
+                       private TextEditorListener
+{
+public:
+    UTF8Component()
+        : desc (String::empty,
+                "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, ready to cut-and-paste into your source-code...")
+    {
+        setSize (400, 300);
+
+        desc.setBounds ("8, 8, parent.width - 8, 55");
+        desc.setJustificationType (Justification::centred);
+        addAndMakeVisible (&desc);
+
+        userText.setMultiLine (true, true);
+        userText.setBounds ("8, 60, parent.width - 8, parent.height / 2 - 4");
+        addAndMakeVisible (&userText);
+        userText.addListener (this);
+
+        resultText.setMultiLine (true, true);
+        resultText.setReadOnly (true);
+        resultText.setBounds ("8, parent.height / 2 + 4, parent.width - 8, parent.height - 8");
+        addAndMakeVisible (&resultText);
+
+        userText.setText (getLastText());
+    }
+
+    void textEditorTextChanged (TextEditor&)
+    {
+        update();
+    }
+
+    void textEditorEscapeKeyPressed (TextEditor&)
+    {
+        getTopLevelComponent()->exitModalState (0);
+    }
+
+    void update()
+    {
+        getLastText() = userText.getText();
+        resultText.setText (CodeHelpers::stringLiteral (getLastText()), false);
+    }
+
+private:
+    Label desc;
+    TextEditor userText, resultText;
+
+    String& getLastText()
+    {
+        static String t;
+        return t;
+    }
+};
+
+void showUTF8ToolWindow()
+{
+    UTF8Component comp;
+    DialogWindow::showModalDialog ("UTF-8 String Literal Converter", &comp,
+                                   nullptr, Colours::white, true, true);
 }

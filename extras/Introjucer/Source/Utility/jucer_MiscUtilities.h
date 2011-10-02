@@ -26,7 +26,6 @@
 //==============================================================================
 // String::hashCode64 actually hit some dupes, so this is a more powerful version.
 int64 hashCode64 (const String& s);
-String randomHexString (Random& random, int numChars);
 String hexString8Digits (int value);
 
 String createAlphaNumericUID();
@@ -47,6 +46,7 @@ void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX = true, bool scr
 void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text);
 void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize);
 
+void showUTF8ToolWindow();
 
 //==============================================================================
 class PropertyPanelWithTooltips  : public Component,
