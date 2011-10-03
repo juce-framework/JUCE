@@ -27,7 +27,6 @@
 class WebBrowserComponentInternal   : public ActiveXControlComponent
 {
 public:
-    //==============================================================================
     WebBrowserComponentInternal()
         : browser (nullptr),
           connectionPoint (nullptr),
@@ -145,7 +144,6 @@ private:
         {
         }
 
-        //==============================================================================
         JUCE_COMRESULT GetTypeInfoCount (UINT*)                                  { return E_NOTIMPL; }
         JUCE_COMRESULT GetTypeInfo (UINT, LCID, ITypeInfo**)                     { return E_NOTIMPL; }
         JUCE_COMRESULT GetIDsOfNames (REFIID, LPOLESTR*, UINT, LCID, DISPID*)    { return E_NOTIMPL; }
@@ -155,18 +153,14 @@ private:
         {
             if (dispIdMember == DISPID_BEFORENAVIGATE2)
             {
-                VARIANT* const vurl = pDispParams->rgvarg[5].pvarVal;
-                String url;
-
-                if ((vurl->vt & VT_BYREF) != 0)
-                    url = *vurl->pbstrVal;
-                else
-                    url = vurl->bstrVal;
-
                 *pDispParams->rgvarg->pboolVal
-                    = owner.pageAboutToLoad (url) ? VARIANT_FALSE
-                                                  : VARIANT_TRUE;
-
+                    = owner.pageAboutToLoad (getStringFromVariant (pDispParams->rgvarg[5].pvarVal)) ? VARIANT_FALSE
+                                                                                                    : VARIANT_TRUE;
+                return S_OK;
+            }
+            else if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
+            {
+                //owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal);
                 return S_OK;
             }
 
@@ -177,9 +171,14 @@ private:
         void componentPeerChanged()                 {}
         void componentVisibilityChanged()           { owner.visibilityChanged(); }
 
-        //==============================================================================
     private:
         WebBrowserComponent& owner;
+
+        static String getStringFromVariant (VARIANT* v)
+        {
+            return (v->vt & VT_BYREF) != 0 ? *v->pbstrVal
+                                           : v->bstrVal;
+        }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler);
     };

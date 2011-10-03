@@ -111,11 +111,7 @@ BEGIN_JUCE_NAMESPACE
  #endif
 
  #if JUCE_WEB_BROWSER
-  #if JUCE_MAC
-   #include "native/juce_mac_WebBrowserComponent.mm"
-  #else
-   #include "native/juce_ios_WebBrowserComponent.mm"
-  #endif
+  #include "native/juce_mac_WebBrowserComponent.mm"
  #endif
 
 //==============================================================================

@@ -25,6 +25,10 @@
 
 END_JUCE_NAMESPACE
 
+class WebBrowserComponentInternal;
+
+#if JUCE_MAC
+
 #define DownloadClickDetector MakeObjCClassName(DownloadClickDetector)
 
 @interface DownloadClickDetector   : NSObject
@@ -40,7 +44,6 @@ END_JUCE_NAMESPACE
                                                     decisionListener: (id<WebPolicyDecisionListener>) listener;
 @end
 
-//==============================================================================
 @implementation DownloadClickDetector
 
 - (DownloadClickDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent_
@@ -55,9 +58,7 @@ END_JUCE_NAMESPACE
                                                               frame: (WebFrame*) frame
                                                    decisionListener: (id <WebPolicyDecisionListener>) listener
 {
-    (void) sender;
-    (void) request;
-    (void) frame;
+    (void) sender; (void) request; (void) frame;
 
     NSURL* url = [actionInformation valueForKey: nsStringLiteral ("WebActionOriginalURLKey")];
 
@@ -69,14 +70,67 @@ END_JUCE_NAMESPACE
 
 @end
 
+#else
+
+//==============================================================================
+@interface WebViewTapDetector  : NSObject <UIGestureRecognizerDelegate>
+{
+}
+
+- (BOOL) gestureRecognizer: (UIGestureRecognizer*) gestureRecognizer
+         shouldRecognizeSimultaneouslyWithGestureRecognizer: (UIGestureRecognizer*) otherGestureRecognizer;
+@end
+
+@implementation WebViewTapDetector
+
+- (BOOL) gestureRecognizer: (UIGestureRecognizer*) gestureRecognizer
+         shouldRecognizeSimultaneouslyWithGestureRecognizer: (UIGestureRecognizer*) otherGestureRecognizer
+{
+    return YES;
+}
+
+@end
+
+//==============================================================================
+@interface WebViewURLChangeDetector : NSObject <UIWebViewDelegate>
+{
+    juce::WebBrowserComponent* ownerComponent;
+}
+
+- (WebViewURLChangeDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent;
+- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request navigationType: (UIWebViewNavigationType) navigationType;
+@end
+
+@implementation WebViewURLChangeDetector
+
+- (WebViewURLChangeDetector*) initWithWebBrowserOwner: (juce::WebBrowserComponent*) ownerComponent_
+{
+    [super init];
+    ownerComponent = ownerComponent_;
+    return self;
+}
+
+- (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request navigationType: (UIWebViewNavigationType) navigationType
+{
+    return ownerComponent->pageAboutToLoad (nsStringToJuce (request.URL.absoluteString));
+}
+@end
+#endif
+
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-class WebBrowserComponentInternal  : public NSViewComponent
+class WebBrowserComponentInternal
+                                   #if JUCE_MAC
+                                    : public NSViewComponent
+                                   #else
+                                    : public UIViewComponent
+                                   #endif
 {
 public:
     WebBrowserComponentInternal (WebBrowserComponent* owner)
     {
+       #if JUCE_MAC
         webView = [[WebView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                        frameName: nsEmptyString()
                                        groupName: nsEmptyString()];
@@ -84,12 +138,30 @@ public:
 
         clickListener = [[DownloadClickDetector alloc] initWithWebBrowserOwner: owner];
         [webView setPolicyDelegate: clickListener];
+       #else
+        webView = [[UIWebView alloc] initWithFrame: CGRectMake (0, 0, 1.0f, 1.0f)];
+        setView (webView);
+
+        tapDetector = [[WebViewTapDetector alloc] init];
+        urlDetector = [[WebViewURLChangeDetector alloc] initWithWebBrowserOwner: owner];
+        gestureRecogniser = nil;
+        webView.delegate = urlDetector;
+       #endif
     }
 
     ~WebBrowserComponentInternal()
     {
+       #if JUCE_MAC
         [webView setPolicyDelegate: nil];
         [clickListener release];
+       #else
+        webView.delegate = nil;
+        [webView removeGestureRecognizer: gestureRecogniser];
+        [gestureRecogniser release];
+        [tapDetector release];
+        [urlDetector release];
+       #endif
+
         setView (nil);
     }
 
@@ -122,13 +194,24 @@ public:
         }
 
         stop();
+
+       #if JUCE_MAC
         [[webView mainFrame] loadRequest: r];
+       #else
+        [webView loadRequest: r];
+       #endif
     }
 
     void goBack()       { [webView goBack]; }
     void goForward()    { [webView goForward]; }
+
+   #if JUCE_MAC
     void stop()         { [webView stopLoading: nil]; }
     void refresh()      { [webView reload: nil]; }
+   #else
+    void stop()         { [webView stopLoading]; }
+    void refresh()      { [webView reload]; }
+   #endif
 
     void mouseMove (const MouseEvent&)
     {
@@ -139,8 +222,15 @@ public:
     }
 
 private:
+   #if JUCE_MAC
     WebView* webView;
     DownloadClickDetector* clickListener;
+   #else
+    UIWebView* webView;
+    WebViewTapDetector* tapDetector;
+    WebViewURLChangeDetector* urlDetector;
+    UITapGestureRecognizer* gestureRecogniser;
+   #endif
 };
 
 //==============================================================================
