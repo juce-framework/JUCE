@@ -415,7 +415,6 @@
 		8A0E175187B06CE9C368A73B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ProgressBar.cpp"; path = "../../../../modules/juce_gui_basics/widgets/juce_ProgressBar.cpp"; sourceTree = "SOURCE_ROOT"; };
 		8A5D40E78966BA8B0F8B542A = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_PathIterator.h"; path = "../../../../modules/juce_graphics/geometry/juce_PathIterator.h"; sourceTree = "SOURCE_ROOT"; };
 		8A9386451AEA0640E55E8869 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AlertWindow.h"; path = "../../../../modules/juce_gui_basics/windows/juce_AlertWindow.h"; sourceTree = "SOURCE_ROOT"; };
-		8B44A87EF618B35F7831E4A3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_ios_WebBrowserComponent.mm"; path = "../../../../modules/juce_gui_extra/native/juce_ios_WebBrowserComponent.mm"; sourceTree = "SOURCE_ROOT"; };
 		8B698D4DCFED3BCB6F30D69F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_RelativeCoordinatePositioner.h"; path = "../../../../modules/juce_gui_basics/positioning/juce_RelativeCoordinatePositioner.h"; sourceTree = "SOURCE_ROOT"; };
 		8C0CDFB36933C81F98328B6D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ScopedValueSetter.h"; path = "../../../../modules/juce_core/containers/juce_ScopedValueSetter.h"; sourceTree = "SOURCE_ROOT"; };
 		8C52A3DDA62A746AA7A68535 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_Main.cpp"; path = "../../Source/Application/jucer_Main.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1533,7 +1532,6 @@
 		4C0BD8F18173E3D675D03872 = { isa = PBXGroup; children = (
 				53704A9E32438DCEFF6A155B,
 				58858190E0EE0AA6955EA236,
-				8B44A87EF618B35F7831E4A3,
 				2E540A9137E245EFADCFABB3,
 				D9342535EA61901A1AD816C6,
 				D800DE818BEDBF4579D15B1D,

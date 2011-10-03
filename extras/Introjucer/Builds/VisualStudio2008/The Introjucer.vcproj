@@ -3392,7 +3392,6 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm"/>
-          <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_ios_WebBrowserComponent.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_extra\native\juce_linux_SystemTrayIcon.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
