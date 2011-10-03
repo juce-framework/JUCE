@@ -273,10 +273,11 @@ public:
     Value shouldShowAllModuleFilesInProject (const String& moduleID);
     Value shouldCopyModuleFilesLocally (const String& moduleID);
 
-    void addModule (const String& moduleID);
+    void addModule (const String& moduleID, bool shouldCopyFilesLocally);
     void removeModule (const String& moduleID);
     int getNumModules() const;
     String getModuleID (int index) const;
+    void addDefaultModules (bool shouldCopyFilesLocally);
 
     void createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const;
 

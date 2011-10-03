@@ -31,9 +31,8 @@
 
 
 //==============================================================================
-ModuleList::ModuleList (const File& modulesFolder_)
+ModuleList::ModuleList()
 {
-    rescan (modulesFolder_);
 }
 
 ModuleList::ModuleList (const ModuleList& other)
@@ -68,6 +67,29 @@ bool ModuleList::operator== (const ModuleList& other) const
     return true;
 }
 
+
+bool ModuleList::isLocalModulesFolderValid()
+{
+    return isModulesFolder (getModulesFolderForJuceOrModulesFolder (getLocalModulesFolder (nullptr)));
+}
+
+bool ModuleList::isJuceFolder (const File& folder)
+{
+    return folder.getFileName().containsIgnoreCase ("juce")
+             && isModulesFolder (folder.getChildFile ("modules"));
+}
+
+bool ModuleList::isModulesFolder (const File& folder)
+{
+    return folder.getFileName().equalsIgnoreCase ("modules")
+             && folder.isDirectory();
+}
+
+bool ModuleList::isJuceOrModulesFolder (const File& folder)
+{
+    return isJuceFolder (folder) || isModulesFolder (folder);
+}
+
 File ModuleList::getModulesFolderForJuceOrModulesFolder (const File& f)
 {
     if (f.getFileName() != "modules" && f.isDirectory() && f.getChildFile ("modules").isDirectory())
@@ -87,12 +109,16 @@ File ModuleList::getDefaultModulesFolder (Project* project)
             File f (project->resolveFilename (exp->getJuceFolder().toString()));
             f = getModulesFolderForJuceOrModulesFolder (f);
 
-            if (FileHelpers::isModulesFolder (f))
+            if (ModuleList::isModulesFolder (f))
                 return f;
         }
     }
 
+   #if JUCE_WINDOWS
+    return File::getSpecialLocation (File::userDocumentsDirectory)
+   #else
     return File::getSpecialLocation (File::userHomeDirectory)
+   #endif
             .getChildFile ("juce")
             .getChildFile ("modules");
 }
@@ -104,7 +130,7 @@ File ModuleList::getLocalModulesFolder (Project* project)
     File f (StoredSettings::getInstance()->getProps().getValue ("lastJuceFolder", defaultJuceFolder.getFullPathName()));
     f = getModulesFolderForJuceOrModulesFolder (f);
 
-    if ((! FileHelpers::isModulesFolder (f)) && FileHelpers::isModulesFolder (defaultJuceFolder))
+    if ((! ModuleList::isModulesFolder (f)) && ModuleList::isModulesFolder (defaultJuceFolder))
         f = defaultJuceFolder;
 
     return f;
@@ -263,17 +289,20 @@ void ModuleList::getDependencies (const String& moduleID, StringArray& dependenc
         const var depsArray (m->moduleInfo ["dependencies"]);
         const Array<var>* const deps = depsArray.getArray();
 
-        for (int i = 0; i < deps->size(); ++i)
+        if (deps != nullptr)
         {
-            const var& d = deps->getReference(i);
-
-            String uid (d ["id"].toString());
-            String version (d ["version"].toString());
-
-            if (! dependencies.contains (uid, true))
+            for (int i = 0; i < deps->size(); ++i)
             {
-                dependencies.add (uid);
-                getDependencies (uid, dependencies);
+                const var& d = deps->getReference(i);
+
+                String uid (d ["id"].toString());
+                String version (d ["version"].toString());
+
+                if (! dependencies.contains (uid, true))
+                {
+                    dependencies.add (uid);
+                    getDependencies (uid, dependencies);
+                }
             }
         }
     }
@@ -300,6 +329,18 @@ void ModuleList::createDependencies (const String& moduleID, OwnedArray<LibraryM
 
         }
     }
+}
+
+StringArray ModuleList::getExtraDependenciesNeeded (Project& project, const ModuleList::Module& m)
+{
+    StringArray dependencies, extraDepsNeeded;
+    getDependencies (m.uid, dependencies);
+
+    for (int i = 0; i < dependencies.size(); ++i)
+        if ((! project.isModuleEnabled (dependencies[i])) && dependencies[i] != m.uid)
+            extraDepsNeeded.add (dependencies[i]);
+
+    return extraDepsNeeded;
 }
 
 //==============================================================================
@@ -334,9 +375,11 @@ File LibraryModule::getInclude (const File& folder) const
 
 RelativePath LibraryModule::getModuleRelativeToProject (ProjectExporter& exporter) const
 {
-    return RelativePath (exporter.getJuceFolder().toString(), RelativePath::projectFolder)
-                .getChildFile ("modules")
-                .getChildFile (getID());
+    RelativePath p (exporter.getJuceFolder().toString(), RelativePath::projectFolder);
+    if (p.getFileName() != "modules")
+        p = p.getChildFile ("modules");
+
+    return p.getChildFile (getID());
 }
 
 //==============================================================================

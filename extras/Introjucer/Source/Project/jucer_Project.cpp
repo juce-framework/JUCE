@@ -128,25 +128,28 @@ void Project::setMissingDefaultValues()
         setBundleIdentifierToDefault();
 
     if (! projectRoot.getChildWithName (Tags::modulesGroup).isValid())
-    {
-        addModule ("juce_core");
+        addDefaultModules (false);
+}
 
-        if (! isConfigFlagEnabled ("JUCE_ONLY_BUILD_CORE_LIBRARY"))
-        {
-            addModule ("juce_events");
-            addModule ("juce_graphics");
-            addModule ("juce_data_structures");
-            addModule ("juce_gui_basics");
-            addModule ("juce_gui_extra");
-            addModule ("juce_gui_audio");
-            addModule ("juce_cryptography");
-            addModule ("juce_video");
-            addModule ("juce_opengl");
-            addModule ("juce_audio_basics");
-            addModule ("juce_audio_devices");
-            addModule ("juce_audio_formats");
-            addModule ("juce_audio_processors");
-        }
+void Project::addDefaultModules (bool shouldCopyFilesLocally)
+{
+    addModule ("juce_core", shouldCopyFilesLocally);
+
+    if (! isConfigFlagEnabled ("JUCE_ONLY_BUILD_CORE_LIBRARY"))
+    {
+        addModule ("juce_events", shouldCopyFilesLocally);
+        addModule ("juce_graphics", shouldCopyFilesLocally);
+        addModule ("juce_data_structures", shouldCopyFilesLocally);
+        addModule ("juce_gui_basics", shouldCopyFilesLocally);
+        addModule ("juce_gui_extra", shouldCopyFilesLocally);
+        addModule ("juce_gui_audio", shouldCopyFilesLocally);
+        addModule ("juce_cryptography", shouldCopyFilesLocally);
+        addModule ("juce_video", shouldCopyFilesLocally);
+        addModule ("juce_opengl", shouldCopyFilesLocally);
+        addModule ("juce_audio_basics", shouldCopyFilesLocally);
+        addModule ("juce_audio_devices", shouldCopyFilesLocally);
+        addModule ("juce_audio_formats", shouldCopyFilesLocally);
+        addModule ("juce_audio_processors", shouldCopyFilesLocally);
     }
 }
 
@@ -835,7 +838,7 @@ Value Project::shouldCopyModuleFilesLocally (const String& moduleID)
                            .getPropertyAsValue (Ids::useLocalCopy, getUndoManagerFor (getModulesNode()));
 }
 
-void Project::addModule (const String& moduleID)
+void Project::addModule (const String& moduleID, bool shouldCopyFilesLocally)
 {
     if (! isModuleEnabled (moduleID))
     {
@@ -847,6 +850,9 @@ void Project::addModule (const String& moduleID)
 
         shouldShowAllModuleFilesInProject (moduleID) = true;
     }
+
+    if (shouldCopyFilesLocally)
+        shouldCopyModuleFilesLocally (moduleID) = true;
 }
 
 void Project::removeModule (const String& moduleID)

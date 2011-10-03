@@ -73,7 +73,7 @@ void StoredSettings::flush()
         // These settings are used in defining the properties file's location.
         PropertiesFile::Options options;
         options.applicationName     = "Introjucer";
-        options.folderName          = "Introjucer";
+        options.folderName          = "Introjucerxx";
         options.filenameSuffix      = "settings";
         options.osxLibrarySubFolder = "Application Support";
 
@@ -81,7 +81,7 @@ void StoredSettings::flush()
 
         // Because older versions of the introjucer saved their settings under a different
         // name, this code is an example of how to migrate your old settings files...
-        if (! props->getFile().exists())
+/*        if (! props->getFile().exists())
         {
             PropertiesFile::Options oldOptions;
             oldOptions.applicationName      = "Jucer2";
@@ -93,7 +93,7 @@ void StoredSettings::flush()
             if (oldProps.getFile().exists())
                 props->addAllPropertiesFrom (oldProps);
         }
-    }
+  */  }
 
     // recent files...
     recentFiles.restoreFromString (props->getValue ("recentFiles"));

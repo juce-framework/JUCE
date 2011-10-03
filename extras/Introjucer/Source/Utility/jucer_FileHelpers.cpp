@@ -145,47 +145,4 @@ namespace FileHelpers
 
         return path1.substring (0, commonBitLength).removeCharacters ("/:").isNotEmpty();
     }
-
-    //==============================================================================
-    bool isJuceFolder (const File& folder)
-    {
-        return folder.getFileName().containsIgnoreCase ("juce")
-                 && isModulesFolder (folder.getChildFile ("modules"));
-    }
-
-    bool isModulesFolder (const File& folder)
-    {
-        return folder.getFileName().equalsIgnoreCase ("modules")
-                 && folder.isDirectory();
-    }
-
-    File lookInFolderForJuceFolder (const File& folder)
-    {
-        for (DirectoryIterator di (folder, false, "*juce*", File::findDirectories); di.next();)
-        {
-            if (isJuceFolder (di.getFile()))
-                return di.getFile();
-        }
-
-        return File::nonexistent;
-    }
-
-    File findParentJuceFolder (const File& file)
-    {
-        File f (file);
-
-        while (f.exists() && f.getParentDirectory() != f)
-        {
-            if (isJuceFolder (f))
-                return f;
-
-            File found = lookInFolderForJuceFolder (f);
-            if (found.exists())
-                return found;
-
-            f = f.getParentDirectory();
-        }
-
-        return File::nonexistent;
-    }
 }

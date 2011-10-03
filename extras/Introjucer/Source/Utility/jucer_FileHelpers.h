@@ -43,12 +43,6 @@ namespace FileHelpers
     String windowsStylePath (const String& path);
 
     bool shouldPathsBeRelative (String path1, String path2);
-
-    //==============================================================================
-    bool isJuceFolder (const File& folder);
-    bool isModulesFolder (const File& folder);
-    File findParentJuceFolder (const File& file);
-    File lookInFolderForJuceFolder (const File& folder);
 }
 
 //==============================================================================

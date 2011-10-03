@@ -27,18 +27,10 @@
 
 
 //==============================================================================
-int64 hashCode64 (const String& s)
-{
-    MD5 md5 (s.toUTF8());
-    const uint64* const m = reinterpret_cast <const uint64*> (md5.getChecksumDataArray());
-
-    return (int64) ByteOrder::swapIfBigEndian (m[0] ^ m[1]);
-}
-
 String createAlphaNumericUID()
 {
     String uid;
-    static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     Random r;
 
     uid << chars [r.nextInt (52)]; // make sure the first character is always a letter
@@ -46,7 +38,7 @@ String createAlphaNumericUID()
     for (int i = 5; --i >= 0;)
     {
         r.setSeedRandomly();
-        uid << chars [r.nextInt (numElementsInArray (chars))];
+        uid << chars [r.nextInt (62)];
     }
 
     return uid;
@@ -65,7 +57,7 @@ String createGUID (const String& seed)
          + "-" + hex.substring (8, 12)
          + "-" + hex.substring (12, 16)
          + "-" + hex.substring (16, 20)
-         + "-" + hex.substring (20, 32) 
+         + "-" + hex.substring (20, 32)
          + "}";
 }
 

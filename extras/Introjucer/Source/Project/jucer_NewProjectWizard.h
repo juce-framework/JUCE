@@ -41,14 +41,14 @@ public:
     static int getNumWizards();
     static NewProjectWizard* createWizard (int index);
 
-    static Project* runNewProjectWizard (Component* ownerWindow);
+    static Component* createComponent();
 
     //==============================================================================
     virtual String getName() = 0;
     virtual String getDescription() = 0;
 
-    virtual void addItemsToAlertWindow (AlertWindow& aw) = 0;
-    virtual String processResultsFromAlertWindow (AlertWindow& aw) = 0;
+    virtual void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated) = 0;
+    virtual Result processResultsFromSetupItems (Component& setupComp) = 0;
     virtual bool initialiseProject (Project& project) = 0;
 
 protected:
@@ -59,9 +59,15 @@ protected:
 
     //==============================================================================
     NewProjectWizard();
-    Project* runWizard (Component* ownerWindow);
+    Project* runWizard (Component* ownerWindow,
+                        const String& projectName,
+                        const File& targetFolder);
+
+    class WizardComp;
+    friend class WizardComp;
 
     File getSourceFilesFolder() const         { return projectFile.getSiblingFile ("Source"); }
+    static File& getLastWizardFolder();
 };
 
 

@@ -192,7 +192,7 @@ namespace
     int listModules()
     {
         std::cout << "Downloading list of available modules..." << std::endl;
-        ModuleList list (File::nonexistent);
+        ModuleList list;
         list.loadFromWebsite();
 
         for (int i = 0; i < list.modules.size(); ++i)

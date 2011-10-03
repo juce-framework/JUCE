@@ -29,9 +29,9 @@
 
 
 //==============================================================================
-JuceUpdater::JuceUpdater (ModuleList& moduleList_)
+JuceUpdater::JuceUpdater (ModuleList& moduleList_, const String& message)
     : moduleList (moduleList_),
-      latestList (File::nonexistent),
+      messageLabel (String::empty, message),
       filenameComp ("Juce Folder", ModuleList::getLocalModulesFolder (nullptr),
                     true, true, false, "*", String::empty, "Select your Juce folder"),
       checkNowButton ("Check for available updates on the JUCE website...",
@@ -39,6 +39,9 @@ JuceUpdater::JuceUpdater (ModuleList& moduleList_)
       installButton ("Download and install selected modules..."),
       selectAllButton ("Select/Deselect All")
 {
+    messageLabel.setJustificationType (Justification::centred);
+    addAndMakeVisible (&messageLabel);
+
     addAndMakeVisible (&label);
     addAndMakeVisible (&currentVersionLabel);
     addAndMakeVisible (&filenameComp);
@@ -80,6 +83,7 @@ public:
         : DialogWindow ("JUCE Module Updater",
                         Colours::lightgrey, true, true)
     {
+        setUsingNativeTitleBar (true);
         setContentOwned (updater, true);
         centreAroundComponent (componentToCentreAround, getWidth(), getHeight());
         setResizable (true, true);
@@ -94,15 +98,17 @@ private:
     JUCE_DECLARE_NON_COPYABLE (UpdateDialogWindow);
 };
 
-void JuceUpdater::show (ModuleList& moduleList, Component* mainWindow)
+void JuceUpdater::show (ModuleList& moduleList, Component* mainWindow, const String& message)
 {
-    UpdateDialogWindow w (new JuceUpdater (moduleList), mainWindow);
+    UpdateDialogWindow w (new JuceUpdater (moduleList, message), mainWindow);
     w.runModalLoop();
 }
 
 void JuceUpdater::resized()
 {
-    filenameComp.setBounds (20, 40, getWidth() - 40, 22);
+    messageLabel.setBounds (20, 10, getWidth() - 40, messageLabel.getText().isEmpty() ? 0 : 30);
+
+    filenameComp.setBounds (20, messageLabel.getBottom() + 20, getWidth() - 40, 22);
     label.setBounds (filenameComp.getX(), filenameComp.getY() - 18, filenameComp.getWidth(), 18);
     currentVersionLabel.setBounds (filenameComp.getX(), filenameComp.getBottom(), filenameComp.getWidth(), 25);
     checkNowButton.changeWidthToFitText (22);
@@ -162,7 +168,7 @@ public:
         else
             AlertWindow::showMessageBox (AlertWindow::InfoIcon,
                                          "Module Update",
-                                         "Couldn't connect to the website!");
+                                         "Couldn't connect to the JUCE webserver!");
     }
 
     void handleAsyncUpdate()
@@ -224,7 +230,7 @@ void JuceUpdater::filenameComponentChanged (FilenameComponent*)
     moduleList.rescan (filenameComp.getCurrentFile());
     filenameComp.setCurrentFile (moduleList.getModulesFolder(), true, false);
 
-    if (! FileHelpers::isModulesFolder (moduleList.getModulesFolder()))
+    if (! ModuleList::isModulesFolder (moduleList.getModulesFolder()))
         currentVersionLabel.setText ("(Not a Juce folder)", false);
     else
         currentVersionLabel.setText (String::empty, false);
@@ -296,7 +302,7 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
                 }
                 else
                 {
-                    status << " (latest version already installed)";
+                    status << " (latest version already installed: " << existingModule->version << ")";
                     toggle.setEnabled (false);
                 }
             }

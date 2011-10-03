@@ -24,8 +24,6 @@
 */
 
 //==============================================================================
-// String::hashCode64 actually hit some dupes, so this is a more powerful version.
-int64 hashCode64 (const String& s);
 String hexString8Digits (int value);
 
 String createAlphaNumericUID();

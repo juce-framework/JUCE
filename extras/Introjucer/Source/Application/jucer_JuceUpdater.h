@@ -37,10 +37,10 @@ class JuceUpdater  : public Component,
                      private ValueTree::Listener
 {
 public:
-    JuceUpdater (ModuleList& moduleList);
+    JuceUpdater (ModuleList& moduleList, const String& message);
     ~JuceUpdater();
 
-    static void show (ModuleList& moduleList, Component* mainWindow);
+    static void show (ModuleList& moduleList, Component* mainWindow, const String& message);
 
     //==============================================================================
     void resized();
@@ -58,7 +58,7 @@ private:
     ModuleList& moduleList;
     ModuleList latestList;
 
-    Label label, currentVersionLabel;
+    Label messageLabel, label, currentVersionLabel;
     FilenameComponent filenameComp;
     TextButton checkNowButton;
     ListBox availableVersionsList;

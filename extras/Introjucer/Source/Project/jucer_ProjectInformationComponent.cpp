@@ -108,19 +108,6 @@ private:
 };
 
 //==============================================================================
-static StringArray getExtraDependenciesNeeded (Project& project, ModuleList& moduleList, const ModuleList::Module& m)
-{
-    StringArray dependencies, extraDepsNeeded;
-    moduleList.getDependencies (m.uid, dependencies);
-
-    for (int i = 0; i < dependencies.size(); ++i)
-        if ((! project.isModuleEnabled (dependencies[i])) && dependencies[i] != m.uid)
-            extraDepsNeeded.add (dependencies[i]);
-
-    return extraDepsNeeded;
-}
-
-//==============================================================================
 class ModuleSettingsPanel  : public PanelBase
 {
 public:
@@ -141,7 +128,7 @@ public:
             if (project.isModuleEnabled (moduleID))
             {
                 const ModuleList::Module* m = moduleList.findModuleInfo (moduleID);
-                if (m != nullptr && getExtraDependenciesNeeded (project, moduleList, *m).size() > 0)
+                if (m != nullptr && moduleList.getExtraDependenciesNeeded (project, *m).size() > 0)
                     props.add (new MissingDependenciesComponent (project, moduleList, moduleID));
             }
 
@@ -239,7 +226,7 @@ private:
             const ModuleList::Module* module = moduleList.findModuleInfo (moduleID);
 
             if (module != nullptr)
-                missingDependencies = getExtraDependenciesNeeded (project, moduleList, *module);
+                missingDependencies = moduleList.getExtraDependenciesNeeded (project, *module);
 
             addAndMakeVisible (&fixButton);
             fixButton.setColour (TextButton::buttonColourId, Colours::red);
@@ -277,42 +264,26 @@ private:
     };
 };
 
-
 //==============================================================================
-class ModulesPanel  : public Component,
-                      public ListBoxModel,
-                      public FilenameComponentListener,
-                      public ButtonListener
+class ModuleSelectionListBox    : public ListBox,
+                                  public ListBoxModel
 {
 public:
-    ModulesPanel (Project& project_)
-        : project (project_),
-          moduleList (ModuleList::getLocalModulesFolder (&project)),
-          modulesLocation ("modules", moduleList.getModulesFolder(),
-                           true, true, false, "*", String::empty,
-                           "Select a folder containing your JUCE modules..."),
-          modulesLabel (String::empty, "Module source folder:"),
-          updateModulesButton ("Check for module updates...")
+    ModuleSelectionListBox (ModuleList& list_)
+        : list (list_), handler (nullptr)
     {
-        addAndMakeVisible (&modulesLocation);
-        modulesLocation.setBounds ("150, 3, parent.width - 180, 28");
-        modulesLocation.addListener (this);
+        setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.4f));
+    }
 
-        modulesLabel.attachToComponent (&modulesLocation, true);
-
-        addAndMakeVisible (&updateModulesButton);
-        updateModulesButton.setBounds ("parent.width - 175, 3, parent.width - 4, 28");
-        updateModulesButton.addListener (this);
-
-        modulesList.setModel (this);
-        modulesList.setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.4f));
-        addAndMakeVisible (&modulesList);
-        modulesList.setBounds ("4, 31, parent.width / 2 - 4, parent.height - 3");
+    void refresh()
+    {
+        updateContent();
+        repaint();
     }
 
     int getNumRows()
     {
-        return moduleList.modules.size();
+        return list.modules.size();
     }
 
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
@@ -320,16 +291,16 @@ public:
         if (rowIsSelected)
             g.fillAll (findColour (TextEditor::highlightColourId));
 
-        const ModuleList::Module* const m = moduleList.modules [rowNumber];
+        const ModuleList::Module* const m = list.modules [rowNumber];
 
         if (m != nullptr)
         {
             const float tickSize = height * 0.7f;
 
             getLookAndFeel().drawTickBox (g, *this, (height - tickSize) / 2, (height - tickSize) / 2, tickSize, tickSize,
-                                          project.isModuleEnabled (m->uid), true, false, false);
+                                          handler->isEnabled (m), true, false, false);
 
-            if (project.isModuleEnabled (m->uid) && getExtraDependenciesNeeded (project, moduleList, *m).size() > 0)
+            if (handler->isEnabled (m) && handler->areDependenciesMissing (m))
                 g.setColour (Colours::red);
             else
                 g.setColour (Colours::black);
@@ -342,39 +313,9 @@ public:
         }
     }
 
-    void flipRow (int row)
-    {
-        const ModuleList::Module* const m = moduleList.modules [row];
-
-        if (m != nullptr)
-        {
-            if (project.isModuleEnabled (m->uid))
-                project.removeModule (m->uid);
-            else
-                project.addModule (m->uid);
-        }
-
-        refresh();
-    }
-
-    void filenameComponentChanged (FilenameComponent*)
-    {
-        moduleList.rescan (modulesLocation.getCurrentFile());
-        modulesLocation.setCurrentFile (moduleList.getModulesFolder(), false, false);
-        ModuleList::setLocalModulesFolder (moduleList.getModulesFolder());
-        modulesList.updateContent();
-    }
-
-    void buttonClicked (Button*)
-    {
-        JuceUpdater::show (moduleList, getTopLevelComponent());
-
-        filenameComponentChanged (nullptr);
-    }
-
     void listBoxItemClicked (int row, const MouseEvent& e)
     {
-        if (e.x < modulesList.getRowHeight())
+        if (e.x < getRowHeight())
             flipRow (row);
     }
 
@@ -390,17 +331,121 @@ public:
 
     void selectedRowsChanged (int lastRowSelected)
     {
-        const ModuleList::Module* const m = moduleList.modules [lastRowSelected];
+        handler->selectionChanged (list.modules [lastRowSelected]);
+    }
 
-        settings = nullptr;
+    void flipRow (int row)
+    {
+        const ModuleList::Module* const m = list.modules [row];
 
         if (m != nullptr)
-            addAndMakeVisible (settings = new ModuleSettingsPanel (project, moduleList, m->uid));
+            handler->setEnabled (m, ! handler->isEnabled (m));
+    }
+
+    //==============================================================================
+    class Handler
+    {
+    public:
+        Handler() {}
+        virtual ~Handler() {};
+
+        virtual bool isEnabled (const ModuleList::Module* m) const = 0;
+        virtual void setEnabled (const ModuleList::Module* m, bool enable) = 0;
+        virtual bool areDependenciesMissing (const ModuleList::Module* m) = 0;
+        virtual void selectionChanged (const ModuleList::Module* selectedModule) = 0;
+    };
+
+    void setHandler (Handler* h)
+    {
+        handler = h;
+        setModel (this);
+    }
+
+private:
+    ModuleList& list;
+    Handler* handler;
+};
+
+
+//==============================================================================
+class ModulesPanel  : public Component,
+                      public ModuleSelectionListBox::Handler,
+                      public FilenameComponentListener,
+                      public ButtonListener
+{
+public:
+    ModulesPanel (Project& project_)
+        : project (project_),
+          modulesLocation ("modules", ModuleList::getLocalModulesFolder (&project),
+                           true, true, false, "*", String::empty,
+                           "Select a folder containing your JUCE modules..."),
+          modulesLabel (String::empty, "Module source folder:"),
+          updateModulesButton ("Check for module updates..."),
+          moduleListBox (moduleList)
+    {
+        moduleList.rescan (ModuleList::getLocalModulesFolder (&project));
+
+        addAndMakeVisible (&modulesLocation);
+        modulesLocation.setBounds ("150, 3, parent.width - 180, 28");
+        modulesLocation.addListener (this);
+
+        modulesLabel.attachToComponent (&modulesLocation, true);
+
+        addAndMakeVisible (&updateModulesButton);
+        updateModulesButton.setBounds ("parent.width - 175, 3, parent.width - 4, 28");
+        updateModulesButton.addListener (this);
+
+        moduleListBox.setHandler (this);
+        addAndMakeVisible (&moduleListBox);
+        moduleListBox.setBounds ("4, 31, parent.width / 2 - 4, parent.height - 3");
+    }
+
+    void filenameComponentChanged (FilenameComponent*)
+    {
+        moduleList.rescan (modulesLocation.getCurrentFile());
+        modulesLocation.setCurrentFile (moduleList.getModulesFolder(), false, false);
+        ModuleList::setLocalModulesFolder (moduleList.getModulesFolder());
+        moduleListBox.refresh();
+    }
+
+    void buttonClicked (Button*)
+    {
+        JuceUpdater::show (moduleList, getTopLevelComponent(), "");
+
+        filenameComponentChanged (nullptr);
+    }
+
+    bool isEnabled (const ModuleList::Module* m) const
+    {
+        return project.isModuleEnabled (m->uid);
+    }
+
+    void setEnabled (const ModuleList::Module* m, bool enable)
+    {
+        if (enable)
+            project.addModule (m->uid, true);
+        else
+            project.removeModule (m->uid);
+
+        refresh();
+    }
+
+    bool areDependenciesMissing (const ModuleList::Module* m)
+    {
+        return moduleList.getExtraDependenciesNeeded (project, *m).size() > 0;
+    }
+
+    void selectionChanged (const ModuleList::Module* selectedModule)
+    {
+        settings = nullptr;
+
+        if (selectedModule != nullptr)
+            addAndMakeVisible (settings = new ModuleSettingsPanel (project, moduleList, selectedModule->uid));
     }
 
     void refresh()
     {
-        modulesList.repaint();
+        moduleListBox.refresh();
 
         if (settings != nullptr)
             settings->refreshAll();
@@ -412,14 +457,16 @@ private:
     FilenameComponent modulesLocation;
     Label modulesLabel;
     TextButton updateModulesButton;
-    ListBox modulesList;
+    ModuleSelectionListBox moduleListBox;
     ScopedPointer<ModuleSettingsPanel> settings;
 };
 
 void ModuleSettingsPanel::MissingDependenciesComponent::buttonClicked (Button*)
 {
+    bool isModuleCopiedLocally = project.shouldCopyModuleFilesLocally (moduleID).getValue();
+
     for (int i = missingDependencies.size(); --i >= 0;)
-        project.addModule (missingDependencies[i]);
+        project.addModule (missingDependencies[i], isModuleCopiedLocally);
 
     ModulesPanel* mp = findParentComponentOfClass ((ModulesPanel*) 0);
     if (mp != nullptr)

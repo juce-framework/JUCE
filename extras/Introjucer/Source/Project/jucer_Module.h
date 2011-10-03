@@ -86,7 +86,7 @@ private:
 class ModuleList
 {
 public:
-    ModuleList (const File& modulesFolder);
+    ModuleList();
     ModuleList (const ModuleList&);
     ModuleList& operator= (const ModuleList&);
 
@@ -121,12 +121,19 @@ public:
     bool operator== (const ModuleList&) const;
 
     //==============================================================================
+    static bool isJuceFolder (const File& folder);
+    static bool isModulesFolder (const File& folder);
+    static bool isJuceOrModulesFolder (const File& folder);
+
     static File getDefaultModulesFolder (Project* project);
+    static bool isLocalModulesFolderValid();
 
     static File getLocalModulesFolder (Project* project);
     static void setLocalModulesFolder (const File& newFile);
 
     static File getModulesFolderForJuceOrModulesFolder (const File& f);
+
+    StringArray getExtraDependenciesNeeded (Project& project, const Module& m);
 
     //==============================================================================
     OwnedArray<Module> modules;
