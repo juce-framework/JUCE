@@ -125,7 +125,7 @@ private:
     CFRunLoopSourceRef runLoopSource;
     MessageQueue messageQueue;
 
-    static const String quotedIfContainsSpaces (NSString* file)
+    static String quotedIfContainsSpaces (NSString* file)
     {
         String s (nsStringToJuce (file));
         if (s.containsChar (' '))
@@ -144,15 +144,13 @@ using namespace juce;
 //==============================================================================
 @interface JuceAppDelegate   : NSObject
 {
-@private
-    id oldDelegate;
-
 @public
     AppDelegateRedirector* redirector;
 }
 
 - (JuceAppDelegate*) init;
 - (void) dealloc;
+- (void) unregisterObservers;
 - (BOOL) application: (NSApplication*) theApplication openFile: (NSString*) filename;
 - (void) application: (NSApplication*) sender openFiles: (NSArray*) filenames;
 - (NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication*) app;
@@ -173,11 +171,8 @@ using namespace juce;
 
     redirector = new AppDelegateRedirector();
 
-    NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-
     if (JUCEApplicationBase::isStandaloneApp())
     {
-        oldDelegate = [NSApp delegate];
         [NSApp setDelegate: self];
 
         [[NSDistributedNotificationCenter defaultCenter] addObserver: self
@@ -187,7 +182,8 @@ using namespace juce;
     }
     else
     {
-        oldDelegate = nil;
+        NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+
         [center addObserver: self selector: @selector (applicationDidResignActive:)
                        name: NSApplicationDidResignActiveNotification object: NSApp];
 
@@ -203,15 +199,23 @@ using namespace juce;
 
 - (void) dealloc
 {
-    if (oldDelegate != nil)
-        [NSApp setDelegate: oldDelegate];
-
-    [[NSDistributedNotificationCenter defaultCenter] removeObserver: self
-                                                               name: AppDelegateRedirector::getBroacastEventName()
-                                                             object: nil];
-
     redirector->deleteSelf();
     [super dealloc];
+}
+
+- (void) unregisterObservers
+{
+    [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: self];
+    [[NSNotificationCenter defaultCenter] removeObserver: self];
+
+    if (JUCEApplicationBase::isStandaloneApp())
+    {
+        [NSApp setDelegate: nil];
+
+        [[NSDistributedNotificationCenter defaultCenter] removeObserver: self
+                                                                   name: AppDelegateRedirector::getBroacastEventName()
+                                                                 object: nil];
+    }
 }
 
 - (NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication*) app
@@ -357,10 +361,8 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 //==============================================================================
 void initialiseNSApplication()
 {
-   #if JUCE_MAC
     JUCE_AUTORELEASEPOOL
     [NSApplication sharedApplication];
-   #endif
 }
 
 void MessageManager::doPlatformSpecificInitialisation()
@@ -368,20 +370,20 @@ void MessageManager::doPlatformSpecificInitialisation()
     if (juceAppDelegate == nil)
         juceAppDelegate = [[JuceAppDelegate alloc] init];
 
-    // This launches a dummy thread, which forces Cocoa to initialise NSThreads
-    // correctly (needed prior to 10.5)
+   #if ! (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+    // This launches a dummy thread, which forces Cocoa to initialise NSThreads correctly (needed prior to 10.5)
     if (! [NSThread isMultiThreaded])
         [NSThread detachNewThreadSelector: @selector (dummyMethod)
                                  toTarget: juceAppDelegate
                                withObject: nil];
+   #endif
 }
 
 void MessageManager::doPlatformSpecificShutdown()
 {
     if (juceAppDelegate != nil)
     {
-        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceAppDelegate];
-        [[NSNotificationCenter defaultCenter] removeObserver: juceAppDelegate];
+        [juceAppDelegate unregisterObservers];
         [juceAppDelegate release];
         juceAppDelegate = nil;
     }

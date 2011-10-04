@@ -25,7 +25,7 @@
 
 BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
+
 ModifierKeys::ModifierKeys() noexcept
     : flags (0)
 {

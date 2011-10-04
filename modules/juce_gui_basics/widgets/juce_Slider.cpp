@@ -643,7 +643,7 @@ String Slider::getTextValueSuffix() const
     return textSuffix;
 }
 
-const String Slider::getTextFromValue (double v)
+String Slider::getTextFromValue (double v)
 {
     if (getNumDecimalPlacesToDisplay() > 0)
         return String (v, getNumDecimalPlacesToDisplay()) + getTextValueSuffix();

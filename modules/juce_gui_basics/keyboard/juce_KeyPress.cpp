@@ -195,7 +195,7 @@ namespace KeyPressHelpers
 }
 
 //==============================================================================
-const KeyPress KeyPress::createFromDescription (const String& desc)
+KeyPress KeyPress::createFromDescription (const String& desc)
 {
     int modifiers = 0;
 

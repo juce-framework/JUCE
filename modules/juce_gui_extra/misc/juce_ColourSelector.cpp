@@ -35,7 +35,7 @@ public:
         setRange (0.0, 255.0, 1.0);
     }
 
-    const String getTextFromValue (double value)
+    String getTextFromValue (double value)
     {
         return String::toHexString ((int) value).toUpperCase().paddedLeft ('0', 2);
     }

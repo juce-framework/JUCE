@@ -671,7 +671,7 @@ public:
 
         @see getValueFromText
     */
-    virtual const String getTextFromValue (double value);
+    virtual String getTextFromValue (double value);
 
     /** Sets a suffix to append to the end of the numeric value when it's displayed as
         a string.

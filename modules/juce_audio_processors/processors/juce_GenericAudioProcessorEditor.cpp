@@ -99,7 +99,7 @@ private:
                 owner.setParameter (index, newVal);
         }
 
-        const String getTextFromValue (double /*value*/)
+        String getTextFromValue (double /*value*/)
         {
             return owner.getParameterText (index);
         }

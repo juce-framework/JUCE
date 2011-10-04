@@ -105,7 +105,7 @@ public:
 
         @see ModifierKeys
     */
-    const ModifierKeys getModifiers() const noexcept            { return mods; }
+    ModifierKeys getModifiers() const noexcept                  { return mods; }
 
     /** Returns the character that is associated with this keypress.
 
@@ -136,7 +136,7 @@ public:
 
         @see getTextDescription
     */
-    static const KeyPress createFromDescription (const String& textVersion);
+    static KeyPress createFromDescription (const String& textVersion);
 
     /** Creates a textual description of the key combination.
 
