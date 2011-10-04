@@ -390,7 +390,7 @@ public:
                         break;
                     }
 
-                    input->setPosition (chunkEnd);
+                    input->setPosition (chunkEnd + (chunkEnd & 1)); // (chunks should be aligned to an even byte address)
                 }
             }
         }

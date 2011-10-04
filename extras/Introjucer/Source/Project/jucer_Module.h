@@ -76,6 +76,7 @@ private:
     void addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const;
     void createLocalHeaderWrapper (ProjectSaver& projectSaver, const File& originalHeader, const File& localHeader) const;
     RelativePath getModuleRelativeToProject (ProjectExporter& exporter) const;
+    RelativePath getModuleOrLocalCopyRelativeToProject (ProjectExporter& exporter, const File& localModuleFolder) const;
 
     bool isPluginClient() const;
     bool isAUPluginHost (const Project& project) const;

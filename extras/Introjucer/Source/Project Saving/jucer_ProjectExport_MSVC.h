@@ -551,7 +551,7 @@ protected:
             XmlElement* compiler = createToolElement (xml, "VCCLCompilerTool");
 
             const int optimiseLevel = (int) config.getOptimisationLevel().getValue();
-            compiler->setAttribute ("Optimization", optimiseLevel <= 1 ? "0" : (optimiseLevel == 2 ? "2" : "3"));
+            compiler->setAttribute ("Optimization", optimiseLevel <= 1 ? "0" : (optimiseLevel == 2 ? "1" : "2"));
 
             if (isDebug)
             {

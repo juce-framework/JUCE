@@ -382,6 +382,14 @@ RelativePath LibraryModule::getModuleRelativeToProject (ProjectExporter& exporte
     return p.getChildFile (getID());
 }
 
+RelativePath LibraryModule::getModuleOrLocalCopyRelativeToProject (ProjectExporter& exporter, const File& localModuleFolder) const
+{
+    if (exporter.getProject().shouldCopyModuleFilesLocally (getID()).getValue())
+        return RelativePath (exporter.getProject().getRelativePathForFile (localModuleFolder), RelativePath::projectFolder);
+
+    return getModuleRelativeToProject (exporter);
+}
+
 //==============================================================================
 void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out)
 {
@@ -650,7 +658,7 @@ void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<Fil
 
     Project::Item sourceGroup (Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID()));
 
-    const RelativePath moduleFromProject (getModuleRelativeToProject (exporter));
+    const RelativePath moduleFromProject (getModuleOrLocalCopyRelativeToProject (exporter, localModuleFolder));
 
     for (int i = 0; i < sourceFiles.size(); ++i)
     {
