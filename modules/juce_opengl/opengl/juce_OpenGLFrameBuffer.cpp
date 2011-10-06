@@ -323,4 +323,374 @@ void OpenGLFrameBuffer::draw3D (float x1, float y1, float z1,
     }
 }
 
+//==============================================================================
+// This breaks down a path into a series of horizontal strips of trapezoids..
+class TrapezoidedPath
+{
+public:
+    TrapezoidedPath (const Path& p)
+        : firstSlice (nullptr),
+          windingMask (p.isUsingNonZeroWinding() ? -1 : 1)
+    {
+        PathFlatteningIterator iter (p);
+
+        while (iter.next())
+            addLine (floatToInt (iter.x1), floatToInt (iter.y1),
+                     floatToInt (iter.x2), floatToInt (iter.y2));
+    }
+
+    ~TrapezoidedPath()
+    {
+        delete firstSlice;
+    }
+
+    template <class Consumer>
+    void iterate (Consumer& consumer) const
+    {
+        for (HorizontalSlice* s = firstSlice; s != nullptr; s = s->next)
+            s->iterate (consumer, windingMask);
+    }
+
+private:
+    void addLine (int x1, int y1, int x2, int y2)
+    {
+        int winding = 1;
+
+        if (y2 < y1)
+        {
+            std::swap (x1, x2);
+            std::swap (y1, y2);
+            winding = -1;
+        }
+
+        HorizontalSlice* last = nullptr;
+        HorizontalSlice* s = firstSlice;
+
+        while (y2 > y1)
+        {
+            if (s == nullptr)
+            {
+                insert (last, new HorizontalSlice (nullptr, x1, y1, x2, y2, winding));
+                break;
+            }
+
+            if (s->y2 > y1)
+            {
+                if (y1 < s->y1)
+                {
+                    if (y2 <= s->y1)
+                    {
+                        insert (last, new HorizontalSlice (s, x1, y1, x2, y2, winding));
+                        break;
+                    }
+                    else
+                    {
+                        const int newX = x1 + (s->y1 - y1) * (x2 - x1) / (y2 - y1);
+                        insert (last, new HorizontalSlice (s, x1, y1, newX, s->y1, winding));
+                        x1 = newX;
+                        y1 = s->y1;
+                        continue;
+                    }
+                }
+                else if (y1 > s->y1)
+                {
+                    s->split (y1);
+                    s = s->next;
+                    jassert (s != nullptr);
+                }
+
+                jassert (y1 == s->y1);
+
+                if (y2 > s->y2)
+                {
+                    const int newY = s->y2;
+                    const int newX = x1 + (newY - y1) * (x2 - x1) / (y2 - y1);
+                    s->addLine (x1, newX, winding);
+                    x1 = newX;
+                    y1 = newY;
+                }
+                else
+                {
+                    if (y2 < s->y2)
+                        s->split (y2);
+
+                    jassert (y2 == s->y2);
+                    s->addLine (x1, x2, winding);
+                    break;
+                }
+            }
+
+            last = s;
+            s = s->next;
+        }
+    }
+
+    struct HorizontalSlice
+    {
+        HorizontalSlice (const HorizontalSlice& other, HorizontalSlice* next_, int y1_, int y2_)
+            : next (next_), y1 (y1_), y2 (y2_), segments (other.segments)
+        {
+        }
+
+        HorizontalSlice (HorizontalSlice* next_, int x1, int y1_, int x2, int y2_, int winding)
+            : next (next_), y1 (y1_), y2 (y2_)
+        {
+            jassert (next != this);
+            jassert (y2 > y1);
+            segments.ensureStorageAllocated (32);
+            segments.add (LineSegment (x1, x2, winding));
+        }
+
+        ~HorizontalSlice()
+        {
+            delete next;
+        }
+
+        void addLine (const int x1, const int x2, int winding)
+        {
+            const int dy = y2 - y1;
+
+            for (int i = 0; i < segments.size(); ++i)
+            {
+                const LineSegment& l = segments.getReference (i);
+
+                const int diff1 = x1 - l.x1;
+                const int diff2 = x2 - l.x2;
+
+                if ((diff1 < 0) == (diff2 > 0))
+                {
+                    const int dx1 = l.x2 - l.x1;
+                    const int dx2 = x2 - x1;
+                    const int dxDiff = dx2 - dx1;
+
+                    if (dxDiff != 0)
+                    {
+                        const int intersectionY = (dy * (l.x1 - x1)) / dxDiff;
+
+                        if (intersectionY > 0 && intersectionY < dy)
+                        {
+                            const int intersectionX = x1 + (intersectionY * dx2) / dy;
+                            split (intersectionY + y1);
+                            next->addLine (intersectionX, x2, winding);
+                            addLine (x1, intersectionX, winding);
+                            return;
+                        }
+                    }
+                }
+
+                if (diff1 + diff2 < 0)
+                {
+                    segments.insert (i, LineSegment (x1, x2, winding));
+                    return;
+                }
+            }
+
+            segments.add (LineSegment (x1, x2, winding));
+        }
+
+        void split (const int newY)
+        {
+            jassert (newY > y1 && newY < y2);
+
+            const int dy1 = newY - y1;
+            const int dy2 = y2 - y1;
+            next = new HorizontalSlice (*this, next, newY, y2);
+            y2 = newY;
+
+            LineSegment* const oldSegments = segments.getRawDataPointer();
+            LineSegment* const newSegments = next->segments.getRawDataPointer();
+
+            for (int i = 0; i < segments.size(); ++i)
+            {
+                LineSegment& l = oldSegments[i];
+                const int newX = l.x1 + dy1 * (l.x2 - l.x1) / dy2;
+                newSegments[i].x1 = newX;
+                l.x2 = newX;
+            }
+        }
+
+        template <class Consumer>
+        void iterate (Consumer& consumer, const int windingMask)
+        {
+            jassert (segments.size() > 0);
+
+            const float fy1 = intToFloat (y1);
+            const float fy2 = intToFloat (y2);
+
+            const LineSegment* s1 = segments.getRawDataPointer();
+            const LineSegment* s2 = s1;
+            int winding = s1->winding;
+
+            for (int i = segments.size(); --i > 0;)
+            {
+                ++s2;
+                winding += s2->winding;
+
+                if ((winding & windingMask) == 0)
+                {
+                    const float ax1 = intToFloat (s1->x1);
+                    const float ax2 = intToFloat (s1->x2);
+                    const float bx1 = intToFloat (s2->x1);
+                    const float bx2 = intToFloat (s2->x2);
+
+                    if (s1->x1 == s2->x1)
+                        consumer.useTriangle (ax1, fy1, ax2, fy2, bx2, fy2);
+                    else if (s1->x2 == s2->x2)
+                        consumer.useTriangle (ax1, fy1, bx1, fy1, ax2, fy2);
+                    else
+                        consumer.useTrapezoid (fy1, fy2, ax1, ax2, bx1, bx2);
+
+                    s1 = s2 + 1;
+                }
+            }
+        }
+
+        HorizontalSlice* next;
+        int y1, y2;
+
+    private:
+        struct LineSegment
+        {
+            LineSegment (int x1_, int x2_, int winding_) noexcept
+                : x1 (x1_), x2 (x2_), winding (winding_) {}
+
+            int x1, x2;
+            int winding;
+        };
+
+        Array<LineSegment> segments;
+    };
+
+    HorizontalSlice* firstSlice; // note: this cannot be a ScopedPointer!
+    const int windingMask;
+
+    void insert (HorizontalSlice*& last, HorizontalSlice* const newOne)
+    {
+        if (last == nullptr)
+        {
+            firstSlice = newOne;
+        }
+        else
+        {
+            jassert (newOne != last);
+            last->next = newOne;
+        }
+
+        last = newOne;
+    }
+
+    enum { factor = 128 };
+    static inline int floatToInt (float n) noexcept     { return roundToInt (n * (float) factor); }
+    static inline float intToFloat (int n) noexcept     { return n * (1.0f/ (float) factor); }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrapezoidedPath);
+};
+
+//==============================================================================
+class TrapezoidConsumer
+{
+public:
+    TrapezoidConsumer()
+    {
+        startNewBlock();
+    }
+
+    void draw (const int oversamplingLevel)
+    {
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f / (oversamplingLevel * oversamplingLevel));
+
+        glTranslatef (-0.5f, -0.5f, 0.0f);
+        const float inc = 1.0f / oversamplingLevel;
+
+        for (int y = oversamplingLevel; --y >= 0;)
+        {
+            for (int x = oversamplingLevel; --x >= 0;)
+            {
+                glTranslatef (inc, 0.0f, 0.0f);
+
+                for (int i = 0; i < blocks.size(); ++i)
+                    blocks.getUnchecked(i)->draw();
+            }
+
+            glTranslatef (-1.0f, inc, 0.0f);
+        }
+    }
+
+    void useTriangle (float x1, float y1, float x2, float y2, float x3, float y3)
+    {
+        if (currentBlock->numDone >= trianglesPerBlock)
+            startNewBlock();
+
+        GLfloat* t = currentBlock->getNextTriangle();
+        *t++ = x1; *t++ = y1; *t++ = x2; *t++ = y2; *t++ = x3; *t++ = y3;
+
+        currentBlock->numDone++;
+    }
+
+    void useTrapezoid (float y1, float y2, float x1, float x2, float x3, float x4)
+    {
+        if (currentBlock->numDone >= trianglesPerBlock - 1)
+            startNewBlock();
+
+        GLfloat* t = currentBlock->getNextTriangle();
+        *t++ = x1; *t++ = y1; *t++ = x2; *t++ = y2; *t++ = x3; *t++ = y1;
+        *t++ = x4; *t++ = y2; *t++ = x2; *t++ = y2; *t++ = x3; *t++ = y1;
+
+        currentBlock->numDone += 2;
+    }
+
+private:
+    // Some GL implementations can't take very large triangle lists, so store
+    // the list as a series of blocks containing this max number of triangles.
+    enum { trianglesPerBlock = 2048 };
+
+    struct TriangleBlock
+    {
+        TriangleBlock() noexcept : numDone (0) {}
+
+        void draw() const
+        {
+            glVertexPointer (2, GL_FLOAT, 0, triangles);
+            glDrawArrays (GL_TRIANGLES, 0, numDone * 3);
+        }
+
+        inline GLfloat* getNextTriangle() noexcept    { return triangles + numDone * 6; }
+
+        int numDone;
+        GLfloat triangles [trianglesPerBlock * 6];
+    };
+
+    void startNewBlock()
+    {
+        currentBlock = new TriangleBlock();
+        blocks.add (currentBlock);
+    }
+
+    OwnedArray<TriangleBlock> blocks;
+    TriangleBlock* currentBlock;
+};
+
+void OpenGLFrameBuffer::createAlphaChannelFromPath (const Path& path, const int oversamplingLevel)
+{
+    makeCurrentTarget();
+
+    glEnableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState (GL_COLOR_ARRAY);
+    glDisableClientState (GL_NORMAL_ARRAY);
+    glDisable (GL_TEXTURE_2D);
+    glDisable (GL_DEPTH_TEST);
+    glColorMask (GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_ONE, GL_ONE);
+
+    OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
+
+    TrapezoidedPath trapezoidedPath (path);
+    TrapezoidConsumer consumer;
+
+    trapezoidedPath.iterate (consumer);
+    consumer.draw (oversamplingLevel);
+}
+
 END_JUCE_NAMESPACE
