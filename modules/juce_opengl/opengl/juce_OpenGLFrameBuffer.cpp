@@ -341,7 +341,11 @@ public:
 
     ~TrapezoidedPath()
     {
-        delete firstSlice;
+        for (HorizontalSlice* s = firstSlice; s != nullptr;)
+        {
+            const ScopedPointer<HorizontalSlice> deleter (s);
+            s = s->next;
+        }
     }
 
     template <class Consumer>
@@ -386,7 +390,9 @@ private:
                     else
                     {
                         const int newX = x1 + (s->y1 - y1) * (x2 - x1) / (y2 - y1);
-                        insert (last, new HorizontalSlice (s, x1, y1, newX, s->y1, winding));
+                        HorizontalSlice* const newSlice = new HorizontalSlice (s, x1, y1, newX, s->y1, winding);
+                        insert (last, newSlice);
+                        last = newSlice;
                         x1 = newX;
                         y1 = s->y1;
                         continue;
@@ -427,23 +433,18 @@ private:
 
     struct HorizontalSlice
     {
-        HorizontalSlice (const HorizontalSlice& other, HorizontalSlice* next_, int y1_, int y2_)
+        HorizontalSlice (const HorizontalSlice& other, HorizontalSlice* const next_, int y1_, int y2_)
             : next (next_), y1 (y1_), y2 (y2_), segments (other.segments)
         {
         }
 
-        HorizontalSlice (HorizontalSlice* next_, int x1, int y1_, int x2, int y2_, int winding)
+        HorizontalSlice (HorizontalSlice* const next_, int x1, int y1_, int x2, int y2_, int winding)
             : next (next_), y1 (y1_), y2 (y2_)
         {
             jassert (next != this);
             jassert (y2 > y1);
             segments.ensureStorageAllocated (32);
             segments.add (LineSegment (x1, x2, winding));
-        }
-
-        ~HorizontalSlice()
-        {
-            delete next;
         }
 
         void addLine (const int x1, const int x2, int winding)
@@ -454,8 +455,8 @@ private:
             {
                 const LineSegment& l = segments.getReference (i);
 
-                const int diff1 = x1 - l.x1;
-                const int diff2 = x2 - l.x2;
+                const int diff1 = l.x1 - x1;
+                const int diff2 = l.x2 - x2;
 
                 if ((diff1 < 0) == (diff2 > 0))
                 {
@@ -465,7 +466,7 @@ private:
 
                     if (dxDiff != 0)
                     {
-                        const int intersectionY = (dy * (l.x1 - x1)) / dxDiff;
+                        const int intersectionY = (dy * diff1) / dxDiff;
 
                         if (intersectionY > 0 && intersectionY < dy)
                         {
@@ -478,7 +479,7 @@ private:
                     }
                 }
 
-                if (diff1 + diff2 < 0)
+                if (diff1 + diff2 > 0)
                 {
                     segments.insert (i, LineSegment (x1, x2, winding));
                     return;
@@ -530,15 +531,13 @@ private:
                 {
                     const float ax1 = intToFloat (s1->x1);
                     const float ax2 = intToFloat (s1->x2);
-                    const float bx1 = intToFloat (s2->x1);
-                    const float bx2 = intToFloat (s2->x2);
 
                     if (s1->x1 == s2->x1)
-                        consumer.useTriangle (ax1, fy1, ax2, fy2, bx2, fy2);
+                        consumer.addTriangle (ax1, fy1, ax2, fy2, intToFloat (s2->x2), fy2);
                     else if (s1->x2 == s2->x2)
-                        consumer.useTriangle (ax1, fy1, bx1, fy1, ax2, fy2);
+                        consumer.addTriangle (ax1, fy1, intToFloat (s2->x1), fy1, ax2, fy2);
                     else
-                        consumer.useTrapezoid (fy1, fy2, ax1, ax2, bx1, bx2);
+                        consumer.addTrapezoid (fy1, fy2, ax1, ax2, intToFloat (s2->x1), intToFloat (s2->x2));
 
                     s1 = s2 + 1;
                 }
@@ -551,7 +550,7 @@ private:
     private:
         struct LineSegment
         {
-            LineSegment (int x1_, int x2_, int winding_) noexcept
+            inline LineSegment (int x1_, int x2_, int winding_) noexcept
                 : x1 (x1_), x2 (x2_), winding (winding_) {}
 
             int x1, x2;
@@ -559,43 +558,41 @@ private:
         };
 
         Array<LineSegment> segments;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HorizontalSlice);
     };
 
-    HorizontalSlice* firstSlice; // note: this cannot be a ScopedPointer!
+    HorizontalSlice* firstSlice;
     const int windingMask;
 
-    void insert (HorizontalSlice*& last, HorizontalSlice* const newOne)
+    inline void insert (HorizontalSlice* const last, HorizontalSlice* const newOne) noexcept
     {
         if (last == nullptr)
-        {
             firstSlice = newOne;
-        }
         else
-        {
-            jassert (newOne != last);
             last->next = newOne;
-        }
-
-        last = newOne;
     }
 
     enum { factor = 128 };
-    static inline int floatToInt (float n) noexcept     { return roundToInt (n * (float) factor); }
-    static inline float intToFloat (int n) noexcept     { return n * (1.0f/ (float) factor); }
+    static inline int floatToInt (const float n) noexcept     { return roundToInt (n * (float) factor); }
+    static inline float intToFloat (const int n) noexcept     { return n * (1.0f/ (float) factor); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrapezoidedPath);
 };
 
 //==============================================================================
-class TrapezoidConsumer
+// Breaks a path into a set of openGL triangles..
+class TriangulatedPath
 {
 public:
-    TrapezoidConsumer()
+    TriangulatedPath (const Path& path)
     {
         startNewBlock();
+
+        TrapezoidedPath (path).iterate (*this);
     }
 
-    void draw (const int oversamplingLevel)
+    void draw (const int oversamplingLevel) const
     {
         glColor4f (1.0f, 1.0f, 1.0f, 1.0f / (oversamplingLevel * oversamplingLevel));
 
@@ -616,7 +613,7 @@ public:
         }
     }
 
-    void useTriangle (float x1, float y1, float x2, float y2, float x3, float y3)
+    void addTriangle (GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat x3, GLfloat y3)
     {
         if (currentBlock->numDone >= trianglesPerBlock)
             startNewBlock();
@@ -627,7 +624,7 @@ public:
         currentBlock->numDone++;
     }
 
-    void useTrapezoid (float y1, float y2, float x1, float x2, float x3, float x4)
+    void addTrapezoid (GLfloat y1, GLfloat y2, GLfloat x1, GLfloat x2, GLfloat x3, GLfloat x4)
     {
         if (currentBlock->numDone >= trianglesPerBlock - 1)
             startNewBlock();
@@ -668,8 +665,11 @@ private:
 
     OwnedArray<TriangleBlock> blocks;
     TriangleBlock* currentBlock;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TriangulatedPath);
 };
 
+//==============================================================================
 void OpenGLFrameBuffer::createAlphaChannelFromPath (const Path& path, const int oversamplingLevel)
 {
     makeCurrentTarget();
@@ -686,11 +686,7 @@ void OpenGLFrameBuffer::createAlphaChannelFromPath (const Path& path, const int 
 
     OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
 
-    TrapezoidedPath trapezoidedPath (path);
-    TrapezoidConsumer consumer;
-
-    trapezoidedPath.iterate (consumer);
-    consumer.draw (oversamplingLevel);
+    TriangulatedPath (path).draw (oversamplingLevel);
 }
 
 END_JUCE_NAMESPACE
