@@ -121,4 +121,146 @@ void OpenGLHelpers::drawQuad3D (float x1, float y1, float z1,
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
 
+namespace OpenGLGradientHelpers
+{
+    void drawTriangles (GLenum mode, const GLfloat* vertices, const GLfloat* textureCoords, const int numElements)
+    {
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState (GL_COLOR_ARRAY);
+        glDisableClientState (GL_NORMAL_ARRAY);
+
+        glVertexPointer (2, GL_FLOAT, 0, vertices);
+        glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
+
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+        glDrawArrays (mode, 0, numElements);
+    }
+
+    void fillWithLinearGradient (const Rectangle<int>& rect,
+                                 const ColourGradient& grad,
+                                 const AffineTransform& transform,
+                                 const int textureSize)
+    {
+        const Point<float> p1 (grad.point1.transformedBy (transform));
+        const Point<float> p2 (grad.point2.transformedBy (transform));
+        const Point<float> p3 (Point<float> (grad.point1.getX() - (grad.point2.getY() - grad.point1.getY()) / textureSize,
+                                             grad.point1.getY() + (grad.point2.getX() - grad.point1.getX()) / textureSize).transformedBy (transform));
+
+        const AffineTransform textureTransform (AffineTransform::fromTargetPoints (p1.getX(), p1.getY(),  0.0f, 0.0f,
+                                                                                   p2.getX(), p2.getY(),  1.0f, 0.0f,
+                                                                                   p3.getX(), p3.getY(),  0.0f, 1.0f));
+
+        const float l = (float) rect.getX();
+        const float r = (float) rect.getRight();
+        const float t = (float) rect.getY();
+        const float b = (float) rect.getBottom();
+
+        const GLfloat vertices[] = { l, t, r, t, l, b, r, b };
+        GLfloat textureCoords[]  = { l, t, r, t, l, b, r, b };
+
+        textureTransform.transformPoints (textureCoords[0], textureCoords[1], textureCoords[2], textureCoords[3]);
+        textureTransform.transformPoints (textureCoords[4], textureCoords[5], textureCoords[6], textureCoords[7]);
+
+        drawTriangles (GL_TRIANGLE_STRIP, vertices, textureCoords, 4);
+    }
+
+    void fillWithRadialGradient (const Rectangle<int>& rect,
+                                 const ColourGradient& grad,
+                                 const AffineTransform& transform)
+    {
+        const Point<float> centre (grad.point1.transformedBy (transform));
+
+        const float screenRadius = centre.getDistanceFrom (rect.getCentre().toFloat())
+                                    + Point<int> (rect.getWidth() / 2,
+                                                  rect.getHeight() / 2).getDistanceFromOrigin()
+                                    + 8.0f;
+
+        const AffineTransform inverse (transform.inverted());
+        const float renderingRadius = jmax (Point<float> (screenRadius, 0.0f).transformedBy (inverse).getDistanceFromOrigin(),
+                                            Point<float> (0.0f, screenRadius).transformedBy (inverse).getDistanceFromOrigin());
+
+        const int numDivisions = 80;
+        GLfloat vertices      [6 + numDivisions * 4];
+        GLfloat textureCoords [6 + numDivisions * 4];
+
+        {
+            const float originalRadius = grad.point1.getDistanceFrom (grad.point2);
+            const float texturePos = renderingRadius / originalRadius;
+
+            GLfloat* t = textureCoords;
+            *t++ = 0.0f;
+            *t++ = 0.0f;
+
+            for (int i = numDivisions + 1; --i >= 0;)
+            {
+                *t++ = texturePos;
+                *t++ = 0.0f;
+                *t++ = texturePos;
+                *t++ = 1.0f;
+            }
+
+            jassert (t == textureCoords + numElementsInArray (vertices));
+        }
+
+        {
+            GLfloat* v = vertices;
+
+            *v++ = centre.getX();
+            *v++ = centre.getY();
+
+            const Point<float> first (grad.point1.translated (renderingRadius, -renderingRadius).transformedBy (transform));
+            Point<float> last (first);
+
+            for (int i = 0; i < numDivisions; ++i)
+            {
+                const float angle = (i + 1) * (float_Pi * 4.0f / numDivisions);
+                const Point<float> next (grad.point1.translated (std::sin (angle) * renderingRadius,
+                                                                 -std::cos (angle) * renderingRadius)
+                                                    .transformedBy (transform));
+                *v++ = last.getX();
+                *v++ = last.getY();
+                *v++ = next.getX();
+                *v++ = next.getY();
+                last = next;
+            }
+
+            *v++ = last.getX();
+            *v++ = last.getY();
+            *v++ = first.getX();
+            *v++ = first.getY();
+
+            jassert (v == vertices + numElementsInArray (vertices));
+        }
+
+        glEnable (GL_SCISSOR_TEST);
+        glScissor (rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+        drawTriangles (GL_TRIANGLE_FAN, vertices, textureCoords, numDivisions + 3);
+        glDisable (GL_SCISSOR_TEST);
+    }
+}
+
+void OpenGLHelpers::fillRectWithColourGradient (const Rectangle<int>& rect,
+                                                const ColourGradient& gradient,
+                                                const AffineTransform& transform)
+{
+    const int textureSize = 256;
+    OpenGLTexture texture;
+
+    HeapBlock<PixelARGB> lookup (textureSize);
+    gradient.createLookupTable (lookup, textureSize);
+    texture.load (lookup, textureSize, 1);
+    texture.bind();
+
+    if (gradient.isOpaque())
+        glDisable (GL_BLEND);
+    else
+        glEnable (GL_BLEND);
+
+    if (gradient.isRadial)
+        OpenGLGradientHelpers::fillWithRadialGradient (rect, gradient, transform);
+    else
+        OpenGLGradientHelpers::fillWithLinearGradient (rect, gradient, transform, textureSize);
+}
+
 END_JUCE_NAMESPACE

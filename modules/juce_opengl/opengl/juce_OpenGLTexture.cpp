@@ -25,6 +25,12 @@
 
 BEGIN_JUCE_NAMESPACE
 
+#if JUCE_OPENGL_ES
+ enum { internalGLTextureFormat = GL_RGBA };
+#else
+ enum { internalGLTextureFormat = 4 };
+#endif
+
 
 OpenGLTexture::OpenGLTexture()
     : textureID (0), width (0), height (0)
@@ -36,12 +42,12 @@ OpenGLTexture::~OpenGLTexture()
     release();
 }
 
-void OpenGLTexture::load (const Image& image)
+void OpenGLTexture::create (const int w, const int h)
 {
     release();
 
-    width  = image.getWidth();
-    height = image.getHeight();
+    width  = w;
+    height = h;
 
     jassert (BitArray (width).countNumberOfSetBits() == 1); // these dimensions must be a power-of-two
     jassert (BitArray (height).countNumberOfSetBits() == 1);
@@ -57,19 +63,25 @@ void OpenGLTexture::load (const Image& image)
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
+}
+
+void OpenGLTexture::load (const Image& image)
+{
+    create (image.getWidth(), image.getHeight());
 
     Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
-   #if JUCE_OPENGL_ES
-    enum { internalFormat = GL_RGBA };
-   #else
-    enum { internalFormat = 4 };
-   #endif
-
-    glTexImage2D (GL_TEXTURE_2D, 0, internalFormat,
-                  width, height, 0,
+    glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, width, height, 0,
                   image.getFormat() == Image::RGB ? GL_RGB : GL_BGRA_EXT,
                   GL_UNSIGNED_BYTE, srcData.data);
+}
+
+void OpenGLTexture::load (const PixelARGB* const pixels, const int w, const int h)
+{
+    create (w, h);
+
+    glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, w, h, 0,
+                  GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 }
 
 void OpenGLTexture::release()

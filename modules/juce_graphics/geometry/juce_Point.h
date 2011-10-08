@@ -137,14 +137,14 @@ public:
         @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
     */
     Point getPointOnCircumference (const float radius, const float angle) const noexcept  { return Point<float> (x + radius * std::sin (angle),
-                                                                                                                       y - radius * std::cos (angle)); }
+                                                                                                                 y - radius * std::cos (angle)); }
     /** Taking this point to be the centre of an ellipse, this returns a point on its circumference.
         @param radiusX  the horizontal radius of the circle.
         @param radiusY  the vertical radius of the circle.
         @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
     */
     Point getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const noexcept  { return Point<float> (x + radiusX * std::sin (angle),
-                                                                                                                                             y - radiusY * std::cos (angle)); }
+                                                                                                                                       y - radiusY * std::cos (angle)); }
 
     /** Uses a transform to change the point's co-ordinates.
         This will only compile if ValueType = float!

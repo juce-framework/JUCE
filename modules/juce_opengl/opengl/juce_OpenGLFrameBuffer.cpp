@@ -639,7 +639,7 @@ public:
 private:
     // Some GL implementations can't take very large triangle lists, so store
     // the list as a series of blocks containing this max number of triangles.
-    enum { trianglesPerBlock = 2048 };
+    enum { trianglesPerBlock = 256 };
 
     struct TriangleBlock
     {

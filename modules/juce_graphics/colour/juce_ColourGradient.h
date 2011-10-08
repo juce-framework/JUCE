@@ -128,8 +128,16 @@ public:
     /** Creates a set of interpolated premultiplied ARGB values.
         This will resize the HeapBlock, fill it with the colours, and will return the number of
         colours that it added.
+        When calling this, the ColourGradient must have at least 2 colour stops specified.
     */
     int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const;
+
+    /** Creates a set of interpolated premultiplied ARGB values.
+        This will fill an array of a user-specified size with the gradient, interpolating to fit.
+        The numEntries argument specifies the size of the array, and this size must be greater than zero.
+        When calling this, the ColourGradient must have at least 2 colour stops specified.
+    */
+    void createLookupTable (PixelARGB* resultLookupTable, int numEntries) const noexcept;
 
     /** Returns true if all colours are opaque. */
     bool isOpaque() const noexcept;

@@ -40,6 +40,9 @@ public:
     */
     void load (const Image& image);
 
+    /** Creates a texture from a raw array of pixels. */
+    void load (const PixelARGB* pixels, int width, int height);
+
     /** Frees the texture, if there is one. */
     void release();
 
@@ -66,6 +69,8 @@ public:
 private:
     unsigned int textureID;
     int width, height;
+
+    void create (int w, int h);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTexture);
 };

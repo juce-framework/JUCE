@@ -253,27 +253,29 @@ void Viewport::updateVisibleArea()
     horizontalScrollBar.setVisible (hBarVisible);
     verticalScrollBar.setVisible (vBarVisible);
 
-    const Point<int> newContentCompPos (viewportPosToCompPos (visibleOrigin));
-
-    if (contentComp != nullptr && contentComp->getBounds().getPosition() != newContentCompPos)
+    if (contentComp != nullptr)
     {
-        contentComp->setTopLeftPosition (newContentCompPos);  // (this will re-entrantly call updateVisibleArea again)
-    }
-    else
-    {
-        const Rectangle<int> visibleArea (visibleOrigin.getX(), visibleOrigin.getY(),
-                                          jmin (contentBounds.getWidth() - visibleOrigin.getX(),  contentArea.getWidth()),
-                                          jmin (contentBounds.getHeight() - visibleOrigin.getY(), contentArea.getHeight()));
+        const Point<int> newContentCompPos (viewportPosToCompPos (visibleOrigin));
 
-        if (lastVisibleArea != visibleArea)
+        if (contentComp->getBounds().getPosition() != newContentCompPos)
         {
-            lastVisibleArea = visibleArea;
-            visibleAreaChanged (visibleArea);
+            contentComp->setTopLeftPosition (newContentCompPos);  // (this will re-entrantly call updateVisibleArea again)
+            return;
         }
-
-        horizontalScrollBar.handleUpdateNowIfNeeded();
-        verticalScrollBar.handleUpdateNowIfNeeded();
     }
+
+    const Rectangle<int> visibleArea (visibleOrigin.getX(), visibleOrigin.getY(),
+                                      jmin (contentBounds.getWidth()  - visibleOrigin.getX(), contentArea.getWidth()),
+                                      jmin (contentBounds.getHeight() - visibleOrigin.getY(), contentArea.getHeight()));
+
+    if (lastVisibleArea != visibleArea)
+    {
+        lastVisibleArea = visibleArea;
+        visibleAreaChanged (visibleArea);
+    }
+
+    horizontalScrollBar.handleUpdateNowIfNeeded();
+    verticalScrollBar.handleUpdateNowIfNeeded();
 }
 
 //==============================================================================

@@ -60,6 +60,11 @@ public:
                             float x3, float y3, float z3,
                             float x4, float y4, float z4,
                             const Colour& colour);
+
+    /** Fills a rectangle with the specified gradient. */
+    static void fillRectWithColourGradient (const Rectangle<int>& rect,
+                                            const ColourGradient& gradient,
+                                            const AffineTransform& transform);
 };
 
 
