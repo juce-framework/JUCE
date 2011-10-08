@@ -66,6 +66,10 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 //==============================================================================
 #ifndef WM_TOUCH
  #define WM_TOUCH 0x0240
+ #define TOUCH_COORD_TO_PIXEL(l)  ((l) / 100)
+ #define TOUCHEVENTF_MOVE   0x0001
+ #define TOUCHEVENTF_DOWN   0x0002
+ #define TOUCHEVENTF_UP     0x0004
  DECLARE_HANDLE (HTOUCHINPUT);
 
  typedef struct tagTOUCHINPUT
@@ -81,21 +85,16 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     DWORD cxContact;
     DWORD cyContact;
  } TOUCHINPUT, *PTOUCHINPUT;
-
- #define TOUCH_COORD_TO_PIXEL(l) ((l) / 100)
-
- #define TOUCHEVENTF_MOVE            0x0001
- #define TOUCHEVENTF_DOWN            0x0002
- #define TOUCHEVENTF_UP              0x0004
 #endif
 
 typedef BOOL (WINAPI* RegisterTouchWindowFunc) (HWND, ULONG);
 typedef BOOL (WINAPI* GetTouchInputInfoFunc) (HTOUCHINPUT, UINT, PTOUCHINPUT, int);
 typedef BOOL (WINAPI* CloseTouchInputHandleFunc) (HTOUCHINPUT);
 
-static RegisterTouchWindowFunc registerTouchWindow = nullptr;
-static GetTouchInputInfoFunc getTouchInputInfo = nullptr;
+static RegisterTouchWindowFunc   registerTouchWindow = nullptr;
+static GetTouchInputInfoFunc     getTouchInputInfo = nullptr;
 static CloseTouchInputHandleFunc closeTouchInputHandle = nullptr;
+
 static bool hasCheckedForMultiTouch = false;
 
 static bool canUseMultiTouch()
@@ -1542,17 +1541,20 @@ private:
                 const DWORD flags = inputInfo[i].dwFlags;
 
                 if ((flags & (TOUCHEVENTF_DOWN | TOUCHEVENTF_MOVE | TOUCHEVENTF_UP)) != 0)
-                    handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0,
-                                                    (flags & TOUCHEVENTF_UP) != 0,
-                                                    false);
+                {
+                    if (! handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0,
+                                                          (flags & TOUCHEVENTF_UP) != 0))
+                        return;  // abandon method if this window was deleted by the callback
+                }
             }
         }
 
         closeTouchInputHandle (eventHandle);
     }
 
-    void handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp, bool isCancel)
+    bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp)
     {
+        bool isCancel = false;
         const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
         const int64 time = getMouseEventTime();
         const Point<int> pos (globalToLocal (Point<int> ((int) TOUCH_COORD_TO_PIXEL (touch.x),
@@ -1567,7 +1569,7 @@ private:
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
             handleMouseEvent (touchIndex + 1, pos, modsToSend.withoutMouseButtons(), time);
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
-                return;
+                return false;
         }
         else if (isUp)
         {
@@ -1586,14 +1588,16 @@ private:
 
         handleMouseEvent (touchIndex + 1, pos, modsToSend, time);
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
-            return;
+            return false;
 
         if (isUp || isCancel)
         {
             handleMouseEvent (touchIndex + 1, Point<int> (-1, -1), currentModifiers, time);
             if (! isValidPeer (this))
-                return;
+                return false;
         }
+
+        return true;
     }
 
     //==============================================================================
