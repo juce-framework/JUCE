@@ -160,7 +160,7 @@ public:
                 + (int64) ([e timestamp] * 1000.0);
     }
 
-    static const Rectangle<int> rotatedScreenPosToReal (const Rectangle<int>& r)
+    static Rectangle<int> rotatedScreenPosToReal (const Rectangle<int>& r)
     {
         const Rectangle<int> screen (convertToRectInt ([[UIScreen mainScreen] bounds]));
 
@@ -187,7 +187,7 @@ public:
         return r;
     }
 
-    static const Rectangle<int> realScreenPosToRotated (const Rectangle<int>& r)
+    static Rectangle<int> realScreenPosToRotated (const Rectangle<int>& r)
     {
         const Rectangle<int> screen (convertToRectInt ([[UIScreen mainScreen] bounds]));
 
@@ -214,7 +214,7 @@ public:
         return r;
     }
 
-    Array <UITouch*> currentTouches;
+    MultiTouchMapper<UITouch*> currentTouches;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer);
@@ -739,17 +739,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
         juce_lastMousePos = pos + getScreenPosition();
 
         const int64 time = getMouseTime (event);
-
-        int touchIndex = currentTouches.indexOf (touch);
-
-        if (touchIndex < 0)
-        {
-            for (touchIndex = 0; touchIndex < currentTouches.size(); ++touchIndex)
-                if (currentTouches.getUnchecked (touchIndex) == nil)
-                    break;
-
-            currentTouches.set (touchIndex, touch);
-        }
+        const int touchIndex = currentTouches.getIndexOfTouch (touch);
 
         ModifierKeys modsToSend (currentModifiers);
 
@@ -772,14 +762,9 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
                 continue;
 
             modsToSend = modsToSend.withoutMouseButtons();
-            currentTouches.set (touchIndex, nil);
+            currentTouches.clearTouch (touchIndex);
 
-            int totalActiveTouches = 0;
-            for (int j = currentTouches.size(); --j >= 0;)
-                if (currentTouches.getUnchecked(j) != nil)
-                    ++totalActiveTouches;
-
-            if (totalActiveTouches == 0)
+            if (! currentTouches.areAnyTouchesActive())
                 isCancel = true;
         }
 

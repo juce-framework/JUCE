@@ -46,7 +46,7 @@ static bool shouldDeactivateTitleBar = true;
 
 //==============================================================================
 typedef BOOL (WINAPI* UpdateLayeredWinFunc) (HWND, HDC, POINT*, SIZE*, HDC, POINT*, COLORREF, BLENDFUNCTION*, DWORD);
-static UpdateLayeredWinFunc updateLayeredWindow = 0;
+static UpdateLayeredWinFunc updateLayeredWindow = nullptr;
 
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
@@ -55,6 +55,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
         if (! juce_IsRunningInWine())
         {
             HMODULE user32Mod = GetModuleHandle (_T("user32.dll"));
+            jassert (user32Mod != 0);
             updateLayeredWindow = (UpdateLayeredWinFunc) GetProcAddress (user32Mod, "UpdateLayeredWindow");
         }
     }
@@ -62,6 +63,59 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return updateLayeredWindow != 0;
 }
 
+//==============================================================================
+#ifndef WM_TOUCH
+ #define WM_TOUCH 0x0240
+ DECLARE_HANDLE (HTOUCHINPUT);
+
+ typedef struct tagTOUCHINPUT
+ {
+    LONG x;
+    LONG y;
+    HANDLE hSource;
+    DWORD dwID;
+    DWORD dwFlags;
+    DWORD dwMask;
+    DWORD dwTime;
+    ULONG_PTR dwExtraInfo;
+    DWORD cxContact;
+    DWORD cyContact;
+ } TOUCHINPUT, *PTOUCHINPUT;
+
+ #define TOUCH_COORD_TO_PIXEL(l) ((l) / 100)
+
+ #define TOUCHEVENTF_MOVE            0x0001
+ #define TOUCHEVENTF_DOWN            0x0002
+ #define TOUCHEVENTF_UP              0x0004
+#endif
+
+typedef BOOL (WINAPI* RegisterTouchWindowFunc) (HWND, ULONG);
+typedef BOOL (WINAPI* GetTouchInputInfoFunc) (HTOUCHINPUT, UINT, PTOUCHINPUT, int);
+typedef BOOL (WINAPI* CloseTouchInputHandleFunc) (HTOUCHINPUT);
+
+static RegisterTouchWindowFunc registerTouchWindow = nullptr;
+static GetTouchInputInfoFunc getTouchInputInfo = nullptr;
+static CloseTouchInputHandleFunc closeTouchInputHandle = nullptr;
+static bool hasCheckedForMultiTouch = false;
+
+static bool canUseMultiTouch()
+{
+    if (registerTouchWindow == nullptr && ! hasCheckedForMultiTouch)
+    {
+        hasCheckedForMultiTouch = true;
+
+        HMODULE user32Mod = GetModuleHandle (_T("user32.dll"));
+        jassert (user32Mod != 0);
+
+        registerTouchWindow   = (RegisterTouchWindowFunc)   GetProcAddress (user32Mod, "RegisterTouchWindow");
+        getTouchInputInfo     = (GetTouchInputInfoFunc)     GetProcAddress (user32Mod, "GetTouchInputInfo");
+        closeTouchInputHandle = (CloseTouchInputHandleFunc) GetProcAddress (user32Mod, "CloseTouchInputHandle");
+    }
+
+    return registerTouchWindow != nullptr;
+}
+
+//==============================================================================
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
     return upright;
@@ -864,6 +918,7 @@ private:
     HICON currentWindowIcon;
     IDropTarget* dropTarget;
     uint8 updateLayeredWindowAlpha;
+    MultiTouchMapper<DWORD> currentTouches;
 
     //==============================================================================
     class TemporaryImage    : public Timer
@@ -981,6 +1036,7 @@ private:
                 case WM_MOUSEACTIVATE:
                 case WM_NCMOUSEHOVER:
                 case WM_MOUSEHOVER:
+                case WM_TOUCH:
                     return isHWNDBlockedByModalComponents (m.hwnd);
 
                 case WM_NCLBUTTONDOWN:
@@ -1085,6 +1141,9 @@ private:
                 dropTarget = new JuceDropTarget (*this);
 
             RegisterDragDrop (hwnd, dropTarget);
+
+            if (canUseMultiTouch())
+                registerTouchWindow (hwnd, 0);
 
             updateBorderSize();
 
@@ -1470,6 +1529,75 @@ private:
         peer->handleMouseWheel (0, peer->globalToLocal (globalPos), getMouseEventTime(),
                                 isVertical ? 0.0f : -amount,
                                 isVertical ? amount : 0.0f);
+    }
+
+    void doTouchEvent (const int numInputs, HTOUCHINPUT eventHandle)
+    {
+        HeapBlock<TOUCHINPUT> inputInfo (numInputs);
+
+        if (getTouchInputInfo (eventHandle, numInputs, inputInfo, sizeof (TOUCHINPUT)))
+        {
+            for (int i = 0; i < numInputs; ++i)
+            {
+                const DWORD flags = inputInfo[i].dwFlags;
+
+                if ((flags & (TOUCHEVENTF_DOWN | TOUCHEVENTF_MOVE | TOUCHEVENTF_UP)) != 0)
+                    handleTouchInput (inputInfo[i], (flags & TOUCHEVENTF_DOWN) != 0,
+                                                    (flags & TOUCHEVENTF_UP) != 0,
+                                                    false);
+            }
+        }
+
+        closeTouchInputHandle (eventHandle);
+    }
+
+    void handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp, bool isCancel)
+    {
+        POINT p = { TOUCH_COORD_TO_PIXEL (touch.x),
+                    TOUCH_COORD_TO_PIXEL (touch.y) };
+        ScreenToClient (hwnd, &p);
+
+        const Point<int> pos ((int) p.x, (int) p.y);
+        const int64 time = getMouseEventTime();
+        const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
+
+        ModifierKeys modsToSend (currentModifiers);
+
+        if (isDown)
+        {
+            currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+            modsToSend = currentModifiers;
+
+            // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
+            handleMouseEvent (touchIndex + 1, pos, modsToSend.withoutMouseButtons(), time);
+            if (! isValidPeer (this)) // (in case this component was deleted by the event)
+                return;
+        }
+        else if (isUp)
+        {
+            modsToSend = modsToSend.withoutMouseButtons();
+            currentTouches.clearTouch (touchIndex);
+
+            if (! currentTouches.areAnyTouchesActive())
+                isCancel = true;
+        }
+
+        if (isCancel)
+        {
+            currentTouches.clear();
+            currentModifiers = currentModifiers.withoutMouseButtons();
+        }
+
+        handleMouseEvent (touchIndex + 1, pos, modsToSend, time);
+        if (! isValidPeer (this)) // (in case this component was deleted by the event)
+            return;
+
+        if (isUp || isCancel)
+        {
+            handleMouseEvent (touchIndex + 1, Point<int> (-1, -1), currentModifiers, time);
+            if (! isValidPeer (this))
+                return;
+        }
     }
 
     //==============================================================================
@@ -2006,6 +2134,13 @@ private:
             case 0x020A: /* WM_MOUSEWHEEL */
             case 0x020E: /* WM_MOUSEHWHEEL */
                 doMouseWheel (getCurrentMousePosGlobal(), wParam, message == 0x020A);
+                return 0;
+
+            case WM_TOUCH:
+                if (getTouchInputInfo == nullptr)
+                    break;
+
+                doTouchEvent ((int) wParam, (HTOUCHINPUT) lParam);
                 return 0;
 
             //==============================================================================
@@ -2680,6 +2815,10 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 void Desktop::createMouseInputSources()
 {
     mouseSources.add (new MouseInputSource (0, true));
+
+    if (canUseMultiTouch())
+        for (int i = 1; i <= 10; ++i)
+            mouseSources.add (new MouseInputSource (i, false));
 }
 
 Point<int> MouseInputSource::getCurrentMousePosition()
