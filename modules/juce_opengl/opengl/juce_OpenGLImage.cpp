@@ -74,14 +74,7 @@ namespace OpenGLImageHelpers
     {
         static void read (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
         {
-            if (frameBuffer.makeCurrentTarget())
-            {
-                OpenGLHelpers::prepareFor2D (frameBuffer.getWidth(), frameBuffer.getHeight());
-
-                glPixelStorei (GL_PACK_ALIGNMENT, 4);
-                glReadPixels (x, y, bitmapData.width, bitmapData.height, GL_RGBA, GL_UNSIGNED_BYTE, bitmapData.data);
-                frameBuffer.releaseCurrentTarget();
-            }
+            frameBuffer.readPixels (bitmapData.data, Rectangle<int> (x, y, bitmapData.width, bitmapData.height));
         }
     };
 
@@ -93,49 +86,7 @@ namespace OpenGLImageHelpers
 
         void write (const void* const data) const noexcept
         {
-            if (frameBuffer.makeCurrentTarget())
-            {
-                OpenGLHelpers::prepareFor2D (frameBuffer.getWidth(), frameBuffer.getHeight());
-
-                glDisable (GL_DEPTH_TEST);
-                glDisable (GL_BLEND);
-
-               #if JUCE_OPENGL_ES
-                // GLES has no glDrawPixels function, so we have to create a texture and draw it..
-                GLuint temporaryTexture = 0;
-                glGenTextures (1, &temporaryTexture);
-                jassert (temporaryTexture != 0); // can't create a texture!
-
-                if (temporaryTexture != 0)
-                {
-                    glEnable (GL_TEXTURE_2D);
-                    glBindTexture (GL_TEXTURE_2D, temporaryTexture);
-
-                    glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
-                    glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, area.getWidth(), area.getHeight(), 0,
-                                  GL_BGRA_EXT, GL_UNSIGNED_BYTE, data);
-
-                    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-                    const int cropRect[4] = { 0, 0, area.getWidth(), area.getHeight() };
-                    glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
-
-                    glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
-
-                    glBindTexture (GL_TEXTURE_2D, 0);
-                    glDeleteTextures (1, &temporaryTexture);
-                }
-
-               #else
-                glRasterPos2i (area.getX(), area.getY());
-                glBindTexture (GL_TEXTURE_2D, 0);
-                glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
-                glDrawPixels (area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, data);
-              #endif
-
-                frameBuffer.releaseCurrentTarget();
-            }
+            frameBuffer.writePixels (data, area);
         }
 
         OpenGLFrameBuffer& frameBuffer;

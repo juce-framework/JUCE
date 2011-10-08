@@ -49,9 +49,23 @@ public:
     */
     bool initialise (int width, int height);
 
-    /** Releases the buffer, if one has been allocated. */
+    /** Releases the buffer, if one has been allocated.
+        Any saved state that was created with saveAndRelease() will also be freed by this call.
+    */
     void release();
 
+    /** If the framebuffer is active, this will save a stashed copy of its contents in main memory,
+        and will release the GL buffer.
+        After saving, the original state can be restored again by calling reloadSavedCopy().
+    */
+    void saveAndRelease();
+
+    /** Restores the framebuffer content that was previously saved using saveAndRelease().
+        After saving to main memory, the original state can be restored by calling restoreToGPUMemory().
+    */
+    bool reloadSavedCopy();
+
+    //==============================================================================
     /** Returns true if a valid buffer has been allocated. */
     bool isValid() const noexcept                       { return pimpl != nullptr; }
 
@@ -88,6 +102,12 @@ public:
                  float x4, float y4, float z4,
                  const Colour& colour) const;
 
+    /** Reads an area of pixels from the framebuffer into a specified pixel array. */
+    bool readPixels (void* target, const Rectangle<int>& area);
+
+    /** Writes an area of pixels into the framebuffer from a specified pixel array. */
+    bool writePixels (const void* target, const Rectangle<int>& area);
+
     /** This will render an anti-aliased path into just the alpha channel of this framebuffer.
 
         The idea here is that you can clear a framebuffer, use this to set its alpha channel, then
@@ -103,6 +123,10 @@ private:
     class Pimpl;
     friend class ScopedPointer<Pimpl>;
     ScopedPointer<Pimpl> pimpl;
+
+    class SavedState;
+    friend class ScopedPointer<SavedState>;
+    ScopedPointer<SavedState> savedState;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBuffer);
 };

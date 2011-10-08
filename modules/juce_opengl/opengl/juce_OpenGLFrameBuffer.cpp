@@ -250,6 +250,34 @@ private:
     JUCE_DECLARE_NON_COPYABLE (Pimpl);
 };
 
+//==============================================================================
+class OpenGLFrameBuffer::SavedState
+{
+public:
+    SavedState (OpenGLFrameBuffer& buffer, const int w, const int h)
+        : width (w), height (h),
+          data (w * h)
+    {
+        buffer.readPixels (data, Rectangle<int> (0, 0, w, h));
+    }
+
+    bool restore (OpenGLFrameBuffer& buffer)
+    {
+        if (buffer.initialise (width, height))
+        {
+            buffer.writePixels (data, Rectangle<int> (0, 0, width, height));
+            return true;
+        }
+
+        return false;
+    }
+
+private:
+    const int width, height;
+    HeapBlock <int32> data;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState);
+};
 
 //==============================================================================
 OpenGLFrameBuffer::OpenGLFrameBuffer() {}
@@ -257,7 +285,7 @@ OpenGLFrameBuffer::~OpenGLFrameBuffer() {}
 
 bool OpenGLFrameBuffer::initialise (int width, int height)
 {
-    release();
+    pimpl = nullptr;
     pimpl = new Pimpl (width, height, true, false);
 
     if (! pimpl->ok)
@@ -269,6 +297,28 @@ bool OpenGLFrameBuffer::initialise (int width, int height)
 void OpenGLFrameBuffer::release()
 {
     pimpl = nullptr;
+    savedState = nullptr;
+}
+
+void OpenGLFrameBuffer::saveAndRelease()
+{
+    if (pimpl != nullptr)
+    {
+        savedState = new SavedState (*this, pimpl->width, pimpl->height);
+        pimpl = nullptr;
+    }
+}
+
+bool OpenGLFrameBuffer::reloadSavedCopy()
+{
+    if (savedState != nullptr
+         && savedState->restore (*this))
+    {
+        savedState = nullptr;
+        return true;
+    }
+
+    return false;
 }
 
 int OpenGLFrameBuffer::getWidth() const noexcept            { return pimpl != nullptr ? pimpl->width : 0; }
@@ -277,6 +327,10 @@ GLuint OpenGLFrameBuffer::getTextureID() const noexcept     { return pimpl != nu
 
 bool OpenGLFrameBuffer::makeCurrentTarget()
 {
+    // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
+    // reloadSavedCopy() to put it back into GPU memory before using it..
+    jassert (savedState == nullptr);
+
     return pimpl != nullptr && pimpl->bind();
 }
 
@@ -293,6 +347,70 @@ void OpenGLFrameBuffer::clear (const Colour& colour)
         OpenGLHelpers::clear (colour);
         releaseCurrentTarget();
     }
+}
+
+bool OpenGLFrameBuffer::readPixels (void* target, const Rectangle<int>& area)
+{
+    if (! makeCurrentTarget())
+        return false;
+
+    OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
+
+    glPixelStorei (GL_PACK_ALIGNMENT, 4);
+    glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, target);
+
+    glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+
+    return true;
+}
+
+bool OpenGLFrameBuffer::writePixels (const void* data, const Rectangle<int>& area)
+{
+    if (! makeCurrentTarget())
+        return false;
+
+    OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
+
+    glDisable (GL_DEPTH_TEST);
+    glDisable (GL_BLEND);
+
+   #if JUCE_OPENGL_ES
+    // GLES has no glDrawPixels function, so we have to create a texture and draw it..
+    GLuint temporaryTexture = 0;
+    glGenTextures (1, &temporaryTexture);
+    jassert (temporaryTexture != 0); // can't create a texture!
+
+    if (temporaryTexture != 0)
+    {
+        glEnable (GL_TEXTURE_2D);
+        glBindTexture (GL_TEXTURE_2D, temporaryTexture);
+
+        glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
+        glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, area.getWidth(), area.getHeight(), 0,
+                      GL_BGRA_EXT, GL_UNSIGNED_BYTE, data);
+
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        const int cropRect[4] = { 0, 0, area.getWidth(), area.getHeight() };
+        glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
+
+        glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
+
+        glBindTexture (GL_TEXTURE_2D, 0);
+        glDeleteTextures (1, &temporaryTexture);
+    }
+
+   #else
+    glRasterPos2i (area.getX(), area.getY());
+    glBindTexture (GL_TEXTURE_2D, 0);
+    glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
+    glDrawPixels (area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, data);
+  #endif
+
+    glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+
+    return true;
 }
 
 void OpenGLFrameBuffer::draw2D (float x1, float y1,
@@ -332,9 +450,7 @@ public:
         : firstSlice (nullptr),
           windingMask (p.isUsingNonZeroWinding() ? -1 : 1)
     {
-        PathFlatteningIterator iter (p);
-
-        while (iter.next())
+        for (PathFlatteningIterator iter (p); iter.next();)
             addLine (floatToInt (iter.x1), floatToInt (iter.y1),
                      floatToInt (iter.x2), floatToInt (iter.y2));
     }
@@ -575,7 +691,7 @@ private:
 
     enum { factor = 128 };
     static inline int floatToInt (const float n) noexcept     { return roundToInt (n * (float) factor); }
-    static inline float intToFloat (const int n) noexcept     { return n * (1.0f/ (float) factor); }
+    static inline float intToFloat (const int n) noexcept     { return n * (1.0f / (float) factor); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrapezoidedPath);
 };
