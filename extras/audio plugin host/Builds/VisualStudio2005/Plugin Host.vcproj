@@ -85,7 +85,7 @@
             TypeLibraryName=".\Release\Plugin Host.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
-            Optimization="2"
+            Optimization="1"
             InlineFunctionExpansion="1"
             StringPooling="true"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode;c:\SDKs\vstsdk2.4"
@@ -3845,6 +3845,7 @@
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\native\juce_mac_MouseCursor.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\native\juce_mac_NSViewComponentPeer.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\native\juce_mac_Windowing.mm"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\native\juce_win32_DragAndDrop.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

@@ -438,6 +438,7 @@
 		852C44541F302ECE66F1369D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CustomTypeface.h"; path = "../../../../modules/juce_graphics/fonts/juce_CustomTypeface.h"; sourceTree = "SOURCE_ROOT"; };
 		854E09D6791FAA63FD774F05 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_ComponentLayoutPanel.cpp"; path = "../../src/ui/jucer_ComponentLayoutPanel.cpp"; sourceTree = "SOURCE_ROOT"; };
 		858CB9B13580398A66685B49 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_LookAndFeel.cpp"; path = "../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel.cpp"; sourceTree = "SOURCE_ROOT"; };
+		85C3E577B62AAE4E02295B40 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_MultiTouchMapper.h"; path = "../../../../modules/juce_gui_basics/native/juce_MultiTouchMapper.h"; sourceTree = "SOURCE_ROOT"; };
 		866CDAD4E22B3318EEE45621 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ComponentUndoableAction.h"; path = "../../src/model/components/jucer_ComponentUndoableAction.h"; sourceTree = "SOURCE_ROOT"; };
 		86742D778847DB69243EAF2F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TextButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_TextButton.h"; sourceTree = "SOURCE_ROOT"; };
 		86C00D9FE681C7318697DBFB = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_FillType.cpp"; path = "../../src/model/paintelements/jucer_FillType.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1516,6 +1517,7 @@
 				7F8DDDAFF79F6EBFF60C584A,
 				0542DC47766D750AF3A127B6,
 				7CB38E0FFD17B18E68DB5487,
+				85C3E577B62AAE4E02295B40,
 				116AD9367AFF9F2E2452B6DB,
 				3A889B42A19D28430DBD4480,
 				52B7EC1B24062BEB423D2E44 ); name = native; sourceTree = "<group>"; };

@@ -85,7 +85,7 @@
             TypeLibraryName=".\Release\BinaryBuilder.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
-            Optimization="2"
+            Optimization="1"
             InlineFunctionExpansion="1"
             StringPooling="true"
             AdditionalIncludeDirectories="..\..\JuceLibraryCode"

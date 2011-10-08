@@ -1553,14 +1553,10 @@ private:
 
     void handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp, bool isCancel)
     {
-        POINT p = { TOUCH_COORD_TO_PIXEL (touch.x),
-                    TOUCH_COORD_TO_PIXEL (touch.y) };
-        ScreenToClient (hwnd, &p);
-
-        const Point<int> pos ((int) p.x, (int) p.y);
-        const int64 time = getMouseEventTime();
         const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
-
+        const int64 time = getMouseEventTime();
+        const Point<int> pos (globalToLocal (Point<int> ((int) TOUCH_COORD_TO_PIXEL (touch.x),
+                                                         (int) TOUCH_COORD_TO_PIXEL (touch.y))));
         ModifierKeys modsToSend (currentModifiers);
 
         if (isDown)
