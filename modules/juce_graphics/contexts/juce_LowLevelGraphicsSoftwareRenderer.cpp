@@ -2377,12 +2377,99 @@ void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, float le
 }
 
 //==============================================================================
-class LowLevelGraphicsSoftwareRenderer::CachedGlyph
+template <class CachedGlyphType, class RenderTargetType>
+class GlyphCache  : private DeletedAtShutdown
 {
 public:
-    CachedGlyph() : glyph (0), lastAccessCount (0) {}
+    GlyphCache()
+        : accessCounter (0), hits (0), misses (0)
+    {
+        addNewGlyphSlots (120);
+    }
 
-    void draw (SavedState& state, float x, const float y) const
+    ~GlyphCache()
+    {
+        getSingletonPointer() = nullptr;
+    }
+
+    static GlyphCache& getInstance()
+    {
+        GlyphCache*& g = getSingletonPointer();
+
+        if (g == nullptr)
+            g = new GlyphCache();
+
+        return *g;
+    }
+
+    //==============================================================================
+    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, float x, float y)
+    {
+        ++accessCounter;
+        int oldestCounter = std::numeric_limits<int>::max();
+        CachedGlyphType* oldest = nullptr;
+
+        for (int i = glyphs.size(); --i >= 0;)
+        {
+            CachedGlyphType* const glyph = glyphs.getUnchecked (i);
+
+            if (glyph->glyph == glyphNumber && glyph->font == font)
+            {
+                ++hits;
+                glyph->lastAccessCount = accessCounter;
+                glyph->draw (target, x, y);
+                return;
+            }
+
+            if (glyph->lastAccessCount <= oldestCounter)
+            {
+                oldestCounter = glyph->lastAccessCount;
+                oldest = glyph;
+            }
+        }
+
+        if (hits + ++misses > (glyphs.size() << 4))
+        {
+            if (misses * 2 > hits)
+                addNewGlyphSlots (32);
+
+            hits = misses = 0;
+            oldest = glyphs.getLast();
+        }
+
+        jassert (oldest != nullptr);
+        oldest->lastAccessCount = accessCounter;
+        oldest->generate (font, glyphNumber);
+        oldest->draw (target, x, y);
+    }
+
+private:
+    friend class OwnedArray <CachedGlyphType>;
+    OwnedArray <CachedGlyphType> glyphs;
+    int accessCounter, hits, misses;
+
+    void addNewGlyphSlots (int num)
+    {
+        while (--num >= 0)
+            glyphs.add (new CachedGlyphType());
+    }
+
+    static GlyphCache*& getSingletonPointer() noexcept
+    {
+        static GlyphCache* g = nullptr;
+        return g;
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache);
+};
+
+//==============================================================================
+class CachedGlyphEdgeTable
+{
+public:
+    CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
+
+    void draw (LowLevelGraphicsSoftwareRenderer::SavedState& state, float x, const float y) const
     {
         if (snapToIntegerCoordinate)
             x = std::floor (x + 0.5f);
@@ -2413,93 +2500,8 @@ public:
 private:
     ScopedPointer <EdgeTable> edgeTable;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyph);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable);
 };
-
-//==============================================================================
-class LowLevelGraphicsSoftwareRenderer::GlyphCache  : private DeletedAtShutdown
-{
-public:
-    GlyphCache()
-        : accessCounter (0), hits (0), misses (0)
-    {
-        addNewGlyphSlots (120);
-    }
-
-    ~GlyphCache()
-    {
-        clearSingletonInstance();
-    }
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (GlyphCache);
-
-    //==============================================================================
-    void drawGlyph (SavedState& state, const Font& font, const int glyphNumber, float x, float y)
-    {
-        ++accessCounter;
-        int oldestCounter = std::numeric_limits<int>::max();
-        CachedGlyph* oldest = nullptr;
-
-        for (int i = glyphs.size(); --i >= 0;)
-        {
-            CachedGlyph* const glyph = glyphs.getUnchecked (i);
-
-            if (glyph->glyph == glyphNumber && glyph->font == font)
-            {
-                ++hits;
-                glyph->lastAccessCount = accessCounter;
-                glyph->draw (state, x, y);
-                return;
-            }
-
-            if (glyph->lastAccessCount <= oldestCounter)
-            {
-                oldestCounter = glyph->lastAccessCount;
-                oldest = glyph;
-            }
-        }
-
-        if (hits + ++misses > (glyphs.size() << 4))
-        {
-            if (misses * 2 > hits)
-                addNewGlyphSlots (32);
-
-            hits = misses = 0;
-            oldest = glyphs.getLast();
-        }
-
-        jassert (oldest != nullptr);
-        oldest->lastAccessCount = accessCounter;
-        oldest->generate (font, glyphNumber);
-        oldest->draw (state, x, y);
-    }
-
-private:
-    friend class OwnedArray <CachedGlyph>;
-    OwnedArray <CachedGlyph> glyphs;
-    int accessCounter, hits, misses;
-
-    void addNewGlyphSlots (int num)
-    {
-        while (--num >= 0)
-            glyphs.add (new CachedGlyph());
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache);
-};
-
-juce_ImplementSingleton_SingleThreaded (LowLevelGraphicsSoftwareRenderer::GlyphCache);
-
-
-void LowLevelGraphicsSoftwareRenderer::setFont (const Font& newFont)
-{
-    currentState->font = newFont;
-}
-
-Font LowLevelGraphicsSoftwareRenderer::getFont()
-{
-    return currentState->font;
-}
 
 void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineTransform& transform)
 {
@@ -2507,17 +2509,22 @@ void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineT
 
     if (transform.isOnlyTranslation() && currentState->isOnlyTranslated)
     {
-        GlyphCache::getInstance()->drawGlyph (*currentState, f, glyphNumber,
-                                              transform.getTranslationX(),
-                                              transform.getTranslationY());
+        GlyphCache <CachedGlyphEdgeTable, SavedState>::getInstance()
+            .drawGlyph (*currentState, f, glyphNumber,
+                        transform.getTranslationX(),
+                        transform.getTranslationY());
     }
     else
     {
         const float fontHeight = f.getHeight();
-        currentState->drawGlyph (f, glyphNumber, AffineTransform::scale (fontHeight * f.getHorizontalScale(), fontHeight)
-                                                                 .followedBy (transform));
+        currentState->drawGlyph (f, glyphNumber,
+                                 AffineTransform::scale (fontHeight * f.getHorizontalScale(), fontHeight)
+                                                 .followedBy (transform));
     }
 }
+
+void LowLevelGraphicsSoftwareRenderer::setFont (const Font& newFont)    { currentState->font = newFont; }
+Font LowLevelGraphicsSoftwareRenderer::getFont()                        { return currentState->font; }
 
 #if JUCE_MSVC
  #pragma warning (pop)

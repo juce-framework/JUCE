@@ -95,12 +95,11 @@ protected:
     //==============================================================================
     Image image;
 
-    class GlyphCache;
-    class CachedGlyph;
-    class SavedState;
-    friend class ScopedPointer <SavedState>;
-    friend class OwnedArray <SavedState>;
-    friend class OwnedArray <CachedGlyph>;
+   #ifndef DOXYGEN
+    public:  class SavedState;
+    private:
+   #endif
+
     ScopedPointer <SavedState> currentState;
     OwnedArray <SavedState> stateStack;
 

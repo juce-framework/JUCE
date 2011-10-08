@@ -177,8 +177,8 @@ namespace OpenGLGradientHelpers
                                     + 8.0f;
 
         const AffineTransform inverse (transform.inverted());
-        const float renderingRadius = jmax (Point<float> (screenRadius, 0.0f).transformedBy (inverse).getDistanceFromOrigin(),
-                                            Point<float> (0.0f, screenRadius).transformedBy (inverse).getDistanceFromOrigin());
+        const float sourceRadius = jmax (Point<float> (screenRadius, 0.0f).transformedBy (inverse).getDistanceFromOrigin(),
+                                         Point<float> (0.0f, screenRadius).transformedBy (inverse).getDistanceFromOrigin());
 
         const int numDivisions = 80;
         GLfloat vertices      [6 + numDivisions * 4];
@@ -186,7 +186,7 @@ namespace OpenGLGradientHelpers
 
         {
             const float originalRadius = grad.point1.getDistanceFrom (grad.point2);
-            const float texturePos = renderingRadius / originalRadius;
+            const float texturePos = sourceRadius / originalRadius;
 
             GLfloat* t = textureCoords;
             *t++ = 0.0f;
@@ -205,18 +205,17 @@ namespace OpenGLGradientHelpers
 
         {
             GLfloat* v = vertices;
-
             *v++ = centre.getX();
             *v++ = centre.getY();
 
-            const Point<float> first (grad.point1.translated (renderingRadius, -renderingRadius).transformedBy (transform));
+            const Point<float> first (grad.point1.translated (sourceRadius, -sourceRadius).transformedBy (transform));
             Point<float> last (first);
 
             for (int i = 0; i < numDivisions; ++i)
             {
                 const float angle = (i + 1) * (float_Pi * 4.0f / numDivisions);
-                const Point<float> next (grad.point1.translated (std::sin (angle) * renderingRadius,
-                                                                 -std::cos (angle) * renderingRadius)
+                const Point<float> next (grad.point1.translated (std::sin (angle) * sourceRadius,
+                                                                 std::cos (angle) * -sourceRadius)
                                                     .transformedBy (transform));
                 *v++ = last.getX();
                 *v++ = last.getY();
