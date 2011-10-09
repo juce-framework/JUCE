@@ -26,6 +26,7 @@
 #ifndef __JUCE_OPENGLHELPERS_JUCEHEADER__
 #define __JUCE_OPENGLHELPERS_JUCEHEADER__
 
+//==============================================================================
 /**
     A set of miscellaneous openGL helper functions.
 */
@@ -61,10 +62,47 @@ public:
                             float x4, float y4, float z4,
                             const Colour& colour);
 
+    /** Fills a rectangle with the specified colour. */
+    static void fillRectWithColour (const Rectangle<int>& rect,
+                                    const Colour& colour);
+
     /** Fills a rectangle with the specified gradient. */
     static void fillRectWithColourGradient (const Rectangle<int>& rect,
                                             const ColourGradient& gradient,
                                             const AffineTransform& transform);
+};
+
+//==============================================================================
+/** Holds a set of OpenGL triangles, having generated them from a Path object.
+*/
+class JUCE_API  TriangulatedPath
+{
+public:
+    TriangulatedPath (const Path& path);
+
+    /** Renders the path, using a jittered oversampling method.
+        The oversampling level is the square root of the number of times it
+        should be oversampled, so 3 or 4 might be reasonable.
+    */
+    void draw (int oversamplingLevel) const;
+
+    /** Reduces the memory footprint of this object to the minimum possible. */
+    void optimiseStorage();
+
+private:
+    class TrapezoidedPath;
+    friend class TrapezoidedPath;
+
+    void startNewBlock();
+    void addTriangle (GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat x3, GLfloat y3);
+    void addTrapezoid (GLfloat y1, GLfloat y2, GLfloat x1, GLfloat x2, GLfloat x3, GLfloat x4);
+
+    struct TriangleBlock;
+    friend class OwnedArray<TriangleBlock>;
+    OwnedArray<TriangleBlock> blocks;
+    TriangleBlock* currentBlock;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TriangulatedPath);
 };
 
 

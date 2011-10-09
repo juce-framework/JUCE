@@ -74,7 +74,7 @@ namespace OpenGLImageHelpers
     {
         static void read (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
         {
-            frameBuffer.readPixels (bitmapData.data, Rectangle<int> (x, y, bitmapData.width, bitmapData.height));
+            frameBuffer.readPixels (bitmapData.data, 0, Rectangle<int> (x, y, bitmapData.width, bitmapData.height));
         }
     };
 
@@ -86,7 +86,7 @@ namespace OpenGLImageHelpers
 
         void write (const void* const data) const noexcept
         {
-            frameBuffer.writePixels (data, area);
+            frameBuffer.writePixels (data, 0, 4, area);
         }
 
         OpenGLFrameBuffer& frameBuffer;

@@ -49,6 +49,12 @@ public:
     */
     bool initialise (int width, int height);
 
+    /** Tries to allocates a buffer containing a copy of a given image.
+        Note that a valid openGL context must be selected when you call this method,
+        or it will fail.
+    */
+    bool initialise (const Image& content);
+
     /** Releases the buffer, if one has been allocated.
         Any saved state that was created with saveAndRelease() will also be freed by this call.
     */
@@ -102,11 +108,19 @@ public:
                  float x4, float y4, float z4,
                  const Colour& colour) const;
 
-    /** Reads an area of pixels from the framebuffer into a specified pixel array. */
-    bool readPixels (void* target, const Rectangle<int>& area);
+    /** Reads an area of pixels from the framebuffer into a 32-bit ARGB pixel array.
+        The lineStride is measured as a number of pixels, not bytes - pass a stride
+        of 0 to indicate a packed array.
+    */
+    bool readPixels (void* targetData, int lineStride, const Rectangle<int>& sourceArea);
 
-    /** Writes an area of pixels into the framebuffer from a specified pixel array. */
-    bool writePixels (const void* target, const Rectangle<int>& area);
+    /** Writes an area of pixels into the framebuffer from a specified pixel array.
+        The lineStride is measured as a number of pixels, not bytes - pass a stride
+        of 0 to indicate a packed array.
+    */
+    bool writePixels (const void* srcData,
+                      int srcLineStride, int srcPixelStride,
+                      const Rectangle<int>& targetArea);
 
     /** This will render an anti-aliased path into just the alpha channel of this framebuffer.
 

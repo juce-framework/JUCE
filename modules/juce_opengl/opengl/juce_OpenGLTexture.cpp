@@ -61,8 +61,6 @@ void OpenGLTexture::create (const int w, const int h)
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
 }
 
 void OpenGLTexture::load (const Image& image)
@@ -71,8 +69,11 @@ void OpenGLTexture::load (const Image& image)
 
     Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
+    glPixelStorei (GL_UNPACK_ALIGNMENT, srcData.pixelFormat);
+    glPixelStorei (GL_UNPACK_ROW_LENGTH, srcData.lineStride);
+
     glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, width, height, 0,
-                  image.getFormat() == Image::RGB ? GL_RGB : GL_BGRA_EXT,
+                  srcData.pixelFormat == Image::RGB ? GL_RGB : GL_BGRA_EXT,
                   GL_UNSIGNED_BYTE, srcData.data);
 }
 
@@ -80,6 +81,7 @@ void OpenGLTexture::load (const PixelARGB* const pixels, const int w, const int 
 {
     create (w, h);
 
+    glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
     glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, w, h, 0,
                   GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 }
