@@ -157,14 +157,14 @@ AffineTransform AffineTransform::scale (const float factorX, const float factorY
 }
 
 AffineTransform AffineTransform::scaled (const float factorX, const float factorY,
-                                               const float pivotX, const float pivotY) const noexcept
+                                         const float pivotX, const float pivotY) const noexcept
 {
     return AffineTransform (factorX * mat00, factorX * mat01, factorX * mat02 + pivotX * (1.0f - factorX),
                             factorY * mat10, factorY * mat11, factorY * mat12 + pivotY * (1.0f - factorY));
 }
 
 AffineTransform AffineTransform::scale (const float factorX, const float factorY,
-                                              const float pivotX, const float pivotY) noexcept
+                                        const float pivotX, const float pivotY) noexcept
 {
     return AffineTransform (factorX, 0, pivotX * (1.0f - factorX),
                             0, factorY, pivotY * (1.0f - factorY));
@@ -184,6 +184,11 @@ AffineTransform AffineTransform::sheared (const float shearX, const float shearY
                             shearY * mat00 + mat10,
                             shearY * mat01 + mat11,
                             shearY * mat02 + mat12);
+}
+
+AffineTransform AffineTransform::verticalFlip (const float height) noexcept
+{
+    return AffineTransform (1.0f, 0, 0, 0, -1.0f, height);
 }
 
 AffineTransform AffineTransform::inverted() const noexcept

@@ -169,8 +169,7 @@ void CoreGraphicsContext::setOrigin (int x, int y)
 
 void CoreGraphicsContext::addTransform (const AffineTransform& transform)
 {
-    applyTransform (AffineTransform::scale (1.0f, -1.0f)
-                                    .translated (0, flipHeight)
+    applyTransform (AffineTransform::verticalFlip (flipHeight)
                                     .followedBy (transform)
                                     .translated (0, -flipHeight)
                                     .scaled (1.0f, -1.0f));
@@ -253,7 +252,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, true, greyColourSpace, true);
 
         flip();
-        AffineTransform t (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
+        AffineTransform t (AffineTransform::verticalFlip (sourceImage.getHeight()).followedBy (transform));
         applyTransform (t);
 
         CGRect r = CGRectMake (0, 0, sourceImage.getWidth(), sourceImage.getHeight());
@@ -447,7 +446,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
     CGContextSetAlpha (context, state->fillType.getOpacity());
 
     flip();
-    applyTransform (AffineTransform::scale (1.0f, -1.0f).translated (0, ih).followedBy (transform));
+    applyTransform (AffineTransform::verticalFlip (ih).followedBy (transform));
     CGRect imageRect = CGRectMake (0, 0, iw, ih);
 
     if (fillEntireClipAsTiles)

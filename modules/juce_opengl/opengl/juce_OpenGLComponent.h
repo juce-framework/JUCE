@@ -42,7 +42,8 @@
     method to draw its contents.
 
 */
-class JUCE_API  OpenGLComponent  : public OpenGLBaseType
+class JUCE_API  OpenGLComponent  : public OpenGLBaseType,
+                                   public OpenGLRenderingTarget
 {
 public:
     //==============================================================================
@@ -160,10 +161,7 @@ public:
     */
     OpenGLContext* getCurrentContext() const noexcept           { return context; }
 
-    /** Makes this component the current openGL context.
-
-        You might want to use this in things like your resize() method, before calling
-        GL commands.
+    /** Makes this component the currently active openGL context.
 
         If this returns false, then the context isn't active, so you should avoid
         making any calls.
@@ -172,25 +170,18 @@ public:
         it does this, it will also synchronously call the newOpenGLContextCreated()
         method to let you initialise it as necessary.
 
-        @see OpenGLContext::makeActive
+        @see releaseAsRenderingTarget
     */
-    bool makeCurrentContextActive();
+    bool makeCurrentRenderingTarget();
 
     /** Stops the current component being the active OpenGL context.
-
-        This is the opposite of makeCurrentContextActive()
-
-        @see OpenGLContext::makeInactive
+        This is the opposite of makeCurrentRenderingTarget()
+        @see makeCurrentRenderingTarget
     */
-    void makeCurrentContextInactive();
+    void releaseAsRenderingTarget();
 
-    /** Returns true if this component's context is the active openGL context for the
-        current thread.
-
-        @see OpenGLContext::isActive
-    */
-    bool isActiveContext() const noexcept;
-
+    int getRenderingTargetWidth() const         { return getWidth(); }
+    int getRenderingTargetHeight() const        { return getHeight(); }
 
     //==============================================================================
     /** Calls the rendering callback, and swaps the buffers afterwards.

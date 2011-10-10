@@ -4056,6 +4056,7 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLImage.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLPixelFormat.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLRenderingTarget.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

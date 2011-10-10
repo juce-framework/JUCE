@@ -85,7 +85,7 @@ public:
 
     /** Returns an OS-dependent handle to the raw GL context.
 
-        On win32, this will be a HGLRC; on the Mac, an AGLContext; on Linux,
+        On win32, this will be a HGLRC; on the Mac, an NSOpenGLContext; on Linux,
         a GLXContext.
     */
     virtual void* getRawContext() const noexcept = 0;

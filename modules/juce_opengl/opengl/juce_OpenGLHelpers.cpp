@@ -25,6 +25,7 @@
 
 BEGIN_JUCE_NAMESPACE
 
+//==============================================================================
 void OpenGLHelpers::resetErrorState()
 {
     while (glGetError() != GL_NO_ERROR) {}
@@ -44,7 +45,7 @@ void OpenGLHelpers::setColour (const Colour& colour)
                colour.getFloatBlue(), colour.getFloatAlpha());
 }
 
-void OpenGLHelpers::prepareFor2D (int width, int height)
+void OpenGLHelpers::prepareFor2D (const int width, const int height)
 {
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity();
@@ -73,6 +74,15 @@ void OpenGLHelpers::setPerspective (double fovy, double aspect, double zNear, do
 
     glFrustum  (ymin * aspect, ymax * aspect, ymin, ymax, zNear, zFar);
    #endif
+}
+
+void OpenGLHelpers::applyTransform (const AffineTransform& t)
+{
+    const GLfloat m[] = { t.mat00, t.mat10, 0, 0,
+                          t.mat01, t.mat11, 0, 0,
+                          0,       0,       1, 0,
+                          t.mat02, t.mat12, 0, 1 };
+    glMultMatrixf (m);
 }
 
 void OpenGLHelpers::drawQuad2D (float x1, float y1,
@@ -126,6 +136,8 @@ namespace OpenGLGradientHelpers
 {
     void drawTriangles (GLenum mode, const GLfloat* vertices, const GLfloat* textureCoords, const int numElements)
     {
+        glEnable (GL_BLEND);
+        glEnable (GL_TEXTURE_2D);
         glEnableClientState (GL_VERTEX_ARRAY);
         glEnableClientState (GL_TEXTURE_COORD_ARRAY);
         glDisableClientState (GL_COLOR_ARRAY);
@@ -243,11 +255,6 @@ void OpenGLHelpers::fillRectWithColourGradient (const Rectangle<int>& rect,
     texture.load (lookup, textureSize, 1);
     texture.bind();
 
-    if (gradient.isOpaque())
-        glDisable (GL_BLEND);
-    else
-        glEnable (GL_BLEND);
-
     if (gradient.point1 == gradient.point2)
     {
         fillRectWithColour (rect, gradient.getColourAtPosition (1.0));
@@ -267,13 +274,17 @@ void OpenGLHelpers::fillRectWithColour (const Rectangle<int>& rect, const Colour
     glDisableClientState (GL_TEXTURE_COORD_ARRAY);
     glDisableClientState (GL_COLOR_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);
+    setColour (colour);
+    fillRect (rect);
+}
 
+void OpenGLHelpers::fillRect (const Rectangle<int>& rect)
+{
     const GLfloat vertices[] = { (float) rect.getX(),     (float) rect.getY(),
                                  (float) rect.getRight(), (float) rect.getY(),
                                  (float) rect.getX(),     (float) rect.getBottom(),
                                  (float) rect.getRight(), (float) rect.getBottom() };
 
-    setColour (colour);
     glVertexPointer (2, GL_FLOAT, 0, vertices);
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
@@ -283,11 +294,11 @@ void OpenGLHelpers::fillRectWithColour (const Rectangle<int>& rect, const Colour
 class TriangulatedPath::TrapezoidedPath
 {
 public:
-    TrapezoidedPath (const Path& p)
+    TrapezoidedPath (const Path& p, const AffineTransform& transform)
         : firstSlice (nullptr),
           windingMask (p.isUsingNonZeroWinding() ? -1 : 1)
     {
-        for (PathFlatteningIterator iter (p); iter.next();)
+        for (PathFlatteningIterator iter (p, transform); iter.next();)
             addLine (floatToInt (iter.x1), floatToInt (iter.y1),
                      floatToInt (iter.x2), floatToInt (iter.y2));
     }
@@ -558,10 +569,10 @@ struct TriangulatedPath::TriangleBlock
     HeapBlock<GLfloat> triangles;
 };
 
-TriangulatedPath::TriangulatedPath (const Path& path)
+TriangulatedPath::TriangulatedPath (const Path& path, const AffineTransform& transform)
 {
     startNewBlock();
-    TrapezoidedPath (path).iterate (*this);
+    TrapezoidedPath (path, transform).iterate (*this);
 }
 
 void TriangulatedPath::draw (const int oversamplingLevel) const
@@ -617,6 +628,256 @@ void TriangulatedPath::addTrapezoid (GLfloat y1, GLfloat y2, GLfloat x1, GLfloat
     *t++ = x4; *t++ = y2; *t++ = x2; *t++ = y2; *t++ = x3; *t++ = y1;
 
     currentBlock->numVertices += 12;
+}
+
+//==============================================================================
+OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
+    : width (image.getWidth()),
+      height (image.getHeight())
+{
+    OpenGLFrameBufferImage* glImage = dynamic_cast <OpenGLFrameBufferImage*> (image.getSharedImage());
+
+    if (glImage != nullptr)
+    {
+        textureID = glImage->frameBuffer.getTextureID();
+    }
+    else
+    {
+        if (OpenGLTexture::isValidSize (width, height))
+        {
+            texture = new OpenGLTexture();
+            texture->load (image);
+            textureID = texture->getTextureID();
+        }
+        else
+        {
+            frameBuffer = new OpenGLFrameBuffer();
+            frameBuffer->initialise (image);
+            textureID = frameBuffer->getTextureID();
+        }
+    }
+}
+
+OpenGLTextureFromImage::~OpenGLTextureFromImage() {}
+
+//==============================================================================
+OpenGLRenderingTarget::OpenGLRenderingTarget() {}
+OpenGLRenderingTarget::~OpenGLRenderingTarget() {}
+
+void OpenGLRenderingTarget::prepareFor2D()
+{
+    OpenGLHelpers::prepareFor2D (getRenderingTargetWidth(),
+                                 getRenderingTargetHeight());
+}
+
+namespace GLPathRendering
+{
+    void clipToPath (OpenGLRenderingTarget& target,
+                     const Path& path, const AffineTransform& transform)
+    {
+        const int w = target.getRenderingTargetWidth();
+        const int h = target.getRenderingTargetHeight();
+
+        OpenGLFrameBuffer fb;
+        fb.initialise (w, h);
+        fb.makeCurrentAndClear();
+        fb.createAlphaChannelFromPath (path, transform);
+
+        target.makeCurrentRenderingTarget();
+        target.prepareFor2D();
+
+        glColorMask (GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
+        glBlendFunc (GL_DST_ALPHA, GL_ZERO);
+
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+        fb.drawAt (0, 0);
+    }
+
+    void fillPathWithColour (OpenGLRenderingTarget& target,
+                             const Rectangle<int>& clip, const Path& path,
+                             const AffineTransform& pathTransform,
+                             const Colour& colour)
+    {
+        OpenGLFrameBuffer f;
+        f.initialise (clip.getWidth(), clip.getHeight());
+        f.makeCurrentAndClear();
+
+        f.createAlphaChannelFromPath (path, pathTransform.translated ((float) -clip.getX(), (float) -clip.getY())
+                                                         .followedBy (AffineTransform::verticalFlip ((float) clip.getHeight())));
+        f.releaseAsRenderingTarget();
+
+        target.makeCurrentRenderingTarget();
+
+        glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        OpenGLHelpers::setColour (colour);
+        target.prepareFor2D();
+
+        f.drawAt ((float) clip.getX(), (float) (target.getRenderingTargetHeight() - clip.getBottom()));
+    }
+
+    void fillPathWithGradient (OpenGLRenderingTarget& target,
+                               const Rectangle<int>& clip, const Path& path,
+                               const AffineTransform& pathTransform,
+                               const ColourGradient& grad,
+                               const AffineTransform& gradientTransform,
+                               const GLfloat alpha)
+    {
+        const int targetHeight = target.getRenderingTargetHeight();
+
+        OpenGLFrameBuffer f;
+        f.initialise (clip.getWidth(), clip.getHeight());
+        f.makeCurrentAndClear();
+
+        const AffineTransform correction (AffineTransform::translation ((float) -clip.getX(), (float) -clip.getY())
+                                              .followedBy (AffineTransform::verticalFlip ((float) clip.getHeight())));
+
+        f.createAlphaChannelFromPath (path, pathTransform.followedBy (correction));
+
+        f.makeCurrentRenderingTarget();
+        f.prepareFor2D();
+
+        glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glBlendFunc (GL_DST_ALPHA, GL_ZERO);
+
+        OpenGLHelpers::fillRectWithColourGradient (Rectangle<int> (0, 0, clip.getWidth(), clip.getHeight()),
+                                                   grad, gradientTransform.followedBy (correction));
+        f.releaseAsRenderingTarget();
+        target.makeCurrentRenderingTarget();
+
+        glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4f (alpha, alpha, alpha, alpha);
+        target.prepareFor2D();
+
+        f.drawAt ((float) clip.getX(), (float) (targetHeight - clip.getBottom()));
+    }
+
+    void fillPathWithImage (OpenGLRenderingTarget& target,
+                            const Rectangle<int>& clip, const Path& path,
+                            const AffineTransform& transform,
+                            GLuint textureID, GLfloat textureWidth, GLfloat textureHeight,
+                            const AffineTransform& textureTransform,
+                            const bool tiled,
+                            const GLfloat alpha)
+    {
+        const int targetHeight = target.getRenderingTargetHeight();
+
+        OpenGLFrameBuffer f;
+        f.initialise (clip.getWidth(), clip.getHeight());
+        f.makeCurrentRenderingTarget();
+        f.prepareFor2D();
+
+        glDisable (GL_BLEND);
+        glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+
+        const GLfloat clipX = (GLfloat) clip.getX();
+        const GLfloat clipY = (GLfloat) clip.getY();
+        const GLfloat clipH = (GLfloat) clip.getHeight();
+        const GLfloat clipB = (GLfloat) clip.getBottom();
+
+        const AffineTransform correction (AffineTransform::translation (-clipX, -clipY)
+                                            .followedBy (AffineTransform::verticalFlip (clipH)));
+
+        glBindTexture (GL_TEXTURE_2D, textureID);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState (GL_COLOR_ARRAY);
+        glDisableClientState (GL_NORMAL_ARRAY);
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+
+        if (tiled)
+        {
+            glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+            const GLfloat clipW = (GLfloat) clip.getWidth();
+            const GLfloat clipR = (GLfloat) clip.getRight();
+
+            const GLfloat vertices[]  = { 0, clipH, clipW, clipH, 0, 0, clipW, 0 };
+            GLfloat textureCoords[]   = { clipX, clipY, clipR, clipY, clipX, clipB, clipR, clipB };
+
+            {
+                const AffineTransform t (textureTransform.inverted().scaled (1.0f / textureWidth,
+                                                                             1.0f / textureHeight));
+                t.transformPoints (textureCoords[0], textureCoords[1], textureCoords[2], textureCoords[3]);
+                t.transformPoints (textureCoords[4], textureCoords[5], textureCoords[6], textureCoords[7]);
+            }
+
+            glVertexPointer (2, GL_FLOAT, 0, vertices);
+            glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
+
+            glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        }
+        else
+        {
+            glClearColor (0, 0, 0, 0);
+            glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+            glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+            GLfloat vertices[] = { 0, 0, textureWidth, 0, 0, textureHeight, textureWidth, textureHeight };
+            const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
+
+            {
+                const AffineTransform t (textureTransform.followedBy (correction));
+                t.transformPoints (vertices[0], vertices[1], vertices[2], vertices[3]);
+                t.transformPoints (vertices[4], vertices[5], vertices[6], vertices[7]);
+            }
+
+            glVertexPointer (2, GL_FLOAT, 0, vertices);
+            glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
+
+            glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        }
+
+        glBindTexture (GL_TEXTURE_2D, 0);
+
+        clipToPath (f, path, transform.followedBy (correction));
+
+        f.releaseAsRenderingTarget();
+        target.makeCurrentRenderingTarget();
+
+        glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4f (1.0f, 1.0f, 1.0f, alpha);
+        target.prepareFor2D();
+
+        f.drawAt (clipX, targetHeight - clipB);
+    }
+}
+
+void OpenGLRenderingTarget::fillPath (const Rectangle<int>& clip,
+                                      const Path& path, const AffineTransform& transform,
+                                      const FillType& fill)
+{
+    if (! fill.isInvisible())
+    {
+        if (fill.isColour())
+        {
+            GLPathRendering::fillPathWithColour (*this, clip, path, transform, fill.colour);
+        }
+        else if (fill.isGradient())
+        {
+            GLPathRendering::fillPathWithGradient (*this, clip, path, transform,
+                                                   *(fill.gradient), fill.transform,
+                                                   fill.colour.getFloatAlpha());
+        }
+        else if (fill.isTiledImage())
+        {
+            OpenGLTextureFromImage t (fill.image);
+
+            GLPathRendering::fillPathWithImage (*this, clip, path, transform,
+                                                t.textureID, (GLfloat) t.width, (GLfloat) t.height,
+                                                fill.transform, true,
+                                                fill.colour.getFloatAlpha());
+        }
+    }
 }
 
 END_JUCE_NAMESPACE

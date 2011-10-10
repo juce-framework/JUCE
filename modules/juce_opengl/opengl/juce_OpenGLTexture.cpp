@@ -42,15 +42,19 @@ OpenGLTexture::~OpenGLTexture()
     release();
 }
 
+bool OpenGLTexture::isValidSize (int width, int height)
+{
+    return isPowerOfTwo (width) && isPowerOfTwo (height);
+}
+
 void OpenGLTexture::create (const int w, const int h)
 {
+    jassert (isValidSize (w, h)); // Perhaps these dimensions must be a power-of-two?
+
     release();
 
     width  = w;
     height = h;
-
-    jassert (BitArray (width).countNumberOfSetBits() == 1); // these dimensions must be a power-of-two
-    jassert (BitArray (height).countNumberOfSetBits() == 1);
 
     glGenTextures (1, &textureID);
     glBindTexture (GL_TEXTURE_2D, textureID);
@@ -67,14 +71,21 @@ void OpenGLTexture::load (const Image& image)
 {
     create (image.getWidth(), image.getHeight());
 
-    Image::BitmapData srcData (image, Image::BitmapData::readOnly);
+    {
+        Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
-    glPixelStorei (GL_UNPACK_ALIGNMENT, srcData.pixelFormat);
-    glPixelStorei (GL_UNPACK_ROW_LENGTH, srcData.lineStride);
+        glPixelStorei (GL_UNPACK_ALIGNMENT, srcData.pixelFormat);
 
-    glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, width, height, 0,
-                  srcData.pixelFormat == Image::RGB ? GL_RGB : GL_BGRA_EXT,
-                  GL_UNSIGNED_BYTE, srcData.data);
+        if (srcData.lineStride == image.getWidth() * srcData.pixelStride)
+        {
+            glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, width, height, 0,
+                          srcData.pixelFormat == Image::RGB ? GL_RGB : GL_BGRA_EXT,
+                          GL_UNSIGNED_BYTE, srcData.data);
+            return;
+        }
+    }
+
+    load (Image (image.getSharedImage()->clone()));
 }
 
 void OpenGLTexture::load (const PixelARGB* const pixels, const int w, const int h)

@@ -498,6 +498,7 @@
 		9D4FC9BEE122256B2557D088 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLFrameBuffer.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLFrameBuffer.h"; sourceTree = "SOURCE_ROOT"; };
 		9D7F83D461E62DDA82C74EA8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_PropertyPanel.cpp"; path = "../../../../modules/juce_gui_basics/properties/juce_PropertyPanel.cpp"; sourceTree = "SOURCE_ROOT"; };
 		9D9D7797A0B32F28838D8FC7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_GZIPCompressorOutputStream.h"; path = "../../../../modules/juce_core/zip/juce_GZIPCompressorOutputStream.h"; sourceTree = "SOURCE_ROOT"; };
+		9E067C6101B6E2D11365EBDC = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLRenderingTarget.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLRenderingTarget.h"; sourceTree = "SOURCE_ROOT"; };
 		9E7E5C859FFDA600253B3379 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ScopedPointer.h"; path = "../../../../modules/juce_core/memory/juce_ScopedPointer.h"; sourceTree = "SOURCE_ROOT"; };
 		9E80E6825A34DD1E15D0F61C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_HeapBlock.h"; path = "../../../../modules/juce_core/memory/juce_HeapBlock.h"; sourceTree = "SOURCE_ROOT"; };
 		9EAEFA0E956265487E7A3919 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ios_Audio.cpp"; path = "../../../../modules/juce_audio_devices/native/juce_ios_Audio.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1712,6 +1713,7 @@
 				6DCD8800E380DB691DC9D467,
 				7251827C30AC1C4F55C3DB69,
 				6D95302F8D68BA3F0538214F,
+				9E067C6101B6E2D11365EBDC,
 				A0D54F01BC8018CC41FA34E9,
 				53B9B6090EDB9B6E0FA8577F ); name = opengl; sourceTree = "<group>"; };
 		637D3A9082C214CA0E067538 = { isa = PBXGroup; children = (

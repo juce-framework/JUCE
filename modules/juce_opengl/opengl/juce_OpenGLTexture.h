@@ -26,6 +26,7 @@
 #ifndef __JUCE_OPENGLTEXTURE_JUCEHEADER__
 #define __JUCE_OPENGLTEXTURE_JUCEHEADER__
 
+//==============================================================================
 /**
     Creates an openGL texture from an Image.
 */
@@ -66,13 +67,22 @@ public:
                  float x4, float y4, float z4,
                  const Colour& colour) const;
 
+    /** Returns the GL texture ID number. */
+    GLuint getTextureID() const noexcept        { return textureID; }
+
+    /** Returns true if a texture can be created with the given size.
+        Some systems may require that the sizes are powers-of-two.
+    */
+    static bool isValidSize (int width, int height);
+
 private:
-    unsigned int textureID;
+    GLuint textureID;
     int width, height;
 
     void create (int w, int h);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTexture);
 };
+
 
 #endif   // __JUCE_OPENGLTEXTURE_JUCEHEADER__

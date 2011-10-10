@@ -121,7 +121,6 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 class OpenGLComponent::OpenGLComponentWatcher  : public ComponentMovementWatcher
 {
 public:
-    //==============================================================================
     OpenGLComponentWatcher (OpenGLComponent* const owner_)
         : ComponentMovementWatcher (owner_),
           owner (owner_)
@@ -145,7 +144,6 @@ public:
             owner->stopBackgroundThread();
     }
 
-    //==============================================================================
 private:
     OpenGLComponent* const owner;
 
@@ -276,20 +274,15 @@ void OpenGLComponent::recreateContextAsync()
     repaint();
 }
 
-bool OpenGLComponent::makeCurrentContextActive()
+bool OpenGLComponent::makeCurrentRenderingTarget()
 {
     return context != nullptr && context->makeActive();
 }
 
-void OpenGLComponent::makeCurrentContextInactive()
+void OpenGLComponent::releaseAsRenderingTarget()
 {
     if (context != nullptr)
         context->makeInactive();
-}
-
-bool OpenGLComponent::isActiveContext() const noexcept
-{
-    return context != nullptr && context->isActive();
 }
 
 void OpenGLComponent::swapBuffers()
@@ -416,7 +409,7 @@ bool OpenGLComponent::renderAndSwapBuffers()
 
     if (context != nullptr)
     {
-        if (! makeCurrentContextActive())
+        if (! makeCurrentRenderingTarget())
             return false;
 
         if (needToUpdateViewport)

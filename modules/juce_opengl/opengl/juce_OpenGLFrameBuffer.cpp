@@ -258,14 +258,14 @@ public:
         : width (w), height (h),
           data (w * h)
     {
-        buffer.readPixels (data, 0, Rectangle<int> (0, 0, w, h));
+        buffer.readPixels (data, Rectangle<int> (0, 0, w, h));
     }
 
     bool restore (OpenGLFrameBuffer& buffer)
     {
         if (buffer.initialise (width, height))
         {
-            buffer.writePixels (data, 0, 4, Rectangle<int> (0, 0, width, height));
+            buffer.writePixels (data, 4, Rectangle<int> (0, 0, width, height));
             return true;
         }
 
@@ -294,13 +294,18 @@ bool OpenGLFrameBuffer::initialise (int width, int height)
     return pimpl != nullptr;
 }
 
-bool OpenGLFrameBuffer::initialise (const Image& content)
+bool OpenGLFrameBuffer::initialise (const Image& image)
 {
-    if (initialise (content.getWidth(), content.getHeight()))
+    if (initialise (image.getWidth(), image.getHeight()))
     {
-        Image::BitmapData bitmap (content, Image::BitmapData::readOnly);
-        return writePixels (bitmap.data, bitmap.lineStride / bitmap.pixelStride,
-                            bitmap.pixelStride, content.getBounds());
+        {
+            Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
+
+            if (bitmap.lineStride == image.getWidth() * bitmap.pixelStride)
+                return writePixels (bitmap.data, bitmap.pixelStride, image.getBounds());
+        }
+
+        return initialise (Image (image.getSharedImage()->clone()));
     }
 
     return false;
@@ -340,7 +345,7 @@ int OpenGLFrameBuffer::getWidth() const noexcept            { return pimpl != nu
 int OpenGLFrameBuffer::getHeight() const noexcept           { return pimpl != nullptr ? pimpl->height : 0; }
 GLuint OpenGLFrameBuffer::getTextureID() const noexcept     { return pimpl != nullptr ? pimpl->textureID : 0; }
 
-bool OpenGLFrameBuffer::makeCurrentTarget()
+bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
 {
     // trying to use a framebuffer after saving it with saveAndRelease()! Be sure to call
     // reloadSavedCopy() to put it back into GPU memory before using it..
@@ -349,7 +354,7 @@ bool OpenGLFrameBuffer::makeCurrentTarget()
     return pimpl != nullptr && pimpl->bind();
 }
 
-void OpenGLFrameBuffer::releaseCurrentTarget()
+void OpenGLFrameBuffer::releaseAsRenderingTarget()
 {
     if (pimpl != nullptr)
         pimpl->unbind();
@@ -357,22 +362,28 @@ void OpenGLFrameBuffer::releaseCurrentTarget()
 
 void OpenGLFrameBuffer::clear (const Colour& colour)
 {
-    if (makeCurrentTarget())
+    if (makeCurrentRenderingTarget())
     {
         OpenGLHelpers::clear (colour);
-        releaseCurrentTarget();
+        releaseAsRenderingTarget();
     }
 }
 
-bool OpenGLFrameBuffer::readPixels (void* target, int lineStride, const Rectangle<int>& area)
+void OpenGLFrameBuffer::makeCurrentAndClear()
 {
-    if (! makeCurrentTarget())
+    if (makeCurrentRenderingTarget())
+    {
+        glClearColor (0, 0, 0, 0);
+        glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    }
+}
+
+bool OpenGLFrameBuffer::readPixels (void* target, const Rectangle<int>& area)
+{
+    if (! makeCurrentRenderingTarget())
         return false;
 
-    OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
-
     glPixelStorei (GL_PACK_ALIGNMENT, 4);
-    glPixelStorei (GL_PACK_ROW_LENGTH, lineStride);
     glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, target);
 
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
@@ -380,16 +391,16 @@ bool OpenGLFrameBuffer::readPixels (void* target, int lineStride, const Rectangl
     return true;
 }
 
-bool OpenGLFrameBuffer::writePixels (const void* data, int lineStride, int pixelStride, const Rectangle<int>& area)
+bool OpenGLFrameBuffer::writePixels (const void* data, int pixelStride, const Rectangle<int>& area)
 {
-    if (! makeCurrentTarget())
+    if (! makeCurrentRenderingTarget())
         return false;
-
-    OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
 
     jassert (pixelStride == 3 || pixelStride == 4); // can only handle RGB or ARGB
     const int format = pixelStride == 3 ? GL_RGB : GL_BGRA_EXT;
+    const int invertedY = pimpl->height - area.getBottom();
 
+    OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
     glDisable (GL_DEPTH_TEST);
     glDisable (GL_BLEND);
 
@@ -405,7 +416,6 @@ bool OpenGLFrameBuffer::writePixels (const void* data, int lineStride, int pixel
         glBindTexture (GL_TEXTURE_2D, temporaryTexture);
 
         glPixelStorei (GL_UNPACK_ALIGNMENT, pixelStride);
-        glPixelStorei (GL_UNPACK_ROW_LENGTH, lineStride);
         glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, area.getWidth(), area.getHeight(), 0,
                       format, GL_UNSIGNED_BYTE, data);
 
@@ -415,19 +425,19 @@ bool OpenGLFrameBuffer::writePixels (const void* data, int lineStride, int pixel
         const int cropRect[4] = { 0, 0, area.getWidth(), area.getHeight() };
         glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
 
-        glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
+        glDrawTexiOES (area.getX(), invertedY, 1, area.getWidth(), area.getHeight());
 
         glBindTexture (GL_TEXTURE_2D, 0);
         glDeleteTextures (1, &temporaryTexture);
     }
 
    #else
-    glRasterPos2i (area.getX(), area.getY());
+    glRasterPos2i (area.getX(), invertedY);
     glBindTexture (GL_TEXTURE_2D, 0);
     glPixelStorei (GL_UNPACK_ALIGNMENT, pixelStride);
-    glPixelStorei (GL_UNPACK_ROW_LENGTH, lineStride);
+    glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
     glDrawPixels (area.getWidth(), area.getHeight(), format, GL_UNSIGNED_BYTE, data);
-  #endif
+   #endif
 
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
 
@@ -462,10 +472,39 @@ void OpenGLFrameBuffer::draw3D (float x1, float y1, float z1,
     }
 }
 
-//==============================================================================
-void OpenGLFrameBuffer::createAlphaChannelFromPath (const Path& path, const int oversamplingLevel)
+void OpenGLFrameBuffer::drawAt (float x1, float y1) const
 {
-    makeCurrentTarget();
+    if (pimpl != nullptr)
+    {
+        glEnable (GL_TEXTURE_2D);
+        glBindTexture (GL_TEXTURE_2D, pimpl->textureID);
+
+        glDisableClientState (GL_COLOR_ARRAY);
+        glDisableClientState (GL_NORMAL_ARRAY);
+
+        const GLfloat vertices[] = { x1, y1,
+                                     x1 + pimpl->width, y1,
+                                     x1, y1 + pimpl->height,
+                                     x1 + pimpl->width, y1 + pimpl->height };
+
+        const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
+
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glVertexPointer (2, GL_FLOAT, 0, vertices);
+
+        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+        glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
+
+        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        glBindTexture (GL_TEXTURE_2D, 0);
+    }
+}
+
+//==============================================================================
+void OpenGLFrameBuffer::createAlphaChannelFromPath (const Path& path, const AffineTransform& transform,
+                                                    const int oversamplingLevel)
+{
+    makeCurrentRenderingTarget();
 
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -473,13 +512,12 @@ void OpenGLFrameBuffer::createAlphaChannelFromPath (const Path& path, const int 
     glDisableClientState (GL_NORMAL_ARRAY);
     glDisable (GL_TEXTURE_2D);
     glDisable (GL_DEPTH_TEST);
-    glColorMask (GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
+    glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     glEnable (GL_BLEND);
     glBlendFunc (GL_ONE, GL_ONE);
 
-    OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
-
-    TriangulatedPath (path).draw (oversamplingLevel);
+    prepareFor2D();
+    TriangulatedPath (path, transform).draw (oversamplingLevel);
 }
 
 END_JUCE_NAMESPACE

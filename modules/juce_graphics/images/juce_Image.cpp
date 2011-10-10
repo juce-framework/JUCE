@@ -116,7 +116,16 @@ public:
 
     Image::SharedImage* clone()
     {
-        return new SubsectionSharedImage (image->clone(), area);
+        Image newImage (format, area.getWidth(), area.getHeight(),
+                        format != Image::RGB, image->getType());
+
+        {
+            Graphics g (newImage);
+            g.drawImageAt (Image (this), 0, 0);
+        }
+
+        newImage.getSharedImage()->incReferenceCount();
+        return newImage.getSharedImage();
     }
 
 private:

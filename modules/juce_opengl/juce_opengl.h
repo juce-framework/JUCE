@@ -81,6 +81,7 @@
 
 //=============================================================================
 BEGIN_JUCE_NAMESPACE
+#include "opengl/juce_OpenGLRenderingTarget.h"
 
 // START_AUTOINCLUDE opengl
 #ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
@@ -100,6 +101,9 @@ BEGIN_JUCE_NAMESPACE
 #endif
 #ifndef __JUCE_OPENGLPIXELFORMAT_JUCEHEADER__
  #include "opengl/juce_OpenGLPixelFormat.h"
+#endif
+#ifndef __JUCE_OPENGLRENDERINGTARGET_JUCEHEADER__
+ #include "opengl/juce_OpenGLRenderingTarget.h"
 #endif
 #ifndef __JUCE_OPENGLTEXTURE_JUCEHEADER__
  #include "opengl/juce_OpenGLTexture.h"

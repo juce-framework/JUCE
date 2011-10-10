@@ -26,6 +26,10 @@
 #ifndef __JUCE_OPENGLHELPERS_JUCEHEADER__
 #define __JUCE_OPENGLHELPERS_JUCEHEADER__
 
+class OpenGLTexture;
+class OpenGLFrameBuffer;
+
+
 //==============================================================================
 /**
     A set of miscellaneous openGL helper functions.
@@ -48,6 +52,8 @@ public:
     /** This does the same job as gluPerspective(). */
     static void setPerspective (double fovy, double aspect, double zNear, double zFar);
 
+    static void applyTransform (const AffineTransform& t);
+
     /** Draws a 2D quad with the specified corner points. */
     static void drawQuad2D (float x1, float y1,
                             float x2, float y2,
@@ -61,6 +67,8 @@ public:
                             float x3, float y3, float z3,
                             float x4, float y4, float z4,
                             const Colour& colour);
+
+    static void fillRect (const Rectangle<int>& rect);
 
     /** Fills a rectangle with the specified colour. */
     static void fillRectWithColour (const Rectangle<int>& rect,
@@ -78,7 +86,7 @@ public:
 class JUCE_API  TriangulatedPath
 {
 public:
-    TriangulatedPath (const Path& path);
+    TriangulatedPath (const Path& path, const AffineTransform& transform);
 
     /** Renders the path, using a jittered oversampling method.
         The oversampling level is the square root of the number of times it
@@ -103,6 +111,31 @@ private:
     TriangleBlock* currentBlock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TriangulatedPath);
+};
+
+
+//==============================================================================
+/**
+    Used as a local object while rendering, this will create a temporary texture ID
+    from an image in the quickest way possible.
+
+    If the image is backed by an OpenGL framebuffer, it will use that directly; otherwise,
+    this object will create a temporary texture or framebuffer and copy the image.
+*/
+class JUCE_API  OpenGLTextureFromImage
+{
+public:
+    OpenGLTextureFromImage (const Image& image);
+    ~OpenGLTextureFromImage();
+
+    GLuint textureID;
+    const int width, height;
+
+private:
+    ScopedPointer<OpenGLTexture> texture;
+    ScopedPointer<OpenGLFrameBuffer> frameBuffer;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTextureFromImage);
 };
 
 

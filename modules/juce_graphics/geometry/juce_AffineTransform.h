@@ -185,6 +185,11 @@ public:
     /** Returns a shear transform, centred around the origin (0, 0). */
     static AffineTransform shear (float shearX, float shearY) noexcept;
 
+    /** Returns a transform that will flip co-ordinates vertically within a window of the given height.
+        This is handy for converting between upside-down coordinate systems such as OpenGL or CoreGraphics.
+    */
+    static AffineTransform verticalFlip (float height) noexcept;
+
     /** Returns a matrix which is the inverse operation of this one.
 
         Some matrices don't have an inverse - in this case, the method will just return

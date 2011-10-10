@@ -31,7 +31,7 @@
 /**
     Creates an openGL frame buffer.
 */
-class JUCE_API  OpenGLFrameBuffer
+class JUCE_API  OpenGLFrameBuffer   : public OpenGLRenderingTarget
 {
 public:
     /** Creates an uninitialised buffer.
@@ -81,18 +81,24 @@ public:
     /** Returns the height of the buffer. */
     int getHeight() const noexcept;
 
+    int getRenderingTargetWidth() const         { return getWidth(); }
+    int getRenderingTargetHeight() const        { return getHeight(); }
+
     /** Returns the texture ID number for using this buffer as a texture. */
-    unsigned int getTextureID() const noexcept;
+    GLuint getTextureID() const noexcept;
 
     //==============================================================================
     /** Selects this buffer as the current OpenGL rendering target. */
-    bool makeCurrentTarget();
+    bool makeCurrentRenderingTarget();
 
     /** Deselects this buffer as the current OpenGL rendering target. */
-    void releaseCurrentTarget();
+    void releaseAsRenderingTarget();
 
     /** Clears the framebuffer with the specified colour. */
     void clear (const Colour& colour);
+
+    /** Selects the framebuffer as the current target, and clears it to transparent. */
+    void makeCurrentAndClear();
 
     /** Draws this framebuffer onto the current context, with the specified corner positions. */
     void draw2D (float x1, float y1,
@@ -108,18 +114,20 @@ public:
                  float x4, float y4, float z4,
                  const Colour& colour) const;
 
+    /** Draws the framebuffer at a given position. */
+    void drawAt (float x1, float y1) const;
+
     /** Reads an area of pixels from the framebuffer into a 32-bit ARGB pixel array.
         The lineStride is measured as a number of pixels, not bytes - pass a stride
         of 0 to indicate a packed array.
     */
-    bool readPixels (void* targetData, int lineStride, const Rectangle<int>& sourceArea);
+    bool readPixels (void* targetData, const Rectangle<int>& sourceArea);
 
     /** Writes an area of pixels into the framebuffer from a specified pixel array.
         The lineStride is measured as a number of pixels, not bytes - pass a stride
         of 0 to indicate a packed array.
     */
-    bool writePixels (const void* srcData,
-                      int srcLineStride, int srcPixelStride,
+    bool writePixels (const void* srcData, int srcPixelStride,
                       const Rectangle<int>& targetArea);
 
     /** This will render an anti-aliased path into just the alpha channel of this framebuffer.
@@ -131,7 +139,9 @@ public:
         Calling this will make changes to a lot of openGL state, including colour masks, blend
         functions, etc
     */
-    void createAlphaChannelFromPath (const Path& path, int oversamplingLevel = 4);
+    void createAlphaChannelFromPath (const Path& path,
+                                     const AffineTransform& transform,
+                                     int oversamplingLevel = 4);
 
 private:
     class Pimpl;

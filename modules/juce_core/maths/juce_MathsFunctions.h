@@ -416,6 +416,15 @@ inline int roundFloatToInt (const float value) noexcept
 }
 
 //==============================================================================
+/** Returns true if the specified integer is a power-of-two.
+*/
+template <typename IntegerType>
+bool isPowerOfTwo (IntegerType value)
+{
+   return (value & (value - 1)) == 0;
+}
+
+//==============================================================================
 #if (JUCE_INTEL && JUCE_32BIT) || defined (DOXYGEN)
  /** This macro can be applied to a float variable to check whether it contains a denormalised
      value, and to normalise it if necessary.
