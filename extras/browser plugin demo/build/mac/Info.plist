@@ -28,5 +28,17 @@
 	<string>JuceBrowserPlugin_Version</string>
 	<key>WebPluginName</key>
 	<string>JuceBrowserPlugin_Name</string>
+	<key>WebPluginMIMETypes</key>
+	<dict>
+		<key>application/npjucedemo-plugin</key>
+		<dict>
+			<key>WebPluginExtensions</key>
+			<array>
+				<string>jucedemo</string>
+			</array>
+			<key>WebPluginTypeDescription</key>
+			<string>Juce Demo</string>
+		</dict>
+	</dict>
 </dict>
 </plist>

@@ -131,6 +131,7 @@ public:
     bool xcodeIsBundle, xcodeCreatePList, xcodeCanUseDwarf;
     StringArray xcodeFrameworks;
     Array<RelativePath> xcodeExtraLibrariesDebug, xcodeExtraLibrariesRelease;
+    Array<XmlElement> xcodeExtraPListEntries;
 
     //==============================================================================
     String makefileTargetSuffix;

@@ -292,6 +292,24 @@ public:
         exporter.xcodeProductType = "com.apple.product-type.bundle";
         exporter.xcodeProductInstallPath = "$(HOME)/Library/Internet Plug-Ins//";
 
+        {
+            XmlElement mimeTypesKey ("key");
+            mimeTypesKey.setText ("WebPluginMIMETypes");
+
+            XmlElement mimeTypesEntry ("dict");
+            const String exeName (exporter.getProject().getProjectFilenameRoot().toLowerCase());
+            mimeTypesEntry.createNewChildElement ("key")->setText ("application/" + exeName + "-plugin");
+            XmlElement* d = mimeTypesEntry.createNewChildElement ("dict");
+            d->createNewChildElement ("key")->setText ("WebPluginExtensions");
+            d->createNewChildElement ("array")
+               ->createNewChildElement ("string")->setText (exeName);
+            d->createNewChildElement ("key")->setText ("WebPluginTypeDescription");
+            d->createNewChildElement ("string")->setText (exporter.getProject().getProjectName().toString());
+
+            exporter.xcodeExtraPListEntries.add (mimeTypesKey);
+            exporter.xcodeExtraPListEntries.add (mimeTypesEntry);
+        }
+
         exporter.msvcTargetSuffix = ".dll";
         exporter.msvcIsDLL = true;
 

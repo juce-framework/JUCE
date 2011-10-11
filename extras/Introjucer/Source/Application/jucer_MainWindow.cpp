@@ -107,8 +107,8 @@ void MainWindow::createProjectContentCompIfNeeded()
 void MainWindow::makeVisible()
 {
     setVisible (true);
+    addToDesktop();  // (must add before restoring size so that fullscreen will work)
     restoreWindowPosition();
-    addToDesktop();
 
     getContentComponent()->grabKeyboardFocus();
 }

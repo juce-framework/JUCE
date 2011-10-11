@@ -389,6 +389,9 @@ private:
         if (getSetting ("UIStatusBarHidden").getValue())
             addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
+        for (int i = 0; i < xcodeExtraPListEntries.size(); ++i)
+            dict->addChildElement (new XmlElement (xcodeExtraPListEntries.getReference(i)));
+
         MemoryOutputStream mo;
         plist.writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
 
