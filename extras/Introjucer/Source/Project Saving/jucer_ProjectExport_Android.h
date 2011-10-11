@@ -62,6 +62,8 @@ public:
 
         if (getInternetNeeded().toString().isEmpty())
             getInternetNeeded() = true;
+
+        androidDynamicLibs.add ("GLESv1_CM");
     }
 
     //==============================================================================
@@ -241,7 +243,21 @@ private:
             << "  LOCAL_CPPFLAGS += " << createCPPFlags (false) << newLine
             << "endif" << newLine
             << newLine
+            << getDynamicLibs()
+            << newLine
             << "include $(BUILD_SHARED_LIBRARY)" << newLine;
+    }
+
+    String getDynamicLibs()
+    {
+        if (androidDynamicLibs.size() == 0)
+            return String::empty;
+
+        String flags ("LOCAL_LDLIBS :=");
+        for (int i = 0; i < androidDynamicLibs.size(); ++i)
+            flags << " -l" << androidDynamicLibs[i];
+
+        return flags + newLine;
     }
 
     String createIncludePathFlags (const Project::BuildConfiguration& config)

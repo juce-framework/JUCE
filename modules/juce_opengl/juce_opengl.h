@@ -65,6 +65,8 @@
 #elif JUCE_MAC
  #include <OpenGL/gl.h>
  #include "OpenGL/glext.h"
+#elif JUCE_ANDROID
+ #include <GLES/gl.h>
 #endif
 
 #ifndef GL_BGRA_EXT

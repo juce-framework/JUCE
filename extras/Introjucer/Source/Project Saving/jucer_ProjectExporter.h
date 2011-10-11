@@ -145,6 +145,9 @@ public:
     String msvcPreBuildDescription, msvcPreBuildCommand;
 
     //==============================================================================
+    StringArray androidDynamicLibs;
+
+    //==============================================================================
     StringArray extraSearchPaths;
 
 protected:
