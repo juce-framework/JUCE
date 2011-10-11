@@ -311,6 +311,28 @@ bool OpenGLFrameBuffer::initialise (const Image& image)
     return false;
 }
 
+bool OpenGLFrameBuffer::initialise (const OpenGLFrameBuffer& other)
+{
+    const Pimpl* const p = other.pimpl;
+
+    if (p == nullptr)
+    {
+        pimpl = nullptr;
+        return true;
+    }
+
+    if (initialise (p->width, p->height))
+    {
+        pimpl->bind();
+        glDisable (GL_BLEND);
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+        other.drawAt (0, 0);
+        pimpl->unbind();
+    }
+
+    return false;
+}
+
 void OpenGLFrameBuffer::release()
 {
     pimpl = nullptr;

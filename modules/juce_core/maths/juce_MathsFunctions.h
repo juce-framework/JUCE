@@ -424,6 +424,17 @@ bool isPowerOfTwo (IntegerType value)
    return (value & (value - 1)) == 0;
 }
 
+/** Performs a modulo operation, but can cope with the dividend being negative.
+    The divisor must be greater than zero.
+*/
+template <typename IntegerType>
+int negativeAwareModulo (IntegerType dividend, const IntegerType divisor) noexcept
+{
+    jassert (divisor > 0);
+    dividend %= divisor;
+    return (dividend < 0) ? (dividend + divisor) : dividend;
+}
+
 //==============================================================================
 #if (JUCE_INTEL && JUCE_32BIT) || defined (DOXYGEN)
  /** This macro can be applied to a float variable to check whether it contains a denormalised

@@ -55,6 +55,10 @@ public:
     */
     bool initialise (const Image& content);
 
+    /** Tries to allocate a copy of another framebuffer.
+    */
+    bool initialise (const OpenGLFrameBuffer& other);
+
     /** Releases the buffer, if one has been allocated.
         Any saved state that was created with saveAndRelease() will also be freed by this call.
     */
