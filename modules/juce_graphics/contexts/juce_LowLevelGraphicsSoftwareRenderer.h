@@ -28,6 +28,9 @@
 
 #include "juce_LowLevelGraphicsContext.h"
 
+#ifndef DOXYGEN
+#include "../native/juce_RenderingHelpers.h"
+#endif
 
 //==============================================================================
 /**
@@ -90,22 +93,16 @@ public:
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
-
-protected:
     //==============================================================================
-    Image image;
-
    #ifndef DOXYGEN
-    public:  class SavedState;
-    private:
+    class SavedState;
    #endif
 
-    ScopedPointer <SavedState> currentState;
-    OwnedArray <SavedState> stateStack;
+protected:
+    RenderingHelpers::SavedStateStack<SavedState> savedState;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsSoftwareRenderer);
 };
-
 
 
 #endif   // __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__

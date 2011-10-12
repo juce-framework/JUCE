@@ -26,8 +26,6 @@
 #ifndef __JUCE_RENDERINGHELPERS_JUCEHEADER__
 #define __JUCE_RENDERINGHELPERS_JUCEHEADER__
 
-BEGIN_JUCE_NAMESPACE
-
 namespace RenderingHelpers
 {
 
@@ -223,8 +221,58 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache);
 };
 
-}
+//==============================================================================
+template <class StateObjectType>
+class SavedStateStack
+{
+public:
+    SavedStateStack (StateObjectType* const initialState) noexcept
+        : currentState (initialState)
+    {}
 
-END_JUCE_NAMESPACE
+    inline StateObjectType* operator->() const noexcept     { return currentState; }
+    inline StateObjectType& operator*()  const noexcept     { return *currentState; }
+    
+    void save()
+    {
+        stack.add (new StateObjectType (*currentState));
+    }
+    
+    void restore()
+    {
+        StateObjectType* const top = stack.getLast();
+
+        if (top != nullptr)
+        {
+            currentState = top;
+            stack.removeLast (1, false);
+        }
+        else
+        {
+            jassertfalse; // trying to pop with an empty stack!
+        }
+    }
+    
+    void beginTransparencyLayer (float opacity)
+    {
+        save();
+        currentState = currentState->beginTransparencyLayer (opacity);
+    }
+
+    void endTransparencyLayer()
+    {
+        const ScopedPointer<StateObjectType> finishedTransparencyLayer (currentState);
+        restore();
+        currentState->endTransparencyLayer (*finishedTransparencyLayer);
+    }
+
+private:
+    ScopedPointer<StateObjectType> currentState;
+    OwnedArray<StateObjectType> stack;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedStateStack);
+};
+    
+}
 
 #endif   // __JUCE_RENDERINGHELPERS_JUCEHEADER__

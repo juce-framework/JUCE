@@ -229,7 +229,7 @@ public:
             start = roundToInt ((y - yTerm) * grad);
     }
 
-    inline const PixelARGB getPixel (const int x) const noexcept
+    inline PixelARGB getPixel (const int x) const noexcept
     {
         return vertical ? linePix
                         : lookupTable [jlimit (0, numEntries, (x * scale - start) >> (int) numScaleBits)];
@@ -271,7 +271,7 @@ public:
         dy *= dy;
     }
 
-    inline const PixelARGB getPixel (const int px) const noexcept
+    inline PixelARGB getPixel (const int px) const noexcept
     {
         double x = px - gx1;
         x *= x;
@@ -308,7 +308,7 @@ public:
         lineYM11 = inverseTransform.mat11 * y + inverseTransform.mat12 - gy1;
     }
 
-    inline const PixelARGB getPixel (const int px) const noexcept
+    inline PixelARGB getPixel (const int px) const noexcept
     {
         double x = px;
         const double y = tM10 * x + lineYM11;
@@ -1904,14 +1904,14 @@ public:
         return s;
     }
 
-    void endTransparencyLayer (SavedState& layerState)
+    void endTransparencyLayer (SavedState& finishedLayerState)
     {
         const Rectangle<int> layerBounds (getUntransformedClipBounds());
 
         const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
-        g->setOpacity (layerState.transparencyLayerAlpha);
-        g->drawImage (layerState.image, AffineTransform::translation ((float) layerBounds.getX(),
-                                                                      (float) layerBounds.getY()), false);
+        g->setOpacity (finishedLayerState.transparencyLayerAlpha);
+        g->drawImage (finishedLayerState.image, AffineTransform::translation ((float) layerBounds.getX(),
+                                                                              (float) layerBounds.getY()), false);
     }
 
     //==============================================================================
@@ -2132,16 +2132,14 @@ private:
 
 
 //==============================================================================
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image_)
-    : image (image_),
-      currentState (new SavedState (image_, image_.getBounds(), 0, 0))
+LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image)
+    : savedState (new SavedState (image, image.getBounds(), 0, 0))
 {
 }
 
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image_, const int xOffset, const int yOffset,
+LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, const int xOffset, const int yOffset,
                                                                     const RectangleList& initialClip)
-    : image (image_),
-      currentState (new SavedState (image_, initialClip, xOffset, yOffset))
+    : savedState (new SavedState (image, initialClip, xOffset, yOffset))
 {
 }
 
@@ -2157,123 +2155,96 @@ bool LowLevelGraphicsSoftwareRenderer::isVectorDevice() const
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::setOrigin (int x, int y)
 {
-    currentState->transform.setOrigin (x, y);
+    savedState->transform.setOrigin (x, y);
 }
 
 void LowLevelGraphicsSoftwareRenderer::addTransform (const AffineTransform& transform)
 {
-    currentState->transform.addTransform (transform);
+    savedState->transform.addTransform (transform);
 }
 
 float LowLevelGraphicsSoftwareRenderer::getScaleFactor()
 {
-    return currentState->transform.getScaleFactor();
+    return savedState->transform.getScaleFactor();
 }
 
 bool LowLevelGraphicsSoftwareRenderer::clipToRectangle (const Rectangle<int>& r)
 {
-    return currentState->clipToRectangle (r);
+    return savedState->clipToRectangle (r);
 }
 
 bool LowLevelGraphicsSoftwareRenderer::clipToRectangleList (const RectangleList& clipRegion)
 {
-    return currentState->clipToRectangleList (clipRegion);
+    return savedState->clipToRectangleList (clipRegion);
 }
 
 void LowLevelGraphicsSoftwareRenderer::excludeClipRectangle (const Rectangle<int>& r)
 {
-    currentState->excludeClipRectangle (r);
+    savedState->excludeClipRectangle (r);
 }
 
 void LowLevelGraphicsSoftwareRenderer::clipToPath (const Path& path, const AffineTransform& transform)
 {
-    currentState->clipToPath (path, transform);
+    savedState->clipToPath (path, transform);
 }
 
 void LowLevelGraphicsSoftwareRenderer::clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform)
 {
-    currentState->clipToImageAlpha (sourceImage, transform);
+    savedState->clipToImageAlpha (sourceImage, transform);
 }
 
 bool LowLevelGraphicsSoftwareRenderer::clipRegionIntersects (const Rectangle<int>& r)
 {
-    return currentState->clipRegionIntersects (r);
+    return savedState->clipRegionIntersects (r);
 }
 
 Rectangle<int> LowLevelGraphicsSoftwareRenderer::getClipBounds() const
 {
-    return currentState->getClipBounds();
+    return savedState->getClipBounds();
 }
 
 bool LowLevelGraphicsSoftwareRenderer::isClipEmpty() const
 {
-    return currentState->clip == nullptr;
+    return savedState->clip == nullptr;
 }
 
 //==============================================================================
-void LowLevelGraphicsSoftwareRenderer::saveState()
-{
-    stateStack.add (new SavedState (*currentState));
-}
+void LowLevelGraphicsSoftwareRenderer::saveState()      { savedState.save(); }
+void LowLevelGraphicsSoftwareRenderer::restoreState()   { savedState.restore(); }
 
-void LowLevelGraphicsSoftwareRenderer::restoreState()
-{
-    SavedState* const top = stateStack.getLast();
-
-    if (top != nullptr)
-    {
-        currentState = top;
-        stateStack.removeLast (1, false);
-    }
-    else
-    {
-        jassertfalse; // trying to pop with an empty stack!
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::beginTransparencyLayer (float opacity)
-{
-    saveState();
-    currentState = currentState->beginTransparencyLayer (opacity);
-}
-
-void LowLevelGraphicsSoftwareRenderer::endTransparencyLayer()
-{
-    const ScopedPointer<SavedState> layer (currentState);
-    restoreState();
-    currentState->endTransparencyLayer (*layer);
-}
+void LowLevelGraphicsSoftwareRenderer::beginTransparencyLayer (float opacity)   { savedState.beginTransparencyLayer (opacity); }
+void LowLevelGraphicsSoftwareRenderer::endTransparencyLayer()                   { savedState.endTransparencyLayer(); }
 
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::setFill (const FillType& fillType)
 {
-    currentState->fillType = fillType;
+    savedState->fillType = fillType;
 }
 
 void LowLevelGraphicsSoftwareRenderer::setOpacity (float newOpacity)
 {
-    currentState->fillType.setOpacity (newOpacity);
+    savedState->fillType.setOpacity (newOpacity);
 }
 
 void LowLevelGraphicsSoftwareRenderer::setInterpolationQuality (Graphics::ResamplingQuality quality)
 {
-    currentState->interpolationQuality = quality;
+    savedState->interpolationQuality = quality;
 }
 
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::fillRect (const Rectangle<int>& r, const bool replaceExistingContents)
 {
-    currentState->fillRect (r, replaceExistingContents);
+    savedState->fillRect (r, replaceExistingContents);
 }
 
 void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineTransform& transform)
 {
-    currentState->fillPath (path, transform);
+    savedState->fillPath (path, transform);
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const AffineTransform& transform, const bool fillEntireClipAsTiles)
 {
-    currentState->renderImage (sourceImage, transform, fillEntireClipAsTiles ? currentState->clip : 0);
+    savedState->renderImage (sourceImage, transform, fillEntireClipAsTiles ? savedState->clip : 0);
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawLine (const Line <float>& line)
@@ -2286,13 +2257,13 @@ void LowLevelGraphicsSoftwareRenderer::drawLine (const Line <float>& line)
 void LowLevelGraphicsSoftwareRenderer::drawVerticalLine (const int x, float top, float bottom)
 {
     if (bottom > top)
-        currentState->fillRect (Rectangle<float> ((float) x, top, 1.0f, bottom - top));
+        savedState->fillRect (Rectangle<float> ((float) x, top, 1.0f, bottom - top));
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, float left, float right)
 {
     if (right > left)
-        currentState->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f));
+        savedState->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f));
 }
 
 //==============================================================================
@@ -2337,26 +2308,26 @@ private:
 
 void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineTransform& transform)
 {
-    Font& f = currentState->font;
+    Font& f = savedState->font;
 
-    if (transform.isOnlyTranslation() && currentState->transform.isOnlyTranslated)
+    if (transform.isOnlyTranslation() && savedState->transform.isOnlyTranslated)
     {
         RenderingHelpers::GlyphCache <CachedGlyphEdgeTable, SavedState>::getInstance()
-            .drawGlyph (*currentState, f, glyphNumber,
+            .drawGlyph (*savedState, f, glyphNumber,
                         transform.getTranslationX(),
                         transform.getTranslationY());
     }
     else
     {
         const float fontHeight = f.getHeight();
-        currentState->drawGlyph (f, glyphNumber,
-                                 AffineTransform::scale (fontHeight * f.getHorizontalScale(), fontHeight)
-                                                 .followedBy (transform));
+        savedState->drawGlyph (f, glyphNumber,
+                               AffineTransform::scale (fontHeight * f.getHorizontalScale(), fontHeight)
+                                               .followedBy (transform));
     }
 }
 
-void LowLevelGraphicsSoftwareRenderer::setFont (const Font& newFont)    { currentState->font = newFont; }
-Font LowLevelGraphicsSoftwareRenderer::getFont()                        { return currentState->font; }
+void LowLevelGraphicsSoftwareRenderer::setFont (const Font& newFont)    { savedState->font = newFont; }
+Font LowLevelGraphicsSoftwareRenderer::getFont()                        { return savedState->font; }
 
 #if JUCE_MSVC
  #pragma warning (pop)

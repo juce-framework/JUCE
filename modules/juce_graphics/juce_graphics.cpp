@@ -54,8 +54,6 @@
 #endif
 
 //==============================================================================
-#include "native/juce_RenderingHelpers.h"
-
 // START_AUTOINCLUDE colour/*.cpp, geometry/*.cpp, placement/*.cpp, contexts/*.cpp, images/*.cpp,
 // image_formats/*.cpp, fonts/*.cpp, effects/*.cpp
 #include "colour/juce_Colour.cpp"
