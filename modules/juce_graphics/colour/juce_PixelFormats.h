@@ -265,19 +265,18 @@ public:
 
 private:
     //==============================================================================
+    struct Components
+    {
+      #if JUCE_BIG_ENDIAN
+        uint8 a : 8, r : 8, g : 8, b : 8;
+      #else
+        uint8 b, g, r, a;
+      #endif
+    } PACKED;
+
     union
     {
         uint32 argb;
-
-        struct Components
-        {
-          #if JUCE_BIG_ENDIAN
-            uint8 a : 8, r : 8, g : 8, b : 8;
-          #else
-            uint8 b, g, r, a;
-          #endif
-        } PACKED;
-        
         Components components;
     };
 }
