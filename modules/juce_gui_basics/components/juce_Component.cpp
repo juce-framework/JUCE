@@ -202,7 +202,7 @@ public:
     }
    #endif
 
-    static const Identifier getColourPropertyId (const int colourId)
+    static Identifier getColourPropertyId (const int colourId)
     {
         String s;
         s.preallocateBytes (32);
@@ -302,7 +302,7 @@ public:
         return convertFromDistantParentSpace (topLevelComp, *target, p);
     }
 
-    static const Rectangle<int> getUnclippedArea (const Component& comp)
+    static Rectangle<int> getUnclippedArea (const Component& comp)
     {
         Rectangle<int> r (comp.getLocalBounds());
 
@@ -370,7 +370,7 @@ public:
         }
     }
 
-    static const Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
+    static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
     {
         return comp.getParentComponent() != nullptr ? comp.getParentComponent()->getLocalBounds()
                                                     : Desktop::getInstance().getMainMonitorArea();
@@ -1219,9 +1219,9 @@ bool Component::hitTest (int x, int y)
 
     if (flags.allowChildMouseClicksFlag)
     {
-        for (int i = getNumChildComponents(); --i >= 0;)
+        for (int i = childComponentList.size(); --i >= 0;)
         {
-            Component& child = *getChildComponent (i);
+            Component& child = *childComponentList.getUnchecked (i);
 
             if (child.isVisible()
                  && ComponentHelpers::hitTest (child, ComponentHelpers::convertFromParentSpace (child, Point<int> (x, y))))

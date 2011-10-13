@@ -1438,17 +1438,17 @@ public:
 
     Ptr clipToPath (const Path& p, const AffineTransform& transform)
     {
-        return Ptr (new ClipRegion_EdgeTable (clip))->clipToPath (p, transform);
+        return toEdgeTable()->clipToPath (p, transform);
     }
 
     Ptr clipToEdgeTable (const EdgeTable& et)
     {
-        return Ptr (new ClipRegion_EdgeTable (clip))->clipToEdgeTable (et);
+        return toEdgeTable()->clipToEdgeTable (et);
     }
 
     Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
     {
-        return Ptr (new ClipRegion_EdgeTable (clip))->clipToImageAlpha (image, transform, betterQuality);
+        return toEdgeTable()->clipToImageAlpha (image, transform, betterQuality);
     }
 
     Ptr translated (const Point<int>& delta)
@@ -1594,7 +1594,7 @@ private:
     class SubRectangleIteratorFloat
     {
     public:
-        SubRectangleIteratorFloat (const RectangleList& clip_, const Rectangle<float>& area_)
+        SubRectangleIteratorFloat (const RectangleList& clip_, const Rectangle<float>& area_) noexcept
             : clip (clip_), area (area_)
         {
         }
@@ -1602,66 +1602,7 @@ private:
         template <class Renderer>
         void iterate (Renderer& r) const noexcept
         {
-            int left    = roundToInt (area.getX() * 256.0f);
-            int top     = roundToInt (area.getY() * 256.0f);
-            int right   = roundToInt (area.getRight() * 256.0f);
-            int bottom  = roundToInt (area.getBottom() * 256.0f);
-
-            int totalTop, totalLeft, totalBottom, totalRight;
-            int topAlpha, leftAlpha, bottomAlpha, rightAlpha;
-
-            if ((top >> 8) == (bottom >> 8))
-            {
-                topAlpha = bottom - top;
-                bottomAlpha = 0;
-                totalTop = top >> 8;
-                totalBottom = bottom = top = totalTop + 1;
-            }
-            else
-            {
-                if ((top & 255) == 0)
-                {
-                    topAlpha = 0;
-                    top = totalTop = (top >> 8);
-                }
-                else
-                {
-                    topAlpha = 255 - (top & 255);
-                    totalTop = (top >> 8);
-                    top = totalTop + 1;
-                }
-
-                bottomAlpha = bottom & 255;
-                bottom >>= 8;
-                totalBottom = bottom + (bottomAlpha != 0 ? 1 : 0);
-            }
-
-            if ((left >> 8) == (right >> 8))
-            {
-                leftAlpha = right - left;
-                rightAlpha = 0;
-                totalLeft = (left >> 8);
-                totalRight = right = left = totalLeft + 1;
-            }
-            else
-            {
-                if ((left & 255) == 0)
-                {
-                    leftAlpha = 0;
-                    left = totalLeft = (left >> 8);
-                }
-                else
-                {
-                    leftAlpha = 255 - (left & 255);
-                    totalLeft = (left >> 8);
-                    left = totalLeft + 1;
-                }
-
-                rightAlpha = right & 255;
-                right >>= 8;
-                totalRight = right + (rightAlpha != 0 ? 1 : 0);
-            }
-
+            const RenderingHelpers::FloatRectangleRasterisingInfo f (area);
             RectangleList::Iterator iter (clip);
 
             while (iter.next())
@@ -1671,62 +1612,62 @@ private:
                 const int clipTop    = iter.getRectangle()->getY();
                 const int clipBottom = iter.getRectangle()->getBottom();
 
-                if (totalBottom > clipTop && totalTop < clipBottom && totalRight > clipLeft && totalLeft < clipRight)
+                if (f.totalBottom > clipTop && f.totalTop < clipBottom && f.totalRight > clipLeft && f.totalLeft < clipRight)
                 {
-                    if (right - left == 1 && leftAlpha + rightAlpha == 0) // special case for 1-pix vertical lines
+                    if (f.isOnePixelWide())
                     {
-                        if (topAlpha != 0 && totalTop >= clipTop)
+                        if (f.topAlpha != 0 && f.totalTop >= clipTop)
                         {
-                            r.setEdgeTableYPos (totalTop);
-                            r.handleEdgeTablePixel (left, topAlpha);
+                            r.setEdgeTableYPos (f.totalTop);
+                            r.handleEdgeTablePixel (f.left, f.topAlpha);
                         }
 
-                        const int endY = jmin (bottom, clipBottom);
-                        for (int y = jmax (clipTop, top); y < endY; ++y)
+                        const int endY = jmin (f.bottom, clipBottom);
+                        for (int y = jmax (clipTop, f.top); y < endY; ++y)
                         {
                             r.setEdgeTableYPos (y);
-                            r.handleEdgeTablePixelFull (left);
+                            r.handleEdgeTablePixelFull (f.left);
                         }
 
-                        if (bottomAlpha != 0 && bottom < clipBottom)
+                        if (f.bottomAlpha != 0 && f.bottom < clipBottom)
                         {
-                            r.setEdgeTableYPos (bottom);
-                            r.handleEdgeTablePixel (left, bottomAlpha);
+                            r.setEdgeTableYPos (f.bottom);
+                            r.handleEdgeTablePixel (f.left, f.bottomAlpha);
                         }
                     }
                     else
                     {
-                        const int clippedLeft = jmax (left, clipLeft);
-                        const int clippedWidth = jmin (right, clipRight) - clippedLeft;
-                        const bool doLeftAlpha = leftAlpha != 0 && totalLeft >= clipLeft;
-                        const bool doRightAlpha = rightAlpha != 0 && right < clipRight;
+                        const int clippedLeft   = jmax (f.left, clipLeft);
+                        const int clippedWidth  = jmin (f.right, clipRight) - clippedLeft;
+                        const bool doLeftAlpha  = f.leftAlpha != 0 && f.totalLeft >= clipLeft;
+                        const bool doRightAlpha = f.rightAlpha != 0 && f.right < clipRight;
 
-                        if (topAlpha != 0 && totalTop >= clipTop)
+                        if (f.topAlpha != 0 && f.totalTop >= clipTop)
                         {
-                            r.setEdgeTableYPos (totalTop);
+                            r.setEdgeTableYPos (f.totalTop);
 
-                            if (doLeftAlpha)        r.handleEdgeTablePixel (totalLeft, (leftAlpha * topAlpha) >> 8);
-                            if (clippedWidth > 0)   r.handleEdgeTableLine (clippedLeft, clippedWidth, topAlpha);
-                            if (doRightAlpha)       r.handleEdgeTablePixel (right, (rightAlpha * topAlpha) >> 8);
+                            if (doLeftAlpha)        r.handleEdgeTablePixel (f.totalLeft, f.getTopLeftCornerAlpha());
+                            if (clippedWidth > 0)   r.handleEdgeTableLine (clippedLeft, clippedWidth, f.topAlpha);
+                            if (doRightAlpha)       r.handleEdgeTablePixel (f.right, f.getTopRightCornerAlpha());
                         }
 
-                        const int endY = jmin (bottom, clipBottom);
-                        for (int y = jmax (clipTop, top); y < endY; ++y)
+                        const int endY = jmin (f.bottom, clipBottom);
+                        for (int y = jmax (clipTop, f.top); y < endY; ++y)
                         {
                             r.setEdgeTableYPos (y);
 
-                            if (doLeftAlpha)        r.handleEdgeTablePixel (totalLeft, leftAlpha);
+                            if (doLeftAlpha)        r.handleEdgeTablePixel (f.totalLeft, f.leftAlpha);
                             if (clippedWidth > 0)   r.handleEdgeTableLineFull (clippedLeft, clippedWidth);
-                            if (doRightAlpha)       r.handleEdgeTablePixel (right, rightAlpha);
+                            if (doRightAlpha)       r.handleEdgeTablePixel (f.right, f.rightAlpha);
                         }
 
-                        if (bottomAlpha != 0 && bottom < clipBottom)
+                        if (f.bottomAlpha != 0 && f.bottom < clipBottom)
                         {
-                            r.setEdgeTableYPos (bottom);
+                            r.setEdgeTableYPos (f.bottom);
 
-                            if (doLeftAlpha)        r.handleEdgeTablePixel (totalLeft, (leftAlpha * bottomAlpha) >> 8);
-                            if (clippedWidth > 0)   r.handleEdgeTableLine (clippedLeft, clippedWidth, bottomAlpha);
-                            if (doRightAlpha)       r.handleEdgeTablePixel (right, (rightAlpha * bottomAlpha) >> 8);
+                            if (doLeftAlpha)        r.handleEdgeTablePixel (f.totalLeft, f.getBottomLeftCornerAlpha());
+                            if (clippedWidth > 0)   r.handleEdgeTableLine (clippedLeft, clippedWidth, f.bottomAlpha);
+                            if (doRightAlpha)       r.handleEdgeTablePixel (f.right, f.getBottomRightCornerAlpha());
                         }
                     }
                 }
@@ -1739,6 +1680,8 @@ private:
 
         JUCE_DECLARE_NON_COPYABLE (SubRectangleIteratorFloat);
     };
+
+    inline Ptr toEdgeTable() const   { return new ClipRegion_EdgeTable (clip); }
 
     ClipRegion_RectangleList& operator= (const ClipRegion_RectangleList&);
 };

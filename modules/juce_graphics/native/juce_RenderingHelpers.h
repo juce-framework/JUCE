@@ -232,12 +232,12 @@ public:
 
     inline StateObjectType* operator->() const noexcept     { return currentState; }
     inline StateObjectType& operator*()  const noexcept     { return *currentState; }
-    
+
     void save()
     {
         stack.add (new StateObjectType (*currentState));
     }
-    
+
     void restore()
     {
         StateObjectType* const top = stack.getLast();
@@ -252,7 +252,7 @@ public:
             jassertfalse; // trying to pop with an empty stack!
         }
     }
-    
+
     void beginTransparencyLayer (float opacity)
     {
         save();
@@ -272,7 +272,95 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedStateStack);
 };
-    
+
+//==============================================================================
+// Calculates the alpha values and positions for rendering the edges of a non-pixel
+// aligned rectangle.
+struct FloatRectangleRasterisingInfo
+{
+    FloatRectangleRasterisingInfo (const Rectangle<float>& area)
+        : left   (roundToInt (256.0f * area.getX())),
+          top    (roundToInt (256.0f * area.getY())),
+          right  (roundToInt (256.0f * area.getRight())),
+          bottom (roundToInt (256.0f * area.getBottom()))
+    {
+        if ((top >> 8) == (bottom >> 8))
+        {
+            topAlpha = bottom - top;
+            bottomAlpha = 0;
+            totalTop = top >> 8;
+            totalBottom = bottom = top = totalTop + 1;
+        }
+        else
+        {
+            if ((top & 255) == 0)
+            {
+                topAlpha = 0;
+                top = totalTop = (top >> 8);
+            }
+            else
+            {
+                topAlpha = 255 - (top & 255);
+                totalTop = (top >> 8);
+                top = totalTop + 1;
+            }
+
+            bottomAlpha = bottom & 255;
+            bottom >>= 8;
+            totalBottom = bottom + (bottomAlpha != 0 ? 1 : 0);
+        }
+
+        if ((left >> 8) == (right >> 8))
+        {
+            leftAlpha = right - left;
+            rightAlpha = 0;
+            totalLeft = (left >> 8);
+            totalRight = right = left = totalLeft + 1;
+        }
+        else
+        {
+            if ((left & 255) == 0)
+            {
+                leftAlpha = 0;
+                left = totalLeft = (left >> 8);
+            }
+            else
+            {
+                leftAlpha = 255 - (left & 255);
+                totalLeft = (left >> 8);
+                left = totalLeft + 1;
+            }
+
+            rightAlpha = right & 255;
+            right >>= 8;
+            totalRight = right + (rightAlpha != 0 ? 1 : 0);
+        }
+    }
+
+    template <class Callback>
+    void iterate (Callback& callback) const
+    {
+        if (topAlpha != 0)       callback (totalLeft, totalTop, totalRight - totalLeft, 1, topAlpha);
+        if (bottomAlpha != 0)    callback (totalLeft, bottom,   totalRight - totalLeft, 1, bottomAlpha);
+        if (leftAlpha != 0)      callback (totalLeft, totalTop, 1, totalBottom - totalTop, leftAlpha);
+        if (rightAlpha != 0)     callback (right,     totalTop, 1, totalBottom - totalTop, rightAlpha);
+
+        callback (left, top, 1, bottom - top, 255);
+    }
+
+    inline bool isOnePixelWide() const noexcept            { return right - left == 1 && leftAlpha + rightAlpha == 0; }
+
+    inline int getTopLeftCornerAlpha() const noexcept      { return (topAlpha * leftAlpha) >> 8; }
+    inline int getTopRightCornerAlpha() const noexcept     { return (topAlpha * rightAlpha) >> 8; }
+    inline int getBottomLeftCornerAlpha() const noexcept   { return (bottomAlpha * leftAlpha) >> 8; }
+    inline int getBottomRightCornerAlpha() const noexcept  { return (bottomAlpha * rightAlpha) >> 8; }
+
+    //==============================================================================
+    int left, top, right, bottom;  // bounds of the solid central area, excluding anti-aliased edges
+    int totalTop, totalLeft, totalBottom, totalRight; // bounds of the total area, including edges
+    int topAlpha, leftAlpha, bottomAlpha, rightAlpha; // alpha of each anti-aliased edge
+};
+
 }
 
 #endif   // __JUCE_RENDERINGHELPERS_JUCEHEADER__
