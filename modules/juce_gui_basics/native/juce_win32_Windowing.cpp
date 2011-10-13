@@ -1431,65 +1431,79 @@ private:
         return 1000 / 60;  // Throttling the incoming mouse-events seems to still be needed in XP..
     }
 
+    static bool isCurrentEventFromTouchScreen() noexcept
+    {
+        return (GetMessageExtraInfo() & 0xffffff00 /* SIGNATURE_MASK */) == 0xff515700; /* MI_WP_SIGNATURE */
+    }
+
     void doMouseMove (const Point<int>& position)
     {
-        if (! isMouseOver)
+        if (! isCurrentEventFromTouchScreen())
         {
-            isMouseOver = true;
-            ModifierKeys::getCurrentModifiersRealtime(); // (This avoids a rare stuck-button problem when focus is lost unexpectedly)
-            updateKeyModifiers();
+            if (! isMouseOver)
+            {
+                isMouseOver = true;
+                ModifierKeys::getCurrentModifiersRealtime(); // (This avoids a rare stuck-button problem when focus is lost unexpectedly)
+                updateKeyModifiers();
 
-            TRACKMOUSEEVENT tme;
-            tme.cbSize = sizeof (tme);
-            tme.dwFlags = TME_LEAVE;
-            tme.hwndTrack = hwnd;
-            tme.dwHoverTime = 0;
+                TRACKMOUSEEVENT tme;
+                tme.cbSize = sizeof (tme);
+                tme.dwFlags = TME_LEAVE;
+                tme.hwndTrack = hwnd;
+                tme.dwHoverTime = 0;
 
-            if (! TrackMouseEvent (&tme))
-                jassertfalse;
+                if (! TrackMouseEvent (&tme))
+                    jassertfalse;
 
-            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
-        }
-        else if (! isDragging)
-        {
-            if (! contains (position, false))
-                return;
-        }
+                Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
+            }
+            else if (! isDragging)
+            {
+                if (! contains (position, false))
+                    return;
+            }
 
-        static uint32 lastMouseTime = 0;
-        static int minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
-        const uint32 now = Time::getMillisecondCounter();
+            static uint32 lastMouseTime = 0;
+            static int minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
+            const uint32 now = Time::getMillisecondCounter();
 
-        if (now >= lastMouseTime + minTimeBetweenMouses)
-        {
-            lastMouseTime = now;
-            doMouseEvent (position);
+            if (now >= lastMouseTime + minTimeBetweenMouses)
+            {
+                lastMouseTime = now;
+                doMouseEvent (position);
+            }
         }
     }
 
     void doMouseDown (const Point<int>& position, const WPARAM wParam)
     {
-        if (GetCapture() != hwnd)
-            SetCapture (hwnd);
+        if (! isCurrentEventFromTouchScreen())
+        {
+            if (GetCapture() != hwnd)
+                SetCapture (hwnd);
 
-        doMouseMove (position);
+            doMouseMove (position);
 
-        updateModifiersFromWParam (wParam);
-        isDragging = true;
+            updateModifiersFromWParam (wParam);
+            isDragging = true;
 
-        doMouseEvent (position);
+            doMouseEvent (position);
+        }
     }
 
     void doMouseUp (const Point<int>& position, const WPARAM wParam)
     {
-        updateModifiersFromWParam (wParam);
-        isDragging = false;
+        if (! isCurrentEventFromTouchScreen())
+        {
+            updateModifiersFromWParam (wParam);
+            isDragging = false;
 
-        // release the mouse capture if the user has released all buttons
-        if ((wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
-            ReleaseCapture();
+            // release the mouse capture if the user has released all buttons
+            if ((wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
+                ReleaseCapture();
 
-        doMouseEvent (position);
+            doMouseEvent (position);
+        }
     }
 
     void doCaptureChanged()

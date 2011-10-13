@@ -314,6 +314,7 @@ public:
          currentSampleRate (0),
          deviceIsOpen (false),
          isStarted (false),
+         buffersCreated (false),
          postOutput (true),
          insideControlPanelModalLoop (false),
          shouldUsePreferredSize (false)
@@ -508,7 +509,7 @@ public:
         needToReset = false;
         isReSync = false;
         err = 0;
-        bool buffersCreated = false;
+        buffersCreated = false;
 
         if (currentSampleRate != sampleRate)
         {
@@ -734,9 +735,7 @@ public:
         if (error.isNotEmpty())
         {
             logError (error, err);
-
-            if (asioObject != nullptr && buffersCreated)
-                asioObject->disposeBuffers();
+            disposeBuffers();
 
             Thread::sleep (20);
             isStarted = false;
@@ -775,7 +774,7 @@ public:
                 Thread::sleep (20);
                 asioObject->stop();
                 Thread::sleep (10);
-                asioObject->disposeBuffers();
+                disposeBuffers();
             }
 
             Thread::sleep (10);
@@ -931,7 +930,7 @@ private:
     HeapBlock <float> tempBuffer;
     int volatile bufferIndex, numActiveInputChans, numActiveOutputChans;
 
-    bool deviceIsOpen, isStarted;
+    bool deviceIsOpen, isStarted, buffersCreated;
     bool volatile isASIOOpen;
     bool volatile calledback;
     bool volatile littleEndian, postOutput, needToReset, isReSync;
@@ -1230,10 +1229,7 @@ private:
         if (error.isNotEmpty())
         {
             logError (error, err);
-
-            if (asioObject != nullptr)
-                asioObject->disposeBuffers();
-
+            disposeBuffers();
             removeCurrentDriver();
             isASIOOpen = false;
         }
@@ -1248,6 +1244,15 @@ private:
         isReSync = false;
 
         return error;
+    }
+
+    void disposeBuffers()
+    {
+        if (asioObject != nullptr && buffersCreated)
+        {
+            buffersCreated = false;
+            asioObject->disposeBuffers();
+        }
     }
 
     //==============================================================================

@@ -269,14 +269,16 @@ private:
     {
         uint32 argb;
 
-        struct
+        struct Components
         {
           #if JUCE_BIG_ENDIAN
             uint8 a : 8, r : 8, g : 8, b : 8;
           #else
             uint8 b, g, r, a;
           #endif
-        } PACKED components;
+        } PACKED;
+        
+        Components components;
     };
 }
 #ifndef DOXYGEN

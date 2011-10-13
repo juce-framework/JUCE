@@ -1282,7 +1282,9 @@ void TextEditor::textWasChangedByValue()
 void TextEditor::textChanged()
 {
     updateTextHolderSize();
-    postCommandMessage (TextEditorDefs::textChangeMessageId);
+
+    if (listeners.size() > 0)
+        postCommandMessage (TextEditorDefs::textChangeMessageId);
 
     if (textValue.getValueSource().getReferenceCount() > 1)
     {

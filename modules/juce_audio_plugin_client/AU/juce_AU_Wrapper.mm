@@ -474,7 +474,10 @@ public:
 
     //==============================================================================
    #if BUILD_AU_CARBON_UI
-    int GetNumCustomUIComponents()              { return 1; }
+    int GetNumCustomUIComponents()
+    {
+        return PluginHostType().isDigitalPerformer() ? 0 : 1;
+    }
 
     void GetUIComponentDescs (ComponentDescription* inDescArray)
     {
