@@ -26,12 +26,35 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-struct ThumbnailCacheEntry
+class AudioThumbnailCache::ThumbnailCacheEntry
 {
+public:
+    ThumbnailCacheEntry (const int64 hash_)
+        : hash (hash_),
+          lastUsed (Time::getMillisecondCounter())
+    {
+    }
+
+    ThumbnailCacheEntry (InputStream& in)
+        : lastUsed (0)
+    {
+        hash = in.readInt64();
+        const int64 len = in.readInt64();
+        in.readIntoMemoryBlock (data, len);
+    }
+
+    void write (OutputStream& out)
+    {
+        out.writeInt64 (hash);
+        out.writeInt64 ((int64) data.getSize());
+        out << data;
+    }
+
     int64 hash;
     uint32 lastUsed;
     MemoryBlock data;
 
+private:
     JUCE_LEAK_DETECTOR (ThumbnailCacheEntry);
 };
 
@@ -40,6 +63,7 @@ AudioThumbnailCache::AudioThumbnailCache (const int maxNumThumbsToStore_)
     : TimeSliceThread ("thumb cache"),
       maxNumThumbsToStore (maxNumThumbsToStore_)
 {
+    jassert (maxNumThumbsToStore > 0);
     startThread (2);
 }
 
@@ -47,7 +71,7 @@ AudioThumbnailCache::~AudioThumbnailCache()
 {
 }
 
-ThumbnailCacheEntry* AudioThumbnailCache::findThumbFor (const int64 hash) const
+AudioThumbnailCache::ThumbnailCacheEntry* AudioThumbnailCache::findThumbFor (const int64 hash) const
 {
     for (int i = thumbs.size(); --i >= 0;)
         if (thumbs.getUnchecked(i)->hash == hash)
@@ -56,8 +80,28 @@ ThumbnailCacheEntry* AudioThumbnailCache::findThumbFor (const int64 hash) const
     return nullptr;
 }
 
+int AudioThumbnailCache::findOldestThumb() const
+{
+    int oldest = 0;
+    uint32 oldestTime = Time::getMillisecondCounter() + 1;
+
+    for (int i = thumbs.size(); --i >= 0;)
+    {
+        const ThumbnailCacheEntry* const te = thumbs.getUnchecked(i);
+
+        if (te->lastUsed < oldestTime)
+        {
+            oldest = i;
+            oldestTime = te->lastUsed;
+        }
+    }
+
+    return oldest;
+}
+
 bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode)
 {
+    const ScopedLock sl (lock);
     ThumbnailCacheEntry* te = findThumbFor (hashCode);
 
     if (te != nullptr)
@@ -75,36 +119,18 @@ bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode
 void AudioThumbnailCache::storeThumb (const AudioThumbnail& thumb,
                                       const int64 hashCode)
 {
+    const ScopedLock sl (lock);
     ThumbnailCacheEntry* te = findThumbFor (hashCode);
 
     if (te == nullptr)
     {
-        te = new ThumbnailCacheEntry();
-        te->hash = hashCode;
+        te = new ThumbnailCacheEntry (hashCode);
 
         if (thumbs.size() < maxNumThumbsToStore)
-        {
             thumbs.add (te);
-        }
         else
-        {
-            int oldest = 0;
-            uint32 oldestTime = Time::getMillisecondCounter() + 1;
-
-            for (int i = thumbs.size(); --i >= 0;)
-            {
-                if (thumbs.getUnchecked(i)->lastUsed < oldestTime)
-                {
-                    oldest = i;
-                    oldestTime = thumbs.getUnchecked(i)->lastUsed;
-                }
-            }
-
-            thumbs.set (oldest, te);
-        }
+            thumbs.set (findOldestThumb(), te);
     }
-
-    te->lastUsed = Time::getMillisecondCounter();
 
     MemoryOutputStream out (te->data, false);
     thumb.saveTo (out);
@@ -112,8 +138,39 @@ void AudioThumbnailCache::storeThumb (const AudioThumbnail& thumb,
 
 void AudioThumbnailCache::clear()
 {
+    const ScopedLock sl (lock);
     thumbs.clear();
 }
 
+static inline int getThumbnailCacheFileMagicHeader() noexcept
+{
+    return (int) ByteOrder::littleEndianInt ("ThmC");
+}
+
+bool AudioThumbnailCache::readFromStream (InputStream& source)
+{
+    if (source.readInt() != getThumbnailCacheFileMagicHeader())
+        return false;
+
+    const ScopedLock sl (lock);
+    clear();
+    int numThumbnails = jmin (maxNumThumbsToStore, source.readInt());
+
+    while (--numThumbnails >= 0 && ! source.isExhausted())
+        thumbs.add (new ThumbnailCacheEntry (source));
+
+    return true;
+}
+
+void AudioThumbnailCache::writeToStream (OutputStream& out)
+{
+    const ScopedLock sl (lock);
+
+    out.writeInt (getThumbnailCacheFileMagicHeader());
+    out.writeInt (thumbs.size());
+
+    for (int i = 0; i < thumbs.size(); ++i)
+        thumbs.getUnchecked(i)->write (out);
+}
 
 END_JUCE_NAMESPACE

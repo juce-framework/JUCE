@@ -1929,21 +1929,20 @@ public:
         if (clip != nullptr)
         {
             SoftwareRendererClasses::ClipRegion_EdgeTable* edgeTableClip = new SoftwareRendererClasses::ClipRegion_EdgeTable (edgeTable);
-            SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill (edgeTableClip);
-            edgeTableClip->edgeTable.translate (x + transform.xOffset, y + transform.yOffset);
-            fillShape (shapeToFill, false);
+            edgeTableClip->edgeTable.translate (x + transform.xOffset,
+                                                y + transform.yOffset);
+            fillShape (edgeTableClip, false);
         }
     }
 
     void drawGlyph (const Font& f, int glyphNumber, const AffineTransform& t)
     {
-        const ScopedPointer<EdgeTable> et (f.getTypeface()->getEdgeTableForGlyph (glyphNumber, transform.getTransformWith (t)));
-
-        if (et != nullptr && clip != nullptr)
+        if (clip != nullptr)
         {
-            SoftwareRendererClasses::ClipRegion_EdgeTable* edgeTableClip = new SoftwareRendererClasses::ClipRegion_EdgeTable (*et);
-            SoftwareRendererClasses::ClipRegionBase::Ptr shapeToFill (edgeTableClip);
-            fillShape (shapeToFill, false);
+            const ScopedPointer<EdgeTable> et (f.getTypeface()->getEdgeTableForGlyph (glyphNumber, transform.getTransformWith (t)));
+
+            if (et != nullptr)
+                fillShape (new SoftwareRendererClasses::ClipRegion_EdgeTable (*et), false);
         }
     }
 
@@ -2021,8 +2020,7 @@ public:
 
                     if (! area.isEmpty())
                     {
-                        SoftwareRendererClasses::ClipRegionBase::Ptr c (new SoftwareRendererClasses::ClipRegion_EdgeTable (area));
-                        c = clip->applyClipTo (c);
+                        SoftwareRendererClasses::ClipRegionBase::Ptr c (clip->applyClipTo (new SoftwareRendererClasses::ClipRegion_EdgeTable (area)));
 
                         if (c != nullptr)
                             c->renderImageUntransformed (destData, srcData, alpha, tx, ty, false);

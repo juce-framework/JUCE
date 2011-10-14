@@ -453,7 +453,6 @@ namespace WavFileHelpers
 class WavAudioFormatReader  : public AudioFormatReader
 {
 public:
-    //==============================================================================
     WavAudioFormatReader (InputStream* const in)
         : AudioFormatReader (in, TRANS (wavFormatName)),
           bwavChunkStart (0),
@@ -650,14 +649,14 @@ public:
                                 MemoryBlock textBlock;
                                 input->readIntoMemoryBlock (textBlock, (int) stringLength);
 
-                                metadataValues.set (prefix + "Identifier",      String (identifier));
-                                metadataValues.set (prefix + "SampleLength",    String (sampleLength));
-                                metadataValues.set (prefix + "Purpose",         String (purpose));
-                                metadataValues.set (prefix + "Country",         String (country));
-                                metadataValues.set (prefix + "Language",        String (language));
-                                metadataValues.set (prefix + "Dialect",         String (dialect));
-                                metadataValues.set (prefix + "CodePage",        String (codePage));
-                                metadataValues.set (prefix + "Text",            textBlock.toString());
+                                metadataValues.set (prefix + "Identifier",   String (identifier));
+                                metadataValues.set (prefix + "SampleLength", String (sampleLength));
+                                metadataValues.set (prefix + "Purpose",      String (purpose));
+                                metadataValues.set (prefix + "Country",      String (country));
+                                metadataValues.set (prefix + "Language",     String (language));
+                                metadataValues.set (prefix + "Dialect",      String (dialect));
+                                metadataValues.set (prefix + "CodePage",     String (codePage));
+                                metadataValues.set (prefix + "Text",         textBlock.toString());
                             }
 
                             input->setPosition (adtlChunkEnd);
@@ -746,7 +745,6 @@ private:
 class WavAudioFormatWriter  : public AudioFormatWriter
 {
 public:
-    //==============================================================================
     WavAudioFormatWriter (OutputStream* const out, const double sampleRate_,
                           const unsigned int numChannels_, const unsigned int bits,
                           const StringPairArray& metadataValues)

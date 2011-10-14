@@ -27,7 +27,6 @@
 #define __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 
 #include "juce_AudioThumbnail.h"
-struct ThumbnailCacheEntry;
 
 
 //==============================================================================
@@ -74,13 +73,28 @@ public:
     */
     void storeThumb (const AudioThumbnail& thumb, int64 hashCode);
 
+    //==============================================================================
+    /** Attempts to re-load a saved cache of thumbnails from a stream.
+        The cache data must have been written by the writeToStream() method.
+        This will replace all currently-loaded thumbnails with the new data.
+    */
+    bool readFromStream (InputStream& source);
+
+    /** Writes all currently-loaded cache data to a stream.
+        The resulting data can be re-loaded with readFromStream().
+    */
+    void writeToStream (OutputStream& stream);
 
 private:
     //==============================================================================
-    OwnedArray <ThumbnailCacheEntry> thumbs;
+    class ThumbnailCacheEntry;
+    friend class OwnedArray<ThumbnailCacheEntry>;
+    OwnedArray<ThumbnailCacheEntry> thumbs;
+    CriticalSection lock;
     int maxNumThumbsToStore;
 
     ThumbnailCacheEntry* findThumbFor (int64 hash) const;
+    int findOldestThumb() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnailCache);
 };
