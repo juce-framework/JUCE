@@ -26,7 +26,7 @@
 BEGIN_JUCE_NAMESPACE
 
 // tests that some co-ords aren't NaNs
-#define CHECK_COORDS_ARE_VALID(x, y) \
+#define JUCE_CHECK_COORDS_ARE_VALID(x, y) \
     jassert (x == x && y == y);
 
 //==============================================================================
@@ -168,12 +168,12 @@ void Path::clear() noexcept
 void Path::swapWithPath (Path& other) noexcept
 {
     data.swapWith (other.data);
-    swapVariables <size_t> (numElements, other.numElements);
-    swapVariables <float> (pathXMin, other.pathXMin);
-    swapVariables <float> (pathXMax, other.pathXMax);
-    swapVariables <float> (pathYMin, other.pathYMin);
-    swapVariables <float> (pathYMax, other.pathYMax);
-    swapVariables <bool> (useNonZeroWinding, other.useNonZeroWinding);
+    std::swap (numElements, other.numElements);
+    std::swap (pathXMin, other.pathXMin);
+    std::swap (pathXMax, other.pathXMax);
+    std::swap (pathYMin, other.pathYMin);
+    std::swap (pathYMax, other.pathYMax);
+    std::swap (useNonZeroWinding, other.useNonZeroWinding);
 }
 
 //==============================================================================
@@ -227,7 +227,7 @@ Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) c
 //==============================================================================
 void Path::startNewSubPath (const float x, const float y)
 {
-    CHECK_COORDS_ARE_VALID (x, y);
+    JUCE_CHECK_COORDS_ARE_VALID (x, y);
 
     if (numElements == 0)
     {
@@ -256,7 +256,7 @@ void Path::startNewSubPath (const Point<float>& start)
 
 void Path::lineTo (const float x, const float y)
 {
-    CHECK_COORDS_ARE_VALID (x, y);
+    JUCE_CHECK_COORDS_ARE_VALID (x, y);
 
     if (numElements == 0)
         startNewSubPath (0, 0);
@@ -281,8 +281,8 @@ void Path::lineTo (const Point<float>& end)
 void Path::quadraticTo (const float x1, const float y1,
                         const float x2, const float y2)
 {
-    CHECK_COORDS_ARE_VALID (x1, y1);
-    CHECK_COORDS_ARE_VALID (x2, y2);
+    JUCE_CHECK_COORDS_ARE_VALID (x1, y1);
+    JUCE_CHECK_COORDS_ARE_VALID (x2, y2);
 
     if (numElements == 0)
         startNewSubPath (0, 0);
@@ -312,9 +312,9 @@ void Path::cubicTo (const float x1, const float y1,
                     const float x2, const float y2,
                     const float x3, const float y3)
 {
-    CHECK_COORDS_ARE_VALID (x1, y1);
-    CHECK_COORDS_ARE_VALID (x2, y2);
-    CHECK_COORDS_ARE_VALID (x3, y3);
+    JUCE_CHECK_COORDS_ARE_VALID (x1, y1);
+    JUCE_CHECK_COORDS_ARE_VALID (x2, y2);
+    JUCE_CHECK_COORDS_ARE_VALID (x3, y3);
 
     if (numElements == 0)
         startNewSubPath (0, 0);
@@ -383,11 +383,8 @@ void Path::addRectangle (const float x, const float y,
 {
     float x1 = x, y1 = y, x2 = x + w, y2 = y + h;
 
-    if (w < 0)
-        swapVariables (x1, x2);
-
-    if (h < 0)
-        swapVariables (y1, y2);
+    if (w < 0) std::swap (x1, x2);
+    if (h < 0) std::swap (y1, y2);
 
     data.ensureAllocatedSize ((int) numElements + 13);
 
@@ -962,29 +959,25 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
         float newXCentre = x;
         float newYCentre = y;
 
-        if (justification.testFlags (Justification::left))
-            newXCentre += newW * 0.5f;
-        else if (justification.testFlags (Justification::right))
-            newXCentre += w - newW * 0.5f;
-        else
-            newXCentre += w * 0.5f;
+        if (justification.testFlags (Justification::left))          newXCentre += newW * 0.5f;
+        else if (justification.testFlags (Justification::right))    newXCentre += w - newW * 0.5f;
+        else                                                        newXCentre += w * 0.5f;
 
-        if (justification.testFlags (Justification::top))
-            newYCentre += newH * 0.5f;
-        else if (justification.testFlags (Justification::bottom))
-            newYCentre += h - newH * 0.5f;
-        else
-            newYCentre += h * 0.5f;
+        if (justification.testFlags (Justification::top))           newYCentre += newH * 0.5f;
+        else if (justification.testFlags (Justification::bottom))   newYCentre += h - newH * 0.5f;
+        else                                                        newYCentre += h * 0.5f;
 
-        return AffineTransform::translation (bounds.getWidth() * -0.5f - bounds.getX(),
+        return AffineTransform::translation (bounds.getWidth()  * -0.5f - bounds.getX(),
                                              bounds.getHeight() * -0.5f - bounds.getY())
-                    .scaled (newW / bounds.getWidth(), newH / bounds.getHeight())
+                    .scaled (newW / bounds.getWidth(),
+                             newH / bounds.getHeight())
                     .translated (newXCentre, newYCentre);
     }
     else
     {
         return AffineTransform::translation (-bounds.getX(), -bounds.getY())
-                    .scaled (w / bounds.getWidth(), h / bounds.getHeight())
+                    .scaled (w / bounds.getWidth(),
+                             h / bounds.getHeight())
                     .translated (x, y);
     }
 }
@@ -1042,7 +1035,7 @@ Line<float> Path::getClippedLine (const Line<float>& line, const bool keepSectio
 {
     Line<float> result (line);
     const bool startInside = contains (line.getStart());
-    const bool endInside = contains (line.getEnd());
+    const bool endInside   = contains (line.getEnd());
 
     if (startInside == endInside)
     {
@@ -1162,8 +1155,8 @@ Path Path::createPathWithRoundedCorners (const float cornerRadius) const
                 {
                     startX = data.elements [n - 8];
                     startY = data.elements [n - 7];
-                    joinX = data.elements [n - 5];
-                    joinY = data.elements [n - 4];
+                    joinX  = data.elements [n - 5];
+                    joinY  = data.elements [n - 4];
                 }
             }
             else
@@ -1175,8 +1168,8 @@ Path Path::createPathWithRoundedCorners (const float cornerRadius) const
                 {
                     startX = data.elements [n - 6];
                     startY = data.elements [n - 5];
-                    joinX = data.elements [n - 3];
-                    joinY = data.elements [n - 2];
+                    joinX  = data.elements [n - 3];
+                    joinY  = data.elements [n - 2];
                 }
             }
 
@@ -1592,5 +1585,6 @@ bool Path::Iterator::next()
     return false;
 }
 
+#undef JUCE_CHECK_COORDS_ARE_VALID
 
 END_JUCE_NAMESPACE

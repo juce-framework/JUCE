@@ -223,7 +223,7 @@ public:
             renderingTarget->FillGeometry (geometry, currentState->currentBrush);
     }
 
-    void drawImage (const Image& image, const AffineTransform& transform, bool fillEntireClipAsTiles)
+    void drawImage (const Image& image, const AffineTransform& transform)
     {
         const int x = currentState->origin.getX();
         const int y = currentState->origin.getY();

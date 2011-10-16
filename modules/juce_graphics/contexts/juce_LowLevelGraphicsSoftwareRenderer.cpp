@@ -1854,7 +1854,7 @@ public:
         const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
         g->setOpacity (finishedLayerState.transparencyLayerAlpha);
         g->drawImage (finishedLayerState.image, AffineTransform::translation ((float) layerBounds.getX(),
-                                                                              (float) layerBounds.getY()), false);
+                                                                              (float) layerBounds.getY()));
     }
 
     //==============================================================================
@@ -2183,9 +2183,9 @@ void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineT
     savedState->fillPath (path, transform);
 }
 
-void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const AffineTransform& transform, const bool fillEntireClipAsTiles)
+void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const AffineTransform& transform)
 {
-    savedState->renderImage (sourceImage, transform, fillEntireClipAsTiles ? savedState->clip : 0);
+    savedState->renderImage (sourceImage, transform, nullptr);
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawLine (const Line <float>& line)

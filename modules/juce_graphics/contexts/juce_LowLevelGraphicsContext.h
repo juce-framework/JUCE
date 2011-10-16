@@ -94,7 +94,7 @@ public:
     virtual void fillRect (const Rectangle<int>& r, bool replaceExistingContents) = 0;
     virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
-    virtual void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles) = 0;
+    virtual void drawImage (const Image& sourceImage, const AffineTransform& transform) = 0;
 
     virtual void drawLine (const Line <float>& line) = 0;
     virtual void drawVerticalLine (int x, float top, float bottom) = 0;

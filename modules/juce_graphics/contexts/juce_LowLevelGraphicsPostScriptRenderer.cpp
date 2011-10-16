@@ -464,7 +464,7 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
     out << "\n>}\n";
 }
 
-void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, const AffineTransform& transform, const bool /*fillEntireClipAsTiles*/)
+void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, const AffineTransform& transform)
 {
     const int w = sourceImage.getWidth();
     const int h = sourceImage.getHeight();

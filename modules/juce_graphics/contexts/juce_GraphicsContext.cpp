@@ -697,7 +697,7 @@ void Graphics::drawImageTransformed (const Image& imageToDraw,
         }
         else
         {
-            context->drawImage (imageToDraw, transform, false);
+            context->drawImage (imageToDraw, transform);
         }
     }
 }

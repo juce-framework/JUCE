@@ -63,7 +63,7 @@ public:
     void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
     void fillCGRect (const CGRect& cgRect, const bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
-    void drawImage (const Image& sourceImage, const AffineTransform& transform, const bool fillEntireClipAsTiles);
+    void drawImage (const Image& sourceImage, const AffineTransform& transform);
 
     //==============================================================================
     void drawLine (const Line<float>& line);
@@ -111,6 +111,7 @@ private:
     void createPath (const Path& path, const AffineTransform& transform) const;
     void flip() const;
     void applyTransform (const AffineTransform& transform) const;
+    void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsContext);
 };

@@ -436,6 +436,11 @@ void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& tra
     CGContextRestoreGState (context);
 }
 
+void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform)
+{
+    drawImage (sourceImage, transform, false);
+}
+
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform, const bool fillEntireClipAsTiles)
 {
     const int iw = sourceImage.getWidth();

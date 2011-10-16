@@ -450,7 +450,7 @@ public:
                                     getCurrentPaint());
     }
 
-    void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles)
+    void drawImage (const Image& sourceImage, const AffineTransform& transform)
     {
         AndroidImage* androidImage = dynamic_cast <AndroidImage*> (sourceImage.getSharedImage());
 
@@ -502,7 +502,7 @@ public:
             {
                 saveState();
                 addTransform (transform);
-                drawImage (sourceImage, AffineTransform::identity, fillEntireClipAsTiles);
+                drawImage (sourceImage, AffineTransform::identity);
                 restoreState();
             }
         }

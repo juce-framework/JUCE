@@ -80,7 +80,7 @@ public:
     void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
-    void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles);
+    void drawImage (const Image& sourceImage, const AffineTransform& transform);
 
     void drawLine (const Line <float>& line);
 
