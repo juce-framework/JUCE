@@ -326,7 +326,7 @@ public:
 
                 if (! newClip.isEmpty())
                 {
-                    if (child.isOpaque())
+                    if (child.isOpaque() && child.componentTransparency == 0)
                     {
                         g.excludeClipRegion (newClip + delta);
                     }
@@ -351,7 +351,7 @@ public:
 
             if (c != compToAvoid && c->isVisible())
             {
-                if (c->isOpaque())
+                if (c->isOpaque() && c->componentTransparency == 0)
                 {
                     Rectangle<int> childBounds (c->bounds.getIntersection (clipRect));
                     childBounds.translate (delta.getX(), delta.getY());
