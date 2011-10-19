@@ -134,19 +134,6 @@ public:
     bool writePixels (const void* srcData, int srcPixelStride,
                       const Rectangle<int>& targetArea);
 
-    /** This will render an anti-aliased path into just the alpha channel of this framebuffer.
-
-        The idea here is that you can clear a framebuffer, use this to set its alpha channel, then
-        fill the RGB channels with some kind of fill-pattern, and then copy the whole thing onto
-        a target, to produce a filled path with some kind of texture.
-
-        Calling this will make changes to a lot of openGL state, including colour masks, blend
-        functions, etc
-    */
-    void createAlphaChannelFromPath (const Path& path,
-                                     const AffineTransform& transform,
-                                     int oversamplingLevel = 4);
-
 private:
     class Pimpl;
     friend class ScopedPointer<Pimpl>;

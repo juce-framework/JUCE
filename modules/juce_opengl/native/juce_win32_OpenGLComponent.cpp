@@ -509,3 +509,9 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
         wc.findAlternativeOpenGLPixelFormats (results);
     }
 }
+
+//==============================================================================
+bool OpenGLHelpers::isContextActive()
+{
+    return wglGetCurrentContext() != 0;
+}

@@ -51,11 +51,6 @@ public:
         @see OpenGLHelpers::prepareFor2D
     */
     void prepareFor2D();
-
-    /** Fills a path with a custom FillType. */
-    void fillPath (const Rectangle<int>& clipArea,
-                   const Path& path, const AffineTransform& pathTransform,
-                   const FillType& fill);
 };
 
 

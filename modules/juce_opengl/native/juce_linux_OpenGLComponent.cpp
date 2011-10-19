@@ -200,3 +200,10 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* component, OwnedArr
 {
     results.add (new OpenGLPixelFormat()); // xxx
 }
+
+//==============================================================================
+bool OpenGLHelpers::isContextActive()
+{
+    ScopedXLock xlock;
+    return glXGetCurrentContext() != 0;
+}

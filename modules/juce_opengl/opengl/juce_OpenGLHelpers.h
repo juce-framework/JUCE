@@ -40,6 +40,9 @@ public:
     /** Clears the GL error state. */
     static void resetErrorState();
 
+    /** Returns true if the current thread has an active OpenGL context. */
+    static bool isContextActive();
+
     /** Clears the current context using the given colour. */
     static void clear (const Colour& colour);
 
@@ -78,6 +81,11 @@ public:
     static void fillRectWithColourGradient (const Rectangle<int>& rect,
                                             const ColourGradient& gradient,
                                             const AffineTransform& transform);
+
+    static void fillRectWithTiledTexture (int textureWidth, int textureHeight,
+                                          const Rectangle<int>& targetArea,
+                                          const AffineTransform& transform,
+                                          float alpha);
 };
 
 //==============================================================================
@@ -87,6 +95,9 @@ class JUCE_API  TriangulatedPath
 {
 public:
     TriangulatedPath (const Path& path, const AffineTransform& transform);
+
+    /** Destructor. */
+    ~TriangulatedPath();
 
     /** Renders the path, using a jittered oversampling method.
         The oversampling level is the square root of the number of times it
@@ -102,7 +113,7 @@ private:
     friend class TrapezoidedPath;
 
     void startNewBlock();
-    void addTriangle (GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat x3, GLfloat y3);
+    void addTriangle  (GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat x3, GLfloat y3);
     void addTrapezoid (GLfloat y1, GLfloat y2, GLfloat x1, GLfloat x2, GLfloat x3, GLfloat x4);
 
     struct TriangleBlock;

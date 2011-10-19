@@ -77,7 +77,7 @@ public:
     {
         if (isOnlyTranslated
              && t.isOnlyTranslation()
-             && isIntegerTranlation (t))
+             && isIntegerTranslation (t))
         {
             xOffset += (int) t.getTranslationX();
             yOffset += (int) t.getTranslationY();
@@ -126,7 +126,7 @@ public:
     bool isOnlyTranslated;
 
 private:
-    static inline bool isIntegerTranlation (const AffineTransform& t) noexcept
+    static inline bool isIntegerTranslation (const AffineTransform& t) noexcept
     {
         const int tx = (int) (t.getTranslationX() * 256.0f);
         const int ty = (int) (t.getTranslationY() * 256.0f);

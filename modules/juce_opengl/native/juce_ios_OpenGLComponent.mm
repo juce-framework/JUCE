@@ -234,3 +234,9 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
                                                   OwnedArray <OpenGLPixelFormat>& /*results*/)
 {
 }
+
+//==============================================================================
+bool OpenGLHelpers::isContextActive()
+{
+    return [EAGLContext currentContext] != nil;
+}

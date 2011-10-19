@@ -312,3 +312,9 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
         results.add (pf);
     }
 }
+
+//==============================================================================
+bool OpenGLHelpers::isContextActive()
+{
+    return [NSOpenGLContext currentContext] != nil;
+}

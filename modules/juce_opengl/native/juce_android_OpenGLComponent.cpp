@@ -39,3 +39,8 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
 {
 
 }
+
+bool OpenGLHelpers::isContextActive()
+{
+    return false;
+}

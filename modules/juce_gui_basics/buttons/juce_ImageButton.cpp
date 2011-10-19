@@ -129,16 +129,16 @@ void ImageButton::paintButton (Graphics& g,
         const int ih = im.getHeight();
         imageW = getWidth();
         imageH = getHeight();
-        imageX = (imageW - iw) >> 1;
-        imageY = (imageH - ih) >> 1;
+        imageX = (imageW - iw) / 2;
+        imageY = (imageH - ih) / 2;
 
         if (scaleImageToFit)
         {
             if (preserveProportions)
             {
                 int newW, newH;
-                const float imRatio = ih / (float)iw;
-                const float destRatio = imageH / (float)imageW;
+                const float imRatio = ih / (float) iw;
+                const float destRatio = imageH / (float) imageW;
 
                 if (imRatio > destRatio)
                 {
@@ -169,11 +169,13 @@ void ImageButton::paintButton (Graphics& g,
             imageH = ih;
         }
 
+        const bool useDownImage = isButtonDown || getToggleState();
+
         getLookAndFeel().drawImageButton (g, &im, imageX, imageY, imageW, imageH,
-                                          isButtonDown ? downOverlay
+                                          useDownImage ? downOverlay
                                                        : (isMouseOverButton ? overOverlay
                                                                             : normalOverlay),
-                                          isButtonDown ? downOpacity
+                                          useDownImage ? downOpacity
                                                        : (isMouseOverButton ? overOpacity
                                                                             : normalOpacity),
                                           *this);

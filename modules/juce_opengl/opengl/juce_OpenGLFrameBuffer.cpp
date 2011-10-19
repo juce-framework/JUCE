@@ -145,6 +145,10 @@ public:
           hasStencilBuffer (false),
           ok (false)
     {
+        // Framebuffer objects can only be created when the current thread has an active OpenGL
+        // context. You'll need to make an OpenGLComponent active before calling this.
+        jassert (OpenGLHelpers::isContextActive());
+
        #if JUCE_WINDOWS || JUCE_LINUX
         initialiseFrameBufferFunctions();
 
@@ -155,16 +159,12 @@ public:
         OpenGLHelpers::resetErrorState();
 
         glGenFramebuffersEXT (1, &frameBufferHandle);
+
         glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferHandle);
 
         glGenTextures (1, &textureID);
         glBindTexture (textureType, textureID);
         glTexImage2D (textureType, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-        glTexParameterf (textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf (textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf (textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf (textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         glFramebufferTexture2DEXT (GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, textureType, textureID, 0);
 
@@ -174,36 +174,32 @@ public:
             glBindRenderbufferEXT (GL_RENDERBUFFER_EXT, depthOrStencilBuffer);
             jassert (glIsRenderbufferEXT (depthOrStencilBuffer));
 
-            if (wantsDepthBuffer && wantsStencilBuffer)
-            {
-                glRenderbufferStorageEXT (GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, width, height);
+            glRenderbufferStorageEXT (GL_RENDERBUFFER_EXT,
+                                      (wantsDepthBuffer && wantsStencilBuffer) ? GL_DEPTH24_STENCIL8_EXT
+                                                                              #if JUCE_OPENGL_ES
+                                                                               : GL_DEPTH_COMPONENT16,
+                                                                              #else
+                                                                               : GL_DEPTH_COMPONENT,
+                                                                              #endif
+                                      width, height);
 
-                GLint params = 0;
-                glGetRenderbufferParameterivEXT (GL_RENDERBUFFER_EXT, GL_RENDERBUFFER_DEPTH_SIZE_EXT, &params);
+            GLint params = 0;
+            glGetRenderbufferParameterivEXT (GL_RENDERBUFFER_EXT, GL_RENDERBUFFER_DEPTH_SIZE_EXT, &params);
+            glFramebufferRenderbufferEXT (GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthOrStencilBuffer);
 
-                glFramebufferRenderbufferEXT (GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthOrStencilBuffer);
+            if (wantsStencilBuffer)
                 glFramebufferRenderbufferEXT (GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthOrStencilBuffer);
 
-                hasDepthBuffer = true;
-                hasStencilBuffer = true;
-            }
-            else
-            {
-               #if JUCE_OPENGL_ES
-                glRenderbufferStorageEXT (GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT16, width, height);
-               #else
-                glRenderbufferStorageEXT (GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, width, height);
-               #endif
-
-                GLint params = 0;
-                glGetRenderbufferParameterivEXT (GL_RENDERBUFFER_EXT, GL_RENDERBUFFER_DEPTH_SIZE_EXT, &params);
-                glFramebufferRenderbufferEXT (GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthOrStencilBuffer);
-
-                hasDepthBuffer = true;
-            }
+            hasDepthBuffer = wantsDepthBuffer;
+            hasStencilBuffer = wantsStencilBuffer;
         }
 
         ok = checkStatus();
+
+        glTexParameterf (textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf (textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf (textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf (textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
     }
@@ -438,7 +434,7 @@ bool OpenGLFrameBuffer::writePixels (const void* data, int pixelStride, const Re
         glBindTexture (GL_TEXTURE_2D, temporaryTexture);
 
         glPixelStorei (GL_UNPACK_ALIGNMENT, pixelStride);
-        glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, area.getWidth(), area.getHeight(), 0,
+        glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, area.getWidth(), area.getHeight(), 0,
                       format, GL_UNSIGNED_BYTE, data);
 
         glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -522,24 +518,5 @@ void OpenGLFrameBuffer::drawAt (float x1, float y1) const
     }
 }
 
-//==============================================================================
-void OpenGLFrameBuffer::createAlphaChannelFromPath (const Path& path, const AffineTransform& transform,
-                                                    const int oversamplingLevel)
-{
-    makeCurrentRenderingTarget();
-
-    glEnableClientState (GL_VERTEX_ARRAY);
-    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState (GL_COLOR_ARRAY);
-    glDisableClientState (GL_NORMAL_ARRAY);
-    glDisable (GL_TEXTURE_2D);
-    glDisable (GL_DEPTH_TEST);
-    glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glEnable (GL_BLEND);
-    glBlendFunc (GL_ONE, GL_ONE);
-
-    prepareFor2D();
-    TriangulatedPath (path, transform).draw (oversamplingLevel);
-}
 
 END_JUCE_NAMESPACE

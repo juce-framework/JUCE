@@ -771,7 +771,7 @@ void InterProcessLock::exit()
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
-void* threadEntryProc (void* userData)
+extern "C" void* threadEntryProc (void* userData)
 {
     JUCE_AUTORELEASEPOOL
 
