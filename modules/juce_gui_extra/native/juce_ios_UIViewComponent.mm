@@ -87,7 +87,7 @@ public:
     Rectangle<int> getViewBounds() const
     {
         CGRect r = [view frame];
-        return Rectangle<int> (0, 0, (int) r.size.width, (int) r.size.height);
+        return Rectangle<int> ((int) r.size.width, (int) r.size.height);
     }
 
     UIView* const view;

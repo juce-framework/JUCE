@@ -1012,7 +1012,7 @@ public:
     virtual Ptr clipToPath (const Path& p, const AffineTransform& transform) = 0;
     virtual Ptr clipToEdgeTable (const EdgeTable& et) = 0;
     virtual Ptr clipToImageAlpha (const Image& image, const AffineTransform& t, const bool betterQuality) = 0;
-    virtual Ptr translated (const Point<int>& delta) = 0;
+    virtual void translate (const Point<int>& delta) = 0;
 
     virtual bool clipRegionIntersects (const Rectangle<int>& r) const = 0;
     virtual Rectangle<int> getClipBounds() const = 0;
@@ -1294,10 +1294,9 @@ public:
         return edgeTable.isEmpty() ? nullptr : this;
     }
 
-    Ptr translated (const Point<int>& delta)
+    void translate (const Point<int>& delta)
     {
         edgeTable.translate ((float) delta.getX(), delta.getY());
-        return edgeTable.isEmpty() ? nullptr : this;
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r) const
@@ -1451,10 +1450,9 @@ public:
         return toEdgeTable()->clipToImageAlpha (image, transform, betterQuality);
     }
 
-    Ptr translated (const Point<int>& delta)
+    void translate (const Point<int>& delta)
     {
         clip.offsetAll (delta.getX(), delta.getY());
-        return clip.isEmpty() ? nullptr : this;
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r) const
@@ -1821,12 +1819,6 @@ public:
         return false;
     }
 
-    Rectangle<int> getUntransformedClipBounds() const
-    {
-        return clip != nullptr ? clip->getClipBounds()
-                               : Rectangle<int>();
-    }
-
     Rectangle<int> getClipBounds() const
     {
         return clip != nullptr ? transform.deviceSpaceToUserSpace (clip->getClipBounds())
@@ -1835,26 +1827,34 @@ public:
 
     SavedState* beginTransparencyLayer (float opacity)
     {
-        const Rectangle<int> layerBounds (getUntransformedClipBounds());
-
         SavedState* s = new SavedState (*this);
-        s->image = Image (Image::ARGB, layerBounds.getWidth(), layerBounds.getHeight(), true);
-        s->transparencyLayerAlpha = opacity;
-        s->transform.moveOriginInDeviceSpace (-layerBounds.getX(), -layerBounds.getY());
 
-        s->cloneClipIfMultiplyReferenced();
-        s->clip = s->clip->translated (-layerBounds.getPosition());
+        if (clip != nullptr)
+        {
+            const Rectangle<int> layerBounds (clip->getClipBounds());
+
+            s->image = Image (Image::ARGB, layerBounds.getWidth(), layerBounds.getHeight(), true);
+            s->transparencyLayerAlpha = opacity;
+            s->transform.moveOriginInDeviceSpace (-layerBounds.getX(), -layerBounds.getY());
+
+            s->cloneClipIfMultiplyReferenced();
+            s->clip->translate (-layerBounds.getPosition());
+        }
+
         return s;
     }
 
     void endTransparencyLayer (SavedState& finishedLayerState)
     {
-        const Rectangle<int> layerBounds (getUntransformedClipBounds());
+        if (clip != nullptr)
+        {
+            const Rectangle<int> layerBounds (clip->getClipBounds());
 
-        const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
-        g->setOpacity (finishedLayerState.transparencyLayerAlpha);
-        g->drawImage (finishedLayerState.image, AffineTransform::translation ((float) layerBounds.getX(),
-                                                                              (float) layerBounds.getY()));
+            const ScopedPointer<LowLevelGraphicsContext> g (image.createLowLevelContext());
+            g->setOpacity (finishedLayerState.transparencyLayerAlpha);
+            g->drawImage (finishedLayerState.image, AffineTransform::translation ((float) layerBounds.getX(),
+                                                                                  (float) layerBounds.getY()));
+        }
     }
 
     //==============================================================================

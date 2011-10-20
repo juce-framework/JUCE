@@ -199,7 +199,7 @@ String InputStream::readNextLine()
     return String::fromUTF8 (data, (int) i);
 }
 
-int InputStream::readIntoMemoryBlock (MemoryBlock& block, int numBytes)
+int InputStream::readIntoMemoryBlock (MemoryBlock& block, ssize_t numBytes)
 {
     MemoryOutputStream mo (block, true);
     return mo.writeFromInputStream (*this, numBytes);

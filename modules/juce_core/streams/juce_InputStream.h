@@ -245,7 +245,7 @@ public:
         @returns the number of bytes that were added to the memory block
     */
     virtual int readIntoMemoryBlock (MemoryBlock& destBlock,
-                                     int maxNumBytesToRead = -1);
+                                     ssize_t maxNumBytesToRead = -1);
 
     //==============================================================================
     /** Returns the offset of the next byte that will be read from the stream.

@@ -99,7 +99,7 @@ public:
     Rectangle<int> getViewBounds() const
     {
         NSRect r = [view frame];
-        return Rectangle<int> (0, 0, (int) r.size.width, (int) r.size.height);
+        return Rectangle<int> ((int) r.size.width, (int) r.size.height);
     }
 
     NSView* const view;

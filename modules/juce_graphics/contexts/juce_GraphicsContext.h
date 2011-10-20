@@ -138,13 +138,16 @@ public:
         This will use the current colour (or brush) to fill the text. The font is the last
         one specified by setFont().
 
-        @param text         the string to draw
-        @param startX       the position to draw the left-hand edge of the text
-        @param baselineY    the position of the text's baseline
+        @param text          the string to draw
+        @param startX        the position to draw the left-hand edge of the text
+        @param baselineY     the position of the text's baseline
+        @param justification the horizontal flags indicate which end of the text string is
+                             anchored at the specified point.
         @see drawMultiLineText, drawText, drawFittedText, GlyphArrangement::addLineOfText
     */
     void drawSingleLineText (const String& text,
-                             int startX, int baselineY) const;
+                             int startX, int baselineY,
+                             const Justification& justification = Justification::left) const;
 
     /** Draws text across multiple lines.
 

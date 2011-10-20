@@ -610,7 +610,7 @@ public:
 
         Graphics::ScopedSaveState state (g);
         g.reduceClipRegion (Rectangle<int> (startX, baselineY, endX - startX, 1));
-        g.fillCheckerBoard (Rectangle<int> (0, 0, endX, baselineY + 1), 3, 1, colour, Colours::transparentBlack);
+        g.fillCheckerBoard (Rectangle<int> (endX, baselineY + 1), 3, 1, colour, Colours::transparentBlack);
     }
 
     void drawSelectedText (Graphics& g,

@@ -1162,7 +1162,7 @@ void Component::setBoundsToFit (int x, int y, int width, int height,
         }
 
         if (newW > 0 && newH > 0)
-            setBounds (justification.appliedToRectangle (Rectangle<int> (0, 0, newW, newH),
+            setBounds (justification.appliedToRectangle (Rectangle<int> (newW, newH),
                                                          Rectangle<int> (x, y, width, height)));
     }
 }

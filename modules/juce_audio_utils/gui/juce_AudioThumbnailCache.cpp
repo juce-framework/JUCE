@@ -40,7 +40,7 @@ public:
     {
         hash = in.readInt64();
         const int64 len = in.readInt64();
-        in.readIntoMemoryBlock (data, len);
+        in.readIntoMemoryBlock (data, (ssize_t) len);
     }
 
     void write (OutputStream& out)

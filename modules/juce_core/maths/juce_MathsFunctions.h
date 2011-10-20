@@ -91,6 +91,10 @@ typedef unsigned int                uint32;
   typedef unsigned int              pointer_sized_uint;
 #endif
 
+#if JUCE_MSVC
+  typedef pointer_sized_int ssize_t;
+#endif
+
 //==============================================================================
 // Some indispensible min/max functions
 
@@ -351,6 +355,10 @@ inline bool juce_isfinite (FloatingPointType value)
 }
 
 //==============================================================================
+#if JUCE_MSVC
+ #pragma optimize ("t", off)
+#endif
+
 /** Fast floating-point-to-integer conversion.
 
     This is faster than using the normal c++ cast to convert a float to an int, and
@@ -373,6 +381,10 @@ inline int roundToInt (const FloatType value) noexcept
     return n.asInt [0];
    #endif
 }
+
+#if JUCE_MSVC
+ #pragma optimize ("", on)  // resets optimisations to the project defaults
+#endif
 
 /** Fast floating-point-to-integer conversion.
 
@@ -422,6 +434,19 @@ template <typename IntegerType>
 bool isPowerOfTwo (IntegerType value)
 {
    return (value & (value - 1)) == 0;
+}
+
+/** Returns the next power-of-two which is equal to or greater than the given integer.
+*/
+inline int nextPowerOfTwo (int n)
+{
+    --n;
+    n |= (n >> 1);
+    n |= (n >> 2);
+    n |= (n >> 4);
+    n |= (n >> 8);
+    n |= (n >> 16);
+    return n + 1;
 }
 
 /** Performs a modulo operation, but can cope with the dividend being negative.

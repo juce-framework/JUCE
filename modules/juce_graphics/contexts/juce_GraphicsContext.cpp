@@ -231,14 +231,33 @@ Font Graphics::getCurrentFont() const
 }
 
 //==============================================================================
-void Graphics::drawSingleLineText (const String& text, const int startX, const int baselineY) const
+void Graphics::drawSingleLineText (const String& text, const int startX, const int baselineY,
+                                   const Justification& justification) const
 {
     if (text.isNotEmpty()
          && startX < context->getClipBounds().getRight())
     {
         GlyphArrangement arr;
         arr.addLineOfText (context->getFont(), text, (float) startX, (float) baselineY);
-        arr.draw (*this);
+
+        // Don't pass any vertical placement flags to this method - they'll be ignored.
+        jassert (justification.getOnlyVerticalFlags() == 0);
+
+        const int flags = justification.getOnlyHorizontalFlags();
+
+        if (flags != Justification::left)
+        {
+            float w = arr.getBoundingBox (0, -1, true).getWidth();
+
+            if ((flags & (Justification::horizontallyCentred | Justification::horizontallyJustified)) != 0)
+                w /= 2.0f;
+
+            arr.draw (*this, AffineTransform::translation (-w, 0));
+        }
+        else
+        {
+            arr.draw (*this);
+        }
     }
 }
 
