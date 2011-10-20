@@ -31,6 +31,84 @@ void OpenGLHelpers::resetErrorState()
     while (glGetError() != GL_NO_ERROR) {}
 }
 
+void* OpenGLHelpers::getExtensionFunction (const char* functionName)
+{
+   #if JUCE_WINDOWS
+    return (void*) wglGetProcAddress (functionName);
+
+   #elif JUCE_MAC
+    static void* handle = dlopen (nullptr, RTLD_LAZY);
+    return dlsym (handle, functionName);
+
+   #elif JUCE_LINUX
+    return (void*) glXGetProcAddress ((const GLubyte*) functionName);
+   #endif
+}
+
+#if ! JUCE_OPENGL_ES
+namespace
+{
+    bool isExtensionSupportedV3 (const char* extensionName)
+    {
+       #ifndef GL_NUM_EXTENSIONS
+        enum { GL_NUM_EXTENSIONS = 0x821d };
+       #endif
+
+        JUCE_DECLARE_GL_EXTENSION_FUNCTION (glGetStringi, const GLubyte*, (GLenum, GLuint))
+
+        if (glGetStringi == nullptr)
+            glGetStringi = (type_glGetStringi) OpenGLHelpers::getExtensionFunction ("glGetStringi");
+
+        if (glGetStringi != nullptr)
+        {
+            GLint numExtensions = 0;
+            glGetIntegerv (GL_NUM_EXTENSIONS, &numExtensions);
+
+            for (int i = 0; i < numExtensions; ++i)
+                if (strcmp (extensionName, (const char*) glGetStringi (GL_EXTENSIONS, i)) == 0)
+                    return true;
+        }
+
+        return false;
+    }
+}
+#endif
+
+bool OpenGLHelpers::isExtensionSupported (const char* const extensionName)
+{
+    jassert (extensionName != nullptr); // you must supply a genuine string for this.
+    jassert (isContextActive()); // An OpenGL context will need to be active before calling this.
+
+   #if ! JUCE_OPENGL_ES
+    const GLubyte* version = glGetString (GL_VERSION);
+
+    if (version != nullptr && version[0] >= '3')
+    {
+        return isExtensionSupportedV3 (extensionName);
+    }
+    else
+   #endif
+    {
+        const char* extensions = (const char*) glGetString (GL_EXTENSIONS);
+        jassert (extensions != nullptr); // Perhaps you didn't activate an OpenGL context before calling this?
+
+        for (;;)
+        {
+            const char* found = strstr (extensions, extensionName);
+
+            if (found == nullptr)
+                break;
+
+            extensions = found + strlen (extensionName);
+
+            if (extensions[0] == ' ' || extensions[0] == 0)
+                return true;
+        }
+    }
+
+    return false;
+}
+
 void OpenGLHelpers::clear (const Colour& colour)
 {
     glClearColor (colour.getFloatRed(), colour.getFloatGreen(),
@@ -295,14 +373,13 @@ void OpenGLHelpers::fillRectWithTiledTexture (int textureWidth, int textureHeigh
     glEnable (GL_TEXTURE_2D);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_TEXTURE_COORD_ARRAY);
     glDisableClientState (GL_COLOR_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);
     glColor4f (1.0f, 1.0f, 1.0f, alpha);
-
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     const GLfloat clipX = (GLfloat) clip.getX();
     const GLfloat clipY = (GLfloat) clip.getY();
@@ -325,6 +402,87 @@ void OpenGLHelpers::fillRectWithTiledTexture (int textureWidth, int textureHeigh
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
 
+//==============================================================================
+struct OpenGLEdgeTableRenderer
+{
+    OpenGLEdgeTableRenderer (float r_, float g_, float b_, const Point<int>& origin_) noexcept
+        : origin (origin_), r (r_), g (g_), b (b_), lastAlpha (-1)
+    {
+    }
+
+    void draw (const EdgeTable& et)
+    {
+        glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glVertexPointer (2, GL_FLOAT, 0, vertices);
+
+        et.iterate (*this);
+    }
+
+    void setEdgeTableYPos (const int y) noexcept
+    {
+        const int lineY = y + origin.getY();
+
+        vertices[1] = (GLfloat) lineY;
+        vertices[3] = (GLfloat) (lineY + 1);
+        vertices[5] = (GLfloat) lineY;
+        vertices[7] = (GLfloat) (lineY + 1);
+    }
+
+    void handleEdgeTablePixel (const int x, const int alphaLevel) noexcept
+    {
+        drawHorizontal (x, 1, alphaLevel);
+    }
+
+    void handleEdgeTablePixelFull (const int x) noexcept
+    {
+        drawHorizontal (x, 1, 255);
+    }
+
+    void handleEdgeTableLine (const int x, const int width, const int alphaLevel) noexcept
+    {
+        drawHorizontal (x, width, alphaLevel);
+    }
+
+    void handleEdgeTableLineFull (const int x, const int width) noexcept
+    {
+        drawHorizontal (x, width, 255);
+    }
+
+private:
+    GLfloat vertices[8];
+    const Point<int> origin;
+    const float r, g, b;
+    int lastAlpha;
+
+    void drawHorizontal (int x, const int w, const int alphaLevel) noexcept
+    {
+        x += origin.getX();
+
+        vertices[0] = (GLfloat) x;
+        vertices[2] = (GLfloat) x;
+        vertices[4] = (GLfloat) (x + w);
+        vertices[6] = (GLfloat) (x + w);
+
+        if (lastAlpha != alphaLevel)
+        {
+            lastAlpha = alphaLevel;
+            glColor4f (r, g, b, alphaLevel / 255.0f);
+        }
+
+        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (OpenGLEdgeTableRenderer);
+};
+
+void OpenGLHelpers::fillEdgeTable (const EdgeTable& edgeTable,
+                                   float red, float green, float blue,
+                                   const Point<int>& offset)
+{
+    OpenGLEdgeTableRenderer etr (red, green, blue, offset);
+    etr.draw (edgeTable);
+}
 
 //==============================================================================
 // This breaks down a path into a series of horizontal strips of trapezoids..
@@ -390,7 +548,7 @@ private:
                     }
                     else
                     {
-                        const int newX = x1 + (s->y1 - y1) * (x2 - x1) / (y2 - y1);
+                        const int newX = x1 + (int) ((s->y1 - y1) * (int64) (x2 - x1) / (y2 - y1));
                         HorizontalSlice* const newSlice = new HorizontalSlice (s, x1, y1, newX, s->y1, winding);
                         insert (last, newSlice);
                         last = newSlice;
@@ -411,7 +569,7 @@ private:
                 if (y2 > s->y2)
                 {
                     const int newY = s->y2;
-                    const int newX = x1 + (newY - y1) * (x2 - x1) / (y2 - y1);
+                    const int newX = x1 + (int) ((newY - y1) * (int64) (x2 - x1) / (y2 - y1));
                     s->addLine (x1, newX, winding);
                     x1 = newX;
                     y1 = newY;
@@ -467,7 +625,7 @@ private:
 
                     if (dxDiff != 0)
                     {
-                        const int intersectionY = (dy * diff1) / dxDiff;
+                        const int intersectionY = (int) ((dy * (int64) diff1) / dxDiff);
 
                         if (intersectionY > 0 && intersectionY < dy)
                         {
@@ -505,7 +663,7 @@ private:
             for (int i = 0; i < segments.size(); ++i)
             {
                 LineSegment& l = oldSegments[i];
-                const int newX = l.x1 + dy1 * (l.x2 - l.x1) / dy2;
+                const int newX = l.x1 + (int) (dy1 * (int64) (l.x2 - l.x1) / dy2);
                 newSegments[i].x1 = newX;
                 l.x2 = newX;
             }

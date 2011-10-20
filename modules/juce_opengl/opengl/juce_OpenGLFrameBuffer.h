@@ -98,6 +98,11 @@ public:
     /** Deselects this buffer as the current OpenGL rendering target. */
     void releaseAsRenderingTarget();
 
+    /** Selects a framebuffer as the active target, or deselects the current
+        target buffer if you pass 0.
+    */
+    static void setCurrentFrameBufferTarget (GLuint frameBufferID);
+
     /** Clears the framebuffer with the specified colour. */
     void clear (const Colour& colour);
 
@@ -125,14 +130,13 @@ public:
         The lineStride is measured as a number of pixels, not bytes - pass a stride
         of 0 to indicate a packed array.
     */
-    bool readPixels (void* targetData, const Rectangle<int>& sourceArea);
+    bool readPixels (PixelARGB* targetData, const Rectangle<int>& sourceArea);
 
     /** Writes an area of pixels into the framebuffer from a specified pixel array.
         The lineStride is measured as a number of pixels, not bytes - pass a stride
         of 0 to indicate a packed array.
     */
-    bool writePixels (const void* srcData, int srcPixelStride,
-                      const Rectangle<int>& targetArea);
+    bool writePixels (const PixelARGB* srcData, const Rectangle<int>& targetArea);
 
 private:
     class Pimpl;

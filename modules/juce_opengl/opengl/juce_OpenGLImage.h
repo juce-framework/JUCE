@@ -41,7 +41,7 @@
 class JUCE_API  OpenGLFrameBufferImage   : public Image::SharedImage
 {
 public:
-    OpenGLFrameBufferImage (Image::PixelFormat format, int width, int height);
+    OpenGLFrameBufferImage (int width, int height);
 
     /** Destructor. */
     ~OpenGLFrameBufferImage();

@@ -114,6 +114,7 @@ public:
 
     OpenGLPixelFormat getPixelFormat() const        { return pixelFormat; }
     void* getRawContext() const noexcept            { return glLayer; }
+    unsigned int getFrameBufferID() const           { return (unsigned int) frameBufferHandle; }
 
     void updateWindowPosition (const Rectangle<int>& bounds)
     {

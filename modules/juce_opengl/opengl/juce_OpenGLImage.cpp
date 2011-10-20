@@ -25,8 +25,8 @@
 
 BEGIN_JUCE_NAMESPACE
 
-OpenGLFrameBufferImage::OpenGLFrameBufferImage (Image::PixelFormat format, int width, int height)
-    : Image::SharedImage (format, width, height),
+OpenGLFrameBufferImage::OpenGLFrameBufferImage (int width, int height)
+    : Image::SharedImage (Image::ARGB, width, height),
       pixelStride (4),
       lineStride (width * pixelStride)
 {
@@ -43,7 +43,7 @@ LowLevelGraphicsContext* OpenGLFrameBufferImage::createLowLevelContext()
 
 Image::SharedImage* OpenGLFrameBufferImage::clone()
 {
-    OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (getPixelFormat(), getWidth(), getHeight());
+    OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (getWidth(), getHeight());
     im->incReferenceCount();
 
     {
@@ -67,14 +67,15 @@ namespace OpenGLImageHelpers
     {
         Dummy (OpenGLFrameBuffer&, int, int, int, int) noexcept {}
         static void read (OpenGLFrameBuffer&, Image::BitmapData& , int, int) noexcept {}
-        static void write (const void*) noexcept {}
+        static void write (const PixelARGB*) noexcept {}
     };
 
     struct Reader
     {
         static void read (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
         {
-            frameBuffer.readPixels (bitmapData.data, Rectangle<int> (x, y, bitmapData.width, bitmapData.height));
+            frameBuffer.readPixels ((PixelARGB*) bitmapData.data,
+                                    Rectangle<int> (x, y, bitmapData.width, bitmapData.height));
         }
     };
 
@@ -84,9 +85,9 @@ namespace OpenGLImageHelpers
             : frameBuffer (frameBuffer_), area (x, y, w, h)
         {}
 
-        void write (const void* const data) const noexcept
+        void write (const PixelARGB* const data) const noexcept
         {
-            frameBuffer.writePixels (data, 4, area);
+            frameBuffer.writePixels (data, area);
         }
 
         OpenGLFrameBuffer& frameBuffer;
@@ -98,8 +99,8 @@ namespace OpenGLImageHelpers
     template <class ReaderType, class WriterType>
     struct DataReleaser  : public Image::BitmapData::BitmapDataReleaser
     {
-        DataReleaser (OpenGLFrameBuffer& frameBuffer, size_t dataSize, int x, int y, int w, int h)
-            : data (dataSize),
+        DataReleaser (OpenGLFrameBuffer& frameBuffer, int x, int y, int w, int h)
+            : data (w * h),
               writer (frameBuffer, x, y, w, h)
         {}
 
@@ -110,15 +111,14 @@ namespace OpenGLImageHelpers
 
         static void initialise (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
         {
-            DataReleaser* r = new DataReleaser (frameBuffer, bitmapData.lineStride * bitmapData.height,
-                                                x, y, bitmapData.width, bitmapData.height);
+            DataReleaser* r = new DataReleaser (frameBuffer, x, y, bitmapData.width, bitmapData.height);
             bitmapData.dataReleaser = r;
-            bitmapData.data = r->data + x * bitmapData.pixelStride + y * bitmapData.lineStride;
+            bitmapData.data = (uint8*) (r->data + (x + y * bitmapData.width));
 
             ReaderType::read (frameBuffer, bitmapData, x, y);
         }
 
-        HeapBlock<uint8> data;
+        HeapBlock<PixelARGB> data;
         WriterType writer;
     };
 }

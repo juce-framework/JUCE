@@ -37,7 +37,8 @@ public:
     ~OpenGLTexture();
 
     /** Creates a texture from the given image.
-        Note that the image's width and height must both be a power-of-two.
+        Note that if the image's dimensions aren't a power-of-two, the texture may
+        be created with a larger size.
     */
     void load (const Image& image);
 
@@ -70,6 +71,9 @@ public:
     /** Returns the GL texture ID number. */
     GLuint getTextureID() const noexcept        { return textureID; }
 
+    int getWidth() const noexcept               { return width; }
+    int getHeight() const noexcept              { return height; }
+
     /** Returns true if a texture can be created with the given size.
         Some systems may require that the sizes are powers-of-two.
     */
@@ -79,7 +83,7 @@ private:
     GLuint textureID;
     int width, height;
 
-    void create (int w, int h);
+    void create (int w, int h, const void*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTexture);
 };

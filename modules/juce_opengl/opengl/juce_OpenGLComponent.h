@@ -205,6 +205,11 @@ public:
     */
     void deleteContext();
 
+    /** If this component is backed by a frame buffer, this returns its ID number, or
+        0 if the component has no accessible framebuffer.
+    */
+    unsigned int getFrameBufferID() const;
+
     //==============================================================================
     /** Returns the native handle of an embedded heavyweight window, if there is one.
 

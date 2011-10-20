@@ -60,16 +60,7 @@ enum
     USE_FUNCTION (glGetFramebufferAttachmentParameterivEXT,     void, (GLenum target, GLenum attachment, GLenum pname, GLint *params))\
     USE_FUNCTION (glGenerateMipmapEXT,                          void, (GLenum target))\
 
-#if JUCE_WINDOWS
- #define APICALLTYPE __stdcall
-#else
- #define APICALLTYPE
-#endif
-
-#define DECLARE_FUNCTION(name, returnType, params) \
-  typedef returnType (APICALLTYPE * type_ ## name) params; static type_ ## name name;
-FRAMEBUFFER_FUNCTION_LIST (DECLARE_FUNCTION)
-#undef DECLARE_FUNCTION
+FRAMEBUFFER_FUNCTION_LIST (JUCE_DECLARE_GL_EXTENSION_FUNCTION)
 
 static bool framebufferFunctionsInitialised = false;
 
@@ -79,16 +70,9 @@ static void initialiseFrameBufferFunctions()
     {
         framebufferFunctionsInitialised = true;
 
-       #if JUCE_LINUX
-        #define JUCE_LOOKUP_FUNCTION(name) glXGetProcAddress ((const GLubyte*) name)
-       #else
-        #define JUCE_LOOKUP_FUNCTION(name) wglGetProcAddress (name)
-       #endif
-
-       #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) JUCE_LOOKUP_FUNCTION (#name);
+       #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
         FRAMEBUFFER_FUNCTION_LIST (FIND_FUNCTION)
        #undef FIND_FUNCTION
-       #undef JUCE_LOOKUP_FUNCTION
     }
 }
 
@@ -134,8 +118,7 @@ class OpenGLFrameBuffer::Pimpl
 {
 public:
     Pimpl (const int width_, const int height_,
-           const bool wantsDepthBuffer, const bool wantsStencilBuffer,
-           const GLenum textureType = GL_TEXTURE_2D)
+           const bool wantsDepthBuffer, const bool wantsStencilBuffer)
         : width (width_),
           height (height_),
           textureID (0),
@@ -159,14 +142,19 @@ public:
         OpenGLHelpers::resetErrorState();
 
         glGenFramebuffersEXT (1, &frameBufferHandle);
-
         glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferHandle);
 
         glGenTextures (1, &textureID);
-        glBindTexture (textureType, textureID);
-        glTexImage2D (textureType, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glBindTexture (GL_TEXTURE_2D, textureID);
 
-        glFramebufferTexture2DEXT (GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, textureType, textureID, 0);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+        glFramebufferTexture2DEXT (GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, textureID, 0);
 
         if (wantsDepthBuffer || wantsStencilBuffer)
         {
@@ -195,11 +183,6 @@ public:
         }
 
         ok = checkStatus();
-
-        glTexParameterf (textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf (textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf (textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf (textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
     }
@@ -254,14 +237,14 @@ public:
         : width (w), height (h),
           data (w * h)
     {
-        buffer.readPixels (data, Rectangle<int> (0, 0, w, h));
+        buffer.readPixels (data, Rectangle<int> (w, h));
     }
 
     bool restore (OpenGLFrameBuffer& buffer)
     {
         if (buffer.initialise (width, height))
         {
-            buffer.writePixels (data, 4, Rectangle<int> (0, 0, width, height));
+            buffer.writePixels (data, Rectangle<int> (width, height));
             return true;
         }
 
@@ -270,7 +253,7 @@ public:
 
 private:
     const int width, height;
-    HeapBlock <int32> data;
+    HeapBlock <PixelARGB> data;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SavedState);
 };
@@ -292,19 +275,13 @@ bool OpenGLFrameBuffer::initialise (int width, int height)
 
 bool OpenGLFrameBuffer::initialise (const Image& image)
 {
-    if (initialise (image.getWidth(), image.getHeight()))
-    {
-        {
-            Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
+    if (! image.isARGB())
+        return initialise (image.convertedToFormat (Image::ARGB));
 
-            if (bitmap.lineStride == image.getWidth() * bitmap.pixelStride)
-                return writePixels (bitmap.data, bitmap.pixelStride, image.getBounds());
-        }
+    Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
 
-        return initialise (Image (image.getSharedImage()->clone()));
-    }
-
-    return false;
+    return initialise (bitmap.width, bitmap.height)
+            && writePixels ((const PixelARGB*) bitmap.data, image.getBounds());
 }
 
 bool OpenGLFrameBuffer::initialise (const OpenGLFrameBuffer& other)
@@ -320,6 +297,7 @@ bool OpenGLFrameBuffer::initialise (const OpenGLFrameBuffer& other)
     if (initialise (p->width, p->height))
     {
         pimpl->bind();
+        OpenGLHelpers::prepareFor2D (p->width, p->height);
         glDisable (GL_BLEND);
         glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
         other.drawAt (0, 0);
@@ -372,10 +350,14 @@ bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
     return pimpl != nullptr && pimpl->bind();
 }
 
+void OpenGLFrameBuffer::setCurrentFrameBufferTarget (GLuint frameBufferID)
+{
+    glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferID);
+}
+
 void OpenGLFrameBuffer::releaseAsRenderingTarget()
 {
-    if (pimpl != nullptr)
-        pimpl->unbind();
+    setCurrentFrameBufferTarget (0);
 }
 
 void OpenGLFrameBuffer::clear (const Colour& colour)
@@ -396,69 +378,53 @@ void OpenGLFrameBuffer::makeCurrentAndClear()
     }
 }
 
-bool OpenGLFrameBuffer::readPixels (void* target, const Rectangle<int>& area)
+bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& area)
 {
     if (! makeCurrentRenderingTarget())
         return false;
 
     glPixelStorei (GL_PACK_ALIGNMENT, 4);
     glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, target);
-
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
 
     return true;
 }
 
-bool OpenGLFrameBuffer::writePixels (const void* data, int pixelStride, const Rectangle<int>& area)
+bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>& area)
 {
     if (! makeCurrentRenderingTarget())
         return false;
 
-    jassert (pixelStride == 3 || pixelStride == 4); // can only handle RGB or ARGB
-    const int format = pixelStride == 3 ? GL_RGB : GL_BGRA_EXT;
     const int invertedY = pimpl->height - area.getBottom();
 
     OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
     glDisable (GL_DEPTH_TEST);
     glDisable (GL_BLEND);
+    glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 
    #if JUCE_OPENGL_ES
-    // GLES has no glDrawPixels function, so we have to create a texture and draw it..
-    GLuint temporaryTexture = 0;
-    glGenTextures (1, &temporaryTexture);
-    jassert (temporaryTexture != 0); // can't create a texture!
-
-    if (temporaryTexture != 0)
     {
+        // GLES has no glDrawPixels function, so we have to create a texture and draw it..
         glEnable (GL_TEXTURE_2D);
-        glBindTexture (GL_TEXTURE_2D, temporaryTexture);
 
-        glPixelStorei (GL_UNPACK_ALIGNMENT, pixelStride);
-        glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, area.getWidth(), area.getHeight(), 0,
-                      format, GL_UNSIGNED_BYTE, data);
+        OpenGLTexture temp;
+        temp.load (data, area.getWidth(), area.getHeight());
+        temp.bind();
 
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        const int cropRect[4] = { 0, 0, area.getWidth(), area.getHeight() };
+        const GLint cropRect[4] = { 0, 0, area.getWidth(), area.getHeight() };
         glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
 
         glDrawTexiOES (area.getX(), invertedY, 1, area.getWidth(), area.getHeight());
-
         glBindTexture (GL_TEXTURE_2D, 0);
-        glDeleteTextures (1, &temporaryTexture);
     }
-
    #else
     glRasterPos2i (area.getX(), invertedY);
     glBindTexture (GL_TEXTURE_2D, 0);
-    glPixelStorei (GL_UNPACK_ALIGNMENT, pixelStride);
-    glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
-    glDrawPixels (area.getWidth(), area.getHeight(), format, GL_UNSIGNED_BYTE, data);
+    glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
+    glDrawPixels (area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, data);
    #endif
 
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
-
     return true;
 }
 

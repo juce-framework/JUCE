@@ -47,7 +47,7 @@ bool OpenGLTexture::isValidSize (int width, int height)
     return isPowerOfTwo (width) && isPowerOfTwo (height);
 }
 
-void OpenGLTexture::create (const int w, const int h)
+void OpenGLTexture::create (const int w, const int h, const void* pixels)
 {
     // Texture objects can only be created when the current thread has an active OpenGL
     // context. You'll need to make an OpenGLComponent active before calling this.
@@ -69,36 +69,71 @@ void OpenGLTexture::create (const int w, const int h)
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
-void OpenGLTexture::load (const Image& image)
-{
-    create (image.getWidth(), image.getHeight());
-
-    {
-        Image::BitmapData srcData (image, Image::BitmapData::readOnly);
-
-        glPixelStorei (GL_UNPACK_ALIGNMENT, srcData.pixelFormat);
-
-        if (srcData.lineStride == image.getWidth() * srcData.pixelStride)
-        {
-            glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, width, height, 0,
-                          srcData.pixelFormat == Image::RGB ? GL_RGB : GL_BGRA_EXT,
-                          GL_UNSIGNED_BYTE, srcData.data);
-            return;
-        }
-    }
-
-    load (Image (image.getSharedImage()->clone()));
-}
-
-void OpenGLTexture::load (const PixelARGB* const pixels, const int w, const int h)
-{
-    create (w, h);
 
     glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
     glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, w, h, 0,
                   GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+}
+
+void OpenGLTexture::load (const Image& image)
+{
+    const int imageW = image.getWidth();
+    const int imageH = image.getHeight();
+    const int textureW = nextPowerOfTwo (imageW);
+    const int textureH = nextPowerOfTwo (imageH);
+
+    Image::BitmapData srcData (image, Image::BitmapData::readOnly);
+    const PixelARGB* data = (const PixelARGB*) srcData.data;
+    HeapBlock<PixelARGB> dataCopy;
+
+    if (srcData.pixelFormat != Image::ARGB
+         || textureW != imageW
+         || textureH != imageH
+         || srcData.lineStride != imageW * srcData.pixelStride)
+    {
+        const int srcLineStride  = (srcData.pixelStride * imageW + 3) & ~3;
+        dataCopy.malloc (textureW * textureH);
+        data = dataCopy;
+
+        if (srcData.pixelFormat == Image::RGB)
+        {
+            for (int y = 0; y < imageH; ++y)
+            {
+                const PixelRGB* const src = (const PixelRGB*) addBytesToPointer (srcData.data, srcLineStride * y);
+                PixelARGB* const dst = (PixelARGB*) (dataCopy + textureW * y);
+
+                for (int x = 0; x < imageW; ++x)
+                    dst[x].set (src[x]);
+            }
+        }
+        else if (srcData.pixelFormat == Image::ARGB)
+        {
+            for (int y = 0; y < imageH; ++y)
+                memcpy (dataCopy + textureW * y, addBytesToPointer (srcData.data, srcLineStride * y), srcLineStride);
+        }
+    }
+
+    create (textureW, textureH, data);
+}
+
+void OpenGLTexture::load (const PixelARGB* pixels, const int w, const int h)
+{
+    const int textureW = nextPowerOfTwo (w);
+    const int textureH = nextPowerOfTwo (h);
+
+    HeapBlock<PixelARGB> dataCopy;
+
+    if (textureW != w || textureH != h)
+    {
+        dataCopy.malloc (textureW * textureH);
+
+        for (int y = 0; y < h; ++y)
+            memcpy (dataCopy + textureW * y,  pixels + w * y, w * 4);
+
+        pixels = dataCopy;
+    }
+
+    create (textureW, textureH, pixels);
 }
 
 void OpenGLTexture::release()

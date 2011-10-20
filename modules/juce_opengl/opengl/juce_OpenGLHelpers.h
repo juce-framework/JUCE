@@ -86,6 +86,17 @@ public:
                                           const Rectangle<int>& targetArea,
                                           const AffineTransform& transform,
                                           float alpha);
+
+    /** Renders an edge-table into the current context. */
+    static void fillEdgeTable (const EdgeTable& edgeTable,
+                               float red, float green, float blue,
+                               const Point<int>& offset);
+
+    /** Checks whether the current context supports the specified extension. */
+    static bool isExtensionSupported (const char* extensionName);
+
+    /** Returns the address of a named GL extension function */
+    static void* getExtensionFunction (const char* functionName);
 };
 
 //==============================================================================

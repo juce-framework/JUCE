@@ -120,6 +120,14 @@
  #include <GLES/glext.h>
 #endif
 
+#if JUCE_WINDOWS
+ #define JUCE_DECLARE_GL_EXTENSION_FUNCTION(name, returnType, params) \
+   typedef returnType (__stdcall *type_ ## name) params; static type_ ## name name;
+#else
+ #define JUCE_DECLARE_GL_EXTENSION_FUNCTION(name, returnType, params) \
+   typedef returnType (*type_ ## name) params; static type_ ## name name;
+#endif
+
 //==============================================================================
 // START_AUTOINCLUDE opengl/*.cpp
 #include "opengl/juce_OpenGLComponent.cpp"

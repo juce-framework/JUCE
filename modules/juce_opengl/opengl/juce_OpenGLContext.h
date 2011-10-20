@@ -100,6 +100,11 @@ public:
     */
     virtual void deleteContext() = 0;
 
+    /** If this context is backed by a frame buffer, this returns its ID number, or
+        0 if the context has no accessible framebuffer.
+    */
+    virtual unsigned int getFrameBufferID() const = 0;
+
     //==============================================================================
     /** Returns the context that's currently in active use by the calling thread.
 

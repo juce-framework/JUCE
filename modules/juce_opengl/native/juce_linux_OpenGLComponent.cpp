@@ -146,6 +146,11 @@ public:
         return renderContext;
     }
 
+    unsigned int getFrameBufferID() const
+    {
+        return 0;
+    }
+
     void updateWindowPosition (const Rectangle<int>& bounds)
     {
         ScopedXLock xlock;

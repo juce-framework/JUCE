@@ -26,7 +26,6 @@
 #define WGL_EXT_FUNCTION_INIT(extType, extFunc) \
     ((extFunc = (extType) wglGetProcAddress (#extFunc)) != 0)
 
-typedef const char* (WINAPI* PFNWGLGETEXTENSIONSSTRINGARBPROC) (HDC hdc);
 typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBIVARBPROC) (HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes, const int *piAttributes, int *piValues);
 typedef BOOL (WINAPI * PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
 typedef BOOL (WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
@@ -58,16 +57,6 @@ enum
     WGL_SAMPLES_ARB                 = 0x2042,
     WGL_TYPE_RGBA_ARB               = 0x202B
 };
-
-static void getWglExtensions (HDC dc, StringArray& result) noexcept
-{
-    PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = 0;
-
-    if (WGL_EXT_FUNCTION_INIT (PFNWGLGETEXTENSIONSSTRINGARBPROC, wglGetExtensionsStringARB))
-        result.addTokens (String (wglGetExtensionsStringARB (dc)), false);
-    else
-        jassertfalse; // If this fails, it may be because you didn't activate the openGL context
-}
 
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component* component, void* parent);
 
@@ -146,18 +135,19 @@ public:
     OpenGLPixelFormat getPixelFormat() const
     {
         OpenGLPixelFormat pf;
-
         makeActive();
-        StringArray availableExtensions;
-        getWglExtensions (dc, availableExtensions);
-
-        fillInPixelFormatDetails (GetPixelFormat (dc), pf, availableExtensions);
+        fillInPixelFormatDetails (GetPixelFormat (dc), pf);
         return pf;
     }
 
     void* getRawContext() const noexcept
     {
         return renderContext;
+    }
+
+    unsigned int getFrameBufferID() const
+    {
+        return 0;
     }
 
     bool setPixelFormat (const OpenGLPixelFormat& pixelFormat)
@@ -188,10 +178,7 @@ public:
 
         PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
 
-        StringArray availableExtensions;
-        getWglExtensions (dc, availableExtensions);
-
-        if (availableExtensions.contains ("WGL_ARB_pixel_format")
+        if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_pixel_format")
              && WGL_EXT_FUNCTION_INIT (PFNWGLCHOOSEPIXELFORMATARBPROC, wglChoosePixelFormatARB))
         {
             int attributes[64];
@@ -236,7 +223,7 @@ public:
             attributes[n++] = WGL_ACCUM_ALPHA_BITS_ARB;
             attributes[n++] = pixelFormat.accumulationBufferAlphaBits;
 
-            if (availableExtensions.contains ("WGL_ARB_multisample")
+            if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_multisample")
                  && pixelFormat.fullSceneAntiAliasingNumSamples > 0)
             {
                 attributes[n++] = WGL_SAMPLE_BUFFERS_ARB;
@@ -303,12 +290,9 @@ public:
     {
         makeActive();
 
-        StringArray availableExtensions;
-        getWglExtensions (dc, availableExtensions);
-
         PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
 
-        return availableExtensions.contains ("WGL_EXT_swap_control")
+        return OpenGLHelpers::isExtensionSupported ("WGL_EXT_swap_control")
                 && WGL_EXT_FUNCTION_INIT (PFNWGLSWAPINTERVALEXTPROC, wglSwapIntervalEXT)
                 && wglSwapIntervalEXT (numFramesPerSwap) != FALSE;
     }
@@ -317,12 +301,9 @@ public:
     {
         makeActive();
 
-        StringArray availableExtensions;
-        getWglExtensions (dc, availableExtensions);
-
         PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT = 0;
 
-        if (availableExtensions.contains ("WGL_EXT_swap_control")
+        if (OpenGLHelpers::isExtensionSupported ("WGL_EXT_swap_control")
              && WGL_EXT_FUNCTION_INIT (PFNWGLGETSWAPINTERVALEXTPROC, wglGetSwapIntervalEXT))
             return wglGetSwapIntervalEXT();
 
@@ -333,13 +314,10 @@ public:
     {
         jassert (isActive());
 
-        StringArray availableExtensions;
-        getWglExtensions (dc, availableExtensions);
-
         PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB = 0;
         int numTypes = 0;
 
-        if (availableExtensions.contains("WGL_ARB_pixel_format")
+        if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_pixel_format")
              && WGL_EXT_FUNCTION_INIT (PFNWGLGETPIXELFORMATATTRIBIVARBPROC, wglGetPixelFormatAttribivARB))
         {
             int attributes = WGL_NUMBER_PIXEL_FORMATS_ARB;
@@ -356,7 +334,7 @@ public:
 
         for (int i = 0; i < numTypes; ++i)
         {
-            if (fillInPixelFormatDetails (i + 1, pf, availableExtensions))
+            if (fillInPixelFormatDetails (i + 1, pf))
             {
                 bool alreadyListed = false;
                 for (int j = results.size(); --j >= 0;)
@@ -391,13 +369,11 @@ private:
         dc = GetDC ((HWND) nativeWindow->getNativeHandle());
     }
 
-    bool fillInPixelFormatDetails (const int pixelFormatIndex,
-                                   OpenGLPixelFormat& result,
-                                   const StringArray& availableExtensions) const noexcept
+    bool fillInPixelFormatDetails (const int pixelFormatIndex, OpenGLPixelFormat& result) const noexcept
     {
         PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB = 0;
 
-        if (availableExtensions.contains ("WGL_ARB_pixel_format")
+        if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_pixel_format")
              && WGL_EXT_FUNCTION_INIT (PFNWGLGETPIXELFORMATATTRIBIVARBPROC, wglGetPixelFormatAttribivARB))
         {
             int attributes[32];
@@ -419,7 +395,7 @@ private:
             attributes[numAttributes++] = WGL_ACCUM_BLUE_BITS_ARB;
             attributes[numAttributes++] = WGL_ACCUM_ALPHA_BITS_ARB;
 
-            if (availableExtensions.contains ("WGL_ARB_multisample"))
+            if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_multisample"))
                 attributes[numAttributes++] = WGL_SAMPLES_ARB;
 
             int values[32] = { 0 };

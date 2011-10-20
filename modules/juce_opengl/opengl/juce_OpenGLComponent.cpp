@@ -433,5 +433,9 @@ void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
         context->repaint();
 }
 
+unsigned int OpenGLComponent::getFrameBufferID() const
+{
+    return context != nullptr ? context->getFrameBufferID() : 0;
+}
 
 END_JUCE_NAMESPACE
