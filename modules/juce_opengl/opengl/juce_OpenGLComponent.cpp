@@ -127,7 +127,6 @@ public:
     {
     }
 
-    //==============================================================================
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
         owner->updateContextPosition();
@@ -349,9 +348,7 @@ void OpenGLComponent::updateContextPosition()
         if (topComp->getPeer() != nullptr)
         {
             const ScopedLock sl (contextLock);
-
-            if (context != nullptr)
-                context->updateWindowPosition (topComp->getLocalArea (this, getLocalBounds()));
+            updateEmbeddedPosition (topComp->getLocalArea (this, getLocalBounds()));
         }
     }
 }
@@ -423,14 +420,6 @@ bool OpenGLComponent::renderAndSwapBuffers()
     }
 
     return true;
-}
-
-void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
-{
-    Component::internalRepaint (x, y, w, h);
-
-    if (context != nullptr)
-        context->repaint();
 }
 
 unsigned int OpenGLComponent::getFrameBufferID() const

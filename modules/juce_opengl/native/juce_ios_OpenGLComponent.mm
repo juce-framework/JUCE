@@ -143,10 +143,6 @@ public:
         return numFrames;
     }
 
-    void repaint()
-    {
-    }
-
     //==============================================================================
     void createGLBuffers()
     {
@@ -231,9 +227,15 @@ OpenGLContext* OpenGLComponent::createContext()
     return nullptr;
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
-                                                  OwnedArray <OpenGLPixelFormat>& /*results*/)
+void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
 {
+    Component::internalRepaint (x, y, w, h);
+}
+
+void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
+{
+    if (context != nullptr)
+        static_cast <GLESContext*> (context.get())->updateWindowPosition (bounds);
 }
 
 //==============================================================================

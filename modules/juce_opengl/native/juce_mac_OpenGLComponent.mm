@@ -209,8 +209,6 @@ public:
     void* getRawContext() const noexcept            { return renderContext; }
     unsigned int getFrameBufferID() const           { return 0; }
 
-    void updateWindowPosition (const Rectangle<int>&) {}
-
     void swapBuffers()
     {
         [renderContext flushBuffer];
@@ -231,19 +229,6 @@ public:
         return numFrames;
     }
 
-    void repaint()
-    {
-        // we need to invalidate the juce view that holds this gl view, to make it
-        // cause a repaint callback
-        NSRect r = [view frame];
-
-        // bit of a bodge here.. if we only invalidate the area of the gl component,
-        // it's completely covered by the NSOpenGLView, so the OS throws away the
-        // repaint message, thus never causing our paint() callback, and never repainting
-        // the comp. So invalidating just a little bit around the edge helps..
-        [[view superview] setNeedsDisplayInRect: NSInsetRect (r, -2.0f, -2.0f)];
-    }
-
     void* getNativeWindowHandle() const     { return view; }
 
     //==============================================================================
@@ -253,7 +238,6 @@ public:
 private:
     OpenGLPixelFormat pixelFormat;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
 };
 
@@ -268,50 +252,28 @@ OpenGLContext* OpenGLComponent::createContext()
 
 void* OpenGLComponent::getNativeWindowHandle() const
 {
-    return context != nullptr ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle()
+    return context != nullptr ? static_cast<WindowedGLContext*> (context.get())->getNativeWindowHandle()
                               : nullptr;
 }
 
-static int getPixelFormatAttribute (NSOpenGLPixelFormat* p, NSOpenGLPixelFormatAttribute att)
+void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
 {
-    GLint val = 0;
-    [p getValues: &val forAttribute: att forVirtualScreen: 0];
-    return (int) val;
+    Component::internalRepaint (x, y, w, h);
+
+    if (context != nullptr)
+    {
+        NSView* const v = static_cast<WindowedGLContext*> (context.get())->view;
+
+        // bit of a bodge here.. if we only invalidate the area of the gl component,
+        // it's completely covered by the NSOpenGLView, so the OS throws away the
+        // repaint message, thus never causing our paint() callback, and never repainting
+        // the comp. So invalidating just a little bit around the edge helps..
+        [[v superview] setNeedsDisplayInRect: NSInsetRect ([v frame], -2.0f, -2.0f)];
+    }
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
-                                                  OwnedArray <OpenGLPixelFormat>& results)
+void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>&)
 {
-    NSOpenGLPixelFormatAttribute attributes[] =
-    {
-        NSOpenGLPFAWindow,
-        NSOpenGLPFADoubleBuffer,
-        NSOpenGLPFAAccelerated,
-        NSOpenGLPFANoRecovery,
-        NSOpenGLPFADepthSize,  (NSOpenGLPixelFormatAttribute) 16,
-        NSOpenGLPFAAlphaSize,  (NSOpenGLPixelFormatAttribute) 8,
-        NSOpenGLPFAColorSize,  (NSOpenGLPixelFormatAttribute) 24,
-        NSOpenGLPFAAccumSize,  (NSOpenGLPixelFormatAttribute) 32,
-        (NSOpenGLPixelFormatAttribute) 0
-    };
-
-    NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes: attributes];
-
-    if (format != nil)
-    {
-        OpenGLPixelFormat* const pf = new OpenGLPixelFormat();
-
-        pf->redBits = pf->greenBits = pf->blueBits = getPixelFormatAttribute (format, NSOpenGLPFAColorSize) / 3;
-        pf->alphaBits = getPixelFormatAttribute (format, NSOpenGLPFAAlphaSize);
-        pf->depthBufferBits = getPixelFormatAttribute (format, NSOpenGLPFADepthSize);
-        pf->stencilBufferBits = getPixelFormatAttribute (format, NSOpenGLPFAStencilSize);
-        pf->accumulationBufferRedBits = pf->accumulationBufferGreenBits
-            = pf->accumulationBufferBlueBits = pf->accumulationBufferAlphaBits
-            = getPixelFormatAttribute (format, NSOpenGLPFAAccumSize) / 4;
-
-        [format release];
-        results.add (pf);
-    }
 }
 
 //==============================================================================

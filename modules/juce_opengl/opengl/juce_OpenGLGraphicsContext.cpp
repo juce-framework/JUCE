@@ -244,7 +244,7 @@ namespace
             glVertexPointer (2, GL_FLOAT, 0, vertices);
             glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
 
-            const Rectangle<int> targetArea (clip.transformed (transform.inverted()));
+            const Rectangle<int> targetArea (clip.toFloat().transformed (transform.inverted()).getSmallestIntegerContainer());
             int x = targetArea.getX() - negativeAwareModulo (targetArea.getX(), textureWidth);
             int y = targetArea.getY() - negativeAwareModulo (targetArea.getY(), textureHeight);
             const int right  = targetArea.getRight();

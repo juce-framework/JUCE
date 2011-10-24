@@ -158,7 +158,7 @@ public:
     /** Returns a rectangle with the same size as this image.
         The rectangle's origin is always (0, 0).
     */
-    const Rectangle<int> getBounds() const noexcept         { return image == nullptr ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }
+    Rectangle<int> getBounds() const noexcept               { return image == nullptr ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }
 
     /** Returns the image's pixel format. */
     PixelFormat getFormat() const noexcept                  { return image == nullptr ? UnknownFormat : image->format; }

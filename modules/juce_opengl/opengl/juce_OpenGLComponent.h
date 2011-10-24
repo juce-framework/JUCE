@@ -72,10 +72,7 @@ public:
     ~OpenGLComponent();
 
     //==============================================================================
-    /** Changes the pixel format used by this component.
-
-        @see OpenGLPixelFormat::getAvailablePixelFormats()
-    */
+    /** Changes the pixel format used by this component. */
     void setPixelFormat (const OpenGLPixelFormat& formatToUse);
 
     /** Returns the pixel format that this component is currently using. */
@@ -261,6 +258,7 @@ private:
     void stopBackgroundThread();
     void recreateContextAsync();
     void internalRepaint (int x, int y, int w, int h);
+    void updateEmbeddedPosition (const Rectangle<int>&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);
 };

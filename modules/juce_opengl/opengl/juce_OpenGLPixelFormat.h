@@ -67,17 +67,7 @@ public:
 
     uint8 fullSceneAntiAliasingNumSamples;      /**< The number of samples to use in full-scene anti-aliasing (if available). */
 
-    //==============================================================================
-    /** Returns a list of all the pixel formats that can be used in this system.
-
-        A reference component is needed in case there are multiple screens with different
-        capabilities - in which case, the one that the component is on will be used.
-    */
-    static void getAvailablePixelFormats (Component* component,
-                                          OwnedArray <OpenGLPixelFormat>& results);
-
 private:
-    //==============================================================================
     JUCE_LEAK_DETECTOR (OpenGLPixelFormat);
 };
 

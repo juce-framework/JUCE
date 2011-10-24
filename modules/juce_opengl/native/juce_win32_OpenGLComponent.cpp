@@ -269,18 +269,6 @@ public:
         return false;
     }
 
-    void updateWindowPosition (const Rectangle<int>& bounds)
-    {
-        SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
-                      bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-    }
-
-    void repaint()
-    {
-        nativeWindow->repaint (nativeWindow->getBounds().withPosition (Point<int>()));
-    }
-
     void swapBuffers()
     {
         SwapBuffers (dc);
@@ -354,9 +342,9 @@ public:
 
     //==============================================================================
     HGLRC renderContext;
+    ScopedPointer<ComponentPeer> nativeWindow;
 
 private:
-    ScopedPointer<ComponentPeer> nativeWindow;
     Component* const component;
     HDC dc;
 
@@ -471,18 +459,29 @@ OpenGLContext* OpenGLComponent::createContext()
 
 void* OpenGLComponent::getNativeWindowHandle() const
 {
-    return context != nullptr ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle() : nullptr;
+    return context != nullptr ? static_cast<WindowedGLContext*> (context.get())->getNativeWindowHandle() : nullptr;
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
-                                                  OwnedArray <OpenGLPixelFormat>& results)
+void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
 {
-    Component tempComp;
+    Component::internalRepaint (x, y, w, h);
 
+    if (context != nullptr)
     {
-        WindowedGLContext wc (component, 0, OpenGLPixelFormat (8, 8, 16, 0));
-        wc.makeActive();
-        wc.findAlternativeOpenGLPixelFormats (results);
+        ComponentPeer* peer = static_cast<WindowedGLContext*> (context.get())->nativeWindow;
+        peer->repaint (peer->getBounds().withPosition (Point<int>()));
+    }
+}
+
+void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
+{
+    if (context != nullptr)
+    {
+        ComponentPeer* peer = static_cast<WindowedGLContext*> (context.get())->nativeWindow;
+
+        SetWindowPos ((HWND) peer->getNativeHandle(), 0,
+                      bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
+                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
     }
 }
 

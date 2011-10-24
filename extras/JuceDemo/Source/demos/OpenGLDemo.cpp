@@ -37,36 +37,14 @@ public:
           delta (1.0f)
     {
         startTimer (20);
-
-        // Just for demo purposes, let's dump a list of all the available pixel formats..
-        OwnedArray <OpenGLPixelFormat> availablePixelFormats;
-        OpenGLPixelFormat::getAvailablePixelFormats (this, availablePixelFormats);
-
-        for (int i = 0; i < availablePixelFormats.size(); ++i)
-        {
-            const OpenGLPixelFormat* const pixFormat = availablePixelFormats[i];
-
-            DBG (i << ": RGBA=(" << pixFormat->redBits
-                   << ", " << pixFormat->greenBits
-                   << ", " << pixFormat->blueBits
-                   << ", " << pixFormat->alphaBits
-                   << "), depth=" << pixFormat->depthBufferBits
-                   << ", stencil=" << pixFormat->stencilBufferBits
-                   << ", accum RGBA=(" << pixFormat->accumulationBufferRedBits
-                   << ", " << pixFormat->accumulationBufferGreenBits
-                   << ", " << pixFormat->accumulationBufferBlueBits
-                   << ", " << pixFormat->accumulationBufferAlphaBits
-                   << "), full-scene AA="
-                   << (int) pixFormat->fullSceneAntiAliasingNumSamples);
-        }
     }
 
     // when the component creates a new internal context, this is called, and
     // we'll use the opportunity to create the textures needed.
     void newOpenGLContextCreated()
     {
-        texture1 = createImage1();
-        texture2 = createImage2();
+        texture1.load (createImage1());
+        texture2.load (createImage2());
 
         // (no need to call makeCurrentContextActive(), as that will have
         // been done for us before the method call).
@@ -89,20 +67,17 @@ public:
 
     void renderOpenGL()
     {
-        OpenGLHelpers::clear (Colours::darkgrey.withAlpha (0.0f));
+        OpenGLHelpers::clear (Colours::darkgrey.withAlpha (1.0f));
         OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
 
         glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        OpenGLFrameBuffer& frameBuffer1 = dynamic_cast <OpenGLFrameBufferImage*> (texture1.getSharedImage())->frameBuffer;
-        OpenGLFrameBuffer& frameBuffer2 = dynamic_cast <OpenGLFrameBufferImage*> (texture2.getSharedImage())->frameBuffer;
-
-        frameBuffer1.draw2D (50.0f, getHeight() - 50.0f,
-                             getWidth() - 50.0f, getHeight() - 50.0f,
-                             getWidth() - 50.0f, 50.0f,
-                             50.0f, 50.0f,
-                             Colours::white.withAlpha (fabsf (::sinf (rotation / 100.0f))));
+        texture1.draw2D (50.0f, getHeight() - 50.0f,
+                         getWidth() - 50.0f, getHeight() - 50.0f,
+                         getWidth() - 50.0f, 50.0f,
+                         50.0f, 50.0f,
+                         Colours::white.withAlpha (fabsf (::sinf (rotation / 100.0f))));
 
         glClear (GL_DEPTH_BUFFER_BIT);
 
@@ -112,12 +87,12 @@ public:
         glRotatef (rotation, 0.5f, 1.0f, 0.0f);
 
         // this draws the sides of our spinning cube..
-        frameBuffer1.draw3D (-1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, Colours::white);
-        frameBuffer1.draw3D (-1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, Colours::white);
-        frameBuffer1.draw3D (-1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, Colours::white);
-        frameBuffer2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, Colours::white);
-        frameBuffer2.draw3D ( 1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f, Colours::white);
-        frameBuffer2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, Colours::white);
+        texture1.draw3D (-1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, Colours::white);
+        texture1.draw3D (-1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f, Colours::white);
+        texture1.draw3D (-1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, Colours::white);
+        texture2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, Colours::white);
+        texture2.draw3D ( 1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f, Colours::white);
+        texture2.draw3D (-1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, Colours::white);
     }
 
     void timerCallback()
@@ -127,13 +102,13 @@ public:
     }
 
 private:
-    Image texture1, texture2;
+    OpenGLTexture texture1, texture2;
     float rotation, delta;
 
     // Functions to create a couple of images to use as textures..
     static Image createImage1()
     {
-        Image image (new OpenGLFrameBufferImage (256, 256));
+        Image image (Image::ARGB, 256, 256, true);
 
         Graphics g (image);
 
@@ -148,7 +123,7 @@ private:
 
     static Image createImage2()
     {
-        Image image (new OpenGLFrameBufferImage (128, 128));
+        Image image (Image::ARGB, 128, 128, true);
 
         Graphics g (image);
         g.fillAll (Colours::darkred.withAlpha (0.7f));

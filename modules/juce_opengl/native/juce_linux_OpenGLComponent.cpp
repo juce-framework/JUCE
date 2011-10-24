@@ -151,13 +151,6 @@ public:
         return 0;
     }
 
-    void updateWindowPosition (const Rectangle<int>& bounds)
-    {
-        ScopedXLock xlock;
-        XMoveResizeWindow (display, embeddedWindow,
-                           bounds.getX(), bounds.getY(), jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()));
-    }
-
     void swapBuffers()
     {
         ScopedXLock xlock;
@@ -179,13 +172,12 @@ public:
     }
 
     int getSwapInterval() const    { return swapInterval; }
-    void repaint() {}
 
     //==============================================================================
     GLXContext renderContext;
+    Window embeddedWindow;
 
 private:
-    Window embeddedWindow;
     OpenGLPixelFormat pixelFormat;
     int swapInterval;
 
@@ -201,9 +193,21 @@ OpenGLContext* OpenGLComponent::createContext()
     return (c->renderContext != 0) ? c.release() : nullptr;
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (Component* component, OwnedArray <OpenGLPixelFormat>& results)
+void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
 {
-    results.add (new OpenGLPixelFormat()); // xxx
+    Component::internalRepaint (x, y, w, h);
+}
+
+void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
+{
+    if (context != nullptr)
+    {
+        Window embeddedWindow = static_cast<WindowedGLContext*> (context.get())->embeddedWindow;
+
+        ScopedXLock xlock;
+        XMoveResizeWindow (display, embeddedWindow,
+                           bounds.getX(), bounds.getY(), jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()));
+    }
 }
 
 //==============================================================================

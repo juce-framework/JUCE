@@ -34,10 +34,9 @@ void* OpenGLComponent::getNativeWindowHandle() const
     return nullptr;
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
-                                                  OwnedArray <OpenGLPixelFormat>& results)
+void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
 {
-
+    Component::internalRepaint (x, y, w, h);
 }
 
 bool OpenGLHelpers::isContextActive()

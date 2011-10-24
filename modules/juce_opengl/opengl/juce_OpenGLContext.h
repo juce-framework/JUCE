@@ -72,17 +72,6 @@ public:
     /** Returns the pixel format being used by this context. */
     virtual OpenGLPixelFormat getPixelFormat() const = 0;
 
-    /** For windowed contexts, this moves the context within the bounds of
-        its parent window.
-    */
-    virtual void updateWindowPosition (const Rectangle<int>& bounds) = 0;
-
-    /** For windowed contexts, this triggers a repaint of the window.
-
-        (Not relevent on all platforms).
-    */
-    virtual void repaint() = 0;
-
     /** Returns an OS-dependent handle to the raw GL context.
 
         On win32, this will be a HGLRC; on the Mac, an NSOpenGLContext; on Linux,
