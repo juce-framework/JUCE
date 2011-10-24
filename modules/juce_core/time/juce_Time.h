@@ -132,16 +132,19 @@ public:
     String getMonthName (bool threeLetterVersion) const;
 
     /** Returns the day of the month.
-
         The value returned is in the range 1 to 31.
     */
     int getDayOfMonth() const noexcept;
 
     /** Returns the number of the day of the week.
-
         The value returned is in the range 0 to 6 (0 = sunday, 1 = monday, etc).
     */
     int getDayOfWeek() const noexcept;
+
+    /** Returns the number of the day of the year.
+        The value returned is in the range 0 to 365.
+    */
+    int getDayOfYear() const noexcept;
 
     /** Returns the name of the weekday.
 

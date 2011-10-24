@@ -139,8 +139,6 @@ public:
             return;
        #endif
 
-        OpenGLHelpers::resetErrorState();
-
         glGenFramebuffersEXT (1, &frameBufferHandle);
         glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferHandle);
 
@@ -302,6 +300,8 @@ bool OpenGLFrameBuffer::initialise (const OpenGLFrameBuffer& other)
         glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
         other.drawAt (0, 0);
         pimpl->unbind();
+
+        return true;
     }
 
     return false;
@@ -384,9 +384,8 @@ bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& are
         return false;
 
     glPixelStorei (GL_PACK_ALIGNMENT, 4);
-    glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, target);
+    glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, target);
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
-
     return true;
 }
 
@@ -394,8 +393,6 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
 {
     if (! makeCurrentRenderingTarget())
         return false;
-
-    const int invertedY = pimpl->height - area.getBottom();
 
     OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
     glDisable (GL_DEPTH_TEST);
@@ -414,11 +411,11 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
         const GLint cropRect[4] = { 0, 0, area.getWidth(), area.getHeight() };
         glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
 
-        glDrawTexiOES (area.getX(), invertedY, 1, area.getWidth(), area.getHeight());
+        glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
         glBindTexture (GL_TEXTURE_2D, 0);
     }
    #else
-    glRasterPos2i (area.getX(), invertedY);
+    glRasterPos2i (area.getX(), area.getY());
     glBindTexture (GL_TEXTURE_2D, 0);
     glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
     glDrawPixels (area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, data);

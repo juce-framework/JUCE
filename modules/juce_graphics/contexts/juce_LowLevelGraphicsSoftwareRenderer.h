@@ -49,19 +49,15 @@ public:
     ~LowLevelGraphicsSoftwareRenderer();
 
     bool isVectorDevice() const;
-
-    //==============================================================================
     void setOrigin (int x, int y);
-    void addTransform (const AffineTransform& transform);
+    void addTransform (const AffineTransform&);
     float getScaleFactor();
-
-    bool clipToRectangle (const Rectangle<int>& r);
-    bool clipToRectangleList (const RectangleList& clipRegion);
-    void excludeClipRectangle (const Rectangle<int>& r);
-    void clipToPath (const Path& path, const AffineTransform& transform);
-    void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform);
-
-    bool clipRegionIntersects (const Rectangle<int>& r);
+    bool clipToRectangle (const Rectangle<int>&);
+    bool clipToRectangleList (const RectangleList&);
+    void excludeClipRectangle (const Rectangle<int>&);
+    void clipToPath (const Path&, const AffineTransform&);
+    void clipToImageAlpha (const Image&, const AffineTransform&);
+    bool clipRegionIntersects (const Rectangle<int>&);
     Rectangle<int> getClipBounds() const;
     bool isClipEmpty() const;
 
@@ -71,29 +67,25 @@ public:
     void beginTransparencyLayer (float opacity);
     void endTransparencyLayer();
 
-    //==============================================================================
-    void setFill (const FillType& fillType);
+    void setFill (const FillType&);
     void setOpacity (float opacity);
-    void setInterpolationQuality (Graphics::ResamplingQuality quality);
+    void setInterpolationQuality (Graphics::ResamplingQuality);
 
-    //==============================================================================
-    void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
-    void fillPath (const Path& path, const AffineTransform& transform);
+    void fillRect (const Rectangle<int>&, bool replaceExistingContents);
+    void fillPath (const Path&, const AffineTransform&);
 
-    void drawImage (const Image& sourceImage, const AffineTransform& transform);
+    void drawImage (const Image&, const AffineTransform&);
 
     void drawLine (const Line <float>& line);
 
     void drawVerticalLine (int x, float top, float bottom);
     void drawHorizontalLine (int x, float top, float bottom);
 
-    //==============================================================================
-    void setFont (const Font& newFont);
+    void setFont (const Font&);
     Font getFont();
     void drawGlyph (int glyphNumber, float x, float y);
-    void drawGlyph (int glyphNumber, const AffineTransform& transform);
+    void drawGlyph (int glyphNumber, const AffineTransform&);
 
-    //==============================================================================
    #ifndef DOXYGEN
     class SavedState;
    #endif

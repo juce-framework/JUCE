@@ -57,6 +57,8 @@ public:
 
     static void applyTransform (const AffineTransform& t);
 
+    static void enableScissorTest (const Rectangle<int>& clip);
+
     /** Draws a 2D quad with the specified corner points. */
     static void drawQuad2D (float x1, float y1,
                             float x2, float y2,
@@ -76,21 +78,9 @@ public:
     /** Fills a rectangle with the specified colour. */
     static void fillRectWithColour (const Rectangle<int>& rect,
                                     const Colour& colour);
-
-    /** Fills a rectangle with the specified gradient. */
-    static void fillRectWithColourGradient (const Rectangle<int>& rect,
-                                            const ColourGradient& gradient,
-                                            const AffineTransform& transform);
-
-    static void fillRectWithTiledTexture (int textureWidth, int textureHeight,
-                                          const Rectangle<int>& targetArea,
-                                          const AffineTransform& transform,
-                                          float alpha);
-
     /** Renders an edge-table into the current context. */
     static void fillEdgeTable (const EdgeTable& edgeTable,
-                               float red, float green, float blue,
-                               const Point<int>& offset);
+                               float red, float green, float blue);
 
     /** Checks whether the current context supports the specified extension. */
     static bool isExtensionSupported (const char* extensionName);

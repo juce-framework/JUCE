@@ -684,12 +684,14 @@ var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValu
     return object == nullptr ? defaultReturnValue : object->getProperty (name, defaultReturnValue);
 }
 
-void ValueTree::setProperty (const Identifier& name, const var& newValue, UndoManager* const undoManager)
+ValueTree& ValueTree::setProperty (const Identifier& name, const var& newValue, UndoManager* const undoManager)
 {
     jassert (name.toString().isNotEmpty());
 
     if (object != nullptr && name.toString().isNotEmpty())
         object->setProperty (name, newValue, undoManager);
+
+    return *this;
 }
 
 bool ValueTree::hasProperty (const Identifier& name) const

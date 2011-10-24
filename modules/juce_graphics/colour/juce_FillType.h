@@ -112,6 +112,11 @@ public:
     /** Returns true if this fill type is completely transparent. */
     bool isInvisible() const noexcept;
 
+    /** Returns a copy of this fill, adding the specified transform applied to the
+        existing transform.
+    */
+    FillType transformed (const AffineTransform& transform) const;
+
     //==============================================================================
     /** The solid colour being used.
 

@@ -58,7 +58,7 @@ public:
             getSDKPath() = "${user.home}/SDKs/android-sdk-mac_x86";
 
         if (getNDKPath().toString().isEmpty())
-            getNDKPath() = "${user.home}/SDKs/android-ndk-r5";
+            getNDKPath() = "${user.home}/SDKs/android-ndk-r6b";
 
         if (getInternetNeeded().toString().isEmpty())
             getInternetNeeded() = true;

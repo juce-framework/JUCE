@@ -163,6 +163,12 @@ void OpenGLHelpers::applyTransform (const AffineTransform& t)
     glMultMatrixf (m);
 }
 
+void OpenGLHelpers::enableScissorTest (const Rectangle<int>& clip)
+{
+    glEnable (GL_SCISSOR_TEST);
+    glScissor (clip.getX(), clip.getY(), clip.getWidth(), clip.getHeight());
+}
+
 void OpenGLHelpers::drawQuad2D (float x1, float y1,
                                 float x2, float y2,
                                 float x3, float y3,
@@ -210,140 +216,6 @@ void OpenGLHelpers::drawQuad3D (float x1, float y1, float z1,
 }
 
 //==============================================================================
-namespace OpenGLGradientHelpers
-{
-    void drawTriangles (GLenum mode, const GLfloat* vertices, const GLfloat* textureCoords, const int numElements)
-    {
-        glEnable (GL_TEXTURE_2D);
-        glEnableClientState (GL_VERTEX_ARRAY);
-        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
-        glDisableClientState (GL_COLOR_ARRAY);
-        glDisableClientState (GL_NORMAL_ARRAY);
-
-        glVertexPointer (2, GL_FLOAT, 0, vertices);
-        glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
-
-        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-        glDrawArrays (mode, 0, numElements);
-    }
-
-    void fillWithLinearGradient (const Rectangle<int>& rect,
-                                 const ColourGradient& grad,
-                                 const AffineTransform& transform,
-                                 const int textureSize)
-    {
-        const Point<float> p1 (grad.point1.transformedBy (transform));
-        const Point<float> p2 (grad.point2.transformedBy (transform));
-        const Point<float> p3 (Point<float> (grad.point1.getX() - (grad.point2.getY() - grad.point1.getY()) / textureSize,
-                                             grad.point1.getY() + (grad.point2.getX() - grad.point1.getX()) / textureSize).transformedBy (transform));
-
-        const AffineTransform textureTransform (AffineTransform::fromTargetPoints (p1.getX(), p1.getY(),  0.0f, 0.0f,
-                                                                                   p2.getX(), p2.getY(),  1.0f, 0.0f,
-                                                                                   p3.getX(), p3.getY(),  0.0f, 1.0f));
-
-        const GLfloat l = (GLfloat) rect.getX();
-        const GLfloat r = (GLfloat) rect.getRight();
-        const GLfloat t = (GLfloat) rect.getY();
-        const GLfloat b = (GLfloat) rect.getBottom();
-
-        const GLfloat vertices[] = { l, t, r, t, l, b, r, b };
-        GLfloat textureCoords[]  = { l, t, r, t, l, b, r, b };
-
-        textureTransform.transformPoints (textureCoords[0], textureCoords[1], textureCoords[2], textureCoords[3]);
-        textureTransform.transformPoints (textureCoords[4], textureCoords[5], textureCoords[6], textureCoords[7]);
-
-        drawTriangles (GL_TRIANGLE_STRIP, vertices, textureCoords, 4);
-    }
-
-    void fillWithRadialGradient (const Rectangle<int>& rect,
-                                 const ColourGradient& grad,
-                                 const AffineTransform& transform)
-    {
-        const Point<float> centre (grad.point1.transformedBy (transform));
-
-        const float screenRadius = centre.getDistanceFrom (rect.getCentre().toFloat())
-                                    + Point<int> (rect.getWidth() / 2,
-                                                  rect.getHeight() / 2).getDistanceFromOrigin()
-                                    + 8.0f;
-
-        const AffineTransform inverse (transform.inverted());
-        const float sourceRadius = jmax (Point<float> (screenRadius, 0.0f).transformedBy (inverse).getDistanceFromOrigin(),
-                                         Point<float> (0.0f, screenRadius).transformedBy (inverse).getDistanceFromOrigin());
-
-        const int numDivisions = 90;
-        GLfloat vertices      [4 + numDivisions * 2];
-        GLfloat textureCoords [4 + numDivisions * 2];
-
-        {
-            GLfloat* t = textureCoords;
-            *t++ = 0.0f;
-            *t++ = 0.0f;
-
-            const GLfloat texturePos = sourceRadius / grad.point1.getDistanceFrom (grad.point2);
-
-            for (int i = numDivisions + 1; --i >= 0;)
-            {
-                *t++ = texturePos;
-                *t++ = 0.0f;
-            }
-        }
-
-        {
-            GLfloat* v = vertices;
-            *v++ = centre.getX();
-            *v++ = centre.getY();
-
-            const Point<float> first (grad.point1.translated (0, -sourceRadius)
-                                                 .transformedBy (transform));
-            *v++ = first.getX();
-            *v++ = first.getY();
-
-            for (int i = 1; i < numDivisions; ++i)
-            {
-                const float angle = i * (float_Pi * 2.0f / numDivisions);
-                const Point<float> p (grad.point1.translated (std::sin (angle) * sourceRadius,
-                                                              std::cos (angle) * -sourceRadius)
-                                                 .transformedBy (transform));
-                *v++ = p.getX();
-                *v++ = p.getY();
-            }
-
-            *v++ = first.getX();
-            *v++ = first.getY();
-        }
-
-        glEnable (GL_SCISSOR_TEST);
-        glScissor (rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
-        drawTriangles (GL_TRIANGLE_FAN, vertices, textureCoords, numDivisions + 2);
-        glDisable (GL_SCISSOR_TEST);
-    }
-}
-
-void OpenGLHelpers::fillRectWithColourGradient (const Rectangle<int>& rect,
-                                                const ColourGradient& gradient,
-                                                const AffineTransform& transform)
-{
-    const int textureSize = 256;
-    OpenGLTexture texture;
-
-    HeapBlock<PixelARGB> lookup (textureSize);
-    gradient.createLookupTable (lookup, textureSize);
-    texture.load (lookup, textureSize, 1);
-    texture.bind();
-
-    if (gradient.point1 == gradient.point2)
-    {
-        fillRectWithColour (rect, gradient.getColourAtPosition (1.0));
-    }
-    else
-    {
-        if (gradient.isRadial)
-            OpenGLGradientHelpers::fillWithRadialGradient (rect, gradient, transform);
-        else
-            OpenGLGradientHelpers::fillWithLinearGradient (rect, gradient, transform, textureSize);
-    }
-}
-
 void OpenGLHelpers::fillRectWithColour (const Rectangle<int>& rect, const Colour& colour)
 {
     glEnableClientState (GL_VERTEX_ARRAY);
@@ -365,48 +237,11 @@ void OpenGLHelpers::fillRect (const Rectangle<int>& rect)
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void OpenGLHelpers::fillRectWithTiledTexture (int textureWidth, int textureHeight,
-                                              const Rectangle<int>& clip,
-                                              const AffineTransform& transform,
-                                              float alpha)
-{
-    glEnable (GL_TEXTURE_2D);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glEnableClientState (GL_VERTEX_ARRAY);
-    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState (GL_COLOR_ARRAY);
-    glDisableClientState (GL_NORMAL_ARRAY);
-    glColor4f (1.0f, 1.0f, 1.0f, alpha);
-
-    const GLfloat clipX = (GLfloat) clip.getX();
-    const GLfloat clipY = (GLfloat) clip.getY();
-    const GLfloat clipR = (GLfloat) clip.getRight();
-    const GLfloat clipB = (GLfloat) clip.getBottom();
-
-    const GLfloat vertices[]  = { clipX, clipY, clipR, clipY, clipX, clipB, clipR, clipB };
-    GLfloat textureCoords[]   = { clipX, clipY, clipR, clipY, clipX, clipB, clipR, clipB };
-
-    {
-        const AffineTransform t (transform.inverted().scaled (1.0f / textureWidth,
-                                                              1.0f / textureHeight));
-        t.transformPoints (textureCoords[0], textureCoords[1], textureCoords[2], textureCoords[3]);
-        t.transformPoints (textureCoords[4], textureCoords[5], textureCoords[6], textureCoords[7]);
-    }
-
-    glVertexPointer (2, GL_FLOAT, 0, vertices);
-    glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
-
-    glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
-}
-
 //==============================================================================
 struct OpenGLEdgeTableRenderer
 {
-    OpenGLEdgeTableRenderer (float r_, float g_, float b_, const Point<int>& origin_) noexcept
-        : origin (origin_), r (r_), g (g_), b (b_), lastAlpha (-1)
+    OpenGLEdgeTableRenderer (float r_, float g_, float b_) noexcept
+        : r (r_), g (g_), b (b_), lastAlpha (-1)
     {
     }
 
@@ -421,12 +256,8 @@ struct OpenGLEdgeTableRenderer
 
     void setEdgeTableYPos (const int y) noexcept
     {
-        const int lineY = y + origin.getY();
-
-        vertices[1] = (GLfloat) lineY;
-        vertices[3] = (GLfloat) (lineY + 1);
-        vertices[5] = (GLfloat) lineY;
-        vertices[7] = (GLfloat) (lineY + 1);
+        vertices[1] = vertices[5] = (GLfloat) y;
+        vertices[3] = vertices[7] = (GLfloat) (y + 1);
     }
 
     void handleEdgeTablePixel (const int x, const int alphaLevel) noexcept
@@ -451,18 +282,13 @@ struct OpenGLEdgeTableRenderer
 
 private:
     GLfloat vertices[8];
-    const Point<int> origin;
     const float r, g, b;
     int lastAlpha;
 
     void drawHorizontal (int x, const int w, const int alphaLevel) noexcept
     {
-        x += origin.getX();
-
-        vertices[0] = (GLfloat) x;
-        vertices[2] = (GLfloat) x;
-        vertices[4] = (GLfloat) (x + w);
-        vertices[6] = (GLfloat) (x + w);
+        vertices[0] = vertices[2] = (GLfloat) x;
+        vertices[4] = vertices[6] = (GLfloat) (x + w);
 
         if (lastAlpha != alphaLevel)
         {
@@ -477,10 +303,9 @@ private:
 };
 
 void OpenGLHelpers::fillEdgeTable (const EdgeTable& edgeTable,
-                                   float red, float green, float blue,
-                                   const Point<int>& offset)
+                                   float red, float green, float blue)
 {
-    OpenGLEdgeTableRenderer etr (red, green, blue, offset);
+    OpenGLEdgeTableRenderer etr (red, green, blue);
     etr.draw (edgeTable);
 }
 
@@ -776,6 +601,7 @@ void TriangulatedPath::draw (const int oversamplingLevel) const
 {
     glColor4f (1.0f, 1.0f, 1.0f, 1.0f / (oversamplingLevel * oversamplingLevel));
 
+    glPushMatrix();
     glTranslatef (-0.5f, -0.5f, 0.0f);
     const float inc = 1.0f / oversamplingLevel;
 
@@ -791,6 +617,8 @@ void TriangulatedPath::draw (const int oversamplingLevel) const
 
         glTranslatef (-1.0f, inc, 0.0f);
     }
+
+    glPopMatrix();
 }
 
 void TriangulatedPath::optimiseStorage()

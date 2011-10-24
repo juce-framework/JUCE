@@ -156,9 +156,13 @@ protected:
     }
 
     //==============================================================================
-    void writeSolutionFile (OutputStream& out, const String& versionString, const File& vcProject)
+    void writeSolutionFile (OutputStream& out, const String& versionString, String commentString, const File& vcProject)
     {
+        if (commentString.isNotEmpty())
+            commentString += newLine;
+
         out << "Microsoft Visual Studio Solution File, Format Version " << versionString << newLine
+            << commentString
             << "Project(\"" << createGUID (projectName + "sln_guid") << "\") = \"" << projectName << "\", \""
             << vcProject.getFileName() << "\", \"" << projectGUID << '"' << newLine
             << "EndProject" << newLine
@@ -395,7 +399,7 @@ public:
 
         {
             MemoryOutputStream mo;
-            writeSolutionFile (mo, getSolutionVersionString(), getVCProjFile());
+            writeSolutionFile (mo, getSolutionVersionString(), String::empty, getVCProjFile());
 
             overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
         }
@@ -1037,7 +1041,7 @@ public:
 
         {
             MemoryOutputStream mo;
-            writeSolutionFile (mo, "11.00", getVCProjFile());
+            writeSolutionFile (mo, "11.00", "# Visual Studio 2010", getVCProjFile());
 
             overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
         }

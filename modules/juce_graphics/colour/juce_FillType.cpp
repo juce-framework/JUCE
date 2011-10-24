@@ -144,5 +144,11 @@ bool FillType::isInvisible() const noexcept
     return colour.isTransparent() || (gradient != nullptr && gradient->isInvisible());
 }
 
+FillType FillType::transformed (const AffineTransform& t) const
+{
+    FillType f (*this);
+    f.transform = f.transform.followedBy (t);
+    return f;
+}
 
 END_JUCE_NAMESPACE

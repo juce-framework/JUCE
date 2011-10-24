@@ -1,4 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{564A18DF-F8DA-8D8F-D473-CFFE700460BA}") = "Jucer", "Jucer.vcxproj", "{47850045-7AC4-D12B-6F23-A2E7E3B3617A}"
 EndProject
 Global

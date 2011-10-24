@@ -1,4 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{B49533A3-E69B-E288-783B-47C939C7FB33}") = "Juce Demo", "Juce Demo.vcxproj", "{E9F746BA-9271-B101-E5E2-1615849AF13D}"
 EndProject
 Global

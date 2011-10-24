@@ -167,8 +167,9 @@ public:
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
         @see var, getProperty, removeProperty
+        @returns a reference to the value tree, so that you can daisy-chain calls to this method.
     */
-    void setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager);
+    ValueTree& setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager);
 
     /** Returns true if the node contains a named property. */
     bool hasProperty (const Identifier& name) const;
