@@ -1096,6 +1096,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLGraphicsContext.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLHelpers.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1524,6 +1527,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLGraphicsContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLImage.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLPixelFormat.h"/>

@@ -133,7 +133,7 @@ private:
     // Functions to create a couple of images to use as textures..
     static Image createImage1()
     {
-        Image image (new OpenGLFrameBufferImage (Image::ARGB, 256, 256));
+        Image image (new OpenGLFrameBufferImage (256, 256));
 
         Graphics g (image);
 
@@ -148,7 +148,7 @@ private:
 
     static Image createImage2()
     {
-        Image image (new OpenGLFrameBufferImage (Image::ARGB, 128, 128));
+        Image image (new OpenGLFrameBufferImage (128, 128));
 
         Graphics g (image);
         g.fillAll (Colours::darkred.withAlpha (0.7f));

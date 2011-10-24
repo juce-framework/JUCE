@@ -29,10 +29,7 @@
 #include "../juce_gui_extra/juce_gui_extra.h"
 
 #undef JUCE_OPENGL
-
-#if ! JUCE_ANDROID
- #define JUCE_OPENGL 1
-#endif
+#define JUCE_OPENGL 1
 
 #if JUCE_IOS || JUCE_ANDROID
  #define JUCE_OPENGL_ES 1
@@ -94,6 +91,9 @@ BEGIN_JUCE_NAMESPACE
 #endif
 #ifndef __JUCE_OPENGLFRAMEBUFFER_JUCEHEADER__
  #include "opengl/juce_OpenGLFrameBuffer.h"
+#endif
+#ifndef __JUCE_OPENGLGRAPHICSCONTEXT_JUCEHEADER__
+ #include "opengl/juce_OpenGLGraphicsContext.h"
 #endif
 #ifndef __JUCE_OPENGLHELPERS_JUCEHEADER__
  #include "opengl/juce_OpenGLHelpers.h"

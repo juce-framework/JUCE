@@ -38,7 +38,7 @@ OpenGLFrameBufferImage::~OpenGLFrameBufferImage() {}
 
 LowLevelGraphicsContext* OpenGLFrameBufferImage::createLowLevelContext()
 {
-    return new LowLevelGraphicsSoftwareRenderer (Image (this));
+    return new OpenGLRenderer (frameBuffer);
 }
 
 Image::SharedImage* OpenGLFrameBufferImage::clone()
@@ -75,7 +75,24 @@ namespace OpenGLImageHelpers
         static void read (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
         {
             frameBuffer.readPixels ((PixelARGB*) bitmapData.data,
-                                    Rectangle<int> (x, y, bitmapData.width, bitmapData.height));
+                                    Rectangle<int> (x, frameBuffer.getHeight() - (y + bitmapData.height), bitmapData.width, bitmapData.height));
+
+            verticalRowFlip ((PixelARGB*) bitmapData.data, bitmapData.width, bitmapData.height);
+        }
+
+        static void verticalRowFlip (PixelARGB* const data, const int w, const int h)
+        {
+            HeapBlock<PixelARGB> tempRow (w);
+            const int rowSize = sizeof (PixelARGB) * w;
+
+            for (int y = 0; y < h / 2; ++y)
+            {
+                PixelARGB* const row1 = data + y * w;
+                PixelARGB* const row2 = data + (h - 1 - y) * w;
+                memcpy (tempRow, row1, rowSize);
+                memcpy (row1, row2, rowSize);
+                memcpy (row2, tempRow, rowSize);
+            }
         }
     };
 
@@ -87,7 +104,14 @@ namespace OpenGLImageHelpers
 
         void write (const PixelARGB* const data) const noexcept
         {
-            frameBuffer.writePixels (data, area);
+            HeapBlock<PixelARGB> invertedCopy (area.getWidth() * area.getHeight());
+            const int rowSize = sizeof (PixelARGB) * area.getWidth();
+
+            for (int y = 0; y < area.getHeight(); ++y)
+                memcpy (invertedCopy + area.getWidth() * y,
+                        data + area.getWidth() * (area.getHeight() - 1 - y), rowSize);
+
+            frameBuffer.writePixels (invertedCopy, area);
         }
 
         OpenGLFrameBuffer& frameBuffer;

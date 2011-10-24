@@ -132,6 +132,7 @@
 // START_AUTOINCLUDE opengl/*.cpp
 #include "opengl/juce_OpenGLComponent.cpp"
 #include "opengl/juce_OpenGLFrameBuffer.cpp"
+#include "opengl/juce_OpenGLGraphicsContext.cpp"
 #include "opengl/juce_OpenGLHelpers.cpp"
 #include "opengl/juce_OpenGLImage.cpp"
 #include "opengl/juce_OpenGLTexture.cpp"
