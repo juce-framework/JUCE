@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="Juce Demo" default="debug">
-  <property file="local.properties"/>
-  <property file="build.properties"/>
-  <property file="default.properties"/>
+  <loadproperties srcFile="local.properties"/>
+  <loadproperties srcFile="project.properties"/>
   <path id="android.antlibs">
     <pathelement path="${sdk.dir}/tools/lib/anttasks.jar"/>
     <pathelement path="${sdk.dir}/tools/lib/sdklib.jar"/>
@@ -18,7 +17,7 @@
   </target>
   <exec executable="ln" dir="${basedir}" failonerror="false">
     <arg value="-s"/>
-    <arg value="${basedir}/../../../../../juce/src/native/android/java/"/>
+    <arg value="${basedir}/../../../../../juce/modules/juce_core/native/java/"/>
     <arg value="src/com/juce"/>
   </exec>
   <target name="debug">
@@ -33,5 +32,5 @@
       <arg value="CONFIG=Release"/>
     </exec>
   </target>
-  <setup/>
+  <import file="${sdk.dir}/tools/ant/build.xml"/>
 </project>

@@ -3,3 +3,4 @@
 
 APP_STL := gnustl_static
 APP_CPPFLAGS += -fsigned-char -fexceptions -frtti
+APP_PLATFORM := android-7

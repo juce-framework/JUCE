@@ -178,10 +178,12 @@ int SystemStats::getCpuSpeedInMegaherz()
 
 int SystemStats::getMemorySizeInMegabytes()
 {
+   #if __ANDROID_API__ > 7
     struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
         return (sysi.totalram * sysi.mem_unit / (1024 * 1024));
+   #endif
 
     return 0;
 }
@@ -264,9 +266,3 @@ bool Time::setSystemTimeToThisTime() const
     jassertfalse;
     return false;
 }
-
-//==============================================================================
-// This is an unsatisfactory workaround for a linker warning that appeared in NDK5c.
-// If anyone actually understands what this symbol is for and why the linker gets confused by it,
-// please let me know!
-extern "C" { void* __dso_handle = 0; }

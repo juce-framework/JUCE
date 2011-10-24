@@ -129,8 +129,7 @@ public:
             writeXmlOrThrow (*antBuildXml, target.getChildFile ("build.xml"), "UTF-8", 100);
         }
 
-        writeBuildPropertiesFile (target.getChildFile ("build.properties"));
-        writeDefaultPropertiesFile (target.getChildFile ("default.properties"));
+        writeProjectPropertiesFile (target.getChildFile ("project.properties"));
         writeLocalPropertiesFile (target.getChildFile ("local.properties"));
 
         writeIcon (target.getChildFile ("res/drawable-hdpi/icon.png"), 72);
@@ -155,7 +154,7 @@ private:
         screens->setAttribute ("android:smallScreens", "true");
         screens->setAttribute ("android:normalScreens", "true");
         screens->setAttribute ("android:largeScreens", "true");
-        screens->setAttribute ("android:xlargeScreens", "true");
+        //screens->setAttribute ("android:xlargeScreens", "true");
         screens->setAttribute ("android:anyDensity", "true");
 
         if (getInternetNeeded().getValue())
@@ -202,7 +201,8 @@ private:
            << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
            << newLine
            << "APP_STL := gnustl_static" << newLine
-           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine;
+           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine
+           << "APP_PLATFORM := android-7" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }
@@ -325,9 +325,8 @@ private:
         proj->setAttribute ("name", projectName);
         proj->setAttribute ("default", "debug");
 
-        proj->createNewChildElement ("property")->setAttribute ("file", "local.properties");
-        proj->createNewChildElement ("property")->setAttribute ("file", "build.properties");
-        proj->createNewChildElement ("property")->setAttribute ("file", "default.properties");
+        proj->createNewChildElement ("loadproperties")->setAttribute ("srcFile", "local.properties");
+        proj->createNewChildElement ("loadproperties")->setAttribute ("srcFile", "project.properties");
 
         XmlElement* path = proj->createNewChildElement ("path");
         path->setAttribute ("id", "android.antlibs");
@@ -343,12 +342,12 @@ private:
         addNDKBuildStep (proj, "clean", "clean");
 
         //addLinkStep (proj, "${basedir}/" + rebaseFromProjectFolderToBuildTarget (RelativePath()).toUnixStyle() + "/", "jni/app");
-        addLinkStep (proj, "${basedir}/" + getJucePathFromTargetFolder().toUnixStyle() + "/src/native/android/java/", "src/com/juce");
+        addLinkStep (proj, "${basedir}/" + getJucePathFromTargetFolder().toUnixStyle() + "/modules/juce_core/native/java/", "src/com/juce");
 
         addNDKBuildStep (proj, "debug", "CONFIG=Debug");
         addNDKBuildStep (proj, "release", "CONFIG=Release");
 
-        proj->createNewChildElement ("setup");
+        proj->createNewChildElement ("import")->setAttribute ("file", "${sdk.dir}/tools/ant/build.xml");
 
         return proj;
     }
@@ -379,20 +378,13 @@ private:
         executable->createNewChildElement ("arg")->setAttribute ("value", to);
     }
 
-    void writeBuildPropertiesFile (const File& file)
-    {
-        MemoryOutputStream mo;
-        mo << "# This file is used to override default values used by the Ant build system." << newLine;
-        overwriteFileIfDifferentOrThrow (file, mo);
-    }
-
-    void writeDefaultPropertiesFile (const File& file)
+    void writeProjectPropertiesFile (const File& file)
     {
         MemoryOutputStream mo;
         mo << "# This file is used to override default values used by the Ant build system." << newLine
            << "# It is automatically generated - DO NOT EDIT IT or your changes will be lost!." << newLine
            << newLine
-           << "target=android-9"
+           << "target=Google Inc.:Google APIs:7" << newLine
            << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
