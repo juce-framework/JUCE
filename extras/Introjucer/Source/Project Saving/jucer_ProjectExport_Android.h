@@ -78,6 +78,7 @@ public:
 
     bool isPossibleForCurrentProject()          { return projectType.isGUIApplication(); }
     bool usesMMFiles() const                    { return false; }
+    bool canCopeWithDuplicateFiles()            { return false; }
 
     void launchProject()
     {

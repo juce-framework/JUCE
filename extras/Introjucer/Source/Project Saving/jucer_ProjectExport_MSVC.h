@@ -50,6 +50,7 @@ public:
     bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
     bool isVisualStudio() const                 { return true; }
+    bool canCopeWithDuplicateFiles()            { return false; }
 
     void createPropertyEditors (Array <PropertyComponent*>& props)
     {

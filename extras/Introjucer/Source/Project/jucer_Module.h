@@ -71,7 +71,6 @@ private:
     };
 
     void findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const;
-    void addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path) const;
     void findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& localModuleFolder, Array<File>& result) const;
     void addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const;
     void createLocalHeaderWrapper (ProjectSaver& projectSaver, const File& originalHeader, const File& localHeader) const;

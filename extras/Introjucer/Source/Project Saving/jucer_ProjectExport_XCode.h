@@ -87,6 +87,7 @@ public:
     bool usesMMFiles() const                { return true; }
     bool isXcode() const                    { return true; }
     bool isOSX() const                      { return ! iOS; }
+    bool canCopeWithDuplicateFiles()        { return true; }
 
     void createPropertyEditors (Array <PropertyComponent*>& props)
     {

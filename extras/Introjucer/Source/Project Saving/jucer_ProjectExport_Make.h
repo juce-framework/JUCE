@@ -69,6 +69,7 @@ public:
     bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
     bool isLinux() const                        { return true; }
+    bool canCopeWithDuplicateFiles()            { return false; }
 
     void launchProject()
     {

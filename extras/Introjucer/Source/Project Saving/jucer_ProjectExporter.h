@@ -59,6 +59,7 @@ public:
     virtual void launchProject() = 0;
     virtual void create() = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
+    virtual bool canCopeWithDuplicateFiles() = 0;
 
     virtual bool isXcode() const            { return false; }
     virtual bool isVisualStudio() const     { return false; }

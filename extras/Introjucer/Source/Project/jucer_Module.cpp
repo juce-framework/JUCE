@@ -595,25 +595,6 @@ void LibraryModule::findWildcardMatches (const File& localModuleFolder, const St
     result.addArray (tempList);
 }
 
-void LibraryModule::addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path) const
-{
-    const int slash = path.indexOfChar (File::separator);
-
-    if (slash >= 0)
-    {
-        const String topLevelGroup (path.substring (0, slash));
-        const String remainingPath (path.substring (slash + 1));
-
-        Project::Item newGroup (group.getOrCreateSubGroup (topLevelGroup));
-        addFileWithGroups (newGroup, file, remainingPath);
-    }
-    else
-    {
-        if (! group.containsChildForFile (file))
-            group.addRelativeFile (file, -1, false);
-    }
-}
-
 void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver,
                                             const File& localModuleFolder, Array<File>& result) const
 {
@@ -645,6 +626,25 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
     }
 }
 
+static void addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path)
+{
+    const int slash = path.indexOfChar (File::separator);
+
+    if (slash >= 0)
+    {
+        const String topLevelGroup (path.substring (0, slash));
+        const String remainingPath (path.substring (slash + 1));
+
+        Project::Item newGroup (group.getOrCreateSubGroup (topLevelGroup));
+        addFileWithGroups (newGroup, file, remainingPath);
+    }
+    else
+    {
+        if (! group.containsChildForFile (file))
+            group.addRelativeFile (file, -1, false);
+    }
+}
+
 void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const
 {
     if (sourceFiles.size() == 0)
@@ -664,9 +664,12 @@ void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<Fil
     {
         const String pathWithinModule (sourceFiles.getReference(i).getRelativePathFrom (localModuleFolder));
 
-        addFileWithGroups (sourceGroup,
-                           moduleFromProject.getChildFile (pathWithinModule),
-                           pathWithinModule);
+        // (Note: in exporters like MSVC we have to avoid adding the same file twice, even if one of those instances
+        // is flagged as being excluded from the build, because this overrides the other and it fails to compile)
+        if (exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFiles.getReference(i)))
+            addFileWithGroups (sourceGroup,
+                               moduleFromProject.getChildFile (pathWithinModule),
+                               pathWithinModule);
     }
 
     sourceGroup.addFile (localModuleFolder.getChildFile (moduleFile.getRelativePathFrom (moduleFolder)), -1, false);
