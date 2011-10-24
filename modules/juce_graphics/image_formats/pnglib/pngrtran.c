@@ -3379,69 +3379,71 @@ png_do_background(png_row_infop row_info, png_bytep row,
  * is 16, use gamma_16_table and gamma_shift.  Build these with
  * build_gamma_table().
  */
+
+// (Note: the reason I've pulled this block of code out of png_do_gamma and into its own function
+// is because the android NDK compiler was crashing when it tried to compile it)
+static void doGamma_RGB (png_uint_32 row_width, png_row_infop row_info, png_bytep row, png_bytep gamma_table, png_uint_16pp gamma_16_table, int gamma_shift)
+{
+    if (row_info->bit_depth == 8)
+    {
+       png_bytep sp = row;
+       for (png_uint_32 i = 0; i < row_width; i++)
+       {
+          *sp = gamma_table[*sp];
+          sp++;
+          *sp = gamma_table[*sp];
+          sp++;
+          *sp = gamma_table[*sp];
+          sp++;
+       }
+    }
+    else /* if (row_info->bit_depth == 16) */
+    {
+       png_bytep sp = row;
+       for (png_uint_32 i = 0; i < row_width; i++)
+       {
+          png_uint_16 v;
+
+          v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
+          *sp = (png_byte)((v >> 8) & 0xff);
+          *(sp + 1) = (png_byte)(v & 0xff);
+          sp += 2;
+          v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
+          *sp = (png_byte)((v >> 8) & 0xff);
+          *(sp + 1) = (png_byte)(v & 0xff);
+          sp += 2;
+          v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
+          *sp = (png_byte)((v >> 8) & 0xff);
+          *(sp + 1) = (png_byte)(v & 0xff);
+          sp += 2;
+       }
+    }
+}
+
 void /* PRIVATE */
 png_do_gamma(png_row_infop row_info, png_bytep row,
    png_bytep gamma_table, png_uint_16pp gamma_16_table,
    int gamma_shift)
 {
    png_bytep sp;
-   png_uint_32 i;
-   png_uint_32 row_width=row_info->width;
+   const png_uint_32 row_width=row_info->width;
 
    png_debug(1, "in png_do_gamma\n");
-   if (
-#if defined(PNG_USELESS_TESTS_SUPPORTED)
-       row != NULL && row_info != NULL &&
-#endif
-       ((row_info->bit_depth <= 8 && gamma_table != NULL) ||
+   if (((row_info->bit_depth <= 8 && gamma_table != NULL) ||
         (row_info->bit_depth == 16 && gamma_16_table != NULL)))
    {
       switch (row_info->color_type)
       {
-         case PNG_COLOR_TYPE_RGB:
-         {
-            if (row_info->bit_depth == 8)
-            {
-               sp = row;
-               for (i = 0; i < row_width; i++)
-               {
-                  *sp = gamma_table[*sp];
-                  sp++;
-                  *sp = gamma_table[*sp];
-                  sp++;
-                  *sp = gamma_table[*sp];
-                  sp++;
-               }
-            }
-            else /* if (row_info->bit_depth == 16) */
-            {
-               sp = row;
-               for (i = 0; i < row_width; i++)
-               {
-                  png_uint_16 v;
+          case PNG_COLOR_TYPE_RGB:
+              doGamma_RGB (row_width, row_info, row, gamma_table, gamma_16_table, gamma_shift);
+              break;
 
-                  v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
-                  *sp = (png_byte)((v >> 8) & 0xff);
-                  *(sp + 1) = (png_byte)(v & 0xff);
-                  sp += 2;
-                  v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
-                  *sp = (png_byte)((v >> 8) & 0xff);
-                  *(sp + 1) = (png_byte)(v & 0xff);
-                  sp += 2;
-                  v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
-                  *sp = (png_byte)((v >> 8) & 0xff);
-                  *(sp + 1) = (png_byte)(v & 0xff);
-                  sp += 2;
-               }
-            }
-            break;
-         }
-         case PNG_COLOR_TYPE_RGB_ALPHA:
+          case PNG_COLOR_TYPE_RGB_ALPHA:
          {
             if (row_info->bit_depth == 8)
             {
                sp = row;
-               for (i = 0; i < row_width; i++)
+               for (png_uint_32 i = 0; i < row_width; i++)
                {
                   *sp = gamma_table[*sp];
                   sp++;
@@ -3455,7 +3457,7 @@ png_do_gamma(png_row_infop row_info, png_bytep row,
             else /* if (row_info->bit_depth == 16) */
             {
                sp = row;
-               for (i = 0; i < row_width; i++)
+               for (png_uint_32 i = 0; i < row_width; i++)
                {
                   png_uint_16 v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
                   *sp = (png_byte)((v >> 8) & 0xff);
@@ -3478,7 +3480,7 @@ png_do_gamma(png_row_infop row_info, png_bytep row,
             if (row_info->bit_depth == 8)
             {
                sp = row;
-               for (i = 0; i < row_width; i++)
+               for (png_uint_32 i = 0; i < row_width; i++)
                {
                   *sp = gamma_table[*sp];
                   sp += 2;
@@ -3487,7 +3489,7 @@ png_do_gamma(png_row_infop row_info, png_bytep row,
             else /* if (row_info->bit_depth == 16) */
             {
                sp = row;
-               for (i = 0; i < row_width; i++)
+               for (png_uint_32 i = 0; i < row_width; i++)
                {
                   png_uint_16 v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
                   *sp = (png_byte)((v >> 8) & 0xff);
@@ -3502,7 +3504,7 @@ png_do_gamma(png_row_infop row_info, png_bytep row,
             if (row_info->bit_depth == 2)
             {
                sp = row;
-               for (i = 0; i < row_width; i += 4)
+               for (png_uint_32 i = 0; i < row_width; i += 4)
                {
                   int a = *sp & 0xc0;
                   int b = *sp & 0x30;
@@ -3520,7 +3522,7 @@ png_do_gamma(png_row_infop row_info, png_bytep row,
             if (row_info->bit_depth == 4)
             {
                sp = row;
-               for (i = 0; i < row_width; i += 2)
+               for (png_uint_32 i = 0; i < row_width; i += 2)
                {
                   int msb = *sp & 0xf0;
                   int lsb = *sp & 0x0f;
@@ -3533,7 +3535,7 @@ png_do_gamma(png_row_infop row_info, png_bytep row,
             else if (row_info->bit_depth == 8)
             {
                sp = row;
-               for (i = 0; i < row_width; i++)
+               for (png_uint_32 i = 0; i < row_width; i++)
                {
                   *sp = gamma_table[*sp];
                   sp++;
@@ -3542,7 +3544,7 @@ png_do_gamma(png_row_infop row_info, png_bytep row,
             else if (row_info->bit_depth == 16)
             {
                sp = row;
-               for (i = 0; i < row_width; i++)
+               for (png_uint_32 i = 0; i < row_width; i++)
                {
                   png_uint_16 v = gamma_16_table[*(sp + 1) >> gamma_shift][*sp];
                   *sp = (png_byte)((v >> 8) & 0xff);
