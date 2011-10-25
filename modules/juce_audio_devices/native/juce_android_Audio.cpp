@@ -158,9 +158,9 @@ public:
         numClientInputChannels = activeInputChans.countNumberOfSetBits();
 
         actualBufferSize = preferredBufferSize;
-        inputChannelBuffer.setSize (actualBufferSize, 2);
-        outputChannelBuffer.setSize (actualBufferSize, 2);
+        inputChannelBuffer.setSize (2, actualBufferSize);
         inputChannelBuffer.clear();
+        outputChannelBuffer.setSize (2, actualBufferSize);
         outputChannelBuffer.clear();
 
         JNIEnv* env = getEnv();
