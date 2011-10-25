@@ -607,6 +607,12 @@ public:
     void setPopupDisplayEnabled (bool isEnabled,
                                  Component* parentComponentToUse);
 
+    /** If a popup display is enabled and is currently visible, this returns the component
+        that is being shown, or nullptr if none is currently in use.
+        @see setPopupDisplayEnabled
+    */
+    Component* getCurrentPopupDisplay() const noexcept;
+
     /** If this is set to true, then right-clicking on the slider will pop-up
         a menu to let the user change the way it works.
 

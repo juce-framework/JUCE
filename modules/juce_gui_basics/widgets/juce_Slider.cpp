@@ -296,11 +296,15 @@ void Slider::setSliderSnapsToMousePosition (const bool shouldSnapToMouse)
     snapsToMousePos = shouldSnapToMouse;
 }
 
-void Slider::setPopupDisplayEnabled (const bool enabled,
-                                     Component* const parentComponentToUse)
+void Slider::setPopupDisplayEnabled (const bool enabled, Component* const parentComponentToUse)
 {
     popupDisplayEnabled = enabled;
     parentForPopupDisplay = parentComponentToUse;
+}
+
+Component* Slider::getCurrentPopupDisplay() const noexcept
+{
+    return popupDisplay.get();
 }
 
 //==============================================================================

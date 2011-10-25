@@ -169,7 +169,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         for (int i = channelsToProcess; --i >= 0;)
             applyFilter (info.buffer->getSampleData (i, info.startSample), info.numSamples, filterStates[i]);
     }
-    else if (localRatio <= 1.0001)
+    else if (localRatio <= 1.0001 && info.numSamples > 0)
     {
         // if the filter's not currently being applied, keep it stoked with the last couple of samples to avoid discontinuities
         for (int i = channelsToProcess; --i >= 0;)
