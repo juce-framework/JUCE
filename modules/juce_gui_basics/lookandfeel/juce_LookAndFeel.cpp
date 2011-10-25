@@ -332,6 +332,11 @@ MouseCursor LookAndFeel::getMouseCursorFor (Component& component)
     return component.getMouseCursor();
 }
 
+LowLevelGraphicsContext* LookAndFeel::createGraphicsContext (const Image& imageToRenderOn, const Point<int>& origin, const RectangleList& initialClip)
+{
+    return new LowLevelGraphicsSoftwareRenderer (imageToRenderOn, origin, initialClip);
+}
+
 //==============================================================================
 void LookAndFeel::drawButtonBackground (Graphics& g,
                                         Button& button,

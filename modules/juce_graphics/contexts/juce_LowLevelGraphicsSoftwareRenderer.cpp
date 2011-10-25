@@ -1690,9 +1690,9 @@ private:
 class LowLevelGraphicsSoftwareRenderer::SavedState
 {
 public:
-    SavedState (const Image& image_, const Rectangle<int>& clip_, const int xOffset_, const int yOffset_)
+    SavedState (const Image& image_, const Rectangle<int>& clip_)
         : image (image_), clip (new SoftwareRendererClasses::ClipRegion_RectangleList (clip_)),
-          transform (xOffset_, yOffset_),
+          transform (0, 0),
           interpolationQuality (Graphics::mediumResamplingQuality),
           transparencyLayerAlpha (1.0f)
     {
@@ -2074,13 +2074,13 @@ private:
 
 //==============================================================================
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image)
-    : savedState (new SavedState (image, image.getBounds(), 0, 0))
+    : savedState (new SavedState (image, image.getBounds()))
 {
 }
 
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, const int xOffset, const int yOffset,
+LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, const Point<int>& origin,
                                                                     const RectangleList& initialClip)
-    : savedState (new SavedState (image, initialClip, xOffset, yOffset))
+    : savedState (new SavedState (image, initialClip, origin.getX(), origin.getY()))
 {
 }
 

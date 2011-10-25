@@ -571,7 +571,7 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS (Image (this));
+        return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
@@ -1749,7 +1749,6 @@ private:
 
                 RectangleList adjustedList (originalRepaintRegion);
                 adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
-                JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS context (image, -totalArea.getX(), -totalArea.getY(), adjustedList);
 
                 if (peer->depth == 32)
                 {
@@ -1759,7 +1758,11 @@ private:
                         image.clear (*i.getRectangle() - totalArea.getPosition());
                 }
 
-                peer->handlePaint (context);
+                {
+                    ScopedPointer<LowLevelGraphicsContext> context (peer->getComponent()->getLookAndFeel()
+                                                                      .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
+                    peer->handlePaint (*context);
+                }
 
                 if (! peer->maskedRegion.isEmpty())
                     originalRepaintRegion.subtract (peer->maskedRegion);

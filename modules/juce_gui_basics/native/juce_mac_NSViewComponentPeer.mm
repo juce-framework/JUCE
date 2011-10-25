@@ -1594,6 +1594,23 @@ bool NSViewComponentPeer::isOpaque()
     return component == nullptr || component->isOpaque();
 }
 
+static void getClipRects (RectangleList& clip, NSView* view,
+                          const int xOffset, const int yOffset, const int clipW, const int clipH)
+{
+    const NSRect* rects = nullptr;
+    NSInteger numRects = 0;
+    [view getRectsBeingDrawn: &rects count: &numRects];
+
+    const Rectangle<int> clipBounds (clipW, clipH);
+    const CGFloat viewH = [view frame].size.height;
+
+    for (int i = 0; i < numRects; ++i)
+        clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (roundToInt (rects[i].origin.x) + xOffset,
+                                                                            roundToInt (viewH - (rects[i].origin.y + rects[i].size.height)) + yOffset,
+                                                                            roundToInt (rects[i].size.width),
+                                                                            roundToInt (rects[i].size.height))));
+}
+
 void NSViewComponentPeer::drawRect (NSRect r)
 {
     if (r.size.width < 1.0f || r.size.height < 1.0f)
@@ -1616,41 +1633,32 @@ void NSViewComponentPeer::drawRect (NSRect r)
     else
    #endif
     {
-        Image temp (getComponent()->isOpaque() ? Image::RGB : Image::ARGB,
-                    (int) (r.size.width + 0.5f),
-                    (int) (r.size.height + 0.5f),
-                    ! getComponent()->isOpaque());
-
         const int xOffset = -roundToInt (r.origin.x);
         const int yOffset = -roundToInt ([view frame].size.height - (r.origin.y + r.size.height));
-
-        const NSRect* rects = nullptr;
-        NSInteger numRects = 0;
-        [view getRectsBeingDrawn: &rects count: &numRects];
-
-        const Rectangle<int> clipBounds (temp.getBounds());
+        const int clipW = (int) (r.size.width  + 0.5f);
+        const int clipH = (int) (r.size.height + 0.5f);
 
         RectangleList clip;
-        for (int i = 0; i < numRects; ++i)
-        {
-            clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (roundToInt (rects[i].origin.x) + xOffset,
-                                                                                roundToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)) + yOffset,
-                                                                                roundToInt (rects[i].size.width),
-                                                                                roundToInt (rects[i].size.height))));
-        }
+        getClipRects (clip, view, xOffset, yOffset, clipW, clipH);
 
         if (! clip.isEmpty())
         {
-            JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS context (temp, xOffset, yOffset, clip);
+            Image temp (getComponent()->isOpaque() ? Image::RGB : Image::ARGB,
+                        clipW, clipH, ! getComponent()->isOpaque());
 
-            insideDrawRect = true;
-            handlePaint (context);
-            insideDrawRect = false;
+            {
+                ScopedPointer<LowLevelGraphicsContext> context (component->getLookAndFeel()
+                                                                    .createGraphicsContext (temp, Point<int> (xOffset, yOffset), clip));
+
+                insideDrawRect = true;
+                handlePaint (*context);
+                insideDrawRect = false;
+            }
 
             CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
             CGImageRef image = juce_createCoreGraphicsImage (temp, false, colourSpace, false);
             CGColorSpaceRelease (colourSpace);
-            CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, temp.getWidth(), temp.getHeight()), image);
+            CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, clipW, clipH), image);
             CGImageRelease (image);
         }
     }

@@ -45,7 +45,7 @@ class JUCE_API  LowLevelGraphicsSoftwareRenderer    : public LowLevelGraphicsCon
 public:
     //==============================================================================
     LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn);
-    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn, int xOffset, int yOffset, const RectangleList& initialClip);
+    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn, const Point<int>& origin, const RectangleList& initialClip);
     ~LowLevelGraphicsSoftwareRenderer();
 
     bool isVectorDevice() const;

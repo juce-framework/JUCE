@@ -145,6 +145,12 @@ public:
     virtual MouseCursor getMouseCursorFor (Component& component);
 
     //==============================================================================
+    // Creates a new graphics context object.
+    virtual LowLevelGraphicsContext* createGraphicsContext (const Image& imageToRenderOn,
+                                                            const Point<int>& origin,
+                                                            const RectangleList& initialClip);
+
+    //==============================================================================
     /** Draws the lozenge-shaped background for a standard button. */
     virtual void drawButtonBackground (Graphics& g,
                                        Button& button,
@@ -642,7 +648,6 @@ public:
                                   bool flatOnTop, bool flatOnBottom) noexcept;
 
     static Drawable* loadDrawableFromData (const void* data, size_t numBytes);
-
 
 private:
     //==============================================================================

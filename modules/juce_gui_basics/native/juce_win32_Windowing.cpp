@@ -255,7 +255,7 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS (Image (this));
+        return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
@@ -925,7 +925,7 @@ private:
     public:
         TemporaryImage() {}
 
-        const Image& getImage (const bool transparent, const int w, const int h)
+        Image& getImage (const bool transparent, const int w, const int h)
         {
             const Image::PixelFormat format = transparent ? Image::ARGB : Image::RGB;
 
@@ -1293,7 +1293,7 @@ private:
             {
                 clearMaskedRegion();
 
-                Image offscreenImage (offscreenImageGenerator.getImage (transparent, w, h));
+                Image& offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
 
                 RectangleList contextClip;
                 const Rectangle<int> clipBounds (0, 0, w, h);
@@ -1360,8 +1360,11 @@ private:
 
                 updateCurrentModifiers();
 
-                JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS context (offscreenImage, -x, -y, contextClip);
-                handlePaint (context);
+                {
+                    ScopedPointer<LowLevelGraphicsContext> context (component->getLookAndFeel()
+                                                                        .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
+                    handlePaint (*context);
+                }
 
                 if (! dontRepaint)
                     static_cast <WindowsBitmapImage*> (offscreenImage.getSharedImage())

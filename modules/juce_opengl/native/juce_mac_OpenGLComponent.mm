@@ -126,10 +126,9 @@ class WindowedGLContext     : public OpenGLContext
 {
 public:
     WindowedGLContext (OpenGLComponent& component,
-                       const OpenGLPixelFormat& pixelFormat_,
+                       const OpenGLPixelFormat& pixelFormat,
                        NSOpenGLContext* sharedContext)
-        : renderContext (nil),
-          pixelFormat (pixelFormat_)
+        : renderContext (nil)
     {
         NSOpenGLPixelFormatAttribute attribs[] =
         {
@@ -205,7 +204,6 @@ public:
         return [NSOpenGLContext currentContext] == renderContext;
     }
 
-    OpenGLPixelFormat getPixelFormat() const        { return pixelFormat; }
     void* getRawContext() const noexcept            { return renderContext; }
     unsigned int getFrameBufferID() const           { return 0; }
 
@@ -236,8 +234,6 @@ public:
     ThreadSafeNSOpenGLView* view;
 
 private:
-    OpenGLPixelFormat pixelFormat;
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
 };
 

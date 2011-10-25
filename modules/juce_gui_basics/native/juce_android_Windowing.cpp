@@ -394,7 +394,7 @@ public:
                                                        dest, ! component->isOpaque()));
 
                     {
-                        JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS g (temp);
+                        LowLevelGraphicsSoftwareRenderer g (temp);
                         g.setOrigin (-clip.getX(), -clip.getY());
                         handlePaint (g);
                     }
@@ -501,7 +501,6 @@ private:
     class PreallocatedImage  : public Image::SharedImage
     {
     public:
-        //==============================================================================
         PreallocatedImage (const int width_, const int height_, jint* data_, bool hasAlpha_)
             : Image::SharedImage (Image::ARGB, width_, height_), data (data_), hasAlpha (hasAlpha_)
         {
@@ -524,7 +523,7 @@ private:
         }
 
         Image::ImageType getType() const                    { return Image::SoftwareImage; }
-        LowLevelGraphicsContext* createLowLevelContext()    { return new JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS (Image (this)); }
+        LowLevelGraphicsContext* createLowLevelContext()    { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
 
         void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
         {
@@ -543,7 +542,6 @@ private:
             return s;
         }
 
-        //==============================================================================
     private:
         jint* data;
         HeapBlock<jint> allocatedData;

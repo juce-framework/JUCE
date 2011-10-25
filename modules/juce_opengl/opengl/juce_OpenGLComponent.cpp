@@ -41,7 +41,7 @@ OpenGLPixelFormat::OpenGLPixelFormat (const int bitsPerRGBComponent,
       accumulationBufferGreenBits (0),
       accumulationBufferBlueBits (0),
       accumulationBufferAlphaBits (0),
-      fullSceneAntiAliasingNumSamples (0)
+      multisamplingLevel (0)
 {
 }
 
@@ -56,7 +56,7 @@ OpenGLPixelFormat::OpenGLPixelFormat (const OpenGLPixelFormat& other)
       accumulationBufferGreenBits (other.accumulationBufferGreenBits),
       accumulationBufferBlueBits (other.accumulationBufferBlueBits),
       accumulationBufferAlphaBits (other.accumulationBufferAlphaBits),
-      fullSceneAntiAliasingNumSamples (other.fullSceneAntiAliasingNumSamples)
+      multisamplingLevel (other.multisamplingLevel)
 {
 }
 
@@ -72,7 +72,7 @@ OpenGLPixelFormat& OpenGLPixelFormat::operator= (const OpenGLPixelFormat& other)
     accumulationBufferGreenBits = other.accumulationBufferGreenBits;
     accumulationBufferBlueBits = other.accumulationBufferBlueBits;
     accumulationBufferAlphaBits = other.accumulationBufferAlphaBits;
-    fullSceneAntiAliasingNumSamples = other.fullSceneAntiAliasingNumSamples;
+    multisamplingLevel = other.multisamplingLevel;
     return *this;
 }
 
@@ -88,7 +88,7 @@ bool OpenGLPixelFormat::operator== (const OpenGLPixelFormat& other) const
             && accumulationBufferGreenBits == other.accumulationBufferGreenBits
             && accumulationBufferBlueBits == other.accumulationBufferBlueBits
             && accumulationBufferAlphaBits == other.accumulationBufferAlphaBits
-            && fullSceneAntiAliasingNumSamples == other.fullSceneAntiAliasingNumSamples;
+            && multisamplingLevel == other.multisamplingLevel;
 }
 
 //==============================================================================
@@ -233,17 +233,6 @@ OpenGLComponent::~OpenGLComponent()
 {
     stopBackgroundThread();
     componentWatcher = nullptr;
-}
-
-OpenGLPixelFormat OpenGLComponent::getPixelFormat() const
-{
-    OpenGLPixelFormat pf;
-
-    const ScopedLock sl (contextLock);
-    if (context != nullptr)
-        pf = context->getPixelFormat();
-
-    return pf;
 }
 
 void OpenGLComponent::setPixelFormat (const OpenGLPixelFormat& formatToUse)

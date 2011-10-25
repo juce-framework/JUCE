@@ -75,9 +75,6 @@ public:
     /** Changes the pixel format used by this component. */
     void setPixelFormat (const OpenGLPixelFormat& formatToUse);
 
-    /** Returns the pixel format that this component is currently using. */
-    OpenGLPixelFormat getPixelFormat() const;
-
     /** Specifies an OpenGL context which should be shared with the one that this
         component is using.
 

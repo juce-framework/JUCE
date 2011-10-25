@@ -69,9 +69,6 @@ public:
     virtual int getSwapInterval() const = 0;
 
     //==============================================================================
-    /** Returns the pixel format being used by this context. */
-    virtual OpenGLPixelFormat getPixelFormat() const = 0;
-
     /** Returns an OS-dependent handle to the raw GL context.
 
         On win32, this will be a HGLRC; on the Mac, an NSOpenGLContext; on Linux,

@@ -46,11 +46,12 @@ class GLESContext   : public OpenGLContext
 public:
     GLESContext (UIView* parentView,
                  Component* const component_,
-                 const OpenGLPixelFormat& pixelFormat_,
+                 const OpenGLPixelFormat& pixelFormat,
                  const GLESContext* const sharedContext,
                  NSUInteger apiType)
-        : component (component_), pixelFormat (pixelFormat_), glLayer (nil), context (nil),
-          useDepthBuffer (pixelFormat_.depthBufferBits > 0), frameBufferHandle (0), colorBufferHandle (0),
+        : component (component_), glLayer (nil), context (nil),
+          useDepthBuffer (pixelFormat_.depthBufferBits > 0),
+          frameBufferHandle (0), colorBufferHandle (0),
           depthBufferHandle (0), lastWidth (0), lastHeight (0)
     {
         view = [[JuceGLView alloc] initWithFrame: CGRectMake (0, 0, 64, 64)];
@@ -112,7 +113,6 @@ public:
         return [EAGLContext currentContext] == context;
     }
 
-    OpenGLPixelFormat getPixelFormat() const        { return pixelFormat; }
     void* getRawContext() const noexcept            { return glLayer; }
     unsigned int getFrameBufferID() const           { return (unsigned int) frameBufferHandle; }
 
@@ -200,7 +200,6 @@ public:
     //==============================================================================
 private:
     WeakReference<Component> component;
-    OpenGLPixelFormat pixelFormat;
     JuceGLView* view;
     CAEAGLLayer* glLayer;
     EAGLContext* context;

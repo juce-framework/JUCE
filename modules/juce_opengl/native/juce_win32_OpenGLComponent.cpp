@@ -23,14 +23,6 @@
   ==============================================================================
 */
 
-#define WGL_EXT_FUNCTION_INIT(extType, extFunc) \
-    ((extFunc = (extType) wglGetProcAddress (#extFunc)) != 0)
-
-typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBIVARBPROC) (HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes, const int *piAttributes, int *piValues);
-typedef BOOL (WINAPI * PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
-typedef BOOL (WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
-typedef int (WINAPI * PFNWGLGETSWAPINTERVALEXTPROC) (void);
-
 enum
 {
     WGL_NUMBER_PIXEL_FORMATS_ARB    = 0x2000,
@@ -58,6 +50,24 @@ enum
     WGL_TYPE_RGBA_ARB               = 0x202B
 };
 
+typedef BOOL (WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC, const int*, const FLOAT*, UINT, int*, UINT*);
+typedef BOOL (WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int);
+typedef int  (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC)();
+
+static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
+static PFNWGLSWAPINTERVALEXTPROC      wglSwapIntervalEXT = 0;
+static PFNWGLGETSWAPINTERVALEXTPROC   wglGetSwapIntervalEXT = 0;
+
+static void initialiseGLExtensions()
+{
+    if (wglChoosePixelFormatARB == 0)
+    {
+        wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC) OpenGLHelpers::getExtensionFunction ("wglChoosePixelFormatARB");
+        wglSwapIntervalEXT      = (PFNWGLSWAPINTERVALEXTPROC)      OpenGLHelpers::getExtensionFunction ("wglSwapIntervalEXT");
+        wglGetSwapIntervalEXT   = (PFNWGLGETSWAPINTERVALEXTPROC)   OpenGLHelpers::getExtensionFunction ("wglGetSwapIntervalEXT");
+    }
+}
+
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component* component, void* parent);
 
 //==============================================================================
@@ -71,18 +81,13 @@ public:
           component (component_),
           dc (0)
     {
+        initialiseGLExtensions();
         jassert (component != nullptr);
 
         createNativeWindow();
 
-        // Use a default pixel format that should be supported everywhere
-        PIXELFORMATDESCRIPTOR pfd = { 0 };
-        pfd.nSize = sizeof (pfd);
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = 24;
-        pfd.cDepthBits = 16;
+        PIXELFORMATDESCRIPTOR pfd;
+        initialisePixelFormatDescriptor (pfd, pixelFormat);
 
         const int format = ChoosePixelFormat (dc, &pfd);
 
@@ -90,12 +95,15 @@ public:
             SetPixelFormat (dc, format, &pfd);
 
         renderContext = wglCreateContext (dc);
-        makeActive();
 
-        setPixelFormat (pixelFormat);
+        if (renderContext != 0)
+        {
+            makeActive();
+            setPixelFormat (pixelFormat);
 
-        if (contextToShareWith != 0 && renderContext != 0)
-            wglShareLists (contextToShareWith, renderContext);
+            if (contextToShareWith != 0)
+                wglShareLists (contextToShareWith, renderContext);
+        }
     }
 
     ~WindowedGLContext()
@@ -132,14 +140,6 @@ public:
         return wglGetCurrentContext() == renderContext;
     }
 
-    OpenGLPixelFormat getPixelFormat() const
-    {
-        OpenGLPixelFormat pf;
-        makeActive();
-        fillInPixelFormatDetails (GetPixelFormat (dc), pf);
-        return pf;
-    }
-
     void* getRawContext() const noexcept
     {
         return renderContext;
@@ -154,95 +154,70 @@ public:
     {
         makeActive();
 
-        PIXELFORMATDESCRIPTOR pfd = { 0 };
-        pfd.nSize = sizeof (pfd);
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.iLayerType = PFD_MAIN_PLANE;
-        pfd.cColorBits = (BYTE) (pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits);
-        pfd.cRedBits = (BYTE) pixelFormat.redBits;
-        pfd.cGreenBits = (BYTE) pixelFormat.greenBits;
-        pfd.cBlueBits = (BYTE) pixelFormat.blueBits;
-        pfd.cAlphaBits = (BYTE) pixelFormat.alphaBits;
-        pfd.cDepthBits = (BYTE) pixelFormat.depthBufferBits;
-        pfd.cStencilBits = (BYTE) pixelFormat.stencilBufferBits;
-        pfd.cAccumBits = (BYTE) (pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
-                                    + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits);
-        pfd.cAccumRedBits = (BYTE) pixelFormat.accumulationBufferRedBits;
-        pfd.cAccumGreenBits = (BYTE) pixelFormat.accumulationBufferGreenBits;
-        pfd.cAccumBlueBits = (BYTE) pixelFormat.accumulationBufferBlueBits;
-        pfd.cAccumAlphaBits = (BYTE) pixelFormat.accumulationBufferAlphaBits;
+        PIXELFORMATDESCRIPTOR pfd;
+        initialisePixelFormatDescriptor (pfd, pixelFormat);
 
         int format = 0;
 
-        PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
-
-        if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_pixel_format")
-             && WGL_EXT_FUNCTION_INIT (PFNWGLCHOOSEPIXELFORMATARBPROC, wglChoosePixelFormatARB))
+        if (wglChoosePixelFormatARB != nullptr)
         {
-            int attributes[64];
+            int atts[64];
             int n = 0;
 
-            attributes[n++] = WGL_DRAW_TO_WINDOW_ARB;
-            attributes[n++] = GL_TRUE;
-            attributes[n++] = WGL_SUPPORT_OPENGL_ARB;
-            attributes[n++] = GL_TRUE;
-            attributes[n++] = WGL_ACCELERATION_ARB;
-            attributes[n++] = WGL_FULL_ACCELERATION_ARB;
-            attributes[n++] = WGL_DOUBLE_BUFFER_ARB;
-            attributes[n++] = GL_TRUE;
-            attributes[n++] = WGL_PIXEL_TYPE_ARB;
-            attributes[n++] = WGL_TYPE_RGBA_ARB;
+            atts[n++] = WGL_DRAW_TO_WINDOW_ARB;
+            atts[n++] = GL_TRUE;
+            atts[n++] = WGL_SUPPORT_OPENGL_ARB;
+            atts[n++] = GL_TRUE;
+            atts[n++] = WGL_ACCELERATION_ARB;
+            atts[n++] = WGL_FULL_ACCELERATION_ARB;
+            atts[n++] = WGL_DOUBLE_BUFFER_ARB;
+            atts[n++] = GL_TRUE;
+            atts[n++] = WGL_PIXEL_TYPE_ARB;
+            atts[n++] = WGL_TYPE_RGBA_ARB;
 
-            attributes[n++] = WGL_COLOR_BITS_ARB;
-            attributes[n++] = pfd.cColorBits;
-            attributes[n++] = WGL_RED_BITS_ARB;
-            attributes[n++] = pixelFormat.redBits;
-            attributes[n++] = WGL_GREEN_BITS_ARB;
-            attributes[n++] = pixelFormat.greenBits;
-            attributes[n++] = WGL_BLUE_BITS_ARB;
-            attributes[n++] = pixelFormat.blueBits;
-            attributes[n++] = WGL_ALPHA_BITS_ARB;
-            attributes[n++] = pixelFormat.alphaBits;
-            attributes[n++] = WGL_DEPTH_BITS_ARB;
-            attributes[n++] = pixelFormat.depthBufferBits;
+            atts[n++] = WGL_COLOR_BITS_ARB;
+            atts[n++] = pfd.cColorBits;
+            atts[n++] = WGL_RED_BITS_ARB;
+            atts[n++] = pixelFormat.redBits;
+            atts[n++] = WGL_GREEN_BITS_ARB;
+            atts[n++] = pixelFormat.greenBits;
+            atts[n++] = WGL_BLUE_BITS_ARB;
+            atts[n++] = pixelFormat.blueBits;
+            atts[n++] = WGL_ALPHA_BITS_ARB;
+            atts[n++] = pixelFormat.alphaBits;
+            atts[n++] = WGL_DEPTH_BITS_ARB;
+            atts[n++] = pixelFormat.depthBufferBits;
 
-            if (pixelFormat.stencilBufferBits > 0)
+            atts[n++] = WGL_STENCIL_BITS_ARB;
+            atts[n++] = pixelFormat.stencilBufferBits;
+
+            atts[n++] = WGL_ACCUM_RED_BITS_ARB;
+            atts[n++] = pixelFormat.accumulationBufferRedBits;
+            atts[n++] = WGL_ACCUM_GREEN_BITS_ARB;
+            atts[n++] = pixelFormat.accumulationBufferGreenBits;
+            atts[n++] = WGL_ACCUM_BLUE_BITS_ARB;
+            atts[n++] = pixelFormat.accumulationBufferBlueBits;
+            atts[n++] = WGL_ACCUM_ALPHA_BITS_ARB;
+            atts[n++] = pixelFormat.accumulationBufferAlphaBits;
+
+            if (pixelFormat.multisamplingLevel > 0
+                  && OpenGLHelpers::isExtensionSupported ("WGL_ARB_multisample"))
             {
-                attributes[n++] = WGL_STENCIL_BITS_ARB;
-                attributes[n++] = pixelFormat.stencilBufferBits;
+                atts[n++] = WGL_SAMPLE_BUFFERS_ARB;
+                atts[n++] = 1;
+                atts[n++] = WGL_SAMPLES_ARB;
+                atts[n++] = pixelFormat.multisamplingLevel;
             }
 
-            attributes[n++] = WGL_ACCUM_RED_BITS_ARB;
-            attributes[n++] = pixelFormat.accumulationBufferRedBits;
-            attributes[n++] = WGL_ACCUM_GREEN_BITS_ARB;
-            attributes[n++] = pixelFormat.accumulationBufferGreenBits;
-            attributes[n++] = WGL_ACCUM_BLUE_BITS_ARB;
-            attributes[n++] = pixelFormat.accumulationBufferBlueBits;
-            attributes[n++] = WGL_ACCUM_ALPHA_BITS_ARB;
-            attributes[n++] = pixelFormat.accumulationBufferAlphaBits;
-
-            if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_multisample")
-                 && pixelFormat.fullSceneAntiAliasingNumSamples > 0)
-            {
-                attributes[n++] = WGL_SAMPLE_BUFFERS_ARB;
-                attributes[n++] = 1;
-                attributes[n++] = WGL_SAMPLES_ARB;
-                attributes[n++] = pixelFormat.fullSceneAntiAliasingNumSamples;
-            }
-
-            attributes[n++] = 0;
+            atts[n++] = 0;
+            jassert (n <= numElementsInArray (atts));
 
             UINT formatsCount;
-            const BOOL ok = wglChoosePixelFormatARB (dc, attributes, 0, 1, &format, &formatsCount);
-            (void) ok;
-            jassert (ok);
+            wglChoosePixelFormatARB (dc, atts, nullptr, 1, &format, &formatsCount);
         }
-        else
-        {
+
+        if (format == 0)
             format = ChoosePixelFormat (dc, &pfd);
-        }
 
         if (format != 0)
         {
@@ -277,62 +252,13 @@ public:
     bool setSwapInterval (int numFramesPerSwap)
     {
         makeActive();
-
-        PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
-
-        return OpenGLHelpers::isExtensionSupported ("WGL_EXT_swap_control")
-                && WGL_EXT_FUNCTION_INIT (PFNWGLSWAPINTERVALEXTPROC, wglSwapIntervalEXT)
-                && wglSwapIntervalEXT (numFramesPerSwap) != FALSE;
+        return wglSwapIntervalEXT != nullptr && wglSwapIntervalEXT (numFramesPerSwap) != FALSE;
     }
 
     int getSwapInterval() const
     {
         makeActive();
-
-        PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT = 0;
-
-        if (OpenGLHelpers::isExtensionSupported ("WGL_EXT_swap_control")
-             && WGL_EXT_FUNCTION_INIT (PFNWGLGETSWAPINTERVALEXTPROC, wglGetSwapIntervalEXT))
-            return wglGetSwapIntervalEXT();
-
-        return 0;
-    }
-
-    void findAlternativeOpenGLPixelFormats (OwnedArray <OpenGLPixelFormat>& results)
-    {
-        jassert (isActive());
-
-        PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB = 0;
-        int numTypes = 0;
-
-        if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_pixel_format")
-             && WGL_EXT_FUNCTION_INIT (PFNWGLGETPIXELFORMATATTRIBIVARBPROC, wglGetPixelFormatAttribivARB))
-        {
-            int attributes = WGL_NUMBER_PIXEL_FORMATS_ARB;
-
-            if (! wglGetPixelFormatAttribivARB (dc, 1, 0, 1, &attributes, &numTypes))
-                jassertfalse;
-        }
-        else
-        {
-            numTypes = DescribePixelFormat (dc, 0, 0, 0);
-        }
-
-        OpenGLPixelFormat pf;
-
-        for (int i = 0; i < numTypes; ++i)
-        {
-            if (fillInPixelFormatDetails (i + 1, pf))
-            {
-                bool alreadyListed = false;
-                for (int j = results.size(); --j >= 0;)
-                    if (pf == *results.getUnchecked(j))
-                        alreadyListed = true;
-
-                if (! alreadyListed)
-                    results.add (new OpenGLPixelFormat (pf));
-            }
-        }
+        return wglGetSwapIntervalEXT != nullptr ? wglGetSwapIntervalEXT() : 0;
     }
 
     void* getNativeWindowHandle() const
@@ -357,91 +283,27 @@ private:
         dc = GetDC ((HWND) nativeWindow->getNativeHandle());
     }
 
-    bool fillInPixelFormatDetails (const int pixelFormatIndex, OpenGLPixelFormat& result) const noexcept
+    static void initialisePixelFormatDescriptor (PIXELFORMATDESCRIPTOR& pfd, const OpenGLPixelFormat& pixelFormat)
     {
-        PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB = 0;
-
-        if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_pixel_format")
-             && WGL_EXT_FUNCTION_INIT (PFNWGLGETPIXELFORMATATTRIBIVARBPROC, wglGetPixelFormatAttribivARB))
-        {
-            int attributes[32];
-            UINT numAttributes = 0;
-
-            attributes[numAttributes++] = WGL_DRAW_TO_WINDOW_ARB;
-            attributes[numAttributes++] = WGL_SUPPORT_OPENGL_ARB;
-            attributes[numAttributes++] = WGL_ACCELERATION_ARB;
-            attributes[numAttributes++] = WGL_DOUBLE_BUFFER_ARB;
-            attributes[numAttributes++] = WGL_PIXEL_TYPE_ARB;
-            attributes[numAttributes++] = WGL_RED_BITS_ARB;
-            attributes[numAttributes++] = WGL_GREEN_BITS_ARB;
-            attributes[numAttributes++] = WGL_BLUE_BITS_ARB;
-            attributes[numAttributes++] = WGL_ALPHA_BITS_ARB;
-            attributes[numAttributes++] = WGL_DEPTH_BITS_ARB;
-            attributes[numAttributes++] = WGL_STENCIL_BITS_ARB;
-            attributes[numAttributes++] = WGL_ACCUM_RED_BITS_ARB;
-            attributes[numAttributes++] = WGL_ACCUM_GREEN_BITS_ARB;
-            attributes[numAttributes++] = WGL_ACCUM_BLUE_BITS_ARB;
-            attributes[numAttributes++] = WGL_ACCUM_ALPHA_BITS_ARB;
-
-            if (OpenGLHelpers::isExtensionSupported ("WGL_ARB_multisample"))
-                attributes[numAttributes++] = WGL_SAMPLES_ARB;
-
-            int values[32] = { 0 };
-
-            if (wglGetPixelFormatAttribivARB (dc, pixelFormatIndex, 0, numAttributes, attributes, values))
-            {
-                int n = 0;
-                bool isValidFormat = (values[n++] == GL_TRUE);      // WGL_DRAW_TO_WINDOW_ARB
-                isValidFormat = (values[n++] == GL_TRUE) && isValidFormat;   // WGL_SUPPORT_OPENGL_ARB
-                isValidFormat = (values[n++] == WGL_FULL_ACCELERATION_ARB) && isValidFormat; // WGL_ACCELERATION_ARB
-                isValidFormat = (values[n++] == GL_TRUE) && isValidFormat;   // WGL_DOUBLE_BUFFER_ARB:
-                isValidFormat = (values[n++] == WGL_TYPE_RGBA_ARB) && isValidFormat; // WGL_PIXEL_TYPE_ARB
-                result.redBits = values[n++];           // WGL_RED_BITS_ARB
-                result.greenBits = values[n++];         // WGL_GREEN_BITS_ARB
-                result.blueBits = values[n++];          // WGL_BLUE_BITS_ARB
-                result.alphaBits = values[n++];         // WGL_ALPHA_BITS_ARB
-                result.depthBufferBits = values[n++];   // WGL_DEPTH_BITS_ARB
-                result.stencilBufferBits = values[n++]; // WGL_STENCIL_BITS_ARB
-                result.accumulationBufferRedBits = values[n++];      // WGL_ACCUM_RED_BITS_ARB
-                result.accumulationBufferGreenBits = values[n++];    // WGL_ACCUM_GREEN_BITS_ARB
-                result.accumulationBufferBlueBits = values[n++];     // WGL_ACCUM_BLUE_BITS_ARB
-                result.accumulationBufferAlphaBits = values[n++];    // WGL_ACCUM_ALPHA_BITS_ARB
-                result.fullSceneAntiAliasingNumSamples = (uint8) values[n++];       // WGL_SAMPLES_ARB
-
-                return isValidFormat;
-            }
-            else
-            {
-                jassertfalse;
-            }
-        }
-        else
-        {
-            PIXELFORMATDESCRIPTOR pfd;
-
-            if (DescribePixelFormat (dc, pixelFormatIndex, sizeof (pfd), &pfd))
-            {
-                result.redBits = pfd.cRedBits;
-                result.greenBits = pfd.cGreenBits;
-                result.blueBits = pfd.cBlueBits;
-                result.alphaBits = pfd.cAlphaBits;
-                result.depthBufferBits = pfd.cDepthBits;
-                result.stencilBufferBits = pfd.cStencilBits;
-                result.accumulationBufferRedBits = pfd.cAccumRedBits;
-                result.accumulationBufferGreenBits = pfd.cAccumGreenBits;
-                result.accumulationBufferBlueBits = pfd.cAccumBlueBits;
-                result.accumulationBufferAlphaBits = pfd.cAccumAlphaBits;
-                result.fullSceneAntiAliasingNumSamples = 0;
-
-                return true;
-            }
-            else
-            {
-                jassertfalse;
-            }
-        }
-
-        return false;
+        zerostruct (pfd);
+        pfd.nSize           = sizeof (pfd);
+        pfd.nVersion        = 1;
+        pfd.dwFlags         = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER;
+        pfd.iPixelType      = PFD_TYPE_RGBA;
+        pfd.iLayerType      = PFD_MAIN_PLANE;
+        pfd.cColorBits      = (BYTE) (pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits);
+        pfd.cRedBits        = (BYTE) pixelFormat.redBits;
+        pfd.cGreenBits      = (BYTE) pixelFormat.greenBits;
+        pfd.cBlueBits       = (BYTE) pixelFormat.blueBits;
+        pfd.cAlphaBits      = (BYTE) pixelFormat.alphaBits;
+        pfd.cDepthBits      = (BYTE) pixelFormat.depthBufferBits;
+        pfd.cStencilBits    = (BYTE) pixelFormat.stencilBufferBits;
+        pfd.cAccumBits      = (BYTE) (pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
+                                        + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits);
+        pfd.cAccumRedBits   = (BYTE) pixelFormat.accumulationBufferRedBits;
+        pfd.cAccumGreenBits = (BYTE) pixelFormat.accumulationBufferGreenBits;
+        pfd.cAccumBlueBits  = (BYTE) pixelFormat.accumulationBufferBlueBits;
+        pfd.cAccumAlphaBits = (BYTE) pixelFormat.accumulationBufferAlphaBits;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);

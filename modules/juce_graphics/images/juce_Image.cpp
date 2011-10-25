@@ -56,7 +56,7 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS (Image (this));
+        return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)

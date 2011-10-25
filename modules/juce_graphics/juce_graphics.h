@@ -52,14 +52,6 @@
  #define USE_COREGRAPHICS_RENDERING 1
 #endif
 
-// This macro will let you replace all uses of the LowLevelGraphicsSoftwareRenderer with
-// a custom class if you want to. As well as setting this macro in your app settings header,
-// you'll also need to actually provide the class definition in that header too, so that it's
-// available for the internal library code.
-#ifndef JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS
- #define JUCE_DEFAULT_SOFTWARE_RENDERER_CLASS LowLevelGraphicsSoftwareRenderer
-#endif
-
 //=============================================================================
 BEGIN_JUCE_NAMESPACE
 

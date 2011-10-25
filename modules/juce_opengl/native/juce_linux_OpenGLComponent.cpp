@@ -31,11 +31,10 @@ class WindowedGLContext   : public OpenGLContext
 {
 public:
     WindowedGLContext (Component* const component,
-                       const OpenGLPixelFormat& pixelFormat_,
+                       const OpenGLPixelFormat& pixelFormat,
                        GLXContext sharedContext)
         : renderContext (0),
           embeddedWindow (0),
-          pixelFormat (pixelFormat_),
           swapInterval (0)
     {
         jassert (component != nullptr);
@@ -48,13 +47,14 @@ public:
 
         GLint attribs[] =
         {
-            GLX_RGBA, GLX_DOUBLEBUFFER,
-            GLX_RED_SIZE,   pixelFormat.redBits,
-            GLX_GREEN_SIZE, pixelFormat.greenBits,
-            GLX_BLUE_SIZE,  pixelFormat.blueBits,
-            GLX_ALPHA_SIZE, pixelFormat.alphaBits,
-            GLX_DEPTH_SIZE,   pixelFormat.depthBufferBits,
-            GLX_STENCIL_SIZE, pixelFormat.stencilBufferBits,
+            GLX_RGBA,
+            GLX_DOUBLEBUFFER,
+            GLX_RED_SIZE,         pixelFormat.redBits,
+            GLX_GREEN_SIZE,       pixelFormat.greenBits,
+            GLX_BLUE_SIZE,        pixelFormat.blueBits,
+            GLX_ALPHA_SIZE,       pixelFormat.alphaBits,
+            GLX_DEPTH_SIZE,       pixelFormat.depthBufferBits,
+            GLX_STENCIL_SIZE,     pixelFormat.stencilBufferBits,
             GLX_ACCUM_RED_SIZE,   pixelFormat.accumulationBufferRedBits,
             GLX_ACCUM_GREEN_SIZE, pixelFormat.accumulationBufferGreenBits,
             GLX_ACCUM_BLUE_SIZE,  pixelFormat.accumulationBufferBlueBits,
@@ -136,11 +136,6 @@ public:
         return glXGetCurrentContext() == renderContext;
     }
 
-    OpenGLPixelFormat getPixelFormat() const
-    {
-        return pixelFormat;
-    }
-
     void* getRawContext() const noexcept
     {
         return renderContext;
@@ -157,14 +152,18 @@ public:
         glXSwapBuffers (display, embeddedWindow);
     }
 
-    bool setSwapInterval (const int numFramesPerSwap)
+    bool setSwapInterval (const int newSwapInterval)
     {
-        static PFNGLXSWAPINTERVALSGIPROC GLXSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC) glXGetProcAddress ((const GLubyte*) "glXSwapIntervalSGI");
+        if (newSwapInterval == swapInterval)
+            return true;
 
-        if (GLXSwapIntervalSGI != 0)
+        PFNGLXSWAPINTERVALSGIPROC GLXSwapIntervalSGI
+            = (PFNGLXSWAPINTERVALSGIPROC) OpenGLHelpers::getExtensionFunction ("glXSwapIntervalSGI");
+
+        if (GLXSwapIntervalSGI != nullptr)
         {
-            swapInterval = numFramesPerSwap;
-            GLXSwapIntervalSGI (numFramesPerSwap);
+            swapInterval = newSwapInterval;
+            GLXSwapIntervalSGI (newSwapInterval);
             return true;
         }
 
@@ -173,12 +172,10 @@ public:
 
     int getSwapInterval() const    { return swapInterval; }
 
-    //==============================================================================
     GLXContext renderContext;
     Window embeddedWindow;
 
 private:
-    OpenGLPixelFormat pixelFormat;
     int swapInterval;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
