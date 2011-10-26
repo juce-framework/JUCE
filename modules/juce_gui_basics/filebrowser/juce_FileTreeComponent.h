@@ -76,6 +76,9 @@ public:
         (and if the file isn't in the list, all other items will be deselected). */
     void setSelectedFile (const File&);
 
+    /** Updates the files in the list. */
+    void refresh();
+
     /** Setting a name for this allows tree items to be dragged.
 
         The string that you pass in here will be returned by the getDragSourceDescription()

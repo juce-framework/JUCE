@@ -209,18 +209,25 @@ private:
 FileTreeComponent::FileTreeComponent (DirectoryContentsList& listToShow)
     : DirectoryContentsDisplayComponent (listToShow)
 {
-    FileListTreeItem* const root
-        = new FileListTreeItem (*this, 0, 0, listToShow.getDirectory(),
-                                listToShow.getTimeSliceThread());
-
-    root->setSubContentsList (&listToShow, false);
     setRootItemVisible (false);
-    setRootItem (root);
+    refresh();
 }
 
 FileTreeComponent::~FileTreeComponent()
 {
     deleteRootItem();
+}
+
+void FileTreeComponent::refresh()
+{
+    deleteRootItem();
+
+    FileListTreeItem* const root
+        = new FileListTreeItem (*this, nullptr, 0, fileList.getDirectory(),
+                                fileList.getTimeSliceThread());
+
+    root->setSubContentsList (&fileList, false);
+    setRootItem (root);
 }
 
 //==============================================================================
