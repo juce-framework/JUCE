@@ -213,6 +213,51 @@ void OpenGLHelpers::drawQuad3D (float x1, float y1, float z1,
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
 
+void OpenGLHelpers::drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords, const int numVertices) noexcept
+{
+    glEnable (GL_TEXTURE_2D);
+    glDisableClientState (GL_COLOR_ARRAY);
+    glDisableClientState (GL_NORMAL_ARRAY);
+    glEnableClientState (GL_VERTEX_ARRAY);
+    glVertexPointer (2, GL_FLOAT, 0, vertices);
+    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
+    glDrawArrays (GL_TRIANGLE_STRIP, 0, numVertices);
+}
+
+void OpenGLHelpers::drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords,
+                                       const int numVertices, const GLuint textureID) noexcept
+{
+    jassert (textureID != 0);
+    glBindTexture (GL_TEXTURE_2D, textureID);
+    drawTriangleStrip (vertices, textureCoords, numVertices);
+    glBindTexture (GL_TEXTURE_2D, 0);
+}
+
+void OpenGLHelpers::drawTextureQuad (GLuint textureID, int x, int y, int w, int h)
+{
+    const GLfloat l = (GLfloat) x;
+    const GLfloat t = (GLfloat) y;
+    const GLfloat r = (GLfloat) (x + w);
+    const GLfloat b = (GLfloat) (y + h);
+
+    const GLfloat vertices[]      = { l, t, r, t, l, b, r, b };
+    const GLfloat textureCoords[] = { 0, 1.0f, 1.0f, 1.0f, 0, 0, 1.0f, 0 };
+
+    drawTriangleStrip (vertices, textureCoords, 4, textureID);
+}
+
+void OpenGLHelpers::fillRectWithTexture (const Rectangle<int>& rect, GLuint textureID, const float alpha)
+{
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glColor4f (alpha, alpha, alpha, alpha);
+
+    drawTextureQuad (textureID, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+}
+
 //==============================================================================
 void OpenGLHelpers::fillRectWithColour (const Rectangle<int>& rect, const Colour& colour)
 {
@@ -238,8 +283,8 @@ void OpenGLHelpers::fillRect (const Rectangle<int>& rect)
 //==============================================================================
 struct OpenGLEdgeTableRenderer
 {
-    OpenGLEdgeTableRenderer (float r_, float g_, float b_) noexcept
-        : r (r_), g (g_), b (b_), lastAlpha (-1)
+    OpenGLEdgeTableRenderer() noexcept
+        : lastAlpha (-1)
     {
     }
 
@@ -280,7 +325,6 @@ struct OpenGLEdgeTableRenderer
 
 private:
     GLfloat vertices[8];
-    const float r, g, b;
     int lastAlpha;
 
     void drawHorizontal (int x, const int w, const int alphaLevel) noexcept
@@ -291,7 +335,8 @@ private:
         if (lastAlpha != alphaLevel)
         {
             lastAlpha = alphaLevel;
-            glColor4f (r, g, b, alphaLevel / 255.0f);
+            const float a = alphaLevel / 255.0f;
+            glColor4f (a, a, a, a);
         }
 
         glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
@@ -300,10 +345,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE (OpenGLEdgeTableRenderer);
 };
 
-void OpenGLHelpers::fillEdgeTable (const EdgeTable& edgeTable,
-                                   float red, float green, float blue)
+void OpenGLHelpers::fillEdgeTable (const EdgeTable& edgeTable)
 {
-    OpenGLEdgeTableRenderer etr (red, green, blue);
+    OpenGLEdgeTableRenderer etr;
     etr.draw (edgeTable);
 }
 
@@ -597,7 +641,8 @@ TriangulatedPath::~TriangulatedPath() {}
 
 void TriangulatedPath::draw (const int oversamplingLevel) const
 {
-    glColor4f (1.0f, 1.0f, 1.0f, 1.0f / (oversamplingLevel * oversamplingLevel));
+    const float a = 1.0f / (oversamplingLevel * oversamplingLevel);
+    glColor4f (a, a, a, a);
 
     glPushMatrix();
     glTranslatef (-0.5f, -0.5f, 0.0f);

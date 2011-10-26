@@ -103,67 +103,14 @@ namespace
         glColor4f (alpha, alpha, alpha, alpha);
     }
 
-    void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords, const int numVertices) noexcept
-    {
-        glEnable (GL_TEXTURE_2D);
-        glDisableClientState (GL_COLOR_ARRAY);
-        glDisableClientState (GL_NORMAL_ARRAY);
-        glEnableClientState (GL_VERTEX_ARRAY);
-        glVertexPointer (2, GL_FLOAT, 0, vertices);
-        glEnableClientState (GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
-        glDrawArrays (GL_TRIANGLE_STRIP, 0, numVertices);
-    }
-
-    void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords,
-                            const int numVertices, const GLuint textureID) noexcept
-    {
-        jassert (textureID != 0);
-        glBindTexture (GL_TEXTURE_2D, textureID);
-        drawTriangleStrip (vertices, textureCoords, numVertices);
-        glBindTexture (GL_TEXTURE_2D, 0);
-    }
-
-    void drawTextureQuad (GLuint textureID, int x, int y, int w, int h)
-    {
-        const GLfloat l = (GLfloat) x;
-        const GLfloat t = (GLfloat) y;
-        const GLfloat r = (GLfloat) (x + w);
-        const GLfloat b = (GLfloat) (y + h);
-
-        const GLfloat vertices[]      = { l, t, r, t, l, b, r, b };
-        const GLfloat textureCoords[] = { 0, 1.0f, 1.0f, 1.0f, 0, 0, 1.0f, 0 };
-
-        drawTriangleStrip (vertices, textureCoords, 4, textureID);
-    }
-
-    void fillRectWithTexture (const Rectangle<int>& rect, GLuint textureID, const float alpha)
-    {
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glColor4f (1.0f, 1.0f, 1.0f, alpha);
-
-        drawTextureQuad (textureID, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
-    }
-
-    void clipFrameBuffers (const OpenGLTarget& dest, OpenGLFrameBuffer& source,
-                           const Point<int> sourceOrigin, const bool shouldMaskRGB)
+    void clipFrameBuffers (const OpenGLTarget& dest, OpenGLFrameBuffer& source, const Point<int> sourceOrigin)
     {
         dest.makeActiveFor2D();
         glEnable (GL_BLEND);
         glBlendFunc (GL_ZERO, GL_SRC_ALPHA);
         setColour (1.0f);
-
-        if (shouldMaskRGB)
-            glColorMask (GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
-
-        drawTextureQuad (source.getTextureID(), sourceOrigin.getX(), sourceOrigin.getY(),
-                         source.getWidth(), source.getHeight());
-
-        if (shouldMaskRGB)
-            glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        OpenGLHelpers::drawTextureQuad (source.getTextureID(), sourceOrigin.getX(), sourceOrigin.getY(),
+                                        source.getWidth(), source.getHeight());
     }
 
     void renderPath (const Path& path, const AffineTransform& transform, int oversamplingLevel)
@@ -177,10 +124,10 @@ namespace
         TriangulatedPath (path, transform).draw (oversamplingLevel);
     }
 
-    void setNormalBlendingMode() noexcept
+    void setPremultipliedBlendingMode() noexcept
     {
         glEnable (GL_BLEND);
-        glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     void setBlendMode (const bool replaceExistingContents) noexcept
@@ -188,7 +135,7 @@ namespace
         if (replaceExistingContents)
             glDisable (GL_BLEND);
         else
-            setNormalBlendingMode();
+            setPremultipliedBlendingMode();
     }
 
     void fillRectWithTiledTexture (const OpenGLTarget& target, int textureWidth, int textureHeight,
@@ -295,7 +242,8 @@ namespace
         textureTransform.transformPoints (textureCoords[0], textureCoords[1], textureCoords[2], textureCoords[3]);
         textureTransform.transformPoints (textureCoords[4], textureCoords[5], textureCoords[6], textureCoords[7]);
 
-        drawTriangleStrip (vertices, textureCoords, 4);
+        setColour (1.0f);
+        OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4);
     }
 
     void fillWithRadialGradient (const OpenGLTarget& target, const Rectangle<int>& rect,
@@ -442,7 +390,6 @@ public:
     virtual Ptr clipToEdgeTable (const EdgeTable&) = 0;
     virtual Ptr clipToImageAlpha (const OpenGLTextureFromImage&, const AffineTransform&) = 0;
     virtual Ptr clipToMask (ClipRegion_Mask*) = 0;
-    virtual void translate (const Point<int>& delta) = 0;
     virtual const Rectangle<int>& getClipBounds() const = 0;
     virtual void fillAll (const OpenGLTarget&, const FillType& fill, bool replaceContents) = 0;
     virtual void fillRect (const OpenGLTarget&, const Rectangle<int>& area, const FillType& fill, bool replaceContents) = 0;
@@ -489,7 +436,7 @@ public:
           maskOrigin (clip.getPosition())
     {
         initialiseClear();
-        OpenGLHelpers::fillEdgeTable (e, 0, 0, 0);
+        OpenGLHelpers::fillEdgeTable (e);
     }
 
     ClipRegion_Mask (const Rectangle<int>& bounds, const Path& p, const AffineTransform& transform, int oversamplingLevel)
@@ -510,12 +457,6 @@ public:
     Ptr clone() const                               { return new ClipRegion_Mask (*this); }
     const Rectangle<int>& getClipBounds() const     { return clip; }
     Ptr applyClipTo (const Ptr& target)             { return target->clipToMask (this); }
-
-    void translate (const Point<int>& delta)
-    {
-        maskOrigin += delta;
-        clip += delta;
-    }
 
     Ptr clipToRectangle (const Rectangle<int>& r)
     {
@@ -579,7 +520,7 @@ public:
         if (clip.isEmpty())
             return nullptr;
 
-        clipFrameBuffers (OpenGLTarget (mask, maskOrigin), m->mask, m->maskOrigin, true);
+        clipFrameBuffers (OpenGLTarget (mask, maskOrigin), m->mask, m->maskOrigin);
         return this;
     }
 
@@ -645,7 +586,7 @@ public:
             OpenGLTarget bufferTarget (buffer, bufferArea.getPosition());
             bufferTarget.makeActiveFor2D();
             glDisable (GL_BLEND);
-            fillRectWithTexture (targetArea, source.textureID, alpha);
+            OpenGLHelpers::fillRectWithTexture (targetArea, source.textureID, alpha);
 
             clipAndDraw (target, bufferTarget);
         }
@@ -703,7 +644,7 @@ private:
             const GLfloat b = (GLfloat) (y + h);
 
             const GLfloat vertices[] = { l, t, r, t, l, b, r, b };
-            glColor4f (1.0f, 1.0f, 1.0f, alpha / 255.0f);
+            setColour (alpha / 255.0f);
             glVertexPointer (2, GL_FLOAT, 0, vertices);
             glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
         }
@@ -711,7 +652,7 @@ private:
 
     void clipAndDraw (const OpenGLTarget& target, const OpenGLTarget& buffer)
     {
-        clipFrameBuffers (buffer, mask, maskOrigin, false);
+        clipFrameBuffers (buffer, mask, maskOrigin);
 
         target.makeActiveFor2D();
         glEnable (GL_BLEND);
@@ -723,8 +664,8 @@ private:
 
     void drawFrameBuffer (const OpenGLFrameBuffer& buffer, const Point<int>& topLeft)
     {
-        drawTextureQuad (buffer.getTextureID(), topLeft.getX(), topLeft.getY(),
-                         buffer.getWidth(), buffer.getHeight());
+        OpenGLHelpers::drawTextureQuad (buffer.getTextureID(), topLeft.getX(), topLeft.getY(),
+                                        buffer.getWidth(), buffer.getHeight());
     }
 
     void fillMaskWithSourceImage (const OpenGLTextureFromImage& image, const AffineTransform& transform) const
@@ -749,7 +690,12 @@ private:
         inv.transformPoints (textureCoords[0], textureCoords[1], textureCoords[2], textureCoords[3]);
         inv.transformPoints (textureCoords[4], textureCoords[5], textureCoords[6], textureCoords[7]);
 
-        drawTriangleStrip (vertices, textureCoords, 4);
+        textureCoords[1] = 1.0f - textureCoords[1];
+        textureCoords[3] = 1.0f - textureCoords[3];
+        textureCoords[5] = 1.0f - textureCoords[5];
+        textureCoords[7] = 1.0f - textureCoords[7];
+
+        OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4);
     }
 
     ClipRegion_Mask& operator= (const ClipRegion_Mask&);
@@ -767,7 +713,6 @@ public:
     Ptr clone() const                               { return new ClipRegion_Rectangle (clip); }
     const Rectangle<int>& getClipBounds() const     { return clip; }
     Ptr applyClipTo (const Ptr& target)             { return target->clipToRectangle (clip); }
-    void translate (const Point<int>& delta)        { clip += delta; }
 
     Ptr clipToRectangle (const Rectangle<int>& r)
     {
@@ -814,8 +759,8 @@ public:
     {
         target.makeActiveFor2D();
         target.scissor (clip);
-        setNormalBlendingMode();
-        fillRectWithTexture (targetArea, source.textureID, alpha);
+        setPremultipliedBlendingMode();
+        OpenGLHelpers::fillRectWithTexture (targetArea, source.textureID, alpha);
         glDisable (GL_SCISSOR_TEST);
     }
 
@@ -977,12 +922,11 @@ public:
 
             OpenGLFrameBufferImage* fbi = new OpenGLFrameBufferImage (clipBounds.getWidth(), clipBounds.getHeight());
             fbi->frameBuffer.clear (Colours::transparentBlack);
+
             s->transparencyLayer = Image (fbi);
-            s->target = OpenGLTarget (fbi->frameBuffer, Point<int>());
+            s->target = OpenGLTarget (fbi->frameBuffer, clipBounds.getPosition());
             s->transparencyLayerAlpha = opacity;
-            s->transform.moveOriginInDeviceSpace (-clipBounds.getX(), -clipBounds.getY());
             s->cloneClipIfMultiplyReferenced();
-            s->clip->translate (-clipBounds.getPosition());
         }
 
         return s;
@@ -1048,15 +992,32 @@ public:
     {
         if (clip != nullptr)
         {
-            const float fontHeight = font.getHeight();
+            if (transform.isOnlyTranslated && t.isOnlyTranslation())
+            {
+                RenderingHelpers::GlyphCache <CachedGlyphEdgeTable, SavedState>::getInstance()
+                    .drawGlyph (*this, font, glyphNumber,
+                                transform.xOffset + t.getTranslationX(),
+                                transform.yOffset + t.getTranslationY());
+            }
+            else
+            {
+                const float fontHeight = font.getHeight();
 
-            const ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph
-                    (glyphNumber, transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                              .followedBy (t))));
+                const ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph
+                        (glyphNumber, transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
+                                                                                  .followedBy (t))));
 
-            if (et != nullptr)
-                fillShape (new ClipRegion_Mask (*et), false);
+                if (et != nullptr)
+                    fillShape (new ClipRegion_Mask (*et), false);
+            }
         }
+    }
+
+    void fillEdgeTable (const EdgeTable& et, float x, int y)
+    {
+        EdgeTable et2 (et);
+        et2.translate (x, y);
+        fillShape (new ClipRegion_Mask (et2), false);
     }
 
     void drawLine (const Line <float>& line)
@@ -1147,9 +1108,47 @@ private:
         return fillType.transformed (transform.getTransform());
     }
 
+    class CachedGlyphEdgeTable
+    {
+    public:
+        CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
+
+        void draw (OpenGLRenderer::SavedState& state, float x, const float y) const
+        {
+            if (snapToIntegerCoordinate)
+                x = std::floor (x + 0.5f);
+
+            if (edgeTable != nullptr)
+                state.fillEdgeTable (*edgeTable, x, roundToInt (y));
+        }
+
+        void generate (const Font& newFont, const int glyphNumber)
+        {
+            font = newFont;
+            snapToIntegerCoordinate = newFont.getTypeface()->isHinted();
+            glyph = glyphNumber;
+
+            const float fontHeight = font.getHeight();
+            edgeTable = font.getTypeface()->getEdgeTableForGlyph (glyphNumber,
+                                                                  AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
+                                                                                #if JUCE_MAC || JUCE_IOS
+                                                                                  .translated (0.0f, -0.5f)
+                                                                                #endif
+                                                                  );
+        }
+
+        Font font;
+        int glyph, lastAccessCount;
+        bool snapToIntegerCoordinate;
+
+    private:
+        ScopedPointer <EdgeTable> edgeTable;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable);
+    };
+
     SavedState& operator= (const SavedState&);
 };
-
 
 //==============================================================================
 OpenGLRenderer::OpenGLRenderer (OpenGLComponent& target)
@@ -1160,6 +1159,13 @@ OpenGLRenderer::OpenGLRenderer (OpenGLComponent& target)
 
 OpenGLRenderer::OpenGLRenderer (OpenGLFrameBuffer& target)
     : stack (new SavedState (OpenGLTarget (target, Point<int>())))
+{
+    // This object can only be created and used when the current thread has an active OpenGL context.
+    jassert (OpenGLHelpers::isContextActive());
+}
+
+OpenGLRenderer::OpenGLRenderer (unsigned int frameBufferID, int width, int height)
+    : stack (new SavedState (OpenGLTarget (frameBufferID, width, height)))
 {
     // This object can only be created and used when the current thread has an active OpenGL context.
     jassert (OpenGLHelpers::isContextActive());

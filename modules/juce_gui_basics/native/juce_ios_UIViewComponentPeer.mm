@@ -51,8 +51,6 @@ END_JUCE_NAMESPACE
 - (BOOL) resignFirstResponder;
 - (BOOL) canBecomeFirstResponder;
 
-- (void) asyncRepaint: (id) rect;
-
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text;
 @end
 
@@ -341,12 +339,6 @@ juce::Point<int> juce_lastMousePos;
 - (BOOL) canBecomeFirstResponder
 {
     return owner != nullptr && owner->canBecomeKeyWindow();
-}
-
-- (void) asyncRepaint: (id) rect
-{
-    CGRect* r = (CGRect*) [((NSData*) rect) bytes];
-    [self setNeedsDisplayInRect: *r];
 }
 
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text

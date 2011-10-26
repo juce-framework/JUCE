@@ -35,6 +35,7 @@ class JUCE_API  OpenGLRenderer   : public LowLevelGraphicsContext
 public:
     explicit OpenGLRenderer (OpenGLComponent& target);
     explicit OpenGLRenderer (OpenGLFrameBuffer& target);
+    OpenGLRenderer (unsigned int frameBufferID, int width, int height);
     ~OpenGLRenderer();
 
     bool isVectorDevice() const;

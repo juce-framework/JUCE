@@ -69,7 +69,7 @@ END_JUCE_NAMESPACE
 {
     const ScopedLock sl (*contextLock);
 
-    if ([self openGLContext] == 0)
+    if ([self openGLContext] == nil)
         return false;
 
     [[self openGLContext] makeCurrentContext];
@@ -108,15 +108,8 @@ END_JUCE_NAMESPACE
     needsUpdate = true;
 }
 
-- (void) rightMouseDown: (NSEvent*) ev
-{
-    [[self superview] rightMouseDown: ev];
-}
-
-- (void) rightMouseUp: (NSEvent*) ev
-{
-    [[self superview] rightMouseUp: ev];
-}
+- (void) rightMouseDown: (NSEvent*) ev  { [[self superview] rightMouseDown: ev]; }
+- (void) rightMouseUp:   (NSEvent*) ev  { [[self superview] rightMouseUp:   ev]; }
 
 @end
 BEGIN_JUCE_NAMESPACE
@@ -275,5 +268,5 @@ void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>&)
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
 {
-    return [NSOpenGLContext currentContext] != nil;
+    return CGLGetCurrentContext() != 0;
 }

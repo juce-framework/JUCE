@@ -94,13 +94,14 @@ void OpenGLTexture::load (const Image& image)
         const int srcLineStride  = (srcData.pixelStride * imageW + 3) & ~3;
         dataCopy.malloc (textureW * textureH);
         data = dataCopy;
+        const int yOffset = textureH - imageH;
 
         if (srcData.pixelFormat == Image::RGB)
         {
             for (int y = 0; y < imageH; ++y)
             {
                 const PixelRGB* const src = (const PixelRGB*) addBytesToPointer (srcData.data, srcLineStride * y);
-                PixelARGB* const dst = (PixelARGB*) (dataCopy + textureW * y);
+                PixelARGB* const dst = (PixelARGB*) (dataCopy + textureW * (y + yOffset));
 
                 for (int x = 0; x < imageW; ++x)
                     dst[x].set (src[x]);
@@ -109,7 +110,7 @@ void OpenGLTexture::load (const Image& image)
         else if (srcData.pixelFormat == Image::ARGB)
         {
             for (int y = 0; y < imageH; ++y)
-                memcpy (dataCopy + textureW * y, addBytesToPointer (srcData.data, srcLineStride * y), srcLineStride);
+                memcpy (dataCopy + textureW * (y + yOffset), addBytesToPointer (srcData.data, srcLineStride * y), srcLineStride);
         }
     }
 
@@ -128,7 +129,7 @@ void OpenGLTexture::load (const PixelARGB* pixels, const int w, const int h)
         dataCopy.malloc (textureW * textureH);
 
         for (int y = 0; y < h; ++y)
-            memcpy (dataCopy + textureW * y,  pixels + w * y, w * 4);
+            memcpy (dataCopy + textureW * (y + textureH - h),  pixels + w * y, w * 4);
 
         pixels = dataCopy;
     }

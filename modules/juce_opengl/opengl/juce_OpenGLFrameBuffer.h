@@ -103,6 +103,9 @@ public:
     */
     static void setCurrentFrameBufferTarget (GLuint frameBufferID);
 
+    /** Returns the ID of the currently-bound framebuffer. */
+    static GLuint getCurrentFrameBufferTarget();
+
     /** Clears the framebuffer with the specified colour. */
     void clear (const Colour& colour);
 

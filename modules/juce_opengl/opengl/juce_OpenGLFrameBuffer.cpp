@@ -126,7 +126,7 @@ public:
           depthOrStencilBuffer (0),
           hasDepthBuffer (false),
           hasStencilBuffer (false),
-          ok (false)
+          ok (true)
     {
         // Framebuffer objects can only be created when the current thread has an active OpenGL
         // context. You'll need to make an OpenGLComponent active before calling this.
@@ -180,8 +180,6 @@ public:
             hasStencilBuffer = wantsStencilBuffer;
         }
 
-        ok = checkStatus();
-
         glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
     }
 
@@ -197,25 +195,14 @@ public:
             glDeleteFramebuffersEXT (1, &frameBufferHandle);
     }
 
-    bool bind()    { return bind (frameBufferHandle); }
-    bool unbind()  { return bind (0); }
+    void bind()    { glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferHandle); }
+    void unbind()  { glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0); }
 
     const int width, height;
     GLuint textureID, frameBufferHandle, depthOrStencilBuffer;
     bool hasDepthBuffer, hasStencilBuffer, ok;
 
 private:
-    bool bind (GLuint buffer)
-    {
-        if (ok)
-        {
-            glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, buffer);
-            ok = checkStatus();
-        }
-
-        return ok;
-    }
-
     static bool checkStatus() noexcept
     {
         const GLenum status = glCheckFramebufferStatusEXT (GL_FRAMEBUFFER_EXT);
@@ -347,12 +334,23 @@ bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
     // reloadSavedCopy() to put it back into GPU memory before using it..
     jassert (savedState == nullptr);
 
-    return pimpl != nullptr && pimpl->bind();
+    if (pimpl == nullptr)
+        return false;
+
+    pimpl->bind();
+    return true;
 }
 
 void OpenGLFrameBuffer::setCurrentFrameBufferTarget (GLuint frameBufferID)
 {
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferID);
+}
+
+GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
+{
+	GLint fb;
+	glGetIntegerv (GL_FRAMEBUFFER_BINDING_EXT, &fb);
+    return (GLuint) fb;
 }
 
 void OpenGLFrameBuffer::releaseAsRenderingTarget()
@@ -397,16 +395,16 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
     glDisable (GL_DEPTH_TEST);
     glDisable (GL_BLEND);
-    glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 
    #if JUCE_OPENGL_ES
     {
         // GLES has no glDrawPixels function, so we have to create a texture and draw it..
         glEnable (GL_TEXTURE_2D);
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 
-        OpenGLTexture temp;
-        temp.load (data, area.getWidth(), area.getHeight());
-        temp.bind();
+        OpenGLTexture tex;
+        tex.load (data, area.getWidth(), area.getHeight());
+        tex.bind();
 
         const GLint cropRect[4] = { 0, 0, area.getWidth(), area.getHeight() };
         glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
@@ -415,10 +413,12 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
         glBindTexture (GL_TEXTURE_2D, 0);
     }
    #else
-    glRasterPos2i (area.getX(), area.getY());
-    glBindTexture (GL_TEXTURE_2D, 0);
-    glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
-    glDrawPixels (area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, data);
+    {
+        OpenGLTexture tex;
+        tex.load (data, area.getWidth(), area.getHeight());
+
+        OpenGLHelpers::fillRectWithTexture (area.withSize (tex.getWidth(), tex.getHeight()), tex.getTextureID(), 1.0f);
+    }
    #endif
 
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);

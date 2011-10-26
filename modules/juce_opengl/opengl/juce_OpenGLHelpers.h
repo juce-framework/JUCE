@@ -73,14 +73,23 @@ public:
                             float x4, float y4, float z4,
                             const Colour& colour);
 
+    static void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords, const int numVertices) noexcept;
+
+    static void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords,
+                                   const int numVertices, const GLuint textureID) noexcept;
+
+    static void drawTextureQuad (GLuint textureID, int x, int y, int w, int h);
+
+    static void fillRectWithTexture (const Rectangle<int>& rect, GLuint textureID, const float alpha);
+
     static void fillRect (const Rectangle<int>& rect);
 
     /** Fills a rectangle with the specified colour. */
     static void fillRectWithColour (const Rectangle<int>& rect,
                                     const Colour& colour);
+
     /** Renders an edge-table into the current context. */
-    static void fillEdgeTable (const EdgeTable& edgeTable,
-                               float red, float green, float blue);
+    static void fillEdgeTable (const EdgeTable& edgeTable);
 
     /** Checks whether the current context supports the specified extension. */
     static bool isExtensionSupported (const char* extensionName);
