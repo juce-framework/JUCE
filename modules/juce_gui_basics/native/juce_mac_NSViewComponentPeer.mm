@@ -30,6 +30,10 @@ extern AppFocusChangeCallback appFocusChangeCallback;
 typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
 extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 
+#if JUCE_MODULE_AVAILABLE_juce_opengl && ! defined (JUCE_OSX_OPENGL_RENDERER)
+ //#define JUCE_OSX_OPENGL_RENDERER 1
+#endif
+
 //==============================================================================
 END_JUCE_NAMESPACE
 
@@ -99,8 +103,6 @@ END_JUCE_NAMESPACE
 - (BOOL) becomeFirstResponder;
 - (BOOL) resignFirstResponder;
 - (BOOL) acceptsFirstResponder;
-
-- (void) asyncRepaint: (id) rect;
 
 - (NSArray*) getSupportedDragTypes;
 - (BOOL) sendDragCallback: (int) type sender: (id <NSDraggingInfo>) sender;
@@ -210,6 +212,10 @@ public:
     virtual bool isOpaque();
     virtual void drawRect (NSRect r);
 
+   #if JUCE_OSX_OPENGL_RENDERER
+    virtual void drawOpenGL();
+   #endif
+
     virtual bool canBecomeKeyWindow();
     virtual void becomeKeyWindow();
     virtual bool windowShouldClose();
@@ -298,7 +304,7 @@ public:
     //==============================================================================
     NSWindow* window;
     JuceNSView* view;
-    bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics, recursiveToFrontCall;
+    bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics, usingOpenGL, recursiveToFrontCall;
 
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
@@ -530,12 +536,6 @@ END_JUCE_NAMESPACE
 {
    if (owner != nullptr)
        owner->viewMovedToWindow();
-}
-
-- (void) asyncRepaint: (id) rect
-{
-    NSRect* r = (NSRect*) [((NSData*) rect) bytes];
-    [self setNeedsDisplayInRect: *r];
 }
 
 //==============================================================================
@@ -849,6 +849,49 @@ END_JUCE_NAMESPACE
 
 @end
 
+
+//==============================================================================
+#if JUCE_OSX_OPENGL_RENDERER
+
+@interface JuceOpenGLLayer : CAOpenGLLayer
+{
+    NSViewComponentPeer* owner;
+}
+
+- (JuceOpenGLLayer*) initWithPeer: (NSViewComponentPeer*) owner;
+- (void) dealloc;
+
+- (void) drawInCGLContext: (CGLContextObj) glContext
+              pixelFormat: (CGLPixelFormatObj) pixelFormat
+             forLayerTime: (CFTimeInterval) timeInterval
+              displayTime: (const CVTimeStamp*) timeStamp;
+@end
+
+@implementation JuceOpenGLLayer
+
+- (JuceOpenGLLayer*) initWithPeer: (NSViewComponentPeer*) owner_
+{
+    [super init];
+    owner = owner_;
+    return self;
+}
+
+- (void) dealloc
+{
+    [super dealloc];
+}
+
+- (void) drawInCGLContext: (CGLContextObj) glContext
+              pixelFormat: (CGLPixelFormatObj) pixelFormat
+             forLayerTime: (CFTimeInterval) timeInterval
+              displayTime: (const CVTimeStamp*) timeStamp
+{
+    owner->drawOpenGL();
+}
+
+@end
+#endif
+
 //==============================================================================
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
@@ -926,6 +969,7 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
      #else
       usingCoreGraphics (false),
      #endif
+      usingOpenGL (false),
       recursiveToFrontCall (false)
 {
     appFocusChangeCallback = appFocusChanged;
@@ -1051,7 +1095,13 @@ void NSViewComponentPeer::setBounds (int x, int y, int w, int h, bool isNowFullS
 
         if ([view frame].size.width != r.size.width
              || [view frame].size.height != r.size.height)
-            [view setNeedsDisplay: true];
+        {
+           #if JUCE_OSX_OPENGL_RENDERER
+            if (usingOpenGL)
+                [[view layer] setNeedsDisplay: true];
+           #endif
+                [view setNeedsDisplay: true];
+        }
 
         [view setFrame: r];
     }
@@ -1061,6 +1111,11 @@ void NSViewComponentPeer::setBounds (int x, int y, int w, int h, bool isNowFullS
 
         [window setFrame: [window frameRectForContentRect: r]
                  display: true];
+
+       #if JUCE_OSX_OPENGL_RENDERER
+        if (usingOpenGL)
+            [[view layer] setFrame: CGRectMake (0, 0, [view frame].size.width, [view frame].size.height)];
+       #endif
     }
 }
 
@@ -1611,6 +1666,21 @@ static void getClipRects (RectangleList& clip, NSView* view,
                                                                             roundToInt (rects[i].size.height))));
 }
 
+#if JUCE_OSX_OPENGL_RENDERER
+void NSViewComponentPeer::drawOpenGL()
+{
+    if (! component->isOpaque())
+        OpenGLHelpers::clear (Colours::transparentBlack);
+
+    OpenGLRenderer context (OpenGLFrameBuffer::getCurrentFrameBufferTarget(),
+                            component->getWidth(), component->getHeight());
+
+    insideDrawRect = true;
+    handlePaint (context);
+    insideDrawRect = false;
+}
+#endif
+
 void NSViewComponentPeer::drawRect (NSRect r)
 {
     if (r.size.width < 1.0f || r.size.height < 1.0f)
@@ -1672,16 +1742,44 @@ StringArray NSViewComponentPeer::getAvailableRenderingEngines()
     s.add ("CoreGraphics Renderer");
    #endif
 
+   #if JUCE_OSX_OPENGL_RENDERER
+    s.add ("OpenGL Renderer");
+   #endif
+
     return s;
 }
 
 int NSViewComponentPeer::getCurrentRenderingEngine() const
 {
+   #if JUCE_OSX_OPENGL_RENDERER
+    if (usingOpenGL) return 2;
+   #endif
+
     return usingCoreGraphics ? 1 : 0;
 }
 
 void NSViewComponentPeer::setCurrentRenderingEngine (int index)
 {
+   #if JUCE_OSX_OPENGL_RENDERER
+    if (index == 2)
+    {
+        usingCoreGraphics = false;
+        usingOpenGL = true;
+
+        JuceOpenGLLayer* glLayer = [[JuceOpenGLLayer alloc] initWithPeer: this];
+        [view setLayer: glLayer];
+        [view setWantsLayer: YES];
+        [glLayer release];
+    }
+    else
+    {
+        usingOpenGL = false;
+
+        [view setLayer: nil];
+        [view setWantsLayer: NO];
+    }
+   #endif
+
    #if USE_COREGRAPHICS_RENDERING
     if (usingCoreGraphics != (index > 0))
     {
@@ -1802,8 +1900,14 @@ void NSViewComponentPeer::repaint (const Rectangle<int>& area)
     }
     else
     {
-        [view setNeedsDisplayInRect: NSMakeRect ((CGFloat) area.getX(), [view frame].size.height - (CGFloat) area.getBottom(),
-                                                 (CGFloat) area.getWidth(), (CGFloat) area.getHeight())];
+       #if JUCE_OSX_OPENGL_RENDERER
+        if (usingOpenGL)
+            [[view layer] setNeedsDisplayInRect: CGRectMake ((CGFloat) area.getX(), [view frame].size.height - (CGFloat) area.getBottom(),
+                                                             (CGFloat) area.getWidth(), (CGFloat) area.getHeight())];
+        else
+       #endif
+            [view setNeedsDisplayInRect: NSMakeRect ((CGFloat) area.getX(), [view frame].size.height - (CGFloat) area.getBottom(),
+                                                     (CGFloat) area.getWidth(), (CGFloat) area.getHeight())];
     }
 }
 

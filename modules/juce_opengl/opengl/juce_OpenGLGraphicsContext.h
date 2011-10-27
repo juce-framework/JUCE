@@ -75,9 +75,11 @@ public:
 
    #ifndef DOXYGEN
     class SavedState;
+    class ScratchBufferManager;
    #endif
 
 private:
+    ScopedPointer<ScratchBufferManager> scratchBufferManager;
     RenderingHelpers::SavedStateStack<SavedState> stack;
 };
 

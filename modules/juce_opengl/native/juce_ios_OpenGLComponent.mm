@@ -50,7 +50,7 @@ public:
                  const GLESContext* const sharedContext,
                  NSUInteger apiType)
         : component (component_), glLayer (nil), context (nil),
-          useDepthBuffer (pixelFormat_.depthBufferBits > 0),
+          useDepthBuffer (pixelFormat.depthBufferBits > 0),
           frameBufferHandle (0), colorBufferHandle (0),
           depthBufferHandle (0), lastWidth (0), lastHeight (0)
     {

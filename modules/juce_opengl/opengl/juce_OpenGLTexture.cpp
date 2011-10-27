@@ -75,6 +75,27 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels)
                   GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 }
 
+template <class PixelType>
+struct Flipper
+{
+    static void flip (HeapBlock<PixelARGB>& dataCopy, const uint8* srcData, const int lineStride,
+                      const int w, const int h, const int textureW, const int textureH)
+    {
+        dataCopy.malloc (textureW * textureH);
+
+        for (int y = 0; y < h; ++y)
+        {
+            const PixelType* src = (const PixelType*) srcData;
+            PixelARGB* const dst = (PixelARGB*) (dataCopy + textureW * (textureH - 1 - y));
+
+            for (int x = 0; x < w; ++x)
+                dst[x].set (src[x]);
+
+            srcData += lineStride;
+        }
+    }
+};
+
 void OpenGLTexture::load (const Image& image)
 {
     const int imageW = image.getWidth();
@@ -82,59 +103,36 @@ void OpenGLTexture::load (const Image& image)
     const int textureW = nextPowerOfTwo (imageW);
     const int textureH = nextPowerOfTwo (imageH);
 
-    Image::BitmapData srcData (image, Image::BitmapData::readOnly);
-    const PixelARGB* data = (const PixelARGB*) srcData.data;
     HeapBlock<PixelARGB> dataCopy;
+    Image::BitmapData srcData (image, Image::BitmapData::readOnly);
 
-    if (srcData.pixelFormat != Image::ARGB
-         || textureW != imageW
-         || textureH != imageH
-         || srcData.lineStride != imageW * srcData.pixelStride)
+    switch (srcData.pixelFormat)
     {
-        const int srcLineStride  = (srcData.pixelStride * imageW + 3) & ~3;
-        dataCopy.malloc (textureW * textureH);
-        data = dataCopy;
-        const int yOffset = textureH - imageH;
-
-        if (srcData.pixelFormat == Image::RGB)
-        {
-            for (int y = 0; y < imageH; ++y)
-            {
-                const PixelRGB* const src = (const PixelRGB*) addBytesToPointer (srcData.data, srcLineStride * y);
-                PixelARGB* const dst = (PixelARGB*) (dataCopy + textureW * (y + yOffset));
-
-                for (int x = 0; x < imageW; ++x)
-                    dst[x].set (src[x]);
-            }
-        }
-        else if (srcData.pixelFormat == Image::ARGB)
-        {
-            for (int y = 0; y < imageH; ++y)
-                memcpy (dataCopy + textureW * (y + yOffset), addBytesToPointer (srcData.data, srcLineStride * y), srcLineStride);
-        }
+        case Image::ARGB:           Flipper<PixelARGB> ::flip (dataCopy, srcData.data, srcData.lineStride, imageW, imageH, textureW, textureH); break;
+        case Image::RGB:            Flipper<PixelRGB>  ::flip (dataCopy, srcData.data, srcData.lineStride, imageW, imageH, textureW, textureH); break;
+        case Image::SingleChannel:  Flipper<PixelAlpha>::flip (dataCopy, srcData.data, srcData.lineStride, imageW, imageH, textureW, textureH); break;
+        default: break;
     }
 
-    create (textureW, textureH, data);
+    create (textureW, textureH, dataCopy);
 }
 
 void OpenGLTexture::load (const PixelARGB* pixels, const int w, const int h)
 {
     const int textureW = nextPowerOfTwo (w);
-    const int textureH = nextPowerOfTwo (h);
 
-    HeapBlock<PixelARGB> dataCopy;
-
-    if (textureW != w || textureH != h)
+    if (h == 1 && textureW == w)
     {
-        dataCopy.malloc (textureW * textureH);
-
-        for (int y = 0; y < h; ++y)
-            memcpy (dataCopy + textureW * (y + textureH - h),  pixels + w * y, w * 4);
-
-        pixels = dataCopy;
+        create (w, 1, pixels);
     }
+    else
+    {
+        const int textureH = nextPowerOfTwo (h);
 
-    create (textureW, textureH, pixels);
+        HeapBlock<PixelARGB> dataCopy;
+        Flipper<PixelARGB>::flip (dataCopy, (const uint8*) pixels, 4 * w, w, h, textureW, textureH);
+        create (textureW, textureH, dataCopy);
+    }
 }
 
 void OpenGLTexture::release()

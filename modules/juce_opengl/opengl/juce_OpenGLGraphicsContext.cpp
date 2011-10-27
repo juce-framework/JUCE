@@ -25,16 +25,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-namespace
-{
-    void applyFlippedMatrix (int x, int y, int width, int height)
-    {
-        OpenGLHelpers::prepareFor2D (width, height);
-        OpenGLHelpers::applyTransform (AffineTransform::translation ((float) -x, (float) -y)
-                                        .followedBy (AffineTransform::verticalFlip ((float) height)));
-    }
-}
-
 struct OpenGLTarget
 {
     OpenGLTarget (GLuint frameBufferID_, int width_, int height_) noexcept
@@ -67,6 +57,20 @@ struct OpenGLTarget
     {
         r = r.translated (-x, -y);
         OpenGLHelpers::enableScissorTest (r.withY (height - r.getBottom()));
+    }
+
+    static void applyFlippedMatrix (const int x, const int y, const int width, const int height)
+    {
+        glMatrixMode (GL_PROJECTION);
+        glLoadIdentity();
+
+       #if JUCE_OPENGL_ES
+        glOrthof ((GLfloat) x, (GLfloat) (x + width), (GLfloat) (y + height), (GLfloat) y, 0.0f, 1.0f);
+       #else
+        glOrtho (x, x + width, y + height, y, 0, 1);
+       #endif
+
+        glViewport (0, 0, width, height);
     }
 
     OpenGLFrameBuffer* frameBuffer;
@@ -170,6 +174,11 @@ namespace
                                                                       1.0f / textureHeight));
                 t.transformPoints (textureCoords[0], textureCoords[1], textureCoords[2], textureCoords[3]);
                 t.transformPoints (textureCoords[4], textureCoords[5], textureCoords[6], textureCoords[7]);
+
+                textureCoords[1] = 1.0f - textureCoords[1];
+                textureCoords[3] = 1.0f - textureCoords[3];
+                textureCoords[5] = 1.0f - textureCoords[5];
+                textureCoords[7] = 1.0f - textureCoords[7];
             }
 
             glVertexPointer (2, GL_FLOAT, 0, vertices);
@@ -342,9 +351,6 @@ namespace
     void fillRectWithFillType (const OpenGLTarget& target, const Rectangle<int>& rect,
                                const FillType& fill, const bool replaceExistingContents)
     {
-        jassert (! fill.isInvisible());
-        jassert (! fill.isColour());
-
         if (fill.isGradient())
         {
             target.makeActiveFor2D();
@@ -370,13 +376,48 @@ namespace
     }
 }
 
+//==============================================================================
+class OpenGLRenderer::ScratchBufferManager
+{
+public:
+    ScratchBufferManager() {}
+
+    OpenGLFrameBuffer* get (int width, int height)
+    {
+        for (int i = 0; i < buffers.size(); ++i)
+        {
+            OpenGLFrameBuffer* b = buffers.getUnchecked(i);
+
+            if (width <= b->getWidth() && height <= b->getHeight())
+                return buffers.removeAndReturn (i);
+        }
+
+        OpenGLFrameBuffer* b = new OpenGLFrameBuffer();
+        b->initialise (width, height);
+        return b;
+    }
+
+    void release (OpenGLFrameBuffer* buffer)
+    {
+        buffers.add (buffer);
+
+        if (buffers.size() > 10)
+            buffers.remove (0);
+    }
+
+private:
+    OwnedArray<OpenGLFrameBuffer> buffers;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScratchBufferManager);
+};
+
 class ClipRegion_Mask;
 
 //==============================================================================
 class ClipRegionBase  : public SingleThreadedReferenceCountedObject
 {
 public:
-    ClipRegionBase() noexcept {}
+    ClipRegionBase (OpenGLRenderer::ScratchBufferManager& scratchBuffer_) noexcept : scratchBuffer (scratchBuffer_) {}
     virtual ~ClipRegionBase() {}
 
     typedef ReferenceCountedObjectPtr<ClipRegionBase> Ptr;
@@ -394,6 +435,11 @@ public:
     virtual void fillAll (const OpenGLTarget&, const FillType& fill, bool replaceContents) = 0;
     virtual void fillRect (const OpenGLTarget&, const Rectangle<int>& area, const FillType& fill, bool replaceContents) = 0;
     virtual void drawImage (const OpenGLTarget&, const OpenGLTextureFromImage&, float alpha, const Rectangle<int>& targetArea) = 0;
+
+    OpenGLRenderer::ScratchBufferManager& scratchBuffer;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (ClipRegionBase);
 };
 
 //==============================================================================
@@ -401,24 +447,31 @@ class ClipRegion_Mask  : public ClipRegionBase
 {
 public:
     ClipRegion_Mask (const ClipRegion_Mask& other)
-        : clip (other.clip),
-          maskOrigin (other.maskOrigin)
+        : ClipRegionBase (other.scratchBuffer),
+          clip (other.clip),
+          maskOrigin (other.clip.getPosition())
     {
-        const bool ok = mask.initialise (other.mask);
-        (void) ok; jassert (ok);
+        mask = scratchBuffer.get (clip.getWidth(), clip.getHeight());
+
+        OpenGLTarget m (*mask, maskOrigin);
+        m.makeActiveFor2D();
+        glDisable (GL_BLEND);
+        setColour (1.0f);
+        drawFrameBuffer (*(other.mask), other.maskOrigin);
     }
 
-    explicit ClipRegion_Mask (const Rectangle<int>& r)
-        : clip (r),
+    explicit ClipRegion_Mask (const Rectangle<int>& r, OpenGLRenderer::ScratchBufferManager& scratchBuffer_)
+        : ClipRegionBase (scratchBuffer_),
+          clip (r),
           maskOrigin (r.getPosition())
     {
-        const bool ok = mask.initialise (r.getWidth(), r.getHeight());
-        (void) ok; jassert (ok);
-        mask.clear (Colours::white);
+        mask = scratchBuffer_.get (r.getWidth(), r.getHeight());
+        mask->clear (Colours::white);
     }
 
-    explicit ClipRegion_Mask (const Rectangle<float>& r)
-        : clip (r.getSmallestIntegerContainer()),
+    explicit ClipRegion_Mask (const Rectangle<float>& r, OpenGLRenderer::ScratchBufferManager& scratchBuffer_)
+        : ClipRegionBase (scratchBuffer_),
+          clip (r.getSmallestIntegerContainer()),
           maskOrigin (clip.getPosition())
     {
         initialiseClear();
@@ -431,27 +484,36 @@ public:
         fr.iterate (callback);
     }
 
-    explicit ClipRegion_Mask (const EdgeTable& e)
-        : clip (e.getMaximumBounds()),
+    explicit ClipRegion_Mask (const EdgeTable& e, OpenGLRenderer::ScratchBufferManager& scratchBuffer_)
+        : ClipRegionBase (scratchBuffer_),
+          clip (e.getMaximumBounds()),
           maskOrigin (clip.getPosition())
     {
         initialiseClear();
         OpenGLHelpers::fillEdgeTable (e);
     }
 
-    ClipRegion_Mask (const Rectangle<int>& bounds, const Path& p, const AffineTransform& transform, int oversamplingLevel)
-        : clip (bounds), maskOrigin (clip.getPosition())
+    ClipRegion_Mask (OpenGLRenderer::ScratchBufferManager& scratchBuffer_, const Rectangle<int>& bounds,
+                     const Path& p, const AffineTransform& transform, int oversamplingLevel)
+        : ClipRegionBase (scratchBuffer_),
+          clip (bounds), maskOrigin (clip.getPosition())
     {
         initialiseClear();
         renderPath (p, transform, oversamplingLevel);
     }
 
-    static ClipRegion_Mask* createFromPath (Rectangle<int> bounds, const Path& p, const AffineTransform& transform)
+    ~ClipRegion_Mask()
+    {
+        scratchBuffer.release (mask);
+    }
+
+    static ClipRegion_Mask* createFromPath (OpenGLRenderer::ScratchBufferManager& scratchBuffer, Rectangle<int> bounds,
+                                            const Path& p, const AffineTransform& transform)
     {
         bounds = bounds.getIntersection (p.getBoundsTransformed (transform).getSmallestIntegerContainer());
 
         return bounds.isEmpty() ? nullptr
-                                : new ClipRegion_Mask (bounds, p, transform, (int) defaultOversamplingLevel);
+                                : new ClipRegion_Mask (scratchBuffer, bounds, p, transform, (int) defaultOversamplingLevel);
     }
 
     Ptr clone() const                               { return new ClipRegion_Mask (*this); }
@@ -500,14 +562,14 @@ public:
 
     Ptr clipToPath (const Path& p, const AffineTransform& t)
     {
-        ClipRegion_Mask* tempMask = createFromPath (clip, p, t);
+        ClipRegion_Mask* tempMask = createFromPath (scratchBuffer, clip, p, t);
         const Ptr tempMaskPtr (tempMask);
         return tempMask == nullptr ? nullptr : clipToMask (tempMask);
     }
 
     Ptr clipToEdgeTable (const EdgeTable& et)
     {
-        ClipRegion_Mask* const tempMask = new ClipRegion_Mask (et);
+        ClipRegion_Mask* const tempMask = new ClipRegion_Mask (et, scratchBuffer);
         const Ptr tempMaskPtr (tempMask);
         return clipToMask (tempMask);
     }
@@ -520,7 +582,7 @@ public:
         if (clip.isEmpty())
             return nullptr;
 
-        clipFrameBuffers (OpenGLTarget (mask, maskOrigin), m->mask, m->maskOrigin);
+        clipFrameBuffers (OpenGLTarget (*mask, maskOrigin), *(m->mask), m->maskOrigin);
         return this;
     }
 
@@ -529,9 +591,7 @@ public:
         makeMaskActive();
         glEnable (GL_BLEND);
         glBlendFunc (GL_ZERO, GL_SRC_ALPHA);
-        glColorMask (GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
         fillMaskWithSourceImage (image, transform);
-        glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         return this;
     }
 
@@ -555,21 +615,22 @@ public:
         if (fill.isColour())
         {
             target.makeActiveFor2D();
-
             setBlendMode (replaceContents);
-            OpenGLHelpers::setColour (fill.colour);
+            PixelARGB p (fill.colour.getARGB());
+            p.premultiply();
+            OpenGLHelpers::setColour (Colour (p.getARGB()));
             target.scissor (area);
-            drawFrameBuffer (mask, maskOrigin);
+            drawFrameBuffer (*mask, maskOrigin);
             glDisable (GL_SCISSOR_TEST);
         }
         else
         {
-            OpenGLFrameBuffer patternBuffer;
-            bool ok = patternBuffer.initialise (area.getWidth(), area.getHeight());
-            (void) ok; jassert (ok);
+            OpenGLFrameBuffer* patternBuffer = scratchBuffer.get (area.getWidth(), area.getHeight());
 
-            fillRectWithFillType (OpenGLTarget (patternBuffer, area.getPosition()), area, fill, true);
-            clipAndDraw (target, OpenGLTarget (patternBuffer, area.getPosition()));
+            fillRectWithFillType (OpenGLTarget (*patternBuffer, area.getPosition()), area, fill, true);
+            clipAndDraw (target, OpenGLTarget (*patternBuffer, area.getPosition()), area);
+
+            scratchBuffer.release (patternBuffer);
         }
     }
 
@@ -579,16 +640,16 @@ public:
 
         if (! bufferArea.isEmpty())
         {
-            OpenGLFrameBuffer buffer;
-            bool ok = buffer.initialise (bufferArea.getWidth(), bufferArea.getHeight());
-            (void) ok; jassert (ok);
+            OpenGLFrameBuffer* buffer = scratchBuffer.get (bufferArea.getWidth(), bufferArea.getHeight());
 
-            OpenGLTarget bufferTarget (buffer, bufferArea.getPosition());
+            OpenGLTarget bufferTarget (*buffer, bufferArea.getPosition());
             bufferTarget.makeActiveFor2D();
             glDisable (GL_BLEND);
             OpenGLHelpers::fillRectWithTexture (targetArea, source.textureID, alpha);
 
-            clipAndDraw (target, bufferTarget);
+            clipAndDraw (target, bufferTarget, bufferArea);
+
+            scratchBuffer.release (buffer);
         }
     }
 
@@ -603,22 +664,24 @@ public:
         target.makeActiveFor2D();
         setColour (alpha);
         glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        drawFrameBuffer (mask, maskOrigin);
+        target.scissor (clip);
+        drawFrameBuffer (*mask, maskOrigin);
+        glDisable (GL_SCISSOR_TEST);
     }
 
 private:
-    OpenGLFrameBuffer mask;
+    OpenGLFrameBuffer* mask;
     Rectangle<int> clip;
     Point<int> maskOrigin;
 
     void prepareFor2D() const
     {
-        applyFlippedMatrix (maskOrigin.getX(), maskOrigin.getY(), mask.getWidth(), mask.getHeight());
+        OpenGLTarget::applyFlippedMatrix (maskOrigin.getX(), maskOrigin.getY(), mask->getWidth(), mask->getHeight());
     }
 
     void makeMaskActive()
     {
-        const bool b = mask.makeCurrentRenderingTarget();
+        const bool b = mask->makeCurrentRenderingTarget();
         (void) b; jassert (b);
         prepareFor2D();
     }
@@ -626,9 +689,8 @@ private:
     void initialiseClear()
     {
         jassert (! clip.isEmpty());
-        bool ok = mask.initialise (clip.getWidth(), clip.getHeight());
-        mask.makeCurrentAndClear();
-        (void) ok; jassert (ok);
+        mask = scratchBuffer.get (clip.getWidth(), clip.getHeight());
+        mask->makeCurrentAndClear();
         glDisable (GL_TEXTURE_2D);
         glDisable (GL_BLEND);
         prepareFor2D();
@@ -650,16 +712,18 @@ private:
         }
     };
 
-    void clipAndDraw (const OpenGLTarget& target, const OpenGLTarget& buffer)
+    void clipAndDraw (const OpenGLTarget& target, const OpenGLTarget& buffer, const Rectangle<int>& clip)
     {
-        clipFrameBuffers (buffer, mask, maskOrigin);
+        clipFrameBuffers (buffer, *mask, maskOrigin);
 
         target.makeActiveFor2D();
         glEnable (GL_BLEND);
         glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         setColour (1.0f);
+        target.scissor (clip);
 
         drawFrameBuffer (*buffer.frameBuffer, Point<int> (buffer.x, buffer.y));
+        glDisable (GL_SCISSOR_TEST);
     }
 
     void drawFrameBuffer (const OpenGLFrameBuffer& buffer, const Point<int>& topLeft)
@@ -679,8 +743,8 @@ private:
 
         const GLfloat l = (GLfloat) maskOrigin.getX();
         const GLfloat t = (GLfloat) maskOrigin.getY();
-        const GLfloat r = (GLfloat) (maskOrigin.getX() + mask.getWidth());
-        const GLfloat b = (GLfloat) (maskOrigin.getY() + mask.getHeight());
+        const GLfloat r = (GLfloat) (maskOrigin.getX() + mask->getWidth());
+        const GLfloat b = (GLfloat) (maskOrigin.getY() + mask->getHeight());
         const GLfloat vertices[]  = { l, t, r, t, l, b, r, b };
         GLfloat textureCoords[]   = { l, t, r, t, l, b, r, b };
 
@@ -706,11 +770,12 @@ private:
 class ClipRegion_Rectangle  : public ClipRegionBase
 {
 public:
-    explicit ClipRegion_Rectangle (const Rectangle<int>& r) noexcept
-        : clip (r)
+    explicit ClipRegion_Rectangle (const Rectangle<int>& r, OpenGLRenderer::ScratchBufferManager& scratchBuffer_) noexcept
+        : ClipRegionBase (scratchBuffer_),
+          clip (r)
     {}
 
-    Ptr clone() const                               { return new ClipRegion_Rectangle (clip); }
+    Ptr clone() const                               { return new ClipRegion_Rectangle (clip, scratchBuffer); }
     const Rectangle<int>& getClipBounds() const     { return clip; }
     Ptr applyClipTo (const Ptr& target)             { return target->clipToRectangle (clip); }
 
@@ -784,7 +849,7 @@ private:
 
     Ptr toMask() const
     {
-        return new ClipRegion_Mask (clip);
+        return new ClipRegion_Mask (clip, scratchBuffer);
     }
 
     ClipRegion_Rectangle& operator= (const ClipRegion_Rectangle&);
@@ -795,8 +860,8 @@ private:
 class OpenGLRenderer::SavedState
 {
 public:
-    SavedState (const OpenGLTarget& target_)
-        : clip (new ClipRegion_Rectangle (Rectangle<int> (target_.width, target_.height))),
+    SavedState (const OpenGLTarget& target_, ScratchBufferManager& scratchBuffer)
+        : clip (new ClipRegion_Rectangle (Rectangle<int> (target_.width, target_.height), scratchBuffer)),
           transform (0, 0), interpolationQuality (Graphics::mediumResamplingQuality),
           target (target_), transparencyLayerAlpha (1.0f)
     {
@@ -965,7 +1030,7 @@ public:
             if (transform.isOnlyTranslated)
             {
                 fillShape (new ClipRegion_Mask (r.translated ((float) transform.xOffset,
-                                                              (float) transform.yOffset)), false);
+                                                              (float) transform.yOffset), clip->scratchBuffer), false);
             }
             else
             {
@@ -980,7 +1045,7 @@ public:
     {
         if (clip != nullptr)
         {
-            ClipRegion_Mask* m = ClipRegion_Mask::createFromPath (clip->getClipBounds(), path,
+            ClipRegion_Mask* m = ClipRegion_Mask::createFromPath (clip->scratchBuffer, clip->getClipBounds(), path,
                                                                   transform.getTransformWith (t));
 
             if (m != nullptr)
@@ -1008,7 +1073,7 @@ public:
                                                                                   .followedBy (t))));
 
                 if (et != nullptr)
-                    fillShape (new ClipRegion_Mask (*et), false);
+                    fillShape (new ClipRegion_Mask (*et, clip->scratchBuffer), false);
             }
         }
     }
@@ -1017,7 +1082,7 @@ public:
     {
         EdgeTable et2 (et);
         et2.translate (x, y);
-        fillShape (new ClipRegion_Mask (et2), false);
+        fillShape (new ClipRegion_Mask (et2, clip->scratchBuffer), false);
     }
 
     void drawLine (const Line <float>& line)
@@ -1069,7 +1134,7 @@ public:
 
         Path p;
         p.addRectangle (image.getBounds());
-        ClipRegion_Mask* m = ClipRegion_Mask::createFromPath (clip->getClipBounds(), p, t);
+        ClipRegion_Mask* m = ClipRegion_Mask::createFromPath (clip->scratchBuffer, clip->getClipBounds(), p, t);
 
         if (m != nullptr)
         {
@@ -1152,20 +1217,23 @@ private:
 
 //==============================================================================
 OpenGLRenderer::OpenGLRenderer (OpenGLComponent& target)
-    : stack (new SavedState (OpenGLTarget (target.getFrameBufferID(), target.getWidth(), target.getHeight())))
+    : scratchBufferManager (new ScratchBufferManager()),
+      stack (new SavedState (OpenGLTarget (target.getFrameBufferID(), target.getWidth(), target.getHeight()), *scratchBufferManager))
 {
     target.makeCurrentRenderingTarget();
 }
 
 OpenGLRenderer::OpenGLRenderer (OpenGLFrameBuffer& target)
-    : stack (new SavedState (OpenGLTarget (target, Point<int>())))
+    : scratchBufferManager (new ScratchBufferManager()),
+      stack (new SavedState (OpenGLTarget (target, Point<int>()), *scratchBufferManager))
 {
     // This object can only be created and used when the current thread has an active OpenGL context.
     jassert (OpenGLHelpers::isContextActive());
 }
 
 OpenGLRenderer::OpenGLRenderer (unsigned int frameBufferID, int width, int height)
-    : stack (new SavedState (OpenGLTarget (frameBufferID, width, height)))
+    : scratchBufferManager (new ScratchBufferManager()),
+      stack (new SavedState (OpenGLTarget (frameBufferID, width, height), *scratchBufferManager))
 {
     // This object can only be created and used when the current thread has an active OpenGL context.
     jassert (OpenGLHelpers::isContextActive());
@@ -1195,8 +1263,8 @@ void OpenGLRenderer::setInterpolationQuality (Graphics::ResamplingQuality qualit
 void OpenGLRenderer::fillRect (const Rectangle<int>& r, bool replace)               { stack->fillRect (r, replace); }
 void OpenGLRenderer::fillPath (const Path& path, const AffineTransform& t)          { stack->fillPath (path, t); }
 void OpenGLRenderer::drawImage (const Image& im, const AffineTransform& t)          { stack->drawImage (im, t); }
-void OpenGLRenderer::drawVerticalLine (int x, float top, float bottom)              { stack->fillRect (Rectangle<float> ((float) x, top, 1.0f, bottom - top)); }
-void OpenGLRenderer::drawHorizontalLine (int y, float left, float right)            { stack->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f)); }
+void OpenGLRenderer::drawVerticalLine (int x, float top, float bottom)              { if (top < bottom) stack->fillRect (Rectangle<float> ((float) x, top, 1.0f, bottom - top)); }
+void OpenGLRenderer::drawHorizontalLine (int y, float left, float right)            { if (left < right) stack->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f)); }
 void OpenGLRenderer::drawGlyph (int glyphNumber, const AffineTransform& t)          { stack->drawGlyph (glyphNumber, t); }
 void OpenGLRenderer::drawLine (const Line <float>& line)                            { stack->drawLine (line); }
 void OpenGLRenderer::setFont (const Font& newFont)                                  { stack->font = newFont; }

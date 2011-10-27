@@ -30,6 +30,7 @@ enum
 {
     GL_FRAMEBUFFER_EXT = 0x8D40,
     GL_RENDERBUFFER_EXT = 0x8D41,
+    GL_FRAMEBUFFER_BINDING_EXT = 0x8CA6,
     GL_COLOR_ATTACHMENT0_EXT = 0x8CE0,
     GL_DEPTH_ATTACHMENT_EXT = 0x8D00,
     GL_STENCIL_ATTACHMENT_EXT = 0x8D20,
@@ -100,6 +101,7 @@ static void initialiseFrameBufferFunctions()
 #define glGenerateMipmapEXT                         glGenerateMipmapOES
 
 #define GL_FRAMEBUFFER_EXT                          GL_FRAMEBUFFER_OES
+#define GL_FRAMEBUFFER_BINDING_EXT                  GL_FRAMEBUFFER_BINDING_OES
 #define GL_RGBA8                                    GL_RGBA
 #define GL_COLOR_ATTACHMENT0_EXT                    GL_COLOR_ATTACHMENT0_OES
 #define GL_RENDERBUFFER_EXT                         GL_RENDERBUFFER_OES
@@ -398,7 +400,6 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
 
    #if JUCE_OPENGL_ES
     {
-        // GLES has no glDrawPixels function, so we have to create a texture and draw it..
         glEnable (GL_TEXTURE_2D);
         glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -417,7 +418,23 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
         OpenGLTexture tex;
         tex.load (data, area.getWidth(), area.getHeight());
 
-        OpenGLHelpers::fillRectWithTexture (area.withSize (tex.getWidth(), tex.getHeight()), tex.getTextureID(), 1.0f);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+
+        const int x = area.getX();
+        const int texH = tex.getHeight();
+        const int y = area.getY() - (texH - area.getHeight());
+        const GLfloat x1 = (GLfloat) x;
+        const GLfloat y1 = (GLfloat) y;
+        const GLfloat x2 = (GLfloat) (x + tex.getWidth());
+        const GLfloat y2 = (GLfloat) (y + texH);
+        const GLfloat vertices[]      = { x1, y1, x2, y1, x1, y2, x2, y2 };
+        const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
+
+        OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4, tex.getTextureID());
     }
    #endif
 

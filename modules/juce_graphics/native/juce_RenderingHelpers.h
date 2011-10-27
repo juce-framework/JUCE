@@ -345,7 +345,7 @@ struct FloatRectangleRasterisingInfo
         if (leftAlpha != 0)      callback (totalLeft, totalTop, 1, totalBottom - totalTop, leftAlpha);
         if (rightAlpha != 0)     callback (right,     totalTop, 1, totalBottom - totalTop, rightAlpha);
 
-        callback (left, top, 1, bottom - top, 255);
+        callback (left, top, right - left, bottom - top, 255);
     }
 
     inline bool isOnePixelWide() const noexcept            { return right - left == 1 && leftAlpha + rightAlpha == 0; }

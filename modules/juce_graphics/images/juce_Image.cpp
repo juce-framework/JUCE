@@ -242,15 +242,26 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
 
             for (int y = 0; y < h; ++y)
             {
-                const PixelARGB* src = (const PixelARGB*) srcData.getLinePointer(y);
-                uint8* dst = destData.getLinePointer (y);
+                const PixelARGB* const src = (const PixelARGB*) srcData.getLinePointer (y);
+                uint8* const dst = destData.getLinePointer (y);
 
-                for (int x = w; --x >= 0;)
-                {
-                    *dst++ = src->getAlpha();
-                    ++src;
-                }
+                for (int x = 0; x < w; ++x)
+                    dst[x] = src[x].getAlpha();
             }
+        }
+    }
+    else if (image->format == SingleChannel && newFormat == Image::ARGB)
+    {
+        const BitmapData destData (newImage, 0, 0, w, h, BitmapData::writeOnly);
+        const BitmapData srcData (*this, 0, 0, w, h);
+
+        for (int y = 0; y < h; ++y)
+        {
+            const PixelAlpha* const src = (const PixelAlpha*) srcData.getLinePointer (y);
+            PixelARGB* const dst = (PixelARGB*) destData.getLinePointer (y);
+
+            for (int x = 0; x < w; ++x)
+                dst[x].set (src[x]);
         }
     }
     else
