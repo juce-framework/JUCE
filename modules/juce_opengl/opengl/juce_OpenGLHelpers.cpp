@@ -703,11 +703,11 @@ OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
     : width (image.getWidth()),
       height (image.getHeight())
 {
-    OpenGLFrameBufferImage* glImage = dynamic_cast <OpenGLFrameBufferImage*> (image.getSharedImage());
+    OpenGLFrameBuffer* const fb = OpenGLImageType::getFrameBufferFrom (image);
 
-    if (glImage != nullptr)
+    if (fb != nullptr)
     {
-        textureID = glImage->frameBuffer.getTextureID();
+        textureID = fb->getTextureID();
     }
     else
     {

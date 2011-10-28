@@ -1789,7 +1789,7 @@ void Component::paintComponent (Graphics& g)
         if (bufferedImage.isNull())
         {
             bufferedImage = Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                   getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
+                                   getWidth(), getHeight(), ! flags.opaqueFlag);
 
             Graphics imG (bufferedImage);
             paint (imG);
@@ -1893,7 +1893,7 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
     if (effect != nullptr)
     {
         Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                           getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
+                           getWidth(), getHeight(), ! flags.opaqueFlag);
         {
             Graphics g2 (effectImage);
             paintComponentAndChildren (g2);

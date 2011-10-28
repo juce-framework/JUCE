@@ -985,11 +985,8 @@ public:
         {
             const Rectangle<int>& clipBounds = clip->getClipBounds();
 
-            OpenGLFrameBufferImage* fbi = new OpenGLFrameBufferImage (clipBounds.getWidth(), clipBounds.getHeight());
-            fbi->frameBuffer.clear (Colours::transparentBlack);
-
-            s->transparencyLayer = Image (fbi);
-            s->target = OpenGLTarget (fbi->frameBuffer, clipBounds.getPosition());
+            s->transparencyLayer = Image (OpenGLImageType().create (Image::ARGB, clipBounds.getWidth(), clipBounds.getHeight(), true));
+            s->target = OpenGLTarget (*OpenGLImageType::getFrameBufferFrom (s->transparencyLayer), clipBounds.getPosition());
             s->transparencyLayerAlpha = opacity;
             s->cloneClipIfMultiplyReferenced();
         }

@@ -274,7 +274,7 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
     if (returnNullIfNothingBigEnough && im.getWidth() < size && im.getHeight() < size)
         return Image::null;
 
-    Image newIm (Image::ARGB, size, size, true, Image::SoftwareImage);
+    Image newIm (Image::ARGB, size, size, true, SoftwareImageType());
     Graphics g (newIm);
     g.drawImageWithin (im, 0, 0, size, size,
                        RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);

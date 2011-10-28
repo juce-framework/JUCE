@@ -29,6 +29,9 @@
 #include "../colour/juce_Colour.h"
 #include "../contexts/juce_GraphicsContext.h"
 
+class ImageType;
+class ImagePixelData;
+
 
 //==============================================================================
 /**
@@ -66,17 +69,25 @@ public:
         SingleChannel       /**<< each pixel is a 1-byte alpha channel value. */
     };
 
-    /**
-    */
-    enum ImageType
-    {
-        SoftwareImage = 0,
-        NativeImage
-    };
-
     //==============================================================================
     /** Creates a null image. */
     Image();
+
+    /** Creates an image with a specified size and format.
+
+        The image's internal type will be of the NativeImageType class - to specify a
+        different type, use the other constructor, which takes an ImageType to use.
+
+        @param format           the number of colour channels in the image
+        @param imageWidth       the desired width of the image, in pixels - this value must be
+                                greater than zero (otherwise a width of 1 will be used)
+        @param imageHeight      the desired width of the image, in pixels - this value must be
+                                greater than zero (otherwise a height of 1 will be used)
+        @param clearImage       if true, the image will initially be cleared to black (if it's RGB)
+                                or transparent black (if it's ARGB). If false, the image may contain
+                                junk initially, so you need to make sure you overwrite it thoroughly.
+    */
+    Image (PixelFormat format, int imageWidth, int imageHeight, bool clearImage);
 
     /** Creates an image with a specified size and format.
 
@@ -88,14 +99,10 @@ public:
         @param clearImage       if true, the image will initially be cleared to black (if it's RGB)
                                 or transparent black (if it's ARGB). If false, the image may contain
                                 junk initially, so you need to make sure you overwrite it thoroughly.
-        @param type             the type of image - this lets you specify whether you want a purely
-                                memory-based image, or one that may be managed by the OS if possible.
+        @param type             the type of image - this lets you specify the internal format that will
+                                be used to allocate and manage the image data.
     */
-    Image (PixelFormat format,
-           int imageWidth,
-           int imageHeight,
-           bool clearImage,
-           ImageType type = NativeImage);
+    Image (PixelFormat format, int imageWidth, int imageHeight, bool clearImage, const ImageType& type);
 
     /** Creates a shared reference to another image.
 
@@ -150,30 +157,30 @@ public:
 
     //==============================================================================
     /** Returns the image's width (in pixels). */
-    int getWidth() const noexcept                           { return image == nullptr ? 0 : image->width; }
+    int getWidth() const noexcept;
 
     /** Returns the image's height (in pixels). */
-    int getHeight() const noexcept                          { return image == nullptr ? 0 : image->height; }
+    int getHeight() const noexcept;
 
     /** Returns a rectangle with the same size as this image.
         The rectangle's origin is always (0, 0).
     */
-    Rectangle<int> getBounds() const noexcept               { return image == nullptr ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }
+    Rectangle<int> getBounds() const noexcept;
 
     /** Returns the image's pixel format. */
-    PixelFormat getFormat() const noexcept                  { return image == nullptr ? UnknownFormat : image->format; }
+    PixelFormat getFormat() const noexcept;
 
     /** True if the image's format is ARGB. */
-    bool isARGB() const noexcept                            { return getFormat() == ARGB; }
+    bool isARGB() const noexcept;
 
     /** True if the image's format is RGB. */
-    bool isRGB() const noexcept                             { return getFormat() == RGB; }
+    bool isRGB() const noexcept;
 
     /** True if the image's format is a single-channel alpha map. */
-    bool isSingleChannel() const noexcept                   { return getFormat() == SingleChannel; }
+    bool isSingleChannel() const noexcept;
 
     /** True if the image contains an alpha-channel. */
-    bool hasAlphaChannel() const noexcept                   { return getFormat() != RGB; }
+    bool hasAlphaChannel() const noexcept;
 
     //==============================================================================
     /** Clears a section of the image with a given colour.
@@ -236,7 +243,7 @@ public:
 
         @see setPixelAt, Image::BitmapData::getPixelColour
     */
-    const Colour getPixelAt (int x, int y) const;
+    Colour getPixelAt (int x, int y) const;
 
     /** Sets the colour of one of the image's pixels.
 
@@ -387,54 +394,117 @@ public:
 
         @see duplicateIfShared
     */
-    int getReferenceCount() const noexcept              { return image == nullptr ? 0 : image->getReferenceCount(); }
+    int getReferenceCount() const noexcept;
 
     //==============================================================================
-    /** This is a base class for task-specific types of image.
-
-        Don't use this class directly! It's used internally by the Image class.
-    */
-    class SharedImage  : public ReferenceCountedObject
-    {
-    public:
-        SharedImage (PixelFormat format, int width, int height);
-        ~SharedImage();
-
-        virtual LowLevelGraphicsContext* createLowLevelContext() = 0;
-        virtual SharedImage* clone() = 0;
-        virtual ImageType getType() const = 0;
-        virtual void initialiseBitmapData (BitmapData& bitmapData, int x, int y, BitmapData::ReadWriteMode mode) = 0;
-
-        static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
-        static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
-
-        PixelFormat getPixelFormat() const noexcept         { return format; }
-        int getWidth() const noexcept                       { return width; }
-        int getHeight() const noexcept                      { return height; }
-
-    protected:
-        friend class Image;
-        friend class BitmapData;
-        const PixelFormat format;
-        const int width, height;
-        NamedValueSet userData;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedImage);
-    };
+    /** @internal */
+    ImagePixelData* getPixelData() const noexcept       { return image; }
 
     /** @internal */
-    SharedImage* getSharedImage() const noexcept        { return image; }
-    /** @internal */
-    explicit Image (SharedImage* instance);
+    explicit Image (ImagePixelData*);
 
 private:
     //==============================================================================
-    friend class SharedImage;
-    friend class BitmapData;
-
-    ReferenceCountedObjectPtr<SharedImage> image;
+    ReferenceCountedObjectPtr<ImagePixelData> image;
 
     JUCE_LEAK_DETECTOR (Image);
+};
+
+
+//==============================================================================
+/**
+    This is a base class for holding image data in implementation-specific ways.
+
+    You may never need to use this class directly - it's used internally
+    by the Image class to store the actual image data. To access pixel data directly,
+    you should use Image::BitmapData rather than this class.
+
+    ImagePixelData objects are created indirectly, by subclasses of ImageType.
+    @see Image, ImageType
+*/
+class JUCE_API  ImagePixelData  : public ReferenceCountedObject
+{
+public:
+    ImagePixelData (Image::PixelFormat, int width, int height);
+    ~ImagePixelData();
+
+    /** Creates a context that will draw into this image. */
+    virtual LowLevelGraphicsContext* createLowLevelContext() = 0;
+    /** Creates a copy of this image. */
+    virtual ImagePixelData* clone() = 0;
+    /** Creates an instance of the type of this image. */
+    virtual ImageType* createType() const = 0;
+    /** Initialises a BitmapData object. */
+    virtual void initialiseBitmapData (Image::BitmapData&, int x, int y, Image::BitmapData::ReadWriteMode) = 0;
+
+    /** The pixel format of the image data. */
+    const Image::PixelFormat pixelFormat;
+    const int width, height;
+
+    /** User-defined settings that are attached to this image.
+        @see Image::getProperties().
+    */
+    NamedValueSet userData;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData);
+};
+
+//==============================================================================
+/**
+    This base class is for handlers that control a type of image manipulation format,
+    e.g. an in-memory bitmap, an OpenGL image, CoreGraphics image, etc.
+
+    @see SoftwareImageType, NativeImageType, OpenGLImageType
+*/
+class JUCE_API  ImageType
+{
+public:
+    ImageType();
+    virtual ~ImageType();
+
+    /** Creates a new image of this type, and the specified parameters. */
+    virtual ImagePixelData* create (Image::PixelFormat format, int width, int height, bool shouldClearImage) const = 0;
+
+    /** Must return a unique number to identify this type. */
+    virtual int getTypeID() const = 0;
+
+    /** Returns an image which is a copy of the source image, but using this type of storage mechanism.
+        For example, to make sure that an image is stored in-memory, you could use:
+        @code myImage = SoftwareImageType().convert (myImage); @endcode
+    */
+    virtual Image convert (const Image& source) const;
+};
+
+//==============================================================================
+/**
+    An image storage type which holds the pixels in-memory as a simple block of values.
+    @see ImageType, NativeImageType
+*/
+class JUCE_API  SoftwareImageType   : public ImageType
+{
+public:
+    SoftwareImageType();
+    ~SoftwareImageType();
+
+    ImagePixelData* create (Image::PixelFormat, int width, int height, bool clearImage) const;
+    int getTypeID() const;
+};
+
+//==============================================================================
+/**
+    An image storage type which holds the pixels using whatever is the default storage
+    format on the current platform.
+    @see ImageType, SoftwareImageType
+*/
+class JUCE_API  NativeImageType   : public ImageType
+{
+public:
+    NativeImageType();
+    ~NativeImageType();
+
+    ImagePixelData* create (Image::PixelFormat, int width, int height, bool clearImage) const;
+    int getTypeID() const;
 };
 
 

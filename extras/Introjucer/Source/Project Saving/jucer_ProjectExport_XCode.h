@@ -244,7 +244,7 @@ private:
         if (w != h || (w != 16 && w != 32 && w != 48 && w != 64))
         {
             const int newSize = w >= 128 ? 128 : (w >= 64 ? 64 : (w >= 32 ? 32 : 16));
-            Image newIm (Image::ARGB, newSize, newSize, true, Image::SoftwareImage);
+            Image newIm (Image::ARGB, newSize, newSize, true, SoftwareImageType());
             Graphics g (newIm);
             g.drawImageWithin (image, 0, 0, newSize, newSize,
                                RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);

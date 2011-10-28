@@ -194,16 +194,16 @@ const int KeyPress::rewindKey               = 0x30003;
 
 
 //==============================================================================
-class WindowsBitmapImage  : public Image::SharedImage
+class WindowsBitmapImage  : public ImagePixelData
 {
 public:
-    WindowsBitmapImage (const Image::PixelFormat format_,
+    WindowsBitmapImage (const Image::PixelFormat format,
                         const int w, const int h, const bool clearImage)
-        : Image::SharedImage (format_, w, h)
+        : ImagePixelData (format, w, h)
     {
-        jassert (format_ == Image::RGB || format_ == Image::ARGB);
+        jassert (format == Image::RGB || format == Image::ARGB);
 
-        pixelStride = (format_ == Image::RGB) ? 3 : 4;
+        pixelStride = (format == Image::RGB) ? 3 : 4;
         lineStride = -((w * pixelStride + 3) & ~3);
 
         zerostruct (bitmapInfo);
@@ -214,7 +214,7 @@ public:
         bitmapInfo.bV4CSType   = 1;
         bitmapInfo.bV4BitCount = (unsigned short) (pixelStride * 8);
 
-        if (format_ == Image::ARGB)
+        if (format == Image::ARGB)
         {
             bitmapInfo.bV4AlphaMask      = 0xff000000;
             bitmapInfo.bV4RedMask        = 0xff0000;
@@ -238,7 +238,7 @@ public:
 
         previousBitmap = SelectObject (hdc, hBitmap);
 
-        if (format_ == Image::ARGB && clearImage)
+        if (format == Image::ARGB && clearImage)
             zeromem (bitmapData, (size_t) std::abs (h * lineStride));
 
         imageData = bitmapData - (lineStride * (h - 1));
@@ -251,24 +251,24 @@ public:
         DeleteObject (hBitmap);
     }
 
-    Image::ImageType getType() const    { return Image::NativeImage; }
+    ImageType* createType() const                       { return new NativeImageType(); }
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
-        bitmap.pixelFormat = format;
+        bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
     }
 
-    Image::SharedImage* clone()
+    ImagePixelData* clone()
     {
-        WindowsBitmapImage* im = new WindowsBitmapImage (format, width, height, false);
+        WindowsBitmapImage* im = new WindowsBitmapImage (pixelFormat, width, height, false);
 
         for (int i = 0; i < height; ++i)
             memcpy (im->imageData + i * lineStride, imageData + i * lineStride, (size_t) lineStride);
@@ -1367,7 +1367,7 @@ private:
                 }
 
                 if (! dontRepaint)
-                    static_cast <WindowsBitmapImage*> (offscreenImage.getSharedImage())
+                    static_cast <WindowsBitmapImage*> (offscreenImage.getPixelData())
                         ->blitToWindow (hwnd, dc, transparent, x, y, maskedRegion, updateLayeredWindowAlpha);
             }
 
@@ -2851,9 +2851,9 @@ void Desktop::setMousePosition (const Point<int>& newPosition)
 }
 
 //==============================================================================
-Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
+ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
-    return createSoftwareImage (format, width, height, clearImage);
+    return SoftwareImageType().create (format, width, height, clearImage);
 }
 
 //==============================================================================

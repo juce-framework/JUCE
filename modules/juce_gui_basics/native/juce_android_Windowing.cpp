@@ -498,11 +498,11 @@ private:
     bool usingAndroidGraphics, fullScreen;
     int sizeAllocated;
 
-    class PreallocatedImage  : public Image::SharedImage
+    class PreallocatedImage  : public ImagePixelData
     {
     public:
         PreallocatedImage (const int width_, const int height_, jint* data_, bool hasAlpha_)
-            : Image::SharedImage (Image::ARGB, width_, height_), data (data_), hasAlpha (hasAlpha_)
+            : ImagePixelData (Image::ARGB, width_, height_), data (data_), hasAlpha (hasAlpha_)
         {
             if (hasAlpha_)
                 zeromem (data_, width * height * sizeof (jint));
@@ -522,7 +522,7 @@ private:
             }
         }
 
-        Image::ImageType getType() const                    { return Image::SoftwareImage; }
+        ImageType* createType() const                       { return new SoftwareImageType(); }
         LowLevelGraphicsContext* createLowLevelContext()    { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
 
         void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
@@ -533,7 +533,7 @@ private:
             bm.data = (uint8*) (data + x + y * width);
         }
 
-        SharedImage* clone()
+        ImagePixelData* clone()
         {
             PreallocatedImage* s = new PreallocatedImage (width, height, 0, hasAlpha);
             s->allocatedData.malloc (sizeof (jint) * width * height);

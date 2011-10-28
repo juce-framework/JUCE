@@ -436,18 +436,18 @@ namespace Visuals
 }
 
 //==============================================================================
-class XBitmapImage  : public Image::SharedImage
+class XBitmapImage  : public ImagePixelData
 {
 public:
-    XBitmapImage (const Image::PixelFormat format_, const int w, const int h,
+    XBitmapImage (const Image::PixelFormat format, const int w, const int h,
                   const bool clearImage, const int imageDepth_, Visual* visual)
-        : Image::SharedImage (format_, w, h),
+        : ImagePixelData (format, w, h),
           imageDepth (imageDepth_),
           gc (None)
     {
-        jassert (format_ == Image::RGB || format_ == Image::ARGB);
+        jassert (format == Image::RGB || format == Image::ARGB);
 
-        pixelStride = (format_ == Image::RGB) ? 3 : 4;
+        pixelStride = (format == Image::RGB) ? 3 : 4;
         lineStride = ((w * pixelStride + 3) & ~3);
 
         ScopedXLock xlock;
@@ -499,7 +499,7 @@ public:
         if (! usingXShm)
        #endif
         {
-            imageDataAllocated.allocate (lineStride * h, format_ == Image::ARGB && clearImage);
+            imageDataAllocated.allocate (lineStride * h, format == Image::ARGB && clearImage);
             imageData = imageDataAllocated;
 
             xImage = (XImage*) ::calloc (1, sizeof (XImage));
@@ -567,26 +567,26 @@ public:
         }
     }
 
-    Image::ImageType getType() const    { return Image::NativeImage; }
-
     LowLevelGraphicsContext* createLowLevelContext()
     {
         return new LowLevelGraphicsSoftwareRenderer (Image (this));
     }
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
-        bitmap.pixelFormat = format;
+        bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
     }
 
-    SharedImage* clone()
+    ImagePixelData* clone()
     {
         jassertfalse;
         return nullptr;
     }
+
+    ImageType* createType() const                       { return new NativeImageType(); }
 
     void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
     {
@@ -1774,7 +1774,7 @@ private:
                    #endif
                     const Rectangle<int>& r = *i.getRectangle();
 
-                    static_cast<XBitmapImage*> (image.getSharedImage())
+                    static_cast<XBitmapImage*> (image.getPixelData())
                         ->blitToWindow (peer->windowH,
                                         r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                         r.getX() - totalArea.getX(), r.getY() - totalArea.getY());
@@ -3008,9 +3008,9 @@ Image juce_createIconForFile (const File& file)
     return Image::null;
 }
 
-Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
+ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
-    return createSoftwareImage (format, width, height, clearImage);
+    return SoftwareImageType().create (format, width, height, clearImage);
 }
 
 //==============================================================================

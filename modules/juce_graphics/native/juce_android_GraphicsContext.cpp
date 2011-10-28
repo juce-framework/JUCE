@@ -158,18 +158,17 @@ DECLARE_JNI_CLASS (RadialGradientClass, "android/graphics/RadialGradient");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
-class AndroidImage  : public Image::SharedImage
+class AndroidImage  : public ImagePixelData
 {
 public:
-    //==============================================================================
     AndroidImage (const int width_, const int height_, const bool clearImage)
-        : Image::SharedImage (Image::ARGB, width_, height_),
+        : ImagePixelData (Image::ARGB, width_, height_),
           bitmap (createBitmap (width_, height_, false))
     {
     }
 
     AndroidImage (const int width_, const int height_, const GlobalRef& bitmap_)
-        : Image::SharedImage (Image::ARGB, width_, height_),
+        : ImagePixelData (Image::ARGB, width_, height_),
           bitmap (bitmap_)
     {
     }
@@ -180,7 +179,6 @@ public:
             bitmap.callVoidMethod (BitmapClass.recycle);
     }
 
-    Image::ImageType getType() const    { return Image::NativeImage; }
     LowLevelGraphicsContext* createLowLevelContext();
 
     void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode mode)
@@ -191,7 +189,7 @@ public:
         bm.dataReleaser = new CopyHandler (*this, bm, x, y, mode);
     }
 
-    SharedImage* clone()
+    ImagePixelData* clone()
     {
         JNIEnv* env = getEnv();
         jobject mode = env->GetStaticObjectField (BitmapConfig, BitmapConfig.ARGB_8888);
@@ -200,6 +198,8 @@ public:
 
         return new AndroidImage (width, height, newCopy);
     }
+
+    ImageType* createType() const    { return new NativeImageType(); }
 
     static jobject createBitmap (int width, int height, bool asSingleChannel)
     {
@@ -282,14 +282,14 @@ private:
 };
 #endif
 
-Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
+ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
    #if USE_ANDROID_CANVAS
-    if (format != Image::SingleChannel)
+    if (pixelFormat != Image::SingleChannel)
         return new AndroidImage (width, height, clearImage);
    #endif
 
-    return createSoftwareImage (format, width, height, clearImage);
+    return SoftwareImageType().create (format, width, height, clearImage);
 }
 
 #if USE_ANDROID_CANVAS
@@ -452,7 +452,7 @@ public:
 
     void drawImage (const Image& sourceImage, const AffineTransform& transform)
     {
-        AndroidImage* androidImage = dynamic_cast <AndroidImage*> (sourceImage.getSharedImage());
+        AndroidImage* androidImage = dynamic_cast <AndroidImage*> (sourceImage.getPixelData());
 
         if (androidImage != 0)
         {

@@ -223,14 +223,13 @@ private:
         {
             fresh = false;
 
-            do
+            for (;;)
             {
-                firstcode = oldcode
-                    = getCode (codeSize, false);
-            }
-            while (firstcode == clearCode);
+                firstcode = oldcode = getCode (codeSize, false);
 
-            return firstcode;
+                if (firstcode != clearCode)
+                    return firstcode;
+            }
         }
 
         if (sp > stack)
@@ -256,8 +255,8 @@ private:
                     return -2;
 
                 uint8 buf [260];
-
                 int n;
+
                 while ((n = readDataBlock (buf)) > 0)
                 {}
 
@@ -290,8 +289,7 @@ private:
                 table[1][code] = firstcode;
                 ++maxCode;
 
-                if ((maxCode >= maxCodeSize)
-                    && (maxCodeSize < maxGifCode))
+                if (maxCode >= maxCodeSize && maxCodeSize < maxGifCode)
                 {
                     maxCodeSize <<= 1;
                     ++codeSize;
@@ -345,7 +343,6 @@ private:
         }
 
         currentBit += codeSize_;
-
         return result;
     }
 
@@ -389,9 +386,7 @@ private:
 
                     while (ypos >= destData.height)
                     {
-                        ++pass;
-
-                        switch (pass)
+                        switch (++pass)
                         {
                             case 1:     ypos = 4; yStep = 8; break;
                             case 2:     ypos = 2; yStep = 4; break;
@@ -436,12 +431,12 @@ bool GIFImageFormat::canUnderstand (InputStream& in)
 
 Image GIFImageFormat::decodeImage (InputStream& in)
 {
-  #if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
+   #if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);
-  #else
+   #else
     const ScopedPointer <GIFLoader> loader (new GIFLoader (in));
     return loader->image;
-  #endif
+   #endif
 }
 
 bool GIFImageFormat::writeImageToStream (const Image& /*sourceImage*/, OutputStream& /*destStream*/)

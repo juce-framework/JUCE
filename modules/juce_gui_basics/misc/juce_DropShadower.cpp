@@ -196,7 +196,7 @@ void DropShadower::updateShadows()
 
             if (bigIm.isNull())
             {
-                bigIm = Image (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true, Image::NativeImage);
+                bigIm = Image (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true);
 
                 Graphics bigG (bigIm);
                 bigG.setColour (Colours::black.withAlpha (alpha));
@@ -280,7 +280,7 @@ void DropShadower::updateShadows()
 void DropShadower::setShadowImage (const Image& src, const int num, const int w, const int h,
                                    const int sx, const int sy)
 {
-    shadowImageSections[num] = Image (Image::ARGB, w, h, true, Image::NativeImage);
+    shadowImageSections[num] = Image (Image::ARGB, w, h, true);
 
     Graphics g (shadowImageSections[num]);
     g.drawImage (src, 0, 0, w, h, sx, sy, w, h);

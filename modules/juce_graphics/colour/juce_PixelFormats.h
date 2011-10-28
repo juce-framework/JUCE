@@ -89,7 +89,8 @@ public:
         This takes into account the opacity of the pixel being overlaid, and blends
         it accordingly.
     */
-    forcedinline void blend (const PixelARGB& src) noexcept
+    template <class Pixel>
+    forcedinline void blend (const Pixel& src) noexcept
     {
         uint32 sargb = src.getARGB();
         const uint32 alpha = 0x100 - (sargb >> 24);
@@ -99,14 +100,6 @@ public:
 
         argb = sargb;
     }
-
-    /** Blends another pixel onto this one.
-
-        This takes into account the opacity of the pixel being overlaid, and blends
-        it accordingly.
-    */
-    forcedinline void blend (const PixelAlpha& src) noexcept;
-
 
     /** Blends another pixel onto this one.
 
@@ -183,7 +176,7 @@ public:
 
     forcedinline void multiplyAlpha (const float multiplier) noexcept
     {
-        multiplyAlpha ((int) (multiplier * 256.0f));
+        multiplyAlpha ((int) (multiplier * 255.0f));
     }
 
     /** Sets the pixel's colour from individual components. */
@@ -257,21 +250,21 @@ public:
 
     //==============================================================================
     /** The indexes of the different components in the byte layout of this type of colour. */
-    #if JUCE_BIG_ENDIAN
+   #if JUCE_BIG_ENDIAN
     enum { indexA = 0, indexR = 1, indexG = 2, indexB = 3 };
-    #else
+   #else
     enum { indexA = 3, indexR = 2, indexG = 1, indexB = 0 };
-    #endif
+   #endif
 
 private:
     //==============================================================================
     struct Components
     {
-      #if JUCE_BIG_ENDIAN
+       #if JUCE_BIG_ENDIAN
         uint8 a : 8, r : 8, g : 8, b : 8;
-      #else
+       #else
         uint8 b, g, r, a;
-      #endif
+       #endif
     } PACKED;
 
     union
@@ -328,7 +321,8 @@ public:
         This takes into account the opacity of the pixel being overlaid, and blends
         it accordingly.
     */
-    forcedinline void blend (const PixelARGB& src) noexcept
+    template <class Pixel>
+    forcedinline void blend (const Pixel& src) noexcept
     {
         uint32 sargb = src.getARGB();
         const uint32 alpha = 0x100 - (sargb >> 24);
@@ -345,8 +339,6 @@ public:
     {
         set (src);
     }
-
-    forcedinline void blend (const PixelAlpha& src) noexcept;
 
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
 
@@ -408,6 +400,9 @@ public:
     /** Multiplies the colour's alpha value with another one. */
     forcedinline void multiplyAlpha (int) noexcept {}
 
+    /** Multiplies the colour's alpha value with another one. */
+    forcedinline void multiplyAlpha (float) noexcept {}
+
     /** Sets the pixel's colour from individual components. */
     void setARGB (const uint8, const uint8 r_, const uint8 g_, const uint8 b_) noexcept
     {
@@ -429,19 +424,19 @@ public:
 
     //==============================================================================
     /** The indexes of the different components in the byte layout of this type of colour. */
-    #if JUCE_MAC
+   #if JUCE_MAC
     enum { indexR = 0, indexG = 1, indexB = 2 };
-    #else
+   #else
     enum { indexR = 2, indexG = 1, indexB = 0 };
-    #endif
+   #endif
 
 private:
     //==============================================================================
-#if JUCE_MAC
+   #if JUCE_MAC
     uint8 r, g, b;
-#else
+   #else
     uint8 b, g, r;
-#endif
+   #endif
 
 }
 #ifndef DOXYGEN
@@ -520,7 +515,7 @@ public:
     template <class Pixel>
     forcedinline void tween (const Pixel& src, const uint32 amount) noexcept
     {
-        a += ((src,getAlpha() - a) * amount) >> 8;
+        a += ((src.getAlpha() - a) * amount) >> 8;
     }
 
     /** Copies another pixel colour over this one.
@@ -558,18 +553,12 @@ public:
     }
 
     /** Premultiplies the pixel's RGB values by its alpha. */
-    forcedinline void premultiply() noexcept
-    {
-    }
+    forcedinline void premultiply() noexcept {}
 
     /** Unpremultiplies the pixel's RGB values. */
-    forcedinline void unpremultiply() noexcept
-    {
-    }
+    forcedinline void unpremultiply() noexcept {}
 
-    forcedinline void desaturate() noexcept
-    {
-    }
+    forcedinline void desaturate() noexcept {}
 
     //==============================================================================
     /** The indexes of the different components in the byte layout of this type of colour. */
@@ -584,26 +573,8 @@ private:
 #endif
 ;
 
-forcedinline void PixelRGB::blend (const PixelAlpha& src) noexcept
-{
-    blend (PixelARGB (src.getARGB()));
-}
-
-
-forcedinline void PixelARGB::blend (const PixelAlpha& src) noexcept
-{
-    uint32 sargb = src.getARGB();
-    const uint32 alpha = 0x100 - (sargb >> 24);
-
-    sargb += 0x00ff00ff & ((getRB() * alpha) >> 8);
-    sargb += 0xff00ff00 & (getAG() * alpha);
-
-    argb = sargb;
-}
-
-
 #if JUCE_MSVC
-  #pragma pack (pop)
+ #pragma pack (pop)
 #endif
 
 #undef PACKED

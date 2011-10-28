@@ -27,14 +27,13 @@
 #include "juce_mac_CoreGraphicsContext.h"
 
 //==============================================================================
-class CoreGraphicsImage : public Image::SharedImage
+class CoreGraphicsImage : public ImagePixelData
 {
 public:
-    //==============================================================================
-    CoreGraphicsImage (const Image::PixelFormat format_, const int width_, const int height_, const bool clearImage)
-        : Image::SharedImage (format_, width_, height_)
+    CoreGraphicsImage (const Image::PixelFormat format, const int width_, const int height_, const bool clearImage)
+        : ImagePixelData (format, width_, height_)
     {
-        pixelStride = format_ == Image::RGB ? 3 : ((format_ == Image::ARGB) ? 4 : 1);
+        pixelStride = format == Image::RGB ? 3 : ((format == Image::ARGB) ? 4 : 1);
         lineStride = (pixelStride * jmax (1, width) + 3) & ~3;
 
         imageData.allocate (lineStride * jmax (1, height), clearImage);
@@ -43,7 +42,7 @@ public:
                                                                        : CGColorSpaceCreateDeviceRGB();
 
         context = CGBitmapContextCreate (imageData, width, height, 8, lineStride,
-                                         colourSpace, getCGImageFlags (format_));
+                                         colourSpace, getCGImageFlags (format));
 
         CGColorSpaceRelease (colourSpace);
     }
@@ -53,29 +52,30 @@ public:
         CGContextRelease (context);
     }
 
-    Image::ImageType getType() const    { return Image::NativeImage; }
     LowLevelGraphicsContext* createLowLevelContext();
 
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/)
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
     {
         bitmap.data = imageData + x * pixelStride + y * lineStride;
-        bitmap.pixelFormat = format;
+        bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
     }
 
-    SharedImage* clone()
+    ImagePixelData* clone()
     {
-        CoreGraphicsImage* im = new CoreGraphicsImage (format, width, height, false);
+        CoreGraphicsImage* im = new CoreGraphicsImage (pixelFormat, width, height, false);
         memcpy (im->imageData, imageData, lineStride * height);
         return im;
     }
+
+    ImageType* createType() const    { return new NativeImageType(); }
 
     //==============================================================================
     static CGImageRef createImage (const Image& juceImage, const bool forAlpha,
                                    CGColorSpaceRef colourSpace, const bool mustOutliveSource)
     {
-        const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (juceImage.getSharedImage());
+        const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (juceImage.getPixelData());
 
         if (nativeImage != nullptr && (juceImage.getFormat() == Image::SingleChannel || ! forAlpha))
         {
@@ -125,9 +125,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsImage);
 };
 
-Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
+ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
-    return new CoreGraphicsImage (format == RGB ? ARGB : format, width, height, clearImage);
+    return new CoreGraphicsImage (format == Image::RGB ? Image::ARGB : format, width, height, clearImage);
 }
 
 //==============================================================================
@@ -818,11 +818,12 @@ Image juce_loadWithCoreImage (InputStream& input)
                                          && alphaInfo != kCGImageAlphaNoneSkipLast
                                          && alphaInfo != kCGImageAlphaNoneSkipFirst);
 
-            Image image (Image::ARGB, // (CoreImage doesn't work with 24-bit images)
-                         (int) CGImageGetWidth (loadedImage), (int) CGImageGetHeight (loadedImage),
-                         hasAlphaChan, Image::NativeImage);
+            Image image (NativeImageType().create (Image::ARGB, // (CoreImage doesn't work with 24-bit images)
+                                                   (int) CGImageGetWidth (loadedImage),
+                                                   (int) CGImageGetHeight (loadedImage),
+                                                   hasAlphaChan));
 
-            CoreGraphicsImage* const cgImage = dynamic_cast<CoreGraphicsImage*> (image.getSharedImage());
+            CoreGraphicsImage* const cgImage = dynamic_cast<CoreGraphicsImage*> (image.getPixelData());
             jassert (cgImage != nullptr); // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsImage class should have been used.
 
             CGContextDrawImage (cgImage->context, CGRectMake (0, 0, image.getWidth(), image.getHeight()), loadedImage);
@@ -863,7 +864,7 @@ CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, const bool forA
 
 CGContextRef juce_getImageContext (const Image& image)
 {
-    CoreGraphicsImage* const cgi = dynamic_cast <CoreGraphicsImage*> (image.getSharedImage());
+    CoreGraphicsImage* const cgi = dynamic_cast <CoreGraphicsImage*> (image.getPixelData());
     jassert (cgi != nullptr);
     return cgi != nullptr ? cgi->context : 0;
 }

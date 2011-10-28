@@ -39,6 +39,10 @@ void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
     Component::internalRepaint (x, y, w, h);
 }
 
+void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>&)
+{
+}
+
 bool OpenGLHelpers::isContextActive()
 {
     return false;

@@ -25,44 +25,62 @@
 
 BEGIN_JUCE_NAMESPACE
 
-OpenGLFrameBufferImage::OpenGLFrameBufferImage (int width, int height)
-    : Image::SharedImage (Image::ARGB, width, height),
-      pixelStride (4),
-      lineStride (width * pixelStride)
+
+//==============================================================================
+class OpenGLFrameBufferImage   : public ImagePixelData
 {
-    frameBuffer.initialise (width, height);
-    frameBuffer.clear (Colours::transparentBlack);
-}
-
-OpenGLFrameBufferImage::~OpenGLFrameBufferImage() {}
-
-LowLevelGraphicsContext* OpenGLFrameBufferImage::createLowLevelContext()
-{
-    return new OpenGLRenderer (frameBuffer);
-}
-
-Image::SharedImage* OpenGLFrameBufferImage::clone()
-{
-    OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (getWidth(), getHeight());
-    im->incReferenceCount();
-
+public:
+    OpenGLFrameBufferImage (int width, int height)
+        : ImagePixelData (Image::ARGB, width, height),
+          pixelStride (4),
+          lineStride (width * pixelStride)
     {
-        Image newImage (im);
-        Graphics g (newImage);
-        g.drawImageAt (Image (this), 0, 0, false);
+        frameBuffer.initialise (width, height);
+        frameBuffer.clear (Colours::transparentBlack);
     }
 
-    im->resetReferenceCount();
-    return im;
-}
+    LowLevelGraphicsContext* createLowLevelContext()
+    {
+        return new OpenGLRenderer (frameBuffer);
+    }
 
-Image::ImageType OpenGLFrameBufferImage::getType() const
-{
-    return Image::NativeImage;
-}
+    ImageType* createType() const                       { return new OpenGLImageType(); }
 
-namespace OpenGLImageHelpers
-{
+    ImagePixelData* clone()
+    {
+        OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (width, height);
+        im->incReferenceCount();
+
+        {
+            Image newImage (im);
+            Graphics g (newImage);
+            g.drawImageAt (Image (this), 0, 0, false);
+        }
+
+        im->resetReferenceCount();
+        return im;
+    }
+
+    void initialiseBitmapData (Image::BitmapData& bitmapData, int x, int y, Image::BitmapData::ReadWriteMode mode)
+    {
+        bitmapData.pixelFormat = pixelFormat;
+        bitmapData.lineStride  = lineStride;
+        bitmapData.pixelStride = pixelStride;
+
+        switch (mode)
+        {
+            case Image::BitmapData::writeOnly:  DataReleaser<Dummy,  Writer>::initialise (frameBuffer, bitmapData, x, y); break;
+            case Image::BitmapData::readOnly:   DataReleaser<Reader, Dummy> ::initialise (frameBuffer, bitmapData, x, y); break;
+            case Image::BitmapData::readWrite:  DataReleaser<Reader, Writer>::initialise (frameBuffer, bitmapData, x, y); break;
+            default:                            jassertfalse; break;
+        }
+    }
+
+    OpenGLFrameBuffer frameBuffer;
+
+private:
+    int pixelStride, lineStride;
+
     struct Dummy
     {
         Dummy (OpenGLFrameBuffer&, int, int, int, int) noexcept {}
@@ -145,24 +163,35 @@ namespace OpenGLImageHelpers
         HeapBlock<PixelARGB> data;
         WriterType writer;
     };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBufferImage);
+};
+
+
+//==============================================================================
+OpenGLImageType::OpenGLImageType() {}
+OpenGLImageType::~OpenGLImageType() {}
+
+int OpenGLImageType::getTypeID() const
+{
+    return 3;
 }
 
-void OpenGLFrameBufferImage::initialiseBitmapData (Image::BitmapData& bitmapData, int x, int y,
-                                                   Image::BitmapData::ReadWriteMode mode)
+ImagePixelData* OpenGLImageType::create (Image::PixelFormat, int width, int height, bool shouldClearImage) const
 {
-    using namespace OpenGLImageHelpers;
+    OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (width, height);
 
-    bitmapData.pixelFormat = format;
-    bitmapData.lineStride  = lineStride;
-    bitmapData.pixelStride = pixelStride;
+    if (shouldClearImage)
+        im->frameBuffer.clear (Colours::transparentBlack);
 
-    switch (mode)
-    {
-        case Image::BitmapData::writeOnly:  DataReleaser<Dummy,  Writer>::initialise (frameBuffer, bitmapData, x, y); break;
-        case Image::BitmapData::readOnly:   DataReleaser<Reader, Dummy> ::initialise (frameBuffer, bitmapData, x, y); break;
-        case Image::BitmapData::readWrite:  DataReleaser<Reader, Writer>::initialise (frameBuffer, bitmapData, x, y); break;
-        default:                            jassertfalse; break;
-    }
+    return im;
+}
+
+OpenGLFrameBuffer* OpenGLImageType::getFrameBufferFrom (const Image& image)
+{
+    OpenGLFrameBufferImage* const glImage = dynamic_cast<OpenGLFrameBufferImage*> (image.getPixelData());
+
+    return glImage != nullptr ? &(glImage->frameBuffer) : nullptr;
 }
 
 END_JUCE_NAMESPACE

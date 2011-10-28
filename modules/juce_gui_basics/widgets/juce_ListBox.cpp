@@ -882,7 +882,7 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     imageArea = imageArea.getIntersection (getLocalBounds());
     imageX = imageArea.getX();
     imageY = imageArea.getY();
-    Image snapshot (Image::ARGB, imageArea.getWidth(), imageArea.getHeight(), true, Image::NativeImage);
+    Image snapshot (Image::ARGB, imageArea.getWidth(), imageArea.getHeight(), true);
 
     for (i = getNumRowsOnScreen() + 2; --i >= 0;)
     {

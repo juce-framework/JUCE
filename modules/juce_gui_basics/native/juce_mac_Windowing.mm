@@ -328,7 +328,7 @@ Image juce_createIconForFile (const File& file)
 
     NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: juceStringToNS (file.getFullPathName())];
 
-    Image result (Image::ARGB, (int) [image size].width, (int) [image size].height, true, Image::NativeImage);
+    Image result (Image::ARGB, (int) [image size].width, (int) [image size].height, true);
 
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithGraphicsPort: juce_getImageContext (result) flipped: false]];

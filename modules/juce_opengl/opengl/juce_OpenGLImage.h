@@ -29,42 +29,25 @@
 
 //==============================================================================
 /**
-    A type of Image::SharedImage that stores its image data in an OpenGL
+    A type of ImagePixelData that stores its image data in an OpenGL
     framebuffer, allowing a JUCE Image object to wrap a framebuffer.
 
     By creating an Image from an instance of an OpenGLFrameBufferImage,
     you can then use a Graphics object to draw into the framebuffer using normal
     JUCE 2D operations.
 
-    @see Image, Image::SharedImage, OpenGLFrameBuffer
+    @see Image, ImageType, ImagePixelData, OpenGLFrameBuffer
 */
-class JUCE_API  OpenGLFrameBufferImage   : public Image::SharedImage
+class JUCE_API  OpenGLImageType     : public ImageType
 {
 public:
-    OpenGLFrameBufferImage (int width, int height);
+    OpenGLImageType();
+    ~OpenGLImageType();
 
-    /** Destructor. */
-    ~OpenGLFrameBufferImage();
+    ImagePixelData* create (Image::PixelFormat, int width, int height, bool shouldClearImage) const;
+    int getTypeID() const;
 
-    /** The underlying framebuffer.
-        Although this is exposed to allow access to use it as a texture, etc, be
-        careful not to change its size while the image is using it.
-    */
-    OpenGLFrameBuffer frameBuffer;
-
-    /** @internal */
-    LowLevelGraphicsContext* createLowLevelContext();
-    /** @internal */
-    SharedImage* clone();
-    /** @internal */
-    Image::ImageType getType() const;
-    /** @internal */
-    void initialiseBitmapData (Image::BitmapData&, int, int, Image::BitmapData::ReadWriteMode);
-
-private:
-    int pixelStride, lineStride;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLFrameBufferImage);
+    static OpenGLFrameBuffer* getFrameBufferFrom (const Image&);
 };
 
 #endif   // __JUCE_OPENGLIMAGE_JUCEHEADER__

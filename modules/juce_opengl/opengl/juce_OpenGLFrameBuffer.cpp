@@ -350,8 +350,8 @@ void OpenGLFrameBuffer::setCurrentFrameBufferTarget (GLuint frameBufferID)
 
 GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
 {
-	GLint fb;
-	glGetIntegerv (GL_FRAMEBUFFER_BINDING_EXT, &fb);
+    GLint fb;
+    glGetIntegerv (GL_FRAMEBUFFER_BINDING_EXT, &fb);
     return (GLuint) fb;
 }
 
@@ -398,26 +398,22 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     glDisable (GL_DEPTH_TEST);
     glDisable (GL_BLEND);
 
+    OpenGLTexture tex;
+    tex.load (data, area.getWidth(), area.getHeight());
+
    #if JUCE_OPENGL_ES
     {
-        glEnable (GL_TEXTURE_2D);
-        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-
-        OpenGLTexture tex;
-        tex.load (data, area.getWidth(), area.getHeight());
         tex.bind();
 
-        const GLint cropRect[4] = { 0, 0, area.getWidth(), area.getHeight() };
+        const GLint cropRect[4] = { 0, tex.getHeight() - area.getHeight(), area.getWidth(), area.getHeight() };
         glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
-
+        glEnable (GL_TEXTURE_2D);
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
         glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
         glBindTexture (GL_TEXTURE_2D, 0);
     }
    #else
     {
-        OpenGLTexture tex;
-        tex.load (data, area.getWidth(), area.getHeight());
-
         glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
