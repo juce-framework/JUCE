@@ -357,6 +357,7 @@ inline bool juce_isfinite (FloatingPointType value)
 //==============================================================================
 #if JUCE_MSVC
  #pragma optimize ("t", off)
+ #pragma float_control (precise, on, push)
 #endif
 
 /** Fast floating-point-to-integer conversion.
@@ -383,6 +384,7 @@ inline int roundToInt (const FloatType value) noexcept
 }
 
 #if JUCE_MSVC
+ #pragma float_control (pop)
  #pragma optimize ("", on)  // resets optimisations to the project defaults
 #endif
 

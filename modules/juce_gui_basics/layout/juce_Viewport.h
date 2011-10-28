@@ -184,6 +184,9 @@ public:
     */
     virtual void visibleAreaChanged (const Rectangle<int>& newVisibleArea);
 
+    /** Callback method that is called when the viewed component is added, removed or swapped. */
+    virtual void viewedComponentChanged (Component* newComponent);
+
     //==============================================================================
     /** Turns scrollbars on or off.
 

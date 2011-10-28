@@ -57,9 +57,8 @@ Viewport::~Viewport()
 }
 
 //==============================================================================
-void Viewport::visibleAreaChanged (const Rectangle<int>&)
-{
-}
+void Viewport::visibleAreaChanged (const Rectangle<int>&) {}
+void Viewport::viewedComponentChanged (Component*) {}
 
 //==============================================================================
 void Viewport::deleteContentComp()
@@ -92,6 +91,7 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
             contentComp->addComponentListener (this);
         }
 
+        viewedComponentChanged (contentComp);
         updateVisibleArea();
     }
 }
