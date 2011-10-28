@@ -277,7 +277,7 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
     const int w = image->width, h = image->height;
 
     const ScopedPointer<ImageType> type (image->createType());
-    Image newImage (type->create (image->pixelFormat, w, h, false));
+    Image newImage (type->create (newFormat, w, h, false));
 
     if (newFormat == SingleChannel)
     {

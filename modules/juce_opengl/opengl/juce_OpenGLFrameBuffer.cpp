@@ -400,38 +400,33 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
 
     OpenGLTexture tex;
     tex.load (data, area.getWidth(), area.getHeight());
+    const int texH = tex.getHeight();
 
    #if JUCE_OPENGL_ES
-    {
-        tex.bind();
-
-        const GLint cropRect[4] = { 0, tex.getHeight() - area.getHeight(), area.getWidth(), area.getHeight() };
-        glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
-        glEnable (GL_TEXTURE_2D);
-        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-        glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
-        glBindTexture (GL_TEXTURE_2D, 0);
-    }
+    tex.bind();
+    const GLint cropRect[4] = { 0, texH - area.getHeight(), area.getWidth(), area.getHeight() };
+    glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
+    glEnable (GL_TEXTURE_2D);
+    glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+    glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
+    glBindTexture (GL_TEXTURE_2D, 0);
    #else
-    {
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 
-        const int x = area.getX();
-        const int texH = tex.getHeight();
-        const int y = area.getY() - (texH - area.getHeight());
-        const GLfloat x1 = (GLfloat) x;
-        const GLfloat y1 = (GLfloat) y;
-        const GLfloat x2 = (GLfloat) (x + tex.getWidth());
-        const GLfloat y2 = (GLfloat) (y + texH);
-        const GLfloat vertices[]      = { x1, y1, x2, y1, x1, y2, x2, y2 };
-        const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
+    const int x = area.getX();
+    const int y = area.getY() - (texH - area.getHeight());
+    const GLfloat x1 = (GLfloat) x;
+    const GLfloat y1 = (GLfloat) y;
+    const GLfloat x2 = (GLfloat) (x + tex.getWidth());
+    const GLfloat y2 = (GLfloat) (y + texH);
+    const GLfloat vertices[]      = { x1, y1, x2, y1, x1, y2, x2, y2 };
+    const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
 
-        OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4, tex.getTextureID());
-    }
+    OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4, tex.getTextureID());
    #endif
 
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
