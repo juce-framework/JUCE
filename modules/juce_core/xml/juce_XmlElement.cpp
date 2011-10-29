@@ -127,7 +127,8 @@ XmlElement::~XmlElement() noexcept
 //==============================================================================
 namespace XmlOutputFunctions
 {
-    /*bool isLegalXmlCharSlow (const juce_wchar character) noexcept
+   #if 0 // (These functions are just used to generate the lookup table used below)
+    bool isLegalXmlCharSlow (const juce_wchar character) noexcept
     {
         if ((character >= 'a' && character <= 'z')
              || (character >= 'A' && character <= 'Z')
@@ -146,7 +147,7 @@ namespace XmlOutputFunctions
         return false;
     }
 
-    void generateLegalCharConstants()
+    void generateLegalCharLookupTable()
     {
         uint8 n[32] = { 0 };
         for (int i = 0; i < 256; ++i)
@@ -158,7 +159,8 @@ namespace XmlOutputFunctions
             s << (int) n[i] << ", ";
 
         DBG (s);
-    }*/
+    }
+   #endif
 
     bool isLegalXmlChar (const uint32 c) noexcept
     {
@@ -253,10 +255,10 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
         {
             outputStream.writeByte ('>');
 
-            XmlElement* child = firstChildElement;
+
             bool lastWasTextNode = false;
 
-            while (child != nullptr)
+            for (XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
             {
                 if (child->isTextElement())
                 {
@@ -272,8 +274,6 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                                                lastWasTextNode ? 0 : (indentationLevel + (indentationLevel >= 0 ? 2 : 0)), lineWrapLength);
                     lastWasTextNode = false;
                 }
-
-                child = child->getNextElement();
             }
 
             if (indentationLevel >= 0 && ! lastWasTextNode)
@@ -568,17 +568,11 @@ XmlElement* XmlElement::getChildElement (const int index) const noexcept
 
 XmlElement* XmlElement::getChildByName (const String& childName) const noexcept
 {
-    XmlElement* child = firstChildElement;
-
-    while (child != nullptr)
-    {
+    for (XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
         if (child->hasTagName (childName))
-            break;
+            return child;
 
-        child = child->nextListItem;
-    }
-
-    return child;
+    return nullptr;
 }
 
 void XmlElement::addChildElement (XmlElement* const newNode) noexcept
@@ -646,14 +640,12 @@ bool XmlElement::isEquivalentTo (const XmlElement* const other,
         if (ignoreOrderOfAttributes)
         {
             int totalAtts = 0;
-            const XmlAttributeNode* att = attributes;
 
-            while (att != nullptr)
+            for (const XmlAttributeNode* att = attributes; att != nullptr; att = att->nextListItem)
             {
                 if (! other->compareAttribute (att->name, att->value))
                     return false;
 
-                att = att->nextListItem;
                 ++totalAtts;
             }
 
@@ -740,9 +732,7 @@ XmlElement* XmlElement::findParentElementOf (const XmlElement* const elementToLo
     if (this == elementToLookFor || elementToLookFor == nullptr)
         return nullptr;
 
-    XmlElement* child = firstChildElement;
-
-    while (child != nullptr)
+    for (XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
     {
         if (elementToLookFor == child)
             return this;
@@ -751,8 +741,6 @@ XmlElement* XmlElement::findParentElementOf (const XmlElement* const elementToLo
 
         if (found != nullptr)
             return found;
-
-        child = child->nextListItem;
     }
 
     return nullptr;
@@ -806,17 +794,12 @@ String XmlElement::getAllSubText() const
     if (isTextElement())
         return getText();
 
-    String result;
-    String::Concatenator concatenator (result);
-    const XmlElement* child = firstChildElement;
+    MemoryOutputStream mem (1024);
 
-    while (child != nullptr)
-    {
-        concatenator.append (child->getAllSubText());
-        child = child->nextListItem;
-    }
+    for (const XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
+        mem << child->getAllSubText();
 
-    return result;
+    return mem.toString();
 }
 
 String XmlElement::getChildElementAllSubText (const String& childTagName,

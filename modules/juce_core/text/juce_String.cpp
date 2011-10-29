@@ -2063,31 +2063,6 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 #endif
 
 //==============================================================================
-String::Concatenator::Concatenator (String& stringToAppendTo)
-    : result (stringToAppendTo),
-      nextIndex (stringToAppendTo.length())
-{
-}
-
-String::Concatenator::~Concatenator()
-{
-}
-
-void String::Concatenator::append (const String& s)
-{
-    const int len = s.length();
-
-    if (len > 0)
-    {
-        size_t extraBytes = s.getCharPointer().sizeInBytes();
-        result.preallocateBytes (nextIndex + extraBytes);
-        CharPointerType (result.text + nextIndex).writeAll (s.text);
-        nextIndex += len;
-    }
-}
-
-
-//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

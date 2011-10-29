@@ -100,7 +100,7 @@ public:
 
         for (size_t i = 1; i <= numExtraValues; ++i)
         {
-            const juce_wchar nextByte = (juce_wchar) (uint8) data [i];
+            const uint8 nextByte = (uint8) data [i];
 
             if ((nextByte & 0xc0) != 0x80)
                 break;
