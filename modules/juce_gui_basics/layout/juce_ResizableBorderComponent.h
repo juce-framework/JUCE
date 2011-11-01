@@ -146,16 +146,16 @@ public:
                 return original + distance;
 
             if (isDraggingLeftEdge())
-                original.setLeft (jmin (original.getRight(), original.getX() + distance.getX()));
+                original.setLeft (jmin (original.getRight(), original.getX() + distance.x));
 
             if (isDraggingRightEdge())
-                original.setWidth (jmax (ValueType(), original.getWidth() + distance.getX()));
+                original.setWidth (jmax (ValueType(), original.getWidth() + distance.x));
 
             if (isDraggingTopEdge())
-                original.setTop (jmin (original.getBottom(), original.getY() + distance.getY()));
+                original.setTop (jmin (original.getBottom(), original.getY() + distance.y));
 
             if (isDraggingBottomEdge())
-                original.setHeight (jmax (ValueType(), original.getHeight() + distance.getY()));
+                original.setHeight (jmax (ValueType(), original.getHeight() + distance.y));
 
             return original;
         }

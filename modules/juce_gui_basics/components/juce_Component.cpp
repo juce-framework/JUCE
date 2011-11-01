@@ -213,9 +213,9 @@ public:
     //==============================================================================
     static inline bool hitTest (Component& comp, const Point<int>& localPoint)
     {
-        return isPositiveAndBelow (localPoint.getX(), comp.getWidth())
-                 && isPositiveAndBelow (localPoint.getY(), comp.getHeight())
-                 && comp.hitTest (localPoint.getX(), localPoint.getY());
+        return isPositiveAndBelow (localPoint.x, comp.getWidth())
+                 && isPositiveAndBelow (localPoint.y, comp.getHeight())
+                 && comp.hitTest (localPoint.x, localPoint.y);
     }
 
     static Point<int> convertFromParentSpace (const Component& comp, const Point<int>& pointInParentSpace)
@@ -354,7 +354,7 @@ public:
                 if (c->isOpaque() && c->componentTransparency == 0)
                 {
                     Rectangle<int> childBounds (c->bounds.getIntersection (clipRect));
-                    childBounds.translate (delta.getX(), delta.getY());
+                    childBounds.translate (delta.x, delta.y);
 
                     result.subtract (childBounds);
                 }
@@ -608,7 +608,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             Desktop::getInstance().addDesktopComponent (this);
 
             bounds.setPosition (topLeft);
-            peer->setBounds (topLeft.getX(), topLeft.getY(), getWidth(), getHeight(), false);
+            peer->setBounds (topLeft.x, topLeft.y, getWidth(), getHeight(), false);
 
             peer->setVisible (isVisible());
 
@@ -908,8 +908,8 @@ int Component::getParentHeight() const noexcept
                                       : getParentMonitorArea().getHeight();
 }
 
-int Component::getScreenX() const   { return getScreenPosition().getX(); }
-int Component::getScreenY() const   { return getScreenPosition().getY(); }
+int Component::getScreenX() const   { return getScreenPosition().x; }
+int Component::getScreenY() const   { return getScreenPosition().y; }
 
 Point<int> Component::getScreenPosition() const       { return localPointToGlobal (Point<int>()); }
 Rectangle<int> Component::getScreenBounds() const     { return localAreaToGlobal (getLocalBounds()); }
@@ -1065,7 +1065,7 @@ void Component::setTopLeftPosition (const int x, const int y)
 
 void Component::setTopLeftPosition (const Point<int>& pos)
 {
-    setBounds (pos.getX(), pos.getY(), getWidth(), getHeight());
+    setBounds (pos.x, pos.y, getWidth(), getHeight());
 }
 
 void Component::setTopRightPosition (const int x, const int y)

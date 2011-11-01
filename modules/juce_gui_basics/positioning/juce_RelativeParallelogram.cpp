@@ -94,9 +94,9 @@ const AffineTransform RelativeParallelogram::resetToPerpendicular (Expression::S
     topRight.moveToAbsolute (newTopRight, scope);
     bottomLeft.moveToAbsolute (newBottomLeft, scope);
 
-    return AffineTransform::fromTargetPoints (corners[0].getX(), corners[0].getY(), corners[0].getX(), corners[0].getY(),
-                                              corners[1].getX(), corners[1].getY(), newTopRight.getX(), newTopRight.getY(),
-                                              corners[2].getX(), corners[2].getY(), newBottomLeft.getX(), newBottomLeft.getY());
+    return AffineTransform::fromTargetPoints (corners[0].x, corners[0].y, corners[0].x, corners[0].y,
+                                              corners[1].x, corners[1].y, newTopRight.x, newTopRight.y,
+                                              corners[2].x, corners[2].y, newBottomLeft.x, newBottomLeft.y);
 }
 
 bool RelativeParallelogram::isDynamic() const
@@ -127,8 +127,8 @@ const Point<float> RelativeParallelogram::getInternalCoordForPoint (const Point<
 const Point<float> RelativeParallelogram::getPointForInternalCoord (const Point<float>* const corners, const Point<float>& point) noexcept
 {
     return corners[0]
-            + Line<float> (Point<float>(), corners[1] - corners[0]).getPointAlongLine (point.getX())
-            + Line<float> (Point<float>(), corners[2] - corners[0]).getPointAlongLine (point.getY());
+            + Line<float> (Point<float>(), corners[1] - corners[0]).getPointAlongLine (point.x)
+            + Line<float> (Point<float>(), corners[2] - corners[0]).getPointAlongLine (point.y);
 }
 
 const Rectangle<float> RelativeParallelogram::getBoundingBox (const Point<float>* const p) noexcept

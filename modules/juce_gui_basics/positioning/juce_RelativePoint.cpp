@@ -42,7 +42,7 @@ RelativePoint::RelativePoint()
 }
 
 RelativePoint::RelativePoint (const Point<float>& absolutePoint)
-    : x (absolutePoint.getX()), y (absolutePoint.getY())
+    : x (absolutePoint.x), y (absolutePoint.y)
 {
 }
 
@@ -82,8 +82,8 @@ const Point<float> RelativePoint::resolve (const Expression::Scope* scope) const
 
 void RelativePoint::moveToAbsolute (const Point<float>& newPos, const Expression::Scope* scope)
 {
-    x.moveToAbsolute (newPos.getX(), scope);
-    y.moveToAbsolute (newPos.getY(), scope);
+    x.moveToAbsolute (newPos.x, scope);
+    y.moveToAbsolute (newPos.y, scope);
 }
 
 String RelativePoint::toString() const

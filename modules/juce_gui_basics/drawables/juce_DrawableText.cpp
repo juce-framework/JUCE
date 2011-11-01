@@ -140,8 +140,8 @@ void DrawableText::recalculateCoordinates (Expression::Scope* scope)
     const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
 
     const Point<float> fontCoords (RelativeParallelogram::getInternalCoordForPoint (resolvedPoints, fontSizeControlPoint.resolve (scope)));
-    const float fontHeight = jlimit (0.01f, jmax (0.01f, h), fontCoords.getY());
-    const float fontWidth = jlimit (0.01f, jmax (0.01f, w), fontCoords.getX());
+    const float fontHeight = jlimit (0.01f, jmax (0.01f, h), fontCoords.y);
+    const float fontWidth = jlimit (0.01f, jmax (0.01f, w), fontCoords.x);
 
     scaledFont = font;
     scaledFont.setHeight (fontHeight);
@@ -158,9 +158,9 @@ const AffineTransform DrawableText::getArrangementAndTransform (GlyphArrangement
 
     glyphs.addFittedText (scaledFont, text, 0, 0, w, h, justification, 0x100000);
 
-    return AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].getX(), resolvedPoints[0].getY(),
-                                              w, 0, resolvedPoints[1].getX(), resolvedPoints[1].getY(),
-                                              0, h, resolvedPoints[2].getX(), resolvedPoints[2].getY());
+    return AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].x, resolvedPoints[0].y,
+                                              w, 0, resolvedPoints[1].x, resolvedPoints[1].y,
+                                              0, h, resolvedPoints[2].x, resolvedPoints[2].y);
 }
 
 //==============================================================================

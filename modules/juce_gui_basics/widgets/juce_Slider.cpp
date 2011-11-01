@@ -1245,8 +1245,8 @@ void Slider::handleAbsoluteDrag (const MouseEvent& e)
                                  || style == LinearHorizontal
                                  || style == LinearBar
                                  || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                ? e.x - mouseDragStartPos.getX()
-                                : mouseDragStartPos.getY() - e.y;
+                                ? e.x - mouseDragStartPos.x
+                                : mouseDragStartPos.y - e.y;
 
         double newPos = valueToProportionOfLength (valueOnMouseDown)
                            + mouseDiff * (1.0 / pixelsForFullDragExtent);
@@ -1272,8 +1272,8 @@ void Slider::handleVelocityDrag (const MouseEvent& e)
 {
     const int mouseDiff = (isHorizontal() || style == RotaryHorizontalDrag
                              || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                            ? e.x - mousePosWhenLastDragged.getX()
-                            : e.y - mousePosWhenLastDragged.getY();
+                            ? e.x - mousePosWhenLastDragged.x
+                            : e.y - mousePosWhenLastDragged.y;
 
     const double maxSpeed = jmax (200, sliderRegionSize);
     double speed = jlimit (0.0, maxSpeed, (double) abs (mouseDiff));

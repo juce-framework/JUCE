@@ -30,7 +30,7 @@ ColourGradient::ColourGradient() noexcept
 {
    #if JUCE_DEBUG
     point1.setX (987654.0f);
-    #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED   jassert (point1.getX() != 987654.0f);
+    #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED   jassert (point1.x != 987654.0f);
    #else
     #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED
    #endif

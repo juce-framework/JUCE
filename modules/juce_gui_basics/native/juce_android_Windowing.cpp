@@ -276,10 +276,10 @@ public:
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        return isPositiveAndBelow (position.getX(), component->getWidth())
-            && isPositiveAndBelow (position.getY(), component->getHeight())
+        return isPositiveAndBelow (position.x, component->getWidth())
+            && isPositiveAndBelow (position.y, component->getHeight())
             && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
-                                                                    position.getX(), position.getY()));
+                                                                    position.x, position.y));
     }
 
     const BorderSize<int> getFrameSize() const

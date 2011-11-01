@@ -89,13 +89,13 @@ void TooltipWindow::showFor (const String& tip)
     int w, h;
     getLookAndFeel().getTooltipSize (tip, w, h);
 
-    int x = mousePos.getX();
+    int x = mousePos.x;
     if (x > parentArea.getCentreX())
         x -= (w + 12);
     else
         x += 24;
 
-    int y = mousePos.getY();
+    int y = mousePos.y;
     if (y > parentArea.getCentreY())
         y -= (h + 6);
     else

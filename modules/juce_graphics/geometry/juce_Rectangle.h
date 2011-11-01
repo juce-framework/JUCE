@@ -73,10 +73,10 @@ public:
 
     /** Creates a Rectangle from the positions of two opposite corners. */
     Rectangle (const Point<ValueType>& corner1, const Point<ValueType>& corner2) noexcept
-      : x (jmin (corner1.getX(), corner2.getX())),
-        y (jmin (corner1.getY(), corner2.getY())),
-        w (corner1.getX() - corner2.getX()),
-        h (corner1.getY() - corner2.getY())
+      : x (jmin (corner1.x, corner2.x)),
+        y (jmin (corner1.y, corner2.y)),
+        w (corner1.x - corner2.x),
+        h (corner1.y - corner2.y)
     {
         if (w < ValueType()) w = -w;
         if (h < ValueType()) h = -h;
@@ -143,7 +143,7 @@ public:
     Point<ValueType> getPosition() const noexcept                                                   { return Point<ValueType> (x, y); }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    void setPosition (const Point<ValueType>& newPos) noexcept                                      { x = newPos.getX(); y = newPos.getY(); }
+    void setPosition (const Point<ValueType>& newPos) noexcept                                      { x = newPos.x; y = newPos.y; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
     void setPosition (const ValueType newX, const ValueType newY) noexcept                          { x = newX; y = newY; }
@@ -152,7 +152,7 @@ public:
     Rectangle withPosition (const ValueType newX, const ValueType newY) const noexcept              { return Rectangle (newX, newY, w, h); }
 
     /** Returns a rectangle with the same size as this one, but a new position. */
-    Rectangle withPosition (const Point<ValueType>& newPos) const noexcept                          { return Rectangle (newPos.getX(), newPos.getY(), w, h); }
+    Rectangle withPosition (const Point<ValueType>& newPos) const noexcept                          { return Rectangle (newPos.x, newPos.y, w, h); }
 
     /** Returns the rectangle's top-left position as a Point. */
     Point<ValueType> getTopLeft() const noexcept                                                    { return getPosition(); }
@@ -286,26 +286,26 @@ public:
     /** Returns a rectangle which is the same as this one moved by a given amount. */
     Rectangle operator+ (const Point<ValueType>& deltaPosition) const noexcept
     {
-        return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
+        return Rectangle (x + deltaPosition.x, y + deltaPosition.y, w, h);
     }
 
     /** Moves this rectangle by a given amount. */
     Rectangle& operator+= (const Point<ValueType>& deltaPosition) noexcept
     {
-        x += deltaPosition.getX(); y += deltaPosition.getY();
+        x += deltaPosition.x; y += deltaPosition.y;
         return *this;
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
     Rectangle operator- (const Point<ValueType>& deltaPosition) const noexcept
     {
-        return Rectangle (x - deltaPosition.getX(), y - deltaPosition.getY(), w, h);
+        return Rectangle (x - deltaPosition.x, y - deltaPosition.y, w, h);
     }
 
     /** Moves this rectangle by a given amount. */
     Rectangle& operator-= (const Point<ValueType>& deltaPosition) noexcept
     {
-        x -= deltaPosition.getX(); y -= deltaPosition.getY();
+        x -= deltaPosition.x; y -= deltaPosition.y;
         return *this;
     }
 
@@ -447,7 +447,7 @@ public:
     /** Returns true if this co-ordinate is inside the rectangle. */
     bool contains (const Point<ValueType>& point) const noexcept
     {
-        return point.getX() >= x && point.getY() >= y && point.getX() < x + w && point.getY() < y + h;
+        return point.x >= x && point.y >= y && point.x < x + w && point.y < y + h;
     }
 
     /** Returns true if this other rectangle is completely inside this one. */
@@ -460,8 +460,8 @@ public:
     /** Returns the nearest point to the specified point that lies within this rectangle. */
     Point<ValueType> getConstrainedPoint (const Point<ValueType>& point) const noexcept
     {
-        return Point<ValueType> (jlimit (x, x + w, point.getX()),
-                                 jlimit (y, y + h, point.getY()));
+        return Point<ValueType> (jlimit (x, x + w, point.x),
+                                 jlimit (y, y + h, point.y));
     }
 
     /** Returns true if any part of another rectangle overlaps this one. */
@@ -635,17 +635,17 @@ public:
         if (numPoints == 0)
             return Rectangle();
 
-        ValueType minX (points[0].getX());
+        ValueType minX (points[0].x);
         ValueType maxX (minX);
-        ValueType minY (points[0].getY());
+        ValueType minY (points[0].y);
         ValueType maxY (minY);
 
         for (int i = 1; i < numPoints; ++i)
         {
-            minX = jmin (minX, points[i].getX());
-            maxX = jmax (maxX, points[i].getX());
-            minY = jmin (minY, points[i].getY());
-            maxY = jmax (maxY, points[i].getY());
+            minX = jmin (minX, points[i].x);
+            maxX = jmax (maxX, points[i].x);
+            minY = jmin (minY, points[i].y);
+            maxY = jmax (maxY, points[i].y);
         }
 
         return Rectangle (minX, minY, maxX - minX, maxY - minY);

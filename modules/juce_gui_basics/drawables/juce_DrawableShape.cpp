@@ -203,8 +203,8 @@ bool DrawableShape::hitTest (int x, int y)
     if (! allowsClicksOnThisComponent)
         return false;
 
-    const float globalX = (float) (x - originRelativeToComponent.getX());
-    const float globalY = (float) (y - originRelativeToComponent.getY());
+    const float globalX = (float) (x - originRelativeToComponent.x);
+    const float globalY = (float) (y - originRelativeToComponent.y);
 
     return path.contains (globalX, globalY)
             || (isStrokeVisible() && strokePath.contains (globalX, globalY));
@@ -224,8 +224,8 @@ DrawableShape::RelativeFillType::RelativeFillType (const FillType& fill_)
 
         gradientPoint1 = g.point1.transformedBy (fill.transform);
         gradientPoint2 = g.point2.transformedBy (fill.transform);
-        gradientPoint3 = Point<float> (g.point1.getX() + g.point2.getY() - g.point1.getY(),
-                                       g.point1.getY() + g.point1.getX() - g.point2.getX())
+        gradientPoint3 = Point<float> (g.point1.x + g.point2.y - g.point1.y,
+                                       g.point1.y + g.point1.x - g.point2.x)
                             .transformedBy (fill.transform);
         fill.transform = AffineTransform::identity;
     }
@@ -275,12 +275,12 @@ bool DrawableShape::RelativeFillType::recalculateCoords (Expression::Scope* scop
         if (g.isRadial)
         {
             const Point<float> g3 (gradientPoint3.resolve (scope));
-            const Point<float> g3Source (g1.getX() + g2.getY() - g1.getY(),
-                                         g1.getY() + g1.getX() - g2.getX());
+            const Point<float> g3Source (g1.x + g2.y - g1.y,
+                                         g1.y + g1.x - g2.x);
 
-            t = AffineTransform::fromTargetPoints (g1.getX(), g1.getY(), g1.getX(), g1.getY(),
-                                                   g2.getX(), g2.getY(), g2.getX(), g2.getY(),
-                                                   g3Source.getX(), g3Source.getY(), g3.getX(), g3.getY());
+            t = AffineTransform::fromTargetPoints (g1.x, g1.y, g1.x, g1.y,
+                                                   g2.x, g2.y, g2.x, g2.y,
+                                                   g3Source.x, g3Source.y, g3.x, g3.y);
         }
 
         if (g.point1 != g1 || g.point2 != g2 || fill.transform != t)

@@ -99,7 +99,7 @@ void BubbleComponent::setPosition (Component* componentToPointTo)
     else
         pos = componentToPointTo->localPointToGlobal (pos);
 
-    setPosition (Rectangle<int> (pos.getX(), pos.getY(), componentToPointTo->getWidth(), componentToPointTo->getHeight()));
+    setPosition (Rectangle<int> (pos.x, pos.y, componentToPointTo->getWidth(), componentToPointTo->getHeight()));
 }
 
 void BubbleComponent::setPosition (const int arrowTipX_,

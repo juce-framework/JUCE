@@ -245,12 +245,12 @@ int MidiKeyboardComponent::xyToNote (const Point<int>& pos, float& mousePosition
 
     if (orientation != horizontalKeyboard)
     {
-        p = Point<int> (p.getY(), p.getX());
+        p = Point<int> (p.y, p.x);
 
         if (orientation == verticalKeyboardFacingLeft)
-            p = Point<int> (p.getX(), getWidth() - p.getY());
+            p = Point<int> (p.x, getWidth() - p.y);
         else
-            p = Point<int> (getHeight() - p.getX(), p.getY());
+            p = Point<int> (getHeight() - p.x, p.y);
     }
 
     return remappedXYToNote (p + Point<int> (xOffset, 0), mousePositionVelocity);
@@ -272,9 +272,9 @@ int MidiKeyboardComponent::remappedXYToNote (const Point<int>& pos, float& mouse
                     getKeyPos (note, kx, kw);
                     kx += xOffset;
 
-                    if (pos.getX() >= kx && pos.getX() < kx + kw)
+                    if (pos.x >= kx && pos.x < kx + kw)
                     {
-                        mousePositionVelocity = pos.getY() / (float) blackNoteLength;
+                        mousePositionVelocity = pos.y / (float) blackNoteLength;
                         return note;
                     }
                 }
@@ -294,10 +294,10 @@ int MidiKeyboardComponent::remappedXYToNote (const Point<int>& pos, float& mouse
                 getKeyPos (note, kx, kw);
                 kx += xOffset;
 
-                if (pos.getX() >= kx && pos.getX() < kx + kw)
+                if (pos.x >= kx && pos.x < kx + kw)
                 {
                     const int whiteNoteLength = (orientation == horizontalKeyboard) ? getHeight() : getWidth();
-                    mousePositionVelocity = pos.getY() / (float) whiteNoteLength;
+                    mousePositionVelocity = pos.y / (float) whiteNoteLength;
                     return note;
                 }
             }

@@ -116,7 +116,7 @@ void MenuBarComponent::resized()
 int MenuBarComponent::getItemAt (const Point<int>& p)
 {
     for (int i = 0; i < xPositions.size(); ++i)
-        if (p.getX() >= xPositions[i] && p.getX() < xPositions[i + 1])
+        if (p.x >= xPositions[i] && p.x < xPositions[i + 1])
             return reallyContains (p, true) ? i : -1;
 
     return -1;

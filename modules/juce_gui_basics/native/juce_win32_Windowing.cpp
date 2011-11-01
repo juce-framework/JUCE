@@ -738,15 +738,15 @@ public:
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        if (! (isPositiveAndBelow (position.getX(), component->getWidth())
-                && isPositiveAndBelow (position.getY(), component->getHeight())))
+        if (! (isPositiveAndBelow (position.x, component->getWidth())
+                && isPositiveAndBelow (position.y, component->getHeight())))
             return false;
 
         RECT r;
         GetWindowRect (hwnd, &r);
 
-        POINT p = { position.getX() + r.left + windowBorder.getLeft(),
-                    position.getY() + r.top  + windowBorder.getTop() };
+        POINT p = { position.x + r.left + windowBorder.getLeft(),
+                    position.y + r.top  + windowBorder.getTop() };
 
         HWND w = WindowFromPoint (p);
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
@@ -1536,7 +1536,7 @@ private:
 
         // Because Windows stupidly sends all wheel events to the window with the keyboard
         // focus, we have to redirect them here according to the mouse pos..
-        POINT p = { globalPos.getX(), globalPos.getY() };
+        POINT p = { globalPos.x, globalPos.y };
         HWNDComponentPeer* peer = getOwnerOfWindow (WindowFromPoint (p));
 
         if (peer == nullptr)
@@ -2847,7 +2847,7 @@ Point<int> MouseInputSource::getCurrentMousePosition()
 
 void Desktop::setMousePosition (const Point<int>& newPosition)
 {
-    SetCursorPos (newPosition.getX(), newPosition.getY());
+    SetCursorPos (newPosition.x, newPosition.y);
 }
 
 //==============================================================================
@@ -3026,7 +3026,7 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
         screen.setPosition (jmax (screen.getX(), (int) r.left),
                             jmax (screen.getY(), (int) r.top));
 
-        screen.setSize (jmin (screen.getRight(), (int) r.right) - screen.getX(),
+        screen.setSize (jmin (screen.getRight(),  (int) r.right)  - screen.getX(),
                         jmin (screen.getBottom(), (int) r.bottom) - screen.getY());
     }
 }

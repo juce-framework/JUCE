@@ -53,15 +53,15 @@ const ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositio
          && ! border.subtractedFrom (totalSize).contains (position))
     {
         const int minW = jmax (totalSize.getWidth() / 10, jmin (10, totalSize.getWidth() / 3));
-        if (position.getX() < jmax (border.getLeft(), minW) && border.getLeft() > 0)
+        if (position.x < jmax (border.getLeft(), minW) && border.getLeft() > 0)
             z |= left;
-        else if (position.getX() >= totalSize.getWidth() - jmax (border.getRight(), minW) && border.getRight() > 0)
+        else if (position.x >= totalSize.getWidth() - jmax (border.getRight(), minW) && border.getRight() > 0)
             z |= right;
 
         const int minH = jmax (totalSize.getHeight() / 10, jmin (10, totalSize.getHeight() / 3));
-        if (position.getY() < jmax (border.getTop(), minH) && border.getTop() > 0)
+        if (position.y < jmax (border.getTop(), minH) && border.getTop() > 0)
             z |= top;
-        else if (position.getY() >= totalSize.getHeight() - jmax (border.getBottom(), minH) && border.getBottom() > 0)
+        else if (position.y >= totalSize.getHeight() - jmax (border.getBottom(), minH) && border.getBottom() > 0)
             z |= bottom;
     }
 

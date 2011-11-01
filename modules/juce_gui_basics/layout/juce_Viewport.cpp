@@ -102,8 +102,8 @@ int Viewport::getMaximumVisibleHeight() const   { return contentHolder.getHeight
 Point<int> Viewport::viewportPosToCompPos (const Point<int>& pos) const
 {
     jassert (contentComp != nullptr);
-    return Point<int> (jmax (jmin (0, contentHolder.getWidth()  - contentComp->getWidth()),  jmin (0, -pos.getX())),
-                       jmax (jmin (0, contentHolder.getHeight() - contentComp->getHeight()), jmin (0, -pos.getY())));
+    return Point<int> (jmax (jmin (0, contentHolder.getWidth()  - contentComp->getWidth()),  jmin (0, -(pos.x))),
+                       jmax (jmin (0, contentHolder.getHeight() - contentComp->getHeight()), jmin (0, -(pos.y))));
 }
 
 void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset)
@@ -227,7 +227,7 @@ void Viewport::updateVisibleArea()
     {
         horizontalScrollBar.setBounds (0, contentArea.getHeight(), contentArea.getWidth(), scrollbarWidth);
         horizontalScrollBar.setRangeLimits (0.0, contentBounds.getWidth());
-        horizontalScrollBar.setCurrentRange (visibleOrigin.getX(), contentArea.getWidth());
+        horizontalScrollBar.setCurrentRange (visibleOrigin.x, contentArea.getWidth());
         horizontalScrollBar.setSingleStepSize (singleStepX);
         horizontalScrollBar.cancelPendingUpdate();
     }
@@ -240,7 +240,7 @@ void Viewport::updateVisibleArea()
     {
         verticalScrollBar.setBounds (contentArea.getWidth(), 0, scrollbarWidth, contentArea.getHeight());
         verticalScrollBar.setRangeLimits (0.0, contentBounds.getHeight());
-        verticalScrollBar.setCurrentRange (visibleOrigin.getY(), contentArea.getHeight());
+        verticalScrollBar.setCurrentRange (visibleOrigin.y, contentArea.getHeight());
         verticalScrollBar.setSingleStepSize (singleStepY);
         verticalScrollBar.cancelPendingUpdate();
     }
@@ -264,9 +264,9 @@ void Viewport::updateVisibleArea()
         }
     }
 
-    const Rectangle<int> visibleArea (visibleOrigin.getX(), visibleOrigin.getY(),
-                                      jmin (contentBounds.getWidth()  - visibleOrigin.getX(), contentArea.getWidth()),
-                                      jmin (contentBounds.getHeight() - visibleOrigin.getY(), contentArea.getHeight()));
+    const Rectangle<int> visibleArea (visibleOrigin.x, visibleOrigin.y,
+                                      jmin (contentBounds.getWidth()  - visibleOrigin.x, contentArea.getWidth()),
+                                      jmin (contentBounds.getHeight() - visibleOrigin.y, contentArea.getHeight()));
 
     if (lastVisibleArea != visibleArea)
     {
@@ -369,19 +369,19 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrem
 
             if (wheelIncrementX != 0 && wheelIncrementY != 0 && hasHorzBar && hasVertBar)
             {
-                pos.setX (pos.getX() - roundToInt (wheelIncrementX));
-                pos.setY (pos.getY() - roundToInt (wheelIncrementY));
+                pos.setX (pos.x - roundToInt (wheelIncrementX));
+                pos.setY (pos.y - roundToInt (wheelIncrementY));
             }
             else if (hasHorzBar && (wheelIncrementX != 0 || e.mods.isShiftDown() || ! hasVertBar))
             {
                 if (wheelIncrementX == 0 && ! hasVertBar)
                     wheelIncrementX = wheelIncrementY;
 
-                pos.setX (pos.getX() - roundToInt (wheelIncrementX));
+                pos.setX (pos.x - roundToInt (wheelIncrementX));
             }
             else if (hasVertBar && wheelIncrementY != 0)
             {
-                pos.setY (pos.getY() - roundToInt (wheelIncrementY));
+                pos.setY (pos.y - roundToInt (wheelIncrementY));
             }
 
             if (pos != getViewPosition())

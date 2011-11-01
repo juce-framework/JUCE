@@ -168,9 +168,9 @@ public:
     /** Returns the point as a string in the form "x, y". */
     String toString() const                                       { return String (x) + ", " + String (y); }
 
-private:
     //==============================================================================
-    ValueType x, y;
+    ValueType x; /**< The point's X coordinate. */
+    ValueType y; /**< The point's Y coordinate. */
 };
 
 

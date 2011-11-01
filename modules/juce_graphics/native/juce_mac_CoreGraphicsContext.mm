@@ -662,7 +662,7 @@ CGShadingRef CoreGraphicsContext::SavedState::getShading (CoreGraphicsContext& o
         numGradientLookupEntries = g.createLookupTable (fillType.transform, gradientLookupTable) - 1;
 
         CGFunctionRef function = CGFunctionCreate (this, 1, 0, 4, 0, &(owner.gradientCallbacks));
-        CGPoint p1 (CGPointMake (g.point1.getX(), g.point1.getY()));
+        CGPoint p1 (CGPointMake (g.point1.x, g.point1.y));
 
         if (g.isRadial)
         {
@@ -673,7 +673,7 @@ CGShadingRef CoreGraphicsContext::SavedState::getShading (CoreGraphicsContext& o
         else
         {
             shading = CGShadingCreateAxial (owner.rgbColourSpace, p1,
-                                            CGPointMake (g.point2.getX(), g.point2.getY()),
+                                            CGPointMake (g.point2.x, g.point2.y),
                                             function, true, true);
         }
 

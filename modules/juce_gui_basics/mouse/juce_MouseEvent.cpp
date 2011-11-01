@@ -36,8 +36,8 @@ MouseEvent::MouseEvent (MouseInputSource& source_,
                         const Time& mouseDownTime_,
                         const int numberOfClicks_,
                         const bool mouseWasDragged) noexcept
-    : x (position.getX()),
-      y (position.getY()),
+    : x (position.x),
+      y (position.y),
       mods (mods_),
       eventComponent (eventComponent_),
       originalComponent (originator),
@@ -96,17 +96,17 @@ Point<int> MouseEvent::getMouseDownScreenPosition() const       { return eventCo
 Point<int> MouseEvent::getOffsetFromDragStart() const noexcept  { return getPosition() - mouseDownPos; }
 int MouseEvent::getDistanceFromDragStart() const noexcept       { return mouseDownPos.getDistanceFrom (getPosition()); }
 
-int MouseEvent::getMouseDownX() const noexcept                  { return mouseDownPos.getX(); }
-int MouseEvent::getMouseDownY() const noexcept                  { return mouseDownPos.getY(); }
+int MouseEvent::getMouseDownX() const noexcept                  { return mouseDownPos.x; }
+int MouseEvent::getMouseDownY() const noexcept                  { return mouseDownPos.y; }
 
-int MouseEvent::getDistanceFromDragStartX() const noexcept      { return x - mouseDownPos.getX(); }
-int MouseEvent::getDistanceFromDragStartY() const noexcept      { return y - mouseDownPos.getY(); }
+int MouseEvent::getDistanceFromDragStartX() const noexcept      { return x - mouseDownPos.x; }
+int MouseEvent::getDistanceFromDragStartY() const noexcept      { return y - mouseDownPos.y; }
 
-int MouseEvent::getScreenX() const                              { return getScreenPosition().getX(); }
-int MouseEvent::getScreenY() const                              { return getScreenPosition().getY(); }
+int MouseEvent::getScreenX() const                              { return getScreenPosition().x; }
+int MouseEvent::getScreenY() const                              { return getScreenPosition().y; }
 
-int MouseEvent::getMouseDownScreenX() const                     { return getMouseDownScreenPosition().getX(); }
-int MouseEvent::getMouseDownScreenY() const                     { return getMouseDownScreenPosition().getY(); }
+int MouseEvent::getMouseDownScreenX() const                     { return getMouseDownScreenPosition().x; }
+int MouseEvent::getMouseDownScreenY() const                     { return getMouseDownScreenPosition().y; }
 
 //==============================================================================
 static int doubleClickTimeOutMs = 400;

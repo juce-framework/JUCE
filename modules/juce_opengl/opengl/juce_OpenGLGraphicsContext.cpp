@@ -75,7 +75,7 @@ struct OpenGLTarget
     }
 
     OpenGLTarget (OpenGLFrameBuffer& frameBuffer_, const Point<int>& origin) noexcept
-        : frameBuffer (&frameBuffer_), frameBufferID (0), x (origin.getX()), y (origin.getY()),
+        : frameBuffer (&frameBuffer_), frameBufferID (0), x (origin.x), y (origin.y),
           width (frameBuffer_.getWidth()), height (frameBuffer_.getHeight())
     {}
 
@@ -529,12 +529,12 @@ namespace
     {
         const Point<float> p1 (grad.point1.transformedBy (transform));
         const Point<float> p2 (grad.point2.transformedBy (transform));
-        const Point<float> p3 (Point<float> (grad.point1.getX() - (grad.point2.getY() - grad.point1.getY()) / gradientTexture.textureSize,
-                                             grad.point1.getY() + (grad.point2.getX() - grad.point1.getX()) / gradientTexture.textureSize).transformedBy (transform));
+        const Point<float> p3 (Point<float> (grad.point1.x - (grad.point2.y - grad.point1.y) / gradientTexture.textureSize,
+                                             grad.point1.y + (grad.point2.x - grad.point1.x) / gradientTexture.textureSize).transformedBy (transform));
 
-        const AffineTransform textureTransform (AffineTransform::fromTargetPoints (p1.getX(), p1.getY(),  0.0f, 0.0f,
-                                                                                   p2.getX(), p2.getY(),  1.0f, 0.0f,
-                                                                                   p3.getX(), p3.getY(),  0.0f, 1.0f));
+        const AffineTransform textureTransform (AffineTransform::fromTargetPoints (p1.x, p1.y,  0.0f, 0.0f,
+                                                                                   p2.x, p2.y,  1.0f, 0.0f,
+                                                                                   p3.x, p3.y,  0.0f, 1.0f));
 
         const GLfloat l = (GLfloat) rect.getX();
         const GLfloat r = (GLfloat) rect.getRight();
@@ -594,13 +594,13 @@ namespace
 
         {
             GLfloat* v = vertices;
-            *v++ = centre.getX();
-            *v++ = centre.getY();
+            *v++ = centre.x;
+            *v++ = centre.y;
 
             const Point<float> first (grad.point1.translated (0, -sourceRadius)
                                                  .transformedBy (transform));
-            *v++ = first.getX();
-            *v++ = first.getY();
+            *v++ = first.x;
+            *v++ = first.y;
 
             for (int i = 1; i < numDivisions; ++i)
             {
@@ -608,12 +608,12 @@ namespace
                 const Point<float> p (grad.point1.translated (std::sin (angle) * sourceRadius,
                                                               std::cos (angle) * -sourceRadius)
                                                  .transformedBy (transform));
-                *v++ = p.getX();
-                *v++ = p.getY();
+                *v++ = p.x;
+                *v++ = p.y;
             }
 
-            *v++ = first.getX();
-            *v++ = first.getY();
+            *v++ = first.x;
+            *v++ = first.y;
         }
 
         prepareMasks (mask1, mask2, textureCoords2, textureCoords3, nullptr);
@@ -765,7 +765,7 @@ public:
 
     Ptr applyClipTo (const Ptr& target)
     {
-        return target->clipToTexture (PositionedTexture (mask.getTextureID(), Rectangle<int> (maskOrigin.getX(), maskOrigin.getY(),
+        return target->clipToTexture (PositionedTexture (mask.getTextureID(), Rectangle<int> (maskOrigin.x, maskOrigin.y,
                                                                                               mask.getWidth(), mask.getHeight()), clip));
     }
 
@@ -856,10 +856,10 @@ public:
         glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        const GLfloat l = (GLfloat) maskOrigin.getX();
-        const GLfloat t = (GLfloat) maskOrigin.getY();
-        const GLfloat r = (GLfloat) (maskOrigin.getX() + mask.getWidth());
-        const GLfloat b = (GLfloat) (maskOrigin.getY() + mask.getHeight());
+        const GLfloat l = (GLfloat) maskOrigin.x;
+        const GLfloat t = (GLfloat) maskOrigin.y;
+        const GLfloat r = (GLfloat) (maskOrigin.x + mask.getWidth());
+        const GLfloat b = (GLfloat) (maskOrigin.y + mask.getHeight());
         const GLfloat vertices[]  = { l, t, r, t, l, b, r, b };
         GLfloat textureCoords[]   = { l, t, r, t, l, b, r, b };
 
@@ -890,13 +890,13 @@ public:
 
     void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture& texture, const FillType& fill, GradientTexture& gradientTexture)
     {
-        PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.getX(), maskOrigin.getY(), mask.getWidth(), mask.getHeight()), area);
+        PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.x, maskOrigin.y, mask.getWidth(), mask.getHeight()), area);
         fillTexture (target, area, fill, gradientTexture, &texture, &pt, false);
     }
 
     void fillRectInternal (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, GradientTexture& gradientTexture, bool replaceContents)
     {
-        PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.getX(), maskOrigin.getY(), mask.getWidth(), mask.getHeight()), area);
+        PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.x, maskOrigin.y, mask.getWidth(), mask.getHeight()), area);
         fillTexture (target, area, fill, gradientTexture, &pt, nullptr, replaceContents);
     }
 
@@ -907,7 +907,7 @@ public:
 
         if (! bufferArea.isEmpty())
         {
-            PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.getX(), maskOrigin.getY(), mask.getWidth(), mask.getHeight()), bufferArea);
+            PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.x, maskOrigin.y, mask.getWidth(), mask.getHeight()), bufferArea);
             renderImage (target, source, bufferArea, transform, alpha, mask1, &pt, false, false);
         }
     }
@@ -919,7 +919,7 @@ private:
 
     void prepareFor2D() const
     {
-        OpenGLTarget::applyFlippedMatrix (maskOrigin.getX(), maskOrigin.getY(), mask.getWidth(), mask.getHeight());
+        OpenGLTarget::applyFlippedMatrix (maskOrigin.x, maskOrigin.y, mask.getWidth(), mask.getHeight());
     }
 
     void makeMaskActive()
@@ -942,7 +942,7 @@ private:
     void drawFrameBuffer (const OpenGLFrameBuffer& buffer, const Point<int>& topLeft)
     {
         enableSingleTexture();
-        OpenGLHelpers::drawTextureQuad (buffer.getTextureID(), Rectangle<int> (topLeft.getX(), topLeft.getY(),
+        OpenGLHelpers::drawTextureQuad (buffer.getTextureID(), Rectangle<int> (topLeft.x, topLeft.y,
                                                                                buffer.getWidth(), buffer.getHeight()));
     }
 

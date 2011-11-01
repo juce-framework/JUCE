@@ -251,7 +251,7 @@ void Path::startNewSubPath (const float x, const float y)
 
 void Path::startNewSubPath (const Point<float>& start)
 {
-    startNewSubPath (start.getX(), start.getY());
+    startNewSubPath (start.x, start.y);
 }
 
 void Path::lineTo (const float x, const float y)
@@ -275,7 +275,7 @@ void Path::lineTo (const float x, const float y)
 
 void Path::lineTo (const Point<float>& end)
 {
-    lineTo (end.getX(), end.getY());
+    lineTo (end.x, end.y);
 }
 
 void Path::quadraticTo (const float x1, const float y1,
@@ -304,8 +304,8 @@ void Path::quadraticTo (const float x1, const float y1,
 void Path::quadraticTo (const Point<float>& controlPoint,
                         const Point<float>& endPoint)
 {
-    quadraticTo (controlPoint.getX(), controlPoint.getY(),
-                 endPoint.getX(), endPoint.getY());
+    quadraticTo (controlPoint.x, controlPoint.y,
+                 endPoint.x, endPoint.y);
 }
 
 void Path::cubicTo (const float x1, const float y1,
@@ -339,9 +339,9 @@ void Path::cubicTo (const Point<float>& controlPoint1,
                     const Point<float>& controlPoint2,
                     const Point<float>& endPoint)
 {
-    cubicTo (controlPoint1.getX(), controlPoint1.getY(),
-             controlPoint2.getX(), controlPoint2.getY(),
-             endPoint.getX(), endPoint.getY());
+    cubicTo (controlPoint1.x, controlPoint1.y,
+             controlPoint2.x, controlPoint2.y,
+             endPoint.x, endPoint.y);
 }
 
 void Path::closeSubPath()
@@ -572,7 +572,7 @@ void Path::addPieSegment (const float x, const float y,
             radiusY *= innerCircleProportionalSize;
 
             startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, toRadians));
-            addArc (centre.getX() - radiusX, centre.getY() - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
+            addArc (centre.x - radiusX, centre.y - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
         }
     }
     else
@@ -582,7 +582,7 @@ void Path::addPieSegment (const float x, const float y,
             radiusX *= innerCircleProportionalSize;
             radiusY *= innerCircleProportionalSize;
 
-            addArc (centre.getX() - radiusX, centre.getY() - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
+            addArc (centre.x - radiusX, centre.y - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
         }
         else
         {
@@ -1016,7 +1016,7 @@ bool Path::contains (const float x, const float y, const float tolerance) const
 
 bool Path::contains (const Point<float>& point, const float tolerance) const
 {
-    return contains (point.getX(), point.getY(), tolerance);
+    return contains (point.x, point.y, tolerance);
 }
 
 bool Path::intersectsLine (const Line<float>& line, const float tolerance)

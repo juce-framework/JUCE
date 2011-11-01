@@ -91,9 +91,9 @@ public:
 
                     if (isMoving)
                     {
-                        left += (destination.getX() - left) * delta;
-                        top += (destination.getY() - top) * delta;
-                        right += (destination.getRight() - right) * delta;
+                        left   += (destination.getX()      - left)   * delta;
+                        top    += (destination.getY()      - top)    * delta;
+                        right  += (destination.getRight()  - right)  * delta;
                         bottom += (destination.getBottom() - bottom) * delta;
 
                         const Rectangle<int> newBounds (roundToInt (left),

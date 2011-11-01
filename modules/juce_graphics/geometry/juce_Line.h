@@ -86,16 +86,16 @@ public:
 
     //==============================================================================
     /** Returns the x co-ordinate of the line's start point. */
-    inline ValueType getStartX() const noexcept                             { return start.getX(); }
+    inline ValueType getStartX() const noexcept                             { return start.x; }
 
     /** Returns the y co-ordinate of the line's start point. */
-    inline ValueType getStartY() const noexcept                             { return start.getY(); }
+    inline ValueType getStartY() const noexcept                             { return start.y; }
 
     /** Returns the x co-ordinate of the line's end point. */
-    inline ValueType getEndX() const noexcept                               { return end.getX(); }
+    inline ValueType getEndX() const noexcept                               { return end.x; }
 
     /** Returns the y co-ordinate of the line's end point. */
-    inline ValueType getEndY() const noexcept                               { return end.getY(); }
+    inline ValueType getEndY() const noexcept                               { return end.y; }
 
     /** Returns the line's start point. */
     inline const Point<ValueType>& getStart() const noexcept                { return start; }
@@ -130,10 +130,10 @@ public:
     ValueType getLength() const noexcept                                    { return start.getDistanceFrom (end); }
 
     /** Returns true if the line's start and end x co-ordinates are the same. */
-    bool isVertical() const noexcept                                        { return start.getX() == end.getX(); }
+    bool isVertical() const noexcept                                        { return start.x == end.x; }
 
     /** Returns true if the line's start and end y co-ordinates are the same. */
-    bool isHorizontal() const noexcept                                      { return start.getY() == end.getY(); }
+    bool isHorizontal() const noexcept                                      { return start.y == end.y; }
 
     /** Returns the line's angle.
 
@@ -209,13 +209,13 @@ public:
                                         ValueType perpendicularDistance) const noexcept
     {
         const Point<ValueType> delta (end - start);
-        const double length = juce_hypot ((double) delta.getX(),
-                                          (double) delta.getY());
+        const double length = juce_hypot ((double) delta.x,
+                                          (double) delta.y);
         if (length <= 0)
             return start;
 
-        return Point<ValueType> (start.getX() + (ValueType) ((delta.getX() * distanceFromStart - delta.getY() * perpendicularDistance) / length),
-                                 start.getY() + (ValueType) ((delta.getY() * distanceFromStart + delta.getX() * perpendicularDistance) / length));
+        return Point<ValueType> (start.x + (ValueType) ((delta.x * distanceFromStart - delta.y * perpendicularDistance) / length),
+                                 start.y + (ValueType) ((delta.y * distanceFromStart + delta.x * perpendicularDistance) / length));
     }
 
     /** Returns the location of the point which is a given distance along this line
@@ -248,12 +248,12 @@ public:
                                     Point<ValueType>& pointOnLine) const noexcept
     {
         const Point<ValueType> delta (end - start);
-        const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
+        const double length = delta.x * delta.x + delta.y * delta.y;
 
         if (length > 0)
         {
-            const double prop = ((targetPoint.getX() - start.getX()) * delta.getX()
-                                  + (targetPoint.getY() - start.getY()) * delta.getY()) / length;
+            const double prop = ((targetPoint.x - start.x) * delta.x
+                               + (targetPoint.y - start.y) * delta.y) / length;
 
             if (prop >= 0 && prop <= 1.0)
             {
@@ -288,12 +288,12 @@ public:
     ValueType findNearestProportionalPositionTo (const Point<ValueType>& point) const noexcept
     {
         const Point<ValueType> delta (end - start);
-        const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
+        const double length = delta.x * delta.x + delta.y * delta.y;
 
         return length <= 0 ? 0
                            : jlimit ((ValueType) 0, (ValueType) 1,
-                                     (ValueType) (((point.getX() - start.getX()) * delta.getX()
-                                                    + (point.getY() - start.getY()) * delta.getY()) / length));
+                                     (ValueType) (((point.x - start.x) * delta.x
+                                                 + (point.y - start.y) * delta.y) / length));
     }
 
     /** Finds the point on this line which is nearest to a given point.
@@ -312,9 +312,9 @@ public:
     */
     bool isPointAbove (const Point<ValueType>& point) const noexcept
     {
-        return start.getX() != end.getX()
-                && point.getY() < ((end.getY() - start.getY())
-                                    * (point.getX() - start.getX())) / (end.getX() - start.getX()) + start.getY();
+        return start.x != end.x
+                && point.y < ((end.y - start.y)
+                                    * (point.x - start.x)) / (end.x - start.x) + start.y;
     }
 
     //==============================================================================
@@ -355,34 +355,34 @@ private:
 
         const Point<ValueType> d1 (p2 - p1);
         const Point<ValueType> d2 (p4 - p3);
-        const ValueType divisor = d1.getX() * d2.getY() - d2.getX() * d1.getY();
+        const ValueType divisor = d1.x * d2.y - d2.x * d1.y;
 
         if (divisor == 0)
         {
             if (! (d1.isOrigin() || d2.isOrigin()))
             {
-                if (d1.getY() == 0 && d2.getY() != 0)
+                if (d1.y == 0 && d2.y != 0)
                 {
-                    const ValueType along = (p1.getY() - p3.getY()) / d2.getY();
-                    intersection = p1.withX (p3.getX() + along * d2.getX());
+                    const ValueType along = (p1.y - p3.y) / d2.y;
+                    intersection = p1.withX (p3.x + along * d2.x);
                     return along >= 0 && along <= (ValueType) 1;
                 }
-                else if (d2.getY() == 0 && d1.getY() != 0)
+                else if (d2.y == 0 && d1.y != 0)
                 {
-                    const ValueType along = (p3.getY() - p1.getY()) / d1.getY();
-                    intersection = p3.withX (p1.getX() + along * d1.getX());
+                    const ValueType along = (p3.y - p1.y) / d1.y;
+                    intersection = p3.withX (p1.x + along * d1.x);
                     return along >= 0 && along <= (ValueType) 1;
                 }
-                else if (d1.getX() == 0 && d2.getX() != 0)
+                else if (d1.x == 0 && d2.x != 0)
                 {
-                    const ValueType along = (p1.getX() - p3.getX()) / d2.getX();
-                    intersection = p1.withY (p3.getY() + along * d2.getY());
+                    const ValueType along = (p1.x - p3.x) / d2.x;
+                    intersection = p1.withY (p3.y + along * d2.y);
                     return along >= 0 && along <= (ValueType) 1;
                 }
-                else if (d2.getX() == 0 && d1.getX() != 0)
+                else if (d2.x == 0 && d1.x != 0)
                 {
-                    const ValueType along = (p3.getX() - p1.getX()) / d1.getX();
-                    intersection = p3.withY (p1.getY() + along * d1.getY());
+                    const ValueType along = (p3.x - p1.x) / d1.x;
+                    intersection = p3.withY (p1.y + along * d1.y);
                     return along >= 0 && along <= (ValueType) 1;
                 }
             }
@@ -391,13 +391,13 @@ private:
             return false;
         }
 
-        const ValueType along1 = ((p1.getY() - p3.getY()) * d2.getX() - (p1.getX() - p3.getX()) * d2.getY()) / divisor;
+        const ValueType along1 = ((p1.y - p3.y) * d2.x - (p1.x - p3.x) * d2.y) / divisor;
         intersection = p1 + d1 * along1;
 
         if (along1 < 0 || along1 > (ValueType) 1)
             return false;
 
-        const ValueType along2 = ((p1.getY() - p3.getY()) * d1.getX() - (p1.getX() - p3.getX()) * d1.getY()) / divisor;
+        const ValueType along2 = ((p1.y - p3.y) * d1.x - (p1.x - p3.x) * d1.y) / divisor;
         return along2 >= 0 && along2 <= (ValueType) 1;
     }
 };

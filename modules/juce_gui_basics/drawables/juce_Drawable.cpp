@@ -48,8 +48,8 @@ void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& 
 
     const float oldOpacity = getAlpha();
     setAlpha (opacity);
-    g.addTransform (AffineTransform::translation ((float) -originRelativeToComponent.getX(),
-                                                  (float) -originRelativeToComponent.getY())
+    g.addTransform (AffineTransform::translation ((float) -(originRelativeToComponent.x),
+                                                  (float) -(originRelativeToComponent.y))
                         .followedBy (getTransform())
                         .followedBy (transform));
 
@@ -77,8 +77,8 @@ DrawableComposite* Drawable::getParent() const
 
 void Drawable::transformContextToCorrectOrigin (Graphics& g)
 {
-    g.setOrigin (originRelativeToComponent.getX(),
-                 originRelativeToComponent.getY());
+    g.setOrigin (originRelativeToComponent.x,
+                 originRelativeToComponent.y);
 }
 
 void Drawable::parentHierarchyChanged()
@@ -101,7 +101,7 @@ void Drawable::setBoundsToEnclose (const Rectangle<float>& area)
 //==============================================================================
 void Drawable::setOriginWithOriginalSize (const Point<float>& originWithinParent)
 {
-    setTransform (AffineTransform::translation (originWithinParent.getX(), originWithinParent.getY()));
+    setTransform (AffineTransform::translation (originWithinParent.x, originWithinParent.y));
 }
 
 void Drawable::setTransformToFit (const Rectangle<float>& area, const RectanglePlacement& placement)

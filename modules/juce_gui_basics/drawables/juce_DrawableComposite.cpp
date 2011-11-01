@@ -154,9 +154,9 @@ void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)
 
     const Rectangle<float> content (getContentArea().resolve (scope));
 
-    AffineTransform t (AffineTransform::fromTargetPoints (content.getX(), content.getY(), resolved[0].getX(), resolved[0].getY(),
-                                                          content.getRight(), content.getY(), resolved[1].getX(), resolved[1].getY(),
-                                                          content.getX(), content.getBottom(), resolved[2].getX(), resolved[2].getY()));
+    AffineTransform t (AffineTransform::fromTargetPoints (content.getX(),     content.getY(),      resolved[0].x, resolved[0].y,
+                                                          content.getRight(), content.getY(),      resolved[1].x, resolved[1].y,
+                                                          content.getX(),     content.getBottom(), resolved[2].x, resolved[2].y));
 
     if (t.isSingularity())
         t = AffineTransform::identity;

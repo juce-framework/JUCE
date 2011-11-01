@@ -980,7 +980,7 @@ private:
                 }
 
                 Path areaTowardsSubMenu;
-                areaTowardsSubMenu.addTriangle ((float) lastMousePos.getX(), (float) lastMousePos.getY(),
+                areaTowardsSubMenu.addTriangle ((float) lastMousePos.x, (float) lastMousePos.y,
                                                 subX, (float) activeSubMenu->getScreenY(),
                                                 subX, (float) (activeSubMenu->getScreenY() + activeSubMenu->getHeight()));
 
@@ -1100,12 +1100,12 @@ private:
     bool scrollIfNecessary (const Point<int>& localMousePos, const uint32 timeNow)
     {
         if (canScroll()
-             && (isOver || (isDown && isPositiveAndBelow (localMousePos.getX(), getWidth()))))
+             && (isOver || (isDown && isPositiveAndBelow (localMousePos.x, getWidth()))))
         {
-            if (isTopScrollZoneActive() && localMousePos.getY() < PopupMenuSettings::scrollZone)
+            if (isTopScrollZoneActive() && localMousePos.y < PopupMenuSettings::scrollZone)
                 return scroll (timeNow, -1);
 
-            if (isBottomScrollZoneActive() && localMousePos.getY() > getHeight() - PopupMenuSettings::scrollZone)
+            if (isBottomScrollZoneActive() && localMousePos.y > getHeight() - PopupMenuSettings::scrollZone)
                 return scroll (timeNow, 1);
         }
 

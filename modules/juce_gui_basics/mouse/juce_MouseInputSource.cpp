@@ -459,8 +459,8 @@ private:
         bool canBePartOfMultipleClickWith (const RecentMouseDown& other, const int maxTimeBetweenMs) const
         {
             return time - other.time < RelativeTime::milliseconds (maxTimeBetweenMs)
-                    && abs (position.getX() - other.position.getX()) < 8
-                    && abs (position.getY() - other.position.getY()) < 8
+                    && abs (position.x - other.position.x) < 8
+                    && abs (position.y - other.position.y) < 8
                     && buttons == other.buttons;;
         }
     };

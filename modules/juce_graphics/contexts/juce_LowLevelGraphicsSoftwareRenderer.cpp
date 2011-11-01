@@ -199,24 +199,24 @@ public:
             p2 = Line<float> (p2, p3).findNearestPointTo (p1);
         }
 
-        vertical = std::abs (p1.getX() - p2.getX()) < 0.001f;
-        horizontal = std::abs (p1.getY() - p2.getY()) < 0.001f;
+        vertical   = std::abs (p1.x - p2.x) < 0.001f;
+        horizontal = std::abs (p1.y - p2.y) < 0.001f;
 
         if (vertical)
         {
-            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.getY() - p1.getY()));
-            start = roundToInt (p1.getY() * scale);
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.y - p1.y));
+            start = roundToInt (p1.y * scale);
         }
         else if (horizontal)
         {
-            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.getX() - p1.getX()));
-            start = roundToInt (p1.getX() * scale);
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.x - p1.x));
+            start = roundToInt (p1.x * scale);
         }
         else
         {
-            grad = (p2.getY() - p1.getY()) / (double) (p1.getX() - p2.getX());
-            yTerm = p1.getY() - p1.getX() / grad;
-            scale = roundToInt ((numEntries << (int) numScaleBits) / (yTerm * grad - (p2.getY() * grad - p2.getX())));
+            grad = (p2.getY() - p1.y) / (double) (p1.x - p2.x);
+            yTerm = p1.getY() - p1.x / grad;
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (yTerm * grad - (p2.y * grad - p2.x)));
             grad *= scale;
         }
     }
@@ -255,12 +255,12 @@ public:
                                   const PixelARGB* const lookupTable_, const int numEntries_)
         : lookupTable (lookupTable_),
           numEntries (numEntries_),
-          gx1 (gradient.point1.getX()),
-          gy1 (gradient.point1.getY())
+          gx1 (gradient.point1.x),
+          gy1 (gradient.point1.y)
     {
         jassert (numEntries_ >= 0);
         const Point<float> diff (gradient.point1 - gradient.point2);
-        maxDist = diff.getX() * diff.getX() + diff.getY() * diff.getY();
+        maxDist = diff.x * diff.x + diff.y * diff.y;
         invScale = numEntries / std::sqrt (maxDist);
         jassert (roundToInt (std::sqrt (maxDist) * invScale) <= numEntries);
     }
@@ -1296,7 +1296,7 @@ public:
 
     void translate (const Point<int>& delta)
     {
-        edgeTable.translate ((float) delta.getX(), delta.getY());
+        edgeTable.translate ((float) delta.x, delta.y);
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r) const
@@ -1452,7 +1452,7 @@ public:
 
     void translate (const Point<int>& delta)
     {
-        clip.offsetAll (delta.getX(), delta.getY());
+        clip.offsetAll (delta.x, delta.y);
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r) const
@@ -2080,7 +2080,7 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image&
 
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, const Point<int>& origin,
                                                                     const RectangleList& initialClip)
-    : savedState (new SavedState (image, initialClip, origin.getX(), origin.getY()))
+    : savedState (new SavedState (image, initialClip, origin.x, origin.y))
 {
 }
 
