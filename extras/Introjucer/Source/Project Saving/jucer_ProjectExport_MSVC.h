@@ -44,6 +44,7 @@ public:
             getLibraryType() = 1;
 
         projectGUID = createGUID (project.getProjectUID());
+        msvcPreBuildCommand = getPrebuildCommand().toString();
     }
 
     //==============================================================================
@@ -68,6 +69,8 @@ public:
             props.add (new TextPropertyComponent (getSetting (Ids::libraryName_Release), "Library Name (Release)", 128, false));
             props.getLast()->setTooltip ("If set, this name will override the binary name specified in the configuration settings, for a release build. You must include the .lib or .dll suffix on this filename.");
         }
+
+        props.add (new TextPropertyComponent (getPrebuildCommand(), "Pre-build Command", 2048, false));
     }
 
 protected:
@@ -78,6 +81,7 @@ protected:
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
     Value getLibraryType() const        { return getSetting (Ids::libraryType); }
+    Value getPrebuildCommand() const    { return getSetting (Ids::prebuildCommand); }
     bool isLibraryDLL() const           { return msvcIsDLL || (projectType.isLibrary() && getLibraryType() == 2); }
 
     //==============================================================================
@@ -524,9 +528,9 @@ protected:
 
         XmlElement* preBuildEvent = createToolElement (xml, "VCPreBuildEventTool");
 
-        if (msvcPreBuildDescription.isNotEmpty() || msvcPreBuildCommand.isNotEmpty())
+        if (msvcPreBuildCommand.isNotEmpty())
         {
-            preBuildEvent->setAttribute ("Description", msvcPreBuildDescription);
+            preBuildEvent->setAttribute ("Description", "Pre-build");
             preBuildEvent->setAttribute ("CommandLine", msvcPreBuildCommand);
         }
 

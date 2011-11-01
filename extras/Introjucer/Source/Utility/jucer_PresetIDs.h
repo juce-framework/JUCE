@@ -94,6 +94,7 @@ namespace Ids
     DECLARE_ID (osxArchitecture);
     DECLARE_ID (jucerVersion);
     DECLARE_ID (projectType);
+    DECLARE_ID (prebuildCommand);
     DECLARE_ID (juceLinkage);
     DECLARE_ID (buildVST);
     DECLARE_ID (bundleIdentifier);
