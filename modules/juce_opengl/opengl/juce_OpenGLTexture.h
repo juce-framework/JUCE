@@ -37,13 +37,39 @@ public:
     ~OpenGLTexture();
 
     /** Creates a texture from the given image.
+
         Note that if the image's dimensions aren't a power-of-two, the texture may
         be created with a larger size.
-    */
-    void load (const Image& image);
 
-    /** Creates a texture from a raw array of pixels. */
-    void load (const PixelARGB* pixels, int width, int height);
+        The image will be arranged so that its top-left corner is at texture
+        coordinate (0, 1).
+    */
+    void loadImage (const Image& image);
+
+    /** Creates a texture from a raw array of pixels.
+        The width and height provided must be valid - i.e. power-of-two unless
+        the underlying GL system allows otherwise.
+        The data is sent directly to the OpenGL driver without being flipped vertically,
+        so the first pixel will be mapped onto texture coordinate (0, 0).
+        bottom-left corner of the texture
+    */
+    void loadARGB (const PixelARGB* pixels, int width, int height);
+
+    /** Creates a texture from a raw array of pixels.
+        This is like loadARGB, but will vertically flip the data so that the first
+        pixel ends up at texture coordinate (0, 1), and if the width and height are
+        not powers-of-two, it will compensate by using a larger texture size.
+    */
+    void loadARGBFlipped (const PixelARGB* pixels, int width, int height);
+
+    /** Creates an alpha-channel texture from an array of alpha values.
+        The width and height provided must be valid - i.e. power-of-two unless
+        the underlying GL system allows otherwise.
+        The data is sent directly to the OpenGL driver without being flipped vertically,
+        so the first pixel will be mapped onto texture coordinate (0, 0).
+        bottom-left corner of the texture
+    */
+    void loadAlpha (const uint8* pixels, int width, int height);
 
     /** Frees the texture, if there is one. */
     void release();
@@ -83,7 +109,7 @@ private:
     GLuint textureID;
     int width, height;
 
-    void create (int w, int h, const void*);
+    void create (int w, int h, const void*, GLenum type);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTexture);
 };

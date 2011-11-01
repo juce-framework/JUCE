@@ -75,12 +75,13 @@ public:
 
    #ifndef DOXYGEN
     class SavedState;
-    class ScratchBufferManager;
    #endif
 
 private:
-    ScopedPointer<ScratchBufferManager> scratchBufferManager;
     RenderingHelpers::SavedStateStack<SavedState> stack;
+    GLuint previousFrameBufferTarget;
+
+    void initialise();
 };
 
 #endif   // __JUCE_OPENGLGRAPHICSCONTEXT_JUCEHEADER__

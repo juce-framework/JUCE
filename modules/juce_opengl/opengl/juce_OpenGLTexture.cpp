@@ -25,12 +25,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#if JUCE_OPENGL_ES
- enum { internalGLTextureFormat = GL_RGBA };
-#else
- enum { internalGLTextureFormat = 4 };
-#endif
-
 
 OpenGLTexture::OpenGLTexture()
     : textureID (0), width (0), height (0)
@@ -47,7 +41,7 @@ bool OpenGLTexture::isValidSize (int width, int height)
     return isPowerOfTwo (width) && isPowerOfTwo (height);
 }
 
-void OpenGLTexture::create (const int w, const int h, const void* pixels)
+void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum type)
 {
     // Texture objects can only be created when the current thread has an active OpenGL
     // context. You'll need to make an OpenGLComponent active before calling this.
@@ -55,24 +49,26 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels)
 
     jassert (isValidSize (w, h)); // Perhaps these dimensions must be a power-of-two?
 
-    release();
+    if (width != w || height != h)
+    {
+        release();
 
-    width  = w;
-    height = h;
+        width  = w;
+        height = h;
 
-    glGenTextures (1, &textureID);
+        glGenTextures (1, &textureID);
+    }
+
     glBindTexture (GL_TEXTURE_2D, textureID);
-
-    glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
-    glTexImage2D (GL_TEXTURE_2D, 0, internalGLTextureFormat, w, h, 0,
-                  GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+    glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D (GL_TEXTURE_2D, 0, type == GL_ALPHA ? GL_ALPHA : GL_RGBA,
+                  w, h, 0, type, GL_UNSIGNED_BYTE, pixels);
 }
 
 template <class PixelType>
@@ -96,7 +92,7 @@ struct Flipper
     }
 };
 
-void OpenGLTexture::load (const Image& image)
+void OpenGLTexture::loadImage (const Image& image)
 {
     const int imageW = image.getWidth();
     const int imageH = image.getHeight();
@@ -114,25 +110,30 @@ void OpenGLTexture::load (const Image& image)
         default: break;
     }
 
-    create (textureW, textureH, dataCopy);
+    create (textureW, textureH, dataCopy, GL_BGRA_EXT);
 }
 
-void OpenGLTexture::load (const PixelARGB* pixels, const int w, const int h)
+void OpenGLTexture::loadARGB (const PixelARGB* pixels, const int w, const int h)
+{
+    jassert (isValidSize (w, h));
+    create (w, h, pixels, GL_BGRA_EXT);
+}
+
+void OpenGLTexture::loadAlpha (const uint8* pixels, int w, int h)
+{
+    jassert (isValidSize (w, h));
+    create (w, h, pixels, GL_ALPHA);
+}
+
+void OpenGLTexture::loadARGBFlipped (const PixelARGB* pixels, int w, int h)
 {
     const int textureW = nextPowerOfTwo (w);
+    const int textureH = nextPowerOfTwo (h);
 
-    if (h == 1 && textureW == w)
-    {
-        create (w, 1, pixels);
-    }
-    else
-    {
-        const int textureH = nextPowerOfTwo (h);
+    HeapBlock<PixelARGB> flippedCopy;
+    Flipper<PixelARGB>::flip (flippedCopy, (const uint8*) pixels, 4 * w, w, h, textureW, textureH);
 
-        HeapBlock<PixelARGB> dataCopy;
-        Flipper<PixelARGB>::flip (dataCopy, (const uint8*) pixels, 4 * w, w, h, textureW, textureH);
-        create (textureW, textureH, dataCopy);
-    }
+    loadARGB (flippedCopy, textureW, textureH);
 }
 
 void OpenGLTexture::release()

@@ -25,95 +25,98 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#if JUCE_WINDOWS
-enum
+namespace
 {
-    GL_FRAMEBUFFER_EXT = 0x8D40,
-    GL_RENDERBUFFER_EXT = 0x8D41,
-    GL_FRAMEBUFFER_BINDING_EXT = 0x8CA6,
-    GL_COLOR_ATTACHMENT0_EXT = 0x8CE0,
-    GL_DEPTH_ATTACHMENT_EXT = 0x8D00,
-    GL_STENCIL_ATTACHMENT_EXT = 0x8D20,
-    GL_FRAMEBUFFER_COMPLETE_EXT = 0x8CD5,
-    GL_DEPTH24_STENCIL8_EXT = 0x88F0,
-    GL_RENDERBUFFER_DEPTH_SIZE_EXT = 0x8D54
-};
-#endif
-
-#if JUCE_WINDOWS || JUCE_LINUX
-
-#define FRAMEBUFFER_FUNCTION_LIST(USE_FUNCTION) \
-    USE_FUNCTION (glIsRenderbufferEXT,                          GLboolean, (GLuint renderbuffer))\
-    USE_FUNCTION (glBindRenderbufferEXT,                        void, (GLenum target, GLuint renderbuffer))\
-    USE_FUNCTION (glDeleteRenderbuffersEXT,                     void, (GLsizei n, const GLuint *renderbuffers))\
-    USE_FUNCTION (glGenRenderbuffersEXT,                        void, (GLsizei n, GLuint *renderbuffers))\
-    USE_FUNCTION (glRenderbufferStorageEXT,                     void, (GLenum target, GLenum internalformat, GLsizei width, GLsizei height))\
-    USE_FUNCTION (glGetRenderbufferParameterivEXT,              void, (GLenum target, GLenum pname, GLint* params))\
-    USE_FUNCTION (glIsFramebufferEXT,                           GLboolean, (GLuint framebuffer))\
-    USE_FUNCTION (glBindFramebufferEXT,                         void, (GLenum target, GLuint framebuffer))\
-    USE_FUNCTION (glDeleteFramebuffersEXT,                      void, (GLsizei n, const GLuint *framebuffers))\
-    USE_FUNCTION (glGenFramebuffersEXT,                         void, (GLsizei n, GLuint *framebuffers))\
-    USE_FUNCTION (glCheckFramebufferStatusEXT,                  GLenum, (GLenum target))\
-    USE_FUNCTION (glFramebufferTexture1DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level))\
-    USE_FUNCTION (glFramebufferTexture2DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level))\
-    USE_FUNCTION (glFramebufferTexture3DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset))\
-    USE_FUNCTION (glFramebufferRenderbufferEXT,                 void, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer))\
-    USE_FUNCTION (glGetFramebufferAttachmentParameterivEXT,     void, (GLenum target, GLenum attachment, GLenum pname, GLint *params))\
-    USE_FUNCTION (glGenerateMipmapEXT,                          void, (GLenum target))\
-
-FRAMEBUFFER_FUNCTION_LIST (JUCE_DECLARE_GL_EXTENSION_FUNCTION)
-
-static bool framebufferFunctionsInitialised = false;
-
-static void initialiseFrameBufferFunctions()
-{
-    if (! framebufferFunctionsInitialised)
+    #if JUCE_WINDOWS
+    enum
     {
-        framebufferFunctionsInitialised = true;
+        GL_FRAMEBUFFER_EXT = 0x8D40,
+        GL_RENDERBUFFER_EXT = 0x8D41,
+        GL_FRAMEBUFFER_BINDING_EXT = 0x8CA6,
+        GL_COLOR_ATTACHMENT0_EXT = 0x8CE0,
+        GL_DEPTH_ATTACHMENT_EXT = 0x8D00,
+        GL_STENCIL_ATTACHMENT_EXT = 0x8D20,
+        GL_FRAMEBUFFER_COMPLETE_EXT = 0x8CD5,
+        GL_DEPTH24_STENCIL8_EXT = 0x88F0,
+        GL_RENDERBUFFER_DEPTH_SIZE_EXT = 0x8D54
+    };
+    #endif
 
-       #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
-        FRAMEBUFFER_FUNCTION_LIST (FIND_FUNCTION)
-       #undef FIND_FUNCTION
+   #if JUCE_WINDOWS || JUCE_LINUX
+
+    #define FRAMEBUFFER_FUNCTION_LIST(USE_FUNCTION) \
+        USE_FUNCTION (glIsRenderbufferEXT,                          GLboolean, (GLuint renderbuffer))\
+        USE_FUNCTION (glBindRenderbufferEXT,                        void, (GLenum target, GLuint renderbuffer))\
+        USE_FUNCTION (glDeleteRenderbuffersEXT,                     void, (GLsizei n, const GLuint *renderbuffers))\
+        USE_FUNCTION (glGenRenderbuffersEXT,                        void, (GLsizei n, GLuint *renderbuffers))\
+        USE_FUNCTION (glRenderbufferStorageEXT,                     void, (GLenum target, GLenum internalformat, GLsizei width, GLsizei height))\
+        USE_FUNCTION (glGetRenderbufferParameterivEXT,              void, (GLenum target, GLenum pname, GLint* params))\
+        USE_FUNCTION (glIsFramebufferEXT,                           GLboolean, (GLuint framebuffer))\
+        USE_FUNCTION (glBindFramebufferEXT,                         void, (GLenum target, GLuint framebuffer))\
+        USE_FUNCTION (glDeleteFramebuffersEXT,                      void, (GLsizei n, const GLuint *framebuffers))\
+        USE_FUNCTION (glGenFramebuffersEXT,                         void, (GLsizei n, GLuint *framebuffers))\
+        USE_FUNCTION (glCheckFramebufferStatusEXT,                  GLenum, (GLenum target))\
+        USE_FUNCTION (glFramebufferTexture1DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level))\
+        USE_FUNCTION (glFramebufferTexture2DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level))\
+        USE_FUNCTION (glFramebufferTexture3DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset))\
+        USE_FUNCTION (glFramebufferRenderbufferEXT,                 void, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer))\
+        USE_FUNCTION (glGetFramebufferAttachmentParameterivEXT,     void, (GLenum target, GLenum attachment, GLenum pname, GLint *params))\
+        USE_FUNCTION (glGenerateMipmapEXT,                          void, (GLenum target))\
+
+    FRAMEBUFFER_FUNCTION_LIST (JUCE_DECLARE_GL_EXTENSION_FUNCTION)
+
+    static bool framebufferFunctionsInitialised = false;
+
+    void initialiseFrameBufferFunctions()
+    {
+        if (! framebufferFunctionsInitialised)
+        {
+            framebufferFunctionsInitialised = true;
+
+           #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+            FRAMEBUFFER_FUNCTION_LIST (FIND_FUNCTION)
+           #undef FIND_FUNCTION
+        }
     }
+
+    #undef FRAMEBUFFER_FUNCTION_LIST
+
+    //==============================================================================
+   #elif JUCE_OPENGL_ES
+
+    #define glIsRenderbufferEXT                         glIsRenderbufferOES
+    #define glBindRenderbufferEXT                       glBindRenderbufferOES
+    #define glDeleteRenderbuffersEXT                    glDeleteRenderbuffersOES
+    #define glGenRenderbuffersEXT                       glGenRenderbuffersOES
+    #define glRenderbufferStorageEXT                    glRenderbufferStorageOES
+    #define glGetRenderbufferParameterivEXT             glGetRenderbufferParameterivOES
+    #define glIsFramebufferEXT                          glIsFramebufferOES
+    #define glBindFramebufferEXT                        glBindFramebufferOES
+    #define glDeleteFramebuffersEXT                     glDeleteFramebuffersOES
+    #define glGenFramebuffersEXT                        glGenFramebuffersOES
+    #define glCheckFramebufferStatusEXT                 glCheckFramebufferStatusOES
+    #define glFramebufferTexture1DEXT                   glFramebufferTexture1DOES
+    #define glFramebufferTexture2DEXT                   glFramebufferTexture2DOES
+    #define glFramebufferTexture3DEXT                   glFramebufferTexture3DOES
+    #define glFramebufferRenderbufferEXT                glFramebufferRenderbufferOES
+    #define glGetFramebufferAttachmentParameterivEXT    glGetFramebufferAttachmentParameterivOES
+    #define glGenerateMipmapEXT                         glGenerateMipmapOES
+
+    #define GL_FRAMEBUFFER_EXT                          GL_FRAMEBUFFER_OES
+    #define GL_FRAMEBUFFER_BINDING_EXT                  GL_FRAMEBUFFER_BINDING_OES
+    #define GL_RGBA8                                    GL_RGBA
+    #define GL_COLOR_ATTACHMENT0_EXT                    GL_COLOR_ATTACHMENT0_OES
+    #define GL_RENDERBUFFER_EXT                         GL_RENDERBUFFER_OES
+    #define GL_DEPTH24_STENCIL8_EXT                     GL_DEPTH24_STENCIL8_OES
+    #define GL_RENDERBUFFER_DEPTH_SIZE_EXT              GL_RENDERBUFFER_DEPTH_SIZE_OES
+    #define GL_DEPTH_ATTACHMENT_EXT                     GL_DEPTH_ATTACHMENT_OES
+    #define GL_STENCIL_ATTACHMENT_EXT                   GL_STENCIL_ATTACHMENT_OES
+    #define GL_FRAMEBUFFER_COMPLETE_EXT                 GL_FRAMEBUFFER_COMPLETE_OES
+    #define GL_FRAMEBUFFER_UNSUPPORTED_EXT              GL_FRAMEBUFFER_UNSUPPORTED_OES
+    #define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT    GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES
+
+   #endif
 }
-
-#undef FRAMEBUFFER_FUNCTION_LIST
-
-//==============================================================================
-#elif JUCE_OPENGL_ES
-
-#define glIsRenderbufferEXT                         glIsRenderbufferOES
-#define glBindRenderbufferEXT                       glBindRenderbufferOES
-#define glDeleteRenderbuffersEXT                    glDeleteRenderbuffersOES
-#define glGenRenderbuffersEXT                       glGenRenderbuffersOES
-#define glRenderbufferStorageEXT                    glRenderbufferStorageOES
-#define glGetRenderbufferParameterivEXT             glGetRenderbufferParameterivOES
-#define glIsFramebufferEXT                          glIsFramebufferOES
-#define glBindFramebufferEXT                        glBindFramebufferOES
-#define glDeleteFramebuffersEXT                     glDeleteFramebuffersOES
-#define glGenFramebuffersEXT                        glGenFramebuffersOES
-#define glCheckFramebufferStatusEXT                 glCheckFramebufferStatusOES
-#define glFramebufferTexture1DEXT                   glFramebufferTexture1DOES
-#define glFramebufferTexture2DEXT                   glFramebufferTexture2DOES
-#define glFramebufferTexture3DEXT                   glFramebufferTexture3DOES
-#define glFramebufferRenderbufferEXT                glFramebufferRenderbufferOES
-#define glGetFramebufferAttachmentParameterivEXT    glGetFramebufferAttachmentParameterivOES
-#define glGenerateMipmapEXT                         glGenerateMipmapOES
-
-#define GL_FRAMEBUFFER_EXT                          GL_FRAMEBUFFER_OES
-#define GL_FRAMEBUFFER_BINDING_EXT                  GL_FRAMEBUFFER_BINDING_OES
-#define GL_RGBA8                                    GL_RGBA
-#define GL_COLOR_ATTACHMENT0_EXT                    GL_COLOR_ATTACHMENT0_OES
-#define GL_RENDERBUFFER_EXT                         GL_RENDERBUFFER_OES
-#define GL_DEPTH24_STENCIL8_EXT                     GL_DEPTH24_STENCIL8_OES
-#define GL_RENDERBUFFER_DEPTH_SIZE_EXT              GL_RENDERBUFFER_DEPTH_SIZE_OES
-#define GL_DEPTH_ATTACHMENT_EXT                     GL_DEPTH_ATTACHMENT_OES
-#define GL_STENCIL_ATTACHMENT_EXT                   GL_STENCIL_ATTACHMENT_OES
-#define GL_FRAMEBUFFER_COMPLETE_EXT                 GL_FRAMEBUFFER_COMPLETE_OES
-#define GL_FRAMEBUFFER_UNSUPPORTED_EXT              GL_FRAMEBUFFER_UNSUPPORTED_OES
-#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT    GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES
-
-#endif
 
 //==============================================================================
 class OpenGLFrameBuffer::Pimpl
@@ -399,7 +402,7 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     glDisable (GL_BLEND);
 
     OpenGLTexture tex;
-    tex.load (data, area.getWidth(), area.getHeight());
+    tex.loadARGBFlipped (data, area.getWidth(), area.getHeight());
     const int texH = tex.getHeight();
 
    #if JUCE_OPENGL_ES

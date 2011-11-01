@@ -57,9 +57,6 @@
  #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
- #endif
-
- #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment(lib, "OpenGL32.Lib")
   #pragma comment(lib, "GlU32.Lib")
  #endif
@@ -127,6 +124,9 @@
  #define JUCE_DECLARE_GL_EXTENSION_FUNCTION(name, returnType, params) \
    typedef returnType (*type_ ## name) params; static type_ ## name name;
 #endif
+
+#define JUCE_INSTANTIATE_GL_EXTENSION(name) \
+   name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
 
 //==============================================================================
 // START_AUTOINCLUDE opengl/*.cpp

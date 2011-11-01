@@ -78,7 +78,7 @@ public:
     static void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords,
                                    const int numVertices, const GLuint textureID) noexcept;
 
-    static void drawTextureQuad (GLuint textureID, int x, int y, int w, int h);
+    static void drawTextureQuad (GLuint textureID, const Rectangle<int>& rect);
 
     static void fillRectWithTexture (const Rectangle<int>& rect, GLuint textureID, const float alpha);
 
@@ -88,52 +88,12 @@ public:
     static void fillRectWithColour (const Rectangle<int>& rect,
                                     const Colour& colour);
 
-    /** Renders an edge-table into the current context. */
-    static void fillEdgeTable (const EdgeTable& edgeTable);
-
     /** Checks whether the current context supports the specified extension. */
     static bool isExtensionSupported (const char* extensionName);
 
     /** Returns the address of a named GL extension function */
     static void* getExtensionFunction (const char* functionName);
 };
-
-//==============================================================================
-/** Holds a set of OpenGL triangles, having generated them from a Path object.
-*/
-class JUCE_API  TriangulatedPath
-{
-public:
-    TriangulatedPath (const Path& path, const AffineTransform& transform);
-
-    /** Destructor. */
-    ~TriangulatedPath();
-
-    /** Renders the path, using a jittered oversampling method.
-        The oversampling level is the square root of the number of times it
-        should be oversampled, so 3 or 4 might be reasonable.
-    */
-    void draw (int oversamplingLevel) const;
-
-    /** Reduces the memory footprint of this object to the minimum possible. */
-    void optimiseStorage();
-
-private:
-    class TrapezoidedPath;
-    friend class TrapezoidedPath;
-
-    void startNewBlock();
-    void addTriangle  (GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat x3, GLfloat y3);
-    void addTrapezoid (GLfloat y1, GLfloat y2, GLfloat x1, GLfloat x2, GLfloat x3, GLfloat x4);
-
-    struct TriangleBlock;
-    friend class OwnedArray<TriangleBlock>;
-    OwnedArray<TriangleBlock> blocks;
-    TriangleBlock* currentBlock;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TriangulatedPath);
-};
-
 
 //==============================================================================
 /**
@@ -150,11 +110,11 @@ public:
     ~OpenGLTextureFromImage();
 
     GLuint textureID;
-    const int width, height;
+    const int imageWidth, imageHeight;
+    float fullWidthProportion, fullHeightProportion;
 
 private:
     ScopedPointer<OpenGLTexture> texture;
-    ScopedPointer<OpenGLFrameBuffer> frameBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLTextureFromImage);
 };

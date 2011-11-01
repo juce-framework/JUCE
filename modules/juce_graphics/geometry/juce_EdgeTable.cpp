@@ -44,10 +44,10 @@ EdgeTable::EdgeTable (const Rectangle<int>& bounds_,
         t += lineStrideElements;
     }
 
-    const int topLimit = bounds.getY() << 8;
+    const int topLimit    = bounds.getY() << 8;
     const int heightLimit = bounds.getHeight() << 8;
-    const int leftLimit = bounds.getX() << 8;
-    const int rightLimit = bounds.getRight() << 8;
+    const int leftLimit   = bounds.getX() << 8;
+    const int rightLimit  = bounds.getRight() << 8;
 
     PathFlatteningIterator iter (path, transform);
 
@@ -598,13 +598,10 @@ void EdgeTable::clipToRectangle (const Rectangle<int>& r)
         if (bottom < bounds.getHeight())
             bounds.setHeight (bottom);
 
-        if (clipped.getRight() < bounds.getRight())
-            bounds.setRight (clipped.getRight());
-
         for (int i = top; --i >= 0;)
             table [lineStrideElements * i] = 0;
 
-        if (clipped.getX() > bounds.getX())
+        if (clipped.getX() > bounds.getX() || clipped.getRight() < bounds.getRight())
         {
             const int x1 = clipped.getX() << 8;
             const int x2 = jmin (bounds.getRight(), clipped.getRight()) << 8;
