@@ -64,9 +64,9 @@ static void juce_getCpuVendor (char* const v)
 {
     int vendor[4] = { 0 };
 
-  #ifndef __MINGW32__
+   #if ! JUCE_MINGW
     __try
-  #endif
+   #endif
     {
        #if JUCE_GCC
         unsigned int dummy = 0;
@@ -82,7 +82,7 @@ static void juce_getCpuVendor (char* const v)
         }
        #endif
     }
-   #ifndef __MINGW32__
+   #if ! JUCE_MINGW
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
         *v = 0;

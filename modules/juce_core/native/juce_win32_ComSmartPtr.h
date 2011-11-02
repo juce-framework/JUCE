@@ -63,7 +63,7 @@ public:
 
     HRESULT CoCreateInstance (REFCLSID classUUID, DWORD dwClsContext = CLSCTX_INPROC_SERVER)
     {
-       #ifndef __MINGW32__
+       #if ! JUCE_MINGW
         return ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
        #else
         jassertfalse; // need to find a mingw equivalent of __uuidof to make this possible
@@ -83,7 +83,7 @@ public:
     template <class OtherComClass>
     HRESULT QueryInterface (ComSmartPtr<OtherComClass>& destObject) const
     {
-       #ifndef __MINGW32__
+       #if ! JUCE_MINGW
         return this->QueryInterface (__uuidof (OtherComClass), destObject);
        #else
         jassertfalse; // need to find a mingw equivalent of __uuidof to make this possible
@@ -114,7 +114,7 @@ public:
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
-       #ifndef __MINGW32__
+       #if ! JUCE_MINGW
         if (refId == __uuidof (ComClass))   { AddRef(); *result = dynamic_cast <ComClass*> (this); return S_OK; }
        #endif
 

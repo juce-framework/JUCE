@@ -84,6 +84,10 @@
   #pragma comment (lib, "D2d1.lib")
  #endif
 
+ #if JUCE_MINGW
+  #include <Imm.h>
+ #endif
+
 //==============================================================================
 #elif JUCE_LINUX
  #include <X11/Xlib.h>
