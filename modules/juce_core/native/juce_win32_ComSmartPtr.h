@@ -36,7 +36,7 @@ class ComSmartPtr
 public:
     ComSmartPtr() throw() : p (0)                               {}
     ComSmartPtr (ComClass* const p_) : p (p_)                   { if (p_ != 0) p_->AddRef(); }
-    ComSmartPtr (const ComSmartPtr<ComClass>& p_) : p (p_.p)    { if (p != 0) p->AddRef(); }
+    ComSmartPtr (const ComSmartPtr<ComClass>& p_) : p (p_.p)    { if (p  != 0) p ->AddRef(); }
     ~ComSmartPtr()                                              { release(); }
 
     operator ComClass*() const throw()     { return p; }
@@ -116,6 +116,8 @@ public:
     {
        #if ! JUCE_MINGW
         if (refId == __uuidof (ComClass))   { AddRef(); *result = dynamic_cast <ComClass*> (this); return S_OK; }
+       #else
+        jassertfalse; // need to find a mingw equivalent of __uuidof to make this possible
        #endif
 
         if (refId == IID_IUnknown)          { AddRef(); *result = dynamic_cast <IUnknown*> (this); return S_OK; }
@@ -124,11 +126,11 @@ public:
         return E_NOINTERFACE;
     }
 
-    ULONG __stdcall AddRef()    { return (ULONG) ++refCount; }
-    ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return (ULONG) r; }
+    ULONG __stdcall AddRef()    { return ++refCount; }
+    ULONG __stdcall Release()   { const ULONG r = --refCount; if (r == 0) delete this; return r; }
 
 protected:
-    int refCount;
+    ULONG refCount;
 };
 
 #endif   // __JUCE_WIN32_COMSMARTPTR_JUCEHEADER__

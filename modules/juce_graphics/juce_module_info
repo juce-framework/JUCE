@@ -25,5 +25,5 @@
                       "native/*" ],
 
   "OSXFrameworks":  "Cocoa",
-  "iOSFrameworks":  "CoreGraphics CoreText"
+  "iOSFrameworks":  "CoreGraphics CoreText QuartzCore"
 }
