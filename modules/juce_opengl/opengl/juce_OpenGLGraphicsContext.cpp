@@ -177,6 +177,7 @@ public:
     GLuint textureID;
     Rectangle<int> area, clip;
 
+private:
     struct EdgeTableData
     {
         EdgeTableData (const EdgeTable& et)
@@ -285,10 +286,8 @@ namespace
 
     void fillRectangleList (const RectangleList& list)
     {
-        glEnableClientState (GL_VERTEX_ARRAY);
-        glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-
         GLfloat vertices [8];
+        glEnableClientState (GL_VERTEX_ARRAY);
         glVertexPointer (2, GL_FLOAT, 0, vertices);
 
         for (RectangleList::Iterator i (list); i.next();)
@@ -297,6 +296,24 @@ namespace
             vertices[1] = vertices[3] = (GLfloat) i.getRectangle()->getY();
             vertices[2] = vertices[6] = (GLfloat) i.getRectangle()->getRight();
             vertices[5] = vertices[7] = (GLfloat) i.getRectangle()->getBottom();
+
+            glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        }
+    }
+
+    void fillRectangleList (const RectangleList& list, const Rectangle<int>& clip)
+    {
+        GLfloat vertices [8];
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glVertexPointer (2, GL_FLOAT, 0, vertices);
+
+        for (RectangleList::Iterator i (list); i.next();)
+        {
+            const Rectangle<int> r (i.getRectangle()->getIntersection (clip));
+            vertices[0] = vertices[4] = (GLfloat) r.getX();
+            vertices[1] = vertices[3] = (GLfloat) r.getY();
+            vertices[2] = vertices[6] = (GLfloat) r.getRight();
+            vertices[5] = vertices[7] = (GLfloat) r.getBottom();
 
             glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
         }
@@ -698,6 +715,123 @@ namespace
                          mask1, mask2, replaceExistingContents, true);
         }
     }
+
+    //==============================================================================
+    struct VariableAlphaColour
+    {
+        VariableAlphaColour (const Colour& c) noexcept
+            : r (c.getFloatRed()), g (c.getFloatGreen()), b (c.getFloatBlue()),
+              alphaScale (c.getFloatAlpha() / 255.0f), lastAlpha (-1)
+        {}
+
+        void setForAlpha (const int alpha) noexcept
+        {
+            if (lastAlpha != alpha)
+            {
+                lastAlpha = alpha;
+                const float a = alpha * alphaScale;
+                glColor4f (r * a, g * a, b * a, a);
+            }
+        }
+
+    private:
+        const float r, g, b, alphaScale;
+        int lastAlpha;
+
+        JUCE_DECLARE_NON_COPYABLE (VariableAlphaColour);
+    };
+
+    //==============================================================================
+    struct EdgeTableRenderer
+    {
+        EdgeTableRenderer (const Colour& c) noexcept
+            : colour (c)
+        {}
+
+        void draw (const EdgeTable& et)
+        {
+            glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+            glEnableClientState (GL_VERTEX_ARRAY);
+            glVertexPointer (2, GL_FLOAT, 0, vertices);
+
+            et.iterate (*this);
+        }
+
+        void setEdgeTableYPos (const int y) noexcept
+        {
+            vertices[1] = vertices[5] = (GLfloat) y;
+            vertices[3] = vertices[7] = (GLfloat) (y + 1);
+        }
+
+        void handleEdgeTablePixel (const int x, const int alphaLevel) noexcept
+        {
+            drawHorizontal (x, 1, alphaLevel);
+        }
+
+        void handleEdgeTablePixelFull (const int x) noexcept
+        {
+            drawHorizontal (x, 1, 255);
+        }
+
+        void handleEdgeTableLine (const int x, const int width, const int alphaLevel) noexcept
+        {
+            drawHorizontal (x, width, alphaLevel);
+        }
+
+        void handleEdgeTableLineFull (const int x, const int width) noexcept
+        {
+            drawHorizontal (x, width, 255);
+        }
+
+    private:
+        GLfloat vertices[8];
+        VariableAlphaColour colour;
+
+        void drawHorizontal (int x, const int w, const int alpha) noexcept
+        {
+            vertices[0] = vertices[2] = (GLfloat) x;
+            vertices[4] = vertices[6] = (GLfloat) (x + w);
+
+            colour.setForAlpha (alpha);
+            glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        }
+
+        JUCE_DECLARE_NON_COPYABLE (EdgeTableRenderer);
+    };
+
+    //==============================================================================
+    struct FloatRectangleRenderer
+    {
+        FloatRectangleRenderer (const Colour& c) noexcept
+            : colour (c)
+        {}
+
+        void draw (const Rectangle<float>& r)
+        {
+            glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+            glEnableClientState (GL_VERTEX_ARRAY);
+            glVertexPointer (2, GL_FLOAT, 0, vertices);
+
+            RenderingHelpers::FloatRectangleRasterisingInfo (r).iterate (*this);
+        }
+
+        void operator() (const int x, const int y, const int w, const int h, const int alpha)
+        {
+            vertices[0] = vertices[2] = (GLfloat) x;
+            vertices[1] = vertices[5] = (GLfloat) y;
+            vertices[4] = vertices[6] = (GLfloat) (x + w);
+            vertices[3] = vertices[7] = (GLfloat) (y + h);
+
+            colour.setForAlpha (alpha);
+            glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        }
+
+    private:
+        GLfloat vertices[8];
+        VariableAlphaColour colour;
+
+        JUCE_DECLARE_NON_COPYABLE (FloatRectangleRenderer);
+    };
 }
 
 //==============================================================================
@@ -722,7 +856,9 @@ public:
     virtual Ptr clipToTexture (const PositionedTexture&) = 0;
     virtual Rectangle<int> getClipBounds() const = 0;
     virtual void fillRect (const OpenGLTarget&, const Rectangle<int>& area, const FillType&, GradientTexture&, bool replaceContents) = 0;
+    virtual void fillRect (const OpenGLTarget&, const Rectangle<float>& area, const FillType&, GradientTexture&) = 0;
     virtual void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture&, const FillType&, GradientTexture&) = 0;
+    virtual void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, GradientTexture& gradientTexture) = 0;
     virtual void drawImage (const OpenGLTarget&, const OpenGLTextureFromImage&, const AffineTransform&, float alpha,
                             const Rectangle<int>& clip, const PositionedTexture* mask) = 0;
 
@@ -888,10 +1024,24 @@ public:
             fillRectInternal (target, r, fill, gradientTexture, false);
     }
 
+    void fillRect (const OpenGLTarget& target, const Rectangle<float>& area, const FillType& fill, GradientTexture& gradientTexture)
+    {
+        EdgeTable et (area);
+        fillEdgeTable (target, et, fill, gradientTexture);
+    }
+
     void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture& texture, const FillType& fill, GradientTexture& gradientTexture)
     {
         PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.x, maskOrigin.y, mask.getWidth(), mask.getHeight()), area);
         fillTexture (target, area, fill, gradientTexture, &texture, &pt, false);
+    }
+
+    void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, GradientTexture& gradientTexture)
+    {
+        OpenGLTexture texture;
+        PositionedTexture pt (texture, et, clip);
+
+        fillMask (target, pt.clip, pt, fill, gradientTexture);
     }
 
     void fillRectInternal (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, GradientTexture& gradientTexture, bool replaceContents)
@@ -970,18 +1120,54 @@ public:
     Ptr clipToRectangleList (const RectangleList& r)    { return clip.clipTo (r) ? this : nullptr; }
     Ptr excludeClipRectangle (const Rectangle<int>& r)  { clip.subtract (r); return clip.isEmpty() ? nullptr : this; }
 
-    Ptr clipToTexture (const PositionedTexture& t)      { return toMask()->clipToTexture (t); }
+    Ptr clipToTexture (const PositionedTexture& t)                      { return toMask()->clipToTexture (t); }
     Ptr clipToPath (const Path& p, const AffineTransform& transform)    { return toMask()->clipToPath (p, transform); }
     Ptr clipToImageAlpha (const OpenGLTextureFromImage& image, const AffineTransform& transform)    { return toMask()->clipToImageAlpha (image, transform); }
 
     void fillRect (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, GradientTexture& gradientTexture, bool replaceContents)
     {
-        for (RectangleList::Iterator i (clip); i.next();)
+        if (fill.isColour())
         {
-            const Rectangle<int> r (i.getRectangle()->getIntersection (area));
+            disableMultiTexture();
+            setBlendMode (replaceContents || fill.colour.isOpaque());
+            setPremultipliedColour (fill.colour);
+            fillRectangleList (clip, area);
+        }
+        else
+        {
+            for (RectangleList::Iterator i (clip); i.next();)
+            {
+                const Rectangle<int> r (i.getRectangle()->getIntersection (area));
 
-            if (! r.isEmpty())
-                fillTexture (target, r, fill, gradientTexture, nullptr, nullptr, replaceContents);
+                if (! r.isEmpty())
+                    fillTexture (target, r, fill, gradientTexture, nullptr, nullptr, replaceContents);
+            }
+        }
+    }
+
+    void fillRect (const OpenGLTarget& target, const Rectangle<float>& area, const FillType& fill, GradientTexture& gradientTexture)
+    {
+        if (fill.isColour())
+        {
+            disableMultiTexture();
+            setPremultipliedBlendingMode();
+            setPremultipliedColour (fill.colour);
+
+            for (RectangleList::Iterator i (clip); i.next();)
+            {
+                const Rectangle<float> r (i.getRectangle()->toFloat().getIntersection (area));
+
+                if (! r.isEmpty())
+                {
+                    FloatRectangleRenderer frr (fill.colour);
+                    frr.draw (r);
+                }
+            }
+        }
+        else
+        {
+            EdgeTable et (area);
+            fillEdgeTable (target, et, fill, gradientTexture);
         }
     }
 
@@ -994,6 +1180,39 @@ public:
 
             if (! bufferArea.isEmpty())
                 renderImage (target, source, bufferArea, transform, alpha, mask, nullptr, false, false);
+        }
+    }
+
+    void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, GradientTexture& gradientTexture)
+    {
+        if (fill.isColour())
+        {
+            setPremultipliedBlendingMode();
+            disableMultiTexture (GL_TEXTURE2);
+            disableMultiTexture (GL_TEXTURE1);
+            disableMultiTexture (GL_TEXTURE0);
+
+            for (RectangleList::Iterator i (clip); i.next();)
+            {
+                const Rectangle<int> r (i.getRectangle()->getIntersection (et.getMaximumBounds()));
+
+                if (! r.isEmpty())
+                {
+                    target.scissor (r);
+
+                    EdgeTableRenderer etr (fill.colour);
+                    etr.draw (et);
+                }
+            }
+
+            glDisable (GL_SCISSOR_TEST);
+        }
+        else
+        {
+            OpenGLTexture texture;
+            PositionedTexture pt (texture, et, clip.getBounds());
+
+            fillMask (target, pt.clip, pt, fill, gradientTexture);
         }
     }
 
@@ -1196,10 +1415,7 @@ public:
                                            .getIntersection (clip->getClipBounds().toFloat()));
 
                 if (! c.isEmpty())
-                {
-                    EdgeTable et (c);
-                    fillEdgeTable (et);
-                }
+                    clip->fillRect (target, c, getFillType(), gradientTexture);
             }
             else
             {
@@ -1332,10 +1548,7 @@ private:
 
     void fillEdgeTable (EdgeTable& et)
     {
-        OpenGLTexture texture;
-        PositionedTexture pt (texture, et, clip->getClipBounds());
-
-        clip->fillMask (target, pt.clip, pt, getFillType(), gradientTexture);
+        clip->fillEdgeTable (target, et, getFillType(), gradientTexture);
     }
 
     class CachedGlyphEdgeTable
