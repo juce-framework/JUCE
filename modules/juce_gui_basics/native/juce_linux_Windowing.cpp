@@ -738,7 +738,6 @@ namespace PixmapHelpers
 class LinuxComponentPeer  : public ComponentPeer
 {
 public:
-    //==============================================================================
     LinuxComponentPeer (Component* const component, const int windowStyleFlags, Window parentToAddTo)
         : ComponentPeer (component, windowStyleFlags),
           windowH (0), parentWindow (0),
@@ -776,16 +775,14 @@ public:
 
     static LinuxComponentPeer* getPeerFor (Window windowHandle) noexcept
     {
-        XPointer peer = 0;
+        XPointer peer = nullptr;
 
         ScopedXLock xlock;
         if (! XFindContext (display, (XID) windowHandle, windowHandleXContext, &peer))
-        {
-            if (peer != nullptr && ! ComponentPeer::isValidPeer ((LinuxComponentPeer*) peer))
-                peer = 0;
-        }
+            if (peer != nullptr && ! ComponentPeer::isValidPeer (reinterpret_cast <LinuxComponentPeer*> (peer)))
+                peer = nullptr;
 
-        return (LinuxComponentPeer*) peer;
+        return reinterpret_cast <LinuxComponentPeer*> (peer);
     }
 
     void setVisible (bool shouldBeVisible)
@@ -1201,7 +1198,7 @@ public:
     {
         switch (event->xany.type)
         {
-            case 2: /* KeyPress */      handleKeyPressEvent ((XKeyEvent*) &event->xkey); break;
+            case KeyPressEventType:     handleKeyPressEvent ((XKeyEvent*) &event->xkey); break;
             case KeyRelease:            handleKeyReleaseEvent ((const XKeyEvent*) &event->xkey); break;
             case ButtonPress:           handleButtonPressEvent ((const XButtonPressedEvent*) &event->xbutton); break;
             case ButtonRelease:         handleButtonReleaseEvent ((const XButtonReleasedEvent*) &event->xbutton); break;
@@ -1266,7 +1263,7 @@ public:
             XLookupString (keyEvent, utf8, sizeof (utf8), &sym, 0);
             ::setlocale (LC_ALL, oldLocale);
 
-            unicodeChar = String::fromUTF8 (utf8, sizeof (utf8) - 1) [0];
+            unicodeChar = *CharPointer_UTF8 (utf8);
             keyCode = (int) unicodeChar;
 
             if (keyCode < 0x20)
@@ -1348,60 +1345,71 @@ public:
             handleKeyPress (keyCode, unicodeChar);
     }
 
-    void handleKeyReleaseEvent (const XKeyEvent* const keyEvent)
+    static bool isKeyReleasePartOfAutoRepeat (const XKeyEvent* const keyReleaseEvent)
     {
-        updateKeyStates (keyEvent->keycode, false);
-        KeySym sym;
-
+        if (XPending (display))
         {
-            ScopedXLock xlock;
-            sym = XKeycodeToKeysym (display, keyEvent->keycode, 0);
+            XEvent e;
+            XPeekEvent (display, &e);
+
+            // Look for a subsequent key-down event with the same timestamp and keycode
+            return e.type == KeyPressEventType
+                    && e.xkey.keycode == keyReleaseEvent->keycode
+                    && e.xkey.time == keyReleaseEvent->time;
         }
 
-        const ModifierKeys oldMods (currentModifiers);
-        const bool keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, false);
+        return false;
+    }
 
-        if (oldMods != currentModifiers)
-            handleModifierKeysChange();
+    void handleKeyReleaseEvent (const XKeyEvent* const keyEvent)
+    {
+        if (! isKeyReleasePartOfAutoRepeat (keyEvent))
+        {
+            updateKeyStates (keyEvent->keycode, false);
+            KeySym sym;
 
-        if (keyDownChange)
-            handleKeyUpOrDown (false);
+            {
+                ScopedXLock xlock;
+                sym = XKeycodeToKeysym (display, keyEvent->keycode, 0);
+            }
+
+            const ModifierKeys oldMods (currentModifiers);
+            const bool keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, false);
+
+            if (oldMods != currentModifiers)
+                handleModifierKeysChange();
+
+            if (keyDownChange)
+                handleKeyUpOrDown (false);
+        }
+    }
+
+    void handleWheelEvent (const XButtonPressedEvent* const buttonPressEvent, const float amount)
+    {
+        handleMouseWheel (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y),
+                          getEventTime (buttonPressEvent->time), 0, amount);
+    }
+
+    void handleButtonPressEvent (const XButtonPressedEvent* const buttonPressEvent, int buttonModifierFlag)
+    {
+        currentModifiers = currentModifiers.withFlags (buttonModifierFlag);
+        toFront (true);
+        handleMouseEvent (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y), currentModifiers,
+                          getEventTime (buttonPressEvent->time));
     }
 
     void handleButtonPressEvent (const XButtonPressedEvent* const buttonPressEvent)
     {
         updateKeyModifiers (buttonPressEvent->state);
 
-        bool buttonMsg = false;
-        const int map = pointerMap [buttonPressEvent->button - Button1];
-
-        if (map == Keys::WheelUp || map == Keys::WheelDown)
+        switch (pointerMap [buttonPressEvent->button - Button1])
         {
-            handleMouseWheel (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y),
-                              getEventTime (buttonPressEvent->time), 0, map == Keys::WheelDown ? -84.0f : 84.0f);
-        }
-        if (map == Keys::LeftButton)
-        {
-            currentModifiers = currentModifiers.withFlags (ModifierKeys::leftButtonModifier);
-            buttonMsg = true;
-        }
-        else if (map == Keys::RightButton)
-        {
-            currentModifiers = currentModifiers.withFlags (ModifierKeys::rightButtonModifier);
-            buttonMsg = true;
-        }
-        else if (map == Keys::MiddleButton)
-        {
-            currentModifiers = currentModifiers.withFlags (ModifierKeys::middleButtonModifier);
-            buttonMsg = true;
-        }
-
-        if (buttonMsg)
-        {
-            toFront (true);
-
-            handleMouseEvent (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y), currentModifiers,
-                              getEventTime (buttonPressEvent->time));
+            case Keys::WheelUp:         handleWheelEvent (buttonPressEvent, 84.0f); break;
+            case Keys::WheelDown:       handleWheelEvent (buttonPressEvent, -84.0f); break;
+            case Keys::LeftButton:      handleButtonPressEvent (buttonPressEvent, ModifierKeys::leftButtonModifier); break;
+            case Keys::RightButton:     handleButtonPressEvent (buttonPressEvent, ModifierKeys::rightButtonModifier); break;
+            case Keys::MiddleButton:    handleButtonPressEvent (buttonPressEvent, ModifierKeys::middleButtonModifier); break;
+            default: break;
         }
 
         clearLastMousePos();
@@ -1410,11 +1418,14 @@ public:
     void handleButtonReleaseEvent (const XButtonReleasedEvent* const buttonRelEvent)
     {
         updateKeyModifiers (buttonRelEvent->state);
-        const int map = pointerMap [buttonRelEvent->button - Button1];
 
-        if (map == Keys::LeftButton)        currentModifiers = currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier);
-        else if (map == Keys::RightButton)  currentModifiers = currentModifiers.withoutFlags (ModifierKeys::rightButtonModifier);
-        else if (map == Keys::MiddleButton) currentModifiers = currentModifiers.withoutFlags (ModifierKeys::middleButtonModifier);
+        switch (pointerMap [buttonRelEvent->button - Button1])
+        {
+            case Keys::LeftButton:      currentModifiers = currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier); break;
+            case Keys::RightButton:     currentModifiers = currentModifiers.withoutFlags (ModifierKeys::rightButtonModifier); break;
+            case Keys::MiddleButton:    currentModifiers = currentModifiers.withoutFlags (ModifierKeys::middleButtonModifier); break;
+            default: break;
+        }
 
         handleMouseEvent (0, Point<int> (buttonRelEvent->x, buttonRelEvent->y), currentModifiers,
                           getEventTime (buttonRelEvent->time));
@@ -1516,11 +1527,11 @@ public:
 
         while (XEventsQueued (display, QueuedAfterFlush) > 0)
         {
-            XPeekEvent (display, (XEvent*) &nextEvent);
+            XPeekEvent (display, &nextEvent);
             if (nextEvent.type != Expose || nextEvent.xany.window != exposeEvent->window)
                 break;
 
-            XNextEvent (display, (XEvent*) &nextEvent);
+            XNextEvent (display, &nextEvent);
             XExposeEvent* nextExposeEvent = (XExposeEvent*) &nextEvent.xexpose;
             repaint (Rectangle<int> (nextExposeEvent->x, nextExposeEvent->y,
                                      nextExposeEvent->width, nextExposeEvent->height));
@@ -1604,14 +1615,17 @@ public:
             }
             else if (atom == Atoms::ProtocolList [Atoms::TAKE_FOCUS])
             {
-                XWindowAttributes atts;
-
-                ScopedXLock xlock;
-                if (clientMsg->window != 0
-                     && XGetWindowAttributes (display, clientMsg->window, &atts))
+                if ((getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0)
                 {
-                    if (atts.map_state == IsViewable)
-                        XSetInputFocus (display, clientMsg->window, RevertToParent, clientMsg->data.l[1]);
+                    XWindowAttributes atts;
+
+                    ScopedXLock xlock;
+                    if (clientMsg->window != 0
+                         && XGetWindowAttributes (display, clientMsg->window, &atts))
+                    {
+                        if (atts.map_state == IsViewable)
+                            XSetInputFocus (display, clientMsg->window, RevertToParent, clientMsg->data.l[1]);
+                    }
                 }
             }
             else if (atom == Atoms::ProtocolList [Atoms::DELETE_WINDOW])
@@ -1813,6 +1827,7 @@ private:
     Visual* visual;
     int depth;
     BorderSize<int> windowBorder;
+    enum { KeyPressEventType = 2 };
 
     struct MotifWmHints
     {
@@ -1890,13 +1905,8 @@ private:
                 break;
         }
 
-        if (modifier != 0)
-        {
-            if (press)
-                currentModifiers = currentModifiers.withFlags (modifier);
-            else
-                currentModifiers = currentModifiers.withoutFlags (modifier);
-        }
+        currentModifiers = press ? currentModifiers.withFlags (modifier)
+                                 : currentModifiers.withoutFlags (modifier);
 
         return isModifier;
     }
@@ -2149,38 +2159,8 @@ private:
         XChangeProperty (display, windowH, Atoms::XdndAware, XA_ATOM, 32, PropModeReplace,
                          (const unsigned char*) &dndVersion, 1);
 
-        // Initialise the pointer and keyboard mapping
-        // This is not the same as the logical pointer mapping the X server uses:
-        // we don't mess with this.
-        static bool mappingInitialised = false;
-
-        if (! mappingInitialised)
-        {
-            mappingInitialised = true;
-
-            const int numButtons = XGetPointerMapping (display, 0, 0);
-
-            if (numButtons == 2)
-            {
-                pointerMap[0] = Keys::LeftButton;
-                pointerMap[1] = Keys::RightButton;
-                pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
-            }
-            else if (numButtons >= 3)
-            {
-                pointerMap[0] = Keys::LeftButton;
-                pointerMap[1] = Keys::MiddleButton;
-                pointerMap[2] = Keys::RightButton;
-
-                if (numButtons >= 5)
-                {
-                    pointerMap[3] = Keys::WheelUp;
-                    pointerMap[4] = Keys::WheelDown;
-                }
-            }
-
-            updateModifierMappings();
-        }
+        initialisePointerMap();
+        updateModifierMappings();
     }
 
     void destroyWindow()
@@ -2526,7 +2506,32 @@ private:
 
     Array <Atom> srcMimeTypeAtomList;
 
-    static int pointerMap[5];
+    int pointerMap[5];
+
+    void initialisePointerMap()
+    {
+        const int numButtons = XGetPointerMapping (display, 0, 0);
+
+        if (numButtons == 2)
+        {
+            pointerMap[0] = Keys::LeftButton;
+            pointerMap[1] = Keys::RightButton;
+            pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
+        }
+        else if (numButtons >= 3)
+        {
+            pointerMap[0] = Keys::LeftButton;
+            pointerMap[1] = Keys::MiddleButton;
+            pointerMap[2] = Keys::RightButton;
+
+            if (numButtons >= 5)
+            {
+                pointerMap[3] = Keys::WheelUp;
+                pointerMap[4] = Keys::WheelDown;
+            }
+        }
+    }
+
     static Point<int> lastMousePos;
 
     static void clearLastMousePos() noexcept
@@ -2539,7 +2544,6 @@ private:
 
 ModifierKeys LinuxComponentPeer::currentModifiers;
 bool LinuxComponentPeer::isActiveApplication = false;
-int LinuxComponentPeer::pointerMap[5];
 Point<int> LinuxComponentPeer::lastMousePos;
 
 //==============================================================================

@@ -1172,7 +1172,7 @@ private:
                             channelInfo.isInput = 1;
                             asioObject->getChannelInfo (&channelInfo);
 
-                            inputChannelNames.add (String (channelInfo.name));
+                            inputChannelNames.add (String (CharPointer_UTF8 (channelInfo.name)));
                         }
 
                         for (i = 0; i < totalNumOutputChans; ++i)
@@ -1182,7 +1182,7 @@ private:
                             channelInfo.isInput = 0;
                             asioObject->getChannelInfo (&channelInfo);
 
-                            outputChannelNames.add (String (channelInfo.name));
+                            outputChannelNames.add (String (CharPointer_UTF8 (channelInfo.name)));
                             outputFormat[i] = ASIOSampleFormat (channelInfo.type);
 
                             if (i < 2)

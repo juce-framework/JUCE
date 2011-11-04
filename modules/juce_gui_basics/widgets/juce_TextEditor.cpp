@@ -1200,8 +1200,7 @@ void TextEditor::setPasswordCharacter (const juce_wchar newPasswordCharacter)
     if (passwordCharacter != newPasswordCharacter)
     {
         passwordCharacter = newPasswordCharacter;
-        resized();
-        repaint();
+        applyFontToAllText (currentFont);
     }
 }
 
