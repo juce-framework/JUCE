@@ -9,6 +9,7 @@
 		F70117123739E2303A99AD70 = { isa = PBXBuildFile; fileRef = AF0CC5F28EB37B1FABBDD5DD; };
 		02F0D49EDD6A3E82D98302F3 = { isa = PBXBuildFile; fileRef = FE9531D38CA4C273B6FB87A7; };
 		9C737750FC4663FBFDF8C048 = { isa = PBXBuildFile; fileRef = FB6FA17C00AB569935B5CFF8; };
+		EAA5A5EECF04D2B7FCF768FC = { isa = PBXBuildFile; fileRef = EF932865774E86525CE7FC55; };
 		ACB6DFC6389AFB78A7EF0A61 = { isa = PBXBuildFile; fileRef = 07D50D8347ED27B84F822D6C; };
 		535A340E26E5D6766D1780CA = { isa = PBXBuildFile; fileRef = B3978067F1432E1A2618A5DB; };
 		31E87C6EC193B9C408D16F20 = { isa = PBXBuildFile; fileRef = 0EDDB91E8D84944C3EBACFFE; };
@@ -576,6 +577,7 @@
 		EF28BA2B5E24F4749F732230 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OptionalScopedPointer.h"; path = "../../../../modules/juce_core/memory/juce_OptionalScopedPointer.h"; sourceTree = "SOURCE_ROOT"; };
 		EF3A7A1A871BAB32EA1B46EF = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Logger.h"; path = "../../../../modules/juce_core/logging/juce_Logger.h"; sourceTree = "SOURCE_ROOT"; };
 		EF54929F7151858D8FF8107B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SystemStats.h"; path = "../../../../modules/juce_core/system/juce_SystemStats.h"; sourceTree = "SOURCE_ROOT"; };
+		EF932865774E86525CE7FC55 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		EFE00478AEAFE39D81B0E59D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CustomTypeface.h"; path = "../../../../modules/juce_graphics/fonts/juce_CustomTypeface.h"; sourceTree = "SOURCE_ROOT"; };
 		EFE65E031B01332448C2BE5E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_InterprocessConnectionServer.h"; path = "../../../../modules/juce_events/interprocess/juce_InterprocessConnectionServer.h"; sourceTree = "SOURCE_ROOT"; };
 		F003AC63C800E3F090BF217F = { isa = PBXFileReference; lastKnownFileType = file; name = "juce_module_info"; path = "../../../../modules/juce_core/juce_module_info"; sourceTree = "SOURCE_ROOT"; };
@@ -1359,6 +1361,7 @@
 				AF0CC5F28EB37B1FABBDD5DD,
 				FE9531D38CA4C273B6FB87A7,
 				FB6FA17C00AB569935B5CFF8,
+				EF932865774E86525CE7FC55,
 				07D50D8347ED27B84F822D6C ); name = Frameworks; sourceTree = "<group>"; };
 		1C83313FCFBC3FAFA8CDB087 = { isa = PBXGroup; children = (
 				EA398D9C544440E06637C134 ); name = Products; sourceTree = "<group>"; };
@@ -1450,6 +1453,7 @@
 				F70117123739E2303A99AD70,
 				02F0D49EDD6A3E82D98302F3,
 				9C737750FC4663FBFDF8C048,
+				EAA5A5EECF04D2B7FCF768FC,
 				ACB6DFC6389AFB78A7EF0A61 ); runOnlyForDeploymentPostprocessing = 0; };
 		9337F8263A94B688D61D5B68 = { isa = PBXNativeTarget; buildConfigurationList = D2ABD8290ABA5095AE85F9A6; buildPhases = (
 				7B2C68FAAB7FB794B44BA476,

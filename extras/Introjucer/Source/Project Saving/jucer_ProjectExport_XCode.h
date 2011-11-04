@@ -431,13 +431,6 @@ private:
         for (int i = 0; i < extraLibs.size(); ++i)
             getLinkerFlagsForStaticLibrary (extraLibs.getReference(i), flags, librarySearchPaths);
 
-        /*if (project.getJuceLinkageMode() == Project::useLinkedJuce)
-        {
-            RelativePath juceLib (getJucePathFromTargetFolder().getChildFile (config.isDebug().getValue() ? "bin/libjucedebug.a"
-                                                                                                          : "bin/libjuce.a"));
-            getLinkerFlagsForStaticLibrary (juceLib, flags, librarySearchPaths);
-        }*/
-
         flags.add (replacePreprocessorTokens (config, getExtraLinkerFlags().toString()));
         flags.removeEmptyStrings (true);
     }
@@ -456,7 +449,7 @@ private:
         s.add ("WARNING_CFLAGS = -Wreorder");
         s.add ("GCC_MODEL_TUNING = G5");
 
-        if (projectType.isLibrary() /*|| project.getJuceLinkageMode() == Project::useLinkedJuce*/)
+        if (projectType.isLibrary())
         {
             s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = NO");
             s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = NO");
