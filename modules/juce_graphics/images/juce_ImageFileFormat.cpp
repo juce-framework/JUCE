@@ -26,17 +26,17 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-struct DefaultImageFormats
-{
-    PNGImageFormat  png;
-    JPEGImageFormat jpg;
-    GIFImageFormat  gif;
-};
-
-static DefaultImageFormats defaultImageFormats;
-
 ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
 {
+    struct DefaultImageFormats
+    {
+        PNGImageFormat  png;
+        JPEGImageFormat jpg;
+        GIFImageFormat  gif;
+    };
+
+    static DefaultImageFormats defaultImageFormats;
+
     ImageFileFormat* formats[] = { &defaultImageFormats.png,
                                    &defaultImageFormats.jpg,
                                    &defaultImageFormats.gif };
@@ -68,11 +68,11 @@ Image ImageFileFormat::loadFrom (InputStream& input)
 
 Image ImageFileFormat::loadFrom (const File& file)
 {
-    InputStream* const in = file.createInputStream();
+    FileInputStream stream (file);
 
-    if (in != nullptr)
+    if (stream.openedOk())
     {
-        BufferedInputStream b (in, 8192, true);
+        BufferedInputStream b (stream, 8192);
         return loadFrom (b);
     }
 

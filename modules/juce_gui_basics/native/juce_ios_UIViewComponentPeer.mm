@@ -388,12 +388,15 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
 
     view = [[JuceUIView alloc] initWithOwner: this withFrame: r];
 
+    view.multipleTouchEnabled = YES;
+    view.hidden = ! component->isVisible();
+    view.opaque = component->isOpaque();
+    view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
+
     if (isSharedWindow)
     {
         window = [viewToAttachTo window];
         [viewToAttachTo addSubview: view];
-
-        setVisible (component->isVisible());
     }
     else
     {
@@ -405,11 +408,8 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
 
         window = [[JuceUIWindow alloc] init];
         window.frame = r;
-
         window.opaque = component->isOpaque();
-        view.opaque = component->isOpaque();
         window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
-        view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
 
         [((JuceUIWindow*) window) setOwner: this];
 
@@ -419,10 +419,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
         [window addSubview: view];
         view.frame = CGRectMake (0, 0, r.size.width, r.size.height);
 
-        view.hidden = ! component->isVisible();
-        window.hidden = ! component->isVisible();
-
-        view.multipleTouchEnabled = YES;
+        window.hidden = view.hidden;
     }
 
     setTitle (component->getName());
@@ -441,7 +438,7 @@ UIViewComponentPeer::~UIViewComponentPeer()
 
     if (! isSharedWindow)
     {
-        [((JuceUIWindow*) window) setOwner: 0];
+        [((JuceUIWindow*) window) setOwner: nil];
         [window release];
     }
 }

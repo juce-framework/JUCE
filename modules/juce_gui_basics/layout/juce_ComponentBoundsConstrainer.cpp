@@ -201,17 +201,14 @@ void ComponentBoundsConstrainer::checkBounds (Rectangle<int>& bounds,
                                               const bool isStretchingBottom,
                                               const bool isStretchingRight)
 {
-    // constrain the size if it's being stretched..
     if (isStretchingLeft)
         bounds.setLeft (jlimit (old.getRight() - maxW, old.getRight() - minW, bounds.getX()));
-
-    if (isStretchingRight)
+    else
         bounds.setWidth (jlimit (minW, maxW, bounds.getWidth()));
 
     if (isStretchingTop)
         bounds.setTop (jlimit (old.getBottom() - maxH, old.getBottom() - minH, bounds.getY()));
-
-    if (isStretchingBottom)
+    else
         bounds.setHeight (jlimit (minH, maxH, bounds.getHeight()));
 
     if (bounds.isEmpty())
