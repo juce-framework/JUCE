@@ -83,6 +83,12 @@ BEGIN_JUCE_NAMESPACE
 #include "opengl/juce_OpenGLRenderingTarget.h"
 
 // START_AUTOINCLUDE opengl
+#ifndef __JUCE_DRAGGABLE3DORIENTATION_JUCEHEADER__
+ #include "opengl/juce_Draggable3DOrientation.h"
+#endif
+#ifndef __JUCE_MATRIX3D_JUCEHEADER__
+ #include "opengl/juce_Matrix3D.h"
+#endif
 #ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
  #include "opengl/juce_OpenGLComponent.h"
 #endif
@@ -109,6 +115,12 @@ BEGIN_JUCE_NAMESPACE
 #endif
 #ifndef __JUCE_OPENGLTEXTURE_JUCEHEADER__
  #include "opengl/juce_OpenGLTexture.h"
+#endif
+#ifndef __JUCE_QUATERNION_JUCEHEADER__
+ #include "opengl/juce_Quaternion.h"
+#endif
+#ifndef __JUCE_VECTOR3D_JUCEHEADER__
+ #include "opengl/juce_Vector3D.h"
 #endif
 // END_AUTOINCLUDE
 

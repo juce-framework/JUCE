@@ -48,12 +48,23 @@ public:
         dynamicTextureImage = Image (Image::ARGB, 128, 128, true, OpenGLImageType());
     }
 
+    void mouseDown (const MouseEvent& e)
+    {
+        draggableOrientation.mouseDown (e.getPosition());
+    }
+
     void mouseDrag (const MouseEvent& e)
     {
+        draggableOrientation.mouseDrag (e.getPosition());
         delta = e.getDistanceFromDragStartX() / 100.0f;
         repaint();
     }
 
+    void resized()
+    {
+        draggableOrientation.setViewport (getLocalBounds());
+    }
+    
     void renderOpenGL()
     {
         OpenGLHelpers::clear (Colours::darkgrey.withAlpha (1.0f));
@@ -73,7 +84,7 @@ public:
         OpenGLHelpers::setPerspective (45.0, getWidth() / (double) getHeight(), 0.1, 100.0);
 
         glTranslatef (0.0f, 0.0f, -5.0f);
-        glRotatef (rotation, 0.5f, 1.0f, 0.0f);
+        draggableOrientation.applyToOpenGLMatrix();
 
         // logoImage and dynamicTextureImage are actually OpenGL images, so we can use this utility function to
         // extract the frame buffer which is their backing store, and use it directly.
@@ -155,6 +166,7 @@ public:
 private:
     Image logoImage, dynamicTextureImage;
     float rotation, delta, textScrollPos;
+    Draggable3DOrientation draggableOrientation;
 
     // Functions to create a couple of images to use as textures..
     static Image createLogoImage()
