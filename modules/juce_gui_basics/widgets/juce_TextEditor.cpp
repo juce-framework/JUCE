@@ -1229,7 +1229,9 @@ void TextEditor::setText (const String& newText,
 
     if (newLength != getTotalNumChars() || getText() != newText)
     {
-        const int oldCursorPos = caretPosition;
+        textValue = newText;
+
+        int oldCursorPos = caretPosition;
         const bool cursorWasAtEnd = oldCursorPos >= getTotalNumChars();
 
         clearInternal (0);
@@ -1240,9 +1242,9 @@ void TextEditor::setText (const String& newText,
         jassert (multiline || ! newText.containsAnyOf ("\r\n"));
 
         if (cursorWasAtEnd && ! isMultiLine())
-            moveCaretTo (getTotalNumChars(), false);
-        else
-            moveCaretTo (oldCursorPos, false);
+            oldCursorPos = getTotalNumChars();
+
+        moveCaretTo (oldCursorPos, false);
 
         if (sendTextChangeMessage)
             textChanged();

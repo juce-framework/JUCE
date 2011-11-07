@@ -160,7 +160,7 @@ public:
 
     static Rectangle<int> rotatedScreenPosToReal (const Rectangle<int>& r)
     {
-        const Rectangle<int> screen (convertToRectInt ([[UIScreen mainScreen] bounds]));
+        const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
         switch ([[UIApplication sharedApplication] statusBarOrientation])
         {
@@ -187,7 +187,7 @@ public:
 
     static Rectangle<int> realScreenPosToRotated (const Rectangle<int>& r)
     {
-        const Rectangle<int> screen (convertToRectInt ([[UIScreen mainScreen] bounds]));
+        const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
         switch ([[UIApplication sharedApplication] statusBarOrientation])
         {
@@ -404,7 +404,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
         controller.view = view;
 
         r = convertToCGRect (rotatedScreenPosToReal (component->getBounds()));
-        r.origin.y = [[UIScreen mainScreen] bounds].size.height - (r.origin.y + r.size.height);
+        r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
 
         window = [[JuceUIWindow alloc] init];
         window.frame = r;
@@ -480,10 +480,10 @@ void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
 
     if (isSharedWindow)
     {
-        CGRect r = CGRectMake ((float) x, (float) y, (float) w, (float) h);
+        CGRect r = CGRectMake ((CGFloat) x, (CGFloat) y, (CGFloat) w, (CGFloat) h);
 
-        if ([view frame].size.width != r.size.width
-             || [view frame].size.height != r.size.height)
+        if (view.frame.size.width != r.size.width
+             || view.frame.size.height != r.size.height)
             [view setNeedsDisplay];
 
         view.frame = r;
@@ -492,7 +492,7 @@ void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     {
         const Rectangle<int> bounds (rotatedScreenPosToReal (Rectangle<int> (x, y, w, h)));
         window.frame = convertToCGRect (bounds);
-        view.frame = CGRectMake (0, 0, (float) bounds.getWidth(), (float) bounds.getHeight());
+        view.frame = CGRectMake (0, 0, (CGFloat) bounds.getWidth(), (CGFloat) bounds.getHeight());
 
         handleMovedOrResized();
     }
@@ -500,17 +500,17 @@ void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
 
 const Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
 {
-    CGRect r = [view frame];
+    CGRect r = view.frame;
 
-    if (global && [view window] != nil)
+    if (global && view.window != nil)
     {
         r = [view convertRect: r toView: nil];
-        CGRect wr = [[view window] frame];
+        CGRect wr = view.window.frame;
 
         const Rectangle<int> windowBounds (realScreenPosToRotated (convertToRectInt (wr)));
 
-        r.origin.x = windowBounds.getX();
-        r.origin.y = windowBounds.getY();
+        r.origin.x += windowBounds.getX();
+        r.origin.y += windowBounds.getY();
     }
 
     return convertToRectInt (r);
@@ -540,10 +540,12 @@ CGRect UIViewComponentPeer::constrainRect (CGRect r)
 {
     if (constrainer != nullptr)
     {
-        CGRect current = [window frame];
-        current.origin.y = [[UIScreen mainScreen] bounds].size.height - current.origin.y - current.size.height;
+        CGRect mainScreen = [UIScreen mainScreen].bounds;
 
-        r.origin.y = [[UIScreen mainScreen] bounds].size.height - r.origin.y - r.size.height;
+        CGRect current = window.frame;
+        current.origin.y = mainScreen.size.height - current.origin.y - current.size.height;
+
+        r.origin.y = mainScreen.size.height - r.origin.y - r.size.height;
 
         Rectangle<int> pos (convertToRectInt (r));
         Rectangle<int> original (convertToRectInt (current));
@@ -551,12 +553,12 @@ CGRect UIViewComponentPeer::constrainRect (CGRect r)
         constrainer->checkBounds (pos, original,
                                   Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
                                   pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
-                                  pos.getX() != original.getX() && pos.getRight() == original.getRight(),
+                                  pos.getX() != original.getX() && pos.getRight()  == original.getRight(),
                                   pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
-                                  pos.getX() == original.getX() && pos.getRight() != original.getRight());
+                                  pos.getX() == original.getX() && pos.getRight()  != original.getRight());
 
         r.origin.x = pos.getX();
-        r.origin.y = [[UIScreen mainScreen] bounds].size.height - r.size.height - pos.getY();
+        r.origin.y = mainScreen.size.height - r.size.height - pos.getY();
         r.size.width = pos.getWidth();
         r.size.height = pos.getHeight();
     }
@@ -566,7 +568,7 @@ CGRect UIViewComponentPeer::constrainRect (CGRect r)
 
 void UIViewComponentPeer::setAlpha (float newAlpha)
 {
-    [[view window] setAlpha: (CGFloat) newAlpha];
+    [view.window setAlpha: (CGFloat) newAlpha];
 }
 
 void UIViewComponentPeer::setMinimised (bool shouldBeMinimised)
@@ -634,7 +636,7 @@ void UIViewComponentPeer::displayRotated()
         fullScreen = false;
         setFullScreen (true);
     }
-    else
+    else if (! isSharedWindow)
     {
         const float l = oldArea.getX() / (float) oldDesktop.getWidth();
         const float r = oldArea.getRight() / (float) oldDesktop.getWidth();
@@ -657,7 +659,7 @@ bool UIViewComponentPeer::contains (const Point<int>& position, bool trueIfInACh
             && isPositiveAndBelow (position.getY(), component->getHeight())))
         return false;
 
-    UIView* v = [view hitTest: CGPointMake ((float) position.getX(), (float) position.getY())
+    UIView* v = [view hitTest: CGPointMake ((CGFloat) position.getX(), (CGFloat) position.getY())
                     withEvent: nil];
 
     if (trueIfInAChildWindow)

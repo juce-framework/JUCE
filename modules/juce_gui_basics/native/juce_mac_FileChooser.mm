@@ -98,6 +98,47 @@ bool FileChooser::isPlatformDialogAvailable()
     return true;
 }
 
+class TemporaryMainMenuWithStandardCommands
+{
+public:
+    TemporaryMainMenuWithStandardCommands()
+        : oldMenu (MenuBarModel::getMacMainMenu())
+    {
+        MenuBarModel::setMacMainMenu (nullptr);
+
+        NSMenu* menu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Edit")];
+        NSMenuItem* item;
+
+        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Cut"), nil)
+                                          action: @selector (cut:)  keyEquivalent: nsStringLiteral ("x")];
+        [menu addItem: item];
+        [item release];
+
+        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Copy"), nil)
+                                          action: @selector (copy:)  keyEquivalent: nsStringLiteral ("c")];
+        [menu addItem: item];
+        [item release];
+
+        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Paste"), nil)
+                                          action: @selector (paste:)  keyEquivalent: nsStringLiteral ("v")];
+        [menu addItem: item];
+        [item release];
+
+        item = [[NSApp mainMenu] addItemWithTitle: NSLocalizedString (nsStringLiteral ("Edit"), nil)
+                                           action: nil keyEquivalent: nsEmptyString()];
+        [[NSApp mainMenu] setSubmenu: menu forItem: item];
+        [menu release];
+    }
+
+    ~TemporaryMainMenuWithStandardCommands()
+    {
+        MenuBarModel::setMacMainMenu (oldMenu);
+    }
+
+private:
+    MenuBarModel* oldMenu;
+};
+
 void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,
@@ -110,6 +151,8 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       FilePreviewComponent* /*extraInfoComponent*/)
 {
     JUCE_AUTORELEASEPOOL
+
+    const TemporaryMainMenuWithStandardCommands tempMenu;
 
     StringArray* filters = new StringArray();
     filters->addTokens (filter.replaceCharacters (",:", ";;"), ";", String::empty);
@@ -151,8 +194,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     }
 
     if ([panel runModalForDirectory: juceStringToNS (directory)
-                               file: juceStringToNS (filename)]
-           == NSOKButton)
+                               file: juceStringToNS (filename)] == NSOKButton)
     {
         if (isSaveDialogue)
         {
@@ -164,10 +206,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
             NSArray* urls = [openPanel filenames];
 
             for (unsigned int i = 0; i < [urls count]; ++i)
-            {
-                NSString* f = [urls objectAtIndex: i];
-                results.add (File (nsStringToJuce (f)));
-            }
+                results.add (File (nsStringToJuce ([urls objectAtIndex: i])));
         }
     }
 

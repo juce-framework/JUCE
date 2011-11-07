@@ -68,6 +68,7 @@
         template <typename Type> Type abs (Type a)              { if (a < 0) return -a; return a; }
         template <typename Type> Type tan (Type a)              { return static_cast<Type> (::tan (static_cast<double> (a))); }
         template <typename Type> Type sin (Type a)              { return static_cast<Type> (::sin (static_cast<double> (a))); }
+        template <typename Type> Type asin (Type a)             { return static_cast<Type> (::asin (static_cast<double> (a))); }
         template <typename Type> Type cos (Type a)              { return static_cast<Type> (::cos (static_cast<double> (a))); }
         template <typename Type> Type sqrt (Type a)             { return static_cast<Type> (::sqrt (static_cast<double> (a))); }
         template <typename Type> Type floor (Type a)            { return static_cast<Type> (::floor (static_cast<double> (a))); }

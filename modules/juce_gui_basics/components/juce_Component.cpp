@@ -2383,7 +2383,7 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
 
     if (! flags.dontFocusOnMouseClickFlag)
     {
-        grabFocusInternal (focusChangedByMouseClick);
+        grabFocusInternal (focusChangedByMouseClick, true);
 
         if (checker.shouldBailOut())
             return;
@@ -2804,7 +2804,7 @@ void Component::grabKeyboardFocus()
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     CHECK_MESSAGE_MANAGER_IS_LOCKED
 
-    grabFocusInternal (focusChangedDirectly);
+    grabFocusInternal (focusChangedDirectly, true);
 }
 
 void Component::moveKeyboardFocusToSibling (const bool moveToNext)
@@ -2834,7 +2834,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
                         return;
                 }
 
-                nextComp->grabFocusInternal (focusChangedByTabKey);
+                nextComp->grabFocusInternal (focusChangedByTabKey, true);
                 return;
             }
         }

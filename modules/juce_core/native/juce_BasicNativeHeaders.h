@@ -80,7 +80,7 @@
 
  #define STRICT 1
  #define WIN32_LEAN_AND_MEAN 1
- #define _WIN32_WINNT 0x0500
+ #define _WIN32_WINNT 0x0600
  #define _UNICODE 1
  #define UNICODE 1
  #ifndef _WIN32_IE

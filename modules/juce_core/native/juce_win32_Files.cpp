@@ -168,14 +168,13 @@ bool File::moveToTrash() const
     if (! exists())
         return true;
 
-    SHFILEOPSTRUCT fos = { 0 };
-
     // The string we pass in must be double null terminated..
     const int numBytes = CharPointer_UTF16::getBytesRequiredFor (fullPath.getCharPointer()) + 8;
     HeapBlock<WCHAR> doubleNullTermPath;
     doubleNullTermPath.calloc (numBytes, 1);
     fullPath.copyToUTF16 (doubleNullTermPath, numBytes);
 
+    SHFILEOPSTRUCT fos = { 0 };
     fos.wFunc = FO_DELETE;
     fos.pFrom = doubleNullTermPath;
     fos.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_SILENT | FOF_NOCONFIRMATION
@@ -645,12 +644,12 @@ public:
 
         filenameFound = findData.cFileName;
 
-        if (isDir != nullptr)         *isDir = ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
-        if (isHidden != nullptr)      *isHidden = ((findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0);
-        if (fileSize != nullptr)      *fileSize = findData.nFileSizeLow + (((int64) findData.nFileSizeHigh) << 32);
-        if (modTime != nullptr)       *modTime = Time (fileTimeToTime (&findData.ftLastWriteTime));
+        if (isDir != nullptr)         *isDir        = ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
+        if (isHidden != nullptr)      *isHidden     = ((findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0);
+        if (isReadOnly != nullptr)    *isReadOnly   = ((findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0);
+        if (fileSize != nullptr)      *fileSize     = findData.nFileSizeLow + (((int64) findData.nFileSizeHigh) << 32);
+        if (modTime != nullptr)       *modTime      = Time (fileTimeToTime (&findData.ftLastWriteTime));
         if (creationTime != nullptr)  *creationTime = Time (fileTimeToTime (&findData.ftCreationTime));
-        if (isReadOnly != nullptr)    *isReadOnly = ((findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0);
 
         return true;
     }
@@ -695,10 +694,13 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
 void File::revealToUser() const
 {
-    if (isDirectory())
-        startAsProcess();
-    else if (getParentDirectory().exists())
-        getParentDirectory().startAsProcess();
+    ITEMIDLIST* const itemIDList = ILCreateFromPath (fullPath.toWideCharPointer());
+
+    if (itemIDList != nullptr)
+    {
+        SHOpenFolderAndSelectItems (itemIDList, 0, nullptr, 0);
+        ILFree (itemIDList);
+    }
 }
 
 //==============================================================================

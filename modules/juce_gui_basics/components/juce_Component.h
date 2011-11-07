@@ -2324,7 +2324,7 @@ private:
     void repaintParent();
     void sendFakeMouseMove() const;
     void takeKeyboardFocus (const FocusChangeType);
-    void grabFocusInternal (const FocusChangeType, bool canTryParent = true);
+    void grabFocusInternal (const FocusChangeType, bool canTryParent);
     static void giveAwayFocus (bool sendFocusLossEvent);
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
