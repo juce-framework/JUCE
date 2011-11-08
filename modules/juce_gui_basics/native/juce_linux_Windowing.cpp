@@ -46,8 +46,11 @@ namespace Atoms
 
     const unsigned long DndVersion = 3;
 
+    Atom getIfExists (const char* name)    { return XInternAtom (display, name, True); }
+    Atom getCreating (const char* name)    { return XInternAtom (display, name, False); }
+
     //==============================================================================
-    static void initialiseAtoms()
+    void initialiseAtoms()
     {
         static bool atomsInitialised = false;
 
@@ -55,39 +58,39 @@ namespace Atoms
         {
             atomsInitialised = true;
 
-            Protocols                       = XInternAtom (display, "WM_PROTOCOLS", True);
-            ProtocolList [TAKE_FOCUS]       = XInternAtom (display, "WM_TAKE_FOCUS", True);
-            ProtocolList [DELETE_WINDOW]    = XInternAtom (display, "WM_DELETE_WINDOW", True);
-            ProtocolList [PING]             = XInternAtom (display, "_NET_WM_PING", True);
-            ChangeState                     = XInternAtom (display, "WM_CHANGE_STATE", True);
-            State                           = XInternAtom (display, "WM_STATE", True);
-            ActiveWin                       = XInternAtom (display, "_NET_ACTIVE_WINDOW", False);
-            Pid                             = XInternAtom (display, "_NET_WM_PID", False);
-            WindowType                      = XInternAtom (display, "_NET_WM_WINDOW_TYPE", True);
-            WindowState                     = XInternAtom (display, "_NET_WM_STATE", True);
+            Protocols                       = getIfExists ("WM_PROTOCOLS");
+            ProtocolList [TAKE_FOCUS]       = getIfExists ("WM_TAKE_FOCUS");
+            ProtocolList [DELETE_WINDOW]    = getIfExists ("WM_DELETE_WINDOW");
+            ProtocolList [PING]             = getIfExists ("_NET_WM_PING");
+            ChangeState                     = getIfExists ("WM_CHANGE_STATE");
+            State                           = getIfExists ("WM_STATE");
+            ActiveWin                       = getCreating ("_NET_ACTIVE_WINDOW");
+            Pid                             = getCreating ("_NET_WM_PID");
+            WindowType                      = getIfExists ("_NET_WM_WINDOW_TYPE");
+            WindowState                     = getIfExists ("_NET_WM_STATE");
 
-            XdndAware                       = XInternAtom (display, "XdndAware", False);
-            XdndEnter                       = XInternAtom (display, "XdndEnter", False);
-            XdndLeave                       = XInternAtom (display, "XdndLeave", False);
-            XdndPosition                    = XInternAtom (display, "XdndPosition", False);
-            XdndStatus                      = XInternAtom (display, "XdndStatus", False);
-            XdndDrop                        = XInternAtom (display, "XdndDrop", False);
-            XdndFinished                    = XInternAtom (display, "XdndFinished", False);
-            XdndSelection                   = XInternAtom (display, "XdndSelection", False);
+            XdndAware                       = getCreating ("XdndAware");
+            XdndEnter                       = getCreating ("XdndEnter");
+            XdndLeave                       = getCreating ("XdndLeave");
+            XdndPosition                    = getCreating ("XdndPosition");
+            XdndStatus                      = getCreating ("XdndStatus");
+            XdndDrop                        = getCreating ("XdndDrop");
+            XdndFinished                    = getCreating ("XdndFinished");
+            XdndSelection                   = getCreating ("XdndSelection");
 
-            XdndTypeList                    = XInternAtom (display, "XdndTypeList", False);
-            XdndActionList                  = XInternAtom (display, "XdndActionList", False);
-            XdndActionCopy                  = XInternAtom (display, "XdndActionCopy", False);
-            XdndActionDescription           = XInternAtom (display, "XdndActionDescription", False);
+            XdndTypeList                    = getCreating ("XdndTypeList");
+            XdndActionList                  = getCreating ("XdndActionList");
+            XdndActionCopy                  = getCreating ("XdndActionCopy");
+            XdndActionDescription           = getCreating ("XdndActionDescription");
 
-            allowedMimeTypes[0]             = XInternAtom (display, "text/plain", False);
-            allowedMimeTypes[1]             = XInternAtom (display, "text/uri-list", False);
+            allowedMimeTypes[0]             = getCreating ("text/plain");
+            allowedMimeTypes[1]             = getCreating ("text/uri-list");
 
-            allowedActions[0]               = XInternAtom (display, "XdndActionMove", False);
+            allowedActions[0]               = getCreating ("XdndActionMove");
             allowedActions[1]               = XdndActionCopy;
-            allowedActions[2]               = XInternAtom (display, "XdndActionLink", False);
-            allowedActions[3]               = XInternAtom (display, "XdndActionAsk", False);
-            allowedActions[4]               = XInternAtom (display, "XdndActionPrivate", False);
+            allowedActions[2]               = getCreating ("XdndActionLink");
+            allowedActions[3]               = getCreating ("XdndActionAsk");
+            allowedActions[4]               = getCreating ("XdndActionPrivate");
         }
     }
 }
@@ -326,10 +329,10 @@ namespace Visuals
 
         if (desiredDepth == 32)
         {
-            desiredVisual.c_class = TrueColor;
-            desiredVisual.red_mask = 0x00FF0000;
+            desiredVisual.c_class    = TrueColor;
+            desiredVisual.red_mask   = 0x00FF0000;
             desiredVisual.green_mask = 0x0000FF00;
-            desiredVisual.blue_mask = 0x000000FF;
+            desiredVisual.blue_mask  = 0x000000FF;
             desiredVisual.bits_per_rgb = 8;
 
             desiredMask |= VisualClassMask;
@@ -1136,7 +1139,7 @@ public:
     void setIcon (const Image& newIcon)
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
-        HeapBlock <unsigned long> data (dataSize);
+        HeapBlock <int> data (dataSize);
 
         int index = 0;
         data[index++] = newIcon.getWidth();
@@ -1147,16 +1150,13 @@ public:
                 data[index++] = newIcon.getPixelAt (x, y).getARGB();
 
         ScopedXLock xlock;
-        XChangeProperty (display, windowH,
-                         XInternAtom (display, "_NET_WM_ICON", False),
-                         XA_CARDINAL, 32, PropModeReplace,
-                         reinterpret_cast<unsigned char*> (data.getData()), dataSize);
+        xchangeProperty (windowH, Atoms::getCreating ("_NET_WM_ICON"), XA_CARDINAL, 32, data.getData(), dataSize);
 
         deleteIconPixmaps();
 
         XWMHints* wmHints = XGetWMHints (display, windowH);
 
-        if (wmHints == 0)
+        if (wmHints == nullptr)
             wmHints = XAllocWMHints();
 
         wmHints->flags |= IconPixmapHint | IconMaskHint;
@@ -1174,7 +1174,7 @@ public:
         ScopedXLock xlock;
         XWMHints* wmHints = XGetWMHints (display, windowH);
 
-        if (wmHints != 0)
+        if (wmHints != nullptr)
         {
             if ((wmHints->flags & IconPixmapHint) != 0)
             {
@@ -1939,9 +1939,14 @@ private:
     }
 
     //==============================================================================
+    static void xchangeProperty (Window wndH, Atom property, Atom type, int format, const void* data, int numElements)
+    {
+        XChangeProperty (display, wndH, property, type, format, PropModeReplace, (const unsigned char*) data, numElements);
+    }
+
     void removeWindowDecorations (Window wndH)
     {
-        Atom hints = XInternAtom (display, "_MOTIF_WM_HINTS", True);
+        Atom hints = Atoms::getIfExists ("_MOTIF_WM_HINTS");
 
         if (hints != None)
         {
@@ -1950,37 +1955,34 @@ private:
             motifHints.decorations = 0;
 
             ScopedXLock xlock;
-            XChangeProperty (display, wndH, hints, hints, 32, PropModeReplace,
-                             (unsigned char*) &motifHints, 4);
+            xchangeProperty (wndH, hints, hints, 32, &motifHints, 4);
         }
 
-        hints = XInternAtom (display, "_WIN_HINTS", True);
+        hints = Atoms::getIfExists ("_WIN_HINTS");
 
         if (hints != None)
         {
             long gnomeHints = 0;
 
             ScopedXLock xlock;
-            XChangeProperty (display, wndH, hints, hints, 32, PropModeReplace,
-                             (unsigned char*) &gnomeHints, 1);
+            xchangeProperty (wndH, hints, hints, 32, &gnomeHints, 1);
         }
 
-        hints = XInternAtom (display, "KWM_WIN_DECORATION", True);
+        hints = Atoms::getIfExists ("KWM_WIN_DECORATION");
 
         if (hints != None)
         {
             long kwmHints = 2; /*KDE_tinyDecoration*/
 
             ScopedXLock xlock;
-            XChangeProperty (display, wndH, hints, hints, 32, PropModeReplace,
-                             (unsigned char*) &kwmHints, 1);
+            xchangeProperty (wndH, hints, hints, 32, &kwmHints, 1);
         }
     }
 
     void addWindowButtons (Window wndH)
     {
         ScopedXLock xlock;
-        Atom hints = XInternAtom (display, "_MOTIF_WM_HINTS", True);
+        Atom hints = Atoms::getIfExists ("_MOTIF_WM_HINTS");
 
         if (hints != None)
         {
@@ -2011,59 +2013,56 @@ private:
                 motifHints.decorations |= 0x4; /* MWM_DECOR_RESIZEH */
             }
 
-            XChangeProperty (display, wndH, hints, hints, 32, 0, (unsigned char*) &motifHints, 5);
+            xchangeProperty (wndH, hints, hints, 32, &motifHints, 5);
         }
 
-        hints = XInternAtom (display, "_NET_WM_ALLOWED_ACTIONS", True);
+        hints = Atoms::getIfExists ("_NET_WM_ALLOWED_ACTIONS");
 
         if (hints != None)
         {
-            int netHints [6];
+            Atom netHints [6];
             int num = 0;
 
             if ((styleFlags & windowIsResizable) != 0)
-                netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_RESIZE", True);
+                netHints [num++] = Atoms::getIfExists ("_NET_WM_ACTION_RESIZE");
 
             if ((styleFlags & windowHasMaximiseButton) != 0)
-                netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_FULLSCREEN", True);
+                netHints [num++] = Atoms::getIfExists ("_NET_WM_ACTION_FULLSCREEN");
 
             if ((styleFlags & windowHasMinimiseButton) != 0)
-                netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_MINIMIZE", True);
+                netHints [num++] = Atoms::getIfExists ("_NET_WM_ACTION_MINIMIZE");
 
             if ((styleFlags & windowHasCloseButton) != 0)
-                netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_CLOSE", True);
+                netHints [num++] = Atoms::getIfExists ("_NET_WM_ACTION_CLOSE");
 
-            XChangeProperty (display, wndH, hints, XA_ATOM, 32, PropModeReplace, (unsigned char*) &netHints, num);
+            xchangeProperty (wndH, hints, XA_ATOM, 32, &netHints, num);
         }
     }
 
     void setWindowType()
     {
-        int netHints [2];
-        int numHints = 0;
+        Atom netHints [2];
 
         if ((styleFlags & windowIsTemporary) != 0
              || ((styleFlags & windowHasDropShadow) == 0 && Desktop::canUseSemiTransparentWindows()))
-            netHints [numHints++] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_COMBO", True);
+            netHints [0] = Atoms::getIfExists ("_NET_WM_WINDOW_TYPE_COMBO");
         else
-            netHints [numHints++] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
+            netHints [0] = Atoms::getIfExists ("_NET_WM_WINDOW_TYPE_NORMAL");
 
-        netHints[numHints++] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
+        netHints[1] = Atoms::getIfExists ("_KDE_NET_WM_WINDOW_TYPE_OVERRIDE");
 
-        XChangeProperty (display, windowH, Atoms::WindowType, XA_ATOM, 32, PropModeReplace,
-                         (unsigned char*) &netHints, numHints);
+        xchangeProperty (windowH, Atoms::WindowType, XA_ATOM, 32, &netHints, 2);
 
-        numHints = 0;
+        int numHints = 0;
 
         if ((styleFlags & windowAppearsOnTaskbar) == 0)
-            netHints [numHints++] = XInternAtom (display, "_NET_WM_STATE_SKIP_TASKBAR", True);
+            netHints [numHints++] = Atoms::getIfExists ("_NET_WM_STATE_SKIP_TASKBAR");
 
         if (component->isAlwaysOnTop())
-            netHints [numHints++] = XInternAtom (display, "_NET_WM_STATE_ABOVE", True);
+            netHints [numHints++] = Atoms::getIfExists ("_NET_WM_STATE_ABOVE");
 
         if (numHints > 0)
-            XChangeProperty (display, windowH, Atoms::WindowState, XA_ATOM, 32, PropModeReplace,
-                             (unsigned char*) &netHints, numHints);
+            xchangeProperty (windowH, Atoms::WindowState, XA_ATOM, 32, &netHints, numHints);
     }
 
     void createWindow (Window parentToAddTo)
@@ -2094,12 +2093,13 @@ private:
         swa.border_pixel = 0;
         swa.background_pixmap = None;
         swa.colormap = colormap;
+        swa.override_redirect = (getComponent()->isAlwaysOnTop() && (styleFlags & windowIsTemporary) != 0) ? True : False;
         swa.event_mask = getAllEventsMask();
 
         windowH = XCreateWindow (display, parentToAddTo != 0 ? parentToAddTo : root,
                                  0, 0, 1, 1,
                                  0, depth, InputOutput, visual,
-                                 CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask,
+                                 CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
                                  &swa);
 
         XGrabButton (display, AnyButton, AnyModifier, windowH, False,
@@ -2138,26 +2138,16 @@ private:
 
         // Associate the PID, allowing to be shut down when something goes wrong
         unsigned long pid = getpid();
-        XChangeProperty (display, windowH, Atoms::Pid, XA_CARDINAL, 32, PropModeReplace,
-                         (unsigned char*) &pid, 1);
+        xchangeProperty (windowH, Atoms::Pid, XA_CARDINAL, 32, &pid, 1);
 
         // Set window manager protocols
-        XChangeProperty (display, windowH, Atoms::Protocols, XA_ATOM, 32, PropModeReplace,
-                         (unsigned char*) Atoms::ProtocolList, 2);
+        xchangeProperty (windowH, Atoms::Protocols, XA_ATOM, 32, Atoms::ProtocolList, 2);
 
         // Set drag and drop flags
-        XChangeProperty (display, windowH, Atoms::XdndTypeList, XA_ATOM, 32, PropModeReplace,
-                         (const unsigned char*) Atoms::allowedMimeTypes, numElementsInArray (Atoms::allowedMimeTypes));
-
-        XChangeProperty (display, windowH, Atoms::XdndActionList, XA_ATOM, 32, PropModeReplace,
-                         (const unsigned char*) Atoms::allowedActions, numElementsInArray (Atoms::allowedActions));
-
-        XChangeProperty (display, windowH, Atoms::XdndActionDescription, XA_STRING, 8, PropModeReplace,
-                         (const unsigned char*) "", 0);
-
-        unsigned long dndVersion = Atoms::DndVersion;
-        XChangeProperty (display, windowH, Atoms::XdndAware, XA_ATOM, 32, PropModeReplace,
-                         (const unsigned char*) &dndVersion, 1);
+        xchangeProperty (windowH, Atoms::XdndTypeList, XA_ATOM, 32, Atoms::allowedMimeTypes, numElementsInArray (Atoms::allowedMimeTypes));
+        xchangeProperty (windowH, Atoms::XdndActionList, XA_ATOM, 32, Atoms::allowedActions, numElementsInArray (Atoms::allowedActions));
+        xchangeProperty (windowH, Atoms::XdndActionDescription, XA_STRING, 8, "", 0);
+        xchangeProperty (windowH, Atoms::XdndAware, XA_ATOM, 32, &Atoms::DndVersion, 1);
 
         initialisePointerMap();
         updateModifierMappings();
@@ -2209,7 +2199,7 @@ private:
         else if (windowBorder.getTopAndBottom() == 0 && windowBorder.getLeftAndRight() == 0)
         {
             ScopedXLock xlock;
-            Atom hints = XInternAtom (display, "_NET_FRAME_EXTENTS", True);
+            Atom hints = Atoms::getIfExists ("_NET_FRAME_EXTENTS");
 
             if (hints != None)
             {
@@ -2491,7 +2481,7 @@ private:
             XConvertSelection (display,
                                Atoms::XdndSelection,
                                dragAndDropCurrentMimeType,
-                               XInternAtom (display, "JXSelectionWindowProperty", 0),
+                               Atoms::getCreating ("JXSelectionWindowProperty"),
                                windowH,
                                dragAndDropTimestamp);
         }
@@ -2687,7 +2677,7 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
     if (monitorCoords.size() == 0)
   #endif
     {
-        Atom hints = XInternAtom (display, "_NET_WORKAREA", True);
+        Atom hints = Atoms::getIfExists ("_NET_WORKAREA");
 
         if (hints != None)
         {

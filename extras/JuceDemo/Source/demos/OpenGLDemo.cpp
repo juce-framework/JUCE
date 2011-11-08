@@ -64,7 +64,7 @@ public:
     {
         draggableOrientation.setViewport (getLocalBounds());
     }
-    
+
     void renderOpenGL()
     {
         OpenGLHelpers::clear (Colours::darkgrey.withAlpha (1.0f));
