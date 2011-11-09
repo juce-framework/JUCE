@@ -90,9 +90,9 @@ public:
             float alpha) noexcept;
 
     /** Creates a colour using 8-bit red, green, blue and float alpha values. */
-    static Colour fromRGBAFloat (uint8 red,
-                                 uint8 green,
-                                 uint8 blue,
+    static Colour fromRGBAFloat (float red,
+                                 float green,
+                                 float blue,
                                  float alpha) noexcept;
 
     /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.

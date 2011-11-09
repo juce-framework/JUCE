@@ -126,9 +126,7 @@ public:
                                int samplesPerBlock = 2048);
 
 
-    /** Writes some samples from an AudioSampleBuffer.
-
-    */
+    /** Writes some samples from an AudioSampleBuffer. */
     bool writeFromAudioSampleBuffer (const AudioSampleBuffer& source,
                                      int startSample, int numSamples);
 

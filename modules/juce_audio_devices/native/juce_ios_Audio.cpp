@@ -415,8 +415,11 @@ private:
         if (audioUnit == 0)
             return false;
 
-        const UInt32 one = 1;
-        AudioUnitSetProperty (audioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &one, sizeof (one));
+        if (numInputChannels > 0)
+        {
+            const UInt32 one = 1;
+            AudioUnitSetProperty (audioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &one, sizeof (one));
+        }
 
         AudioChannelLayout layout;
         layout.mChannelBitmap = 0;
