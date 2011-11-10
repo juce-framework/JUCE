@@ -665,6 +665,9 @@ public:
     Pimpl (const String& name, const int timeOutMillisecs)
         : handle (0), refCount (1)
     {
+       #if JUCE_IOS
+        handle = 1; // On iOS we can't run multiple apps, so just assume success.
+       #else
         // Note that we can't get the normal temp folder here, as it might be different for each app.
         File tempFolder ("/var/tmp");
 
@@ -703,6 +706,7 @@ public:
         }
 
         closeFile();
+       #endif
     }
 
     ~Pimpl()
@@ -712,6 +716,7 @@ public:
 
     void closeFile()
     {
+       #if ! JUCE_IOS
         if (handle != 0)
         {
             struct flock fl = { 0 };
@@ -724,6 +729,7 @@ public:
             close (handle);
             handle = 0;
         }
+       #endif
     }
 
     int handle, refCount;
@@ -747,7 +753,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
         pimpl = new Pimpl (name, timeOutMillisecs);
 
         if (pimpl->handle == 0)
-            pimpl = 0;
+            pimpl = nullptr;
     }
     else
     {
@@ -765,7 +771,7 @@ void InterProcessLock::exit()
     jassert (pimpl != nullptr);
 
     if (pimpl != nullptr && --(pimpl->refCount) == 0)
-        pimpl = 0;
+        pimpl = nullptr;
 }
 
 //==============================================================================
