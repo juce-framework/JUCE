@@ -129,6 +129,8 @@ public:
     ULONG __stdcall AddRef()    { return ++refCount; }
     ULONG __stdcall Release()   { const ULONG r = --refCount; if (r == 0) delete this; return r; }
 
+    void resetReferenceCount() noexcept     { refCount = 0; }
+
 protected:
     ULONG refCount;
 };
