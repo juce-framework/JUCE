@@ -248,6 +248,16 @@ public:
         }
     }
 
+    /** Returns a uint32 which when written to memory, will be in the order r, g, b, a. */
+    inline uint32 getInRGBAMemoryOrder() const noexcept
+    {
+       #if JUCE_BIG_ENDIAN
+        return (((uint32) components.r) << 24) | (((uint32) components.g) << 16) | (((uint32) components.b) << 8) | components.a;
+       #else
+        return (((uint32) components.a) << 24) | (((uint32) components.b) << 16) | (((uint32) components.g) << 8) | components.r;
+       #endif
+    }
+
     //==============================================================================
     /** The indexes of the different components in the byte layout of this type of colour. */
    #if JUCE_BIG_ENDIAN

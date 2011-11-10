@@ -224,34 +224,68 @@ private:
 };
 
 //==============================================================================
-class GradientTexture
+class TextureCache   : public SingleThreadedReferenceCountedObject
 {
 public:
-    GradientTexture() : needsRefresh (true) {}
+    TextureCache() : activeGradientIndex (0), gradientNeedsRefresh (true) {}
 
-    enum { textureSize = 256 };
+    enum { gradientTextureSize = 256, numTexturesToCache = 8, numGradientTexturesToCache = 6 };
 
-    void reset() noexcept
+    void resetGradient() noexcept
     {
-        needsRefresh = true;
+        gradientNeedsRefresh = true;
     }
 
-    void bind (const ColourGradient& gradient)
+    void bindTextureForGradient (const ColourGradient& gradient)
     {
-        if (needsRefresh)
+        if (gradientNeedsRefresh)
         {
-            needsRefresh = false;
-            PixelARGB lookup [textureSize];
-            gradient.createLookupTable (lookup, textureSize);
-            texture.loadARGB (lookup, textureSize, 1);
+            gradientNeedsRefresh = false;
+
+            if (gradientTextures.size() < numGradientTexturesToCache)
+            {
+                activeGradientIndex = gradientTextures.size();
+                gradientTextures.add (new OpenGLTexture());
+            }
+            else
+            {
+                activeGradientIndex = (activeGradientIndex + 1) % numGradientTexturesToCache;
+            }
+
+            PixelARGB lookup [gradientTextureSize];
+            gradient.createLookupTable (lookup, gradientTextureSize);
+            gradientTextures.getUnchecked (activeGradientIndex)->loadARGB (lookup, gradientTextureSize, 1);
         }
 
-        texture.bind();
+        gradientTextures.getUnchecked (activeGradientIndex)->bind();
     }
 
+    OpenGLTexture* getTexture (const int w, const int h)
+    {
+        if (textures.size() < numTexturesToCache)
+            return new OpenGLTexture();
+
+        for (int i = 0; i < numTexturesToCache - 1; ++i)
+        {
+            const OpenGLTexture* const t = textures.getUnchecked(i);
+            if (t->getWidth() == w && t->getHeight() == h)
+                return textures.removeAndReturn (i);
+        }
+
+        return textures.removeAndReturn (0);
+    }
+
+    void release (OpenGLTexture* texture)
+    {
+        textures.add (texture);
+    }
+
+    typedef ReferenceCountedObjectPtr<TextureCache> Ptr;
+
 private:
-    OpenGLTexture texture;
-    bool needsRefresh;
+    OwnedArray<OpenGLTexture> textures, gradientTextures;
+    int activeGradientIndex;
+    bool gradientNeedsRefresh;
 };
 
 //==============================================================================
@@ -286,16 +320,16 @@ namespace
 
     void fillRectangleList (const RectangleList& list)
     {
-        GLfloat vertices [8];
+        GLshort vertices [8];
         glEnableClientState (GL_VERTEX_ARRAY);
-        glVertexPointer (2, GL_FLOAT, 0, vertices);
+        glVertexPointer (2, GL_SHORT, 0, vertices);
 
         for (RectangleList::Iterator i (list); i.next();)
         {
-            vertices[0] = vertices[4] = (GLfloat) i.getRectangle()->getX();
-            vertices[1] = vertices[3] = (GLfloat) i.getRectangle()->getY();
-            vertices[2] = vertices[6] = (GLfloat) i.getRectangle()->getRight();
-            vertices[5] = vertices[7] = (GLfloat) i.getRectangle()->getBottom();
+            vertices[0] = vertices[4] = (GLshort) i.getRectangle()->getX();
+            vertices[1] = vertices[3] = (GLshort) i.getRectangle()->getY();
+            vertices[2] = vertices[6] = (GLshort) i.getRectangle()->getRight();
+            vertices[5] = vertices[7] = (GLshort) i.getRectangle()->getBottom();
 
             glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
         }
@@ -303,17 +337,17 @@ namespace
 
     void fillRectangleList (const RectangleList& list, const Rectangle<int>& clip)
     {
-        GLfloat vertices [8];
+        GLshort vertices [8];
         glEnableClientState (GL_VERTEX_ARRAY);
-        glVertexPointer (2, GL_FLOAT, 0, vertices);
+        glVertexPointer (2, GL_SHORT, 0, vertices);
 
         for (RectangleList::Iterator i (list); i.next();)
         {
             const Rectangle<int> r (i.getRectangle()->getIntersection (clip));
-            vertices[0] = vertices[4] = (GLfloat) r.getX();
-            vertices[1] = vertices[3] = (GLfloat) r.getY();
-            vertices[2] = vertices[6] = (GLfloat) r.getRight();
-            vertices[5] = vertices[7] = (GLfloat) r.getBottom();
+            vertices[0] = vertices[4] = (GLshort) r.getX();
+            vertices[1] = vertices[3] = (GLshort) r.getY();
+            vertices[2] = vertices[6] = (GLshort) r.getRight();
+            vertices[5] = vertices[7] = (GLshort) r.getBottom();
 
             glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
         }
@@ -541,13 +575,13 @@ namespace
         }
     }
 
-    void fillWithLinearGradient (GradientTexture& gradientTexture, const Rectangle<int>& rect, const ColourGradient& grad,
+    void fillWithLinearGradient (TextureCache& textureCache, const Rectangle<int>& rect, const ColourGradient& grad,
                                  const AffineTransform& transform, const PositionedTexture* mask1, const PositionedTexture* mask2)
     {
         const Point<float> p1 (grad.point1.transformedBy (transform));
         const Point<float> p2 (grad.point2.transformedBy (transform));
-        const Point<float> p3 (Point<float> (grad.point1.x - (grad.point2.y - grad.point1.y) / gradientTexture.textureSize,
-                                             grad.point1.y + (grad.point2.x - grad.point1.x) / gradientTexture.textureSize).transformedBy (transform));
+        const Point<float> p3 (Point<float> (grad.point1.x - (grad.point2.y - grad.point1.y) / textureCache.gradientTextureSize,
+                                             grad.point1.y + (grad.point2.x - grad.point1.x) / textureCache.gradientTextureSize).transformedBy (transform));
 
         const AffineTransform textureTransform (AffineTransform::fromTargetPoints (p1.x, p1.y,  0.0f, 0.0f,
                                                                                    p2.x, p2.y,  1.0f, 0.0f,
@@ -568,13 +602,13 @@ namespace
         prepareMasks (mask1, mask2, textureCoords1, textureCoords2, &rect);
         TemporaryColourModulationMode tmm;
 
-        gradientTexture.bind (grad);
+        textureCache.bindTextureForGradient (grad);
 
         setColour (1.0f);
         OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4);
     }
 
-    void fillWithRadialGradient (GradientTexture& gradientTexture, const OpenGLTarget& target, const Rectangle<int>& rect,
+    void fillWithRadialGradient (TextureCache& textureCache, const OpenGLTarget& target, const Rectangle<int>& rect,
                                  const ColourGradient& grad, const AffineTransform& transform,
                                  const PositionedTexture* mask1, const PositionedTexture* mask2)
     {
@@ -645,7 +679,7 @@ namespace
                     mask2->getTextureCoordAt (vertices[i], vertices[i + 1], textureCoords3[i], textureCoords3[i + 1]);
         }
 
-        gradientTexture.bind (grad);
+        textureCache.bindTextureForGradient (grad);
 
         target.scissor (rect);
         glEnable (GL_TEXTURE_2D);
@@ -659,7 +693,7 @@ namespace
         glDisable (GL_SCISSOR_TEST);
     }
 
-    void fillTexture (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, GradientTexture& gradientTexture,
+    void fillTexture (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, TextureCache& textureCache,
                       const PositionedTexture* mask1, const PositionedTexture* mask2, const bool replaceExistingContents)
     {
         jassert (! (mask1 == nullptr && mask2 != nullptr));
@@ -697,16 +731,16 @@ namespace
 
             if (g2.point1 == g2.point2)
             {
-                fillTexture (target, area, g2.getColourAtPosition (1.0), gradientTexture, mask1, mask2, replaceExistingContents);
+                fillTexture (target, area, g2.getColourAtPosition (1.0), textureCache, mask1, mask2, replaceExistingContents);
             }
             else
             {
                 setBlendMode (replaceExistingContents || (mask1 == nullptr && fill.colour.isOpaque() && fill.gradient->isOpaque()));
 
                 if (g2.isRadial)
-                    fillWithRadialGradient (gradientTexture, target, area, g2, fill.transform, mask1, mask2);
+                    fillWithRadialGradient (textureCache, target, area, g2, fill.transform, mask1, mask2);
                 else
-                    fillWithLinearGradient (gradientTexture, area, g2, fill.transform, mask1, mask2);
+                    fillWithLinearGradient (textureCache, area, g2, fill.transform, mask1, mask2);
             }
         }
         else if (fill.isTiledImage())
@@ -717,84 +751,112 @@ namespace
     }
 
     //==============================================================================
-    struct VariableAlphaColour
+    struct MultipleQuadList
     {
-        VariableAlphaColour (const Colour& c) noexcept
-            : r (c.getFloatRed()), g (c.getFloatGreen()), b (c.getFloatBlue()),
-              alphaScale (c.getFloatAlpha() / 255.0f), lastAlpha (-1)
+    public:
+        MultipleQuadList (const Colour& colour) noexcept
+            : colour (colour.getPixelARGB()),
+              numVertices (0)
         {}
 
-        void setForAlpha (const int alpha) noexcept
+        void begin()
         {
-            if (lastAlpha != alpha)
+            glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+            glEnableClientState (GL_VERTEX_ARRAY);
+            glEnableClientState (GL_COLOR_ARRAY);
+            glVertexPointer (2, GL_SHORT, 0, vertices);
+            glColorPointer (4, GL_UNSIGNED_BYTE, 0, colours);
+            setColour (1.0f);
+        }
+
+        void end()
+        {
+            if (numVertices > 0)
+                glDrawArrays (GL_TRIANGLES, 0, numVertices);
+
+            glDisableClientState (GL_COLOR_ARRAY);
+        }
+
+        void addQuad (const int x, const int y, const int w, const int h, const int alpha)
+        {
+            if (numVertices > maxVerticesPerBlock - 6)
             {
-                lastAlpha = alpha;
-                const float a = alpha * alphaScale;
-                glColor4f (r * a, g * a, b * a, a);
+                glDrawArrays (GL_TRIANGLES, 0, numVertices);
+                numVertices = 0;
             }
+
+            const GLshort x1 = (GLshort) x;
+            const GLshort y1 = (GLshort) y;
+            const GLshort x2 = (GLshort) (x + w);
+            const GLshort y2 = (GLshort) (y + h);
+
+            GLshort* const v = vertices + numVertices * 2;
+            v[0] = x1;  v[1] = y1;  v[2] = x2;  v[3] = y1;  v[4]  = x1;  v[5]  = y2;
+            v[6] = x2;  v[7] = y1;  v[8] = x1;  v[9] = y2;  v[10] = x2;  v[11] = y2;
+
+            PixelARGB p (colour);
+            p.multiplyAlpha (alpha);
+            const uint32 rgba = p.getInRGBAMemoryOrder();
+
+            uint32* const c = colours + numVertices;
+            for (int i = 0; i < 6; ++i)
+                c[i] = rgba;
+
+            numVertices += 6;
         }
 
     private:
-        const float r, g, b, alphaScale;
-        int lastAlpha;
+        const PixelARGB colour;
+        enum { maxVerticesPerBlock = 192 };
+        GLshort vertices [maxVerticesPerBlock * 2];
+        uint32 colours [maxVerticesPerBlock];
+        int numVertices;
 
-        JUCE_DECLARE_NON_COPYABLE (VariableAlphaColour);
+        JUCE_DECLARE_NON_COPYABLE (MultipleQuadList);
     };
 
     //==============================================================================
     struct EdgeTableRenderer
     {
-        EdgeTableRenderer (const Colour& c) noexcept
-            : colour (c)
+        EdgeTableRenderer (const Colour& colour) noexcept
+            : quadList (colour)
         {}
 
         void draw (const EdgeTable& et)
         {
-            glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-            glEnableClientState (GL_VERTEX_ARRAY);
-            glVertexPointer (2, GL_FLOAT, 0, vertices);
-
+            quadList.begin();
             et.iterate (*this);
+            quadList.end();
         }
 
         void setEdgeTableYPos (const int y) noexcept
         {
-            vertices[1] = vertices[5] = (GLfloat) y;
-            vertices[3] = vertices[7] = (GLfloat) (y + 1);
+            currentY = y;
         }
 
         void handleEdgeTablePixel (const int x, const int alphaLevel) noexcept
         {
-            drawHorizontal (x, 1, alphaLevel);
+            quadList.addQuad (x, currentY, 1, 1, alphaLevel);
         }
 
         void handleEdgeTablePixelFull (const int x) noexcept
         {
-            drawHorizontal (x, 1, 255);
+            quadList.addQuad (x, currentY, 1, 1, 255);
         }
 
         void handleEdgeTableLine (const int x, const int width, const int alphaLevel) noexcept
         {
-            drawHorizontal (x, width, alphaLevel);
+            quadList.addQuad (x, currentY, width, 1, alphaLevel);
         }
 
         void handleEdgeTableLineFull (const int x, const int width) noexcept
         {
-            drawHorizontal (x, width, 255);
+            quadList.addQuad (x, currentY, width, 1, 255);
         }
 
     private:
-        GLfloat vertices[8];
-        VariableAlphaColour colour;
-
-        void drawHorizontal (int x, const int w, const int alpha) noexcept
-        {
-            vertices[0] = vertices[2] = (GLfloat) x;
-            vertices[4] = vertices[6] = (GLfloat) (x + w);
-
-            colour.setForAlpha (alpha);
-            glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
-        }
+        MultipleQuadList quadList;
+        int currentY;
 
         JUCE_DECLARE_NON_COPYABLE (EdgeTableRenderer);
     };
@@ -803,32 +865,23 @@ namespace
     struct FloatRectangleRenderer
     {
         FloatRectangleRenderer (const Colour& c) noexcept
-            : colour (c)
+            : quadList (c)
         {}
 
         void draw (const Rectangle<float>& r)
         {
-            glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-            glEnableClientState (GL_VERTEX_ARRAY);
-            glVertexPointer (2, GL_FLOAT, 0, vertices);
-
+            quadList.begin();
             RenderingHelpers::FloatRectangleRasterisingInfo (r).iterate (*this);
+            quadList.end();
         }
 
         void operator() (const int x, const int y, const int w, const int h, const int alpha)
         {
-            vertices[0] = vertices[2] = (GLfloat) x;
-            vertices[1] = vertices[5] = (GLfloat) y;
-            vertices[4] = vertices[6] = (GLfloat) (x + w);
-            vertices[3] = vertices[7] = (GLfloat) (y + h);
-
-            colour.setForAlpha (alpha);
-            glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+            quadList.addQuad (x, y, w, h, alpha);
         }
 
     private:
-        GLfloat vertices[8];
-        VariableAlphaColour colour;
+        MultipleQuadList quadList;
 
         JUCE_DECLARE_NON_COPYABLE (FloatRectangleRenderer);
     };
@@ -855,10 +908,10 @@ public:
     virtual Ptr clipToImageAlpha (const OpenGLTextureFromImage&, const AffineTransform&) = 0;
     virtual Ptr clipToTexture (const PositionedTexture&) = 0;
     virtual Rectangle<int> getClipBounds() const = 0;
-    virtual void fillRect (const OpenGLTarget&, const Rectangle<int>& area, const FillType&, GradientTexture&, bool replaceContents) = 0;
-    virtual void fillRect (const OpenGLTarget&, const Rectangle<float>& area, const FillType&, GradientTexture&) = 0;
-    virtual void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture&, const FillType&, GradientTexture&) = 0;
-    virtual void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, GradientTexture& gradientTexture) = 0;
+    virtual void fillRect (const OpenGLTarget&, const Rectangle<int>& area, const FillType&, TextureCache&, bool replaceContents) = 0;
+    virtual void fillRect (const OpenGLTarget&, const Rectangle<float>& area, const FillType&, TextureCache&) = 0;
+    virtual void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture&, const FillType&, TextureCache&) = 0;
+    virtual void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, TextureCache&) = 0;
     virtual void drawImage (const OpenGLTarget&, const OpenGLTextureFromImage&, const AffineTransform&, float alpha,
                             const Rectangle<int>& clip, const PositionedTexture* mask) = 0;
 
@@ -1015,39 +1068,39 @@ public:
         return this;
     }
 
-    void fillRect (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, GradientTexture& gradientTexture, bool replaceContents)
+    void fillRect (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, TextureCache& textureCache, bool replaceContents)
     {
         jassert (! replaceContents);
         const Rectangle<int> r (clip.getIntersection (area));
 
         if (! r.isEmpty())
-            fillRectInternal (target, r, fill, gradientTexture, false);
+            fillRectInternal (target, r, fill, textureCache, false);
     }
 
-    void fillRect (const OpenGLTarget& target, const Rectangle<float>& area, const FillType& fill, GradientTexture& gradientTexture)
+    void fillRect (const OpenGLTarget& target, const Rectangle<float>& area, const FillType& fill, TextureCache& textureCache)
     {
         EdgeTable et (area);
-        fillEdgeTable (target, et, fill, gradientTexture);
+        fillEdgeTable (target, et, fill, textureCache);
     }
 
-    void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture& texture, const FillType& fill, GradientTexture& gradientTexture)
+    void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture& texture, const FillType& fill, TextureCache& textureCache)
     {
         PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.x, maskOrigin.y, mask.getWidth(), mask.getHeight()), area);
-        fillTexture (target, area, fill, gradientTexture, &texture, &pt, false);
+        fillTexture (target, area, fill, textureCache, &texture, &pt, false);
     }
 
-    void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, GradientTexture& gradientTexture)
+    void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, TextureCache& textureCache)
     {
-        OpenGLTexture texture;
-        PositionedTexture pt (texture, et, clip);
-
-        fillMask (target, pt.clip, pt, fill, gradientTexture);
+        OpenGLTexture* texture = textureCache.getTexture (clip.getWidth(), clip.getHeight());
+        PositionedTexture pt (*texture, et, clip);
+        fillMask (target, pt.clip, pt, fill, textureCache);
+        textureCache.release (texture);
     }
 
-    void fillRectInternal (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, GradientTexture& gradientTexture, bool replaceContents)
+    void fillRectInternal (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, TextureCache& textureCache, bool replaceContents)
     {
         PositionedTexture pt (mask.getTextureID(), Rectangle<int> (maskOrigin.x, maskOrigin.y, mask.getWidth(), mask.getHeight()), area);
-        fillTexture (target, area, fill, gradientTexture, &pt, nullptr, replaceContents);
+        fillTexture (target, area, fill, textureCache, &pt, nullptr, replaceContents);
     }
 
     void drawImage (const OpenGLTarget& target, const OpenGLTextureFromImage& source, const AffineTransform& transform,
@@ -1124,7 +1177,7 @@ public:
     Ptr clipToPath (const Path& p, const AffineTransform& transform)    { return toMask()->clipToPath (p, transform); }
     Ptr clipToImageAlpha (const OpenGLTextureFromImage& image, const AffineTransform& transform)    { return toMask()->clipToImageAlpha (image, transform); }
 
-    void fillRect (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, GradientTexture& gradientTexture, bool replaceContents)
+    void fillRect (const OpenGLTarget& target, const Rectangle<int>& area, const FillType& fill, TextureCache& textureCache, bool replaceContents)
     {
         if (fill.isColour())
         {
@@ -1140,12 +1193,12 @@ public:
                 const Rectangle<int> r (i.getRectangle()->getIntersection (area));
 
                 if (! r.isEmpty())
-                    fillTexture (target, r, fill, gradientTexture, nullptr, nullptr, replaceContents);
+                    fillTexture (target, r, fill, textureCache, nullptr, nullptr, replaceContents);
             }
         }
     }
 
-    void fillRect (const OpenGLTarget& target, const Rectangle<float>& area, const FillType& fill, GradientTexture& gradientTexture)
+    void fillRect (const OpenGLTarget& target, const Rectangle<float>& area, const FillType& fill, TextureCache& textureCache)
     {
         if (fill.isColour())
         {
@@ -1167,7 +1220,7 @@ public:
         else
         {
             EdgeTable et (area);
-            fillEdgeTable (target, et, fill, gradientTexture);
+            fillEdgeTable (target, et, fill, textureCache);
         }
     }
 
@@ -1183,7 +1236,7 @@ public:
         }
     }
 
-    void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, GradientTexture& gradientTexture)
+    void fillEdgeTable (const OpenGLTarget& target, EdgeTable& et, const FillType& fill, TextureCache& textureCache)
     {
         if (fill.isColour())
         {
@@ -1209,16 +1262,16 @@ public:
         }
         else
         {
-            OpenGLTexture texture;
-            PositionedTexture pt (texture, et, clip.getBounds());
-
-            fillMask (target, pt.clip, pt, fill, gradientTexture);
+            OpenGLTexture* texture = textureCache.getTexture (clip.getBounds().getWidth(), clip.getBounds().getHeight());
+            PositionedTexture pt (*texture, et, clip.getBounds());
+            fillMask (target, pt.clip, pt, fill, textureCache);
+            textureCache.release (texture);
         }
     }
 
-    void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture& texture, const FillType& fill, GradientTexture& gradientTexture)
+    void fillMask (const OpenGLTarget& target, const Rectangle<int>& area, const PositionedTexture& texture, const FillType& fill, TextureCache& textureCache)
     {
-        fillTexture (target, area, fill, gradientTexture, &texture, nullptr, false);
+        fillTexture (target, area, fill, textureCache, &texture, nullptr, false);
     }
 
 private:
@@ -1240,7 +1293,8 @@ public:
     SavedState (const OpenGLTarget& target_)
         : clip (new ClipRegion_RectangleList (Rectangle<int> (target_.width, target_.height))),
           transform (0, 0), interpolationQuality (Graphics::mediumResamplingQuality),
-          target (target_), transparencyLayerAlpha (1.0f)
+          target (target_), transparencyLayerAlpha (1.0f),
+          textureCache (new TextureCache())
     {
     }
 
@@ -1248,7 +1302,8 @@ public:
         : clip (other.clip), transform (other.transform), font (other.font),
           fillType (other.fillType), interpolationQuality (other.interpolationQuality),
           target (other.target), transparencyLayerAlpha (other.transparencyLayerAlpha),
-          transparencyLayer (other.transparencyLayer)
+          transparencyLayer (other.transparencyLayer),
+          textureCache (other.textureCache)
     {
     }
 
@@ -1394,7 +1449,7 @@ public:
             if (transform.isOnlyTranslated)
             {
                 clip->fillRect (target, r.translated (transform.xOffset, transform.yOffset),
-                                getFillType(), gradientTexture, replaceContents);
+                                getFillType(), *textureCache, replaceContents);
             }
             else
             {
@@ -1415,7 +1470,7 @@ public:
                                            .getIntersection (clip->getClipBounds().toFloat()));
 
                 if (! c.isEmpty())
-                    clip->fillRect (target, c, getFillType(), gradientTexture);
+                    clip->fillRect (target, c, getFillType(), *textureCache);
             }
             else
             {
@@ -1508,18 +1563,19 @@ public:
             Path p;
             p.addRectangle (image.getBounds());
 
-            OpenGLTexture texture;
+            OpenGLTexture* texture = textureCache->getTexture (clipBounds.getWidth(), clipBounds.getHeight());
             EdgeTable et (clipBounds, p, t);
-            PositionedTexture pt (texture, et, clipBounds);
+            PositionedTexture pt (*texture, et, clipBounds);
 
             clip->drawImage (target, image, t, alpha, clipBounds, &pt);
+            textureCache->release (texture);
         }
     }
 
     void setFillType (const FillType& newFill)
     {
         fillType = newFill;
-        gradientTexture.reset();
+        textureCache->resetGradient();
     }
 
     //==============================================================================
@@ -1533,7 +1589,7 @@ public:
 private:
     float transparencyLayerAlpha;
     Image transparencyLayer;
-    GradientTexture gradientTexture;
+    TextureCache::Ptr textureCache;
 
     void cloneClipIfMultiplyReferenced()
     {
@@ -1548,7 +1604,7 @@ private:
 
     void fillEdgeTable (EdgeTable& et)
     {
-        clip->fillEdgeTable (target, et, getFillType(), gradientTexture);
+        clip->fillEdgeTable (target, et, getFillType(), *textureCache);
     }
 
     class CachedGlyphEdgeTable

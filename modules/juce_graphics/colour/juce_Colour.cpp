@@ -172,7 +172,7 @@ Colour::Colour (const uint8 red, const uint8 green, const uint8 blue, const floa
     argb.setARGB (ColourHelpers::floatToUInt8 (alpha), red, green, blue);
 }
 
-Colour Colour::fromRGBAFloat (const float red, const float green, const float blue, const float alpha) noexcept
+Colour Colour::fromFloatRGBA (const float red, const float green, const float blue, const float alpha) noexcept
 {
     return Colour (ColourHelpers::floatToUInt8 (red), ColourHelpers::floatToUInt8 (green), ColourHelpers::floatToUInt8 (blue), alpha);
 }

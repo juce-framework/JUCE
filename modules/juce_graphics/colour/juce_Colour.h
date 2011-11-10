@@ -89,8 +89,10 @@ public:
             uint8 blue,
             float alpha) noexcept;
 
-    /** Creates a colour using 8-bit red, green, blue and float alpha values. */
-    static Colour fromRGBAFloat (float red,
+    /** Creates a colour using floating point red, green, blue and alpha values.
+        Numbers outside the range 0..1 will be clipped.
+    */
+    static Colour fromFloatRGBA (float red,
                                  float green,
                                  float blue,
                                  float alpha) noexcept;
