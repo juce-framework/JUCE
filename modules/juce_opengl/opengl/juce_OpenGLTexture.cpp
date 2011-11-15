@@ -49,22 +49,22 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum
 
     jassert (isValidSize (w, h)); // Perhaps these dimensions must be a power-of-two?
 
-    if (width != w || height != h)
+    width  = w;
+    height = h;
+
+    if (textureID == 0)
     {
-        release();
-
-        width  = w;
-        height = h;
-
         glGenTextures (1, &textureID);
+        glBindTexture (GL_TEXTURE_2D, textureID);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
-
-    glBindTexture (GL_TEXTURE_2D, textureID);
-
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    else
+    {
+        glBindTexture (GL_TEXTURE_2D, textureID);
+    }
 
     glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D (GL_TEXTURE_2D, 0, type == GL_ALPHA ? GL_ALPHA : GL_RGBA,

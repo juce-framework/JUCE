@@ -75,13 +75,12 @@ public:
 
    #ifndef DOXYGEN
     class SavedState;
+    class GLState;
    #endif
 
 private:
+    ScopedPointer<GLState> glState;
     RenderingHelpers::SavedStateStack<SavedState> stack;
-    GLuint previousFrameBufferTarget;
-
-    void initialise();
 };
 
 #endif   // __JUCE_OPENGLGRAPHICSCONTEXT_JUCEHEADER__
