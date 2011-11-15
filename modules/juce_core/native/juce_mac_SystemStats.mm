@@ -110,16 +110,16 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 String SystemStats::getOperatingSystemName()
 {
    #if JUCE_IOS
-    String s ("iOS ");
+    return "iOS " + nsStringToJuce ([[UIDevice currentDevice] systemVersion]);
    #else
+    SInt32 major, minor;
+    Gestalt (gestaltSystemVersionMajor, &major);
+    Gestalt (gestaltSystemVersionMinor, &minor);
+
     String s ("Mac OSX ");
-   #endif
-
-    struct utsname uts;
-    if (uname (&uts) >= 0)
-        s << uts.release;
-
+    s << (int) major << '.' << (int) minor;
     return s;
+   #endif
 }
 
 #if ! JUCE_IOS

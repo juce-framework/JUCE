@@ -46,6 +46,7 @@ namespace
                 extensionsArray.add ("." + String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (extensions, i)));
         }
 
+        CFRelease (extensions);
         return extensionsArray;
     }
 }

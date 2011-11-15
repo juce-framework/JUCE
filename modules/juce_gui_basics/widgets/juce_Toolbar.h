@@ -200,8 +200,8 @@ public:
     /** Pops up a modal dialog box that allows this toolbar to be customised by the user.
 
         The dialog contains a ToolbarItemPalette and various controls for editing other
-        aspects of the toolbar. This method will block and run the dialog box modally,
-        returning when the user closes it.
+        aspects of the toolbar. The dialog box will be opened modally, but the method will
+        return immediately.
 
         The factory is used to determine the set of items that will be shown on the
         palette.

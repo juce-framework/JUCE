@@ -166,7 +166,7 @@ private:
                 out << " -L" << libraryPaths.getReference(i).toUnixStyle().quoted();
         }
 
-        const char* defaultLibs[] = { "freetype", "pthread", "rt", "X11", "GL", "GLU", "Xinerama", "asound", 0 };
+        const char* defaultLibs[] = { "freetype", "pthread", "rt", "X11", "GL", "GLU", "Xinerama", "asound", "Xext", 0 };
         StringArray libs (defaultLibs);
 
         for (int i = 0; i < libs.size(); ++i)

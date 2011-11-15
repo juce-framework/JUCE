@@ -278,7 +278,7 @@ public:
                         if (key == 0)
                             key = (juce_wchar) kp.getKeyCode();
 
-                        [item setKeyEquivalent: juceStringToNS (String::charToString (key))];
+                        [item setKeyEquivalent: juceStringToNS (String::charToString (key).toLowerCase())];
                         [item setKeyEquivalentModifierMask: juceModsToNSMods (kp.getModifiers())];
                     }
                 }
