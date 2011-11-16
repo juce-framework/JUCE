@@ -117,12 +117,13 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
 
     if (numSamples > 0)
     {
+        const int numTargetChannels = buffer->getNumChannels();
         int* chans[3];
 
         if (useReaderLeftChan == useReaderRightChan)
         {
             chans[0] = reinterpret_cast<int*> (buffer->getSampleData (0, startSample));
-            chans[1] = (numChannels > 1 && buffer->getNumChannels() > 1) ? reinterpret_cast<int*> (buffer->getSampleData (1, startSample)) : nullptr;
+            chans[1] = (numChannels > 1 && numTargetChannels > 1) ? reinterpret_cast<int*> (buffer->getSampleData (1, startSample)) : nullptr;
         }
         else if (useReaderLeftChan || (numChannels == 1))
         {
@@ -155,7 +156,7 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
             }
         }
 
-        if (numChannels > 1 && (chans[0] == nullptr || chans[1] == nullptr))
+        if (numTargetChannels > 1 && (chans[0] == nullptr || chans[1] == nullptr))
         {
             // if this is a stereo buffer and the source was mono, dupe the first channel..
             memcpy (buffer->getSampleData (1, startSample),
@@ -221,9 +222,9 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
             rmin = lmin;
         }
 
-        lowestLeft = lmin;
-        highestLeft = lmax;
-        lowestRight = rmin;
+        lowestLeft   = lmin;
+        highestLeft  = lmax;
+        lowestRight  = rmin;
         highestRight = rmax;
     }
     else
@@ -266,9 +267,9 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
             rmin = lmin;
         }
 
-        lowestLeft = lmin / (float) std::numeric_limits<int>::max();
-        highestLeft = lmax / (float) std::numeric_limits<int>::max();
-        lowestRight = rmin / (float) std::numeric_limits<int>::max();
+        lowestLeft   = lmin / (float) std::numeric_limits<int>::max();
+        highestLeft  = lmax / (float) std::numeric_limits<int>::max();
+        lowestRight  = rmin / (float) std::numeric_limits<int>::max();
         highestRight = rmax / (float) std::numeric_limits<int>::max();
     }
 }
