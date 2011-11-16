@@ -533,12 +533,12 @@ AudioThumbnail::~AudioThumbnail()
 void AudioThumbnail::clear()
 {
     source = nullptr;
+    const ScopedLock sl (lock);
     clearChannelData();
 }
 
 void AudioThumbnail::clearChannelData()
 {
-    const ScopedLock sl (lock);
     window->invalidate();
     channels.clear();
     totalSamples = numSamplesFinished = 0;
@@ -550,6 +550,7 @@ void AudioThumbnail::clearChannelData()
 
 void AudioThumbnail::reset (int newNumChannels, double newSampleRate, int64 totalSamplesInSource)
 {
+    const ScopedLock sl (lock);
     clear();
 
     numChannels = newNumChannels;
@@ -568,12 +569,13 @@ void AudioThumbnail::createChannels (const int length)
 //==============================================================================
 void AudioThumbnail::loadFrom (InputStream& rawInput)
 {
-    clearChannelData();
-
     BufferedInputStream input (rawInput, 4096);
 
     if (input.readByte() != 'j' || input.readByte() != 'a' || input.readByte() != 't' || input.readByte() != 'm')
         return;
+
+    const ScopedLock sl (lock);
+    clearChannelData();
 
     samplesPerThumbSample = input.readInt();
     totalSamples = input.readInt64();             // Total number of source samples.
@@ -740,6 +742,7 @@ int64 AudioThumbnail::getNumSamplesFinished() const noexcept
 
 float AudioThumbnail::getApproximatePeak() const
 {
+    const ScopedLock sl (lock);
     int peak = 0;
 
     for (int i = channels.size(); --i >= 0;)
@@ -751,6 +754,7 @@ float AudioThumbnail::getApproximatePeak() const
 void AudioThumbnail::getApproximateMinMax (const double startTime, const double endTime, const int channelIndex,
                                            float& minValue, float& maxValue) const noexcept
 {
+    const ScopedLock sl (lock);
     MinMaxValue result;
     const ThumbData* const data = channels [channelIndex];
 
