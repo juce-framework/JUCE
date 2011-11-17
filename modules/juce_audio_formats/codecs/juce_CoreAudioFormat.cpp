@@ -93,7 +93,7 @@ public:
 
                 destinationAudioFormat.mSampleRate       = sampleRate;
                 destinationAudioFormat.mFormatID         = kAudioFormatLinearPCM;
-                destinationAudioFormat.mFormatFlags      = kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsNonInterleaved;
+                destinationAudioFormat.mFormatFlags      = kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
                 destinationAudioFormat.mBitsPerChannel   = sizeof (float) * 8;
                 destinationAudioFormat.mChannelsPerFrame = numChannels;
                 destinationAudioFormat.mBytesPerFrame    = sizeof (float);

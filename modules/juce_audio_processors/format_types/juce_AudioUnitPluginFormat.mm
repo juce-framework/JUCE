@@ -398,7 +398,7 @@ public:
                 AudioStreamBasicDescription stream = { 0 };
                 stream.mSampleRate       = sampleRate_;
                 stream.mFormatID         = kAudioFormatLinearPCM;
-                stream.mFormatFlags      = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
+                stream.mFormatFlags      = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
                 stream.mFramesPerPacket  = 1;
                 stream.mBytesPerPacket   = 4;
                 stream.mBytesPerFrame    = 4;
