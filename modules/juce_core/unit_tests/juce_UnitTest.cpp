@@ -77,7 +77,7 @@ void UnitTest::expect (const bool result, const String& failureMessage)
 //==============================================================================
 UnitTestRunner::UnitTestRunner()
     : currentTest (nullptr),
-      assertOnFailure (false),
+      assertOnFailure (true),
       logPasses (false)
 {
 }

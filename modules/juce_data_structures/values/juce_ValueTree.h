@@ -164,6 +164,7 @@ public:
     const var& operator[] (const Identifier& name) const;
 
     /** Changes a named property of the node.
+        The name identifier must not be an empty string.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
         @see var, getProperty, removeProperty
@@ -427,6 +428,11 @@ public:
     /** Removes a listener that was previously added with addListener(). */
     void removeListener (Listener* listener);
 
+    /** Causes a property-change callback to be triggered for the specified property,
+        calling any listeners that are registered.
+    */
+    void sendPropertyChangeMessage (const Identifier& property);
+
     //==============================================================================
     /** This method uses a comparator object to sort the tree's children into order.
 
@@ -454,10 +460,11 @@ public:
     {
         if (object != nullptr)
         {
-            ReferenceCountedArray <SharedObject> sortedList (object->children);
+            OwnedArray<ValueTree> sortedList;
+            createListOfChildren (sortedList);
             ComparatorAdapter <ElementComparator> adapter (comparator);
             sortedList.sort (adapter, retainOrderOfEquivalentItems);
-            object->reorderChildren (sortedList, undoManager);
+            reorderChildren (sortedList, undoManager);
         }
     }
 
@@ -468,78 +475,29 @@ public:
 
 private:
     //==============================================================================
-    class SetPropertyAction;        friend class SetPropertyAction;
-    class AddOrRemoveChildAction;   friend class AddOrRemoveChildAction;
-    class MoveChildAction;          friend class MoveChildAction;
+    class SharedObject;
+    friend class SharedObject;
 
-    class JUCE_API  SharedObject    : public SingleThreadedReferenceCountedObject
-    {
-    public:
-        explicit SharedObject (const Identifier& type);
-        SharedObject (const SharedObject& other);
-        ~SharedObject();
-
-        const Identifier type;
-        NamedValueSet properties;
-        ReferenceCountedArray <SharedObject> children;
-        SortedSet <ValueTree*> valueTreesWithListeners;
-        SharedObject* parent;
-
-        void sendPropertyChangeMessage (const Identifier& property);
-        void sendPropertyChangeMessage (ValueTree& tree, const Identifier& property);
-        void sendChildAddedMessage (ValueTree& parent, ValueTree& child);
-        void sendChildAddedMessage (ValueTree child);
-        void sendChildRemovedMessage (ValueTree& parent, ValueTree& child);
-        void sendChildRemovedMessage (ValueTree child);
-        void sendChildOrderChangedMessage (ValueTree& parent);
-        void sendChildOrderChangedMessage();
-        void sendParentChangeMessage();
-        const var& getProperty (const Identifier& name) const;
-        var getProperty (const Identifier& name, const var& defaultReturnValue) const;
-        void setProperty (const Identifier& name, const var& newValue, UndoManager*);
-        bool hasProperty (const Identifier& name) const;
-        void removeProperty (const Identifier& name, UndoManager*);
-        void removeAllProperties (UndoManager*);
-        bool isAChildOf (const SharedObject* possibleParent) const;
-        int indexOf (const ValueTree& child) const;
-        ValueTree getChildWithName (const Identifier& type) const;
-        ValueTree getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager);
-        ValueTree getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const;
-        void addChild (SharedObject* child, int index, UndoManager*);
-        void removeChild (int childIndex, UndoManager*);
-        void removeAllChildren (UndoManager*);
-        void moveChild (int currentIndex, int newIndex, UndoManager*);
-        void reorderChildren (const ReferenceCountedArray <SharedObject>& newOrder, UndoManager*);
-        bool isEquivalentTo (const SharedObject& other) const;
-        XmlElement* createXml() const;
-
-    private:
-        SharedObject& operator= (const SharedObject&);
-        JUCE_LEAK_DETECTOR (SharedObject);
-    };
+    ReferenceCountedObjectPtr<SharedObject> object;
+    ListenerList<Listener> listeners;
 
     template <typename ElementComparator>
-    class ComparatorAdapter
+    struct ComparatorAdapter
     {
-    public:
         ComparatorAdapter (ElementComparator& comparator_) noexcept : comparator (comparator_) {}
 
-        int compareElements (SharedObject* const first, SharedObject* const second)
+        int compareElements (const ValueTree* const first, const ValueTree* const second)
         {
-            return comparator.compareElements (ValueTree (first), ValueTree (second));
+            return comparator.compareElements (*first, *second);
         }
 
     private:
         ElementComparator& comparator;
-
         JUCE_DECLARE_NON_COPYABLE (ComparatorAdapter);
     };
 
-    friend class SharedObject;
-    typedef ReferenceCountedObjectPtr <SharedObject> SharedObjectPtr;
-
-    SharedObjectPtr object;
-    ListenerList <Listener> listeners;
+    void createListOfChildren (OwnedArray<ValueTree>&) const;
+    void reorderChildren (const OwnedArray<ValueTree>&, UndoManager*);
 
 #if JUCE_MSVC && ! DOXYGEN
  public:  // (workaround for VC6)

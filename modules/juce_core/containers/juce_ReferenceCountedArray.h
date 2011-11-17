@@ -130,17 +130,39 @@ public:
     */
     inline ObjectClassPtr operator[] (const int index) const noexcept
     {
-        const ScopedLockType lock (getLock());
-        return isPositiveAndBelow (index, numUsed) ? data.elements [index]
-                                                   : static_cast <ObjectClass*> (nullptr);
+        return getObjectPointer (index);
     }
 
-    /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
+    /** Returns a pointer to the object at this index in the array, without checking
+        whether the index is in-range.
 
         This is a faster and less safe version of operator[] which doesn't check the index passed in, so
         it can be used when you're sure the index if always going to be legal.
     */
     inline ObjectClassPtr getUnchecked (const int index) const noexcept
+    {
+        return getObjectPointerUnchecked (index);
+    }
+
+    /** Returns a raw pointer to the object at this index in the array.
+
+        If the index is out-of-range, this will return a null pointer, (and
+        it could be null anyway, because it's ok for the array to hold null
+        pointers as well as objects).
+
+        @see getUnchecked
+    */
+    inline ObjectClass* getObjectPointer (const int index) const noexcept
+    {
+        const ScopedLockType lock (getLock());
+        return isPositiveAndBelow (index, numUsed) ? data.elements [index]
+                                                   : nullptr;
+    }
+
+    /** Returns a raw pointer to the object at this index in the array, without checking
+        whether the index is in-range.
+    */
+    inline ObjectClass* getObjectPointerUnchecked (const int index) const noexcept
     {
         const ScopedLockType lock (getLock());
         jassert (isPositiveAndBelow (index, numUsed));
@@ -734,6 +756,18 @@ public:
     {
         const ScopedLockType lock (getLock());
         data.shrinkToNoMoreThan (numUsed);
+    }
+
+    /** Increases the array's internal storage to hold a minimum number of elements.
+
+        Calling this before adding a large known number of elements means that
+        the array won't have to keep dynamically resizing itself as the elements
+        are added, and it'll therefore be more efficient.
+    */
+    void ensureStorageAllocated (const int minNumElements)
+    {
+        const ScopedLockType lock (getLock());
+        data.ensureAllocatedSize (minNumElements);
     }
 
     //==============================================================================

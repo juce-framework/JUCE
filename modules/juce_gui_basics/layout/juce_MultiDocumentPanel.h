@@ -243,6 +243,8 @@ public:
     */
     const Colour& getBackgroundColour() const noexcept                  { return backgroundColour; }
 
+    /** If the panel is being used in tabbed mode, this returns the TabbedComponent that's involved. */
+    TabbedComponent* getCurrentTabbedComponent() const noexcept         { return tabComponent; }
 
     //==============================================================================
     /** A subclass must override this to say whether its currently ok for a document
