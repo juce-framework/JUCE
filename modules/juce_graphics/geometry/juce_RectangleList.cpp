@@ -32,8 +32,7 @@ RectangleList::RectangleList() noexcept
 
 RectangleList::RectangleList (const Rectangle<int>& rect)
 {
-    if (! rect.isEmpty())
-        rects.add (rect);
+    addWithoutMerging (rect);
 }
 
 RectangleList::RectangleList (const RectangleList& other)
@@ -99,7 +98,7 @@ bool RectangleList::Iterator::next() noexcept
 {
     if (--index >= 0)
     {
-        current = & (owner.rects.getReference (index));
+        current = &(owner.rects.getReference (index));
         return true;
     }
 
@@ -120,15 +119,14 @@ void RectangleList::add (const Rectangle<int>& rect)
         {
             bool anyOverlaps = false;
 
-            int i;
-            for (i = rects.size(); --i >= 0;)
+            for (int j = rects.size(); --j >= 0;)
             {
-                Rectangle<int>& ourRect = rects.getReference (i);
+                Rectangle<int>& ourRect = rects.getReference (j);
 
                 if (rect.intersects (ourRect))
                 {
                     if (rect.contains (ourRect))
-                        rects.remove (i);
+                        rects.remove (j);
                     else if (! ourRect.reduceIfPartlyContainedIn (rect))
                         anyOverlaps = true;
                 }
@@ -138,7 +136,7 @@ void RectangleList::add (const Rectangle<int>& rect)
             {
                 RectangleList r (rect);
 
-                for (i = rects.size(); --i >= 0;)
+                for (int i = rects.size(); --i >= 0;)
                 {
                     const Rectangle<int>& ourRect = rects.getReference (i);
 
@@ -151,8 +149,7 @@ void RectangleList::add (const Rectangle<int>& rect)
                     }
                 }
 
-                for (i = r.getNumRectangles(); --i >= 0;)
-                    rects.add (r.rects.getReference (i));
+                rects.addArray (r.rects);
             }
             else
             {
@@ -170,15 +167,7 @@ void RectangleList::addWithoutMerging (const Rectangle<int>& rect)
 
 void RectangleList::add (const int x, const int y, const int w, const int h)
 {
-    if (rects.size() == 0)
-    {
-        if (w > 0 && h > 0)
-            rects.add (Rectangle<int> (x, y, w, h));
-    }
-    else
-    {
-        add (Rectangle<int> (x, y, w, h));
-    }
+    add (Rectangle<int> (x, y, w, h));
 }
 
 void RectangleList::add (const RectangleList& other)
@@ -220,8 +209,8 @@ void RectangleList::subtract (const Rectangle<int>& rect)
                         r.x = x1;
                         r.w = rx2 - x1;
 
-                        rects.insert (i + 1, Rectangle<int> (rx1, ry1, x1 - rx1,  ry2 - ry1));
-                        i += 2;
+                        rects.insert (++i, Rectangle<int> (rx1, ry1, x1 - rx1,  ry2 - ry1));
+                        ++i;
                     }
                 }
                 else if (x2 > rx1 && x2 < rx2)
@@ -231,8 +220,8 @@ void RectangleList::subtract (const Rectangle<int>& rect)
 
                     if (y1 > ry1 || y2 < ry2 || x1 > rx1)
                     {
-                        rects.insert (i + 1, Rectangle<int> (rx1, ry1, x2 - rx1,  ry2 - ry1));
-                        i += 2;
+                        rects.insert (++i, Rectangle<int> (rx1, ry1, x2 - rx1,  ry2 - ry1));
+                        ++i;
                     }
                 }
                 else if (y1 > ry1 && y1 < ry2)
@@ -246,8 +235,8 @@ void RectangleList::subtract (const Rectangle<int>& rect)
                         r.y = y1;
                         r.h = ry2 - y1;
 
-                        rects.insert (i + 1, Rectangle<int> (rx1, ry1, rx2 - rx1, y1 - ry1));
-                        i += 2;
+                        rects.insert (++i, Rectangle<int> (rx1, ry1, rx2 - rx1, y1 - ry1));
+                        ++i;
                     }
                 }
                 else if (y2 > ry1 && y2 < ry2)
@@ -257,8 +246,8 @@ void RectangleList::subtract (const Rectangle<int>& rect)
 
                     if (x1 > rx1 || x2 < rx2 || y1 > ry1)
                     {
-                        rects.insert (i + 1, Rectangle<int> (rx1, ry1, rx2 - rx1, y2 - ry1));
-                        i += 2;
+                        rects.insert (++i, Rectangle<int> (rx1, ry1, rx2 - rx1, y2 - ry1));
+                        ++i;
                     }
                 }
                 else
@@ -522,15 +511,8 @@ Path RectangleList::toPath() const
 {
     Path p;
 
-    for (int i = rects.size(); --i >= 0;)
-    {
-        const Rectangle<int>& r = rects.getReference (i);
-
-        p.addRectangle ((float) r.x,
-                        (float) r.y,
-                        (float) r.w,
-                        (float) r.h);
-    }
+    for (int i = 0; i < rects.size(); ++i)
+        p.addRectangle (rects.getReference (i));
 
     return p;
 }

@@ -223,7 +223,7 @@ public:
             getComponent().setBounds (newBounds);
         }
 
-        jassertfalse; // must be a recursive reference!
+        jassertfalse; // Seems to be a recursive reference!
     }
 
     void applyNewBounds (const Rectangle<int>& newBounds)

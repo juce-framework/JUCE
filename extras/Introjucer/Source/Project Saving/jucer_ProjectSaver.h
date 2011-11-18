@@ -213,20 +213,6 @@ private:
 
         if (xml != nullptr)
         {
-           #if JUCE_DEBUG
-            {
-                MemoryOutputStream mo;
-                project.getProjectRoot().writeToStream (mo);
-
-                MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
-                ValueTree v = ValueTree::readFromStream (mi);
-                ScopedPointer <XmlElement> xml2 (v.createXml());
-
-                // This bit just tests that ValueTree save/load works reliably.. Let me know if this asserts for you!
-                jassert (xml->isEquivalentTo (xml2, true));
-            }
-           #endif
-
             MemoryOutputStream mo;
             xml->writeToStream (mo, String::empty);
             replaceFileIfDifferent (projectFile, mo);

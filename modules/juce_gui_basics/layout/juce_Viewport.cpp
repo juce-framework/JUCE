@@ -68,7 +68,6 @@ void Viewport::deleteContentComp()
         // This sets the content comp to a null pointer before deleting the old one, in case
         // anything tries to use the old one while it's in mid-deletion..
         ScopedPointer<Component> oldCompDeleter (contentComp);
-        contentComp = nullptr;
     }
     else
     {
@@ -186,36 +185,49 @@ void Viewport::updateVisibleArea()
     const bool canShowHBar = showHScrollbar && canShowAnyBars;
     const bool canShowVBar = showVScrollbar && canShowAnyBars;
 
-    bool hBarVisible = canShowHBar && ! horizontalScrollBar.autoHides();
-    bool vBarVisible = canShowVBar && ! verticalScrollBar.autoHides();
+    bool hBarVisible, vBarVisible;
+    Rectangle<int> contentArea;
 
-    Rectangle<int> contentArea (getLocalBounds());
-
-    if (contentComp != nullptr && ! contentArea.contains (contentComp->getBounds()))
+    for (int i = 3; --i >= 0;)
     {
-        hBarVisible = canShowHBar && (hBarVisible || contentComp->getX() < 0 || contentComp->getRight() > contentArea.getWidth());
-        vBarVisible = canShowVBar && (vBarVisible || contentComp->getY() < 0 || contentComp->getBottom() > contentArea.getHeight());
+        hBarVisible = canShowHBar && ! horizontalScrollBar.autoHides();
+        vBarVisible = canShowVBar && ! verticalScrollBar.autoHides();
+        contentArea = getLocalBounds();
 
-        if (vBarVisible)
-            contentArea.setWidth (getWidth() - scrollbarWidth);
-
-        if (hBarVisible)
-            contentArea.setHeight (getHeight() - scrollbarWidth);
-
-        if (! contentArea.contains (contentComp->getBounds()))
+        if (contentComp != nullptr && ! contentArea.contains (contentComp->getBounds()))
         {
-            hBarVisible = canShowHBar && (hBarVisible || contentComp->getRight() > contentArea.getWidth());
-            vBarVisible = canShowVBar && (vBarVisible || contentComp->getBottom() > contentArea.getHeight());
+            hBarVisible = canShowHBar && (hBarVisible || contentComp->getX() < 0 || contentComp->getRight() > contentArea.getWidth());
+            vBarVisible = canShowVBar && (vBarVisible || contentComp->getY() < 0 || contentComp->getBottom() > contentArea.getHeight());
+
+            if (vBarVisible)
+                contentArea.setWidth (getWidth() - scrollbarWidth);
+
+            if (hBarVisible)
+                contentArea.setHeight (getHeight() - scrollbarWidth);
+
+            if (! contentArea.contains (contentComp->getBounds()))
+            {
+                hBarVisible = canShowHBar && (hBarVisible || contentComp->getRight() > contentArea.getWidth());
+                vBarVisible = canShowVBar && (vBarVisible || contentComp->getBottom() > contentArea.getHeight());
+            }
         }
+
+        if (vBarVisible)  contentArea.setWidth  (getWidth()  - scrollbarWidth);
+        if (hBarVisible)  contentArea.setHeight (getHeight() - scrollbarWidth);
+
+        if (contentComp == nullptr)
+        {
+            contentHolder.setBounds (contentArea);
+            break;
+        }
+
+        const Rectangle<int> oldContentBounds (contentComp->getBounds());
+        contentHolder.setBounds (contentArea);
+
+        // If the content has changed its size, that might affect our scrollbars, so go round again and re-caclulate..
+        if (oldContentBounds == contentComp->getBounds())
+            break;
     }
-
-    if (vBarVisible)
-        contentArea.setWidth (getWidth() - scrollbarWidth);
-
-    if (hBarVisible)
-        contentArea.setHeight (getHeight() - scrollbarWidth);
-
-    contentHolder.setBounds (contentArea);
 
     Rectangle<int> contentBounds;
     if (contentComp != nullptr)

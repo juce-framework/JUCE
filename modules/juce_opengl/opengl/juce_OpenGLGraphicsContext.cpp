@@ -611,7 +611,7 @@ public:
 
     void setColour (const float alpha) noexcept
     {
-        const uint8 v = jmin (255, (int) (alpha * 255.0f));
+        const uint8 v = (uint8) jmin (255, (int) (alpha * 255.0f));
         setColour (PixelARGB (v, v, v, v));
     }
 
@@ -727,7 +727,7 @@ public:
         {
             GLint t = 0;
             glGetIntegerv (GL_TEXTURE_BINDING_2D, &t);
-            jassert (t == textureID);
+            jassert (t == (GLint) textureID);
         }
     }
 
