@@ -146,12 +146,10 @@ public:
     void sort (const SortMethod method);
 
     //==============================================================================
-    /** Creates some XML that can be used to store the state of this list.
-    */
+    /** Creates some XML that can be used to store the state of this list. */
     XmlElement* createXml() const;
 
-    /** Recreates the state of this list from its stored XML format.
-    */
+    /** Recreates the state of this list from its stored XML format. */
     void recreateFromXml (const XmlElement& xml);
 
 

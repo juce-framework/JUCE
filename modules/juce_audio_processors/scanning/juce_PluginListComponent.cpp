@@ -74,10 +74,7 @@ int PluginListComponent::getNumRows()
     return list.getNumTypes();
 }
 
-void PluginListComponent::paintListBoxItem (int row,
-                                            Graphics& g,
-                                            int width, int height,
-                                            bool rowIsSelected)
+void PluginListComponent::paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected)
 {
     if (rowIsSelected)
         g.fillAll (findColour (TextEditor::highlightColourId));
@@ -128,21 +125,11 @@ void PluginListComponent::optionsMenuCallback (int result)
 {
     switch (result)
     {
-        case 1:
-            list.clear();
-            break;
+        case 1:     list.clear(); break;
 
-        case 2:
-            list.sort (KnownPluginList::sortAlphabetically);
-            break;
-
-        case 3:
-            list.sort (KnownPluginList::sortByCategory);
-            break;
-
-        case 4:
-            list.sort (KnownPluginList::sortByManufacturer);
-            break;
+        case 2:     list.sort (KnownPluginList::sortAlphabetically); break;
+        case 3:     list.sort (KnownPluginList::sortByCategory); break;
+        case 4:     list.sort (KnownPluginList::sortByManufacturer); break;
 
         case 5:
         {
@@ -159,11 +146,8 @@ void PluginListComponent::optionsMenuCallback (int result)
         {
             const PluginDescription* const desc = list.getType (listBox.getSelectedRow());
 
-            if (desc != nullptr)
-            {
-                if (File (desc->fileOrIdentifier).existsAsFile())
-                    File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
-            }
+            if (desc != nullptr && File (desc->fileOrIdentifier).existsAsFile())
+                File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
 
             break;
         }
@@ -277,7 +261,6 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
 
     aw.addButton (TRANS("Cancel"), 0, KeyPress::escapeKey);
     aw.addProgressBarComponent (progress);
-
     aw.enterModalState();
 
     MessageManager::getInstance()->runDispatchLoopUntil (300);
@@ -286,8 +269,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
 
     for (;;)
     {
-        aw.setMessage (TRANS("Testing:\n\n")
-                         + scanner.getNextPluginFileThatWillBeScanned());
+        aw.setMessage (TRANS("Testing:\n\n") + scanner.getNextPluginFileThatWillBeScanned());
 
         MessageManager::getInstance()->runDispatchLoopUntil (100);
 

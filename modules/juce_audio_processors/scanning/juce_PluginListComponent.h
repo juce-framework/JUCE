@@ -36,10 +36,11 @@
     add, remove and sort them.
 */
 class JUCE_API  PluginListComponent   : public Component,
+                                        public FileDragAndDropTarget,
                                         public ListBoxModel,
-                                        public ChangeListener,
-                                        public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
-                                        public Timer
+                                        private ChangeListener,
+                                        private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
+                                        private Timer
 {
 public:
     //==============================================================================
@@ -61,21 +62,15 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
+    bool isInterestedInFileDrag (const StringArray&);
     /** @internal */
-    void filesDropped (const StringArray& files, int, int);
+    void filesDropped (const StringArray&, int, int);
     /** @internal */
     int getNumRows();
     /** @internal */
-    void paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected);
+    void paintListBoxItem (int row, Graphics&, int width, int height, bool rowIsSelected);
     /** @internal */
     void deleteKeyPressed (int lastRowSelected);
-    /** @internal */
-    void buttonClicked (Button* b);
-    /** @internal */
-    void changeListenerCallback (ChangeBroadcaster*);
-    /** @internal */
-    void timerCallback();
 
 private:
     //==============================================================================
@@ -86,10 +81,14 @@ private:
     PropertiesFile* propertiesToUse;
     int typeToScan;
 
-    void scanFor (AudioPluginFormat* format);
+    void scanFor (AudioPluginFormat*);
     static void optionsMenuStaticCallback (int result, PluginListComponent*);
     void optionsMenuCallback (int result);
     void updateList();
+
+    void buttonClicked (Button*);
+    void changeListenerCallback (ChangeBroadcaster*);
+    void timerCallback();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent);
 };
