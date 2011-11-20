@@ -1873,8 +1873,7 @@ public:
         : clip (other.clip), transform (other.transform), font (other.font),
           fillType (other.fillType), interpolationQuality (other.interpolationQuality),
           state (other.state), transparencyLayerAlpha (other.transparencyLayerAlpha),
-          transparencyLayer (other.transparencyLayer),
-          previousTarget (other.previousTarget != nullptr ? new OpenGLTarget (*other.previousTarget) : nullptr)
+          transparencyLayer (other.transparencyLayer), previousTarget (other.previousTarget.createCopy())
     {
     }
 

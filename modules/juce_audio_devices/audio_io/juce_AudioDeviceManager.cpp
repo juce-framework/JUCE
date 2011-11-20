@@ -248,7 +248,7 @@ void AudioDeviceManager::insertDefaultDeviceNames (AudioDeviceSetup& setup) cons
 
 XmlElement* AudioDeviceManager::createStateXml() const
 {
-    return lastExplicitSettings != nullptr ? new XmlElement (*lastExplicitSettings) : nullptr;
+    return lastExplicitSettings.createCopy();
 }
 
 //==============================================================================

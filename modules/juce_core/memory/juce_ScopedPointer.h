@@ -169,6 +169,11 @@ public:
         std::swap (object, other.object);
     }
 
+    /** If the pointer is non-null, this will attempt to return a new copy of the object that is pointed to.
+        If the pointer is null, this will safely return a nullptr.
+    */
+    inline ObjectType* createCopy() const                                           { return createCopyIfNotNull (object); }
+
 private:
     //==============================================================================
     ObjectType* object;

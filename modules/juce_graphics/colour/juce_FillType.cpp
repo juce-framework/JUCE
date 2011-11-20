@@ -48,7 +48,7 @@ FillType::FillType (const Image& image_, const AffineTransform& transform_) noex
 
 FillType::FillType (const FillType& other)
     : colour (other.colour),
-      gradient (other.gradient != nullptr ? new ColourGradient (*other.gradient) : nullptr),
+      gradient (other.gradient.createCopy()),
       image (other.image),
       transform (other.transform)
 {
@@ -59,7 +59,7 @@ FillType& FillType::operator= (const FillType& other)
     if (this != &other)
     {
         colour = other.colour;
-        gradient = (other.gradient != nullptr ? new ColourGradient (*other.gradient) : nullptr);
+        gradient = other.gradient.createCopy();
         image = other.image;
         transform = other.transform;
     }

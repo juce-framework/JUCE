@@ -708,7 +708,7 @@ bool ValueTree::isEquivalentTo (const ValueTree& other) const
 
 ValueTree ValueTree::createCopy() const
 {
-    return ValueTree (object != nullptr ? new SharedObject (*object) : nullptr);
+    return ValueTree (createCopyIfNotNull (object.getObject()));
 }
 
 bool ValueTree::hasType (const Identifier& typeName) const

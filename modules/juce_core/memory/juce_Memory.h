@@ -75,6 +75,11 @@ inline Type* addBytesToPointer (Type* pointer, int bytes) noexcept  { return (Ty
 template <typename Type1, typename Type2>
 inline int getAddressDifference (Type1* pointer1, Type2* pointer2) noexcept  { return (int) (((const char*) pointer1) - (const char*) pointer2); }
 
+/** If a pointer is non-null, this returns a new copy of the object that it points to, or safely returns
+    nullptr if the pointer is null.
+*/
+template <class Type>
+inline Type* createCopyIfNotNull (Type* pointer)     { return pointer != nullptr ? new Type (*pointer) : nullptr; }
 
 //==============================================================================
 /* In a Windows DLL build, we'll expose some malloc/free functions that live inside the DLL, and use these for
