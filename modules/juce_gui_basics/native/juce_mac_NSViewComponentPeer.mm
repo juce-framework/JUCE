@@ -227,6 +227,7 @@ public:
 
     static void showArrowCursorIfNeeded();
     static void updateModifiers (NSEvent* e);
+    static void updateModifiers (NSUInteger);
     static void updateKeysDown (NSEvent* ev, bool isKeyDown);
 
     static int getKeyCodeFromEvent (NSEvent* ev)
@@ -918,16 +919,21 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
     return false;
 }
 
-void NSViewComponentPeer::updateModifiers (NSEvent* e)
+void NSViewComponentPeer::updateModifiers (const NSUInteger flags)
 {
     int m = 0;
 
-    if (([e modifierFlags] & NSShiftKeyMask) != 0)          m |= ModifierKeys::shiftModifier;
-    if (([e modifierFlags] & NSControlKeyMask) != 0)        m |= ModifierKeys::ctrlModifier;
-    if (([e modifierFlags] & NSAlternateKeyMask) != 0)      m |= ModifierKeys::altModifier;
-    if (([e modifierFlags] & NSCommandKeyMask) != 0)        m |= ModifierKeys::commandModifier;
+    if ((flags & NSShiftKeyMask) != 0)        m |= ModifierKeys::shiftModifier;
+    if ((flags & NSControlKeyMask) != 0)      m |= ModifierKeys::ctrlModifier;
+    if ((flags & NSAlternateKeyMask) != 0)    m |= ModifierKeys::altModifier;
+    if ((flags & NSCommandKeyMask) != 0)      m |= ModifierKeys::commandModifier;
 
     currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (m);
+}
+
+void NSViewComponentPeer::updateModifiers (NSEvent* e)
+{
+    updateModifiers ([e modifierFlags]);
 }
 
 void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
@@ -946,6 +952,7 @@ void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
 
 ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
+    NSViewComponentPeer::updateModifiers ([NSEvent modifierFlags]);
     return NSViewComponentPeer::currentModifiers;
 }
 
