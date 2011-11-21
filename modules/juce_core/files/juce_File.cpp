@@ -1009,6 +1009,19 @@ public:
             expect (mb[0] == '0');
         }
 
+        {
+            expect (tempFile.getSize() == 10);
+            FileOutputStream fo (tempFile);
+            expect (fo.openedOk());
+
+            expect (fo.setPosition  (7));
+            expect (fo.truncate().wasOk());
+            expect (tempFile.getSize() == 7);
+            fo.write ("789", 3);
+            fo.flush();
+            expect (tempFile.getSize() == 10);
+        }
+
         beginTest ("Memory-mapped files");
 
         {

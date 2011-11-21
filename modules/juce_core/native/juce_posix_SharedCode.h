@@ -280,6 +280,11 @@ namespace
     {
         return value == -1 ? getResultForErrno() : Result::ok();
     }
+
+    int getFD (void* handle) noexcept
+    {
+        return (int) (pointer_sized_int) handle;
+    }
 }
 
 bool File::isDirectory() const
@@ -399,10 +404,10 @@ Result File::createDirectoryInternal (const String& fileName) const
     return getResultForReturnValue (mkdir (fileName.toUTF8(), 0777));
 }
 
-//==============================================================================
+//=====================================================================
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
-    if (handle != 0 && lseek ((int) (pointer_sized_int) handle, pos, SEEK_SET) == pos)
+    if (handle != 0 && lseek (getFD (handle), pos, SEEK_SET) == pos)
         return pos;
 
     return -1;
@@ -424,7 +429,7 @@ void FileInputStream::closeHandle()
 {
     if (fileHandle != 0)
     {
-        close ((int) (pointer_sized_int) fileHandle);
+        close (getFD (fileHandle));
         fileHandle = 0;
     }
 }
@@ -435,7 +440,7 @@ size_t FileInputStream::readInternal (void* const buffer, const size_t numBytes)
 
     if (fileHandle != 0)
     {
-        result = ::read ((int) (pointer_sized_int) fileHandle, buffer, numBytes);
+        result = ::read (getFD (fileHandle), buffer, numBytes);
 
         if (result < 0)
         {
@@ -488,7 +493,7 @@ void FileOutputStream::closeHandle()
 {
     if (fileHandle != 0)
     {
-        close ((int) (pointer_sized_int) fileHandle);
+        close (getFD (fileHandle));
         fileHandle = 0;
     }
 }
@@ -499,7 +504,7 @@ int FileOutputStream::writeInternal (const void* const data, const int numBytes)
 
     if (fileHandle != 0)
     {
-        result = ::write ((int) (pointer_sized_int) fileHandle, data, numBytes);
+        result = ::write (getFD (fileHandle), data, numBytes);
 
         if (result == -1)
             status = getResultForErrno();
@@ -511,8 +516,17 @@ int FileOutputStream::writeInternal (const void* const data, const int numBytes)
 void FileOutputStream::flushInternal()
 {
     if (fileHandle != 0)
-        if (fsync ((int) (pointer_sized_int) fileHandle) == -1)
+        if (fsync (getFD (fileHandle)) == -1)
             status = getResultForErrno();
+}
+
+Result FileOutputStream::truncate()
+{
+    if (fileHandle == 0)
+        return status;
+
+    flush();
+    return getResultForReturnValue (ftruncate (getFD (fileHandle), (off_t) currentPosition));
 }
 
 //==============================================================================

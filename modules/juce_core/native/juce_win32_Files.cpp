@@ -289,6 +289,16 @@ void FileOutputStream::flushInternal()
             status = WindowsFileHelpers::getResultForLastError();
 }
 
+Result FileOutputStream::truncate()
+{
+    if (fileHandle == nullptr)
+        return status;
+
+    flush();
+    return SetEndOfFile ((HANDLE) fileHandle) ? Result::ok()
+                                              : WindowsFileHelpers::getResultForLastError();
+}
+
 //==============================================================================
 MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
     : address (nullptr),

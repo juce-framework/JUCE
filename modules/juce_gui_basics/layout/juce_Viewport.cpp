@@ -185,7 +185,7 @@ void Viewport::updateVisibleArea()
     const bool canShowHBar = showHScrollbar && canShowAnyBars;
     const bool canShowVBar = showVScrollbar && canShowAnyBars;
 
-    bool hBarVisible, vBarVisible;
+    bool hBarVisible = false, vBarVisible = false;
     Rectangle<int> contentArea;
 
     for (int i = 3; --i >= 0;)
