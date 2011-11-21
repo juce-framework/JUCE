@@ -542,3 +542,8 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     f.setTypefaceName (faceName);
     return Typeface::createSystemTypefaceFor (f);
 }
+
+bool GlyphLayout::createNativeLayout (const AttributedString&)
+{
+    return false;
+}

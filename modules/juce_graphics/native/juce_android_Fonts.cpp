@@ -218,3 +218,8 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
     return new AndroidTypeface (font);
 }
+
+bool GlyphLayout::createNativeLayout (const AttributedString&)
+{
+    return false;
+}
