@@ -1758,6 +1758,17 @@
           <File RelativePath="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.h"/>
         </Filter>
         <Filter Name="fonts">
+          <File RelativePath="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\fonts\juce_CustomTypeface.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -1876,6 +1887,26 @@
           <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_mac_Fonts.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeface.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeLayout.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
               <Tool Name="VCCLCompilerTool"/>

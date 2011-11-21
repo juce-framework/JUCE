@@ -31,7 +31,7 @@
 #include "../geometry/juce_RectangleList.h"
 #include "../colour/juce_ColourGradient.h"
 #include "../colour/juce_FillType.h"
-
+class AttributedString;
 
 //==============================================================================
 /**
@@ -103,6 +103,7 @@ public:
     virtual void setFont (const Font& newFont) = 0;
     virtual Font getFont() = 0;
     virtual void drawGlyph (int glyphNumber, const AffineTransform& transform) = 0;
+    virtual bool drawTextLayout (const AttributedString&, const Rectangle<float>&)  { return false; }
 };
 
 

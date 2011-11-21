@@ -43,6 +43,12 @@
 #if JUCE_MAC
  #import <QuartzCore/QuartzCore.h>
 
+#elif JUCE_WINDOWS
+ #if JUCE_USE_DIRECTWRITE
+  #include <d2d1.h>
+  #include <dwrite.h>
+ #endif
+
 #elif JUCE_IOS
  #import <QuartzCore/QuartzCore.h>
  #import <CoreText/CoreText.h>
@@ -78,6 +84,7 @@
 #include "image_formats/juce_GIFLoader.cpp"
 #include "image_formats/juce_JPEGLoader.cpp"
 #include "image_formats/juce_PNGLoader.cpp"
+#include "fonts/juce_AttributedString.cpp"
 #include "fonts/juce_CustomTypeface.cpp"
 #include "fonts/juce_Font.cpp"
 #include "fonts/juce_GlyphArrangement.cpp"
@@ -93,13 +100,17 @@ BEGIN_JUCE_NAMESPACE
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "../juce_core/native/juce_mac_ObjCSuffix.h"
+ #include "native/juce_mac_CoreGraphicsHelpers.h"
  #include "native/juce_mac_Fonts.mm"
  #include "native/juce_mac_CoreGraphicsContext.mm"
 
 #elif JUCE_WINDOWS
+ #include "../juce_core/native/juce_win32_ComSmartPtr.h"
  #if JUCE_DIRECT2D
   #include "native/juce_win32_Direct2DGraphicsContext.cpp"
  #endif
+ #include "native/juce_win32_DirectWriteTypeface.cpp"
+ #include "native/juce_win32_DirectWriteTypeLayout.cpp"
  #include "native/juce_win32_Fonts.cpp"
 
 #elif JUCE_LINUX

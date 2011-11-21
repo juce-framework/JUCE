@@ -2492,6 +2492,17 @@
           <File RelativePath="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.h"/>
         </Filter>
         <Filter Name="fonts">
+          <File RelativePath="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\fonts\juce_CustomTypeface.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -2610,6 +2621,26 @@
           <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_mac_Fonts.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h"/>
           <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeface.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_graphics\native\juce_win32_DirectWriteTypeLayout.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
               <Tool Name="VCCLCompilerTool"/>
@@ -4197,6 +4228,8 @@
       </Filter>
       <Filter Name="juce_opengl">
         <Filter Name="opengl">
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_Draggable3DOrientation.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_Matrix3D.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -4266,6 +4299,8 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_Quaternion.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_Vector3D.h"/>
         </Filter>
         <Filter Name="native">
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_android_OpenGLComponent.cpp">

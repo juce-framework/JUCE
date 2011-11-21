@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-#include "juce_mac_CoreGraphicsHelpers.h"
 #include "juce_mac_CoreGraphicsContext.h"
 
 //==============================================================================
@@ -620,6 +619,16 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
         fillPath (p, AffineTransform::scale (f.getHeight() * f.getHorizontalScale(), f.getHeight())
                                      .followedBy (transform));
     }
+}
+
+bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Rectangle<float>& area)
+{
+   #if JUCE_CORETEXT_AVAILABLE
+    CoreTextTypeLayout::drawToCGContext (text, area, context, flipHeight);
+    return true;
+   #else
+    return false;
+   #endif
 }
 
 CoreGraphicsContext::SavedState::SavedState()

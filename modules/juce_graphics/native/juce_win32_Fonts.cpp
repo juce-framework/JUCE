@@ -416,5 +416,12 @@ const MAT2 WindowsTypeface::identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0
 
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
-    return new WindowsTypeface (font);
+   #if JUCE_USE_DIRECTWRITE
+    const Direct2DFactories& factories = Direct2DFactories::getInstance();
+
+    if (factories.systemFonts != nullptr)
+        return new WindowsDirectWriteTypeface (font, factories.systemFonts);
+    else
+   #endif
+        return new WindowsTypeface (font);
 }

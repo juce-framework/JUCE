@@ -33,6 +33,7 @@
 // juce_graphics flags:
 
 //#define  JUCE_USE_COREIMAGE_LOADER
+//#define  JUCE_USE_DIRECTWRITE
 
 //==============================================================================
 // juce_gui_basics flags:

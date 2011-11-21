@@ -20,13 +20,13 @@ namespace BinaryData
     const int            jucer_AudioPluginEditorTemplate_hSize = 799;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 4468;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 4455;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2413;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2400;
 
     extern const char*   jucer_MainConsoleAppTemplate_cpp;
-    const int            jucer_MainConsoleAppTemplate_cppSize = 483;
+    const int            jucer_MainConsoleAppTemplate_cppSize = 470;
 
     extern const char*   jucer_MainTemplate_cpp;
     const int            jucer_MainTemplate_cppSize = 1825;
@@ -38,10 +38,10 @@ namespace BinaryData
     const int            jucer_NewCppFileTemplate_hSize = 308;
 
     extern const char*   jucer_WindowTemplate_cpp;
-    const int            jucer_WindowTemplate_cppSize = 794;
+    const int            jucer_WindowTemplate_cppSize = 781;
 
     extern const char*   jucer_WindowTemplate_h;
-    const int            jucer_WindowTemplate_hSize = 1229;
+    const int            jucer_WindowTemplate_hSize = 1216;
 
     extern const char*   juce_icon_png;
     const int            juce_icon_pngSize = 19826;

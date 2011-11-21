@@ -30,11 +30,11 @@ namespace ColourHelpers
 {
     uint8 floatToUInt8 (const float n) noexcept
     {
-        return (uint8) jlimit (0, 255, roundToInt (n * 255.0f));
+        return n <= 0.0f ? 0 : (n >= 1.0f ? 255 : (uint8) (n * 255.0f));
     }
 
-    // This is an adjusted brightness value, based on the way the human eye responds to
-    // different colour channels..
+    // This is an adjusted brightness value, based on the way the human
+    // eye responds to different colour channels..
     float getPerceivedBrightness (float r, float g, float b) noexcept
     {
         return std::sqrt (r * r * 0.241f

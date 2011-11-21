@@ -40,6 +40,15 @@
  #define JUCE_USE_COREIMAGE_LOADER 1
 #endif
 
+/** Config: JUCE_USE_DIRECTWRITE
+
+    Enabling this flag means that DirectWrite will be used when available for font
+    management and layout.
+*/
+#ifndef JUCE_USE_DIRECTWRITE
+ #define JUCE_USE_DIRECTWRITE 1
+#endif
+
 #ifndef JUCE_INCLUDE_PNGLIB_CODE
  #define JUCE_INCLUDE_PNGLIB_CODE 1
 #endif
@@ -131,6 +140,9 @@ BEGIN_JUCE_NAMESPACE
 #endif
 #ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
  #include "images/juce_ImageFileFormat.h"
+#endif
+#ifndef __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__
+ #include "fonts/juce_AttributedString.h"
 #endif
 #ifndef __JUCE_CUSTOMTYPEFACE_JUCEHEADER__
  #include "fonts/juce_CustomTypeface.h"
