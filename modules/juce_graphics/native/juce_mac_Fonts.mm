@@ -121,9 +121,14 @@ namespace CoreTextTypeLayout
 
         CTParagraphStyleSetting settings[] =
         {
-            { kCTParagraphStyleSpecifierAlignment,     sizeof (CTTextAlignment), &ctTextAlignment },
-            { kCTParagraphStyleSpecifierLineBreakMode, sizeof (CTLineBreakMode), &ctLineBreakMode },
-            { kCTParagraphStyleSpecifierLineSpacing,   sizeof (CGFloat),         &ctLineSpacing }
+            { kCTParagraphStyleSpecifierAlignment,              sizeof (CTTextAlignment), &ctTextAlignment },
+            { kCTParagraphStyleSpecifierLineBreakMode,          sizeof (CTLineBreakMode), &ctLineBreakMode },
+
+           #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+            { kCTParagraphStyleSpecifierLineSpacingAdjustment,  sizeof (CGFloat),         &ctLineSpacing }
+           #else
+            { kCTParagraphStyleSpecifierLineSpacing,            sizeof (CGFloat),         &ctLineSpacing }
+           #endif
         };
 
         CTParagraphStyleRef ctParagraphStyleRef = CTParagraphStyleCreate (settings, numElementsInArray (settings));

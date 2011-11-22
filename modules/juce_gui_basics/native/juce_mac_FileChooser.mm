@@ -193,20 +193,27 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         filename = currentFileOrDirectory.getFileName();
     }
 
+   #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+    [panel setDirectoryURL: [NSURL fileURLWithPath: juceStringToNS (directory)]];
+    [panel setNameFieldStringValue: juceStringToNS (filename)];
+
+    if ([panel runModal] == NSOKButton)
+   #else
     if ([panel runModalForDirectory: juceStringToNS (directory)
                                file: juceStringToNS (filename)] == NSOKButton)
+   #endif
     {
         if (isSaveDialogue)
         {
-            results.add (File (nsStringToJuce ([panel filename])));
+            results.add (File (nsStringToJuce ([[panel URL] path])));
         }
         else
         {
             NSOpenPanel* openPanel = (NSOpenPanel*) panel;
-            NSArray* urls = [openPanel filenames];
+            NSArray* urls = [openPanel URLs];
 
             for (unsigned int i = 0; i < [urls count]; ++i)
-                results.add (File (nsStringToJuce ([urls objectAtIndex: i])));
+                results.add (File (nsStringToJuce ([[urls objectAtIndex: i] path])));
         }
     }
 

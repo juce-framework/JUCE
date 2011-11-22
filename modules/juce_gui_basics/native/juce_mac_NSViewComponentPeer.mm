@@ -38,8 +38,14 @@ extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 END_JUCE_NAMESPACE
 
 @interface NSEvent (JuceDeviceDelta)
- - (float) deviceDeltaX;
- - (float) deviceDeltaY;
+ - (CGFloat) deviceDeltaX;
+ - (CGFloat) deviceDeltaY;
+
+#if ! (defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
+ - (CGFloat) scrollingDeltaX;
+ - (CGFloat) scrollingDeltaX;
+ - (BOOL) hasPreciseScrollingDeltas;
+#endif
 @end
 
 #define JuceNSView MakeObjCClassName(JuceNSView)
@@ -1560,8 +1566,21 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 
     @try
     {
-        x = [ev deviceDeltaX] * 0.5f;
-        y = [ev deviceDeltaY] * 0.5f;
+       #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+        if ([ev respondsToSelector: @selector (hasPreciseScrollingDeltas)])
+        {
+            if ([ev hasPreciseScrollingDeltas])
+            {
+                x = [ev scrollingDeltaX] * 0.5f;
+                y = [ev scrollingDeltaY] * 0.5f;
+            }
+        }
+        else
+       #endif
+        {
+            x = [ev deviceDeltaX] * 0.5f;
+            y = [ev deviceDeltaY] * 0.5f;
+        }
     }
     @catch (...)
     {}
