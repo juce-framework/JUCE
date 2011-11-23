@@ -1962,7 +1962,10 @@ private:
 
         JUCE_COMRESULT DragEnter (IDataObject* pDataObject, DWORD grfKeyState, POINTL mousePos, DWORD* pdwEffect)
         {
-            updateFileList (pDataObject);
+            HRESULT hr = updateFileList (pDataObject);
+            if (FAILED (hr))
+                return hr;
+
             return DragOver (grfKeyState, mousePos, pdwEffect);
         }
 
@@ -1981,10 +1984,15 @@ private:
 
         JUCE_COMRESULT Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
-            updateFileList (pDataObject);
-            const bool wasWanted = owner.handleFileDragDrop (files, getMousePos (mousePos));
-            *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
-            return S_OK;
+            HRESULT hr = updateFileList (pDataObject);
+            if (SUCCEEDED (hr))
+            {
+                const bool wasWanted = owner.handleFileDragDrop (files, getMousePos (mousePos));
+                *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
+                hr = S_OK;
+            }
+
+            return hr;
         }
 
     private:
@@ -2015,14 +2023,16 @@ private:
             }
         }
 
-        void updateFileList (IDataObject* const pDataObject)
+        HRESULT updateFileList (IDataObject* const pDataObject)
         {
             files.clear();
 
             FORMATETC format = { CF_HDROP, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
             STGMEDIUM medium = { TYMED_HGLOBAL, { 0 }, 0 };
 
-            if (pDataObject->GetData (&format, &medium) == S_OK)
+            HRESULT hr = pDataObject->GetData (&format, &medium);
+
+            if (SUCCEEDED (hr))
             {
                 const SIZE_T totalLen = GlobalSize (medium.hGlobal);
                 const LPDROPFILES dropFiles = (const LPDROPFILES) GlobalLock (medium.hGlobal);
@@ -2035,6 +2045,8 @@ private:
 
                 GlobalUnlock (medium.hGlobal);
             }
+
+            return hr;
         }
 
         JUCE_DECLARE_NON_COPYABLE (JuceDropTarget);
