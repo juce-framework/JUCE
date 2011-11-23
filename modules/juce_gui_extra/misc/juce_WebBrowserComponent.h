@@ -99,6 +99,9 @@ public:
     */
     virtual bool pageAboutToLoad (const String& newURL);
 
+    /** This callback happens when the browser has finished loading a page. */
+    virtual void pageFinishedLoading (const String& url);
+
     //==============================================================================
     /** @internal */
     void paint (Graphics& g);

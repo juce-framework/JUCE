@@ -160,7 +160,7 @@ private:
             }
             else if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
-                //owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal);
+                owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
                 return S_OK;
             }
 
@@ -311,7 +311,5 @@ void WebBrowserComponent::visibilityChanged()
     checkWindowAssociation();
 }
 
-bool WebBrowserComponent::pageAboutToLoad (const String&)
-{
-    return true;
-}
+bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
+void WebBrowserComponent::pageFinishedLoading (const String&) {}

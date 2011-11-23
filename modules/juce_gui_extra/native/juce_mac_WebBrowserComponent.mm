@@ -41,7 +41,9 @@ class WebBrowserComponentInternal;
 - (void) webView: (WebView*) webView decidePolicyForNavigationAction: (NSDictionary*) actionInformation
                                                              request: (NSURLRequest*) request
                                                                frame: (WebFrame*) frame
-                                                    decisionListener: (id<WebPolicyDecisionListener>) listener;
+                                                    decisionListener: (id <WebPolicyDecisionListener>) listener;
+- (void) webView: (WebView*) webView didFinishLoadForFrame: (WebFrame*) frame;
+
 @end
 
 @implementation DownloadClickDetector
@@ -66,6 +68,15 @@ class WebBrowserComponentInternal;
         [listener use];
     else
         [listener ignore];
+}
+
+- (void) webView: (WebView*) sender didFinishLoadForFrame: (WebFrame*) frame
+{
+    if ([frame isEqual: [sender mainFrame]])
+    {
+        NSURL* url = [[[frame dataSource] request] URL];
+        ownerComponent->pageFinishedLoading (nsStringToJuce ([url absoluteString]));
+    }
 }
 
 @end
@@ -138,6 +149,7 @@ public:
 
         clickListener = [[DownloadClickDetector alloc] initWithWebBrowserOwner: owner];
         [webView setPolicyDelegate: clickListener];
+        [webView setFrameLoadDelegate: clickListener];
        #else
         webView = [[UIWebView alloc] initWithFrame: CGRectMake (0, 0, 1.0f, 1.0f)];
         setView (webView);
@@ -153,6 +165,7 @@ public:
     {
        #if JUCE_MAC
         [webView setPolicyDelegate: nil];
+        [webView setFrameLoadDelegate: nil];
         [clickListener release];
        #else
         webView.delegate = nil;
@@ -342,7 +355,5 @@ void WebBrowserComponent::visibilityChanged()
     checkWindowAssociation();
 }
 
-bool WebBrowserComponent::pageAboutToLoad (const String&)
-{
-    return true;
-}
+bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
+void WebBrowserComponent::pageFinishedLoading (const String&) {}
