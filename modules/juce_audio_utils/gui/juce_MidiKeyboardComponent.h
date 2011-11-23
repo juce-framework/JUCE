@@ -48,8 +48,7 @@
 class JUCE_API  MidiKeyboardComponent  : public Component,
                                          public MidiKeyboardStateListener,
                                          public ChangeBroadcaster,
-                                         private Timer,
-                                         private AsyncUpdater
+                                         private Timer
 {
 public:
     //==============================================================================
@@ -171,7 +170,7 @@ public:
 
         @see setLowestVisibleKey
     */
-    int getLowestVisibleKey() const noexcept                        { return firstKey; }
+    int getLowestVisibleKey() const noexcept                        { return (int) firstKey; }
 
     /** Returns the length of the black notes.
 
@@ -294,8 +293,6 @@ public:
     /** @internal */
     void handleNoteOff (MidiKeyboardState* source, int midiChannel, int midiNoteNumber);
     /** @internal */
-    void handleAsyncUpdate();
-    /** @internal */
     void colourChanged();
 
 protected:
@@ -384,9 +381,11 @@ private:
     float velocity;
     int noteUnderMouse, mouseDownNote;
     BigInteger keysPressed, keysCurrentlyDrawnDown;
+    bool shouldCheckState;
 
-    int rangeStart, rangeEnd, firstKey;
-    bool canScroll, mouseDragging, useMousePositionForVelocity;
+    int rangeStart, rangeEnd;
+    float firstKey;
+    bool canScroll, mouseDragging, useMousePositionForVelocity, shouldCheckMousePos;
     ScopedPointer<Button> scrollDown, scrollUp;
 
     Array <KeyPress> keyPresses;
@@ -403,6 +402,8 @@ private:
     void resetAnyKeysInUse();
     void updateNoteUnderMouse (const Point<int>& pos);
     void repaintNote (const int midiNoteNumber);
+    void setLowestVisibleKeyFloat (float noteNumber);
+    Rectangle<int> getWhiteNotePos (int noteNumber) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent);
 };
