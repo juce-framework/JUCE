@@ -1081,7 +1081,7 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
     else
     {
         // Not initialised, so just bypass..
-        for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
+        for (int i = 0; i < getNumOutputChannels(); ++i)
             buffer.clear (i, 0, buffer.getNumSamples());
     }
 
