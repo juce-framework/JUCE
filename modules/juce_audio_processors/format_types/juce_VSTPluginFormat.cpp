@@ -2902,7 +2902,8 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
    #elif JUCE_WINDOWS
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
-    return FileSearchPath (programFiles + "\\Steinberg\\VstPlugins");
+    return FileSearchPath (PlatformUtilities::getRegistryValue ("HKLM\\Software\\VST\\VSTPluginsPath",
+                                                                programFiles + "\\Steinberg\\VstPlugins"));
    #elif JUCE_LINUX
     return FileSearchPath ("/usr/lib/vst");
    #endif
@@ -2912,7 +2913,5 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 END_JUCE_NAMESPACE
 
 #endif
-
 #undef log
-
 #endif

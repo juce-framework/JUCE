@@ -561,7 +561,7 @@ void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,
         case horizontalKeyboard:            angle = movesOctavesUp ? 0.0f  : 0.5f;  break;
         case verticalKeyboardFacingLeft:    angle = movesOctavesUp ? 0.25f : 0.75f; break;
         case verticalKeyboardFacingRight:   angle = movesOctavesUp ? 0.75f : 0.25f; break;
-        default: break;
+        default:                            jassertfalse; angle = 0; break;
     }
 
     Path path;

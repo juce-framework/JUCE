@@ -53,7 +53,7 @@ public:
     }
 
     /** Destructor. */
-    ~ArrayAllocationBase()
+    ~ArrayAllocationBase() noexcept
     {
     }
 

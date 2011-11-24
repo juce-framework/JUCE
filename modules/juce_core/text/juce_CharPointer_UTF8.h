@@ -446,16 +446,6 @@ public:
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
 
-    /** Compares this string with another one, up to a specified number of characters. */
-    int compareIgnoreCaseUpTo (const CharPointer_UTF8& other, const int maxChars) const noexcept
-    {
-       #if JUCE_WINDOWS
-        return strnicmp (data, other.data, (size_t) maxChars);
-       #else
-        return strncasecmp (data, other.data, maxChars);
-       #endif
-    }
-
     /** Returns the character index of a substring, or -1 if it isn't found. */
     template <typename CharPointer>
     int indexOf (const CharPointer& stringToFind) const noexcept

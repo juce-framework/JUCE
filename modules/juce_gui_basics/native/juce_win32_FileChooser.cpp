@@ -232,7 +232,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         HeapBlock<WCHAR> filters;
         filters.calloc (filterSpaceNumChars);
         const int bytesWritten = filter.copyToUTF16 (filters.getData(), filterSpaceNumChars * sizeof (WCHAR));
-        filter.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)) + 1,
+        filter.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)),
                             (int) ((filterSpaceNumChars - 1) * sizeof (WCHAR) - bytesWritten));
 
         OPENFILENAMEW of = { 0 };
