@@ -43,12 +43,8 @@ void BubbleMessageComponent::showAt (int x, int y,
                                      const bool removeWhenMouseClicked,
                                      const bool deleteSelfAfterUse)
 {
-    textLayout.clear();
-    textLayout.setText (text, Font (14.0f));
-    textLayout.layout (256, Justification::centredLeft, true);
-
+    createLayout (text);
     setPosition (x, y);
-
     init (numMillisecondsBeforeRemoving, removeWhenMouseClicked, deleteSelfAfterUse);
 }
 
@@ -58,13 +54,18 @@ void BubbleMessageComponent::showAt (Component* const component,
                                      const bool removeWhenMouseClicked,
                                      const bool deleteSelfAfterUse)
 {
-    textLayout.clear();
-    textLayout.setText (text, Font (14.0f));
-    textLayout.layout (256, Justification::centredLeft, true);
-
+    createLayout (text);
     setPosition (component);
-
     init (numMillisecondsBeforeRemoving, removeWhenMouseClicked, deleteSelfAfterUse);
+}
+
+void BubbleMessageComponent::createLayout (const String& text)
+{
+    AttributedString attString;
+    attString.append (text, Font (14.0f));
+    attString.setJustification (Justification::centred);
+
+    textLayout.createLayoutWithBalancedLineLengths (attString, 256);
 }
 
 void BubbleMessageComponent::init (const int numMillisecondsBeforeRemoving,
@@ -92,15 +93,15 @@ void BubbleMessageComponent::init (const int numMillisecondsBeforeRemoving,
 
 void BubbleMessageComponent::getContentSize (int& w, int& h)
 {
-    w = textLayout.getWidth() + 16;
-    h = textLayout.getHeight() + 16;
+    w = (int) (textLayout.getWidth() + 16.0f);
+    h = (int) (textLayout.getHeight() + 16.0f);
 }
 
 void BubbleMessageComponent::paintContent (Graphics& g, int w, int h)
 {
     g.setColour (findColour (TooltipWindow::textColourId));
 
-    textLayout.drawWithin (g, 0, 0, w, h, Justification::centred);
+    textLayout.draw (g, Rectangle<float> (0.0f, 0.0f, (float) w, (float) h));
 }
 
 void BubbleMessageComponent::timerCallback()

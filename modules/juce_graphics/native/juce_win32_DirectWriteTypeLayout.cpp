@@ -65,7 +65,7 @@ namespace DirectWriteTypeLayout
                                      DWRITE_GLYPH_RUN const* glyphRun, DWRITE_GLYPH_RUN_DESCRIPTION const* runDescription,
                                      IUnknown* clientDrawingEffect)
         {
-            GlyphLayout* const glyphLayout = static_cast<GlyphLayout*> (clientDrawingContext);
+            TextLayout* const layout = static_cast<TextLayout*> (clientDrawingContext);
 
             if (baselineOriginY != lastOriginY)
             {
@@ -73,49 +73,52 @@ namespace DirectWriteTypeLayout
                 ++currentLine;
 
                 // The x value is only correct when dealing with LTR text
-                glyphLayout->getLine (currentLine).setLineOrigin (Point<float> (baselineOriginX, baselineOriginY));
+                layout->getLine (currentLine).lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
             }
 
             if (currentLine < 0)
                 return S_OK;
 
-            GlyphLayout::Line& glyphLine = glyphLayout->getLine (currentLine);
+            TextLayout::Line& glyphLine = layout->getLine (currentLine);
 
             DWRITE_FONT_METRICS dwFontMetrics;
             glyphRun->fontFace->GetMetrics (&dwFontMetrics);
 
-            const float ascent  = scaledFontSize (dwFontMetrics.ascent, dwFontMetrics, glyphRun);
-            const float descent = scaledFontSize (dwFontMetrics.descent, dwFontMetrics, glyphRun);
-            glyphLine.increaseAscentDescent (ascent, descent);
+            glyphLine.ascent  = jmax (glyphLine->ascent,  scaledFontSize (dwFontMetrics.ascent,  dwFontMetrics, glyphRun));
+            glyphLine.descent = jmax (glyphLine->descent, scaledFontSize (dwFontMetrics.descent, dwFontMetrics, glyphRun));
 
             int styleFlags = 0;
             const String fontName (getFontName (glyphRun, styleFlags));
 
-            GlyphLayout::Run* const glyphRunLayout = new GlyphLayout::Run (Range<int> (runDescription->textPosition,
-                                                                                       runDescription->textPosition + runDescription->stringLength),
-                                                                           glyphRun->glyphCount);
-            glyphLine.addRun (glyphRunLayout);
+            TextLayout::Run* const glyphRunLayout = new TextLayout::Run (Range<int> (runDescription->textPosition,
+                                                                                     runDescription->textPosition + runDescription->stringLength),
+                                                                         glyphRun->glyphCount);
+            glyphLine.runs.add (glyphRunLayout);
 
             glyphRun->fontFace->GetMetrics (&dwFontMetrics);
 
             const float totalHeight = std::abs ((float) dwFontMetrics.ascent) + std::abs ((float) dwFontMetrics.descent);
             const float fontHeightToEmSizeFactor = (float) dwFontMetrics.designUnitsPerEm / totalHeight;
 
-            glyphRunLayout->setFont (Font (fontName, glyphRun->fontEmSize / fontHeightToEmSizeFactor, styleFlags));
-            glyphRunLayout->setColour (getColourOf (static_cast<ID2D1SolidColorBrush*> (clientDrawingEffect)));
+            glyphRunLayout->font = Font (fontName, glyphRun->fontEmSize / fontHeightToEmSizeFactor, styleFlags);
+            glyphRunLayout->colour = getColourOf (static_cast<ID2D1SolidColorBrush*> (clientDrawingEffect));
 
-            const Point<float> lineOrigin (glyphLayout->getLine (currentLine).getLineOrigin());
+            const Point<float> lineOrigin (layout->getLine (currentLine).lineOrigin);
             float x = baselineOriginX - lineOrigin.x;
 
             for (UINT32 i = 0; i < glyphRun->glyphCount; ++i)
             {
-                if ((glyphRun->bidiLevel & 1) != 0)
-                    x -= glyphRun->glyphAdvances[i];  // RTL text
+                const float advance = glyphRun->glyphAdvances[i];
 
-                glyphRunLayout->addGlyph (new GlyphLayout::Glyph (glyphRun->glyphIndices[i], Point<float> (x, baselineOriginY - lineOrigin.y)));
+                if ((glyphRun->bidiLevel & 1) != 0)
+                    x -= advance;  // RTL text
+
+                glyphRunLayout->glyphs.add (TextLayout::Glyph (glyphRun->glyphIndices[i],
+                                                               Point<float> (x, baselineOriginY - lineOrigin.y),
+                                                               advance));
 
                 if ((glyphRun->bidiLevel & 1) == 0)
-                    x += glyphRun->glyphAdvances[i];  // LTR text
+                    x += advance;  // LTR text
             }
 
             return S_OK;
@@ -264,7 +267,7 @@ namespace DirectWriteTypeLayout
         }
     }
 
-    void createLayout (GlyphLayout& glyphLayout, const AttributedString& text, IDWriteFactory* const directWriteFactory,
+    void createLayout (TextLayout& layout, const AttributedString& text, IDWriteFactory* const directWriteFactory,
                        ID2D1Factory* const direct2dFactory, IDWriteFontCollection* const fontCollection)
     {
         // To add color to text, we need to create a D2D render target
@@ -296,7 +299,7 @@ namespace DirectWriteTypeLayout
 
         ComSmartPtr<IDWriteTextLayout> dwTextLayout;
         hr = directWriteFactory->CreateTextLayout (text.getText().toWideCharPointer(), textLen,
-                                                   dwTextFormat, glyphLayout.getWidth(),
+                                                   dwTextFormat, layout.getWidth(),
                                                    1.0e7f, dwTextLayout.resetAndGetPointerAddress());
 
         const int numAttributes = text.getNumAttributes();
@@ -307,7 +310,7 @@ namespace DirectWriteTypeLayout
         UINT32 actualLineCount = 0;
         hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
 
-        glyphLayout.ensureStorageAllocated (actualLineCount);
+        layout.ensureStorageAllocated (actualLineCount);
 
         HeapBlock <DWRITE_LINE_METRICS> dwLineMetrics (actualLineCount);
         hr = dwTextLayout->GetLineMetrics (dwLineMetrics, actualLineCount, &actualLineCount);
@@ -318,19 +321,19 @@ namespace DirectWriteTypeLayout
             const Range<int> lineStringRange (lastLocation, (int) lastLocation + dwLineMetrics[i].length);
             lastLocation = dwLineMetrics[i].length;
 
-            GlyphLayout::Line* glyphLine = new GlyphLayout::Line();
-            glyphLayout.addLine (glyphLine);
-            glyphLine->setStringRange (lineStringRange);
+            TextLayout::Line* glyphLine = new TextLayout::Line();
+            layout.addLine (glyphLine);
+            glyphLine->stringRange = lineStringRange;
         }
 
         ComSmartPtr<CustomDirectWriteTextRenderer> textRenderer (new CustomDirectWriteTextRenderer (fontCollection));
 
-        hr = dwTextLayout->Draw (&glyphLayout, textRenderer, 0, 0);
+        hr = dwTextLayout->Draw (&layout, textRenderer, 0, 0);
     }
 }
 #endif
 
-bool GlyphLayout::createNativeLayout (const AttributedString& text)
+bool TextLayout::createNativeLayout (const AttributedString& text)
 {
    #if JUCE_USE_DIRECTWRITE
     const Direct2DFactories& factories = Direct2DFactories::getInstance();

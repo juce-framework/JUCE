@@ -80,10 +80,10 @@ namespace LookAndFeelHelpers
         p.closeSubPath();
     }
 
-    const Colour createBaseColour (const Colour& buttonColour,
-                                   const bool hasKeyboardFocus,
-                                   const bool isMouseOverButton,
-                                   const bool isButtonDown) noexcept
+    Colour createBaseColour (const Colour& buttonColour,
+                             const bool hasKeyboardFocus,
+                             const bool isMouseOverButton,
+                             const bool isButtonDown) noexcept
     {
         const float sat = hasKeyboardFocus ? 1.3f : 0.9f;
         const Colour baseColour (buttonColour.withMultipliedSaturation (sat));
@@ -96,15 +96,17 @@ namespace LookAndFeelHelpers
         return baseColour;
     }
 
-    const TextLayout layoutTooltipText (const String& text) noexcept
+    TextLayout layoutTooltipText (const String& text) noexcept
     {
-        const float tooltipFontSize = 12.0f;
+        const float tooltipFontSize = 13.0f;
         const int maxToolTipWidth = 400;
 
-        const Font f (tooltipFontSize, Font::bold);
-        TextLayout tl (text, f);
-        tl.layout (maxToolTipWidth, Justification::left, true);
+        AttributedString s;
+        s.setJustification (Justification::centred);
+        s.append (text, Font (tooltipFontSize, Font::bold));
 
+        TextLayout tl;
+        tl.createLayoutWithBalancedLineLengths (s, (float) maxToolTipWidth);
         return tl;
     }
 }
@@ -527,7 +529,6 @@ void LookAndFeel::drawAlertBox (Graphics& g,
     g.fillAll (alert.findColour (AlertWindow::backgroundColourId));
 
     int iconSpaceUsed = 0;
-    Justification alignment (Justification::horizontallyCentred);
 
     const int iconWidth = 80;
     int iconSize = jmin (iconWidth + 50, alert.getHeight() + 20);
@@ -577,15 +578,14 @@ void LookAndFeel::drawAlertBox (Graphics& g,
         g.fillPath (icon);
 
         iconSpaceUsed = iconWidth;
-        alignment = Justification::left;
     }
 
     g.setColour (alert.findColour (AlertWindow::textColourId));
 
-    textLayout.drawWithin (g,
-                           textArea.getX() + iconSpaceUsed, textArea.getY(),
-                           textArea.getWidth() - iconSpaceUsed, textArea.getHeight(),
-                           alignment.getFlags() | Justification::top);
+    textLayout.draw (g, Rectangle<int> (textArea.getX() + iconSpaceUsed,
+                                        textArea.getY(),
+                                        textArea.getWidth() - iconSpaceUsed,
+                                        textArea.getHeight()).toFloat());
 
     g.setColour (alert.findColour (AlertWindow::outlineColourId));
     g.drawRect (0, 0, alert.getWidth(), alert.getHeight());
@@ -1657,8 +1657,8 @@ void LookAndFeel::getTooltipSize (const String& tipText, int& width, int& height
 {
     const TextLayout tl (LookAndFeelHelpers::layoutTooltipText (tipText));
 
-    width = tl.getWidth() + 14;
-    height = tl.getHeight() + 6;
+    width  = (int) (tl.getWidth() + 14.0f);
+    height = (int) (tl.getHeight() + 6.0f);
 }
 
 void LookAndFeel::drawTooltip (Graphics& g, const String& text, int width, int height)
@@ -1673,7 +1673,7 @@ void LookAndFeel::drawTooltip (Graphics& g, const String& text, int width, int h
     const TextLayout tl (LookAndFeelHelpers::layoutTooltipText (text));
 
     g.setColour (findColour (TooltipWindow::textColourId));
-    tl.drawWithin (g, 0, 0, width, height, Justification::centred);
+    tl.draw (g, Rectangle<float> (0.0f, 0.0f, (float) width, (float) height));
 }
 
 //==============================================================================

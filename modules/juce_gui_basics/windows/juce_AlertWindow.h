@@ -446,6 +446,7 @@ protected:
 private:
     //==============================================================================
     String text;
+    AttributedString attributedText;
     TextLayout textLayout;
     AlertIconType alertIconType;
     ComponentBoundsConstrainer constrainer;

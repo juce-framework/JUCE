@@ -117,10 +117,10 @@ void AlertWindow::setMessage (const String& message)
 
         font = getLookAndFeel().getAlertWindowMessageFont();
 
-        Font titleFont (font.getHeight() * 1.1f, Font::bold);
-        textLayout.setText (getName() + "\n\n", titleFont);
-
-        textLayout.appendText (text, font);
+        AttributedString newText;
+        newText.append (getName() + "\n\n", Font (font.getHeight() * 1.1f, Font::bold));
+        newText.append (text, font);
+        attributedText = newText;
 
         updateLayout (true);
         repaint();
@@ -271,10 +271,13 @@ public:
 
     void updateLayout (const int width)
     {
+        AttributedString s;
+        s.setJustification (Justification::topLeft);
+        s.append (getName(), getFont());
+
         TextLayout text;
-        text.appendText (getText(), getFont());
-        text.layout (width - 8, Justification::topLeft, true);
-        setSize (width, jmin (width, text.getHeight() + (int) getFont().getHeight()));
+        text.createLayoutWithBalancedLineLengths (s, width - 8.0f);
+        setSize (width, jmin (width, (int) (text.getHeight() + getFont().getHeight())));
     }
 
 private:
@@ -399,18 +402,20 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
 
     if (alertIconType == NoIcon)
     {
-        textLayout.layout (w, Justification::horizontallyCentred, true);
+        attributedText.setJustification (Justification::centredTop);
+        textLayout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
     }
     else
     {
-        textLayout.layout (w, Justification::left, true);
+        attributedText.setJustification (Justification::topLeft);
+        textLayout.createLayoutWithBalancedLineLengths (attributedText, (float) w);
         iconSpace = iconWidth;
     }
 
-    w = jmax (350, textLayout.getWidth() + iconSpace + edgeGap * 4);
+    w = jmax (350, (int) textLayout.getWidth() + iconSpace + edgeGap * 4);
     w = jmin (w, (int) (getParentWidth() * 0.7f));
 
-    const int textLayoutH = textLayout.getHeight();
+    const int textLayoutH = (int) textLayout.getHeight();
     const int textBottom = 16 + titleH + textLayoutH;
     int h = textBottom;
 

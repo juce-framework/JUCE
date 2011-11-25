@@ -62,7 +62,6 @@ public:
 
 private:
     PropertyPanel panel;
-    TextLayout layout;
     Component* lastComp;
     String lastTip;
 

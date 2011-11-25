@@ -30,124 +30,145 @@
 #include "../placement/juce_Justification.h"
 class Graphics;
 
-
 //==============================================================================
 /**
-    A laid-out arrangement of text.
+    A Pre-formatted piece of text, which may contain multiple fonts and colours.
 
-    You can add text in different fonts to a TextLayout object, then call its
-    layout() method to word-wrap it into lines. The layout can then be drawn
-    using a graphics context.
+    A TextLayout is created from an AttributedString, and once created can be
+    quickly drawn into a Graphics context.
 
-    It's handy if you've got a message to display, because you can format it,
-    measure the extent of the layout, and then create a suitably-sized window
-    to show it in.
-
-    @see Font, Graphics::drawFittedText, GlyphArrangement
+    @see AttributedString
 */
 class JUCE_API  TextLayout
 {
 public:
-    //==============================================================================
-    /** Creates an empty text layout.
-
-        Text can then be appended using the appendText() method.
+    /** Creates an empty layout.
+        Having created a TextLayout, you can populate it using createLayout() or
+        createLayoutWithBalancedLineLengths().
     */
     TextLayout();
-
-    /** Creates a copy of another layout object. */
-    TextLayout (const TextLayout& other);
-
-    /** Creates a text layout from an initial string and font. */
-    TextLayout (const String& text, const Font& font);
+    TextLayout (const TextLayout&);
+    TextLayout& operator= (const TextLayout&);
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    TextLayout (TextLayout&& other) noexcept;
+    TextLayout& operator= (TextLayout&&) noexcept;
+   #endif
 
     /** Destructor. */
     ~TextLayout();
 
-    /** Copies another layout onto this one. */
-    TextLayout& operator= (const TextLayout& layoutToCopy);
+    //==============================================================================
+    /** Creates a layout from the given attributed string.
+        This will replace any data that is currently stored in the layout.
+    */
+    void createLayout (const AttributedString& text, float maxWidth);
+
+    /** Creates a layout, attempting to choose a width which results in lines
+        of a similar length.
+
+        This will be slower than the normal createLayout method, but produces a
+        tidier result.
+    */
+    void createLayoutWithBalancedLineLengths (const AttributedString& text, float maxWidth);
+
+    /** Draws the layout within the specified area.
+        The position of the text within the rectangle is controlled by the justification
+        flags set in the original AttributedString that was used to create this layout.
+    */
+    void draw (Graphics& g, const Rectangle<float>& area) const;
 
     //==============================================================================
-    /** Clears the layout, removing all its text. */
-    void clear();
+    /** A positioned glyph. */
+    class JUCE_API  Glyph
+    {
+    public:
+        Glyph (int glyphCode, const Point<float>& anchor, float width) noexcept;
+        Glyph (const Glyph&) noexcept;
+        Glyph& operator= (const Glyph&) noexcept;
+        ~Glyph() noexcept;
 
-    /** Adds a string to the end of the arrangement.
+        /** The code number of this glyph. */
+        int glyphCode;
 
-        The string will be broken onto new lines wherever it contains
-        carriage-returns or linefeeds. After adding it, you can call layout()
-        to wrap long lines into a paragraph and justify it.
-    */
-    void appendText (const String& textToAppend,
-                     const Font& fontToUse);
+        /** The glyph's anchor point - this is relative to the line's origin.
+            @see TextLayout::Line::lineOrigin
+        */
+        Point<float> anchor;
 
-    /** Replaces all the text with a new string.
-
-        This is equivalent to calling clear() followed by appendText().
-    */
-    void setText (const String& newText,
-                  const Font& fontToUse);
-
-    /** Returns true if the layout has not had any text added yet. */
-    bool isEmpty() const;
+        float width;
+    };
 
     //==============================================================================
-    /** Breaks the text up to form a paragraph with the given width.
+    /** A sequence of glyphs with a common font and colour. */
+    class JUCE_API  Run
+    {
+    public:
+        Run() noexcept;
+        Run (const Run&);
+        Run (const Range<int>& stringRange, int numGlyphsToPreallocate);
+        ~Run() noexcept;
 
-        @param maximumWidth                 any text wider than this will be split
-                                            across multiple lines
-        @param justification                how the lines are to be laid-out horizontally
-        @param attemptToBalanceLineLengths  if true, it will try to split the lines at a
-                                            width that keeps all the lines of text at a
-                                            similar length - this is good when you're displaying
-                                            a short message and don't want it to get split
-                                            onto two lines with only a couple of words on
-                                            the second line, which looks untidy.
-    */
-    void layout (int maximumWidth,
-                 const Justification& justification,
-                 bool attemptToBalanceLineLengths);
-
-
-    //==============================================================================
-    /** Returns the overall width of the entire text layout. */
-    int getWidth() const;
-
-    /** Returns the overall height of the entire text layout. */
-    int getHeight() const;
-
-    /** Returns the total number of lines of text. */
-    int getNumLines() const                     { return totalLines; }
-
-    /** Returns the width of a particular line of text.
-
-        @param lineNumber   the line, from 0 to (getNumLines() - 1)
-    */
-    int getLineWidth (int lineNumber) const;
+        Font font;              /**< The run's font. */
+        Colour colour;          /**< The run's colour. */
+        Array<Glyph> glyphs;    /**< The glyphs in this run. */
+        Range<int> stringRange; /**< The character range that this run represents in the
+                                     original string that was used to create it. */
+    private:
+        Run& operator= (const Run&);
+    };
 
     //==============================================================================
-    /** Renders the text at a specified position using a graphics context.
-    */
-    void draw (Graphics& g, int topLeftX, int topLeftY) const;
+    /** A line containing a sequence of glyph-runs. */
+    class JUCE_API  Line
+    {
+    public:
+        Line() noexcept;
+        Line (const Line&);
+        Line (const Range<int>& stringRange, const Point<float>& lineOrigin,
+              float ascent, float descent, float leading, int numRunsToPreallocate);
+        ~Line() noexcept;
 
-    /** Renders the text within a specified rectangle using a graphics context.
+        /** Returns the X position range which contains all the glyphs in this line. */
+        Range<float> getLineBoundsX() const noexcept;
 
-        The justification flags dictate how the block of text should be positioned
-        within the rectangle.
-    */
-    void drawWithin (Graphics& g,
-                     int x, int y, int w, int h,
-                     const Justification& layoutFlags) const;
+        OwnedArray<Run> runs;           /**< The glyph-runs in this line. */
+        Range<int> stringRange;         /**< The character range that this line represents in the
+                                             original string that was used to create it. */
+        Point<float> lineOrigin;        /**< The line's baseline origin. */
+        float ascent, descent, leading;
 
+    private:
+        Line& operator= (const Line&);
+    };
+
+    //==============================================================================
+    /** Returns the maximum width of the content. */
+    float getWidth() const noexcept     { return width; }
+
+    /** Returns the maximum height of the content. */
+    float getHeight() const noexcept;
+
+    /** Returns the number of lines in the layout. */
+    int getNumLines() const noexcept    { return lines.size(); }
+
+    /** Returns one of the lines. */
+    Line& getLine (int index) const;
+
+    /** Adds a line to the layout. The layout will take ownership of this line object
+        and will delete it when it is no longer needed. */
+    void addLine (Line* line);
+
+    /** Pre-allocates space for the specified number of lines. */
+    void ensureStorageAllocated (int numLinesNeeded);
 
 private:
-    //==============================================================================
-    class Token;
-    friend class OwnedArray <Token>;
-    OwnedArray <Token> tokens;
-    int totalLines;
+    OwnedArray<Line> lines;
+    float width;
+    Justification justification;
 
-    JUCE_LEAK_DETECTOR (TextLayout);
+    void createStandardLayout (const AttributedString&);
+    bool createNativeLayout (const AttributedString&);
+    void recalculateWidth();
 };
-
 
 #endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__

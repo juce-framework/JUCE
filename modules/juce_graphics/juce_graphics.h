@@ -46,7 +46,7 @@
     management and layout.
 */
 #ifndef JUCE_USE_DIRECTWRITE
- #define JUCE_USE_DIRECTWRITE 0
+ #define JUCE_USE_DIRECTWRITE 1
 #endif
 
 #ifndef JUCE_INCLUDE_PNGLIB_CODE

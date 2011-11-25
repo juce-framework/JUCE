@@ -25,351 +25,589 @@
 
 BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
-class TextLayout::Token
+TextLayout::Glyph::Glyph (const int glyphCode_, const Point<float>& anchor_, float width_) noexcept
+    : glyphCode (glyphCode_), anchor (anchor_), width (width_)
 {
-public:
-    Token (const String& t,
-           const Font& f,
-           const bool isWhitespace_)
-        : text (t),
-          font (f),
-          x(0),
-          y(0),
-          isWhitespace (isWhitespace_)
-    {
-        w = font.getStringWidth (t);
-        h = roundToInt (f.getHeight());
-        isNewLine = t.containsChar ('\n') || t.containsChar ('\r');
-    }
+}
 
-    Token (const Token& other)
-        : text (other.text),
-          font (other.font),
-          x (other.x),
-          y (other.y),
-          w (other.w),
-          h (other.h),
-          line (other.line),
-          lineHeight (other.lineHeight),
-          isWhitespace (other.isWhitespace),
-          isNewLine (other.isNewLine)
-    {
-    }
+TextLayout::Glyph::Glyph (const Glyph& other) noexcept
+    : glyphCode (other.glyphCode), anchor (other.anchor), width (other.width)
+{
+}
 
-    void draw (Graphics& g,
-               const int xOffset,
-               const int yOffset)
+TextLayout::Glyph& TextLayout::Glyph::operator= (const Glyph& other) noexcept
+{
+    glyphCode = other.glyphCode;
+    anchor = other.anchor;
+    width = other.width;
+    return *this;
+}
+
+TextLayout::Glyph::~Glyph() noexcept {}
+
+//==============================================================================
+TextLayout::Run::Run() noexcept
+    : colour (0xff000000)
+{
+}
+
+TextLayout::Run::Run (const Range<int>& range, const int numGlyphsToPreallocate)
+    : colour (0xff000000), stringRange (range)
+{
+    glyphs.ensureStorageAllocated (numGlyphsToPreallocate);
+}
+
+TextLayout::Run::Run (const Run& other)
+    : font (other.font),
+      colour (other.colour),
+      glyphs (other.glyphs),
+      stringRange (other.stringRange)
+{
+}
+
+TextLayout::Run::~Run() noexcept {}
+
+//==============================================================================
+TextLayout::Line::Line() noexcept
+    : ascent (0.0f), descent (0.0f), leading (0.0f)
+{
+}
+
+TextLayout::Line::Line (const Range<int>& stringRange_, const Point<float>& lineOrigin_,
+                        const float ascent_, const float descent_, const float leading_,
+                        const int numRunsToPreallocate)
+    : stringRange (stringRange_), lineOrigin (lineOrigin_),
+      ascent (ascent_), descent (descent_), leading (leading_)
+{
+    runs.ensureStorageAllocated (numRunsToPreallocate);
+}
+
+TextLayout::Line::Line (const Line& other)
+    : stringRange (other.stringRange), lineOrigin (other.lineOrigin),
+      ascent (other.ascent), descent (other.descent), leading (other.leading)
+{
+    runs.addCopiesOf (other.runs);
+}
+
+TextLayout::Line::~Line() noexcept
+{
+}
+
+Range<float> TextLayout::Line::getLineBoundsX() const noexcept
+{
+    Range<float> range;
+    bool isFirst = true;
+
+    for (int i = runs.size(); --i >= 0;)
     {
-        if (! isWhitespace)
+        const Run* run = runs.getUnchecked(i);
+        jassert (run != nullptr);
+
+        if (run->glyphs.size() > 0)
         {
-            g.setFont (font);
-            g.drawSingleLineText (text.trimEnd(),
-                                  xOffset + x,
-                                  yOffset + y + (lineHeight - h)
-                                    + roundToInt (font.getAscent()));
+            float minX = run->glyphs.getReference(0).anchor.x;
+            float maxX = minX;
+
+            for (int j = run->glyphs.size(); --j > 0;)
+            {
+                const Glyph& glyph = run->glyphs.getReference (j);
+                const float x = glyph.anchor.x;
+                minX = jmin (minX, x);
+                maxX = jmax (maxX, x + glyph.width);
+            }
+
+            if (isFirst)
+            {
+                isFirst = false;
+                range = Range<float> (minX, maxX);
+            }
+            else
+            {
+                range = range.getUnionWith (Range<float> (minX, maxX));
+            }
         }
     }
 
-    String text;
-    Font font;
-    int x, y, w, h;
-    int line, lineHeight;
-    bool isWhitespace, isNewLine;
-
-private:
-    JUCE_LEAK_DETECTOR (Token);
-};
-
+    return range + lineOrigin.x;
+}
 
 //==============================================================================
 TextLayout::TextLayout()
-    : totalLines (0)
+    : width (0), justification (Justification::topLeft)
 {
-    tokens.ensureStorageAllocated (64);
-}
-
-TextLayout::TextLayout (const String& text, const Font& font)
-    : totalLines (0)
-{
-    tokens.ensureStorageAllocated (64);
-    appendText (text, font);
 }
 
 TextLayout::TextLayout (const TextLayout& other)
-    : totalLines (0)
+    : width (other.width),
+      justification (other.justification)
 {
-    *this = other;
+    lines.addCopiesOf (other.lines);
 }
+
+#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+TextLayout::TextLayout (TextLayout&& other) noexcept
+    : lines (static_cast <OwnedArray<Line>&&> (other.lines)),
+      width (other.width),
+      justification (other.justification)
+{
+}
+
+TextLayout& TextLayout::operator= (TextLayout&& other) noexcept
+{
+    lines = static_cast <OwnedArray<Line>&&> (other.lines);
+    width = other.width;
+    justification = other.justification;
+    return *this;
+}
+#endif
 
 TextLayout& TextLayout::operator= (const TextLayout& other)
 {
-    if (this != &other)
-    {
-        clear();
-
-        totalLines = other.totalLines;
-        tokens.addCopiesOf (other.tokens);
-    }
-
+    width = other.width;
+    justification = other.justification;
+    lines.clear();
+    lines.addCopiesOf (other.lines);
     return *this;
 }
 
 TextLayout::~TextLayout()
 {
-    clear();
+}
+
+float TextLayout::getHeight() const noexcept
+{
+    const Line* const lastLine = lines.getLast();
+
+    return lastLine != nullptr ? lastLine->lineOrigin.y + lastLine->descent
+                               : 0;
+}
+
+TextLayout::Line& TextLayout::getLine (const int index) const
+{
+    return *lines[index];
+}
+
+void TextLayout::ensureStorageAllocated (int numLinesNeeded)
+{
+    lines.ensureStorageAllocated (numLinesNeeded);
+}
+
+void TextLayout::addLine (Line* line)
+{
+    lines.add (line);
+}
+
+void TextLayout::draw (Graphics& g, const Rectangle<float>& area) const
+{
+    const Point<float> origin (justification.appliedToRectangle (Rectangle<float> (0, 0, width, getHeight()), area).getPosition());
+
+    LowLevelGraphicsContext& context = *g.getInternalContext();
+
+    for (int i = 0; i < getNumLines(); ++i)
+    {
+        const Line& line = getLine (i);
+        const Point<float> lineOrigin (origin + line.lineOrigin);
+
+        for (int j = 0; j < line.runs.size(); ++j)
+        {
+            const Run* const run = line.runs.getUnchecked (j);
+            jassert (run != nullptr);
+            context.setFont (run->font);
+            context.setFill (run->colour);
+
+            for (int k = 0; k < run->glyphs.size(); ++k)
+            {
+                const Glyph& glyph = run->glyphs.getReference (k);
+                context.drawGlyph (glyph.glyphCode, AffineTransform::translation (lineOrigin.x + glyph.anchor.x,
+                                                                                  lineOrigin.y + glyph.anchor.y));
+            }
+        }
+    }
+}
+
+void TextLayout::createLayout (const AttributedString& text, float maxWidth)
+{
+    lines.clear();
+    width = maxWidth;
+    justification = text.getJustification();
+
+    if (! createNativeLayout (text))
+        createStandardLayout (text);
+
+    recalculateWidth();
 }
 
 //==============================================================================
-void TextLayout::clear()
+namespace TextLayoutHelpers
 {
-    tokens.clear();
-    totalLines = 0;
-}
-
-bool TextLayout::isEmpty() const
-{
-    return tokens.size() == 0;
-}
-
-void TextLayout::appendText (const String& text, const Font& font)
-{
-    String::CharPointerType t (text.getCharPointer());
-    String currentString;
-    int lastCharType = 0;
-
-    for (;;)
+    struct FontAndColour
     {
-        const juce_wchar c = t.getAndAdvance();
-        if (c == 0)
-            break;
+        FontAndColour (const Font* font_) noexcept   : font (font_), colour (0xff000000) {}
 
-        int charType;
-        if (c == '\r' || c == '\n')
+        const Font* font;
+        Colour colour;
+
+        bool operator!= (const FontAndColour& other) const noexcept
         {
-            charType = 0;
+            return (font != other.font && *font != *other.font) || colour != other.colour;
         }
-        else if (CharacterFunctions::isWhitespace (c))
-        {
-            charType = 2;
-        }
-        else
-        {
-            charType = 1;
-        }
+    };
 
-        if (charType == 0 || charType != lastCharType)
-        {
-            if (currentString.isNotEmpty())
-            {
-                tokens.add (new Token (currentString, font,
-                                       lastCharType == 2 || lastCharType == 0));
-            }
-
-            currentString = String::charToString (c);
-
-            if (c == '\r' && *t == '\n')
-                currentString += t.getAndAdvance();
-        }
-        else
-        {
-            currentString += c;
-        }
-
-        lastCharType = charType;
-    }
-
-    if (currentString.isNotEmpty())
-        tokens.add (new Token (currentString, font, lastCharType == 2));
-}
-
-void TextLayout::setText (const String& text, const Font& font)
-{
-    clear();
-    appendText (text, font);
-}
-
-//==============================================================================
-void TextLayout::layout (int maxWidth,
-                         const Justification& justification,
-                         const bool attemptToBalanceLineLengths)
-{
-    if (attemptToBalanceLineLengths)
+    struct RunAttribute
     {
-        const int originalW = maxWidth;
-        int bestWidth = maxWidth;
-        float bestLineProportion = 0.0f;
+        RunAttribute (const FontAndColour& fontAndColour_, const Range<int>& range_) noexcept
+            : fontAndColour (fontAndColour_), range (range_)
+        {}
 
-        while (maxWidth > originalW / 2)
-        {
-            layout (maxWidth, justification, false);
+        FontAndColour fontAndColour;
+        Range<int> range;
+    };
 
-            if (getNumLines() <= 1)
-                return;
-
-            const int lastLineW = getLineWidth (getNumLines() - 1);
-            const int lastButOneLineW = getLineWidth (getNumLines() - 2);
-
-            const float prop = lastLineW / (float) lastButOneLineW;
-
-            if (prop > 0.9f)
-                return;
-
-            if (prop > bestLineProportion)
-            {
-                bestLineProportion = prop;
-                bestWidth = maxWidth;
-            }
-
-            maxWidth -= 10;
-        }
-
-        layout (bestWidth, justification, false);
-    }
-    else
+    struct Token
     {
-        int x = 0;
-        int y = 0;
-        int h = 0;
-        totalLines = 0;
-        int i;
+        Token (const String& t, const Font& f, const Colour& c, const bool isWhitespace_)
+            : text (t), font (f), colour (c),
+              area (font.getStringWidth (t), roundToInt (f.getHeight())),
+              isWhitespace (isWhitespace_),
+              isNewLine (t.containsChar ('\n') || t.containsChar ('\r'))
+        {}
 
-        for (i = 0; i < tokens.size(); ++i)
+        const String text;
+        const Font font;
+        const Colour colour;
+        Rectangle<int> area;
+        int line, lineHeight;
+        const bool isWhitespace, isNewLine;
+
+    private:
+        Token& operator= (const Token&);
+    };
+
+    class TokenList
+    {
+    public:
+        TokenList() noexcept  : totalLines (0) {}
+
+        void createLayout (const AttributedString& text, TextLayout& layout)
         {
-            Token* const t = tokens.getUnchecked(i);
-            t->x = x;
-            t->y = y;
-            t->line = totalLines;
-            x += t->w;
-            h = jmax (h, t->h);
+            tokens.ensureStorageAllocated (64);
+            layout.ensureStorageAllocated (totalLines);
 
-            const Token* nextTok = tokens [i + 1];
+            addTextRuns (text);
 
-            if (nextTok == 0)
-                break;
+            layoutRuns ((int) layout.getWidth());
 
-            if (t->isNewLine || ((! nextTok->isWhitespace) && x + nextTok->w > maxWidth))
+            int charPosition = 0;
+            int lineStartPosition = 0;
+            int runStartPosition = 0;
+
+            TextLayout::Line* glyphLine = new TextLayout::Line();
+            TextLayout::Run*  glyphRun  = new TextLayout::Run();
+
+            for (int i = 0; i < tokens.size(); ++i)
             {
-                // finished a line, so go back and update the heights of the things on it
-                for (int j = i; j >= 0; --j)
+                const Token* const t = tokens.getUnchecked (i);
+                const Point<float> tokenPos (t->area.getPosition().toFloat());
+
+                Array <int> newGlyphs;
+                Array <float> xOffsets;
+                t->font.getGlyphPositions (t->text.trimEnd(), newGlyphs, xOffsets);
+
+                glyphRun->glyphs.ensureStorageAllocated (glyphRun->glyphs.size() + newGlyphs.size());
+
+                for (int j = 0; j < newGlyphs.size(); ++j)
                 {
-                    Token* const tok = tokens.getUnchecked(j);
+                    if (charPosition == lineStartPosition)
+                        glyphLine->lineOrigin = tokenPos.translated (0, t->font.getAscent());
 
-                    if (tok->line == totalLines)
-                        tok->lineHeight = h;
+                    const float x = xOffsets.getUnchecked (j);
+                    glyphRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked(j),
+                                                             Point<float> (tokenPos.getX() + x, 0),
+                                                             xOffsets.getUnchecked (j + 1) - x));
+                    ++charPosition;
+                }
+
+                if (t->isWhitespace || t->isNewLine)
+                    ++charPosition;
+
+                const Token* const nextToken = tokens [i + 1];
+
+                if (nextToken == nullptr) // this is the last token
+                {
+                    addRun (glyphLine, glyphRun, t, runStartPosition, charPosition);
+                    glyphLine->stringRange = Range<int> (lineStartPosition, charPosition);
+                    layout.addLine (glyphLine);
+                }
+                else
+                {
+                    if (t->font != nextToken->font || t->colour != nextToken->colour)
+                    {
+                        addRun (glyphLine, glyphRun, t, runStartPosition, charPosition);
+                        runStartPosition = charPosition;
+                        glyphRun = new TextLayout::Run();
+                    }
+
+                    if (t->line != nextToken->line)
+                    {
+                        addRun (glyphLine, glyphRun, t, runStartPosition, charPosition);
+                        glyphLine->stringRange = Range<int> (lineStartPosition, charPosition);
+                        layout.addLine (glyphLine);
+
+                        runStartPosition = charPosition;
+                        lineStartPosition = charPosition;
+                        glyphLine = new TextLayout::Line();
+                        glyphRun  = new TextLayout::Run();
+                    }
+                }
+            }
+
+            if ((text.getJustification().getFlags() & (Justification::right | Justification::horizontallyCentred)) != 0)
+            {
+                const int totalW = (int) layout.getWidth();
+
+                for (int i = 0; i < totalLines; ++i)
+                {
+                    const int lineW = getLineWidth (i);
+                    float dx = 0;
+
+                    if ((text.getJustification().getFlags() & Justification::right) != 0)
+                        dx = (float) (totalW - lineW);
                     else
-                        break;
-                }
+                        dx = (totalW - lineW) / 2.0f;
 
-                x = 0;
-                y += h;
-                h = 0;
-                ++totalLines;
+                    TextLayout::Line& glyphLine = layout.getLine (i);
+                    glyphLine.lineOrigin.x += dx;
+                }
             }
         }
 
-        // finished a line, so go back and update the heights of the things on it
-        for (int j = jmin (i, tokens.size() - 1); j >= 0; --j)
+    private:
+        static void addRun (TextLayout::Line* glyphLine, TextLayout::Run* glyphRun,
+                            const Token* const t, const int start, const int end)
         {
-            Token* const t = tokens.getUnchecked(j);
-
-            if (t->line == totalLines)
-                t->lineHeight = h;
-            else
-                break;
+            glyphRun->stringRange = Range<int> (start, end);
+            glyphRun->font = t->font;
+            glyphRun->colour = t->colour;
+            glyphLine->ascent = jmax (glyphLine->ascent, t->font.getAscent());
+            glyphLine->descent = jmax (glyphLine->descent, t->font.getDescent());
+            glyphLine->runs.add (glyphRun);
         }
 
-        ++totalLines;
-
-        if (! justification.testFlags (Justification::left))
+        void appendText (const AttributedString& text, const Range<int>& stringRange,
+                         const Font& font, const Colour& colour)
         {
-            int totalW = getWidth();
+            String stringText (text.getText().substring (stringRange.getStart(), stringRange.getEnd()));
+            String::CharPointerType t (stringText.getCharPointer());
+            String currentString;
+            int lastCharType = 0;
 
-            for (i = totalLines; --i >= 0;)
+            for (;;)
             {
-                const int lineW = getLineWidth (i);
+                const juce_wchar c = t.getAndAdvance();
+                if (c == 0)
+                    break;
 
-                int dx = 0;
-                if (justification.testFlags (Justification::horizontallyCentred))
-                    dx = (totalW - lineW) / 2;
-                else if (justification.testFlags (Justification::right))
-                    dx = totalW - lineW;
+                int charType;
+                if (c == '\r' || c == '\n')
+                    charType = 0;
+                else if (CharacterFunctions::isWhitespace (c))
+                    charType = 2;
+                else
+                    charType = 1;
 
-                for (int j = tokens.size(); --j >= 0;)
+                if (charType == 0 || charType != lastCharType)
                 {
-                    Token* const t = tokens.getUnchecked(j);
+                    if (currentString.isNotEmpty())
+                        tokens.add (new Token (currentString, font, colour,
+                                               lastCharType == 2 || lastCharType == 0));
 
-                    if (t->line == i)
-                        t->x += dx;
+                    currentString = String::charToString (c);
+
+                    if (c == '\r' && *t == '\n')
+                        currentString += t.getAndAdvance();
+                }
+                else
+                {
+                    currentString += c;
+                }
+
+                lastCharType = charType;
+            }
+
+            if (currentString.isNotEmpty())
+                tokens.add (new Token (currentString, font, colour, lastCharType == 2));
+        }
+
+        void layoutRuns (const int maxWidth)
+        {
+            int x = 0, y = 0, h = 0;
+            int i;
+
+            for (i = 0; i < tokens.size(); ++i)
+            {
+                Token* const t = tokens.getUnchecked(i);
+                t->area.setPosition (x, y);
+                t->line = totalLines;
+                x += t->area.getWidth();
+                h = jmax (h, t->area.getHeight());
+
+                const Token* nextTok = tokens[i + 1];
+
+                if (nextTok == 0)
+                    break;
+
+                if (t->isNewLine || ((! nextTok->isWhitespace) && x + nextTok->area.getWidth() > maxWidth))
+                {
+                    setLastLineHeight (i + 1, h);
+                    x = 0;
+                    y += h;
+                    h = 0;
+                    ++totalLines;
                 }
             }
+
+            setLastLineHeight (jmin (i + 1, tokens.size()), h);
+            ++totalLines;
         }
-    }
+
+        void setLastLineHeight (int i, const int height) noexcept
+        {
+            while (--i >= 0)
+            {
+                Token* const tok = tokens.getUnchecked (i);
+
+                if (tok->line == totalLines)
+                    tok->lineHeight = height;
+                else
+                    break;
+            }
+        }
+
+        int getLineWidth (const int lineNumber) const noexcept
+        {
+            int maxW = 0;
+
+            for (int i = tokens.size(); --i >= 0;)
+            {
+                const Token* const t = tokens.getUnchecked (i);
+
+                if (t->line == lineNumber && ! t->isWhitespace)
+                    maxW = jmax (maxW, t->area.getRight());
+            }
+
+            return maxW;
+        }
+
+        void addTextRuns (const AttributedString& text)
+        {
+            Font defaultFont;
+            Array<RunAttribute> runAttributes;
+
+            {
+                const int stringLength = text.getText().length();
+                int rangeStart = 0;
+                FontAndColour lastFontAndColour (nullptr);
+
+                // Iterate through every character in the string
+                for (int i = 0; i < stringLength; ++i)
+                {
+                    FontAndColour newFontAndColour (&defaultFont);
+                    const int numCharacterAttributes = text.getNumAttributes();
+
+                    for (int j = 0; j < numCharacterAttributes; ++j)
+                    {
+                        const AttributedString::Attribute* const attr = text.getAttribute (j);
+
+                        // Check if the current character falls within the range of a font attribute
+                        if (attr->getFont() != nullptr && (i >= attr->range.getStart()) && (i < attr->range.getEnd()))
+                            newFontAndColour.font = attr->getFont();
+
+                        // Check if the current character falls within the range of a foreground colour attribute
+                        if (attr->getColour() != nullptr && (i >= attr->range.getStart()) && (i < attr->range.getEnd()))
+                            newFontAndColour.colour = *attr->getColour();
+                    }
+
+                    if (i > 0 && (newFontAndColour != lastFontAndColour || i == stringLength - 1))
+                    {
+                        runAttributes.add (RunAttribute (lastFontAndColour,
+                                                         Range<int> (rangeStart, (i < stringLength - 1) ? i : (i + 1))));
+                        rangeStart = i;
+                    }
+
+                    lastFontAndColour = newFontAndColour;
+                }
+            }
+
+            for (int i = 0; i < runAttributes.size(); ++i)
+            {
+                const RunAttribute& r = runAttributes.getReference(i);
+                appendText (text, r.range, *(r.fontAndColour.font), r.fontAndColour.colour);
+            }
+        }
+
+        OwnedArray<Token> tokens;
+        int totalLines;
+
+        JUCE_DECLARE_NON_COPYABLE (TokenList);
+    };
 }
 
 //==============================================================================
-int TextLayout::getLineWidth (const int lineNumber) const
+void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& text, float maxWidth)
 {
-    int maxW = 0;
+    const float minimumWidth = maxWidth / 2.0;
+    float bestWidth = maxWidth;
+    float bestLineProportion = 0.0f;
 
-    for (int i = tokens.size(); --i >= 0;)
+    while (maxWidth > minimumWidth)
     {
-        const Token* const t = tokens.getUnchecked(i);
+        createLayout (text, maxWidth);
 
-        if (t->line == lineNumber && ! t->isWhitespace)
-            maxW = jmax (maxW, t->x + t->w);
+        if (getNumLines() < 2)
+            return;
+
+        const float line1 = lines.getUnchecked (lines.size() - 1)->getLineBoundsX().getLength();
+        const float line2 = lines.getUnchecked (lines.size() - 2)->getLineBoundsX().getLength();
+        const float prop = jmax (line1, line2) / jmin (line1, line2);
+
+        if (prop > 0.9f)
+            return;
+
+        if (prop > bestLineProportion)
+        {
+            bestLineProportion = prop;
+            bestWidth = maxWidth;
+        }
+
+        maxWidth -= 10.0f;
     }
 
-    return maxW;
-}
-
-int TextLayout::getWidth() const
-{
-    int maxW = 0;
-
-    for (int i = tokens.size(); --i >= 0;)
-    {
-        const Token* const t = tokens.getUnchecked(i);
-        if (! t->isWhitespace)
-            maxW = jmax (maxW, t->x + t->w);
-    }
-
-    return maxW;
-}
-
-int TextLayout::getHeight() const
-{
-    int maxH = 0;
-
-    for (int i = tokens.size(); --i >= 0;)
-    {
-        const Token* const t = tokens.getUnchecked(i);
-
-        if (! t->isWhitespace)
-            maxH = jmax (maxH, t->y + t->h);
-    }
-
-    return maxH;
+    if (bestWidth != maxWidth)
+        createLayout (text, bestWidth);
 }
 
 //==============================================================================
-void TextLayout::draw (Graphics& g,
-                       const int xOffset,
-                       const int yOffset) const
+void TextLayout::createStandardLayout (const AttributedString& text)
 {
-    for (int i = tokens.size(); --i >= 0;)
-        tokens.getUnchecked(i)->draw (g, xOffset, yOffset);
+    TextLayoutHelpers::TokenList l;
+    l.createLayout (text, *this);
 }
 
-void TextLayout::drawWithin (Graphics& g,
-                             int x, int y, int w, int h,
-                             const Justification& justification) const
+void TextLayout::recalculateWidth()
 {
-    justification.applyToRectangle (x, y, getWidth(), getHeight(),
-                                    x, y, w, h);
+    if (lines.size() > 0)
+    {
+        Range<float> range (lines.getFirst()->getLineBoundsX());
 
-    draw (g, x, y);
+        int i;
+        for (i = lines.size(); --i > 0;)
+            range = range.getUnionWith (lines.getUnchecked(i)->getLineBoundsX());
+
+        for (i = lines.size(); --i >= 0;)
+            lines.getUnchecked(i)->lineOrigin.x -= range.getStart();
+
+        width = range.getLength();
+    }
 }
-
 
 END_JUCE_NAMESPACE

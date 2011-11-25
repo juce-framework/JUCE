@@ -121,6 +121,7 @@ private:
     int64 expiryTime;
     bool deleteAfterUse;
 
+    void createLayout (const String&);
     void init (int numMillisecondsBeforeRemoving,
                bool removeWhenMouseClicked,
                bool deleteSelfAfterUse);

@@ -34,6 +34,8 @@
 
     An attributed string lets you create a string with varied fonts, colours, word-wrapping,
     layout, etc., and draw it using AttributedString::draw().
+
+    @see TextLayout
 */
 class JUCE_API  AttributedString
 {
@@ -44,8 +46,12 @@ public:
     /** Creates an attributed string with the given text. */
     explicit AttributedString (const String& text);
 
-    AttributedString (const AttributedString& other);
-    AttributedString& operator= (const AttributedString& other);
+    AttributedString (const AttributedString&);
+    AttributedString& operator= (const AttributedString&);
+   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    AttributedString (AttributedString&&) noexcept;
+    AttributedString& operator= (AttributedString&&) noexcept;
+   #endif
 
     /** Destructor. */
     ~AttributedString();
@@ -54,11 +60,26 @@ public:
     /** Returns the complete text of this attributed string. */
     const String& getText() const noexcept                  { return text; }
 
-    /** Sets the text.
-        This will change the text, but won't affect any of the attributes that have
-        been added.
+    /** Replaces all the text.
+        This will change the text, but won't affect any of the colour or font attributes
+        that have been added.
     */
     void setText (const String& newText);
+
+    /** Appends some text (with a default font and colour). */
+    void append (const String& textToAppend);
+    /** Appends some text, with a specified font, and the default colour (black). */
+    void append (const String& textToAppend, const Font& font);
+    /** Appends some text, with a specified colour, and the default font. */
+    void append (const String& textToAppend, const Colour& colour);
+    /** Appends some text, with a specified font and colour. */
+    void append (const String& textToAppend, const Font& font, const Colour& colour);
+
+    /** Resets the string, clearing all text and attributes.
+        Note that this won't affect global settings like the justification type,
+        word-wrap mode, etc.
+    */
+    void clear();
 
     //==============================================================================
     /** Draws this string within the given area.
@@ -143,7 +164,7 @@ public:
         /** If this attribute specifies a colour, this returns it; otherwise it returns nullptr. */
         const Colour* getColour() const noexcept        { return colour; }
 
-        /** The range of characters to which this attribute should be applied. */
+        /** The range of characters to which this attribute will be applied. */
         const Range<int> range;
 
     private:
@@ -165,8 +186,14 @@ public:
     /** Adds a colour attribute for the specified range. */
     void setColour (const Range<int>& range, const Colour& colour);
 
+    /** Removes all existing colour attributes, and applies this colour to the whole string. */
+    void setColour (const Colour& colour);
+
     /** Adds a font attribute for the specified range. */
     void setFont (const Range<int>& range, const Font& font);
+
+    /** Removes all existing font attributes, and applies this font to the whole string. */
+    void setFont (const Font& font);
 
 private:
     String text;
@@ -175,144 +202,6 @@ private:
     WordWrap wordWrap;
     ReadingDirection readingDirection;
     OwnedArray<Attribute> attributes;
-};
-
-
-//==============================================================================
-/**
-
-*/
-class JUCE_API  GlyphLayout
-{
-public:
-    /** Creates an empty layout. */
-    GlyphLayout();
-
-    /** Destructor. */
-    ~GlyphLayout();
-
-    //==============================================================================
-    /** Creates a layout from the given attributed string.
-        This will replace any data that is currently stored in the layout.
-    */
-    void setText (const AttributedString& text, float maxWidth);
-
-    /** Draws the layout within the specified area.
-        The position of the text within the rectangle is controlled by the justification
-        flags set in the original AttributedString that was used to create this layout.
-    */
-    void draw (Graphics& g, const Rectangle<float>& area) const;
-
-    //==============================================================================
-    /** A positioned glyph. */
-    class JUCE_API  Glyph
-    {
-    public:
-        Glyph (int glyphCode, const Point<float>& anchor) noexcept;
-        ~Glyph();
-
-        const int glyphCode;
-        const Point<float> anchor;
-
-    private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Glyph);
-    };
-
-    //==============================================================================
-    /** A sequence of glyphs. */
-    class JUCE_API  Run
-    {
-    public:
-        Run();
-        Run (const Range<int>& range, int numGlyphsToPreallocate);
-        ~Run();
-
-        int getNumGlyphs() const noexcept       { return glyphs.size(); }
-        const Font& getFont() const noexcept    { return font; }
-        const Colour& getColour() const         { return colour; }
-        Glyph& getGlyph (int index) const;
-
-        void setStringRange (const Range<int>& newStringRange) noexcept;
-        void setFont (const Font& newFont);
-        void setColour (const Colour& newColour) noexcept;
-
-        void addGlyph (Glyph* glyph);
-        void ensureStorageAllocated (int numGlyphsNeeded);
-
-    private:
-        OwnedArray<Glyph> glyphs;
-        Range<int> stringRange;
-        Font font;
-        Colour colour;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Run);
-    };
-
-    //==============================================================================
-    /** A line containing a sequence of glyph-runs. */
-    class JUCE_API  Line
-    {
-    public:
-        Line() noexcept;
-        Line (const Range<int>& stringRange, const Point<float>& lineOrigin,
-              float ascent, float descent, float leading, int numRunsToPreallocate);
-        ~Line();
-
-        const Point<float>& getLineOrigin() const noexcept      { return lineOrigin; }
-
-        float getAscent() const noexcept                        { return ascent; }
-        float getDescent() const noexcept                       { return descent; }
-        float getLeading() const noexcept                       { return leading; }
-
-        int getNumRuns() const noexcept                         { return runs.size(); }
-        Run& getRun (int index) const noexcept;
-
-        void setStringRange (const Range<int>& newStringRange) noexcept;
-        void setLineOrigin (const Point<float>& newLineOrigin) noexcept;
-        void setLeading (float newLeading) noexcept;
-        void increaseAscentDescent (float newAscent, float newDescent) noexcept;
-
-        void addRun (Run* run);
-
-    private:
-        OwnedArray<Run> runs;
-        Range<int> stringRange;
-        Point<float> lineOrigin;
-        float ascent, descent, leading;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Line);
-    };
-
-    //==============================================================================
-    /** Returns the maximum width of the content. */
-    float getWidth() const noexcept     { return width; }
-
-    /** Returns the maximum height of the content. */
-    float getHeight() const noexcept;
-
-    /** Returns the number of lines in the layout. */
-    int getNumLines() const noexcept    { return lines.size(); }
-
-    /** Returns one of the lines. */
-    Line& getLine (int index) const;
-
-    /** Adds a line to the layout. The object passed-in will be owned and deleted by the layout
-        when it is no longer needed.
-    */
-    void addLine (Line* line);
-
-    /** Pre-allocates space for the specified number of lines. */
-    void ensureStorageAllocated (int numLinesNeeded);
-
-private:
-    OwnedArray<Line> lines;
-    float width;
-    Justification justification;
-
-    void createStandardLayout (const AttributedString&);
-    bool createNativeLayout (const AttributedString&);
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphLayout);
 };
 
 #endif   // __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__

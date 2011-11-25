@@ -33,6 +33,116 @@
 
 namespace CoreTextTypeLayout
 {
+    CTFontRef createCTFont (const Font& font, float fontSize, bool& needsItalicTransform)
+    {
+        CFStringRef cfName = font.getTypefaceName().toCFString();
+        CTFontRef ctFontRef = CTFontCreateWithName (cfName, fontSize, nullptr);
+        CFRelease (cfName);
+
+        if (ctFontRef != nullptr)
+        {
+            if (font.isItalic())
+            {
+                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr,
+                                                                        kCTFontItalicTrait, kCTFontItalicTrait);
+
+                if (newFont != nullptr)
+                {
+                    CFRelease (ctFontRef);
+                    ctFontRef = newFont;
+                }
+                else
+                {
+                    needsItalicTransform = true; // couldn't find a proper italic version, so fake it with a transform..
+                }
+            }
+
+            if (font.isBold())
+            {
+                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr,
+                                                                        kCTFontBoldTrait, kCTFontBoldTrait);
+                if (newFont != nullptr)
+                {
+                    CFRelease (ctFontRef);
+                    ctFontRef = newFont;
+                }
+            }
+        }
+
+        return ctFontRef;
+    }
+
+    float getFontHeightToCGSizeFactor (const Font& font)
+    {
+        static float factor = 0;
+
+        if (factor == 0) // (This factor seems to be a constant for all fonts..)
+        {
+            bool needsItalicTransform = false;
+            CTFontRef tempFont = createCTFont (font, 1024, needsItalicTransform);
+            CGFontRef cgFontRef = CTFontCopyGraphicsFont (tempFont, nullptr);
+            const int totalHeight = std::abs (CGFontGetAscent (cgFontRef)) + std::abs (CGFontGetDescent (cgFontRef));
+            factor = CGFontGetUnitsPerEm (cgFontRef) / (float) totalHeight;
+            CGFontRelease (cgFontRef);
+            CFRelease (tempFont);
+        }
+
+        return factor;
+    }
+
+    //==============================================================================
+    struct Advances
+    {
+        Advances (CTRunRef run, const CFIndex numGlyphs)
+            : advances (CTRunGetAdvancesPtr (run))
+        {
+            if (advances == nullptr)
+            {
+                local.malloc (numGlyphs);
+                CTRunGetAdvances (run, CFRangeMake (0, 0), local);
+                advances = local;
+            }
+        }
+
+        const CGSize* advances;
+        HeapBlock<CGSize> local;
+    };
+
+    struct Glyphs
+    {
+        Glyphs (CTRunRef run, const int numGlyphs)
+            : glyphs (CTRunGetGlyphsPtr (run))
+        {
+            if (glyphs == nullptr)
+            {
+                local.malloc (numGlyphs);
+                CTRunGetGlyphs (run, CFRangeMake (0, 0), local);
+                glyphs = local;
+            }
+        }
+
+        const CGGlyph* glyphs;
+        HeapBlock<CGGlyph> local;
+    };
+
+    struct Positions
+    {
+        Positions (CTRunRef run, const int numGlyphs)
+            : points (CTRunGetPositionsPtr (run))
+        {
+            if (points == nullptr)
+            {
+                local.malloc (numGlyphs);
+                CTRunGetPositions (run, CFRangeMake (0, 0), local);
+                points = local;
+            }
+        }
+
+        const CGPoint* points;
+        HeapBlock<CGPoint> local;
+    };
+
+    //==============================================================================
     CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
        #if JUCE_IOS
@@ -58,17 +168,10 @@ namespace CoreTextTypeLayout
 
             if (attr->getFont() != nullptr)
             {
-                // Apply fontHeightToCGSizeFactor to the font size since this is how glyphs are drawn
-                CTFontRef ctFontRef = CTFontCreateWithName (attr->getFont()->getTypefaceName().toCFString(), 1024, nullptr);
-                CGFontRef cgFontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
-                CFRelease (ctFontRef);
-
-                const int totalHeight = abs (CGFontGetAscent (cgFontRef)) + abs (CGFontGetDescent (cgFontRef));
-                float fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (cgFontRef) / (float) totalHeight;
-                CGFontRelease (cgFontRef);
-
-                ctFontRef = CTFontCreateWithName (attr->getFont()->getTypefaceName().toCFString(),
-                                                  attr->getFont()->getHeight() * fontHeightToCGSizeFactor, nullptr);
+                const Font& f = *attr->getFont();
+                bool needsItalicTransform = false;
+                CTFontRef ctFontRef = createCTFont (f, f.getHeight() * getFontHeightToCGSizeFactor (f),
+                                                    needsItalicTransform);
 
                 CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
                                                 kCTFontAttributeName, ctFontRef);
@@ -190,7 +293,7 @@ namespace CoreTextTypeLayout
         CFRelease (frame);
     }
 
-    void createLayout (GlyphLayout& glyphLayout, const AttributedString& text)
+    void createLayout (TextLayout& glyphLayout, const AttributedString& text)
     {
         CFAttributedStringRef attribString = CoreTextTypeLayout::createCFAttributedString (text);
         CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString (attribString);
@@ -228,9 +331,9 @@ namespace CoreTextTypeLayout
             CGFloat ascent, descent, leading;
             CTLineGetTypographicBounds (line, &ascent,  &descent, &leading);
 
-            GlyphLayout::Line* const glyphLine = new GlyphLayout::Line (lineStringRange, lineOrigin,
-                                                                        (float) ascent, (float) descent, (float) leading,
-                                                                        (int) numRuns);
+            TextLayout::Line* const glyphLine = new TextLayout::Line (lineStringRange, lineOrigin,
+                                                                      (float) ascent, (float) descent, (float) leading,
+                                                                      (int) numRuns);
             glyphLayout.addLine (glyphLine);
 
             for (CFIndex j = 0; j < numRuns; ++j)
@@ -239,10 +342,10 @@ namespace CoreTextTypeLayout
                 const CFIndex numGlyphs = CTRunGetGlyphCount (run);
                 const CFRange runStringRange = CTRunGetStringRange (run);
 
-                GlyphLayout::Run* const glyphRun = new GlyphLayout::Run (Range<int> ((int) runStringRange.location,
-                                                                                     (int) (runStringRange.location + runStringRange.length - 1)),
-                                                                         (int) numGlyphs);
-                glyphLine->addRun (glyphRun);
+                TextLayout::Run* const glyphRun = new TextLayout::Run (Range<int> ((int) runStringRange.location,
+                                                                                   (int) (runStringRange.location + runStringRange.length - 1)),
+                                                                       (int) numGlyphs);
+                glyphLine->runs.add (glyphRun);
 
                 CFDictionaryRef runAttributes = CTRunGetAttributes (run);
 
@@ -250,18 +353,16 @@ namespace CoreTextTypeLayout
                 if (CFDictionaryGetValueIfPresent (runAttributes, kCTFontAttributeName, (const void **) &ctRunFont))
                 {
                     CFStringRef cfsFontName = CTFontCopyPostScriptName (ctRunFont);
-                    const String fontName (String::fromCFString (cfsFontName));
-
                     CTFontRef ctFontRef = CTFontCreateWithName (cfsFontName, 1024, nullptr);
-                    CFRelease (cfsFontName);
                     CGFontRef cgFontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
                     CFRelease (ctFontRef);
-
                     const int totalHeight = std::abs (CGFontGetAscent (cgFontRef)) + std::abs (CGFontGetDescent (cgFontRef));
                     const float fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (cgFontRef) / (float) totalHeight;
                     CGFontRelease (cgFontRef);
 
-                    glyphRun->setFont (Font (fontName, CTFontGetSize (ctRunFont) / fontHeightToCGSizeFactor, 0));
+                    glyphRun->font = Font (String::fromCFString (cfsFontName),
+                                           CTFontGetSize (ctRunFont) / fontHeightToCGSizeFactor, 0); // XXX bold/italic flags?
+                    CFRelease (cfsFontName);
                 }
 
                 CGColorRef cgRunColor;
@@ -270,28 +371,17 @@ namespace CoreTextTypeLayout
                 {
                     const CGFloat* const components = CGColorGetComponents (cgRunColor);
 
-                    glyphRun->setColour (Colour::fromFloatRGBA (components[0], components[1], components[2], components[3]));
+                    glyphRun->colour = Colour::fromFloatRGBA (components[0], components[1], components[2], components[3]);
                 }
 
-                const CGGlyph* glyphsPtr = CTRunGetGlyphsPtr (run);
-                const CGPoint* posPtr = CTRunGetPositionsPtr (run);
-                HeapBlock <CGGlyph> glyphBuffer;
-                HeapBlock <CGPoint> positionBuffer;
-
-                if (glyphsPtr == nullptr || posPtr == nullptr)
-                {
-                    // If we can't get a direct pointer, we have to copy the metrics to get them..
-                    glyphBuffer.malloc (numGlyphs);
-                    glyphsPtr = glyphBuffer;
-                    CTRunGetGlyphs (run, CFRangeMake (0, 0), glyphBuffer);
-
-                    positionBuffer.malloc (numGlyphs);
-                    posPtr = positionBuffer;
-                    CTRunGetPositions (run, CFRangeMake (0, 0), positionBuffer);
-                }
+                const CoreTextTypeLayout::Glyphs glyphs (run, numGlyphs);
+                const CoreTextTypeLayout::Advances advances (run, numGlyphs);
+                const CoreTextTypeLayout::Positions positions (run, numGlyphs);
 
                 for (CFIndex k = 0; k < numGlyphs; ++k)
-                    glyphRun->addGlyph (new GlyphLayout::Glyph (glyphsPtr[k], Point<float> (posPtr[k].x, posPtr[k].y)));
+                    glyphRun->glyphs.add (TextLayout::Glyph (glyphs.glyphs[k], Point<float> (positions.points[k].x,
+                                                                                             positions.points[k].y),
+                                                             advances.advances[k].width));
             }
         }
 
@@ -314,41 +404,11 @@ public:
           ascent (0.0f),
           unitsToHeightScaleFactor (0.0f)
     {
-        CFStringRef cfName = font.getTypefaceName().toCFString();
-        ctFontRef = CTFontCreateWithName (cfName, 1024, nullptr);
-        CFRelease (cfName);
+        bool needsItalicTransform = false;
+        ctFontRef = CoreTextTypeLayout::createCTFont (font, 1024.0f, needsItalicTransform);
 
         if (ctFontRef != nullptr)
         {
-            bool needsItalicTransform = false;
-
-            if (font.isItalic())
-            {
-                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr,
-                                                                        kCTFontItalicTrait, kCTFontItalicTrait);
-
-                if (newFont != nullptr)
-                {
-                    CFRelease (ctFontRef);
-                    ctFontRef = newFont;
-                }
-                else
-                {
-                    needsItalicTransform = true; // couldn't find a proper italic version, so fake it with a transform..
-                }
-            }
-
-            if (font.isBold())
-            {
-                CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr,
-                                                                        kCTFontBoldTrait, kCTFontBoldTrait);
-                if (newFont != nullptr)
-                {
-                    CFRelease (ctFontRef);
-                    ctFontRef = newFont;
-                }
-            }
-
             ascent = std::abs ((float) CTFontGetAscent (ctFontRef));
             const float totalSize = ascent + std::abs ((float) CTFontGetDescent (ctFontRef));
             ascent /= totalSize;
@@ -411,11 +471,11 @@ public:
             {
                 CTRunRef run = (CTRunRef) CFArrayGetValueAtIndex (runArray, i);
                 CFIndex length = CTRunGetGlyphCount (run);
-                HeapBlock <CGSize> advances (length);
-                CTRunGetAdvances (run, CFRangeMake (0, 0), advances);
+
+                const CoreTextTypeLayout::Advances advances (run, length);
 
                 for (int j = 0; j < length; ++j)
-                    x += (float) advances[j].width;
+                    x += (float) advances.advances[j].width;
             }
 
             CFRelease (line);
@@ -446,16 +506,15 @@ public:
             {
                 CTRunRef run = (CTRunRef) CFArrayGetValueAtIndex (runArray, i);
                 CFIndex length = CTRunGetGlyphCount (run);
-                HeapBlock <CGSize> advances (length);
-                CTRunGetAdvances (run, CFRangeMake (0, 0), advances);
-                HeapBlock <CGGlyph> glyphs (length);
-                CTRunGetGlyphs (run, CFRangeMake (0, 0), glyphs);
+
+                const CoreTextTypeLayout::Advances advances (run, length);
+                const CoreTextTypeLayout::Glyphs glyphs (run, length);
 
                 for (int j = 0; j < length; ++j)
                 {
-                    x += (float) advances[j].width;
+                    x += (float) advances.advances[j].width;
                     xOffsets.add (x * unitsToHeightScaleFactor);
-                    resultGlyphs.add (glyphs[j]);
+                    resultGlyphs.add (glyphs.glyphs[j]);
                 }
             }
 
@@ -1048,7 +1107,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     return Typeface::createSystemTypefaceFor (f);
 }
 
-bool GlyphLayout::createNativeLayout (const AttributedString& text)
+bool TextLayout::createNativeLayout (const AttributedString& text)
 {
    #if JUCE_CORETEXT_AVAILABLE
     CoreTextTypeLayout::createLayout (*this, text);

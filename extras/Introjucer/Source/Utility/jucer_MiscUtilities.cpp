@@ -231,18 +231,16 @@ PropertyPanelWithTooltips::~PropertyPanelWithTooltips()
 
 void PropertyPanelWithTooltips::paint (Graphics& g)
 {
-    g.setColour (Colour::greyLevel (0.15f));
-    g.setFont (13.0f);
+    AttributedString s;
+    s.setJustification (Justification::centredLeft);
+    s.append (lastTip, Font (14.0f), Colour::greyLevel (0.15f));
 
     TextLayout tl;
-    tl.appendText (lastTip, Font (14.0f));
-    tl.layout (getWidth() - 10, Justification::left, true); // try to make it look nice
+    tl.createLayoutWithBalancedLineLengths (s, getWidth() - 10.0f);
     if (tl.getNumLines() > 3)
-        tl.layout (getWidth() - 10, Justification::left, false); // too big, so just squash it in..
+        tl.createLayout (s, getWidth() - 10.0f);
 
-    Rectangle<int> r (getTipArea());
-    tl.drawWithin (g, r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                   Justification::bottomLeft);
+    tl.draw (g, getLocalBounds().toFloat());
 }
 
 void PropertyPanelWithTooltips::resized()
