@@ -84,8 +84,8 @@ namespace DirectWriteTypeLayout
             DWRITE_FONT_METRICS dwFontMetrics;
             glyphRun->fontFace->GetMetrics (&dwFontMetrics);
 
-            glyphLine.ascent  = jmax (glyphLine->ascent,  scaledFontSize (dwFontMetrics.ascent,  dwFontMetrics, glyphRun));
-            glyphLine.descent = jmax (glyphLine->descent, scaledFontSize (dwFontMetrics.descent, dwFontMetrics, glyphRun));
+            glyphLine.ascent  = jmax (glyphLine.ascent,  scaledFontSize (dwFontMetrics.ascent,  dwFontMetrics, glyphRun));
+            glyphLine.descent = jmax (glyphLine.descent, scaledFontSize (dwFontMetrics.descent, dwFontMetrics, glyphRun));
 
             int styleFlags = 0;
             const String fontName (getFontName (glyphRun, styleFlags));
