@@ -72,6 +72,9 @@ namespace DirectWriteTypeLayout
                 lastOriginY = baselineOriginY;
                 ++currentLine;
 
+                if (currentLine == layout->getNumLines())
+                    return S_OK;
+
                 // The x value is only correct when dealing with LTR text
                 layout->getLine (currentLine).lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
             }

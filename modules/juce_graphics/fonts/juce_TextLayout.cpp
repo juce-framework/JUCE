@@ -555,7 +555,7 @@ namespace TextLayoutHelpers
 //==============================================================================
 void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& text, float maxWidth)
 {
-    const float minimumWidth = maxWidth / 2.0;
+    const float minimumWidth = maxWidth / 2.0f;
     float bestWidth = maxWidth;
     float bestLineProportion = 0.0f;
 

@@ -888,63 +888,64 @@ public:
     // Numeric conversions..
 
     /** Creates a string containing this signed 32-bit integer as a decimal number.
-
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
     explicit String (int decimalInteger);
 
     /** Creates a string containing this unsigned 32-bit integer as a decimal number.
-
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
     explicit String (unsigned int decimalInteger);
 
     /** Creates a string containing this signed 16-bit integer as a decimal number.
-
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
     explicit String (short decimalInteger);
 
     /** Creates a string containing this unsigned 16-bit integer as a decimal number.
-
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
     explicit String (unsigned short decimalInteger);
 
     /** Creates a string containing this signed 64-bit integer as a decimal number.
-
         @see getLargeIntValue, getFloatValue, getDoubleValue, toHexString
     */
     explicit String (int64 largeIntegerValue);
 
     /** Creates a string containing this unsigned 64-bit integer as a decimal number.
-
         @see getLargeIntValue, getFloatValue, getDoubleValue, toHexString
     */
     explicit String (uint64 largeIntegerValue);
 
     /** Creates a string representing this floating-point number.
+        @param floatValue               the value to convert to a string
+        @see getDoubleValue, getIntValue
+    */
+    explicit String (float floatValue);
 
+    /** Creates a string representing this floating-point number.
+        @param doubleValue              the value to convert to a string
+        @see getFloatValue, getIntValue
+    */
+    explicit String (double doubleValue);
+
+    /** Creates a string representing this floating-point number.
         @param floatValue               the value to convert to a string
         @param numberOfDecimalPlaces    if this is > 0, it will format the number using that many
                                         decimal places, and will not use exponent notation. If 0 or
                                         less, it will use exponent notation if necessary.
         @see getDoubleValue, getIntValue
     */
-    explicit String (float floatValue,
-                     int numberOfDecimalPlaces = 0);
+    String (float floatValue, int numberOfDecimalPlaces);
 
     /** Creates a string representing this floating-point number.
-
         @param doubleValue              the value to convert to a string
         @param numberOfDecimalPlaces    if this is > 0, it will format the number using that many
                                         decimal places, and will not use exponent notation. If 0 or
                                         less, it will use exponent notation if necessary.
-
         @see getFloatValue, getIntValue
     */
-    explicit String (double doubleValue,
-                     int numberOfDecimalPlaces = 0);
+    String (double doubleValue, int numberOfDecimalPlaces);
 
     /** Reads the value of the string as a decimal number (up to 32 bits in size).
 

@@ -490,6 +490,8 @@ String::String (const unsigned short number) : text (NumberToStringConverters::c
 String::String (const int64 number)          : text (NumberToStringConverters::createFromInteger (number)) {}
 String::String (const uint64 number)         : text (NumberToStringConverters::createFromInteger (number)) {}
 
+String::String (const float number)          : text (NumberToStringConverters::createFromDouble ((double) number, 0)) {}
+String::String (const double number)         : text (NumberToStringConverters::createFromDouble (number, 0)) {}
 String::String (const float number, const int numberOfDecimalPlaces)   : text (NumberToStringConverters::createFromDouble ((double) number, numberOfDecimalPlaces)) {}
 String::String (const double number, const int numberOfDecimalPlaces)  : text (NumberToStringConverters::createFromDouble (number, numberOfDecimalPlaces)) {}
 
