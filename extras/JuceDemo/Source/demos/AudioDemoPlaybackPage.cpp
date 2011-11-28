@@ -24,20 +24,26 @@
 
 #include "AudioDemoPlaybackPage.h"
 
-
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 class DemoThumbnailComp  : public Component,
                            public ChangeListener,
-                           public FileDragAndDropTarget
+                           public FileDragAndDropTarget,
+                           private Timer
 {
 public:
-    DemoThumbnailComp()
-        : thumbnailCache (5),
+    DemoThumbnailComp (AudioFormatManager& formatManager,
+                       AudioTransportSource& transportSource_,
+                       Slider& zoomSlider_)
+        : transportSource (transportSource_),
+          zoomSlider (zoomSlider_),
+          thumbnailCache (5),
           thumbnail (512, formatManager, thumbnailCache)
     {
         startTime = endTime = 0;
-        formatManager.registerBasicFormats();
         thumbnail.addChangeListener (this);
+
+        currentPositionMarker.setFill (Colours::purple.withAlpha (0.7f));
+        addAndMakeVisible (&currentPositionMarker);
     }
 
     ~DemoThumbnailComp()
@@ -50,14 +56,17 @@ public:
         thumbnail.setSource (new FileInputSource (file));
         startTime = 0;
         endTime = thumbnail.getTotalLength();
+        startTimer (1000 / 40);
     }
 
     void setZoomFactor (double amount)
     {
         if (thumbnail.getTotalLength() > 0)
         {
-            double timeDisplayed = jmax (0.001, (thumbnail.getTotalLength() - startTime) * (1.0 - jlimit (0.0, 1.0, amount)));
-            endTime = startTime + timeDisplayed;
+            const double newScale = jmax (0.001, thumbnail.getTotalLength() * (1.0 - jlimit (0.0, 0.99, amount)));
+            const double timeAtCentre = xToTime (getWidth() / 2.0f);
+            startTime = timeAtCentre - newScale * 0.5;
+            endTime = timeAtCentre + newScale * 0.5;
             repaint();
         }
     }
@@ -66,10 +75,14 @@ public:
     {
         if (thumbnail.getTotalLength() > 0)
         {
-            double newStart = startTime + (wheelIncrementX + wheelIncrementY) * (endTime - startTime) / 10.0;
+            double newStart = startTime - wheelIncrementX * (endTime - startTime) / 10.0;
             newStart = jlimit (0.0, thumbnail.getTotalLength() - (endTime - startTime), newStart);
             endTime = newStart + (endTime - startTime);
             startTime = newStart;
+
+            if (wheelIncrementY != 0)
+                zoomSlider.setValue (zoomSlider.getValue() - wheelIncrementY);
+
             repaint();
         }
     }
@@ -77,8 +90,7 @@ public:
     void paint (Graphics& g)
     {
         g.fillAll (Colours::white);
-
-        g.setColour (Colours::mediumblue);
+        g.setColour (Colours::lightblue);
 
         if (thumbnail.getTotalLength() > 0)
         {
@@ -112,10 +124,44 @@ public:
             demoPage->showFile (File (files[0]));
     }
 
-    AudioFormatManager formatManager;
+    void mouseDrag (const MouseEvent& e)
+    {
+        transportSource.setPosition (jmax (0.0, xToTime ((float) e.x)));
+    }
+
+    void mouseUp (const MouseEvent&)
+    {
+        transportSource.start();
+    }
+
+    void timerCallback()
+    {
+        currentPositionMarker.setVisible (transportSource.isPlaying() || isMouseButtonDown());
+
+        double currentPlayPosition = transportSource.getCurrentPosition();
+
+        currentPositionMarker.setRectangle (Rectangle<float> (timeToX (currentPlayPosition) - 0.75f, 0,
+                                                              1.5f, (float) getHeight()));
+    }
+
+private:
+    AudioTransportSource& transportSource;
+    Slider& zoomSlider;
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
     double startTime, endTime;
+
+    DrawableRectangle currentPositionMarker;
+
+    float timeToX (const double time) const
+    {
+        return getWidth() * (float) ((time - startTime) / (endTime - startTime));
+    }
+
+    double xToTime (const float x) const
+    {
+        return (x / getWidth()) * (endTime - startTime) + startTime;
+    }
 };
 
 //[/MiscUserDefs]
@@ -140,15 +186,6 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
     zoomLabel->setColour (TextEditor::textColourId, Colours::black);
     zoomLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
-    addAndMakeVisible (thumbnail = new DemoThumbnailComp());
-
-    addAndMakeVisible (startStopButton = new TextButton (String::empty));
-    startStopButton->setButtonText (L"Play/Stop");
-    startStopButton->addListener (this);
-    startStopButton->setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
-
-    addAndMakeVisible (fileTreeComp = new FileTreeComponent (directoryList));
-
     addAndMakeVisible (explanation = new Label (String::empty,
                                                 L"Select an audio file in the treeview above, and this page will display its waveform, and let you play it.."));
     explanation->setFont (Font (14.0000f, Font::plain));
@@ -164,6 +201,14 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
     zoomSlider->addListener (this);
     zoomSlider->setSkewFactor (2);
 
+    addAndMakeVisible (thumbnail = new DemoThumbnailComp (formatManager, transportSource, *zoomSlider));
+
+    addAndMakeVisible (startStopButton = new TextButton (String::empty));
+    startStopButton->setButtonText (L"Play/Stop");
+    startStopButton->addListener (this);
+    startStopButton->setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
+
+    addAndMakeVisible (fileTreeComp = new FileTreeComponent (directoryList));
 
     //[UserPreSize]
     //[/UserPreSize]
@@ -172,7 +217,9 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
 
 
     //[Constructor] You can add your own custom stuff here..
-    directoryList.setDirectory (File::getSpecialLocation (File::userHomeDirectory), true, true);
+    formatManager.registerBasicFormats();
+
+    directoryList.setDirectory (File ("/Users/jules/Music/iTunes/iTunes Music/"), true, true);
     thread.startThread (3);
 
     fileTreeComp->setColour (FileTreeComponent::backgroundColourId, Colours::white);
@@ -288,10 +335,6 @@ void AudioDemoPlaybackPage::loadFileIntoTransport (const File& audioFile)
     transportSource.setSource (nullptr);
     currentAudioFileSource = nullptr;
 
-    // get a format manager and set it up with the basic types (wav and aiff).
-    AudioFormatManager formatManager;
-    formatManager.registerBasicFormats();
-
     AudioFormatReader* reader = formatManager.createReaderFor (audioFile);
 
     if (reader != nullptr)
@@ -340,15 +383,6 @@ BEGIN_JUCER_METADATA
          edBkgCol="0" labelText="zoom:" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15"
          bold="0" italic="0" justification="34"/>
-  <GENERICCOMPONENT name="" id="beef657b0e007936" memberName="thumbnail" virtualName=""
-                    explicitFocusOrder="0" pos="16 221R 32M 123" class="DemoThumbnailComp"
-                    params=""/>
-  <TEXTBUTTON name="" id="abe446e2f3f09420" memberName="startStopButton" virtualName=""
-              explicitFocusOrder="0" pos="16 46R 150 32" bgColOff="ff79ed7f"
-              buttonText="Play/Stop" connectedEdges="0" needsCallback="1" radioGroupId="0"/>
-  <GENERICCOMPONENT name="" id="1de1dc6a18a9032b" memberName="fileTreeComp" virtualName=""
-                    explicitFocusOrder="0" pos="16 8 32M 245M" class="FileTreeComponent"
-                    params="directoryList"/>
   <LABEL name="" id="7db7d0a64ef21311" memberName="explanation" virtualName=""
          explicitFocusOrder="0" pos="256 82R 275M 64" edTextCol="ff000000"
          edBkgCol="0" labelText="Select an audio file in the treeview above, and this page will display its waveform, and let you play it.."
@@ -358,6 +392,15 @@ BEGIN_JUCER_METADATA
           explicitFocusOrder="0" pos="72 90R 200 24" min="0" max="1" int="0"
           style="LinearHorizontal" textBoxPos="NoTextBox" textBoxEditable="1"
           textBoxWidth="80" textBoxHeight="20" skewFactor="2"/>
+  <GENERICCOMPONENT name="" id="beef657b0e007936" memberName="thumbnail" virtualName=""
+                    explicitFocusOrder="0" pos="16 221R 32M 123" class="DemoThumbnailComp"
+                    params="formatManager, transportSource, *zoomSlider"/>
+  <TEXTBUTTON name="" id="abe446e2f3f09420" memberName="startStopButton" virtualName=""
+              explicitFocusOrder="0" pos="16 46R 150 32" bgColOff="ff79ed7f"
+              buttonText="Play/Stop" connectedEdges="0" needsCallback="1" radioGroupId="0"/>
+  <GENERICCOMPONENT name="" id="1de1dc6a18a9032b" memberName="fileTreeComp" virtualName=""
+                    explicitFocusOrder="0" pos="16 8 32M 245M" class="FileTreeComponent"
+                    params="directoryList"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA

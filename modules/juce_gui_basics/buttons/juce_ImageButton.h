@@ -49,7 +49,7 @@ public:
 
         @param name                 the name to give the component
     */
-    explicit ImageButton (const String& name);
+    explicit ImageButton (const String& name = String::empty);
 
     /** Destructor. */
     ~ImageButton();
@@ -139,8 +139,8 @@ protected:
 private:
     //==============================================================================
     bool scaleImageToFit, preserveProportions;
-    unsigned char alphaThreshold;
-    int imageX, imageY, imageW, imageH;
+    uint8 alphaThreshold;
+    Rectangle<int> imageBounds;
     Image normalImage, overImage, downImage;
     float normalOpacity, overOpacity, downOpacity;
     Colour normalOverlay, overOverlay, downOverlay;

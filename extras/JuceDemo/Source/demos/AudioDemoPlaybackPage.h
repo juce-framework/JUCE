@@ -71,6 +71,7 @@ public:
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     AudioDeviceManager& deviceManager;
+    AudioFormatManager formatManager;
     TimeSliceThread thread;
     DirectoryContentsList directoryList;
 

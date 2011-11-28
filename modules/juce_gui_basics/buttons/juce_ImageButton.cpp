@@ -30,11 +30,7 @@ ImageButton::ImageButton (const String& text_)
     : Button (text_),
       scaleImageToFit (true),
       preserveProportions (true),
-      alphaThreshold (0),
-      imageX (0),
-      imageY (0),
-      imageW (0),
-      imageH (0)
+      alphaThreshold (0)
 {
 }
 
@@ -62,10 +58,10 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
 
     if (resizeButtonNowToFitThisImage && normalImage.isValid())
     {
-        imageW = normalImage.getWidth();
-        imageH = normalImage.getHeight();
+        imageBounds.setSize (normalImage.getWidth(),
+                             normalImage.getHeight());
 
-        setSize (imageW, imageH);
+        setSize (imageBounds.getWidth(), imageBounds.getHeight());
     }
 
     scaleImageToFit = rescaleImagesWhenButtonSizeChanges;
@@ -78,7 +74,7 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
     downOpacity   = imageOpacityWhenDown;
     downOverlay   = overlayColourWhenDown;
 
-    alphaThreshold = (unsigned char) jlimit (0, 0xff, roundToInt (255.0f * hitTestAlphaThreshold));
+    alphaThreshold = (uint8) jlimit (0, 0xff, roundToInt (255.0f * hitTestAlphaThreshold));
 
     repaint();
 }
@@ -127,10 +123,10 @@ void ImageButton::paintButton (Graphics& g,
     {
         const int iw = im.getWidth();
         const int ih = im.getHeight();
-        imageW = getWidth();
-        imageH = getHeight();
-        imageX = (imageW - iw) / 2;
-        imageY = (imageH - ih) / 2;
+        int w = getWidth();
+        int h = getHeight();
+        int x = (w - iw) / 2;
+        int y = (h - ih) / 2;
 
         if (scaleImageToFit)
         {
@@ -138,40 +134,42 @@ void ImageButton::paintButton (Graphics& g,
             {
                 int newW, newH;
                 const float imRatio = ih / (float) iw;
-                const float destRatio = imageH / (float) imageW;
+                const float destRatio = h / (float) w;
 
                 if (imRatio > destRatio)
                 {
-                    newW = roundToInt (imageH / imRatio);
-                    newH = imageH;
+                    newW = roundToInt (h / imRatio);
+                    newH = h;
                 }
                 else
                 {
-                    newW = imageW;
-                    newH = roundToInt (imageW * imRatio);
+                    newW = w;
+                    newH = roundToInt (w * imRatio);
                 }
 
-                imageX = (imageW - newW) / 2;
-                imageY = (imageH - newH) / 2;
-                imageW = newW;
-                imageH = newH;
+                x = (w - newW) / 2;
+                y = (h - newH) / 2;
+                w = newW;
+                h = newH;
             }
             else
             {
-                imageX = 0;
-                imageY = 0;
+                x = 0;
+                y = 0;
             }
         }
 
         if (! scaleImageToFit)
         {
-            imageW = iw;
-            imageH = ih;
+            w = iw;
+            h = ih;
         }
+
+        imageBounds.setBounds (x, y, w, h);
 
         const bool useDownImage = isButtonDown || getToggleState();
 
-        getLookAndFeel().drawImageButton (g, &im, imageX, imageY, imageW, imageH,
+        getLookAndFeel().drawImageButton (g, &im, x, y, w, h,
                                           useDownImage ? downOverlay
                                                        : (isMouseOverButton ? overOverlay
                                                                             : normalOverlay),
@@ -189,9 +187,9 @@ bool ImageButton::hitTest (int x, int y)
 
     Image im (getCurrentImage());
 
-    return im.isNull() || (imageW > 0 && imageH > 0
-                            && alphaThreshold < im.getPixelAt (((x - imageX) * im.getWidth()) / imageW,
-                                                               ((y - imageY) * im.getHeight()) / imageH).getAlpha());
+    return im.isNull() || ((! imageBounds.isEmpty())
+                            && alphaThreshold < im.getPixelAt (((x - imageBounds.getX()) * im.getWidth()) / imageBounds.getWidth(),
+                                                               ((y - imageBounds.getY()) * im.getHeight()) / imageBounds.getHeight()).getAlpha());
 }
 
 END_JUCE_NAMESPACE
