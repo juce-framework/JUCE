@@ -219,7 +219,7 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     return new AndroidTypeface (font);
 }
 
-bool GlyphLayout::createNativeLayout (const AttributedString&)
+bool TextLayout::createNativeLayout (const AttributedString&)
 {
     return false;
 }

@@ -543,7 +543,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     return Typeface::createSystemTypefaceFor (f);
 }
 
-bool GlyphLayout::createNativeLayout (const AttributedString&)
+bool TextLayout::createNativeLayout (const AttributedString&)
 {
     return false;
 }

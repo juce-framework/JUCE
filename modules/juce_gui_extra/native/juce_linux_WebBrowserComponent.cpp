@@ -114,7 +114,5 @@ void WebBrowserComponent::visibilityChanged()
     checkWindowAssociation();
 }
 
-bool WebBrowserComponent::pageAboutToLoad (const String& url)
-{
-    return true;
-}
+bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
+void WebBrowserComponent::pageFinishedLoading (const String&) {}
