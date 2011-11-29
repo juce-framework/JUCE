@@ -76,7 +76,7 @@ public:
         if (thumbnail.getTotalLength() > 0)
         {
             double newStart = startTime - wheelIncrementX * (endTime - startTime) / 10.0;
-            newStart = jlimit (0.0, thumbnail.getTotalLength() - (endTime - startTime), newStart);
+            newStart = jlimit (0.0, jmax (0.0, thumbnail.getTotalLength() - (endTime - startTime)), newStart);
             endTime = newStart + (endTime - startTime);
             startTime = newStart;
 
@@ -122,6 +122,11 @@ public:
 
         if (demoPage != 0)
             demoPage->showFile (File (files[0]));
+    }
+
+    void mouseDown (const MouseEvent& e)
+    {
+        mouseDrag (e);
     }
 
     void mouseDrag (const MouseEvent& e)
@@ -219,7 +224,7 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
     //[Constructor] You can add your own custom stuff here..
     formatManager.registerBasicFormats();
 
-    directoryList.setDirectory (File ("/Users/jules/Music/iTunes/iTunes Music/"), true, true);
+    directoryList.setDirectory (File::getSpecialLocation (File::userHomeDirectory), true, true);
     thread.startThread (3);
 
     fileTreeComp->setColour (FileTreeComponent::backgroundColourId, Colours::white);

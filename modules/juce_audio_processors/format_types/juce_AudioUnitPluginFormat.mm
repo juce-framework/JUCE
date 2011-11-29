@@ -598,10 +598,8 @@ public:
         AudioUnitParameterInfo info;
         UInt32 sz = sizeof (info);
 
-        if (AudioUnitGetProperty (audioUnit,
-                                  kAudioUnitProperty_ParameterInfo,
-                                  kAudioUnitScope_Global,
-                                  parameterIds [index], &info, &sz) == noErr)
+        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_ParameterInfo,
+                                  kAudioUnitScope_Global, parameterIds [index], &info, &sz) == noErr)
         {
             return (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0;
         }
@@ -616,10 +614,8 @@ public:
         UInt32 sz = sizeof (CFArrayRef);
         int num = 0;
 
-        if (AudioUnitGetProperty (audioUnit,
-                                  kAudioUnitProperty_FactoryPresets,
-                                  kAudioUnitScope_Global,
-                                  0, &presets, &sz) == noErr)
+        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
+                                  kAudioUnitScope_Global, 0, &presets, &sz) == noErr)
         {
             num = (int) CFArrayGetCount (presets);
             CFRelease (presets);
@@ -634,10 +630,8 @@ public:
         current.presetNumber = 0;
         UInt32 sz = sizeof (AUPreset);
 
-        AudioUnitGetProperty (audioUnit,
-                              kAudioUnitProperty_FactoryPresets,
-                              kAudioUnitScope_Global,
-                              0, &current, &sz);
+        AudioUnitGetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
+                              kAudioUnitScope_Global, 0, &current, &sz);
 
         return current.presetNumber;
     }
@@ -648,10 +642,8 @@ public:
         current.presetNumber = newIndex;
         current.presetName = 0;
 
-        AudioUnitSetProperty (audioUnit,
-                              kAudioUnitProperty_PresentPreset,
-                              kAudioUnitScope_Global,
-                              0, &current, sizeof (AUPreset));
+        AudioUnitSetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
+                              kAudioUnitScope_Global, 0, &current, sizeof (AUPreset));
     }
 
     const String getProgramName (int index)
@@ -660,10 +652,8 @@ public:
         CFArrayRef presets;
         UInt32 sz = sizeof (CFArrayRef);
 
-        if (AudioUnitGetProperty (audioUnit,
-                                  kAudioUnitProperty_FactoryPresets,
-                                  kAudioUnitScope_Global,
-                                  0, &presets, &sz) == noErr)
+        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
+                                  kAudioUnitScope_Global, 0, &presets, &sz) == noErr)
         {
             for (CFIndex i = 0; i < CFArrayGetCount (presets); ++i)
             {

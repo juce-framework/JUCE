@@ -365,7 +365,7 @@ namespace TextLayoutHelpers
             {
                 const int totalW = (int) layout.getWidth();
 
-                for (int i = 0; i < totalLines; ++i)
+                for (int i = 0; i < layout.getNumLines(); ++i)
                 {
                     const int lineW = getLineWidth (i);
                     float dx = 0;
