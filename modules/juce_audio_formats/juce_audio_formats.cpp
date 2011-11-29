@@ -97,6 +97,7 @@
 #include "codecs/juce_AiffAudioFormat.cpp"
 #include "codecs/juce_CoreAudioFormat.cpp"
 #include "codecs/juce_FlacAudioFormat.cpp"
+#include "codecs/juce_MP3AudioFormat.cpp"
 #include "codecs/juce_OggVorbisAudioFormat.cpp"
 #include "codecs/juce_QuickTimeAudioFormat.cpp"
 #include "codecs/juce_WavAudioFormat.cpp"

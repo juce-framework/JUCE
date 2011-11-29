@@ -75,6 +75,10 @@ void AudioFormatManager::registerBasicFormats()
    #if JUCE_USE_OGGVORBIS
     registerFormat (new OggVorbisAudioFormat(), false);
    #endif
+
+   #if JUCE_USE_MP3AUDIOFORMAT
+    registerFormat (new MP3AudioFormat(), false);
+   #endif
 }
 
 void AudioFormatManager::clearFormats()

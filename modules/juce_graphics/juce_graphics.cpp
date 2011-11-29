@@ -45,6 +45,10 @@
 
 #elif JUCE_WINDOWS
  #if JUCE_USE_DIRECTWRITE
+  /* If you hit a compile error trying to include these files, you may need to update
+     your version of the Windows SDK to the latest one. The DirectWrite and Direct2D
+     headers are in the version 7 SDKs.
+  */
   #include <d2d1.h>
   #include <dwrite.h>
  #endif

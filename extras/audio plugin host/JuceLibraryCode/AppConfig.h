@@ -45,6 +45,7 @@
 
 #define    JUCE_USE_FLAC 0
 #define    JUCE_USE_OGGVORBIS 0
+//#define  JUCE_USE_MP3AUDIOFORMAT
 
 //==============================================================================
 // juce_audio_processors flags:

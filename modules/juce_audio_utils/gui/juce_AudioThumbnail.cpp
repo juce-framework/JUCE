@@ -96,7 +96,7 @@ public:
         owner.cache.removeTimeSliceClient (this);
     }
 
-    enum { timeBeforeDeletingReader = 1000 };
+    enum { timeBeforeDeletingReader = 3000 };
 
     void initialise (int64 numSamplesFinished_)
     {
@@ -128,7 +128,10 @@ public:
             createReader();
 
             if (reader != nullptr)
+            {
+                lastReaderUseTime = Time::getMillisecondCounter();
                 owner.cache.addTimeSliceClient (this);
+            }
         }
 
         if (reader != nullptr)
@@ -138,6 +141,8 @@ public:
 
             levels.clearQuick();
             levels.addArray ((const float*) l, 4);
+
+            lastReaderUseTime = Time::getMillisecondCounter();
         }
     }
 
@@ -152,7 +157,12 @@ public:
         if (isFullyLoaded())
         {
             if (reader != nullptr && source != nullptr)
-                releaseResources();
+            {
+                if (Time::getMillisecondCounter() > lastReaderUseTime + timeBeforeDeletingReader)
+                    releaseResources();
+                else
+                    return 200;
+            }
 
             return -1;
         }
@@ -176,7 +186,7 @@ public:
         if (justFinished)
             owner.cache.storeThumb (owner, hashCode);
 
-        return timeBeforeDeletingReader;
+        return 200;
     }
 
     bool isFullyLoaded() const noexcept
@@ -199,6 +209,7 @@ private:
     ScopedPointer <InputSource> source;
     ScopedPointer <AudioFormatReader> reader;
     CriticalSection readerLock;
+    uint32 lastReaderUseTime;
 
     void createReader()
     {
@@ -247,6 +258,7 @@ private:
                 }
 
                 numSamplesFinished += numToDo;
+                lastReaderUseTime = Time::getMillisecondCounter();
             }
         }
 
