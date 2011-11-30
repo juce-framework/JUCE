@@ -1429,20 +1429,9 @@ struct MP3Stream
 {
     MP3Stream (InputStream& source)
         : stream (source, 8192),
-          numFrames (0), currentFrameIndex (0), vbrHeaderFound (false),
-          encoderDelay (-1), encoderPadding (-1),
-          headerParsed (false), sideParsed (false), dataParsed (false),
-          needToSyncBitStream (true), isFreeFormat (false), wasFreeFormat (false),
-          sideInfoSize (0), dataSize (0), frameSize (0), lastFrameSize (-1),
-          lastFrameSizeNoPadding (0), bufferSpaceIndex (0),
-          wordPointer (bufferSpace[bufferSpaceIndex] + 512),
-          bitIndex (0), synthBo (1)
+          numFrames (0), currentFrameIndex (0), vbrHeaderFound (false)
     {
-        zerostruct (sideinfo);
-        zeromem (bufferSpace, sizeof (bufferSpace));
-        zeromem (hybridBlock, sizeof (hybridBlock));
-        zeromem (hybridBlockIndex, sizeof (hybridBlockIndex));
-        zeromem (synthBuffers, sizeof (synthBuffers));
+        reset();
     }
 
     int decodeNextBlock (float* const out0, float* const out1, int& done)
@@ -1468,12 +1457,12 @@ struct MP3Stream
                 int size;
                 wasFreeFormat = false;
                 needToSyncBitStream = true;
-                size = (int) (wordPointer - (bufferSpace[bufferSpaceIndex] + 512));
+                size = (int) (bufferPointer - (bufferSpace[bufferSpaceIndex] + 512));
 
                 if (size > 2880)
                 {
                     size = 0;
-                    wordPointer = bufferSpace[bufferSpaceIndex] + 512;
+                    bufferPointer = bufferSpace[bufferSpaceIndex] + 512;
                 }
 
                 const int toSkip = (size + nextFrameOffset) - 2880;
@@ -1484,7 +1473,7 @@ struct MP3Stream
                     nextFrameOffset -= toSkip;
                 }
 
-                stream.read (wordPointer, nextFrameOffset);
+                stream.read (bufferPointer, nextFrameOffset);
                 lastFrameSize += nextFrameOffset;
             }
 
@@ -1499,7 +1488,7 @@ struct MP3Stream
                 sideInfoSize += 2;
 
             bufferSpaceIndex = 1 - bufferSpaceIndex;
-            wordPointer = bufferSpace[bufferSpaceIndex] + 512;
+            bufferPointer = bufferSpace[bufferSpaceIndex] + 512;
             bitIndex = 0;
 
             if (lastFrameSize == -1)
@@ -1510,7 +1499,7 @@ struct MP3Stream
         {
             if (frame.layer == 3)
             {
-                stream.read (wordPointer, sideInfoSize);
+                stream.read (bufferPointer, sideInfoSize);
 
                 if (frame.crc16FollowsHeader)
                     getBits (16);
@@ -1534,7 +1523,7 @@ struct MP3Stream
 
         if (! dataParsed)
         {
-            stream.read (wordPointer, dataSize);
+            stream.read (bufferPointer, dataSize);
 
             if (out0 != nullptr)
             {
@@ -1550,7 +1539,7 @@ struct MP3Stream
                 }
             }
 
-            wordPointer = bufferSpace[bufferSpaceIndex] + 512 + sideInfoSize + dataSize;
+            bufferPointer = bufferSpace[bufferSpaceIndex] + 512 + sideInfoSize + dataSize;
             dataParsed = true;
             result = 0;
         }
@@ -1588,8 +1577,8 @@ struct MP3Stream
                 frameSize -= toSkip;
             }
 
-            stream.read (wordPointer, bytes);
-            wordPointer += bytes;
+            stream.read (bufferPointer, bytes);
+            bufferPointer += bytes;
         }
 
         lastFrameSize = frameSize;
@@ -1618,8 +1607,7 @@ struct MP3Stream
                            frameStreamPositions.size() * storedStartPosInterval - 1);
         stream.setPosition (frameStreamPositions.getUnchecked (frameIndex / storedStartPosInterval));
         currentFrameIndex = frameIndex;
-        frameSize = 0;
-        headerParsed = sideParsed = dataParsed = false;
+        reset();
         return true;
     }
 
@@ -1638,13 +1626,30 @@ private:
     int bufferSpaceIndex;
     Layer3SideInfo sideinfo;
     uint8 bufferSpace[2][2880 + 1024];
-    uint8* wordPointer;
+    uint8* bufferPointer;
     int bitIndex, synthBo;
     float hybridBlock[2][2][32 * 18];
     int hybridBlockIndex[2];
     float synthBuffers[2][2][0x110];
     float hybridIn[2][32][18];
     float hybridOut[2][18][32];
+
+    void reset() noexcept
+    {
+        headerParsed = sideParsed = dataParsed = isFreeFormat = wasFreeFormat = false;
+        encoderDelay = encoderPadding = lastFrameSize = -1;
+        needToSyncBitStream = true;
+        frameSize = sideInfoSize = dataSize = frameSize = bitIndex = 0;
+        lastFrameSizeNoPadding = bufferSpaceIndex = 0;
+        bufferPointer = bufferSpace[bufferSpaceIndex] + 512;
+        synthBo = 1;
+
+        zerostruct (sideinfo);
+        zeromem (bufferSpace, sizeof (bufferSpace));
+        zeromem (hybridBlock, sizeof (hybridBlock));
+        zeromem (hybridBlockIndex, sizeof (hybridBlockIndex));
+        zeromem (synthBuffers, sizeof (synthBuffers));
+    }
 
     enum { storedStartPosInterval = 4 };
     Array<int64> frameStreamPositions;
@@ -1673,16 +1678,16 @@ private:
                 && (header & 3) != 2;
     }
 
-    bool rollBackPointer (int backstep) noexcept
+    bool rollBackBufferPointer (int backstep) noexcept
     {
         if (lastFrameSize < 0 && backstep > 0)
             return false;
 
         const uint8* oldBuffer = bufferSpace[1 - bufferSpaceIndex] + 512;
-        wordPointer -= backstep;
+        bufferPointer -= backstep;
 
         if (backstep != 0)
-            memcpy (wordPointer, oldBuffer + lastFrameSize - backstep, (size_t) backstep);
+            memcpy (bufferPointer, oldBuffer + lastFrameSize - backstep, (size_t) backstep);
 
         bitIndex = 0;
         return true;
@@ -1690,31 +1695,31 @@ private:
 
     uint32 getBits (const int numBits) noexcept
     {
-        if (numBits <= 0 || wordPointer == nullptr)
+        if (numBits <= 0 || bufferPointer == nullptr)
             return 0;
 
-        const uint32 result = ((((((wordPointer[0] << 8) | wordPointer[1]) << 8)
-                                 | wordPointer[2]) << bitIndex) & 0xffffff) >> (24 - numBits);
+        const uint32 result = ((((((bufferPointer[0] << 8) | bufferPointer[1]) << 8)
+                               | bufferPointer[2]) << bitIndex) & 0xffffff) >> (24 - numBits);
         bitIndex += numBits;
-        wordPointer += (bitIndex >> 3);
+        bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
         return result;
     }
 
     uint32 getOneBit() noexcept
     {
-        const uint8 result = *wordPointer << bitIndex;
+        const uint8 result = *bufferPointer << bitIndex;
         ++bitIndex;
-        wordPointer += (bitIndex >> 3);
+        bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
         return result >> 7;
     }
 
     uint32 getBitsFast (const int numBits) noexcept
     {
-        const uint32 result = ((((wordPointer[0] << 8) | wordPointer[1]) << bitIndex) & 0xffff) >> (16 - numBits);
+        const uint32 result = ((((bufferPointer[0] << 8) | bufferPointer[1]) << bitIndex) & 0xffff) >> (16 - numBits);
         bitIndex += numBits;
-        wordPointer += (bitIndex >> 3);
+        bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
         return result;
     }
@@ -1843,7 +1848,7 @@ private:
 
     void decodeLayer3Frame (float* const pcm0, float* const pcm1, int& samplesDone) noexcept
     {
-        if (! rollBackPointer ((int) sideinfo.mainDataStart))
+        if (! rollBackBufferPointer ((int) sideinfo.mainDataStart))
             return;
 
         const int single = frame.numChannels == 1 ? 0 : frame.single;
@@ -1997,7 +2002,6 @@ private:
             {
                 const uint8 n0 = si.allocation[i][0];
                 const uint8 n1 = si.allocation[i][1];
-
                 fraction[0][i] = n0 > 0 ? (float) (((-1 << n0) + getLeq16Bits (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0;
                 fraction[1][i] = n1 > 0 ? (float) (((-1 << n1) + getLeq16Bits (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0;
             }
@@ -3015,6 +3019,7 @@ public:
             }
             else
             {
+                decodedStart = decodedEnd = 0;
                 const int64 streamPos = stream.currentFrameIndex * 1152;
                 int toSkip = startSampleInFile - streamPos;
                 jassert (toSkip >= 0);
