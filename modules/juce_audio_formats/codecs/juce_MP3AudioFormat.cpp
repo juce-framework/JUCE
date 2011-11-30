@@ -2692,7 +2692,7 @@ private:
             {
                 if (mc == 0)
                 {
-                    mc = *mapEnd++;
+                    mc = *map++;
                     xrpnt = ((float*) xr) + *map++;
                     step = (*map++ == 3) ? 1 : 3;
                     ++map;
