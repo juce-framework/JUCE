@@ -640,7 +640,7 @@ public:
     {
         AUPreset current;
         current.presetNumber = newIndex;
-        current.presetName = 0;
+        current.presetName = CFSTR("");
 
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
                               kAudioUnitScope_Global, 0, &current, sizeof (AUPreset));
