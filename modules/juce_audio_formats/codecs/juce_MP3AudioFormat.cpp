@@ -1606,7 +1606,7 @@ struct MP3Stream
         while (frameIndex >= frameStreamPositions.size() * storedStartPosInterval)
         {
             int dummy = 0;
-            int result = decodeNextBlock (nullptr, nullptr, dummy);
+            const int result = decodeNextBlock (nullptr, nullptr, dummy);
 
             if (result < 0)
                 return false;
@@ -3037,9 +3037,9 @@ public:
 
                     toSkip -= numReady;
                 }
-            }
 
-            currentPosition = startSampleInFile;
+                currentPosition = startSampleInFile;
+            }
         }
 
         while (numSamples > 0)
@@ -3108,25 +3108,27 @@ private:
     void skipID3()
     {
         const int64 originalPosition = stream.stream.getPosition();
-        const uint8 major = stream.stream.readInt() & 0xff;
-        uint8 buffer[6];
+        const uint32 firstWord = stream.stream.readInt();
 
-        if (major != 0xff
-             && stream.stream.read (buffer, 6) == 6
-             && buffer[0] != 0xff
-             && ((buffer[2] | buffer[3] | buffer[4] | buffer[5]) & 0x80) == 0)
+        if ((firstWord & 0xffffff) == 0x334449)
         {
-            const int length = (((uint32) buffer[2]) << 21)
-                             | (((uint32) buffer[3]) << 14)
-                             | (((uint32) buffer[4]) << 7)
-                             |  ((uint32) buffer[5]);
+            uint8 buffer[6];
 
-            stream.stream.skipNextBytes (length);
+            if (stream.stream.read (buffer, 6) == 6
+                 && buffer[0] != 0xff
+                 && ((buffer[2] | buffer[3] | buffer[4] | buffer[5]) & 0x80) == 0)
+            {
+                const int length = (((uint32) buffer[2]) << 21)
+                                 | (((uint32) buffer[3]) << 14)
+                                 | (((uint32) buffer[4]) << 7)
+                                 |  ((uint32) buffer[5]);
+
+                stream.stream.skipNextBytes (length);
+                return;
+            }
         }
-        else
-        {
-            stream.stream.setPosition (originalPosition);
-        }
+
+        stream.stream.setPosition (originalPosition);
     }
 
     int64 findLength (int64 streamStartPos)
