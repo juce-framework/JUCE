@@ -73,8 +73,6 @@ MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom, const size_t s
 
 MemoryBlock::~MemoryBlock() noexcept
 {
-    jassert (size >= 0);    // should never happen
-    jassert (size == 0 || data != nullptr); // non-zero size but no data allocated?
 }
 
 MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other)

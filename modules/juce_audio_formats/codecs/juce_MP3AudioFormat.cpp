@@ -778,7 +778,7 @@ private:
             int* mp = map[j][0] = mapbuf0[j];
             const int16* bdf = bi.longDiff;
 
-            for (i = 0, cb = 0; cb < 8; cb++, i += *bdf++)
+            for (i = 0, cb = 0; cb < 8; ++cb, i += *bdf++)
             {
                 *mp++ = (*bdf) >> 1;
                 *mp++ = i;
@@ -911,8 +911,8 @@ struct Layer3SideInfo
                 for (int ss = 7; ss >= 0; --ss)
                 {
                     const float bu = *--xr2, bd = *xr1;
-                    *xr2   = (bu * (*cs))   - (bd * (*ca));
-                    *xr1++ = (bd * (*cs++)) + (bu * (*ca++));
+                    *xr2   = (bu * *cs)   - (bd * *ca);
+                    *xr1++ = (bd * *cs++) + (bu * *ca++);
                 }
             }
         }
@@ -959,8 +959,7 @@ struct Layer3SideInfo
                 for (int lwin = 0; lwin < 3; ++lwin)
                 {
                     int sfb = maxBand[lwin];
-                    if (sfb > 3)
-                        doL = false;
+                    doL = doL && (sfb <= 3);
 
                     for (; sfb < 12; ++sfb)
                     {
@@ -1001,10 +1000,9 @@ struct Layer3SideInfo
 
                 if (doL)
                 {
-                    int sfb = maxBandl;
-                    int index = bi.longIndex[sfb];
+                    int index = bi.longIndex[maxBandl];
 
-                    for (; sfb < 8; ++sfb)
+                    for (int sfb = maxBandl; sfb < 8; ++sfb)
                     {
                         int sb = bi.longDiff[sfb];
                         const int p = scaleFactors[sfb];
@@ -1028,8 +1026,7 @@ struct Layer3SideInfo
             }
             else
             {
-                int sfb = maxBandl;
-                int index = bi.longIndex[sfb];
+                int index = bi.longIndex[maxBandl];
 
                 for (int sfb = maxBandl; sfb < 21; ++sfb)
                 {
@@ -1090,7 +1087,7 @@ namespace DCT
     enum { SBLIMIT = 32 };
 
     inline void dct36_0 (const int v, float* const ts, float* const out1, float* const out2,
-                         const float* const wintab, float sum0, const float sum1)
+                         const float* const wintab, float sum0, const float sum1) noexcept
     {
         const float tmp = sum0 + sum1;
         out2[9 + v] = tmp * wintab[27 + v];
@@ -1103,15 +1100,13 @@ namespace DCT
     inline void dct36_1 (const int v, float* const ts, float* const out1, float* const out2, const float* const wintab,
                          const float tmp1a, const float tmp1b, const float tmp2a, const float tmp2b) noexcept
     {
-        dct36_0 (v, ts, out1, out2, wintab,
-                 tmp1a + tmp2a, (tmp1b + tmp2b) * constants.tfcos36[v]);
+        dct36_0 (v, ts, out1, out2, wintab, tmp1a + tmp2a, (tmp1b + tmp2b) * constants.tfcos36[v]);
     }
 
     inline void dct36_2 (const int v, float* const ts, float* const out1, float* const out2, const float* const wintab,
                          const float tmp1a, const float tmp1b, const float tmp2a, const float tmp2b) noexcept
     {
-        dct36_0 (v, ts, out1, out2, wintab,
-                 tmp2a - tmp1a, (tmp2b - tmp1b) * constants.tfcos36[v]);
+        dct36_0 (v, ts, out1, out2, wintab, tmp2a - tmp1a, (tmp2b - tmp1b) * constants.tfcos36[v]);
     }
 
     void dct36 (float* const in, float* const out1, float* const out2, const float* const wintab, float* const ts) noexcept
@@ -2377,14 +2372,13 @@ private:
 
             if (granule.mixedBlockFlag)
             {
-                for (i = 8; i; --i)
-                    *scf++ = getBitsFast (num0);
-                i = 9;
+                for (int j = 8; --j >= 0;)  *scf++ = getBitsFast (num0);
                 numBits -= num0;
+                i = 9;
             }
 
-            for (; i; --i)       *scf++ = getBitsFast (num0);
-            for (i = 18; i; --i) *scf++ = getBitsFast (num1);
+            for (; --i >= 0;)       *scf++ = getBitsFast (num0);
+            for (i = 18; --i >= 0;) *scf++ = getBitsFast (num1);
 
             *scf++ = 0;
             *scf++ = 0;
@@ -2396,8 +2390,8 @@ private:
 
             if (scfsi < 0)
             {
-                for (int i = 11; i != 0; --i)   *scf++ = getBitsFast (num0);
-                for (int i = 10; i != 0; --i)   *scf++ = getBitsFast (num1);
+                for (int i = 11; --i >= 0;)   *scf++ = getBitsFast (num0);
+                for (int j = 10; --j >= 0;)   *scf++ = getBitsFast (num1);
                 numBits = (num0 + num1) * 10 + num0;
             }
             else
@@ -2436,7 +2430,7 @@ private:
                     scf += 5;
             }
 
-            *scf++ = 0;
+            *scf = 0;
         }
 
         return numBits;
@@ -2446,9 +2440,9 @@ private:
     {
         static const uint8 scaleTable[3][6][4] =
         {
-            { { 6, 5, 5, 5 }, { 6, 5, 7, 3 },  { 11, 10, 0, 0}, { 7, 7, 7, 0 },    { 6, 6, 6, 3 },  { 8, 8, 5, 0 } },
-            { { 9, 9, 9, 9 }, { 9, 9, 12, 6 }, { 18, 18, 0, 0}, { 12, 12, 12, 0 }, { 12, 9, 9, 6 }, { 15, 12, 9, 0 } },
-            { { 6, 9, 9, 9 }, { 6, 9, 12, 6 }, { 15, 18, 0, 0}, { 6, 15, 12, 0 },  { 6, 12, 9, 6 }, { 6, 18, 9, 0 } }
+            { { 6, 5, 5, 5 }, { 6, 5, 7, 3 },  { 11, 10, 0, 0 }, { 7, 7, 7, 0 },    { 6, 6, 6, 3 },  { 8, 8, 5, 0 } },
+            { { 9, 9, 9, 9 }, { 9, 9, 12, 6 }, { 18, 18, 0, 0 }, { 12, 12, 12, 0 }, { 12, 9, 9, 6 }, { 15, 12, 9, 0 } },
+            { { 6, 9, 9, 9 }, { 6, 9, 12, 6 }, { 15, 18, 0, 0 }, { 6, 15, 12, 0 },  { 6, 12, 9, 6 }, { 6, 18, 9, 0 } }
         };
 
         uint32 len = iStereo ? constants.iLength2 [granule.scaleFactorCompression >> 1]
@@ -2986,10 +2980,8 @@ class MP3Reader : public AudioFormatReader
 public:
     MP3Reader (InputStream* const in)
         : AudioFormatReader (in, TRANS (mp3FormatName)),
-          stream (*in),
-          currentPosition (0),
-          decodedStart (0),
-          decodedEnd (0)
+          stream (*in), currentPosition (0),
+          decodedStart (0), decodedEnd (0)
     {
         skipID3();
         const int64 streamPos = stream.stream.getPosition();
@@ -3091,7 +3083,7 @@ private:
 
     bool readNextBlock()
     {
-        for (;;)
+        for (int attempts = 10; --attempts >= 0;)
         {
             int samplesDone = 0;
             const int result = stream.decodeNextBlock (decoded0, decoded1, samplesDone);
@@ -3108,6 +3100,8 @@ private:
                 return result == 0;
             }
         }
+
+        return false;
     }
 
     void skipID3()
