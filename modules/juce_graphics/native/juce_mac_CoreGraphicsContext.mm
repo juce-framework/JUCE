@@ -51,7 +51,10 @@ public:
         CGContextRelease (context);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext();
+    LowLevelGraphicsContext* createLowLevelContext()
+    {
+        return new CoreGraphicsContext (context, height);
+    }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
     {
@@ -74,36 +77,27 @@ public:
     static CGImageRef createImage (const Image& juceImage, const bool forAlpha,
                                    CGColorSpaceRef colourSpace, const bool mustOutliveSource)
     {
-        const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (juceImage.getPixelData());
+        const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
+        CGDataProviderRef provider;
 
-        if (nativeImage != nullptr && (juceImage.getFormat() == Image::SingleChannel || ! forAlpha))
+        if (mustOutliveSource)
         {
-            return CGBitmapContextCreateImage (nativeImage->context);
+            CFDataRef data = CFDataCreate (0, (const UInt8*) srcData.data, (CFIndex) (srcData.lineStride * srcData.height));
+            provider = CGDataProviderCreateWithCFData (data);
+            CFRelease (data);
         }
         else
         {
-            const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
-            CGDataProviderRef provider;
-
-            if (mustOutliveSource)
-            {
-                CFDataRef data = CFDataCreate (0, (const UInt8*) srcData.data, (CFIndex) (srcData.lineStride * srcData.height));
-                provider = CGDataProviderCreateWithCFData (data);
-                CFRelease (data);
-            }
-            else
-            {
-                provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.height, 0);
-            }
-
-            CGImageRef imageRef = CGImageCreate (srcData.width, srcData.height,
-                                                 8, srcData.pixelStride * 8, srcData.lineStride,
-                                                 colourSpace, getCGImageFlags (juceImage.getFormat()), provider,
-                                                 0, true, kCGRenderingIntentDefault);
-
-            CGDataProviderRelease (provider);
-            return imageRef;
+            provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.height, 0);
         }
+
+        CGImageRef imageRef = CGImageCreate (srcData.width, srcData.height,
+                                             8, srcData.pixelStride * 8, srcData.lineStride,
+                                             colourSpace, getCGImageFlags (juceImage.getFormat()), provider,
+                                             0, true, kCGRenderingIntentDefault);
+
+        CGDataProviderRelease (provider);
+        return imageRef;
     }
 
     //==============================================================================
@@ -785,11 +779,6 @@ void CoreGraphicsContext::applyTransform (const AffineTransform& transform) cons
     t.tx = transform.mat02;
     t.ty = transform.mat12;
     CGContextConcatCTM (context, t);
-}
-
-LowLevelGraphicsContext* CoreGraphicsImage::createLowLevelContext()
-{
-    return new CoreGraphicsContext (context, height);
 }
 
 //==============================================================================

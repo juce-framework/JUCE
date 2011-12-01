@@ -561,7 +561,7 @@ struct Constants
 {
     Constants()
     {
-        pnts[0] = cos64; pnts[1] = cos32; pnts[2] = cos16; pnts[3] = cos8; pnts[4] = cos4;
+        cosTables[0] = cos64; cosTables[1] = cos32; cosTables[2] = cos16; cosTables[3] = cos8; cosTables[4] = cos4;
         initDecodeTables();
         initLayer2Tables();
         initLayer3Tables();
@@ -577,20 +577,16 @@ struct Constants
             default:  break;
         }
 
-        static uint8 dummy[] = { 0, 0, 0 };
+        static const uint8 dummy[] = { 0, 0, 0 };
         return dummy;
     }
 
     float muls[27][64];
-    float ispow[8207];
+    float nToThe4Over3[8207];
     float antiAliasingCa[8], antiAliasingCs[8];
     float win[4][36];
     float win1[4][36];
-    float gainpow2[256 + 118 + 4];
-    float COS9[9];
-    float COS6_1, COS6_2;
-    float tfcos36[9];
-    float tfcos12[3];
+    float powToGains[256 + 118 + 4];
     int longLimit[9][23];
     int shortLimit[9][14];
     float tan1_1[16], tan2_1[16], tan1_2[16], tan2_2[16];
@@ -600,7 +596,7 @@ struct Constants
     uint32 nLength2[512];
     uint32 iLength2[256];
     float decodeWin[512 + 32];
-    float* pnts[5];
+    float* cosTables[5];
 
 private:
     int mapbuf0[9][152];
@@ -620,10 +616,10 @@ private:
         {
             int kr = 0x10 >> i;
             int divv = 0x40 >> i;
-            float* costab = pnts[i];
+            float* costab = cosTables[i];
 
             for (int k = 0; k < kr; ++k)
-                costab[k] = (float) (1.0 / (2.0 * cos (double_Pi * (k * 2.0 + 1.0) / divv)));
+                costab[k] = (float) (1.0 / (2.0 * cos (double_Pi * (k * 2 + 1) / divv)));
         }
 
         for (i = 0, j = 0; i < 256; ++i, ++j, table += 32)
@@ -695,10 +691,10 @@ private:
     {
         int i, j;
         for (i = -256; i < 118 + 4; ++i)
-            gainpow2[i + 256] = pow (2.0, -0.25 * (i + 210));
+            powToGains[i + 256] = pow (2.0, -0.25 * (i + 210));
 
         for (i = 0; i < 8207; ++i)
-            ispow[i] = pow ((double) i, 4.0 / 3.0);
+            nToThe4Over3[i] = pow ((double) i, 4.0 / 3.0);
 
         for (i = 0; i < 8; ++i)
         {
@@ -710,25 +706,20 @@ private:
 
         for (i = 0; i < 18; ++i)
         {
-            win[0][i] = win[1][i] = 0.5 * sin (double_Pi / 72.0 * (2 * (i + 0) + 1)) / cos (double_Pi * (2 * (i + 0) + 19) / 72.0);
+            win[0][i] = win[1][i] = 0.5 * sin (double_Pi / 72.0 * (2 * i + 1)) / cos (double_Pi * (2 * i + 19) / 72.0);
             win[0][i + 18] = win[3][i + 18] = 0.5 * sin (double_Pi / 72.0 * (2 * (i + 18) + 1)) / cos (double_Pi * (2 * (i + 18) + 19) / 72.0);
         }
 
+        const double piOver72 = double_Pi;
+
         for (i = 0; i < 6; ++i)
         {
-            win[1][i + 18] = 0.5 / cos (double_Pi * (2 * (i + 18) + 19) / 72.0);
-            win[3][i + 12] = 0.5 / cos (double_Pi * (2 * (i + 12) + 19) / 72.0);
-            win[1][i + 24] = 0.5 * sin (double_Pi / 24.0 * (2 * i + 13)) / cos (double_Pi * (2 * (i + 24) + 19) / 72.0);
+            win[1][i + 18] = 0.5 / cos (piOver72 * (2 * (i + 18) + 19));
+            win[3][i + 12] = 0.5 / cos (piOver72 * (2 * (i + 12) + 19));
+            win[1][i + 24] = 0.5 * sin (double_Pi / 24.0 * (2 * i + 13)) / cos (piOver72 * (2 * (i + 24) + 19));
             win[1][i + 30] = win[3][i] = 0;
-            win[3][i + 6] = 0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (double_Pi * (2 * (i + 6) + 19) / 72.0);
+            win[3][i + 6] = 0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (piOver72 * (2 * (i + 6) + 19));
         }
-
-        for (i = 0; i < 9; ++i)   COS9[i] = cos (double_Pi / 18.0 * i);
-        for (i = 0; i < 9; ++i)   tfcos36[i] = 0.5 / cos (double_Pi * (i * 2 + 1) / 36.0);
-        for (i = 0; i < 3; ++i)   tfcos12[i] = 0.5 / cos (double_Pi * (i * 2 + 1) / 12.0);
-
-        COS6_1 = cos (double_Pi / 6.0 * 1.0);
-        COS6_2 = cos (double_Pi / 6.0 * 2.0);
 
         for (i = 0; i < 12; ++i)
             win[2][i] = 0.5 * sin (double_Pi / 24.0 * (2 * i + 1)) / cos (double_Pi * (2 * i + 7) / 24.0);
@@ -756,10 +747,10 @@ private:
 
                 if (i > 0)
                 {
-                    const double base = pow (2.0, -0.25 * (j + 1.0));
+                    const double base = pow (2.0, -0.25 * (j + 1));
 
                     if (i & 1)
-                        p1 = pow (base, (i + 1.0) * 0.5);
+                        p1 = pow (base, (i + 1) * 0.5);
                     else
                         p2 = pow (base, i * 0.5);
                 }
@@ -1085,6 +1076,11 @@ struct Layer3SideInfo
 namespace DCT
 {
     enum { SBLIMIT = 32 };
+    static const float cos6_1  = 0.866025388f;
+    static const float cos6_2  = 0.5f;
+    static const float cos9[]  = { 1.0f, 0.98480773f, 0.939692616f, 0.866025388f, 0.766044438f, 0.642787635f, 0.5f, 0.342020154f, 0.173648179f };
+    static const float cos36[] = { 0.501909912f, 0.517638087f, 0.551688969f, 0.610387266f, 0.707106769f, 0.871723413f, 1.18310082f, 1.93185163f, 5.73685646f };
+    static const float cos12[] = { 0.517638087f, 0.707106769f, 1.93185163f };
 
     inline void dct36_0 (const int v, float* const ts, float* const out1, float* const out2,
                          const float* const wintab, float sum0, const float sum1) noexcept
@@ -1100,13 +1096,13 @@ namespace DCT
     inline void dct36_1 (const int v, float* const ts, float* const out1, float* const out2, const float* const wintab,
                          const float tmp1a, const float tmp1b, const float tmp2a, const float tmp2b) noexcept
     {
-        dct36_0 (v, ts, out1, out2, wintab, tmp1a + tmp2a, (tmp1b + tmp2b) * constants.tfcos36[v]);
+        dct36_0 (v, ts, out1, out2, wintab, tmp1a + tmp2a, (tmp1b + tmp2b) * cos36[v]);
     }
 
     inline void dct36_2 (const int v, float* const ts, float* const out1, float* const out2, const float* const wintab,
                          const float tmp1a, const float tmp1b, const float tmp2a, const float tmp2b) noexcept
     {
-        dct36_0 (v, ts, out1, out2, wintab, tmp2a - tmp1a, (tmp2b - tmp1b) * constants.tfcos36[v]);
+        dct36_0 (v, ts, out1, out2, wintab, tmp2a - tmp1a, (tmp2b - tmp1b) * cos36[v]);
     }
 
     void dct36 (float* const in, float* const out1, float* const out2, const float* const wintab, float* const ts) noexcept
@@ -1117,50 +1113,49 @@ namespace DCT
         in[2]  += in[1];  in[1]  += in[0];  in[17] += in[15]; in[15] += in[13]; in[13] += in[11];
         in[11] += in[9];  in[9]  += in[7];  in[7]  += in[5];  in[5]  += in[3];  in[3]  += in[1];
 
-        const float* const c = constants.COS9;
-        const float ta33 = in[2 * 3 + 0] * c[3];
-        const float ta66 = in[2 * 6 + 0] * c[6];
-        const float tb33 = in[2 * 3 + 1] * c[3];
-        const float tb66 = in[2 * 6 + 1] * c[6];
+        const float ta33 = in[6]  * cos9[3];
+        const float ta66 = in[12] * cos9[6];
+        const float tb33 = in[7]  * cos9[3];
+        const float tb66 = in[13] * cos9[6];
 
         {
-            const float tmp1a = in[2 * 1 + 0] * c[1] + ta33 + in[2 * 5 + 0] * c[5] + in[2 * 7 + 0] * c[7];
-            const float tmp1b = in[2 * 1 + 1] * c[1] + tb33 + in[2 * 5 + 1] * c[5] + in[2 * 7 + 1] * c[7];
-            const float tmp2a = in[2 * 0 + 0] + in[2 * 2 + 0] * c[2] + in[2 * 4 + 0] * c[4] + ta66 + in[2 * 8 + 0] * c[8];
-            const float tmp2b = in[2 * 0 + 1] + in[2 * 2 + 1] * c[2] + in[2 * 4 + 1] * c[4] + tb66 + in[2 * 8 + 1] * c[8];
+            const float tmp1a = in[2] * cos9[1] + ta33 + in[10] * cos9[5] + in[14] * cos9[7];
+            const float tmp1b = in[3] * cos9[1] + tb33 + in[11] * cos9[5] + in[15] * cos9[7];
+            const float tmp2a = in[0] + in[4] * cos9[2] + in[8] * cos9[4] + ta66 + in[16] * cos9[8];
+            const float tmp2b = in[1] + in[5] * cos9[2] + in[9] * cos9[4] + tb66 + in[17] * cos9[8];
             dct36_1 (0, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
             dct36_2 (8, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
         }
 
         {
-            const float tmp1a = (in[2 * 1 + 0] - in[2 * 5 + 0] - in[2 * 7 + 0]) * c[3];
-            const float tmp1b = (in[2 * 1 + 1] - in[2 * 5 + 1] - in[2 * 7 + 1]) * c[3];
-            const float tmp2a = (in[2 * 2 + 0] - in[2 * 4 + 0] - in[2 * 8 + 0]) * c[6] - in[2 * 6 + 0] + in[2 * 0 + 0];
-            const float tmp2b = (in[2 * 2 + 1] - in[2 * 4 + 1] - in[2 * 8 + 1]) * c[6] - in[2 * 6 + 1] + in[2 * 0 + 1];
+            const float tmp1a = (in[2] - in[10] - in[14]) * cos9[3];
+            const float tmp1b = (in[3] - in[11] - in[15]) * cos9[3];
+            const float tmp2a = (in[4] - in[8] - in[16]) * cos9[6] - in[12] + in[0];
+            const float tmp2b = (in[5] - in[9] - in[17]) * cos9[6] - in[13] + in[1];
             dct36_1 (1, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
             dct36_2 (7, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
         }
 
         {
-            const float tmp1a = in[2 * 1 + 0] * c[5] - ta33 - in[2 * 5 + 0] * c[7] + in[2 * 7 + 0] * c[1];
-            const float tmp1b = in[2 * 1 + 1] * c[5] - tb33 - in[2 * 5 + 1] * c[7] + in[2 * 7 + 1] * c[1];
-            const float tmp2a = in[2 * 0 + 0] - in[2 * 2 + 0] * c[8] - in[2 * 4 + 0] * c[2] + ta66 + in[2 * 8 + 0] * c[4];
-            const float tmp2b = in[2 * 0 + 1] - in[2 * 2 + 1] * c[8] - in[2 * 4 + 1] * c[2] + tb66 + in[2 * 8 + 1] * c[4];
+            const float tmp1a = in[2] * cos9[5] - ta33 - in[10] * cos9[7] + in[14] * cos9[1];
+            const float tmp1b = in[3] * cos9[5] - tb33 - in[11] * cos9[7] + in[15] * cos9[1];
+            const float tmp2a = in[0] - in[4] * cos9[8] - in[8] * cos9[2] + ta66 + in[16] * cos9[4];
+            const float tmp2b = in[1] - in[5] * cos9[8] - in[9] * cos9[2] + tb66 + in[17] * cos9[4];
             dct36_1 (2, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
             dct36_2 (6, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
         }
 
         {
-            const float tmp1a = in[2 * 1 + 0] * c[7] - ta33 + in[2 * 5 + 0] * c[1] - in[2 * 7 + 0] * c[5];
-            const float tmp1b = in[2 * 1 + 1] * c[7] - tb33 + in[2 * 5 + 1] * c[1] - in[2 * 7 + 1] * c[5];
-            const float tmp2a = in[2 * 0 + 0] - in[2 * 2 + 0] * c[4] + in[2 * 4 + 0] * c[8] + ta66 - in[2 * 8 + 0] * c[2];
-            const float tmp2b = in[2 * 0 + 1] - in[2 * 2 + 1] * c[4] + in[2 * 4 + 1] * c[8] + tb66 - in[2 * 8 + 1] * c[2];
+            const float tmp1a = in[2] * cos9[7] - ta33 + in[10] * cos9[1] - in[14] * cos9[5];
+            const float tmp1b = in[3] * cos9[7] - tb33 + in[11] * cos9[1] - in[15] * cos9[5];
+            const float tmp2a = in[0] - in[4] * cos9[4] + in[8] * cos9[8] + ta66 - in[16] * cos9[2];
+            const float tmp2b = in[1] - in[5] * cos9[4] + in[9] * cos9[8] + tb66 - in[17] * cos9[2];
             dct36_1 (3, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
             dct36_2 (5, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
         }
 
-        const float sum0 =  in[2 * 0 + 0] - in[2 * 2 + 0] + in[2 * 4 + 0] - in[2 * 6 + 0] + in[2 * 8 + 0];
-        const float sum1 = (in[2 * 0 + 1] - in[2 * 2 + 1] + in[2 * 4 + 1] - in[2 * 6 + 1] + in[2 * 8 + 1]) * constants.tfcos36[4];
+        const float sum0 =  in[0] - in[4] + in[8] - in[12] + in[16];
+        const float sum1 = (in[1] - in[5] + in[9] - in[13] + in[17]) * cos36[4];
         dct36_0 (4, ts, out1, out2, wintab, sum0, sum1);
     }
 
@@ -1176,17 +1171,17 @@ namespace DCT
             in2 += (in1 = in[1*3]);
             in1 += (in0 = in[0*3]);
             in5 += in3; in3 += in1;
-            in2 *= constants.COS6_1;
-            in3 *= constants.COS6_1;
+            in2 *= cos6_1;
+            in3 *= cos6_1;
         }
 
         inline void process() noexcept
         {
-            in0 += in4 * constants.COS6_2;
+            in0 += in4 * cos6_2;
             in4 = in0 + in2; in0 -= in2;
-            in1 += in5 * constants.COS6_2;
-            in5 = (in1 + in3) * constants.tfcos12[0];
-            in1 = (in1 - in3) * constants.tfcos12[2];
+            in1 += in5 * cos6_2;
+            in5 = (in1 + in3) * cos12[0];
+            in1 = (in1 - in3) * cos12[2];
             in3 = in4 + in5; in4 -= in5;
             in2 = in0 + in1; in0 -= in1;
         }
@@ -1195,7 +1190,7 @@ namespace DCT
     void dct12 (const float* in, float* const out1, float* const out2, const float* wi, float* ts) noexcept
     {
         {
-            ts[SBLIMIT * 0] = out1[0];
+            ts[0] = out1[0];
             ts[SBLIMIT * 1] = out1[1];
             ts[SBLIMIT * 2] = out1[2];
             ts[SBLIMIT * 3] = out1[3];
@@ -1206,90 +1201,83 @@ namespace DCT
 
             {
                 float tmp1 = (inputs.in0 - inputs.in4);
-                const float tmp2 = (inputs.in1 - inputs.in5) * constants.tfcos12[1];
+                const float tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
                 const float tmp0 = tmp1 + tmp2;
                 tmp1 -= tmp2;
 
-                ts [(17 - 1) * SBLIMIT] = out1 [17 - 1] + tmp0 * wi[11 - 1];
-                ts [(12 + 1) * SBLIMIT] = out1 [12 + 1] + tmp0 * wi[6 + 1];
-                ts [(6 + 1)  * SBLIMIT] = out1 [6 + 1]  + tmp1 * wi[1];
-                ts [(11 - 1) * SBLIMIT] = out1 [11 - 1] + tmp1 * wi[5 - 1];
+                ts[16 * SBLIMIT] = out1[16] + tmp0 * wi[10];
+                ts[13 * SBLIMIT] = out1[13] + tmp0 * wi[7];
+                ts[7  * SBLIMIT] = out1[7]  + tmp1 * wi[1];
+                ts[10 * SBLIMIT] = out1[10] + tmp1 * wi[4];
             }
 
             inputs.process();
 
-            ts [(17 - 0) * SBLIMIT] = out1[17 - 0] + inputs.in2 * wi[11 - 0];
-            ts [(12 + 0) * SBLIMIT] = out1[12 + 0] + inputs.in2 * wi[6 + 0];
-            ts [(12 + 2) * SBLIMIT] = out1[12 + 2] + inputs.in3 * wi[6 + 2];
-            ts [(17 - 2) * SBLIMIT] = out1[17 - 2] + inputs.in3 * wi[11 - 2];
+            ts[17 * SBLIMIT] = out1[17] + inputs.in2 * wi[11];
+            ts[12 * SBLIMIT] = out1[12] + inputs.in2 * wi[6];
+            ts[14 * SBLIMIT] = out1[14] + inputs.in3 * wi[8];
+            ts[15 * SBLIMIT] = out1[15] + inputs.in3 * wi[9];
 
-            ts [(6 + 0)  * SBLIMIT] = out1[6 + 0]  + inputs.in0 * wi[0];
-            ts [(11 - 0) * SBLIMIT] = out1[11 - 0] + inputs.in0 * wi[5 - 0];
-            ts [(6 + 2)  * SBLIMIT] = out1[6 + 2]  + inputs.in4 * wi[2];
-            ts [(11 - 2) * SBLIMIT] = out1[11 - 2] + inputs.in4 * wi[5 - 2];
+            ts[6  * SBLIMIT] = out1[6]  + inputs.in0 * wi[0];
+            ts[11 * SBLIMIT] = out1[11] + inputs.in0 * wi[5];
+            ts[8  * SBLIMIT] = out1[8]  + inputs.in4 * wi[2];
+            ts[9  * SBLIMIT] = out1[9]  + inputs.in4 * wi[3];
         }
 
-        ++in;
-
         {
-            DCT12Inputs inputs (in);
+            DCT12Inputs inputs (++in);
             float tmp1 = (inputs.in0 - inputs.in4);
-            const float tmp2 = (inputs.in1 - inputs.in5) * constants.tfcos12[1];
+            const float tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
             const float tmp0 = tmp1 + tmp2;
             tmp1 -= tmp2;
-
-            out2 [5 - 1] = tmp0 * wi[11 - 1];
-            out2 [0 + 1] = tmp0 * wi[6 + 1];
-            ts [(12 + 1) * SBLIMIT] += tmp1 * wi[1];
-            ts [(17 - 1) * SBLIMIT] += tmp1 * wi[5 - 1];
+            out2[4] = tmp0 * wi[10];
+            out2[1] = tmp0 * wi[7];
+            ts[13 * SBLIMIT] += tmp1 * wi[1];
+            ts[16 * SBLIMIT] += tmp1 * wi[4];
 
             inputs.process();
 
-            out2 [5 - 0] = inputs.in2 * wi[11 - 0];
-            out2 [0 + 0] = inputs.in2 * wi[6 + 0];
-            out2 [0 + 2] = inputs.in3 * wi[6 + 2];
-            out2 [5 - 2] = inputs.in3 * wi[11 - 2];
-
-            ts [(12 + 0) * SBLIMIT] += inputs.in0 * wi[0];
-            ts [(17 - 0) * SBLIMIT] += inputs.in0 * wi[5 - 0];
-            ts [(12 + 2) * SBLIMIT] += inputs.in4 * wi[2];
-            ts [(17 - 2) * SBLIMIT] += inputs.in4 * wi[5 - 2];
+            out2[5] = inputs.in2 * wi[11];
+            out2[0] = inputs.in2 * wi[6];
+            out2[2] = inputs.in3 * wi[8];
+            out2[3] = inputs.in3 * wi[9];
+            ts[12 * SBLIMIT] += inputs.in0 * wi[0];
+            ts[17 * SBLIMIT] += inputs.in0 * wi[5];
+            ts[14 * SBLIMIT] += inputs.in4 * wi[2];
+            ts[15 * SBLIMIT] += inputs.in4 * wi[5 - 2];
         }
 
-        ++in;
-
         {
-            DCT12Inputs inputs (in);
+            DCT12Inputs inputs (++in);
             out2[12] = out2[13] = out2[14] = out2[15] = out2[16] = out2[17] = 0;
 
             float tmp1 = (inputs.in0 - inputs.in4);
-            const float tmp2 = (inputs.in1 - inputs.in5) * constants.tfcos12[1];
+            const float tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
             const float tmp0 = tmp1 + tmp2;
             tmp1 -= tmp2;
 
-            out2[11 - 1] = tmp0 * wi[11 - 1];
-            out2[6 + 1]  = tmp0 * wi[6 + 1];
-            out2[0 + 1] += tmp1 * wi[1];
-            out2[5 - 1] += tmp1 * wi[5 - 1];
+            out2[10] = tmp0 * wi[10];
+            out2[7]  = tmp0 * wi[7];
+            out2[1] += tmp1 * wi[1];
+            out2[4] += tmp1 * wi[4];
 
             inputs.process();
 
-            out2[11 - 0] = inputs.in2 * wi[11 - 0];
-            out2[6 + 0]  = inputs.in2 * wi[6 + 0];
-            out2[6 + 2]  = inputs.in3 * wi[6 + 2];
-            out2[11 - 2] = inputs.in3 * wi[11 - 2];
-
-            out2[0 + 0] += inputs.in0 * wi[0];
-            out2[5 - 0] += inputs.in0 * wi[5 - 0];
-            out2[0 + 2] += inputs.in4 * wi[2];
-            out2[5 - 2] += inputs.in4 * wi[5 - 2];
+            out2[11] = inputs.in2 * wi[11];
+            out2[6]  = inputs.in2 * wi[6];
+            out2[8]  = inputs.in3 * wi[8];
+            out2[9]  = inputs.in3 * wi[9];
+            out2[0] += inputs.in0 * wi[0];
+            out2[5] += inputs.in0 * wi[5];
+            out2[2] += inputs.in4 * wi[2];
+            out2[3] += inputs.in4 * wi[3];
         }
     }
 
     void dct64 (float* const out0, float* const out1, float* const b1, float* const b2, const float* const samples) noexcept
     {
         {
-            const float* const costab = constants.pnts[0];
+            const float* const costab = constants.cosTables[0];
             b1[0x00] = samples[0x00] + samples[0x1F];   b1[0x1F] = (samples[0x00] - samples[0x1F]) * costab[0x0];
             b1[0x01] = samples[0x01] + samples[0x1E];   b1[0x1E] = (samples[0x01] - samples[0x1E]) * costab[0x1];
             b1[0x02] = samples[0x02] + samples[0x1D];   b1[0x1D] = (samples[0x02] - samples[0x1D]) * costab[0x2];
@@ -1309,7 +1297,7 @@ namespace DCT
         }
 
         {
-            const float* const costab = constants.pnts[1];
+            const float* const costab = constants.cosTables[1];
             b2[0x00] = b1[0x00] + b1[0x0F];   b2[0x0F] = (b1[0x00] - b1[0x0F]) * costab[0];
             b2[0x01] = b1[0x01] + b1[0x0E];   b2[0x0E] = (b1[0x01] - b1[0x0E]) * costab[1];
             b2[0x02] = b1[0x02] + b1[0x0D];   b2[0x0D] = (b1[0x02] - b1[0x0D]) * costab[2];
@@ -1329,7 +1317,7 @@ namespace DCT
         }
 
         {
-            const float* const costab = constants.pnts[2];
+            const float* const costab = constants.cosTables[2];
             b1[0x00] = b2[0x00] + b2[0x07];   b1[0x07] = (b2[0x00] - b2[0x07]) * costab[0];
             b1[0x01] = b2[0x01] + b2[0x06];   b1[0x06] = (b2[0x01] - b2[0x06]) * costab[1];
             b1[0x02] = b2[0x02] + b2[0x05];   b1[0x05] = (b2[0x02] - b2[0x05]) * costab[2];
@@ -1349,8 +1337,8 @@ namespace DCT
         }
 
         {
-            const float cos0 = constants.pnts[3][0];
-            const float cos1 = constants.pnts[3][1];
+            const float cos0 = constants.cosTables[3][0];
+            const float cos1 = constants.cosTables[3][1];
             b2[0x00] = b1[0x00] + b1[0x03];   b2[0x03] = (b1[0x00] - b1[0x03]) * cos0;
             b2[0x01] = b1[0x01] + b1[0x02];   b2[0x02] = (b1[0x01] - b1[0x02]) * cos1;
             b2[0x04] = b1[0x04] + b1[0x07];   b2[0x07] = (b1[0x07] - b1[0x04]) * cos0;
@@ -1370,7 +1358,7 @@ namespace DCT
         }
 
         {
-            const float cos0 = constants.pnts[4][0];
+            const float cos0 = constants.cosTables[4][0];
             b1[0x00] = b2[0x00] + b2[0x01];   b1[0x01] = (b2[0x00] - b2[0x01]) * cos0;
             b1[0x02] = b2[0x02] + b2[0x03];   b1[0x03] = (b2[0x03] - b2[0x02]) * cos0;  b1[0x02] += b1[0x03];
             b1[0x04] = b2[0x04] + b2[0x05];   b1[0x05] = (b2[0x04] - b2[0x05]) * cos0;
@@ -1394,7 +1382,7 @@ namespace DCT
         }
 
         out0[0x10 * 16] = b1[0x00];  out0[0x10 * 12] = b1[0x04]; out0[0x10 * 8]  = b1[0x02];  out0[0x10 * 4]  = b1[0x06];
-        out0[0x10 * 0]  = b1[0x01];  out1[0x10 * 0]  = b1[0x01]; out1[0x10 * 4]  = b1[0x05];  out1[0x10 * 8]  = b1[0x03];
+        out0[0] = b1[0x01];  out1[0]  = b1[0x01]; out1[0x10 * 4]  = b1[0x05];  out1[0x10 * 8]  = b1[0x03];
         out1[0x10 * 12] = b1[0x07];
 
         b1[0x08] += b1[0x0C];  out0[0x10 * 14] = b1[0x08];  b1[0x0C] += b1[0x0a];  out0[0x10 * 10] = b1[0x0C];
@@ -1710,7 +1698,7 @@ private:
         return result >> 7;
     }
 
-    uint32 getBitsFast (const int numBits) noexcept
+    uint32 getBitsUnchecked (const int numBits) noexcept
     {
         const uint32 result = ((((bufferPointer[0] << 8) | bufferPointer[1]) << bitIndex) & 0xffff) >> (16 - numBits);
         bitIndex += numBits;
@@ -1719,8 +1707,8 @@ private:
         return result;
     }
 
-    uint8 getLeq8Bits (const int numBits) noexcept    { return (uint8)  getBitsFast (numBits); }
-    uint16 getLeq16Bits (const int numBits) noexcept  { return (uint16) getBitsFast (numBits); }
+    inline uint8  getBitsUint8  (const int numBits) noexcept  { return (uint8)  getBitsUnchecked (numBits); }
+    inline uint16 getBitsUint16 (const int numBits) noexcept  { return (uint16) getBitsUnchecked (numBits); }
 
     int scanForNextFrameHeader (const bool checkTypeAgainstLastFrame) noexcept
     {
@@ -1942,10 +1930,10 @@ private:
         const bool msStereo = (frame.mode == 1) && (frame.modeExt & 2) != 0;
         const int granules = frame.lsf ? 1 : 2;
 
-        if (frame.lsf != 0)
-            getLayer3SideInfo2 (numChannels, msStereo, sampleRate, single);
-        else
+        if (frame.lsf == 0)
             getLayer3SideInfo1 (numChannels, msStereo, sampleRate, single);
+        else
+            getLayer3SideInfo2 (numChannels, msStereo, sampleRate, single);
 
         int databits = 0;
         for (int gr = 0; gr < granules; ++gr)
@@ -1964,26 +1952,26 @@ private:
         {
             for (i = 0; i < jsbound; ++i)
             {
-                si.allocation[i][0] = getLeq8Bits (4);
-                si.allocation[i][1] = getLeq8Bits (4);
+                si.allocation[i][0] = getBitsUint8 (4);
+                si.allocation[i][1] = getBitsUint8 (4);
             }
 
             for (i = jsbound; i < 32; ++i)
-                si.allocation[i][0] = si.allocation[i][1] = getLeq8Bits (4);
+                si.allocation[i][0] = si.allocation[i][1] = getBitsUint8 (4);
 
             for (i = 0; i < 32; ++i)
             {
-                si.scaleFactor[i][0] = si.allocation[i][0] ? getLeq8Bits (6) : 0;
-                si.scaleFactor[i][1] = si.allocation[i][1] ? getLeq8Bits (6) : 0;
+                si.scaleFactor[i][0] = si.allocation[i][0] ? getBitsUint8 (6) : 0;
+                si.scaleFactor[i][1] = si.allocation[i][1] ? getBitsUint8 (6) : 0;
             }
         }
         else
         {
             for (i = 0; i < 32; ++i)
-                si.allocation[i][0] = getLeq8Bits (4);
+                si.allocation[i][0] = getBitsUint8 (4);
 
             for (i = 0; i < 32; ++i)
-                si.scaleFactor[i][0] = si.allocation[i][0] ? getLeq8Bits (6) : 0;
+                si.scaleFactor[i][0] = si.allocation[i][0] ? getBitsUint8 (6) : 0;
         }
     }
 
@@ -1997,8 +1985,8 @@ private:
             {
                 const uint8 n0 = si.allocation[i][0];
                 const uint8 n1 = si.allocation[i][1];
-                fraction[0][i] = n0 > 0 ? (float) (((-1 << n0) + getLeq16Bits (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0;
-                fraction[1][i] = n1 > 0 ? (float) (((-1 << n1) + getLeq16Bits (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0;
+                fraction[0][i] = n0 > 0 ? (float) (((-1 << n0) + getBitsUint16 (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0;
+                fraction[1][i] = n1 > 0 ? (float) (((-1 << n1) + getBitsUint16 (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0;
             }
 
             for (i = jsbound; i < 32; ++i)
@@ -2007,7 +1995,7 @@ private:
 
                 if (n > 0)
                 {
-                    const uint32 w = ((-1 << n) + getLeq16Bits (n + 1) + 1);
+                    const uint32 w = ((-1 << n) + getBitsUint16 (n + 1) + 1);
                     fraction[0][i] = (float) (w * constants.muls[n + 1][si.scaleFactor[i][0]]);
                     fraction[1][i] = (float) (w * constants.muls[n + 1][si.scaleFactor[i][1]]);
                 }
@@ -2023,7 +2011,7 @@ private:
                 const uint8 j = si.scaleFactor[i][0];
 
                 if (n > 0)
-                    fraction[0][i] = (float) (((-1 << n) + getLeq16Bits (n + 1) + 1) * constants.muls[n + 1][j]);
+                    fraction[0][i] = (float) (((-1 << n) + getBitsUint16 (n + 1) + 1) * constants.muls[n + 1][j]);
                 else
                     fraction[0][i] = 0;
             }
@@ -2045,14 +2033,14 @@ private:
             {
                 const int16 step = allocTable->bits;
                 allocTable += (1 << step);
-                si.allocation[i][0] = getLeq8Bits (step);
-                si.allocation[i][1] = getLeq8Bits (step);
+                si.allocation[i][0] = getBitsUint8 (step);
+                si.allocation[i][1] = getBitsUint8 (step);
             }
 
             for (i = jsbound; i < sblimit; ++i)
             {
                 const int16 step = allocTable->bits;
-                const uint8 b0 = getLeq8Bits (step);
+                const uint8 b0 = getBitsUint8 (step);
                 allocTable += (1 << step);
                 si.allocation[i][0] = b0;
                 si.allocation[i][1] = b0;
@@ -2060,8 +2048,8 @@ private:
 
             for (i = 0; i < sblimit; ++i)
             {
-                scfsi[i][0] = si.allocation[i][0] ? getLeq8Bits (2) : 0;
-                scfsi[i][1] = si.allocation[i][1] ? getLeq8Bits (2) : 0;
+                scfsi[i][0] = si.allocation[i][0] ? getBitsUint8 (2) : 0;
+                scfsi[i][1] = si.allocation[i][1] ? getBitsUint8 (2) : 0;
             }
         }
         else
@@ -2070,11 +2058,11 @@ private:
             {
                 const int16 step = allocTable->bits;
                 allocTable += (1 << step);
-                si.allocation[i][0] = getLeq8Bits (step);
+                si.allocation[i][0] = getBitsUint8 (step);
             }
 
             for (i = 0; i < sblimit; ++i)
-                scfsi[i][0] = si.allocation[i][0] ? getLeq8Bits (2) : 0;
+                scfsi[i][0] = si.allocation[i][0] ? getBitsUint8 (2) : 0;
         }
 
         for (i = 0; i < sblimit; ++i)
@@ -2088,20 +2076,20 @@ private:
                     switch (scfsi[i][ch])
                     {
                         case 0:
-                            s0 = getLeq8Bits (6);
-                            s1 = getLeq8Bits (6);
-                            s2 = getLeq8Bits (6);
+                            s0 = getBitsUint8 (6);
+                            s1 = getBitsUint8 (6);
+                            s2 = getBitsUint8 (6);
                             break;
                         case 1:
-                            s1 = s0 = getLeq8Bits (6);
-                            s2 = getLeq8Bits (6);
+                            s1 = s0 = getBitsUint8 (6);
+                            s2 = getBitsUint8 (6);
                             break;
                         case 2:
-                            s2 = s1 = s0 = getLeq8Bits (6);
+                            s2 = s1 = s0 = getBitsUint8 (6);
                             break;
                         case 3:
-                            s0 = getLeq8Bits (6);
-                            s2 = s1 = getLeq8Bits (6);
+                            s0 = getBitsUint8 (6);
+                            s2 = s1 = getBitsUint8 (6);
                             break;
                         default:
                             break;
@@ -2219,12 +2207,12 @@ private:
     {
         const int powdiff = (single == 3) ? 4 : 0;
         sideinfo.mainDataStart = getBits (9);
-        sideinfo.privateBits = getBitsFast (stereo == 1 ? 5 : 3);
+        sideinfo.privateBits = getBitsUnchecked (stereo == 1 ? 5 : 3);
 
         for (int ch = 0; ch < stereo; ++ch)
         {
             sideinfo.ch[ch].gr[0].scfsi = -1;
-            sideinfo.ch[ch].gr[1].scfsi = getBitsFast (4);
+            sideinfo.ch[ch].gr[1].scfsi = getBitsUnchecked (4);
         }
 
         for (int gr = 0; gr < 2; ++gr)
@@ -2234,32 +2222,28 @@ private:
                 Layer3SideInfo::Info& granule = sideinfo.ch[ch].gr[gr];
 
                 granule.part2_3Length = getBits (12);
-                granule.bigValues = jmin (288, (int) getBitsFast (9));
+                granule.bigValues = jmin (288, (int) getBitsUnchecked (9));
 
-                const int qss = getBitsFast (8);
-                granule.pow2gain = constants.gainpow2 + 256 - qss + powdiff;
+                const int qss = getBitsUnchecked (8);
+                granule.pow2gain = constants.powToGains + 256 - qss + powdiff;
 
                 if (msStereo)
                     granule.pow2gain += 2;
 
-                granule.scaleFactorCompression = getBitsFast (4);
+                granule.scaleFactorCompression = getBitsUnchecked (4);
 
                 if (getOneBit())
                 {
-                    granule.blockType = getBitsFast (2);
+                    granule.blockType = getBitsUnchecked (2);
                     granule.mixedBlockFlag = getOneBit();
-                    granule.tableSelect[0] = getBitsFast (5);
-                    granule.tableSelect[1] = getBitsFast (5);
+                    granule.tableSelect[0] = getBitsUnchecked (5);
+                    granule.tableSelect[1] = getBitsUnchecked (5);
                     granule.tableSelect[2] = 0;
 
                     for (int i = 0; i < 3; ++i)
                     {
-                        const int sbg = (getBitsFast (3) << 3);
+                        const int sbg = (getBitsUnchecked (3) << 3);
                         granule.fullGain[i] = granule.pow2gain + sbg;
-                    }
-
-                    if (granule.blockType == 0)
-                    {
                     }
 
                     granule.region1Start = 36 >> 1;
@@ -2268,10 +2252,10 @@ private:
                 else
                 {
                     for (int i = 0; i < 3; ++i)
-                        granule.tableSelect[i] = getBitsFast (5);
+                        granule.tableSelect[i] = getBitsUnchecked (5);
 
-                    const int r0c = getBitsFast (4);
-                    const int r1c = getBitsFast (3);
+                    const int r0c = getBitsUnchecked (4);
+                    const int r1c = getBitsUnchecked (3);
                     const int region0index = jmin (22, r0c + 1);
                     const int region1index = jmin (22, r0c + 1 + r1c + 1);
 
@@ -2292,17 +2276,17 @@ private:
     {
         const int powdiff = (single == 3) ? 4 : 0;
         sideinfo.mainDataStart = getBits (8);
-        sideinfo.privateBits = stereo == 1 ? getOneBit() : getBitsFast (2);
+        sideinfo.privateBits = stereo == 1 ? getOneBit() : getBitsUnchecked (2);
 
         for (int ch = 0; ch < stereo; ++ch)
         {
             Layer3SideInfo::Info& granule = sideinfo.ch[ch].gr[0];
 
             granule.part2_3Length = getBits (12);
-            granule.bigValues = jmin (288, (int) getBitsFast (9));
+            granule.bigValues = jmin (288, (int) getBitsUnchecked (9));
 
-            const uint32 qss = getBitsFast (8);
-            granule.pow2gain = constants.gainpow2 + 256 - qss + powdiff;
+            const uint32 qss = getBitsUnchecked (8);
+            granule.pow2gain = constants.powToGains + 256 - qss + powdiff;
 
             if (msStereo)
                 granule.pow2gain += 2;
@@ -2311,15 +2295,15 @@ private:
 
             if (getOneBit())
             {
-                granule.blockType = getBitsFast (2);
+                granule.blockType = getBitsUnchecked (2);
                 granule.mixedBlockFlag = getOneBit();
-                granule.tableSelect[0] = getBitsFast (5);
-                granule.tableSelect[1] = getBitsFast (5);
+                granule.tableSelect[0] = getBitsUnchecked (5);
+                granule.tableSelect[1] = getBitsUnchecked (5);
                 granule.tableSelect[2] = 0;
 
                 for (int i = 0; i < 3; ++i)
                 {
-                    const uint32 sbg = (getBitsFast (3) << 3);
+                    const uint32 sbg = (getBitsUnchecked (3) << 3);
                     granule.fullGain[i] = granule.pow2gain + sbg;
                 }
 
@@ -2336,10 +2320,10 @@ private:
             else
             {
                 for (int i = 0; i < 3; ++i)
-                    granule.tableSelect[i] = getBitsFast (5);
+                    granule.tableSelect[i] = getBitsUnchecked (5);
 
-                const int r0c = getBitsFast (4);
-                const int r1c = getBitsFast (3);
+                const int r0c = getBitsUnchecked (4);
+                const int r1c = getBitsUnchecked (3);
                 const int region0index = jmin (22, r0c + 1);
                 const int region1index = jmin (22, r0c + 1 + r1c + 1);
 
@@ -2372,13 +2356,13 @@ private:
 
             if (granule.mixedBlockFlag)
             {
-                for (int j = 8; --j >= 0;)  *scf++ = getBitsFast (num0);
+                for (int j = 8; --j >= 0;)  *scf++ = getBitsUnchecked (num0);
                 numBits -= num0;
                 i = 9;
             }
 
-            for (; --i >= 0;)       *scf++ = getBitsFast (num0);
-            for (i = 18; --i >= 0;) *scf++ = getBitsFast (num1);
+            for (; --i >= 0;)       *scf++ = getBitsUnchecked (num0);
+            for (i = 18; --i >= 0;) *scf++ = getBitsUnchecked (num1);
 
             *scf++ = 0;
             *scf++ = 0;
@@ -2390,8 +2374,8 @@ private:
 
             if (scfsi < 0)
             {
-                for (int i = 11; --i >= 0;)   *scf++ = getBitsFast (num0);
-                for (int j = 10; --j >= 0;)   *scf++ = getBitsFast (num1);
+                for (int i = 11; --i >= 0;)   *scf++ = getBitsUnchecked (num0);
+                for (int j = 10; --j >= 0;)   *scf++ = getBitsUnchecked (num1);
                 numBits = (num0 + num1) * 10 + num0;
             }
             else
@@ -2399,7 +2383,7 @@ private:
                 numBits = 0;
                 if ((scfsi & 8) == 0)
                 {
-                    for (int i = 6; --i >= 0;)  *scf++ = getBitsFast (num0);
+                    for (int i = 6; --i >= 0;)  *scf++ = getBitsUnchecked (num0);
                     numBits += num0 * 6;
                 }
                 else
@@ -2407,7 +2391,7 @@ private:
 
                 if ((scfsi & 4) == 0)
                 {
-                    for (int i = 5; --i >= 0;)  *scf++ = getBitsFast (num0);
+                    for (int i = 5; --i >= 0;)  *scf++ = getBitsUnchecked (num0);
                     numBits += num0 * 5;
                 }
                 else
@@ -2415,7 +2399,7 @@ private:
 
                 if ((scfsi & 2) == 0)
                 {
-                    for (int i = 5; --i >= 0;)  *scf++ = getBitsFast (num1);
+                    for (int i = 5; --i >= 0;)  *scf++ = getBitsUnchecked (num1);
                     numBits += num1 * 5;
                 }
                 else
@@ -2423,7 +2407,7 @@ private:
 
                 if ((scfsi & 1) == 0)
                 {
-                    for (int i = 5; --i >= 0;)  *scf++ = getBitsFast (num1);
+                    for (int i = 5; --i >= 0;)  *scf++ = getBitsUnchecked (num1);
                     numBits += num1 * 5;
                 }
                 else
@@ -2469,7 +2453,7 @@ private:
             if (num)
             {
                 for (int j = 0; j < (int) (data[i]); ++j)
-                    *scf++ = getBitsFast (num);
+                    *scf++ = getBitsUnchecked (num);
 
                 numBits += data[i] * num;
             }
@@ -2592,12 +2576,12 @@ private:
                         max[lwin] = cb;
                         part2remain -= h->linbits + 1;
                         x += getBits ((int) h->linbits);
-                        *xrpnt = constants.ispow[x] * (getOneBit() ? -v : v);
+                        *xrpnt = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                     }
                     else if (x)
                     {
                         max[lwin] = cb;
-                        *xrpnt = constants.ispow[x] * (getOneBit() ? -v : v);
+                        *xrpnt = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                         --part2remain;
                     }
                     else
@@ -2610,12 +2594,12 @@ private:
                         max[lwin] = cb;
                         part2remain -= h->linbits + 1;
                         y += getBits ((int) h->linbits);
-                        *xrpnt = constants.ispow[y] * (getOneBit() ? -v : v);
+                        *xrpnt = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                     }
                     else if (y)
                     {
                         max[lwin] = cb;
-                        *xrpnt = constants.ispow[y] * (getOneBit() ? -v : v);
+                        *xrpnt = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                         --part2remain;
                     }
                     else
@@ -2750,12 +2734,12 @@ private:
                         max = cb;
                         part2remain -= h->linbits + 1;
                         x += getBits ((int) h->linbits);
-                        *xrpnt++ = constants.ispow[x] * (getOneBit() ? -v : v);
+                        *xrpnt++ = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                     }
                     else if (x)
                     {
                         max = cb;
-                        *xrpnt++ = constants.ispow[x] * (getOneBit() ? -v : v);
+                        *xrpnt++ = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                         --part2remain;
                     }
                     else
@@ -2766,12 +2750,12 @@ private:
                         max = cb;
                         part2remain -= h->linbits + 1;
                         y += getBits ((int) h->linbits);
-                        *xrpnt++ = constants.ispow[y] * (getOneBit() ? -v : v);
+                        *xrpnt++ = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                     }
                     else if (y)
                     {
                         max = cb;
-                        *xrpnt++ = constants.ispow[y] * (getOneBit() ? -v : v);
+                        *xrpnt++ = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                         --part2remain;
                     }
                     else

@@ -81,7 +81,6 @@ public:
           component (component_),
           dc (0)
     {
-        initialiseGLExtensions();
         jassert (component != nullptr);
 
         createNativeWindow();
@@ -99,6 +98,7 @@ public:
         if (renderContext != 0)
         {
             makeActive();
+            initialiseGLExtensions();
             setPixelFormat (pixelFormat);
 
             if (contextToShareWith != 0)
@@ -201,7 +201,7 @@ public:
             atts[n++] = pixelFormat.accumulationBufferAlphaBits;
 
             if (pixelFormat.multisamplingLevel > 0
-                  && OpenGLHelpers::isExtensionSupported ("WGL_ARB_multisample"))
+                  && OpenGLHelpers::isExtensionSupported ("GL_ARB_multisample"))
             {
                 atts[n++] = WGL_SAMPLE_BUFFERS_ARB;
                 atts[n++] = 1;
@@ -212,7 +212,7 @@ public:
             atts[n++] = 0;
             jassert (n <= numElementsInArray (atts));
 
-            UINT formatsCount;
+            UINT formatsCount = 0;
             wglChoosePixelFormatARB (dc, atts, nullptr, 1, &format, &formatsCount);
         }
 
