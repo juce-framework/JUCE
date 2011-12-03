@@ -146,15 +146,25 @@ public:
     void fillWith (uint8 valueToUse) noexcept;
 
     /** Adds another block of data to the end of this one.
-
-        This block's size will be increased accordingly.
+        The data pointer must not be null. This block's size will be increased accordingly.
     */
     void append (const void* data, size_t numBytes);
 
-    /** Exchanges the contents of this and another memory block.
-        No actual copying is required for this, so it's very fast.
+    /** Inserts some data into the block.
+        The dataToInsert pointer must not be null. This block's size will be increased accordingly.
+        If the insert position lies outside the valid range of the block, it will be clipped to
+        within the range before being used.
     */
-    void swapWith (MemoryBlock& other) noexcept;
+    void insert (const void* dataToInsert, size_t numBytesToInsert, size_t insertPosition);
+
+    /** Chops out a section  of the block.
+
+        This will remove a section of the memory block and close the gap around it,
+        shifting any subsequent data downwards and reducing the size of the block.
+
+        If the range specified goes beyond the size of the block, it will be clipped.
+    */
+    void removeSection (size_t startByte, size_t numBytesToRemove);
 
     //==============================================================================
     /** Copies data into this MemoryBlock from a memory address.
@@ -179,14 +189,11 @@ public:
                  int sourceOffset,
                  size_t numBytes) const noexcept;
 
-    /** Chops out a section  of the block.
-
-        This will remove a section of the memory block and close the gap around it,
-        shifting any subsequent data downwards and reducing the size of the block.
-
-        If the range specified goes beyond the size of the block, it will be clipped.
+    //==============================================================================
+    /** Exchanges the contents of this and another memory block.
+        No actual copying is required for this, so it's very fast.
     */
-    void removeSection (size_t startByte, size_t numBytesToRemove);
+    void swapWith (MemoryBlock& other) noexcept;
 
     //==============================================================================
     /** Attempts to parse the contents of the block as a zero-terminated UTF8 string. */

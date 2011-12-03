@@ -171,9 +171,44 @@ void MemoryBlock::append (const void* const srcData, const size_t numBytes)
 {
     if (numBytes > 0)
     {
+        jassert (srcData != nullptr); // this must not be null!
         const size_t oldSize = size;
         setSize (size + numBytes);
         memcpy (data + oldSize, srcData, numBytes);
+    }
+}
+
+void MemoryBlock::insert (const void* const srcData, const size_t numBytes, size_t insertPosition)
+{
+    if (numBytes > 0)
+    {
+        jassert (srcData != nullptr); // this must not be null!
+        insertPosition = jmin (size, insertPosition);
+        const size_t trailingDataSize = size - insertPosition;
+        setSize (size + numBytes, false);
+
+        if (trailingDataSize > 0)
+            memmove (data + insertPosition + numBytes,
+                     data + insertPosition,
+                     trailingDataSize);
+
+        memcpy (data + insertPosition, srcData, numBytes);
+    }
+}
+
+void MemoryBlock::removeSection (const size_t startByte, const size_t numBytesToRemove)
+{
+    if (startByte + numBytesToRemove >= size)
+    {
+        setSize (startByte);
+    }
+    else if (numBytesToRemove > 0)
+    {
+        memmove (data + startByte,
+                 data + startByte + numBytesToRemove,
+                 size - (startByte + numBytesToRemove));
+
+        setSize (size - numBytesToRemove);
     }
 }
 
@@ -217,22 +252,6 @@ void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const noexcep
 
     if (num > 0)
         memcpy (d, data + offset, num);
-}
-
-void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove)
-{
-    if (startByte + numBytesToRemove >= size)
-    {
-        setSize (startByte);
-    }
-    else if (numBytesToRemove > 0)
-    {
-        memmove (data + startByte,
-                 data + startByte + numBytesToRemove,
-                 size - (startByte + numBytesToRemove));
-
-        setSize (size - numBytesToRemove);
-    }
 }
 
 String MemoryBlock::toString() const
