@@ -25,6 +25,8 @@
 
 #if JUCE_QUICKTIME && ! (JUCE_64BIT || JUCE_IOS)
 
+END_JUCE_NAMESPACE
+
 #if ! JUCE_WINDOWS
  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
  #define Component CarbonDummyCompName
@@ -381,7 +383,5 @@ AudioFormatWriter* QuickTimeAudioFormat::createWriterFor (OutputStream* /*stream
     jassertfalse; // not yet implemented!
     return nullptr;
 }
-
-END_JUCE_NAMESPACE
 
 #endif

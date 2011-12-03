@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 AudioFormatReader::AudioFormatReader (InputStream* const in,
                                       const String& formatName_)
     : sampleRate (0),
@@ -389,6 +386,3 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
 
     return -1;
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,13 +23,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-
-#include "../format/juce_AudioFormat.h"
-
 #if JUCE_USE_FLAC || defined (DOXYGEN)
-
 
 //==============================================================================
 /**
@@ -70,4 +64,3 @@ private:
 
 
 #endif
-#endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__

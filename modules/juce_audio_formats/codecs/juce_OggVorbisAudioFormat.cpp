@@ -29,8 +29,6 @@
  #define __MACOSX__ 1
 #endif
 
-BEGIN_JUCE_NAMESPACE
-
 namespace OggVorbisNamespace
 {
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
@@ -482,7 +480,5 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 
     return 1;
 }
-
-END_JUCE_NAMESPACE
 
 #endif

@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 AudioFormatWriter::AudioFormatWriter (OutputStream* const out,
                                       const String& formatName_,
                                       const double rate,
@@ -297,5 +294,3 @@ void AudioFormatWriter::ThreadedWriter::setDataReceiver (AudioFormatWriter::Thre
 {
     buffer->setDataReceiver (receiver);
 }
-
-END_JUCE_NAMESPACE

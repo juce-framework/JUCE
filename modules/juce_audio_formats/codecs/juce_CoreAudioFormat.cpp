@@ -25,8 +25,6 @@
 
 #if JUCE_MAC || JUCE_IOS
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 namespace
 {
@@ -259,7 +257,5 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream* streamToWrite
     jassertfalse; // not yet implemented!
     return nullptr;
 }
-
-END_JUCE_NAMESPACE
 
 #endif

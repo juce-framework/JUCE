@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 static const char* const aiffFormatName = "AIFF file";
 static const char* const aiffExtensions[] = { ".aiff", ".aif", 0 };
@@ -719,5 +717,3 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
 
     return nullptr;
 }
-
-END_JUCE_NAMESPACE

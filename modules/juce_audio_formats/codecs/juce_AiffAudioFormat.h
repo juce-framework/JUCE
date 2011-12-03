@@ -23,12 +23,6 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-
-#include "../format/juce_AudioFormat.h"
-
-
 //==============================================================================
 /**
     Reads and Writes AIFF format audio files.
@@ -70,6 +64,3 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AiffAudioFormat);
 };
-
-
-#endif   // __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__

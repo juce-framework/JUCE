@@ -23,13 +23,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-#include "../format/juce_AudioFormat.h"
-
 #if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
-
 
 //==============================================================================
 /**
@@ -90,4 +84,3 @@ private:
 
 
 #endif
-#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__

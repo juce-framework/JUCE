@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 AudioSubsectionReader::AudioSubsectionReader (AudioFormatReader* const source_,
                                               const int64 startSample_,
                                               const int64 length_,
@@ -84,5 +81,3 @@ void AudioSubsectionReader::readMaxLevels (int64 startSampleInFile,
                            lowestLeft, highestLeft,
                            lowestRight, highestRight);
 }
-
-END_JUCE_NAMESPACE

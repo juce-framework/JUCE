@@ -23,12 +23,7 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-#include "../format/juce_AudioFormat.h"
 #if JUCE_QUICKTIME
-
 
 //==============================================================================
 /**
@@ -73,4 +68,3 @@ private:
 
 
 #endif
-#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__

@@ -36,8 +36,6 @@
 */
 #if JUCE_USE_MP3AUDIOFORMAT
 
-BEGIN_JUCE_NAMESPACE
-
 namespace MP3Decoder
 {
 
@@ -3168,5 +3166,4 @@ AudioFormatWriter* MP3AudioFormat::createWriterFor (OutputStream*, double /*samp
     return nullptr;
 }
 
-END_JUCE_NAMESPACE
 #endif

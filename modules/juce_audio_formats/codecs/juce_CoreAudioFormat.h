@@ -23,11 +23,6 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_COREAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_COREAUDIOFORMAT_JUCEHEADER__
-
-#include "../format/juce_AudioFormat.h"
-
 #if JUCE_MAC || JUCE_IOS
 
 //==============================================================================
@@ -71,4 +66,3 @@ private:
 };
 
 #endif
-#endif   // __JUCE_COREAUDIOFORMAT_JUCEHEADER__

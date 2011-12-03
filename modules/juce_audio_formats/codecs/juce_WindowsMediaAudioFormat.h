@@ -23,28 +23,31 @@
   ==============================================================================
 */
 
-//==============================================================================
-AudioFormat::AudioFormat (const String& name, const StringArray& extensions)
-  : formatName (name),
-    fileExtensions (extensions)
-{
-}
-
-AudioFormat::~AudioFormat()
-{
-}
+#if JUCE_WINDOWS
 
 //==============================================================================
-bool AudioFormat::canHandleFile (const File& f)
+/**
+    Audio format which uses the Windows Media codecs (Windows only).
+*/
+class WindowsMediaAudioFormat  : public AudioFormat
 {
-    for (int i = 0; i < fileExtensions.size(); ++i)
-        if (f.hasFileExtension (fileExtensions[i]))
-            return true;
+public:
+    //==============================================================================
+    WindowsMediaAudioFormat();
+    ~WindowsMediaAudioFormat();
 
-    return false;
-}
+    //==============================================================================
+    Array<int> getPossibleSampleRates();
+    Array<int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
 
-const String& AudioFormat::getFormatName() const                { return formatName; }
-const StringArray& AudioFormat::getFileExtensions() const       { return fileExtensions; }
-bool AudioFormat::isCompressed()                                { return false; }
-StringArray AudioFormat::getQualityOptions()                    { return StringArray(); }
+    //==============================================================================
+    AudioFormatReader* createReaderFor (InputStream*, bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream*, double sampleRateToUse,
+                                        unsigned int numberOfChannels, int bitsPerSample,
+                                        const StringPairArray& metadataValues, int qualityOptionIndex);
+};
+
+#endif

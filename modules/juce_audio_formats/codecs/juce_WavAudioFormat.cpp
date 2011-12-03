@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 static const char* const wavFormatName = "WAV file";
 static const char* const wavExtensions[] = { ".wav", ".bwf", 0 };
@@ -1100,6 +1098,3 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 
     return slowCopyWavFileWithNewMetadata (wavFile, newMetadata);
 }
-
-
-END_JUCE_NAMESPACE

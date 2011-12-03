@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 AudioFormatReaderSource::AudioFormatReaderSource (AudioFormatReader* const reader_,
                                                   const bool deleteReaderWhenThisIsDeleted)
     : reader (reader_, deleteReaderWhenThisIsDeleted),
@@ -87,5 +84,3 @@ void AudioFormatReaderSource::getNextAudioBlock (const AudioSourceChannelInfo& i
         }
     }
 }
-
-END_JUCE_NAMESPACE

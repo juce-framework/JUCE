@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 SamplerSound::SamplerSound (const String& name_,
                             AudioFormatReader& source,
@@ -236,5 +234,3 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
         }
     }
 }
-
-END_JUCE_NAMESPACE

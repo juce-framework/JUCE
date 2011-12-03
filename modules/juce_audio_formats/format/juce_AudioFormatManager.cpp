@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 AudioFormatManager::AudioFormatManager()
     : defaultFormatIndex (0)
@@ -192,6 +190,3 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
 
     return nullptr;
 }
-
-
-END_JUCE_NAMESPACE

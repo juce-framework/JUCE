@@ -78,12 +78,19 @@
   #endif
  #endif
 
+ #include <wmsdk.h>
+#endif
+
 //==============================================================================
-#elif JUCE_ANDROID
- BEGIN_JUCE_NAMESPACE
+BEGIN_JUCE_NAMESPACE
+
+#if JUCE_ANDROID
  #include "../juce_core/native/juce_android_JNIHelpers.h"
- END_JUCE_NAMESPACE
  #undef JUCE_QUICKTIME
+#endif
+
+#if JUCE_WINDOWS
+ #include "../juce_core/native/juce_win32_ComSmartPtr.h"
 #endif
 
 // START_AUTOINCLUDE format/*.cpp, sampler/*.cpp, codecs/*.cpp
@@ -101,4 +108,7 @@
 #include "codecs/juce_OggVorbisAudioFormat.cpp"
 #include "codecs/juce_QuickTimeAudioFormat.cpp"
 #include "codecs/juce_WavAudioFormat.cpp"
+#include "codecs/juce_WindowsMediaAudioFormat.cpp"
 // END_AUTOINCLUDE
+
+END_JUCE_NAMESPACE

@@ -85,25 +85,14 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
  #include "format/juce_AudioSubsectionReader.h"
 #endif
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
- #include "codecs/juce_AiffAudioFormat.h"
-#endif
-#ifndef __JUCE_COREAUDIOFORMAT_JUCEHEADER__
- #include "codecs/juce_CoreAudioFormat.h"
-#endif
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
- #include "codecs/juce_FlacAudioFormat.h"
-#endif
+#include "codecs/juce_AiffAudioFormat.h"
+#include "codecs/juce_CoreAudioFormat.h"
+#include "codecs/juce_FlacAudioFormat.h"
 #include "codecs/juce_MP3AudioFormat.h"
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
- #include "codecs/juce_OggVorbisAudioFormat.h"
-#endif
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
- #include "codecs/juce_QuickTimeAudioFormat.h"
-#endif
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
- #include "codecs/juce_WavAudioFormat.h"
-#endif
+#include "codecs/juce_OggVorbisAudioFormat.h"
+#include "codecs/juce_QuickTimeAudioFormat.h"
+#include "codecs/juce_WavAudioFormat.h"
+#include "codecs/juce_WindowsMediaAudioFormat.h"
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
  #include "sampler/juce_Sampler.h"
 #endif

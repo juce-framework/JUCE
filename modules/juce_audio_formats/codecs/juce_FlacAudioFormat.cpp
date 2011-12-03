@@ -25,8 +25,6 @@
 
 #if JUCE_USE_FLAC
 
-BEGIN_JUCE_NAMESPACE
-
 namespace FlacNamespace
 {
 #if JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE)
@@ -534,7 +532,5 @@ StringArray FlacAudioFormat::getQualityOptions()
     const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
     return StringArray (options);
 }
-
-END_JUCE_NAMESPACE
 
 #endif
