@@ -38,7 +38,7 @@ public:
     }
 
     JUCE_COMRESULT Commit (DWORD)                        { return S_OK; }
-    JUCE_COMRESULT Write (void const*, ULONG, ULONG*)    { return E_NOTIMPL; }
+    JUCE_COMRESULT Write (const void*, ULONG, ULONG*)    { return E_NOTIMPL; }
     JUCE_COMRESULT Clone (IStream**)                     { return E_NOTIMPL; }
     JUCE_COMRESULT SetSize (ULARGE_INTEGER)              { return E_NOTIMPL; }
     JUCE_COMRESULT Revert()                              { return E_NOTIMPL; }
@@ -145,10 +145,16 @@ public:
         {
             HRESULT hr = wmCreateSyncReader (nullptr, WMT_RIGHT_PLAYBACK, wmSyncReader.resetAndGetPointerAddress());
             hr = wmSyncReader->OpenStream (new JuceIStream (*input));
-            hr = wmSyncReader->SetReadStreamSamples (0, false);
 
-            scanFileForDetails();
-            ok = sampleRate > 0;
+            if (SUCCEEDED (hr))
+            {
+                WORD streamNum = 1;
+                hr = wmSyncReader->GetStreamNumberForOutput (0, &streamNum);
+                hr = wmSyncReader->SetReadStreamSamples (streamNum, false);
+
+                scanFileForDetails();
+                ok = sampleRate > 0;
+            }
         }
     }
 

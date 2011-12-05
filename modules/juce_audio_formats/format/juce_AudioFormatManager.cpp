@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-//==============================================================================
+
 AudioFormatManager::AudioFormatManager()
     : defaultFormatIndex (0)
 {
@@ -62,10 +62,6 @@ void AudioFormatManager::registerBasicFormats()
     registerFormat (new WavAudioFormat(), true);
     registerFormat (new AiffAudioFormat(), false);
 
-   #if JUCE_MAC || JUCE_IOS
-    registerFormat (new CoreAudioFormat(), false);
-   #endif
-
    #if JUCE_USE_FLAC
     registerFormat (new FlacAudioFormat(), false);
    #endif
@@ -74,7 +70,13 @@ void AudioFormatManager::registerBasicFormats()
     registerFormat (new OggVorbisAudioFormat(), false);
    #endif
 
-   #if JUCE_USE_MP3AUDIOFORMAT
+   #if JUCE_MAC || JUCE_IOS
+    registerFormat (new CoreAudioFormat(), false);
+   #elif JUCE_WINDOWS
+    registerFormat (new WindowsMediaAudioFormat(), false);
+   #elif JUCE_USE_MP3AUDIOFORMAT
+    // The software MP3 decoder is only used as a default format if
+    // there isn't an OS-provided alternative.
     registerFormat (new MP3AudioFormat(), false);
    #endif
 }
