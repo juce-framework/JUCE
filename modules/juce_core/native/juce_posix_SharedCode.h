@@ -682,11 +682,16 @@ public:
        #if JUCE_IOS
         handle = 1; // On iOS we can't run multiple apps, so just assume success.
        #else
-        // Note that we can't get the normal temp folder here, as it might be different for each app.
-        File tempFolder ("/var/tmp");
 
-        if (! tempFolder.isDirectory())
-            tempFolder = "/tmp";
+         // Note that we can't get the normal temp folder here, as it might be different for each app.
+        #if JUCE_MAC
+         File tempFolder ("~/Library/Caches/com.juce.locks");
+        #else
+         File tempFolder ("/var/tmp");
+
+         if (! tempFolder.isDirectory())
+             tempFolder = "/tmp";
+        #endif
 
         const File temp (tempFolder.getChildFile (name));
 

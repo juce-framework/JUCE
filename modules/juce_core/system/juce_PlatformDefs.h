@@ -205,7 +205,7 @@
   #define JUCE_CATCH_ALL            catch (...) {}
   #define JUCE_CATCH_ALL_ASSERT     catch (...) { jassertfalse; }
 
-  #if JUCE_ONLY_BUILD_CORE_LIBRARY
+  #if ! JUCE_MODULE_AVAILABLE_juce_gui_basics
     #define JUCE_CATCH_EXCEPTION    JUCE_CATCH_ALL
   #else
     /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplication

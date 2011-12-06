@@ -90,6 +90,13 @@
  #define JUCE_ZLIB_INCLUDE_PATH <zlib.h>
 #endif
 
+/*  Config: JUCE_CATCH_UNHANDLED_EXCEPTIONS
+    If enabled, this will add some exception-catching code to forward unhandled exceptions
+    to your JUCEApplication::unhandledException() callback.
+*/
+#ifndef JUCE_CATCH_UNHANDLED_EXCEPTIONS
+ //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
+#endif
 
 //=============================================================================
 //=============================================================================
