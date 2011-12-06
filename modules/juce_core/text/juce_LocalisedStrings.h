@@ -29,18 +29,6 @@
 #include "juce_StringPairArray.h"
 #include "../files/juce_File.h"
 
-
-//==============================================================================
-/** Used in the same way as the T(text) macro, this will attempt to translate a
-    string into a localised version using the LocalisedStrings class.
-
-    @see LocalisedStrings
-*/
-#define TRANS(stringLiteral) \
-    juce::LocalisedStrings::translateWithCurrentMappings (stringLiteral)
-
-
-
 //==============================================================================
 /**
     Used to convert strings to localised foreign-language versions.
@@ -149,10 +137,14 @@ public:
 
     //==============================================================================
     /** Attempts to look up a string and return its localised version.
-
         If the string isn't found in the list, the original string will be returned.
     */
     String translate (const String& text) const;
+
+    /** Attempts to look up a string and return its localised version.
+        If the string isn't found in the list, the resultIfNotFound string will be returned.
+    */
+    String translate (const String& text, const String& resultIfNotFound) const;
 
     /** Returns the name of the language specified in the translation file.
 
@@ -191,6 +183,32 @@ private:
 
     JUCE_LEAK_DETECTOR (LocalisedStrings);
 };
+
+//==============================================================================
+#ifndef TRANS
+ /** Uses the LocalisedStrings class to translate the given string literal.
+     This macro is provided for backwards-compatibility, and just calls the translate()
+     function. In new code, it's recommended that you just call translate() directly
+     instead, and avoid using macros.
+     @see translate(), LocalisedStrings
+ */
+ #define TRANS(stringLiteral) juce::translate (stringLiteral)
+#endif
+
+/** Uses the LocalisedStrings class to translate the given string literal.
+    @see LocalisedStrings
+*/
+String translate (const String& stringLiteral);
+
+/** Uses the LocalisedStrings class to translate the given string literal.
+    @see LocalisedStrings
+*/
+String translate (const char* stringLiteral);
+
+/** Uses the LocalisedStrings class to translate the given string literal.
+    @see LocalisedStrings
+*/
+String translate (const String& stringLiteral, const String& resultIfNotFound);
 
 
 #endif   // __JUCE_LOCALISEDSTRINGS_JUCEHEADER__

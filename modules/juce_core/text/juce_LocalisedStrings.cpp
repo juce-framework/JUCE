@@ -46,6 +46,11 @@ String LocalisedStrings::translate (const String& text) const
     return translations.getValue (text, text);
 }
 
+String LocalisedStrings::translate (const String& text, const String& resultIfNotFound) const
+{
+    return translations.getValue (text, resultIfNotFound);
+}
+
 namespace
 {
    #if JUCE_CHECK_MEMORY_LEAKS
@@ -155,17 +160,34 @@ LocalisedStrings* LocalisedStrings::getCurrentMappings()
 
 String LocalisedStrings::translateWithCurrentMappings (const String& text)
 {
-    const SpinLock::ScopedLockType sl (currentMappingsLock);
-
-    if (currentMappings != nullptr)
-        return currentMappings->translate (text);
-
-    return text;
+    return juce::translate (text);
 }
 
 String LocalisedStrings::translateWithCurrentMappings (const char* text)
 {
-    return translateWithCurrentMappings (String (text));
+    return juce::translate (String (text));
+}
+
+String translate (const String& text)
+{
+    return translate (text, text);
+}
+
+String translate (const char* const literal)
+{
+    const String text (literal);
+    return translate (text, text);
+}
+
+String translate (const String& text, const String& resultIfNotFound)
+{
+    const SpinLock::ScopedLockType sl (currentMappingsLock);
+
+    const LocalisedStrings* const currentMappings = LocalisedStrings::getCurrentMappings();
+    if (currentMappings != nullptr)
+        return currentMappings->translate (text, resultIfNotFound);
+
+    return resultIfNotFound;
 }
 
 

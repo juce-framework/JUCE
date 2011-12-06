@@ -124,6 +124,15 @@ namespace Ids
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
+    DECLARE_ID (upImage);
+    DECLARE_ID (downImage);
+    DECLARE_ID (overImage);
+    DECLARE_ID (upOverlay);
+    DECLARE_ID (downOverlay);
+    DECLARE_ID (overOverlay);
+    DECLARE_ID (upOpacity);
+    DECLARE_ID (downOpacity);
+    DECLARE_ID (overOpacity);
     const Identifier class_ ("class");
     const Identifier id_ ("id");
 

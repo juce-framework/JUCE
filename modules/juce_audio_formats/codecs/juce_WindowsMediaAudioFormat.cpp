@@ -132,7 +132,6 @@ class WMAudioReader   : public AudioFormatReader
 public:
     WMAudioReader (InputStream* const input_)
         : AudioFormatReader (input_, TRANS (wmFormatName)),
-          ok (false),
           wmvCoreLib ("Wmvcore.dll"),
           currentPosition (0),
           bufferStart (0), bufferEnd (0)
@@ -143,8 +142,12 @@ public:
 
         if (wmCreateSyncReader != nullptr)
         {
+            CoInitialize (0);
+
             HRESULT hr = wmCreateSyncReader (nullptr, WMT_RIGHT_PLAYBACK, wmSyncReader.resetAndGetPointerAddress());
-            hr = wmSyncReader->OpenStream (new JuceIStream (*input));
+
+            if (SUCCEEDED (hr))
+                hr = wmSyncReader->OpenStream (new JuceIStream (*input));
 
             if (SUCCEEDED (hr))
             {
@@ -153,7 +156,6 @@ public:
                 hr = wmSyncReader->SetReadStreamSamples (streamNum, false);
 
                 scanFileForDetails();
-                ok = sampleRate > 0;
             }
         }
     }
@@ -170,7 +172,7 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
     {
-        if (! ok)
+        if (sampleRate <= 0)
             return false;
 
         if (startSampleInFile != currentPosition)
@@ -245,8 +247,6 @@ public:
         return true;
     }
 
-    bool ok;
-
 private:
     DynamicLibrary wmvCoreLib;
     ComSmartPtr<IWMSyncReader> wmSyncReader;
@@ -259,36 +259,49 @@ private:
         ComSmartPtr<IWMHeaderInfo> wmHeaderInfo;
         HRESULT hr = wmSyncReader.QueryInterface (wmHeaderInfo);
 
-        QWORD lengthInNanoseconds = 0;
-        WORD lengthOfLength = sizeof (lengthInNanoseconds);
-        WORD wmStreamNum = 0;
-        WMT_ATTR_DATATYPE wmAttrDataType;
-        hr = wmHeaderInfo->GetAttributeByName (&wmStreamNum, L"Duration", &wmAttrDataType,
-                                               (BYTE*) &lengthInNanoseconds, &lengthOfLength);
-
-        ComSmartPtr<IWMStreamConfig> wmStreamConfig;
-        ComSmartPtr<IWMProfile> wmProfile;
-        hr = wmSyncReader.QueryInterface (wmProfile);
-        hr = wmProfile->GetStream (0, wmStreamConfig.resetAndGetPointerAddress());
-
-        ComSmartPtr<IWMMediaProps> wmMediaProperties;
-        hr = wmStreamConfig.QueryInterface (wmMediaProperties);
-
-        DWORD sizeMediaType;
-        hr = wmMediaProperties->GetMediaType (0, &sizeMediaType);
-
-        HeapBlock<WM_MEDIA_TYPE> mediaType;
-        mediaType.malloc (sizeMediaType, 1);
-        hr = wmMediaProperties->GetMediaType (mediaType, &sizeMediaType);
-
-        if (mediaType->majortype == WMMEDIATYPE_Audio)
+        if (SUCCEEDED (hr))
         {
-            const WAVEFORMATEX* const inputFormat = reinterpret_cast<WAVEFORMATEX*> (mediaType->pbFormat);
+            QWORD lengthInNanoseconds = 0;
+            WORD lengthOfLength = sizeof (lengthInNanoseconds);
+            WORD streamNum = 0;
+            WMT_ATTR_DATATYPE wmAttrDataType;
+            hr = wmHeaderInfo->GetAttributeByName (&streamNum, L"Duration", &wmAttrDataType,
+                                                   (BYTE*) &lengthInNanoseconds, &lengthOfLength);
 
-            sampleRate = inputFormat->nSamplesPerSec;
-            numChannels = inputFormat->nChannels;
-            bitsPerSample = inputFormat->wBitsPerSample;
-            lengthInSamples = (lengthInNanoseconds * sampleRate) / 10000000;
+            ComSmartPtr<IWMProfile> wmProfile;
+            hr = wmSyncReader.QueryInterface (wmProfile);
+
+            if (SUCCEEDED (hr))
+            {
+                ComSmartPtr<IWMStreamConfig> wmStreamConfig;
+                hr = wmProfile->GetStream (0, wmStreamConfig.resetAndGetPointerAddress());
+
+                if (SUCCEEDED (hr))
+                {
+                    ComSmartPtr<IWMMediaProps> wmMediaProperties;
+                    hr = wmStreamConfig.QueryInterface (wmMediaProperties);
+
+                    if (SUCCEEDED (hr))
+                    {
+                        DWORD sizeMediaType;
+                        hr = wmMediaProperties->GetMediaType (0, &sizeMediaType);
+
+                        HeapBlock<WM_MEDIA_TYPE> mediaType;
+                        mediaType.malloc (sizeMediaType, 1);
+                        hr = wmMediaProperties->GetMediaType (mediaType, &sizeMediaType);
+
+                        if (mediaType->majortype == WMMEDIATYPE_Audio)
+                        {
+                            const WAVEFORMATEX* const inputFormat = reinterpret_cast<WAVEFORMATEX*> (mediaType->pbFormat);
+
+                            sampleRate = inputFormat->nSamplesPerSec;
+                            numChannels = inputFormat->nChannels;
+                            bitsPerSample = inputFormat->wBitsPerSample;
+                            lengthInSamples = (lengthInNanoseconds * sampleRate) / 10000000;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -316,7 +329,7 @@ AudioFormatReader* WindowsMediaAudioFormat::createReaderFor (InputStream* source
 {
     ScopedPointer<WindowsMediaCodec::WMAudioReader> r (new WindowsMediaCodec::WMAudioReader (sourceStream));
 
-    if (r->ok)
+    if (r->sampleRate > 0)
         return r.release();
 
     if (! deleteStreamIfOpeningFails)
