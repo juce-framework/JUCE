@@ -39,25 +39,25 @@ public:
         infoLabel.setText ("These sliders demonstrate how components can be added as children "
                            "of an OpenGLComponent, in which case, their content will be rendered into "
                            "an OpenGL framebuffer and efficiently overlaid onto your GL content.", false);
-        infoLabel.setBounds ("parent.width * 0.05, bottom - 150, parent.width * 0.4, parent.height - 60");
         infoLabel.setInterceptsMouseClicks (false, false);
         addAndMakeVisible (&infoLabel);
+        infoLabel.setBounds ("parent.width * 0.05, bottom - 150, parent.width * 0.4, parent.height - 60");
 
         speedSlider.setRange (-10.0, 10.0, 0.1);
         speedSlider.setPopupMenuEnabled (true);
         speedSlider.setValue (Random::getSystemRandom().nextDouble() * 3.0, false, false);
         speedSlider.setSliderStyle (Slider::LinearHorizontal);
         speedSlider.setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
-        speedSlider.setBounds ("parent.width * 0.05, parent.height - 65, parent.width * 0.6, top + 24");
         addAndMakeVisible (&speedSlider);
+        speedSlider.setBounds ("parent.width * 0.05, parent.height - 65, parent.width * 0.6, top + 24");
 
         sizeSlider.setRange (0.2, 2.0, 0.01);
         sizeSlider.setPopupMenuEnabled (true);
         sizeSlider.setValue (Random::getSystemRandom().nextDouble() + 0.5, false, false);
         sizeSlider.setSliderStyle (Slider::LinearHorizontal);
         sizeSlider.setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
-        sizeSlider.setBounds ("parent.width * 0.05, parent.height - 35, parent.width * 0.6, top + 24");
         addAndMakeVisible (&sizeSlider);
+        sizeSlider.setBounds ("parent.width * 0.05, parent.height - 35, parent.width * 0.6, top + 24");
 
         startTimer (1000 / 30);
     }

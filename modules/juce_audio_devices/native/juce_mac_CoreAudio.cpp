@@ -177,20 +177,25 @@ public:
 
         const ScopedLock sl (callbackLock);
 
-        Float64 sr;
-        UInt32 size = sizeof (Float64);
-
         AudioObjectPropertyAddress pa;
-        pa.mSelector = kAudioDevicePropertyNominalSampleRate;
         pa.mScope = kAudioObjectPropertyScopeWildcard;
         pa.mElement = kAudioObjectPropertyElementMaster;
 
+        UInt32 isAlive;
+        UInt32 size = sizeof (isAlive);
+        pa.mSelector = kAudioDevicePropertyDeviceIsAlive;
+        if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &isAlive))
+             && isAlive == 0)
+            return;
+
+        Float64 sr;
+        size = sizeof (sr);
+        pa.mSelector = kAudioDevicePropertyNominalSampleRate;
         if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &sr)))
             sampleRate = sr;
 
         UInt32 framesPerBuf;
         size = sizeof (framesPerBuf);
-
         pa.mSelector = kAudioDevicePropertyBufferFrameSize;
         if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &framesPerBuf)))
         {
