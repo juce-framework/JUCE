@@ -40,6 +40,8 @@ class MouseInputSourceInternal;
 class ComponentPeer;
 class MarkerList;
 class RelativeRectangle;
+class CachedComponentImage;
+
 
 //==============================================================================
 /**
@@ -958,8 +960,9 @@ public:
         There's no guarantee about how soon after calling repaint() the redraw will actually
         happen, and other queued events may be delivered before a redraw is done.
 
-        If the setBufferedToImage() method has been used to cause this component
-        to use a buffer, the repaint() call will invalidate the component's buffer.
+        If the setBufferedToImage() method has been used to cause this component to use a
+        buffer, the repaint() call will invalidate the cached buffer. If setCachedComponentImage()
+        has been used to provide a custom image cache, that cache will be invalidated appropriately.
 
         To redraw just a subsection of the component rather than the whole thing,
         use the repaint (int, int, int, int) method.
@@ -2227,12 +2230,24 @@ public:
     */
     void setPositioner (Positioner* newPositioner);
 
+    /** Gives the component a CachedComponentImage that should be used to buffer its painting.
+        The object that is passed-in will be owned by this component, and will be deleted automatically
+        later on.
+        @see setBufferedToImage
+    */
+    void setCachedComponentImage (CachedComponentImage* newCachedImage);
+
+    /** Returns the object that was set by setCachedComponentImage().
+        @see setCachedComponentImage
+    */
+    CachedComponentImage* getCachedComponentImage() const noexcept  { return cachedImage; }
+
     //==============================================================================
    #ifndef DOXYGEN
     // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
-    JUCE_DEPRECATED (const Point<int> relativePositionToGlobal (const Point<int>&) const);
-    JUCE_DEPRECATED (const Point<int> globalPositionToRelative (const Point<int>&) const);
-    JUCE_DEPRECATED (const Point<int> relativePositionToOtherComponent (const Component*, const Point<int>&) const);
+    JUCE_DEPRECATED (Point<int> relativePositionToGlobal (const Point<int>&) const);
+    JUCE_DEPRECATED (Point<int> globalPositionToRelative (const Point<int>&) const);
+    JUCE_DEPRECATED (Point<int> relativePositionToOtherComponent (const Component*, const Point<int>&) const);
    #endif
 
 private:
@@ -2254,7 +2269,7 @@ private:
     LookAndFeel* lookAndFeel;
     MouseCursor cursor;
     ImageEffectFilter* effect;
-    Image bufferedImage;
+    ScopedPointer <CachedComponentImage> cachedImage;
 
     class MouseListenerList;
     friend class MouseListenerList;
@@ -2315,10 +2330,11 @@ private:
     void internalModifierKeysChanged();
     void internalChildrenChanged();
     void internalHierarchyChanged();
+    void internalRepaint (const Rectangle<int>&);
+    void internalRepaintUnchecked (const Rectangle<int>&, bool);
     Component* removeChildComponent (int index, bool sendParentEvents, bool sendChildEvents);
     void moveChildInternal (int sourceIndex, int destIndex);
     void paintComponentAndChildren (Graphics&);
-    void paintComponent (Graphics&);
     void paintWithinParentContext (Graphics&);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);
     void repaintParent();
@@ -2352,8 +2368,6 @@ private:
 
 protected:
     //==============================================================================
-    /** @internal */
-    virtual void internalRepaint (int x, int y, int w, int h);
     /** @internal */
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
    #endif

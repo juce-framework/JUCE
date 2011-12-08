@@ -33,11 +33,33 @@ class DemoOpenGLCanvas  : public OpenGLComponent,
 {
 public:
     DemoOpenGLCanvas()
-        : rotation (0.0f),
-          delta (1.0f),
+        : OpenGLComponent (openGLDefault), rotation (0.0f),
           textScrollPos (200)
     {
-        startTimer (20);
+        infoLabel.setText ("These sliders demonstrate how components can be added as children "
+                           "of an OpenGLComponent, in which case, their content will be rendered into "
+                           "an OpenGL framebuffer and efficiently overlaid onto your GL content.", false);
+        infoLabel.setBounds ("parent.width * 0.05, bottom - 150, parent.width * 0.4, parent.height - 60");
+        infoLabel.setInterceptsMouseClicks (false, false);
+        addAndMakeVisible (&infoLabel);
+
+        speedSlider.setRange (-10.0, 10.0, 0.1);
+        speedSlider.setPopupMenuEnabled (true);
+        speedSlider.setValue (Random::getSystemRandom().nextDouble() * 3.0, false, false);
+        speedSlider.setSliderStyle (Slider::LinearHorizontal);
+        speedSlider.setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
+        speedSlider.setBounds ("parent.width * 0.05, parent.height - 65, parent.width * 0.6, top + 24");
+        addAndMakeVisible (&speedSlider);
+
+        sizeSlider.setRange (0.2, 2.0, 0.01);
+        sizeSlider.setPopupMenuEnabled (true);
+        sizeSlider.setValue (Random::getSystemRandom().nextDouble() + 0.5, false, false);
+        sizeSlider.setSliderStyle (Slider::LinearHorizontal);
+        sizeSlider.setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
+        sizeSlider.setBounds ("parent.width * 0.05, parent.height - 35, parent.width * 0.6, top + 24");
+        addAndMakeVisible (&sizeSlider);
+
+        startTimer (1000 / 30);
     }
 
     // when the component creates a new internal context, this is called, and
@@ -56,8 +78,7 @@ public:
     void mouseDrag (const MouseEvent& e)
     {
         draggableOrientation.mouseDrag (e.getPosition());
-        delta = e.getDistanceFromDragStartX() / 100.0f;
-        repaint();
+        triggerRepaint();
     }
 
     void resized()
@@ -81,6 +102,7 @@ public:
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable (GL_TEXTURE_2D);
 
+        OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
         OpenGLHelpers::setPerspective (45.0, getWidth() / (double) getHeight(), 0.1, 100.0);
 
         glTranslatef (0.0f, 0.0f, -5.0f);
@@ -101,8 +123,6 @@ public:
         tex2->draw3D (-1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f, Colours::white);
         tex2->draw3D ( 1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, Colours::white);
         tex2->draw3D (-1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, Colours::white);
-
-        drawForeground2DStuff(); // draws our scrolling text overlay
     }
 
     void updateTextureImage()
@@ -110,7 +130,8 @@ public:
         // This image is a special framebuffer-backed image, so when we draw to it, the context
         // will render directly into its framebuffer
 
-        dynamicTextureImage.clear (dynamicTextureImage.getBounds(), Colours::red.withRotatedHue (fabsf (::sinf (rotation / 300.0f))).withAlpha (0.7f));
+        dynamicTextureImage.clear (dynamicTextureImage.getBounds(),
+                                   Colours::red.withRotatedHue (fabsf (::sinf (rotation / 300.0f))).withAlpha (0.7f));
 
         Graphics g (dynamicTextureImage);
 
@@ -127,9 +148,9 @@ public:
         // This stuff just creates a spinning star shape and fills it..
         Path p;
         const float scale = getHeight() * 0.4f;
-        p.addStar (getLocalBounds().getCentre().toFloat(), 7,
-                   scale + ::cosf (rotation * 0.0021f) * scale / 2,
-                   scale + ::sinf (rotation * 0.001f) * scale / 2, rotation / 50.0f);
+        p.addStar (Point<float> (getWidth() * 0.7f, getHeight() * 0.4f), 7,
+                   scale * (float) sizeSlider.getValue(), scale,
+                   rotation / 50.0f);
 
         g.setGradientFill (ColourGradient (Colours::green.withRotatedHue (fabsf (::sinf (rotation / 300.0f))),
                                            0, 0,
@@ -138,35 +159,20 @@ public:
         g.fillPath (p);
     }
 
-    void drawForeground2DStuff()
-    {
-        OpenGLRenderer glRenderer (*this); // Create an OpenGLRenderer that will draw into this GL window..
-        Graphics g (&glRenderer);          // ..and then wrap it in a normal Graphics object so we can draw with it.
-
-        // Then, just draw our scolling text like we would in any other component.
-        g.setColour (Colours::blue.withAlpha (0.5f));
-        g.setFont (30.0f, Font::bold);
-        drawScrollingMessage (g, getHeight() / 2);
-    }
-
-    void drawScrollingMessage (Graphics& g, int y) const
-    {
-        g.drawSingleLineText ("The background, foreground and texture are all being drawn using the OpenGLRenderer class, which "
-                              "lets you use a standard JUCE 2D graphics context to render directly onto an OpenGL window or framebuffer...  ",
-                              (int) -std::fmod (textScrollPos, 2500.0f), y);
-    }
-
     void timerCallback()
     {
-        rotation += delta;
+        rotation += (float) speedSlider.getValue();
         textScrollPos += 1.4f;
-        repaint();
+        triggerRepaint();
     }
 
 private:
     Image logoImage, dynamicTextureImage;
-    float rotation, delta, textScrollPos;
+    float rotation, textScrollPos;
     Draggable3DOrientation draggableOrientation;
+
+    Slider speedSlider, sizeSlider;
+    Label infoLabel;
 
     // Functions to create a couple of images to use as textures..
     static Image createLogoImage()
@@ -193,6 +199,13 @@ private:
             g.setColour (Colours::pink.withAlpha (0.4f));
             g.fillPath (pp);
         }
+    }
+
+    void drawScrollingMessage (Graphics& g, int y) const
+    {
+        g.drawSingleLineText ("The background, foreground and texture are all being drawn using the OpenGLRenderer class, which "
+                              "lets you use a standard JUCE 2D graphics context to render directly onto an OpenGL window or framebuffer...  ",
+                              (int) -std::fmod (textScrollPos, 2500.0f), y);
     }
 };
 

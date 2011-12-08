@@ -75,6 +75,9 @@ BEGIN_JUCE_NAMESPACE
 // START_AUTOINCLUDE components, mouse, keyboard, buttons, drawables,
 // filebrowser, layout, lookandfeel, menus, positioning, properties,
 // widgets, windows, commands, application, misc
+#ifndef __JUCE_CACHEDCOMPONENTIMAGE_JUCEHEADER__
+ #include "components/juce_CachedComponentImage.h"
+#endif
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
  #include "components/juce_Component.h"
 #endif

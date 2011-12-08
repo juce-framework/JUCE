@@ -2620,6 +2620,7 @@
       </Filter>
       <Filter Name="juce_gui_basics">
         <Filter Name="components">
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\components\juce_CachedComponentImage.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\components\juce_Component.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

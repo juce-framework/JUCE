@@ -250,13 +250,6 @@ public:
     {
     }
 
-    GLShaderProgram (const GLchar* fragment) noexcept
-        : program (glCreateProgram())
-    {
-        addShader (fragment, GL_FRAGMENT_SHADER);
-        link();
-    }
-
     ~GLShaderProgram() noexcept
     {
         glDeleteProgram (program);
@@ -297,9 +290,9 @@ public:
        #endif
     }
 
-    struct UniformLocation
+    struct Uniform
     {
-        UniformLocation (const GLShaderProgram& program, const GLchar* name)
+        Uniform (const GLShaderProgram& program, const GLchar* name)
             : uniformID (glGetUniformLocation (program.program, name))
         {
             jassert (uniformID >= 0);
@@ -335,76 +328,85 @@ struct ShaderPrograms
 
     bool areShadersSupported;
 
-    struct SolidColourMaskedProgram
+    struct ShaderBase
+    {
+        ShaderBase (const char* fragmentShader)
+        {
+            addShader (fragmentShader, GL_FRAGMENT_SHADER);
+            link();
+        }
+
+        GLShaderProgram program;
+    };
+
+    struct SolidColourMaskedProgram  : public ShaderBase
     {
         SolidColourMaskedProgram()
-            : program ("#version 120\n"
-                       "uniform sampler2D maskTexture;"
-                       "uniform ivec4 maskBounds;"
-                       "const float textureY = 0.5;"
-                       ""
-                       "void main()"
-                       "{"
-                       "  vec2 maskPos;"
-                       "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
-                       "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
-                       "  gl_FragColor = gl_Color * texture2D (maskTexture, maskPos).w;"
-                       "}"),
+            : ShaderBase ("#version 120\n"
+                          "uniform sampler2D maskTexture;"
+                          "uniform ivec4 maskBounds;"
+                          "const float textureY = 0.5;"
+                          ""
+                          "void main()"
+                          "{"
+                          "  vec2 maskPos;"
+                          "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
+                          "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
+                          "  gl_FragColor = gl_Color * texture2D (maskTexture, maskPos).w;"
+                          "}"),
               maskTexture (program, "maskTexture"),
               maskBounds (program, "maskBounds")
         {
         }
 
-        GLShaderProgram program;
-        GLShaderProgram::UniformLocation maskTexture, maskBounds;
+        GLShaderProgram::Uniform maskTexture, maskBounds;
     };
 
-    struct RadialGradientProgram
+    struct RadialGradientProgram  : public ShaderBase
     {
         RadialGradientProgram()
-            : program ("#version 120\n"
-                       "uniform sampler2D gradientTexture;"
-                       "uniform mat2x3 matrix;"
-                       "const float textureY = 0.5;"
-                       ""
-                       "void main()"
-                       "{"
-                       "  float dist = length (vec2 (matrix[0][0] * gl_FragCoord.x + matrix[0][1] * gl_FragCoord.y + matrix[0][2],"
-                       "                             matrix[1][0] * gl_FragCoord.x + matrix[1][1] * gl_FragCoord.y + matrix[1][2]));"
-                       "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
-                       "}"),
+            : ShaderBase ("#version 120\n"
+                          "uniform sampler2D gradientTexture;"
+                          "uniform mat2x3 matrix;"
+                          "const float textureY = 0.5;"
+                          ""
+                          "void main()"
+                          "{"
+                          "  float dist = length (vec2 (matrix[0][0] * gl_FragCoord.x + matrix[0][1] * gl_FragCoord.y + matrix[0][2],"
+                          "                             matrix[1][0] * gl_FragCoord.x + matrix[1][1] * gl_FragCoord.y + matrix[1][2]));"
+                          "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
+                          "}"),
               gradientTexture (program, "gradientTexture"),
               matrix (program, "matrix")
         {
         }
 
-        GLShaderProgram program;
-        GLShaderProgram::UniformLocation gradientTexture, matrix;
+        GLShaderProgram::Uniform gradientTexture, matrix;
     };
 
-    struct RadialGradientMaskedProgram
+    struct RadialGradientMaskedProgram  : public ShaderBase
     {
         RadialGradientMaskedProgram()
-            : program ("#version 120\n"
-                       "uniform sampler2D gradientTexture;"
-                       "uniform mat2x3 matrix;"
-                       "uniform sampler2D maskTexture;"
-                       "uniform ivec4 maskBounds;"
-                       "const float textureY = 0.5;"
-                       ""
-                       "void main()"
-                       "{"
-                       "  float dist = length (vec2 (matrix[0][0] * gl_FragCoord.x + matrix[0][1] * gl_FragCoord.y + matrix[0][2],"
-                       "                             matrix[1][0] * gl_FragCoord.x + matrix[1][1] * gl_FragCoord.y + matrix[1][2]));"
-                       "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
-                       ""
-                       "  vec2 maskPos;"
-                       "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
-                       "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
-                       "  result *= texture2D (maskTexture, maskPos).w;"
-                       ""
-                       "  gl_FragColor = result;"
-                       "}"),
+            : ShaderBase ("#version 120\n"
+                          "uniform sampler2D gradientTexture;"
+                          "uniform mat2x3 matrix;"
+                          "uniform sampler2D maskTexture;"
+                          "uniform ivec4 maskBounds;"
+                          "const float textureY = 0.5;"
+                          ""
+                          "void main()"
+                          "{"
+                          "  float dist = length (vec2 (matrix[0][0] * gl_FragCoord.x + matrix[0][1] * gl_FragCoord.y + matrix[0][2],"
+                          "                             matrix[1][0] * gl_FragCoord.x + matrix[1][1] * gl_FragCoord.y + matrix[1][2]));"
+                          "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
+                          ""
+                          "  vec2 maskPos;"
+                          "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
+                          "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
+                          "  result *= texture2D (maskTexture, maskPos).w;"
+                          ""
+                          "  gl_FragColor = result;"
+                          "}"),
               gradientTexture (program, "gradientTexture"),
               matrix (program, "matrix"),
               maskTexture (program, "maskTexture"),
@@ -412,54 +414,52 @@ struct ShaderPrograms
         {
         }
 
-        GLShaderProgram program;
-        GLShaderProgram::UniformLocation gradientTexture, matrix;
-        GLShaderProgram::UniformLocation maskTexture, maskBounds;
+        GLShaderProgram::Uniform gradientTexture, matrix;
+        GLShaderProgram::Uniform maskTexture, maskBounds;
     };
 
-    struct LinearGradient1Program
+    struct LinearGradient1Program  : public ShaderBase
     {
         LinearGradient1Program()
-            : program ("#version 120\n"
-                       "uniform sampler2D gradientTexture;"
-                       "uniform vec4 gradientInfo;"  // x = x1, y = y1, z = (y2 - y1) / (x2 - x1), w = length
-                       "const float textureY = 0.5;"
-                       ""
-                       "void main()"
-                       "{"
-                       "  float dist = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.z * (gl_FragCoord.x - gradientInfo.x)))) / gradientInfo.w;"
-                       "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
-                       "}"),
+            : ShaderBase ("#version 120\n"
+                          "uniform sampler2D gradientTexture;"
+                          "uniform vec4 gradientInfo;"  // x = x1, y = y1, z = (y2 - y1) / (x2 - x1), w = length
+                          "const float textureY = 0.5;"
+                          ""
+                          "void main()"
+                          "{"
+                          "  float dist = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.z * (gl_FragCoord.x - gradientInfo.x)))) / gradientInfo.w;"
+                          "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
+                          "}"),
               gradientTexture (program, "gradientTexture"),
               gradientInfo (program, "gradientInfo")
         {
         }
 
-        GLShaderProgram program;
-        GLShaderProgram::UniformLocation gradientTexture, gradientInfo;
+        GLShaderProgram::Uniform gradientTexture, gradientInfo;
     };
 
-    struct LinearGradient1MaskedProgram
+    struct LinearGradient1MaskedProgram  : public ShaderBase
     {
         LinearGradient1MaskedProgram()
-            : program ("#version 120\n"
-                       "uniform sampler2D gradientTexture;"
-                       "uniform vec3 gradientInfo;"  // x = (x2 - x1) / (y2 - y1), y = x1, z = length
-                       "uniform sampler2D maskTexture;"
-                       "uniform ivec4 maskBounds;"
-                       "const float textureY = 0.5;"
-                       ""
-                       "void main()"
-                       "{"
-                       "  float dist = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.x * (gl_FragCoord.x - gradientInfo.y)))) / gradientInfo.z;"
-                       "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
-                       ""
-                       "  vec2 maskPos;"
-                       "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
-                       "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
-                       "  result *= texture2D (maskTexture, maskPos).w;"
-                       "  gl_FragColor = result;"
-                       "}"),
+            : ShaderBase ("#version 120\n"
+                          "uniform sampler2D gradientTexture;"
+                          "uniform vec3 gradientInfo;"  // x = (x2 - x1) / (y2 - y1), y = x1, z = length
+                          "uniform sampler2D maskTexture;"
+                          "uniform ivec4 maskBounds;"
+                          "const float textureY = 0.5;"
+                          ""
+                          "void main()"
+                          "{"
+                          "  float dist = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.x * (gl_FragCoord.x - gradientInfo.y)))) / gradientInfo.z;"
+                          "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
+                          ""
+                          "  vec2 maskPos;"
+                          "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
+                          "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
+                          "  result *= texture2D (maskTexture, maskPos).w;"
+                          "  gl_FragColor = result;"
+                          "}"),
               gradientTexture (program, "gradientTexture"),
               gradientInfo (program, "gradientInfo"),
               maskTexture (program, "maskTexture"),
@@ -467,54 +467,52 @@ struct ShaderPrograms
         {
         }
 
-        GLShaderProgram program;
-        GLShaderProgram::UniformLocation gradientTexture, gradientInfo;
-        GLShaderProgram::UniformLocation maskTexture, maskBounds;
+        GLShaderProgram::Uniform gradientTexture, gradientInfo;
+        GLShaderProgram::Uniform maskTexture, maskBounds;
     };
 
-    struct LinearGradient2Program
+    struct LinearGradient2Program  : public ShaderBase
     {
         LinearGradient2Program()
-            : program ("#version 120\n"
-                       "uniform sampler2D gradientTexture;"
-                       "uniform vec4 gradientInfo;"  // x = x1, y = y1, z = (x2 - x1) / (y2 - y1), y = y1, w = length
-                       "const float textureY = 0.5;"
-                       ""
-                       "void main()"
-                       "{"
-                       "  float dist = (gl_FragCoord.x - (gradientInfo.x + (gradientInfo.z * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.w;"
-                       "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
-                       "}"),
+            : ShaderBase ("#version 120\n"
+                          "uniform sampler2D gradientTexture;"
+                          "uniform vec4 gradientInfo;"  // x = x1, y = y1, z = (x2 - x1) / (y2 - y1), y = y1, w = length
+                          "const float textureY = 0.5;"
+                          ""
+                          "void main()"
+                          "{"
+                          "  float dist = (gl_FragCoord.x - (gradientInfo.x + (gradientInfo.z * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.w;"
+                          "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
+                          "}"),
               gradientTexture (program, "gradientTexture"),
               gradientInfo (program, "gradientInfo")
         {
         }
 
-        GLShaderProgram program;
-        GLShaderProgram::UniformLocation gradientTexture, gradientInfo;
+        GLShaderProgram::Uniform gradientTexture, gradientInfo;
     };
 
-    struct LinearGradient2MaskedProgram
+    struct LinearGradient2MaskedProgram  : public ShaderBase
     {
         LinearGradient2MaskedProgram()
-            : program ("#version 120\n"
-                       "uniform sampler2D gradientTexture;"
-                       "uniform vec3 gradientInfo;"  // x = (y2 - y1) / (x2 - x1), y = y1, z = length
-                       "uniform sampler2D maskTexture;"
-                       "uniform ivec4 maskBounds;"
-                       "const float textureY = 0.5;"
-                       ""
-                       "void main()"
-                       "{"
-                       "  float dist = (gl_FragCoord.x - (gradientInfo.y + (gradientInfo.x * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.z;"
-                       "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
-                       ""
-                       "  vec2 maskPos;"
-                       "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
-                       "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
-                       "  result *= texture2D (maskTexture, maskPos).w;"
-                       "  gl_FragColor = result;"
-                       "}"),
+            : ShaderBase ("#version 120\n"
+                          "uniform sampler2D gradientTexture;"
+                          "uniform vec3 gradientInfo;"  // x = (y2 - y1) / (x2 - x1), y = y1, z = length
+                          "uniform sampler2D maskTexture;"
+                          "uniform ivec4 maskBounds;"
+                          "const float textureY = 0.5;"
+                          ""
+                          "void main()"
+                          "{"
+                          "  float dist = (gl_FragCoord.x - (gradientInfo.y + (gradientInfo.x * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.z;"
+                          "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
+                          ""
+                          "  vec2 maskPos;"
+                          "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
+                          "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
+                          "  result *= texture2D (maskTexture, maskPos).w;"
+                          "  gl_FragColor = result;"
+                          "}"),
               gradientTexture (program, "gradientTexture"),
               gradientInfo (program, "gradientInfo"),
               maskTexture (program, "maskTexture"),
@@ -522,9 +520,8 @@ struct ShaderPrograms
         {
         }
 
-        GLShaderProgram program;
-        GLShaderProgram::UniformLocation gradientTexture, gradientInfo;
-        GLShaderProgram::UniformLocation maskTexture, maskBounds;
+        GLShaderProgram::Uniform gradientTexture, gradientInfo;
+        GLShaderProgram::Uniform maskTexture, maskBounds;
     };
 
     SolidColourMaskedProgram solidColourMasked;

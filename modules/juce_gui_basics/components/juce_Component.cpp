@@ -35,7 +35,7 @@ Component* Component::currentlyFocusedComponent = nullptr;
 class Component::MouseListenerList
 {
 public:
-    MouseListenerList()
+    MouseListenerList() noexcept
         : numDeepMouseListeners (0)
     {
     }
@@ -377,6 +377,73 @@ public:
     }
 };
 
+//==============================================================================
+class StandardCachedComponentImage  : public CachedComponentImage
+{
+public:
+    StandardCachedComponentImage (Component& owner_) noexcept : owner (owner_) {}
+
+    void paint (Graphics& g)
+    {
+        const Rectangle<int> bounds (owner.getLocalBounds());
+
+        if (image.isNull() || image.getBounds() != bounds)
+        {
+            image = Image (owner.isOpaque() ? Image::RGB : Image::ARGB,
+                           jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()), ! owner.isOpaque());
+
+            validArea.clear();
+        }
+
+        {
+            Graphics imG (image);
+            LowLevelGraphicsContext* const lg = imG.getInternalContext();
+
+            for (RectangleList::Iterator i (validArea); i.next();)
+                lg->excludeClipRectangle (*i.getRectangle());
+
+            if (! lg->isClipEmpty())
+            {
+                if (! owner.isOpaque())
+                {
+                    lg->setFill (Colours::transparentBlack);
+                    lg->fillRect (bounds, true);
+                    lg->setFill (Colours::black);
+                }
+
+                owner.paintEntireComponent (imG, true);
+            }
+        }
+
+        validArea = bounds;
+
+        g.setColour (Colours::black.withAlpha (owner.getAlpha()));
+        g.drawImageAt (image, 0, 0);
+    }
+
+    void invalidateAll()
+    {
+        validArea.clear();
+    }
+
+    void invalidate (const Rectangle<int>& area)
+    {
+        validArea.subtract (area);
+    }
+
+    void releaseResources()
+    {
+        image = Image::null;
+    }
+
+private:
+    Image image;
+    RectangleList validArea;
+    Component& owner;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandardCachedComponentImage);
+};
+
 
 //==============================================================================
 Component::Component()
@@ -461,16 +528,21 @@ void Component::setVisible (bool shouldBeVisible)
         // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
         CHECK_MESSAGE_MANAGER_IS_LOCKED
 
-        WeakReference<Component> safePointer (this);
-
+        const WeakReference<Component> safePointer (this);
         flags.visibleFlag = shouldBeVisible;
 
-        internalRepaint (0, 0, getWidth(), getHeight());
+        if (shouldBeVisible)
+            repaint();
+        else
+            repaintParent();
 
         sendFakeMouseMove();
 
         if (! shouldBeVisible)
         {
+            if (cachedImage != nullptr)
+                cachedImage->releaseResources();
+
             if (currentlyFocusedComponent == this || isParentOf (currentlyFocusedComponent))
             {
                 if (parentComponent != nullptr)
@@ -567,7 +639,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
     if (styleWanted != currentStyleFlags || ! flags.hasHeavyweightPeerFlag)
     {
-        WeakReference<Component> safePointer (this);
+        const WeakReference<Component> safePointer (this);
 
        #if JUCE_LINUX
         // it's wise to give the component a non-zero size before
@@ -701,12 +773,27 @@ bool Component::isOpaque() const noexcept
 }
 
 //==============================================================================
+void Component::setCachedComponentImage (CachedComponentImage* newCachedImage)
+{
+    cachedImage = newCachedImage;
+}
+
 void Component::setBufferedToImage (const bool shouldBeBuffered)
 {
-    if (shouldBeBuffered != flags.bufferToImageFlag)
+    // This assertion means that this component is already using a custom CachedComponentImage,
+    // so by calling setBufferedToImage, you'll be deleting the custom one - this is almost certainly
+    // not what you wanted to happen... If you really do know what you're doing here, and want to
+    // avoid this assertion, just call setCachedComponentImage (nullptr) before setBufferedToImage().
+    jassert (cachedImage == nullptr || dynamic_cast <StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
+
+    if (shouldBeBuffered)
     {
-        bufferedImage = Image::null;
-        flags.bufferToImageFlag = shouldBeBuffered;
+        if (cachedImage == nullptr)
+            cachedImage = new StandardCachedComponentImage (*this);
+    }
+    else
+    {
+        cachedImage = nullptr;
     }
 }
 
@@ -935,17 +1022,17 @@ Rectangle<int> Component::localAreaToGlobal (const Rectangle<int>& area) const
 }
 
 /* Deprecated methods... */
-const Point<int> Component::relativePositionToGlobal (const Point<int>& relativePosition) const
+Point<int> Component::relativePositionToGlobal (const Point<int>& relativePosition) const
 {
     return localPointToGlobal (relativePosition);
 }
 
-const Point<int> Component::globalPositionToRelative (const Point<int>& screenPosition) const
+Point<int> Component::globalPositionToRelative (const Point<int>& screenPosition) const
 {
     return getLocalPoint (nullptr, screenPosition);
 }
 
-const Point<int> Component::relativePositionToOtherComponent (const Component* const targetComponent, const Point<int>& positionRelativeToThis) const
+Point<int> Component::relativePositionToOtherComponent (const Component* const targetComponent, const Point<int>& positionRelativeToThis) const
 {
     return targetComponent == nullptr ? localPointToGlobal (positionRelativeToThis)
                                       : targetComponent->getLocalPoint (this, positionRelativeToThis);
@@ -991,9 +1078,9 @@ void Component::setBounds (const int x, const int y, int w, int h)
             else if (! flags.hasHeavyweightPeerFlag)
                 repaintParent();
         }
-        else
+        else if (cachedImage != nullptr)
         {
-            bufferedImage = Image::null;
+            cachedImage->invalidateAll();
         }
 
         if (flags.hasHeavyweightPeerFlag)
@@ -1375,11 +1462,16 @@ Component* Component::removeChildComponent (const int index, bool sendParentEven
         if (sendParentEvents)
         {
             sendFakeMouseMove();
-            child->repaintParent();
+
+            if (child->isVisible())
+                child->repaintParent();
         }
 
         childComponentList.remove (index);
         child->parentComponent = nullptr;
+
+        if (child->cachedImage != nullptr)
+            child->cachedImage->releaseResources();
 
         // (NB: there are obscure situations where child->isShowing() = false, but it still has the focus)
         if (currentlyFocusedComponent == child || child->isParentOf (currentlyFocusedComponent))
@@ -1702,112 +1794,76 @@ float Component::getAlpha() const
     return (255 - componentTransparency) / 255.0f;
 }
 
-void Component::repaintParent()
-{
-    if (flags.visibleFlag)
-        internalRepaint (0, 0, getWidth(), getHeight());
-}
-
+//==============================================================================
 void Component::repaint()
 {
-    repaint (0, 0, getWidth(), getHeight());
+    internalRepaintUnchecked (getLocalBounds(), true);
 }
 
-void Component::repaint (const int x, const int y,
-                         const int w, const int h)
+void Component::repaint (const int x, const int y, const int w, const int h)
 {
-    bufferedImage = Image::null;
-
-    if (flags.visibleFlag)
-        internalRepaint (x, y, w, h);
+    internalRepaint (Rectangle<int> (x, y, w, h));
 }
 
 void Component::repaint (const Rectangle<int>& area)
 {
-    repaint (area.getX(), area.getY(), area.getWidth(), area.getHeight());
+    internalRepaint (area);
 }
 
-void Component::internalRepaint (int x, int y, int w, int h)
+void Component::repaintParent()
+{
+    if (parentComponent != nullptr)
+        parentComponent->internalRepaint (ComponentHelpers::convertToParentSpace (*this, getLocalBounds()));
+}
+
+void Component::internalRepaint (const Rectangle<int>& area)
+{
+    const Rectangle<int> r (area.getIntersection (getLocalBounds()));
+
+    if (! r.isEmpty())
+        internalRepaintUnchecked (r, false);
+}
+
+void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool isEntireComponent)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     CHECK_MESSAGE_MANAGER_IS_LOCKED
 
-    if (x < 0)
+    if (flags.visibleFlag)
     {
-        w += x;
-        x = 0;
-    }
-
-    if (x + w > getWidth())
-        w = getWidth() - x;
-
-    if (w > 0)
-    {
-        if (y < 0)
+        if (flags.hasHeavyweightPeerFlag)
         {
-            h += y;
-            y = 0;
+            ComponentPeer* const peer = getPeer();
+
+            if (peer != nullptr)
+                peer->repaint (area);
         }
-
-        if (y + h > getHeight())
-            h = getHeight() - y;
-
-        if (h > 0)
+        else
         {
-            if (parentComponent != nullptr)
+            if (cachedImage != nullptr)
             {
-                if (parentComponent->flags.visibleFlag)
-                {
-                    if (affineTransform == nullptr)
-                    {
-                        parentComponent->internalRepaint (x + getX(), y + getY(), w, h);
-                    }
-                    else
-                    {
-                        const Rectangle<int> r (ComponentHelpers::convertToParentSpace (*this, Rectangle<int> (x, y, w, h)));
-                        parentComponent->internalRepaint (r.getX(), r.getY(), r.getWidth(), r.getHeight());
-                    }
-                }
+                if (isEntireComponent)
+                    cachedImage->invalidateAll();
+                else
+                    cachedImage->invalidate (area);
             }
-            else if (flags.hasHeavyweightPeerFlag)
-            {
-                ComponentPeer* const peer = getPeer();
 
-                if (peer != nullptr)
-                    peer->repaint (Rectangle<int> (x, y, w, h));
-            }
+            if (parentComponent != nullptr)
+                parentComponent->internalRepaint (ComponentHelpers::convertToParentSpace (*this, area));
         }
     }
 }
 
 //==============================================================================
-void Component::paintComponent (Graphics& g)
-{
-    if (flags.bufferToImageFlag)
-    {
-        if (bufferedImage.isNull())
-        {
-            bufferedImage = Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                   getWidth(), getHeight(), ! flags.opaqueFlag);
-
-            Graphics imG (bufferedImage);
-            paint (imG);
-        }
-
-        g.setColour (Colours::black);
-        g.drawImageAt (bufferedImage, 0, 0);
-    }
-    else
-    {
-        paint (g);
-    }
-}
-
 void Component::paintWithinParentContext (Graphics& g)
 {
     g.setOrigin (getX(), getY());
-    paintEntireComponent (g, false);
+
+    if (cachedImage != nullptr)
+        cachedImage->paint (g);
+    else
+        paintEntireComponent (g, false);
 }
 
 void Component::paintComponentAndChildren (Graphics& g)
@@ -1816,7 +1872,7 @@ void Component::paintComponentAndChildren (Graphics& g)
 
     if (flags.dontClipGraphicsFlag)
     {
-        paintComponent (g);
+        paint (g);
     }
     else
     {
@@ -1824,7 +1880,7 @@ void Component::paintComponentAndChildren (Graphics& g)
         ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, Point<int>());
 
         if (! g.isClipEmpty())
-            paintComponent (g);
+            paint (g);
 
         g.restoreState();
     }
@@ -1884,8 +1940,6 @@ void Component::paintComponentAndChildren (Graphics& g)
 
 void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
 {
-    jassert (! g.isClipEmpty());
-
    #if JUCE_DEBUG
     flags.isInsidePaintCall = true;
    #endif
@@ -1990,7 +2044,7 @@ void Component::sendLookAndFeelChange()
 {
     repaint();
 
-    WeakReference<Component> safePointer (this);
+    const WeakReference<Component> safePointer (this);
 
     lookAndFeelChanged();
 
@@ -2592,7 +2646,7 @@ void Component::focusLost (FocusChangeType)
 
 void Component::internalFocusLoss (const FocusChangeType cause)
 {
-    WeakReference<Component> safePointer (this);
+    const WeakReference<Component> safePointer (this);
 
     focusLost (focusChangedDirectly);
 
@@ -2645,7 +2699,7 @@ void Component::setEnabled (const bool shouldBeEnabled)
 
 void Component::sendEnablementChangeMessage()
 {
-    WeakReference<Component> safePointer (this);
+    const WeakReference<Component> safePointer (this);
 
     enablementChanged();
 
@@ -2731,14 +2785,12 @@ void Component::takeKeyboardFocus (const FocusChangeType cause)
 
         if (peer != nullptr)
         {
-            WeakReference<Component> safePointer (this);
-
+            const WeakReference<Component> safePointer (this);
             peer->grabFocus();
 
             if (peer->isFocused() && currentlyFocusedComponent != this)
             {
                 WeakReference<Component> componentLosingFocus (currentlyFocusedComponent);
-
                 currentlyFocusedComponent = this;
 
                 Desktop::getInstance().triggerFocusCallback();
@@ -2827,7 +2879,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
             {
                 if (nextComp->isCurrentlyBlockedByAnotherModalComponent())
                 {
-                    WeakReference<Component> nextCompPointer (nextComp);
+                    const WeakReference<Component> nextCompPointer (nextComp);
                     internalModalInputAttempt();
 
                     if (nextCompPointer == nullptr || nextComp->isCurrentlyBlockedByAnotherModalComponent())

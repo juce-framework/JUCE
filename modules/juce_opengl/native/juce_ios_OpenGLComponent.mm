@@ -153,7 +153,8 @@ public:
         glGenRenderbuffersOES (1, &depthBufferHandle);
 
         glBindRenderbufferOES (GL_RENDERBUFFER_OES, colorBufferHandle);
-        [context renderbufferStorage: GL_RENDERBUFFER_OES fromDrawable: glLayer];
+        bool ok = [context renderbufferStorage: GL_RENDERBUFFER_OES fromDrawable: glLayer];
+        jassert (ok);
 
         GLint width, height;
         glGetRenderbufferParameterivOES (GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &width);
@@ -178,6 +179,8 @@ public:
 
     void freeGLBuffers()
     {
+        [context renderbufferStorage: GL_RENDERBUFFER_OES fromDrawable: nil];
+
         if (frameBufferHandle != 0)
         {
             glDeleteFramebuffersOES (1, &frameBufferHandle);
@@ -197,7 +200,6 @@ public:
         }
     }
 
-    //==============================================================================
 private:
     WeakReference<Component> component;
     JuceGLView* view;
@@ -208,7 +210,6 @@ private:
     int numFrames;
     int lastWidth, lastHeight;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GLESContext);
 };
 
@@ -221,14 +222,10 @@ OpenGLContext* OpenGLComponent::createContext()
     if (peer != nullptr)
         return new GLESContext ((UIView*) peer->getNativeHandle(), this, preferredPixelFormat,
                                 dynamic_cast <const GLESContext*> (contextToShareListsWith),
-                                type == openGLES2 ? kEAGLRenderingAPIOpenGLES2 : kEAGLRenderingAPIOpenGLES1);
+                                (flags & openGLES2) == 0 ? kEAGLRenderingAPIOpenGLES1
+                                                         : kEAGLRenderingAPIOpenGLES2);
 
     return nullptr;
-}
-
-void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
-{
-    Component::internalRepaint (x, y, w, h);
 }
 
 void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)

@@ -324,17 +324,6 @@ void* OpenGLComponent::getNativeWindowHandle() const
     return context != nullptr ? static_cast<WindowedGLContext*> (context.get())->getNativeWindowHandle() : nullptr;
 }
 
-void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
-{
-    Component::internalRepaint (x, y, w, h);
-
-    if (context != nullptr)
-    {
-        ComponentPeer* peer = static_cast<WindowedGLContext*> (context.get())->nativeWindow;
-        peer->repaint (peer->getBounds().withPosition (Point<int>()));
-    }
-}
-
 void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
 {
     if (context != nullptr)

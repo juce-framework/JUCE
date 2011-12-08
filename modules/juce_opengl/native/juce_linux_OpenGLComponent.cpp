@@ -190,11 +190,6 @@ OpenGLContext* OpenGLComponent::createContext()
     return (c->renderContext != 0) ? c.release() : nullptr;
 }
 
-void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
-{
-    Component::internalRepaint (x, y, w, h);
-}
-
 void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
 {
     if (context != nullptr)

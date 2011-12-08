@@ -2367,6 +2367,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\juce_graphics.h">
       <Filter>Juce Modules\juce_graphics</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_CachedComponentImage.h">
+      <Filter>Juce Modules\juce_gui_basics\components</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_Component.h">
       <Filter>Juce Modules\juce_gui_basics\components</Filter>
     </ClInclude>

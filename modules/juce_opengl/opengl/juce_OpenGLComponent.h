@@ -47,26 +47,42 @@ class JUCE_API  OpenGLComponent  : public OpenGLBaseType,
 {
 public:
     //==============================================================================
-    /** Used to select the type of openGL API to use, if more than one choice is available
-        on a particular platform.
+    /** These flags can be combined and passed to the OpenGLComponent constructor to
+        specify various options.
     */
-    enum OpenGLType
+    enum OpenGLFlags
     {
-        openGLDefault = 0,
+        /** This value can be used if you want your OpenGLComponent to use the
+            default settings.
+        */
+        openGLDefault = 8,
 
        #if JUCE_IOS
-        openGLES1,  /**< On the iPhone, this selects openGL ES 1.0 */
-        openGLES2   /**< On the iPhone, this selects openGL ES 2.0 */
+        openGLES1 = 1,  /**< On the iPhone, this selects openGL ES 1.0 */
+        openGLES2 = 2,  /**< On the iPhone, this selects openGL ES 2.0 */
        #endif
+
+        /** If this flag is enabled, the component will launch a background thread to
+            perform the rendering. If this flag is not enabled, then renderOpenGL()
+            will be invoked on the main event thread when the component has been told to
+            repaint, or after triggerRepaint() has been called.
+        */
+        useBackgroundThread = 4,
+
+        /** If this flag is enabled, then any sub-components of the OpenGLComponent
+            will be correctly overlaid on top of the GL content, and its paint() method will
+            be able to render over it. If you're not using sub-components, you can disable
+            this flag, which will eliminate some overhead.
+        */
+        allowSubComponents = 8
     };
 
+    //==============================================================================
     /** Creates an OpenGLComponent.
-        If useBackgroundThread is true, the component will launch a background thread
-        to do the rendering. If false, then renderOpenGL() will be called as part of the
-        normal paint() method.
+        The flags parameter should be a combination of the values in the
+        OpenGLFlags enum.
     */
-    OpenGLComponent (OpenGLType type = openGLDefault,
-                     bool useBackgroundThread = false);
+    OpenGLComponent (int flags = openGLDefault);
 
     /** Destructor. */
     ~OpenGLComponent();
@@ -101,7 +117,7 @@ public:
     /** Returns true if the component is performing the rendering on a background thread.
         This property is specified in the constructor.
     */
-    bool isUsingDedicatedThread() const noexcept        { return useThread; }
+    inline bool isUsingDedicatedThread() const noexcept        { return (flags & useBackgroundThread) != 0; }
 
     /** This replaces the normal paint() callback - use it to draw your openGL stuff.
 
@@ -177,6 +193,14 @@ public:
     int getRenderingTargetWidth() const         { return getWidth(); }
     int getRenderingTargetHeight() const        { return getHeight(); }
 
+    /** Causes a repaint to be invoked asynchronously.
+        This has a similar effect to calling repaint(), and triggers a callback to
+        renderOpenGL(), but unlike repaint(), it does not mark any of the component's
+        children as needing a redraw, which means that their cached state can be re-used
+        if possible.
+    */
+    void triggerRepaint();
+
     //==============================================================================
     /** Calls the rendering callback, and swaps the buffers afterwards.
         This is called automatically by paint() when the component needs to be rendered.
@@ -225,12 +249,11 @@ protected:
     */
     virtual void stopRenderThread();
 
-    //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
 
 private:
-    const OpenGLType type;
+    const int flags;
 
     class OpenGLComponentRenderThread;
     friend class OpenGLComponentRenderThread;
@@ -247,14 +270,15 @@ private:
     CriticalSection contextLock;
     OpenGLPixelFormat preferredPixelFormat;
     bool needToUpdateViewport, needToDeleteContext, threadStarted;
-    const bool useThread;
+
+    class OpenGLCachedComponentImage;
+    friend class OpenGLCachedComponentImage;
 
     OpenGLContext* createContext();
     void updateContext();
     void updateContextPosition();
     void stopBackgroundThread();
     void recreateContextAsync();
-    void internalRepaint (int x, int y, int w, int h);
     void updateEmbeddedPosition (const Rectangle<int>&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);

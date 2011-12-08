@@ -45,11 +45,11 @@ public:
     OpenGLPixelFormat (int bitsPerRGBComponent = 8,
                        int alphaBits = 8,
                        int depthBufferBits = 16,
-                       int stencilBufferBits = 0);
+                       int stencilBufferBits = 0) noexcept;
 
-    OpenGLPixelFormat (const OpenGLPixelFormat&);
-    OpenGLPixelFormat& operator= (const OpenGLPixelFormat&);
-    bool operator== (const OpenGLPixelFormat&) const;
+    OpenGLPixelFormat (const OpenGLPixelFormat&) noexcept;
+    OpenGLPixelFormat& operator= (const OpenGLPixelFormat&) noexcept;
+    bool operator== (const OpenGLPixelFormat&) const noexcept;
 
     //==============================================================================
     int redBits;          /**< The number of bits per pixel to use for the red channel. */

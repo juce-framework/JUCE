@@ -34,11 +34,6 @@ void* OpenGLComponent::getNativeWindowHandle() const
     return nullptr;
 }
 
-void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
-{
-    Component::internalRepaint (x, y, w, h);
-}
-
 void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>&)
 {
 }

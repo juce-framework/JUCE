@@ -245,22 +245,6 @@ void* OpenGLComponent::getNativeWindowHandle() const
                               : nullptr;
 }
 
-void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
-{
-    Component::internalRepaint (x, y, w, h);
-
-    if (context != nullptr)
-    {
-        NSView* const v = static_cast<WindowedGLContext*> (context.get())->view;
-
-        // bit of a bodge here.. if we only invalidate the area of the gl component,
-        // it's completely covered by the NSOpenGLView, so the OS throws away the
-        // repaint message, thus never causing our paint() callback, and never repainting
-        // the comp. So invalidating just a little bit around the edge helps..
-        [[v superview] setNeedsDisplayInRect: NSInsetRect ([v frame], -2.0f, -2.0f)];
-    }
-}
-
 void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>&)
 {
 }
