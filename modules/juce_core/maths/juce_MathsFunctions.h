@@ -518,6 +518,13 @@ namespace TypeHelpers
     */
     #define PARAMETER_TYPE(a)    typename TypeHelpers::ParameterType<a>::type
    #endif
+
+
+    /** These templates are designed to take a type, and if it's a double, they return a double
+        type; for anything else, they return a float type.
+    */
+    template <typename Type> struct SmallestFloatType             { typedef float  type; };
+    template <>              struct SmallestFloatType <double>    { typedef double type; };
 }
 
 

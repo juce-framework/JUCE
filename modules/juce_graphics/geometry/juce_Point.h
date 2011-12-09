@@ -125,26 +125,33 @@ public:
     /** Returns the straight-line distance between this point and another one. */
     ValueType getDistanceFrom (const Point& other) const noexcept       { return juce_hypot (x - other.x, y - other.y); }
 
+    /** This type will be double if the Point's type is double, otherwise it will be float. */
+    typedef typename TypeHelpers::SmallestFloatType<ValueType>::type FloatType;
+
     /** Returns the angle from this point to another one.
 
-        The return value is the number of radians clockwise from the 3 o'clock direction,
+        The return value is the number of radians clockwise from the 12 o'clock direction,
         where this point is the centre and the other point is on the circumference.
     */
-    ValueType getAngleToPoint (const Point& other) const noexcept       { return (ValueType) std::atan2 (other.x - x, other.y - y); }
+    FloatType getAngleToPoint (const Point& other) const noexcept
+        { return static_cast<FloatType> (std::atan2 (other.x - x, y - other.y)); }
 
     /** Taking this point to be the centre of a circle, this returns a point on its circumference.
         @param radius   the radius of the circle.
         @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
     */
-    Point getPointOnCircumference (const float radius, const float angle) const noexcept  { return Point<float> (x + radius * std::sin (angle),
-                                                                                                                 y - radius * std::cos (angle)); }
+    Point<FloatType> getPointOnCircumference (const float radius, const float angle) const noexcept
+        { return Point<FloatType> (static_cast <FloatType> (x + radius * std::sin (angle)),
+                                   static_cast <FloatType> (y - radius * std::cos (angle))); }
+
     /** Taking this point to be the centre of an ellipse, this returns a point on its circumference.
         @param radiusX  the horizontal radius of the circle.
         @param radiusY  the vertical radius of the circle.
         @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
     */
-    Point getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const noexcept  { return Point<float> (x + radiusX * std::sin (angle),
-                                                                                                                                       y - radiusY * std::cos (angle)); }
+    Point<FloatType> getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const noexcept
+        { return Point<FloatType> (static_cast <FloatType> (x + radiusX * std::sin (angle)),
+                                   static_cast <FloatType> (y - radiusY * std::cos (angle))); }
 
     /** Uses a transform to change the point's co-ordinates.
         This will only compile if ValueType = float!
@@ -153,8 +160,9 @@ public:
     void applyTransform (const AffineTransform& transform) noexcept     { transform.transformPoint (x, y); }
 
     /** Returns the position of this point, if it is transformed by a given AffineTransform. */
-    Point transformedBy (const AffineTransform& transform) const noexcept   { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
-                                                                                            transform.mat10 * x + transform.mat11 * y + transform.mat12); }
+    Point transformedBy (const AffineTransform& transform) const noexcept
+        { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
+                        transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
     /** Casts this point to a Point<int> object. */
     Point<int> toInt() const noexcept                             { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
