@@ -73,16 +73,20 @@ class JuceWindowIdentifier
 public:
     static bool isJUCEWindow (HWND hwnd) noexcept
     {
-        return GetWindowLong (hwnd, GWLP_USERDATA) == improbableWindowNumber;
+        return GetWindowLongPtr (hwnd, GWLP_USERDATA) == getImprobableWindowNumber();
     }
 
     static void setAsJUCEWindow (HWND hwnd, bool isJuceWindow) noexcept
     {
-        SetWindowLongPtr (hwnd, GWLP_USERDATA, isJuceWindow ? improbableWindowNumber : 0);
+        SetWindowLongPtr (hwnd, GWLP_USERDATA, isJuceWindow ? getImprobableWindowNumber() : 0);
     }
 
 private:
-    enum { improbableWindowNumber = 0xf965aa01 };
+    static LONG_PTR getImprobableWindowNumber() noexcept
+    {
+        static LONG_PTR number = (LONG_PTR) Random::getSystemRandom().nextInt64();
+        return number;
+    }
 };
 
 //==============================================================================
