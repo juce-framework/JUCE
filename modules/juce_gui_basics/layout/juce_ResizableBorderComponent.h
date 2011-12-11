@@ -84,7 +84,7 @@ public:
 
         @see setBorderThickness
     */
-    const BorderSize<int> getBorderThickness() const;
+    BorderSize<int> getBorderThickness() const;
 
 
     //==============================================================================

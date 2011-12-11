@@ -857,17 +857,17 @@ public:
         }
     }
 
-    void setPosition (int x, int y)                 { setBounds (x, y, ww, wh, false); }
-    void setSize (int w, int h)                     { setBounds (wx, wy, w, h, false); }
-    const Rectangle<int> getBounds() const          { return Rectangle<int> (wx, wy, ww, wh); }
-    const Point<int> getScreenPosition() const      { return Point<int> (wx, wy); }
+    void setPosition (int x, int y)           { setBounds (x, y, ww, wh, false); }
+    void setSize (int w, int h)               { setBounds (wx, wy, w, h, false); }
+    Rectangle<int> getBounds() const          { return Rectangle<int> (wx, wy, ww, wh); }
+    Point<int> getScreenPosition() const      { return Point<int> (wx, wy); }
 
-    const Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (const Point<int>& relativePosition)
     {
         return relativePosition + getScreenPosition();
     }
 
-    const Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (const Point<int>& screenPosition)
     {
         return screenPosition - getScreenPosition();
     }
@@ -1033,7 +1033,7 @@ public:
         return child == None;
     }
 
-    const BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const
     {
         return BorderSize<int>();
     }

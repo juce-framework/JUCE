@@ -182,8 +182,8 @@ void RectangleList::subtract (const Rectangle<int>& rect)
 
     if (originalNumRects > 0)
     {
-        const int x1 = rect.x;
-        const int y1 = rect.y;
+        const int x1 = rect.pos.x;
+        const int y1 = rect.pos.y;
         const int x2 = x1 + rect.w;
         const int y2 = y1 + rect.h;
 
@@ -191,8 +191,8 @@ void RectangleList::subtract (const Rectangle<int>& rect)
         {
             Rectangle<int>& r = rects.getReference (i);
 
-            const int rx1 = r.x;
-            const int ry1 = r.y;
+            const int rx1 = r.pos.x;
+            const int ry1 = r.pos.y;
             const int rx2 = rx1 + r.w;
             const int ry2 = ry1 + r.h;
 
@@ -206,7 +206,7 @@ void RectangleList::subtract (const Rectangle<int>& rect)
                     }
                     else
                     {
-                        r.x = x1;
+                        r.pos.x = x1;
                         r.w = rx2 - x1;
 
                         rects.insert (++i, Rectangle<int> (rx1, ry1, x1 - rx1,  ry2 - ry1));
@@ -215,7 +215,7 @@ void RectangleList::subtract (const Rectangle<int>& rect)
                 }
                 else if (x2 > rx1 && x2 < rx2)
                 {
-                    r.x = x2;
+                    r.pos.x = x2;
                     r.w = rx2 - x2;
 
                     if (y1 > ry1 || y2 < ry2 || x1 > rx1)
@@ -232,7 +232,7 @@ void RectangleList::subtract (const Rectangle<int>& rect)
                     }
                     else
                     {
-                        r.y = y1;
+                        r.pos.y = y1;
                         r.h = ry2 - y1;
 
                         rects.insert (++i, Rectangle<int> (rx1, ry1, rx2 - rx1, y1 - ry1));
@@ -241,7 +241,7 @@ void RectangleList::subtract (const Rectangle<int>& rect)
                 }
                 else if (y2 > ry1 && y2 < ry2)
                 {
-                    r.y = y2;
+                    r.pos.y = y2;
                     r.h = ry2 - y2;
 
                     if (x1 > rx1 || x2 < rx2 || y1 > ry1)
@@ -281,7 +281,7 @@ bool RectangleList::clipTo (const Rectangle<int>& rect)
         {
             Rectangle<int>& r = rects.getReference (i);
 
-            if (! rect.intersectRectangle (r.x, r.y, r.w, r.h))
+            if (! rect.intersectRectangle (r.pos.x, r.pos.y, r.w, r.h))
                 rects.remove (i);
             else
                 notEmpty = true;
@@ -306,7 +306,7 @@ bool RectangleList::clipTo (const RectangleList& other)
         {
             Rectangle<int> r (other.rects.getReference (i));
 
-            if (rect.intersectRectangle (r.x, r.y, r.w, r.h))
+            if (rect.intersectRectangle (r.pos.x, r.pos.y, r.w, r.h))
                 result.rects.add (r);
         }
     }
@@ -326,7 +326,7 @@ bool RectangleList::getIntersectionWith (const Rectangle<int>& rect, RectangleLi
         {
             Rectangle<int> r (rects.getReference (i));
 
-            if (rect.intersectRectangle (r.x, r.y, r.w, r.h))
+            if (rect.intersectRectangle (r.pos.x, r.pos.y, r.w, r.h))
                 destRegion.rects.add (r);
         }
     }
@@ -347,16 +347,16 @@ void RectangleList::consolidate()
     for (i = 0; i < getNumRectangles() - 1; ++i)
     {
         Rectangle<int>& r = rects.getReference (i);
-        const int rx1 = r.x;
-        const int ry1 = r.y;
+        const int rx1 = r.pos.x;
+        const int ry1 = r.pos.y;
         const int rx2 = rx1 + r.w;
         const int ry2 = ry1 + r.h;
 
         for (int j = rects.size(); --j > i;)
         {
             Rectangle<int>& r2 = rects.getReference (j);
-            const int jrx1 = r2.x;
-            const int jry1 = r2.y;
+            const int jrx1 = r2.pos.x;
+            const int jry1 = r2.pos.y;
             const int jrx2 = jrx1 + r2.w;
             const int jry2 = jry1 + r2.h;
 
@@ -476,8 +476,8 @@ Rectangle<int> RectangleList::getBounds() const noexcept
     {
         const Rectangle<int>& r = rects.getReference (0);
 
-        int minX = r.x;
-        int minY = r.y;
+        int minX = r.pos.x;
+        int minY = r.pos.y;
         int maxX = minX + r.w;
         int maxY = minY + r.h;
 
@@ -485,8 +485,8 @@ Rectangle<int> RectangleList::getBounds() const noexcept
         {
             const Rectangle<int>& r2 = rects.getReference (i);
 
-            minX = jmin (minX, r2.x);
-            minY = jmin (minY, r2.y);
+            minX = jmin (minX, r2.pos.x);
+            minY = jmin (minY, r2.pos.y);
             maxX = jmax (maxX, r2.getRight());
             maxY = jmax (maxY, r2.getBottom());
         }
@@ -501,8 +501,8 @@ void RectangleList::offsetAll (const int dx, const int dy) noexcept
     {
         Rectangle<int>& r = rects.getReference (i);
 
-        r.x += dx;
-        r.y += dy;
+        r.pos.x += dx;
+        r.pos.y += dy;
     }
 }
 

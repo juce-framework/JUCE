@@ -85,13 +85,13 @@ int Desktop::getNumDisplayMonitors() const noexcept
     return monitorCoordsClipped.size();
 }
 
-const Rectangle<int> Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const noexcept
+Rectangle<int> Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const noexcept
 {
     return clippedToWorkArea ? monitorCoordsClipped [index]
                              : monitorCoordsUnclipped [index];
 }
 
-const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWorkArea) const
+RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWorkArea) const
 {
     RectangleList rl;
 
@@ -101,12 +101,12 @@ const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWork
     return rl;
 }
 
-const Rectangle<int> Desktop::getMainMonitorArea (const bool clippedToWorkArea) const noexcept
+Rectangle<int> Desktop::getMainMonitorArea (const bool clippedToWorkArea) const noexcept
 {
     return getDisplayMonitorCoordinates (0, clippedToWorkArea);
 }
 
-const Rectangle<int> Desktop::getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea) const
+Rectangle<int> Desktop::getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea) const
 {
     Rectangle<int> best (getMainMonitorArea (clippedToWorkArea));
     double bestDistance = 1.0e10;
@@ -223,12 +223,12 @@ void Desktop::componentBroughtToFront (Component* const c)
 }
 
 //==============================================================================
-const Point<int> Desktop::getMousePosition()
+Point<int> Desktop::getMousePosition()
 {
     return getInstance().getMainMouseSource().getScreenPosition();
 }
 
-const Point<int> Desktop::getLastMouseDownPosition()
+Point<int> Desktop::getLastMouseDownPosition()
 {
     return getInstance().getMainMouseSource().getLastMouseDownPosition();
 }

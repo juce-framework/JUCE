@@ -693,15 +693,11 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             if (wasMinimised)
                 peer->setMinimised (true);
 
-            if (isAlwaysOnTop())
-                peer->setAlwaysOnTop (true);
-
             peer->setConstrainer (currentConstainer);
 
             repaint();
+            internalHierarchyChanged();
         }
-
-        internalHierarchyChanged();
     }
 }
 
@@ -2031,7 +2027,6 @@ void Component::setLookAndFeel (LookAndFeel* const newLookAndFeel)
     if (lookAndFeel != newLookAndFeel)
     {
         lookAndFeel = newLookAndFeel;
-
         sendLookAndFeelChange();
     }
 }
@@ -2418,20 +2413,14 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
         }
     }
 
+    for (Component* c = this; c != nullptr; c = c->parentComponent)
     {
-        Component* c = this;
-
-        while (c != nullptr)
+        if (c->isBroughtToFrontOnMouseClick())
         {
-            if (c->isBroughtToFrontOnMouseClick())
-            {
-                c->toFront (true);
+            c->toFront (true);
 
-                if (checker.shouldBailOut())
-                    return;
-            }
-
-            c = c->parentComponent;
+            if (checker.shouldBailOut())
+                return;
         }
     }
 

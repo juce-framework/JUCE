@@ -46,35 +46,34 @@ public:
         The default co-ordinates will be (0, 0, 0, 0).
     */
     Rectangle() noexcept
-      : x(), y(), w(), h()
+      : w(), h()
     {
     }
 
     /** Creates a copy of another rectangle. */
     Rectangle (const Rectangle& other) noexcept
-      : x (other.x), y (other.y),
-        w (other.w), h (other.h)
+      : pos (other.pos), w (other.w), h (other.h)
     {
     }
 
     /** Creates a rectangle with a given position and size. */
     Rectangle (const ValueType initialX, const ValueType initialY,
                const ValueType width, const ValueType height) noexcept
-      : x (initialX), y (initialY),
+      : pos (initialX, initialY),
         w (width), h (height)
     {
     }
 
     /** Creates a rectangle with a given size, and a position of (0, 0). */
     Rectangle (const ValueType width, const ValueType height) noexcept
-      : x(), y(), w (width), h (height)
+      : w (width), h (height)
     {
     }
 
     /** Creates a Rectangle from the positions of two opposite corners. */
     Rectangle (const Point<ValueType>& corner1, const Point<ValueType>& corner2) noexcept
-      : x (jmin (corner1.x, corner2.x)),
-        y (jmin (corner1.y, corner2.y)),
+      : pos (jmin (corner1.x, corner2.x),
+             jmin (corner1.y, corner2.y)),
         w (corner1.x - corner2.x),
         h (corner1.y - corner2.y)
     {
@@ -94,7 +93,7 @@ public:
 
     Rectangle& operator= (const Rectangle& other) noexcept
     {
-        x = other.x; y = other.y;
+        pos = other.pos;
         w = other.w; h = other.h;
         return *this;
     }
@@ -107,10 +106,10 @@ public:
     bool isEmpty() const noexcept                                   { return w <= ValueType() || h <= ValueType(); }
 
     /** Returns the x co-ordinate of the rectangle's left-hand-side. */
-    inline ValueType getX() const noexcept                          { return x; }
+    inline ValueType getX() const noexcept                          { return pos.x; }
 
     /** Returns the y co-ordinate of the rectangle's top edge. */
-    inline ValueType getY() const noexcept                          { return y; }
+    inline ValueType getY() const noexcept                          { return pos.y; }
 
     /** Returns the width of the rectangle. */
     inline ValueType getWidth() const noexcept                      { return w; }
@@ -119,19 +118,20 @@ public:
     inline ValueType getHeight() const noexcept                     { return h; }
 
     /** Returns the x co-ordinate of the rectangle's right-hand-side. */
-    inline ValueType getRight() const noexcept                      { return x + w; }
+    inline ValueType getRight() const noexcept                      { return pos.x + w; }
 
     /** Returns the y co-ordinate of the rectangle's bottom edge. */
-    inline ValueType getBottom() const noexcept                     { return y + h; }
+    inline ValueType getBottom() const noexcept                     { return pos.y + h; }
 
     /** Returns the x co-ordinate of the rectangle's centre. */
-    ValueType getCentreX() const noexcept                           { return x + w / (ValueType) 2; }
+    ValueType getCentreX() const noexcept                           { return pos.x + w / (ValueType) 2; }
 
     /** Returns the y co-ordinate of the rectangle's centre. */
-    ValueType getCentreY() const noexcept                           { return y + h / (ValueType) 2; }
+    ValueType getCentreY() const noexcept                           { return pos.y + h / (ValueType) 2; }
 
     /** Returns the centre point of the rectangle. */
-    Point<ValueType> getCentre() const noexcept                     { return Point<ValueType> (x + w / (ValueType) 2, y + h / (ValueType) 2); }
+    Point<ValueType> getCentre() const noexcept                     { return Point<ValueType> (pos.x + w / (ValueType) 2,
+                                                                                               pos.y + h / (ValueType) 2); }
 
     /** Returns the aspect ratio of the rectangle's width / height.
         If widthOverHeight is true, it returns width / height; if widthOverHeight is false,
@@ -140,13 +140,13 @@ public:
 
     //==============================================================================
     /** Returns the rectangle's top-left position as a Point. */
-    Point<ValueType> getPosition() const noexcept                                                   { return Point<ValueType> (x, y); }
+    const Point<ValueType>& getPosition() const noexcept                                            { return pos; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    void setPosition (const Point<ValueType>& newPos) noexcept                                      { x = newPos.x; y = newPos.y; }
+    void setPosition (const Point<ValueType>& newPos) noexcept                                      { pos = newPos; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    void setPosition (const ValueType newX, const ValueType newY) noexcept                          { x = newX; y = newY; }
+    void setPosition (const ValueType newX, const ValueType newY) noexcept                          { pos.setXY (newX, newY); }
 
     /** Returns a rectangle with the same size as this one, but a new position. */
     Rectangle withPosition (const ValueType newX, const ValueType newY) const noexcept              { return Rectangle (newX, newY, w, h); }
@@ -155,35 +155,35 @@ public:
     Rectangle withPosition (const Point<ValueType>& newPos) const noexcept                          { return Rectangle (newPos.x, newPos.y, w, h); }
 
     /** Returns the rectangle's top-left position as a Point. */
-    Point<ValueType> getTopLeft() const noexcept                                                    { return getPosition(); }
+    const Point<ValueType>& getTopLeft() const noexcept                                             { return pos; }
 
     /** Returns the rectangle's top-right position as a Point. */
-    Point<ValueType> getTopRight() const noexcept                                                   { return Point<ValueType> (x + w, y); }
+    Point<ValueType> getTopRight() const noexcept                                                   { return Point<ValueType> (pos.x + w, pos.y); }
 
     /** Returns the rectangle's bottom-left position as a Point. */
-    Point<ValueType> getBottomLeft() const noexcept                                                 { return Point<ValueType> (x, y + h); }
+    Point<ValueType> getBottomLeft() const noexcept                                                 { return Point<ValueType> (pos.x, pos.y + h); }
 
     /** Returns the rectangle's bottom-right position as a Point. */
-    Point<ValueType> getBottomRight() const noexcept                                                { return Point<ValueType> (x + w, y + h); }
+    Point<ValueType> getBottomRight() const noexcept                                                { return Point<ValueType> (pos.x + w, pos.y + h); }
 
     /** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
     void setSize (const ValueType newWidth, const ValueType newHeight) noexcept                     { w = newWidth; h = newHeight; }
 
     /** Returns a rectangle with the same position as this one, but a new size. */
-    Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const noexcept         { return Rectangle (x, y, newWidth, newHeight); }
+    Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, newWidth, newHeight); }
 
     /** Changes all the rectangle's co-ordinates. */
     void setBounds (const ValueType newX, const ValueType newY,
                     const ValueType newWidth, const ValueType newHeight) noexcept
     {
-        x = newX; y = newY; w = newWidth; h = newHeight;
+        pos.x = newX; pos.y = newY; w = newWidth; h = newHeight;
     }
 
     /** Changes the rectangle's X coordinate */
-    void setX (const ValueType newX) noexcept                       { x = newX; }
+    void setX (const ValueType newX) noexcept                       { pos.x = newX; }
 
     /** Changes the rectangle's Y coordinate */
-    void setY (const ValueType newY) noexcept                       { y = newY; }
+    void setY (const ValueType newY) noexcept                       { pos.y = newY; }
 
     /** Changes the rectangle's width */
     void setWidth (const ValueType newWidth) noexcept               { w = newWidth; }
@@ -192,16 +192,16 @@ public:
     void setHeight (const ValueType newHeight) noexcept             { h = newHeight; }
 
     /** Returns a rectangle which has the same size and y-position as this one, but with a different x-position. */
-    Rectangle withX (const ValueType newX) const noexcept                                     { return Rectangle (newX, y, w, h); }
+    Rectangle withX (const ValueType newX) const noexcept                                     { return Rectangle (newX, pos.y, w, h); }
 
     /** Returns a rectangle which has the same size and x-position as this one, but with a different y-position. */
-    Rectangle withY (const ValueType newY) const noexcept                                     { return Rectangle (x, newY, w, h); }
+    Rectangle withY (const ValueType newY) const noexcept                                     { return Rectangle (pos.x, newY, w, h); }
 
     /** Returns a rectangle which has the same position and height as this one, but with a different width. */
-    Rectangle withWidth (const ValueType newWidth) const noexcept                             { return Rectangle (x, y, newWidth, h); }
+    Rectangle withWidth (const ValueType newWidth) const noexcept                             { return Rectangle (pos.x, pos.y, newWidth, h); }
 
     /** Returns a rectangle which has the same position and width as this one, but with a different height. */
-    Rectangle withHeight (const ValueType newHeight) const noexcept                           { return Rectangle (x, y, w, newHeight); }
+    Rectangle withHeight (const ValueType newHeight) const noexcept                           { return Rectangle (pos.x, pos.y, w, newHeight); }
 
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
@@ -209,15 +209,15 @@ public:
     */
     void setLeft (const ValueType newLeft) noexcept
     {
-        w = jmax (ValueType(), x + w - newLeft);
-        x = newLeft;
+        w = jmax (ValueType(), pos.x + w - newLeft);
+        pos.x = newLeft;
     }
 
     /** Returns a new rectangle with a different x position, but the same right-hand edge as this one.
         If the new x is beyond the right of the current right-hand edge, the width will be set to zero.
         @see setLeft
     */
-    Rectangle withLeft (const ValueType newLeft) const noexcept       { return Rectangle (newLeft, y, jmax (ValueType(), x + w - newLeft), h); }
+    Rectangle withLeft (const ValueType newLeft) const noexcept       { return Rectangle (newLeft, pos.y, jmax (ValueType(), pos.x + w - newLeft), h); }
 
     /** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
         If the y is moved to be below the current bottom edge, the height will be set to zero.
@@ -225,15 +225,15 @@ public:
     */
     void setTop (const ValueType newTop) noexcept
     {
-        h = jmax (ValueType(), y + h - newTop);
-        y = newTop;
+        h = jmax (ValueType(), pos.y + h - newTop);
+        pos.y = newTop;
     }
 
     /** Returns a new rectangle with a different y position, but the same bottom edge as this one.
         If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
         @see setTop
     */
-    Rectangle withTop (const ValueType newTop) const noexcept         { return Rectangle (x, newTop, w, jmax (ValueType(), y + h - newTop)); }
+    Rectangle withTop (const ValueType newTop) const noexcept         { return Rectangle (pos.x, newTop, w, jmax (ValueType(), pos.y + h - newTop)); }
 
     /** Adjusts the width so that the right-hand edge of the rectangle has this new value.
         If the new right is below the current X value, the X will be pushed down to match it.
@@ -241,15 +241,15 @@ public:
     */
     void setRight (const ValueType newRight) noexcept
     {
-        x = jmin (x, newRight);
-        w = newRight - x;
+        pos.x = jmin (pos.x, newRight);
+        w = newRight - pos.x;
     }
 
     /** Returns a new rectangle with a different right-hand edge position, but the same left-hand edge as this one.
         If the new right edge is below the current left-hand edge, the width will be set to zero.
         @see setRight
     */
-    Rectangle withRight (const ValueType newRight) const noexcept     { return Rectangle (jmin (x, newRight), y, jmax (ValueType(), newRight - x), h); }
+    Rectangle withRight (const ValueType newRight) const noexcept     { return Rectangle (jmin (pos.x, newRight), pos.y, jmax (ValueType(), newRight - pos.x), h); }
 
     /** Adjusts the height so that the bottom edge of the rectangle has this new value.
         If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
@@ -257,55 +257,55 @@ public:
     */
     void setBottom (const ValueType newBottom) noexcept
     {
-        y = jmin (y, newBottom);
-        h = newBottom - y;
+        pos.y = jmin (pos.y, newBottom);
+        h = newBottom - pos.y;
     }
 
     /** Returns a new rectangle with a different bottom edge position, but the same top edge as this one.
         If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
         @see setBottom
     */
-    Rectangle withBottom (const ValueType newBottom) const noexcept   { return Rectangle (x, jmin (y, newBottom), w, jmax (ValueType(), newBottom - y)); }
+    Rectangle withBottom (const ValueType newBottom) const noexcept   { return Rectangle (pos.x, jmin (pos.y, newBottom), w, jmax (ValueType(), newBottom - pos.y)); }
 
     //==============================================================================
     /** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
     void translate (const ValueType deltaX,
                     const ValueType deltaY) noexcept
     {
-        x += deltaX;
-        y += deltaY;
+        pos.x += deltaX;
+        pos.y += deltaY;
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
     Rectangle translated (const ValueType deltaX,
                           const ValueType deltaY) const noexcept
     {
-        return Rectangle (x + deltaX, y + deltaY, w, h);
+        return Rectangle (pos.x + deltaX, pos.y + deltaY, w, h);
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
     Rectangle operator+ (const Point<ValueType>& deltaPosition) const noexcept
     {
-        return Rectangle (x + deltaPosition.x, y + deltaPosition.y, w, h);
+        return Rectangle (pos.x + deltaPosition.x, pos.y + deltaPosition.y, w, h);
     }
 
     /** Moves this rectangle by a given amount. */
     Rectangle& operator+= (const Point<ValueType>& deltaPosition) noexcept
     {
-        x += deltaPosition.x; y += deltaPosition.y;
+        pos += deltaPosition;
         return *this;
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
     Rectangle operator- (const Point<ValueType>& deltaPosition) const noexcept
     {
-        return Rectangle (x - deltaPosition.x, y - deltaPosition.y, w, h);
+        return Rectangle (pos.x - deltaPosition.x, pos.y - deltaPosition.y, w, h);
     }
 
     /** Moves this rectangle by a given amount. */
     Rectangle& operator-= (const Point<ValueType>& deltaPosition) noexcept
     {
-        x -= deltaPosition.x; y -= deltaPosition.y;
+        pos -= deltaPosition;
         return *this;
     }
 
@@ -319,7 +319,7 @@ public:
     {
         const ValueType nw = jmax (ValueType(), w + deltaX * 2);
         const ValueType nh = jmax (ValueType(), h + deltaY * 2);
-        setBounds (x - deltaX, y - deltaY, nw, nh);
+        setBounds (pos.x - deltaX, pos.y - deltaY, nw, nh);
     }
 
     /** Returns a rectangle that is larger than this one by a given amount.
@@ -332,7 +332,7 @@ public:
     {
         const ValueType nw = jmax (ValueType(), w + deltaX * 2);
         const ValueType nh = jmax (ValueType(), h + deltaY * 2);
-        return Rectangle (x - deltaX, y - deltaY, nw, nh);
+        return Rectangle (pos.x - deltaX, pos.y - deltaY, nw, nh);
     }
 
     /** Shrinks the rectangle by a given amount.
@@ -368,8 +368,8 @@ public:
     */
     Rectangle removeFromTop (const ValueType amountToRemove) noexcept
     {
-        const Rectangle r (x, y, w, jmin (amountToRemove, h));
-        y += r.h; h -= r.h;
+        const Rectangle r (pos.x, pos.y, w, jmin (amountToRemove, h));
+        pos.y += r.h; h -= r.h;
         return r;
     }
 
@@ -384,8 +384,8 @@ public:
     */
     Rectangle removeFromLeft (const ValueType amountToRemove) noexcept
     {
-        const Rectangle r (x, y, jmin (amountToRemove, w), h);
-        x += r.w; w -= r.w;
+        const Rectangle r (pos.x, pos.y, jmin (amountToRemove, w), h);
+        pos.x += r.w; w -= r.w;
         return r;
     }
 
@@ -401,7 +401,7 @@ public:
     Rectangle removeFromRight (ValueType amountToRemove) noexcept
     {
         amountToRemove = jmin (amountToRemove, w);
-        const Rectangle r (x + w - amountToRemove, y, amountToRemove, h);
+        const Rectangle r (pos.x + w - amountToRemove, pos.y, amountToRemove, h);
         w -= amountToRemove;
         return r;
     }
@@ -418,7 +418,7 @@ public:
     Rectangle removeFromBottom (ValueType amountToRemove) noexcept
     {
         amountToRemove = jmin (amountToRemove, h);
-        const Rectangle r (x, y + h - amountToRemove, w, amountToRemove);
+        const Rectangle r (pos.x, pos.y + h - amountToRemove, w, amountToRemove);
         h -= amountToRemove;
         return r;
     }
@@ -427,50 +427,48 @@ public:
     /** Returns true if the two rectangles are identical. */
     bool operator== (const Rectangle& other) const noexcept
     {
-        return x == other.x && y == other.y
-            && w == other.w && h == other.h;
+        return pos == other.pos && w == other.w && h == other.h;
     }
 
     /** Returns true if the two rectangles are not identical. */
     bool operator!= (const Rectangle& other) const noexcept
     {
-        return x != other.x || y != other.y
-            || w != other.w || h != other.h;
+        return pos != other.pos || w != other.w || h != other.h;
     }
 
     /** Returns true if this co-ordinate is inside the rectangle. */
     bool contains (const ValueType xCoord, const ValueType yCoord) const noexcept
     {
-        return xCoord >= x && yCoord >= y && xCoord < x + w && yCoord < y + h;
+        return xCoord >= pos.x && yCoord >= pos.y && xCoord < pos.x + w && yCoord < pos.y + h;
     }
 
     /** Returns true if this co-ordinate is inside the rectangle. */
     bool contains (const Point<ValueType>& point) const noexcept
     {
-        return point.x >= x && point.y >= y && point.x < x + w && point.y < y + h;
+        return point.x >= pos.x && point.y >= pos.y && point.x < pos.x + w && point.y < pos.y + h;
     }
 
     /** Returns true if this other rectangle is completely inside this one. */
     bool contains (const Rectangle& other) const noexcept
     {
-        return x <= other.x && y <= other.y
-            && x + w >= other.x + other.w && y + h >= other.y + other.h;
+        return pos.x <= other.pos.x && pos.y <= other.pos.y
+            && pos.x + w >= other.pos.x + other.w && pos.y + h >= other.pos.y + other.h;
     }
 
     /** Returns the nearest point to the specified point that lies within this rectangle. */
     Point<ValueType> getConstrainedPoint (const Point<ValueType>& point) const noexcept
     {
-        return Point<ValueType> (jlimit (x, x + w, point.x),
-                                 jlimit (y, y + h, point.y));
+        return Point<ValueType> (jlimit (pos.x, pos.x + w, point.x),
+                                 jlimit (pos.y, pos.y + h, point.y));
     }
 
     /** Returns true if any part of another rectangle overlaps this one. */
     bool intersects (const Rectangle& other) const noexcept
     {
-        return x + w > other.x
-            && y + h > other.y
-            && x < other.x + other.w
-            && y < other.y + other.h
+        return pos.x + w > other.pos.x
+            && pos.y + h > other.pos.y
+            && pos.x < other.pos.x + other.w
+            && pos.y < other.pos.y + other.h
             && w > ValueType() && h > ValueType();
     }
 
@@ -480,10 +478,10 @@ public:
     */
     Rectangle getIntersection (const Rectangle& other) const noexcept
     {
-        const ValueType nx = jmax (x, other.x);
-        const ValueType ny = jmax (y, other.y);
-        const ValueType nw = jmin (x + w, other.x + other.w) - nx;
-        const ValueType nh = jmin (y + h, other.y + other.h) - ny;
+        const ValueType nx = jmax (pos.x, other.pos.x);
+        const ValueType ny = jmax (pos.y, other.pos.y);
+        const ValueType nw = jmin (pos.x + w, other.pos.x + other.w) - nx;
+        const ValueType nh = jmin (pos.y + h, other.pos.y + other.h) - ny;
 
         if (nw >= ValueType() && nh >= ValueType())
             return Rectangle (nx, ny, nw, nh);
@@ -499,13 +497,13 @@ public:
     */
     bool intersectRectangle (ValueType& otherX, ValueType& otherY, ValueType& otherW, ValueType& otherH) const noexcept
     {
-        const int maxX = jmax (otherX, x);
-        otherW = jmin (otherX + otherW, x + w) - maxX;
+        const int maxX = jmax (otherX, pos.x);
+        otherW = jmin (otherX + otherW, pos.x + w) - maxX;
 
         if (otherW > ValueType())
         {
-            const int maxY = jmax (otherY, y);
-            otherH = jmin (otherY + otherH, y + h) - maxY;
+            const int maxY = jmax (otherY, pos.y);
+            otherH = jmin (otherY + otherH, pos.y + h) - maxY;
 
             if (otherH > ValueType())
             {
@@ -527,12 +525,12 @@ public:
         if (other.isEmpty())  return *this;
         if (isEmpty())        return other;
 
-        const ValueType newX = jmin (x, other.x);
-        const ValueType newY = jmin (y, other.y);
+        const ValueType newX = jmin (pos.x, other.pos.x);
+        const ValueType newY = jmin (pos.y, other.pos.y);
 
         return Rectangle (newX, newY,
-                          jmax (x + w, other.x + other.w) - newX,
-                          jmax (y + h, other.y + other.h) - newY);
+                          jmax (pos.x + w, other.pos.x + other.w) - newX,
+                          jmax (pos.y + h, other.pos.y + other.h) - newY);
     }
 
     /** If this rectangle merged with another one results in a simple rectangle, this
@@ -543,20 +541,20 @@ public:
     */
     bool enlargeIfAdjacent (const Rectangle& other) noexcept
     {
-        if (x == other.x && getRight() == other.getRight()
-             && (other.getBottom() >= y && other.y <= getBottom()))
+        if (pos.x == other.pos.x && getRight() == other.getRight()
+             && (other.getBottom() >= pos.y && other.pos.y <= getBottom()))
         {
-            const ValueType newY = jmin (y, other.y);
+            const ValueType newY = jmin (pos.y, other.pos.y);
             h = jmax (getBottom(), other.getBottom()) - newY;
-            y = newY;
+            pos.y = newY;
             return true;
         }
-        else if (y == other.y && getBottom() == other.getBottom()
-                  && (other.getRight() >= x && other.x <= getRight()))
+        else if (pos.y == other.pos.y && getBottom() == other.getBottom()
+                  && (other.getRight() >= pos.x && other.pos.x <= getRight()))
         {
-            const ValueType newX = jmin (x, other.x);
+            const ValueType newX = jmin (pos.x, other.pos.x);
             w = jmax (getRight(), other.getRight()) - newX;
-            x = newX;
+            pos.x = newX;
             return true;
         }
 
@@ -573,20 +571,20 @@ public:
     {
         int inside = 0;
         const int otherR = other.getRight();
-        if (x >= other.x && x < otherR) inside = 1;
+        if (pos.x >= other.pos.x && pos.x < otherR) inside = 1;
         const int otherB = other.getBottom();
-        if (y >= other.y && y < otherB) inside |= 2;
-        const int r = x + w;
-        if (r >= other.x && r < otherR) inside |= 4;
-        const int b = y + h;
-        if (b >= other.y && b < otherB) inside |= 8;
+        if (pos.y >= other.pos.y && pos.y < otherB) inside |= 2;
+        const int r = pos.x + w;
+        if (r >= other.pos.x && r < otherR) inside |= 4;
+        const int b = pos.y + h;
+        if (b >= other.pos.y && b < otherB) inside |= 8;
 
         switch (inside)
         {
-            case 1 + 2 + 8:     w = r - otherR; x = otherR; return true;
-            case 1 + 2 + 4:     h = b - otherB; y = otherB; return true;
-            case 2 + 4 + 8:     w = other.x - x; return true;
-            case 1 + 4 + 8:     h = other.y - y; return true;
+            case 1 + 2 + 8:     w = r - otherR; pos.x = otherR; return true;
+            case 1 + 2 + 4:     h = b - otherB; pos.y = otherB; return true;
+            case 2 + 4 + 8:     w = other.pos.x - pos.x; return true;
+            case 1 + 4 + 8:     h = other.pos.y - pos.y; return true;
         }
 
         return false;
@@ -599,10 +597,10 @@ public:
     */
     Rectangle transformed (const AffineTransform& transform) const noexcept
     {
-        float x1 = x,     y1 = y;
-        float x2 = x + w, y2 = y;
-        float x3 = x,     y3 = y + h;
-        float x4 = x2,    y4 = y3;
+        float x1 = pos.x,     y1 = pos.y;
+        float x2 = pos.x + w, y2 = pos.y;
+        float x3 = pos.x,     y3 = pos.y + h;
+        float x4 = x2,        y4 = y3;
 
         transform.transformPoints (x1, y1, x2, y2);
         transform.transformPoints (x3, y3, x4, y4);
@@ -621,10 +619,10 @@ public:
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
-        const int x1 = (int) std::floor (static_cast<float> (x));
-        const int y1 = (int) std::floor (static_cast<float> (y));
-        const int x2 = (int) std::ceil  (static_cast<float> (x + w));
-        const int y2 = (int) std::ceil  (static_cast<float> (y + h));
+        const int x1 = (int) std::floor (static_cast<float> (pos.x));
+        const int y1 = (int) std::floor (static_cast<float> (pos.y));
+        const int x2 = (int) std::ceil  (static_cast<float> (pos.x + w));
+        const int y2 = (int) std::ceil  (static_cast<float> (pos.y + h));
 
         return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
     }
@@ -657,8 +655,8 @@ public:
     */
     Rectangle<float> toFloat() const noexcept
     {
-        return Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
-                                 static_cast<float> (w), static_cast<float> (h));
+        return Rectangle<float> (static_cast<float> (pos.x), static_cast<float> (pos.y),
+                                 static_cast<float> (w),     static_cast<float> (h));
     }
 
     //==============================================================================
@@ -703,7 +701,7 @@ public:
     {
         String s;
         s.preallocateBytes (32);
-        s << x << ' ' << y << ' ' << w << ' ' << h;
+        s << pos.x << ' ' << pos.y << ' ' << w << ' ' << h;
         return s;
     }
 
@@ -730,7 +728,8 @@ public:
 
 private:
     friend class RectangleList;
-    ValueType x, y, w, h;
+    Point<ValueType> pos;
+    ValueType w, h;
 };
 
 

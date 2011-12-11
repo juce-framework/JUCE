@@ -100,18 +100,18 @@ public:
     void setSize (int w, int h);
     void setBounds (int x, int y, int w, int h, bool isNowFullScreen);
 
-    const Rectangle<int> getBounds() const;
-    const Rectangle<int> getBounds (const bool global) const;
-    const Point<int> getScreenPosition() const;
-    const Point<int> localToGlobal (const Point<int>& relativePosition);
-    const Point<int> globalToLocal (const Point<int>& screenPosition);
+    Rectangle<int> getBounds() const;
+    Rectangle<int> getBounds (const bool global) const;
+    Point<int> getScreenPosition() const;
+    Point<int> localToGlobal (const Point<int>& relativePosition);
+    Point<int> globalToLocal (const Point<int>& screenPosition);
     void setAlpha (float newAlpha);
     void setMinimised (bool shouldBeMinimised);
     bool isMinimised() const;
     void setFullScreen (bool shouldBeFullScreen);
     bool isFullScreen() const;
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const;
-    const BorderSize<int> getFrameSize() const;
+    BorderSize<int> getFrameSize() const;
     bool setAlwaysOnTop (bool alwaysOnTop);
     void toFront (bool makeActiveWindow);
     void toBehind (ComponentPeer* other);
@@ -498,7 +498,7 @@ void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     }
 }
 
-const Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
+Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
 {
     CGRect r = view.frame;
 
@@ -516,22 +516,22 @@ const Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
     return convertToRectInt (r);
 }
 
-const Rectangle<int> UIViewComponentPeer::getBounds() const
+Rectangle<int> UIViewComponentPeer::getBounds() const
 {
     return getBounds (! isSharedWindow);
 }
 
-const Point<int> UIViewComponentPeer::getScreenPosition() const
+Point<int> UIViewComponentPeer::getScreenPosition() const
 {
     return getBounds (true).getPosition();
 }
 
-const Point<int> UIViewComponentPeer::localToGlobal (const Point<int>& relativePosition)
+Point<int> UIViewComponentPeer::localToGlobal (const Point<int>& relativePosition)
 {
     return relativePosition + getScreenPosition();
 }
 
-const Point<int> UIViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
+Point<int> UIViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
 {
     return screenPosition - getScreenPosition();
 }
@@ -668,7 +668,7 @@ bool UIViewComponentPeer::contains (const Point<int>& position, bool trueIfInACh
     return v == view;
 }
 
-const BorderSize<int> UIViewComponentPeer::getFrameSize() const
+BorderSize<int> UIViewComponentPeer::getFrameSize() const
 {
     return BorderSize<int>();
 }

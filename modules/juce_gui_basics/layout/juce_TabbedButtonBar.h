@@ -75,7 +75,7 @@ protected:
         This deals with the orientation of the tabs, which affects which side is
         touching the tabbed box's content component.
     */
-    const Rectangle<int> getActiveArea();
+    Rectangle<int> getActiveArea();
 
     /** Returns this tab's index in its tab bar. */
     int getIndex() const;

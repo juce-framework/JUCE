@@ -104,7 +104,7 @@ int TabBarButton::getBestTabLength (const int depth)
                    getLookAndFeel().getTabButtonBestWidth (getIndex(), getButtonText(), depth, *this));
 }
 
-const Rectangle<int> TabBarButton::getActiveArea()
+Rectangle<int> TabBarButton::getActiveArea()
 {
     Rectangle<int> r (getLocalBounds());
     const int spaceAroundImage = getLookAndFeel().getTabButtonSpaceAroundImage();

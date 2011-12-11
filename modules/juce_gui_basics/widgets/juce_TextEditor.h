@@ -485,7 +485,7 @@ public:
 
         @see setBorder
     */
-    const BorderSize<int> getBorder() const;
+    BorderSize<int> getBorder() const;
 
     /** Used to disable the auto-scrolling which keeps the caret visible.
 

@@ -240,7 +240,7 @@ int TableHeaderComponent::getColumnIdOfIndex (int index, const bool onlyCountVis
     return (ci != nullptr) ? ci->id : 0;
 }
 
-const Rectangle<int> TableHeaderComponent::getColumnPosition (const int index) const
+Rectangle<int> TableHeaderComponent::getColumnPosition (const int index) const
 {
     int x = 0, width = 0, n = 0;
 

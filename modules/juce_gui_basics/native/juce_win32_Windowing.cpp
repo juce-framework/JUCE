@@ -612,7 +612,7 @@ public:
         repaintNowIfTransparent();
     }
 
-    const Rectangle<int> getBounds() const
+    Rectangle<int> getBounds() const
     {
         RECT r;
         GetWindowRect (hwnd, &r);
@@ -629,7 +629,7 @@ public:
         return windowBorder.subtractedFrom (bounds);
     }
 
-    const Point<int> getScreenPosition() const
+    Point<int> getScreenPosition() const
     {
         RECT r;
         GetWindowRect (hwnd, &r);
@@ -637,12 +637,12 @@ public:
                            r.top + windowBorder.getTop());
     }
 
-    const Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (const Point<int>& relativePosition)
     {
         return relativePosition + getScreenPosition();
     }
 
-    const Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (const Point<int>& screenPosition)
     {
         return screenPosition - getScreenPosition();
     }
@@ -752,7 +752,7 @@ public:
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
-    const BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const
     {
         return windowBorder;
     }
@@ -1153,6 +1153,9 @@ private:
             const float alpha = component->getAlpha();
             if (alpha < 1.0f)
                 setAlpha (alpha);
+
+            if (component->isAlwaysOnTop())
+                setAlwaysOnTop (true);
         }
         else
         {

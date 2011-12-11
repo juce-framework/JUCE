@@ -292,12 +292,12 @@ public:
     /** Returns the width of the frame to use around the window.
         @see getContentComponentBorder
     */
-    virtual const BorderSize<int> getBorderThickness();
+    virtual BorderSize<int> getBorderThickness();
 
     /** Returns the insets to use when positioning the content component.
         @see getBorderThickness
     */
-    virtual const BorderSize<int> getContentComponentBorder();
+    virtual BorderSize<int> getContentComponentBorder();
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the window.

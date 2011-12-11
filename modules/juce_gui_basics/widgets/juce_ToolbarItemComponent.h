@@ -74,7 +74,7 @@ public:
     /** Returns the item type ID that this component represents.
         This value is in the constructor.
     */
-    int getItemId() const noexcept                                      { return itemId; }
+    int getItemId() const noexcept                                  { return itemId; }
 
     /** Returns the toolbar that contains this component, or 0 if it's not currently
         inside one.
@@ -91,7 +91,7 @@ public:
         Styles are listed in the Toolbar::ToolbarItemStyle enum.
         @see setStyle, Toolbar::getStyle
     */
-    Toolbar::ToolbarItemStyle getStyle() const noexcept                 { return toolbarStyle; }
+    Toolbar::ToolbarItemStyle getStyle() const noexcept             { return toolbarStyle; }
 
     /** Changes the current style setting of this item.
 
@@ -110,7 +110,7 @@ public:
 
         @see contentAreaChanged
     */
-    const Rectangle<int> getContentArea() const noexcept                { return contentArea; }
+    const Rectangle<int>& getContentArea() const noexcept           { return contentArea; }
 
     //==============================================================================
     /** This method must return the size criteria for this item, based on a given toolbar

@@ -1480,7 +1480,7 @@ void TextEditor::setBorder (const BorderSize<int>& border)
     resized();
 }
 
-const BorderSize<int> TextEditor::getBorder() const
+BorderSize<int> TextEditor::getBorder() const
 {
     return borderSize;
 }

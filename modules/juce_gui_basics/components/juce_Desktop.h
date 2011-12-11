@@ -74,14 +74,14 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const RectangleList getAllMonitorDisplayAreas (bool clippedToWorkArea = true) const;
+    RectangleList getAllMonitorDisplayAreas (bool clippedToWorkArea = true) const;
 
     /** Returns the position and size of the main monitor.
 
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle<int> getMainMonitorArea (bool clippedToWorkArea = true) const noexcept;
+    Rectangle<int> getMainMonitorArea (bool clippedToWorkArea = true) const noexcept;
 
     /** Returns the position and size of the monitor which contains this co-ordinate.
 
@@ -91,7 +91,7 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, bool clippedToWorkArea = true) const;
+    Rectangle<int> getMonitorAreaContaining (const Point<int>& position, bool clippedToWorkArea = true) const;
 
 
     //==============================================================================
@@ -103,7 +103,7 @@ public:
         you should only resort to grabbing the global mouse position if there's really no
         way to get the coordinates via a mouse event callback instead.
     */
-    static const Point<int> getMousePosition();
+    static Point<int> getMousePosition();
 
     /** Makes the mouse pointer jump to a given location.
 
@@ -118,7 +118,7 @@ public:
         get this information via other means, such as MouseEvent::getMouseDownScreenPosition()
         if possible, and only ever call this as a last resort.
     */
-    static const Point<int> getLastMouseDownPosition();
+    static Point<int> getLastMouseDownPosition();
 
     /** Returns the number of times the mouse button has been clicked since the
         app started.
@@ -390,7 +390,7 @@ private:
     ListenerList <MouseListener>& getMouseListeners();
 
     int getNumDisplayMonitors() const noexcept;
-    const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const noexcept;
+    Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const noexcept;
     static void getCurrentMonitorPositions (Array <Rectangle<int> >&, const bool clipToWorkArea);
 
     void addDesktopComponent (Component*);

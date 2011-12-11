@@ -215,7 +215,7 @@ public:
         }
     }
 
-    const Rectangle<int> getBounds() const
+    Rectangle<int> getBounds() const
     {
         return Rectangle<int> (view.callIntMethod (ComponentPeerView.getLeft),
                                view.callIntMethod (ComponentPeerView.getTop),
@@ -223,18 +223,18 @@ public:
                                view.callIntMethod (ComponentPeerView.getHeight));
     }
 
-    const Point<int> getScreenPosition() const
+    Point<int> getScreenPosition() const
     {
         return Point<int> (view.callIntMethod (ComponentPeerView.getLeft),
                            view.callIntMethod (ComponentPeerView.getTop));
     }
 
-    const Point<int> localToGlobal (const Point<int>& relativePosition)
+    Point<int> localToGlobal (const Point<int>& relativePosition)
     {
         return relativePosition + getScreenPosition();
     }
 
-    const Point<int> globalToLocal (const Point<int>& screenPosition)
+    Point<int> globalToLocal (const Point<int>& screenPosition)
     {
         return screenPosition - getScreenPosition();
     }
@@ -282,7 +282,7 @@ public:
                                                                     position.x, position.y));
     }
 
-    const BorderSize<int> getFrameSize() const
+    BorderSize<int> getFrameSize() const
     {
         // TODO
         return BorderSize<int>();

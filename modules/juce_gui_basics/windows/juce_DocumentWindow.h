@@ -237,9 +237,9 @@ public:
     /** @internal */
     void lookAndFeelChanged();
     /** @internal */
-    const BorderSize<int> getBorderThickness();
+    BorderSize<int> getBorderThickness();
     /** @internal */
-    const BorderSize<int> getContentComponentBorder();
+    BorderSize<int> getContentComponentBorder();
     /** @internal */
     void mouseDoubleClick (const MouseEvent& e);
     /** @internal */
@@ -251,7 +251,7 @@ public:
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
-    const Rectangle<int> getTitleBarArea();
+    Rectangle<int> getTitleBarArea();
    #endif
 
 private:

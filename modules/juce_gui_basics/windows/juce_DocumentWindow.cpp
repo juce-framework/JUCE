@@ -258,13 +258,13 @@ void DocumentWindow::resized()
                             titleBarArea.getWidth(), menuBarHeight);
 }
 
-const BorderSize<int> DocumentWindow::getBorderThickness()
+BorderSize<int> DocumentWindow::getBorderThickness()
 {
     return BorderSize<int> ((isFullScreen() || isUsingNativeTitleBar())
                                 ? 0 : (resizableBorder != nullptr ? 4 : 1));
 }
 
-const BorderSize<int> DocumentWindow::getContentComponentBorder()
+BorderSize<int> DocumentWindow::getContentComponentBorder()
 {
     BorderSize<int> border (getBorderThickness());
 
@@ -280,7 +280,7 @@ int DocumentWindow::getTitleBarHeight() const
     return isUsingNativeTitleBar() ? 0 : jmin (titleBarHeight, getHeight() - 4);
 }
 
-const Rectangle<int> DocumentWindow::getTitleBarArea()
+Rectangle<int> DocumentWindow::getTitleBarArea()
 {
     const BorderSize<int> border (getBorderThickness());
 

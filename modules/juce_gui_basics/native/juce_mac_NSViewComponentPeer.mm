@@ -164,11 +164,11 @@ public:
     void setPosition (int x, int y);
     void setSize (int w, int h);
     void setBounds (int x, int y, int w, int h, const bool isNowFullScreen);
-    const Rectangle<int> getBounds (const bool global) const;
-    const Rectangle<int> getBounds() const;
-    const Point<int> getScreenPosition() const;
-    const Point<int> localToGlobal (const Point<int>& relativePosition);
-    const Point<int> globalToLocal (const Point<int>& screenPosition);
+    Rectangle<int> getBounds (const bool global) const;
+    Rectangle<int> getBounds() const;
+    Point<int> getScreenPosition() const;
+    Point<int> localToGlobal (const Point<int>& relativePosition);
+    Point<int> globalToLocal (const Point<int>& screenPosition);
     void setAlpha (float newAlpha);
     void setMinimised (bool shouldBeMinimised);
     bool isMinimised() const;
@@ -177,7 +177,7 @@ public:
     void updateFullscreenStatus();
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const;
     bool hasNativeTitleBar() const        { return (getStyleFlags() & windowHasTitleBar) != 0; }
-    const BorderSize<int> getFrameSize() const;
+    BorderSize<int> getFrameSize() const;
     bool setAlwaysOnTop (bool alwaysOnTop);
     void toFront (bool makeActiveWindow);
     void toBehind (ComponentPeer* other);
@@ -273,7 +273,7 @@ public:
                 + (int64) ([e timestamp] * 1000.0);
     }
 
-    static const Point<int> getMousePos (NSEvent* e, NSView* view)
+    static Point<int> getMousePos (NSEvent* e, NSView* view)
     {
         NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
         return Point<int> (roundToInt (p.x), roundToInt ([view frame].size.height - p.y));
@@ -1134,7 +1134,7 @@ void NSViewComponentPeer::setBounds (int x, int y, int w, int h, bool isNowFullS
     }
 }
 
-const Rectangle<int> NSViewComponentPeer::getBounds (const bool global) const
+Rectangle<int> NSViewComponentPeer::getBounds (const bool global) const
 {
     NSRect r = [view frame];
 
@@ -1154,22 +1154,22 @@ const Rectangle<int> NSViewComponentPeer::getBounds (const bool global) const
     return Rectangle<int> (convertToRectInt (r));
 }
 
-const Rectangle<int> NSViewComponentPeer::getBounds() const
+Rectangle<int> NSViewComponentPeer::getBounds() const
 {
     return getBounds (! isSharedWindow);
 }
 
-const Point<int> NSViewComponentPeer::getScreenPosition() const
+Point<int> NSViewComponentPeer::getScreenPosition() const
 {
     return getBounds (true).getPosition();
 }
 
-const Point<int> NSViewComponentPeer::localToGlobal (const Point<int>& relativePosition)
+Point<int> NSViewComponentPeer::localToGlobal (const Point<int>& relativePosition)
 {
     return relativePosition + getScreenPosition();
 }
 
-const Point<int> NSViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
+Point<int> NSViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
 {
     return screenPosition - getScreenPosition();
 }
@@ -1308,7 +1308,7 @@ bool NSViewComponentPeer::contains (const Point<int>& position, bool trueIfInACh
     return v == view;
 }
 
-const BorderSize<int> NSViewComponentPeer::getFrameSize() const
+BorderSize<int> NSViewComponentPeer::getFrameSize() const
 {
     BorderSize<int> b;
 

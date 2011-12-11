@@ -140,7 +140,7 @@ public:
         If the specified component isn't currently being animated, this method will just
         return its current position.
     */
-    const Rectangle<int> getComponentDestination (Component* component);
+    Rectangle<int> getComponentDestination (Component* component);
 
     /** Returns true if the specified component is currently being animated. */
     bool isAnimating (Component* component) const noexcept;

@@ -186,7 +186,7 @@ void ResizableBorderComponent::setBorderThickness (const BorderSize<int>& newBor
     }
 }
 
-const BorderSize<int> ResizableBorderComponent::getBorderThickness() const
+BorderSize<int> ResizableBorderComponent::getBorderThickness() const
 {
     return borderSize;
 }

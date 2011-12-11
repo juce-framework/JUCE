@@ -297,7 +297,7 @@ void ComponentAnimator::cancelAnimation (Component* const component,
     }
 }
 
-const Rectangle<int> ComponentAnimator::getComponentDestination (Component* const component)
+Rectangle<int> ComponentAnimator::getComponentDestination (Component* const component)
 {
     jassert (component != nullptr);
     AnimationTask* const at = findTaskFor (component);

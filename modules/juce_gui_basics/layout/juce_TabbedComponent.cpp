@@ -36,8 +36,8 @@ namespace TabbedComponentHelpers
             delete comp;
     }
 
-    const Rectangle<int> getTabArea (Rectangle<int>& content, BorderSize<int>& outline,
-                                     const TabbedButtonBar::Orientation orientation, const int tabDepth)
+    Rectangle<int> getTabArea (Rectangle<int>& content, BorderSize<int>& outline,
+                               const TabbedButtonBar::Orientation orientation, const int tabDepth)
     {
         switch (orientation)
         {

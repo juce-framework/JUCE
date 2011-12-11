@@ -393,12 +393,12 @@ const Rectangle<int>& ComponentPeer::getNonFullScreenBounds() const noexcept
     return lastNonFullscreenBounds;
 }
 
-const Rectangle<int> ComponentPeer::localToGlobal (const Rectangle<int>& relativePosition)
+Rectangle<int> ComponentPeer::localToGlobal (const Rectangle<int>& relativePosition)
 {
     return relativePosition.withPosition (localToGlobal (relativePosition.getPosition()));
 }
 
-const Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPosition)
+Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPosition)
 {
     return screenPosition.withPosition (globalToLocal (screenPosition.getPosition()));
 }

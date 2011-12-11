@@ -175,12 +175,12 @@ void ResizableWindow::setContentComponentSize (int width, int height)
              height + border.getTopAndBottom());
 }
 
-const BorderSize<int> ResizableWindow::getBorderThickness()
+BorderSize<int> ResizableWindow::getBorderThickness()
 {
     return BorderSize<int> (isUsingNativeTitleBar() ? 0 : ((resizableBorder != nullptr && ! isFullScreen()) ? 5 : 3));
 }
 
-const BorderSize<int> ResizableWindow::getContentComponentBorder()
+BorderSize<int> ResizableWindow::getContentComponentBorder()
 {
     return getBorderThickness();
 }

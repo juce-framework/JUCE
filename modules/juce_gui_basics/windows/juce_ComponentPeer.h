@@ -149,22 +149,22 @@ public:
         If the native window is contained in another window, then the co-ordinates are
         relative to the parent window's origin, not the screen origin.
     */
-    virtual const Rectangle<int> getBounds() const = 0;
+    virtual Rectangle<int> getBounds() const = 0;
 
     /** Returns the x-position of this window, relative to the screen's origin. */
-    virtual const Point<int> getScreenPosition() const = 0;
+    virtual Point<int> getScreenPosition() const = 0;
 
     /** Converts a position relative to the top-left of this component to screen co-ordinates. */
-    virtual const Point<int> localToGlobal (const Point<int>& relativePosition) = 0;
+    virtual Point<int> localToGlobal (const Point<int>& relativePosition) = 0;
 
     /** Converts a rectangle relative to the top-left of this component to screen co-ordinates. */
-    virtual const Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
+    virtual Rectangle<int> localToGlobal (const Rectangle<int>& relativePosition);
 
     /** Converts a screen co-ordinate to a position relative to the top-left of this component. */
-    virtual const Point<int> globalToLocal (const Point<int>& screenPosition) = 0;
+    virtual Point<int> globalToLocal (const Point<int>& screenPosition) = 0;
 
     /** Converts a screen area to a position relative to the top-left of this component. */
-    virtual const Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
+    virtual Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
 
     /** Minimises the window. */
     virtual void setMinimised (bool shouldBeMinimised) = 0;
@@ -210,7 +210,7 @@ public:
         Whether or not the window has a normal window frame depends on the flags
         that were set when the window was created by Component::addToDesktop()
     */
-    virtual const BorderSize<int> getFrameSize() const = 0;
+    virtual BorderSize<int> getFrameSize() const = 0;
 
     /** This is called when the window's bounds change.
 
