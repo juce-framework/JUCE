@@ -454,7 +454,7 @@ void OpenGLComponent::updateContext()
             if (context != nullptr)
             {
                #if JUCE_LINUX
-                if (! useThread)
+                if (! isUsingDedicatedThread())
                #endif
                     updateContextPosition();
 

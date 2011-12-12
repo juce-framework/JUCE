@@ -69,7 +69,7 @@ public:
         }
     }
 
-    static void sendMouseEvent (Component& comp, BailOutChecker& checker,
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
                                 void (MouseListener::*eventMethod) (const MouseEvent&), const MouseEvent& e)
     {
         if (checker.shouldBailOut())
@@ -117,7 +117,7 @@ public:
         }
     }
 
-    static void sendWheelEvent (Component& comp, BailOutChecker& checker, const MouseEvent& e,
+    static void sendWheelEvent (Component& comp, Component::BailOutChecker& checker, const MouseEvent& e,
                                 const float wheelIncrementX, const float wheelIncrementY)
     {
         {
@@ -169,7 +169,7 @@ private:
     class BailOutChecker2
     {
     public:
-        BailOutChecker2 (BailOutChecker& checker_, Component* const component)
+        BailOutChecker2 (Component::BailOutChecker& checker_, Component* const component)
             : checker (checker_), safePointer (component)
         {
         }
@@ -180,7 +180,7 @@ private:
         }
 
     private:
-        BailOutChecker& checker;
+        Component::BailOutChecker& checker;
         const WeakReference<Component> safePointer;
 
         JUCE_DECLARE_NON_COPYABLE (BailOutChecker2);
@@ -692,6 +692,11 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
             if (wasMinimised)
                 peer->setMinimised (true);
+
+           #if JUCE_WINDOWS
+            if (isAlwaysOnTop())
+                peer->setAlwaysOnTop (true);
+           #endif
 
             peer->setConstrainer (currentConstainer);
 

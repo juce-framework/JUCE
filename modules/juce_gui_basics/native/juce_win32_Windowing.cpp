@@ -1153,9 +1153,6 @@ private:
             const float alpha = component->getAlpha();
             if (alpha < 1.0f)
                 setAlpha (alpha);
-
-            if (component->isAlwaysOnTop())
-                setAlwaysOnTop (true);
         }
         else
         {
