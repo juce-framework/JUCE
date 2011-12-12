@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 		4B72EFB0E9D74CA7227F6CAB = { isa = PBXBuildFile; fileRef = 57DDB771ED96A256F190ADF8; };
@@ -433,6 +433,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -447,6 +448,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -501,7 +503,7 @@
 				7B52CBCC65AE087EEFB2C437,
 				77D79017A9F2C7F35DD55196,
 				FA91AF2CE863567091E8A6B0 ); buildRules = ( ); dependencies = ( ); name = BinaryBuilder; productName = BinaryBuilder; productReference = E2EADDD364B6C6F37D8BBD7A; productInstallPath = /usr/bin; productType = "com.apple.product-type.tool"; };
-		36B6F402BC83F21646259DEF = { isa = PBXProject; buildConfigurationList = E4C85B0464A93027D035AA1F; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = C18D022743CF5BD14D6A6A9E; projectDirPath = ""; projectRoot = ""; targets = ( 3F86988238803AA6377D688E ); };
+		36B6F402BC83F21646259DEF = { isa = PBXProject; buildConfigurationList = E4C85B0464A93027D035AA1F; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = C18D022743CF5BD14D6A6A9E; projectDirPath = ""; projectRoot = ""; targets = ( 3F86988238803AA6377D688E ); };
 	};
 	rootObject = 36B6F402BC83F21646259DEF;
 }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 		21D330A5B13178B12BEAFC3C = { isa = PBXBuildFile; fileRef = D4EBC17BDB7F88CCBC76730B; };
@@ -1922,6 +1922,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1938,6 +1939,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2021,7 +2023,7 @@
 				2309EA55A722EF4ED2D62447,
 				8915908C84EBB721DD5BF3C1,
 				C1A9B94FBBEB8C8B72689262 ); buildRules = ( ); dependencies = ( ); name = "Plugin Host"; productName = "Plugin Host"; productReference = B2A7B6A8E3CCA7E2038E8EFF; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		ADE6E539DB98A302483A82D0 = { isa = PBXProject; buildConfigurationList = 493C2C5E457692E5149C5525; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = 65BEFC705A89E5C8A9E35C97; projectDirPath = ""; projectRoot = ""; targets = ( B5F8DFF64A83B053583709F0 ); };
+		ADE6E539DB98A302483A82D0 = { isa = PBXProject; buildConfigurationList = 493C2C5E457692E5149C5525; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 65BEFC705A89E5C8A9E35C97; projectDirPath = ""; projectRoot = ""; targets = ( B5F8DFF64A83B053583709F0 ); };
 	};
 	rootObject = ADE6E539DB98A302483A82D0;
 }

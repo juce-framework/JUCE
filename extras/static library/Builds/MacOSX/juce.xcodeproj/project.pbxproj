@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 		4197ECE314623E3FE6393D12 = { isa = PBXBuildFile; fileRef = 36C52951440860FFBD722ADC; };
@@ -1825,6 +1825,7 @@
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				DEPLOYMENT_LOCATION = YES;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1840,6 +1841,7 @@
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				DEPLOYMENT_LOCATION = YES;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1901,7 +1903,7 @@
 				4CC4F07CA06FFC2FC673152F ); runOnlyForDeploymentPostprocessing = 0; };
 		FCF826EAB08EF3A1F2BC3709 = { isa = PBXNativeTarget; buildConfigurationList = D67693E9A8A4FBDFDDD3D293; buildPhases = (
 				622F454228B50F01EAC31F9F ); buildRules = ( ); dependencies = ( ); name = juce; productName = juce; productReference = BB3752B34C9A609E300D679B; productType = "com.apple.product-type.library.static"; };
-		60CFAC1D1BF4C471A1906F08 = { isa = PBXProject; buildConfigurationList = 176EE8F55C1439922FFD9FBF; compatibilityVersion = "Xcode 3.1"; hasScannedForEncodings = 0; mainGroup = C7ABC58E08B41276CE7F3337; projectDirPath = ""; projectRoot = ""; targets = ( FCF826EAB08EF3A1F2BC3709 ); };
+		60CFAC1D1BF4C471A1906F08 = { isa = PBXProject; buildConfigurationList = 176EE8F55C1439922FFD9FBF; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = C7ABC58E08B41276CE7F3337; projectDirPath = ""; projectRoot = ""; targets = ( FCF826EAB08EF3A1F2BC3709 ); };
 	};
 	rootObject = 60CFAC1D1BF4C471A1906F08;
 }

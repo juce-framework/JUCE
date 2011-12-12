@@ -521,6 +521,8 @@ private:
             s.add ("DEPLOYMENT_LOCATION = YES");
         }
 
+        String gccVersion ("com.apple.compilers.llvm.clang.1_0");
+
         if (! iOS)
         {
             const String sdk (config.getMacSDKVersion().toString());
@@ -529,7 +531,7 @@ private:
             if (sdk == Project::BuildConfiguration::osxVersion10_4)
             {
                 s.add ("SDKROOT = macosx10.4");
-                s.add ("GCC_VERSION = 4.0");
+                gccVersion = "4.0";
             }
             else if (sdk == Project::BuildConfiguration::osxVersion10_5)
             {
@@ -546,6 +548,8 @@ private:
 
             s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
         }
+
+        s.add ("GCC_VERSION = " + gccVersion);
 
         {
             StringArray linkerFlags, librarySearchPaths;
@@ -630,7 +634,7 @@ private:
         output << "// !$*UTF8*$!\n{\n"
                   "\tarchiveVersion = 1;\n"
                   "\tclasses = {\n\t};\n"
-                  "\tobjectVersion = 45;\n"
+                  "\tobjectVersion = 46;\n"
                   "\tobjects = {\n\n";
 
         Array <ValueTree*> objects;
@@ -756,6 +760,7 @@ private:
         else if (file.hasFileExtension (".jpeg;.jpg"))           return "image.jpeg";
         else if (file.hasFileExtension ("png;gif"))              return "image" + file.getFileExtension();
         else if (file.hasFileExtension ("html;htm"))             return "text.html";
+        else if (file.hasFileExtension ("xml;zip;wav"))          return "file" + file.getFileExtension();
         else if (file.hasFileExtension ("txt;rtf"))              return "text" + file.getFileExtension();
         else if (file.hasFileExtension ("plist"))                return "text.plist.xml";
         else if (file.hasFileExtension ("app"))                  return "wrapper.application";
@@ -948,7 +953,7 @@ private:
         ValueTree* const v = new ValueTree (createID ("__root"));
         v->setProperty ("isa", "PBXProject", 0);
         v->setProperty ("buildConfigurationList", createID ("__projList"), 0);
-        v->setProperty ("compatibilityVersion", "Xcode 3.1", 0);
+        v->setProperty ("compatibilityVersion", "Xcode 3.2", 0);
         v->setProperty ("hasScannedForEncodings", (int) 0, 0);
         v->setProperty ("mainGroup", createID ("__mainsourcegroup"), 0);
         v->setProperty ("projectDirPath", "\"\"", 0);
