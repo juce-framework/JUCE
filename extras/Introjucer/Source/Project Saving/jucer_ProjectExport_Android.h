@@ -55,10 +55,10 @@ public:
             getTargetLocation() = getDefaultBuildsRootFolder() + "Android";
 
         if (getSDKPath().toString().isEmpty())
-            getSDKPath() = "${user.home}/SDKs/android-sdk-mac_x86";
+            getSDKPath() = "${user.home}/SDKs/android-sdk-macosx";
 
         if (getNDKPath().toString().isEmpty())
-            getNDKPath() = "${user.home}/SDKs/android-ndk-r6b";
+            getNDKPath() = "${user.home}/SDKs/android-ndk-r7";
 
         if (getInternetNeeded().toString().isEmpty())
             getInternetNeeded() = true;
@@ -119,7 +119,7 @@ public:
 
         {
             ScopedPointer<XmlElement> manifest (createManifestXML());
-            writeXmlOrThrow (*manifest, target.getChildFile ("AndroidManifest.xml"), "utf-8", 100);
+            writeXmlOrThrow (*manifest, target.getChildFile ("AndroidManifest.xml"), "utf-8", 100, true);
         }
 
         writeApplicationMk (jniFolder.getChildFile ("Application.mk"));
@@ -230,7 +230,6 @@ private:
             << newLine
             << "include $(CLEAR_VARS)" << newLine
             << newLine
-            << "LOCAL_CPP_EXTENSION := cpp" << newLine
             << "LOCAL_MODULE := juce_jni" << newLine
             << "LOCAL_SRC_FILES := \\" << newLine;
 

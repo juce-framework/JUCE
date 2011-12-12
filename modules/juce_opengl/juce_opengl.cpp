@@ -114,6 +114,9 @@
 
 //==============================================================================
 #elif JUCE_ANDROID
+ #ifndef GL_GLEXT_PROTOTYPES
+  #define GL_GLEXT_PROTOTYPES 1
+ #endif
  #include <GLES/glext.h>
 #endif
 
@@ -127,6 +130,18 @@
 
 #define JUCE_INSTANTIATE_GL_EXTENSION(name) \
    name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+
+#ifndef GL_BGRA_EXT
+ #define GL_BGRA_EXT 0x80e1
+#endif
+
+#ifndef GL_CLAMP_TO_EDGE
+ #define GL_CLAMP_TO_EDGE 0x812f
+#endif
+
+#ifndef GL_DEPTH_COMPONENT16
+ #define GL_DEPTH_COMPONENT16 0x81a5
+#endif
 
 //==============================================================================
 // START_AUTOINCLUDE opengl/*.cpp

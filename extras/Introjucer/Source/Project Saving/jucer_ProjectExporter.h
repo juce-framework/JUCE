@@ -189,11 +189,21 @@ protected:
             throw SaveError ("Can't create folder: " + dirToCreate.getFullPathName());
     }
 
-    static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding, int maxCharsPerLine)
+    static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding, int maxCharsPerLine, bool useUnixNewLines = false)
     {
         MemoryOutputStream mo;
         xml.writeToStream (mo, String::empty, false, true, encoding, maxCharsPerLine);
-        overwriteFileIfDifferentOrThrow (file, mo);
+
+        if (useUnixNewLines)
+        {
+            MemoryOutputStream mo2;
+            mo2 << mo.toString().replace ("\r\n", "\n");
+            overwriteFileIfDifferentOrThrow (file, mo2);
+        }
+        else
+        {
+            overwriteFileIfDifferentOrThrow (file, mo);
+        }
     }
 
 private:

@@ -5,7 +5,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_CPP_EXTENSION := cpp
 LOCAL_MODULE := juce_jni
 LOCAL_SRC_FILES := \
   ../../../Source/ApplicationStartup.cpp\

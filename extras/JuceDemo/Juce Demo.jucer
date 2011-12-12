@@ -21,8 +21,8 @@
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"/>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
             rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../../../juce"/>
-    <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-mac_x86"
-             androidNDKPath="${user.home}/SDKs/android-ndk-r6b" juceFolder="../../../juce"
+    <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"
+             androidNDKPath="${user.home}/SDKs/android-ndk-r7" juceFolder="../../../juce"
              androidInternetNeeded="1"/>
   </EXPORTFORMATS>
   <CONFIGURATIONS>

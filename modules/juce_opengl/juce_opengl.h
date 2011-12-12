@@ -66,18 +66,6 @@
  #include <GLES/gl.h>
 #endif
 
-#ifndef GL_BGRA_EXT
- #define GL_BGRA_EXT 0x80e1
-#endif
-
-#ifndef GL_CLAMP_TO_EDGE
- #define GL_CLAMP_TO_EDGE 0x812f
-#endif
-
-#ifndef GL_DEPTH_COMPONENT16
- #define GL_DEPTH_COMPONENT16 0x81a5
-#endif
-
 //=============================================================================
 BEGIN_JUCE_NAMESPACE
 #include "opengl/juce_OpenGLRenderingTarget.h"
