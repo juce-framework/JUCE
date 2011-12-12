@@ -28,6 +28,7 @@
  STATICMETHOD (getMinBufferSize,            "getMinBufferSize",             "(III)I") \
  STATICMETHOD (getNativeOutputSampleRate,   "getNativeOutputSampleRate",    "(I)I") \
  METHOD (constructor,   "<init>",   "(IIIIII)V") \
+ METHOD (getState,      "getState", "()I") \
  METHOD (play,          "play",     "()V") \
  METHOD (stop,          "stop",     "()V") \
  METHOD (release,       "release",  "()V") \
@@ -40,22 +41,27 @@ DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (getMinBufferSize, "getMinBufferSize", "(III)I") \
- METHOD (constructor,       "<init>",           "(IIIII)V"); \
- METHOD (startRecording,    "startRecording",   "()V"); \
- METHOD (stop,              "stop",             "()V"); \
- METHOD (read,              "read",             "([SII)I"); \
- METHOD (release,           "release",          "()V"); \
+ METHOD (constructor,       "<init>",           "(IIIII)V") \
+ METHOD (getState,          "getState",         "()I") \
+ METHOD (startRecording,    "startRecording",   "()V") \
+ METHOD (stop,              "stop",             "()V") \
+ METHOD (read,              "read",             "([SII)I") \
+ METHOD (release,           "release",          "()V") \
 
 DECLARE_JNI_CLASS (AudioRecord, "android/media/AudioRecord");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
-#define CHANNEL_OUT_STEREO  ((jint) 12)
-#define CHANNEL_IN_STEREO   ((jint) 12)
-#define CHANNEL_IN_MONO     ((jint) 16)
-#define ENCODING_PCM_16BIT  ((jint) 2)
-#define STREAM_MUSIC        ((jint) 3)
-#define MODE_STREAM         ((jint) 1)
+enum
+{
+    CHANNEL_OUT_STEREO  = 12,
+    CHANNEL_IN_STEREO   = 12,
+    CHANNEL_IN_MONO     = 16,
+    ENCODING_PCM_16BIT  = 2,
+    STREAM_MUSIC        = 3,
+    MODE_STREAM         = 1,
+    STATE_UNINITIALIZED = 0
+};
 
 //==============================================================================
 class AndroidAudioIODevice  : public AudioIODevice,
@@ -171,7 +177,11 @@ public:
             outputDevice = GlobalRef (env->NewObject (AudioTrack, AudioTrack.constructor,
                                                       STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
                                                       (jint) (actualBufferSize * numDeviceOutputChannels * sizeof (float)), MODE_STREAM));
-            isRunning = true;
+
+            if (env->CallIntMethod (outputDevice, AudioTrack.getState) != STATE_UNINITIALIZED)
+                isRunning = true;
+            else
+                outputDevice.clear(); // failed to open the device
         }
 
         if (numClientInputChannels > 0 && numDeviceInputChannelsAvailable > 0)
@@ -182,7 +192,11 @@ public:
                                                      numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
                                                      ENCODING_PCM_16BIT,
                                                      (jint) (actualBufferSize * numDeviceInputChannels * sizeof (float))));
-            isRunning = true;
+
+            if (env->CallIntMethod (inputDevice, AudioRecord.getState) != STATE_UNINITIALIZED)
+                isRunning = true;
+            else
+                inputDevice.clear(); // failed to open the device
         }
 
         if (isRunning)
