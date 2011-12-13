@@ -23,18 +23,6 @@
   ==============================================================================
 */
 
-namespace zlibNamespace
-{
- #if JUCE_INCLUDE_ZLIB_CODE
-  #undef OS_CODE
-  #undef fdopen
-  #include "zlib/zlib.h"
-  #undef OS_CODE
- #else
-  #include JUCE_ZLIB_INCLUDE_PATH
- #endif
-}
-
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
@@ -42,9 +30,7 @@ class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
     GZIPCompressorHelper (const int compressionLevel, const int windowBits)
-        : buffer ((size_t) gzipCompBufferSize),
-          compLevel (compressionLevel),
-          strategy (0),
+        : compLevel ((compressionLevel < 1 || compressionLevel > 9) ? -1 : compressionLevel),
           isFirstDeflate (true),
           streamIsValid (false),
           finished (false)
@@ -86,12 +72,12 @@ public:
     }
 
 private:
-    enum { gzipCompBufferSize = 32768 };
+    enum { strategy = 0 };
 
-    HeapBlock <zlibNamespace::Bytef> buffer;
     zlibNamespace::z_stream stream;
-    int compLevel, strategy;
+    const int compLevel;
     bool isFirstDeflate, streamIsValid, finished;
+    zlibNamespace::Bytef buffer[32768];
 
     bool doNextBlock (const uint8*& data, int& dataSize, OutputStream& destStream, const int flushMode)
     {
@@ -101,7 +87,7 @@ private:
             stream.next_in   = const_cast <uint8*> (data);
             stream.next_out  = buffer;
             stream.avail_in  = (z_uInt) dataSize;
-            stream.avail_out = (z_uInt) gzipCompBufferSize;
+            stream.avail_out = (z_uInt) sizeof (buffer);
 
             const int result = isFirstDeflate ? deflateParams (&stream, compLevel, strategy)
                                               : deflate (&stream, flushMode);
@@ -116,7 +102,7 @@ private:
                 {
                     data += dataSize - stream.avail_in;
                     dataSize = (int) stream.avail_in;
-                    const int bytesDone = (int) (gzipCompBufferSize - stream.avail_out);
+                    const int bytesDone = ((int) sizeof (buffer)) - (int) stream.avail_out;
                     return bytesDone <= 0 || destStream.write (buffer, bytesDone);
                 }
 
@@ -127,21 +113,19 @@ private:
 
         return false;
     }
+
+    JUCE_DECLARE_NON_COPYABLE (GZIPCompressorHelper);
 };
 
 //==============================================================================
 GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const destStream_,
-                                                        int compressionLevel,
+                                                        const int compressionLevel,
                                                         const bool deleteDestStream,
                                                         const int windowBits)
-    : destStream (destStream_, deleteDestStream)
+    : destStream (destStream_, deleteDestStream),
+      helper (new GZIPCompressorHelper (compressionLevel, windowBits))
 {
     jassert (destStream_ != nullptr);
-
-    if (compressionLevel < 1 || compressionLevel > 9)
-        compressionLevel = -1;
-
-    helper = new GZIPCompressorHelper (compressionLevel, windowBits);
 }
 
 GZIPCompressorOutputStream::~GZIPCompressorOutputStream()

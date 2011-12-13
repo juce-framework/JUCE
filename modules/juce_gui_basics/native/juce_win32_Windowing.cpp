@@ -1436,7 +1436,9 @@ private:
 
     static bool isCurrentEventFromTouchScreen() noexcept
     {
-        return (GetMessageExtraInfo() & 0xffffff00 /* SIGNATURE_MASK */) == 0xff515700; /* MI_WP_SIGNATURE */
+        const LPARAM flags = GetMessageExtraInfo();
+        return (flags & 0xffffff00 /* SIGNATURE_MASK */) == 0xff515700 /* MI_WP_SIGNATURE */
+                && (flags & 0x80) != 0; // (bit 7 = 0 for pen events, 1 for touch)
     }
 
     void doMouseMove (const Point<int>& position)

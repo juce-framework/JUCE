@@ -70,6 +70,8 @@ public:
 
     void runTest()
     {
+        beginTest ("Child Processes");
+
       #if JUCE_WINDOWS || JUCE_MAC || JUCE_LINUX
         ChildProcess p;
 

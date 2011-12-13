@@ -958,7 +958,7 @@ public:
 
         if (pipe (pipeHandles) == 0)
         {
-            const int result = fork();
+            const pid_t result = fork();
 
             if (result < 0)
             {
@@ -970,6 +970,7 @@ public:
                 // we're the child process..
                 close (pipeHandles[0]);   // close the read handle
                 dup2 (pipeHandles[1], 1); // turns the pipe into stdout
+                close (pipeHandles[1]);
 
                 Array<char*> argv;
                 for (int i = 0; i < arguments.size(); ++i)

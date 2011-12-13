@@ -491,7 +491,7 @@ private:
 
         const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim());
         if (extraFlags.isNotEmpty())
-            s.add ("OTHER_CPLUSPLUSFLAGS = " + extraFlags);
+            s.add ("OTHER_CPLUSPLUSFLAGS = \"" + extraFlags + "\"");
 
         if (xcodeProductInstallPath.isNotEmpty())
             s.add ("INSTALL_PATH = \"" + xcodeProductInstallPath + "\"");

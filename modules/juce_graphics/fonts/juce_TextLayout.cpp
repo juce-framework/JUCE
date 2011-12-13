@@ -303,6 +303,7 @@ namespace TextLayoutHelpers
 
             TextLayout::Line* glyphLine = new TextLayout::Line();
             TextLayout::Run*  glyphRun  = new TextLayout::Run();
+            bool needToSetLineOrigin = true;
 
             for (int i = 0; i < tokens.size(); ++i)
             {
@@ -317,8 +318,11 @@ namespace TextLayoutHelpers
 
                 for (int j = 0; j < newGlyphs.size(); ++j)
                 {
-                    if (charPosition == lineStartPosition)
+                    if (needToSetLineOrigin)
+                    {
+                        needToSetLineOrigin = false;
                         glyphLine->lineOrigin = tokenPos.translated (0, t->font.getAscent());
+                    }
 
                     const float x = xOffsets.getUnchecked (j);
                     glyphRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked(j),
@@ -357,6 +361,7 @@ namespace TextLayoutHelpers
                         lineStartPosition = charPosition;
                         glyphLine = new TextLayout::Line();
                         glyphRun  = new TextLayout::Run();
+                        needToSetLineOrigin = true;
                     }
                 }
             }
@@ -393,10 +398,18 @@ namespace TextLayoutHelpers
             glyphLine->runs.add (glyphRun);
         }
 
+        static int getCharacterType (const juce_wchar c) noexcept
+        {
+            if (c == '\r' || c == '\n')
+                return 0;
+
+            return CharacterFunctions::isWhitespace (c) ? 2 : 1;
+        }
+
         void appendText (const AttributedString& text, const Range<int>& stringRange,
                          const Font& font, const Colour& colour)
         {
-            String stringText (text.getText().substring (stringRange.getStart(), stringRange.getEnd()));
+            const String stringText (text.getText().substring (stringRange.getStart(), stringRange.getEnd()));
             String::CharPointerType t (stringText.getCharPointer());
             String currentString;
             int lastCharType = 0;
@@ -407,13 +420,7 @@ namespace TextLayoutHelpers
                 if (c == 0)
                     break;
 
-                int charType;
-                if (c == '\r' || c == '\n')
-                    charType = 0;
-                else if (CharacterFunctions::isWhitespace (c))
-                    charType = 2;
-                else
-                    charType = 1;
+                const int charType = getCharacterType (c);
 
                 if (charType == 0 || charType != lastCharType)
                 {
@@ -451,9 +458,9 @@ namespace TextLayoutHelpers
                 x += t->area.getWidth();
                 h = jmax (h, t->area.getHeight());
 
-                const Token* nextTok = tokens[i + 1];
+                const Token* const nextTok = tokens[i + 1];
 
-                if (nextTok == 0)
+                if (nextTok == nullptr)
                     break;
 
                 if (t->isNewLine || ((! nextTok->isWhitespace) && x + nextTok->area.getWidth() > maxWidth))
