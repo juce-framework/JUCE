@@ -389,6 +389,7 @@ bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& are
     glPixelStorei (GL_PACK_ALIGNMENT, 4);
     glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, target);
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+    glPixelStorei (GL_PACK_ALIGNMENT, 0);
     return true;
 }
 

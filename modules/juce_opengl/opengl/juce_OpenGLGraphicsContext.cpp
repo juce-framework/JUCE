@@ -25,6 +25,10 @@
 
 BEGIN_JUCE_NAMESPACE
 
+#if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
+// #define JUCE_USE_OPENGL_SHADERS 1
+#endif
+
 namespace
 {
    #if JUCE_WINDOWS
@@ -45,23 +49,65 @@ namespace
         GL_COMBINE_RGB = 0x8571,
         GL_COMBINE_ALPHA = 0x8572,
         GL_PREVIOUS = 0x8578,
+        GL_COMPILE_STATUS = 0x8B81,
+        GL_LINK_STATUS = 0x8B82,
+        GL_SHADING_LANGUAGE_VERSION = 0x8B8C,
+        GL_FRAGMENT_SHADER = 0x8B30
     };
+
+    typedef char GLchar;
    #endif
 
    #if JUCE_WINDOWS || JUCE_LINUX
-    JUCE_DECLARE_GL_EXTENSION_FUNCTION (glActiveTexture, void, (GLenum));
-    JUCE_DECLARE_GL_EXTENSION_FUNCTION (glClientActiveTexture, void, (GLenum));
 
-    void initialiseMultiTextureExtensions()
-    {
-        if (glActiveTexture == nullptr)
-        {
-            JUCE_INSTANTIATE_GL_EXTENSION (glActiveTexture);
-            JUCE_INSTANTIATE_GL_EXTENSION (glClientActiveTexture);
-        }
-    }
+   #if JUCE_USE_OPENGL_SHADERS
+    #define WINDOWS_GL_FUNCTION_LIST(USE_FUNCTION) \
+        USE_FUNCTION (glActiveTexture,          void, (GLenum))\
+        USE_FUNCTION (glClientActiveTexture,    void, (GLenum))\
+        USE_FUNCTION (glCreateProgram,          GLuint, ())\
+        USE_FUNCTION (glDeleteProgram,          void, (GLuint))\
+        USE_FUNCTION (glCreateShader,           GLuint, (GLenum))\
+        USE_FUNCTION (glDeleteShader,           void, (GLuint))\
+        USE_FUNCTION (glShaderSource,           void, (GLuint, GLsizei, const GLchar**, const GLint*))\
+        USE_FUNCTION (glCompileShader,          void, (GLuint))\
+        USE_FUNCTION (glAttachShader,           void, (GLuint, GLuint))\
+        USE_FUNCTION (glLinkProgram,            void, (GLuint))\
+        USE_FUNCTION (glUseProgram,             void, (GLuint))\
+        USE_FUNCTION (glGetShaderiv,            void, (GLuint, GLenum, GLint*))\
+        USE_FUNCTION (glGetShaderInfoLog,       void, (GLuint, GLsizei, GLsizei*, GLchar*))\
+        USE_FUNCTION (glGetProgramiv,           void, (GLuint, GLenum, GLint*))\
+        USE_FUNCTION (glGetUniformLocation,     GLint, (GLuint, const GLchar*))\
+        USE_FUNCTION (glUniform1f,              void, (GLint, GLfloat))\
+        USE_FUNCTION (glUniform1i,              void, (GLint, GLint))\
+        USE_FUNCTION (glUniform2f,              void, (GLint, GLfloat, GLfloat))\
+        USE_FUNCTION (glUniform3f,              void, (GLint, GLfloat, GLfloat, GLfloat))\
+        USE_FUNCTION (glUniform4f,              void, (GLint, GLfloat, GLfloat, GLfloat, GLfloat))\
+        USE_FUNCTION (glUniform4i,              void, (GLint, GLint, GLint, GLint, GLint))\
+        USE_FUNCTION (glUniformMatrix2x3fv,     void, (GLint, GLsizei, GLboolean, const GLfloat*))\
+
    #else
-    void initialiseMultiTextureExtensions() {}
+    #define WINDOWS_GL_FUNCTION_LIST(USE_FUNCTION) \
+        USE_FUNCTION (glActiveTexture,         void, (GLenum))\
+        USE_FUNCTION (glClientActiveTexture,   void, (GLenum))
+   #endif
+
+    WINDOWS_GL_FUNCTION_LIST (JUCE_DECLARE_GL_EXTENSION_FUNCTION)
+
+    static bool windowsFunctionsInitialised = false;
+
+    void initialiseWindowsExtensions()
+    {
+        windowsFunctionsInitialised = true;
+
+       #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+        WINDOWS_GL_FUNCTION_LIST (FIND_FUNCTION)
+       #undef FIND_FUNCTION
+    }
+
+    #undef WINDOWS_GL_FUNCTION_LIST
+
+   #else
+    void initialiseWindowsExtensions() {}
    #endif
 }
 
@@ -242,15 +288,15 @@ namespace
 
 //==============================================================================
 #if JUCE_USE_OPENGL_SHADERS
-class GLShaderProgram
+class OpenGLShaderProgram
 {
 public:
-    GLShaderProgram() noexcept
+    OpenGLShaderProgram() noexcept
         : program (glCreateProgram())
     {
     }
 
-    ~GLShaderProgram() noexcept
+    ~OpenGLShaderProgram() noexcept
     {
         glDeleteProgram (program);
     }
@@ -292,7 +338,7 @@ public:
 
     struct Uniform
     {
-        Uniform (const GLShaderProgram& program, const GLchar* name)
+        Uniform (const OpenGLShaderProgram& program, const GLchar* name)
             : uniformID (glGetUniformLocation (program.program, name))
         {
             jassert (uniformID >= 0);
@@ -315,6 +361,9 @@ public:
     };
 
     GLuint program;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (OpenGLShaderProgram);
 };
 
 struct ShaderPrograms
@@ -332,11 +381,48 @@ struct ShaderPrograms
     {
         ShaderBase (const char* fragmentShader)
         {
-            addShader (fragmentShader, GL_FRAGMENT_SHADER);
-            link();
+            program.addShader (fragmentShader, GL_FRAGMENT_SHADER);
+            program.link();
         }
 
-        GLShaderProgram program;
+        OpenGLShaderProgram program;
+    };
+
+    struct MaskedShaderParams
+    {
+        MaskedShaderParams (const OpenGLShaderProgram& program)
+            : maskTexture (program, "maskTexture"),
+              maskBounds (program, "maskBounds")
+        {}
+
+        OpenGLShaderProgram::Uniform maskTexture, maskBounds;
+    };
+
+    struct RadialGradientParams
+    {
+        RadialGradientParams (const OpenGLShaderProgram& program)
+            : gradientTexture (program, "gradientTexture"),
+              matrix (program, "matrix")
+        {}
+
+        void setMatrix (const Point<float>& p1, const Point<float>& p2, const Point<float>& p3)
+        {
+            matrix.set (AffineTransform::fromTargetPoints (p1.x, p1.y,  0.0f, 0.0f,
+                                                           p2.x, p2.y,  1.0f, 0.0f,
+                                                           p3.x, p3.y,  0.0f, 1.0f));
+        }
+
+        OpenGLShaderProgram::Uniform gradientTexture, matrix;
+    };
+
+    struct LinearGradientParams
+    {
+        LinearGradientParams (const OpenGLShaderProgram& program)
+            : gradientTexture (program, "gradientTexture"),
+              gradientInfo (program, "gradientInfo")
+        {}
+
+        OpenGLShaderProgram::Uniform gradientTexture, gradientInfo;
     };
 
     struct SolidColourMaskedProgram  : public ShaderBase
@@ -345,21 +431,19 @@ struct ShaderPrograms
             : ShaderBase ("#version 120\n"
                           "uniform sampler2D maskTexture;"
                           "uniform ivec4 maskBounds;"
-                          "const float textureY = 0.5;"
                           ""
                           "void main()"
                           "{"
                           "  vec2 maskPos;"
                           "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
-                          "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
-                          "  gl_FragColor = gl_Color * texture2D (maskTexture, maskPos).w;"
+                          "  maskPos.y = (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
+                          "  gl_FragColor = gl_Color * texture2D (maskTexture, maskPos).a;"
                           "}"),
-              maskTexture (program, "maskTexture"),
-              maskBounds (program, "maskBounds")
+              maskParams (program)
         {
         }
 
-        GLShaderProgram::Uniform maskTexture, maskBounds;
+        MaskedShaderParams maskParams;
     };
 
     struct RadialGradientProgram  : public ShaderBase
@@ -376,12 +460,11 @@ struct ShaderPrograms
                           "                             matrix[1][0] * gl_FragCoord.x + matrix[1][1] * gl_FragCoord.y + matrix[1][2]));"
                           "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
                           "}"),
-              gradientTexture (program, "gradientTexture"),
-              matrix (program, "matrix")
+              gradientParams (program)
         {
         }
 
-        GLShaderProgram::Uniform gradientTexture, matrix;
+        RadialGradientParams gradientParams;
     };
 
     struct RadialGradientMaskedProgram  : public ShaderBase
@@ -402,20 +485,18 @@ struct ShaderPrograms
                           ""
                           "  vec2 maskPos;"
                           "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
-                          "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
-                          "  result *= texture2D (maskTexture, maskPos).w;"
+                          "  maskPos.y = (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
+                          "  result *= texture2D (maskTexture, maskPos).a;"
                           ""
                           "  gl_FragColor = result;"
                           "}"),
-              gradientTexture (program, "gradientTexture"),
-              matrix (program, "matrix"),
-              maskTexture (program, "maskTexture"),
-              maskBounds (program, "maskBounds")
+              gradientParams (program),
+              maskParams (program)
         {
         }
 
-        GLShaderProgram::Uniform gradientTexture, matrix;
-        GLShaderProgram::Uniform maskTexture, maskBounds;
+        RadialGradientParams gradientParams;
+        MaskedShaderParams maskParams;
     };
 
     struct LinearGradient1Program  : public ShaderBase
@@ -431,12 +512,11 @@ struct ShaderPrograms
                           "  float dist = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.z * (gl_FragCoord.x - gradientInfo.x)))) / gradientInfo.w;"
                           "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
                           "}"),
-              gradientTexture (program, "gradientTexture"),
-              gradientInfo (program, "gradientInfo")
+              gradientParams (program)
         {
         }
 
-        GLShaderProgram::Uniform gradientTexture, gradientInfo;
+        LinearGradientParams gradientParams;
     };
 
     struct LinearGradient1MaskedProgram  : public ShaderBase
@@ -444,31 +524,29 @@ struct ShaderPrograms
         LinearGradient1MaskedProgram()
             : ShaderBase ("#version 120\n"
                           "uniform sampler2D gradientTexture;"
-                          "uniform vec3 gradientInfo;"  // x = (x2 - x1) / (y2 - y1), y = x1, z = length
+                          "uniform vec4 gradientInfo;"  // x = x1, y = y1, z = (y2 - y1) / (x2 - x1), w = length
                           "uniform sampler2D maskTexture;"
                           "uniform ivec4 maskBounds;"
                           "const float textureY = 0.5;"
                           ""
                           "void main()"
                           "{"
-                          "  float dist = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.x * (gl_FragCoord.x - gradientInfo.y)))) / gradientInfo.z;"
+                          "  float dist = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.z * (gl_FragCoord.x - gradientInfo.x)))) / gradientInfo.w;"
                           "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
                           ""
                           "  vec2 maskPos;"
                           "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
-                          "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
-                          "  result *= texture2D (maskTexture, maskPos).w;"
+                          "  maskPos.y = (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
+                          "  result *= texture2D (maskTexture, maskPos).a;"
                           "  gl_FragColor = result;"
                           "}"),
-              gradientTexture (program, "gradientTexture"),
-              gradientInfo (program, "gradientInfo"),
-              maskTexture (program, "maskTexture"),
-              maskBounds (program, "maskBounds")
+              gradientParams (program),
+              maskParams (program)
         {
         }
 
-        GLShaderProgram::Uniform gradientTexture, gradientInfo;
-        GLShaderProgram::Uniform maskTexture, maskBounds;
+        LinearGradientParams gradientParams;
+        MaskedShaderParams maskParams;
     };
 
     struct LinearGradient2Program  : public ShaderBase
@@ -484,12 +562,11 @@ struct ShaderPrograms
                           "  float dist = (gl_FragCoord.x - (gradientInfo.x + (gradientInfo.z * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.w;"
                           "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
                           "}"),
-              gradientTexture (program, "gradientTexture"),
-              gradientInfo (program, "gradientInfo")
+              gradientParams (program)
         {
         }
 
-        GLShaderProgram::Uniform gradientTexture, gradientInfo;
+        LinearGradientParams gradientParams;
     };
 
     struct LinearGradient2MaskedProgram  : public ShaderBase
@@ -497,31 +574,29 @@ struct ShaderPrograms
         LinearGradient2MaskedProgram()
             : ShaderBase ("#version 120\n"
                           "uniform sampler2D gradientTexture;"
-                          "uniform vec3 gradientInfo;"  // x = (y2 - y1) / (x2 - x1), y = y1, z = length
+                          "uniform vec4 gradientInfo;"  // x = x1, y = y1, z = (x2 - x1) / (y2 - y1), y = y1, w = length
                           "uniform sampler2D maskTexture;"
                           "uniform ivec4 maskBounds;"
                           "const float textureY = 0.5;"
                           ""
                           "void main()"
                           "{"
-                          "  float dist = (gl_FragCoord.x - (gradientInfo.y + (gradientInfo.x * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.z;"
+                          "  float dist = (gl_FragCoord.x - (gradientInfo.x + (gradientInfo.z * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.w;"
                           "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
                           ""
                           "  vec2 maskPos;"
                           "  maskPos.x = (gl_FragCoord.x - maskBounds.x) / maskBounds.z;"
-                          "  maskPos.y = 1.0 - (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
-                          "  result *= texture2D (maskTexture, maskPos).w;"
+                          "  maskPos.y = (gl_FragCoord.y - maskBounds.y) / maskBounds.w;"
+                          "  result *= texture2D (maskTexture, maskPos).a;"
                           "  gl_FragColor = result;"
                           "}"),
-              gradientTexture (program, "gradientTexture"),
-              gradientInfo (program, "gradientInfo"),
-              maskTexture (program, "maskTexture"),
-              maskBounds (program, "maskBounds")
+              gradientParams (program),
+              maskParams (program)
         {
         }
 
-        GLShaderProgram::Uniform gradientTexture, gradientInfo;
-        GLShaderProgram::Uniform maskTexture, maskBounds;
+        LinearGradientParams gradientParams;
+        MaskedShaderParams maskParams;
     };
 
     SolidColourMaskedProgram solidColourMasked;
@@ -533,7 +608,7 @@ struct ShaderPrograms
     LinearGradient2MaskedProgram linearGradient2Masked;
 };
 
-//static ScopedPointer<ShaderPrograms> programs;
+static ScopedPointer<ShaderPrograms> programs;
 #endif
 
 class OpenGLRenderer::GLState
@@ -549,7 +624,7 @@ public:
           srcFunction (0), dstFunction (0),
           currentColour (0),
           quadQueueActive (false),
-          numVertices (0),
+          numIndices (0), numVertices (0),
           activeGradientIndex (0),
           gradientNeedsRefresh (true)
          #if JUCE_USE_OPENGL_SHADERS
@@ -559,7 +634,7 @@ public:
         // This object can only be created and used when the current thread has an active OpenGL context.
         jassert (OpenGLHelpers::isContextActive());
 
-        initialiseMultiTextureExtensions();
+        initialiseWindowsExtensions();
         target.makeActiveFor2D();
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_NORMAL_ARRAY);
@@ -722,9 +797,11 @@ public:
         }
         else
         {
+           #if JUCE_DEBUG
             GLint t = 0;
             glGetIntegerv (GL_TEXTURE_BINDING_2D, &t);
             jassert (t == (GLint) textureID);
+           #endif
         }
     }
 
@@ -768,7 +845,10 @@ public:
                     if ((textureIndexMask & (1 << i)) != 0)
                         glEnable (GL_TEXTURE_2D);
                     else
+                    {
                         glDisable (GL_TEXTURE_2D);
+                        currentTextureID[i] = 0;
+                    }
                 }
             }
 
@@ -820,7 +900,7 @@ public:
     {
         if (! quadQueueActive)
         {
-            jassert (numVertices == 0);
+            jassert (numIndices == 0 && numVertices == 0);
             setTexturesEnabled (0);
             glEnableClientState (GL_COLOR_ARRAY);
             glVertexPointer (2, GL_SHORT, 0, vertices);
@@ -840,22 +920,31 @@ public:
         const GLshort y2 = (GLshort) (y + h);
 
         GLshort* const v = vertices + numVertices * 2;
-        v[0] = x1;  v[1] = y1;  v[2] = x2;  v[3] = y1;  v[4]  = x1;  v[5]  = y2;
-        v[6] = x2;  v[7] = y1;  v[8] = x1;  v[9] = y2;  v[10] = x2;  v[11] = y2;
-
-        const uint32 rgba = colour.getInRGBAMemoryOrder();
+        v[0] = x1;  v[1] = y1;  v[2] = x2;  v[3] = y1;
+        v[4] = x1;  v[5] = y2;  v[6] = x2;  v[7] = y2;
 
         uint32* const c = colours + numVertices;
-        for (int i = 0; i < 6; ++i)
-            c[i] = rgba;
+        c[0] = c[1] = c[2] = c[3] = colour.getInRGBAMemoryOrder();
 
-        numVertices += 6;
+        GLubyte* const i = indices + numIndices;
+        i[0] = (GLubyte) numVertices;
+        i[1] = i[3] = (GLubyte) (numVertices + 1);
+        i[2] = i[4] = (GLubyte) (numVertices + 2);
+        i[5] = (GLubyte) (numVertices + 3);
 
-        if (numVertices > maxVerticesPerBlock - 6)
-        {
-            glDrawArrays (GL_TRIANGLES, 0, numVertices);
-            numVertices = 0;
-        }
+        numVertices += 4;
+        numIndices += 6;
+
+        if (numIndices > maxVerticesPerBlock - 6)
+            drawQuadQueue();
+    }
+
+    void fillRect (const Rectangle<int>& r, const PixelARGB& colour) noexcept
+    {
+        jassert (! r.isEmpty());
+
+        checkQuadQueueActive();
+        addQuadToList (r.getX(), r.getY(), r.getWidth(), r.getHeight(), colour);
     }
 
     void fillRect (const Rectangle<float>& r, const PixelARGB& colour) noexcept
@@ -1082,45 +1171,104 @@ public:
     }
 
    #if JUCE_USE_OPENGL_SHADERS
-    void setShaderForGradientFill (const FillType& fill)
+    void setShaderForGradientFill (const FillType& fill, PositionedTexture* mask)
     {
         setPremultipliedBlendingMode();
-        setSingleTextureMode();
         setSolidColour();
 
         const ColourGradient& g = *fill.gradient;
-        bindTextureForGradient (g);
 
-        const AffineTransform t (fill.transform.followedBy (AffineTransform::verticalFlip (target.height)));
+        if (mask != nullptr)
+        {
+            setTexturesEnabled (3);
+            setActiveTexture (1);
+            bindTexture (mask->textureID);
+            setActiveTexture (0);
+            bindTextureForGradient (g);
+        }
+        else
+        {
+            setSingleTextureMode();
+            bindTextureForGradient (g);
+        }
+
+        const AffineTransform t (fill.transform.translated ((float) -target.x, (float) -target.y)
+                                     .followedBy (AffineTransform::verticalFlip ((float) target.height)));
         Point<float> p1 (g.point1.transformedBy (t));
         const Point<float> p2 (g.point2.transformedBy (t));
         const Point<float> p3 (Point<float> (g.point1.x + (g.point2.y - g.point1.y),
                                              g.point1.y - (g.point2.x - g.point1.x)).transformedBy (t));
 
+        const ShaderPrograms::MaskedShaderParams* maskParams = nullptr;
+
         if (g.isRadial)
         {
-            setShader (&(programs->radialGradient.program));
-            programs->radialGradient.matrix.set (AffineTransform::fromTargetPoints (p1.x, p1.y,  0.0f, 0.0f,
-                                                                                    p2.x, p2.y,  1.0f, 0.0f,
-                                                                                    p3.x, p3.y,  0.0f, 1.0f));
+            ShaderPrograms::RadialGradientParams* gradientParams;
+
+            if (mask == nullptr)
+            {
+                setShader (programs->radialGradient);
+                gradientParams = &programs->radialGradient.gradientParams;
+            }
+            else
+            {
+                setShader (programs->radialGradientMasked);
+                gradientParams = &programs->radialGradientMasked.gradientParams;
+                maskParams = &programs->radialGradientMasked.maskParams;
+            }
+
+            gradientParams->setMatrix (p1, p2, p3);
         }
         else
         {
             p1 = Line<float> (p1, p3).findNearestPointTo (p2);
             const Point<float> delta (p2.x - p1.x, p1.y - p2.y);
+            const ShaderPrograms::LinearGradientParams* gradientParams;
+            float grad, length;
 
             if (std::abs (delta.x) < std::abs (delta.y))
             {
-                setShader (&(programs->linearGradient1.program));
-                const float grad = delta.x / delta.y;
-                programs->linearGradient1.gradientInfo.set (p1.x, p1.y, grad, (p2.y - grad * p2.x) - (p1.y - grad * p1.x));
+                if (mask == nullptr)
+                {
+                    setShader (programs->linearGradient1);
+                    gradientParams = &(programs->linearGradient1.gradientParams);
+                }
+                else
+                {
+                    setShader (programs->linearGradient1Masked);
+                    gradientParams = &(programs->linearGradient1Masked.gradientParams);
+                    maskParams = &programs->linearGradient1Masked.maskParams;
+                }
+
+                grad = delta.x / delta.y;
+                length = (p2.y - grad * p2.x) - (p1.y - grad * p1.x);
             }
             else
             {
-                setShader (&(programs->linearGradient2.program));
-                const float grad = delta.y / delta.x;
-                programs->linearGradient2.gradientInfo.set (p1.x, p1.y, grad, (p2.x - grad * p2.y) - (p1.x - grad * p1.y));
+                if (mask == nullptr)
+                {
+                    setShader (programs->linearGradient2);
+                    gradientParams = &(programs->linearGradient2.gradientParams);
+                }
+                else
+                {
+                    setShader (programs->linearGradient2Masked);
+                    gradientParams = &(programs->linearGradient2Masked.gradientParams);
+                    maskParams = &programs->linearGradient2Masked.maskParams;
+                }
+
+                grad = delta.y / delta.x;
+                length = (p2.x - grad * p2.y) - (p1.x - grad * p1.y);
             }
+
+            gradientParams->gradientInfo.set (p1.x, p1.y, grad, length);
+        }
+
+        if (maskParams != nullptr)
+        {
+            maskParams->maskTexture.set ((GLint) 1);
+            maskParams->maskBounds.set (mask->area.getX() - target.x, target.height - (mask->area.getBottom() - target.y),
+                                        mask->area.getWidth(), mask->area.getHeight());
         }
     }
    #endif
@@ -1129,11 +1277,8 @@ public:
     {
         if (quadQueueActive)
         {
-            if (numVertices > 0)
-            {
-                glDrawArrays (GL_TRIANGLES, 0, numVertices);
-                numVertices = 0;
-            }
+            if (numIndices > 0)
+                drawQuadQueue();
 
             quadQueueActive = false;
             glDisableClientState (GL_COLOR_ARRAY);
@@ -1147,7 +1292,12 @@ public:
     }
 
    #if JUCE_USE_OPENGL_SHADERS
-    void setShader (GLShaderProgram* newShader)
+    void setShader (ShaderPrograms::ShaderBase& shader)
+    {
+        setShader (&(shader.program));
+    }
+
+    void setShader (OpenGLShaderProgram* newShader)
     {
         if (activeShader != newShader)
         {
@@ -1163,7 +1313,7 @@ public:
 private:
     enum
     {
-        maxVerticesPerBlock = 192,
+        maxVerticesPerBlock = 192, // must not go over 256 because indices are 8-bit.
         gradientTextureSize = 256,
         numTexturesToCache = 8,
         numGradientTexturesToCache = 6
@@ -1178,17 +1328,25 @@ private:
 
     bool quadQueueActive;
     GLshort vertices [maxVerticesPerBlock * 2];
+    GLubyte indices [maxVerticesPerBlock];
     uint32 colours [maxVerticesPerBlock];
-    int numVertices;
+    int numIndices, numVertices;
 
     OwnedArray<OpenGLTexture> textures, gradientTextures;
     int activeGradientIndex;
     bool gradientNeedsRefresh;
 
    #if JUCE_USE_OPENGL_SHADERS
-    GLShaderProgram* activeShader;
+    OpenGLShaderProgram* activeShader;
     bool canUseShaders;
    #endif
+
+    void drawQuadQueue()
+    {
+        glDrawElements (GL_TRIANGLES, numIndices, GL_UNSIGNED_BYTE, indices);
+        numIndices = 0;
+        numVertices = 0;
+    }
 
     void resetMultiTextureMode (int index, const bool forRGBTextures)
     {
@@ -1609,6 +1767,27 @@ public:
 
         if (! r.isEmpty())
         {
+           #if JUCE_USE_OPENGL_SHADERS
+            if (state.shadersAvailable())
+            {
+                if (fill.isColour())
+                {
+                    setSolidColourShader();
+                    state.fillEdgeTable (et, fill.colour.getPixelARGB());
+                    state.setShader (nullptr);
+                    return;
+                }
+                else if (fill.isGradient())
+                {
+                    PositionedTexture pt (mask.getTextureID(), getMaskArea(), r);
+                    state.setShaderForGradientFill (fill, &pt);
+                    state.fillEdgeTable (et, fill.colour.getPixelARGB());
+                    state.setShader (nullptr);
+                    return;
+                }
+            }
+           #endif
+
             OpenGLTexture* texture = state.getTexture (r.getWidth(), r.getHeight());
             PositionedTexture pt1 (*texture, et, r);
             PositionedTexture pt2 (mask.getTextureID(), getMaskArea(), r);
@@ -1619,6 +1798,27 @@ public:
 
     void fillRectInternal (const Rectangle<int>& area, const FillType& fill, bool replaceContents)
     {
+       #if JUCE_USE_OPENGL_SHADERS
+        if (state.shadersAvailable())
+        {
+            if (fill.isColour())
+            {
+                setSolidColourShader();
+                state.fillRect (area, fill.colour.getPixelARGB());
+                state.setShader (nullptr);
+                return;
+            }
+            else if (fill.isGradient())
+            {
+                PositionedTexture pt (mask.getTextureID(), getMaskArea(), area);
+                state.setShaderForGradientFill (fill, &pt);
+                state.fillRect (area, fill.colour.getPixelARGB());
+                state.setShader (nullptr);
+                return;
+            }
+        }
+       #endif
+
         PositionedTexture pt (mask.getTextureID(), getMaskArea(), area);
         state.fillTexture (area, fill, &pt, nullptr, replaceContents);
     }
@@ -1663,6 +1863,21 @@ private:
         state.disableBlend();
         prepareFor2D();
     }
+
+   #if JUCE_USE_OPENGL_SHADERS
+    void setSolidColourShader()
+    {
+        state.setSolidColour();
+        state.setPremultipliedBlendingMode();
+        state.setSingleTextureMode();
+        state.bindTexture (mask.getTextureID());
+
+        state.setShader (programs->solidColourMasked);
+        programs->solidColourMasked.maskParams.maskBounds.set (maskOrigin.x - state.target.x,
+                                                               state.target.height - (maskOrigin.y + mask.getHeight() - state.target.y),
+                                                               mask.getWidth(), mask.getHeight());
+    }
+   #endif
 
     struct FloatRectangleRenderer
     {
@@ -1726,7 +1941,7 @@ public:
        #if JUCE_USE_OPENGL_SHADERS
         else if (state.shadersAvailable() && fill.isGradient())
         {
-            state.setShaderForGradientFill (fill);
+            state.setShaderForGradientFill (fill, nullptr);
             state.fillRectangleList (clip, area, fill.colour.getPixelARGB());
             state.setShader (nullptr);
         }
@@ -1760,7 +1975,7 @@ public:
        #if JUCE_USE_OPENGL_SHADERS
         else if (state.shadersAvailable() && fill.isGradient())
         {
-            state.setShaderForGradientFill (fill);
+            state.setShaderForGradientFill (fill, nullptr);
 
             for (RectangleList::Iterator i (clip); i.next();)
             {
@@ -1811,7 +2026,7 @@ public:
        #if JUCE_USE_OPENGL_SHADERS
         else if (state.shadersAvailable() && fill.isGradient())
         {
-            state.setShaderForGradientFill (fill);
+            state.setShaderForGradientFill (fill, nullptr);
 
             if (clip.containsRectangle (et.getMaximumBounds()))
             {
@@ -1859,7 +2074,7 @@ private:
 class OpenGLRenderer::SavedState
 {
 public:
-    SavedState (GLState* const state_)
+    SavedState (OpenGLRenderer::GLState* const state_)
         : clip (new ClipRegion_RectangleList (*state_, Rectangle<int> (state_->target.width, state_->target.height))),
           transform (0, 0), interpolationQuality (Graphics::mediumResamplingQuality),
           state (state_), transparencyLayerAlpha (1.0f)
