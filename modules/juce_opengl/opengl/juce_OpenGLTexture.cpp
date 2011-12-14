@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 
 OpenGLTexture::OpenGLTexture()
     : textureID (0), width (0), height (0)
@@ -178,5 +176,3 @@ void OpenGLTexture::draw3D (float x1, float y1, float z1,
     OpenGLHelpers::drawQuad3D (x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, colour);
     unbind();
 }
-
-END_JUCE_NAMESPACE

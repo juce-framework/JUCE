@@ -37,6 +37,8 @@ public:
           embeddedWindow (0),
           swapInterval (0)
     {
+        initialiseGLExtensions();
+
         jassert (component != nullptr);
         ComponentPeer* const peer = component->getTopLevelComponent()->getPeer();
         if (peer == nullptr)

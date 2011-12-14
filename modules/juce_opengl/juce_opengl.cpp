@@ -120,28 +120,8 @@
  #include <GLES/glext.h>
 #endif
 
-#if JUCE_WINDOWS
- #define JUCE_DECLARE_GL_EXTENSION_FUNCTION(name, returnType, params) \
-   typedef returnType (__stdcall *type_ ## name) params; static type_ ## name name;
-#else
- #define JUCE_DECLARE_GL_EXTENSION_FUNCTION(name, returnType, params) \
-   typedef returnType (*type_ ## name) params; static type_ ## name name;
-#endif
-
-#define JUCE_INSTANTIATE_GL_EXTENSION(name) \
-   name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
-
-#ifndef GL_BGRA_EXT
- #define GL_BGRA_EXT 0x80e1
-#endif
-
-#ifndef GL_CLAMP_TO_EDGE
- #define GL_CLAMP_TO_EDGE 0x812f
-#endif
-
-#ifndef GL_DEPTH_COMPONENT16
- #define GL_DEPTH_COMPONENT16 0x81a5
-#endif
+BEGIN_JUCE_NAMESPACE
+#include "native/juce_OpenGLExtensions.h"
 
 //==============================================================================
 // START_AUTOINCLUDE opengl/*.cpp
@@ -150,14 +130,15 @@
 #include "opengl/juce_OpenGLGraphicsContext.cpp"
 #include "opengl/juce_OpenGLHelpers.cpp"
 #include "opengl/juce_OpenGLImage.cpp"
+#include "opengl/juce_OpenGLShaderProgram.cpp"
 #include "opengl/juce_OpenGLTexture.cpp"
 // END_AUTOINCLUDE
 
+END_JUCE_NAMESPACE
 using namespace juce;
-
-//==============================================================================
 BEGIN_JUCE_NAMESPACE
 
+//==============================================================================
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "../juce_core/native/juce_mac_ObjCSuffix.h"

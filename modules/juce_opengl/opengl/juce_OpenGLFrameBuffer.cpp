@@ -23,102 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-namespace
-{
-    #if JUCE_WINDOWS
-    enum
-    {
-        GL_FRAMEBUFFER_EXT = 0x8D40,
-        GL_RENDERBUFFER_EXT = 0x8D41,
-        GL_FRAMEBUFFER_BINDING_EXT = 0x8CA6,
-        GL_COLOR_ATTACHMENT0_EXT = 0x8CE0,
-        GL_DEPTH_ATTACHMENT_EXT = 0x8D00,
-        GL_STENCIL_ATTACHMENT_EXT = 0x8D20,
-        GL_FRAMEBUFFER_COMPLETE_EXT = 0x8CD5,
-        GL_DEPTH24_STENCIL8_EXT = 0x88F0,
-        GL_RENDERBUFFER_DEPTH_SIZE_EXT = 0x8D54
-    };
-    #endif
-
-   #if JUCE_WINDOWS || JUCE_LINUX
-
-    #define FRAMEBUFFER_FUNCTION_LIST(USE_FUNCTION) \
-        USE_FUNCTION (glIsRenderbufferEXT,                          GLboolean, (GLuint renderbuffer))\
-        USE_FUNCTION (glBindRenderbufferEXT,                        void, (GLenum target, GLuint renderbuffer))\
-        USE_FUNCTION (glDeleteRenderbuffersEXT,                     void, (GLsizei n, const GLuint *renderbuffers))\
-        USE_FUNCTION (glGenRenderbuffersEXT,                        void, (GLsizei n, GLuint *renderbuffers))\
-        USE_FUNCTION (glRenderbufferStorageEXT,                     void, (GLenum target, GLenum internalformat, GLsizei width, GLsizei height))\
-        USE_FUNCTION (glGetRenderbufferParameterivEXT,              void, (GLenum target, GLenum pname, GLint* params))\
-        USE_FUNCTION (glIsFramebufferEXT,                           GLboolean, (GLuint framebuffer))\
-        USE_FUNCTION (glBindFramebufferEXT,                         void, (GLenum target, GLuint framebuffer))\
-        USE_FUNCTION (glDeleteFramebuffersEXT,                      void, (GLsizei n, const GLuint *framebuffers))\
-        USE_FUNCTION (glGenFramebuffersEXT,                         void, (GLsizei n, GLuint *framebuffers))\
-        USE_FUNCTION (glCheckFramebufferStatusEXT,                  GLenum, (GLenum target))\
-        USE_FUNCTION (glFramebufferTexture1DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level))\
-        USE_FUNCTION (glFramebufferTexture2DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level))\
-        USE_FUNCTION (glFramebufferTexture3DEXT,                    void, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset))\
-        USE_FUNCTION (glFramebufferRenderbufferEXT,                 void, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer))\
-        USE_FUNCTION (glGetFramebufferAttachmentParameterivEXT,     void, (GLenum target, GLenum attachment, GLenum pname, GLint *params))\
-        USE_FUNCTION (glGenerateMipmapEXT,                          void, (GLenum target))\
-
-    FRAMEBUFFER_FUNCTION_LIST (JUCE_DECLARE_GL_EXTENSION_FUNCTION)
-
-    static bool framebufferFunctionsInitialised = false;
-
-    void initialiseFrameBufferFunctions()
-    {
-        if (! framebufferFunctionsInitialised)
-        {
-            framebufferFunctionsInitialised = true;
-
-           #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
-            FRAMEBUFFER_FUNCTION_LIST (FIND_FUNCTION)
-           #undef FIND_FUNCTION
-        }
-    }
-
-    #undef FRAMEBUFFER_FUNCTION_LIST
-
-    //==============================================================================
-   #elif JUCE_OPENGL_ES
-
-    #define glIsRenderbufferEXT                         glIsRenderbufferOES
-    #define glBindRenderbufferEXT                       glBindRenderbufferOES
-    #define glDeleteRenderbuffersEXT                    glDeleteRenderbuffersOES
-    #define glGenRenderbuffersEXT                       glGenRenderbuffersOES
-    #define glRenderbufferStorageEXT                    glRenderbufferStorageOES
-    #define glGetRenderbufferParameterivEXT             glGetRenderbufferParameterivOES
-    #define glIsFramebufferEXT                          glIsFramebufferOES
-    #define glBindFramebufferEXT                        glBindFramebufferOES
-    #define glDeleteFramebuffersEXT                     glDeleteFramebuffersOES
-    #define glGenFramebuffersEXT                        glGenFramebuffersOES
-    #define glCheckFramebufferStatusEXT                 glCheckFramebufferStatusOES
-    #define glFramebufferTexture1DEXT                   glFramebufferTexture1DOES
-    #define glFramebufferTexture2DEXT                   glFramebufferTexture2DOES
-    #define glFramebufferTexture3DEXT                   glFramebufferTexture3DOES
-    #define glFramebufferRenderbufferEXT                glFramebufferRenderbufferOES
-    #define glGetFramebufferAttachmentParameterivEXT    glGetFramebufferAttachmentParameterivOES
-    #define glGenerateMipmapEXT                         glGenerateMipmapOES
-
-    #define GL_FRAMEBUFFER_EXT                          GL_FRAMEBUFFER_OES
-    #define GL_FRAMEBUFFER_BINDING_EXT                  GL_FRAMEBUFFER_BINDING_OES
-    #define GL_RGBA8                                    GL_RGBA
-    #define GL_COLOR_ATTACHMENT0_EXT                    GL_COLOR_ATTACHMENT0_OES
-    #define GL_RENDERBUFFER_EXT                         GL_RENDERBUFFER_OES
-    #define GL_DEPTH24_STENCIL8_EXT                     GL_DEPTH24_STENCIL8_OES
-    #define GL_RENDERBUFFER_DEPTH_SIZE_EXT              GL_RENDERBUFFER_DEPTH_SIZE_OES
-    #define GL_DEPTH_ATTACHMENT_EXT                     GL_DEPTH_ATTACHMENT_OES
-    #define GL_STENCIL_ATTACHMENT_EXT                   GL_STENCIL_ATTACHMENT_OES
-    #define GL_FRAMEBUFFER_COMPLETE_EXT                 GL_FRAMEBUFFER_COMPLETE_OES
-    #define GL_FRAMEBUFFER_UNSUPPORTED_EXT              GL_FRAMEBUFFER_UNSUPPORTED_OES
-    #define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT    GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES
-
-   #endif
-}
-
-//==============================================================================
 class OpenGLFrameBuffer::Pimpl
 {
 public:
@@ -138,14 +42,12 @@ public:
         jassert (OpenGLHelpers::isContextActive());
 
        #if JUCE_WINDOWS || JUCE_LINUX
-        initialiseFrameBufferFunctions();
-
-        if (glGenFramebuffersEXT == nullptr)
+        if (glGenFramebuffers == nullptr)
             return;
        #endif
 
-        glGenFramebuffersEXT (1, &frameBufferHandle);
-        glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferHandle);
+        glGenFramebuffers (1, &frameBufferHandle);
+        glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle);
 
         glGenTextures (1, &textureID);
         glBindTexture (GL_TEXTURE_2D, textureID);
@@ -157,16 +59,16 @@ public:
 
         glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
-        glFramebufferTexture2DEXT (GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, textureID, 0);
+        glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
 
         if (wantsDepthBuffer || wantsStencilBuffer)
         {
-            glGenRenderbuffersEXT (1, &depthOrStencilBuffer);
-            glBindRenderbufferEXT (GL_RENDERBUFFER_EXT, depthOrStencilBuffer);
-            jassert (glIsRenderbufferEXT (depthOrStencilBuffer));
+            glGenRenderbuffers (1, &depthOrStencilBuffer);
+            glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
+            jassert (glIsRenderbuffer (depthOrStencilBuffer));
 
-            glRenderbufferStorageEXT (GL_RENDERBUFFER_EXT,
-                                      (wantsDepthBuffer && wantsStencilBuffer) ? GL_DEPTH24_STENCIL8_EXT
+            glRenderbufferStorage (GL_RENDERBUFFER,
+                                      (wantsDepthBuffer && wantsStencilBuffer) ? GL_DEPTH24_STENCIL8
                                                                               #if JUCE_OPENGL_ES
                                                                                : GL_DEPTH_COMPONENT16,
                                                                               #else
@@ -175,17 +77,17 @@ public:
                                       width, height);
 
             GLint params = 0;
-            glGetRenderbufferParameterivEXT (GL_RENDERBUFFER_EXT, GL_RENDERBUFFER_DEPTH_SIZE_EXT, &params);
-            glFramebufferRenderbufferEXT (GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthOrStencilBuffer);
+            glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &params);
+            glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
 
             if (wantsStencilBuffer)
-                glFramebufferRenderbufferEXT (GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depthOrStencilBuffer);
+                glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
 
             hasDepthBuffer = wantsDepthBuffer;
             hasStencilBuffer = wantsStencilBuffer;
         }
 
-        glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+        glBindFramebuffer (GL_FRAMEBUFFER, 0);
     }
 
     ~Pimpl()
@@ -194,14 +96,14 @@ public:
             glDeleteTextures (1, &textureID);
 
         if (depthOrStencilBuffer != 0)
-            glDeleteRenderbuffersEXT (1, &depthOrStencilBuffer);
+            glDeleteRenderbuffers (1, &depthOrStencilBuffer);
 
         if (frameBufferHandle != 0)
-            glDeleteFramebuffersEXT (1, &frameBufferHandle);
+            glDeleteFramebuffers (1, &frameBufferHandle);
     }
 
-    void bind()    { glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferHandle); }
-    void unbind()  { glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0); }
+    void bind()    { glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle); }
+    void unbind()  { glBindFramebuffer (GL_FRAMEBUFFER, 0); }
 
     const int width, height;
     GLuint textureID, frameBufferHandle, depthOrStencilBuffer;
@@ -210,10 +112,10 @@ public:
 private:
     static bool checkStatus() noexcept
     {
-        const GLenum status = glCheckFramebufferStatusEXT (GL_FRAMEBUFFER_EXT);
+        const GLenum status = glCheckFramebufferStatus (GL_FRAMEBUFFER);
 
         return status == GL_NO_ERROR
-            || status == GL_FRAMEBUFFER_COMPLETE_EXT;
+            || status == GL_FRAMEBUFFER_COMPLETE;
     }
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl);
@@ -348,13 +250,13 @@ bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
 
 void OpenGLFrameBuffer::setCurrentFrameBufferTarget (GLuint frameBufferID)
 {
-    glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, frameBufferID);
+    glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
 }
 
 GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
 {
     GLint fb;
-    glGetIntegerv (GL_FRAMEBUFFER_BINDING_EXT, &fb);
+    glGetIntegerv (GL_FRAMEBUFFER_BINDING, &fb);
     return (GLuint) fb;
 }
 
@@ -388,7 +290,7 @@ bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& are
 
     glPixelStorei (GL_PACK_ALIGNMENT, 4);
     glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, target);
-    glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+    glBindFramebuffer (GL_FRAMEBUFFER, 0);
     glPixelStorei (GL_PACK_ALIGNMENT, 0);
     return true;
 }
@@ -433,7 +335,7 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4, tex.getTextureID());
    #endif
 
-    glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
+    glBindFramebuffer (GL_FRAMEBUFFER, 0);
     return true;
 }
 
@@ -492,6 +394,3 @@ void OpenGLFrameBuffer::drawAt (float x1, float y1) const
         glBindTexture (GL_TEXTURE_2D, 0);
     }
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,93 +23,9 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
 // #define JUCE_USE_OPENGL_SHADERS 1
 #endif
-
-namespace
-{
-   #if JUCE_WINDOWS
-    enum
-    {
-        GL_OPERAND0_RGB = 0x8590,
-        GL_OPERAND1_RGB = 0x8591,
-        GL_OPERAND0_ALPHA = 0x8598,
-        GL_OPERAND1_ALPHA = 0x8599,
-        GL_SRC0_RGB = 0x8580,
-        GL_SRC1_RGB = 0x8581,
-        GL_SRC0_ALPHA = 0x8588,
-        GL_SRC1_ALPHA = 0x8589,
-        GL_TEXTURE0 = 0x84C0,
-        GL_TEXTURE1 = 0x84C1,
-        GL_TEXTURE2 = 0x84C2,
-        GL_COMBINE = 0x8570,
-        GL_COMBINE_RGB = 0x8571,
-        GL_COMBINE_ALPHA = 0x8572,
-        GL_PREVIOUS = 0x8578,
-        GL_COMPILE_STATUS = 0x8B81,
-        GL_LINK_STATUS = 0x8B82,
-        GL_SHADING_LANGUAGE_VERSION = 0x8B8C,
-        GL_FRAGMENT_SHADER = 0x8B30
-    };
-
-    typedef char GLchar;
-   #endif
-
-   #if JUCE_WINDOWS || JUCE_LINUX
-
-   #if JUCE_USE_OPENGL_SHADERS
-    #define WINDOWS_GL_FUNCTION_LIST(USE_FUNCTION) \
-        USE_FUNCTION (glActiveTexture,          void, (GLenum))\
-        USE_FUNCTION (glClientActiveTexture,    void, (GLenum))\
-        USE_FUNCTION (glCreateProgram,          GLuint, ())\
-        USE_FUNCTION (glDeleteProgram,          void, (GLuint))\
-        USE_FUNCTION (glCreateShader,           GLuint, (GLenum))\
-        USE_FUNCTION (glDeleteShader,           void, (GLuint))\
-        USE_FUNCTION (glShaderSource,           void, (GLuint, GLsizei, const GLchar**, const GLint*))\
-        USE_FUNCTION (glCompileShader,          void, (GLuint))\
-        USE_FUNCTION (glAttachShader,           void, (GLuint, GLuint))\
-        USE_FUNCTION (glLinkProgram,            void, (GLuint))\
-        USE_FUNCTION (glUseProgram,             void, (GLuint))\
-        USE_FUNCTION (glGetShaderiv,            void, (GLuint, GLenum, GLint*))\
-        USE_FUNCTION (glGetShaderInfoLog,       void, (GLuint, GLsizei, GLsizei*, GLchar*))\
-        USE_FUNCTION (glGetProgramiv,           void, (GLuint, GLenum, GLint*))\
-        USE_FUNCTION (glGetUniformLocation,     GLint, (GLuint, const GLchar*))\
-        USE_FUNCTION (glUniform1f,              void, (GLint, GLfloat))\
-        USE_FUNCTION (glUniform1i,              void, (GLint, GLint))\
-        USE_FUNCTION (glUniform2f,              void, (GLint, GLfloat, GLfloat))\
-        USE_FUNCTION (glUniform3f,              void, (GLint, GLfloat, GLfloat, GLfloat))\
-        USE_FUNCTION (glUniform4f,              void, (GLint, GLfloat, GLfloat, GLfloat, GLfloat))\
-        USE_FUNCTION (glUniform4i,              void, (GLint, GLint, GLint, GLint, GLint))\
-        USE_FUNCTION (glUniformMatrix2x3fv,     void, (GLint, GLsizei, GLboolean, const GLfloat*))\
-
-   #else
-    #define WINDOWS_GL_FUNCTION_LIST(USE_FUNCTION) \
-        USE_FUNCTION (glActiveTexture,         void, (GLenum))\
-        USE_FUNCTION (glClientActiveTexture,   void, (GLenum))
-   #endif
-
-    WINDOWS_GL_FUNCTION_LIST (JUCE_DECLARE_GL_EXTENSION_FUNCTION)
-
-    static bool windowsFunctionsInitialised = false;
-
-    void initialiseWindowsExtensions()
-    {
-        windowsFunctionsInitialised = true;
-
-       #define FIND_FUNCTION(name, returnType, params) name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
-        WINDOWS_GL_FUNCTION_LIST (FIND_FUNCTION)
-       #undef FIND_FUNCTION
-    }
-
-    #undef WINDOWS_GL_FUNCTION_LIST
-
-   #else
-    void initialiseWindowsExtensions() {}
-   #endif
-}
 
 //==============================================================================
 struct OpenGLTarget
@@ -288,94 +204,14 @@ namespace
 
 //==============================================================================
 #if JUCE_USE_OPENGL_SHADERS
-class OpenGLShaderProgram
-{
-public:
-    OpenGLShaderProgram() noexcept
-        : program (glCreateProgram())
-    {
-    }
-
-    ~OpenGLShaderProgram() noexcept
-    {
-        glDeleteProgram (program);
-    }
-
-    void addShader (const GLchar* const code, GLenum type)
-    {
-        GLuint shaderID = glCreateShader (type);
-        glShaderSource (shaderID, 1, (const GLchar**) &code, nullptr);
-        glCompileShader (shaderID);
-
-       #if JUCE_DEBUG
-        GLint status = 0;
-        glGetShaderiv (shaderID, GL_COMPILE_STATUS, &status);
-
-        if (status == GL_FALSE)
-        {
-            GLchar infoLog [16384];
-            GLsizei infologLength = 0;
-            glGetShaderInfoLog (shaderID, sizeof (infoLog), &infologLength, infoLog);
-            DBG (String (infoLog, infologLength));
-            jassertfalse;
-        }
-       #endif
-
-        glAttachShader (program, shaderID);
-        glDeleteShader (shaderID);
-     }
-
-    void link() noexcept
-    {
-        glLinkProgram (program);
-
-       #if JUCE_DEBUG
-        GLint status = 0;
-        glGetProgramiv (program, GL_LINK_STATUS, &status);
-        jassert (status != GL_FALSE);
-       #endif
-    }
-
-    struct Uniform
-    {
-        Uniform (const OpenGLShaderProgram& program, const GLchar* name)
-            : uniformID (glGetUniformLocation (program.program, name))
-        {
-            jassert (uniformID >= 0);
-        }
-
-        void set (GLfloat n1) const noexcept                                    { glUniform1f (uniformID, n1); }
-        void set (GLint n1) const noexcept                                      { glUniform1i (uniformID, n1); }
-        void set (GLfloat n1, GLfloat n2) const noexcept                        { glUniform2f (uniformID, n1, n2); }
-        void set (GLfloat n1, GLfloat n2, GLfloat n3) const noexcept            { glUniform3f (uniformID, n1, n2, n3); }
-        void set (GLfloat n1, GLfloat n2, GLfloat n3, float n4) const noexcept  { glUniform4f (uniformID, n1, n2, n3, n4); }
-        void set (GLint n1, GLint n2, GLint n3, GLint n4) const noexcept        { glUniform4i (uniformID, n1, n2, n3, n4); }
-
-        void set (const AffineTransform& t) const noexcept
-        {
-            const GLfloat f[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
-            glUniformMatrix2x3fv (uniformID, 1, false, f);
-        }
-
-        GLint uniformID;
-    };
-
-    GLuint program;
-
-private:
-    JUCE_DECLARE_NON_COPYABLE (OpenGLShaderProgram);
-};
-
 struct ShaderPrograms
 {
     ShaderPrograms()
+        : areShadersSupported (OpenGLShaderProgram::getLanguageVersion() >= 1.199)
     {
-        String v ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION));
-        v = v.upToFirstOccurrenceOf (" ", false, false);
-        areShadersSupported = (v.getDoubleValue() >= 1.199);
     }
 
-    bool areShadersSupported;
+    const bool areShadersSupported;
 
     struct ShaderBase
     {
@@ -392,7 +228,7 @@ struct ShaderPrograms
     {
         MaskedShaderParams (const OpenGLShaderProgram& program)
             : maskTexture (program, "maskTexture"),
-              maskBounds (program, "maskBounds")
+              maskBounds  (program, "maskBounds")
         {}
 
         OpenGLShaderProgram::Uniform maskTexture, maskBounds;
@@ -407,9 +243,12 @@ struct ShaderPrograms
 
         void setMatrix (const Point<float>& p1, const Point<float>& p2, const Point<float>& p3)
         {
-            matrix.set (AffineTransform::fromTargetPoints (p1.x, p1.y,  0.0f, 0.0f,
-                                                           p2.x, p2.y,  1.0f, 0.0f,
-                                                           p3.x, p3.y,  0.0f, 1.0f));
+            const AffineTransform t (AffineTransform::fromTargetPoints (p1.x, p1.y,  0.0f, 0.0f,
+                                                                        p2.x, p2.y,  1.0f, 0.0f,
+                                                                        p3.x, p3.y,  0.0f, 1.0f));
+//            const GLfloat m[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
+            const GLfloat m[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
+            matrix.set (m, 6);
         }
 
         OpenGLShaderProgram::Uniform gradientTexture, matrix;
@@ -451,13 +290,13 @@ struct ShaderPrograms
         RadialGradientProgram()
             : ShaderBase ("#version 120\n"
                           "uniform sampler2D gradientTexture;"
-                          "uniform mat2x3 matrix;"
+                          "uniform float matrix[6];"
                           "const float textureY = 0.5;"
                           ""
                           "void main()"
                           "{"
-                          "  float dist = length (vec2 (matrix[0][0] * gl_FragCoord.x + matrix[0][1] * gl_FragCoord.y + matrix[0][2],"
-                          "                             matrix[1][0] * gl_FragCoord.x + matrix[1][1] * gl_FragCoord.y + matrix[1][2]));"
+                          "  float dist = length (vec2 (matrix[0] * gl_FragCoord.x + matrix[1] * gl_FragCoord.y + matrix[2],"
+                          "                             matrix[3] * gl_FragCoord.x + matrix[4] * gl_FragCoord.y + matrix[5]));"
                           "  gl_FragColor = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
                           "}"),
               gradientParams (program)
@@ -472,15 +311,15 @@ struct ShaderPrograms
         RadialGradientMaskedProgram()
             : ShaderBase ("#version 120\n"
                           "uniform sampler2D gradientTexture;"
-                          "uniform mat2x3 matrix;"
+                          "uniform float matrix[6];"
                           "uniform sampler2D maskTexture;"
                           "uniform ivec4 maskBounds;"
                           "const float textureY = 0.5;"
                           ""
                           "void main()"
                           "{"
-                          "  float dist = length (vec2 (matrix[0][0] * gl_FragCoord.x + matrix[0][1] * gl_FragCoord.y + matrix[0][2],"
-                          "                             matrix[1][0] * gl_FragCoord.x + matrix[1][1] * gl_FragCoord.y + matrix[1][2]));"
+                          "  float dist = length (vec2 (matrix[0] * gl_FragCoord.x + matrix[1] * gl_FragCoord.y + matrix[2],"
+                          "                             matrix[3] * gl_FragCoord.x + matrix[4] * gl_FragCoord.y + matrix[5]));"
                           "  vec4 result = gl_Color.w * texture2D (gradientTexture, vec2 (dist, textureY));"
                           ""
                           "  vec2 maskPos;"
@@ -631,10 +470,11 @@ public:
           , activeShader (nullptr)
          #endif
     {
+        initialiseGLExtensions();
+
         // This object can only be created and used when the current thread has an active OpenGL context.
         jassert (OpenGLHelpers::isContextActive());
 
-        initialiseWindowsExtensions();
         target.makeActiveFor2D();
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_NORMAL_ARRAY);
@@ -1303,7 +1143,7 @@ public:
         {
             flushQuads();
             activeShader = newShader;
-            glUseProgram (newShader != nullptr ? newShader->program : 0);
+            glUseProgram (newShader != nullptr ? newShader->programID : 0);
         }
     }
    #endif
@@ -2490,5 +2330,3 @@ void OpenGLRenderer::drawGlyph (int glyphNumber, const AffineTransform& t)      
 void OpenGLRenderer::drawLine (const Line <float>& line)                            { stack->drawLine (line); }
 void OpenGLRenderer::setFont (const Font& newFont)                                  { stack->font = newFont; }
 Font OpenGLRenderer::getFont()                                                      { return stack->font; }
-
-END_JUCE_NAMESPACE

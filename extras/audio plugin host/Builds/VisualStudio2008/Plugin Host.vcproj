@@ -4234,6 +4234,17 @@
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLImage.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLPixelFormat.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLRenderingTarget.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLShaderProgram.cpp">
+            <FileConfiguration Name="Debug|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release|Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLShaderProgram.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -4271,6 +4282,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_mac_OpenGLComponent.mm"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_OpenGLExtensions.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_win32_OpenGLComponent.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

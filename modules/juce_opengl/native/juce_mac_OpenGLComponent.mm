@@ -123,6 +123,8 @@ public:
                        NSOpenGLContext* sharedContext)
         : renderContext (nil)
     {
+        initialiseGLExtensions();
+
         NSOpenGLPixelFormatAttribute attribs[] =
         {
             NSOpenGLPFADoubleBuffer,

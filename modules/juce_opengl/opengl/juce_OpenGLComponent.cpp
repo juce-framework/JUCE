@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-
 //==============================================================================
 OpenGLPixelFormat::OpenGLPixelFormat (const int bitsPerRGBComponent,
                                       const int alphaBits_,
@@ -556,5 +553,3 @@ unsigned int OpenGLComponent::getFrameBufferID() const
 {
     return context != nullptr ? context->getFrameBufferID() : 0;
 }
-
-END_JUCE_NAMESPACE

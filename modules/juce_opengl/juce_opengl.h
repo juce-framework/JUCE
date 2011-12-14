@@ -101,6 +101,9 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_OPENGLRENDERINGTARGET_JUCEHEADER__
  #include "opengl/juce_OpenGLRenderingTarget.h"
 #endif
+#ifndef __JUCE_OPENGLSHADERPROGRAM_JUCEHEADER__
+ #include "opengl/juce_OpenGLShaderProgram.h"
+#endif
 #ifndef __JUCE_OPENGLTEXTURE_JUCEHEADER__
  #include "opengl/juce_OpenGLTexture.h"
 #endif

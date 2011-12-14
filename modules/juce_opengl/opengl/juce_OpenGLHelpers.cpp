@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 void OpenGLHelpers::resetErrorState()
 {
     while (glGetError() != GL_NO_ERROR) {}
@@ -315,6 +312,3 @@ void OpenGLRenderingTarget::prepareFor2D()
     OpenGLHelpers::prepareFor2D (getRenderingTargetWidth(),
                                  getRenderingTargetHeight());
 }
-
-
-END_JUCE_NAMESPACE

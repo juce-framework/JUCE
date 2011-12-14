@@ -23,10 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-
-//==============================================================================
 class OpenGLFrameBufferImage   : public ImagePixelData
 {
 public:
@@ -193,5 +190,3 @@ OpenGLFrameBuffer* OpenGLImageType::getFrameBufferFrom (const Image& image)
 
     return glImage != nullptr ? &(glImage->frameBuffer) : nullptr;
 }
-
-END_JUCE_NAMESPACE

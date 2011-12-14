@@ -23,51 +23,6 @@
   ==============================================================================
 */
 
-enum
-{
-    WGL_NUMBER_PIXEL_FORMATS_ARB    = 0x2000,
-    WGL_DRAW_TO_WINDOW_ARB          = 0x2001,
-    WGL_ACCELERATION_ARB            = 0x2003,
-    WGL_SWAP_METHOD_ARB             = 0x2007,
-    WGL_SUPPORT_OPENGL_ARB          = 0x2010,
-    WGL_PIXEL_TYPE_ARB              = 0x2013,
-    WGL_DOUBLE_BUFFER_ARB           = 0x2011,
-    WGL_COLOR_BITS_ARB              = 0x2014,
-    WGL_RED_BITS_ARB                = 0x2015,
-    WGL_GREEN_BITS_ARB              = 0x2017,
-    WGL_BLUE_BITS_ARB               = 0x2019,
-    WGL_ALPHA_BITS_ARB              = 0x201B,
-    WGL_DEPTH_BITS_ARB              = 0x2022,
-    WGL_STENCIL_BITS_ARB            = 0x2023,
-    WGL_FULL_ACCELERATION_ARB       = 0x2027,
-    WGL_ACCUM_RED_BITS_ARB          = 0x201E,
-    WGL_ACCUM_GREEN_BITS_ARB        = 0x201F,
-    WGL_ACCUM_BLUE_BITS_ARB         = 0x2020,
-    WGL_ACCUM_ALPHA_BITS_ARB        = 0x2021,
-    WGL_STEREO_ARB                  = 0x2012,
-    WGL_SAMPLE_BUFFERS_ARB          = 0x2041,
-    WGL_SAMPLES_ARB                 = 0x2042,
-    WGL_TYPE_RGBA_ARB               = 0x202B
-};
-
-typedef BOOL (WINAPI* PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC, const int*, const FLOAT*, UINT, int*, UINT*);
-typedef BOOL (WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int);
-typedef int  (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC)();
-
-static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
-static PFNWGLSWAPINTERVALEXTPROC      wglSwapIntervalEXT = 0;
-static PFNWGLGETSWAPINTERVALEXTPROC   wglGetSwapIntervalEXT = 0;
-
-static void initialiseGLExtensions()
-{
-    if (wglChoosePixelFormatARB == 0)
-    {
-        wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC) OpenGLHelpers::getExtensionFunction ("wglChoosePixelFormatARB");
-        wglSwapIntervalEXT      = (PFNWGLSWAPINTERVALEXTPROC)      OpenGLHelpers::getExtensionFunction ("wglSwapIntervalEXT");
-        wglGetSwapIntervalEXT   = (PFNWGLGETSWAPINTERVALEXTPROC)   OpenGLHelpers::getExtensionFunction ("wglGetSwapIntervalEXT");
-    }
-}
-
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component* component, void* parent);
 
 //==============================================================================
@@ -81,6 +36,7 @@ public:
           component (component_),
           dc (0)
     {
+        initialiseGLExtensions();
         jassert (component != nullptr);
 
         createNativeWindow();

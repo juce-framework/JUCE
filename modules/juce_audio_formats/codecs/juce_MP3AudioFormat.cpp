@@ -344,13 +344,13 @@ const int16 huffmanTab24[] =
     -1,51,20,-9,-5,-1,65,-1,4,64,-1,35,50,-1,19,49,-7,-5,-3,-1,3,48,34,18,-1,33,-1,2,32,-3,-1,17,1,-1,16,0
 };
 
-struct newhuff
+struct BitsToTableMap
 {
-    uint32 linbits;
+    uint32 bits;
     const int16* table;
 };
 
-const newhuff huffmanTables1[] =
+const BitsToTableMap huffmanTables1[] =
 {
     { 0, huffmanTab0  }, { 0, huffmanTab1  }, { 0,  huffmanTab2  }, { 0,  huffmanTab3  },
     { 0, huffmanTab0  }, { 0, huffmanTab5  }, { 0,  huffmanTab6  }, { 0,  huffmanTab7  },
@@ -365,7 +365,7 @@ const newhuff huffmanTables1[] =
 const int16 huffmanTabC0[] = { -29,-21,-13,-7,-3,-1,11,15,-1,13,14,-3,-1,7,5,9,-3,-1,6,3,-1,10,12,-3,-1,2,1,-1,4,8,0 };
 const int16 huffmanTabC1[] = { -15,-7,-3,-1,15,14,-1,13,12,-3,-1,11,10,-1,9,8,-7,-3,-1,7,6,-1,5,4,-3,-1,3,2,-1,1,0 };
 
-const newhuff huffmanTables2[] = { { 0, huffmanTabC0 }, { 0, huffmanTabC1 } };
+const BitsToTableMap huffmanTables2[] = { { 0, huffmanTabC0 }, { 0, huffmanTabC1 } };
 
 //==============================================================================
 struct VBRTagData
@@ -443,27 +443,11 @@ struct VBRTagData
         }
 
         headersize = ((type + 1) * 72000 * bitrate) / sampleRate;
-
-        data += 21;
-        int encoderDelay = data[0] << 4;
-        encoderDelay += data[1] >> 4;
-        int encoderPadding = (data[1] & 15) << 8;
-        encoderPadding += data[2];
-
-        if (encoderDelay < 0 || encoderDelay > 3000)
-            encoderDelay = -1;
-
-        if (encoderPadding < 0 || encoderPadding > 3000)
-            encoderPadding = -1;
-
-        encoderDelay = encoderDelay;
-        encoderPadding = encoderPadding;
         return true;
     }
 
     uint8 toc[100];
-    int sampleRate, flags, frames, bytes, vbrScale;
-    int headersize, encoderDelay, encoderPadding;
+    int sampleRate, flags, frames, bytes, vbrScale, headersize;
 
 private:
     static bool isVbrTag (const uint8* const d) noexcept
@@ -634,22 +618,14 @@ private:
         {
             if (table < decodeWin + 512 + 16)
                 table[16] = table[0] = (float) (decodeWindow[j] * scaleval);
-            if (i % 32 == 31)
-                table -= 1023;
-            if (i % 64 == 63)
-                scaleval = -scaleval;
+
+            if (i % 32 == 31) table -= 1023;
+            if (i % 64 == 63) scaleval = -scaleval;
         }
     }
 
     void initLayer2Tables()
     {
-        static const double mulmul[27] =
-        {
-            0, -2.0 / 3.0, 2.0 / 3.0, 2.0 / 7.0, 2.0 / 15.0, 2.0 / 31.0, 2.0 / 63.0, 2.0 / 127.0, 2.0 / 255.0,
-            2.0 / 511.0, 2.0 / 1023.0, 2.0 / 2047.0, 2.0 / 4095.0, 2.0 / 8191.0, 2.0 / 16383.0, 2.0 / 32767.0, 2.0 / 65535.0,
-            -4.0 / 5.0, -2.0 / 5.0, 2.0 / 5.0, 4.0 / 5.0, -8.0 / 9.0, -4.0 / 9.0, -2.0 / 9.0, 2.0 / 9.0, 4.0 / 9.0, 8.0 / 9.0
-        };
-
         static const uint8 base[3][9] =
         {
             { 1, 0, 2 },
@@ -657,30 +633,36 @@ private:
             { 21, 1, 22, 23, 0, 24, 25, 2, 26 }
         };
 
-        static const int tablen[3] = { 3, 5, 9 };
-        static uint8* tables[3] = { group3tab, group5tab, group9tab };
+        static const int tableLengths[] = { 3, 5, 9 };
+        static uint8* tables[] = { group3tab, group5tab, group9tab };
 
         for (int i = 0; i < 3; ++i)
         {
-            uint8* itable = tables[i];
-            const int len = tablen[i];
+            uint8* table = tables[i];
+            const int len = tableLengths[i];
 
             for (int j = 0; j < len; ++j)
                 for (int k = 0; k < len; ++k)
                     for (int l = 0; l < len; ++l)
                     {
-                        *itable++ = base[i][l];
-                        *itable++ = base[i][k];
-                        *itable++ = base[i][j];
+                        *table++ = base[i][l];
+                        *table++ = base[i][k];
+                        *table++ = base[i][j];
                     }
         }
 
         for (int k = 0; k < 27; ++k)
         {
-            const double m = mulmul[k];
+            static const double multipliers[] =
+            {
+                0, -2.0 / 3.0, 2.0 / 3.0, 2.0 / 7.0, 2.0 / 15.0, 2.0 / 31.0, 2.0 / 63.0, 2.0 / 127.0, 2.0 / 255.0,
+                2.0 / 511.0, 2.0 / 1023.0, 2.0 / 2047.0, 2.0 / 4095.0, 2.0 / 8191.0, 2.0 / 16383.0, 2.0 / 32767.0, 2.0 / 65535.0,
+                -4.0 / 5.0, -2.0 / 5.0, 2.0 / 5.0, 4.0 / 5.0, -8.0 / 9.0, -4.0 / 9.0, -2.0 / 9.0, 2.0 / 9.0, 4.0 / 9.0, 8.0 / 9.0
+            };
+
             float* table = muls[k];
             for (int j = 3, i = 0; i < 63; ++i, --j)
-                *table++ = (float) (m * pow (2.0, j / 3.0));
+                *table++ = (float) (multipliers[k] * pow (2.0, j / 3.0));
             *table++ = 0;
         }
     }
@@ -1599,7 +1581,6 @@ struct MP3Stream
     bool vbrHeaderFound;
 
 private:
-    int encoderDelay, encoderPadding;
     bool headerParsed, sideParsed, dataParsed, needToSyncBitStream;
     bool isFreeFormat, wasFreeFormat;
     int sideInfoSize, dataSize;
@@ -1618,7 +1599,7 @@ private:
     void reset() noexcept
     {
         headerParsed = sideParsed = dataParsed = isFreeFormat = wasFreeFormat = false;
-        encoderDelay = encoderPadding = lastFrameSize = -1;
+        lastFrameSize = -1;
         needToSyncBitStream = true;
         frameSize = sideInfoSize = dataSize = frameSize = bitIndex = 0;
         lastFrameSizeNoPadding = bufferSpaceIndex = 0;
@@ -1766,8 +1747,6 @@ private:
         if (vbrHeaderFound)
         {
             numFrames = vbrTagData.frames;
-            encoderDelay = vbrTagData.encoderDelay;
-            encoderPadding = vbrTagData.encoderPadding;
             oldPos += jmax (vbrTagData.headersize, 1);
         }
 
@@ -2532,7 +2511,7 @@ private:
 
             for (i = 0; i < 2; ++i)
             {
-                const newhuff* h = huffmanTables1 + granule.tableSelect[i];
+                const BitsToTableMap* h = huffmanTables1 + granule.tableSelect[i];
 
                 for (int lp = l[i]; lp != 0; --lp, --mc)
                 {
@@ -2572,8 +2551,8 @@ private:
                     if (x == 15)
                     {
                         max[lwin] = cb;
-                        part2remain -= h->linbits + 1;
-                        x += getBits ((int) h->linbits);
+                        part2remain -= h->bits + 1;
+                        x += getBits ((int) h->bits);
                         *xrpnt = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                     }
                     else if (x)
@@ -2590,8 +2569,8 @@ private:
                     if (y == 15)
                     {
                         max[lwin] = cb;
-                        part2remain -= h->linbits + 1;
-                        y += getBits ((int) h->linbits);
+                        part2remain -= h->bits + 1;
+                        y += getBits ((int) h->bits);
                         *xrpnt = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                     }
                     else if (y)
@@ -2609,7 +2588,7 @@ private:
 
             for (; l3 && (part2remain > 0); --l3)
             {
-                const newhuff* h = huffmanTables2 + granule.count1TableSelect;
+                const BitsToTableMap* h = huffmanTables2 + granule.count1TableSelect;
                 const int16* val = h->table;
                 int16 a;
 
@@ -2704,7 +2683,7 @@ private:
 
             for (i = 0; i < 3; ++i)
             {
-                const newhuff* h = huffmanTables1 + granule.tableSelect[i];
+                const BitsToTableMap* h = huffmanTables1 + granule.tableSelect[i];
 
                 for (int lp = l[i]; lp != 0; --lp, --mc)
                 {
@@ -2730,8 +2709,8 @@ private:
                     if (x == 15)
                     {
                         max = cb;
-                        part2remain -= h->linbits + 1;
-                        x += getBits ((int) h->linbits);
+                        part2remain -= h->bits + 1;
+                        x += getBits ((int) h->bits);
                         *xrpnt++ = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                     }
                     else if (x)
@@ -2746,8 +2725,8 @@ private:
                     if (y == 15)
                     {
                         max = cb;
-                        part2remain -= h->linbits + 1;
-                        y += getBits ((int) h->linbits);
+                        part2remain -= h->bits + 1;
+                        y += getBits ((int) h->bits);
                         *xrpnt++ = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                     }
                     else if (y)
@@ -2763,7 +2742,7 @@ private:
 
             for (; l3 && part2remain > 0; --l3)
             {
-                const newhuff* h = huffmanTables2 + granule.count1TableSelect;
+                const BitsToTableMap* h = huffmanTables2 + granule.count1TableSelect;
                 const int16* values = h->table;
                 int16 a;
 
