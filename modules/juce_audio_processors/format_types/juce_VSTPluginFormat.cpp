@@ -2127,6 +2127,8 @@ int VSTPluginInstance::dispatch (const int opcode, const int index, const int va
         try
         {
            #if JUCE_MAC
+            const int oldResFile = CurResFile();
+
             if (module->resFileId != 0)
                 UseResFile (module->resFileId);
            #endif
@@ -2134,7 +2136,12 @@ int VSTPluginInstance::dispatch (const int opcode, const int index, const int va
             result = effect->dispatcher (effect, opcode, index, value, ptr, opt);
 
            #if JUCE_MAC
-            module->resFileId = CurResFile();
+            const int newResFile = CurResFile();
+            if (newResFile != oldResFile)  // avoid confusing the parent app's resource file with the plug-in's
+            {
+                module->resFileId = newResFile;
+                UseResFile (oldResFile);
+            }
            #endif
         }
         catch (...)
