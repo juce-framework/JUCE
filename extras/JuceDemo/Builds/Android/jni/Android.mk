@@ -51,6 +51,6 @@ else
   LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -Os -D "JUCE_ANDROID=1" -D "NDEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1"
 endif
 
-LOCAL_LDLIBS := -lGLESv1_CM
+LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)

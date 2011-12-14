@@ -118,6 +118,7 @@
   #define GL_GLEXT_PROTOTYPES 1
  #endif
  #include <GLES/glext.h>
+ #include <GLES2/gl2.h>
 #endif
 
 BEGIN_JUCE_NAMESPACE

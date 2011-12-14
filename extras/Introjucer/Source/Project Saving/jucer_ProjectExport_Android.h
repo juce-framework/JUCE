@@ -64,6 +64,7 @@ public:
             getInternetNeeded() = true;
 
         androidDynamicLibs.add ("GLESv1_CM");
+        androidDynamicLibs.add ("GLESv2");
     }
 
     //==============================================================================
