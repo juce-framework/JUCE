@@ -541,6 +541,11 @@ public:
         return total;
     }
 
+    bool killProcess() const
+    {
+        return TerminateProcess (processInfo.hProcess, 0) != FALSE;
+    }
+
     bool ok;
 
 private:
@@ -568,4 +573,9 @@ bool ChildProcess::isRunning() const
 int ChildProcess::readProcessOutput (void* dest, int numBytes)
 {
     return activeProcess != nullptr ? activeProcess->read (dest, numBytes) : 0;
+}
+
+bool ChildProcess::kill()
+{
+    return activeProcess == nullptr || activeProcess->killProcess();
 }

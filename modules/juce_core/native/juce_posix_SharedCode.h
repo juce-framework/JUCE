@@ -1025,6 +1025,11 @@ public:
         return 0;
     }
 
+    bool killProcess() const
+    {
+        return ::kill (childPID, SIGKILL) == 0;
+    }
+
     int childPID;
 
 private:
@@ -1059,4 +1064,9 @@ bool ChildProcess::isRunning() const
 int ChildProcess::readProcessOutput (void* dest, int numBytes)
 {
     return activeProcess != nullptr ? activeProcess->read (dest, numBytes) : 0;
+}
+
+bool ChildProcess::kill()
+{
+    return activeProcess == nullptr || activeProcess->killProcess();
 }

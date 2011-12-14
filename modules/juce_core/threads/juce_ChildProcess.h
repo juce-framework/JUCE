@@ -74,6 +74,11 @@ public:
     /** Blocks until the process is no longer running. */
     bool waitForProcessToFinish (int timeoutMs) const;
 
+    /** Attempts to kill the child process.
+        Returns true if it succeeded. Trying to read from the process after calling this may
+        result in undefined behaviour.
+    */
+    bool kill();
 
 private:
     //==============================================================================
