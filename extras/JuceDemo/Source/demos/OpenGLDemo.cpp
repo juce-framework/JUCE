@@ -92,7 +92,7 @@ public:
 
         updateTextureImage();  // this will update our dynamically-changing texture image.
 
-        drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLRenderer class
+        drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
 
         // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
         // we'll put back any important settings before doing our normal GL 3D drawing..
@@ -142,7 +142,7 @@ public:
 
     void drawBackground2DStuff()
     {
-        OpenGLRenderer glRenderer (*this); // Create an OpenGLRenderer that will draw into this GL window..
+        OpenGLGraphicsContext glRenderer (*this); // Create an OpenGLGraphicsContext that will draw into this GL window..
         Graphics g (&glRenderer);          // ..and then wrap it in a normal Graphics object so we can draw with it.
 
         // This stuff just creates a spinning star shape and fills it..
@@ -203,7 +203,7 @@ private:
 
     void drawScrollingMessage (Graphics& g, int y) const
     {
-        g.drawSingleLineText ("The background, foreground and texture are all being drawn using the OpenGLRenderer class, which "
+        g.drawSingleLineText ("The background, foreground and texture are all being drawn using the OpenGLGraphicsContext class, which "
                               "lets you use a standard JUCE 2D graphics context to render directly onto an OpenGL window or framebuffer...  ",
                               (int) -std::fmod (textScrollPos, 2500.0f), y);
     }

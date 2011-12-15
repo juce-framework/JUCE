@@ -30,13 +30,13 @@
 //==============================================================================
 /** A LowLevelGraphicsContext for rendering into an OpenGL framebuffer or window.
 */
-class JUCE_API  OpenGLRenderer   : public LowLevelGraphicsContext
+class JUCE_API  OpenGLGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
-    explicit OpenGLRenderer (OpenGLComponent& target);
-    explicit OpenGLRenderer (OpenGLFrameBuffer& target);
-    OpenGLRenderer (unsigned int frameBufferID, int width, int height);
-    ~OpenGLRenderer();
+    explicit OpenGLGraphicsContext (OpenGLComponent& target);
+    explicit OpenGLGraphicsContext (OpenGLFrameBuffer& target);
+    OpenGLGraphicsContext (unsigned int frameBufferID, int width, int height);
+    ~OpenGLGraphicsContext();
 
     bool isVectorDevice() const;
     void setOrigin (int x, int y);

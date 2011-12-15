@@ -68,7 +68,7 @@
   */
   #define juce_breakDebugger        { assert (false); }
 #elif JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
-  #define juce_breakDebugger        { kill (0, SIGTRAP); }
+  #define juce_breakDebugger        { ::kill (0, SIGTRAP); }
 #elif JUCE_USE_INTRINSICS
   #ifndef __INTEL_COMPILER
     #pragma intrinsic (__debugbreak)

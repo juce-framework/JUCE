@@ -308,7 +308,7 @@ public:
 
                 if (! invalid.isEmpty())
                 {
-                    OpenGLRenderer g (frameBuffer);
+                    OpenGLGraphicsContext g (frameBuffer);
                     g.clipToRectangleList (invalid);
 
                     g.setFill (Colours::transparentBlack);
@@ -338,7 +338,7 @@ public:
     }
 
 private:
-    void paintOwner (OpenGLRenderer& glRenderer)
+    void paintOwner (OpenGLGraphicsContext& glRenderer)
     {
         Graphics g (&glRenderer);
 

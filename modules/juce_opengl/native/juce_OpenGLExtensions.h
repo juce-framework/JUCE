@@ -97,6 +97,7 @@ enum
     GL_LINK_STATUS                  = 0x8B82,
     GL_SHADING_LANGUAGE_VERSION     = 0x8B8C,
     GL_FRAGMENT_SHADER              = 0x8B30,
+    GL_VERTEX_SHADER                = 0x8B31,
     GL_FRAMEBUFFER                  = 0x8D40,
     GL_RENDERBUFFER                 = 0x8D41,
     GL_FRAMEBUFFER_BINDING          = 0x8CA6,

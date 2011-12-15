@@ -55,7 +55,7 @@ public:
         If your app is built in debug mode, this method will assert if the program
         fails to compile correctly.
 
-        The shaderType parameter is GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
+        The shaderType parameter could be GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, etc.
     */
     void addShader (const char* const shaderSourceCode, GLenum shaderType);
 

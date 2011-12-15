@@ -98,6 +98,9 @@ public:
     */
     static OpenGLContext* getCurrentContext();
 
+    /** This property set allows you to attach persisent values to the context. */
+    NamedValueSet properties;
+
 protected:
     //==============================================================================
     OpenGLContext() noexcept;

@@ -38,7 +38,7 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new OpenGLRenderer (frameBuffer);
+        return new OpenGLGraphicsContext (frameBuffer);
     }
 
     ImageType* createType() const                       { return new OpenGLImageType(); }
