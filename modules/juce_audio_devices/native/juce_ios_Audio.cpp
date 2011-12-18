@@ -69,8 +69,8 @@ public:
     int getNumSampleRates()                 { return 1; }
     double getSampleRate (int index)        { return sampleRate; }
 
-    int getNumBufferSizesAvailable()        { return 1; }
-    int getBufferSizeSamples (int index)    { return getDefaultBufferSize(); }
+    int getNumBufferSizesAvailable()        { return 6; }
+    int getBufferSizeSamples (int index)    { return 1 << (jlimit (0, 5, index) + 6); }
     int getDefaultBufferSize()              { return 1024; }
 
     String open (const BigInteger& inputChannels,
