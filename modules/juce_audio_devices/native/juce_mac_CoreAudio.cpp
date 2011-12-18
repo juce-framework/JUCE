@@ -778,6 +778,7 @@ private:
             case kAudioDevicePropertyNominalSampleRate:
             case kAudioDevicePropertyStreamFormat:
             case kAudioDevicePropertyDeviceIsAlive:
+            case kAudioStreamPropertyPhysicalFormat:
                 intern->deviceDetailsChanged();
                 break;
 
