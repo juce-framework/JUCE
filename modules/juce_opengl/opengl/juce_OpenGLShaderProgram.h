@@ -101,6 +101,24 @@ public:
         GLint uniformID;
     };
 
+    /** Represents an openGL vertex attribute value.
+        After a program has been linked, you can create Attribute objects to let you
+        set the attributes that your vertex shaders use.
+    */
+    struct Attribute
+    {
+        /** Initialises an attribute.
+            The program must have been successfully linked when this
+            constructor is called.
+        */
+        Attribute (const OpenGLShaderProgram& program, const char* attributeName);
+
+        /** The attribute's ID number.
+            If the uniform couldn't be found, this value will be < 0.
+        */
+        GLint attributeID;
+    };
+
     /** The ID number of the compiled program. */
     GLuint programID;
 

@@ -83,6 +83,12 @@ OpenGLShaderProgram::Uniform::Uniform (const OpenGLShaderProgram& program, const
     jassert (uniformID >= 0);
 }
 
+OpenGLShaderProgram::Attribute::Attribute (const OpenGLShaderProgram& program, const char* name)
+    : attributeID (glGetAttribLocation (program.programID, name))
+{
+    jassert (attributeID >= 0);
+}
+
 void OpenGLShaderProgram::Uniform::set (GLfloat n1) const noexcept                                    { glUniform1f (uniformID, n1); }
 void OpenGLShaderProgram::Uniform::set (GLint n1) const noexcept                                      { glUniform1i (uniformID, n1); }
 void OpenGLShaderProgram::Uniform::set (GLfloat n1, GLfloat n2) const noexcept                        { glUniform2f (uniformID, n1, n2); }
