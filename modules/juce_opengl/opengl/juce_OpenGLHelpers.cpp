@@ -112,6 +112,7 @@ void OpenGLHelpers::clear (const Colour& colour)
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
+#if JUCE_USE_OPENGL_FIXED_FUNCTION
 void OpenGLHelpers::setColour (const Colour& colour)
 {
     glColor4f (colour.getFloatRed(), colour.getFloatGreen(),
@@ -157,6 +158,19 @@ void OpenGLHelpers::applyTransform (const AffineTransform& t)
                           t.mat02, t.mat12, 0, 1 };
     glMultMatrixf (m);
 }
+
+void OpenGLHelpers::applyMatrix (const float matrixValues[16])
+{
+    glMultMatrixf (matrixValues);
+}
+
+#if ! JUCE_OPENGL_ES
+void OpenGLHelpers::applyMatrix (const double matrixValues[16])
+{
+    glMultMatrixd (matrixValues);
+}
+#endif
+#endif
 
 void OpenGLHelpers::enableScissorTest (const Rectangle<int>& clip)
 {

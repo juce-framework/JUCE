@@ -66,9 +66,18 @@
  #include <GLES/gl.h>
 #endif
 
+#if (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX) && ! defined (JUCE_USE_OPENGL_SHADERS)
+ #define JUCE_USE_OPENGL_SHADERS 1
+#endif
+
+#ifndef JUCE_USE_OPENGL_FIXED_FUNCTION
+ #define JUCE_USE_OPENGL_FIXED_FUNCTION 1
+#endif
+
 //=============================================================================
 BEGIN_JUCE_NAMESPACE
 #include "opengl/juce_OpenGLRenderingTarget.h"
+#include "opengl/juce_OpenGLHelpers.h"
 
 // START_AUTOINCLUDE opengl
 #ifndef __JUCE_DRAGGABLE3DORIENTATION_JUCEHEADER__

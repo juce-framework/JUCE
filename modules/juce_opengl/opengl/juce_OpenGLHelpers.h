@@ -46,6 +46,7 @@ public:
     /** Clears the current context using the given colour. */
     static void clear (const Colour& colour);
 
+   #if JUCE_USE_OPENGL_FIXED_FUNCTION
     /** Sets the current colour using a JUCE colour. */
     static void setColour (const Colour& colour);
 
@@ -56,6 +57,12 @@ public:
     static void setPerspective (double fovy, double aspect, double zNear, double zFar);
 
     static void applyTransform (const AffineTransform& t);
+
+    static void applyMatrix (const float matrixValues[16]);
+    #if ! JUCE_OPENGL_ES
+    static void applyMatrix (const double matrixValues[16]);
+    #endif
+   #endif
 
     static void enableScissorTest (const Rectangle<int>& clip);
 

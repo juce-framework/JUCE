@@ -77,21 +77,16 @@ public:
         return *this;
     }
 
+   #if JUCE_USE_OPENGL_FIXED_FUNCTION
     /** Multiplies the active OpenGL context's matrix by this one. */
     void applyToOpenGL() const noexcept
     {
-        applyToGL (mat);
+        OpenGLHelpers::applyMatrix (mat);
     }
+   #endif
 
     /** The 4x4 matrix values. These are stored in the standard OpenGL order. */
     Type mat[16];
-
-private:
-    static void applyToGL (const GLfloat* const m) noexcept  { glMultMatrixf (m); }
-
-   #if ! JUCE_OPENGL_ES
-    static void applyToGL (const GLdouble* const m) noexcept { glMultMatrixd (m); }
-   #endif
 };
 
 

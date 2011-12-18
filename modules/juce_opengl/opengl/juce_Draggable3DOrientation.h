@@ -101,11 +101,13 @@ public:
         return quaternion.getRotationMatrix();
     }
 
+   #if JUCE_USE_OPENGL_FIXED_FUNCTION
     /** Applies this rotation to the active OpenGL context's matrix. */
     void applyToOpenGLMatrix() const noexcept
     {
         getRotationMatrix().applyToOpenGL();
     }
+   #endif
 
 private:
     typedef Quaternion<GLfloat> QuaternionType;
