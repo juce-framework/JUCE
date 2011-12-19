@@ -115,6 +115,7 @@ enum
 
 typedef char GLchar;
 typedef long GLsizeiptr;
+typedef long GLintptr;
 
 #define WGL_FUNCTION_LIST(USE_FUNCTION) \
     USE_FUNCTION (wglChoosePixelFormatARB,  BOOL, (HDC, const int*, const FLOAT*, UINT, int*, UINT*))\

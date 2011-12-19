@@ -958,6 +958,26 @@ struct StateHelpers
             setActiveTexture (0);
         }
 
+        template <class QuadQueueType>
+        void setTwoTextureMode (QuadQueueType& quadQueue, GLuint texture1, GLuint texture2)
+        {
+            setTexturesEnabled (quadQueue, 3);
+
+            if (currentActiveTexture == 0)
+            {
+                bindTexture (texture1);
+                setActiveTexture (1);
+                bindTexture (texture2);
+            }
+            else
+            {
+                setActiveTexture (1);
+                bindTexture (texture2);
+                setActiveTexture (0);
+                bindTexture (texture1);
+            }
+        }
+
         void setActiveTexture (const int index) noexcept
         {
             if (currentActiveTexture != index)
@@ -1071,12 +1091,12 @@ struct StateHelpers
             : numVertices (0)
         {}
 
-        ~ShaderQuadQueue()
+        ~ShaderQuadQueue() noexcept
         {
             glDeleteBuffers (2, buffers);
         }
 
-        void initialise()
+        void initialise() noexcept
         {
             for (int i = 0, v = 0; i < numQuads * 6; i += 6, v += 4)
             {
@@ -1125,13 +1145,13 @@ struct StateHelpers
             RenderingHelpers::FloatRectangleRasterisingInfo (r).iterate (frr);
         }
 
-        void add (const RectangleList& list, const PixelARGB& colour)
+        void add (const RectangleList& list, const PixelARGB& colour) noexcept
         {
             for (RectangleList::Iterator i (list); i.next();)
                 add (*i.getRectangle(), colour);
         }
 
-        void add (const RectangleList& list, const Rectangle<int>& clip, const PixelARGB& colour)
+        void add (const RectangleList& list, const Rectangle<int>& clip, const PixelARGB& colour) noexcept
         {
             for (RectangleList::Iterator i (list); i.next();)
             {
@@ -1697,11 +1717,7 @@ public:
 
         if (maskArea != nullptr)
         {
-            activeTextures.setTexturesEnabled (shaderQuadQueue, 3);
-            activeTextures.setActiveTexture (1);
-            activeTextures.bindTexture (maskTextureID);
-            activeTextures.setActiveTexture (0);
-            activeTextures.bindTexture (image.textureID);
+            activeTextures.setTwoTextureMode (shaderQuadQueue, image.textureID, maskTextureID);
 
             if (clampTiledImages)
             {
