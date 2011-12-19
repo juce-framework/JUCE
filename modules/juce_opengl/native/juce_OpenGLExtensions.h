@@ -137,6 +137,7 @@ WGL_FUNCTION_LIST (JUCE_DECLARE_GL_EXTENSION_FUNCTION)
     USE_FUNCTION (glGetShaderInfoLog,       void, (GLuint, GLsizei, GLsizei*, GLchar*))\
     USE_FUNCTION (glGetProgramiv,           void, (GLuint, GLenum, GLint*))\
     USE_FUNCTION (glGetUniformLocation,     GLint, (GLuint, const GLchar*))\
+    USE_FUNCTION (glGetAttribLocation,      GLint, (GLuint, const GLchar*))\
     USE_FUNCTION (glUniform1f,              void, (GLint, GLfloat))\
     USE_FUNCTION (glUniform1i,              void, (GLint, GLint))\
     USE_FUNCTION (glUniform2f,              void, (GLint, GLfloat, GLfloat))\

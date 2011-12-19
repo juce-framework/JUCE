@@ -124,7 +124,7 @@ private:
 
 //==============================================================================
 static const char* wmFormatName = "Windows Media";
-static const char* const extensions[] = { ".mp3", ".wmv", ".asf", 0 };
+static const char* const extensions[] = { ".mp3", ".wmv", ".asf", ".wm", ".wma", 0 };
 
 //==============================================================================
 class WMAudioReader   : public AudioFormatReader
