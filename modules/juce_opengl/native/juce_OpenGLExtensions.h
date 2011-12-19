@@ -106,10 +106,15 @@ enum
     GL_STENCIL_ATTACHMENT           = 0x8D20,
     GL_FRAMEBUFFER_COMPLETE         = 0x8CD5,
     GL_DEPTH24_STENCIL8             = 0x88F0,
-    GL_RENDERBUFFER_DEPTH_SIZE      = 0x8D54
+    GL_RENDERBUFFER_DEPTH_SIZE      = 0x8D54,
+    GL_ARRAY_BUFFER                 = 0x8892,
+    GL_ELEMENT_ARRAY_BUFFER         = 0x8893,
+    GL_STATIC_DRAW                  = 0x88E4,
+    GL_DYNAMIC_DRAW                 = 0x88E8
 };
 
 typedef char GLchar;
+typedef long GLsizeiptr;
 
 #define WGL_FUNCTION_LIST(USE_FUNCTION) \
     USE_FUNCTION (wglChoosePixelFormatARB,  BOOL, (HDC, const int*, const FLOAT*, UINT, int*, UINT*))\
@@ -138,6 +143,13 @@ WGL_FUNCTION_LIST (JUCE_DECLARE_GL_EXTENSION_FUNCTION)
     USE_FUNCTION (glGetProgramiv,           void, (GLuint, GLenum, GLint*))\
     USE_FUNCTION (glGetUniformLocation,     GLint, (GLuint, const GLchar*))\
     USE_FUNCTION (glGetAttribLocation,      GLint, (GLuint, const GLchar*))\
+    USE_FUNCTION (glVertexAttribPointer,    void, (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*))\
+    USE_FUNCTION (glEnableVertexAttribArray, void, (GLuint))\
+    USE_FUNCTION (glBindBuffer,             void, (GLenum, GLuint))\
+    USE_FUNCTION (glDeleteBuffers,          void, (GLsizei, const GLuint*))\
+    USE_FUNCTION (glGenBuffers,             void, (GLsizei, GLuint*))\
+    USE_FUNCTION (glBufferData,             void, (GLenum, GLsizeiptr, const GLvoid*, GLenum))\
+    USE_FUNCTION (glBufferSubData,          void, (GLenum, GLintptr, GLsizeiptr, const GLvoid*))\
     USE_FUNCTION (glUniform1f,              void, (GLint, GLfloat))\
     USE_FUNCTION (glUniform1i,              void, (GLint, GLint))\
     USE_FUNCTION (glUniform2f,              void, (GLint, GLfloat, GLfloat))\
