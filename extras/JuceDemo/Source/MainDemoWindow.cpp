@@ -34,43 +34,39 @@ class ContentComp  : public Component,
 {
 public:
     //==============================================================================
-    ContentComp (MainDemoWindow* mainWindow_)
+    ContentComp (MainDemoWindow& mainWindow_)
         : mainWindow (mainWindow_),
           currentDemoId (0)
     {
         invokeDirectly (showRendering, true);
     }
 
-    ~ContentComp()
-    {
-    }
-
-    //==============================================================================
-    void resized()
-    {
-        if (currentDemo != 0)
-            currentDemo->setBounds (0, 0, getWidth(), getHeight());
-    }
-
     //==============================================================================
     void showDemo (Component* demoComp)
     {
         currentDemo = demoComp;
-        addAndMakeVisible (currentDemo);
-        resized();
+
+       #if JUCE_OPENGL
+        if (openGLWrapperComp != nullptr)
+            openGLWrapperComp->addAndMakeVisible (currentDemo);
+        else
+       #endif
+            addAndMakeVisible (currentDemo);
+
+        currentDemo->setBounds ("0, 0, parent.width, parent.height");
     }
 
     //==============================================================================
     const StringArray getMenuBarNames()
     {
-        const char* const names[] = { "Demo", "Look-and-feel", 0 };
+        const char* const names[] = { "Demo", "Look-and-feel", nullptr };
 
         return StringArray (names);
     }
 
     const PopupMenu getMenuForIndex (int menuIndex, const String& /*menuName*/)
     {
-        ApplicationCommandManager* commandManager = &(mainWindow->commandManager);
+        ApplicationCommandManager* commandManager = &(mainWindow.commandManager);
 
         PopupMenu menu;
 
@@ -102,22 +98,25 @@ public:
             menu.addSeparator();
             menu.addCommandItem (commandManager, useNativeTitleBar);
 
-#if JUCE_MAC
+           #if JUCE_MAC
             menu.addCommandItem (commandManager, useNativeMenus);
-#endif
+           #endif
 
-#if ! JUCE_LINUX
+           #if ! JUCE_LINUX
             menu.addCommandItem (commandManager, goToKioskMode);
-#endif
+           #endif
 
-            StringArray renderingEngines (getPeer()->getAvailableRenderingEngines());
-            if (renderingEngines.size() > 1)
+            StringArray engines (getRenderingEngines());
+
+            if (engines.size() > 1)
             {
                 menu.addSeparator();
 
-                for (int i = 0; i < renderingEngines.size(); ++i)
-                    menu.addItem (5001 + i, "Use " + renderingEngines[i], true,
-                                  i == getPeer()->getCurrentRenderingEngine());
+                const int currentEngine = openGLWrapperComp != nullptr ? engines.size() - 1
+                                                                       : getPeer()->getCurrentRenderingEngine();
+
+                for (int i = 0; i < engines.size(); ++i)
+                    menu.addItem (5001 + i, "Use " + engines[i], true, i == currentEngine);
             }
         }
 
@@ -130,7 +129,40 @@ public:
         // other special cases here..
 
         if (menuItemID >= 5001 && menuItemID < 5010)
-            getPeer()->setCurrentRenderingEngine (menuItemID - 5001);
+        {
+            const int engineIndex = menuItemID - 5001;
+
+           #if JUCE_OPENGL
+            if (engineIndex >= getPeer()->getAvailableRenderingEngines().size())
+            {
+                setUsingOpenGLRenderer (true);
+                return;
+            }
+           #endif
+
+            setUsingOpenGLRenderer (false);
+            getPeer()->setCurrentRenderingEngine (engineIndex);
+        }
+    }
+
+    void setUsingOpenGLRenderer (bool shouldUseOpenGL)
+    {
+       #if JUCE_OPENGL
+        if (shouldUseOpenGL && currentDemoId != showOpenGL)
+        {
+            if (openGLWrapperComp == nullptr)
+            {
+                addAndMakeVisible (openGLWrapperComp = new DemoOpenGLComp (currentDemo));
+                openGLWrapperComp->setBounds ("0, 0, parent.width, parent.height");
+            }
+        }
+        else
+        {
+            openGLWrapperComp = nullptr;
+            addAndMakeVisible (currentDemo);
+            resized();
+        }
+       #endif
     }
 
     //==============================================================================
@@ -166,13 +198,13 @@ public:
                                   setDefaultLookAndFeel,
                                   setOldSchoolLookAndFeel,
                                   useNativeTitleBar
-#if JUCE_MAC
-                                , useNativeMenus
-#endif
+                                 #if JUCE_MAC
+                                  , useNativeMenus
+                                 #endif
 
-#if ! JUCE_LINUX
-                                , goToKioskMode
-#endif
+                                 #if ! JUCE_LINUX
+                                  , goToKioskMode
+                                 #endif
         };
 
         commands.addArray (ids, numElementsInArray (ids));
@@ -239,45 +271,45 @@ public:
             result.setInfo ("OpenGL", "Shows the OpenGL demo", demosCategory, 0);
             result.addDefaultKeypress ('9', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showOpenGL);
-#if ! JUCE_OPENGL
+           #if ! JUCE_OPENGL
             result.setActive (false);
-#endif
+           #endif
             break;
 
         case showQuicktime:
             result.setInfo ("Quicktime", "Shows the Quicktime demo", demosCategory, 0);
             result.addDefaultKeypress ('b', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showQuicktime);
-#if ! (JUCE_QUICKTIME && ! JUCE_LINUX)
+           #if ! (JUCE_QUICKTIME && ! JUCE_LINUX)
             result.setActive (false);
-#endif
+           #endif
             break;
 
         case showDirectShow:
             result.setInfo ("DirectShow", "Shows the DirectShow demo", demosCategory, 0);
             result.addDefaultKeypress ('b', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showDirectShow);
-#if ! JUCE_DIRECTSHOW
+           #if ! JUCE_DIRECTSHOW
             result.setActive (false);
-#endif
+           #endif
             break;
 
         case showCamera:
             result.setInfo ("Camera Capture", "Shows the camera demo", demosCategory, 0);
             result.addDefaultKeypress ('c', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showCamera);
-#if ! JUCE_USE_CAMERA
+           #if ! JUCE_USE_CAMERA
             result.setActive (false);
-#endif
+           #endif
             break;
 
         case showWebBrowser:
             result.setInfo ("Web Browser", "Shows the web browser demo", demosCategory, 0);
             result.addDefaultKeypress ('i', ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showWebBrowser);
-#if (! JUCE_WEB_BROWSER) || JUCE_LINUX
+           #if (! JUCE_WEB_BROWSER) || JUCE_LINUX
             result.setActive (false);
-#endif
+           #endif
             break;
 
         case showCodeEditor:
@@ -304,22 +336,22 @@ public:
 
         case useNativeTitleBar:
             result.setInfo ("Use native window title bar", String::empty, generalCategory, 0);
-            result.setTicked (mainWindow->isUsingNativeTitleBar());
+            result.setTicked (mainWindow.isUsingNativeTitleBar());
             break;
 
-#if JUCE_MAC
+       #if JUCE_MAC
         case useNativeMenus:
             result.setInfo ("Use the native OSX menu bar", String::empty, generalCategory, 0);
             result.setTicked (MenuBarModel::getMacMainMenu() != 0);
             break;
-#endif
+       #endif
 
-#if ! JUCE_LINUX
+       #if ! JUCE_LINUX
         case goToKioskMode:
             result.setInfo ("Show full-screen kiosk mode", String::empty, generalCategory, 0);
             result.setTicked (Desktop::getInstance().getKioskModeComponent() != 0);
             break;
-#endif
+       #endif
 
         default:
             break;
@@ -372,38 +404,43 @@ public:
             break;
 
         case showOpenGL:
-#if JUCE_OPENGL
+           #if JUCE_OPENGL
+            setUsingOpenGLRenderer (false);
             showDemo (createOpenGLDemo());
             currentDemoId = showOpenGL;
-#endif
+           #endif
             break;
 
         case showQuicktime:
-#if JUCE_QUICKTIME && ! JUCE_LINUX
+           #if JUCE_QUICKTIME && ! JUCE_LINUX
+            setUsingOpenGLRenderer (false);
             showDemo (createQuickTimeDemo());
             currentDemoId = showQuicktime;
-#endif
+           #endif
             break;
 
         case showDirectShow:
-#if JUCE_DIRECTSHOW
+           #if JUCE_DIRECTSHOW
+            setUsingOpenGLRenderer (false);
             showDemo (createDirectShowDemo());
             currentDemoId = showDirectShow;
-#endif
+           #endif
             break;
 
         case showCamera:
-#if JUCE_USE_CAMERA
+           #if JUCE_USE_CAMERA
+            setUsingOpenGLRenderer (false);
             showDemo (createCameraDemo());
             currentDemoId = showCamera;
-#endif
+           #endif
             break;
 
         case showWebBrowser:
-#if JUCE_WEB_BROWSER
+           #if JUCE_WEB_BROWSER
+            setUsingOpenGLRenderer (false);
             showDemo (createWebBrowserDemo());
             currentDemoId = showWebBrowser;
-#endif
+           #endif
             break;
 
         case showCodeEditor:
@@ -425,38 +462,38 @@ public:
             break;
 
         case useNativeTitleBar:
-            mainWindow->setUsingNativeTitleBar (! mainWindow->isUsingNativeTitleBar());
+            mainWindow.setUsingNativeTitleBar (! mainWindow.isUsingNativeTitleBar());
             break;
 
-#if JUCE_MAC
+       #if JUCE_MAC
         case useNativeMenus:
             if (MenuBarModel::getMacMainMenu() != 0)
             {
                 MenuBarModel::setMacMainMenu (0);
-                mainWindow->setMenuBar ((ContentComp*) mainWindow->getContentComponent());
+                mainWindow.setMenuBar ((ContentComp*) mainWindow.getContentComponent());
             }
             else
             {
-                MenuBarModel::setMacMainMenu ((ContentComp*) mainWindow->getContentComponent());
-                mainWindow->setMenuBar (0);
+                MenuBarModel::setMacMainMenu ((ContentComp*) mainWindow.getContentComponent());
+                mainWindow.setMenuBar (0);
             }
 
             break;
-#endif
+       #endif
 
-#if ! JUCE_LINUX
+       #if ! JUCE_LINUX
         case goToKioskMode:
-            if (Desktop::getInstance().getKioskModeComponent() == 0)
             {
-                Desktop::getInstance().setKioskModeComponent (getTopLevelComponent());
-            }
-            else
-            {
-                Desktop::getInstance().setKioskModeComponent (0);
-            }
+                Desktop& desktop = Desktop::getInstance();
 
-            break;
-#endif
+                if (desktop.getKioskModeComponent() == nullptr)
+                    desktop.setKioskModeComponent (getTopLevelComponent());
+                else
+                    desktop.setKioskModeComponent (nullptr);
+
+                break;
+            }
+       #endif
 
         default:
             return false;
@@ -467,7 +504,7 @@ public:
 
 private:
     //==============================================================================
-    MainDemoWindow* mainWindow;
+    MainDemoWindow& mainWindow;
     OldSchoolLookAndFeel oldLookAndFeel;
     ScopedPointer<Component> currentDemo;
     int currentDemoId;
@@ -476,6 +513,40 @@ private:
                                  // just need to create one of these and leave it
                                  // there to do its work..
 
+    //==============================================================================
+   #if JUCE_OPENGL
+    class DemoOpenGLComp  : public OpenGLComponent
+    {
+    public:
+        DemoOpenGLComp (Component* contentComp)
+        {
+            addAndMakeVisible (contentComp);
+        }
+
+        void newOpenGLContextCreated()   {}
+        void renderOpenGL()   {}
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colours::azure);
+        }
+    };
+
+    ScopedPointer<DemoOpenGLComp> openGLWrapperComp;
+   #endif
+
+    StringArray getRenderingEngines()
+    {
+        StringArray renderingEngines (getPeer()->getAvailableRenderingEngines());
+
+       #if JUCE_OPENGL
+        renderingEngines.add ("Use OpenGL Renderer");
+       #endif
+
+        return renderingEngines;
+    }
+
+    //==============================================================================
     enum CommandIDs
     {
         showRendering              = 0x2000,
@@ -526,10 +597,6 @@ public:
         setIconTooltip ("Juce Demo App!");
     }
 
-    ~DemoTaskbarComponent()
-    {
-    }
-
     void mouseDown (const MouseEvent&)
     {
         PopupMenu m;
@@ -554,7 +621,7 @@ MainDemoWindow::MainDemoWindow()
     setResizable (true, false); // resizability is a property of ResizableWindow
     setResizeLimits (400, 300, 8192, 8192);
 
-    ContentComp* contentComp = new ContentComp (this);
+    ContentComp* contentComp = new ContentComp (*this);
 
     commandManager.registerAllCommandsForTarget (contentComp);
     commandManager.registerAllCommandsForTarget (JUCEApplication::getInstance());
@@ -577,20 +644,20 @@ MainDemoWindow::MainDemoWindow()
 
     setVisible (true);
 
-  #if JUCE_WINDOWS || JUCE_LINUX
+   #if JUCE_WINDOWS || JUCE_LINUX
     taskbarIcon = new DemoTaskbarComponent();
-  #endif
+   #endif
 }
 
 MainDemoWindow::~MainDemoWindow()
 {
     // because we've set the content comp to be used as our menu bar model, we
     // have to switch this off before deleting the content comp..
-    setMenuBar (0);
+    setMenuBar (nullptr);
 
-  #if JUCE_MAC  // ..and also the main bar if we're using that on a Mac...
-    MenuBarModel::setMacMainMenu (0);
-  #endif
+   #if JUCE_MAC  // ..and also the main bar if we're using that on a Mac...
+    MenuBarModel::setMacMainMenu (nullptr);
+   #endif
 
     // clearing the content component will delete the current one, and
     // that will in turn delete all its child components. You don't always

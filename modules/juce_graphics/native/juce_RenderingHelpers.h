@@ -163,6 +163,8 @@ public:
     //==============================================================================
     void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, float x, float y)
     {
+        const ScopedLock sl (lock);
+
         ++accessCounter;
         int oldestCounter = std::numeric_limits<int>::max();
         CachedGlyphType* oldest = nullptr;
@@ -186,7 +188,7 @@ public:
             }
         }
 
-        if (hits + ++misses > (glyphs.size() << 4))
+        if (hits + ++misses > glyphs.size() * 16)
         {
             if (misses * 2 > hits)
                 addNewGlyphSlots (32);
@@ -205,6 +207,7 @@ private:
     friend class OwnedArray <CachedGlyphType>;
     OwnedArray <CachedGlyphType> glyphs;
     int accessCounter, hits, misses;
+    CriticalSection lock;
 
     void addNewGlyphSlots (int num)
     {

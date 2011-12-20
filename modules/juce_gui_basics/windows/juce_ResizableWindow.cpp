@@ -498,17 +498,13 @@ void ResizableWindow::setMinimised (const bool shouldMinimise)
 void ResizableWindow::updateLastPos()
 {
     if (isShowing() && ! (isFullScreen() || isMinimised()))
-    {
         lastNonFullScreenPos = getBounds();
-    }
 }
 
 void ResizableWindow::parentSizeChanged()
 {
     if (isFullScreen() && getParentComponent() != nullptr)
-    {
         setBounds (0, 0, getParentWidth(), getParentHeight());
-    }
 }
 
 //==============================================================================

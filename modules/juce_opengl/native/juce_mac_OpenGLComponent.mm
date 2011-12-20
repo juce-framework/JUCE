@@ -128,22 +128,17 @@ public:
         NSOpenGLPixelFormatAttribute attribs[] =
         {
             NSOpenGLPFADoubleBuffer,
-            NSOpenGLPFAAccelerated,
             NSOpenGLPFAMPSafe,
             NSOpenGLPFAClosestPolicy,
             NSOpenGLPFANoRecovery,
-            NSOpenGLPFAColorSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.redBits
-                                                                        + pixelFormat.greenBits
-                                                                        + pixelFormat.blueBits),
-            NSOpenGLPFAAlphaSize,   (NSOpenGLPixelFormatAttribute) pixelFormat.alphaBits,
-            NSOpenGLPFADepthSize,   (NSOpenGLPixelFormatAttribute) pixelFormat.depthBufferBits,
-            NSOpenGLPFAStencilSize, (NSOpenGLPixelFormatAttribute) pixelFormat.stencilBufferBits,
-            NSOpenGLPFAAccumSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.accumulationBufferRedBits
-                                                                        + pixelFormat.accumulationBufferGreenBits
-                                                                        + pixelFormat.accumulationBufferBlueBits
-                                                                        + pixelFormat.accumulationBufferAlphaBits),
-            NSOpenGLPFASampleBuffers, (NSOpenGLPixelFormatAttribute) 1,
-            (NSOpenGLPixelFormatAttribute) 0
+            NSOpenGLPFAColorSize,   pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits,
+            NSOpenGLPFAAlphaSize,   pixelFormat.alphaBits,
+            NSOpenGLPFADepthSize,   pixelFormat.depthBufferBits,
+            NSOpenGLPFAStencilSize, pixelFormat.stencilBufferBits,
+            NSOpenGLPFAAccumSize,   pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
+                                        + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits,
+            NSOpenGLPFASampleBuffers, 1,
+            0
         };
 
         NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes: attribs];

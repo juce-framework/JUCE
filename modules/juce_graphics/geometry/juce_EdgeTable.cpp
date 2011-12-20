@@ -44,10 +44,10 @@ EdgeTable::EdgeTable (const Rectangle<int>& bounds_,
         t += lineStrideElements;
     }
 
-    const int topLimit    = bounds.getY() << 8;
-    const int heightLimit = bounds.getHeight() << 8;
     const int leftLimit   = bounds.getX() << 8;
+    const int topLimit    = bounds.getY() << 8;
     const int rightLimit  = bounds.getRight() << 8;
+    const int heightLimit = bounds.getHeight() << 8;
 
     PathFlatteningIterator iter (path, transform);
 

@@ -65,10 +65,6 @@ public:
         startTimer (1000 / redrawFramesPerSecond);
     }
 
-    ~RenderingTestCanvas()
-    {
-    }
-
     void paint (Graphics& g)
     {
         g.fillAll (Colours::white);

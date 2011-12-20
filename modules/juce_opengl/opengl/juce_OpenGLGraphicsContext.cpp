@@ -1181,8 +1181,8 @@ struct StateHelpers
             GLuint colour;
         };
 
-       #if JUCE_LINUX
-        enum { numQuads = 192 }; // (had problems with my driver segfaulting when the buffers are any larger)
+       #if ! JUCE_MAC
+        enum { numQuads = 64 }; // (had problems with my drivers segfaulting when these buffers are any larger)
        #else
         enum { numQuads = 8192 };
        #endif
