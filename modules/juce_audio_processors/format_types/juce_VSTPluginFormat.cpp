@@ -25,8 +25,6 @@
 
 #if JUCE_PLUGINHOST_VST
 
-#include "../../juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h"
-
 //==============================================================================
 #if ! (JUCE_MAC && JUCE_64BIT)
 
@@ -62,6 +60,7 @@ BEGIN_JUCE_NAMESPACE
 
 #if JUCE_MSVC
  #pragma warning (pop)
+ #pragma warning (disable: 4355) // ("this" used in initialiser list warning)
 #endif
 
 //==============================================================================
@@ -1109,9 +1108,9 @@ static Array <VSTPluginWindow*> activeVSTWindows;
 
 //==============================================================================
 class VSTPluginWindow   : public AudioProcessorEditor,
-                          #if ! JUCE_MAC
+                         #if ! JUCE_MAC
                           public ComponentMovementWatcher,
-                          #endif
+                         #endif
                           public Timer
 {
 public:

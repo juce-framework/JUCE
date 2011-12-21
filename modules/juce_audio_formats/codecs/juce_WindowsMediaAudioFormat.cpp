@@ -178,7 +178,7 @@ public:
         if (startSampleInFile != currentPosition)
         {
             currentPosition = startSampleInFile;
-            wmSyncReader->SetRange (((QWORD) startSampleInFile * 10000000) / sampleRate, 0);
+            wmSyncReader->SetRange (((QWORD) startSampleInFile * 10000000) / (int) sampleRate, 0);
             bufferStart = bufferEnd = 0;
         }
 
@@ -297,7 +297,7 @@ private:
                             sampleRate = inputFormat->nSamplesPerSec;
                             numChannels = inputFormat->nChannels;
                             bitsPerSample = inputFormat->wBitsPerSample;
-                            lengthInSamples = (lengthInNanoseconds * sampleRate) / 10000000;
+                            lengthInSamples = (lengthInNanoseconds * (int) sampleRate) / 10000000;
                         }
                     }
                 }
