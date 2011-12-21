@@ -140,7 +140,6 @@ class GlyphCache  : private DeletedAtShutdown
 {
 public:
     GlyphCache()
-        : accessCounter (0), hits (0), misses (0)
     {
         addNewGlyphSlots (120);
     }
@@ -163,23 +162,70 @@ public:
     //==============================================================================
     void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, float x, float y)
     {
-        const ScopedLock sl (lock);
-
         ++accessCounter;
-        int oldestCounter = std::numeric_limits<int>::max();
-        CachedGlyphType* oldest = nullptr;
+        CachedGlyphType* glyph = nullptr;
+
+        const ScopedReadLock srl (lock);
 
         for (int i = glyphs.size(); --i >= 0;)
         {
-            CachedGlyphType* const glyph = glyphs.getUnchecked (i);
+            CachedGlyphType* const g = glyphs.getUnchecked (i);
 
-            if (glyph->glyph == glyphNumber && glyph->font == font)
+            if (g->glyph == glyphNumber && g->font == font)
             {
+                glyph = g;
                 ++hits;
-                glyph->lastAccessCount = accessCounter;
-                glyph->draw (target, x, y);
-                return;
+                break;
             }
+        }
+
+        if (glyph == nullptr)
+        {
+            ++misses;
+            const ScopedWriteLock swl (lock);
+
+            if (hits.value + misses.value > glyphs.size() * 16)
+            {
+                if (misses.value * 2 > hits.value)
+                    addNewGlyphSlots (32);
+
+                hits.set (0);
+                misses.set (0);
+                glyph = glyphs.getLast();
+            }
+            else
+            {
+                glyph = findLeastRecentlyUsedGlyph();
+            }
+
+            jassert (glyph != nullptr);
+            glyph->generate (font, glyphNumber);
+        }
+
+        glyph->lastAccessCount = accessCounter.value;
+        glyph->draw (target, x, y);
+    }
+
+private:
+    friend class OwnedArray <CachedGlyphType>;
+    OwnedArray <CachedGlyphType> glyphs;
+    Atomic<int> accessCounter, hits, misses;
+    ReadWriteLock lock;
+
+    void addNewGlyphSlots (int num)
+    {
+        while (--num >= 0)
+            glyphs.add (new CachedGlyphType());
+    }
+
+    CachedGlyphType* findLeastRecentlyUsedGlyph() const noexcept
+    {
+        CachedGlyphType* oldest = glyphs.getLast();
+        int oldestCounter = oldest->lastAccessCount;
+
+        for (int i = glyphs.size() - 1; --i >= 0;)
+        {
+            CachedGlyphType* const glyph = glyphs.getUnchecked(i);
 
             if (glyph->lastAccessCount <= oldestCounter)
             {
@@ -188,31 +234,7 @@ public:
             }
         }
 
-        if (hits + ++misses > glyphs.size() * 16)
-        {
-            if (misses * 2 > hits)
-                addNewGlyphSlots (32);
-
-            hits = misses = 0;
-            oldest = glyphs.getLast();
-        }
-
-        jassert (oldest != nullptr);
-        oldest->lastAccessCount = accessCounter;
-        oldest->generate (font, glyphNumber);
-        oldest->draw (target, x, y);
-    }
-
-private:
-    friend class OwnedArray <CachedGlyphType>;
-    OwnedArray <CachedGlyphType> glyphs;
-    int accessCounter, hits, misses;
-    CriticalSection lock;
-
-    void addNewGlyphSlots (int num)
-    {
-        while (--num >= 0)
-            glyphs.add (new CachedGlyphType());
+        return oldest;
     }
 
     static GlyphCache*& getSingletonPointer() noexcept

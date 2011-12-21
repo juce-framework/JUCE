@@ -206,12 +206,7 @@ private:
 class ShaderPrograms  : public ReferenceCountedObject
 {
 public:
-    ShaderPrograms()
-        : areShadersSupported (OpenGLShaderProgram::getLanguageVersion() >= 1.199)
-    {
-    }
-
-    const bool areShadersSupported;
+    ShaderPrograms() {}
 
     typedef ReferenceCountedObjectPtr<ShaderPrograms> Ptr;
 
@@ -341,7 +336,7 @@ public:
     #define JUCE_MATRIX_TIMES_FRAGCOORD   "(vec2 (matrix[0], matrix[3]) * gl_FragCoord.x" \
                                           " + vec2 (matrix[1], matrix[4]) * gl_FragCoord.y " \
                                           " + vec2 (matrix[2], matrix[5]))"
-    #define JUCE_GET_TEXTURE_COLOUR       "(gl_Color.w * texture2D (gradientTexture, vec2 (gradientPos, 0.5)))"
+    #define JUCE_GET_TEXTURE_COLOUR       "(gl_Color.a * texture2D (gradientTexture, vec2 (gradientPos, 0.5)))"
 
     struct RadialGradientProgram  : public ShaderBase
     {
@@ -391,6 +386,8 @@ public:
 
     #define JUCE_DECLARE_LINEAR_UNIFORMS  "uniform sampler2D gradientTexture;" \
                                           "uniform vec4 gradientInfo;"
+    #define JUCE_CALC_LINEAR_GRAD_POS1    "float gradientPos = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.z * (gl_FragCoord.x - gradientInfo.x)))) / gradientInfo.w;"
+    #define JUCE_CALC_LINEAR_GRAD_POS2    "float gradientPos = (gl_FragCoord.x - (gradientInfo.x + (gradientInfo.z * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.w;"
 
     struct LinearGradient1Program  : public ShaderBase
     {
@@ -399,7 +396,7 @@ public:
                           JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (y2 - y1) / (x2 - x1), w = length
                           "void main()"
                           "{"
-                            "float gradientPos = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.z * (gl_FragCoord.x - gradientInfo.x)))) / gradientInfo.w;"
+                            JUCE_CALC_LINEAR_GRAD_POS1
                             "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR ";"
                           "}"),
               gradientParams (program)
@@ -416,7 +413,7 @@ public:
                           JUCE_DECLARE_MASK_UNIFORMS
                           "void main()"
                           "{"
-                            "float gradientPos = (gl_FragCoord.y - (gradientInfo.y + (gradientInfo.z * (gl_FragCoord.x - gradientInfo.x)))) / gradientInfo.w;"
+                            JUCE_CALC_LINEAR_GRAD_POS1
                             "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               gradientParams (program),
@@ -434,7 +431,7 @@ public:
                           JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (x2 - x1) / (y2 - y1), y = y1, w = length
                           "void main()"
                           "{"
-                            "float gradientPos = (gl_FragCoord.x - (gradientInfo.x + (gradientInfo.z * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.w;"
+                            JUCE_CALC_LINEAR_GRAD_POS2
                             "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR ";"
                           "}"),
               gradientParams (program)
@@ -451,7 +448,7 @@ public:
                           JUCE_DECLARE_MASK_UNIFORMS
                           "void main()"
                           "{"
-                            "float gradientPos = (gl_FragCoord.x - (gradientInfo.x + (gradientInfo.z * (gl_FragCoord.y - gradientInfo.y)))) / gradientInfo.w;"
+                            JUCE_CALC_LINEAR_GRAD_POS2
                             "gl_FragColor = " JUCE_GET_TEXTURE_COLOUR " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               gradientParams (program),
@@ -511,7 +508,7 @@ public:
                           "void main()"
                           "{"
                             "vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", vec2 (0, 0), imageRepeatSize);"
-                            "gl_FragColor = gl_Color.w * " JUCE_GET_IMAGE_PIXEL ";"
+                            "gl_FragColor = gl_Color.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}"),
               imageParams (program)
         {}
@@ -528,7 +525,7 @@ public:
                           "void main()"
                           "{"
                             "vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", vec2 (0, 0), imageRepeatSize);"
-                            "gl_FragColor = gl_Color.w * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = gl_Color.a * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               imageParams (program),
               maskParams (program)
@@ -546,7 +543,7 @@ public:
                           "void main()"
                           "{"
                             "vec2 texturePos = mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageRepeatSize);"
-                            "gl_FragColor = gl_Color.w * " JUCE_GET_IMAGE_PIXEL ";"
+                            "gl_FragColor = gl_Color.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}"),
               imageParams (program)
         {}
@@ -563,7 +560,7 @@ public:
                           "void main()"
                           "{"
                             "vec2 texturePos = mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageRepeatSize);"
-                            "gl_FragColor = gl_Color.w * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
+                            "gl_FragColor = gl_Color.a * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               imageParams (program),
               maskParams (program)
@@ -581,7 +578,7 @@ public:
                           "void main()"
                           "{"
                             "vec2 texturePos = mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageRepeatSize);"
-                            "gl_FragColor = " JUCE_GET_IMAGE_PIXEL ";"
+                            "gl_FragColor = gl_Color.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}"),
               imageParams (program)
         {}
@@ -1204,7 +1201,7 @@ struct StateHelpers
     struct CurrentShader
     {
         CurrentShader() noexcept
-            : canUseShaders (false), activeShader (nullptr)
+            : canUseShaders (OpenGLShaderProgram::getLanguageVersion() >= 1.199), activeShader (nullptr)
         {
             OpenGLContext* context = OpenGLContext::getCurrentContext();
             jassert (context != nullptr); // You can only use this class when you have an active GL context!
@@ -1212,13 +1209,11 @@ struct StateHelpers
             const Identifier programValueID ("GraphicsContextPrograms");
             programs = dynamic_cast <ShaderPrograms*> (context->properties [programValueID].getObject());
 
-            if (programs == nullptr)
+            if (programs == nullptr && canUseShaders)
             {
                 programs = new ShaderPrograms();
                 context->properties.set (programValueID, var (programs));
             }
-
-            canUseShaders = programs->areShadersSupported;
         }
 
         void setShader (const Rectangle<int>& bounds, ShaderQuadQueue& quadQueue, ShaderPrograms::ShaderBase& shader)
@@ -2417,7 +2412,7 @@ public:
         state.activeTextures.bindTexture (other.mask.getTextureID());
 
         state.currentShader.setShader (maskArea, state.shaderQuadQueue, state.currentShader.programs->copyTexture);
-        state.currentShader.programs->maskTexture.imageParams.imageTexture.set (0);
+        state.currentShader.programs->copyTexture.imageParams.imageTexture.set (0);
         state.currentShader.programs->copyTexture.imageParams
             .setMatrix (AffineTransform::translation ((float) other.maskArea.getX(), (float) other.maskArea.getY()),
                         other.maskArea.getWidth(), other.maskArea.getHeight(), 1.0f, 1.0f,
