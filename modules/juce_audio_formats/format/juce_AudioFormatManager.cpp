@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioFormatManager::AudioFormatManager()
     : defaultFormatIndex (0)
 {

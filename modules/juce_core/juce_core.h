@@ -366,6 +366,9 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_THREAD_JUCEHEADER__
  #include "threads/juce_Thread.h"
 #endif
+#ifndef __JUCE_THREADLOCALVALUE_JUCEHEADER__
+ #include "threads/juce_ThreadLocalValue.h"
+#endif
 #ifndef __JUCE_THREADPOOL_JUCEHEADER__
  #include "threads/juce_ThreadPool.h"
 #endif

@@ -1587,6 +1587,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_Thread.h">
       <Filter>Juce Modules\juce_core\threads</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadLocalValue.h">
+      <Filter>Juce Modules\juce_core\threads</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.h">
       <Filter>Juce Modules\juce_core\threads</Filter>
     </ClInclude>

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class OpenGLFrameBufferImage   : public ImagePixelData
 {
 public:

@@ -1338,6 +1338,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ScopedWriteLock.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_SpinLock.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_Thread.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadLocalValue.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\threads\juce_WaitableEvent.h"/>

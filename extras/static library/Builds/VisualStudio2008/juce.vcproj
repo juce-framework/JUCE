@@ -1159,6 +1159,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_Thread.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_ThreadLocalValue.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\threads\juce_ThreadPool.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
