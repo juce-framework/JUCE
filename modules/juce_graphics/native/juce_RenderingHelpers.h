@@ -247,6 +247,48 @@ private:
 };
 
 //==============================================================================
+template <class RendererType>
+class CachedGlyphEdgeTable
+{
+public:
+    CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
+
+    void draw (RendererType& state, float x, const float y) const
+    {
+        if (snapToIntegerCoordinate)
+            x = std::floor (x + 0.5f);
+
+        if (edgeTable != nullptr)
+            state.fillEdgeTable (*edgeTable, x, roundToInt (y));
+    }
+
+    void generate (const Font& newFont, const int glyphNumber)
+    {
+        font = newFont;
+        Typeface* const typeface = newFont.getTypeface();
+        snapToIntegerCoordinate = typeface->isHinted();
+        glyph = glyphNumber;
+
+        const float fontHeight = font.getHeight();
+        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber,
+                                                    AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
+                                                                  #if JUCE_MAC || JUCE_IOS
+                                                                    .translated (0.0f, -0.5f)
+                                                                  #endif
+                                                    );
+    }
+
+    Font font;
+    int glyph, lastAccessCount;
+    bool snapToIntegerCoordinate;
+
+private:
+    ScopedPointer <EdgeTable> edgeTable;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable);
+};
+
+//==============================================================================
 template <class StateObjectType>
 class SavedStateStack
 {

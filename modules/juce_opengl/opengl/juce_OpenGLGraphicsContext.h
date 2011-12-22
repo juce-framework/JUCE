@@ -69,7 +69,7 @@ public:
     void drawHorizontalLine (int y, float left, float right);
 
     void setFont (const Font&);
-    Font getFont();
+    const Font& getFont();
 
     void drawGlyph (int glyphNumber, const AffineTransform&);
 

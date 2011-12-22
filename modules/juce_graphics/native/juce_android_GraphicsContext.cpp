@@ -533,7 +533,7 @@ public:
         }
     }
 
-    Font getFont()
+    const Font& getFont()
     {
         return currentState->font;
     }

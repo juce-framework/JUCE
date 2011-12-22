@@ -291,20 +291,15 @@ StringArray MidiOutput::getDevices()
     for (ItemCount i = 0; i < num; ++i)
     {
         MIDIEndpointRef dest = MIDIGetDestination (i);
+        String name;
 
         if (dest != 0)
-        {
-            String name (CoreMidiHelpers::getConnectedEndpointName (dest));
+            name = CoreMidiHelpers::getConnectedEndpointName (dest);
 
-            if (name.isEmpty())
-                name = "<error>";
+        if (name.isEmpty())
+            name = "<error>";
 
-            s.add (name);
-        }
-        else
-        {
-            s.add ("<error>");
-        }
+        s.add (name);
     }
 
     return s;
@@ -413,20 +408,15 @@ StringArray MidiInput::getDevices()
     for (ItemCount i = 0; i < num; ++i)
     {
         MIDIEndpointRef source = MIDIGetSource (i);
+        String name;
 
         if (source != 0)
-        {
-            String name (CoreMidiHelpers::getConnectedEndpointName (source));
+            name = CoreMidiHelpers::getConnectedEndpointName (source);
 
-            if (name.isEmpty())
-                name = "<error>";
+        if (name.isEmpty())
+            name = "<error>";
 
-            s.add (name);
-        }
-        else
-        {
-            s.add ("<error>");
-        }
+        s.add (name);
     }
 
     return s;

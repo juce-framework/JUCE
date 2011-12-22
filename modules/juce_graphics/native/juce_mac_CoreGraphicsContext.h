@@ -70,7 +70,7 @@ public:
     void drawVerticalLine (const int x, float top, float bottom);
     void drawHorizontalLine (const int y, float left, float right);
     void setFont (const Font& newFont);
-    Font getFont();
+    const Font& getFont();
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
     bool drawTextLayout (const AttributedString& text, const Rectangle<float>&);
 

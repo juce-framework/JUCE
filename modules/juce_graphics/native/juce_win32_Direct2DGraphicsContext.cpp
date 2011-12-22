@@ -295,7 +295,7 @@ public:
         currentState->setFont (newFont);
     }
 
-    Font getFont()
+    const Font& getFont()
     {
         return currentState->font;
     }

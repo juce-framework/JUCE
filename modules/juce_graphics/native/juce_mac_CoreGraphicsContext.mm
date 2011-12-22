@@ -571,7 +571,7 @@ void CoreGraphicsContext::setFont (const Font& newFont)
     }
 }
 
-Font CoreGraphicsContext::getFont()
+const Font& CoreGraphicsContext::getFont()
 {
     return state->font;
 }

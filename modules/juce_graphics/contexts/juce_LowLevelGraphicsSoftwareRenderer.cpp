@@ -2207,53 +2207,13 @@ void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, float le
         savedState->fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f));
 }
 
-//==============================================================================
-class CachedGlyphEdgeTable
-{
-public:
-    CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
-
-    void draw (LowLevelGraphicsSoftwareRenderer::SavedState& state, float x, const float y) const
-    {
-        if (snapToIntegerCoordinate)
-            x = std::floor (x + 0.5f);
-
-        if (edgeTable != nullptr)
-            state.fillEdgeTable (*edgeTable, x, roundToInt (y));
-    }
-
-    void generate (const Font& newFont, const int glyphNumber)
-    {
-        font = newFont;
-        snapToIntegerCoordinate = newFont.getTypeface()->isHinted();
-        glyph = glyphNumber;
-
-        const float fontHeight = font.getHeight();
-        edgeTable = font.getTypeface()->getEdgeTableForGlyph (glyphNumber,
-                                                              AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                            #if JUCE_MAC || JUCE_IOS
-                                                                              .translated (0.0f, -0.5f)
-                                                                            #endif
-                                                              );
-    }
-
-    Font font;
-    int glyph, lastAccessCount;
-    bool snapToIntegerCoordinate;
-
-private:
-    ScopedPointer <EdgeTable> edgeTable;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable);
-};
-
 void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineTransform& transform)
 {
     Font& f = savedState->font;
 
     if (transform.isOnlyTranslation() && savedState->transform.isOnlyTranslated)
     {
-        RenderingHelpers::GlyphCache <CachedGlyphEdgeTable, SavedState>::getInstance()
+        RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <LowLevelGraphicsSoftwareRenderer::SavedState>, SavedState>::getInstance()
             .drawGlyph (*savedState, f, glyphNumber,
                         transform.getTranslationX(),
                         transform.getTranslationY());
@@ -2268,7 +2228,7 @@ void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineT
 }
 
 void LowLevelGraphicsSoftwareRenderer::setFont (const Font& newFont)    { savedState->font = newFont; }
-Font LowLevelGraphicsSoftwareRenderer::getFont()                        { return savedState->font; }
+const Font& LowLevelGraphicsSoftwareRenderer::getFont()                 { return savedState->font; }
 
 #if JUCE_MSVC
  #pragma warning (pop)

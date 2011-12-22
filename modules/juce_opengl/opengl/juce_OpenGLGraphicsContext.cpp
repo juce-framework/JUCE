@@ -26,19 +26,18 @@
 //==============================================================================
 struct OpenGLTarget
 {
-    OpenGLTarget (GLuint frameBufferID_, int width_, int height_) noexcept
-        : frameBuffer (nullptr), frameBufferID (frameBufferID_),
-          x (0), y (0), width (width_), height (height_)
+    OpenGLTarget (GLuint frameBufferID_, int width, int height) noexcept
+        : frameBuffer (nullptr), frameBufferID (frameBufferID_), bounds (width, height)
     {}
 
     OpenGLTarget (OpenGLFrameBuffer& frameBuffer_, const Point<int>& origin) noexcept
-        : frameBuffer (&frameBuffer_), frameBufferID (0), x (origin.x), y (origin.y),
-          width (frameBuffer_.getWidth()), height (frameBuffer_.getHeight())
+        : frameBuffer (&frameBuffer_), frameBufferID (0),
+          bounds (origin.x, origin.y, frameBuffer_.getWidth(), frameBuffer_.getHeight())
     {}
 
     OpenGLTarget (const OpenGLTarget& other) noexcept
         : frameBuffer (other.frameBuffer), frameBufferID (other.frameBufferID),
-          x (other.x), y (other.y), width (other.width), height (other.height)
+          bounds (other.bounds)
     {}
 
     void makeActiveFor2D() const
@@ -49,9 +48,9 @@ struct OpenGLTarget
             OpenGLFrameBuffer::setCurrentFrameBufferTarget (frameBufferID);
 
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
-        applyFlippedMatrix (x, y, width, height);
+        applyFlippedMatrix (bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
        #else
-        glViewport (0, 0, width, height);
+        glViewport (0, 0, bounds.getWidth(), bounds.getHeight());
        #endif
         glDisable (GL_DEPTH_TEST);
     }
@@ -59,8 +58,8 @@ struct OpenGLTarget
    #if JUCE_USE_OPENGL_FIXED_FUNCTION
     void scissor (Rectangle<int> r) const
     {
-        r = r.translated (-x, -y);
-        OpenGLHelpers::enableScissorTest (r.withY (height - r.getBottom()));
+        r -= bounds.getPosition();
+        OpenGLHelpers::enableScissorTest (r.withY (bounds.getHeight() - r.getBottom()));
     }
 
     static void applyFlippedMatrix (const int x, const int y, const int width, const int height)
@@ -80,35 +79,8 @@ struct OpenGLTarget
 
     OpenGLFrameBuffer* frameBuffer;
     GLuint frameBufferID;
-    int x, y, width, height;
-};
 
-struct ClippedEdgeTable
-{
-    ClippedEdgeTable (const EdgeTable& et, const Rectangle<int>& clip)
-        : table (&et)
-    {
-        if (! clip.contains (et.getMaximumBounds()))
-        {
-            clipped = new EdgeTable (clip);
-            clipped->clipToEdgeTable (et);
-            table = clipped;
-        }
-    }
-
-    ClippedEdgeTable (const EdgeTable& et, const RectangleList& clip)
-        : table (&et)
-    {
-        if (! clip.containsRectangle (et.getMaximumBounds()))
-        {
-            clipped = new EdgeTable (clip);
-            clipped->clipToEdgeTable (et);
-            table = clipped;
-        }
-    }
-
-    const EdgeTable* table;
-    ScopedPointer<EdgeTable> clipped;
+    Rectangle<int> bounds;
 };
 
 //==============================================================================
@@ -118,12 +90,16 @@ public:
     PositionedTexture (OpenGLTexture& texture, const EdgeTable& et, const Rectangle<int>& clip_)
         : clip (clip_.getIntersection (et.getMaximumBounds()))
     {
-        const ClippedEdgeTable clippedTable (et, clip);
-
-        EdgeTableAlphaMap alphaMap (*(clippedTable.table));
-        texture.loadAlpha (alphaMap.data, alphaMap.area.getWidth(), alphaMap.area.getHeight());
-        textureID = texture.getTextureID();
-        area = alphaMap.area;
+        if (clip.contains (et.getMaximumBounds()))
+        {
+            createMap (texture, et);
+        }
+        else
+        {
+            EdgeTable et2 (clip);
+            et2.clipToEdgeTable (et);
+            createMap (texture, et2);
+        }
     }
 
     PositionedTexture (GLuint textureID_, const Rectangle<int> area_, const Rectangle<int> clip_) noexcept
@@ -156,6 +132,14 @@ public:
     Rectangle<int> area, clip;
 
 private:
+    void createMap (OpenGLTexture& texture, const EdgeTable& et)
+    {
+        EdgeTableAlphaMap alphaMap (et);
+        texture.loadAlpha (alphaMap.data, alphaMap.area.getWidth(), alphaMap.area.getHeight());
+        textureID = texture.getTextureID();
+        area = alphaMap.area;
+    }
+
     struct EdgeTableAlphaMap
     {
         EdgeTableAlphaMap (const EdgeTable& et)
@@ -267,9 +251,11 @@ public:
               maskBounds  (program, "maskBounds")
         {}
 
-        void setBounds (const Rectangle<int>& area, const OpenGLTarget& target) const
+        void setBounds (const Rectangle<int>& area, const OpenGLTarget& target, const GLint textureIndex) const
         {
-            maskBounds.set (area.getX() - target.x, target.height - (area.getBottom() - target.y),
+            maskTexture.set (textureIndex);
+            maskBounds.set (area.getX() - target.bounds.getX(),
+                            target.bounds.getHeight() - (area.getBottom() - target.bounds.getY()),
                             area.getWidth(), area.getHeight());
         }
 
@@ -284,8 +270,7 @@ public:
                           "{"
                           " gl_FragColor = gl_Color;"
                           "}")
-        {
-        }
+        {}
     };
 
     #define JUCE_DECLARE_SHADER_VERSION "#version 120\n"
@@ -305,8 +290,7 @@ public:
                             "gl_FragColor = gl_Color * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               maskParams (program)
-        {
-        }
+        {}
 
         MaskedShaderParams maskParams;
     };
@@ -1090,6 +1074,7 @@ struct StateHelpers
 
         ~ShaderQuadQueue() noexcept
         {
+            static_jassert (sizeof (VertexInfo) == 8);
             glDeleteBuffers (2, buffers);
         }
 
@@ -1237,7 +1222,7 @@ struct StateHelpers
 
         void setShader (OpenGLTarget& target, ShaderQuadQueue& quadQueue, ShaderPrograms::ShaderBase& shader)
         {
-            setShader (Rectangle<int> (target.x, target.y, target.width, target.height), quadQueue, shader);
+            setShader (target.bounds, quadQueue, shader);
         }
 
         void clearShader (ShaderQuadQueue& quadQueue)
@@ -1278,15 +1263,34 @@ public:
 
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
         currentColour.resync();
+       #endif
+
+       #ifdef GL_COLOR_ARRAY
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_NORMAL_ARRAY);
 
-        glEnableClientState (GL_VERTEX_ARRAY);
-
-        for (int i = 3; --i >= 0;)
+        #if JUCE_USE_OPENGL_SHADERS
+        if (currentShader.canUseShaders)
         {
-            activeTextures.setActiveTexture (i);
-            glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+            glDisableClientState (GL_VERTEX_ARRAY);
+            glDisableClientState (GL_INDEX_ARRAY);
+
+            for (int i = 3; --i >= 0;)
+            {
+                activeTextures.setActiveTexture (i);
+                glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+            }
+        }
+        else
+        #endif
+        {
+            glEnableClientState (GL_VERTEX_ARRAY);
+
+            for (int i = 3; --i >= 0;)
+            {
+                activeTextures.setActiveTexture (i);
+                glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+            }
         }
        #endif
 
@@ -1620,8 +1624,8 @@ public:
             textureCache.bindTextureForGradient (activeTextures, g);
         }
 
-        const AffineTransform t (transform.translated ((float) -target.x, (float) -target.y)
-                                          .followedBy (AffineTransform::verticalFlip ((float) target.height)));
+        const AffineTransform t (transform.translated ((float) -target.bounds.getX(), (float) -target.bounds.getY())
+                                          .followedBy (AffineTransform::verticalFlip ((float) target.bounds.getHeight())));
         Point<float> p1 (g.point1.transformedBy (t));
         const Point<float> p2 (g.point2.transformedBy (t));
         const Point<float> p3 (Point<float> (g.point1.x + (g.point2.y - g.point1.y),
@@ -1694,10 +1698,7 @@ public:
         }
 
         if (maskParams != nullptr)
-        {
-            maskParams->maskTexture.set ((GLint) 1);
-            maskParams->setBounds (*maskArea, target);
-        }
+            maskParams->setBounds (*maskArea, target, 1);
     }
 
     void setShaderForTiledImageFill (const OpenGLTextureFromImage& image, const AffineTransform& transform,
@@ -1744,13 +1745,11 @@ public:
             }
         }
 
-        imageParams->setMatrix (transform, image, (float) target.x, (float) target.y, (float) target.height);
+        imageParams->setMatrix (transform, image, (float) target.bounds.getX(),
+                                (float) target.bounds.getY(), (float) target.bounds.getHeight());
 
         if (maskParams != nullptr)
-        {
-            maskParams->maskTexture.set ((GLint) 1);
-            maskParams->setBounds (*maskArea, target);
-        }
+            maskParams->setBounds (*maskArea, target, 1);
     }
    #endif
 
@@ -2625,7 +2624,7 @@ private:
                 state.activeTextures.bindTexture (maskTextureID);
 
                 state.setShader (state.currentShader.programs->solidColourMasked);
-                state.currentShader.programs->solidColourMasked.maskParams.setBounds (clip.maskArea, state.target);
+                state.currentShader.programs->solidColourMasked.maskParams.setBounds (clip.maskArea, state.target, 0);
             }
             else if (fill.isGradient())
             {
@@ -2729,13 +2728,14 @@ public:
 
     void fillRect (const Rectangle<float>& area, const FillType& fill)
     {
+        const PixelARGB colour (fill.colour.getPixelARGB());
         ShaderFillOperation fillOp (*this, fill, false, false);
 
         for (RectangleList::Iterator i (clip); i.next();)
         {
             const Rectangle<float> r (i.getRectangle()->toFloat().getIntersection (area));
             if (! r.isEmpty())
-                state.shaderQuadQueue.add (r, fill.colour.getPixelARGB());
+                state.shaderQuadQueue.add (r, colour);
         }
     }
 
@@ -2822,7 +2822,7 @@ class OpenGLGraphicsContext::SavedState
 {
 public:
     SavedState (OpenGLGraphicsContext::GLState* const state_)
-        : clip (createRectangleClip (*state_, Rectangle<int> (state_->target.width, state_->target.height))),
+        : clip (createRectangleClip (*state_, state_->target.bounds)),
           transform (0, 0), interpolationQuality (Graphics::mediumResamplingQuality),
           state (state_), transparencyLayerAlpha (1.0f)
     {
@@ -3049,7 +3049,7 @@ public:
         {
             if (transform.isOnlyTranslated && t.isOnlyTranslation())
             {
-                RenderingHelpers::GlyphCache <CachedGlyphEdgeTable, SavedState>::getInstance()
+                RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <OpenGLGraphicsContext::SavedState>, SavedState>::getInstance()
                     .drawGlyph (*this, font, glyphNumber,
                                 transform.xOffset + t.getTranslationX(),
                                 transform.yOffset + t.getTranslationY());
@@ -3156,45 +3156,6 @@ private:
         clip->fillEdgeTable (et, getFillType());
     }
 
-    class CachedGlyphEdgeTable
-    {
-    public:
-        CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
-
-        void draw (OpenGLGraphicsContext::SavedState& state, float x, const float y) const
-        {
-            if (snapToIntegerCoordinate)
-                x = std::floor (x + 0.5f);
-
-            if (edgeTable != nullptr)
-                state.fillEdgeTable (*edgeTable, x, roundToInt (y));
-        }
-
-        void generate (const Font& newFont, const int glyphNumber)
-        {
-            font = newFont;
-            snapToIntegerCoordinate = newFont.getTypeface()->isHinted();
-            glyph = glyphNumber;
-
-            const float fontHeight = font.getHeight();
-            edgeTable = font.getTypeface()->getEdgeTableForGlyph (glyphNumber,
-                                                                  AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                                #if JUCE_MAC || JUCE_IOS
-                                                                                  .translated (0.0f, -0.5f)
-                                                                                #endif
-                                                                  );
-        }
-
-        Font font;
-        int glyph, lastAccessCount;
-        bool snapToIntegerCoordinate;
-
-    private:
-        ScopedPointer <EdgeTable> edgeTable;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable);
-    };
-
     SavedState& operator= (const SavedState&);
 };
 
@@ -3217,9 +3178,7 @@ OpenGLGraphicsContext::OpenGLGraphicsContext (unsigned int frameBufferID, int wi
 {
 }
 
-OpenGLGraphicsContext::~OpenGLGraphicsContext()
-{
-}
+OpenGLGraphicsContext::~OpenGLGraphicsContext() {}
 
 bool OpenGLGraphicsContext::isVectorDevice() const                                         { return false; }
 void OpenGLGraphicsContext::setOrigin (int x, int y)                                       { stack->transform.setOrigin (x, y); }
@@ -3248,4 +3207,4 @@ void OpenGLGraphicsContext::drawHorizontalLine (int y, float left, float right) 
 void OpenGLGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& t)          { stack->drawGlyph (glyphNumber, t); }
 void OpenGLGraphicsContext::drawLine (const Line <float>& line)                            { stack->drawLine (line); }
 void OpenGLGraphicsContext::setFont (const Font& newFont)                                  { stack->font = newFont; }
-Font OpenGLGraphicsContext::getFont()                                                      { return stack->font; }
+const Font& OpenGLGraphicsContext::getFont()                                               { return stack->font; }
