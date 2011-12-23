@@ -194,6 +194,8 @@ OpenGLContext* OpenGLComponent::createContext()
 
 void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
 {
+    const ScopedLock sl (contextLock);
+
     if (context != nullptr)
     {
         Window embeddedWindow = static_cast<WindowedGLContext*> (context.get())->embeddedWindow;

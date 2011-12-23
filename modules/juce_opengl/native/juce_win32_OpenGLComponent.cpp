@@ -282,6 +282,8 @@ void* OpenGLComponent::getNativeWindowHandle() const
 
 void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
 {
+    const ScopedLock sl (contextLock);
+
     if (context != nullptr)
     {
         ComponentPeer* peer = static_cast<WindowedGLContext*> (context.get())->nativeWindow;

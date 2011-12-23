@@ -519,6 +519,7 @@ private:
     {
     public:
         DemoOpenGLComp (Component* contentComp)
+            : OpenGLComponent (useBackgroundThread | allowSubComponents)
         {
             addAndMakeVisible (contentComp);
         }

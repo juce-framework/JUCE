@@ -34,6 +34,8 @@
  typedef Component OpenGLBaseType;
 #endif
 
+class OpenGLGraphicsContext;
+
 //==============================================================================
 /**
     A component that contains an OpenGL canvas.
@@ -202,12 +204,6 @@ public:
     void triggerRepaint();
 
     //==============================================================================
-    /** Calls the rendering callback, and swaps the buffers afterwards.
-        This is called automatically by paint() when the component needs to be rendered.
-        Returns true if the operation succeeded.
-    */
-    virtual bool renderAndSwapBuffers();
-
     /** This returns a critical section that can be used to lock the current context.
 
         Because the context that is used by this component can change, e.g. when the
@@ -269,10 +265,11 @@ private:
 
     CriticalSection contextLock;
     OpenGLPixelFormat preferredPixelFormat;
-    bool needToUpdateViewport, needToDeleteContext, threadStarted;
+    bool needToUpdateViewport, needToDeleteContext, threadStarted, needToRepaint;
 
     class OpenGLCachedComponentImage;
     friend class OpenGLCachedComponentImage;
+    OpenGLCachedComponentImage* cachedImage;
 
     OpenGLContext* createContext();
     void updateContext();
@@ -280,6 +277,10 @@ private:
     void stopBackgroundThread();
     void recreateContextAsync();
     void updateEmbeddedPosition (const Rectangle<int>&);
+    bool performRender();
+    void paintSelf (OpenGLGraphicsContext&);
+
+    int renderAndSwapBuffers();  // (This method has been deprecated)
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);
 };

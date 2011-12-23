@@ -334,7 +334,7 @@ public:
         The masked region is cleared each time before a paint happens, so a component
         will have to make sure it calls this every time it's painted.
     */
-    void addMaskedRegion (int x, int y, int w, int h);
+    void addMaskedRegion (const Rectangle<int>& area);
 
     //==============================================================================
     /** Returns the number of currently-active peers.

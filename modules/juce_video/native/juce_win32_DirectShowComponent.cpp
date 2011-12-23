@@ -809,10 +809,7 @@ void DirectShowComponent::paint (Graphics& g)
         ComponentPeer* const peer = getPeer();
 
         if (peer != nullptr)
-        {
-            const Point<int> topLeft (getScreenPosition() - peer->getScreenPosition());
-            peer->addMaskedRegion (topLeft.getX(), topLeft.getY(), getWidth(), getHeight());
-        }
+            peer->addMaskedRegion (getScreenBounds() - peer->getScreenPosition());
     }
     else
     {

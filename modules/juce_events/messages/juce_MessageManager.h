@@ -273,7 +273,7 @@ public:
         @endcode
 
     */
-    MessageManagerLock (Thread* threadToCheckForExitSignal = 0);
+    MessageManagerLock (Thread* threadToCheckForExitSignal = nullptr);
 
     //==============================================================================
     /** This has the same behaviour as the other constructor, but takes a ThreadPoolJob
@@ -304,7 +304,7 @@ private:
     ReferenceCountedObjectPtr<BlockingMessage> blockingMessage;
     bool locked;
 
-    void init (Thread* thread, ThreadPoolJob* job);
+    bool attemptLock (Thread*, ThreadPoolJob*);
 
     JUCE_DECLARE_NON_COPYABLE (MessageManagerLock);
 };

@@ -549,9 +549,9 @@ void ComponentPeer::clearMaskedRegion()
     maskedRegion.clear();
 }
 
-void ComponentPeer::addMaskedRegion (int x, int y, int w, int h)
+void ComponentPeer::addMaskedRegion (const Rectangle<int>& area)
 {
-    maskedRegion.add (x, y, w, h);
+    maskedRegion.add (area);
 }
 
 //==============================================================================

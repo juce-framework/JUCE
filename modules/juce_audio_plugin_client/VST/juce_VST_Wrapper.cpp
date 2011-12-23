@@ -1062,7 +1062,7 @@ public:
                 Window editorWnd = (Window) editorComp->getWindowHandle();
                 XReparentWindow (display, editorWnd, hostWindow, 0, 0);
               #else
-                hostWindow = attachComponentToWindowRef (editorComp, (WindowRef) ptr);
+                hostWindow = attachComponentToWindowRef (editorComp, ptr);
               #endif
                 editorComp->setVisible (true);
 

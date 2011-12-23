@@ -241,64 +241,58 @@ private:
 
 //==============================================================================
 MessageManagerLock::MessageManagerLock (Thread* const threadToCheck)
-    : locked (false)
+    : blockingMessage(), locked (attemptLock (threadToCheck, nullptr))
 {
-    init (threadToCheck, nullptr);
 }
 
 MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal)
-    : locked (false)
+    : blockingMessage(), locked (attemptLock (nullptr, jobToCheckForExitSignal))
 {
-    init (nullptr, jobToCheckForExitSignal);
 }
 
-void MessageManagerLock::init (Thread* const threadToCheck, ThreadPoolJob* const job)
+bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob* const job)
 {
-    if (MessageManager::instance != nullptr)
+    if (MessageManager::instance == nullptr)
+        return false;
+
+    if (MessageManager::instance->currentThreadHasLockedMessageManager())
+        return true;
+
+    if (threadToCheck == nullptr && job == nullptr)
     {
-        if (MessageManager::instance->currentThreadHasLockedMessageManager())
+        MessageManager::instance->lockingLock.enter();
+    }
+    else
+    {
+        while (! MessageManager::instance->lockingLock.tryEnter())
         {
-            locked = true;   // either we're on the message thread, or this is a re-entrant call.
-        }
-        else
-        {
-            if (threadToCheck == nullptr && job == nullptr)
-            {
-                MessageManager::instance->lockingLock.enter();
-            }
-            else
-            {
-                while (! MessageManager::instance->lockingLock.tryEnter())
-                {
-                    if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
-                          || (job != nullptr && job->shouldExit()))
-                        return;
+            if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
+                  || (job != nullptr && job->shouldExit()))
+                return false;
 
-                    Thread::sleep (1);
-                }
-            }
-
-            blockingMessage = new BlockingMessage();
-            blockingMessage->post();
-
-            while (! blockingMessage->lockedEvent.wait (20))
-            {
-                if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
-                      || (job != nullptr && job->shouldExit()))
-                {
-                    blockingMessage->releaseEvent.signal();
-                    blockingMessage = nullptr;
-                    MessageManager::instance->lockingLock.exit();
-                    return;
-                }
-            }
-
-            jassert (MessageManager::instance->threadWithLock == 0);
-
-            MessageManager::instance->threadWithLock = Thread::getCurrentThreadId();
-            locked = true;
+            Thread::sleep (1);
         }
     }
+
+    blockingMessage = new BlockingMessage();
+    blockingMessage->post();
+
+    while (! blockingMessage->lockedEvent.wait (20))
+    {
+        if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
+              || (job != nullptr && job->shouldExit()))
+        {
+            blockingMessage->releaseEvent.signal();
+            blockingMessage = nullptr;
+            MessageManager::instance->lockingLock.exit();
+            return false;
+        }
+    }
+
+    jassert (MessageManager::instance->threadWithLock == 0);
+
+    MessageManager::instance->threadWithLock = Thread::getCurrentThreadId();
+    return true;
 }
 
 MessageManagerLock::~MessageManagerLock() noexcept

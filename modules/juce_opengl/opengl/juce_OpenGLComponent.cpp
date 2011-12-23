@@ -115,6 +115,108 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 }
 
 //==============================================================================
+class OpenGLComponent::OpenGLCachedComponentImage  : public CachedComponentImage,
+                                                     public Timer // N.B. using a Timer rather than an AsyncUpdater
+                                                                  // to avoid scheduling problems on Windows
+{
+public:
+    OpenGLCachedComponentImage (OpenGLComponent& owner_)
+        : owner (owner_)
+    {
+    }
+
+    void paint (Graphics&)
+    {
+        ComponentPeer* const peer = owner.getPeer();
+
+        if (peer != nullptr)
+            peer->addMaskedRegion (owner.getScreenBounds() - peer->getScreenPosition());
+
+        if (owner.isUsingDedicatedThread())
+        {
+            if (peer != nullptr && owner.isShowing())
+            {
+               #if ! JUCE_LINUX
+                owner.updateContext();
+               #endif
+
+                if (! owner.threadStarted)
+                {
+                    owner.threadStarted = true;
+                    owner.startRenderThread();
+                }
+            }
+        }
+        else
+        {
+            owner.updateContext();
+
+            if (isTimerRunning())
+                timerCallback();
+        }
+    }
+
+    void invalidateAll()
+    {
+        validArea.clear();
+        triggerRepaint();
+    }
+
+    void invalidate (const Rectangle<int>& area)
+    {
+        validArea.subtract (area);
+        triggerRepaint();
+    }
+
+    void releaseResources()
+    {
+        frameBuffer.release();
+    }
+
+    void timerCallback()
+    {
+        stopTimer();
+
+        owner.performRender();
+        owner.releaseAsRenderingTarget();
+    }
+
+    void triggerRepaint()
+    {
+        owner.needToRepaint = true;
+
+        if (! owner.isUsingDedicatedThread())
+            startTimer (1000 / 70);
+    }
+
+    OpenGLFrameBuffer& getFrameBuffer (int width, int height)
+    {
+        const int fbW = frameBuffer.getWidth();
+        const int fbH = frameBuffer.getHeight();
+
+        if (fbW < width
+             || fbH < height
+             || fbW > width + 128
+             || fbH > height + 128
+             || ! frameBuffer.isValid())
+        {
+            frameBuffer.initialise (width, height);
+            validArea.clear();
+        }
+
+        return frameBuffer;
+    }
+
+    RectangleList validArea;
+
+private:
+    OpenGLComponent& owner;
+    OpenGLFrameBuffer frameBuffer;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLCachedComponentImage);
+};
+
+//==============================================================================
 class OpenGLComponent::OpenGLComponentWatcher  : public ComponentMovementWatcher
 {
 public:
@@ -174,11 +276,11 @@ public:
         {
             const uint32 startOfRendering = Time::getMillisecondCounter();
 
-            if (! owner.renderAndSwapBuffers())
+            if (! owner.performRender())
                 break;
 
             const int elapsed = (int) (Time::getMillisecondCounter() - startOfRendering);
-            Thread::sleep (jmax (1, 20 - elapsed));
+            Thread::sleep (jmax (1, (1000 / 60) - elapsed));
         }
 
        #if JUCE_LINUX
@@ -214,175 +316,17 @@ void OpenGLComponent::stopRenderThread()
 }
 
 //==============================================================================
-class OpenGLComponent::OpenGLCachedComponentImage  : public CachedComponentImage,
-                                                     public Timer // N.B. using a Timer rather than an AsyncUpdater
-                                                                  // to avoid scheduling problems on Windows
-{
-public:
-    OpenGLCachedComponentImage (OpenGLComponent& owner_)
-        : owner (owner_)
-    {
-    }
-
-    void paint (Graphics&)
-    {
-        ComponentPeer* const peer = owner.getPeer();
-
-        if (peer != nullptr)
-        {
-            const Point<int> topLeft (owner.getScreenPosition() - peer->getScreenPosition());
-            peer->addMaskedRegion (topLeft.x, topLeft.y, owner.getWidth(), owner.getHeight());
-        }
-
-        if (owner.isUsingDedicatedThread())
-        {
-            if (peer != nullptr && owner.isShowing())
-            {
-               #if ! JUCE_LINUX
-                owner.updateContext();
-               #endif
-
-                if (! owner.threadStarted)
-                {
-                    owner.threadStarted = true;
-                    owner.startRenderThread();
-                }
-            }
-        }
-        else
-        {
-            owner.updateContext();
-
-            if (isTimerRunning())
-                timerCallback();
-        }
-    }
-
-    void invalidateAll()
-    {
-        validArea.clear();
-        triggerRepaint();
-    }
-
-    void invalidate (const Rectangle<int>& area)
-    {
-        validArea.subtract (area);
-        triggerRepaint();
-    }
-
-    void releaseResources()
-    {
-        frameBuffer.release();
-    }
-
-    void timerCallback()
-    {
-        stopTimer();
-
-        if (! owner.makeCurrentRenderingTarget())
-            return;
-
-        const Rectangle<int> bounds (owner.getLocalBounds());
-
-        const int fbW = frameBuffer.getWidth();
-        const int fbH = frameBuffer.getHeight();
-
-        if (fbW < bounds.getWidth()
-             || fbH < bounds.getHeight()
-             || fbW > bounds.getWidth() + 128
-             || fbH > bounds.getHeight() + 128
-             || ! frameBuffer.isValid())
-        {
-            frameBuffer.initialise (bounds.getWidth(), bounds.getHeight());
-            validArea.clear();
-        }
-
-        owner.renderOpenGL();
-
-        if ((owner.flags & allowSubComponents) != 0)
-        {
-            {
-                RectangleList invalid (bounds);
-                invalid.subtract (validArea);
-                validArea = bounds;
-
-                if (! invalid.isEmpty())
-                {
-                    OpenGLGraphicsContext g (frameBuffer);
-                    g.clipToRectangleList (invalid);
-
-                    g.setFill (Colours::transparentBlack);
-                    g.fillRect (bounds, true);
-                    g.setFill (Colours::black);
-
-                    paintOwner (g);
-                }
-            }
-
-            owner.makeCurrentRenderingTarget();
-            OpenGLHelpers::prepareFor2D (bounds.getWidth(), bounds.getHeight());
-            glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable (GL_BLEND);
-            glColor4f (1.0f, 1.0f, 1.0f, owner.getAlpha());
-            frameBuffer.drawAt (0, (float) (bounds.getHeight() - frameBuffer.getHeight()));
-        }
-
-        owner.swapBuffers();
-        owner.releaseAsRenderingTarget();
-    }
-
-    void triggerRepaint()
-    {
-        if (! owner.isUsingDedicatedThread())
-            startTimer (1000 / 70);
-    }
-
-private:
-    void paintOwner (OpenGLGraphicsContext& glRenderer)
-    {
-        Graphics g (&glRenderer);
-
-       #if JUCE_ENABLE_REPAINT_DEBUGGING
-        g.saveState();
-       #endif
-
-        JUCE_TRY
-        {
-            owner.paintEntireComponent (g, false);
-        }
-        JUCE_CATCH_EXCEPTION
-
-       #if JUCE_ENABLE_REPAINT_DEBUGGING
-        // enabling this code will fill all areas that get repainted with a colour overlay, to show
-        // clearly when things are being repainted.
-        g.restoreState();
-
-        static Random rng;
-        g.fillAll (Colour ((uint8) rng.nextInt (255),
-                           (uint8) rng.nextInt (255),
-                           (uint8) rng.nextInt (255),
-                           (uint8) 0x50));
-       #endif
-    }
-
-    OpenGLComponent& owner;
-    OpenGLFrameBuffer frameBuffer;
-    RectangleList validArea;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLCachedComponentImage);
-};
-
-//==============================================================================
 OpenGLComponent::OpenGLComponent (const int flags_)
     : flags (flags_),
       contextToShareListsWith (nullptr),
       needToUpdateViewport (true),
       needToDeleteContext (false),
-      threadStarted (false)
+      threadStarted (false),
+      needToRepaint (true)
 {
     setOpaque (true);
+    setCachedComponentImage (cachedImage = new OpenGLCachedComponentImage (*this));
     componentWatcher = new OpenGLComponentWatcher (*this);
-    setCachedComponentImage (new OpenGLCachedComponentImage (*this));
 }
 
 OpenGLComponent::~OpenGLComponent()
@@ -492,10 +436,7 @@ void OpenGLComponent::updateContextPosition()
         Component* const topComp = getTopLevelComponent();
 
         if (topComp->getPeer() != nullptr)
-        {
-            const ScopedLock sl (contextLock);
             updateEmbeddedPosition (topComp->getLocalArea (this, getLocalBounds()));
-        }
     }
 }
 
@@ -508,7 +449,24 @@ void OpenGLComponent::stopBackgroundThread()
     }
 }
 
-bool OpenGLComponent::renderAndSwapBuffers()
+void OpenGLComponent::triggerRepaint()
+{
+    // you mustn't set your own cached image object for an OpenGLComponent!
+    jassert (dynamic_cast<OpenGLCachedComponentImage*> (getCachedComponentImage()) == cachedImage);
+
+    cachedImage->triggerRepaint();
+}
+
+void OpenGLComponent::paint (Graphics&)
+{
+}
+
+unsigned int OpenGLComponent::getFrameBufferID() const
+{
+    return context != nullptr ? context->getFrameBufferID() : 0;
+}
+
+bool OpenGLComponent::performRender()
 {
     const ScopedLock sl (contextLock);
 
@@ -528,28 +486,80 @@ bool OpenGLComponent::renderAndSwapBuffers()
         }
 
         renderOpenGL();
+
+        if (needToRepaint && (flags & allowSubComponents) != 0)
+        {
+            needToRepaint = false;
+
+            contextLock.exit(); // (MM must be locked before the context lock)
+            MessageManagerLock mmLock (renderThread);
+            contextLock.enter();
+
+            if (! mmLock.lockWasGained())
+                return false;
+
+            // you mustn't set your own cached image object for an OpenGLComponent!
+            jassert (dynamic_cast<OpenGLCachedComponentImage*> (getCachedComponentImage()) == cachedImage);
+
+            const Rectangle<int> bounds (getLocalBounds());
+            OpenGLFrameBuffer& frameBuffer = cachedImage->getFrameBuffer (bounds.getWidth(), bounds.getHeight());
+
+            {
+                RectangleList invalid (bounds);
+                invalid.subtract (cachedImage->validArea);
+                cachedImage->validArea = bounds;
+
+                if (! invalid.isEmpty())
+                {
+                    OpenGLGraphicsContext g (frameBuffer);
+                    g.clipToRectangleList (invalid);
+
+                    g.setFill (Colours::transparentBlack);
+                    g.fillRect (bounds, true);
+                    g.setFill (Colours::black);
+
+                    paintSelf (g);
+
+                    makeCurrentRenderingTarget();
+                }
+            }
+
+            OpenGLHelpers::prepareFor2D (bounds.getWidth(), bounds.getHeight());
+            glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable (GL_BLEND);
+            glColor4f (1.0f, 1.0f, 1.0f, getAlpha());
+            frameBuffer.drawAt (0, (float) (bounds.getHeight() - frameBuffer.getHeight()));
+        }
+
         swapBuffers();
     }
 
     return true;
 }
 
-void OpenGLComponent::triggerRepaint()
+void OpenGLComponent::paintSelf (OpenGLGraphicsContext& glRenderer)
 {
-    OpenGLCachedComponentImage* const c
-        = dynamic_cast<OpenGLCachedComponentImage*> (getCachedComponentImage());
+    Graphics g (&glRenderer);
 
-    jassert (c != nullptr); // you mustn't set your own cached image object for an OpenGLComponent!
+   #if JUCE_ENABLE_REPAINT_DEBUGGING
+    g.saveState();
+   #endif
 
-    if (c != nullptr)
-        c->triggerRepaint();
-}
+    JUCE_TRY
+    {
+        paintEntireComponent (g, false);
+    }
+    JUCE_CATCH_EXCEPTION
 
-void OpenGLComponent::paint (Graphics&)
-{
-}
+   #if JUCE_ENABLE_REPAINT_DEBUGGING
+    // enabling this code will fill all areas that get repainted with a colour overlay, to show
+    // clearly when things are being repainted.
+    g.restoreState();
 
-unsigned int OpenGLComponent::getFrameBufferID() const
-{
-    return context != nullptr ? context->getFrameBufferID() : 0;
+    static Random rng;
+    g.fillAll (Colour ((uint8) rng.nextInt (255),
+                       (uint8) rng.nextInt (255),
+                       (uint8) rng.nextInt (255),
+                       (uint8) 0x50));
+   #endif
 }
