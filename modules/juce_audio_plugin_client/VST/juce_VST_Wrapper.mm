@@ -89,6 +89,13 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
     comp->addToDesktop (ComponentPeer::windowIgnoresKeyPresses, parentView);
    #endif
 
+    // (this workaround is because Wavelab provides a zero-size parent view..)
+    if ([parentView frame].size.height == 0)
+        [((NSView*) comp->getWindowHandle()) setFrameOrigin: NSZeroPoint];
+
+    comp->setVisible (true);
+    comp->toFront (false);
+
     [[parentView window] setAcceptsMouseMovedEvents: YES];
     return parentView;
   #else

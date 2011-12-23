@@ -1230,8 +1230,7 @@ public:
 
             if (peer != nullptr)
             {
-                const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
-                peer->addMaskedRegion (pos.getX(), pos.getY(), getWidth(), getHeight());
+                peer->addMaskedRegion (getScreenBounds() - peer->getScreenPosition());
 
                #if JUCE_LINUX
                 if (pluginWindow != 0)
