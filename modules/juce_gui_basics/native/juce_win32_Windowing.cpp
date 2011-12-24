@@ -959,7 +959,7 @@ private:
             // this name has to be different for each app/dll instance because otherwise poor old Windows can
             // get a bit confused (even despite it not being a process-global window class).
             String windowClassName ("JUCE_");
-            windowClassName << (int) (Time::currentTimeMillis() & 0x7fffffff);
+            windowClassName << String::toHexString (Time::currentTimeMillis());
 
             HINSTANCE moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
 

@@ -181,11 +181,11 @@ public:
                 {
                     MemoryBlock data (rng.nextInt (2000) + 1);
 
-                    for (int k = data.getSize(); --k >= 0;)
+                    for (int k = (int) data.getSize(); --k >= 0;)
                         data[k] = (char) rng.nextInt (255);
 
-                    original.write (data.getData(), data.getSize());
-                    zipper  .write (data.getData(), data.getSize());
+                    original.write (data.getData(), (int) data.getSize());
+                    zipper  .write (data.getData(), (int) data.getSize());
                 }
             }
 

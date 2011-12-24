@@ -52,10 +52,10 @@ namespace WindowsFileHelpers
         if (path.isNotEmpty() && path[1] == ':' && path[2] == 0)
             path << '\\';
 
-        const int numBytes = CharPointer_UTF16::getBytesRequiredFor (path.getCharPointer()) + 4;
+        const size_t numBytes = CharPointer_UTF16::getBytesRequiredFor (path.getCharPointer()) + 4;
         HeapBlock<WCHAR> pathCopy;
         pathCopy.calloc (numBytes, 1);
-        path.copyToUTF16 (pathCopy, numBytes);
+        path.copyToUTF16 (pathCopy, (int) numBytes);
 
         if (PathStripToRoot (pathCopy))
             path = static_cast <const WCHAR*> (pathCopy);
@@ -169,10 +169,10 @@ bool File::moveToTrash() const
         return true;
 
     // The string we pass in must be double null terminated..
-    const int numBytes = CharPointer_UTF16::getBytesRequiredFor (fullPath.getCharPointer()) + 8;
+    const size_t numBytes = CharPointer_UTF16::getBytesRequiredFor (fullPath.getCharPointer()) + 8;
     HeapBlock<WCHAR> doubleNullTermPath;
     doubleNullTermPath.calloc (numBytes, 1);
-    fullPath.copyToUTF16 (doubleNullTermPath, numBytes);
+    fullPath.copyToUTF16 (doubleNullTermPath, (int) numBytes);
 
     SHFILEOPSTRUCT fos = { 0 };
     fos.wFunc = FO_DELETE;
@@ -704,7 +704,10 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
 void File::revealToUser() const
 {
+   #pragma warning (push)
+   #pragma warning (disable: 4090) // (alignment warning)
     ITEMIDLIST* const itemIDList = ILCreateFromPath (fullPath.toWideCharPointer());
+   #pragma warning (pop)
 
     if (itemIDList != nullptr)
     {

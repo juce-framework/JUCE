@@ -136,10 +136,10 @@ public:
         const size_t len = textUTF32.length();
 
         HeapBlock <UINT16> glyphIndices (len);
-        dwFontFace->GetGlyphIndices (textUTF32, len, glyphIndices);
+        dwFontFace->GetGlyphIndices (textUTF32, (UINT32) len, glyphIndices);
 
         HeapBlock <DWRITE_GLYPH_METRICS> dwGlyphMetrics (len);
-        dwFontFace->GetDesignGlyphMetrics (glyphIndices, len, dwGlyphMetrics, false);
+        dwFontFace->GetDesignGlyphMetrics (glyphIndices, (UINT32) len, dwGlyphMetrics, false);
 
         float x = 0;
         for (size_t i = 0; i < len; ++i)
@@ -156,9 +156,9 @@ public:
         const size_t len = textUTF32.length();
 
         HeapBlock <UINT16> glyphIndices (len);
-        dwFontFace->GetGlyphIndices (textUTF32, len, glyphIndices);
+        dwFontFace->GetGlyphIndices (textUTF32, (UINT32) len, glyphIndices);
         HeapBlock <DWRITE_GLYPH_METRICS> dwGlyphMetrics (len);
-        dwFontFace->GetDesignGlyphMetrics (glyphIndices, len, dwGlyphMetrics, false);
+        dwFontFace->GetDesignGlyphMetrics (glyphIndices, (UINT32) len, dwGlyphMetrics, false);
 
         float x = 0;
         for (size_t i = 0; i < len; ++i)
