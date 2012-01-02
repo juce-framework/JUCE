@@ -535,19 +535,26 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     if (newPos.isEmpty())
         return false;
 
-    const Rectangle<int> screen (Desktop::getInstance().getMonitorAreaContaining (newPos.getCentre()));
-
     ComponentPeer* const peer = isOnDesktop() ? getPeer() : nullptr;
     if (peer != nullptr)
         peer->getFrameSize().addTo (newPos);
 
-    if (! screen.contains (newPos))
     {
-        newPos.setSize (jmin (newPos.getWidth(), screen.getWidth()),
-                        jmin (newPos.getHeight(), screen.getHeight()));
+        Desktop& desktop = Desktop::getInstance();
+        RectangleList allMonitors (desktop.getAllMonitorDisplayAreas());
+        allMonitors.clipTo (newPos);
+        const Rectangle<int> onScreenArea (allMonitors.getBounds());
 
-        newPos.setPosition (jlimit (screen.getX(), screen.getRight() - newPos.getWidth(), newPos.getX()),
-                            jlimit (screen.getY(), screen.getBottom() - newPos.getHeight(), newPos.getY()));
+        if (onScreenArea.getWidth() * onScreenArea.getHeight() < 32 * 32)
+        {
+            const Rectangle<int> screen (desktop.getMonitorAreaContaining (newPos.getCentre()));
+
+            newPos.setSize (jmin (newPos.getWidth(),  screen.getWidth()),
+                            jmin (newPos.getHeight(), screen.getHeight()));
+
+            newPos.setPosition (jlimit (screen.getX(), screen.getRight()  - newPos.getWidth(),  newPos.getX()),
+                                jlimit (screen.getY(), screen.getBottom() - newPos.getHeight(), newPos.getY()));
+        }
     }
 
     if (peer != nullptr)

@@ -335,8 +335,8 @@ void Slider::lookAndFeelChanged()
 
         if (style == LinearBar)
             valueBox->addMouseListener (this, false);
-
-        valueBox->setTooltip (getTooltip());
+        else
+            valueBox->setTooltip (getTooltip());
     }
     else
     {

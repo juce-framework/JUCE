@@ -490,19 +490,17 @@ public:
     }
 
     /** Clips a rectangle so that it lies only within this one.
-
         This is a non-static version of intersectRectangles().
-
         Returns false if the two regions didn't overlap.
     */
     bool intersectRectangle (ValueType& otherX, ValueType& otherY, ValueType& otherW, ValueType& otherH) const noexcept
     {
-        const int maxX = jmax (otherX, pos.x);
+        const ValueType maxX (jmax (otherX, pos.x));
         otherW = jmin (otherX + otherW, pos.x + w) - maxX;
 
         if (otherW > ValueType())
         {
-            const int maxY = jmax (otherY, pos.y);
+            const ValueType maxY (jmax (otherY, pos.y));
             otherH = jmin (otherY + otherH, pos.y + h) - maxY;
 
             if (otherH > ValueType())
@@ -570,13 +568,13 @@ public:
     bool reduceIfPartlyContainedIn (const Rectangle& other) noexcept
     {
         int inside = 0;
-        const int otherR = other.getRight();
+        const ValueType otherR (other.getRight());
         if (pos.x >= other.pos.x && pos.x < otherR) inside = 1;
-        const int otherB = other.getBottom();
+        const ValueType otherB (other.getBottom());
         if (pos.y >= other.pos.y && pos.y < otherB) inside |= 2;
-        const int r = pos.x + w;
+        const ValueType r (pos.x + w);
         if (r >= other.pos.x && r < otherR) inside |= 4;
-        const int b = pos.y + h;
+        const ValueType b (pos.y + h);
         if (b >= other.pos.y && b < otherB) inside |= 8;
 
         switch (inside)
@@ -619,10 +617,10 @@ public:
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
-        const int x1 = (int) std::floor (static_cast<float> (pos.x));
-        const int y1 = (int) std::floor (static_cast<float> (pos.y));
-        const int x2 = (int) std::ceil  (static_cast<float> (pos.x + w));
-        const int y2 = (int) std::ceil  (static_cast<float> (pos.y + h));
+        const int x1 = static_cast <int> (std::floor (static_cast<float> (pos.x)));
+        const int y1 = static_cast <int> (std::floor (static_cast<float> (pos.y)));
+        const int x2 = static_cast <int> (std::ceil  (static_cast<float> (pos.x + w)));
+        const int y2 = static_cast <int> (std::ceil  (static_cast<float> (pos.y + h)));
 
         return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
     }
@@ -661,20 +659,18 @@ public:
 
     //==============================================================================
     /** Static utility to intersect two sets of rectangular co-ordinates.
-
         Returns false if the two regions didn't overlap.
-
         @see intersectRectangle
     */
     static bool intersectRectangles (ValueType& x1, ValueType& y1, ValueType& w1, ValueType& h1,
                                      const ValueType x2, const ValueType y2, const ValueType w2, const ValueType h2) noexcept
     {
-        const ValueType x = jmax (x1, x2);
+        const ValueType x (jmax (x1, x2));
         w1 = jmin (x1 + w1, x2 + w2) - x;
 
         if (w1 > ValueType())
         {
-            const ValueType y = jmax (y1, y2);
+            const ValueType y (jmax (y1, y2));
             h1 = jmin (y1 + h1, y2 + h2) - y;
 
             if (h1 > ValueType())
