@@ -184,6 +184,12 @@ void DrawableButton::buttonStateChanged()
         currentImage->setAlpha (opacity);
 }
 
+void DrawableButton::enablementChanged()
+{
+    Button::enablementChanged();
+    buttonStateChanged();
+}
+
 void DrawableButton::paintButton (Graphics& g,
                                   bool isMouseOverButton,
                                   bool isButtonDown)

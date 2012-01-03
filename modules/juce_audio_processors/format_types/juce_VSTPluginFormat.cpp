@@ -2311,12 +2311,15 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
 
         return 1; // (not connected)
 
+    case audioMasterIOChanged:
+        setLatencySamples (effect->initialDelay);
+        break;
+
     // none of these are handled (yet)..
     case audioMasterBeginEdit:
     case audioMasterEndEdit:
     case audioMasterSetTime:
     case audioMasterGetParameterQuantization:
-    case audioMasterIOChanged:
     case audioMasterGetInputLatency:
     case audioMasterGetOutputLatency:
     case audioMasterGetPreviousPlug:

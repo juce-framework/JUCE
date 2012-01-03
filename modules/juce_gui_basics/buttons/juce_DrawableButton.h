@@ -176,6 +176,8 @@ protected:
     void buttonStateChanged();
     /** @internal */
     void resized();
+    /** @internal */
+    void enablementChanged();
 
 private:
     //==============================================================================
