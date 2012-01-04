@@ -38,7 +38,6 @@ public:
     {
         initialiseGLExtensions();
         jassert (component != nullptr);
-
         createNativeWindow();
 
         PIXELFORMATDESCRIPTOR pfd;
@@ -55,6 +54,7 @@ public:
         {
             makeActive();
             initialiseGLExtensions();
+            extensions.initialise();
             setPixelFormat (pixelFormat);
 
             if (contextToShareWith != 0)
@@ -229,6 +229,23 @@ public:
 private:
     Component* const component;
     HDC dc;
+
+    #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
+        typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
+
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglChoosePixelFormatARB,  BOOL, (HDC, const int*, const FLOAT*, UINT, int*, UINT*))
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglSwapIntervalEXT,       BOOL, (int))
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT,    int, ())
+    #undef JUCE_DECLARE_WGL_EXTENSION_FUNCTION
+
+    void initialiseGLExtensions()
+    {
+        #define JUCE_INIT_WGL_FUNCTION(name)    name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+        JUCE_INIT_WGL_FUNCTION (wglChoosePixelFormatARB);
+        JUCE_INIT_WGL_FUNCTION (wglSwapIntervalEXT);
+        JUCE_INIT_WGL_FUNCTION (wglGetSwapIntervalEXT);
+        #undef JUCE_INIT_WGL_FUNCTION
+    }
 
     //==============================================================================
     void createNativeWindow()

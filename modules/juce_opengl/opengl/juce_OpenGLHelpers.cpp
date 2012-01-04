@@ -40,65 +40,25 @@ void* OpenGLHelpers::getExtensionFunction (const char* functionName)
    #endif
 }
 
-#if ! JUCE_OPENGL_ES
-namespace
-{
-    bool isExtensionSupportedV3 (const char* extensionName)
-    {
-       #ifndef GL_NUM_EXTENSIONS
-        enum { GL_NUM_EXTENSIONS = 0x821d };
-       #endif
-
-        JUCE_DECLARE_GL_EXTENSION_FUNCTION (glGetStringi, const GLubyte*, (GLenum, GLuint))
-
-        if (glGetStringi == nullptr)
-            glGetStringi = (type_glGetStringi) OpenGLHelpers::getExtensionFunction ("glGetStringi");
-
-        if (glGetStringi != nullptr)
-        {
-            GLint numExtensions = 0;
-            glGetIntegerv (GL_NUM_EXTENSIONS, &numExtensions);
-
-            for (int i = 0; i < numExtensions; ++i)
-                if (strcmp (extensionName, (const char*) glGetStringi (GL_EXTENSIONS, i)) == 0)
-                    return true;
-        }
-
-        return false;
-    }
-}
-#endif
-
 bool OpenGLHelpers::isExtensionSupported (const char* const extensionName)
 {
     jassert (extensionName != nullptr); // you must supply a genuine string for this.
     jassert (isContextActive()); // An OpenGL context will need to be active before calling this.
 
-   #if ! JUCE_OPENGL_ES
-    const GLubyte* version = glGetString (GL_VERSION);
+    const char* extensions = (const char*) glGetString (GL_EXTENSIONS);
+    jassert (extensions != nullptr); // Perhaps you didn't activate an OpenGL context before calling this?
 
-    if (version != nullptr && version[0] >= '3')
+    for (;;)
     {
-        return isExtensionSupportedV3 (extensionName);
-    }
-    else
-   #endif
-    {
-        const char* extensions = (const char*) glGetString (GL_EXTENSIONS);
-        jassert (extensions != nullptr); // Perhaps you didn't activate an OpenGL context before calling this?
+        const char* found = strstr (extensions, extensionName);
 
-        for (;;)
-        {
-            const char* found = strstr (extensions, extensionName);
+        if (found == nullptr)
+            break;
 
-            if (found == nullptr)
-                break;
+        extensions = found + strlen (extensionName);
 
-            extensions = found + strlen (extensionName);
-
-            if (extensions[0] == ' ' || extensions[0] == 0)
-                return true;
-        }
+        if (extensions[0] == ' ' || extensions[0] == 0)
+            return true;
     }
 
     return false;

@@ -4283,6 +4283,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_mac_OpenGLComponent.mm"/>
+          <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_OpenGLExtensions.h"/>
           <File RelativePath="..\..\..\..\modules\juce_opengl\native\juce_win32_OpenGLComponent.cpp">
             <FileConfiguration Name="Debug|Win32"

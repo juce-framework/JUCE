@@ -34,8 +34,8 @@ class JUCE_API  OpenGLGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
     explicit OpenGLGraphicsContext (OpenGLComponent& target);
-    explicit OpenGLGraphicsContext (OpenGLFrameBuffer& target);
-    OpenGLGraphicsContext (unsigned int frameBufferID, int width, int height);
+    OpenGLGraphicsContext (OpenGLContext& context, OpenGLFrameBuffer& target);
+    OpenGLGraphicsContext (OpenGLContext& context, unsigned int frameBufferID, int width, int height);
     ~OpenGLGraphicsContext();
 
     bool isVectorDevice() const;

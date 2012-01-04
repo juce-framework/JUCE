@@ -122,7 +122,21 @@
 #endif
 
 BEGIN_JUCE_NAMESPACE
+
+//==============================================================================
+#include "native/juce_MissingGLDefinitions.h"
 #include "native/juce_OpenGLExtensions.h"
+
+void OpenGLExtensionFunctions::initialise()
+{
+   #if JUCE_WINDOWS || JUCE_LINUX
+    #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams)    name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
+    #undef JUCE_INIT_GL_FUNCTION
+   #endif
+}
+
+#undef JUCE_GL_EXTENSION_FUNCTIONS
 
 //==============================================================================
 // START_AUTOINCLUDE opengl/*.cpp

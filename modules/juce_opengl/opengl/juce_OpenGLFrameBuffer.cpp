@@ -26,9 +26,10 @@
 class OpenGLFrameBuffer::Pimpl
 {
 public:
-    Pimpl (const int width_, const int height_,
+    Pimpl (const OpenGLContext& context_, const int width_, const int height_,
            const bool wantsDepthBuffer, const bool wantsStencilBuffer)
-        : width (width_),
+        : context (context_),
+          width (width_),
           height (height_),
           textureID (0),
           frameBufferHandle (0),
@@ -42,12 +43,12 @@ public:
         jassert (OpenGLHelpers::isContextActive());
 
        #if JUCE_WINDOWS || JUCE_LINUX
-        if (glGenFramebuffers == nullptr)
+        if (context.extensions.glGenFramebuffers == nullptr)
             return;
        #endif
 
-        glGenFramebuffers (1, &frameBufferHandle);
-        glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle);
+        context.extensions.glGenFramebuffers (1, &frameBufferHandle);
+        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle);
 
         glGenTextures (1, &textureID);
         glBindTexture (GL_TEXTURE_2D, textureID);
@@ -59,15 +60,15 @@ public:
 
         glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
-        glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+        context.extensions.glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
 
         if (wantsDepthBuffer || wantsStencilBuffer)
         {
-            glGenRenderbuffers (1, &depthOrStencilBuffer);
-            glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
-            jassert (glIsRenderbuffer (depthOrStencilBuffer));
+            context.extensions.glGenRenderbuffers (1, &depthOrStencilBuffer);
+            context.extensions.glBindRenderbuffer (GL_RENDERBUFFER, depthOrStencilBuffer);
+            jassert (context.extensions.glIsRenderbuffer (depthOrStencilBuffer));
 
-            glRenderbufferStorage (GL_RENDERBUFFER,
+            context.extensions.glRenderbufferStorage (GL_RENDERBUFFER,
                                       (wantsDepthBuffer && wantsStencilBuffer) ? GL_DEPTH24_STENCIL8
                                                                               #if JUCE_OPENGL_ES
                                                                                : GL_DEPTH_COMPONENT16,
@@ -77,17 +78,17 @@ public:
                                       width, height);
 
             GLint params = 0;
-            glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &params);
-            glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
+            context.extensions.glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_DEPTH_SIZE, &params);
+            context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
 
             if (wantsStencilBuffer)
-                glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
+                context.extensions.glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthOrStencilBuffer);
 
             hasDepthBuffer = wantsDepthBuffer;
             hasStencilBuffer = wantsStencilBuffer;
         }
 
-        glBindFramebuffer (GL_FRAMEBUFFER, 0);
+        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
     }
 
     ~Pimpl()
@@ -96,23 +97,24 @@ public:
             glDeleteTextures (1, &textureID);
 
         if (depthOrStencilBuffer != 0)
-            glDeleteRenderbuffers (1, &depthOrStencilBuffer);
+            context.extensions.glDeleteRenderbuffers (1, &depthOrStencilBuffer);
 
         if (frameBufferHandle != 0)
-            glDeleteFramebuffers (1, &frameBufferHandle);
+            context.extensions.glDeleteFramebuffers (1, &frameBufferHandle);
     }
 
-    void bind()    { glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle); }
-    void unbind()  { glBindFramebuffer (GL_FRAMEBUFFER, 0); }
+    void bind()    { context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle); }
+    void unbind()  { context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0); }
 
+    const OpenGLContext& context;
     const int width, height;
     GLuint textureID, frameBufferHandle, depthOrStencilBuffer;
     bool hasDepthBuffer, hasStencilBuffer, ok;
 
 private:
-    static bool checkStatus() noexcept
+    bool checkStatus() noexcept
     {
-        const GLenum status = glCheckFramebufferStatus (GL_FRAMEBUFFER);
+        const GLenum status = context.extensions.glCheckFramebufferStatus (GL_FRAMEBUFFER);
 
         return status == GL_NO_ERROR
             || status == GL_FRAMEBUFFER_COMPLETE;
@@ -132,9 +134,9 @@ public:
         buffer.readPixels (data, Rectangle<int> (w, h));
     }
 
-    bool restore (OpenGLFrameBuffer& buffer)
+    bool restore (const OpenGLContext& context, OpenGLFrameBuffer& buffer)
     {
-        if (buffer.initialise (width, height))
+        if (buffer.initialise (context, width, height))
         {
             buffer.writePixels (data, Rectangle<int> (width, height));
             return true;
@@ -154,10 +156,12 @@ private:
 OpenGLFrameBuffer::OpenGLFrameBuffer() {}
 OpenGLFrameBuffer::~OpenGLFrameBuffer() {}
 
-bool OpenGLFrameBuffer::initialise (int width, int height)
+bool OpenGLFrameBuffer::initialise (const OpenGLContext& context, int width, int height)
 {
+    jassert (context.isActive()); // The context must be active when creating a framebuffer!
+
     pimpl = nullptr;
-    pimpl = new Pimpl (width, height, false, false);
+    pimpl = new Pimpl (context, width, height, false, false);
 
     if (! pimpl->ok)
         pimpl = nullptr;
@@ -165,14 +169,14 @@ bool OpenGLFrameBuffer::initialise (int width, int height)
     return pimpl != nullptr;
 }
 
-bool OpenGLFrameBuffer::initialise (const Image& image)
+bool OpenGLFrameBuffer::initialise (const OpenGLContext& context, const Image& image)
 {
     if (! image.isARGB())
-        return initialise (image.convertedToFormat (Image::ARGB));
+        return initialise (context, image.convertedToFormat (Image::ARGB));
 
     Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
 
-    return initialise (bitmap.width, bitmap.height)
+    return initialise (context, bitmap.width, bitmap.height)
             && writePixels ((const PixelARGB*) bitmap.data, image.getBounds());
 }
 
@@ -186,7 +190,7 @@ bool OpenGLFrameBuffer::initialise (const OpenGLFrameBuffer& other)
         return true;
     }
 
-    if (initialise (p->width, p->height))
+    if (initialise (p->context, p->width, p->height))
     {
         pimpl->bind();
         OpenGLHelpers::prepareFor2D (p->width, p->height);
@@ -216,13 +220,13 @@ void OpenGLFrameBuffer::saveAndRelease()
     }
 }
 
-bool OpenGLFrameBuffer::reloadSavedCopy()
+bool OpenGLFrameBuffer::reloadSavedCopy (const OpenGLContext& context)
 {
     if (savedState != nullptr)
     {
         ScopedPointer<SavedState> state (savedState);
 
-        if (state->restore (*this))
+        if (state->restore (context, *this))
             return true;
 
         savedState = state;
@@ -248,11 +252,6 @@ bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
     return true;
 }
 
-void OpenGLFrameBuffer::setCurrentFrameBufferTarget (GLuint frameBufferID)
-{
-    glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
-}
-
 GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
 {
     GLint fb;
@@ -262,7 +261,8 @@ GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
 
 void OpenGLFrameBuffer::releaseAsRenderingTarget()
 {
-    setCurrentFrameBufferTarget (0);
+    if (pimpl != nullptr)
+        pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
 }
 
 void OpenGLFrameBuffer::clear (const Colour& colour)
@@ -290,7 +290,7 @@ bool OpenGLFrameBuffer::readPixels (PixelARGB* target, const Rectangle<int>& are
 
     glPixelStorei (GL_PACK_ALIGNMENT, 4);
     glReadPixels (area.getX(), area.getY(), area.getWidth(), area.getHeight(), GL_BGRA_EXT, GL_UNSIGNED_BYTE, target);
-    glBindFramebuffer (GL_FRAMEBUFFER, 0);
+    pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
     glPixelStorei (GL_PACK_ALIGNMENT, 0);
     return true;
 }
@@ -335,7 +335,7 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4, tex.getTextureID());
    #endif
 
-    glBindFramebuffer (GL_FRAMEBUFFER, 0);
+    pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
     return true;
 }
 

@@ -26,25 +26,26 @@
 class OpenGLFrameBufferImage   : public ImagePixelData
 {
 public:
-    OpenGLFrameBufferImage (int width, int height)
+    OpenGLFrameBufferImage (OpenGLContext& context_, int width, int height)
         : ImagePixelData (Image::ARGB, width, height),
+          context (context_),
           pixelStride (4),
           lineStride (width * pixelStride)
     {
-        frameBuffer.initialise (width, height);
+        frameBuffer.initialise (context, width, height);
         frameBuffer.clear (Colours::transparentBlack);
     }
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new OpenGLGraphicsContext (frameBuffer);
+        return new OpenGLGraphicsContext (context, frameBuffer);
     }
 
     ImageType* createType() const                       { return new OpenGLImageType(); }
 
     ImagePixelData* clone()
     {
-        OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (width, height);
+        OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (context, width, height);
         im->incReferenceCount();
 
         {
@@ -72,6 +73,7 @@ public:
         }
     }
 
+    OpenGLContext& context;
     OpenGLFrameBuffer frameBuffer;
 
 private:
@@ -175,7 +177,10 @@ int OpenGLImageType::getTypeID() const
 
 ImagePixelData* OpenGLImageType::create (Image::PixelFormat, int width, int height, bool shouldClearImage) const
 {
-    OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (width, height);
+    OpenGLContext* currentContext = OpenGLContext::getCurrentContext();
+    jassert (currentContext != nullptr); // an OpenGL image can only be created when a valid context is active!
+
+    OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (*currentContext, width, height);
 
     if (shouldClearImage)
         im->frameBuffer.clear (Colours::transparentBlack);

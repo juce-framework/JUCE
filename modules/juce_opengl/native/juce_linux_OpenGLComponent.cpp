@@ -37,7 +37,7 @@ public:
           embeddedWindow (0),
           swapInterval (0)
     {
-        initialiseGLExtensions();
+        extensions.initialise();
 
         jassert (component != nullptr);
         ComponentPeer* const peer = component->getTopLevelComponent()->getPeer();
@@ -94,6 +94,10 @@ public:
 
         XFree (bestVisual);
         XSync (display, False);
+
+        makeActive();
+        extensions.initialise();
+        makeInactive();
     }
 
     ~WindowedGLContext()

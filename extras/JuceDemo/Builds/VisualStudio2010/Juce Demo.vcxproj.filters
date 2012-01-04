@@ -2844,6 +2844,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Vector3D.h">
       <Filter>Juce Modules\juce_opengl\opengl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h">
+      <Filter>Juce Modules\juce_opengl\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGLExtensions.h">
       <Filter>Juce Modules\juce_opengl\native</Filter>
     </ClInclude>

@@ -170,7 +170,9 @@ public:
 
     void releaseResources()
     {
+        owner.makeCurrentRenderingTarget();
         frameBuffer.release();
+        owner.releaseAsRenderingTarget();
     }
 
     void timerCallback()
@@ -200,7 +202,8 @@ public:
              || fbH > height + 128
              || ! frameBuffer.isValid())
         {
-            frameBuffer.initialise (width, height);
+            jassert (owner.getCurrentContext() != nullptr);
+            frameBuffer.initialise (*owner.getCurrentContext(), width, height);
             validArea.clear();
         }
 
@@ -331,7 +334,11 @@ OpenGLComponent::OpenGLComponent (const int flags_)
 
 OpenGLComponent::~OpenGLComponent()
 {
-    stopBackgroundThread();
+    if (isUsingDedicatedThread())
+        stopBackgroundThread();
+    else
+        deleteContext();
+
     componentWatcher = nullptr;
 }
 
@@ -416,12 +423,12 @@ void OpenGLComponent::deleteContext()
     {
         if (context->makeActive())
         {
+            setCachedComponentImage (nullptr);
             releaseOpenGLContext();
             context->makeInactive();
         }
 
         context = nullptr;
-        setCachedComponentImage (nullptr);
     }
 
     needToDeleteContext = false;
@@ -511,7 +518,9 @@ bool OpenGLComponent::performRender()
 
                 if (! invalid.isEmpty())
                 {
-                    OpenGLGraphicsContext g (frameBuffer);
+                    jassert (getCurrentContext() != nullptr);
+
+                    OpenGLGraphicsContext g (*getCurrentContext(), frameBuffer);
                     g.clipToRectangleList (invalid);
 
                     g.setFill (Colours::transparentBlack);

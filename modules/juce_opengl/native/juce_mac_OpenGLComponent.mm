@@ -123,7 +123,7 @@ public:
                        NSOpenGLContext* sharedContext)
         : renderContext (nil)
     {
-        initialiseGLExtensions();
+        extensions.initialise();
 
         NSOpenGLPixelFormatAttribute attribs[] =
         {

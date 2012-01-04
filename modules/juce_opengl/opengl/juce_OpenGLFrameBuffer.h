@@ -47,13 +47,13 @@ public:
         Note that a valid openGL context must be selected when you call this method,
         or it will fail.
     */
-    bool initialise (int width, int height);
+    bool initialise (const OpenGLContext& context, int width, int height);
 
     /** Tries to allocates a buffer containing a copy of a given image.
         Note that a valid openGL context must be selected when you call this method,
         or it will fail.
     */
-    bool initialise (const Image& content);
+    bool initialise (const OpenGLContext& context, const Image& content);
 
     /** Tries to allocate a copy of another framebuffer.
     */
@@ -73,7 +73,7 @@ public:
     /** Restores the framebuffer content that was previously saved using saveAndRelease().
         After saving to main memory, the original state can be restored by calling restoreToGPUMemory().
     */
-    bool reloadSavedCopy();
+    bool reloadSavedCopy (const OpenGLContext& context);
 
     //==============================================================================
     /** Returns true if a valid buffer has been allocated. */
@@ -98,12 +98,7 @@ public:
     /** Deselects this buffer as the current OpenGL rendering target. */
     void releaseAsRenderingTarget();
 
-    /** Selects a framebuffer as the active target, or deselects the current
-        target buffer if you pass 0.
-    */
-    static void setCurrentFrameBufferTarget (GLuint frameBufferID);
-
-    /** Returns the ID of the currently-bound framebuffer. */
+    /** Returns the current frame buffer ID for the current context. */
     static GLuint getCurrentFrameBufferTarget();
 
     /** Clears the framebuffer with the specified colour. */

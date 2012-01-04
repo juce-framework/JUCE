@@ -27,6 +27,7 @@
 #define __JUCE_OPENGLCONTEXT_JUCEHEADER__
 
 #include "juce_OpenGLPixelFormat.h"
+#include "../native/juce_OpenGLExtensions.h"
 
 
 //==============================================================================
@@ -91,6 +92,9 @@ public:
     */
     virtual unsigned int getFrameBufferID() const = 0;
 
+    /** Checks whether the current context supports the specified extension. */
+    bool isExtensionSupported (const char* const extensionName);
+
     //==============================================================================
     /** Returns the context that's currently in active use by the calling thread.
 
@@ -100,6 +104,9 @@ public:
 
     /** This property set allows you to attach persisent values to the context. */
     NamedValueSet properties;
+
+    /** This structure holds a set of dynamically loaded GL functions for use on this context. */
+    OpenGLExtensionFunctions extensions;
 
 protected:
     //==============================================================================

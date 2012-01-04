@@ -33,7 +33,7 @@
 class JUCE_API  OpenGLShaderProgram
 {
 public:
-    OpenGLShaderProgram() noexcept;
+    OpenGLShaderProgram (const OpenGLContext& context) noexcept;
     ~OpenGLShaderProgram() noexcept;
 
     /** Returns the version of GLSL that the current context supports.
@@ -99,6 +99,11 @@ public:
             If the uniform couldn't be found, this value will be < 0.
         */
         GLint uniformID;
+
+    private:
+        const OpenGLContext& context;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Uniform);
     };
 
     /** Represents an openGL vertex attribute value.
@@ -123,6 +128,8 @@ public:
     GLuint programID;
 
 private:
+    const OpenGLContext& context;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLShaderProgram);
 };
 
