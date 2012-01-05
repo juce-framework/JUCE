@@ -96,6 +96,11 @@ public:
     */
     String getScheme() const;
 
+    /** Attempts to read a port number from the URL.
+        @returns the port number, or 0 if none is explicitly specified.
+    */
+    int getPort() const;
+
     /** Returns a new version of this URL that uses a different sub-path.
 
         E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with

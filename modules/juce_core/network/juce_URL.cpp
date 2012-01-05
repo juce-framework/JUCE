@@ -121,7 +121,7 @@ namespace URLHelpers
         return p;
     }
 
-    int findStartOfDomain (const String& url)
+    int findEndOfScheme (const String& url)
     {
         int i = 0;
 
@@ -130,6 +130,20 @@ namespace URLHelpers
             ++i;
 
         return url[i] == ':' ? i + 1 : 0;
+    }
+
+    int findStartOfNetLocation (const String& url)
+    {
+        int start = findEndOfScheme (url);
+        while (url[start] == '/')
+            ++start;
+
+        return start;
+    }
+
+    int findStartOfPath (const String& url)
+    {
+        return url.indexOfChar (findStartOfNetLocation (url), '/') + 1;
     }
 
     void createHeadersAndPostData (const URL& url, String& headers, MemoryBlock& postData)
@@ -214,10 +228,7 @@ bool URL::isWellFormed() const
 
 String URL::getDomain() const
 {
-    int start = URLHelpers::findStartOfDomain (url);
-    while (url[start] == '/')
-        ++start;
-
+    const int start = URLHelpers::findStartOfNetLocation (url);
     const int end1 = url.indexOfChar (start, '/');
     const int end2 = url.indexOfChar (start, ':');
 
@@ -229,11 +240,7 @@ String URL::getDomain() const
 
 String URL::getSubPath() const
 {
-    int start = URLHelpers::findStartOfDomain (url);
-    while (url[start] == '/')
-        ++start;
-
-    const int startOfPath = url.indexOfChar (start, '/') + 1;
+    const int startOfPath = URLHelpers::findStartOfPath (url);
 
     return startOfPath <= 0 ? String::empty
                             : url.substring (startOfPath);
@@ -241,16 +248,19 @@ String URL::getSubPath() const
 
 String URL::getScheme() const
 {
-    return url.substring (0, URLHelpers::findStartOfDomain (url) - 1);
+    return url.substring (0, URLHelpers::findEndOfScheme (url) - 1);
+}
+
+int URL::getPort() const
+{
+    const int colonPos = url.indexOfChar (URLHelpers::findStartOfNetLocation (url), ':');
+
+    return colonPos > 0 ? url.substring (colonPos + 1).getIntValue() : 0;
 }
 
 URL URL::withNewSubPath (const String& newPath) const
 {
-    int start = URLHelpers::findStartOfDomain (url);
-    while (url[start] == '/')
-        ++start;
-
-    const int startOfPath = url.indexOfChar (start, '/') + 1;
+    const int startOfPath = URLHelpers::findStartOfPath (url);
 
     URL u (*this);
 

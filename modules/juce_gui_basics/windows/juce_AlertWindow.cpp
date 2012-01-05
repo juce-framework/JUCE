@@ -400,6 +400,8 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     const int labelHeight = 18;
     int iconSpace = 0;
 
+    attributedText.setColour (findColour (textColourId));
+
     if (alertIconType == NoIcon)
     {
         attributedText.setJustification (Justification::centredTop);
@@ -590,6 +592,7 @@ void AlertWindow::lookAndFeelChanged()
 
     setUsingNativeTitleBar ((newFlags & ComponentPeer::windowHasTitleBar) != 0);
     setDropShadowEnabled (isOpaque() && (newFlags & ComponentPeer::windowHasDropShadow) != 0);
+    updateLayout (false);
 }
 
 int AlertWindow::getDesktopWindowStyleFlags() const

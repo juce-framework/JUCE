@@ -176,10 +176,7 @@ Image Image::getClippedImage (const Rectangle<int>& area) const
         return *this;
 
     const Rectangle<int> validArea (area.getIntersection (getBounds()));
-    if (validArea.isEmpty())
-        return Image::null;
-
-    return Image (new SubsectionPixelData (image, validArea));
+    return Image (validArea.isEmpty() ? nullptr : new SubsectionPixelData (image, validArea));
 }
 
 
@@ -252,6 +249,11 @@ void Image::duplicateIfShared()
 {
     if (image != nullptr && image->getReferenceCount() > 1)
         image = image->clone();
+}
+
+Image Image::createCopy() const
+{
+    return Image (image != nullptr ? image->clone() : nullptr);
 }
 
 Image Image::rescaled (const int newWidth, const int newHeight, const Graphics::ResamplingQuality quality) const

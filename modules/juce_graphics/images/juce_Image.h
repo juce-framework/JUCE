@@ -200,6 +200,13 @@ public:
     Image rescaled (int newWidth, int newHeight,
                     Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
 
+    /** Creates a copy of this image.
+        Note that it's usually more efficient to use duplicateIfShared(), because it may not be necessary
+        to copy an image if nothing else is using it.
+        @see getReferenceCount
+    */
+    Image createCopy() const;
+
     /** Returns a version of this image with a different image format.
 
         A new image is returned which has been converted to the specified format.
