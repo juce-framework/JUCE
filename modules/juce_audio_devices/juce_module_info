@@ -22,5 +22,5 @@
                       "native/*" ],
 
   "OSXFrameworks":  "CoreAudio CoreMIDI DiscRecording",
-  "iOSFrameworks":  "AudioToolbox"
+  "iOSFrameworks":  "AudioToolbox CoreMIDI"
 }

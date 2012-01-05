@@ -164,6 +164,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 #elif JUCE_IOS
  #include "native/juce_ios_Audio.cpp"
+ #include "native/juce_MidiDataConcatenator.h"
  #include "native/juce_mac_CoreMidi.cpp"
 
 //==============================================================================

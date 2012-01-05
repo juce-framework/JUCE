@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-#if JUCE_MAC
-
-//==============================================================================
 namespace CoreMidiHelpers
 {
     bool logError (const OSStatus err, const int lineNum)
@@ -364,6 +361,12 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
     CoreMidiHelpers::MidiPortAndEndpoint* const mpe = static_cast<CoreMidiHelpers::MidiPortAndEndpoint*> (internal);
 
+   #if JUCE_IOS
+    const MIDITimeStamp timeStamp = mach_absolute_time();
+   #else
+    const MIDITimeStamp timeStamp = AudioGetCurrentHostTime();
+   #endif
+
     if (message.isSysEx())
     {
         const int maxPacketSize = 256;
@@ -377,7 +380,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 
         for (int i = 0; i < numPackets; ++i)
         {
-            p->timeStamp = AudioGetCurrentHostTime();
+            p->timeStamp = timeStamp;
             p->length = jmin (maxPacketSize, bytesLeft);
             memcpy (p->data, message.getRawData() + pos, p->length);
             pos += p->length;
@@ -391,7 +394,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
     {
         MIDIPacketList packets;
         packets.numPackets = 1;
-        packets.packet[0].timeStamp = AudioGetCurrentHostTime();
+        packets.packet[0].timeStamp = timeStamp;
         packets.packet[0].length = message.getRawDataSize();
         *(int*) (packets.packet[0].data) = *(const int*) message.getRawData();
 
@@ -536,16 +539,3 @@ void MidiInput::stop()
 }
 
 #undef CHECK_ERROR
-
-
-//==============================================================================
-#else  // Stubs for iOS...
-
-MidiOutput::~MidiOutput() {}
-void MidiOutput::sendMessageNow (const MidiMessage& message)                {}
-StringArray MidiOutput::getDevices()                                        { return StringArray(); }
-MidiOutput* MidiOutput::openDevice (int index)                              { return nullptr; }
-StringArray MidiInput::getDevices()                                         { return StringArray(); }
-MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)   { return nullptr; }
-
-#endif
