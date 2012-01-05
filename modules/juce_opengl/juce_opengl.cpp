@@ -136,6 +136,12 @@ void OpenGLExtensionFunctions::initialise()
    #endif
 }
 
+#if JUCE_OPENGL_ES
+ #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams) inline returnType OpenGLExtensionFunctions::name params { return ::name callparams; }
+ JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+ #undef JUCE_DECLARE_GL_FUNCTION
+#endif
+
 #undef JUCE_GL_EXTENSION_FUNCTIONS
 
 //==============================================================================

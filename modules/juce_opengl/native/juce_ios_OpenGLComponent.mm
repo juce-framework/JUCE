@@ -154,7 +154,7 @@ public:
 
         glBindRenderbufferOES (GL_RENDERBUFFER_OES, colorBufferHandle);
         bool ok = [context renderbufferStorage: GL_RENDERBUFFER_OES fromDrawable: glLayer];
-        jassert (ok);
+        jassert (ok); (void) ok;
 
         GLint width, height;
         glGetRenderbufferParameterivOES (GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &width);

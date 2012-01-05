@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#if JUCE_USE_OPENGL_SHADERS
+
 OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& context_) noexcept
     : context (context_)
 {
@@ -97,3 +99,5 @@ void OpenGLShaderProgram::Uniform::set (GLfloat n1, GLfloat n2, GLfloat n3) cons
 void OpenGLShaderProgram::Uniform::set (GLfloat n1, GLfloat n2, GLfloat n3, float n4) const noexcept  { context.extensions.glUniform4f (uniformID, n1, n2, n3, n4); }
 void OpenGLShaderProgram::Uniform::set (GLint n1, GLint n2, GLint n3, GLint n4) const noexcept        { context.extensions.glUniform4i (uniformID, n1, n2, n3, n4); }
 void OpenGLShaderProgram::Uniform::set (const GLfloat* values, GLsizei numValues) const noexcept      { context.extensions.glUniform1fv (uniformID, numValues, values); }
+
+#endif
