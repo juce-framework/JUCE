@@ -2664,9 +2664,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLPixelFormat.h">
       <Filter>Juce Modules\juce_opengl\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLRenderingTarget.h">
-      <Filter>Juce Modules\juce_opengl\opengl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLShaderProgram.h">
       <Filter>Juce Modules\juce_opengl\opengl</Filter>
     </ClInclude>

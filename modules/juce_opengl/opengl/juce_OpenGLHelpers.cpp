@@ -138,6 +138,7 @@ void OpenGLHelpers::enableScissorTest (const Rectangle<int>& clip)
     glScissor (clip.getX(), clip.getY(), clip.getWidth(), clip.getHeight());
 }
 
+#if JUCE_USE_OPENGL_FIXED_FUNCTION
 void OpenGLHelpers::drawQuad2D (float x1, float y1,
                                 float x2, float y2,
                                 float x3, float y3,
@@ -229,7 +230,6 @@ void OpenGLHelpers::fillRectWithTexture (const Rectangle<int>& rect, GLuint text
     drawTextureQuad (textureID, rect);
 }
 
-//==============================================================================
 void OpenGLHelpers::fillRectWithColour (const Rectangle<int>& rect, const Colour& colour)
 {
     glEnableClientState (GL_VERTEX_ARRAY);
@@ -250,6 +250,7 @@ void OpenGLHelpers::fillRect (const Rectangle<int>& rect)
     glVertexPointer (2, GL_FLOAT, 0, vertices);
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
+#endif
 
 //==============================================================================
 OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
@@ -276,13 +277,3 @@ OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
 }
 
 OpenGLTextureFromImage::~OpenGLTextureFromImage() {}
-
-//==============================================================================
-OpenGLRenderingTarget::OpenGLRenderingTarget() {}
-OpenGLRenderingTarget::~OpenGLRenderingTarget() {}
-
-void OpenGLRenderingTarget::prepareFor2D()
-{
-    OpenGLHelpers::prepareFor2D (getRenderingTargetWidth(),
-                                 getRenderingTargetHeight());
-}

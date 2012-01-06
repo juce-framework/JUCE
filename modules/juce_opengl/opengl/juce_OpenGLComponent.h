@@ -44,8 +44,7 @@ class OpenGLGraphicsContext;
     method to draw its contents.
 
 */
-class JUCE_API  OpenGLComponent  : public OpenGLBaseType,
-                                   public OpenGLRenderingTarget
+class JUCE_API  OpenGLComponent  : public OpenGLBaseType
 {
 public:
     //==============================================================================
@@ -191,9 +190,6 @@ public:
         @see makeCurrentRenderingTarget
     */
     void releaseAsRenderingTarget();
-
-    int getRenderingTargetWidth() const         { return getWidth(); }
-    int getRenderingTargetHeight() const        { return getHeight(); }
 
     /** Causes a repaint to be invoked asynchronously.
         This has a similar effect to calling repaint(), and triggers a callback to

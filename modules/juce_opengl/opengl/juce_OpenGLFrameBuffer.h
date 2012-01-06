@@ -31,7 +31,7 @@
 /**
     Creates an openGL frame buffer.
 */
-class JUCE_API  OpenGLFrameBuffer   : public OpenGLRenderingTarget
+class JUCE_API  OpenGLFrameBuffer
 {
 public:
     /** Creates an uninitialised buffer.
@@ -84,9 +84,6 @@ public:
 
     /** Returns the height of the buffer. */
     int getHeight() const noexcept;
-
-    int getRenderingTargetWidth() const         { return getWidth(); }
-    int getRenderingTargetHeight() const        { return getHeight(); }
 
     /** Returns the texture ID number for using this buffer as a texture. */
     GLuint getTextureID() const noexcept;

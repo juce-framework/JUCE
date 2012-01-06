@@ -46,6 +46,14 @@ public:
     /** Clears the current context using the given colour. */
     static void clear (const Colour& colour);
 
+    static void enableScissorTest (const Rectangle<int>& clip);
+
+    /** Checks whether the current context supports the specified extension. */
+    static bool isExtensionSupported (const char* extensionName);
+
+    /** Returns the address of a named GL extension function */
+    static void* getExtensionFunction (const char* functionName);
+
    #if JUCE_USE_OPENGL_FIXED_FUNCTION
     /** Sets the current colour using a JUCE colour. */
     static void setColour (const Colour& colour);
@@ -59,12 +67,9 @@ public:
     static void applyTransform (const AffineTransform& t);
 
     static void applyMatrix (const float matrixValues[16]);
-    #if ! JUCE_OPENGL_ES
+   #if ! JUCE_OPENGL_ES
     static void applyMatrix (const double matrixValues[16]);
-    #endif
    #endif
-
-    static void enableScissorTest (const Rectangle<int>& clip);
 
     /** Draws a 2D quad with the specified corner points. */
     static void drawQuad2D (float x1, float y1,
@@ -79,7 +84,6 @@ public:
                             float x3, float y3, float z3,
                             float x4, float y4, float z4,
                             const Colour& colour);
-
     static void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords, const int numVertices) noexcept;
 
     static void drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords,
@@ -89,17 +93,12 @@ public:
 
     static void fillRectWithTexture (const Rectangle<int>& rect, GLuint textureID, const float alpha);
 
-    static void fillRect (const Rectangle<int>& rect);
-
     /** Fills a rectangle with the specified colour. */
     static void fillRectWithColour (const Rectangle<int>& rect,
                                     const Colour& colour);
 
-    /** Checks whether the current context supports the specified extension. */
-    static bool isExtensionSupported (const char* extensionName);
-
-    /** Returns the address of a named GL extension function */
-    static void* getExtensionFunction (const char* functionName);
+    static void fillRect (const Rectangle<int>& rect);
+   #endif
 };
 
 //==============================================================================

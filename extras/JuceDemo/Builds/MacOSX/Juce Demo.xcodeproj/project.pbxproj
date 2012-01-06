@@ -572,7 +572,6 @@
 		936C6419223D7B28CE16A72B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_BufferedInputStream.cpp"; path = "../../../../modules/juce_core/streams/juce_BufferedInputStream.cpp"; sourceTree = "SOURCE_ROOT"; };
 		9398049BFCAC42B8FD1E16C5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DirectXPluginFormat.h"; path = "../../../../modules/juce_audio_processors/format_types/juce_DirectXPluginFormat.h"; sourceTree = "SOURCE_ROOT"; };
 		93C594ECD5CEA7878114149A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_WebBrowserComponent.cpp"; path = "../../../../modules/juce_gui_extra/native/juce_win32_WebBrowserComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
-		942191F317B1B2B1CFBB7C60 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGLRenderingTarget.h"; path = "../../../../modules/juce_opengl/opengl/juce_OpenGLRenderingTarget.h"; sourceTree = "SOURCE_ROOT"; };
 		94A9A7DF00C64509E9B5A337 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QuickTimeDemo.cpp; path = ../../Source/demos/QuickTimeDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		94EB4630C360BA31195FA13D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_AudioIODeviceType.cpp"; path = "../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.cpp"; sourceTree = "SOURCE_ROOT"; };
 		95305C4003CD4784CA20D1D1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TextEditorKeyMapper.h"; path = "../../../../modules/juce_gui_basics/keyboard/juce_TextEditorKeyMapper.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1908,7 +1907,6 @@
 				E46977801F19277F4D3B324B,
 				17422D876DAAF091ED089B8D,
 				B81FA2ED22BCC03D124031ED,
-				942191F317B1B2B1CFBB7C60,
 				58864C3D7F369EBE01E42C5C,
 				8EEB4DEB11F3DF01BA6F7528,
 				FE9A5898294228EB7F439951,
