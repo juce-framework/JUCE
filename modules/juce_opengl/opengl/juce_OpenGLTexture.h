@@ -80,6 +80,7 @@ public:
     /** Unbinds the texture to the currently selected openGL context. */
     void unbind() const;
 
+   #if JUCE_USE_OPENGL_FIXED_FUNCTION
     /** Draws this texture into the current context, with the specified corner positions. */
     void draw2D (float x1, float y1,
                  float x2, float y2,
@@ -93,6 +94,7 @@ public:
                  float x3, float y3, float z3,
                  float x4, float y4, float z4,
                  const Colour& colour) const;
+   #endif
 
     /** Returns the GL texture ID number. */
     GLuint getTextureID() const noexcept        { return textureID; }

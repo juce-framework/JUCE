@@ -376,7 +376,7 @@ public:
     public:
         //==============================================================================
         Iterator (const HashMap& hashMapToIterate)
-            : hashMap (hashMapToIterate), entry (0), index (0)
+            : hashMap (hashMapToIterate), entry (nullptr), index (0)
         {}
 
         /** Moves to the next item, if one is available.

@@ -74,18 +74,14 @@ public:
 
     ~GLESContext()
     {
-        deleteContext();
+        properties.clear(); // to release any stored programs, etc that may be held in properties.
+        makeInactive();
+        [context release];
+        context = nil;
 
         [view removeFromSuperview];
         [view release];
         freeGLBuffers();
-    }
-
-    void deleteContext()
-    {
-        makeInactive();
-        [context release];
-        context = nil;
     }
 
     bool makeActive() const noexcept
@@ -115,6 +111,9 @@ public:
 
     void* getRawContext() const noexcept            { return glLayer; }
     unsigned int getFrameBufferID() const           { return (unsigned int) frameBufferHandle; }
+
+    int getWidth() const                            { return lastWidth; }
+    int getHeight() const                           { return lastHeight; }
 
     void updateWindowPosition (const Rectangle<int>& bounds)
     {

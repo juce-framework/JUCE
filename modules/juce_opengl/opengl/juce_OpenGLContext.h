@@ -77,15 +77,10 @@ public:
     */
     virtual void* getRawContext() const noexcept = 0;
 
-    /** Deletes the context.
-
-        This must only be called on the message thread, or will deadlock.
-        On background threads, call getCurrentContext()->deleteContext(), but be careful not
-        to call any other OpenGL function afterwards.
-        This doesn't touch other resources, such as window handles, etc.
-        You'll probably never have to call this method directly.
-    */
-    virtual void deleteContext() = 0;
+    /** Returns the width of this context */
+    virtual int getWidth() const = 0;
+    /** Returns the height of this context */
+    virtual int getHeight() const = 0;
 
     /** If this context is backed by a frame buffer, this returns its ID number, or
         0 if the context has no accessible framebuffer.
@@ -108,11 +103,26 @@ public:
     /** This structure holds a set of dynamically loaded GL functions for use on this context. */
     OpenGLExtensionFunctions extensions;
 
+    //==============================================================================
+    /** Draws the currently selected texture into this context at its original size.
+        @param targetClipArea  the target area to draw into (in top-left origin coords)
+        @param anchorPosAndTextureSize  the position of this rectangle is the texture's top-left
+                                        anchor position in the target space, and the size must be
+                                        the total size of the texture.
+    */
+    void copyTexture (const Rectangle<int>& targetClipArea,
+                      const Rectangle<int>& anchorPosAndTextureSize,
+                      float alpha);
+
 protected:
     //==============================================================================
     OpenGLContext() noexcept;
 
 private:
+    double shaderLanguageVersion;
+
+    double getShaderLanguageVersion();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLContext);
 };
 

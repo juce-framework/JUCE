@@ -147,6 +147,7 @@ void OpenGLExtensionFunctions::initialise()
 //==============================================================================
 // START_AUTOINCLUDE opengl/*.cpp
 #include "opengl/juce_OpenGLComponent.cpp"
+#include "opengl/juce_OpenGLContext.cpp"
 #include "opengl/juce_OpenGLFrameBuffer.cpp"
 #include "opengl/juce_OpenGLGraphicsContext.cpp"
 #include "opengl/juce_OpenGLHelpers.cpp"

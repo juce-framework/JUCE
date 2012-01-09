@@ -47,17 +47,17 @@ public:
         Note that a valid openGL context must be selected when you call this method,
         or it will fail.
     */
-    bool initialise (const OpenGLContext& context, int width, int height);
+    bool initialise (OpenGLContext& context, int width, int height);
 
     /** Tries to allocates a buffer containing a copy of a given image.
         Note that a valid openGL context must be selected when you call this method,
         or it will fail.
     */
-    bool initialise (const OpenGLContext& context, const Image& content);
+    bool initialise (OpenGLContext& context, const Image& content);
 
     /** Tries to allocate a copy of another framebuffer.
     */
-    bool initialise (const OpenGLFrameBuffer& other);
+    bool initialise (OpenGLFrameBuffer& other);
 
     /** Releases the buffer, if one has been allocated.
         Any saved state that was created with saveAndRelease() will also be freed by this call.
@@ -73,7 +73,7 @@ public:
     /** Restores the framebuffer content that was previously saved using saveAndRelease().
         After saving to main memory, the original state can be restored by calling restoreToGPUMemory().
     */
-    bool reloadSavedCopy (const OpenGLContext& context);
+    bool reloadSavedCopy (OpenGLContext& context);
 
     //==============================================================================
     /** Returns true if a valid buffer has been allocated. */
@@ -104,6 +104,7 @@ public:
     /** Selects the framebuffer as the current target, and clears it to transparent. */
     void makeCurrentAndClear();
 
+   #if JUCE_USE_OPENGL_FIXED_FUNCTION
     /** Draws this framebuffer onto the current context, with the specified corner positions. */
     void draw2D (float x1, float y1,
                  float x2, float y2,
@@ -120,6 +121,7 @@ public:
 
     /** Draws the framebuffer at a given position. */
     void drawAt (float x1, float y1) const;
+   #endif
 
     /** Reads an area of pixels from the framebuffer into a 32-bit ARGB pixel array.
         The lineStride is measured as a number of pixels, not bytes - pass a stride

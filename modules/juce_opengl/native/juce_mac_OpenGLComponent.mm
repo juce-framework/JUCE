@@ -160,11 +160,8 @@ public:
 
     ~WindowedGLContext()
     {
-        deleteContext();
-    }
+        properties.clear(); // to release any stored programs, etc that may be held in properties.
 
-    void deleteContext()
-    {
         makeInactive();
         [renderContext clearDrawable];
         [renderContext setView: nil];
@@ -196,6 +193,9 @@ public:
 
     void* getRawContext() const noexcept            { return renderContext; }
     unsigned int getFrameBufferID() const           { return 0; }
+
+    int getWidth() const                            { return [view frame].size.width; }
+    int getHeight() const                           { return [view frame].size.height; }
 
     void swapBuffers()
     {

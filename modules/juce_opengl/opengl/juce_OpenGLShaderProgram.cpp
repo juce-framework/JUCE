@@ -80,6 +80,11 @@ void OpenGLShaderProgram::link() noexcept
    #endif
 }
 
+void OpenGLShaderProgram::use() const noexcept
+{
+    context.extensions.glUseProgram (programID);
+}
+
 OpenGLShaderProgram::Uniform::Uniform (const OpenGLShaderProgram& program, const char* const name)
     : uniformID (program.context.extensions.glGetUniformLocation (program.programID, name)), context (program.context)
 {

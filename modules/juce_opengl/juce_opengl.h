@@ -76,7 +76,6 @@
 
 //=============================================================================
 BEGIN_JUCE_NAMESPACE
-#include "opengl/juce_OpenGLRenderingTarget.h"
 #include "opengl/juce_OpenGLHelpers.h"
 
 // START_AUTOINCLUDE opengl

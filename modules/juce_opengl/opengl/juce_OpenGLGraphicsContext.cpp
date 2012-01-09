@@ -199,7 +199,7 @@ private:
 class ShaderPrograms  : public ReferenceCountedObject
 {
 public:
-    ShaderPrograms (const OpenGLContext& context)
+    ShaderPrograms (OpenGLContext& context)
         : solidColourProgram (context),
           solidColourMasked (context),
           radialGradient (context),
@@ -221,7 +221,7 @@ public:
     //==============================================================================
     struct ShaderProgramHolder
     {
-        ShaderProgramHolder (const OpenGLContext& context, const char* fragmentShader)
+        ShaderProgramHolder (OpenGLContext& context, const char* fragmentShader)
             : program (context)
         {
             program.addShader ("attribute vec2 position;"
@@ -243,7 +243,7 @@ public:
 
     struct ShaderBase   : public ShaderProgramHolder
     {
-        ShaderBase (const OpenGLContext& context, const char* fragmentShader)
+        ShaderBase (OpenGLContext& context, const char* fragmentShader)
             : ShaderProgramHolder (context, fragmentShader),
               positionAttribute (program, "position"),
               colourAttribute (program, "colour"),
@@ -255,7 +255,7 @@ public:
             screenBounds.set (bounds.getX(), bounds.getY(), 0.5f * bounds.getWidth(), 0.5f * bounds.getHeight());
         }
 
-        void bindAttributes (const OpenGLContext& context)
+        void bindAttributes (OpenGLContext& context)
         {
             context.extensions.glVertexAttribPointer (positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 8, (void*) 0);
             context.extensions.glVertexAttribPointer (colourAttribute.attributeID, 4, GL_UNSIGNED_BYTE, GL_TRUE, 8, (void*) 4);
@@ -271,7 +271,7 @@ public:
 
     struct MaskedShaderParams
     {
-        MaskedShaderParams (const OpenGLShaderProgram& program)
+        MaskedShaderParams (OpenGLShaderProgram& program)
             : maskTexture (program, "maskTexture"),
               maskBounds  (program, "maskBounds")
         {}
@@ -290,7 +290,7 @@ public:
     //==============================================================================
     struct SolidColourProgram  : public ShaderBase
     {
-        SolidColourProgram (const OpenGLContext& context)
+        SolidColourProgram (OpenGLContext& context)
             : ShaderBase (context, "void main()"
                                    "{"
                                    " gl_FragColor = gl_Color;"
@@ -307,7 +307,7 @@ public:
 
     struct SolidColourMaskedProgram  : public ShaderBase
     {
-        SolidColourMaskedProgram (const OpenGLContext& context)
+        SolidColourMaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_MASK_UNIFORMS
                           "void main()"
@@ -323,7 +323,7 @@ public:
     //==============================================================================
     struct RadialGradientParams
     {
-        RadialGradientParams (const OpenGLShaderProgram& program)
+        RadialGradientParams (OpenGLShaderProgram& program)
             : gradientTexture (program, "gradientTexture"),
               matrix (program, "matrix")
         {}
@@ -342,14 +342,13 @@ public:
 
     #define JUCE_DECLARE_MATRIX_UNIFORM   "uniform float matrix[6];"
     #define JUCE_DECLARE_RADIAL_UNIFORMS  "uniform sampler2D gradientTexture;" JUCE_DECLARE_MATRIX_UNIFORM
-    #define JUCE_MATRIX_TIMES_FRAGCOORD   "(vec2 (matrix[0], matrix[3]) * gl_FragCoord.x" \
-                                          " + vec2 (matrix[1], matrix[4]) * gl_FragCoord.y " \
+    #define JUCE_MATRIX_TIMES_FRAGCOORD   "(mat2 (matrix[0], matrix[3], matrix[1], matrix[4]) * gl_FragCoord.xy" \
                                           " + vec2 (matrix[2], matrix[5]))"
     #define JUCE_GET_TEXTURE_COLOUR       "(gl_Color.a * texture2D (gradientTexture, vec2 (gradientPos, 0.5)))"
 
     struct RadialGradientProgram  : public ShaderBase
     {
-        RadialGradientProgram (const OpenGLContext& context)
+        RadialGradientProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_RADIAL_UNIFORMS
                           "void main()"
@@ -365,7 +364,7 @@ public:
 
     struct RadialGradientMaskedProgram  : public ShaderBase
     {
-        RadialGradientMaskedProgram (const OpenGLContext& context)
+        RadialGradientMaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_RADIAL_UNIFORMS
                           JUCE_DECLARE_MASK_UNIFORMS
@@ -385,7 +384,7 @@ public:
     //==============================================================================
     struct LinearGradientParams
     {
-        LinearGradientParams (const OpenGLShaderProgram& program)
+        LinearGradientParams (OpenGLShaderProgram& program)
             : gradientTexture (program, "gradientTexture"),
               gradientInfo (program, "gradientInfo")
         {}
@@ -400,7 +399,7 @@ public:
 
     struct LinearGradient1Program  : public ShaderBase
     {
-        LinearGradient1Program (const OpenGLContext& context)
+        LinearGradient1Program (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (y2 - y1) / (x2 - x1), w = length
                           "void main()"
@@ -416,7 +415,7 @@ public:
 
     struct LinearGradient1MaskedProgram  : public ShaderBase
     {
-        LinearGradient1MaskedProgram (const OpenGLContext& context)
+        LinearGradient1MaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (y2 - y1) / (x2 - x1), w = length
                           JUCE_DECLARE_MASK_UNIFORMS
@@ -435,7 +434,7 @@ public:
 
     struct LinearGradient2Program  : public ShaderBase
     {
-        LinearGradient2Program (const OpenGLContext& context)
+        LinearGradient2Program (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (x2 - x1) / (y2 - y1), y = y1, w = length
                           "void main()"
@@ -451,7 +450,7 @@ public:
 
     struct LinearGradient2MaskedProgram  : public ShaderBase
     {
-        LinearGradient2MaskedProgram (const OpenGLContext& context)
+        LinearGradient2MaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (x2 - x1) / (y2 - y1), y = y1, w = length
                           JUCE_DECLARE_MASK_UNIFORMS
@@ -471,7 +470,7 @@ public:
     //==============================================================================
     struct ImageParams
     {
-        ImageParams (const OpenGLShaderProgram& program)
+        ImageParams (OpenGLShaderProgram& program)
             : imageTexture (program, "imageTexture"),
               matrix (program, "matrix"),
               imageRepeatSize (program, "imageRepeatSize")
@@ -511,7 +510,7 @@ public:
 
     struct ImageProgram  : public ShaderBase
     {
-        ImageProgram (const OpenGLContext& context)
+        ImageProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_IMAGE_UNIFORMS
                           "void main()"
@@ -527,7 +526,7 @@ public:
 
     struct ImageMaskedProgram  : public ShaderBase
     {
-        ImageMaskedProgram (const OpenGLContext& context)
+        ImageMaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_IMAGE_UNIFORMS
                           JUCE_DECLARE_MASK_UNIFORMS
@@ -546,7 +545,7 @@ public:
 
     struct TiledImageProgram  : public ShaderBase
     {
-        TiledImageProgram (const OpenGLContext& context)
+        TiledImageProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_IMAGE_UNIFORMS
                           "void main()"
@@ -562,7 +561,7 @@ public:
 
     struct TiledImageMaskedProgram  : public ShaderBase
     {
-        TiledImageMaskedProgram (const OpenGLContext& context)
+        TiledImageMaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_IMAGE_UNIFORMS
                           JUCE_DECLARE_MASK_UNIFORMS
@@ -581,7 +580,7 @@ public:
 
     struct CopyTextureProgram  : public ShaderBase
     {
-        CopyTextureProgram (const OpenGLContext& context)
+        CopyTextureProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_IMAGE_UNIFORMS
                           "void main()"
@@ -597,7 +596,7 @@ public:
 
     struct MaskTextureProgram  : public ShaderBase
     {
-        MaskTextureProgram (const OpenGLContext& context)
+        MaskTextureProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_SHADER_VERSION
                           JUCE_DECLARE_IMAGE_UNIFORMS
                           "void main()"
@@ -1237,7 +1236,7 @@ struct StateHelpers
             {
                 quadQueue.flush();
                 activeShader = &(shader.program);
-                context.extensions.glUseProgram (shader.program.programID);
+                shader.program.use();
                 shader.bindAttributes (context);
 
                 currentBounds = bounds;
@@ -1350,6 +1349,10 @@ public:
         target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
         resetMultiTextureModes (true);
+       #endif
+
+       #if JUCE_USE_OPENGL_SHADERS
+        glDisableClientState (GL_INDEX_ARRAY);
        #endif
     }
 

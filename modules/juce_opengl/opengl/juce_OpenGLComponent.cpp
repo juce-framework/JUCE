@@ -23,98 +23,6 @@
   ==============================================================================
 */
 
-//==============================================================================
-OpenGLPixelFormat::OpenGLPixelFormat (const int bitsPerRGBComponent,
-                                      const int alphaBits_,
-                                      const int depthBufferBits_,
-                                      const int stencilBufferBits_) noexcept
-    : redBits (bitsPerRGBComponent),
-      greenBits (bitsPerRGBComponent),
-      blueBits (bitsPerRGBComponent),
-      alphaBits (alphaBits_),
-      depthBufferBits (depthBufferBits_),
-      stencilBufferBits (stencilBufferBits_),
-      accumulationBufferRedBits (0),
-      accumulationBufferGreenBits (0),
-      accumulationBufferBlueBits (0),
-      accumulationBufferAlphaBits (0),
-      multisamplingLevel (0)
-{
-}
-
-OpenGLPixelFormat::OpenGLPixelFormat (const OpenGLPixelFormat& other) noexcept
-    : redBits (other.redBits),
-      greenBits (other.greenBits),
-      blueBits (other.blueBits),
-      alphaBits (other.alphaBits),
-      depthBufferBits (other.depthBufferBits),
-      stencilBufferBits (other.stencilBufferBits),
-      accumulationBufferRedBits (other.accumulationBufferRedBits),
-      accumulationBufferGreenBits (other.accumulationBufferGreenBits),
-      accumulationBufferBlueBits (other.accumulationBufferBlueBits),
-      accumulationBufferAlphaBits (other.accumulationBufferAlphaBits),
-      multisamplingLevel (other.multisamplingLevel)
-{
-}
-
-OpenGLPixelFormat& OpenGLPixelFormat::operator= (const OpenGLPixelFormat& other) noexcept
-{
-    redBits = other.redBits;
-    greenBits = other.greenBits;
-    blueBits = other.blueBits;
-    alphaBits = other.alphaBits;
-    depthBufferBits = other.depthBufferBits;
-    stencilBufferBits = other.stencilBufferBits;
-    accumulationBufferRedBits = other.accumulationBufferRedBits;
-    accumulationBufferGreenBits = other.accumulationBufferGreenBits;
-    accumulationBufferBlueBits = other.accumulationBufferBlueBits;
-    accumulationBufferAlphaBits = other.accumulationBufferAlphaBits;
-    multisamplingLevel = other.multisamplingLevel;
-    return *this;
-}
-
-bool OpenGLPixelFormat::operator== (const OpenGLPixelFormat& other) const noexcept
-{
-    return redBits == other.redBits
-            && greenBits == other.greenBits
-            && blueBits == other.blueBits
-            && alphaBits == other.alphaBits
-            && depthBufferBits == other.depthBufferBits
-            && stencilBufferBits == other.stencilBufferBits
-            && accumulationBufferRedBits == other.accumulationBufferRedBits
-            && accumulationBufferGreenBits == other.accumulationBufferGreenBits
-            && accumulationBufferBlueBits == other.accumulationBufferBlueBits
-            && accumulationBufferAlphaBits == other.accumulationBufferAlphaBits
-            && multisamplingLevel == other.multisamplingLevel;
-}
-
-//==============================================================================
-static Array<OpenGLContext*> knownContexts;
-
-OpenGLContext::OpenGLContext() noexcept
-{
-    knownContexts.add (this);
-}
-
-OpenGLContext::~OpenGLContext()
-{
-    knownContexts.removeValue (this);
-}
-
-OpenGLContext* OpenGLContext::getCurrentContext()
-{
-    for (int i = knownContexts.size(); --i >= 0;)
-    {
-        OpenGLContext* const oglc = knownContexts.getUnchecked(i);
-
-        if (oglc->isActive())
-            return oglc;
-    }
-
-    return nullptr;
-}
-
-//==============================================================================
 class OpenGLComponent::OpenGLCachedComponentImage  : public CachedComponentImage,
                                                      public Timer // N.B. using a Timer rather than an AsyncUpdater
                                                                   // to avoid scheduling problems on Windows
@@ -122,8 +30,7 @@ class OpenGLComponent::OpenGLCachedComponentImage  : public CachedComponentImage
 public:
     OpenGLCachedComponentImage (OpenGLComponent& owner_)
         : owner (owner_)
-    {
-    }
+    {}
 
     void paint (Graphics&)
     {
@@ -533,11 +440,15 @@ bool OpenGLComponent::performRender()
                 }
             }
 
-            OpenGLHelpers::prepareFor2D (bounds.getWidth(), bounds.getHeight());
-            glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable (GL_BLEND);
-            glColor4f (1.0f, 1.0f, 1.0f, getAlpha());
-            frameBuffer.drawAt (0, (float) (bounds.getHeight() - frameBuffer.getHeight()));
+            glEnable (GL_TEXTURE_2D);
+            glActiveTexture (GL_TEXTURE0);
+            glBindTexture (GL_TEXTURE_2D, frameBuffer.getTextureID());
+
+            context->copyTexture (getLocalBounds(),
+                                  Rectangle<int> (frameBuffer.getWidth(), frameBuffer.getHeight()),
+                                  getAlpha());
+
+            glBindTexture (GL_TEXTURE_2D, 0);
         }
 
         swapBuffers();

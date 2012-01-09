@@ -26,7 +26,7 @@
 class OpenGLFrameBuffer::Pimpl
 {
 public:
-    Pimpl (const OpenGLContext& context_, const int width_, const int height_,
+    Pimpl (OpenGLContext& context_, const int width_, const int height_,
            const bool wantsDepthBuffer, const bool wantsStencilBuffer)
         : context (context_),
           width (width_),
@@ -106,7 +106,7 @@ public:
     void bind()    { context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle); }
     void unbind()  { context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0); }
 
-    const OpenGLContext& context;
+    OpenGLContext& context;
     const int width, height;
     GLuint textureID, frameBufferHandle, depthOrStencilBuffer;
     bool hasDepthBuffer, hasStencilBuffer, ok;
@@ -134,7 +134,7 @@ public:
         buffer.readPixels (data, Rectangle<int> (w, h));
     }
 
-    bool restore (const OpenGLContext& context, OpenGLFrameBuffer& buffer)
+    bool restore (OpenGLContext& context, OpenGLFrameBuffer& buffer)
     {
         if (buffer.initialise (context, width, height))
         {
@@ -156,7 +156,7 @@ private:
 OpenGLFrameBuffer::OpenGLFrameBuffer() {}
 OpenGLFrameBuffer::~OpenGLFrameBuffer() {}
 
-bool OpenGLFrameBuffer::initialise (const OpenGLContext& context, int width, int height)
+bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int height)
 {
     jassert (context.isActive()); // The context must be active when creating a framebuffer!
 
@@ -169,7 +169,7 @@ bool OpenGLFrameBuffer::initialise (const OpenGLContext& context, int width, int
     return pimpl != nullptr;
 }
 
-bool OpenGLFrameBuffer::initialise (const OpenGLContext& context, const Image& image)
+bool OpenGLFrameBuffer::initialise (OpenGLContext& context, const Image& image)
 {
     if (! image.isARGB())
         return initialise (context, image.convertedToFormat (Image::ARGB));
@@ -180,7 +180,7 @@ bool OpenGLFrameBuffer::initialise (const OpenGLContext& context, const Image& i
             && writePixels ((const PixelARGB*) bitmap.data, image.getBounds());
 }
 
-bool OpenGLFrameBuffer::initialise (const OpenGLFrameBuffer& other)
+bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 {
     const Pimpl* const p = other.pimpl;
 
@@ -190,15 +190,18 @@ bool OpenGLFrameBuffer::initialise (const OpenGLFrameBuffer& other)
         return true;
     }
 
-    if (initialise (p->context, p->width, p->height))
+    const Rectangle<int> area (pimpl->width, pimpl->height);
+
+    if (initialise (p->context, area.getWidth(), area.getHeight()))
     {
         pimpl->bind();
-        OpenGLHelpers::prepareFor2D (p->width, p->height);
-        glDisable (GL_BLEND);
-        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-        other.drawAt (0, 0);
-        pimpl->unbind();
 
+        glEnable (GL_TEXTURE_2D);
+        glBindTexture (GL_TEXTURE_2D, p->textureID);
+        pimpl->context.copyTexture (area, area, 1.0f);
+        glBindTexture (GL_TEXTURE_2D, 0);
+
+        pimpl->unbind();
         return true;
     }
 
@@ -220,7 +223,7 @@ void OpenGLFrameBuffer::saveAndRelease()
     }
 }
 
-bool OpenGLFrameBuffer::reloadSavedCopy (const OpenGLContext& context)
+bool OpenGLFrameBuffer::reloadSavedCopy (OpenGLContext& context)
 {
     if (savedState != nullptr)
     {
@@ -300,15 +303,14 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     if (! makeCurrentRenderingTarget())
         return false;
 
-    OpenGLHelpers::prepareFor2D (pimpl->width, pimpl->height);
     glDisable (GL_DEPTH_TEST);
     glDisable (GL_BLEND);
 
     OpenGLTexture tex;
     tex.loadARGBFlipped (data, area.getWidth(), area.getHeight());
-    const int texH = tex.getHeight();
 
    #if JUCE_OPENGL_ES
+    const int texH = tex.getHeight();
     tex.bind();
     const GLint cropRect[4] = { 0, texH - area.getHeight(), area.getWidth(), area.getHeight() };
     glTexParameteriv (GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, cropRect);
@@ -317,28 +319,14 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
     glBindTexture (GL_TEXTURE_2D, 0);
    #else
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-
-    const int x = area.getX();
-    const int y = area.getY() - (texH - area.getHeight());
-    const GLfloat x1 = (GLfloat) x;
-    const GLfloat y1 = (GLfloat) y;
-    const GLfloat x2 = (GLfloat) (x + tex.getWidth());
-    const GLfloat y2 = (GLfloat) (y + texH);
-    const GLfloat vertices[]      = { x1, y1, x2, y1, x1, y2, x2, y2 };
-    const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
-
-    OpenGLHelpers::drawTriangleStrip (vertices, textureCoords, 4, tex.getTextureID());
+    pimpl->context.copyTexture (area, area, 1.0f);
    #endif
 
     pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
     return true;
 }
 
+#if JUCE_USE_OPENGL_FIXED_FUNCTION
 void OpenGLFrameBuffer::draw2D (float x1, float y1,
                                 float x2, float y2,
                                 float x3, float y3,
@@ -394,3 +382,4 @@ void OpenGLFrameBuffer::drawAt (float x1, float y1) const
         glBindTexture (GL_TEXTURE_2D, 0);
     }
 }
+#endif

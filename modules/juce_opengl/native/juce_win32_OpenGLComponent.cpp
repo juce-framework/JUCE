@@ -64,13 +64,7 @@ public:
 
     ~WindowedGLContext()
     {
-        deleteContext();
-        ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
-        nativeWindow = nullptr;
-    }
-
-    void deleteContext()
-    {
+        properties.clear(); // to release any stored programs, etc that may be held in properties.
         makeInactive();
 
         if (renderContext != 0)
@@ -78,6 +72,9 @@ public:
             wglDeleteContext (renderContext);
             renderContext = 0;
         }
+
+        ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
+        nativeWindow = nullptr;
     }
 
     bool makeActive() const noexcept
@@ -96,15 +93,11 @@ public:
         return wglGetCurrentContext() == renderContext;
     }
 
-    void* getRawContext() const noexcept
-    {
-        return renderContext;
-    }
+    void* getRawContext() const noexcept            { return renderContext; }
+    unsigned int getFrameBufferID() const           { return 0; }
 
-    unsigned int getFrameBufferID() const
-    {
-        return 0;
-    }
+    int getWidth() const                            { return component->getWidth(); }
+    int getHeight() const                           { return component->getHeight(); }
 
     bool setPixelFormat (const OpenGLPixelFormat& pixelFormat)
     {

@@ -65,6 +65,9 @@ public:
     */
     void link() noexcept;
 
+    /** Selects this program into the current context. */
+    void use() const noexcept;
+
     /** Represents an openGL uniform value.
         After a program has been linked, you can create Uniform objects to let you
         set the uniforms that your shaders use.

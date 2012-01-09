@@ -103,14 +103,8 @@ public:
     ~WindowedGLContext()
     {
         ScopedXLock xlock;
-        deleteContext();
 
-        XUnmapWindow (display, embeddedWindow);
-        XDestroyWindow (display, embeddedWindow);
-    }
-
-    void deleteContext()
-    {
+        properties.clear(); // to release any stored programs, etc that may be held in properties.
         makeInactive();
 
         if (renderContext != 0)
@@ -119,6 +113,9 @@ public:
             glXDestroyContext (display, renderContext);
             renderContext = nullptr;
         }
+
+        XUnmapWindow (display, embeddedWindow);
+        XDestroyWindow (display, embeddedWindow);
     }
 
     bool makeActive() const noexcept
@@ -142,14 +139,19 @@ public:
         return glXGetCurrentContext() == renderContext;
     }
 
-    void* getRawContext() const noexcept
-    {
-        return renderContext;
-    }
+    unsigned int getFrameBufferID() const           { return 0; }
+    void* getRawContext() const noexcept            { return renderContext; }
 
-    unsigned int getFrameBufferID() const
+    int getWidth() const                            { return bounds.getWidth(); }
+    int getHeight() const                           { return bounds.getHeight(); }
+
+    void updateWindowPosition (const Rectangle<int>& newBounds)
     {
-        return 0;
+        bounds = newBounds;
+
+        ScopedXLock xlock;
+        XMoveResizeWindow (display, embeddedWindow,
+                           bounds.getX(), bounds.getY(), jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()));
     }
 
     void swapBuffers()
@@ -183,6 +185,7 @@ public:
 
 private:
     int swapInterval;
+    Rectangle<int> bounds;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
 };
@@ -201,13 +204,7 @@ void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
     const ScopedLock sl (contextLock);
 
     if (context != nullptr)
-    {
-        Window embeddedWindow = static_cast<WindowedGLContext*> (context.get())->embeddedWindow;
-
-        ScopedXLock xlock;
-        XMoveResizeWindow (display, embeddedWindow,
-                           bounds.getX(), bounds.getY(), jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()));
-    }
+        static_cast<WindowedGLContext*> (context.get())->updateWindowPosition (bounds);
 }
 
 //==============================================================================
