@@ -229,6 +229,11 @@ FileBasedDocument::SaveResult FileBasedDocument::saveIfNeededAndUserAgrees()
     return userCancelledSave;
 }
 
+File FileBasedDocument::getSuggestedSaveAsFile (const File& defaultFile)
+{
+    return defaultFile.withFileExtension (fileExtension).getNonexistentSibling (true);
+}
+
 FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool warnAboutOverwritingExistingFiles)
 {
     File f;
@@ -248,8 +253,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
     else
         f = File::getSpecialLocation (File::userDocumentsDirectory).getChildFile (legalFilename);
 
-    f = f.withFileExtension (fileExtension)
-         .getNonexistentSibling (true);
+    f = getSuggestedSaveAsFile (f);
 
     FileChooser fc (saveFileDialogTitle, f, fileWildcard);
 

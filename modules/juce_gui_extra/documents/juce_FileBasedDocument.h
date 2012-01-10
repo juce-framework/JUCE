@@ -275,6 +275,13 @@ protected:
     */
     virtual void setLastDocumentOpened (const File& file) = 0;
 
+    /** This is called by saveAsInteractive() to allow you to optionally customise the
+        filename that the user is presented with in the save dialog.
+        The defaultFile parameter is an initial suggestion based on what the class knows
+        about the current document - you can return a variation on this file with a different
+        extension, etc, or just return something completely different.
+    */
+    virtual File getSuggestedSaveAsFile (const File& defaultFile);
 
 private:
     //==============================================================================

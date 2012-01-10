@@ -559,17 +559,17 @@ void TableHeaderComponent::resized()
 
 void TableHeaderComponent::mouseMove (const MouseEvent& e)
 {
-    updateColumnUnderMouse (e.x, e.y);
+    updateColumnUnderMouse (e);
 }
 
 void TableHeaderComponent::mouseEnter (const MouseEvent& e)
 {
-    updateColumnUnderMouse (e.x, e.y);
+    updateColumnUnderMouse (e);
 }
 
 void TableHeaderComponent::mouseExit (const MouseEvent& e)
 {
-    updateColumnUnderMouse (e.x, e.y);
+    setColumnUnderMouse (0);
 }
 
 void TableHeaderComponent::mouseDown (const MouseEvent& e)
@@ -771,7 +771,7 @@ void TableHeaderComponent::mouseUp (const MouseEvent& e)
 
     endDrag (getIndexOfColumnId (columnIdBeingDragged, true));
 
-    updateColumnUnderMouse (e.x, e.y);
+    updateColumnUnderMouse (e);
 
     if (columnIdUnderMouse != 0 && e.mouseWasClicked() && ! e.mods.isPopupMenu())
         columnClicked (columnIdUnderMouse, e.mods);
@@ -892,16 +892,19 @@ int TableHeaderComponent::getResizeDraggerAt (const int mouseX) const
     return 0;
 }
 
-void TableHeaderComponent::updateColumnUnderMouse (int x, int y)
+void TableHeaderComponent::setColumnUnderMouse (const int newCol)
 {
-    const int newCol = (reallyContains (Point<int> (x, y), true) && getResizeDraggerAt (x) == 0)
-                            ? getColumnIdAtX (x) : 0;
-
     if (newCol != columnIdUnderMouse)
     {
         columnIdUnderMouse = newCol;
         repaint();
     }
+}
+
+void TableHeaderComponent::updateColumnUnderMouse (const MouseEvent& e)
+{
+    setColumnUnderMouse (reallyContains (e.getPosition(), true) && getResizeDraggerAt (e.x) == 0
+                            ? getColumnIdAtX (e.x) : 0);
 }
 
 static void tableHeaderMenuCallback (int result, TableHeaderComponent* tableHeader, int columnIdClicked)

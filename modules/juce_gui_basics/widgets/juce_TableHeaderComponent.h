@@ -419,7 +419,8 @@ private:
     void beginDrag (const MouseEvent&);
     void endDrag (int finalIndex);
     int getResizeDraggerAt (int mouseX) const;
-    void updateColumnUnderMouse (int x, int y);
+    void updateColumnUnderMouse (const MouseEvent&);
+    void setColumnUnderMouse (int columnId);
     void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableHeaderComponent);

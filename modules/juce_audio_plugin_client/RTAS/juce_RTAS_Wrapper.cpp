@@ -959,7 +959,7 @@ private:
     static String createRTASName()
     {
         return String (JucePlugin_Name) + "\n"
-                 + String (JucePlugin_Name).substring (0, 4);
+                 + String (JucePlugin_Desc);
     }
 
     static EPlugIn_StemFormat getFormatForChans (const int numChans) noexcept
