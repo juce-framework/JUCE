@@ -50,6 +50,18 @@ namespace
     Value getPluginAUCocoaViewClassName (const Project& project)        { return project.getProjectValue ("pluginAUViewClass"); }
     Value getPluginRTASCategory (const Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
 
+    String getPluginRTASCategoryCode (const Project& project)
+    {
+        if (static_cast <bool> (getPluginIsSynth (project).getValue()))
+            return "ePlugInCategory_SWGenerators";
+
+        String s (getPluginRTASCategory (project).toString());
+        if (s.isEmpty())
+            s = "ePlugInCategory_None";
+
+        return s;
+    }
+
     int countMaxPluginChannels (const String& configString, bool isInput)
     {
         StringArray configs;
@@ -103,7 +115,7 @@ namespace
             << "#define JucePlugin_AUManufacturerCode   JucePlugin_ManufacturerCode" << newLine
             << "#define JucePlugin_CFBundleIdentifier   "  << project.getBundleIdentifier().toString() << newLine
             << "#define JucePlugin_AUCocoaViewClassName "  << getPluginAUCocoaViewClassName (project).toString() << newLine
-            << "#define JucePlugin_RTASCategory         "  << ((bool) getPluginIsSynth (project).getValue() ? "ePlugInCategory_SWGenerators" : "ePlugInCategory_None") << newLine
+            << "#define JucePlugin_RTASCategory         "  << getPluginRTASCategoryCode (project) << newLine
             << "#define JucePlugin_RTASManufacturerCode JucePlugin_ManufacturerCode" << newLine
             << "#define JucePlugin_RTASProductId        JucePlugin_PluginCode" << newLine
             << newLine;

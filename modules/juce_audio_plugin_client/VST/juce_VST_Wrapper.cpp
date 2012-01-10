@@ -1448,10 +1448,10 @@ namespace
         return pluginEntryPoint (audioMaster);
     }
 
-   #ifndef _WIN64 // (can't compile this on win64, but it's not needed anyway with VST2.4)
-    extern "C" __declspec (dllexport) void* main (audioMasterCallback audioMaster)
+   #ifndef JUCE_64BIT // (can't compile this on win64, but it's not needed anyway with VST2.4)
+    extern "C" __declspec (dllexport) int main (audioMasterCallback audioMaster)
     {
-        return (void*) pluginEntryPoint (audioMaster);
+        return (int) pluginEntryPoint (audioMaster);
     }
    #endif
 
