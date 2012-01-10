@@ -144,6 +144,16 @@ void OpenGLExtensionFunctions::initialise()
 
 #undef JUCE_GL_EXTENSION_FUNCTIONS
 
+#if JUCE_OPENGL_ES
+ #define JUCE_LOWP    "lowp"
+ #define JUCE_MEDIUMP "mediump"
+ #define JUCE_HIGHP   "highp"
+#else
+ #define JUCE_LOWP
+ #define JUCE_MEDIUMP
+ #define JUCE_HIGHP
+#endif
+
 //==============================================================================
 // START_AUTOINCLUDE opengl/*.cpp
 #include "opengl/juce_OpenGLComponent.cpp"

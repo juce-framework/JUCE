@@ -91,7 +91,7 @@ bool OpenGLPixelFormat::operator== (const OpenGLPixelFormat& other) const noexce
 static Array<OpenGLContext*> knownContexts;
 
 OpenGLContext::OpenGLContext() noexcept
-    : shaderLanguageVersion (0)
+    : shaderLanguageAvailable (0)
 {
     knownContexts.add (this);
 }
@@ -114,31 +114,26 @@ OpenGLContext* OpenGLContext::getCurrentContext()
     return nullptr;
 }
 
-#if JUCE_USE_OPENGL_SHADERS
-double OpenGLContext::getShaderLanguageVersion()
+bool OpenGLContext::areShadersAvailable() const
 {
-    if (shaderLanguageVersion == 0)
-        shaderLanguageVersion = OpenGLShaderProgram::getLanguageVersion();
+   #if JUCE_USE_OPENGL_SHADERS
+    if (shaderLanguageAvailable == 0)
+        shaderLanguageAvailable = (OpenGLShaderProgram::getLanguageVersion() > 0) ? 1 : -1;
 
-    return shaderLanguageVersion;
+    return shaderLanguageAvailable > 0;
+   #else
+    return false;
+   #endif
 }
-#endif
 
 void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
-                                 const Rectangle<int>& anchorPosAndTextureSize,
-                                 float alpha)
+                                 const Rectangle<int>& anchorPosAndTextureSize)
 {
     glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable (GL_BLEND);
-    glColor4f (1.0f, 1.0f, 1.0f, alpha);
-
-    const GLshort y = (GLshort) (getHeight() - anchorPosAndTextureSize.getHeight());
-    const GLshort width = (GLshort) anchorPosAndTextureSize.getWidth();
-    const GLshort bottom = (GLshort) (y + anchorPosAndTextureSize.getHeight());
-    const GLshort vertices[] = { 0, y, width, y, 0, bottom, width, bottom };
 
    #if JUCE_USE_OPENGL_SHADERS
-    if (getShaderLanguageVersion() > 1.199)
+    if (areShadersAvailable())
     {
         struct OverlayShaderProgram  : public ReferenceCountedObject
         {
@@ -167,23 +162,25 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
             {
                 ProgramBuilder (OpenGLShaderProgram& program)
                 {
-                    program.addShader ("attribute vec2 position;"
-                                       "uniform vec2 screenSize;"
+                    program.addShader ("attribute " JUCE_HIGHP " vec2 position;"
+                                       "uniform " JUCE_HIGHP " vec2 screenSize;"
+                                       "varying " JUCE_HIGHP " vec2 pixelPos;"
                                        "void main()"
                                        "{"
-                                       " vec2 scaled = position / (0.5 * screenSize.xy);"
-                                       " gl_Position = vec4 (scaled.x - 1.0, 1.0 - scaled.y, 0, 1.0);"
+                                        "pixelPos = position;"
+                                        JUCE_HIGHP " vec2 scaled = position / (0.5 * screenSize.xy);"
+                                        "gl_Position = vec4 (scaled.x - 1.0, 1.0 - scaled.y, 0, 1.0);"
                                        "}",
                                        GL_VERTEX_SHADER);
 
-                    program.addShader ("#version 120\n"
-                                       "uniform sampler2D imageTexture;"
-                                       "uniform float matrix[6];"
+                    program.addShader ("uniform sampler2D imageTexture;"
+                                       "uniform " JUCE_HIGHP " float matrix[6];"
+                                       "varying " JUCE_HIGHP " vec2 pixelPos;"
                                        "void main()"
                                        "{"
-                                        "vec2 texturePos = mat2 (matrix[0], matrix[3], matrix[1], matrix[4]) * gl_FragCoord.xy"
-                                                          " + vec2 (matrix[2], matrix[5]);"
-                                        "gl_FragColor = gl_Color.a * texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y));"
+                                        JUCE_HIGHP " vec2 texturePos = mat2 (matrix[0], matrix[3], matrix[1], matrix[4]) * pixelPos"
+                                                                      " + vec2 (matrix[2], matrix[5]);"
+                                        "gl_FragColor = texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y));"
                                        "}",
                                        GL_FRAGMENT_SHADER);
                     program.link();
@@ -199,11 +196,10 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                       matrix (program, "matrix")
                 {}
 
-                void set (const int targetWidth, const int targetHeight, const Rectangle<float>& anchorPosAndTextureSize) const
+                void set (const float targetWidth, const float targetHeight, const Rectangle<float>& anchorPosAndTextureSize) const
                 {
-                    const AffineTransform t (AffineTransform::translation (-anchorPosAndTextureSize.getX(),
-                                                                           -anchorPosAndTextureSize.getY())
-                                                .followedBy (AffineTransform::verticalFlip (targetHeight))
+                    const AffineTransform t (AffineTransform::translation (anchorPosAndTextureSize.getX(),
+                                                                           anchorPosAndTextureSize.getY())
                                                 .inverted().scaled (1.0f / anchorPosAndTextureSize.getWidth(),
                                                                     1.0f / anchorPosAndTextureSize.getHeight()));
 
@@ -222,8 +218,14 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
             Params params;
         };
 
+        const GLshort left   = (GLshort) targetClipArea.getX();
+        const GLshort top    = (GLshort) targetClipArea.getY();
+        const GLshort right  = (GLshort) targetClipArea.getRight();
+        const GLshort bottom = (GLshort) targetClipArea.getBottom();
+        const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
+
         const OverlayShaderProgram& program = OverlayShaderProgram::select (*this);
-        program.params.set (getWidth(), getHeight(), anchorPosAndTextureSize.toFloat());
+        program.params.set ((float) getWidth(), (float) getHeight(), anchorPosAndTextureSize.toFloat());
 
         extensions.glVertexAttribPointer (program.params.positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 4, vertices);
         extensions.glEnableVertexAttribArray (program.params.positionAttribute.attributeID);
@@ -239,8 +241,16 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
    #if JUCE_USE_OPENGL_FIXED_FUNCTION
     {
+        (void) anchorPosAndTextureSize; // xxx need to scissor
+        const GLshort left   = (GLshort) targetClipArea.getX();
+        const GLshort right  = (GLshort) targetClipArea.getRight();
+        const GLshort top    = (GLshort) (getHeight() - targetClipArea.getY());
+        const GLshort bottom = (GLshort) (getHeight() - targetClipArea.getBottom());
+        const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
+
         OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
 
+        glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_NORMAL_ARRAY);
         glEnableClientState (GL_VERTEX_ARRAY);

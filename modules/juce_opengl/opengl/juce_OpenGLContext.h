@@ -90,6 +90,9 @@ public:
     /** Checks whether the current context supports the specified extension. */
     bool isExtensionSupported (const char* const extensionName);
 
+    /** Returns true if shaders can be used in this context. */
+    virtual bool areShadersAvailable() const;
+
     //==============================================================================
     /** Returns the context that's currently in active use by the calling thread.
 
@@ -111,17 +114,14 @@ public:
                                         the total size of the texture.
     */
     void copyTexture (const Rectangle<int>& targetClipArea,
-                      const Rectangle<int>& anchorPosAndTextureSize,
-                      float alpha);
+                      const Rectangle<int>& anchorPosAndTextureSize);
 
 protected:
     //==============================================================================
     OpenGLContext() noexcept;
 
 private:
-    double shaderLanguageVersion;
-
-    double getShaderLanguageVersion();
+    mutable int shaderLanguageAvailable;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLContext);
 };

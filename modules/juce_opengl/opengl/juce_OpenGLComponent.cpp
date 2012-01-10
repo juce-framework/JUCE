@@ -103,11 +103,7 @@ public:
         const int fbW = frameBuffer.getWidth();
         const int fbH = frameBuffer.getHeight();
 
-        if (fbW < width
-             || fbH < height
-             || fbW > width + 128
-             || fbH > height + 128
-             || ! frameBuffer.isValid())
+        if (fbW != width || fbH != height || ! frameBuffer.isValid())
         {
             jassert (owner.getCurrentContext() != nullptr);
             frameBuffer.initialise (*owner.getCurrentContext(), width, height);
@@ -427,27 +423,27 @@ bool OpenGLComponent::performRender()
                 {
                     jassert (getCurrentContext() != nullptr);
 
-                    OpenGLGraphicsContext g (*getCurrentContext(), frameBuffer);
-                    g.clipToRectangleList (invalid);
+                    {
+                        OpenGLGraphicsContext g (*getCurrentContext(), frameBuffer);
+                        g.clipToRectangleList (invalid);
 
-                    g.setFill (Colours::transparentBlack);
-                    g.fillRect (bounds, true);
-                    g.setFill (Colours::black);
+                        g.setFill (Colours::transparentBlack);
+                        g.fillRect (bounds, true);
+                        g.setFill (Colours::black);
 
-                    paintSelf (g);
+                        paintSelf (g);
+                    }
 
                     makeCurrentRenderingTarget();
                 }
             }
 
             glEnable (GL_TEXTURE_2D);
-            glActiveTexture (GL_TEXTURE0);
+            context->extensions.glActiveTexture (GL_TEXTURE0);
             glBindTexture (GL_TEXTURE_2D, frameBuffer.getTextureID());
 
-            context->copyTexture (getLocalBounds(),
-                                  Rectangle<int> (frameBuffer.getWidth(), frameBuffer.getHeight()),
-                                  getAlpha());
-
+            context->copyTexture (bounds, Rectangle<int> (bounds.getWidth(),
+                                                          bounds.getHeight()));
             glBindTexture (GL_TEXTURE_2D, 0);
         }
 

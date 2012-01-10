@@ -48,9 +48,9 @@ public:
                  Component* const component_,
                  const OpenGLPixelFormat& pixelFormat,
                  const GLESContext* const sharedContext,
-                 NSUInteger apiType)
+                 const bool isGLES2_)
         : component (component_), glLayer (nil), context (nil),
-          useDepthBuffer (pixelFormat.depthBufferBits > 0),
+          useDepthBuffer (pixelFormat.depthBufferBits > 0), isGLES2 (isGLES2_),
           frameBufferHandle (0), colorBufferHandle (0),
           depthBufferHandle (0), lastWidth (0), lastHeight (0)
     {
@@ -62,6 +62,9 @@ public:
 
         glLayer = (CAEAGLLayer*) [view layer];
         [parentView addSubview: view];
+
+        NSUInteger apiType = isGLES2_ ? kEAGLRenderingAPIOpenGLES2
+                                      : kEAGLRenderingAPIOpenGLES1;
 
         if (sharedContext != nullptr)
             context = [[EAGLContext alloc] initWithAPI: apiType
@@ -89,14 +92,14 @@ public:
         jassert (context != nil);
 
         [EAGLContext setCurrentContext: context];
-        glBindFramebufferOES (GL_FRAMEBUFFER_OES, frameBufferHandle);
+        glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle);
         return true;
     }
 
     void swapBuffers()
     {
-        glBindRenderbufferOES (GL_RENDERBUFFER_OES, colorBufferHandle);
-        [context presentRenderbuffer: GL_RENDERBUFFER_OES];
+        glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
+        [context presentRenderbuffer: GL_RENDERBUFFER];
     }
 
     bool makeInactive() const noexcept
@@ -104,16 +107,15 @@ public:
         return [EAGLContext setCurrentContext: nil];
     }
 
-    bool isActive() const noexcept
-    {
-        return [EAGLContext currentContext] == context;
-    }
+    bool isActive() const noexcept                  { return [EAGLContext currentContext] == context; }
 
     void* getRawContext() const noexcept            { return glLayer; }
     unsigned int getFrameBufferID() const           { return (unsigned int) frameBufferHandle; }
 
     int getWidth() const                            { return lastWidth; }
     int getHeight() const                           { return lastHeight; }
+
+    bool areShadersAvailable() const                { return isGLES2; }
 
     void updateWindowPosition (const Rectangle<int>& bounds)
     {
@@ -147,54 +149,54 @@ public:
     {
         makeActive();
 
-        glGenFramebuffersOES (1, &frameBufferHandle);
-        glGenRenderbuffersOES (1, &colorBufferHandle);
-        glGenRenderbuffersOES (1, &depthBufferHandle);
+        glGenFramebuffers (1, &frameBufferHandle);
+        glGenRenderbuffers (1, &colorBufferHandle);
+        glGenRenderbuffers (1, &depthBufferHandle);
 
-        glBindRenderbufferOES (GL_RENDERBUFFER_OES, colorBufferHandle);
-        bool ok = [context renderbufferStorage: GL_RENDERBUFFER_OES fromDrawable: glLayer];
+        glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
+        bool ok = [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: glLayer];
         jassert (ok); (void) ok;
 
         GLint width, height;
-        glGetRenderbufferParameterivOES (GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &width);
-        glGetRenderbufferParameterivOES (GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &height);
+        glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+        glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
 
         if (useDepthBuffer)
         {
-            glBindRenderbufferOES (GL_RENDERBUFFER_OES, depthBufferHandle);
-            glRenderbufferStorageOES (GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT16_OES, width, height);
+            glBindRenderbuffer (GL_RENDERBUFFER, depthBufferHandle);
+            glRenderbufferStorage (GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
         }
 
-        glBindRenderbufferOES (GL_RENDERBUFFER_OES, colorBufferHandle);
+        glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
 
-        glBindFramebufferOES (GL_FRAMEBUFFER_OES, frameBufferHandle);
-        glFramebufferRenderbufferOES (GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorBufferHandle);
+        glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle);
+        glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBufferHandle);
 
         if (useDepthBuffer)
-            glFramebufferRenderbufferOES (GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthBufferHandle);
+            glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferHandle);
 
-        jassert (glCheckFramebufferStatusOES (GL_FRAMEBUFFER_OES) == GL_FRAMEBUFFER_COMPLETE_OES);
+        jassert (glCheckFramebufferStatus (GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
     }
 
     void freeGLBuffers()
     {
-        [context renderbufferStorage: GL_RENDERBUFFER_OES fromDrawable: nil];
+        [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: nil];
 
         if (frameBufferHandle != 0)
         {
-            glDeleteFramebuffersOES (1, &frameBufferHandle);
+            glDeleteFramebuffers (1, &frameBufferHandle);
             frameBufferHandle = 0;
         }
 
         if (colorBufferHandle != 0)
         {
-            glDeleteRenderbuffersOES (1, &colorBufferHandle);
+            glDeleteRenderbuffers (1, &colorBufferHandle);
             colorBufferHandle = 0;
         }
 
         if (depthBufferHandle != 0)
         {
-            glDeleteRenderbuffersOES (1, &depthBufferHandle);
+            glDeleteRenderbuffers (1, &depthBufferHandle);
             depthBufferHandle = 0;
         }
     }
@@ -204,7 +206,7 @@ private:
     JuceGLView* view;
     CAEAGLLayer* glLayer;
     EAGLContext* context;
-    bool useDepthBuffer;
+    bool useDepthBuffer, isGLES2;
     GLuint frameBufferHandle, colorBufferHandle, depthBufferHandle;
     int numFrames;
     int lastWidth, lastHeight;
@@ -221,8 +223,7 @@ OpenGLContext* OpenGLComponent::createContext()
     if (peer != nullptr)
         return new GLESContext ((UIView*) peer->getNativeHandle(), this, preferredPixelFormat,
                                 dynamic_cast <const GLESContext*> (contextToShareListsWith),
-                                (flags & openGLES2) == 0 ? kEAGLRenderingAPIOpenGLES1
-                                                         : kEAGLRenderingAPIOpenGLES2);
+                                (flags & openGLES2) != 0);
 
     return nullptr;
 }

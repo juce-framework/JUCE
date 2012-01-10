@@ -32,7 +32,6 @@
 */
 #define JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION) \
     USE_FUNCTION (glActiveTexture,          void, (GLenum p1), (p1))\
-    USE_FUNCTION (glClientActiveTexture,    void, (GLenum p1), (p1))\
     USE_FUNCTION (glBindBuffer,             void, (GLenum p1, GLuint p2), (p1, p2))\
     USE_FUNCTION (glDeleteBuffers,          void, (GLsizei p1, const GLuint* p2), (p1, p2))\
     USE_FUNCTION (glGenBuffers,             void, (GLsizei p1, GLuint* p2), (p1, p2))\
@@ -54,7 +53,7 @@
     USE_FUNCTION (glGetFramebufferAttachmentParameteriv, void, (GLenum p1, GLenum p2, GLenum p3, GLint* p4), (p1, p2, p3, p4))
 
 #if JUCE_USE_OPENGL_SHADERS
- #define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION) JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION) \
+ #define JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION) JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION) \
     USE_FUNCTION (glCreateProgram,          GLuint, (), ())\
     USE_FUNCTION (glDeleteProgram,          void, (GLuint p1), (p1))\
     USE_FUNCTION (glCreateShader,           GLuint, (GLenum p1), (p1))\
@@ -79,7 +78,14 @@
     USE_FUNCTION (glUniform4i,              void, (GLint p1, GLint p2, GLint p3, GLint p4, GLint p5), (p1, p2, p3, p4, p5))\
     USE_FUNCTION (glUniform1fv,             void, (GLint p1, GLsizei p2, const GLfloat* p3), (p1, p2, p3))
 #else
- #define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION) JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION)
+ #define JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION) JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION)
+#endif
+
+#if JUCE_USE_OPENGL_FIXED_FUNCTION
+ #define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION) JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION) \
+    USE_FUNCTION (glClientActiveTexture,    void, (GLenum p1), (p1))
+#else
+ #define JUCE_GL_EXTENSION_FUNCTIONS(USE_FUNCTION) JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION)
 #endif
 
 /** This class contains a generated list of OpenGL extension functions, which are either dynamically loaded

@@ -41,8 +41,13 @@ OpenGLShaderProgram::~OpenGLShaderProgram() noexcept
 
 double OpenGLShaderProgram::getLanguageVersion()
 {
+   #if JUCE_OPENGL_ES
+    jassertfalse; // doesn't work in ES
+    return 0;
+   #else
     return String ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
             .upToFirstOccurrenceOf (" ", false, false).getDoubleValue();
+   #endif
 }
 
 void OpenGLShaderProgram::addShader (const char* const code, GLenum type)

@@ -198,7 +198,7 @@ bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 
         glEnable (GL_TEXTURE_2D);
         glBindTexture (GL_TEXTURE_2D, p->textureID);
-        pimpl->context.copyTexture (area, area, 1.0f);
+        pimpl->context.copyTexture (area, area);
         glBindTexture (GL_TEXTURE_2D, 0);
 
         pimpl->unbind();
@@ -309,7 +309,7 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     OpenGLTexture tex;
     tex.loadARGBFlipped (data, area.getWidth(), area.getHeight());
 
-   #if JUCE_OPENGL_ES
+   #if JUCE_OPENGL_ES && JUCE_USE_OPENGL_FIXED_FUNCTION
     const int texH = tex.getHeight();
     tex.bind();
     const GLint cropRect[4] = { 0, texH - area.getHeight(), area.getWidth(), area.getHeight() };
@@ -319,7 +319,7 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
     glBindTexture (GL_TEXTURE_2D, 0);
    #else
-    pimpl->context.copyTexture (area, area, 1.0f);
+    pimpl->context.copyTexture (area, area);
    #endif
 
     pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);
