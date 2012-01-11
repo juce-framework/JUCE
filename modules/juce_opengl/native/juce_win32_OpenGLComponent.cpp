@@ -113,41 +113,23 @@ public:
             int atts[64];
             int n = 0;
 
-            atts[n++] = WGL_DRAW_TO_WINDOW_ARB;
-            atts[n++] = GL_TRUE;
-            atts[n++] = WGL_SUPPORT_OPENGL_ARB;
-            atts[n++] = GL_TRUE;
-            atts[n++] = WGL_ACCELERATION_ARB;
-            atts[n++] = WGL_FULL_ACCELERATION_ARB;
-            atts[n++] = WGL_DOUBLE_BUFFER_ARB;
-            atts[n++] = GL_TRUE;
-            atts[n++] = WGL_PIXEL_TYPE_ARB;
-            atts[n++] = WGL_TYPE_RGBA_ARB;
+            atts[n++] = WGL_DRAW_TO_WINDOW_ARB;   atts[n++] = GL_TRUE;
+            atts[n++] = WGL_SUPPORT_OPENGL_ARB;   atts[n++] = GL_TRUE;
+            atts[n++] = WGL_DOUBLE_BUFFER_ARB;    atts[n++] = GL_TRUE;
+            atts[n++] = WGL_PIXEL_TYPE_ARB;       atts[n++] = WGL_TYPE_RGBA_ARB;
 
-            atts[n++] = WGL_COLOR_BITS_ARB;
-            atts[n++] = pfd.cColorBits;
-            atts[n++] = WGL_RED_BITS_ARB;
-            atts[n++] = pixelFormat.redBits;
-            atts[n++] = WGL_GREEN_BITS_ARB;
-            atts[n++] = pixelFormat.greenBits;
-            atts[n++] = WGL_BLUE_BITS_ARB;
-            atts[n++] = pixelFormat.blueBits;
-            atts[n++] = WGL_ALPHA_BITS_ARB;
-            atts[n++] = pixelFormat.alphaBits;
-            atts[n++] = WGL_DEPTH_BITS_ARB;
-            atts[n++] = pixelFormat.depthBufferBits;
+            atts[n++] = WGL_COLOR_BITS_ARB;  atts[n++] = pfd.cColorBits;
+            atts[n++] = WGL_RED_BITS_ARB;    atts[n++] = pixelFormat.redBits;
+            atts[n++] = WGL_GREEN_BITS_ARB;  atts[n++] = pixelFormat.greenBits;
+            atts[n++] = WGL_BLUE_BITS_ARB;   atts[n++] = pixelFormat.blueBits;
+            atts[n++] = WGL_ALPHA_BITS_ARB;  atts[n++] = pixelFormat.alphaBits;
+            atts[n++] = WGL_DEPTH_BITS_ARB;  atts[n++] = pixelFormat.depthBufferBits;
 
-            atts[n++] = WGL_STENCIL_BITS_ARB;
-            atts[n++] = pixelFormat.stencilBufferBits;
-
-            atts[n++] = WGL_ACCUM_RED_BITS_ARB;
-            atts[n++] = pixelFormat.accumulationBufferRedBits;
-            atts[n++] = WGL_ACCUM_GREEN_BITS_ARB;
-            atts[n++] = pixelFormat.accumulationBufferGreenBits;
-            atts[n++] = WGL_ACCUM_BLUE_BITS_ARB;
-            atts[n++] = pixelFormat.accumulationBufferBlueBits;
-            atts[n++] = WGL_ACCUM_ALPHA_BITS_ARB;
-            atts[n++] = pixelFormat.accumulationBufferAlphaBits;
+            atts[n++] = WGL_STENCIL_BITS_ARB;       atts[n++] = pixelFormat.stencilBufferBits;
+            atts[n++] = WGL_ACCUM_RED_BITS_ARB;     atts[n++] = pixelFormat.accumulationBufferRedBits;
+            atts[n++] = WGL_ACCUM_GREEN_BITS_ARB;   atts[n++] = pixelFormat.accumulationBufferGreenBits;
+            atts[n++] = WGL_ACCUM_BLUE_BITS_ARB;    atts[n++] = pixelFormat.accumulationBufferBlueBits;
+            atts[n++] = WGL_ACCUM_ALPHA_BITS_ARB;   atts[n++] = pixelFormat.accumulationBufferAlphaBits;
 
             if (pixelFormat.multisamplingLevel > 0
                   && OpenGLHelpers::isExtensionSupported ("GL_ARB_multisample"))

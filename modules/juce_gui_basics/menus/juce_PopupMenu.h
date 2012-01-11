@@ -77,6 +77,9 @@
 */
 class JUCE_API  PopupMenu
 {
+private:
+    class Window;
+
 public:
     //==============================================================================
     /** Creates an empty popup menu. */
@@ -232,6 +235,7 @@ public:
 
     private:
         friend class PopupMenu;
+        friend class PopupMenu::Window;
         Rectangle<int> targetArea;
         Component* targetComponent;
         int visibleItemID, minWidth, maxColumns, standardHeight;
@@ -474,7 +478,6 @@ private:
     //==============================================================================
     class Item;
     class ItemComponent;
-    class Window;
 
     friend class MenuItemIterator;
     friend class ItemComponent;

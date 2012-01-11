@@ -124,9 +124,7 @@ public:
       : itemInfo (itemInfo_),
         isHighlighted (false)
     {
-        if (itemInfo.customComp != nullptr)
-            addAndMakeVisible (itemInfo.customComp);
-
+        addAndMakeVisible (itemInfo.customComp);
         parent->addAndMakeVisible (this);
 
         int itemW = 80;
@@ -139,8 +137,7 @@ public:
 
     ~ItemComponent()
     {
-        if (itemInfo.customComp != nullptr)
-            removeChildComponent (itemInfo.customComp);
+        removeChildComponent (itemInfo.customComp);
     }
 
     void getIdealSize (int& idealWidth, int& idealHeight, const int standardItemHeight)
