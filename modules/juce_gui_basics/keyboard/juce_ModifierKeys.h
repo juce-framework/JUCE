@@ -113,6 +113,9 @@ public:
     /** Flags that represent the different keys. */
     enum Flags
     {
+        /** Indicates no modifier keys. */
+        noModifiers                             = 0,
+
         /** Shift key flag. */
         shiftModifier                           = 1,
 

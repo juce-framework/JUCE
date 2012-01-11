@@ -545,6 +545,9 @@ public:
 
     void setTitle (const String& title)
     {
+        // Unfortunately some ancient bits of win32 mean you can only perform this operation from the message thread.
+        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
         SetWindowText (hwnd, title.toWideCharPointer());
     }
 

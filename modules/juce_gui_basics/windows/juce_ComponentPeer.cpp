@@ -184,12 +184,19 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
         if (keyWasUsed || deletionChecker == nullptr)
             break;
 
-        if (keyInfo.isKeyCode (KeyPress::tabKey) && Component::getCurrentlyFocusedComponent() != nullptr)
+        Component* const currentlyFocused = Component::getCurrentlyFocusedComponent();
+
+        if (currentlyFocused != nullptr)
         {
-            Component* const currentlyFocused = Component::getCurrentlyFocusedComponent();
-            currentlyFocused->moveKeyboardFocusToSibling (! keyInfo.getModifiers().isShiftDown());
-            keyWasUsed = (currentlyFocused != Component::getCurrentlyFocusedComponent());
-            break;
+            const bool isTab      = (keyInfo == KeyPress (KeyPress::tabKey, ModifierKeys::noModifiers, 0));
+            const bool isShiftTab = (keyInfo == KeyPress (KeyPress::tabKey, ModifierKeys::shiftModifier, 0));
+
+            if (isTab || isShiftTab)
+            {
+                currentlyFocused->moveKeyboardFocusToSibling (isTab);
+                keyWasUsed = (currentlyFocused != Component::getCurrentlyFocusedComponent());
+                break;
+            }
         }
 
         target = target->getParentComponent();
