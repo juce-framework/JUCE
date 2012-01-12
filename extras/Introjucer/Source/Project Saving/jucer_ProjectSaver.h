@@ -276,18 +276,19 @@ private:
                     const Project::ConfigFlag* const f = flags[i];
                     const String value (project.getConfigFlag (f->symbol).toString());
 
+                    out << "#ifndef    " << f->symbol << newLine;
+
                     if (value == Project::configFlagEnabled)
-                        out << "#define    " << f->symbol << " 1";
+                        out << " #define   " << f->symbol << " 1";
                     else if (value == Project::configFlagDisabled)
-                        out << "#define    " << f->symbol << " 0";
+                        out << " #define   " << f->symbol << " 0";
                     else
-                        out << "//#define  " << f->symbol;
+                        out << " //#define " << f->symbol;
 
-                    out << newLine;
+                    out << newLine
+                        << "#endif" << newLine
+                        << newLine;
                 }
-
-                if (j < modules.size() - 1)
-                    out << newLine;
             }
         }
 

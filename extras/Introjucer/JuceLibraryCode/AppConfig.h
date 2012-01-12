@@ -25,28 +25,58 @@
 //==============================================================================
 // juce_core flags:
 
-//#define  JUCE_FORCE_DEBUG
-//#define  JUCE_LOG_ASSERTIONS
-//#define  JUCE_CHECK_MEMORY_LEAKS
-//#define  JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+#ifndef    JUCE_FORCE_DEBUG
+ //#define JUCE_FORCE_DEBUG
+#endif
+
+#ifndef    JUCE_LOG_ASSERTIONS
+ //#define JUCE_LOG_ASSERTIONS
+#endif
+
+#ifndef    JUCE_CHECK_MEMORY_LEAKS
+ //#define JUCE_CHECK_MEMORY_LEAKS
+#endif
+
+#ifndef    JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+#endif
 
 //==============================================================================
 // juce_graphics flags:
 
-#define    JUCE_USE_COREIMAGE_LOADER 0
-//#define  JUCE_USE_DIRECTWRITE
+#ifndef    JUCE_USE_COREIMAGE_LOADER
+ #define   JUCE_USE_COREIMAGE_LOADER 0
+#endif
+
+#ifndef    JUCE_USE_DIRECTWRITE
+ //#define JUCE_USE_DIRECTWRITE
+#endif
 
 //==============================================================================
 // juce_gui_basics flags:
 
-//#define  JUCE_ENABLE_REPAINT_DEBUGGING
-//#define  JUCE_USE_XSHM
-//#define  JUCE_USE_XRENDER
-//#define  JUCE_USE_XCURSOR
+#ifndef    JUCE_ENABLE_REPAINT_DEBUGGING
+ //#define JUCE_ENABLE_REPAINT_DEBUGGING
+#endif
+
+#ifndef    JUCE_USE_XSHM
+ //#define JUCE_USE_XSHM
+#endif
+
+#ifndef    JUCE_USE_XRENDER
+ //#define JUCE_USE_XRENDER
+#endif
+
+#ifndef    JUCE_USE_XCURSOR
+ //#define JUCE_USE_XCURSOR
+#endif
 
 //==============================================================================
 // juce_gui_extra flags:
 
-//#define  JUCE_WEB_BROWSER
+#ifndef    JUCE_WEB_BROWSER
+ //#define JUCE_WEB_BROWSER
+#endif
+
 
 #endif  // __JUCE_APPCONFIG_M70QFTRRK__

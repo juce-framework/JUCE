@@ -1,12 +1,12 @@
 {
   "id":             "juce_audio_processors",
   "name":           "JUCE audio plugin hosting classes",
-  "version":        "2.0.15",
+  "version":        "2.0.16",
   "description":    "Classes for loading and playing VST, AU, or internally-generated audio processors.",
   "website":        "http://www.juce.com/juce",
   "license":        "GPL/Commercial",
 
-  "dependencies":   [ { "id": "juce_gui_basics",     "version": "matching" },
+  "dependencies":   [ { "id": "juce_gui_extra",     "version": "matching" },
                       { "id": "juce_audio_basics",   "version": "matching" } ],
 
   "include":        "juce_audio_processors.h",

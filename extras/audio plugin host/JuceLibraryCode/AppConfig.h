@@ -32,60 +32,134 @@
 //==============================================================================
 // juce_audio_devices flags:
 
-//#define  JUCE_ASIO
-#define    JUCE_WASAPI 1
-#define    JUCE_DIRECTSOUND 1
-#define    JUCE_ALSA 1
-//#define  JUCE_JACK
-#define    JUCE_USE_CDREADER 0
-#define    JUCE_USE_CDBURNER 0
+#ifndef    JUCE_ASIO
+ //#define JUCE_ASIO
+#endif
+
+#ifndef    JUCE_WASAPI
+ #define   JUCE_WASAPI 1
+#endif
+
+#ifndef    JUCE_DIRECTSOUND
+ #define   JUCE_DIRECTSOUND 1
+#endif
+
+#ifndef    JUCE_ALSA
+ #define   JUCE_ALSA 1
+#endif
+
+#ifndef    JUCE_JACK
+ //#define JUCE_JACK
+#endif
+
+#ifndef    JUCE_USE_CDREADER
+ #define   JUCE_USE_CDREADER 0
+#endif
+
+#ifndef    JUCE_USE_CDBURNER
+ #define   JUCE_USE_CDBURNER 0
+#endif
 
 //==============================================================================
 // juce_audio_formats flags:
 
-#define    JUCE_USE_FLAC 0
-#define    JUCE_USE_OGGVORBIS 0
-//#define  JUCE_USE_MP3AUDIOFORMAT
+#ifndef    JUCE_USE_FLAC
+ #define   JUCE_USE_FLAC 0
+#endif
+
+#ifndef    JUCE_USE_OGGVORBIS
+ #define   JUCE_USE_OGGVORBIS 0
+#endif
+
+#ifndef    JUCE_USE_MP3AUDIOFORMAT
+ //#define JUCE_USE_MP3AUDIOFORMAT
+#endif
 
 //==============================================================================
 // juce_audio_processors flags:
 
-#define    JUCE_PLUGINHOST_VST 1
-#define    JUCE_PLUGINHOST_AU 1
+#ifndef    JUCE_PLUGINHOST_VST
+ #define   JUCE_PLUGINHOST_VST 1
+#endif
+
+#ifndef    JUCE_PLUGINHOST_AU
+ #define   JUCE_PLUGINHOST_AU 1
+#endif
 
 //==============================================================================
 // juce_core flags:
 
-//#define  JUCE_FORCE_DEBUG
-//#define  JUCE_LOG_ASSERTIONS
-//#define  JUCE_CHECK_MEMORY_LEAKS
-//#define  JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+#ifndef    JUCE_FORCE_DEBUG
+ //#define JUCE_FORCE_DEBUG
+#endif
+
+#ifndef    JUCE_LOG_ASSERTIONS
+ //#define JUCE_LOG_ASSERTIONS
+#endif
+
+#ifndef    JUCE_CHECK_MEMORY_LEAKS
+ //#define JUCE_CHECK_MEMORY_LEAKS
+#endif
+
+#ifndef    JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+#endif
 
 //==============================================================================
 // juce_graphics flags:
 
-//#define  JUCE_USE_COREIMAGE_LOADER
-//#define  JUCE_USE_DIRECTWRITE
+#ifndef    JUCE_USE_COREIMAGE_LOADER
+ //#define JUCE_USE_COREIMAGE_LOADER
+#endif
+
+#ifndef    JUCE_USE_DIRECTWRITE
+ //#define JUCE_USE_DIRECTWRITE
+#endif
 
 //==============================================================================
 // juce_gui_basics flags:
 
-//#define  JUCE_ENABLE_REPAINT_DEBUGGING
-//#define  JUCE_USE_XSHM
-//#define  JUCE_USE_XRENDER
-//#define  JUCE_USE_XCURSOR
+#ifndef    JUCE_ENABLE_REPAINT_DEBUGGING
+ //#define JUCE_ENABLE_REPAINT_DEBUGGING
+#endif
+
+#ifndef    JUCE_USE_XSHM
+ //#define JUCE_USE_XSHM
+#endif
+
+#ifndef    JUCE_USE_XRENDER
+ //#define JUCE_USE_XRENDER
+#endif
+
+#ifndef    JUCE_USE_XCURSOR
+ //#define JUCE_USE_XCURSOR
+#endif
 
 //==============================================================================
 // juce_gui_extra flags:
 
-#define    JUCE_WEB_BROWSER 0
+#ifndef    JUCE_WEB_BROWSER
+ #define   JUCE_WEB_BROWSER 0
+#endif
 
 //==============================================================================
 // juce_video flags:
 
-//#define  JUCE_DIRECTSHOW
-//#define  JUCE_MEDIAFOUNDATION
-#define    JUCE_QUICKTIME 0
-#define    JUCE_USE_CAMERA 0
+#ifndef    JUCE_DIRECTSHOW
+ //#define JUCE_DIRECTSHOW
+#endif
+
+#ifndef    JUCE_MEDIAFOUNDATION
+ //#define JUCE_MEDIAFOUNDATION
+#endif
+
+#ifndef    JUCE_QUICKTIME
+ #define   JUCE_QUICKTIME 0
+#endif
+
+#ifndef    JUCE_USE_CAMERA
+ #define   JUCE_USE_CAMERA 0
+#endif
+
 
 #endif  // __JUCE_APPCONFIG_NTE0XB0IJ__
