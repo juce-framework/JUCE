@@ -43,7 +43,9 @@
 #if JUCE_MAC
  #define Point CarbonDummyPointName
  #define Component CarbonDummyCompName
- #import <QTKit/QTKit.h>
+ #if JUCE_QUICKTIME
+  #import <QTKit/QTKit.h>
+ #endif
  #include <AudioToolbox/AudioToolbox.h>
  #undef Component
  #undef Point

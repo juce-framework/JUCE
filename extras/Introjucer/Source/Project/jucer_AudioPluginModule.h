@@ -77,48 +77,61 @@ namespace
         return maxVal;
     }
 
+    String valueToBool (const Value& v)
+    {
+        return static_cast<bool> (v.getValue()) ? "1" : "0";
+    }
+
     void writePluginCharacteristicsFile (ProjectSaver& projectSaver)
     {
         Project& project = projectSaver.getProject();
+
+        StringPairArray flags;
+        flags.set ("JucePlugin_Build_VST",                   valueToBool (shouldBuildVST  (project)));
+        flags.set ("JucePlugin_Build_AU",                    valueToBool (shouldBuildAU   (project)));
+        flags.set ("JucePlugin_Build_RTAS",                  valueToBool (shouldBuildRTAS (project)));
+        flags.set ("JucePlugin_Name",                        getPluginName (project).toString().quoted());
+        flags.set ("JucePlugin_Desc",                        getPluginDesc (project).toString().quoted());
+        flags.set ("JucePlugin_Manufacturer",                getPluginManufacturer (project).toString().quoted());
+        flags.set ("JucePlugin_ManufacturerCode",            getPluginManufacturerCode (project).toString().trim().substring (0, 4).quoted ('\''));
+        flags.set ("JucePlugin_PluginCode",                  getPluginCode (project).toString().trim().substring (0, 4).quoted ('\''));
+        flags.set ("JucePlugin_MaxNumInputChannels",         String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true)));
+        flags.set ("JucePlugin_MaxNumOutputChannels",        String (countMaxPluginChannels (getPluginChannelConfigs (project).toString(), false)));
+        flags.set ("JucePlugin_PreferredChannelConfigurations", getPluginChannelConfigs (project).toString());
+        flags.set ("JucePlugin_IsSynth",                     valueToBool (getPluginIsSynth (project)));
+        flags.set ("JucePlugin_WantsMidiInput",              valueToBool (getPluginWantsMidiInput (project)));
+        flags.set ("JucePlugin_ProducesMidiOutput",          valueToBool (getPluginProducesMidiOut (project)));
+        flags.set ("JucePlugin_SilenceInProducesSilenceOut", valueToBool (getPluginSilenceInProducesSilenceOut (project)));
+        flags.set ("JucePlugin_TailLengthSeconds",           String (static_cast <double> (getPluginTailLengthSeconds (project).getValue())));
+        flags.set ("JucePlugin_EditorRequiresKeyboardFocus", valueToBool (getPluginEditorNeedsKeyFocus (project)));
+        flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());
+        flags.set ("JucePlugin_VersionString",               project.getVersion().toString().quoted());
+        flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
+        flags.set ("JucePlugin_VSTCategory",                 static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kPlugCategSynth" : "kPlugCategEffect");
+        flags.set ("JucePlugin_AUMainType",                  static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kAudioUnitType_MusicDevice" : "kAudioUnitType_Effect");
+        flags.set ("JucePlugin_AUSubType",                   "JucePlugin_PluginCode");
+        flags.set ("JucePlugin_AUExportPrefix",              getPluginAUExportPrefix (project).toString());
+        flags.set ("JucePlugin_AUExportPrefixQuoted",        getPluginAUExportPrefix (project).toString().quoted());
+        flags.set ("JucePlugin_AUManufacturerCode",          "JucePlugin_ManufacturerCode");
+        flags.set ("JucePlugin_CFBundleIdentifier",          project.getBundleIdentifier().toString());
+        flags.set ("JucePlugin_AUCocoaViewClassName",        getPluginAUCocoaViewClassName (project).toString());
+        flags.set ("JucePlugin_RTASCategory",                getPluginRTASCategoryCode (project));
+        flags.set ("JucePlugin_RTASManufacturerCode",        "JucePlugin_ManufacturerCode");
+        flags.set ("JucePlugin_RTASProductId",               "JucePlugin_PluginCode");
 
         MemoryOutputStream mem;
 
         mem << "//==============================================================================" << newLine
             << "// Audio plugin settings.." << newLine
-            << newLine
-            << "#define JucePlugin_Build_VST    " << ((bool) shouldBuildVST (project).getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_Build_AU     " << ((bool) shouldBuildAU (project).getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_Build_RTAS   " << ((bool) shouldBuildRTAS (project).getValue() ? 1 : 0) << newLine
-            << newLine
-            << "#define JucePlugin_Name                 "  << getPluginName (project).toString().quoted() << newLine
-            << "#define JucePlugin_Desc                 "  << getPluginDesc (project).toString().quoted() << newLine
-            << "#define JucePlugin_Manufacturer         "  << getPluginManufacturer (project).toString().quoted() << newLine
-            << "#define JucePlugin_ManufacturerCode     '" << getPluginManufacturerCode (project).toString().trim().substring (0, 4) << "'" << newLine
-            << "#define JucePlugin_PluginCode           '" << getPluginCode (project).toString().trim().substring (0, 4) << "'" << newLine
-            << "#define JucePlugin_MaxNumInputChannels  "  << countMaxPluginChannels (getPluginChannelConfigs (project).toString(), true) << newLine
-            << "#define JucePlugin_MaxNumOutputChannels "  << countMaxPluginChannels (getPluginChannelConfigs (project).toString(), false) << newLine
-            << "#define JucePlugin_PreferredChannelConfigurations   " << getPluginChannelConfigs (project).toString() << newLine
-            << "#define JucePlugin_IsSynth              "  << ((bool) getPluginIsSynth (project).getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_WantsMidiInput       "  << ((bool) getPluginWantsMidiInput (project).getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_ProducesMidiOutput   "  << ((bool) getPluginProducesMidiOut (project).getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_SilenceInProducesSilenceOut  " << ((bool) getPluginSilenceInProducesSilenceOut (project).getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_TailLengthSeconds    "  << (double) getPluginTailLengthSeconds (project).getValue() << newLine
-            << "#define JucePlugin_EditorRequiresKeyboardFocus  " << ((bool) getPluginEditorNeedsKeyFocus (project).getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_VersionCode          "  << project.getVersionAsHex() << newLine
-            << "#define JucePlugin_VersionString        "  << project.getVersion().toString().quoted() << newLine
-            << "#define JucePlugin_VSTUniqueID          JucePlugin_PluginCode" << newLine
-            << "#define JucePlugin_VSTCategory          "  << ((bool) getPluginIsSynth (project).getValue() ? "kPlugCategSynth" : "kPlugCategEffect") << newLine
-            << "#define JucePlugin_AUMainType           "  << ((bool) getPluginIsSynth (project).getValue() ? "kAudioUnitType_MusicDevice" : "kAudioUnitType_Effect") << newLine
-            << "#define JucePlugin_AUSubType            JucePlugin_PluginCode" << newLine
-            << "#define JucePlugin_AUExportPrefix       "  << getPluginAUExportPrefix (project).toString() << newLine
-            << "#define JucePlugin_AUExportPrefixQuoted "  << getPluginAUExportPrefix (project).toString().quoted() << newLine
-            << "#define JucePlugin_AUManufacturerCode   JucePlugin_ManufacturerCode" << newLine
-            << "#define JucePlugin_CFBundleIdentifier   "  << project.getBundleIdentifier().toString() << newLine
-            << "#define JucePlugin_AUCocoaViewClassName "  << getPluginAUCocoaViewClassName (project).toString() << newLine
-            << "#define JucePlugin_RTASCategory         "  << getPluginRTASCategoryCode (project) << newLine
-            << "#define JucePlugin_RTASManufacturerCode JucePlugin_ManufacturerCode" << newLine
-            << "#define JucePlugin_RTASProductId        JucePlugin_PluginCode" << newLine
             << newLine;
+
+        for (int i = 0; i < flags.size(); ++i)
+        {
+            mem << "#ifndef  " << flags.getAllKeys()[i] << newLine
+                << " #define " << flags.getAllKeys()[i].paddedRight (' ', 32) << "  "
+                               << flags.getAllValues()[i] << newLine
+                << "#endif" << newLine;
+        }
 
         projectSaver.setExtraAppConfigFileContent (mem.toString());
     }
