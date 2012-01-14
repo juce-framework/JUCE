@@ -1375,14 +1375,19 @@ void TextEditor::moveCaret (int newCaretPos)
     }
 }
 
+int TextEditor::getCaretPosition() const
+{
+    return caretPosition;
+}
+
 void TextEditor::setCaretPosition (const int newIndex)
 {
     moveCaretTo (newIndex, false);
 }
 
-int TextEditor::getCaretPosition() const
+void TextEditor::moveCaretToEnd()
 {
-    return caretPosition;
+    moveCaretTo (std::numeric_limits<int>::max(), false);
 }
 
 void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,

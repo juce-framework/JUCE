@@ -33,9 +33,9 @@ class MessageManager;
 //==============================================================================
 /** The base class for objects that can be delivered to a MessageListener.
 
-    The simplest Message object contains a few integer and pointer parameters
-    that the user can set, and this is enough for a lot of purposes. For passing more
-    complex data, subclasses of Message can also be used.
+    If you want to send a message that carries some kind of custom data, just
+    create a subclass of Message with some appropriate member variables to hold
+    your data.
 
     @see MessageListener, MessageManager, ActionListener, ChangeListener
 */
