@@ -1173,6 +1173,7 @@ public:
     AudioUnitPluginWindowCarbon (AudioUnitPluginInstance& plugin_)
         : AudioProcessorEditor (&plugin_),
           plugin (plugin_),
+          componentRecord (nullptr),
           viewComponent (0)
     {
         addAndMakeVisible (innerWrapper = new InnerWrapperComponent (*this));
@@ -1181,12 +1182,19 @@ public:
         setVisible (true);
         setSize (400, 300);
 
-        ComponentDescription viewList [16] = { 0 };
-        UInt32 viewListSize = sizeof (viewList);
-        AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_GetUIComponentList, kAudioUnitScope_Global,
-                              0, &viewList, &viewListSize);
+        UInt32 propertySize;
+        if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_GetUIComponentList,
+                                      kAudioUnitScope_Global, 0, &propertySize, NULL) == noErr
+             && propertySize > 0)
+        {
+            ComponentDescription views [propertySize / sizeof (ComponentDescription)];
 
-        componentRecord = FindNextComponent (0, &viewList[0]);
+            if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_GetUIComponentList,
+                                      kAudioUnitScope_Global, 0, &views[0], &propertySize) == noErr)
+            {
+                componentRecord = FindNextComponent (0, &views[0]);
+            }
+        }
     }
 
     ~AudioUnitPluginWindowCarbon()
