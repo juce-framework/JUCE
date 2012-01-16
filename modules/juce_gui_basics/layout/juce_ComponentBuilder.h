@@ -58,13 +58,10 @@ public:
     /** Destructor. */
     ~ComponentBuilder();
 
+    /** This is the ValueTree data object that the builder is working with. */
+    ValueTree state;
+
     //==============================================================================
-    /** Returns the ValueTree that this builder is working with. */
-    ValueTree& getState() noexcept              { return state; }
-
-    /** Returns the ValueTree that this builder is working with. */
-    const ValueTree& getState() const noexcept  { return state; }
-
     /** Returns the builder's component (creating it if necessary).
 
         The first time that this method is called, the builder will attempt to create a component
@@ -111,7 +108,7 @@ public:
         virtual ~TypeHandler();
 
         /** Returns the type of the ValueTrees that this handler can parse. */
-        const Identifier& getType() const noexcept          { return valueTreeType; }
+        const Identifier type;
 
         /** Returns the builder that this type is registered with. */
         ComponentBuilder* getBuilder() const noexcept;
@@ -144,7 +141,6 @@ public:
         //==============================================================================
         friend class ComponentBuilder;
         ComponentBuilder* builder;
-        const Identifier valueTreeType;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypeHandler);
     };
@@ -238,7 +234,6 @@ public:
 
 private:
     //=============================================================================
-    ValueTree state;
     OwnedArray <TypeHandler> types;
     ScopedPointer<Component> component;
     ImageProvider* imageProvider;

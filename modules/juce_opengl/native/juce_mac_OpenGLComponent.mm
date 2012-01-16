@@ -137,7 +137,7 @@ public:
             NSOpenGLPFAStencilSize, pixelFormat.stencilBufferBits,
             NSOpenGLPFAAccumSize,   pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
                                         + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits,
-            NSOpenGLPFASampleBuffers, 1,
+            pixelFormat.multisamplingLevel > 0 ? NSOpenGLPFASamples : 0, pixelFormat.multisamplingLevel,
             0
         };
 

@@ -164,7 +164,7 @@ ComponentBuilder::TypeHandler* ComponentBuilder::getHandlerForState (const Value
     {
         TypeHandler* const t = types.getUnchecked(i);
 
-        if (t->getType() == targetType)
+        if (t->type == targetType)
             return t;
     }
 
@@ -217,9 +217,8 @@ void ComponentBuilder::valueTreeParentChanged (ValueTree& tree)
 }
 
 //==============================================================================
-ComponentBuilder::TypeHandler::TypeHandler (const Identifier& valueTreeType_)
-   : builder (nullptr),
-     valueTreeType (valueTreeType_)
+ComponentBuilder::TypeHandler::TypeHandler (const Identifier& valueTreeType)
+   : type (valueTreeType), builder (nullptr)
 {
 }
 
