@@ -55,7 +55,7 @@ public:
     ValueTree getProjectRoot() const                    { return projectRoot; }
     Value getProjectName()                              { return getMainGroup().getName(); }
     String getProjectFilenameRoot()                     { return File::createLegalFileName (getDocumentTitle()); }
-    String getProjectUID() const                        { return projectRoot [Ids::id_]; }
+    String getProjectUID() const                        { return projectRoot [ComponentBuilder::idProperty]; }
 
     //==============================================================================
     template <class FileType>
@@ -292,7 +292,7 @@ public:
     void valueTreeParentChanged (ValueTree& tree);
 
     //==============================================================================
-    UndoManager* getUndoManagerFor (const ValueTree& node) const             { return 0; }
+    UndoManager* getUndoManagerFor (const ValueTree&) const             { return nullptr; }
 
     //==============================================================================
     static const char* projectFileExtension;

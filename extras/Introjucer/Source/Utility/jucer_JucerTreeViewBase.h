@@ -62,7 +62,7 @@ public:
     virtual void showRenameBox();
 
     // Text editor listener for renaming..
-    void textEditorTextChanged (TextEditor& editor)         {}
+    void textEditorTextChanged (TextEditor&)                {}
     void textEditorReturnKeyPressed (TextEditor& editor)    { editor.exitModalState (1); }
     void textEditorEscapeKeyPressed (TextEditor& editor)    { editor.exitModalState (0); }
     void textEditorFocusLost (TextEditor& editor)           { editor.exitModalState (0); }

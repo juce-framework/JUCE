@@ -70,22 +70,17 @@ void ResourceFile::addResourcesFromProjectItem (const Project::Item& projectItem
     else
     {
         if (projectItem.shouldBeAddedToBinaryResources())
-            addFile (projectItem.getFile());
+            addFile (projectItem.getFile(), projectItem.getImageFileID());
     }
 }
 
 //==============================================================================
-void ResourceFile::setJuceHeaderToInclude (const File& header)
-{
-    juceHeader = header;
-}
-
 void ResourceFile::setClassName (const String& className_)
 {
     className = className_;
 }
 
-void ResourceFile::addFile (const File& file)
+void ResourceFile::addFile (const File& file, const String& imageProviderId)
 {
     files.add (file);
 
@@ -95,6 +90,9 @@ void ResourceFile::addFile (const File& file)
     int suffix = 2;
     while (variableNames.contains (variableName))
         variableName = variableNameRoot + String (suffix++);
+
+    if (imageProviderId.isNotEmpty())
+        variableName << "|" << imageProviderId;
 
     variableNames.add (variableName);
 }
@@ -135,51 +133,34 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
     cpp << "/* ==================================== " << resourceFileIdentifierString << " ===================================="
         << comment;
 
-    if (juceHeader.exists())
-        header << CodeHelpers::createIncludeStatement (juceHeader, cppFile) << newLine;
-
     const String namespaceName (className);
-    StringArray returnCodes;
 
-    int i;
-    for (i = 0; i < files.size(); ++i)
-        returnCodes.add ("numBytes = " + namespaceName + "::" + variableNames[i] + "Size; return "
-                            + namespaceName + "::" + variableNames[i] + ";");
-
-    cpp << CodeHelpers::createIncludeStatement (cppFile.withFileExtension (".h"), cppFile) << newLine
-        << newLine
-        << newLine
-        << "const char* " << namespaceName << "::getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
-        << "{" << newLine;
-
-    CodeHelpers::createStringMatcher (cpp, "resourceNameUTF8", variableNames, returnCodes, 4);
-
-    cpp << "    numBytes = 0;" << newLine
-        << "    return 0;" << newLine
-        << "}" << newLine
-        << newLine;
-
+    cpp    << "namespace " << namespaceName << newLine << "{" << newLine;
     header << "namespace " << namespaceName << newLine << "{" << newLine;
 
-    for (i = 0; i < files.size(); ++i)
+    StringArray returnCodes;
+
+    for (int i = 0; i < files.size(); ++i)
     {
         const File& file = files.getReference(i);
         const int64 dataSize = file.getSize();
+
+        const String variableName (variableNames[i].upToFirstOccurrenceOf ("|", false, false));
+
+        returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableName + ";");
 
         ScopedPointer <InputStream> fileStream (file.createInputStream());
         jassert (fileStream != nullptr);
 
         if (fileStream != nullptr)
         {
-            const String variableName (variableNames[i]);
             const String tempVariable ("temp_" + String::toHexString (file.hashCode()));
 
             header << "    extern const char*   " << variableName << ";" << newLine;
             header << "    const int            " << variableName << "Size = " << (int) dataSize << ";" << newLine << newLine;
 
             cpp  << newLine << "//================== " << file.getFileName() << " ==================" << newLine
-                << "static const unsigned char " << tempVariable
-                << "[] =" << newLine;
+                << "static const unsigned char " << tempVariable << "[] =" << newLine;
 
             {
                 MemoryBlock data;
@@ -188,14 +169,47 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
             }
 
             cpp << newLine << newLine
-                << "const char* " << namespaceName << "::" << variableName << " = (const char*) "
-                << tempVariable << ";" << newLine;
+                << "const char* " << variableName << " = (const char*) " << tempVariable << ";" << newLine;
         }
     }
+
+    cpp << newLine
+        << newLine
+        << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
+        << "{" << newLine;
+
+    CodeHelpers::createStringMatcher (cpp, "resourceNameUTF8", variableNames, returnCodes, 4);
+
+    cpp << "    numBytes = 0;" << newLine
+        << "    return 0;" << newLine
+        << "}" << newLine
+        << newLine
+        << "}" << newLine;
 
     header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
            << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
            << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
+           << newLine
+           << "    //==============================================================================" << newLine
+           << "    // This class acts as an ImageProvider that will access the BinaryData images" << newLine
+           << "    class ImageProvider  : public juce::ComponentBuilder::ImageProvider" << newLine
+           << "    {" << newLine
+           << "    public:" << newLine
+           << "        ImageProvider() noexcept {}" << newLine
+          << newLine
+           << "        juce::Image getImageForIdentifier (const juce::var& imageIdentifier)" << newLine
+           << "        {" << newLine
+           << "            int dataSize = 0;" << newLine
+           << "            const char* const data = getNamedResource (imageIdentifier.toString().toUTF8(), dataSize);" << newLine
+           << newLine
+           << "            if (data != nullptr)" << newLine
+           << "                return juce::ImageCache::getFromMemory (data, dataSize);" << newLine
+           << newLine
+           << "            return juce::Image();" << newLine
+           << "        }" << newLine
+           << newLine
+           << "        juce::var getIdentifierForImage (const juce::Image&)  { return juce::var(); }" << newLine
+           << "    };" << newLine
            << "}" << newLine;
 
     return true;

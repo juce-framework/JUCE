@@ -89,6 +89,11 @@ public:
     */
     virtual Font getFont();
 
+    //==============================================================================
+    struct Ids
+    {
+        static const Identifier tagType;
+    };
 
 protected:
     /** @internal */

@@ -91,8 +91,8 @@ void Project::updateProjectSettings()
 
 void Project::setMissingDefaultValues()
 {
-    if (! projectRoot.hasProperty (Ids::id_))
-        projectRoot.setProperty (Ids::id_, createAlphaNumericUID(), nullptr);
+    if (! projectRoot.hasProperty (ComponentBuilder::idProperty))
+        projectRoot.setProperty (ComponentBuilder::idProperty, createAlphaNumericUID(), nullptr);
 
     // Create main file group if missing
     if (! projectRoot.getChildWithName (Tags::projectMainGroup).isValid())
@@ -430,8 +430,8 @@ Project::Item::~Item()
 
 Project::Item Project::Item::createCopy()         { Item i (*this); i.node = i.node.createCopy(); return i; }
 
-String Project::Item::getID() const               { return node [Ids::id_]; }
-void Project::Item::setID (const String& newID)   { node.setProperty (Ids::id_, newID, nullptr); }
+String Project::Item::getID() const               { return node [ComponentBuilder::idProperty]; }
+void Project::Item::setID (const String& newID)   { node.setProperty (ComponentBuilder::idProperty, newID, nullptr); }
 
 String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
@@ -451,7 +451,7 @@ bool Project::Item::isImageFile() const     { return isFile() && getFile().hasFi
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {
-    if (node [Ids::id_] == targetId)
+    if (node [ComponentBuilder::idProperty] == targetId)
         return *this;
 
     if (isGroup())
@@ -595,7 +595,7 @@ File Project::Item::determineGroupFolder() const
 
 void Project::Item::initialiseNodeValues()
 {
-    if (! node.hasProperty (Ids::id_))
+    if (! node.hasProperty (ComponentBuilder::idProperty))
         setID (createAlphaNumericUID());
 
     if (isFile())
@@ -820,7 +820,7 @@ bool Project::isModuleEnabled (const String& moduleID) const
     ValueTree modules (projectRoot.getChildWithName (Tags::modulesGroup));
 
     for (int i = 0; i < modules.getNumChildren(); ++i)
-        if (modules.getChild(i) [Ids::id_] == moduleID)
+        if (modules.getChild(i) [ComponentBuilder::idProperty] == moduleID)
             return true;
 
     return false;
@@ -828,13 +828,13 @@ bool Project::isModuleEnabled (const String& moduleID) const
 
 Value Project::shouldShowAllModuleFilesInProject (const String& moduleID)
 {
-    return getModulesNode().getChildWithProperty (Ids::id_, moduleID)
+    return getModulesNode().getChildWithProperty (ComponentBuilder::idProperty, moduleID)
                            .getPropertyAsValue (Ids::showAllCode, getUndoManagerFor (getModulesNode()));
 }
 
 Value Project::shouldCopyModuleFilesLocally (const String& moduleID)
 {
-    return getModulesNode().getChildWithProperty (Ids::id_, moduleID)
+    return getModulesNode().getChildWithProperty (ComponentBuilder::idProperty, moduleID)
                            .getPropertyAsValue (Ids::useLocalCopy, getUndoManagerFor (getModulesNode()));
 }
 
@@ -843,7 +843,7 @@ void Project::addModule (const String& moduleID, bool shouldCopyFilesLocally)
     if (! isModuleEnabled (moduleID))
     {
         ValueTree module (Tags::module);
-        module.setProperty (Ids::id_, moduleID, nullptr);
+        module.setProperty (ComponentBuilder::idProperty, moduleID, nullptr);
 
         ValueTree modules (getModulesNode());
         modules.addChild (module, -1, getUndoManagerFor (modules));
@@ -860,7 +860,7 @@ void Project::removeModule (const String& moduleID)
     ValueTree modules (getModulesNode());
 
     for (int i = 0; i < modules.getNumChildren(); ++i)
-        if (modules.getChild(i) [Ids::id_] == moduleID)
+        if (modules.getChild(i) [ComponentBuilder::idProperty] == moduleID)
             modules.removeChild (i, getUndoManagerFor (modules));
 }
 
@@ -879,7 +879,7 @@ int Project::getNumModules() const
 
 String Project::getModuleID (int index) const
 {
-    return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [Ids::id_].toString();
+    return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [ComponentBuilder::idProperty].toString();
 }
 
 //==============================================================================

@@ -5,29 +5,8 @@
 
 */
 
-#include "BinaryData.h"
-
-
-const char* BinaryData::getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
+namespace BinaryData
 {
-    int hash = 0;
-    if (resourceNameUTF8 != 0)
-        while (*resourceNameUTF8 != 0)
-            hash = 31 * hash + *resourceNameUTF8++;
-
-    switch (hash)
-    {
-        case 0xe23b4891:  numBytes = BinaryData::jules_jpgSize; return BinaryData::jules_jpg;
-        case 0x496477a8:  numBytes = BinaryData::prefs_about_pngSize; return BinaryData::prefs_about_png;
-        case 0x44e88a0d:  numBytes = BinaryData::prefs_keys_pngSize; return BinaryData::prefs_keys_png;
-        case 0xdd254505:  numBytes = BinaryData::prefs_misc_pngSize; return BinaryData::prefs_misc_png;
-        default: break;
-    }
-
-    numBytes = 0;
-    return 0;
-}
-
 
 //================== jules.jpg ==================
 static const unsigned char temp_ec935dd1[] =
@@ -349,7 +328,7 @@ static const unsigned char temp_ec935dd1[] =
 148,76,143,157,191,200,191,163,9,117,152,15,242,170,125,188,31,241,67,254,85,205,182,34,56,24,127,200,142,189,125,159,246,46,103,124,93,118,171,46,56,244,252,235,113,189,21,239,91,116,110,79,218,160,1,107,212,217,105,250,99,194,218,181,27,250,180,248,
 215,255,217,0,0 };
 
-const char* BinaryData::jules_jpg = (const char*) temp_ec935dd1;
+const char* jules_jpg = (const char*) temp_ec935dd1;
 
 //================== prefs_about.png ==================
 static const unsigned char temp_101ffda8[] =
@@ -379,7 +358,7 @@ static const unsigned char temp_101ffda8[] =
 7,143,191,253,252,247,239,255,15,160,186,223,12,116,0,0,1,196,56,210,150,15,3,4,208,136,155,16,7,8,160,17,231,97,128,0,26,113,30,6,8,160,17,231,97,128,0,26,113,30,6,8,160,17,231,97,128,0,26,113,30,6,8,160,17,231,97,128,0,26,113,30,6,8,160,17,231,97,128,
 0,26,113,30,6,8,160,17,231,97,128,0,3,0,159,22,207,49,216,248,213,199,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* BinaryData::prefs_about_png = (const char*) temp_101ffda8;
+const char* prefs_about_png = (const char*) temp_101ffda8;
 
 //================== prefs_keys.png ==================
 static const unsigned char temp_958eb5cf[] =
@@ -436,7 +415,7 @@ static const unsigned char temp_958eb5cf[] =
 0,2,8,91,212,33,15,238,226,74,147,12,104,105,141,145,152,73,45,28,195,82,255,208,216,200,14,135,203,1,4,16,35,17,179,116,184,102,238,112,241,255,227,160,137,153,40,195,233,49,128,0,98,36,194,98,98,166,38,25,137,156,54,68,155,43,33,56,179,7,23,3,8,32,
 198,161,178,166,4,32,128,134,204,236,50,64,0,13,25,135,2,4,208,144,113,40,64,0,13,25,135,2,4,208,144,113,40,64,0,13,25,135,2,4,208,144,113,40,64,128,1,0,18,155,223,249,154,121,1,250,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* BinaryData::prefs_keys_png = (const char*) temp_958eb5cf;
+const char* prefs_keys_png = (const char*) temp_958eb5cf;
 
 //================== prefs_misc.png ==================
 static const unsigned char temp_2dcb70c7[] =
@@ -527,4 +506,31 @@ static const unsigned char temp_2dcb70c7[] =
 69,179,251,63,182,209,53,164,214,21,85,22,227,2,4,16,205,151,103,35,205,117,50,16,72,154,140,216,2,235,63,21,28,8,16,64,244,90,104,255,159,80,106,128,165,252,255,52,8,117,128,0,98,28,9,155,95,0,2,104,68,236,11,1,8,160,17,225,73,128,0,3,0,120,52,172,151,
 198,78,252,63,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* BinaryData::prefs_misc_png = (const char*) temp_2dcb70c7;
+const char* prefs_misc_png = (const char*) temp_2dcb70c7;
+
+
+const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
+{
+    int hash = 0;
+    if (resourceNameUTF8 != 0)
+        while (*resourceNameUTF8 != 0)
+            hash = 31 * hash + *resourceNameUTF8++;
+
+    switch (hash)
+    {
+        case 0xe23b4891:
+        case 0xfe8a1589:  numBytes = 24218; return jules_jpg;
+        case 0x496477a8:
+        case 0xf26e465b:  numBytes = 1819; return prefs_about_png;
+        case 0x44e88a0d:
+        case 0xf6e6db91:  numBytes = 3794; return prefs_keys_png;
+        case 0xdd254505:
+        case 0xe1146fbf:  numBytes = 6162; return prefs_misc_png;
+        default: break;
+    }
+
+    numBytes = 0;
+    return 0;
+}
+
+}

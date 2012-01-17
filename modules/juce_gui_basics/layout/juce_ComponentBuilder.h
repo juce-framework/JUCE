@@ -55,6 +55,9 @@ public:
     */
     explicit ComponentBuilder (const ValueTree& state);
 
+    /** Creates a builder that doesn't have a state object. */
+    ComponentBuilder();
+
     /** Destructor. */
     ~ComponentBuilder();
 
@@ -164,6 +167,9 @@ public:
     */
     TypeHandler* getHandler (int index) const noexcept;
 
+    /** Registers handlers for various standard juce components. */
+    void registerStandardComponentTypes();
+
     //=============================================================================
     /** This class is used when references to images need to be stored in ValueTrees.
 
@@ -221,6 +227,13 @@ public:
     */
     static const Identifier idProperty;
 
+    /**
+    */
+    static void refreshChildrenFromValueTree (Component& parent,
+                                              const ValueTree& state,
+                                              ImageProvider* imageProvider);
+
+    //=============================================================================
     /** @internal */
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
     /** @internal */
@@ -231,6 +244,10 @@ public:
     void valueTreeChildOrderChanged (ValueTree& parentTree);
     /** @internal */
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
+    /** @internal */
+    static void refreshBasicComponentProperties (Component&, const ValueTree&);
+    /** @internal */
+    static RelativeRectangle getComponentBounds (const ValueTree&);
 
 private:
     //=============================================================================
@@ -243,6 +260,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder);
 };
-
 
 #endif   // __JUCE_COMPONENTBUILDER_JUCEHEADER__

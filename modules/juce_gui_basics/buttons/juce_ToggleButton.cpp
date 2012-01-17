@@ -55,4 +55,6 @@ void ToggleButton::colourChanged()
     repaint();
 }
 
+const Identifier ToggleButton::Ids::tagType ("TOGGLEBUTTON");
+
 END_JUCE_NAMESPACE

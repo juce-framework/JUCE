@@ -602,5 +602,40 @@ void ComboBox::handleAsyncUpdate()
     listeners.callChecked (checker, &ComboBoxListener::comboBoxChanged, this);  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
 }
 
+const Identifier ComboBox::Ids::tagType ("COMBOBOX");
+const Identifier ComboBox::Ids::items ("items");
+const Identifier ComboBox::Ids::editable ("editable");
+const Identifier ComboBox::Ids::textJustification ("textJustification");
+const Identifier ComboBox::Ids::unselectedText ("unselectedText");
+const Identifier ComboBox::Ids::noItemsText ("noItemsText");
+
+void ComboBox::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
+{
+    ComponentBuilder::refreshBasicComponentProperties (*this, state);
+
+    {
+        StringArray items;
+        items.addLines (state [Ids::items].toString());
+        items.removeEmptyStrings (true);
+
+        StringArray existingItems;
+
+        for (int i = 0; i < getNumItems(); ++i)
+            existingItems.add (getItemText (i));
+
+        if (existingItems != items)
+        {
+            clear();
+
+            for (int i = 0; i < items.size(); ++i)
+                addItem (items[i], i + 1);
+        }
+    }
+
+    setEditableText (state [Ids::editable]);
+    setJustificationType ((int) state [Ids::textJustification]);
+    setTextWhenNothingSelected (state [Ids::unselectedText].toString());
+    setTextWhenNoChoicesAvailable (state [Ids::noItemsText].toString());
+}
 
 END_JUCE_NAMESPACE

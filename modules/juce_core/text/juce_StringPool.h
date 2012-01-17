@@ -58,7 +58,7 @@ public:
         The pool will own all the pointers that it returns, deleting them when the pool itself
         is deleted.
     */
-    const String::CharPointerType getPooledString (const String& original);
+    String::CharPointerType getPooledString (const String& original);
 
     /** Returns a pointer to a copy of the string that is passed in.
 
@@ -66,7 +66,7 @@ public:
         The pool will own all the pointers that it returns, deleting them when the pool itself
         is deleted.
     */
-    const String::CharPointerType getPooledString (const char* original);
+    String::CharPointerType getPooledString (const char* original);
 
     /** Returns a pointer to a copy of the string that is passed in.
 
@@ -74,14 +74,14 @@ public:
         The pool will own all the pointers that it returns, deleting them when the pool itself
         is deleted.
     */
-    const String::CharPointerType getPooledString (const wchar_t* original);
+    String::CharPointerType getPooledString (const wchar_t* original);
 
     //==============================================================================
     /** Returns the number of strings in the pool. */
     int size() const noexcept;
 
     /** Returns one of the strings in the pool, by index. */
-    const String::CharPointerType operator[] (int index) const noexcept;
+    String::CharPointerType operator[] (int index) const noexcept;
 
 private:
     Array <String> strings;

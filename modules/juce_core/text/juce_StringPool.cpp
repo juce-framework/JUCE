@@ -76,7 +76,7 @@ namespace StringPoolHelpers
     }
 }
 
-const String::CharPointerType StringPool::getPooledString (const String& s)
+String::CharPointerType StringPool::getPooledString (const String& s)
 {
     if (s.isEmpty())
         return String::empty.getCharPointer();
@@ -84,7 +84,7 @@ const String::CharPointerType StringPool::getPooledString (const String& s)
     return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
-const String::CharPointerType StringPool::getPooledString (const char* const s)
+String::CharPointerType StringPool::getPooledString (const char* const s)
 {
     if (s == nullptr || *s == 0)
         return String::empty.getCharPointer();
@@ -92,7 +92,7 @@ const String::CharPointerType StringPool::getPooledString (const char* const s)
     return StringPoolHelpers::getPooledStringFromArray (strings, s);
 }
 
-const String::CharPointerType StringPool::getPooledString (const wchar_t* const s)
+String::CharPointerType StringPool::getPooledString (const wchar_t* const s)
 {
     if (s == nullptr || *s == 0)
         return String::empty.getCharPointer();
@@ -105,7 +105,7 @@ int StringPool::size() const noexcept
     return strings.size();
 }
 
-const String::CharPointerType StringPool::operator[] (const int index) const noexcept
+String::CharPointerType StringPool::operator[] (const int index) const noexcept
 {
     return strings [index].getCharPointer();
 }

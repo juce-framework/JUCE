@@ -73,6 +73,12 @@ public:
         textColourId                    = 0x1006501   /**< The colour to use for the button's text. */
     };
 
+    //==============================================================================
+    struct Ids
+    {
+        static const Identifier tagType;
+    };
+
 protected:
     /** @internal */
     void paintButton (Graphics& g,

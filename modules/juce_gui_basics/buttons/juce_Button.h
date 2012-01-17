@@ -30,6 +30,7 @@
 #include "../keyboard/juce_KeyListener.h"
 #include "../commands/juce_ApplicationCommandManager.h"
 #include "../windows/juce_TooltipWindow.h"
+#include "../layout/juce_ComponentBuilder.h"
 
 #if JUCE_VC6
  #define Listener ButtonListener
@@ -371,6 +372,16 @@ public:
 
 
     //==============================================================================
+    struct Ids
+    {
+        static const Identifier text, radioGroup,
+                                connectedLeft, connectedRight, connectedTop, connectedBottom;
+    };
+
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
+    static int getConnectedFlags (const ValueTree& state);
+
+    //==============================================================================
     // These are deprecated - please use addListener() and removeListener() instead!
     JUCE_DEPRECATED (void addButtonListener (Listener*));
     JUCE_DEPRECATED (void removeButtonListener (Listener*));
@@ -420,7 +431,6 @@ protected:
         @see isDown, isOver
     */
     virtual void buttonStateChanged();
-
 
     //==============================================================================
     /** @internal */

@@ -1438,6 +1438,15 @@ void Component::addAndMakeVisible (Component* const child, int zOrder)
     }
 }
 
+void Component::addChildAndSetID (Component* const child, const String& componentID)
+{
+    if (child != nullptr)
+    {
+        child->setComponentID (componentID);
+        addAndMakeVisible (child);
+    }
+}
+
 void Component::removeChildComponent (Component* const child)
 {
     removeChildComponent (childComponentList.indexOf (child), true, true);

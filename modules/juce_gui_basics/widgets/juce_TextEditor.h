@@ -592,6 +592,15 @@ public:
     */
     virtual void performPopupMenuAction (int menuItemID);
 
+    //==============================================================================
+    struct Ids
+    {
+        static const Identifier tagType, text, font, mode, readOnly, scrollbarsShown,
+                                caretVisible, popupMenuEnabled;
+    };
+
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
+
 
 protected:
     //==============================================================================

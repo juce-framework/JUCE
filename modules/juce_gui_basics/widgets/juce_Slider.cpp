@@ -1419,5 +1419,33 @@ void SliderListener::sliderDragEnded (Slider*)
 {
 }
 
+const Identifier Slider::Ids::tagType ("SLIDER");
+const Identifier Slider::Ids::min ("min");
+const Identifier Slider::Ids::max ("max");
+const Identifier Slider::Ids::interval ("interval");
+const Identifier Slider::Ids::type ("type");
+const Identifier Slider::Ids::editable ("editable");
+const Identifier Slider::Ids::textBoxPos ("textBoxPos");
+const Identifier Slider::Ids::textBoxWidth ("textBoxWidth");
+const Identifier Slider::Ids::textBoxHeight ("textBoxHeight");
+const Identifier Slider::Ids::skew ("skew");
+
+void Slider::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
+{
+    ComponentBuilder::refreshBasicComponentProperties (*this, state);
+
+    setRange (static_cast <double> (state [Ids::min]),
+              static_cast <double> (state [Ids::max]),
+              static_cast <double> (state [Ids::interval]));
+
+    setSliderStyle ((SliderStyle) static_cast <int> (state [Ids::type]));
+
+    setTextBoxStyle ((TextEntryBoxPosition) static_cast <int> (state [Ids::textBoxPos]),
+                     ! static_cast <bool> (state [Ids::editable]),
+                     static_cast <int> (state [Ids::textBoxWidth]),
+                     static_cast <int> (state [Ids::textBoxHeight]));
+
+    setSkewFactor (static_cast <double> (state [Ids::skew]));
+}
 
 END_JUCE_NAMESPACE

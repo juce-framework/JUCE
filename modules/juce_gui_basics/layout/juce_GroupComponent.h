@@ -86,6 +86,14 @@ public:
     };
 
     //==============================================================================
+    struct Ids
+    {
+        static const Identifier tagType, text, justification;
+    };
+
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
     /** @internal */

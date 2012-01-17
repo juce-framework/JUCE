@@ -782,6 +782,15 @@ public:
         textBoxOutlineColourId      = 0x1001700   /**< The colour to use for a border around the text-editor box. */
     };
 
+    //==============================================================================
+    struct Ids
+    {
+        static const Identifier tagType, min, max, interval, type, editable,
+                                textBoxPos, textBoxWidth, textBoxHeight, skew;
+    };
+
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
+
 protected:
     //==============================================================================
     /** @internal */

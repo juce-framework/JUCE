@@ -567,7 +567,7 @@ void TableHeaderComponent::mouseEnter (const MouseEvent& e)
     updateColumnUnderMouse (e);
 }
 
-void TableHeaderComponent::mouseExit (const MouseEvent& e)
+void TableHeaderComponent::mouseExit (const MouseEvent&)
 {
     setColumnUnderMouse (0);
 }

@@ -460,15 +460,20 @@ namespace CodeHelpers
 
     static int findBestHashMultiplier (const StringArray& strings)
     {
+        StringArray allStrings;
+
+        for (int i = strings.size(); --i >= 0;)
+            allStrings.addTokens (strings[i], "|", "");
+
         int v = 31;
 
         for (;;)
         {
             SortedSet <int> hashes;
             bool collision = false;
-            for (int i = strings.size(); --i >= 0;)
+            for (int i = allStrings.size(); --i >= 0;)
             {
-                const int hash = calculateHash (strings[i], v);
+                const int hash = calculateHash (allStrings[i], v);
                 if (hashes.contains (hash))
                 {
                     collision = true;
@@ -503,8 +508,20 @@ namespace CodeHelpers
             << indent << "{" << newLine;
 
         for (int i = 0; i < strings.size(); ++i)
-            out << indent << "    case 0x" << hexString8Digits (calculateHash (strings[i], hashMultiplier))
-                << ":  " << codeToExecute[i] << newLine;
+        {
+            StringArray matchingStrings;
+            matchingStrings.addTokens (strings[i], "|", "");
+
+            for (int j = 0; j < matchingStrings.size(); ++j)
+            {
+                out << indent << "    case 0x" << hexString8Digits (calculateHash (matchingStrings[j], hashMultiplier)) << ":";
+
+                if (j < matchingStrings.size() - 1)
+                    out << newLine;
+            }
+
+            out << "  " << codeToExecute[i] << newLine;
+        }
 
         out << indent << "    default: break;" << newLine
             << indent << "}" << newLine << newLine;

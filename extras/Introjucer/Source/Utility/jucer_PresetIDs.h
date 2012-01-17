@@ -32,46 +32,15 @@ namespace Ids
 {
     #define DECLARE_ID(name)      const Identifier name (#name)
 
-    DECLARE_ID (text);
     DECLARE_ID (name);
     DECLARE_ID (file);
-    DECLARE_ID (font);
-    DECLARE_ID (mode);
-    DECLARE_ID (type);
     DECLARE_ID (version);
     DECLARE_ID (position);
     DECLARE_ID (source);
-    DECLARE_ID (readOnly);
-    DECLARE_ID (editMode);
-    DECLARE_ID (justification);
-    DECLARE_ID (placement);
-    DECLARE_ID (items);
-    DECLARE_ID (editable);
-    DECLARE_ID (textJustification);
-    DECLARE_ID (unselectedText);
-    DECLARE_ID (noItemsText);
-    DECLARE_ID (min);
-    DECLARE_ID (max);
     DECLARE_ID (width);
     DECLARE_ID (height);
     DECLARE_ID (background);
-    DECLARE_ID (interval);
-    DECLARE_ID (textBoxPos);
-    DECLARE_ID (textBoxWidth);
-    DECLARE_ID (textBoxHeight);
-    DECLARE_ID (skew);
-    DECLARE_ID (scrollBarV);
-    DECLARE_ID (scrollBarH);
-    DECLARE_ID (scrollbarWidth);
     DECLARE_ID (initialState);
-    DECLARE_ID (scrollbarsShown);
-    DECLARE_ID (caretVisible);
-    DECLARE_ID (popupMenuEnabled);
-    DECLARE_ID (radioGroup);
-    DECLARE_ID (connectedLeft);
-    DECLARE_ID (connectedRight);
-    DECLARE_ID (connectedTop);
-    DECLARE_ID (connectedBottom);
     DECLARE_ID (juceFolder);
     DECLARE_ID (targetFolder);
     DECLARE_ID (vstFolder);
@@ -108,12 +77,9 @@ namespace Ids
     DECLARE_ID (parentClasses);
     DECLARE_ID (constructorParams);
     DECLARE_ID (memberInitialisers);
-    DECLARE_ID (lossOfFocusDiscardsChanges);
-    DECLARE_ID (url);
     DECLARE_ID (rootItemVisible);
     DECLARE_ID (openByDefault);
     DECLARE_ID (locked);
-    DECLARE_ID (image);
     DECLARE_ID (tooltip);
     DECLARE_ID (memberName);
     DECLARE_ID (focusOrder);
@@ -124,17 +90,7 @@ namespace Ids
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
-    DECLARE_ID (upImage);
-    DECLARE_ID (downImage);
-    DECLARE_ID (overImage);
-    DECLARE_ID (upOverlay);
-    DECLARE_ID (downOverlay);
-    DECLARE_ID (overOverlay);
-    DECLARE_ID (upOpacity);
-    DECLARE_ID (downOpacity);
-    DECLARE_ID (overOpacity);
     const Identifier class_ ("class");
-    const Identifier id_ ("id");
 
     #undef DECLARE_ID
 }

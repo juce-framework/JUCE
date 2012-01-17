@@ -342,6 +342,14 @@ public:
     };
 
     //==============================================================================
+    struct Ids
+    {
+        static const Identifier tagType, items, editable, textJustification, unselectedText, noItemsText;
+    };
+
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
+
+    //==============================================================================
     /** @internal */
     void labelTextChanged (Label*);
     /** @internal */

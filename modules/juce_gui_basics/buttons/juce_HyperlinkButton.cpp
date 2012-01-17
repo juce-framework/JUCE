@@ -38,6 +38,15 @@ HyperlinkButton::HyperlinkButton (const String& linkText,
     setTooltip (linkURL.toString (false));
 }
 
+HyperlinkButton::HyperlinkButton ()
+   : Button (String::empty),
+     font (14.0f, Font::underlined),
+     resizeFont (true),
+     justification (Justification::centred)
+{
+    setMouseCursor (MouseCursor::PointingHandCursor);
+}
+
 HyperlinkButton::~HyperlinkButton()
 {
 }
@@ -106,5 +115,16 @@ void HyperlinkButton::paintButton (Graphics& g,
                 true);
 }
 
+const Identifier HyperlinkButton::Ids::tagType ("HYPERLINKBUTTON");
+const Identifier HyperlinkButton::Ids::text ("text");
+const Identifier HyperlinkButton::Ids::url ("url");
+
+void HyperlinkButton::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
+{
+    ComponentBuilder::refreshBasicComponentProperties (*this, state);
+
+    setButtonText (state [Ids::text].toString());
+    setURL (URL (state [Ids::url].toString()));
+}
 
 END_JUCE_NAMESPACE

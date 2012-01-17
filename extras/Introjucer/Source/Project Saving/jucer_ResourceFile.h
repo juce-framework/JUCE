@@ -42,12 +42,10 @@ public:
     static bool isResourceFile (const File& file);
 
     //==============================================================================
-    void setJuceHeaderToInclude (const File& header);
-
     void setClassName (const String& className);
     String getClassName() const       { return className; }
 
-    void addFile (const File& file);
+    void addFile (const File& file, const String& imageProviderId);
     String getDataVariableFor (const File& file) const;
     String getSizeVariableFor (const File& file) const;
 
@@ -62,7 +60,6 @@ private:
     Array<File> files;
     StringArray variableNames;
     Project& project;
-    File juceHeader;
     String className;
 
     void addResourcesFromProjectItem (const Project::Item& node);

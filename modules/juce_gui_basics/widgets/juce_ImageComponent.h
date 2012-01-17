@@ -67,6 +67,14 @@ public:
     /** Returns the current image placement. */
     const RectanglePlacement getImagePlacement() const;
 
+    //==============================================================================
+    struct Ids
+    {
+        static const Identifier tagType, image, placement;
+    };
+
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
+    static RectanglePlacement getPlacement (const ValueTree& state);
 
     //==============================================================================
     /** @internal */

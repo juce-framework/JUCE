@@ -428,5 +428,17 @@ bool Viewport::keyPressed (const KeyPress& key)
     return false;
 }
 
+//==============================================================================
+const Identifier Viewport::Ids::showScrollBarV ("showScrollBarV");
+const Identifier Viewport::Ids::showScrollBarH ("showScrollBarH");
+const Identifier Viewport::Ids::scrollBarWidth ("scrollBarWidth");
+
+void Viewport::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
+{
+    ComponentBuilder::refreshBasicComponentProperties (*this, state);
+
+    setScrollBarsShown (state [Ids::showScrollBarV], state [Ids::showScrollBarH]);
+    setScrollBarThickness (state [Ids::scrollBarWidth]);
+}
 
 END_JUCE_NAMESPACE

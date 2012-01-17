@@ -192,4 +192,49 @@ bool ImageButton::hitTest (int x, int y)
                                                                ((y - imageBounds.getY()) * im.getHeight()) / imageBounds.getHeight()).getAlpha());
 }
 
+const Identifier ImageButton::Ids::tagType     ("IMAGEBUTTON");
+const Identifier ImageButton::Ids::upImage     ("upImage");
+const Identifier ImageButton::Ids::overImage   ("overImage");
+const Identifier ImageButton::Ids::downImage   ("downImage");
+const Identifier ImageButton::Ids::upOverlay   ("upOverlay");
+const Identifier ImageButton::Ids::overOverlay ("overOverlay");
+const Identifier ImageButton::Ids::downOverlay ("downOverlay");
+const Identifier ImageButton::Ids::upOpacity   ("upOpacity");
+const Identifier ImageButton::Ids::overOpacity ("overOpacity");
+const Identifier ImageButton::Ids::downOpacity ("downOpacity");
+
+static Colour getColourFromVar (const var& col)
+{
+    if (col.isString())
+        return Colour (col.toString().getHexValue32());
+
+    return Colours::transparentBlack;
+}
+
+void ImageButton::refreshFromValueTree (const ValueTree& state, ComponentBuilder& builder)
+{
+    Button::refreshFromValueTree (state, builder);
+
+    const var upImageIdentifier (state [Ids::upImage]),
+              overImageIdentifier (state [Ids::overImage]),
+              downImageIdentifier (state [Ids::downImage]);
+
+    ComponentBuilder::ImageProvider* const imageProvider = builder.getImageProvider();
+    jassert (imageProvider != nullptr || upImageIdentifier.isVoid());
+
+    Image newUpImage, newOverImage, newDownImage;
+
+    if (imageProvider != nullptr)
+    {
+        newUpImage   = imageProvider->getImageForIdentifier (upImageIdentifier);
+        newOverImage = imageProvider->getImageForIdentifier (overImageIdentifier);
+        newDownImage = imageProvider->getImageForIdentifier (downImageIdentifier);
+    }
+
+    setImages (false, true, true,
+               newUpImage, state[Ids::upOpacity], getColourFromVar (state[Ids::upOverlay]),
+               newOverImage, state[Ids::overOpacity], getColourFromVar (state[Ids::overOverlay]),
+               newDownImage, state[Ids::downOpacity], getColourFromVar (state[Ids::downOverlay]));
+}
+
 END_JUCE_NAMESPACE

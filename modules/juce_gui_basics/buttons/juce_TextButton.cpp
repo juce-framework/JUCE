@@ -71,5 +71,6 @@ void TextButton::changeWidthToFitText (const int newHeight)
              getHeight());
 }
 
+const Identifier TextButton::Ids::tagType ("TEXTBUTTON");
 
 END_JUCE_NAMESPACE

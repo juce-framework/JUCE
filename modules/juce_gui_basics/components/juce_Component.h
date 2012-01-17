@@ -719,7 +719,7 @@ public:
                         the child of another component, it'll first be removed from it current parent.
         @param zOrder   The index in the child-list at which this component should be inserted.
                         A value of -1 will insert it in front of the others, 0 is the back.
-        @see removeChildComponent, addAndMakeVisible, getChild, ComponentListener::componentChildrenChanged
+        @see removeChildComponent, addAndMakeVisible, addChildAndSetID, getChild, ComponentListener::componentChildrenChanged
     */
     void addChildComponent (Component* child, int zOrder = -1);
 
@@ -729,6 +729,11 @@ public:
         and then addChildComponent(). See addChildComponent() for more details.
     */
     void addAndMakeVisible (Component* child, int zOrder = -1);
+
+    /** Adds a child component to this one, makes it visible, and sets its component ID.
+        @see addAndMakeVisible, addChildComponent
+    */
+    void addChildAndSetID (Component* child, const String& componentID);
 
     /** Removes one of this component's child-components.
 

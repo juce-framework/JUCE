@@ -180,7 +180,7 @@ public:
             return StringArray ((const char**) names);
         }
 
-        const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName)
+        const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& /*menuName*/)
         {
             PopupMenu menu;
 
@@ -276,7 +276,7 @@ public:
             return menu;
         }
 
-        void menuItemSelected (int menuItemID, int topLevelMenuIndex)
+        void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
         {
             if (menuItemID >= 100 && menuItemID < 200)
             {
