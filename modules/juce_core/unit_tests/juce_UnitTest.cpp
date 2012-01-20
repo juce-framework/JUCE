@@ -117,6 +117,9 @@ void UnitTestRunner::runTests (const Array<UnitTest*>& tests)
 
     for (int i = 0; i < tests.size(); ++i)
     {
+        if (shouldAbortTests())
+            break;
+
         try
         {
             tests.getUnchecked(i)->performTest (this);
@@ -138,6 +141,11 @@ void UnitTestRunner::runAllTests()
 void UnitTestRunner::logMessage (const String& message)
 {
     Logger::writeToLog (message);
+}
+
+bool UnitTestRunner::shouldAbortTests()
+{
+    return false;
 }
 
 void UnitTestRunner::beginNewTest (UnitTest* const test, const String& subCategory)

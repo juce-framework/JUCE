@@ -197,13 +197,15 @@ public:
                 setButtons (screenPos, time, ModifierKeys());
 
                 if (safeOldComp != nullptr)
-                    sendMouseExit (current, screenPos, time);
+                {
+                    componentUnderMouse = safeNewComp;
+                    sendMouseExit (safeOldComp, screenPos, time);
+                }
 
                 buttonState = originalButtonState;
             }
 
-            componentUnderMouse = safeNewComp;
-            current = getComponentUnderMouse();
+            current = componentUnderMouse = safeNewComp;
 
             if (current != nullptr)
                 sendMouseEnter (current, screenPos, time);

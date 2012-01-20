@@ -244,7 +244,7 @@ public:
         successful by calling lockWasGained(). If this is false, your thread is being told to
         die, so you should take evasive action.
 
-        If you pass zero for the thread object, it will wait indefinitely for the lock - be
+        If you pass nullptr for the thread object, it will wait indefinitely for the lock - be
         careful when doing this, because it's very easy to deadlock if your message thread
         attempts to call stopThread() on a thread just as that thread attempts to get the
         message lock.

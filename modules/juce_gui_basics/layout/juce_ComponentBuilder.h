@@ -229,9 +229,9 @@ public:
 
     /**
     */
-    static void refreshChildrenFromValueTree (Component& parent,
-                                              const ValueTree& state,
-                                              ImageProvider* imageProvider);
+    static void initialiseFromValueTree (Component& component,
+                                         const ValueTree& state,
+                                         ImageProvider* imageProvider);
 
     //=============================================================================
     /** @internal */

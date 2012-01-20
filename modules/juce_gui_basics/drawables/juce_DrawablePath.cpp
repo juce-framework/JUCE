@@ -203,7 +203,7 @@ void DrawablePath::ValueTreeWrapper::writeTo (RelativePointPath& relativePath) c
         for (int j = 0; j < numCps; ++j)
             points[j] = e.getControlPoint (j);
 
-        RelativePointPath::ElementBase* newElement = 0;
+        RelativePointPath::ElementBase* newElement = nullptr;
         const Identifier t (e.getType());
 
         if      (t == Element::startSubPathElement)  newElement = new RelativePointPath::StartSubPath (points[0]);

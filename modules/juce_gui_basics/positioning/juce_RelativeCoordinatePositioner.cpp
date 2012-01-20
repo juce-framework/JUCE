@@ -50,7 +50,13 @@ Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (con
     const MarkerList::Marker* const marker = findMarker (symbol, list);
 
     if (marker != nullptr)
-        return marker->position.getExpression();
+    {
+        Component* const parent = component.getParentComponent();
+        jassert (parent != nullptr);
+
+        ComponentScope scope (*parent);
+        return Expression (marker->position.getExpression().evaluate (scope));
+    }
 
     return Expression::Scope::getSymbolValue (symbol);
 }

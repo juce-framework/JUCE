@@ -260,6 +260,11 @@ protected:
     */
     virtual void logMessage (const String& message);
 
+    /** This can be overridden to let the runner know that it should abort the tests
+        as soon as possible, e.g. because the thread needs to stop.
+    */
+    virtual bool shouldAbortTests();
+
 private:
     //==============================================================================
     friend class UnitTest;

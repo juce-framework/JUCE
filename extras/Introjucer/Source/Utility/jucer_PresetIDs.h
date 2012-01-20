@@ -82,6 +82,7 @@ namespace Ids
     DECLARE_ID (locked);
     DECLARE_ID (tooltip);
     DECLARE_ID (memberName);
+    DECLARE_ID (markerName);
     DECLARE_ID (focusOrder);
     DECLARE_ID (hidden);
     DECLARE_ID (useStdCall);

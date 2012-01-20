@@ -359,21 +359,32 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
     }
 }
 
-void ComponentBuilder::refreshChildrenFromValueTree (Component& parent,
-                                                     const ValueTree& childList,
-                                                     ImageProvider* const imageProvider)
+static void updateMarkers (MarkerList* const list, const ValueTree& state)
+{
+    if (list != nullptr)
+        MarkerList::ValueTreeWrapper (state).applyTo (*list);
+}
+
+void ComponentBuilder::initialiseFromValueTree (Component& comp,
+                                                const ValueTree& state,
+                                                ImageProvider* const imageProvider)
 {
     using namespace ComponentBuilderHelpers;
 
     ComponentBuilder builder;
     builder.setImageProvider (imageProvider);
     builder.registerStandardComponentTypes();
-    builder.updateChildComponents (parent, childList);
+
+    updateMarkers (comp.getMarkers (true),  state.getChildWithName ("MARKERS_X"));
+    updateMarkers (comp.getMarkers (false), state.getChildWithName ("MARKERS_Y"));
+
+    const ValueTree childList (state.getChildWithName ("COMPONENTS"));
+    builder.updateChildComponents (comp, childList);
 
     for (int i = 0; i < childList.getNumChildren(); ++i)
     {
         const ValueTree state (childList.getChild(i));
-        Component* const c = findComponentWithID (parent, getStateId (state));
+        Component* const c = findComponentWithID (comp, getStateId (state));
 
         if (c != nullptr)
         {
@@ -385,6 +396,7 @@ void ComponentBuilder::refreshChildrenFromValueTree (Component& parent,
                 refreshBasicComponentProperties (*c, state);
         }
     }
+
 }
 
 RelativeRectangle ComponentBuilder::getComponentBounds (const ValueTree& state)
