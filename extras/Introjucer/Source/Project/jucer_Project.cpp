@@ -864,7 +864,6 @@ void Project::removeModule (const String& moduleID)
             modules.removeChild (i, getUndoManagerFor (modules));
 }
 
-
 void Project::createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const
 {
     for (int i = 0; i < availableModules.modules.size(); ++i)

@@ -77,6 +77,13 @@ public:
     */
     explicit SHA256 (const File& file);
 
+    /** Creates a checksum from a UTF-8 buffer.
+        E.g.
+        @code SHA256 checksum (myString.toUTF8());
+        @endcode
+    */
+    explicit SHA256 (const CharPointer_UTF8& utf8Text) noexcept;
+
     //==============================================================================
     /** Returns the hash as a 32-byte block of data. */
     MemoryBlock getRawData() const;
@@ -92,6 +99,7 @@ public:
 private:
     //==============================================================================
     uint8 result [32];
+    void process (const void*, size_t);
 
     JUCE_LEAK_DETECTOR (SHA256);
 };

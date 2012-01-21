@@ -223,7 +223,6 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Closes the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::openInIDE:

@@ -98,7 +98,11 @@ void DocumentEditorComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Close" + name,
                         "Closes the current document",
                         CommandCategories::general, 0);
+       #if JUCE_MAC
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+       #else
         result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+       #endif
         break;
 
     default:

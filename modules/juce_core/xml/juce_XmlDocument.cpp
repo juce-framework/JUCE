@@ -271,6 +271,7 @@ void XmlDocument::skipNextWhiteSpace()
                  && input[2] == '-'
                  && input[3] == '-')
             {
+                input += 4;
                 const int closeComment = input.indexOf (CharPointer_UTF8 ("-->"));
 
                 if (closeComment < 0)
@@ -284,6 +285,7 @@ void XmlDocument::skipNextWhiteSpace()
             }
             else if (input[1] == '?')
             {
+                input += 2;
                 const int closeBracket = input.indexOf (CharPointer_UTF8 ("?>"));
 
                 if (closeBracket < 0)

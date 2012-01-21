@@ -176,16 +176,12 @@ SHA256& SHA256::operator= (const SHA256& other) noexcept
 
 SHA256::SHA256 (const MemoryBlock& data)
 {
-    MemoryInputStream m (data, false);
-    SHA256Processor processor;
-    processor.processStream (m, -1, result);
+    process (data.getData(), data.getSize());
 }
 
 SHA256::SHA256 (const void* const data, const size_t numBytes)
 {
-    MemoryInputStream m (data, numBytes, false);
-    SHA256Processor processor;
-    processor.processStream (m, -1, result);
+    process (data, numBytes);
 }
 
 SHA256::SHA256 (InputStream& input, const int64 numBytesToRead)
@@ -207,6 +203,19 @@ SHA256::SHA256 (const File& file)
     {
         zerostruct (result);
     }
+}
+
+SHA256::SHA256 (const CharPointer_UTF8& utf8) noexcept
+{
+    jassert (utf8.getAddress() != nullptr);
+    process (utf8.getAddress(), utf8.sizeInBytes() - 1);
+}
+
+void SHA256::process (const void* const data, size_t numBytes)
+{
+    MemoryInputStream m (data, numBytes, false);
+    SHA256Processor processor;
+    processor.processStream (m, -1, result);
 }
 
 MemoryBlock SHA256::getRawData() const
