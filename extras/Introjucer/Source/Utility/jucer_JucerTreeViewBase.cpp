@@ -37,7 +37,7 @@ JucerTreeViewBase::~JucerTreeViewBase()
 {
 }
 
-const Font JucerTreeViewBase::getFont() const
+Font JucerTreeViewBase::getFont() const
 {
     return Font (getItemHeight() * 0.6f);
 }
@@ -109,7 +109,7 @@ Component* JucerTreeViewBase::createItemComponent()
     createLeftEdgeComponents (components);
     numLeftHandComps = components.size();
 
-    return numLeftHandComps == 0 ? 0 : new TreeLeftHandButtonHolderComponent (components);
+    return numLeftHandComps == 0 ? nullptr : new TreeLeftHandButtonHolderComponent (components);
 }
 
 //==============================================================================

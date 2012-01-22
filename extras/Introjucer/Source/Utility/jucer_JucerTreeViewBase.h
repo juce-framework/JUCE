@@ -70,7 +70,7 @@ public:
     //==============================================================================
 private:
     int numLeftHandComps;
-    const Font getFont() const;
+    Font getFont() const;
     int getTextX() const;
 };
 

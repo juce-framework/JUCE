@@ -747,15 +747,25 @@ public:
         if (inputDevice != nullptr && inputDevice->client != nullptr)
         {
             latencyIn = (int) (inputDevice->latencySamples + inputDevice->actualBufferSize + inputDevice->minBufferSize);
-            HRESULT hr = inputDevice->client->Start();
-            logFailure (hr); //xxx handle this
+
+            if (! check (inputDevice->client->Start()))
+            {
+                close();
+                lastError = "Couldn't start the input device!";
+                return lastError;
+            }
         }
 
         if (outputDevice != nullptr && outputDevice->client != nullptr)
         {
             latencyOut = (int) (outputDevice->latencySamples + outputDevice->actualBufferSize + outputDevice->minBufferSize);
-            HRESULT hr = outputDevice->client->Start();
-            logFailure (hr); //xxx handle this
+
+            if (! check (outputDevice->client->Start()))
+            {
+                close();
+                lastError = "Couldn't start the output device!";
+                return lastError;
+            }
         }
 
         isOpen_ = true;

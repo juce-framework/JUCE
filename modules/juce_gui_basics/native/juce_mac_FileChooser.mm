@@ -241,7 +241,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 {
     JUCE_AUTORELEASEPOOL
 
-    jassertfalse; //xxx to do
+    jassertfalse; //there's no such thing in iOS
 }
 
 #endif

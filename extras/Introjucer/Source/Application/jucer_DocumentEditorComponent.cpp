@@ -91,6 +91,7 @@ void DocumentEditorComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save" + name + " As...",
                         "Saves the current document to a different filename",
                         CommandCategories::general, 0);
+        result.setActive (document != nullptr && document->canSaveAs());
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
@@ -119,8 +120,7 @@ bool DocumentEditorComponent::perform (const InvocationInfo& info)
         return true;
 
     case CommandIDs::saveDocumentAs:
-        jassertfalse //xxxx
-        //document.save();
+        document->saveAs();
         return true;
 
     case CommandIDs::closeDocument:

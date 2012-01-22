@@ -46,13 +46,12 @@ public:
 
     void setValue (const var& newValue)
     {
-        const Type newVal = (Type) newValue;
+        const Type newVal = static_cast <Type> (newValue);
 
-        if (newVal != (Type) getValue())  // this test is important, because if a property is missing, it won't
-            sourceValue = newVal;        // create it (causing an unwanted undo action) when a control sets it to 0
+        if (newVal != static_cast <Type> (getValue()))  // this test is important, because if a property is missing, it won't
+            sourceValue = newVal;                       // create it (causing an unwanted undo action) when a control sets it to 0
     }
 
-    //==============================================================================
 protected:
     Value sourceValue;
 

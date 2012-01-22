@@ -432,13 +432,10 @@ void Graphics::drawBevel (const int x, const int y, const int width, const int h
     {
         context->saveState();
 
-        const float oldOpacity = 1.0f;//xxx state->colour.getFloatAlpha();
-        const float ramp = oldOpacity / bevelThickness;
-
         for (int i = bevelThickness; --i >= 0;)
         {
-            const float op = useGradient ? ramp * (sharpEdgeOnOutside ? bevelThickness - i : i)
-                                         : oldOpacity;
+            const float op = useGradient ? (sharpEdgeOnOutside ? bevelThickness - i : i) / bevelThickness
+                                         : 1.0f;
 
             context->setFill (topLeftColour.withMultipliedAlpha (op));
             context->fillRect (Rectangle<int> (x + i, y + i, width - i * 2, 1), false);

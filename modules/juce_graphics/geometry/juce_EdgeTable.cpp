@@ -629,8 +629,6 @@ void EdgeTable::excludeRectangle (const Rectangle<int>& r)
         const int top = clipped.getY() - bounds.getY();
         const int bottom = clipped.getBottom() - bounds.getY();
 
-        //XXX optimise here by shortening the table if it fills top or bottom
-
         const int rectLine[] = { 4, std::numeric_limits<int>::min(), 255,
                                  clipped.getX() << 8, 0,
                                  clipped.getRight() << 8, 255,

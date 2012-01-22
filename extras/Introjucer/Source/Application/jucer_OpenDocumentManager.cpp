@@ -40,16 +40,11 @@ public:
         reloadFromFile();
     }
 
-    ~SourceCodeDocument()
-    {
-    }
-
     //==============================================================================
     class Type  : public OpenDocumentManager::DocumentType
     {
     public:
         Type() {}
-        ~Type() {}
 
         bool canOpenFile (const File& file)                 { return SourceCodeEditor::isTextFile (file); }
         Document* openFile (Project*, const File& file)     { return new SourceCodeDocument (file); }
@@ -60,6 +55,7 @@ public:
     bool isForFile (const File& file) const             { return modDetector.getFile() == file; }
     bool isForNode (const ValueTree& node) const        { return false; }
     bool refersToProject (Project& project) const       { return false; }
+    bool canSaveAs() const                              { return true; }
     String getName() const                              { return modDetector.getFile().getFileName(); }
     String getType() const                              { return modDetector.getFile().getFileExtension() + " file"; }
     bool needsSaving() const                            { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
@@ -92,6 +88,12 @@ public:
         return true;
     }
 
+    bool saveAs()
+    {
+        jassertfalse; //xxx todo
+        return false;
+    }
+
     Component* createEditor()
     {
         CodeTokeniser* tokeniser = nullptr;
@@ -120,8 +122,6 @@ public:
         reloadFromFile();
     }
 
-    ~UnknownDocument() {}
-
     //==============================================================================
     class Type  : public OpenDocumentManager::DocumentType
     {
@@ -129,7 +129,7 @@ public:
         Type() {}
         ~Type() {}
 
-        bool canOpenFile (const File& file)                         { return true; }
+        bool canOpenFile (const File&)                              { return true; }
         Document* openFile (Project* project, const File& file)     { return new UnknownDocument (project, file); }
     };
 
@@ -140,6 +140,8 @@ public:
     bool refersToProject (Project& p) const         { return project == &p; }
     bool needsSaving() const                        { return false; }
     bool save()                                     { return true; }
+    bool canSaveAs() const                          { return false; }
+    bool saveAs()                                   { return false; }
     bool hasFileBeenModifiedExternally()            { return fileModificationTime != file.getLastModificationTime(); }
     void reloadFromFile()                           { fileModificationTime = file.getLastModificationTime(); }
     String getName() const                          { return file.getFileName(); }

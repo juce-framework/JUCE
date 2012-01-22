@@ -812,11 +812,11 @@ BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
         if (abs (m.getHighestBit() - n.getHighestBit()) <= 16)
             return simpleGCD (&m, &n);
 
-        BigInteger temp1 (m), temp2;
-        temp1.divideBy (n, temp2);
+        BigInteger temp2;
+        m.divideBy (n, temp2);
 
-        m = n;
-        n = temp2;
+        m.swapWith (n);
+        n.swapWith (temp2);
     }
 
     return m;
