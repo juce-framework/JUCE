@@ -388,7 +388,7 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 bool Process::openDocument (const String& fileName, const String& parameters)
 {
   #if JUCE_IOS
-    return [[UIApplication sharedApplication] openURL: [NSURL fileURLWithPath: juceStringToNS (fileName)]];
+    return [[UIApplication sharedApplication] openURL: [NSURL URLWithString: juceStringToNS (fileName)]];
   #else
     JUCE_AUTORELEASEPOOL
 
