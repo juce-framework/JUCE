@@ -38,7 +38,8 @@ DrawableText::DrawableText()
 
 DrawableText::DrawableText (const DrawableText& other)
     : bounds (other.bounds),
-      fontSizeControlPoint (other.fontSizeControlPoint),
+      fontHeight (other.fontHeight),
+      fontHScale (other.fontHScale),
       font (other.font),
       text (other.text),
       colour (other.colour),
@@ -77,8 +78,8 @@ void DrawableText::setFont (const Font& newFont, bool applySizeAndScale)
 
         if (applySizeAndScale)
         {
-            setFontSizeControlPoint (RelativePoint (RelativeParallelogram::getPointForInternalCoord (resolvedPoints,
-                                       Point<float> (font.getHorizontalScale() * font.getHeight(), font.getHeight()))));
+            fontHeight = font.getHeight();
+            fontHScale = font.getHorizontalScale();
         }
 
         refreshBounds();
@@ -100,18 +101,27 @@ void DrawableText::setBoundingBox (const RelativeParallelogram& newBounds)
     }
 }
 
-void DrawableText::setFontSizeControlPoint (const RelativePoint& newPoint)
+void DrawableText::setFontHeight (const RelativeCoordinate& newHeight)
 {
-    if (fontSizeControlPoint != newPoint)
+    if (fontHeight != newHeight)
     {
-        fontSizeControlPoint = newPoint;
+        fontHeight = newHeight;
+        refreshBounds();
+    }
+}
+
+void DrawableText::setFontHorizontalScale (const RelativeCoordinate& newScale)
+{
+    if (fontHScale != newScale)
+    {
+        fontHScale = newScale;
         refreshBounds();
     }
 }
 
 void DrawableText::refreshBounds()
 {
-    if (bounds.isDynamic() || fontSizeControlPoint.isDynamic())
+    if (bounds.isDynamic() || fontHeight.isDynamic() || fontHScale.isDynamic())
     {
         Drawable::Positioner<DrawableText>* const p = new Drawable::Positioner<DrawableText> (*this);
         setPositioner (p);
@@ -129,7 +139,8 @@ bool DrawableText::registerCoordinates (RelativeCoordinatePositionerBase& pos)
     bool ok = pos.addPoint (bounds.topLeft);
     ok = pos.addPoint (bounds.topRight) && ok;
     ok = pos.addPoint (bounds.bottomLeft) && ok;
-    return pos.addPoint (fontSizeControlPoint) && ok;
+    ok = pos.addCoordinate (fontHeight) && ok;
+    return pos.addCoordinate (fontHScale) && ok;
 }
 
 void DrawableText::recalculateCoordinates (Expression::Scope* scope)
@@ -139,13 +150,12 @@ void DrawableText::recalculateCoordinates (Expression::Scope* scope)
     const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
     const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
 
-    const Point<float> fontCoords (RelativeParallelogram::getInternalCoordForPoint (resolvedPoints, fontSizeControlPoint.resolve (scope)));
-    const float fontHeight = jlimit (0.01f, jmax (0.01f, h), fontCoords.y);
-    const float fontWidth = jlimit (0.01f, jmax (0.01f, w), fontCoords.x);
+    const float height = jlimit (0.01f, jmax (0.01f, h), (float) fontHeight.resolve (scope));
+    const float hscale = jlimit (0.01f, jmax (0.01f, w), (float) fontHScale.resolve (scope));
 
     scaledFont = font;
-    scaledFont.setHeight (fontHeight);
-    scaledFont.setHorizontalScale (fontWidth / fontHeight);
+    scaledFont.setHeight (height);
+    scaledFont.setHorizontalScale (hscale);
 
     setBoundsToEnclose (getDrawableBounds());
     repaint();
@@ -195,7 +205,8 @@ const Identifier DrawableText::ValueTreeWrapper::justification ("justification")
 const Identifier DrawableText::ValueTreeWrapper::topLeft ("topLeft");
 const Identifier DrawableText::ValueTreeWrapper::topRight ("topRight");
 const Identifier DrawableText::ValueTreeWrapper::bottomLeft ("bottomLeft");
-const Identifier DrawableText::ValueTreeWrapper::fontSizeAnchor ("fontSizeAnchor");
+const Identifier DrawableText::ValueTreeWrapper::fontHeight ("fontHeight");
+const Identifier DrawableText::ValueTreeWrapper::fontHScale ("fontHScale");
 
 //==============================================================================
 DrawableText::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
@@ -266,14 +277,24 @@ void DrawableText::ValueTreeWrapper::setBoundingBox (const RelativeParallelogram
     state.setProperty (bottomLeft, newBounds.bottomLeft.toString(), undoManager);
 }
 
-RelativePoint DrawableText::ValueTreeWrapper::getFontSizeControlPoint() const
+RelativeCoordinate DrawableText::ValueTreeWrapper::getFontHeight() const
 {
-    return state [fontSizeAnchor].toString();
+    return state [fontHeight].toString();
 }
 
-void DrawableText::ValueTreeWrapper::setFontSizeControlPoint (const RelativePoint& p, UndoManager* undoManager)
+void DrawableText::ValueTreeWrapper::setFontHeight (const RelativeCoordinate& coord, UndoManager* undoManager)
 {
-    state.setProperty (fontSizeAnchor, p.toString(), undoManager);
+    state.setProperty (fontHeight, coord.toString(), undoManager);
+}
+
+RelativeCoordinate DrawableText::ValueTreeWrapper::getFontHorizontalScale() const
+{
+    return state [fontHScale].toString();
+}
+
+void DrawableText::ValueTreeWrapper::setFontHorizontalScale (const RelativeCoordinate& coord, UndoManager* undoManager)
+{
+    state.setProperty (fontHScale, coord.toString(), undoManager);
 }
 
 //==============================================================================
@@ -283,17 +304,20 @@ void DrawableText::refreshFromValueTree (const ValueTree& tree, ComponentBuilder
     setComponentID (v.getID());
 
     const RelativeParallelogram newBounds (v.getBoundingBox());
-    const RelativePoint newFontPoint (v.getFontSizeControlPoint());
+    const RelativeCoordinate newFontHeight (v.getFontHeight());
+    const RelativeCoordinate newFontHScale (v.getFontHorizontalScale());
     const Colour newColour (v.getColour());
     const Justification newJustification (v.getJustification());
     const String newText (v.getText());
     const Font newFont (v.getFont());
 
     if (text != newText || font != newFont || justification != newJustification
-         || colour != newColour || bounds != newBounds || newFontPoint != fontSizeControlPoint)
+         || colour != newColour || bounds != newBounds
+         || newFontHeight != fontHeight || newFontHScale != fontHScale)
     {
         setBoundingBox (newBounds);
-        setFontSizeControlPoint (newFontPoint);
+        setFontHeight (newFontHeight);
+        setFontHorizontalScale (newFontHScale);
         setColour (newColour);
         setFont (newFont, false);
         setJustification (newJustification);
@@ -312,7 +336,8 @@ ValueTree DrawableText::createValueTree (ComponentBuilder::ImageProvider*) const
     v.setJustification (justification, nullptr);
     v.setColour (colour, nullptr);
     v.setBoundingBox (bounds, nullptr);
-    v.setFontSizeControlPoint (fontSizeControlPoint, nullptr);
+    v.setFontHeight (fontHeight, nullptr);
+    v.setFontHorizontalScale (fontHScale, nullptr);
 
     return tree;
 }

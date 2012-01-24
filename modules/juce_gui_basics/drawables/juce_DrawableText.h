@@ -58,10 +58,10 @@ public:
     const Colour& getColour() const noexcept                { return colour; }
 
     /** Sets the font to use.
-        Note that the font height and horizontal scale are actually based upon the position
-        of the fontSizeAndScaleAnchor parameter to setBounds(). If applySizeAndScale is true, then
-        the height and scale control point will be moved to match the dimensions of the font supplied;
-        if it is false, then the new font's height and scale are ignored.
+        Note that the font height and horizontal scale are set as RelativeCoordinates using
+        setFontHeight and setFontHorizontalScale. If applySizeAndScale is true, then these height
+        and scale values will be changed to match the dimensions of the font supplied;
+        if it is false, then the new font object's height and scale are ignored.
     */
     void setFont (const Font& newFont, bool applySizeAndScale);
 
@@ -74,16 +74,11 @@ public:
     /** Sets the bounding box that contains the text. */
     void setBoundingBox (const RelativeParallelogram& newBounds);
 
-    /** Returns the point within the bounds that defines the font's size and scale. */
-    const RelativePoint& getFontSizeControlPoint() const noexcept       { return fontSizeControlPoint; }
+    const RelativeCoordinate& getFontHeight() const                     { return fontHeight; }
+    void setFontHeight (const RelativeCoordinate& newHeight);
 
-    /** Sets the control point that defines the font's height and horizontal scale.
-        This position is a point within the bounding box parallelogram, whose Y position (relative
-        to the parallelogram's origin and possibly distorted shape) specifies the font's height,
-        and its X defines the font's horizontal scale.
-    */
-    void setFontSizeControlPoint (const RelativePoint& newPoint);
-
+    const RelativeCoordinate& getFontHorizontalScale() const            { return fontHScale; }
+    void setFontHorizontalScale (const RelativeCoordinate& newScale);
 
     //==============================================================================
     /** @internal */
@@ -123,16 +118,19 @@ public:
         RelativeParallelogram getBoundingBox() const;
         void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
-        RelativePoint getFontSizeControlPoint() const;
-        void setFontSizeControlPoint (const RelativePoint& p, UndoManager* undoManager);
+        RelativeCoordinate getFontHeight() const;
+        void setFontHeight (const RelativeCoordinate& newHeight, UndoManager* undoManager);
 
-        static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontSizeAnchor;
+        RelativeCoordinate getFontHorizontalScale() const;
+        void setFontHorizontalScale (const RelativeCoordinate& newScale, UndoManager* undoManager);
+
+        static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontHeight, fontHScale;
     };
 
 private:
     //==============================================================================
     RelativeParallelogram bounds;
-    RelativePoint fontSizeControlPoint;
+    RelativeCoordinate fontHeight, fontHScale;
     Point<float> resolvedPoints[3];
     Font font, scaledFont;
     String text;
