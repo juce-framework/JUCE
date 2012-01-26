@@ -65,16 +65,16 @@ public:
         virtual void fileHasBeenRenamed (const File& newFile) = 0;
     };
 
-    Document* getDocumentForFile (Project* project, const File& file);
-    bool canOpenFile (const File& file);
-
     //==============================================================================
     int getNumOpenDocuments() const;
     Document* getOpenDocument (int index) const;
     void moveDocumentToTopOfStack (Document* doc);
 
+    bool canOpenFile (const File& file);
+    Document* openFile (Project* project, const File& file);
     bool closeDocument (int index, bool saveIfNeeded);
     bool closeDocument (Document* document, bool saveIfNeeded);
+    bool closeAll (bool askUserToSave);
     bool closeAllDocumentsUsingProject (Project& project, bool saveIfNeeded);
     void closeFile (const File& f, bool saveIfNeeded);
     bool anyFilesNeedSaving() const;

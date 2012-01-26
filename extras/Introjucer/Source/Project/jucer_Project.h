@@ -113,18 +113,13 @@ public:
         //==============================================================================
         Item (Project& project, const ValueTree& itemNode);
         Item (const Item& other);
-        Item& operator= (const Item& other);
-        ~Item();
 
         static Item createGroup (Project& project, const String& name, const String& uid);
-        void initialiseNodeValues();
+        void initialiseMissingProperties();
 
         //==============================================================================
-        bool isValid() const                            { return node.isValid(); }
-        const ValueTree& getNode() const noexcept       { return node; }
-        ValueTree& getNode() noexcept                   { return node; }
-        Project& getProject() const noexcept            { return *project; }
-        bool operator== (const Item& other) const       { return node == other.node && project == other.project; }
+        bool isValid() const                            { return state.isValid(); }
+        bool operator== (const Item& other) const       { return state == other.state && &project == &other.project; }
         bool operator!= (const Item& other) const       { return ! operator== (other); }
 
         //==============================================================================
@@ -134,9 +129,11 @@ public:
         bool isImageFile() const;
 
         String getID() const;
-        Item findItemWithID (const String& targetId) const; // (recursive search)
-        String getImageFileID() const;
         void setID (const String& newID);
+        Item findItemWithID (const String& targetId) const; // (recursive search)
+
+        String getImageFileID() const;
+        Image loadAsImageFile() const;
 
         //==============================================================================
         Value getName() const;
@@ -157,8 +154,8 @@ public:
 
         //==============================================================================
         bool canContain (const Item& child) const;
-        int getNumChildren() const                      { return node.getNumChildren(); }
-        Item getChild (int index) const                 { return Item (getProject(), node.getChild (index)); }
+        int getNumChildren() const                      { return state.getNumChildren(); }
+        Item getChild (int index) const                 { return Item (project, state.getChild (index)); }
 
         Item addNewSubGroup (const String& name, int insertIndex);
         Item getOrCreateSubGroup (const String& name);
@@ -174,14 +171,15 @@ public:
         Item getParent() const;
         Item createCopy();
 
+        UndoManager* getUndoManager() const              { return project.getUndoManagerFor (state); }
+
         const Drawable* getIcon() const;
 
-    private:
-        //==============================================================================
-        Project* project;
-        ValueTree node;
+        Project& project;
+        ValueTree state;
 
-        UndoManager* getUndoManager() const              { return getProject().getUndoManagerFor (node); }
+    private:
+        Item& operator= (const Item&);
     };
 
     Item getMainGroup();

@@ -102,7 +102,7 @@ void GroupTreeViewItem::showDocument()
     if (pcc != nullptr)
     {
         if (isRoot())
-            pcc->setEditorComponent (new ProjectInformationComponent (item.getProject()), 0);
+            pcc->setEditorComponent (new ProjectInformationComponent (item.project), 0);
         else
             pcc->setEditorComponent (new GroupInformationComponent (item), 0);
     }
@@ -194,7 +194,7 @@ void SourceFileTreeViewItem::setName (const String& newName)
 
     if (correspondingFile.exists() && newFile.hasFileExtension (oldFile.getFileExtension()))
     {
-        Project::Item correspondingItem (item.getProject().getMainGroup().findItemForFile (correspondingFile));
+        Project::Item correspondingItem (item.project.getMainGroup().findItemForFile (correspondingFile));
 
         if (correspondingItem.isValid())
         {

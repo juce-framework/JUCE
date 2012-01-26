@@ -98,10 +98,10 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.getChildWithName (Tags::projectMainGroup).isValid())
     {
         Item mainGroup (*this, ValueTree (Tags::projectMainGroup));
-        projectRoot.addChild (mainGroup.getNode(), 0, 0);
+        projectRoot.addChild (mainGroup.state, 0, 0);
     }
 
-    getMainGroup().initialiseNodeValues();
+    getMainGroup().initialiseMissingProperties();
 
     if (getDocumentTitle().isEmpty())
         setTitle ("Juce Project");
@@ -359,22 +359,12 @@ String Project::getVersionAsHex() const
 
 Image Project::getBigIcon()
 {
-    Item icon (getMainGroup().findItemWithID (getBigIconImageItemID().toString()));
-
-    if (icon.isValid())
-        return ImageCache::getFromFile (icon.getFile());
-
-    return Image::null;
+    return getMainGroup().findItemWithID (getBigIconImageItemID().toString()).loadAsImageFile();
 }
 
 Image Project::getSmallIcon()
 {
-    Item icon (getMainGroup().findItemWithID (getSmallIconImageItemID().toString()));
-
-    if (icon.isValid())
-        return ImageCache::getFromFile (icon.getFile());
-
-    return Image::null;
+    return getMainGroup().findItemWithID (getSmallIconImageItemID().toString()).loadAsImageFile();
 }
 
 StringPairArray Project::getPreprocessorDefs() const
@@ -407,51 +397,46 @@ void Project::findAllImageItems (OwnedArray<Project::Item>& items)
 }
 
 //==============================================================================
-Project::Item::Item (Project& project_, const ValueTree& node_)
-    : project (&project_), node (node_)
+Project::Item::Item (Project& project_, const ValueTree& state_)
+    : project (project_), state (state_)
 {
 }
 
 Project::Item::Item (const Item& other)
-    : project (other.project), node (other.node)
+    : project (other.project), state (other.state)
 {
 }
 
-Project::Item& Project::Item::operator= (const Project::Item& other)
-{
-    project = other.project;
-    node = other.node;
-    return *this;
-}
+Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.state.createCopy(); return i; }
 
-Project::Item::~Item()
-{
-}
-
-Project::Item Project::Item::createCopy()         { Item i (*this); i.node = i.node.createCopy(); return i; }
-
-String Project::Item::getID() const               { return node [ComponentBuilder::idProperty]; }
-void Project::Item::setID (const String& newID)   { node.setProperty (ComponentBuilder::idProperty, newID, nullptr); }
+String Project::Item::getID() const               { return state [ComponentBuilder::idProperty]; }
+void Project::Item::setID (const String& newID)   { state.setProperty (ComponentBuilder::idProperty, newID, nullptr); }
 
 String Project::Item::getImageFileID() const      { return "id:" + getID(); }
+
+Image Project::Item::loadAsImageFile() const
+{
+    return isValid() ? ImageCache::getFromFile (getFile())
+                     : Image::null;
+}
 
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid)
 {
     Item group (project, ValueTree (Tags::group));
     group.setID (uid);
-    group.initialiseNodeValues();
+    group.initialiseMissingProperties();
     group.getName() = name;
     return group;
 }
 
-bool Project::Item::isFile() const          { return node.hasType (Tags::file); }
-bool Project::Item::isGroup() const         { return node.hasType (Tags::group) || isMainGroup(); }
-bool Project::Item::isMainGroup() const     { return node.hasType (Tags::projectMainGroup); }
+bool Project::Item::isFile() const          { return state.hasType (Tags::file); }
+bool Project::Item::isGroup() const         { return state.hasType (Tags::group) || isMainGroup(); }
+bool Project::Item::isMainGroup() const     { return state.hasType (Tags::projectMainGroup); }
 bool Project::Item::isImageFile() const     { return isFile() && getFile().hasFileExtension ("png;jpg;jpeg;gif;drawable"); }
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {
-    if (node [ComponentBuilder::idProperty] == targetId)
+    if (state [ComponentBuilder::idProperty] == targetId)
         return *this;
 
     if (isGroup())
@@ -464,7 +449,7 @@ Project::Item Project::Item::findItemWithID (const String& targetId) const
         }
     }
 
-    return Item (*project, ValueTree::invalid);
+    return Item (project, ValueTree::invalid);
 }
 
 bool Project::Item::canContain (const Item& child) const
@@ -479,24 +464,21 @@ bool Project::Item::canContain (const Item& child) const
     return false;
 }
 
-bool Project::Item::shouldBeAddedToTargetProject() const
-{
-    return isFile();
-}
+bool Project::Item::shouldBeAddedToTargetProject() const    { return isFile(); }
 
 bool Project::Item::shouldBeCompiled() const                { return getShouldCompileValue().getValue(); }
-Value Project::Item::getShouldCompileValue() const          { return node.getPropertyAsValue (Ids::compile, getUndoManager()); }
+Value Project::Item::getShouldCompileValue() const          { return state.getPropertyAsValue (Ids::compile, getUndoManager()); }
 
 bool Project::Item::shouldBeAddedToBinaryResources() const  { return getShouldAddToResourceValue().getValue(); }
-Value Project::Item::getShouldAddToResourceValue() const    { return node.getPropertyAsValue (Ids::resource, getUndoManager()); }
+Value Project::Item::getShouldAddToResourceValue() const    { return state.getPropertyAsValue (Ids::resource, getUndoManager()); }
 
-Value Project::Item::getShouldInhibitWarningsValue() const  { return node.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
-Value Project::Item::getShouldUseStdCallValue() const       { return node.getPropertyAsValue (Ids::useStdCall, nullptr); }
+Value Project::Item::getShouldInhibitWarningsValue() const  { return state.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
+Value Project::Item::getShouldUseStdCallValue() const       { return state.getPropertyAsValue (Ids::useStdCall, nullptr); }
 
 String Project::Item::getFilePath() const
 {
     if (isFile())
-        return node [Ids::file].toString();
+        return state [Ids::file].toString();
     else
         return String::empty;
 }
@@ -504,14 +486,14 @@ String Project::Item::getFilePath() const
 File Project::Item::getFile() const
 {
     if (isFile())
-        return getProject().resolveFilename (node [Ids::file].toString());
+        return project.resolveFilename (state [Ids::file].toString());
     else
         return File::nonexistent;
 }
 
 void Project::Item::setFile (const File& file)
 {
-    setFile (RelativePath (getProject().getRelativePathForFile (file), RelativePath::projectFolder));
+    setFile (RelativePath (project.getRelativePathForFile (file), RelativePath::projectFolder));
     jassert (getFile() == file);
 }
 
@@ -519,8 +501,8 @@ void Project::Item::setFile (const RelativePath& file)
 {
     jassert (file.getRoot() == RelativePath::projectFolder);
     jassert (isFile());
-    node.setProperty (Ids::file, file.toUnixStyle(), getUndoManager());
-    node.setProperty (Ids::name, file.getFileName(), getUndoManager());
+    state.setProperty (Ids::file, file.toUnixStyle(), getUndoManager());
+    state.setProperty (Ids::name, file.getFileName(), getUndoManager());
 }
 
 bool Project::Item::renameFile (const File& newFile)
@@ -539,7 +521,7 @@ bool Project::Item::renameFile (const File& newFile)
 
 bool Project::Item::containsChildForFile (const RelativePath& file) const
 {
-    return node.getChildWithProperty (Ids::file, file.toUnixStyle()).isValid();
+    return state.getChildWithProperty (Ids::file, file.toUnixStyle()).isValid();
 }
 
 Project::Item Project::Item::findItemForFile (const File& file) const
@@ -558,7 +540,7 @@ Project::Item Project::Item::findItemForFile (const File& file) const
         }
     }
 
-    return Item (getProject(), ValueTree::invalid);
+    return Item (project, ValueTree::invalid);
 }
 
 File Project::Item::determineGroupFolder() const
@@ -584,7 +566,7 @@ File Project::Item::determineGroupFolder() const
     }
     else
     {
-        f = getProject().getFile().getParentDirectory();
+        f = project.getFile().getParentDirectory();
 
         if (f.getChildFile ("Source").isDirectory())
             f = f.getChildFile ("Source");
@@ -593,35 +575,35 @@ File Project::Item::determineGroupFolder() const
     return f;
 }
 
-void Project::Item::initialiseNodeValues()
+void Project::Item::initialiseMissingProperties()
 {
-    if (! node.hasProperty (ComponentBuilder::idProperty))
+    if (! state.hasProperty (ComponentBuilder::idProperty))
         setID (createAlphaNumericUID());
 
     if (isFile())
     {
-        node.setProperty (Ids::name, getFile().getFileName(), 0);
+        state.setProperty (Ids::name, getFile().getFileName(), 0);
     }
     else if (isGroup())
     {
         for (int i = getNumChildren(); --i >= 0;)
-            getChild(i).initialiseNodeValues();
+            getChild(i).initialiseMissingProperties();
     }
 }
 
 Value Project::Item::getName() const
 {
-    return node.getPropertyAsValue (Ids::name, getUndoManager());
+    return state.getPropertyAsValue (Ids::name, getUndoManager());
 }
 
 void Project::Item::addChild (const Item& newChild, int insertIndex)
 {
-    node.addChild (newChild.getNode(), insertIndex, getUndoManager());
+    state.addChild (newChild.state, insertIndex, getUndoManager());
 }
 
 void Project::Item::removeItemFromProject()
 {
-    node.getParent().removeChild (node, getUndoManager());
+    state.getParent().removeChild (state, getUndoManager());
 }
 
 Project::Item Project::Item::getParent() const
@@ -629,7 +611,7 @@ Project::Item Project::Item::getParent() const
     if (isMainGroup() || ! isGroup())
         return *this;
 
-    return Item (getProject(), node.getParent());
+    return Item (project, state.getParent());
 }
 
 struct ItemSorter
@@ -659,22 +641,22 @@ void Project::Item::sortAlphabetically (bool keepGroupsAtStart)
     if (keepGroupsAtStart)
     {
         ItemSorterWithGroupsAtStart sorter;
-        node.sort (sorter, getUndoManager(), true);
+        state.sort (sorter, getUndoManager(), true);
     }
     else
     {
         ItemSorter sorter;
-        node.sort (sorter, getUndoManager(), true);
+        state.sort (sorter, getUndoManager(), true);
     }
 }
 
 Project::Item Project::Item::getOrCreateSubGroup (const String& name)
 {
-    for (int i = node.getNumChildren(); --i >= 0;)
+    for (int i = state.getNumChildren(); --i >= 0;)
     {
-        const ValueTree child (node.getChild (i));
+        const ValueTree child (state.getChild (i));
         if (child.getProperty (Ids::name) == name && child.hasType (Tags::group))
-            return Item (getProject(), child);
+            return Item (project, child);
     }
 
     return addNewSubGroup (name, -1);
@@ -682,7 +664,7 @@ Project::Item Project::Item::getOrCreateSubGroup (const String& name)
 
 Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex)
 {
-    Item group (createGroup (getProject(), name, createGUID (getID() + name + String (getNumChildren()))));
+    Item group (createGroup (project, name, createGUID (getID() + name + String (getNumChildren()))));
 
     jassert (canContain (group));
     addChild (group, insertIndex);
@@ -701,7 +683,7 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
         DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories);
         while (iter.next())
         {
-            if (! getProject().getMainGroup().findItemForFile (iter.getFile()).isValid())
+            if (! project.getMainGroup().findItemForFile (iter.getFile()).isValid())
                 group.addFile (iter.getFile(), -1, shouldCompile);
         }
 
@@ -709,7 +691,7 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
     }
     else if (file.existsAsFile())
     {
-        if (! getProject().getMainGroup().findItemForFile (file).isValid())
+        if (! project.getMainGroup().findItemForFile (file).isValid())
             addFileUnchecked (file, insertIndex, shouldCompile);
     }
     else
@@ -722,11 +704,11 @@ bool Project::Item::addFile (const File& file, int insertIndex, const bool shoul
 
 void Project::Item::addFileUnchecked (const File& file, int insertIndex, const bool shouldCompile)
 {
-    Item item (getProject(), ValueTree (Tags::file));
-    item.initialiseNodeValues();
+    Item item (project, ValueTree (Tags::file));
+    item.initialiseMissingProperties();
     item.getName() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile && file.hasFileExtension ("cpp;mm;c;m;cc;cxx;r");
-    item.getShouldAddToResourceValue() = getProject().shouldBeAddedToBinaryResourcesByDefault (file);
+    item.getShouldAddToResourceValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
 
     if (canContain (item))
     {
@@ -737,11 +719,11 @@ void Project::Item::addFileUnchecked (const File& file, int insertIndex, const b
 
 bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile)
 {
-    Item item (getProject(), ValueTree (Tags::file));
-    item.initialiseNodeValues();
+    Item item (project, ValueTree (Tags::file));
+    item.initialiseMissingProperties();
     item.getName() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile;
-    item.getShouldAddToResourceValue() = getProject().shouldBeAddedToBinaryResourcesByDefault (file);
+    item.getShouldAddToResourceValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
 
     if (canContain (item))
     {
@@ -764,7 +746,7 @@ const Drawable* Project::Item::getIcon() const
     }
     else if (isMainGroup())
     {
-        return &(getProject().mainProjectIcon);
+        return &(project.mainProjectIcon);
     }
 
     return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage();

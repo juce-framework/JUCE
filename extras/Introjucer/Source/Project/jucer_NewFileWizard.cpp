@@ -31,7 +31,7 @@ namespace
 {
     bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
     {
-        String s = item.getProject().getFileTemplate (templateName)
+        String s = item.project.getFileTemplate (templateName)
                       .replace ("FILENAME", file.getFileName(), false)
                       .replace ("DATE", Time::getCurrentTime().toString (true, true, true), false)
                       .replace ("AUTHOR", SystemStats::getFullUserName(), false)

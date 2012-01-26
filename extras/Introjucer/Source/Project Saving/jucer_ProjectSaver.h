@@ -110,13 +110,11 @@ public:
     {
         Project::Item item (generatedFilesGroup.findItemForFile (file));
 
-        if (! item.isValid())
-        {
-            generatedFilesGroup.addFile (file, -1, true);
-            item = generatedFilesGroup.findItemForFile (file);
-        }
+        if (item.isValid())
+            return item;
 
-        return item;
+        generatedFilesGroup.addFile (file, -1, true);
+        return generatedFilesGroup.findItemForFile (file);
     }
 
     void setExtraAppConfigFileContent (const String& content)
@@ -413,7 +411,7 @@ private:
     void writeProjects (const OwnedArray<LibraryModule>& modules)
     {
         // keep a copy of the basic generated files group, as each exporter may modify it.
-        const ValueTree originalGeneratedGroup (generatedFilesGroup.getNode().createCopy());
+        const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
 
         for (int i = project.getNumExporters(); --i >= 0;)
         {
@@ -424,7 +422,7 @@ private:
             {
                 exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
 
-                generatedFilesGroup.getNode() = originalGeneratedGroup.createCopy();
+                generatedFilesGroup.state = originalGeneratedGroup.createCopy();
                 project.getProjectType().prepareExporter (*exporter);
 
                 for (int j = 0; j < modules.size(); ++j)

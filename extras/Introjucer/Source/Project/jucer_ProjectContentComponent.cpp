@@ -125,8 +125,7 @@ void ProjectContentComponent::updateMissingFileStatuses()
 
 bool ProjectContentComponent::showEditorForFile (const File& f)
 {
-    return showDocument (OpenDocumentManager::getInstance()
-                           ->getDocumentForFile (project, f));
+    return showDocument (OpenDocumentManager::getInstance()->openFile (project, f));
 }
 
 bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)

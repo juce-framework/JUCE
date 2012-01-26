@@ -41,11 +41,8 @@ public:
     }
 
     //==============================================================================
-    class Type  : public OpenDocumentManager::DocumentType
+    struct Type  : public OpenDocumentManager::DocumentType
     {
-    public:
-        Type() {}
-
         bool canOpenFile (const File& file)                 { return SourceCodeEditor::isTextFile (file); }
         Document* openFile (Project*, const File& file)     { return new SourceCodeDocument (file); }
     };
@@ -123,12 +120,8 @@ public:
     }
 
     //==============================================================================
-    class Type  : public OpenDocumentManager::DocumentType
+    struct Type  : public OpenDocumentManager::DocumentType
     {
-    public:
-        Type() {}
-        ~Type() {}
-
         bool canOpenFile (const File&)                              { return true; }
         Document* openFile (Project* project, const File& file)     { return new UnknownDocument (project, file); }
     };
@@ -208,7 +201,7 @@ bool OpenDocumentManager::canOpenFile (const File& file)
     return false;
 }
 
-OpenDocumentManager::Document* OpenDocumentManager::getDocumentForFile (Project* project, const File& file)
+OpenDocumentManager::Document* OpenDocumentManager::openFile (Project* project, const File& file)
 {
     for (int i = documents.size(); --i >= 0;)
         if (documents.getUnchecked(i)->isForFile (file))
@@ -225,11 +218,9 @@ OpenDocumentManager::Document* OpenDocumentManager::getDocumentForFile (Project*
         }
     }
 
-    jassert (d != nullptr);
+    jassert (d != nullptr);  // should always at least have been picked up by UnknownDocument
 
-    if (d != nullptr)
-        documents.add (d);
-
+    documents.add (d);
     commandManager->commandStatusChanged();
     return d;
 }
@@ -322,6 +313,15 @@ void OpenDocumentManager::closeFile (const File& f, bool saveIfNeeded)
         if (d->isForFile (f))
             closeDocument (i, saveIfNeeded);
     }
+}
+
+bool OpenDocumentManager::closeAll (bool askUserToSave)
+{
+    for (int i = getNumOpenDocuments(); --i >= 0;)
+        if (! closeDocument (i, askUserToSave))
+            return false;
+
+    return true;
 }
 
 bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, bool saveIfNeeded)

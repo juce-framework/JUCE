@@ -438,18 +438,7 @@ public:
 
     bool closeAllDocuments (bool askUserToSave)
     {
-        for (int i = OpenDocumentManager::getInstance()->getNumOpenDocuments(); --i >= 0;)
-        {
-            OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument (i);
-
-            for (int j = mainWindows.size(); --j >= 0;)
-                mainWindows.getUnchecked(j)->getProjectContentComponent()->hideDocument (doc);
-
-            if (! OpenDocumentManager::getInstance()->closeDocument (i, askUserToSave))
-                return false;
-        }
-
-        return true;
+        return OpenDocumentManager::getInstance()->closeAll (askUserToSave);
     }
 
     void updateRecentProjectList()

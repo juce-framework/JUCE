@@ -675,5 +675,5 @@ void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<Fil
     sourceGroup.addFile (localModuleFolder.getChildFile (moduleFile.getRelativePathFrom (moduleFolder)), -1, false);
     sourceGroup.addFile (getInclude (localModuleFolder), -1, false);
 
-    exporter.getModulesGroup().getNode().addChild (sourceGroup.getNode().createCopy(), -1, nullptr);
+    exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);
 }
