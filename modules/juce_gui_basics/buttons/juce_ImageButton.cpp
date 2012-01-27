@@ -203,12 +203,18 @@ const Identifier ImageButton::Ids::upOpacity   ("upOpacity");
 const Identifier ImageButton::Ids::overOpacity ("overOpacity");
 const Identifier ImageButton::Ids::downOpacity ("downOpacity");
 
-static Colour getColourFromVar (const var& col)
+namespace ImageButtonHelpers
 {
-    if (col.isString())
-        return Colour (col.toString().getHexValue32());
+    static Colour getColourFromVar (const var& col)
+    {
+        return col.isString() ? Colour::fromString (col.toString())
+                              : Colours::transparentBlack;
+    }
 
-    return Colours::transparentBlack;
+    static float getOpacityFromVar (const var& v)
+    {
+        return v.isVoid() ? 1.0f : static_cast<float> (v);
+    }
 }
 
 void ImageButton::refreshFromValueTree (const ValueTree& state, ComponentBuilder& builder)
@@ -231,10 +237,12 @@ void ImageButton::refreshFromValueTree (const ValueTree& state, ComponentBuilder
         newDownImage = imageProvider->getImageForIdentifier (downImageIdentifier);
     }
 
+    using namespace ImageButtonHelpers;
+
     setImages (false, true, true,
-               newUpImage, state[Ids::upOpacity], getColourFromVar (state[Ids::upOverlay]),
-               newOverImage, state[Ids::overOpacity], getColourFromVar (state[Ids::overOverlay]),
-               newDownImage, state[Ids::downOpacity], getColourFromVar (state[Ids::downOverlay]));
+               newUpImage,   getOpacityFromVar (state[Ids::upOpacity]),   getColourFromVar (state[Ids::upOverlay]),
+               newOverImage, getOpacityFromVar (state[Ids::overOpacity]), getColourFromVar (state[Ids::overOverlay]),
+               newDownImage, getOpacityFromVar (state[Ids::downOpacity]), getColourFromVar (state[Ids::downOverlay]));
 }
 
 END_JUCE_NAMESPACE

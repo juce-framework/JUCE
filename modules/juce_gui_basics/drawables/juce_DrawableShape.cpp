@@ -349,8 +349,8 @@ bool DrawableShape::RelativeFillType::readFrom (const ValueTree& v, ComponentBui
     if (newType == "solid")
     {
         const String colourString (v [FillAndStrokeState::colour].toString());
-        fill.setColour (Colour (colourString.isEmpty() ? (uint32) 0xff000000
-                                                       : (uint32) colourString.getHexValue32()));
+        fill.setColour (colourString.isEmpty() ? Colours::black
+                                               : Colour::fromString (colourString));
         return true;
     }
     else if (newType == "gradient")
@@ -363,7 +363,7 @@ bool DrawableShape::RelativeFillType::readFrom (const ValueTree& v, ComponentBui
 
         for (int i = 0; i < colourSteps.size() / 2; ++i)
             g.addColour (colourSteps[i * 2].getDoubleValue(),
-                         Colour ((uint32)  colourSteps[i * 2 + 1].getHexValue32()));
+                         Colour::fromString (colourSteps[i * 2 + 1]));
 
         fill.setGradient (g);
 

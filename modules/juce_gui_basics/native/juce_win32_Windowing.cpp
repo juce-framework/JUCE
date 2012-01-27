@@ -521,6 +521,7 @@ public:
 
         if (dropTarget != nullptr)
         {
+            dropTarget->clear();
             dropTarget->Release();
             dropTarget = nullptr;
         }
@@ -908,6 +909,127 @@ public:
     static ModifierKeys currentModifiers;
     static ModifierKeys modifiersAtLastCallback;
 
+    //==============================================================================
+    class JuceDropTarget    : public ComBaseClassHelper <IDropTarget>
+    {
+    public:
+        JuceDropTarget (HWNDComponentPeer& owner_)   : ownerInfo (new OwnerInfo (owner_)) {}
+
+        void clear()
+        {
+            ownerInfo = nullptr;
+        }
+
+        JUCE_COMRESULT DragEnter (IDataObject* pDataObject, DWORD grfKeyState, POINTL mousePos, DWORD* pdwEffect)
+        {
+            HRESULT hr = updateFileList (pDataObject);
+            if (FAILED (hr))
+                return hr;
+
+            return DragOver (grfKeyState, mousePos, pdwEffect);
+        }
+
+        JUCE_COMRESULT DragLeave()
+        {
+            if (ownerInfo == nullptr)
+                return S_FALSE;
+
+            ownerInfo->owner.handleFileDragExit (ownerInfo->files);
+            return S_OK;
+        }
+
+        JUCE_COMRESULT DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        {
+            if (ownerInfo == nullptr)
+                return S_FALSE;
+
+            const bool wasWanted = ownerInfo->owner.handleFileDragMove (ownerInfo->files, ownerInfo->getMousePos (mousePos));
+            *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
+            return S_OK;
+        }
+
+        JUCE_COMRESULT Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        {
+            HRESULT hr = updateFileList (pDataObject);
+            if (SUCCEEDED (hr))
+            {
+                const bool wasWanted = ownerInfo->owner.handleFileDragDrop (ownerInfo->files, ownerInfo->getMousePos (mousePos));
+                *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
+                hr = S_OK;
+            }
+
+            return hr;
+        }
+
+    private:
+        struct OwnerInfo
+        {
+            OwnerInfo (HWNDComponentPeer& owner_) : owner (owner_) {}
+
+            Point<int> getMousePos (const POINTL& mousePos) const
+            {
+                return owner.globalToLocal (Point<int> (mousePos.x, mousePos.y));
+            }
+
+            template <typename CharType>
+            void parseFileList (const CharType* names, const SIZE_T totalLen)
+            {
+                unsigned int i = 0;
+
+                for (;;)
+                {
+                    unsigned int len = 0;
+                    while (i + len < totalLen && names [i + len] != 0)
+                        ++len;
+
+                    if (len == 0)
+                        break;
+
+                    files.add (String (names + i, len));
+                    i += len + 1;
+                }
+            }
+
+            HWNDComponentPeer& owner;
+            StringArray files;
+
+            JUCE_DECLARE_NON_COPYABLE (OwnerInfo);
+        };
+
+        ScopedPointer<OwnerInfo> ownerInfo;
+
+        HRESULT updateFileList (IDataObject* const pDataObject)
+        {
+            if (ownerInfo == nullptr)
+                return S_FALSE;
+
+            ownerInfo->files.clear();
+
+            FORMATETC format = { CF_HDROP, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+            STGMEDIUM medium = { TYMED_HGLOBAL, { 0 }, 0 };
+
+            HRESULT hr = pDataObject->GetData (&format, &medium);
+
+            if (SUCCEEDED (hr))
+            {
+                const SIZE_T totalLen = GlobalSize (medium.hGlobal);
+                const LPDROPFILES dropFiles = (const LPDROPFILES) GlobalLock (medium.hGlobal);
+                const void* const names = addBytesToPointer (dropFiles, sizeof (DROPFILES));
+
+                if (dropFiles->fWide)
+                    ownerInfo->parseFileList (static_cast <const WCHAR*> (names), totalLen);
+                else
+                    ownerInfo->parseFileList (static_cast <const char*>  (names), totalLen);
+
+                GlobalUnlock (medium.hGlobal);
+            }
+
+            return hr;
+        }
+
+        JUCE_DECLARE_NON_COPYABLE (JuceDropTarget);
+    };
+
 private:
     HWND hwnd, parentToAddTo;
     ScopedPointer<DropShadower> shadower;
@@ -918,7 +1040,7 @@ private:
     bool fullScreen, isDragging, isMouseOver, hasCreatedCaret, constrainerIsResizing;
     BorderSize<int> windowBorder;
     HICON currentWindowIcon;
-    IDropTarget* dropTarget;
+    JuceDropTarget* dropTarget;
     uint8 updateLayeredWindowAlpha;
     MultiTouchMapper<DWORD> currentTouches;
 
@@ -1955,107 +2077,6 @@ private:
             }
         }
     }
-
-    //==============================================================================
-    class JuceDropTarget    : public ComBaseClassHelper <IDropTarget>
-    {
-    public:
-        JuceDropTarget (HWNDComponentPeer& owner_)
-            : owner (owner_)
-        {
-        }
-
-        JUCE_COMRESULT DragEnter (IDataObject* pDataObject, DWORD grfKeyState, POINTL mousePos, DWORD* pdwEffect)
-        {
-            HRESULT hr = updateFileList (pDataObject);
-            if (FAILED (hr))
-                return hr;
-
-            return DragOver (grfKeyState, mousePos, pdwEffect);
-        }
-
-        JUCE_COMRESULT DragLeave()
-        {
-            owner.handleFileDragExit (files);
-            return S_OK;
-        }
-
-        JUCE_COMRESULT DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
-        {
-            const bool wasWanted = owner.handleFileDragMove (files, getMousePos (mousePos));
-            *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
-            return S_OK;
-        }
-
-        JUCE_COMRESULT Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
-        {
-            HRESULT hr = updateFileList (pDataObject);
-            if (SUCCEEDED (hr))
-            {
-                const bool wasWanted = owner.handleFileDragDrop (files, getMousePos (mousePos));
-                *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
-                hr = S_OK;
-            }
-
-            return hr;
-        }
-
-    private:
-        HWNDComponentPeer& owner;
-        StringArray files;
-
-        Point<int> getMousePos (const POINTL& mousePos) const
-        {
-            return owner.globalToLocal (Point<int> (mousePos.x, mousePos.y));
-        }
-
-        template <typename CharType>
-        void parseFileList (const CharType* names, const SIZE_T totalLen)
-        {
-            unsigned int i = 0;
-
-            for (;;)
-            {
-                unsigned int len = 0;
-                while (i + len < totalLen && names [i + len] != 0)
-                    ++len;
-
-                if (len == 0)
-                    break;
-
-                files.add (String (names + i, len));
-                i += len + 1;
-            }
-        }
-
-        HRESULT updateFileList (IDataObject* const pDataObject)
-        {
-            files.clear();
-
-            FORMATETC format = { CF_HDROP, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-            STGMEDIUM medium = { TYMED_HGLOBAL, { 0 }, 0 };
-
-            HRESULT hr = pDataObject->GetData (&format, &medium);
-
-            if (SUCCEEDED (hr))
-            {
-                const SIZE_T totalLen = GlobalSize (medium.hGlobal);
-                const LPDROPFILES dropFiles = (const LPDROPFILES) GlobalLock (medium.hGlobal);
-                const void* const names = addBytesToPointer (dropFiles, sizeof (DROPFILES));
-
-                if (dropFiles->fWide)
-                    parseFileList (static_cast <const WCHAR*> (names), totalLen);
-                else
-                    parseFileList (static_cast <const char*>  (names), totalLen);
-
-                GlobalUnlock (medium.hGlobal);
-            }
-
-            return hr;
-        }
-
-        JUCE_DECLARE_NON_COPYABLE (JuceDropTarget);
-    };
 
     void doSettingChange()
     {

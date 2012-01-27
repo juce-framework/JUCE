@@ -115,11 +115,8 @@ void StoredSettings::flush()
     const int numSwatchColours = 24;
 
     for (int i = 0; i < numSwatchColours; ++i)
-    {
-        Colour defaultCol (colours [2 + i]);
-        swatchColours.add (Colour (props->getValue ("swatchColour" + String (i),
-                                                    hexString8Digits (defaultCol.getARGB())).getHexValue32()));
-    }
+        swatchColours.add (Colour::fromString (props->getValue ("swatchColour" + String (i),
+                                                                colours [2 + i].toString())));
 }
 
 Array<File> StoredSettings::getLastProjects() const

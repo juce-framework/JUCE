@@ -309,63 +309,6 @@ namespace CodeHelpers
         return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
     }
 
-    String justificationToCode (const Justification& justification)
-    {
-        switch (justification.getFlags())
-        {
-            case Justification::centred:                return "Justification::centred";
-            case Justification::centredLeft:            return "Justification::centredLeft";
-            case Justification::centredRight:           return "Justification::centredRight";
-            case Justification::centredTop:             return "Justification::centredTop";
-            case Justification::centredBottom:          return "Justification::centredBottom";
-            case Justification::topLeft:                return "Justification::topLeft";
-            case Justification::topRight:               return "Justification::topRight";
-            case Justification::bottomLeft:             return "Justification::bottomLeft";
-            case Justification::bottomRight:            return "Justification::bottomRight";
-            case Justification::left:                   return "Justification::left";
-            case Justification::right:                  return "Justification::right";
-            case Justification::horizontallyCentred:    return "Justification::horizontallyCentred";
-            case Justification::top:                    return "Justification::top";
-            case Justification::bottom:                 return "Justification::bottom";
-            case Justification::verticallyCentred:      return "Justification::verticallyCentred";
-            case Justification::horizontallyJustified:  return "Justification::horizontallyJustified";
-            default:                                    jassertfalse; break;
-        }
-
-        return "Justification (" + String (justification.getFlags()) + ")";
-    }
-
-    String fontToCode (const Font& font)
-    {
-        String s ("Font (");
-        String name (font.getTypefaceName());
-
-        if (name != Font::getDefaultSansSerifFontName())
-        {
-            if (name == Font::getDefaultSerifFontName())
-                name = "Font::getDefaultSerifFontName()";
-            else if (name == Font::getDefaultMonospacedFontName())
-                name = "Font::getDefaultMonospacedFontName()";
-            else
-                name = stringLiteral (font.getTypefaceName());
-
-            s << name << ", ";
-        }
-
-        s << floatLiteral (font.getHeight());
-
-        if (font.isBold() && font.isItalic())
-            s << ", Font::bold | Font::italic";
-        else if (font.isBold())
-            s << ", Font::bold";
-        else if (font.isItalic())
-            s << ", Font::italic";
-        else if (name != Font::getDefaultSansSerifFontName()) // need this param if we're using the typeface name constructor
-            s << ", Font::plain";
-
-        return s + ")";
-    }
-
     String castToFloat (const String& expression)
     {
         if (expression.containsOnly ("0123456789.f"))

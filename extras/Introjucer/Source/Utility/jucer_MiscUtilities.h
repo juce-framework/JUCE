@@ -54,14 +54,13 @@ public:
     PropertyPanelWithTooltips();
     ~PropertyPanelWithTooltips();
 
-    PropertyPanel& getPanel() noexcept        { return panel; }
-
     void paint (Graphics& g);
     void resized();
     void timerCallback();
 
-private:
     PropertyPanel panel;
+
+private:
     Component* lastComp;
     String lastTip;
 

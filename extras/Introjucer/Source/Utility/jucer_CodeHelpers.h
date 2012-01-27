@@ -45,10 +45,8 @@ namespace CodeHelpers
     String doubleLiteral (double v);
 
     String colourToCode (const Colour& col);
-    String justificationToCode (const Justification& justification);
     String castToFloat (const String& expression);
     String castToInt (const String& expression);
-    String fontToCode (const Font& font);
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
 
     void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out);
