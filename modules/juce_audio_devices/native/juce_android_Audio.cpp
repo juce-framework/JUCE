@@ -176,7 +176,7 @@ public:
             numDeviceOutputChannels = 2;
             outputDevice = GlobalRef (env->NewObject (AudioTrack, AudioTrack.constructor,
                                                       STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
-                                                      (jint) (actualBufferSize * numDeviceOutputChannels * sizeof (float)), MODE_STREAM));
+                                                      (jint) (actualBufferSize * numDeviceOutputChannels * sizeof (int16)), MODE_STREAM));
 
             if (env->CallIntMethod (outputDevice, AudioTrack.getState) != STATE_UNINITIALIZED)
                 isRunning = true;
@@ -191,7 +191,7 @@ public:
                                                      0 /* (default audio source) */, sampleRate,
                                                      numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
                                                      ENCODING_PCM_16BIT,
-                                                     (jint) (actualBufferSize * numDeviceInputChannels * sizeof (float))));
+                                                     (jint) (actualBufferSize * numDeviceInputChannels * sizeof (int16))));
 
             if (env->CallIntMethod (inputDevice, AudioRecord.getState) != STATE_UNINITIALIZED)
                 isRunning = true;

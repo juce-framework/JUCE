@@ -476,7 +476,7 @@ public:
         ImageParams (OpenGLShaderProgram& program)
             : imageTexture (program, "imageTexture"),
               matrix (program, "matrix"),
-              imageRepeatSize (program, "imageRepeatSize")
+              imageLimits (program, "imageLimits")
         {}
 
         void setMatrix (const AffineTransform& trans,
@@ -491,7 +491,11 @@ public:
             const GLfloat m[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
             matrix.set (m, 6);
 
-            imageRepeatSize.set (fullWidthProportion, fullHeightProportion);
+            const float halfPixelX = 0.5f / imageWidth;
+            const float halfPixelY = 0.5f / imageHeight;
+            imageLimits.set (halfPixelX, halfPixelY,
+                             fullWidthProportion - halfPixelX,
+                             fullHeightProportion - halfPixelY);
         }
 
         void setMatrix (const AffineTransform& trans, const OpenGLTextureFromImage& image,
@@ -503,13 +507,15 @@ public:
                        targetX, targetY);
         }
 
-        OpenGLShaderProgram::Uniform imageTexture, matrix, imageRepeatSize;
+        OpenGLShaderProgram::Uniform imageTexture, matrix, imageLimits;
     };
 
     #define JUCE_DECLARE_IMAGE_UNIFORMS "uniform sampler2D imageTexture;" \
-                                        "uniform " JUCE_MEDIUMP " vec2 imageRepeatSize;" \
+                                        "uniform " JUCE_MEDIUMP " vec4 imageLimits;" \
                                         JUCE_DECLARE_MATRIX_UNIFORM JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
     #define JUCE_GET_IMAGE_PIXEL        "texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y))"
+    #define JUCE_CLAMP_TEXTURE_COORD    JUCE_HIGHP " vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageLimits.xy, imageLimits.zw);"
+    #define JUCE_MOD_TEXTURE_COORD      JUCE_HIGHP " vec2 texturePos = imageLimits.xy + mod (" JUCE_MATRIX_TIMES_FRAGCOORD " - imageLimits.xy, imageLimits.zw - imageLimits.xy);"
 
     struct ImageProgram  : public ShaderBase
     {
@@ -517,7 +523,7 @@ public:
             : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS
                           "void main()"
                           "{"
-                            JUCE_HIGHP " vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", vec2 (0, 0), imageRepeatSize);"
+                            JUCE_CLAMP_TEXTURE_COORD
                             "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}"),
               imageParams (program)
@@ -532,7 +538,7 @@ public:
             : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_MASK_UNIFORMS
                           "void main()"
                           "{"
-                            JUCE_HIGHP " vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", vec2 (0, 0), imageRepeatSize);"
+                            JUCE_CLAMP_TEXTURE_COORD
                             "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               imageParams (program),
@@ -549,7 +555,7 @@ public:
             : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS
                           "void main()"
                           "{"
-                            JUCE_HIGHP " vec2 texturePos = mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageRepeatSize);"
+                            JUCE_MOD_TEXTURE_COORD
                             "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}"),
               imageParams (program)
@@ -564,7 +570,7 @@ public:
             : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_MASK_UNIFORMS
                           "void main()"
                           "{"
-                            JUCE_HIGHP " vec2 texturePos = mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageRepeatSize);"
+                            JUCE_MOD_TEXTURE_COORD
                             "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL " * " JUCE_GET_MASK_ALPHA ";"
                           "}"),
               imageParams (program),
@@ -581,7 +587,7 @@ public:
             : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS
                           "void main()"
                           "{"
-                            JUCE_HIGHP " vec2 texturePos = mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageRepeatSize);"
+                            JUCE_MOD_TEXTURE_COORD
                             "gl_FragColor = frontColour.a * " JUCE_GET_IMAGE_PIXEL ";"
                           "}"),
               imageParams (program)
@@ -597,7 +603,10 @@ public:
                           "void main()"
                           "{"
                             JUCE_HIGHP " vec2 texturePos = " JUCE_MATRIX_TIMES_FRAGCOORD ";"
-                            "if (texturePos.x >= 0.0 && texturePos.y >= 0.0 && texturePos.x < imageRepeatSize.x && texturePos.y < imageRepeatSize.y)"
+                            "if (texturePos.x >= imageLimits.x"
+                                 "&& texturePos.y >= imageLimits.y"
+                                 "&& texturePos.x < imageLimits.z"
+                                 "&& texturePos.y < imageLimits.w)"
                              "gl_FragColor = frontColour * " JUCE_GET_IMAGE_PIXEL ".a;"
                             "else "
                              "gl_FragColor = vec4 (0, 0, 0, 0);"
@@ -1809,6 +1818,7 @@ private:
     {
         activeTextures.setActiveTexture (index);
         glDisable (GL_TEXTURE_2D);
+        glDisableClientState (GL_TEXTURE_COORD_ARRAY);
         glTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
         glTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
         glTexEnvi (GL_TEXTURE_ENV, GL_SRC0_RGB, GL_PREVIOUS);
