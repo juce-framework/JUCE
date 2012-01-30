@@ -168,8 +168,8 @@ const Colour Colours::yellow (0xffffff00);
 const Colour Colours::yellowgreen (0xff9acd32);
 
 //==============================================================================
-const Colour Colours::findColourForName (const String& colourName,
-                                         const Colour& defaultColour)
+Colour Colours::findColourForName (const String& colourName,
+                                   const Colour& defaultColour)
 {
     static const int presets[] =
     {

@@ -1070,7 +1070,7 @@ private:
     }
 
     //==============================================================================
-    static const Colour parseColour (const String& s, int& index, const Colour& defaultColour)
+    static Colour parseColour (const String& s, int& index, const Colour& defaultColour)
     {
         if (s [index] == '#')
         {

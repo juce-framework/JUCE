@@ -2061,7 +2061,7 @@ public:
 
         @see setColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    const Colour findColour (int colourId, bool inheritFromParent = false) const;
+    Colour findColour (int colourId, bool inheritFromParent = false) const;
 
     /** Registers a colour to be used for a particular purpose.
 

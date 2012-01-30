@@ -268,7 +268,7 @@ LookAndFeel::~LookAndFeel()
 }
 
 //==============================================================================
-const Colour LookAndFeel::findColour (const int colourId) const noexcept
+Colour LookAndFeel::findColour (const int colourId) const noexcept
 {
     const int index = colourIds.indexOf (colourId);
 

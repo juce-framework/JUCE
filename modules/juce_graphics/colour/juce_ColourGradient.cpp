@@ -114,7 +114,7 @@ double ColourGradient::getColourPosition (const int index) const noexcept
     return 0;
  }
 
-const Colour ColourGradient::getColour (const int index) const noexcept
+Colour ColourGradient::getColour (const int index) const noexcept
 {
     if (isPositiveAndBelow (index, colours.size()))
         return colours.getReference (index).colour;

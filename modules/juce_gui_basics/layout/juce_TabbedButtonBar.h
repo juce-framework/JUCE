@@ -234,7 +234,7 @@ public:
 
         This is the colour that was specified in addTab().
     */
-    const Colour getTabBackgroundColour (int tabIndex);
+    Colour getTabBackgroundColour (int tabIndex);
 
     /** Changes the background colour of a tab.
 

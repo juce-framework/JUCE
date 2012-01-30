@@ -373,7 +373,7 @@ Image::BitmapData::~BitmapData()
 {
 }
 
-const Colour Image::BitmapData::getPixelColour (const int x, const int y) const noexcept
+Colour Image::BitmapData::getPixelColour (const int x, const int y) const noexcept
 {
     jassert (isPositiveAndBelow (x, width) && isPositiveAndBelow (y, height));
 

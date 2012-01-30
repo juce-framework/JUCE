@@ -94,7 +94,7 @@ public:
 
         @see setBackgroundColour
     */
-    const Colour getBackgroundColour() const noexcept;
+    Colour getBackgroundColour() const noexcept;
 
     /** Changes the colour currently being used for the window's background.
 

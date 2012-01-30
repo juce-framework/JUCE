@@ -95,8 +95,8 @@ public:
         if a match is found, that colour is returned. If no match is found, the
         colour passed in as the defaultColour parameter is returned.
     */
-    static JUCE_API const Colour findColourForName (const String& colourName,
-                                                    const Colour& defaultColour);
+    static JUCE_API Colour findColourForName (const String& colourName,
+                                              const Colour& defaultColour);
 
 private:
     //==============================================================================

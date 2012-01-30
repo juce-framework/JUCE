@@ -338,7 +338,7 @@ public:
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
             repsonsibility to make sure they're within the image's size.
         */
-        const Colour getPixelColour (int x, int y) const noexcept;
+        Colour getPixelColour (int x, int y) const noexcept;
 
         /** Sets the colour of a given pixel.
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's

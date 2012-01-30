@@ -111,7 +111,7 @@ public:
 
         @see setColour, Component::findColour, Component::setColour
     */
-    const Colour findColour (int colourId) const noexcept;
+    Colour findColour (int colourId) const noexcept;
 
     /** Registers a colour to be used for a particular purpose.
 

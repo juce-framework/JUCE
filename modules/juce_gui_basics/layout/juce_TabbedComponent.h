@@ -138,7 +138,7 @@ public:
     Component* getTabContentComponent (int tabIndex) const noexcept;
 
     /** Returns the colour of one of the tabs. */
-    const Colour getTabBackgroundColour (int tabIndex) const noexcept;
+    Colour getTabBackgroundColour (int tabIndex) const noexcept;
 
     /** Changes the background colour of one of the tabs. */
     void setTabBackgroundColour (int tabIndex, const Colour& newColour);

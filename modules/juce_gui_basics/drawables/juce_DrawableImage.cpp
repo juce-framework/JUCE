@@ -203,7 +203,7 @@ void DrawableImage::ValueTreeWrapper::setOpacity (float newOpacity, UndoManager*
     state.setProperty (opacity, newOpacity, undoManager);
 }
 
-const Colour DrawableImage::ValueTreeWrapper::getOverlayColour() const
+Colour DrawableImage::ValueTreeWrapper::getOverlayColour() const
 {
     return Colour::fromString (state [overlay].toString());
 }

@@ -2071,7 +2071,7 @@ void Component::sendLookAndFeelChange()
     }
 }
 
-const Colour Component::findColour (const int colourId, const bool inheritFromParent) const
+Colour Component::findColour (const int colourId, const bool inheritFromParent) const
 {
     const var* const v = properties.getVarPointer (ComponentHelpers::getColourPropertyId (colourId));
 

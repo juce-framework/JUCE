@@ -450,7 +450,7 @@ void TabbedButtonBar::resized()
 }
 
 //==============================================================================
-const Colour TabbedButtonBar::getTabBackgroundColour (const int tabIndex)
+Colour TabbedButtonBar::getTabBackgroundColour (const int tabIndex)
 {
     TabInfo* const tab = tabs [tabIndex];
     return tab == nullptr ? Colours::white : tab->colour;

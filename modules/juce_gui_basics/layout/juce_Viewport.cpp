@@ -63,6 +63,9 @@ void Viewport::viewedComponentChanged (Component*) {}
 //==============================================================================
 void Viewport::deleteContentComp()
 {
+    if (contentComp != nullptr)
+        contentComp->removeComponentListener (this);
+
     if (deleteContent)
     {
         // This sets the content comp to a null pointer before deleting the old one, in case

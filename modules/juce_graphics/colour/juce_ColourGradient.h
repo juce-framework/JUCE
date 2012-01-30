@@ -112,7 +112,7 @@ public:
     /** Returns the colour that was added with a given index.
         The index is from 0 to getNumColours() - 1.
     */
-    const Colour getColour (int index) const noexcept;
+    Colour getColour (int index) const noexcept;
 
     /** Changes the colour at a given index.
         The index is from 0 to getNumColours() - 1.

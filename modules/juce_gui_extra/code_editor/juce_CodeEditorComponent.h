@@ -191,7 +191,7 @@ public:
         CodeTokeniser::getTokenTypes() to get a list of the token types.
         @see setColourForTokenType
     */
-    const Colour getColourForTokenType (int tokenType) const;
+    Colour getColourForTokenType (int tokenType) const;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.

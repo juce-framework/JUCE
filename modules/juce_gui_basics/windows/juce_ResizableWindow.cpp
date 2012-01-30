@@ -402,7 +402,7 @@ void ResizableWindow::lookAndFeelChanged()
     }
 }
 
-const Colour ResizableWindow::getBackgroundColour() const noexcept
+Colour ResizableWindow::getBackgroundColour() const noexcept
 {
     return findColour (backgroundColourId, false);
 }

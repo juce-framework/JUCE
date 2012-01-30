@@ -113,7 +113,7 @@ public:
         void setOpacity (float newOpacity, UndoManager* undoManager);
         Value getOpacityValue (UndoManager* undoManager);
 
-        const Colour getOverlayColour() const;
+        Colour getOverlayColour() const;
         void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
         Value getOverlayColourValue (UndoManager* undoManager);
 

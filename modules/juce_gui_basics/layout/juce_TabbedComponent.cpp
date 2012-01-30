@@ -72,7 +72,7 @@ public:
         owner.popupMenuClickOnTab (tabIndex, tabName);
     }
 
-    const Colour getTabBackgroundColour (const int tabIndex)
+    Colour getTabBackgroundColour (const int tabIndex)
     {
         return owner.tabs->getTabBackgroundColour (tabIndex);
     }
@@ -192,7 +192,7 @@ Component* TabbedComponent::getTabContentComponent (const int tabIndex) const no
     return contentComponents [tabIndex];
 }
 
-const Colour TabbedComponent::getTabBackgroundColour (const int tabIndex) const noexcept
+Colour TabbedComponent::getTabBackgroundColour (const int tabIndex) const noexcept
 {
     return tabs->getTabBackgroundColour (tabIndex);
 }
