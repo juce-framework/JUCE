@@ -267,6 +267,12 @@ public:
             context.extensions.glEnableVertexAttribArray (colourAttribute.attributeID);
         }
 
+        void unbindAttributes (OpenGLContext& context)
+        {
+            context.extensions.glDisableVertexAttribArray (positionAttribute.attributeID);
+            context.extensions.glDisableVertexAttribArray (colourAttribute.attributeID);
+        }
+
         OpenGLShaderProgram::Attribute positionAttribute, colourAttribute;
 
     private:
@@ -514,8 +520,8 @@ public:
                                         "uniform " JUCE_MEDIUMP " vec4 imageLimits;" \
                                         JUCE_DECLARE_MATRIX_UNIFORM JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
     #define JUCE_GET_IMAGE_PIXEL        "texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y))"
-    #define JUCE_CLAMP_TEXTURE_COORD    JUCE_HIGHP " vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageLimits.xy, imageLimits.zw);"
-    #define JUCE_MOD_TEXTURE_COORD      JUCE_HIGHP " vec2 texturePos = clamp (mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageLimits.zw + imageLimits.xy), imageLimits.xy, imageLimits.zw);"
+    #define JUCE_CLAMP_TEXTURE_COORD    JUCE_HIGHP " vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", vec2 (0, 0), imageLimits.zw + imageLimits.xy);"
+    #define JUCE_MOD_TEXTURE_COORD      JUCE_HIGHP " vec2 texturePos = clamp (mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageLimits.zw + imageLimits.xy), vec2 (0, 0), imageLimits.zw + imageLimits.xy);"
 
     struct ImageProgram  : public ShaderBase
     {
@@ -1236,10 +1242,10 @@ struct StateHelpers
 
         void setShader (const Rectangle<int>& bounds, ShaderQuadQueue& quadQueue, ShaderPrograms::ShaderBase& shader)
         {
-            if (activeShader != &(shader.program))
+            if (activeShader != &shader)
             {
                 quadQueue.flush();
-                activeShader = &(shader.program);
+                activeShader = &shader;
                 shader.program.use();
                 shader.bindAttributes (context);
 
@@ -1263,6 +1269,7 @@ struct StateHelpers
             if (activeShader != nullptr)
             {
                 quadQueue.flush();
+                activeShader->unbindAttributes (context);
                 activeShader = nullptr;
                 context.extensions.glUseProgram (0);
             }
@@ -1273,7 +1280,7 @@ struct StateHelpers
         bool canUseShaders;
 
     private:
-        OpenGLShaderProgram* activeShader;
+        ShaderPrograms::ShaderBase* activeShader;
         Rectangle<int> currentBounds;
 
         CurrentShader& operator= (const CurrentShader&);

@@ -188,6 +188,10 @@ namespace
             mouseWheelHook = 0;
         }
     }
+
+   #if JUCE_WINDOWS
+    static bool messageThreadIsDefinitelyCorrect = false;
+   #endif
 }
 
 //==============================================================================
@@ -315,6 +319,10 @@ public:
             SharedMessageThread::deleteInstance();
            #endif
             shutdownJuce_GUI();
+
+           #if JUCE_WINDOWS
+            messageThreadIsDefinitelyCorrect = false;
+           #endif
         }
     }
 
@@ -1320,8 +1328,6 @@ private:
     {
         if (getHostType().isWavelab() || getHostType().isCubaseBridged())
         {
-            static bool messageThreadIsDefinitelyCorrect = false;
-
             if (! messageThreadIsDefinitelyCorrect)
             {
                 MessageManager::getInstance()->setCurrentThreadAsMessageThread();
