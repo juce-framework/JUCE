@@ -165,7 +165,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
             {
                 MemoryBlock data;
                 fileStream->readIntoMemoryBlock (data);
-                CodeHelpers::writeDataAsCppLiteral (data, cpp);
+                CodeHelpers::writeDataAsCppLiteral (data, cpp, true, true);
             }
 
             cpp << newLine << newLine

@@ -105,7 +105,8 @@ namespace CodeHelpers
     }
 
     static void writeEscapeChars (OutputStream& out, const char* utf8, const int numBytes,
-                                  const int maxCharsOnLine, const bool breakAtNewLines, const bool replaceSingleQuotes)
+                                  const int maxCharsOnLine, const bool breakAtNewLines, 
+                                  const bool replaceSingleQuotes, const bool allowStringBreaks)
     {
         int charsOnLine = 0;
         bool lastWasHexEscapeCode = false;
@@ -117,11 +118,11 @@ namespace CodeHelpers
 
             switch (c)
             {
-                case '\t':  out << "\\t";  lastWasHexEscapeCode = false; break;
-                case '\r':  out << "\\r";  lastWasHexEscapeCode = false; break;
-                case '\n':  out << "\\n";  lastWasHexEscapeCode = false; startNewLine = breakAtNewLines; break;
-                case '\\':  out << "\\\\"; lastWasHexEscapeCode = false; break;
-                case '\"':  out << "\\\""; lastWasHexEscapeCode = false; break;
+                case '\t':  out << "\\t";  lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\r':  out << "\\r";  lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\n':  out << "\\n";  lastWasHexEscapeCode = false; charsOnLine += 2; startNewLine = breakAtNewLines; break;
+                case '\\':  out << "\\\\"; lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\"':  out << "\\\""; lastWasHexEscapeCode = false; charsOnLine += 2; break;
 
                 case 0:
                     if (numBytes < 0)
@@ -129,6 +130,7 @@ namespace CodeHelpers
 
                     out << "\\0";
                     lastWasHexEscapeCode = true;
+                    charsOnLine += 2;
                     break;
 
                 case '\'':
@@ -136,6 +138,7 @@ namespace CodeHelpers
                     {
                         out << "\\\'";
                         lastWasHexEscapeCode = false;
+                        charsOnLine += 2;
                         break;
                     }
 
@@ -147,21 +150,30 @@ namespace CodeHelpers
                     {
                         out << (char) c;
                         lastWasHexEscapeCode = false;
+                        ++charsOnLine;
+                    }
+                    else if (allowStringBreaks && lastWasHexEscapeCode && c >= 32 && c < 127)
+                    {
+                        out << "\"\"" << (char) c;
+                        lastWasHexEscapeCode = false;
+                        charsOnLine += 3;
                     }
                     else
                     {
                         out << (c < 16 ? "\\x0" : "\\x") << String::toHexString ((int) c);
                         lastWasHexEscapeCode = true;
+                        charsOnLine += 4;
                     }
 
                     break;
             }
 
-            if ((startNewLine || (maxCharsOnLine > 0 && ++charsOnLine >= maxCharsOnLine))
+            if ((startNewLine || (maxCharsOnLine > 0 && charsOnLine >= maxCharsOnLine))
                  && (numBytes < 0 || i < numBytes - 1))
             {
                 charsOnLine = 0;
                 out << "\"" << newLine << "\"";
+                lastWasHexEscapeCode = false;
             }
         }
     }
@@ -169,7 +181,7 @@ namespace CodeHelpers
     String addEscapeChars (const String& s)
     {
         MemoryOutputStream out;
-        writeEscapeChars (out, s.toUTF8().getAddress(), -1, -1, false, true);
+        writeEscapeChars (out, s.toUTF8().getAddress(), -1, -1, false, true, true);
         return out.toUTF8();
     }
 
@@ -332,7 +344,8 @@ namespace CodeHelpers
         return "(int) (" + expression + ")";
     }
 
-    void writeDataAsCppLiteral (const MemoryBlock& mb, OutputStream& out)
+    void writeDataAsCppLiteral (const MemoryBlock& mb, OutputStream& out,
+                                bool breakAtNewLines, bool allowStringBreaks)
     {
         const int maxCharsOnLine = 250;
 
@@ -386,7 +399,8 @@ namespace CodeHelpers
         else
         {
             out << "\"";
-            writeEscapeChars (out, (const char*) data, (int) mb.getSize(), maxCharsOnLine, true, false);
+            writeEscapeChars (out, (const char*) data, (int) mb.getSize(), 
+                              maxCharsOnLine, breakAtNewLines, false, allowStringBreaks);
             out << "\";";
         }
     }

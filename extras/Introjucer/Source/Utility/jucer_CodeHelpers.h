@@ -49,7 +49,8 @@ namespace CodeHelpers
     String castToInt (const String& expression);
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
 
-    void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out);
+    void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out,
+                                bool breakAtNewLines, bool allowStringBreaks);
 
     void createStringMatcher (OutputStream& out, const String& utf8PointerVariable,
                               const StringArray& strings, const StringArray& codeToExecute, const int indentLevel);
