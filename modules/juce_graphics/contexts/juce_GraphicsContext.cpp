@@ -434,7 +434,7 @@ void Graphics::drawBevel (const int x, const int y, const int width, const int h
 
         for (int i = bevelThickness; --i >= 0;)
         {
-            const float op = useGradient ? (sharpEdgeOnOutside ? bevelThickness - i : i) / bevelThickness
+            const float op = useGradient ? (sharpEdgeOnOutside ? bevelThickness - i : i) / (float) bevelThickness
                                          : 1.0f;
 
             context->setFill (topLeftColour.withMultipliedAlpha (op));
@@ -607,13 +607,13 @@ void Graphics::drawDashedLine (const Line<float>& line, const float* const dashL
             jassert (dashLengths[n] > 0); // can't have zero-length dashes!
 
             const double lastAlpha = alpha;
-            alpha = jmin (1.0, alpha + dashLengths [n] * onePixAlpha);
+            alpha += dashLengths [n] * onePixAlpha;
             n = (n + 1) % numDashLengths;
 
             if ((n & 1) != 0)
             {
                 const Line<float> segment (line.getStart() + (delta * lastAlpha).toFloat(),
-                                           line.getStart() + (delta * alpha).toFloat());
+                                           line.getStart() + (delta * jmin (1.0, alpha)).toFloat());
 
                 if (lineThickness != 1.0f)
                     drawLine (segment, lineThickness);

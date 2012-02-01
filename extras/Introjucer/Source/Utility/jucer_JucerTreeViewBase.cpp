@@ -69,9 +69,9 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height
     Path p;
 
     if (isOpen())
-        p.addTriangle (width * 0.2f, height * 0.25f, width * 0.8f, height * 0.25f, width * 0.5f, height * 0.75f);
+        p.addTriangle (width * 0.2f,  height * 0.25f, width * 0.8f, height * 0.25f, width * 0.5f, height * 0.75f);
     else
-        p.addTriangle (width * 0.25f, height * 0.25f, width * 0.8f, height * 0.5f, width * 0.25f, height * 0.75f);
+        p.addTriangle (width * 0.25f, height * 0.25f, width * 0.8f, height * 0.5f,  width * 0.25f, height * 0.75f);
 
     g.setColour (Colours::lightgrey);
     g.fillPath (p);
@@ -81,13 +81,13 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height
 class TreeLeftHandButtonHolderComponent   : public Component
 {
 public:
-    TreeLeftHandButtonHolderComponent (const Array<Component*>& comps)
+    TreeLeftHandButtonHolderComponent (OwnedArray<Component>& comps)
     {
-        components.addArray (comps);
+        components.swapWithArray (comps);
         setInterceptsMouseClicks (false, true);
 
-        for (int i = 0; i < comps.size(); ++i)
-            addAndMakeVisible (comps.getUnchecked(i));
+        for (int i = 0; i < components.size(); ++i)
+            addAndMakeVisible (components.getUnchecked(i));
     }
 
     void resized()
@@ -105,7 +105,7 @@ private:
 
 Component* JucerTreeViewBase::createItemComponent()
 {
-    Array<Component*> components;
+    OwnedArray<Component> components;
     createLeftEdgeComponents (components);
     numLeftHandComps = components.size();
 
@@ -113,24 +113,44 @@ Component* JucerTreeViewBase::createItemComponent()
 }
 
 //==============================================================================
+class RenameTreeItemCallback  : public ModalComponentManager::Callback
+{
+public:
+    RenameTreeItemCallback (JucerTreeViewBase& item_, Component& parent, const Rectangle<int>& bounds)
+        : item (item_)
+    {
+        ed.setMultiLine (false, false);
+        ed.setPopupMenuEnabled (false);
+        ed.setSelectAllWhenFocused (true);
+        ed.setFont (item.getFont());
+        ed.addListener (&item);
+        ed.setText (item.getRenamingName());
+        ed.setBounds (bounds);
+
+        parent.addAndMakeVisible (&ed);
+        ed.enterModalState (true, this);
+    }
+
+    void modalStateFinished (int resultCode)
+    {
+        if (resultCode != 0)
+            item.setName (ed.getText());
+    }
+
+private:
+    TextEditor ed;
+    JucerTreeViewBase& item;
+
+    JUCE_DECLARE_NON_COPYABLE (RenameTreeItemCallback);
+};
+
 void JucerTreeViewBase::showRenameBox()
 {
-    TextEditor ed (String::empty);
-    ed.setMultiLine (false, false);
-    ed.setPopupMenuEnabled (false);
-    ed.setSelectAllWhenFocused (true);
-    ed.setFont (getFont());
-    ed.addListener (this);
-    ed.setText (getRenamingName());
-
     Rectangle<int> r (getItemPosition (true));
     r.setLeft (r.getX() + getTextX());
     r.setHeight (getItemHeight());
-    ed.setBounds (r);
-    getOwnerView()->addAndMakeVisible (&ed);
 
-    if (ed.runModalLoop() != 0)
-        setName (ed.getText());
+    new RenameTreeItemCallback (*this, *getOwnerView(), r);
 }
 
 void JucerTreeViewBase::itemClicked (const MouseEvent& e)

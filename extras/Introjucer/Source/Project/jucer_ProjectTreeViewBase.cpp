@@ -431,7 +431,7 @@ void ProjectTreeViewBase::addSubItems()
 
 void ProjectTreeViewBase::refreshSubItems()
 {
-    OpennessRestorer openness (*this);
+    WholeTreeOpennessRestorer openness (*this);
     clearSubItems();
     addSubItems();
 }

@@ -39,7 +39,7 @@ public:
     bool acceptsFileDrop (const StringArray& files) const                   { return false; }
     bool acceptsDragItems (const OwnedArray <Project::Item>& selectedNodes) { return false; }
     ProjectTreeViewBase* createSubItem (const Project::Item& child);
-    void createLeftEdgeComponents (Array<Component*>& components)           {}
+    void createLeftEdgeComponents (OwnedArray<Component>& components)           {}
     void showDocument();
     void showPopupMenu();
     String getDisplayName() const;
@@ -59,7 +59,7 @@ public:
     void checkFileStatus();
     void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex);
     ProjectTreeViewBase* createSubItem (const Project::Item& child);
-    void createLeftEdgeComponents (Array<Component*>& components)       {}
+    void createLeftEdgeComponents (OwnedArray<Component>& components)       {}
     void showDocument();
     void showPopupMenu();
 

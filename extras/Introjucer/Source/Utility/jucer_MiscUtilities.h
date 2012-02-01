@@ -46,6 +46,9 @@ void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize);
 
 void showUTF8ToolWindow();
 
+// Start a callout modally, which will delete the content comp when it's dismissed.
+void launchAsyncCallOutBox (Component& attachTo, Component* content);
+
 //==============================================================================
 class PropertyPanelWithTooltips  : public Component,
                                    public Timer

@@ -42,6 +42,7 @@ public:
     //==============================================================================
     int getItemWidth() const                                { return -1; }
     int getItemHeight() const                               { return 20; }
+    Font getFont() const;
 
     void paintItem (Graphics& g, int width, int height);
     void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
@@ -54,7 +55,7 @@ public:
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
     virtual const Drawable* getIcon() const = 0;
-    virtual void createLeftEdgeComponents (Array<Component*>& components) = 0;
+    virtual void createLeftEdgeComponents (OwnedArray<Component>& components) = 0;
 
     virtual void showPopupMenu();
     virtual void showMultiSelectionPopupMenu();
@@ -68,9 +69,25 @@ public:
     void textEditorFocusLost (TextEditor& editor)           { editor.exitModalState (0); }
 
     //==============================================================================
+    // To handle situations where an item gets deleted before openness is
+    // restored for it, this OpennessRestorer keeps only a pointer to the
+    // topmost tree item.
+    struct WholeTreeOpennessRestorer   : public OpennessRestorer
+    {
+        WholeTreeOpennessRestorer (TreeViewItem& item)  : OpennessRestorer (getTopLevelItem (item))
+        {}
+
+    private:
+        static TreeViewItem& getTopLevelItem (TreeViewItem& item)
+        {
+            TreeViewItem* const p = item.getParentItem();
+            return p != nullptr ? getTopLevelItem (*p) : item;
+        }
+    };
+
+    //==============================================================================
 private:
     int numLeftHandComps;
-    Font getFont() const;
     int getTextX() const;
 };
 
