@@ -1138,8 +1138,10 @@ bool AudioProcessorGraph::disconnectNode (const uint32 nodeId)
     return doneAnything;
 }
 
-bool AudioProcessorGraph::isConnectionLegal (Connection* const c) const
+bool AudioProcessorGraph::isConnectionLegal (const Connection* const c) const
 {
+    jassert (c != nullptr);
+
     const Node* const source = getNodeForId (c->sourceNodeId);
     const Node* const dest   = getNodeForId (c->destNodeId);
 

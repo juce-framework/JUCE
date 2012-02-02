@@ -609,10 +609,11 @@ public:
                           "void main()"
                           "{"
                             JUCE_HIGHP " vec2 texturePos = " JUCE_MATRIX_TIMES_FRAGCOORD ";"
-                            "if (texturePos.x >= imageLimits.x"
-                                 "&& texturePos.y >= imageLimits.y"
-                                 "&& texturePos.x < imageLimits.z"
-                                 "&& texturePos.y < imageLimits.w)"
+                            "const float roundingError = 0.00001;"
+                            "if (texturePos.x >= imageLimits.x - roundingError"
+                                 "&& texturePos.y >= imageLimits.y - roundingError"
+                                 "&& texturePos.x <= imageLimits.z + roundingError"
+                                 "&& texturePos.y <= imageLimits.w + roundingError)"
                              "gl_FragColor = frontColour * " JUCE_GET_IMAGE_PIXEL ".a;"
                             "else "
                              "gl_FragColor = vec4 (0, 0, 0, 0);"
@@ -3208,7 +3209,7 @@ private:
         return fillType.transformed (transform.getTransform());
     }
 
-    void fillEdgeTable (EdgeTable& et)
+    void fillEdgeTable (EdgeTable& et) const
     {
         clip->fillEdgeTable (et, getFillType());
     }

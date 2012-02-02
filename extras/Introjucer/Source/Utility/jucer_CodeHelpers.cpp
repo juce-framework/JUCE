@@ -105,7 +105,7 @@ namespace CodeHelpers
     }
 
     static void writeEscapeChars (OutputStream& out, const char* utf8, const int numBytes,
-                                  const int maxCharsOnLine, const bool breakAtNewLines, 
+                                  const int maxCharsOnLine, const bool breakAtNewLines,
                                   const bool replaceSingleQuotes, const bool allowStringBreaks)
     {
         int charsOnLine = 0;
@@ -399,7 +399,7 @@ namespace CodeHelpers
         else
         {
             out << "\"";
-            writeEscapeChars (out, (const char*) data, (int) mb.getSize(), 
+            writeEscapeChars (out, (const char*) data, (int) mb.getSize(),
                               maxCharsOnLine, breakAtNewLines, false, allowStringBreaks);
             out << "\";";
         }

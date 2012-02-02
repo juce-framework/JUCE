@@ -26,6 +26,76 @@
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
+class MarkerListScope  : public Expression::Scope
+{
+public:
+    MarkerListScope (Component& component_) : component (component_) {}
+
+    Expression getSymbolValue (const String& symbol) const
+    {
+        switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
+        {
+            case RelativeCoordinate::StandardStrings::width:  return Expression ((double) component.getWidth());
+            case RelativeCoordinate::StandardStrings::height: return Expression ((double) component.getHeight());
+            default: break;
+        }
+
+        MarkerList* list;
+        const MarkerList::Marker* const marker = findMarker (component, symbol, list);
+
+        if (marker != nullptr)
+            return Expression (marker->position.getExpression().evaluate (*this));
+
+        return Expression::Scope::getSymbolValue (symbol);
+    }
+
+    void visitRelativeScope (const String& scopeName, Visitor& visitor) const
+    {
+        if (scopeName == RelativeCoordinate::Strings::parent)
+        {
+            Component* const parent = component.getParentComponent();
+
+            if (parent != nullptr)
+            {
+                visitor.visit (MarkerListScope (*parent));
+                return;
+            }
+        }
+
+        Expression::Scope::visitRelativeScope (scopeName, visitor);
+    }
+
+    String getScopeUID() const
+    {
+        return String::toHexString ((pointer_sized_int) (void*) &component) + "m";
+    }
+
+    static const MarkerList::Marker* findMarker (Component& component, const String& name, MarkerList*& list)
+    {
+        const MarkerList::Marker* marker = nullptr;
+        list = component.getMarkers (true);
+
+        if (list != nullptr)
+            marker = list->getMarker (name);
+
+        if (marker == nullptr)
+        {
+            list = component.getMarkers (false);
+
+            if (list != nullptr)
+                marker = list->getMarker (name);
+        }
+
+        return marker;
+    }
+
+private:
+    Component& component;
+
+    JUCE_DECLARE_NON_COPYABLE (MarkerListScope);
+};
+
+//==============================================================================
 RelativeCoordinatePositionerBase::ComponentScope::ComponentScope (Component& component_)
     : component (component_)
 {
@@ -46,16 +116,18 @@ Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (con
         default: break;
     }
 
-    MarkerList* list;
-    const MarkerList::Marker* const marker = findMarker (symbol, list);
+    Component* const parent = component.getParentComponent();
 
-    if (marker != nullptr)
+    if (parent != nullptr)
     {
-        Component* const parent = component.getParentComponent();
-        jassert (parent != nullptr);
+        MarkerList* list;
+        const MarkerList::Marker* const marker = MarkerListScope::findMarker (*parent, symbol, list);
 
-        ComponentScope scope (*parent);
-        return Expression (marker->position.getExpression().evaluate (scope));
+        if (marker != nullptr)
+        {
+            MarkerListScope scope (*parent);
+            return Expression (marker->position.getExpression().evaluate (scope));
+        }
     }
 
     return Expression::Scope::getSymbolValue (symbol);
@@ -63,12 +135,9 @@ Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (con
 
 void RelativeCoordinatePositionerBase::ComponentScope::visitRelativeScope (const String& scopeName, Visitor& visitor) const
 {
-    Component* targetComp = nullptr;
-
-    if (scopeName == RelativeCoordinate::Strings::parent)
-        targetComp = component.getParentComponent();
-    else
-        targetComp = findSiblingComponent (scopeName);
+    Component* const targetComp = (scopeName == RelativeCoordinate::Strings::parent)
+                                        ? component.getParentComponent()
+                                        : findSiblingComponent (scopeName);
 
     if (targetComp != nullptr)
         visitor.visit (ComponentScope (*targetComp));
@@ -78,41 +147,15 @@ void RelativeCoordinatePositionerBase::ComponentScope::visitRelativeScope (const
 
 String RelativeCoordinatePositionerBase::ComponentScope::getScopeUID() const
 {
-    return String::toHexString ((int) (pointer_sized_int) (void*) &component);
+    return String::toHexString ((pointer_sized_int) (void*) &component);
 }
 
 Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponent (const String& componentID) const
 {
     Component* const parent = component.getParentComponent();
 
-    if (parent != nullptr)
-        return parent->findChildWithID (componentID);
-
-    return nullptr;
-}
-
-const MarkerList::Marker* RelativeCoordinatePositionerBase::ComponentScope::findMarker (const String& name, MarkerList*& list) const
-{
-    const MarkerList::Marker* marker = nullptr;
-
-    Component* const parent = component.getParentComponent();
-
-    if (parent != nullptr)
-    {
-        list = parent->getMarkers (true);
-        if (list != nullptr)
-            marker = list->getMarker (name);
-
-        if (marker == nullptr)
-        {
-            list = parent->getMarkers (false);
-
-            if (list != nullptr)
-                marker = list->getMarker (name);
-        }
-    }
-
-    return marker;
+    return parent != nullptr ? parent->findChildWithID (componentID)
+                             : nullptr;
 }
 
 //==============================================================================
@@ -126,29 +169,41 @@ public:
 
     Expression getSymbolValue (const String& symbol) const
     {
-        if (symbol == RelativeCoordinate::Strings::left || symbol == RelativeCoordinate::Strings::x
-             || symbol == RelativeCoordinate::Strings::width || symbol == RelativeCoordinate::Strings::right
-             || symbol == RelativeCoordinate::Strings::top || symbol == RelativeCoordinate::Strings::y
-             || symbol == RelativeCoordinate::Strings::height || symbol == RelativeCoordinate::Strings::bottom)
+        switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
         {
-            positioner.registerComponentListener (component);
-        }
-        else
-        {
-            MarkerList* list;
-            const MarkerList::Marker* const marker = findMarker (symbol, list);
+            case RelativeCoordinate::StandardStrings::x:
+            case RelativeCoordinate::StandardStrings::left:
+            case RelativeCoordinate::StandardStrings::y:
+            case RelativeCoordinate::StandardStrings::top:
+            case RelativeCoordinate::StandardStrings::width:
+            case RelativeCoordinate::StandardStrings::height:
+            case RelativeCoordinate::StandardStrings::right:
+            case RelativeCoordinate::StandardStrings::bottom:
+                positioner.registerComponentListener (component);
+                break;
 
-            if (marker != nullptr)
+            default:
             {
-                positioner.registerMarkerListListener (list);
+                Component* const parent = component.getParentComponent();
+                if (parent != nullptr)
+                {
+                    MarkerList* list;
+                    const MarkerList::Marker* marker = MarkerListScope::findMarker (*parent, symbol, list);
+
+                    if (marker != nullptr)
+                    {
+                        positioner.registerMarkerListListener (list);
+                    }
+                    else
+                    {
+                        // The marker we want doesn't exist, so watch all lists in case they change and the marker appears later..
+                        positioner.registerMarkerListListener (parent->getMarkers (true));
+                        positioner.registerMarkerListListener (parent->getMarkers (false));
+                        ok = false;
+                    }
+                }
             }
-            else
-            {
-                // The marker we want doesn't exist, so watch all lists in case they change and the marker appears later..
-                positioner.registerMarkerListListener (component.getMarkers (true));
-                positioner.registerMarkerListListener (component.getMarkers (false));
-                ok = false;
-            }
+            break;
         }
 
         return ComponentScope::getSymbolValue (symbol);
@@ -156,12 +211,9 @@ public:
 
     void visitRelativeScope (const String& scopeName, Visitor& visitor) const
     {
-        Component* targetComp = nullptr;
-
-        if (scopeName == RelativeCoordinate::Strings::parent)
-            targetComp = component.getParentComponent();
-        else
-            targetComp = findSiblingComponent (scopeName);
+        Component* const targetComp = (scopeName == RelativeCoordinate::Strings::parent)
+                                            ? component.getParentComponent()
+                                            : findSiblingComponent (scopeName);
 
         if (targetComp != nullptr)
         {

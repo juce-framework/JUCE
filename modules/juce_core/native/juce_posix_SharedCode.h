@@ -847,8 +847,8 @@ void Thread::killThread()
 
 void Thread::setCurrentThreadName (const String& name)
 {
-   #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
-    pthread_setname_np (name.toUTF8());
+   #if JUCE_IOS || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+    [[NSThread currentThread] setName: juceStringToNS (name)];
    #elif JUCE_LINUX
     prctl (PR_SET_NAME, name.toUTF8().getAddress(), 0, 0, 0);
    #endif

@@ -70,7 +70,6 @@ public:
         Component& component;
 
         Component* findSiblingComponent (const String& componentID) const;
-        const MarkerList::Marker* findMarker (const String& name, MarkerList*& list) const;
 
     private:
         JUCE_DECLARE_NON_COPYABLE (ComponentScope);

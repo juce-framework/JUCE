@@ -250,7 +250,7 @@ public:
         Even if a connection is valid when created, its status could change if
         a node changes its channel config.
     */
-    bool isConnectionLegal (Connection* connection) const;
+    bool isConnectionLegal (const Connection* connection) const;
 
     /** Performs a sanity checks of all the connections.
 
