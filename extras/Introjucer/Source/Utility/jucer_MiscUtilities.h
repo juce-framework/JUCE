@@ -78,11 +78,33 @@ public:
     FloatingLabelComponent();
 
     void remove();
-    void update (Component* parent, const String& text, const Colour& textColour, int x, int y, bool toRight, bool below);
+    void update (Component* parent, const String& text, const Colour& textColour,
+                 int x, int y, bool toRight, bool below);
+
     void paint (Graphics& g);
 
 private:
     Font font;
     Colour colour;
     GlyphArrangement glyphs;
+};
+
+//==============================================================================
+// A ValueSource which takes an input source, and forwards any changes in it.
+// This class is a handy way to create sources which re-map a value.
+class ValueSourceFilter   : public Value::ValueSource,
+                            public Value::Listener
+{
+public:
+    ValueSourceFilter (const Value& source)  : sourceValue (source)
+    {
+        sourceValue.addListener (this);
+    }
+
+    void valueChanged (Value&)      { sendChangeMessage (true); }
+
+protected:
+    Value sourceValue;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter);
 };

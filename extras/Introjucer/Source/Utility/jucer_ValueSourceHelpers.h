@@ -31,18 +31,15 @@
 /**
 */
 template <typename Type>
-class NumericValueSource   : public Value::ValueSource,
-                             public Value::Listener
+class NumericValueSource   : public ValueSourceFilter
 {
 public:
-    NumericValueSource (const Value& sourceValue_)
-       : sourceValue (sourceValue_)
-    {
-        sourceValue.addListener (this);
-    }
+    NumericValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
-    void valueChanged (Value&)   { sendChangeMessage (true); }
-    var getValue() const         { return (Type) sourceValue.getValue(); }
+    var getValue() const
+    {
+        return (Type) sourceValue.getValue();
+    }
 
     void setValue (const var& newValue)
     {
@@ -51,9 +48,6 @@ public:
         if (newVal != static_cast <Type> (getValue()))  // this test is important, because if a property is missing, it won't
             sourceValue = newVal;                       // create it (causing an unwanted undo action) when a control sets it to 0
     }
-
-protected:
-    Value sourceValue;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NumericValueSource);
 };

@@ -1626,13 +1626,17 @@ private:
         if (! isCurrentEventFromTouchScreen())
         {
             updateModifiersFromWParam (wParam);
+            const bool wasDragging = isDragging;
             isDragging = false;
 
             // release the mouse capture if the user has released all buttons
             if ((wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
                 ReleaseCapture();
 
-            doMouseEvent (position);
+            // NB: under some circumstances (e.g. double-clicking a native title bar), a mouse-up can
+            // arrive without a mouse-down, so in that case we need to avoid sending a message.
+            if (wasDragging)
+                doMouseEvent (position);
         }
     }
 

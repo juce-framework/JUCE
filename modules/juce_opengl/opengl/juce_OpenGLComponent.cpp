@@ -228,10 +228,11 @@ OpenGLComponent::OpenGLComponent (const int flags_)
       needToUpdateViewport (true),
       needToDeleteContext (false),
       threadStarted (false),
-      needToRepaint (true)
+      needToRepaint (true),
+      cachedImage (nullptr)
 {
     setOpaque (true);
-    setCachedComponentImage (cachedImage = new OpenGLCachedComponentImage (*this));
+    triggerRepaint();
     componentWatcher = new OpenGLComponentWatcher (*this);
 }
 
@@ -326,6 +327,7 @@ void OpenGLComponent::deleteContext()
     {
         if (context->makeActive())
         {
+            cachedImage = nullptr;
             setCachedComponentImage (nullptr);
             releaseOpenGLContext();
             context->makeInactive();
@@ -362,7 +364,11 @@ void OpenGLComponent::stopBackgroundThread()
 void OpenGLComponent::triggerRepaint()
 {
     // you mustn't set your own cached image object for an OpenGLComponent!
-    jassert (dynamic_cast<OpenGLCachedComponentImage*> (getCachedComponentImage()) == cachedImage);
+    jassert (cachedImage == nullptr
+              || dynamic_cast<OpenGLCachedComponentImage*> (getCachedComponentImage()) == cachedImage);
+
+    if (cachedImage == nullptr)
+        setCachedComponentImage (cachedImage = new OpenGLCachedComponentImage (*this));
 
     cachedImage->triggerRepaint();
 }

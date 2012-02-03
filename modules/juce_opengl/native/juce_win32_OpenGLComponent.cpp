@@ -229,6 +229,8 @@ private:
         nativeWindow->setVisible (true);
 
         dc = GetDC ((HWND) nativeWindow->getNativeHandle());
+
+        component->getTopLevelComponent()->repaint();
     }
 
     static void initialisePixelFormatDescriptor (PIXELFORMATDESCRIPTOR& pfd, const OpenGLPixelFormat& pixelFormat)
