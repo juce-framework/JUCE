@@ -436,16 +436,37 @@ void ProjectTreeViewBase::refreshSubItems()
     addSubItems();
 }
 
+static void treeViewMultiSelectItemChosen (int resultCode, ProjectTreeViewBase* item)
+{
+    switch (resultCode)
+    {
+        case 1:     item->deleteAllSelectedItems(); break;
+        default:    break;
+    }
+}
+
 void ProjectTreeViewBase::showMultiSelectionPopupMenu()
 {
     PopupMenu m;
-    m.addItem (6, "Delete");
+    m.addItem (1, "Delete");
 
-    switch (m.show())
-    {
-        case 6:     deleteAllSelectedItems(); break;
-        default:    break;
-    }
+    m.showMenuAsync (PopupMenu::Options(),
+                     ModalCallbackFunction::create (treeViewMultiSelectItemChosen, this));
+}
+
+static void treeViewMenuItemChosen (int resultCode, ProjectTreeViewBase* item)
+{
+    item->handlePopupMenuResult (resultCode);
+}
+
+void ProjectTreeViewBase::launchPopupMenu (PopupMenu& m)
+{
+    m.showMenuAsync (PopupMenu::Options(),
+                     ModalCallbackFunction::create (treeViewMenuItemChosen, this));
+}
+
+void ProjectTreeViewBase::handlePopupMenuResult (int)
+{
 }
 
 void ProjectTreeViewBase::itemDoubleClicked (const MouseEvent& e)

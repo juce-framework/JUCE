@@ -120,13 +120,17 @@ void GroupTreeViewItem::showPopupMenu()
     if (! isRoot())
         m.addItem (2, "Delete");
 
-    const int res = m.show();
-    switch (res)
+    launchPopupMenu (m);
+}
+
+void GroupTreeViewItem::handlePopupMenuResult (int resultCode)
+{
+    switch (resultCode)
     {
         case 1:     triggerAsyncRename (item); break;
         case 2:     deleteAllSelectedItems(); break;
         case 3:     item.sortAlphabetically (false); break;
-        default:    processCreateFileMenuItem (res); break;
+        default:    processCreateFileMenuItem (resultCode); break;
     }
 }
 
@@ -228,7 +232,7 @@ void SourceFileTreeViewItem::setName (const String& newName)
 ProjectTreeViewBase* SourceFileTreeViewItem::createSubItem (const Project::Item& child)
 {
     jassertfalse
-    return 0;
+    return nullptr;
 }
 
 void SourceFileTreeViewItem::showDocument()
@@ -242,10 +246,9 @@ void SourceFileTreeViewItem::showDocument()
 
 void SourceFileTreeViewItem::showPopupMenu()
 {
-    GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem());
-
     PopupMenu m;
 
+    GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem());
     if (parentGroup != nullptr)
     {
         parentGroup->addCreateFileMenuItems (m);
@@ -264,8 +267,14 @@ void SourceFileTreeViewItem::showPopupMenu()
     m.addSeparator();
     m.addItem (3, "Delete");
 
-    const int res = m.show();
-    switch (res)
+    launchPopupMenu (m);
+}
+
+void SourceFileTreeViewItem::handlePopupMenuResult (int resultCode)
+{
+    GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem());
+
+    switch (resultCode)
     {
         case 1:     getFile().startAsProcess(); break;
         case 2:     revealInFinder(); break;
@@ -274,7 +283,7 @@ void SourceFileTreeViewItem::showPopupMenu()
 
         default:
             if (parentGroup != nullptr)
-                parentGroup->processCreateFileMenuItem (res);
+                parentGroup->processCreateFileMenuItem (resultCode);
 
             break;
     }

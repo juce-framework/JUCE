@@ -547,18 +547,23 @@ public:
             project.deleteExporter (name.getTrailingIntValue());
     }
 
+    static void newExporterMenuItemChosen (int resultCode, ProjectSettingsComponent* settingsComp)
+    {
+        if (resultCode > 0 && settingsComp != nullptr)
+            settingsComp->project.addNewExporter (ProjectExporter::getExporterNames() [resultCode - 1]);
+    }
+
     void createNewExporter (TextButton& button)
     {
-        StringArray exporters (ProjectExporter::getExporterNames());
         PopupMenu menu;
+
+        const StringArray exporters (ProjectExporter::getExporterNames());
 
         for (int i = 0; i < exporters.size(); ++i)
             menu.addItem (i + 1, "Create a new " + exporters[i] + " target");
 
-        const int r = menu.showAt (&button);
-
-        if (r > 0)
-            project.addNewExporter (exporters [r - 1]);
+        menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&button),
+                            ModalCallbackFunction::forComponent (newExporterMenuItemChosen, this));
     }
 
     void createNewConfig()

@@ -42,6 +42,7 @@ public:
     void createLeftEdgeComponents (OwnedArray<Component>& components)           {}
     void showDocument();
     void showPopupMenu();
+    void handlePopupMenuResult (int resultCode);
     String getDisplayName() const;
     void setName (const String& newName);
 };
@@ -62,6 +63,7 @@ public:
     void createLeftEdgeComponents (OwnedArray<Component>& components)       {}
     void showDocument();
     void showPopupMenu();
+    void handlePopupMenuResult (int resultCode);
 
     void addFiles (const StringArray& files, int insertIndex);
     void addNewGroup();

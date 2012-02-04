@@ -65,6 +65,9 @@ public:
     virtual void addFiles (const StringArray& files, int insertIndex);
     virtual void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex);
     virtual void showMultiSelectionPopupMenu();
+
+    void launchPopupMenu (PopupMenu&); // runs asynchronously, and produces a callback to handlePopupMenuResult().
+    virtual void handlePopupMenuResult (int resultCode);
     void invokeShowDocument();
 
     virtual ProjectTreeViewBase* findTreeViewItem (const Project::Item& itemToFind);
