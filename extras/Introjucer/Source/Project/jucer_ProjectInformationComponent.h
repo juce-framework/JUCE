@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created for JUCE version: JUCE v2.0.9
+  Created for JUCE version: JUCE v2.0.16
 
   ------------------------------------------------------------------------------
 
@@ -45,7 +45,6 @@ public:
     void changeListenerCallback (ChangeBroadcaster*);
     //[/UserMethods]
 
-    void resized();
     void buttonClicked (Button* buttonThatWasClicked);
     void paint (Graphics& g);
 
@@ -63,6 +62,9 @@ private:
     TextButton openProjectButton;
     TextButton saveAndOpenButton;
     ScopedPointer<RolloverHelpComp> rollover;
+
+    void initialiseComponentState();
+    static ValueTree getComponentState();
 
 
     //==============================================================================

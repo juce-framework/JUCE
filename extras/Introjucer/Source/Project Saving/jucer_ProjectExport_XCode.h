@@ -550,6 +550,7 @@ private:
         }
 
         s.add ("GCC_VERSION = " + gccVersion);
+        s.add ("CLANG_CXX_LANGUAGE_STANDARD = \"c++0x\"");
 
         {
             StringArray linkerFlags, librarySearchPaths;

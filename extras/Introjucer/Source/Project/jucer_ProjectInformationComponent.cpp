@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created for JUCE version: JUCE v2.0.9
+  Created for JUCE version: JUCE v2.0.16
 
   ------------------------------------------------------------------------------
 
@@ -795,25 +795,17 @@ private:
 ProjectInformationComponent::ProjectInformationComponent (Project& project_)
     : project (project_)
 {
-    addAndMakeVisible (&viewport);
-    viewport.setComponentID ("ykdBpb");
-    viewport.setBounds (RelativeRectangle ("8, 8, parent.width - 8, parent.height - 74"));
-    viewport.setScrollBarThickness (16);
-    addAndMakeVisible (&openProjectButton);
-    openProjectButton.setComponentID ("a550a652e2666ee7");
-    openProjectButton.setBounds (RelativeRectangle ("8, parent.height - 34, left + 227, top + 24"));
-    openProjectButton.setButtonText ("Open Project in ");
+    //[Constructor_pre]
+    //[/Constructor_pre]
+    addChildAndSetID (&viewport, "ykdBpb");
+    addChildAndSetID (&openProjectButton, "a550a652e2666ee7");
+    addChildAndSetID (&saveAndOpenButton, "dRGMyYx");
+    addChildAndSetID (rollover = new RolloverHelpComp(), "QqLJBF");
+
+    initialiseComponentState();
+
     openProjectButton.addListener (this);
-    openProjectButton.setColour (TextButton::buttonColourId, Colour (0xffddddff));
-    addAndMakeVisible (&saveAndOpenButton);
-    saveAndOpenButton.setComponentID ("dRGMyYx");
-    saveAndOpenButton.setBounds (RelativeRectangle ("8, parent.height - 65, left + 227, top + 24"));
-    saveAndOpenButton.setButtonText ("Save And Open in");
     saveAndOpenButton.addListener (this);
-    saveAndOpenButton.setColour (TextButton::buttonColourId, Colour (0xffddddff));
-    addAndMakeVisible (rollover = new RolloverHelpComp());
-    rollover->setComponentID ("QqLJBF");
-    rollover->setBounds (RelativeRectangle ("246, parent.height - 68, parent.width - 8, parent.height - 4"));
 
     //[UserPreSize]
     viewport.setViewedComponent (new ProjectSettingsComponent (project), true);
@@ -832,8 +824,7 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
 
     setSize (808, 638);
 
-
-    //[Constructor] You can add your own custom stuff here..
+    //[Constructor]
     project.addChangeListener (this);
     //[/Constructor]
 }
@@ -843,26 +834,13 @@ ProjectInformationComponent::~ProjectInformationComponent()
     //[Destructor_pre]. You can add your own custom destruction code here..
     project.removeChangeListener (this);
     //[/Destructor_pre]
-
-    rollover = 0;
-
+    rollover = nullptr;
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]
 }
 
 //==============================================================================
-void ProjectInformationComponent::resized()
-{
-    //[Userresized_Pre]
-    //[/Userresized_Pre]
-
-
-
-    //[Userresized_Post]
-    //[/Userresized_Post]
-}
-
 void ProjectInformationComponent::buttonClicked (Button* buttonThatWasClicked)
 {
     //[UserbuttonClicked_Pre]
@@ -870,13 +848,13 @@ void ProjectInformationComponent::buttonClicked (Button* buttonThatWasClicked)
 
     if (buttonThatWasClicked == &openProjectButton)
     {
-        //[UserButtonCode_a550a652e2666ee7] -- add your button handler code here..
-        //[/UserButtonCode_a550a652e2666ee7]
+        //[UserButtonCode_openProjectButton] -- add your button handler code here..
+        //[/UserButtonCode_openProjectButton]
     }
     else if (buttonThatWasClicked == &saveAndOpenButton)
     {
-        //[UserButtonCode_dRGMyYx] -- add your button handler code here..
-        //[/UserButtonCode_dRGMyYx]
+        //[UserButtonCode_saveAndOpenButton] -- add your button handler code here..
+        //[/UserButtonCode_saveAndOpenButton]
     }
 
     //[UserbuttonClicked_Post]
@@ -893,6 +871,11 @@ void ProjectInformationComponent::paint (Graphics& g)
     //[/UserPaint]
 }
 
+void ProjectInformationComponent::initialiseComponentState()
+{
+    BinaryData::ImageProvider imageProvider;
+    ComponentBuilder::initialiseFromValueTree (*this, getComponentState(), &imageProvider);
+}
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
@@ -901,7 +884,6 @@ void ProjectInformationComponent::changeListenerCallback (ChangeBroadcaster*)
     dynamic_cast<ProjectSettingsComponent*> (viewport.getViewedComponent())->update();
 }
 //[/MiscUserCode]
-
 
 
 //==============================================================================
@@ -936,3 +918,18 @@ JUCER_COMPONENT_METADATA_START
 JUCER_COMPONENT_METADATA_END
 */
 #endif
+
+ValueTree ProjectInformationComponent::getComponentState()
+{
+    const unsigned char data[] =
+        "COMPONENT\0\x01\x08id\0\x01\t\x05tO9EG1a\0""className\0\x01\x1d\x05ProjectInformationComponent\0width\0\x01\x05\x05""808\0height\0\x01\x05\x05""638\0""background\0\x01\x08\x05""f6f9ff\0parentClasses\0\x01)\x05public Component, public ChangeListener\0"
+        "constructorParams\0\x01\x13\x05Project& project_\0memberInitialisers\0\x01\x14\x05project (project_)\0\x01\x04""COMPONENTS\0\0\x01\x04VIEWPORT\0\x01\x06id\0\x01\x08\x05ykdBpb\0memberName\0\x01\n\x05viewport\0position\0\x01,\x05""8, 8, parent.width - "
+        "8, parent.height - 74\0scrollBarV\0\x01\x03\x05""1\0scrollBarH\0\x01\x03\x05""1\0scrollbarWidth\0\x01\x04\x05""16\0\0TEXTBUTTON\0\x01\x0fid\0\x01\x12\x05""a550a652e2666ee7\0memberName\0\x01\x13\x05openProjectButton\0""focusOrder\0\x01\x03\x05""0\0tex"
+        "t\0\x01\x12\x05Open Project in \0""createCallback\0\x01\x03\x05""1\0radioGroup\0\x01\x03\x05""0\0""connectedLeft\0\x01\x03\x05""0\0""connectedRight\0\x01\x03\x05""0\0""connectedTop\0\x01\x03\x05""0\0""connectedBottom\0\x01\x03\x05""0\0""backgroundCol"
+        "our\0\x01\n\x05""FFDDDDFF\0textColour\0\x01\x02\x05\0""backgroundColourOn\0\x01\x02\x05\0textColourOn\0\x01\x02\x05\0position\0\x01-\x05""8, parent.height - 34, left + 227, top + 24\0\0TEXTBUTTON\0\x01\x0cid\0\x01\t\x05""dRGMyYx\0name\0\x01\x02\x05\0"
+        "memberName\0\x01\x13\x05saveAndOpenButton\0position\0\x01-\x05""8, parent.height - 65, left + 227, top + 24\0text\0\x01\x12\x05Save And Open in\0""createCallback\0\x01\x03\x05""1\0radioGroup\0\x01\x03\x05""0\0""connectedLeft\0\x01\x03\x05""0\0""conne"
+        "ctedRight\0\x01\x03\x05""0\0""connectedTop\0\x01\x03\x05""0\0""connectedBottom\0\x01\x03\x05""0\0""backgroundColour\0\x01\n\x05""FFDDDDFF\0\0GENERICCOMPONENT\0\x01\x04id\0\x01\x08\x05QqLJBF\0memberName\0\x01\n\x05rollover\0position\0\x01>\x05""246, p"
+        "arent.height - 68, parent.width - 8, parent.height - 4\0""class\0\x01\x12\x05RolloverHelpComp\0\0MARKERS_X\0\0\0MARKERS_Y\0\0\0METHODS\0\0\0";
+
+    return ValueTree::readFromData (data, sizeof (data));
+}

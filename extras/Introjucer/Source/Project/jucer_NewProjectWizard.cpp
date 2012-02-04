@@ -34,9 +34,8 @@ static void createFileCreationOptionComboBox (Component& setupComp,
                                               const char** types)
 {
     ComboBox* c = new ComboBox();
-    c->setComponentID ("filesToCreate");
     itemsCreated.add (c);
-    setupComp.addAndMakeVisible (c);
+    setupComp.addChildAndSetID (c, "filesToCreate");
 
     const char* fileOptions[] = { "Create a Main.cpp file",
                                   "Create a Main.cpp file and a basic window",
@@ -436,40 +435,34 @@ public:
         setOpaque (true);
         setSize (600, 500);
 
-        projectName.setComponentID ("projectName");
+        addChildAndSetID (&projectName, "projectName");
         projectName.setText ("NewProject");
         projectName.setBounds ("100, 14, parent.width / 2 - 10, top + 22");
-        addAndMakeVisible (&projectName);
         nameLabel.attachToComponent (&projectName, true);
         projectName.addListener (this);
 
-        projectType.setComponentID ("projectType");
+        addChildAndSetID (&projectType, "projectType");
         projectType.addItemList (getWizards(), 1);
         projectType.setSelectedId (1, true);
         projectType.setBounds ("100, projectName.bottom + 4, projectName.right, top + 22");
-        addAndMakeVisible (&projectType);
         typeLabel.attachToComponent (&projectType, true);
         projectType.addListener (this);
 
-        fileOutline.setComponentID ("fileOutline");
+        addChildAndSetID (&fileOutline, "fileOutline");
         fileOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
         fileOutline.setTextLabelPosition (Justification::centred);
-        addAndMakeVisible (&fileOutline);
         fileOutline.setBounds ("10, projectType.bottom + 20, projectType.right, parent.height - 10");
 
-        fileBrowser.setComponentID ("fileBrowser");
+        addChildAndSetID (&fileBrowser, "fileBrowser");
         fileBrowser.setBounds ("fileOutline.left + 10, fileOutline.top + 20, fileOutline.right - 10, fileOutline.bottom - 12");
         fileBrowser.setFilenameBoxLabel ("Folder:");
-        addAndMakeVisible (&fileBrowser);
 
-        createButton.setComponentID ("createButton");
+        addChildAndSetID (&createButton, "createButton");
         createButton.setBounds ("right - 140, bottom - 24, parent.width - 10, parent.height - 10");
-        addAndMakeVisible (&createButton);
         createButton.addListener (this);
 
-        cancelButton.setComponentID ("cancelButton");
+        addChildAndSetID (&cancelButton, "cancelButton");
         cancelButton.setBounds ("right - 140, createButton.top, createButton.left - 10, createButton.bottom");
-        addAndMakeVisible (&cancelButton);
         cancelButton.addListener (this);
 
         updateCustomItems();

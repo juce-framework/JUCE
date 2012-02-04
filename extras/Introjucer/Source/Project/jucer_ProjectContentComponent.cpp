@@ -76,8 +76,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         if (project != nullptr)
         {
-            addAndMakeVisible (projectTree = new TreeView());
-            projectTree->setComponentID ("tree");
+            addChildAndSetID (projectTree = new TreeView(), "tree");
             projectTree->setRootItemVisible (true);
             projectTree->setMultiSelectEnabled (true);
             projectTree->setDefaultOpenness (true);
@@ -93,9 +92,9 @@ void ProjectContentComponent::setProject (Project* newProject)
 
             projectTree->setBounds ("0, 0, left + " + lastTreeWidth + ", parent.height");
 
-            addAndMakeVisible (resizerBar = new ResizableEdgeComponent (projectTree, &treeSizeConstrainer,
-                                                                        ResizableEdgeComponent::rightEdge));
-            resizerBar->setComponentID ("resizer");
+            addChildAndSetID (resizerBar = new ResizableEdgeComponent (projectTree, &treeSizeConstrainer, ResizableEdgeComponent::rightEdge),
+                              "resizer");
+
             resizerBar->setBounds ("tree.right, 0, tree.right + 4, parent.height");
 
             project->addChangeListener (this);
