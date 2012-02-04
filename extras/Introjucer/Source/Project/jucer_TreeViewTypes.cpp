@@ -254,11 +254,11 @@ void SourceFileTreeViewItem::showPopupMenu()
 
     m.addItem (1, "Open in external editor");
     m.addItem (2,
-#if JUCE_MAC
+                 #if JUCE_MAC
                   "Reveal in Finder");
-#else
+                 #else
                   "Reveal in Explorer");
-#endif
+                 #endif
 
     m.addItem (4, "Rename File...");
     m.addSeparator();

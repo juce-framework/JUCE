@@ -225,54 +225,6 @@ namespace CodeHelpers
             return "CharPointer_UTF8 (" + CodeHelpers::addEscapeChars (text).quoted() + ")";
     }
 
-    String stringLiteralIfNotEmpty (const String& text)
-    {
-        return text.isNotEmpty() ? stringLiteral (text) : String::empty;
-    }
-
-    String boolLiteral (const bool b)
-    {
-        return b ? "true" : "false";
-    }
-
-    String floatLiteral (float v)
-    {
-        String s ((double) v, 4);
-
-        if (s.containsChar ('.'))
-        {
-            s = s.trimCharactersAtEnd ("0");
-            if (s.endsWithChar ('.'))
-                s << '0';
-
-            s << 'f';
-        }
-        else
-        {
-            s << ".0f";
-        }
-
-        return s;
-    }
-
-    String doubleLiteral (double v)
-    {
-        String s (v, 7);
-
-        if (s.containsChar ('.'))
-        {
-            s = s.trimCharactersAtEnd ("0");
-            if (s.endsWithChar ('.'))
-                s << '0';
-        }
-        else
-        {
-            s << ".0";
-        }
-
-        return s;
-    }
-
     String alignFunctionCallParams (const String& call, const StringArray& parameters, const int maxLineLength)
     {
         String result, currentLine (call);
@@ -321,29 +273,6 @@ namespace CodeHelpers
         return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
     }
 
-    String castToFloat (const String& expression)
-    {
-        if (expression.containsOnly ("0123456789.f"))
-        {
-            String s (expression.getFloatValue());
-
-            if (s.containsChar ('.'))
-                return s + "f";
-
-            return s + ".0f";
-        }
-
-        return "(float) (" + expression + ")";
-    }
-
-    String castToInt (const String& expression)
-    {
-        if (expression.containsOnly ("0123456789."))
-            return String ((int) expression.getFloatValue());
-
-        return "(int) (" + expression + ")";
-    }
-
     void writeDataAsCppLiteral (const MemoryBlock& mb, OutputStream& out,
                                 bool breakAtNewLines, bool allowStringBreaks)
     {
@@ -382,10 +311,14 @@ namespace CodeHelpers
                 out << num << ',';
 
                 charsOnLine += 2;
+
                 if (num >= 10)
+                {
                     ++charsOnLine;
-                if (num >= 100)
-                    ++charsOnLine;
+
+                    if (num >= 100)
+                        ++charsOnLine;
+                }
 
                 if (charsOnLine >= maxCharsOnLine)
                 {
@@ -405,6 +338,7 @@ namespace CodeHelpers
         }
     }
 
+    //==============================================================================
     static int calculateHash (const String& s, const int hashMultiplier)
     {
         const char* t = s.toUTF8();

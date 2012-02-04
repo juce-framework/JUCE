@@ -33,10 +33,6 @@ JucerTreeViewBase::JucerTreeViewBase()
     setLinesDrawnForSubItems (false);
 }
 
-JucerTreeViewBase::~JucerTreeViewBase()
-{
-}
-
 Font JucerTreeViewBase::getFont() const
 {
     return Font (getItemHeight() * 0.6f);
@@ -113,7 +109,8 @@ Component* JucerTreeViewBase::createItemComponent()
 }
 
 //==============================================================================
-class RenameTreeItemCallback  : public ModalComponentManager::Callback
+class RenameTreeItemCallback  : public ModalComponentManager::Callback,
+                                public TextEditorListener
 {
 public:
     RenameTreeItemCallback (JucerTreeViewBase& item_, Component& parent, const Rectangle<int>& bounds)
@@ -123,7 +120,7 @@ public:
         ed.setPopupMenuEnabled (false);
         ed.setSelectAllWhenFocused (true);
         ed.setFont (item.getFont());
-        ed.addListener (&item);
+        ed.addListener (this);
         ed.setText (item.getRenamingName());
         ed.setBounds (bounds);
 
@@ -136,6 +133,11 @@ public:
         if (resultCode != 0)
             item.setName (ed.getText());
     }
+
+    void textEditorTextChanged (TextEditor&)                {}
+    void textEditorReturnKeyPressed (TextEditor& editor)    { editor.exitModalState (1); }
+    void textEditorEscapeKeyPressed (TextEditor& editor)    { editor.exitModalState (0); }
+    void textEditorFocusLost (TextEditor& editor)           { editor.exitModalState (0); }
 
 private:
     TextEditor ed;

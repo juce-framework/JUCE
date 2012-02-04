@@ -39,14 +39,8 @@ namespace CodeHelpers
     String makeBinaryDataIdentifierName (const File& file);
 
     String stringLiteral (const String& text);
-    String stringLiteralIfNotEmpty (const String& text); // if the string's empty, this returns an empty string
-    String boolLiteral (bool b);
-    String floatLiteral (float v);
-    String doubleLiteral (double v);
 
     String colourToCode (const Colour& col);
-    String castToFloat (const String& expression);
-    String castToInt (const String& expression);
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
 
     void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out,
@@ -54,7 +48,6 @@ namespace CodeHelpers
 
     void createStringMatcher (OutputStream& out, const String& utf8PointerVariable,
                               const StringArray& strings, const StringArray& codeToExecute, const int indentLevel);
-
 }
 
 

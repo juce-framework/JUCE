@@ -30,19 +30,11 @@
 
 
 //==============================================================================
-class JucerTreeViewBase   : public TreeViewItem,
-                            public TextEditorListener
+class JucerTreeViewBase   : public TreeViewItem
 {
-protected:
-    //==============================================================================
-    JucerTreeViewBase();
-    ~JucerTreeViewBase();
-
 public:
-    //==============================================================================
     int getItemWidth() const                                { return -1; }
     int getItemHeight() const                               { return 20; }
-    Font getFont() const;
 
     void paintItem (Graphics& g, int width, int height);
     void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
@@ -50,6 +42,7 @@ public:
     void itemClicked (const MouseEvent& e);
 
     //==============================================================================
+    virtual Font getFont() const;
     virtual String getRenamingName() const = 0;
     virtual String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
@@ -61,12 +54,6 @@ public:
     virtual void showMultiSelectionPopupMenu();
 
     virtual void showRenameBox();
-
-    // Text editor listener for renaming..
-    void textEditorTextChanged (TextEditor&)                {}
-    void textEditorReturnKeyPressed (TextEditor& editor)    { editor.exitModalState (1); }
-    void textEditorEscapeKeyPressed (TextEditor& editor)    { editor.exitModalState (0); }
-    void textEditorFocusLost (TextEditor& editor)           { editor.exitModalState (0); }
 
     //==============================================================================
     // To handle situations where an item gets deleted before openness is
@@ -85,7 +72,9 @@ public:
         }
     };
 
-    //==============================================================================
+protected:
+    JucerTreeViewBase();
+
 private:
     int numLeftHandComps;
     int getTextX() const;
