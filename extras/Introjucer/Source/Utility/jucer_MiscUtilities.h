@@ -49,26 +49,34 @@ void showUTF8ToolWindow();
 // Start a callout modally, which will delete the content comp when it's dismissed.
 void launchAsyncCallOutBox (Component& attachTo, Component* content);
 
+
 //==============================================================================
-class PropertyPanelWithTooltips  : public Component,
-                                   public Timer
+class RolloverHelpComp   : public Component,
+                           private Timer
+{
+public:
+    RolloverHelpComp();
+
+    void paint (Graphics& g);
+    void timerCallback();
+
+private:
+    static String findTip (Component*);
+
+    Component* lastComp;
+    String lastTip;
+};
+
+//==============================================================================
+class PropertyPanelWithTooltips  : public Component
 {
 public:
     PropertyPanelWithTooltips();
-    ~PropertyPanelWithTooltips();
 
-    void paint (Graphics& g);
     void resized();
-    void timerCallback();
 
     PropertyPanel panel;
-
-private:
-    Component* lastComp;
-    String lastTip;
-
-    Rectangle<int> getTipArea() const;
-    String findTip (Component* c);
+    RolloverHelpComp rollover;
 };
 
 //==============================================================================

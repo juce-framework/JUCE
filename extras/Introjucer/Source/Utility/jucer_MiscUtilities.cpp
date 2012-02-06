@@ -218,18 +218,14 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 
 
 //==============================================================================
-PropertyPanelWithTooltips::PropertyPanelWithTooltips()
+RolloverHelpComp::RolloverHelpComp()
     : lastComp (nullptr)
 {
-    addAndMakeVisible (&panel);
+    setInterceptsMouseClicks (false, false);
     startTimer (150);
 }
 
-PropertyPanelWithTooltips::~PropertyPanelWithTooltips()
-{
-}
-
-void PropertyPanelWithTooltips::paint (Graphics& g)
+void RolloverHelpComp::paint (Graphics& g)
 {
     AttributedString s;
     s.setJustification (Justification::centredLeft);
@@ -243,22 +239,13 @@ void PropertyPanelWithTooltips::paint (Graphics& g)
     tl.draw (g, getLocalBounds().toFloat());
 }
 
-void PropertyPanelWithTooltips::resized()
-{
-    panel.setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
-}
-
-Rectangle<int> PropertyPanelWithTooltips::getTipArea() const
-{
-    return Rectangle<int> (5, panel.getBottom() - 50, getWidth() - 10,
-                           getHeight() - (panel.getBottom() - 50) - 4);
-}
-
-void PropertyPanelWithTooltips::timerCallback()
+void RolloverHelpComp::timerCallback()
 {
     Component* newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
 
-    if (newComp != nullptr && newComp->getTopLevelComponent() != getTopLevelComponent())
+    if (newComp != nullptr
+         && (newComp->getTopLevelComponent() != getTopLevelComponent()
+              || newComp->isCurrentlyBlockedByAnotherModalComponent()))
         newComp = nullptr;
 
     if (newComp != lastComp)
@@ -270,14 +257,14 @@ void PropertyPanelWithTooltips::timerCallback()
         if (newTip != lastTip)
         {
             lastTip = newTip;
-            repaint (getTipArea());
+            repaint();
         }
     }
 }
 
-String PropertyPanelWithTooltips::findTip (Component* c)
+String RolloverHelpComp::findTip (Component* c)
 {
-    while (c != nullptr && c != this)
+    while (c != nullptr)
     {
         TooltipClient* const tc = dynamic_cast <TooltipClient*> (c);
         if (tc != nullptr)
@@ -292,6 +279,20 @@ String PropertyPanelWithTooltips::findTip (Component* c)
     }
 
     return String::empty;
+}
+
+//==============================================================================
+PropertyPanelWithTooltips::PropertyPanelWithTooltips()
+{
+    addAndMakeVisible (&panel);
+    addAndMakeVisible (&rollover);
+}
+
+void PropertyPanelWithTooltips::resized()
+{
+    panel.setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
+    rollover.setBounds (3, panel.getBottom() - 50, getWidth() - 6,
+                        getHeight() - (panel.getBottom() - 50) - 4);
 }
 
 //==============================================================================

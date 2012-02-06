@@ -76,7 +76,9 @@ namespace Ids
     DECLARE_ID (createCallback);
     DECLARE_ID (parentClasses);
     DECLARE_ID (constructorParams);
+    DECLARE_ID (objectConstructionArgs);
     DECLARE_ID (memberInitialisers);
+    DECLARE_ID (canBeAggregated);
     DECLARE_ID (rootItemVisible);
     DECLARE_ID (openByDefault);
     DECLARE_ID (locked);

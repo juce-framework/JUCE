@@ -722,78 +722,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSettingsComponent);
 };
 
-//==============================================================================
-class ProjectInformationComponent::RolloverHelpComp   : public Component,
-                                                        private Timer
-{
-public:
-    RolloverHelpComp()
-        : lastComp (nullptr)
-    {
-        startTimer (150);
-    }
-
-    void paint (Graphics& g)
-    {
-        AttributedString s;
-        s.setJustification (Justification::centredLeft);
-        s.append (lastTip, Font (14.0f), Colour::greyLevel (0.15f));
-
-        TextLayout tl;
-        tl.createLayoutWithBalancedLineLengths (s, getWidth() - 10.0f);
-        if (tl.getNumLines() > 3)
-            tl.createLayout (s, getWidth() - 10.0f);
-
-        tl.draw (g, getLocalBounds().toFloat());
-    }
-
-    void timerCallback()
-    {
-        Component* newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
-
-        if (newComp != nullptr
-             && (newComp->getTopLevelComponent() != getTopLevelComponent()
-                  || newComp->isCurrentlyBlockedByAnotherModalComponent()))
-            newComp = nullptr;
-
-        if (newComp != lastComp)
-        {
-            lastComp = newComp;
-
-            String newTip (findTip (newComp));
-
-            if (newTip != lastTip)
-            {
-                lastTip = newTip;
-                repaint();
-            }
-        }
-    }
-
-private:
-    static String findTip (Component* c)
-    {
-        while (c != nullptr)
-        {
-            TooltipClient* const tc = dynamic_cast <TooltipClient*> (c);
-            if (tc != nullptr)
-            {
-                const String tip (tc->getTooltip());
-
-                if (tip.isNotEmpty())
-                    return tip;
-            }
-
-            c = c->getParentComponent();
-        }
-
-        return String::empty;
-    }
-
-    Component* lastComp;
-    String lastTip;
-};
-
 //[/MiscUserDefs]
 
 //==============================================================================
@@ -802,13 +730,13 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
 {
     //[Constructor_pre]
     //[/Constructor_pre]
+
     addChildAndSetID (&viewport, "ykdBpb");
     addChildAndSetID (&openProjectButton, "a550a652e2666ee7");
     addChildAndSetID (&saveAndOpenButton, "dRGMyYx");
-    addChildAndSetID (rollover = new RolloverHelpComp(), "QqLJBF");
+    addChildAndSetID (&rollover, "QqLJBF");
 
     initialiseComponentState();
-
     openProjectButton.addListener (this);
     saveAndOpenButton.addListener (this);
 
@@ -836,12 +764,8 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
 
 ProjectInformationComponent::~ProjectInformationComponent()
 {
-    //[Destructor_pre]. You can add your own custom destruction code here..
+    //[Destructor]
     project.removeChangeListener (this);
-    //[/Destructor_pre]
-    rollover = nullptr;
-
-    //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]
 }
 
@@ -868,7 +792,7 @@ void ProjectInformationComponent::buttonClicked (Button* buttonThatWasClicked)
 
 void ProjectInformationComponent::paint (Graphics& g)
 {
-    //[UserPaint] Add your own custom painting code here..
+    //[UserPaint]
     g.setTiledImageFill (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize),
                          0, 0, 1.0f);
     g.fillAll();
@@ -876,20 +800,12 @@ void ProjectInformationComponent::paint (Graphics& g)
     //[/UserPaint]
 }
 
-void ProjectInformationComponent::initialiseComponentState()
-{
-    BinaryData::ImageProvider imageProvider;
-    ComponentBuilder::initialiseFromValueTree (*this, getComponentState(), &imageProvider);
-}
-
-
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 void ProjectInformationComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     dynamic_cast<ProjectSettingsComponent*> (viewport.getViewedComponent())->update();
 }
 //[/MiscUserCode]
-
 
 //==============================================================================
 //=======================  Jucer Information Section  ==========================
@@ -913,19 +829,27 @@ JUCER_COMPONENT_METADATA_START
                 text="Save And Open in" createCallback="1" radioGroup="0" connectedLeft="0"
                 connectedRight="0" connectedTop="0" connectedBottom="0" backgroundColour="FFDDDDFF"/>
     <GENERICCOMPONENT id="QqLJBF" memberName="rollover" position="246, parent.height - 68, parent.width - 8, parent.height - 4"
-                      class="RolloverHelpComp"/>
+                      class="RolloverHelpComp" canBeAggregated="1" constructorParams=""/>
   </COMPONENTS>
   <MARKERS_X/>
   <MARKERS_Y/>
-  <METHODS/>
+  <METHODS paint="1"/>
 </COMPONENT>
 
 JUCER_COMPONENT_METADATA_END
 */
 #endif
 
+void ProjectInformationComponent::initialiseComponentState()
+{
+
+    BinaryData::ImageProvider imageProvider;
+    ComponentBuilder::initialiseFromValueTree (*this, getComponentState(), &imageProvider);
+}
+
 ValueTree ProjectInformationComponent::getComponentState()
 {
+
     const unsigned char data[] =
         "COMPONENT\0\x01\x08id\0\x01\t\x05tO9EG1a\0""className\0\x01\x1d\x05ProjectInformationComponent\0width\0\x01\x05\x05""808\0height\0\x01\x05\x05""638\0""background\0\x01\x08\x05""f6f9ff\0parentClasses\0\x01)\x05public Component, public ChangeListener\0"
         "constructorParams\0\x01\x13\x05Project& project_\0memberInitialisers\0\x01\x14\x05project (project_)\0\x01\x04""COMPONENTS\0\0\x01\x04VIEWPORT\0\x01\x06id\0\x01\x08\x05ykdBpb\0memberName\0\x01\n\x05viewport\0position\0\x01,\x05""8, 8, parent.width - "
@@ -933,8 +857,8 @@ ValueTree ProjectInformationComponent::getComponentState()
         "t\0\x01\x12\x05Open Project in \0""createCallback\0\x01\x03\x05""1\0radioGroup\0\x01\x03\x05""0\0""connectedLeft\0\x01\x03\x05""0\0""connectedRight\0\x01\x03\x05""0\0""connectedTop\0\x01\x03\x05""0\0""connectedBottom\0\x01\x03\x05""0\0""backgroundCol"
         "our\0\x01\n\x05""FFDDDDFF\0textColour\0\x01\x02\x05\0""backgroundColourOn\0\x01\x02\x05\0textColourOn\0\x01\x02\x05\0position\0\x01-\x05""8, parent.height - 34, left + 227, top + 24\0\0TEXTBUTTON\0\x01\x0cid\0\x01\t\x05""dRGMyYx\0name\0\x01\x02\x05\0"
         "memberName\0\x01\x13\x05saveAndOpenButton\0position\0\x01-\x05""8, parent.height - 65, left + 227, top + 24\0text\0\x01\x12\x05Save And Open in\0""createCallback\0\x01\x03\x05""1\0radioGroup\0\x01\x03\x05""0\0""connectedLeft\0\x01\x03\x05""0\0""conne"
-        "ctedRight\0\x01\x03\x05""0\0""connectedTop\0\x01\x03\x05""0\0""connectedBottom\0\x01\x03\x05""0\0""backgroundColour\0\x01\n\x05""FFDDDDFF\0\0GENERICCOMPONENT\0\x01\x04id\0\x01\x08\x05QqLJBF\0memberName\0\x01\n\x05rollover\0position\0\x01>\x05""246, p"
-        "arent.height - 68, parent.width - 8, parent.height - 4\0""class\0\x01\x12\x05RolloverHelpComp\0\0MARKERS_X\0\0\0MARKERS_Y\0\0\0METHODS\0\0\0";
+        "ctedRight\0\x01\x03\x05""0\0""connectedTop\0\x01\x03\x05""0\0""connectedBottom\0\x01\x03\x05""0\0""backgroundColour\0\x01\n\x05""FFDDDDFF\0\0GENERICCOMPONENT\0\x01\x06id\0\x01\x08\x05QqLJBF\0memberName\0\x01\n\x05rollover\0position\0\x01>\x05""246, p"
+        "arent.height - 68, parent.width - 8, parent.height - 4\0""class\0\x01\x12\x05RolloverHelpComp\0""canBeAggregated\0\x01\x03\x05""1\0""constructorParams\0\x01\x02\x05\0\0MARKERS_X\0\0\0MARKERS_Y\0\0\0METHODS\0\x01\x01paint\0\x01\x03\x05""1\0\0";
 
     return ValueTree::readFromData (data, sizeof (data));
 }
