@@ -518,9 +518,19 @@ public:
                     const unsigned short format = (unsigned short) input->readShort();
                     numChannels = (unsigned int) input->readShort();
                     sampleRate = input->readInt();
-                    input->skipNextBytes (4); // (skip bytes per second)
-                    bytesPerFrame = (unsigned int) input->readShort();
-                    bitsPerSample = (unsigned int) (8 * bytesPerFrame / numChannels);
+                    const int bytesPerSec = input->readInt();
+                    input->skipNextBytes (2);
+                    bitsPerSample = (unsigned int) (int) input->readShort();
+
+                    if (bitsPerSample > 64)
+                    {
+                        bytesPerFrame = bytesPerSec / (int) sampleRate;
+                        bitsPerSample = 8 * bytesPerFrame / numChannels;
+                    }
+                    else
+                    {
+                        bytesPerFrame = numChannels * bitsPerSample / 8;
+                    }
 
                     if (format == 3)
                     {

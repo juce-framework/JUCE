@@ -33,7 +33,7 @@ namespace ComponentBuilderHelpers
         return state [ComponentBuilder::idProperty].toString();
     }
 
-    Component* findComponentWithID (OwnedArray<Component>& components, const String& compId)
+    Component* removeComponentWithID (OwnedArray<Component>& components, const String& compId)
     {
         jassert (compId.isNotEmpty());
 
@@ -157,6 +157,7 @@ namespace ComponentBuilderHelpers
 
 //=============================================================================
 const Identifier ComponentBuilder::idProperty ("id");
+const Identifier ComponentBuilder::positionID ("position");
 
 ComponentBuilder::ComponentBuilder()
     : imageProvider (nullptr)
@@ -331,7 +332,7 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
         for (i = 0; i < newNumChildren; ++i)
         {
             const ValueTree childState (children.getChild (i));
-            Component* c = findComponentWithID (existingComponents, getStateId (childState));
+            Component* c = removeComponentWithID (existingComponents, getStateId (childState));
 
             if (c == nullptr)
             {
@@ -365,44 +366,49 @@ static void updateMarkers (MarkerList* const list, const ValueTree& state)
         MarkerList::ValueTreeWrapper (state).applyTo (*list);
 }
 
-void ComponentBuilder::initialiseFromValueTree (Component& comp,
-                                                const ValueTree& state,
-                                                ImageProvider* const imageProvider)
+void ComponentBuilder::initialiseRecursively (Component& comp, const ValueTree& state)
 {
-    using namespace ComponentBuilderHelpers;
-
-    ComponentBuilder builder;
-    builder.setImageProvider (imageProvider);
-    builder.registerStandardComponentTypes();
+    refreshBasicComponentProperties (comp, state);
 
     updateMarkers (comp.getMarkers (true),  state.getChildWithName ("MARKERS_X"));
     updateMarkers (comp.getMarkers (false), state.getChildWithName ("MARKERS_Y"));
 
     const ValueTree childList (state.getChildWithName ("COMPONENTS"));
-    builder.updateChildComponents (comp, childList);
 
-    for (int i = 0; i < childList.getNumChildren(); ++i)
+    if (childList.isValid())
     {
-        const ValueTree state (childList.getChild(i));
-        Component* const c = findComponentWithID (comp, getStateId (state));
+        updateChildComponents (comp, childList);
 
-        if (c != nullptr)
+        for (int i = 0; i < childList.getNumChildren(); ++i)
         {
-            ComponentBuilder::TypeHandler* const type = builder.getHandlerForState (state);
+            const ValueTree childState (childList.getChild(i));
+            Component* const c = ComponentBuilderHelpers::findComponentWithID (comp, ComponentBuilderHelpers::getStateId (childState));
 
-            if (type != nullptr)
-                type->updateComponentFromState (c, state);
-            else
-                refreshBasicComponentProperties (*c, state);
+            if (c != nullptr)
+            {
+                ComponentBuilder::TypeHandler* const type = getHandlerForState (childState);
+
+                if (type != nullptr)
+                    type->updateComponentFromState (c, childState);
+                else
+                    initialiseRecursively (*c, childState);
+            }
         }
     }
+}
 
+void ComponentBuilder::initialiseFromValueTree (Component& comp,
+                                                const ValueTree& state,
+                                                ImageProvider* const imageProvider)
+{
+    ComponentBuilder builder;
+    builder.setImageProvider (imageProvider);
+    builder.registerStandardComponentTypes();
+    builder.initialiseRecursively (comp, state);
 }
 
 RelativeRectangle ComponentBuilder::getComponentBounds (const ValueTree& state)
 {
-    static const Identifier positionID ("position");
-
     try
     {
         return RelativeRectangle (state [positionID].toString());
@@ -420,7 +426,9 @@ void ComponentBuilder::refreshBasicComponentProperties (Component& comp, const V
     static const Identifier nameID ("name");
 
     comp.setName (state [nameID].toString());
-    getComponentBounds (state).applyToComponent (comp);
+
+    if (state.hasProperty (positionID))
+        getComponentBounds (state).applyToComponent (comp);
 
     comp.setExplicitFocusOrder (state [focusOrderID]);
     const var tip (state [tooltipID]);

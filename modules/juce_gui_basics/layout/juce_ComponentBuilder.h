@@ -258,6 +258,9 @@ private:
     WeakReference<Component> componentRef;
    #endif
 
+    static const Identifier positionID;
+    void initialiseRecursively (Component&, const ValueTree&);
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder);
 };
 
