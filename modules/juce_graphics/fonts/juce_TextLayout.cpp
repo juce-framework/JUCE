@@ -575,7 +575,8 @@ void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& te
 
         const float line1 = lines.getUnchecked (lines.size() - 1)->getLineBoundsX().getLength();
         const float line2 = lines.getUnchecked (lines.size() - 2)->getLineBoundsX().getLength();
-        const float prop = jmax (line1, line2) / jmin (line1, line2);
+        const float shortestLine = jmin (line1, line2);
+        const float prop = (shortestLine > 0) ? jmax (line1, line2) / shortestLine : 1.0f;
 
         if (prop > 0.9f)
             return;
