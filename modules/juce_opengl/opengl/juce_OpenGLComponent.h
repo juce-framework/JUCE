@@ -43,6 +43,9 @@ class OpenGLGraphicsContext;
     Override this, add it to whatever component you want to, and use the renderOpenGL()
     method to draw its contents.
 
+    Important note! When using a GL component with a background thread, your sub-class
+    must call stopRenderThread() in its destructor. See stopRenderThread() for
+    more details.
 */
 class JUCE_API  OpenGLComponent  : public OpenGLBaseType
 {
@@ -67,6 +70,10 @@ public:
             perform the rendering. If this flag is not enabled, then renderOpenGL()
             will be invoked on the main event thread when the component has been told to
             repaint, or after triggerRepaint() has been called.
+
+            Important note! When using a background thread, your sub-class MUST call
+            stopRenderThread() in its destructor. See stopRenderThread() for
+            more details.
         */
         useBackgroundThread = 4,
 
@@ -120,7 +127,14 @@ public:
     */
     inline bool isUsingDedicatedThread() const noexcept        { return (flags & useBackgroundThread) != 0; }
 
-    /** This replaces the normal paint() callback - use it to draw your openGL stuff.
+    /** Shuts down the rendering thread.
+        This must be called by your sub-class's destructor, to make sure that all rendering
+        callbacks have stopped before your class starts to be destroyed.
+    */
+    void stopRenderThread();
+
+    //==============================================================================
+    /** This callback is where your subclass should draw its openGL content.
 
         When this is called, makeCurrentContextActive() will already have been called
         for you, so you just need to draw.
@@ -147,7 +161,7 @@ public:
         using the makeCurrentContextActive() method, so there's no need to call it
         again in your code.
     */
-    virtual void newOpenGLContextCreated() = 0;
+    virtual void newOpenGLContextCreated();
 
     /** This method is called when the component shuts down its OpenGL context.
 
@@ -159,7 +173,7 @@ public:
         using the makeCurrentContextActive() method, so there's no need to call it
         again in your code.
      */
-    virtual void releaseOpenGLContext()                         {}
+    virtual void releaseOpenGLContext();
 
     //==============================================================================
     /** Returns the context that will draw into this component.
@@ -228,19 +242,6 @@ public:
     */
     void* getNativeWindowHandle() const;
 
-protected:
-    /** Kicks off a thread to start rendering.
-        The default implementation creates and manages an internal thread that tries
-        to render at around 50fps, but this can be overloaded to create a custom thread.
-    */
-    virtual void startRenderThread();
-
-    /** Cleans up the rendering thread.
-        Used to shut down the thread that was started by startRenderThread(). If you've
-        created a custom thread, then you should overload this to clean it up and delete it.
-    */
-    virtual void stopRenderThread();
-
     /** @internal */
     void paint (Graphics&);
 
@@ -261,7 +262,7 @@ private:
 
     CriticalSection contextLock;
     OpenGLPixelFormat preferredPixelFormat;
-    bool needToUpdateViewport, needToDeleteContext, threadStarted, needToRepaint;
+    bool needToUpdateViewport, needToDeleteContext, needToRepaint;
 
     class OpenGLCachedComponentImage;
     friend class OpenGLCachedComponentImage;
@@ -270,9 +271,9 @@ private:
     OpenGLContext* createContext();
     void updateContext();
     void updateContextPosition();
-    void stopBackgroundThread();
     void recreateContextAsync();
     void updateEmbeddedPosition (const Rectangle<int>&);
+    void startRenderThread();
     bool performRender();
     void paintSelf (OpenGLGraphicsContext&);
 

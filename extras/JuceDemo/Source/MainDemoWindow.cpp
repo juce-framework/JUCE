@@ -524,6 +524,14 @@ private:
             addAndMakeVisible (contentComp);
         }
 
+        ~DemoOpenGLComp()
+        {
+            // It's essential to call this method before our class is destroyed, to
+            // make sure that the background renderer thread doesn't try to call it
+            // while it's being dismantled..
+            stopRenderThread();
+        }
+
         void newOpenGLContextCreated()   {}
         void renderOpenGL()   {}
 

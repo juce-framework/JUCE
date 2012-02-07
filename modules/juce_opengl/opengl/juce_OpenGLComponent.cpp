@@ -47,11 +47,7 @@ public:
                 owner.updateContext();
                #endif
 
-                if (! owner.threadStarted)
-                {
-                    owner.threadStarted = true;
-                    owner.startRenderThread();
-                }
+                owner.startRenderThread();
             }
         }
         else
@@ -145,7 +141,7 @@ public:
     void componentVisibilityChanged()
     {
         if (! owner.isShowing())
-            owner.stopBackgroundThread();
+            owner.stopRenderThread();
     }
 
 private:
@@ -203,9 +199,10 @@ private:
 void OpenGLComponent::startRenderThread()
 {
     if (renderThread == nullptr)
+    {
         renderThread = new OpenGLComponentRenderThread (*this);
-
-    renderThread->startThread (6);
+        renderThread->startThread (6);
+    }
 }
 
 void OpenGLComponent::stopRenderThread()
@@ -227,7 +224,6 @@ OpenGLComponent::OpenGLComponent (const int flags_)
       contextToShareListsWith (nullptr),
       needToUpdateViewport (true),
       needToDeleteContext (false),
-      threadStarted (false),
       needToRepaint (true),
       cachedImage (nullptr)
 {
@@ -239,9 +235,20 @@ OpenGLComponent::OpenGLComponent (const int flags_)
 OpenGLComponent::~OpenGLComponent()
 {
     if (isUsingDedicatedThread())
-        stopBackgroundThread();
+    {
+        /* If you're using a background thread, then your sub-class MUST call
+           stopRenderThread() in its destructor! Otherwise, the thread could still
+           be running while your sub-class isbeing destroyed, and so may make a call
+           to your subclass's renderOpenGL() method when it no longer exists!
+        */
+        jassert (renderThread == nullptr);
+
+        stopRenderThread();
+    }
     else
+    {
         deleteContext();
+    }
 
     componentWatcher = nullptr;
 }
@@ -352,15 +359,6 @@ void OpenGLComponent::updateContextPosition()
     }
 }
 
-void OpenGLComponent::stopBackgroundThread()
-{
-    if (threadStarted)
-    {
-        stopRenderThread();
-        threadStarted = false;
-    }
-}
-
 void OpenGLComponent::triggerRepaint()
 {
     // you mustn't set your own cached image object for an OpenGLComponent!
@@ -373,9 +371,9 @@ void OpenGLComponent::triggerRepaint()
     cachedImage->triggerRepaint();
 }
 
-void OpenGLComponent::paint (Graphics&)
-{
-}
+void OpenGLComponent::newOpenGLContextCreated() {}
+void OpenGLComponent::releaseOpenGLContext() {}
+void OpenGLComponent::paint (Graphics&) {}
 
 unsigned int OpenGLComponent::getFrameBufferID() const
 {
