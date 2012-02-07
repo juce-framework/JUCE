@@ -62,12 +62,25 @@ public:
         startTimer (1000 / 30);
     }
 
+    ~DemoOpenGLCanvas()
+    {
+        stopRenderThread();
+    }
+
     // when the component creates a new internal context, this is called, and
     // we'll use the opportunity to create some images to use as textures.
     void newOpenGLContextCreated()
     {
         logoImage = createLogoImage();
         dynamicTextureImage = Image (Image::ARGB, 128, 128, true, OpenGLImageType());
+    }
+
+    void releaseOpenGLContext()
+    {
+        // We have to make sure we release any openGL images before the
+        // GL context gets closed..
+        logoImage = Image::null;
+        dynamicTextureImage = Image::null;
     }
 
     void mouseDown (const MouseEvent& e)
