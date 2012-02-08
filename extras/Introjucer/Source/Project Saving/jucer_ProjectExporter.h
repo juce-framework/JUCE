@@ -34,20 +34,18 @@
 //==============================================================================
 class ProjectExporter
 {
-protected:
-    //==============================================================================
-    ProjectExporter (Project& project, const ValueTree& settings);
-
 public:
+    ProjectExporter (Project&, const ValueTree& settings);
     virtual ~ProjectExporter();
 
     static int getNumExporters();
     static StringArray getExporterNames();
-    static ProjectExporter* createNewExporter (Project& project, const int index);
-    static ProjectExporter* createNewExporter (Project& project, const String& name);
 
-    static ProjectExporter* createExporter (Project& project, const ValueTree& settings);
-    static ProjectExporter* createPlatformDefaultExporter (Project& project);
+    static ProjectExporter* createNewExporter (Project&, const int index);
+    static ProjectExporter* createNewExporter (Project&, const String& name);
+    static ProjectExporter* createExporter (Project&, const ValueTree& settings);
+    static ProjectExporter* createPlatformDefaultExporter (Project&);
+
     static StringArray getDefaultExporters();
 
     //=============================================================================
@@ -55,7 +53,7 @@ public:
     virtual int getLaunchPreferenceOrderForCurrentOS() = 0;
     virtual bool isPossibleForCurrentProject() = 0;
     virtual bool usesMMFiles() const = 0;
-    virtual void createPropertyEditors (Array <PropertyComponent*>& props);
+    virtual void createPropertyEditors (PropertyListBuilder&);
     virtual void launchProject() = 0;
     virtual void create() = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
@@ -67,7 +65,7 @@ public:
     virtual bool isOSX() const              { return false; }
 
     //==============================================================================
-    String getName() const                  { return name; }
+    String getName() const                      { return name; }
     File getTargetFolder() const;
 
     Project& getProject() noexcept              { return project; }
@@ -76,11 +74,11 @@ public:
     const ValueTree& getSettings() const                { return settings; }
     Value getSetting (const Identifier& name_) const    { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
 
-    Value getJuceFolder() const             { return getSetting (Ids::juceFolder); }
-    Value getTargetLocation() const         { return getSetting (Ids::targetFolder); }
+    Value getJuceFolder() const                 { return getSetting (Ids::juceFolder); }
+    Value getTargetLocation() const             { return getSetting (Ids::targetFolder); }
 
-    Value getExtraCompilerFlags() const     { return getSetting (Ids::extraCompilerFlags); }
-    Value getExtraLinkerFlags() const       { return getSetting (Ids::extraLinkerFlags); }
+    Value getExtraCompilerFlags() const         { return getSetting (Ids::extraCompilerFlags); }
+    Value getExtraLinkerFlags() const           { return getSetting (Ids::extraLinkerFlags); }
 
     Value getExporterPreprocessorDefs() const   { return getSetting (Ids::extraDefs); }
 
@@ -89,8 +87,7 @@ public:
     // includes exporter + project defs..
     StringPairArray getAllPreprocessorDefs() const;
 
-    String replacePreprocessorTokens (const Project::BuildConfiguration& config,
-                                      const String& sourceString) const;
+    String replacePreprocessorTokens (const Project::BuildConfiguration&, const String& sourceString) const;
 
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
     String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;

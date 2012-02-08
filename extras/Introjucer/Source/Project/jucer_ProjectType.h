@@ -56,7 +56,7 @@ public:
     static const char* getAudioPluginTypeName();
 
     virtual void setMissingProjectProperties (Project&) const = 0;
-    virtual void createPropertyEditors (const Project&, Array <PropertyComponent*>&) const = 0;
+    virtual void createPropertyEditors (const Project&, PropertyListBuilder&) const = 0;
     virtual void prepareExporter (ProjectExporter&) const = 0;
 
 protected:

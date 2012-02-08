@@ -61,10 +61,10 @@ public:
     void timerCallback();
 
 private:
-    static String findTip (Component*);
-
     Component* lastComp;
     String lastTip;
+
+    static String findTip (Component*);
 };
 
 //==============================================================================
@@ -77,6 +77,35 @@ public:
 
     PropertyPanel panel;
     RolloverHelpComp rollover;
+};
+
+//==============================================================================
+class PropertyListBuilder
+{
+public:
+    PropertyListBuilder() {}
+
+    void add (PropertyComponent* propertyComp)
+    {
+        components.add (propertyComp);
+    }
+
+    void add (PropertyComponent* propertyComp, const String& tooltip)
+    {
+        propertyComp->setTooltip (tooltip);
+        add (propertyComp);
+    }
+
+    void setPreferredHeight (int height)
+    {
+        for (int j = components.size(); --j >= 0;)
+            components.getUnchecked(j)->setPreferredHeight (height);
+    }
+
+    Array <PropertyComponent*> components;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyListBuilder);
 };
 
 //==============================================================================

@@ -85,18 +85,18 @@ public:
     {
     }
 
-    void createPropertyEditors (Array <PropertyComponent*>& props)
+    void createPropertyEditors (PropertyListBuilder& props)
     {
         ProjectExporter::createPropertyEditors (props);
 
-        props.add (new TextPropertyComponent (getSDKPath(), "Android SDK Path", 1024, false));
-        props.getLast()->setTooltip ("The path to the Android SDK folder on the target build machine");
+        props.add (new TextPropertyComponent (getSDKPath(), "Android SDK Path", 1024, false),
+                   "The path to the Android SDK folder on the target build machine");
 
-        props.add (new TextPropertyComponent (getNDKPath(), "Android NDK Path", 1024, false));
-        props.getLast()->setTooltip ("The path to the Android NDK folder on the target build machine");
+        props.add (new TextPropertyComponent (getNDKPath(), "Android NDK Path", 1024, false),
+                   "The path to the Android NDK folder on the target build machine");
 
-        props.add (new BooleanPropertyComponent (getInternetNeeded(), "Internet Access", "Specify internet access permission in the manifest"));
-        props.getLast()->setTooltip ("If enabled, this will set the android.permission.INTERNET flag in the manifest.");
+        props.add (new BooleanPropertyComponent (getInternetNeeded(), "Internet Access", "Specify internet access permission in the manifest"),
+                   "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
     }
 
     Value getSDKPath() const                    { return getSetting (Ids::androidSDKPath); }

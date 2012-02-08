@@ -45,12 +45,12 @@ public:
     String getName() const              { return moduleInfo ["name"].toString(); }
     String getDescription() const       { return moduleInfo ["description"].toString(); }
 
-    void writeIncludes (ProjectSaver& projectSaver, OutputStream& out);
-    void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const;
-    void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const;
-    void getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const;
+    void writeIncludes (ProjectSaver&, OutputStream&);
+    void prepareExporter (ProjectExporter&, ProjectSaver&) const;
+    void createPropertyEditors (const ProjectExporter&, PropertyListBuilder&) const;
+    void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
 
-    static String getInfoFileName()           { return "juce_module_info"; }
+    static String getInfoFileName()     { return "juce_module_info"; }
 
     var moduleInfo;
 
@@ -71,15 +71,15 @@ private:
     };
 
     void findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const;
-    void findAndAddCompiledCode (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& localModuleFolder, Array<File>& result) const;
-    void addBrowsableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const;
-    void createLocalHeaderWrapper (ProjectSaver& projectSaver, const File& originalHeader, const File& localHeader) const;
-    RelativePath getModuleRelativeToProject (ProjectExporter& exporter) const;
-    RelativePath getModuleOrLocalCopyRelativeToProject (ProjectExporter& exporter, const File& localModuleFolder) const;
+    void findAndAddCompiledCode (ProjectExporter&, ProjectSaver&, const File& localModuleFolder, Array<File>& result) const;
+    void addBrowsableCode (ProjectExporter&, const Array<File>& compiled, const File& localModuleFolder) const;
+    void createLocalHeaderWrapper (ProjectSaver&, const File& originalHeader, const File& localHeader) const;
+    RelativePath getModuleRelativeToProject (ProjectExporter&) const;
+    RelativePath getModuleOrLocalCopyRelativeToProject (ProjectExporter&, const File& localModuleFolder) const;
 
     bool isPluginClient() const;
-    bool isAUPluginHost (const Project& project) const;
-    bool isVSTPluginHost (const Project& project) const;
+    bool isAUPluginHost (const Project&) const;
+    bool isVSTPluginHost (const Project&) const;
 };
 
 //==============================================================================
@@ -125,15 +125,15 @@ public:
     static bool isModulesFolder (const File& folder);
     static bool isJuceOrModulesFolder (const File& folder);
 
-    static File getDefaultModulesFolder (Project* project);
+    static File getDefaultModulesFolder (Project*);
     static bool isLocalModulesFolderValid();
 
-    static File getLocalModulesFolder (Project* project);
+    static File getLocalModulesFolder (Project*);
     static void setLocalModulesFolder (const File& newFile);
 
     static File getModulesFolderForJuceOrModulesFolder (const File& f);
 
-    StringArray getExtraDependenciesNeeded (Project& project, const Module& m);
+    StringArray getExtraDependenciesNeeded (Project&, const Module&);
 
     //==============================================================================
     OwnedArray<Module> modules;

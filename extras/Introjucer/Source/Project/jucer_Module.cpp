@@ -516,7 +516,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
     }
 }
 
-void LibraryModule::createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props) const
+void LibraryModule::createPropertyEditors (const ProjectExporter& exporter, PropertyListBuilder& props) const
 {
     if (isVSTPluginHost (exporter.getProject()))
         VSTHelpers::createVSTPathEditor (exporter, props);

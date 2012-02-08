@@ -282,13 +282,13 @@ const ProjectType& Project::getProjectType() const
 }
 
 //==============================================================================
-void Project::createPropertyEditors (Array <PropertyComponent*>& props)
+void Project::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getProjectName(), "Project Name", 256, false));
-    props.getLast()->setTooltip ("The name of the project.");
+    props.add (new TextPropertyComponent (getProjectName(), "Project Name", 256, false),
+               "The name of the project.");
 
-    props.add (new TextPropertyComponent (getVersion(), "Project Version", 16, false));
-    props.getLast()->setTooltip ("The project's version number, This should be in the format major.minor.point");
+    props.add (new TextPropertyComponent (getVersion(), "Project Version", 16, false),
+               "The project's version number, This should be in the format major.minor.point");
 
     {
         StringArray projectTypeNames;
@@ -305,8 +305,8 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.add (new ChoicePropertyComponent (getProjectTypeValue(), "Project Type", projectTypeNames, projectTypeCodes));
     }
 
-    props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false));
-    props.getLast()->setTooltip ("A unique identifier for this product, mainly for use in Mac builds. It should be something like 'com.yourcompanyname.yourproductname'");
+    props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false),
+               "A unique identifier for this product, mainly for use in Mac builds. It should be something like 'com.yourcompanyname.yourproductname'");
 
     {
         OwnedArray<Project::Item> images;
@@ -326,20 +326,19 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
             ids.add (images.getUnchecked(i)->getID());
         }
 
-        props.add (new ChoicePropertyComponent (getSmallIconImageItemID(), "Icon (small)", choices, ids));
-        props.getLast()->setTooltip ("Sets an icon to use for the executable.");
+        props.add (new ChoicePropertyComponent (getSmallIconImageItemID(), "Icon (small)", choices, ids),
+                   "Sets an icon to use for the executable.");
 
-        props.add (new ChoicePropertyComponent (getBigIconImageItemID(), "Icon (large)", choices, ids));
-        props.getLast()->setTooltip ("Sets an icon to use for the executable.");
+        props.add (new ChoicePropertyComponent (getBigIconImageItemID(), "Icon (large)", choices, ids),
+                   "Sets an icon to use for the executable.");
     }
 
     getProjectType().createPropertyEditors(*this, props);
 
-    props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, false));
-    props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+    props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, false),
+               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    for (int i = props.size(); --i >= 0;)
-        props.getUnchecked(i)->setPreferredHeight (22);
+    props.setPreferredHeight (22);
 }
 
 String Project::getVersionAsHex() const
@@ -990,30 +989,30 @@ const char* const Project::BuildConfiguration::osxArch_32BitUniversal = "32BitUn
 const char* const Project::BuildConfiguration::osxArch_64BitUniversal = "64BitUniversal";
 const char* const Project::BuildConfiguration::osxArch_64Bit          = "64BitIntel";
 
-void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponent*>& props)
+void Project::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getName(), "Name", 96, false));
-    props.getLast()->setTooltip ("The name of this configuration.");
+    props.add (new TextPropertyComponent (getName(), "Name", 96, false),
+               "The name of this configuration.");
 
-    props.add (new BooleanPropertyComponent (isDebug(), "Debug mode", "Debugging enabled"));
-    props.getLast()->setTooltip ("If enabled, this means that the configuration should be built with debug synbols.");
+    props.add (new BooleanPropertyComponent (isDebug(), "Debug mode", "Debugging enabled"),
+               "If enabled, this means that the configuration should be built with debug synbols.");
 
     const char* optimisationLevels[] = { "No optimisation", "Optimise for size and speed", "Optimise for maximum speed", 0 };
     const int optimisationLevelValues[] = { 1, 2, 3, 0 };
-    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation", StringArray (optimisationLevels), Array<var> (optimisationLevelValues)));
-    props.getLast()->setTooltip ("The optimisation level for this configuration");
+    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation", StringArray (optimisationLevels), Array<var> (optimisationLevelValues)),
+               "The optimisation level for this configuration");
 
-    props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false));
-    props.getLast()->setTooltip ("The filename to use for the destination binary executable file. Don't add a suffix to this, because platform-specific suffixes will be added for each target platform.");
+    props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false),
+               "The filename to use for the destination binary executable file. Don't add a suffix to this, because platform-specific suffixes will be added for each target platform.");
 
-    props.add (new TextPropertyComponent (getTargetBinaryRelativePath(), "Binary location", 1024, false));
-    props.getLast()->setTooltip ("The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed in its default location in the build folder.");
+    props.add (new TextPropertyComponent (getTargetBinaryRelativePath(), "Binary location", 1024, false),
+               "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed in its default location in the build folder.");
 
-    props.add (new TextPropertyComponent (getHeaderSearchPath(), "Header search path", 16384, false));
-    props.getLast()->setTooltip ("Extra header search paths. Use semi-colons to separate multiple paths.");
+    props.add (new TextPropertyComponent (getHeaderSearchPath(), "Header search path", 16384, false),
+               "Extra header search paths. Use semi-colons to separate multiple paths.");
 
-    props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false));
-    props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+    props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false),
+               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
     if (getMacSDKVersion().toString().isEmpty())
         getMacSDKVersion() = osxVersionDefault;
@@ -1021,14 +1020,14 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
     const char* osxVersions[] = { "Use Default", osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
     const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
 
-    props.add (new ChoicePropertyComponent (getMacSDKVersion(), "OSX Base SDK Version", StringArray (osxVersions), Array<var> (osxVersionValues)));
-    props.getLast()->setTooltip ("The version of OSX to link against in the XCode build.");
+    props.add (new ChoicePropertyComponent (getMacSDKVersion(), "OSX Base SDK Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
+               "The version of OSX to link against in the XCode build.");
 
     if (getMacCompatibilityVersion().toString().isEmpty())
         getMacCompatibilityVersion() = osxVersionDefault;
 
-    props.add (new ChoicePropertyComponent (getMacCompatibilityVersion(), "OSX Compatibility Version", StringArray (osxVersions), Array<var> (osxVersionValues)));
-    props.getLast()->setTooltip ("The minimum version of OSX that the target binary will be compatible with.");
+    props.add (new ChoicePropertyComponent (getMacCompatibilityVersion(), "OSX Compatibility Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
+               "The minimum version of OSX that the target binary will be compatible with.");
 
     const char* osxArch[] = { "Use Default", "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
     const char* osxArchValues[] = { osxArch_Default, osxArch_Native, osxArch_32BitUniversal, osxArch_64BitUniversal, osxArch_64Bit, 0 };
@@ -1036,11 +1035,10 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
     if (getMacArchitecture().toString().isEmpty())
         getMacArchitecture() = osxArch_Default;
 
-    props.add (new ChoicePropertyComponent (getMacArchitecture(), "OSX Architecture", StringArray (osxArch), Array<var> (osxArchValues)));
-    props.getLast()->setTooltip ("The type of OSX binary that will be produced.");
+    props.add (new ChoicePropertyComponent (getMacArchitecture(), "OSX Architecture", StringArray (osxArch), Array<var> (osxArchValues)),
+               "The type of OSX binary that will be produced.");
 
-    for (int i = props.size(); --i >= 0;)
-        props.getUnchecked(i)->setPreferredHeight (22);
+    props.setPreferredHeight (22);
 }
 
 StringPairArray Project::BuildConfiguration::getAllPreprocessorDefs() const

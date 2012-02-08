@@ -157,10 +157,10 @@ namespace VSTHelpers
         }
     }
 
-    static void createVSTPathEditor (const ProjectExporter& exporter, Array <PropertyComponent*>& props)
+    static void createVSTPathEditor (const ProjectExporter& exporter, PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (getVSTFolder (exporter), "VST Folder", 1024, false));
-        props.getLast()->setTooltip ("If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
+        props.add (new TextPropertyComponent (getVSTFolder (exporter), "VST Folder", 1024, false),
+                  "If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
     }
 
     static void fixMissingVSTValues (const ProjectExporter& exporter)
@@ -191,7 +191,7 @@ namespace VSTHelpers
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
     }
 
-    static void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props)
+    static void createPropertyEditors (const ProjectExporter& exporter, PropertyListBuilder& props)
     {
         fixMissingVSTValues (exporter);
         createVSTPathEditor (exporter, props);
@@ -325,14 +325,14 @@ namespace RTASHelpers
         addExtraSearchPaths (exporter);
     }
 
-    static void createPropertyEditors (const ProjectExporter& exporter, Array <PropertyComponent*>& props)
+    static void createPropertyEditors (const ProjectExporter& exporter, PropertyListBuilder& props)
     {
         if (exporter.isXcode() || exporter.isVisualStudio())
         {
             fixMissingRTASValues (exporter);
 
-            props.add (new TextPropertyComponent (getRTASFolder (exporter), "RTAS Folder", 1024, false));
-            props.getLast()->setTooltip ("If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
+            props.add (new TextPropertyComponent (getRTASFolder (exporter), "RTAS Folder", 1024, false),
+                       "If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
         }
     }
 }

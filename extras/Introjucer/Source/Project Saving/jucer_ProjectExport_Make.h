@@ -76,7 +76,7 @@ public:
         // what to do on linux?
     }
 
-    void createPropertyEditors (Array <PropertyComponent*>& props)
+    void createPropertyEditors (PropertyListBuilder& props)
     {
         ProjectExporter::createPropertyEditors (props);
     }

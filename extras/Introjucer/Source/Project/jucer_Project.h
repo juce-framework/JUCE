@@ -69,7 +69,7 @@ public:
 
     //==============================================================================
     // Creates editors for the project settings
-    void createPropertyEditors (Array <PropertyComponent*>& properties);
+    void createPropertyEditors (PropertyListBuilder&);
 
     //==============================================================================
     // project types
@@ -197,7 +197,7 @@ public:
         //==============================================================================
         Project& getProject() const                         { return *project; }
 
-        void createPropertyEditors (Array <PropertyComponent*>& properties);
+        void createPropertyEditors (PropertyListBuilder&);
 
         //==============================================================================
         Value getName() const                               { return getValue (Ids::name); }

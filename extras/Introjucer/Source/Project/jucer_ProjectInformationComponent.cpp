@@ -224,7 +224,7 @@ public:
             setEnabled (project.isModuleEnabled (moduleID));
 
             clear();
-            Array <PropertyComponent*> props;
+            PropertyListBuilder props;
 
             ScopedPointer<LibraryModule> module (moduleList.loadModule (moduleID));
 
@@ -240,16 +240,16 @@ public:
                 }
 
                 props.add (new BooleanPropertyComponent (project.shouldShowAllModuleFilesInProject (moduleID),
-                                                         "Add source to project", "Make module files browsable in projects"));
-                props.getLast()->setTooltip ("If this is enabled, then the entire source tree from this module will be shown inside your project, "
-                                             "making it easy to browse/edit the module's classes. If disabled, then only the minimum number of files "
-                                             "required to compile it will appear inside your project.");
+                                                         "Add source to project", "Make module files browsable in projects"),
+                           "If this is enabled, then the entire source tree from this module will be shown inside your project, "
+                           "making it easy to browse/edit the module's classes. If disabled, then only the minimum number of files "
+                           "required to compile it will appear inside your project.");
 
                 props.add (new BooleanPropertyComponent (project.shouldCopyModuleFilesLocally (moduleID),
-                                                         "Create local copy", "Copy the module into the project folder"));
-                props.getLast()->setTooltip ("If this is enabled, then a local copy of the entire module will be made inside your project (in the auto-generated JuceLibraryFiles folder), "
-                                             "so that your project will be self-contained, and won't need to contain any references to files in other folders. "
-                                             "This also means that you can check the module into your source-control system to make sure it is always in sync with your own code.");
+                                                         "Create local copy", "Copy the module into the project folder"),
+                           "If this is enabled, then a local copy of the entire module will be made inside your project (in the auto-generated JuceLibraryFiles folder), "
+                           "so that your project will be self-contained, and won't need to contain any references to files in other folders. "
+                           "This also means that you can check the module into your source-control system to make sure it is always in sync with your own code.");
 
                 StringArray possibleValues;
                 possibleValues.add ("(Use Default)");
@@ -273,7 +273,7 @@ public:
                 }
             }
 
-            addProperties (props);
+            addProperties (props.components);
         }
 
     private:
@@ -406,7 +406,7 @@ public:
         addAndMakeVisible (&configs);
         addAndMakeVisible (&exporters);
 
-        Array<PropertyComponent*> props;
+        PropertyListBuilder props;
         props.add (new ModulesPanel (project));
         modulesPanelGroup.setProperties (props);
         modulesPanelGroup.setName ("Modules");
@@ -441,7 +441,7 @@ public:
     void refreshAll()
     {
         {
-            Array <PropertyComponent*> props;
+            PropertyListBuilder props;
             project.createPropertyEditors (props);
             mainProjectInfoPanel.setProperties (props);
             mainProjectInfoPanel.setName ("Project Settings");
@@ -452,7 +452,7 @@ public:
         {
             PropertyGroup& pp = *configs.groups.getUnchecked(i);
 
-            Array <PropertyComponent*> props;
+            PropertyListBuilder props;
             project.getConfiguration (i).createPropertyEditors (props);
             pp.setProperties (props);
         }
@@ -460,17 +460,13 @@ public:
         for (i = exporters.groups.size(); --i >= 0;)
         {
             PropertyGroup& pp = *exporters.groups.getUnchecked(i);
-            Array <PropertyComponent*> props;
+            PropertyListBuilder props;
             ScopedPointer <ProjectExporter> exp (project.createExporter (i));
 
             jassert (exp != nullptr);
             if (exp != nullptr)
             {
                 exp->createPropertyEditors (props);
-
-                for (int j = props.size(); --j >= 0;)
-                    props.getUnchecked(j)->setPreferredHeight (22);
-
                 pp.setProperties (props);
             }
         }
@@ -586,7 +582,7 @@ private:
     {
     public:
         PropertyGroup()
-            : deleteButton ("Delete"), preferredHeight (0)
+            : deleteButton ("Delete")
         {
             deleteButton.addListener (this);
         }
@@ -602,37 +598,28 @@ private:
             deleteButton.setTooltip (tooltip);
         }
 
-        void setProperties (const Array<PropertyComponent*>& newProps)
+        void setProperties (const PropertyListBuilder& newProps)
         {
             properties.clear();
-            properties.addArray (newProps);
+            properties.addArray (newProps.components);
 
-            preferredHeight = 32;
             for (int i = properties.size(); --i >= 0;)
-            {
                 addAndMakeVisible (properties.getUnchecked(i));
-                preferredHeight += properties.getUnchecked(i)->getPreferredHeight();
-            }
-        }
-
-        int getPreferredHeight() const
-        {
-            return preferredHeight;
         }
 
         int updateSize (int y, int width)
         {
-            setBounds (0, y, width, preferredHeight);
+            int height = 32;
 
-            y = 30;
             for (int i = 0; i < properties.size(); ++i)
             {
                 PropertyComponent* pp = properties.getUnchecked(i);
-                pp->setBounds (10, y, width - 20, pp->getPreferredHeight());
-                y += pp->getHeight();
+                pp->setBounds (10, height, width - 20, pp->getPreferredHeight());
+                height += pp->getHeight();
             }
 
-            return preferredHeight;
+            setBounds (0, y, width, height);
+            return height;
         }
 
         void paint (Graphics& g)
@@ -652,7 +639,6 @@ private:
     private:
         OwnedArray<PropertyComponent> properties;
         TextButton deleteButton;
-        int preferredHeight;
     };
 
     //==============================================================================

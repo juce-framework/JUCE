@@ -64,6 +64,7 @@ public:
 
     //==============================================================================
     Value getObjCSuffix()       { return getSetting ("objCExtraSuffix"); }
+    Value getPListToMerge()     { return getSetting ("customPList"); }
 
     int getLaunchPreferenceOrderForCurrentOS()
     {
@@ -89,27 +90,33 @@ public:
     bool isOSX() const                      { return ! iOS; }
     bool canCopeWithDuplicateFiles()        { return true; }
 
-    void createPropertyEditors (Array <PropertyComponent*>& props)
+    void createPropertyEditors (PropertyListBuilder& props)
     {
         ProjectExporter::createPropertyEditors (props);
 
-        props.add (new TextPropertyComponent (getObjCSuffix(), "Objective-C class name suffix", 64, false));
-        props.getLast()->setTooltip ("Because objective-C linkage is done by string-matching, you can get horrible linkage mix-ups when different modules containing the "
-                                     "same class-names are loaded simultaneously. This setting lets you provide a unique string that will be used in naming the obj-C classes in your executable to avoid this.");
+        props.add (new TextPropertyComponent (getObjCSuffix(), "Objective-C class name suffix", 64, false),
+                   "Because objective-C linkage is done by string-matching, you can get horrible linkage mix-ups when different modules containing the "
+                   "same class-names are loaded simultaneously. This setting lets you provide a unique string that will be used in naming "
+                   "the obj-C classes in your executable to avoid this.");
 
         if (projectType.isGUIApplication() && ! iOS)
         {
-            props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false));
-            props.getLast()->setTooltip ("A comma-separated list of file extensions for documents that your app can open.");
+            props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false),
+                       "A comma-separated list of file extensions for documents that your app can open.");
         }
         else if (iOS)
         {
-            props.add (new BooleanPropertyComponent (getSetting ("UIFileSharingEnabled"), "File Sharing Enabled", "Enabled"));
-            props.getLast()->setTooltip ("Enable this to expose your app's files to iTunes.");
+            props.add (new BooleanPropertyComponent (getSetting ("UIFileSharingEnabled"), "File Sharing Enabled", "Enabled"),
+                       "Enable this to expose your app's files to iTunes.");
 
-            props.add (new BooleanPropertyComponent (getSetting ("UIStatusBarHidden"), "Status Bar Hidden", "Enabled"));
-            props.getLast()->setTooltip ("Enable this to disable the status bar in your app.");
+            props.add (new BooleanPropertyComponent (getSetting ("UIStatusBarHidden"), "Status Bar Hidden", "Enabled"),
+                       "Enable this to disable the status bar in your app.");
         }
+
+        props.add (new TextPropertyComponent (getPListToMerge(), "Custom PList", 8192, true),
+                   "You can paste the contents of an XML PList file in here, and the settings that it contains will override any "
+                   "settings that the Introjucer creates. BEWARE! When doing this, be careful to remove from the XML any "
+                   "values that you DO want the introjucer to change!");
     }
 
     void launchProject()
@@ -344,8 +351,15 @@ private:
         if (! xcodeCreatePList)
             return;
 
-        XmlElement plist ("plist");
-        XmlElement* dict = plist.createNewChildElement ("dict");
+        ScopedPointer<XmlElement> plist (XmlDocument::parse (getPListToMerge().toString()));
+
+        if (plist == nullptr || ! plist->hasTagName ("plist"))
+            plist = new XmlElement ("plist");
+
+        XmlElement* dict = plist->getChildByName ("dict");
+
+        if (dict == nullptr)
+            dict = plist->createNewChildElement ("dict");
 
         if (iOS)
             addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
@@ -394,7 +408,7 @@ private:
             dict->addChildElement (new XmlElement (xcodeExtraPListEntries.getReference(i)));
 
         MemoryOutputStream mo;
-        plist.writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
+        plist->writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
 
         overwriteFileIfDifferentOrThrow (infoPlistFile, mo);
     }
@@ -672,7 +686,24 @@ private:
 
     static void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value)
     {
-        xml->createNewChildElement ("key")->addTextElement (key);
+        forEachXmlChildElementWithTagName (*xml, e, "key")
+        {
+            if (e->getAllSubText().trim().equalsIgnoreCase (key))
+            {
+                if (e->getNextElement() != nullptr && e->getNextElement()->hasTagName ("key"))
+                {
+                    // try to fix broken plist format..
+                    xml->removeChildElement (e, true);
+                    break;
+                }
+                else
+                {
+                    return; // (value already exists)
+                }
+            }
+        }
+
+        xml->createNewChildElement ("key")   ->addTextElement (key);
         xml->createNewChildElement ("string")->addTextElement (value);
     }
 

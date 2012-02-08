@@ -200,13 +200,13 @@ bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) c
     return file.hasFileExtension ("cpp;cc;c;cxx");
 }
 
-void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
+void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getTargetLocation(), "Target Project Folder", 1024, false));
-    props.getLast()->setTooltip ("The location of the folder in which the " + name + " project will be created. This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
+    props.add (new TextPropertyComponent (getTargetLocation(), "Target Project Folder", 1024, false),
+               "The location of the folder in which the " + name + " project will be created. This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
-    props.add (new TextPropertyComponent (getJuceFolder(), "Local JUCE folder", 1024, false));
-    props.getLast()->setTooltip ("The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
+    props.add (new TextPropertyComponent (getJuceFolder(), "Local JUCE folder", 1024, false),
+               "The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
 
     OwnedArray<LibraryModule> modules;
     ModuleList moduleList;
@@ -215,13 +215,13 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
     for (int i = 0; i < modules.size(); ++i)
         modules.getUnchecked(i)->createPropertyEditors (*this, props);
 
-    props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false));
-    props.getLast()->setTooltip ("Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+    props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false),
+               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, false));
-    props.getLast()->setTooltip ("Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
-    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, false));
-    props.getLast()->setTooltip ("Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
+    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, false),
+               "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
+    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, false),
+               "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 }
 
 StringPairArray ProjectExporter::getAllPreprocessorDefs (const Project::BuildConfiguration& config) const
