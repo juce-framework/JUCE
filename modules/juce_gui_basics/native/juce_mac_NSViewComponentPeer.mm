@@ -981,6 +981,11 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
 
         [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
         [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
+
+       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+        if ((windowStyleFlags & (windowHasMaximiseButton | windowHasTitleBar)) == (windowHasMaximiseButton | windowHasTitleBar))
+            [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
+       #endif
     }
 
     const float alpha = component->getAlpha();
@@ -1117,7 +1122,11 @@ Point<int> NSViewComponentPeer::globalToLocal (const Point<int>& screenPosition)
 
 NSRect NSViewComponentPeer::constrainRect (NSRect r)
 {
-    if (constrainer != nullptr)
+    if (constrainer != nullptr
+        #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+         && ([window styleMask] & NSFullScreenWindowMask) == 0
+        #endif
+        )
     {
         NSRect current = [window frame];
         current.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - current.origin.y - current.size.height;
