@@ -446,7 +446,6 @@ protected:
 private:
     //==============================================================================
     String text;
-    AttributedString attributedText;
     TextLayout textLayout;
     AlertIconType alertIconType;
     ComponentBoundsConstrainer constrainer;
@@ -460,7 +459,6 @@ private:
     OwnedArray<Component> textBlocks;
     Array<Component*> allComps;
     StringArray textboxNames, comboBoxNames;
-    Font font;
     Component* associatedComponent;
     bool escapeKeyCancels;
 
