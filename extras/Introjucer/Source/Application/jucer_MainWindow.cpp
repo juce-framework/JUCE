@@ -139,6 +139,11 @@ bool MainWindow::closeProject (Project* project)
     if (! OpenDocumentManager::getInstance()->closeAllDocumentsUsingProject (*project, true))
         return false;
 
+    ProjectContentComponent* const pcc = getProjectContentComponent();
+
+    if (pcc != nullptr)
+        pcc->saveTreeViewState();
+
     FileBasedDocument::SaveResult r = project->saveIfNeededAndUserAgrees();
 
     if (r == FileBasedDocument::savedOk)

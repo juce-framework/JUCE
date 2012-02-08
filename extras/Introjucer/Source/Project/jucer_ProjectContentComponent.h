@@ -45,6 +45,7 @@ public:
     void paint (Graphics& g);
 
     void setProject (Project* project);
+    void saveTreeViewState();
 
     bool showEditorForFile (const File& f);
     bool showDocument (OpenDocumentManager::Document* doc);

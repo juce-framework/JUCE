@@ -59,6 +59,8 @@ void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
     {
+        PropertiesFile& settings = StoredSettings::getInstance()->getProps();
+
         if (project != nullptr)
             project->removeChangeListener (this);
 
@@ -67,7 +69,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         if (projectTree != nullptr)
         {
-            StoredSettings::getInstance()->getProps().setValue ("projectTreeviewWidth", projectTree->getWidth());
+            settings.setValue ("projectTreeviewWidth", projectTree->getWidth());
             projectTree->deleteRootItem();
             projectTree = nullptr;
         }
@@ -86,7 +88,7 @@ void ProjectContentComponent::setProject (Project* newProject)
             projectTree->setRootItem (new GroupTreeViewItem (project->getMainGroup()));
             projectTree->getRootItem()->setOpen (true);
 
-            String lastTreeWidth (StoredSettings::getInstance()->getProps().getValue ("projectTreeviewWidth"));
+            String lastTreeWidth (settings.getValue ("projectTreeviewWidth"));
             if (lastTreeWidth.getIntValue() < 150)
                 lastTreeWidth = "250";
 
@@ -103,7 +105,24 @@ void ProjectContentComponent::setProject (Project* newProject)
                 invokeDirectly (CommandIDs::showProjectSettings, true);
 
             updateMissingFileStatuses();
+
+            const ScopedPointer<XmlElement> treeOpenness (settings.getXmlValue ("treeViewState_" + project->getProjectUID()));
+
+            if (treeOpenness != nullptr)
+                projectTree->restoreOpennessState (*treeOpenness, true);
         }
+    }
+}
+
+void ProjectContentComponent::saveTreeViewState()
+{
+    if (projectTree != nullptr)
+    {
+        const ScopedPointer<XmlElement> opennessState (projectTree->getOpennessState (true));
+
+        if (opennessState != nullptr)
+            StoredSettings::getInstance()->getProps()
+                .setValue ("treeViewState_" + project->getProjectUID(), opennessState);
     }
 }
 

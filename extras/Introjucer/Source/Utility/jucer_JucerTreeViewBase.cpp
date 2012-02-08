@@ -28,7 +28,7 @@
 
 //==============================================================================
 JucerTreeViewBase::JucerTreeViewBase()
-    : numLeftHandComps (0)
+    : textX (0)
 {
     setLinesDrawnForSubItems (false);
 }
@@ -38,26 +38,10 @@ Font JucerTreeViewBase::getFont() const
     return Font (getItemHeight() * 0.6f);
 }
 
-int JucerTreeViewBase::getTextX() const
-{
-    return (numLeftHandComps + 1) * getItemHeight() + 8;
-}
-
 void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
 {
     if (isSelected())
         g.fillAll (Colour (0x401111ee));
-
-    const int x = getTextX();
-
-    g.setColour (Colours::black);
-
-    getIcon()->drawWithin (g, Rectangle<float> (0.0f, 2.0f, height + 6.0f, height - 4.0f),
-                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
-
-    g.setFont (getFont());
-    g.setColour (isMissing() ? Colours::red : Colours::black);
-    g.drawFittedText (getDisplayName(), x, 0, width - x, height, Justification::centredLeft, 1, 0.8f);
 }
 
 void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver)
@@ -74,38 +58,63 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height
 }
 
 //==============================================================================
-class TreeLeftHandButtonHolderComponent   : public Component
+class TreeItemComponent   : public Component
 {
 public:
-    TreeLeftHandButtonHolderComponent (OwnedArray<Component>& comps)
+    TreeItemComponent (JucerTreeViewBase& item_)
+        : item (item_)
     {
-        components.swapWithArray (comps);
         setInterceptsMouseClicks (false, true);
 
-        for (int i = 0; i < components.size(); ++i)
-            addAndMakeVisible (components.getUnchecked(i));
+        item.createLeftEdgeComponents (leftComps);
+
+        for (int i = 0; i < leftComps.size(); ++i)
+            addAndMakeVisible (leftComps.getUnchecked(i));
+
+        addAndMakeVisible (rightHandComponent = item.createRightEdgeComponent());
+    }
+
+    void paint (Graphics& g)
+    {
+        g.setColour (Colours::black);
+
+        const int height = getHeight();
+
+        item.getIcon()->drawWithin (g, Rectangle<float> (0.0f, 2.0f, height + 6.0f, height - 4.0f),
+                                    RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
+
+        g.setFont (item.getFont());
+        g.setColour (item.isMissing() ? Colours::red : Colours::black);
+
+        const int right = rightHandComponent != nullptr ? rightHandComponent->getX() - 2
+                                                        : getWidth();
+
+        g.drawFittedText (item.getDisplayName(),
+                          item.textX, 0, right - item.textX, height, Justification::centredLeft, 1, 0.8f);
     }
 
     void resized()
     {
         const int edge = 1;
         const int itemSize = getHeight() - edge * 2;
+        item.textX = (leftComps.size() + 1) * getHeight() + 8;
 
-        for (int i = 0; i < components.size(); ++i)
-            components.getUnchecked(i)->setBounds (5 + (i + 1) * getHeight(), edge, itemSize, itemSize);
+        for (int i = 0; i < leftComps.size(); ++i)
+            leftComps.getUnchecked(i)->setBounds (5 + (i + 1) * getHeight(), edge, itemSize, itemSize);
+
+        if (rightHandComponent != nullptr)
+            rightHandComponent->setBounds (getWidth() - itemSize - edge, edge, itemSize, itemSize);
     }
 
 private:
-    OwnedArray<Component> components;
+    JucerTreeViewBase& item;
+    OwnedArray<Component> leftComps;
+    ScopedPointer<Component> rightHandComponent;
 };
 
 Component* JucerTreeViewBase::createItemComponent()
 {
-    OwnedArray<Component> components;
-    createLeftEdgeComponents (components);
-    numLeftHandComps = components.size();
-
-    return numLeftHandComps == 0 ? nullptr : new TreeLeftHandButtonHolderComponent (components);
+    return new TreeItemComponent (*this);
 }
 
 //==============================================================================
@@ -149,7 +158,7 @@ private:
 void JucerTreeViewBase::showRenameBox()
 {
     Rectangle<int> r (getItemPosition (true));
-    r.setLeft (r.getX() + getTextX());
+    r.setLeft (r.getX() + textX);
     r.setHeight (getItemHeight());
 
     new RenameTreeItemCallback (*this, *getOwnerView(), r);

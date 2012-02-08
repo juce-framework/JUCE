@@ -33,6 +33,8 @@
 class JucerTreeViewBase   : public TreeViewItem
 {
 public:
+    JucerTreeViewBase();
+
     int getItemWidth() const                                { return -1; }
     int getItemHeight() const                               { return 20; }
 
@@ -48,7 +50,8 @@ public:
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
     virtual const Drawable* getIcon() const = 0;
-    virtual void createLeftEdgeComponents (OwnedArray<Component>& components) = 0;
+    virtual void createLeftEdgeComponents (OwnedArray<Component>&) {}
+    virtual Component* createRightEdgeComponent()   { return nullptr; }
 
     virtual void showPopupMenu();
     virtual void showMultiSelectionPopupMenu();
@@ -72,12 +75,7 @@ public:
         }
     };
 
-protected:
-    JucerTreeViewBase();
-
-private:
-    int numLeftHandComps;
-    int getTextX() const;
+    int textX;
 };
 
 
