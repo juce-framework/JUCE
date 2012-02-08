@@ -216,6 +216,7 @@ MidiMessage::MidiMessage (const void* src_, int sz, int& numBytesUsed, const uin
         {
             const uint8* d = src;
             bool haveReadAllLengthBytes = false;
+            int numVariableLengthSysexBytes = 0;
 
             while (d < src + sz)
             {
@@ -230,19 +231,25 @@ MidiMessage::MidiMessage (const void* src_, int sz, int& numBytesUsed, const uin
                     if (haveReadAllLengthBytes) // if we see a 0x80 bit set after the initial data length
                         break;                  // bytes, assume it's the end of the sysex
 
+                    ++numVariableLengthSysexBytes;
                     ++d;
                     continue;
                 }
 
-                haveReadAllLengthBytes = true;
+                if (! haveReadAllLengthBytes)
+                {
+                    haveReadAllLengthBytes = true;
+                    ++numVariableLengthSysexBytes;
+                }
+
                 ++d;
             }
 
             size = 1 + (int) (d - src);
 
-            data = new uint8 [size];
+            data = new uint8 [size - numVariableLengthSysexBytes];
             *data = (uint8) byte;
-            memcpy (data + 1, src, size - 1);
+            memcpy (data + 1, src + numVariableLengthSysexBytes, size - numVariableLengthSysexBytes - 1);
         }
         else if (byte == 0xff)
         {

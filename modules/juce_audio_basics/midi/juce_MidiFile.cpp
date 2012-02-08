@@ -403,6 +403,15 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
                 ++data;
                 --dataSize;
             }
+            else if ((statusByte & 0xf0) == 0xf0)  // Write sysex message with length bytes.
+            {
+                out.writeByte ((char) statusByte);
+
+                ++data;
+                --dataSize;
+
+                MidiFileHelpers::writeVariableLengthInt (out, dataSize);
+            }
 
             out.write (data, dataSize);
             lastStatusByte = statusByte;
