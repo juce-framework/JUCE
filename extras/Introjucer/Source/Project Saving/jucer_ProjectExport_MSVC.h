@@ -91,17 +91,33 @@ protected:
         MSVCBuildConfiguration (Project& project, const ValueTree& settings)
             : BuildConfiguration (project, settings)
         {
+            if (getWarningLevel() == 0)
+                getWarningLevelValue() = 4;
         }
+
+        Value getWarningLevelValue() const  { return getValue (Ids::winWarningLevel); }
+        int getWarningLevel() const         { return getWarningLevelValue().getValue(); }
 
         void createPropertyEditors (PropertyListBuilder& props)
         {
             createBasicPropertyEditors (props);
+
+            const char* const warningLevelNames[] = { "Low", "Medium", "High", nullptr };
+            const int warningLevels[] = { 2, 3, 4, 0 };
+
+            props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
+                                                    StringArray (warningLevelNames), Array<var> (warningLevels)));
         }
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
     {
         return new MSVCBuildConfiguration (project, settings);
+    }
+
+    static int getWarningLevel (const BuildConfiguration& config)
+    {
+        return dynamic_cast <const MSVCBuildConfiguration&> (config).getWarningLevel();
     }
 
     //==============================================================================
@@ -601,7 +617,7 @@ protected:
             compiler->setAttribute ("AssemblerListingLocation", FileHelpers::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("ObjectFile", FileHelpers::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("ProgramDataBaseFileName", FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("WarningLevel", "4");
+            compiler->setAttribute ("WarningLevel", String (getWarningLevel (config)));
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
             const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim());
@@ -1264,7 +1280,7 @@ protected:
                 cl->createNewChildElement ("AssemblerListingLocation")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
                 cl->createNewChildElement ("ObjectFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
                 cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level4");
+                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (getWarningLevel (*config)));
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
 
