@@ -398,20 +398,14 @@ class ProjectSettingsComponent  : public Component
 public:
     ProjectSettingsComponent (Project& project_)
         : project (project_),
-          configs ("Configurations", "Add a New Configuration", false),
-          exporters ("Export Targets", "Add a New Exporter...", true)
+          exporters ("Export Targets", "Add a New Exporter...", true, false)
     {
         addAndMakeVisible (&mainProjectInfoPanel);
         addAndMakeVisible (&modulesPanelGroup);
-        addAndMakeVisible (&configs);
         addAndMakeVisible (&exporters);
 
-        PropertyListBuilder props;
-        props.add (new ModulesPanel (project));
-        modulesPanelGroup.setProperties (props);
-        modulesPanelGroup.setName ("Modules");
-
-        createItems();
+        mainProjectInfoPanel.backgroundColour = Colours::white.withAlpha (0.3f);
+        modulesPanelGroup.backgroundColour = Colours::white.withAlpha (0.3f);
     }
 
     void updateSize (int width)
@@ -421,7 +415,6 @@ public:
         int y = 0;
         y += mainProjectInfoPanel.updateSize (y, width);
         y += modulesPanelGroup.updateSize (y, width);
-        y += configs.updateSize (y, width);
         y += exporters.updateSize (y, width);
 
         setSize (width, y);
@@ -435,112 +428,152 @@ public:
     void visibilityChanged()
     {
         if (isVisible())
-            refreshAll();
+            createAllPanels();
     }
 
-    void refreshAll()
+    void createModulesPanel()
     {
+        PropertyListBuilder props;
+        props.add (new ModulesPanel (project));
+        modulesPanelGroup.setProperties (props);
+        modulesPanelGroup.setName ("Modules");
+    }
+
+    void createProjectPanel()
+    {
+        PropertyListBuilder props;
+        project.createPropertyEditors (props);
+        mainProjectInfoPanel.setProperties (props);
+        mainProjectInfoPanel.setName ("Project Settings");
+
+        lastProjectType = project.getProjectTypeValue().getValue();
+    }
+
+    void createExportersPanel()
+    {
+        exporters.clear();
+
+        for (int i = 0; i < project.getNumExporters(); ++i)
         {
-            PropertyListBuilder props;
-            project.createPropertyEditors (props);
-            mainProjectInfoPanel.setProperties (props);
-            mainProjectInfoPanel.setName ("Project Settings");
+            PropertyGroup* exporterGroup = exporters.createGroup();
+            exporterGroup->backgroundColour = Colours::white.withAlpha (0.3f);
+            exporterGroup->addDeleteButton ("exporter " + String (i), "Deletes this export target.");
+
+            ScopedPointer <ProjectExporter> exp (project.createExporter (i));
+            jassert (exp != nullptr);
+
+            if (exp != nullptr)
+            {
+                PropertyListBuilder props;
+                exp->createPropertyEditors (props);
+
+                PropertyGroupList* configList = new PropertyGroupList ("Configurations", "Add a New Configuration", false, true);
+                props.add (configList);
+                exporterGroup->setProperties (props);
+
+                configList->createNewButton.setName ("newconfig " + String (i));
+
+                for (int j = 0; j < exp->getNumConfigurations(); ++j)
+                {
+                    PropertyGroup* configGroup = configList->createGroup();
+
+                    if (exp->getNumConfigurations() > 1)
+                        configGroup->addDeleteButton ("config " + String (i) + "/" + String (j), "Deletes this configuration.");
+
+                    PropertyListBuilder configProps;
+                    exp->getConfiguration(j)->createPropertyEditors (configProps);
+                    configGroup->setProperties (configProps);
+                }
+            }
         }
+    }
 
-        int i;
-        for (i = configs.groups.size(); --i >= 0;)
+    void createAllPanels()
+    {
+        createProjectPanel();
+        createModulesPanel();
+        createExportersPanel();
+        updateNames();
+
+        updateSize (getWidth());
+    }
+
+    bool needsFullUpdate() const
+    {
+        if (exporters.groups.size() != project.getNumExporters()
+             || lastProjectType != project.getProjectTypeValue().getValue())
+            return true;
+
+        for (int i = exporters.groups.size(); --i >= 0;)
         {
-            PropertyGroup& pp = *configs.groups.getUnchecked(i);
-
-            PropertyListBuilder props;
-            project.getConfiguration (i).createPropertyEditors (props);
-            pp.setProperties (props);
-        }
-
-        for (i = exporters.groups.size(); --i >= 0;)
-        {
-            PropertyGroup& pp = *exporters.groups.getUnchecked(i);
-            PropertyListBuilder props;
             ScopedPointer <ProjectExporter> exp (project.createExporter (i));
 
             jassert (exp != nullptr);
             if (exp != nullptr)
             {
-                exp->createPropertyEditors (props);
-                pp.setProperties (props);
+                PropertyGroupList* configList = dynamic_cast <PropertyGroupList*> (exporters.groups.getUnchecked(i)->properties.getLast());
+
+                if (configList != nullptr && configList->groups.size() != exp->getNumConfigurations())
+                    return true;
             }
         }
 
-        refreshSectionNames();
-
-        updateSize (getWidth());
+        return false;
     }
 
-    void refreshSectionNames()
+    void updateNames()
     {
-        int i;
-        for (i = configs.groups.size(); --i >= 0;)
+        for (int i = exporters.groups.size(); --i >= 0;)
         {
-            PropertyGroup& pp = *configs.groups.getUnchecked(i);
-            pp.setName (project.getConfiguration (i).getName().toString().quoted());
-            pp.repaint();
-        }
-
-        for (i = exporters.groups.size(); --i >= 0;)
-        {
-            PropertyGroup& pp = *exporters.groups.getUnchecked(i);
+            PropertyGroup& exporterGroup = *exporters.groups.getUnchecked(i);
             ScopedPointer <ProjectExporter> exp (project.createExporter (i));
-
             jassert (exp != nullptr);
+
             if (exp != nullptr)
-                pp.setName (exp->getName());
+            {
+                exporterGroup.setName (exp->getName());
+                exporterGroup.repaint();
 
-            pp.repaint();
+                PropertyGroupList* configList = dynamic_cast <PropertyGroupList*> (exporterGroup.properties.getLast());
+
+                if (configList != nullptr)
+                {
+                    for (int j = configList->groups.size(); --j >= 0;)
+                    {
+                        PropertyGroup& configGroup = *configList->groups.getUnchecked(j);
+                        configGroup.setName ("Configuration: " + exp->getConfiguration (j)->getName().toString().quoted());
+                        configGroup.repaint();
+                    }
+                }
+            }
         }
-    }
-
-    void createItems()
-    {
-        configs.clear();
-        exporters.clear();
-
-        int i;
-        for (i = 0; i < project.getNumConfigurations(); ++i)
-        {
-            PropertyGroup* p = configs.createGroup();
-
-            if (project.getNumConfigurations() > 1)
-                p->addDeleteButton ("config " + String (i), "Deletes this configuration.");
-        }
-
-        for (i = 0; i < project.getNumExporters(); ++i)
-        {
-            PropertyGroup* p = exporters.createGroup();
-            p->addDeleteButton ("exporter " + String (i), "Deletes this export target.");
-        }
-
-        lastProjectType = project.getProjectTypeValue().getValue();
-        refreshAll();
     }
 
     void update()
     {
-        if (configs.groups.size() != project.getNumConfigurations()
-             || exporters.groups.size() != project.getNumExporters()
-             || lastProjectType != project.getProjectTypeValue().getValue())
-        {
-            createItems();
-        }
-
-        refreshSectionNames();
+        if (needsFullUpdate())
+            createAllPanels();
+        else
+            updateNames();
     }
 
     void deleteButtonClicked (const String& name)
     {
         if (name.startsWith ("config"))
-            project.deleteConfiguration (name.getTrailingIntValue());
+        {
+            int exporterIndex = name.upToLastOccurrenceOf ("/", false, false).getTrailingIntValue();
+            int configIndex = name.getTrailingIntValue();
+
+            ScopedPointer<ProjectExporter> exporter (project.createExporter (exporterIndex));
+            jassert (exporter != nullptr);
+
+            if (exporter != nullptr)
+                exporter->deleteConfiguration (configIndex);
+        }
         else
+        {
             project.deleteExporter (name.getTrailingIntValue());
+        }
     }
 
     static void newExporterMenuItemChosen (int resultCode, ProjectSettingsComponent* settingsComp)
@@ -562,17 +595,21 @@ public:
                             ModalCallbackFunction::forComponent (newExporterMenuItemChosen, this));
     }
 
-    void createNewConfig()
+    void createNewConfig (int exporterIndex)
     {
-        project.addNewConfiguration (nullptr);
+        ScopedPointer<ProjectExporter> exp (project.createExporter (exporterIndex));
+        jassert (exp != nullptr);
+
+        if (exp != nullptr)
+            exp->addNewConfiguration (nullptr);
     }
 
     void newItemButtonClicked (TextButton& button)
     {
         if (button.getName().containsIgnoreCase ("export"))
             createNewExporter (button);
-        else
-            createNewConfig();
+        else if (button.getName().containsIgnoreCase ("newconfig"))
+            createNewConfig (button.getName().getTrailingIntValue());
     }
 
 private:
@@ -614,16 +651,32 @@ private:
             for (int i = 0; i < properties.size(); ++i)
             {
                 PropertyComponent* pp = properties.getUnchecked(i);
+
+                PropertyGroupList* pgl = dynamic_cast <PropertyGroupList*> (pp);
+
+                if (pgl != nullptr)
+                    pgl->updateSize (height, width - 20);
+
                 pp->setBounds (10, height, width - 20, pp->getPreferredHeight());
                 height += pp->getHeight();
             }
 
+            height += 16;
             setBounds (0, y, width, height);
             return height;
         }
 
         void paint (Graphics& g)
         {
+            if (! backgroundColour.isTransparent())
+            {
+                g.setColour (backgroundColour);
+                g.fillRect (0, 0, getWidth(), getHeight() - 10);
+
+                g.setColour (Colours::black.withAlpha (0.4f));
+                g.drawRect (0, 0, getWidth(), getHeight() - 10);
+            }
+
             g.setFont (14.0f, Font::bold);
             g.setColour (Colours::black);
             g.drawFittedText (getName(), 12, 0, getWidth() - 16, 28, Justification::bottomLeft, 1);
@@ -636,22 +689,25 @@ private:
                 psc->deleteButtonClicked (deleteButton.getName());
         }
 
-    private:
         OwnedArray<PropertyComponent> properties;
         TextButton deleteButton;
+        Colour backgroundColour;
     };
 
     //==============================================================================
-    class PropertyGroupList  : public Component,
+    class PropertyGroupList  : public PropertyComponent,
                                public ButtonListener
     {
     public:
-        PropertyGroupList (const String& title, const String& newButtonText, bool triggerOnMouseDown)
-            : Component (title), createNewButton (newButtonText)
+        PropertyGroupList (const String& title, const String& newButtonText,
+                           bool triggerOnMouseDown, bool hideNameAndPutButtonAtBottom)
+            : PropertyComponent (title), createNewButton (newButtonText),
+              dontDisplayName (hideNameAndPutButtonAtBottom)
         {
             addAndMakeVisible (&createNewButton);
             createNewButton.setColour (TextButton::buttonColourId, Colours::lightgreen.withAlpha (0.5f));
-            createNewButton.setBounds ("right - 140, 30, parent.width - 10, top + 20");
+            createNewButton.setBounds (hideNameAndPutButtonAtBottom ? "right - 140, parent.height - 25, parent.width - 10, top + 20"
+                                                                    : "right - 140, 30, parent.width - 10, top + 20");
             createNewButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight);
             createNewButton.addListener (this);
             createNewButton.setTriggeredOnMouseDown (triggerOnMouseDown);
@@ -659,27 +715,37 @@ private:
 
         int updateSize (int ourY, int width)
         {
-            int y = 55;
+            int y = dontDisplayName ? 10 : 55;
 
             for (int i = 0; i < groups.size(); ++i)
                 y += groups.getUnchecked(i)->updateSize (y, width);
 
             y = jmax (y, 100);
             setBounds (0, ourY, width, y);
+
+            if (dontDisplayName)
+                y += 25;
+
+            setPreferredHeight (y);
             return y;
         }
 
         void paint (Graphics& g)
         {
-            g.setFont (17.0f, Font::bold);
-            g.setColour (Colours::black);
-            g.drawFittedText (getName(), 0, 30, getWidth(), 20, Justification::centred, 1);
+            if (! dontDisplayName)
+            {
+                g.setFont (17.0f, Font::bold);
+                g.setColour (Colours::black);
+                g.drawFittedText (getName(), 0, 30, getWidth(), 20, Justification::centred, 1);
+            }
         }
 
         void clear()
         {
             groups.clear();
         }
+
+        void refresh() {}
 
         PropertyGroup* createGroup()
         {
@@ -698,12 +764,13 @@ private:
 
         OwnedArray<PropertyGroup> groups;
         TextButton createNewButton;
+        bool dontDisplayName;
     };
 
     Project& project;
     var lastProjectType;
     PropertyGroup mainProjectInfoPanel, modulesPanelGroup;
-    PropertyGroupList configs, exporters;
+    PropertyGroupList exporters;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSettingsComponent);
 };

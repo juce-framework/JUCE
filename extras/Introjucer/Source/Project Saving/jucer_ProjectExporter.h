@@ -80,15 +80,6 @@ public:
     Value getExtraCompilerFlags() const         { return getSetting (Ids::extraCompilerFlags); }
     Value getExtraLinkerFlags() const           { return getSetting (Ids::extraLinkerFlags); }
 
-    Value getExporterPreprocessorDefs() const   { return getSetting (Ids::extraDefs); }
-
-    // includes exporter, project + config defs
-    StringPairArray getAllPreprocessorDefs (const Project::BuildConfiguration& config) const;
-    // includes exporter + project defs..
-    StringPairArray getAllPreprocessorDefs() const;
-
-    String replacePreprocessorTokens (const Project::BuildConfiguration&, const String& sourceString) const;
-
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
     String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
 
@@ -149,6 +140,70 @@ public:
     //==============================================================================
     StringArray extraSearchPaths;
 
+    //==============================================================================
+    class BuildConfiguration  : public ReferenceCountedObject
+    {
+    public:
+        BuildConfiguration (Project& project, const ValueTree& configNode);
+        ~BuildConfiguration();
+
+        typedef ReferenceCountedObjectPtr<BuildConfiguration> Ptr;
+
+        //==============================================================================
+        virtual void createPropertyEditors (PropertyListBuilder&) = 0;
+
+        //==============================================================================
+        Value getName() const                               { return getValue (Ids::name); }
+        Value isDebug() const                               { return getValue (Ids::isDebug); }
+        Value getTargetBinaryName() const                   { return getValue (Ids::targetName); }
+        // the path relative to the build folder in which the binary should go
+        Value getTargetBinaryRelativePath() const           { return getValue (Ids::binaryPath); }
+        Value getOptimisationLevel() const                  { return getValue (Ids::optimisation); }
+        String getGCCOptimisationFlag() const;
+        Value getBuildConfigPreprocessorDefs() const        { return getValue (Ids::defines); }
+        StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
+        Value getHeaderSearchPath() const                   { return getValue (Ids::headerPath); }
+        StringArray getHeaderSearchPaths() const;
+
+        //==============================================================================
+        ValueTree config;
+
+    protected:
+        Project& project;
+
+        Value getValue (const Identifier& name) const       { return config.getPropertyAsValue (name, getUndoManager()); }
+        UndoManager* getUndoManager() const                 { return project.getUndoManagerFor (config); }
+
+        void createBasicPropertyEditors (PropertyListBuilder&);
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration);
+    };
+
+    int getNumConfigurations() const;
+    BuildConfiguration::Ptr getConfiguration (int index) const;
+    void addNewConfiguration (const BuildConfiguration* configToCopy);
+    void deleteConfiguration (int index);
+    bool hasConfigurationNamed (const String& name) const;
+    String getUniqueConfigName (String name) const;
+
+    ValueTree getConfigurations() const;
+    void createDefaultConfigs();
+
+    static const Identifier configurations, configuration;
+
+    //==============================================================================
+    Value getExporterPreprocessorDefs() const   { return getSetting (Ids::extraDefs); }
+
+    // includes exporter, project + config defs
+    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config) const;
+    // includes exporter + project defs..
+    StringPairArray getAllPreprocessorDefs() const;
+
+    String replacePreprocessorTokens (const BuildConfiguration&, const String& sourceString) const;
+
+    ValueTree settings;
+
 protected:
     //==============================================================================
     String name;
@@ -156,9 +211,9 @@ protected:
     const ProjectType& projectType;
     const String projectName;
     const File projectFolder;
-    Array<Project::BuildConfiguration> configs;
-    ValueTree settings;
     Project::Item* modulesGroup;
+
+    virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 

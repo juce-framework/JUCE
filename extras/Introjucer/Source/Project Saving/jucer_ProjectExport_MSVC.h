@@ -85,12 +85,32 @@ protected:
     bool isLibraryDLL() const           { return msvcIsDLL || (projectType.isLibrary() && getLibraryType() == 2); }
 
     //==============================================================================
-    String getIntermediatesPath (const Project::BuildConfiguration& config) const
+    class MSVCBuildConfiguration  : public BuildConfiguration
+    {
+    public:
+        MSVCBuildConfiguration (Project& project, const ValueTree& settings)
+            : BuildConfiguration (project, settings)
+        {
+        }
+
+        void createPropertyEditors (PropertyListBuilder& props)
+        {
+            createBasicPropertyEditors (props);
+        }
+    };
+
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    {
+        return new MSVCBuildConfiguration (project, settings);
+    }
+
+    //==============================================================================
+    String getIntermediatesPath (const BuildConfiguration& config) const
     {
         return ".\\" + File::createLegalFileName (config.getName().toString().trim());
     }
 
-    String getConfigTargetPath (const Project::BuildConfiguration& config) const
+    String getConfigTargetPath (const BuildConfiguration& config) const
     {
         const String binaryPath (config.getTargetBinaryRelativePath().toString().trim());
         if (binaryPath.isEmpty())
@@ -105,7 +125,7 @@ protected:
                                     .toWindowsStyle();
     }
 
-    String getPreprocessorDefs (const Project::BuildConfiguration& config, const String& joinString) const
+    String getPreprocessorDefs (const BuildConfiguration& config, const String& joinString) const
     {
         StringPairArray defines (msvcExtraPreprocessorDefs);
         defines.set ("WIN32", "");
@@ -138,7 +158,7 @@ protected:
         return result.joinIntoString (joinString);
     }
 
-    StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config) const
+    StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
     {
         StringArray searchPaths (extraSearchPaths);
         searchPaths.addArray (config.getHeaderSearchPaths());
@@ -146,7 +166,7 @@ protected:
         return searchPaths;
     }
 
-    String getBinaryFileForConfig (const Project::BuildConfiguration& config) const
+    String getBinaryFileForConfig (const BuildConfiguration& config) const
     {
         const String targetBinary (getSetting (config.isDebug().getValue() ? Ids::libraryName_Debug : Ids::libraryName_Release).toString().trim());
         if (targetBinary.isNotEmpty())
@@ -155,7 +175,7 @@ protected:
         return config.getTargetBinaryName().toString() + msvcTargetSuffix;
     }
 
-    static String createConfigName (const Project::BuildConfiguration& config)
+    virtual String createConfigName (const BuildConfiguration& config) const
     {
         return config.getName().toString() + "|Win32";
     }
@@ -175,20 +195,20 @@ protected:
             << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution" << newLine;
 
         int i;
-        for (i = 0; i < configs.size(); ++i)
+        for (i = 0; i < getNumConfigurations(); ++i)
         {
-            const Project::BuildConfiguration& config = configs.getReference(i);
-            out << "\t\t" << createConfigName (config) << " = " << createConfigName (config) << newLine;
+            const String configName (createConfigName (*getConfiguration(i)));
+            out << "\t\t" << configName << " = " << configName << newLine;
         }
 
         out << "\tEndGlobalSection" << newLine
             << "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution" << newLine;
 
-        for (i = 0; i < configs.size(); ++i)
+        for (i = 0; i < getNumConfigurations(); ++i)
         {
-            const Project::BuildConfiguration& config = configs.getReference(i);
-            out << "\t\t" << projectGUID << "." << createConfigName (config) << ".ActiveCfg = " << createConfigName (config) << newLine;
-            out << "\t\t" << projectGUID << "." << createConfigName (config) << ".Build.0 = " << createConfigName (config) << newLine;
+            const String configName (createConfigName (*getConfiguration(i)));
+            out << "\t\t" << projectGUID << "." << configName << ".ActiveCfg = " << configName << newLine;
+            out << "\t\t" << projectGUID << "." << configName << ".Build.0 = " << configName << newLine;
         }
 
         out << "\tEndGlobalSection" << newLine
@@ -449,12 +469,10 @@ protected:
 
         if (excludeFromBuild || useStdcall)
         {
-            for (int i = 0; i < configs.size(); ++i)
+            for (int i = 0; i < getNumConfigurations(); ++i)
             {
-                const Project::BuildConfiguration& config = configs.getReference(i);
-
                 XmlElement* fileConfig = fileXml->createNewChildElement ("FileConfiguration");
-                fileConfig->setAttribute ("Name", createConfigName (config));
+                fileConfig->setAttribute ("Name", createConfigName (*getConfiguration (i)));
 
                 if (excludeFromBuild)
                     fileConfig->setAttribute ("ExcludedFromBuild", "true");
@@ -508,7 +526,7 @@ protected:
         return e;
     }
 
-    void createConfig (XmlElement& xml, const Project::BuildConfiguration& config) const
+    void createConfig (XmlElement& xml, const BuildConfiguration& config) const
     {
         String binariesPath (getConfigTargetPath (config));
         String intermediatesPath (getIntermediatesPath (config));
@@ -679,8 +697,8 @@ protected:
 
     void createConfigs (XmlElement& xml)
     {
-        for (int i = 0; i < configs.size(); ++i)
-            createConfig (*xml.createNewChildElement ("Configuration"), configs.getReference(i));
+        for (int i = 0; i < getNumConfigurations(); ++i)
+            createConfig (*xml.createNewChildElement ("Configuration"), *getConfiguration(i));
     }
 
     //==============================================================================
@@ -780,14 +798,14 @@ private:
     File getDSWFile() const       { return getProjectFile (".dsw"); }
 
     //==============================================================================
-    String createConfigName (const Project::BuildConfiguration& config) const
+    String createConfigName (const BuildConfiguration& config) const
     {
         return projectName + " - Win32 " + config.getName().toString();
     }
 
     void writeProject (OutputStream& out)
     {
-        const String defaultConfigName (createConfigName (configs.getReference(0)));
+        const String defaultConfigName (createConfigName (*getConfiguration(0)));
 
         String targetType, targetCode;
 
@@ -816,8 +834,8 @@ private:
             << "!MESSAGE " << newLine;
 
         int i;
-        for (i = 0; i < configs.size(); ++i)
-            out << "!MESSAGE \"" << createConfigName (configs.getReference (i)) << "\" (based on " << targetType << ")" << newLine;
+        for (i = 0; i < getNumConfigurations(); ++i)
+            out << "!MESSAGE \"" << createConfigName (*getConfiguration (i)) << "\" (based on " << targetType << ")" << newLine;
 
         out << "!MESSAGE " << newLine
             << "# Begin Project" << newLine
@@ -830,37 +848,37 @@ private:
 
         String targetList;
 
-        for (i = 0; i < configs.size(); ++i)
+        for (i = 0; i < getNumConfigurations(); ++i)
         {
-            const Project::BuildConfiguration& config = configs.getReference(i);
-            const String configName (createConfigName (config));
+            const BuildConfiguration::Ptr config (getConfiguration(i));
+            const String configName (createConfigName (*config));
             targetList << "# Name \"" << configName << '"' << newLine;
 
-            const String binariesPath (getConfigTargetPath (config));
-            const String targetBinary (FileHelpers::windowsStylePath (binariesPath + "/" + getBinaryFileForConfig (config)));
-            const String optimisationFlag (((int) config.getOptimisationLevel().getValue() <= 1) ? "Od" : (config.getOptimisationLevel() == 2 ? "O2" : "O3"));
-            const String defines (getPreprocessorDefs (config, " /D "));
-            const bool isDebug = (bool) config.isDebug().getValue();
+            const String binariesPath (getConfigTargetPath (*config));
+            const String targetBinary (FileHelpers::windowsStylePath (binariesPath + "/" + getBinaryFileForConfig (*config)));
+            const String optimisationFlag (((int) config->getOptimisationLevel().getValue() <= 1) ? "Od" : (config->getOptimisationLevel() == 2 ? "O2" : "O3"));
+            const String defines (getPreprocessorDefs (*config, " /D "));
+            const bool isDebug = (bool) config->isDebug().getValue();
             const String extraDebugFlags (isDebug ? "/Gm /ZI /GZ" : "");
 
             out << (i == 0 ? "!IF" : "!ELSEIF") << "  \"$(CFG)\" == \"" << configName << '"' << newLine
                 << "# PROP BASE Use_MFC 0" << newLine
                 << "# PROP BASE Use_Debug_Libraries " << (isDebug ? "1" : "0") << newLine
                 << "# PROP BASE Output_Dir \"" << binariesPath << '"' << newLine
-                << "# PROP BASE Intermediate_Dir \"" << getIntermediatesPath (config) << '"' << newLine
+                << "# PROP BASE Intermediate_Dir \"" << getIntermediatesPath (*config) << '"' << newLine
                 << "# PROP BASE Target_Dir \"\"" << newLine
                 << "# PROP Use_MFC 0" << newLine
                 << "# PROP Use_Debug_Libraries " << (isDebug ? "1" : "0") << newLine
                 << "# PROP Output_Dir \"" << binariesPath << '"' << newLine
-                << "# PROP Intermediate_Dir \"" << getIntermediatesPath (config) << '"' << newLine
+                << "# PROP Intermediate_Dir \"" << getIntermediatesPath (*config) << '"' << newLine
                 << "# PROP Ignore_Export_Lib 0" << newLine
                 << "# PROP Target_Dir \"\"" << newLine
                 << "# ADD BASE CPP /nologo /W3 /GX /" << optimisationFlag << " /D " << defines
                 << " /YX /FD /c " << extraDebugFlags << " /Zm1024" << newLine
                 << "# ADD CPP /nologo " << (isDebug ? "/MTd" : "/MT") << " /W3 /GR /GX /" << optimisationFlag
-                << " /I " << replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (" /I "))
+                << " /I " << replacePreprocessorTokens (*config, getHeaderSearchPaths (*config).joinIntoString (" /I "))
                 << " /D " << defines << " /D \"_UNICODE\" /D \"UNICODE\" /FD /c /Zm1024 " << extraDebugFlags
-                << " " << replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim() << newLine;
+                << " " << replacePreprocessorTokens (*config, getExtraCompilerFlags().toString()).trim() << newLine;
 
             if (! isDebug)
                 out << "# SUBTRACT CPP /YX" << newLine;
@@ -891,7 +909,7 @@ private:
                     << " /nologo /machine:I386 /out:\"" << targetBinary << "\" "
                     << (isLibraryDLL() ? "/dll" : (msvcIsWindowsSubsystem ? "/subsystem:windows "
                                                                           : "/subsystem:console "))
-                    << replacePreprocessorTokens (config, getExtraLinkerFlags().toString()).trim() << newLine;
+                    << replacePreprocessorTokens (*config, getExtraLinkerFlags().toString()).trim() << newLine;
             }
         }
 
@@ -1053,16 +1071,57 @@ public:
     }
 
 protected:
+    //==============================================================================
+    class VC2010BuildConfiguration  : public MSVCBuildConfiguration
+    {
+    public:
+        VC2010BuildConfiguration (Project& project, const ValueTree& settings)
+            : MSVCBuildConfiguration (project, settings)
+        {
+            if (getArchitectureType().toString().isEmpty())
+                getArchitectureType() = get32BitArchName();
+        }
+
+        //==============================================================================
+        static const char* get32BitArchName()   { return "32-bit"; }
+        static const char* get64BitArchName()   { return "x64"; }
+
+        Value getArchitectureType() const       { return getValue (Ids::winArchitecture); }
+        bool is64Bit() const                    { return getArchitectureType().toString() == get64BitArchName(); }
+
+        //==============================================================================
+        void createPropertyEditors (PropertyListBuilder& props)
+        {
+            MSVCBuildConfiguration::createPropertyEditors (props);
+
+            const char* const archTypes[] = { get32BitArchName(), get64BitArchName(), nullptr };
+            props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
+                                                    StringArray (archTypes), Array<var> (archTypes)));
+        }
+    };
+
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    {
+        return new VC2010BuildConfiguration (project, settings);
+    }
+
+    static bool is64Bit (const BuildConfiguration& config)
+    {
+        return dynamic_cast <const VC2010BuildConfiguration&> (config).is64Bit();
+    }
+
+    //==============================================================================
     File getVCProjFile() const            { return getProjectFile (".vcxproj"); }
     File getVCProjFiltersFile() const     { return getProjectFile (".vcxproj.filters"); }
     File getSLNFile() const               { return getProjectFile (".sln"); }
 
-    static String createConfigName (const Project::BuildConfiguration& config)
+    String createConfigName (const BuildConfiguration& config) const
     {
-        return config.getName().toString() + "|Win32";
+        return config.getName().toString() + (is64Bit (config) ? "|x64"
+                                                               : "|Win32");
     }
 
-    static void setConditionAttribute (XmlElement& xml, const Project::BuildConfiguration& config)
+    void setConditionAttribute (XmlElement& xml, const BuildConfiguration& config)
     {
         xml.setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
     }
@@ -1078,14 +1137,14 @@ protected:
             XmlElement* configsGroup = projectXml.createNewChildElement ("ItemGroup");
             configsGroup->setAttribute ("Label", "ProjectConfigurations");
 
-            for (int i = 0; i < configs.size(); ++i)
+            for (int i = 0; i < getNumConfigurations(); ++i)
             {
-                const Project::BuildConfiguration& config = configs.getReference(i);
+                const BuildConfiguration::Ptr config (getConfiguration(i));
 
                 XmlElement* e = configsGroup->createNewChildElement ("ProjectConfiguration");
-                e->setAttribute ("Include", createConfigName (config));
-                e->createNewChildElement ("Configuration")->addTextElement (config.getName().toString());
-                e->createNewChildElement ("Platform")->addTextElement ("Win32");
+                e->setAttribute ("Include", createConfigName (*config));
+                e->createNewChildElement ("Configuration")->addTextElement (config->getName().toString());
+                e->createNewChildElement ("Platform")->addTextElement (is64Bit (*config) ? "x64" : "Win32");
             }
         }
 
@@ -1100,19 +1159,22 @@ protected:
             imports->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
         }
 
-        for (int i = 0; i < configs.size(); ++i)
+        for (int i = 0; i < getNumConfigurations(); ++i)
         {
-            const Project::BuildConfiguration& config = configs.getReference(i);
+            const BuildConfiguration::Ptr config (getConfiguration(i));
 
             XmlElement* e = projectXml.createNewChildElement ("PropertyGroup");
-            setConditionAttribute (*e, config);
+            setConditionAttribute (*e, *config);
             e->setAttribute ("Label", "Configuration");
             e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
             e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
             e->createNewChildElement ("CharacterSet")->addTextElement ("MultiByte");
 
-            if (! config.isDebug().getValue())
+            if (! config->isDebug().getValue())
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
+
+            if (is64Bit (*config))
+                e->createNewChildElement ("PlatformToolset")->addTextElement ("Windows7.1SDK");
         }
 
         {
@@ -1143,35 +1205,35 @@ protected:
             XmlElement* props = projectXml.createNewChildElement ("PropertyGroup");
             props->createNewChildElement ("_ProjectFileVersion")->addTextElement ("10.0.30319.1");
 
-            for (int i = 0; i < configs.size(); ++i)
+            for (int i = 0; i < getNumConfigurations(); ++i)
             {
-                const Project::BuildConfiguration& config = configs.getReference(i);
+                const BuildConfiguration::Ptr config (getConfiguration(i));
 
                 XmlElement* outdir = props->createNewChildElement ("OutDir");
-                setConditionAttribute (*outdir, config);
-                outdir->addTextElement (getConfigTargetPath (config) + "\\");
+                setConditionAttribute (*outdir, *config);
+                outdir->addTextElement (getConfigTargetPath (*config) + "\\");
 
                 XmlElement* intdir = props->createNewChildElement ("IntDir");
-                setConditionAttribute (*intdir, config);
-                intdir->addTextElement (getConfigTargetPath (config) + "\\");
+                setConditionAttribute (*intdir, *config);
+                intdir->addTextElement (getConfigTargetPath (*config) + "\\");
 
                 XmlElement* name = props->createNewChildElement ("TargetName");
-                setConditionAttribute (*name, config);
-                name->addTextElement (getBinaryFileForConfig (config).upToLastOccurrenceOf (".", false, false));
+                setConditionAttribute (*name, *config);
+                name->addTextElement (getBinaryFileForConfig (*config).upToLastOccurrenceOf (".", false, false));
             }
         }
 
-        for (int i = 0; i < configs.size(); ++i)
+        for (int i = 0; i < getNumConfigurations(); ++i)
         {
-            const Project::BuildConfiguration& config = configs.getReference(i);
-            String binariesPath (getConfigTargetPath (config));
-            String intermediatesPath (getIntermediatesPath (config));
-            const bool isDebug = (bool) config.isDebug().getValue();
-            const String binaryName (File::createLegalFileName (config.getTargetBinaryName().toString()));
-            const String outputFileName (getBinaryFileForConfig (config));
+            const BuildConfiguration::Ptr config (getConfiguration(i));
+            String binariesPath (getConfigTargetPath (*config));
+            String intermediatesPath (getIntermediatesPath (*config));
+            const bool isDebug = (bool) config->isDebug().getValue();
+            const String binaryName (File::createLegalFileName (config->getTargetBinaryName().toString()));
+            const String outputFileName (getBinaryFileForConfig (*config));
 
             XmlElement* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
-            setConditionAttribute (*group, config);
+            setConditionAttribute (*group, *config);
 
             {
                 XmlElement* midl = group->createNewChildElement ("Midl");
@@ -1180,7 +1242,6 @@ protected:
                 midl->createNewChildElement ("MkTypLibCompatible")->addTextElement ("true");
                 midl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 midl->createNewChildElement ("TargetEnvironment")->addTextElement ("Win32");
-                //midl->createNewChildElement ("TypeLibraryName")->addTextElement ("");
                 midl->createNewChildElement ("HeaderFileName");
             }
 
@@ -1189,12 +1250,13 @@ protected:
                 cl->createNewChildElement ("Optimization")->addTextElement (isDebug ? "Disabled" : "MaxSpeed");
 
                 if (isDebug)
-                    cl->createNewChildElement ("DebugInformationFormat")->addTextElement ("EditAndContinue");
+                    cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (*config) ? "ProgramDatabase"
+                                                                                                            : "EditAndContinue");
 
-                StringArray includePaths (getHeaderSearchPaths (config));
+                StringArray includePaths (getHeaderSearchPaths (*config));
                 includePaths.add ("%(AdditionalIncludeDirectories)");
                 cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
-                cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
+                cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (*config, ";") + ";%(PreprocessorDefinitions)");
                 cl->createNewChildElement ("RuntimeLibrary")->addTextElement (msvcNeedsDLLRuntimeLib ? (isDebug ? "MultiThreadedDLLDebug" : "MultiThreadedDLL")
                                                                                                      : (isDebug ? "MultiThreadedDebug" : "MultiThreaded"));
                 cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
@@ -1206,7 +1268,7 @@ protected:
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
 
-                const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim());
+                const String extraFlags (replacePreprocessorTokens (*config, getExtraCompilerFlags().toString()).trim());
                 if (extraFlags.isNotEmpty())
                     cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
             }
@@ -1226,7 +1288,9 @@ protected:
                 link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
                 link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
                 link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
-                link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
+
+                if (! is64Bit (*config))
+                    link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
                 if (! isDebug)
                 {
@@ -1236,7 +1300,7 @@ protected:
 
                 String extraLinkerOptions (getExtraLinkerFlags().toString());
                 if (extraLinkerOptions.isNotEmpty())
-                    link->createNewChildElement ("AdditionalOptions")->addTextElement (replacePreprocessorTokens (config, extraLinkerOptions).trim()
+                    link->createNewChildElement ("AdditionalOptions")->addTextElement (replacePreprocessorTokens (*config, extraLinkerOptions).trim()
                                                                                          + " %(AdditionalOptions)");
             }
 

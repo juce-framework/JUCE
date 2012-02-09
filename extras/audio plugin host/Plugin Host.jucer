@@ -13,19 +13,35 @@
               jucerVersion="3.0.0">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../.." objCExtraSuffix="M73TRi"/>
+               juceFolder="../.." objCExtraSuffix="M73TRi">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
+                       osxSDK="default" osxCompatibility="default"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
+                       osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"/>
+      </CONFIGURATIONS>
+    </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"/>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../.."/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"/>
+      </CONFIGURATIONS>
+    </VS2008>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"/>
+      </CONFIGURATIONS>
+    </LINUX_MAKE>
   </EXPORTFORMATS>
-  <CONFIGURATIONS>
-    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
-                   osxSDK="default" osxCompatibility="default"/>
-    <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
-                   osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
-  </CONFIGURATIONS>
   <MAINGROUP id="YdWL7hi7p" name="Plugin Host">
     <FILE id="8tLeuntR4" name="FilterGraph.cpp" compile="1" resource="0"
           file="Source/FilterGraph.cpp"/>

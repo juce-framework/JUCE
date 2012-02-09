@@ -2171,7 +2171,7 @@ public:
 
     void fillRect (const Rectangle<int>& area, const FillType& fill, bool replaceContents)
     {
-        jassert (! replaceContents);
+        (void) replaceContents; jassert (! replaceContents);
         const Rectangle<int> r (clip.getIntersection (area));
 
         if (! r.isEmpty())
@@ -2605,7 +2605,7 @@ public:
 
     void fillRect (const Rectangle<int>& area, const FillType& fill, bool replaceContents)
     {
-        jassert (! replaceContents);
+        (void) replaceContents; jassert (! replaceContents);
         const Rectangle<int> r (clip.getIntersection (area));
 
         if (! r.isEmpty())

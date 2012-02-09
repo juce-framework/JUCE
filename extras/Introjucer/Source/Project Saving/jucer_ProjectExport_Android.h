@@ -141,6 +141,28 @@ public:
         writeStringsFile (target.getChildFile ("res/values/strings.xml"));
     }
 
+protected:
+    //==============================================================================
+    class AndroidBuildConfiguration  : public BuildConfiguration
+    {
+    public:
+        AndroidBuildConfiguration (Project& project, const ValueTree& settings)
+            : BuildConfiguration (project, settings)
+        {
+        }
+
+        void createPropertyEditors (PropertyListBuilder& props)
+        {
+            createBasicPropertyEditors (props);
+
+        }
+    };
+
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    {
+        return new AndroidBuildConfiguration (project, settings);
+    }
+
 private:
     //==============================================================================
     XmlElement* createManifestXML()
@@ -261,7 +283,7 @@ private:
         return flags + newLine;
     }
 
-    String createIncludePathFlags (const Project::BuildConfiguration& config)
+    String createIncludePathFlags (const BuildConfiguration& config)
     {
         String flags;
         StringArray searchPaths (extraSearchPaths);
@@ -281,11 +303,13 @@ private:
         if (forDebug)
             flags << " -g";
 
-        for (int i = 0; i < configs.size(); ++i)
+        for (int i = 0; i < getNumConfigurations(); ++i)
         {
-            if (configs.getReference(i).isDebug() == forDebug)
+            const BuildConfiguration::Ptr config (getConfiguration(i));
+
+            if (config->isDebug() == forDebug)
             {
-                flags << createIncludePathFlags (configs.getReference(i));
+                flags << createIncludePathFlags (*config);
                 break;
             }
         }
@@ -303,15 +327,15 @@ private:
             defines.set ("NDEBUG", "1");
         }
 
-        for (int i = 0; i < configs.size(); ++i)
+        for (int i = 0; i < getNumConfigurations(); ++i)
         {
-            const Project::BuildConfiguration& config = configs.getReference(i);
+            const BuildConfiguration::Ptr config (getConfiguration(i));
 
-            if (config.isDebug() == forDebug)
+            if (config->isDebug() == forDebug)
             {
-                flags << " -O" << config.getGCCOptimisationFlag();
+                flags << " -O" << config->getGCCOptimisationFlag();
 
-                defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
+                defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config));
                 break;
             }
         }

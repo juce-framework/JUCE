@@ -26,6 +26,7 @@
 #include "jucer_NewProjectWizard.h"
 #include "jucer_ProjectType.h"
 #include "jucer_Module.h"
+#include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Application/jucer_Application.h"
 #include "../Application/jucer_MainWindow.h"
 
@@ -49,6 +50,20 @@ static void createFileCreationOptionComboBox (Component& setupComp,
     itemsCreated.add (l);
 
     c->setBounds ("parent.width / 2 + 160, 10, parent.width - 10, top + 22");
+}
+
+static void setExecutableNameForAllTargets (Project& project, const String& exeName)
+{
+    for (int j = project.getNumExporters(); --j >= 0;)
+    {
+        ScopedPointer<ProjectExporter> exporter (project.createExporter(j));
+
+        if (exporter != nullptr)
+        {
+            for (int i = exporter->getNumConfigurations(); --i >= 0;)
+                exporter->getConfiguration(i)->getTargetBinaryName() = exeName;
+        }
+    }
 }
 
 //==============================================================================
@@ -100,8 +115,7 @@ public:
 
         Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
 
-        for (int i = project.getNumConfigurations(); --i >= 0;)
-            project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
         String initCode, shutdownCode, anotherInstanceStartedCode, privateMembers, memberInitialisers;
@@ -204,8 +218,7 @@ public:
 
         Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
 
-        for (int i = project.getNumConfigurations(); --i >= 0;)
-            project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         if (createMainCpp)
         {
@@ -265,8 +278,7 @@ public:
         Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
         project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
 
-        for (int i = project.getNumConfigurations(); --i >= 0;)
-            project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), filterCppFile));
 

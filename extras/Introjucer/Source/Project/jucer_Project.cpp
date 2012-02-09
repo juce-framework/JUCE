@@ -37,8 +37,6 @@ namespace Tags
     const Identifier projectMainGroup  ("MAINGROUP");
     const Identifier group             ("GROUP");
     const Identifier file              ("FILE");
-    const Identifier configurations    ("CONFIGURATIONS");
-    const Identifier configuration     ("CONFIGURATION");
     const Identifier exporters         ("EXPORTFORMATS");
     const Identifier configGroup       ("JUCEOPTIONS");
     const Identifier modulesGroup      ("MODULES");
@@ -112,11 +110,14 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.hasProperty (Ids::version))
         getVersion() = "1.0.0";
 
-    // Create configs group
-    if (! projectRoot.getChildWithName (Tags::configurations).isValid())
+    updateOldStyleConfigList();
+
+    for (int i = 0; i < getNumExporters(); ++i)
     {
-        projectRoot.addChild (ValueTree (Tags::configurations), 0, 0);
-        createDefaultConfigs();
+        ScopedPointer<ProjectExporter> exporter (createExporter(i));
+
+        if (exporter != nullptr && exporter->getNumConfigurations() == 0)
+            exporter->createDefaultConfigs();
     }
 
     if (! projectRoot.getChildWithName (Tags::exporters).isValid())
@@ -129,6 +130,40 @@ void Project::setMissingDefaultValues()
 
     if (! projectRoot.getChildWithName (Tags::modulesGroup).isValid())
         addDefaultModules (false);
+}
+
+void Project::updateOldStyleConfigList()
+{
+    ValueTree deprecatedConfigsList (projectRoot.getChildWithName (ProjectExporter::configurations));
+
+    if (deprecatedConfigsList.isValid())
+    {
+        projectRoot.removeChild (deprecatedConfigsList, nullptr);
+
+        for (int i = 0; i < getNumExporters(); ++i)
+        {
+            ScopedPointer<ProjectExporter> exporter (createExporter(i));
+
+            if (exporter != nullptr && exporter->getNumConfigurations() == 0)
+            {
+                ValueTree newConfigs (deprecatedConfigsList.createCopy());
+
+                if (! exporter->isXcode())
+                {
+                    for (int j = newConfigs.getNumChildren(); --j >= 0;)
+                    {
+                        ValueTree config (newConfigs.getChild(j));
+
+                        config.removeProperty (Ids::osxSDK, nullptr);
+                        config.removeProperty (Ids::osxCompatibility, nullptr);
+                        config.removeProperty (Ids::osxArchitecture, nullptr);
+                    }
+                }
+
+                exporter->settings.addChild (newConfigs, 0, nullptr);
+            }
+        }
+    }
 }
 
 void Project::addDefaultModules (bool shouldCopyFilesLocally)
@@ -860,198 +895,6 @@ int Project::getNumModules() const
 String Project::getModuleID (int index) const
 {
     return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [ComponentBuilder::idProperty].toString();
-}
-
-//==============================================================================
-ValueTree Project::getConfigurations() const
-{
-    return projectRoot.getChildWithName (Tags::configurations);
-}
-
-int Project::getNumConfigurations() const
-{
-    return getConfigurations().getNumChildren();
-}
-
-Project::BuildConfiguration Project::getConfiguration (int index)
-{
-    jassert (index < getConfigurations().getNumChildren());
-    return BuildConfiguration (this, getConfigurations().getChild (index));
-}
-
-bool Project::hasConfigurationNamed (const String& name) const
-{
-    const ValueTree configs (getConfigurations());
-    for (int i = configs.getNumChildren(); --i >= 0;)
-        if (configs.getChild(i) [Ids::name].toString() == name)
-            return true;
-
-    return false;
-}
-
-String Project::getUniqueConfigName (String name) const
-{
-    String nameRoot (name);
-    while (CharacterFunctions::isDigit (nameRoot.getLastCharacter()))
-        nameRoot = nameRoot.dropLastCharacters (1);
-
-    nameRoot = nameRoot.trim();
-
-    int suffix = 2;
-    while (hasConfigurationNamed (name))
-        name = nameRoot + " " + String (suffix++);
-
-    return name;
-}
-
-void Project::addNewConfiguration (BuildConfiguration* configToCopy)
-{
-    const String configName (getUniqueConfigName (configToCopy != nullptr ? configToCopy->config [Ids::name].toString()
-                                                                          : "New Build Configuration"));
-
-    ValueTree configs (getConfigurations());
-
-    if (! configs.isValid())
-    {
-        projectRoot.addChild (ValueTree (Tags::configurations), 0, getUndoManagerFor (projectRoot));
-        configs = getConfigurations();
-    }
-
-    ValueTree newConfig (Tags::configuration);
-    if (configToCopy != nullptr)
-        newConfig = configToCopy->config.createCopy();
-
-    newConfig.setProperty (Ids::name, configName, 0);
-
-    configs.addChild (newConfig, -1, getUndoManagerFor (configs));
-}
-
-void Project::deleteConfiguration (int index)
-{
-    ValueTree configs (getConfigurations());
-    configs.removeChild (index, getUndoManagerFor (getConfigurations()));
-}
-
-void Project::createDefaultConfigs()
-{
-    for (int i = 0; i < 2; ++i)
-    {
-        addNewConfiguration (nullptr);
-        BuildConfiguration config = getConfiguration (i);
-
-        const bool debugConfig = i == 0;
-
-        config.getName() = debugConfig ? "Debug" : "Release";
-        config.isDebug() = debugConfig;
-        config.getOptimisationLevel() = debugConfig ? 1 : 2;
-        config.getTargetBinaryName() = getProjectFilenameRoot();
-    }
-}
-
-//==============================================================================
-Project::BuildConfiguration::BuildConfiguration (Project* project_, const ValueTree& configNode)
-   : project (project_),
-     config (configNode)
-{
-}
-
-Project::BuildConfiguration::BuildConfiguration (const BuildConfiguration& other)
-   : project (other.project),
-     config (other.config)
-{
-}
-
-const Project::BuildConfiguration& Project::BuildConfiguration::operator= (const BuildConfiguration& other)
-{
-    project = other.project;
-    config = other.config;
-    return *this;
-}
-
-Project::BuildConfiguration::~BuildConfiguration()
-{
-}
-
-String Project::BuildConfiguration::getGCCOptimisationFlag() const
-{
-    const int level = (int) getOptimisationLevel().getValue();
-    return String (level <= 1 ? "0" : (level == 2 ? "s" : "3"));
-}
-
-const char* const Project::BuildConfiguration::osxVersionDefault = "default";
-const char* const Project::BuildConfiguration::osxVersion10_4    = "10.4 SDK";
-const char* const Project::BuildConfiguration::osxVersion10_5    = "10.5 SDK";
-const char* const Project::BuildConfiguration::osxVersion10_6    = "10.6 SDK";
-
-const char* const Project::BuildConfiguration::osxArch_Default        = "default";
-const char* const Project::BuildConfiguration::osxArch_Native         = "Native";
-const char* const Project::BuildConfiguration::osxArch_32BitUniversal = "32BitUniversal";
-const char* const Project::BuildConfiguration::osxArch_64BitUniversal = "64BitUniversal";
-const char* const Project::BuildConfiguration::osxArch_64Bit          = "64BitIntel";
-
-void Project::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)
-{
-    props.add (new TextPropertyComponent (getName(), "Name", 96, false),
-               "The name of this configuration.");
-
-    props.add (new BooleanPropertyComponent (isDebug(), "Debug mode", "Debugging enabled"),
-               "If enabled, this means that the configuration should be built with debug synbols.");
-
-    const char* optimisationLevels[] = { "No optimisation", "Optimise for size and speed", "Optimise for maximum speed", 0 };
-    const int optimisationLevelValues[] = { 1, 2, 3, 0 };
-    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation", StringArray (optimisationLevels), Array<var> (optimisationLevelValues)),
-               "The optimisation level for this configuration");
-
-    props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false),
-               "The filename to use for the destination binary executable file. Don't add a suffix to this, because platform-specific suffixes will be added for each target platform.");
-
-    props.add (new TextPropertyComponent (getTargetBinaryRelativePath(), "Binary location", 1024, false),
-               "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed in its default location in the build folder.");
-
-    props.add (new TextPropertyComponent (getHeaderSearchPath(), "Header search path", 16384, false),
-               "Extra header search paths. Use semi-colons to separate multiple paths.");
-
-    props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
-
-    if (getMacSDKVersion().toString().isEmpty())
-        getMacSDKVersion() = osxVersionDefault;
-
-    const char* osxVersions[] = { "Use Default", osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
-    const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
-
-    props.add (new ChoicePropertyComponent (getMacSDKVersion(), "OSX Base SDK Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
-               "The version of OSX to link against in the XCode build.");
-
-    if (getMacCompatibilityVersion().toString().isEmpty())
-        getMacCompatibilityVersion() = osxVersionDefault;
-
-    props.add (new ChoicePropertyComponent (getMacCompatibilityVersion(), "OSX Compatibility Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
-               "The minimum version of OSX that the target binary will be compatible with.");
-
-    const char* osxArch[] = { "Use Default", "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
-    const char* osxArchValues[] = { osxArch_Default, osxArch_Native, osxArch_32BitUniversal, osxArch_64BitUniversal, osxArch_64Bit, 0 };
-
-    if (getMacArchitecture().toString().isEmpty())
-        getMacArchitecture() = osxArch_Default;
-
-    props.add (new ChoicePropertyComponent (getMacArchitecture(), "OSX Architecture", StringArray (osxArch), Array<var> (osxArchValues)),
-               "The type of OSX binary that will be produced.");
-
-    props.setPreferredHeight (22);
-}
-
-StringPairArray Project::BuildConfiguration::getAllPreprocessorDefs() const
-{
-    return mergePreprocessorDefs (project->getPreprocessorDefs(),
-                                  parsePreprocessorDefs (getBuildConfigPreprocessorDefs().toString()));
-}
-
-StringArray Project::BuildConfiguration::getHeaderSearchPaths() const
-{
-    StringArray s;
-    s.addTokens (getHeaderSearchPath().toString(), ";", String::empty);
-    return s;
 }
 
 //==============================================================================

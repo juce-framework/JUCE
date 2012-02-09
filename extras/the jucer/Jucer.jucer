@@ -4,15 +4,31 @@
               bundleIdentifier="com.yourcompany.Jucer" jucerVersion="3.0.0"
               bigIcon="HFdB13">
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" objCExtraSuffix="wQBvzo" juceFolder="../.."/>
-    <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="1" juceFolder="../.."/>
-    <VS2010 targetFolder="Builds/VisualStudio2010" libraryType="1" juceFolder="../.."/>
-    <LINUX_MAKE targetFolder="Builds/Linux" juceFolder="../.."/>
+    <XCODE_MAC targetFolder="Builds/MacOSX" objCExtraSuffix="wQBvzo" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
+    <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="1" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
+      </CONFIGURATIONS>
+    </VS2008>
+    <VS2010 targetFolder="Builds/VisualStudio2010" libraryType="1" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
+      </CONFIGURATIONS>
+    </VS2010>
+    <LINUX_MAKE targetFolder="Builds/Linux" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
+      </CONFIGURATIONS>
+    </LINUX_MAKE>
   </EXPORTFORMATS>
-  <CONFIGURATIONS>
-    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
-    <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
-  </CONFIGURATIONS>
   <MAINGROUP id="ba5BEZ" name="Jucer">
     <GROUP id="{417804F2-13A6-72FD-F93D-5821DBB93EBE}" name="src">
       <GROUP id="{CBEEAC5A-1CD0-80DB-7D92-99E502259E6A}" name="model">

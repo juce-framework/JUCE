@@ -14,21 +14,42 @@
               bigIcon="rVgowdy">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../.." documentExtensions=".jucer" objCExtraSuffix="zNNCr"/>
+               juceFolder="../.." documentExtensions=".jucer" objCExtraSuffix="zNNCr">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
+                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
+                       osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"/>
+      </CONFIGURATIONS>
+    </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"/>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../.."/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"/>
+      </CONFIGURATIONS>
+    </VS2008>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"/>
+      </CONFIGURATIONS>
+    </LINUX_MAKE>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../.."/>
+            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"/>
+      </CONFIGURATIONS>
+    </VS2010>
   </EXPORTFORMATS>
-  <CONFIGURATIONS>
-    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
-                   osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
-    <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
-                   osxSDK="default" osxCompatibility="10.5 SDK" osxArchitecture="32BitUniversal"/>
-  </CONFIGURATIONS>
   <MAINGROUP name="The Introjucer" id="NhrJq66R">
     <GROUP id="mslFIKZ" name="Application">
       <FILE id="PXX8Yi" name="jucer_Application.h" compile="0" resource="0"

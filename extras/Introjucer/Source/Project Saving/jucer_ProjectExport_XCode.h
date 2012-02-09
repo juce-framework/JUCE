@@ -28,6 +28,19 @@
 
 #include "jucer_ProjectExporter.h"
 
+namespace
+{
+    const char* const osxVersionDefault         = "default";
+    const char* const osxVersion10_4            = "10.4 SDK";
+    const char* const osxVersion10_5            = "10.5 SDK";
+    const char* const osxVersion10_6            = "10.6 SDK";
+
+    const char* const osxArch_Default           = "default";
+    const char* const osxArch_Native            = "Native";
+    const char* const osxArch_32BitUniversal    = "32BitUniversal";
+    const char* const osxArch_64BitUniversal    = "64BitUniversal";
+    const char* const osxArch_64Bit             = "64BitIntel";
+}
 
 //==============================================================================
 class XCodeProjectExporter  : public ProjectExporter
@@ -147,6 +160,55 @@ public:
         writeInfoPlistFile();
     }
 
+protected:
+    //==============================================================================
+    class XcodeBuildConfiguration  : public BuildConfiguration
+    {
+    public:
+        XcodeBuildConfiguration (Project& project, const ValueTree& settings)
+            : BuildConfiguration (project, settings)
+        {
+        }
+
+        Value getMacSDKVersion() const                      { return getValue (Ids::osxSDK); }
+        Value getMacCompatibilityVersion() const            { return getValue (Ids::osxCompatibility); }
+        Value getMacArchitecture() const                    { return getValue (Ids::osxArchitecture); }
+
+        void createPropertyEditors (PropertyListBuilder& props)
+        {
+            createBasicPropertyEditors (props);
+
+            if (getMacSDKVersion().toString().isEmpty())
+                getMacSDKVersion() = osxVersionDefault;
+
+            const char* osxVersions[] = { "Use Default", osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
+            const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
+
+            props.add (new ChoicePropertyComponent (getMacSDKVersion(), "OSX Base SDK Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
+                       "The version of OSX to link against in the XCode build.");
+
+            if (getMacCompatibilityVersion().toString().isEmpty())
+                getMacCompatibilityVersion() = osxVersionDefault;
+
+            props.add (new ChoicePropertyComponent (getMacCompatibilityVersion(), "OSX Compatibility Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
+                       "The minimum version of OSX that the target binary will be compatible with.");
+
+            const char* osxArch[] = { "Use Default", "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
+            const char* osxArchValues[] = { osxArch_Default, osxArch_Native, osxArch_32BitUniversal, osxArch_64BitUniversal, osxArch_64Bit, 0 };
+
+            if (getMacArchitecture().toString().isEmpty())
+                getMacArchitecture() = osxArch_Default;
+
+            props.add (new ChoicePropertyComponent (getMacArchitecture(), "OSX Architecture", StringArray (osxArch), Array<var> (osxArchValues)),
+                       "The type of OSX binary that will be produced.");
+        }
+    };
+
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    {
+        return new XcodeBuildConfiguration (project, settings);
+    }
+
 private:
     OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, misc, projectConfigs, targetConfigs;
     StringArray buildPhaseIDs, resourceIDs, sourceIDs, frameworkIDs;
@@ -215,12 +277,12 @@ private:
             addGroup (createID ("__mainsourcegroup"), "Source", topLevelGroupIDs);
         }
 
-        for (int i = 0; i < configs.size(); ++i)
+        for (int i = 0; i < getNumConfigurations(); ++i)
         {
-            const Project::BuildConfiguration& config = configs.getReference(i);
+            const BuildConfiguration::Ptr config (getConfiguration (i));
 
-            addProjectConfig (config.getName().getValue(), getProjectSettings (config));
-            addTargetConfig  (config.getName().getValue(), getTargetSettings (config));
+            addProjectConfig (config->getName().getValue(), getProjectSettings (*config));
+            addTargetConfig  (config->getName().getValue(), getTargetSettings (dynamic_cast <XcodeBuildConfiguration&> (*config)));
         }
 
         addConfigList (projectConfigs, createID ("__projList"));
@@ -413,7 +475,7 @@ private:
         overwriteFileIfDifferentOrThrow (infoPlistFile, mo);
     }
 
-    StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config)
+    StringArray getHeaderSearchPaths (const BuildConfiguration& config)
     {
         StringArray searchPaths (extraSearchPaths);
         searchPaths.addArray (config.getHeaderSearchPaths());
@@ -434,7 +496,7 @@ private:
         librarySearchPaths.add (sanitisePath (searchPath));
     }
 
-    void getLinkerFlags (const Project::BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths)
+    void getLinkerFlags (const BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths)
     {
         if (xcodeIsBundle)
             flags.add ("-bundle");
@@ -449,7 +511,7 @@ private:
         flags.removeEmptyStrings (true);
     }
 
-    StringArray getProjectSettings (const Project::BuildConfiguration& config)
+    StringArray getProjectSettings (const BuildConfiguration& config)
     {
         StringArray s;
         s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
@@ -489,15 +551,15 @@ private:
         return s;
     }
 
-    StringArray getTargetSettings (const Project::BuildConfiguration& config)
+    StringArray getTargetSettings (const XcodeBuildConfiguration& config)
     {
         StringArray s;
 
         const String arch (config.getMacArchitecture().toString());
-        if (arch == Project::BuildConfiguration::osxArch_Native)                s.add ("ARCHS = \"$(ARCHS_NATIVE)\"");
-        else if (arch == Project::BuildConfiguration::osxArch_32BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
-        else if (arch == Project::BuildConfiguration::osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
-        else if (arch == Project::BuildConfiguration::osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
+        if (arch == osxArch_Native)                s.add ("ARCHS = \"$(ARCHS_NATIVE)\"");
+        else if (arch == osxArch_32BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
+        else if (arch == osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
+        else if (arch == osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
 
         s.add ("HEADER_SEARCH_PATHS = \"" + replacePreprocessorTokens (config, getHeaderSearchPaths (config).joinIntoString (" ")) + " $(inherited)\"");
         s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
@@ -542,23 +604,23 @@ private:
             const String sdk (config.getMacSDKVersion().toString());
             const String sdkCompat (config.getMacCompatibilityVersion().toString());
 
-            if (sdk == Project::BuildConfiguration::osxVersion10_4)
+            if (sdk == osxVersion10_4)
             {
                 s.add ("SDKROOT = macosx10.4");
                 gccVersion = "4.0";
             }
-            else if (sdk == Project::BuildConfiguration::osxVersion10_5)
+            else if (sdk == osxVersion10_5)
             {
                 s.add ("SDKROOT = macosx10.5");
             }
-            else if (sdk == Project::BuildConfiguration::osxVersion10_6)
+            else if (sdk == osxVersion10_6)
             {
                 s.add ("SDKROOT = macosx10.6");
             }
 
-            if (sdkCompat == Project::BuildConfiguration::osxVersion10_4)       s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4");
-            else if (sdkCompat == Project::BuildConfiguration::osxVersion10_5)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5");
-            else if (sdkCompat == Project::BuildConfiguration::osxVersion10_6)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6");
+            if (sdkCompat == osxVersion10_4)       s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4");
+            else if (sdkCompat == osxVersion10_5)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5");
+            else if (sdkCompat == osxVersion10_6)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6");
 
             s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
         }
@@ -888,7 +950,7 @@ private:
     {
         jassert (xcodeFileType.isNotEmpty());
         jassert (xcodeBundleExtension.isEmpty() || xcodeBundleExtension.startsWithChar('.'));
-        String productName (configs.getReference(0).getTargetBinaryName().toString());
+        String productName (getConfiguration(0)->getTargetBinaryName().toString());
 
         if (xcodeFileType == "archive.ar")
             productName = getLibbedFilename (productName);

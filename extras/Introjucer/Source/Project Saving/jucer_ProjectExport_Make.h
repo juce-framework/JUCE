@@ -94,6 +94,27 @@ public:
         overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("Makefile"), mo);
     }
 
+protected:
+    //==============================================================================
+    class MakeBuildConfiguration  : public BuildConfiguration
+    {
+    public:
+        MakeBuildConfiguration (Project& project, const ValueTree& settings)
+            : BuildConfiguration (project, settings)
+        {
+        }
+
+        void createPropertyEditors (PropertyListBuilder& props)
+        {
+            createBasicPropertyEditors (props);
+        }
+    };
+
+    BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
+    {
+        return new MakeBuildConfiguration (project, settings);
+    }
+
 private:
     //==============================================================================
     void findAllFilesToCompile (const Project::Item& projectItem, Array<RelativePath>& results)
@@ -110,7 +131,7 @@ private:
         }
     }
 
-    void writeDefineFlags (OutputStream& out, const Project::BuildConfiguration& config)
+    void writeDefineFlags (OutputStream& out, const BuildConfiguration& config)
     {
         StringPairArray defines;
         defines.set ("LINUX", "1");
@@ -128,7 +149,7 @@ private:
         out << createGCCPreprocessorFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (config)));
     }
 
-    void writeHeaderPathFlags (OutputStream& out, const Project::BuildConfiguration& config)
+    void writeHeaderPathFlags (OutputStream& out, const BuildConfiguration& config)
     {
         StringArray searchPaths (extraSearchPaths);
         searchPaths.addArray (config.getHeaderSearchPaths());
@@ -142,7 +163,7 @@ private:
             out << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])).quoted();
     }
 
-    void writeCppFlags (OutputStream& out, const Project::BuildConfiguration& config)
+    void writeCppFlags (OutputStream& out, const BuildConfiguration& config)
     {
         out << "  CPPFLAGS := $(DEPFLAGS)";
         writeDefineFlags (out, config);
@@ -150,7 +171,7 @@ private:
         out << newLine;
     }
 
-    void writeLinkerFlags (OutputStream& out, const Project::BuildConfiguration& config)
+    void writeLinkerFlags (OutputStream& out, const BuildConfiguration& config)
     {
         out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)";
 
@@ -176,7 +197,7 @@ private:
             << newLine;
     }
 
-    void writeConfig (OutputStream& out, const Project::BuildConfiguration& config)
+    void writeConfig (OutputStream& out, const BuildConfiguration& config)
     {
         const String buildDirName ("build");
         const String intermediatesDirName (buildDirName + "/intermediate/" + config.getName().toString());
@@ -251,7 +272,7 @@ private:
             << newLine;
 
         out << "ifndef CONFIG" << newLine
-            << "  CONFIG=" << escapeSpaces (configs.getReference(0).getName().toString()) << newLine
+            << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName().toString()) << newLine
             << "endif" << newLine
             << newLine;
 
@@ -265,8 +286,8 @@ private:
             << newLine;
 
         int i;
-        for (i = 0; i < configs.size(); ++i)
-            writeConfig (out, configs.getReference(i));
+        for (i = 0; i < getNumConfigurations(); ++i)
+            writeConfig (out, *getConfiguration(i));
 
         writeObjects (out, files);
 

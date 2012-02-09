@@ -187,65 +187,6 @@ public:
     void findAllImageItems (OwnedArray<Item>& items);
 
     //==============================================================================
-    class BuildConfiguration
-    {
-    public:
-        BuildConfiguration (const BuildConfiguration&);
-        const BuildConfiguration& operator= (const BuildConfiguration&);
-        ~BuildConfiguration();
-
-        //==============================================================================
-        Project& getProject() const                         { return *project; }
-
-        void createPropertyEditors (PropertyListBuilder&);
-
-        //==============================================================================
-        Value getName() const                               { return getValue (Ids::name); }
-        Value isDebug() const                               { return getValue (Ids::isDebug); }
-        Value getTargetBinaryName() const                   { return getValue (Ids::targetName); }
-        // the path relative to the build folder in which the binary should go
-        Value getTargetBinaryRelativePath() const           { return getValue (Ids::binaryPath); }
-        Value getOptimisationLevel() const                  { return getValue (Ids::optimisation); }
-        String getGCCOptimisationFlag() const;
-        Value getBuildConfigPreprocessorDefs() const        { return getValue (Ids::defines); }
-        StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
-        Value getHeaderSearchPath() const                   { return getValue (Ids::headerPath); }
-        StringArray getHeaderSearchPaths() const;
-
-        static const char* const osxVersionDefault;
-        static const char* const osxVersion10_4;
-        static const char* const osxVersion10_5;
-        static const char* const osxVersion10_6;
-        Value getMacSDKVersion() const                      { return getValue (Ids::osxSDK); }
-        Value getMacCompatibilityVersion() const            { return getValue (Ids::osxCompatibility); }
-
-        static const char* const osxArch_Default;
-        static const char* const osxArch_Native;
-        static const char* const osxArch_32BitUniversal;
-        static const char* const osxArch_64BitUniversal;
-        static const char* const osxArch_64Bit;
-        Value getMacArchitecture() const                    { return getValue (Ids::osxArchitecture); }
-
-        //==============================================================================
-    private:
-        friend class Project;
-        Project* project;
-        ValueTree config;
-
-        Value getValue (const Identifier& name) const       { return config.getPropertyAsValue (name, getUndoManager()); }
-        UndoManager* getUndoManager() const                 { return project->getUndoManagerFor (config); }
-
-        BuildConfiguration (Project* project, const ValueTree& configNode);
-    };
-
-    int getNumConfigurations() const;
-    BuildConfiguration getConfiguration (int index);
-    void addNewConfiguration (BuildConfiguration* configToCopy);
-    void deleteConfiguration (int index);
-    bool hasConfigurationNamed (const String& name) const;
-    String getUniqueConfigName (String name) const;
-
-    //==============================================================================
     ValueTree getExporters();
     int getNumExporters();
     ProjectExporter* createExporter (int index);
@@ -305,9 +246,10 @@ private:
     void sanitiseConfigFlags();
     void setMissingDefaultValues();
     ValueTree getConfigurations() const;
-    void createDefaultConfigs();
     ValueTree getConfigNode();
     ValueTree getModulesNode();
+
+    void updateOldStyleConfigList();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project);
 };
