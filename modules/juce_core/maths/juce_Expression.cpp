@@ -44,7 +44,7 @@ public:
     virtual ReferenceCountedObjectPtr<Term> negated();
 
     virtual ReferenceCountedObjectPtr<Term> createTermToEvaluateInput (const Scope&, const Term* /*inputTerm*/,
-                                                                             double /*overallTarget*/, Term* /*topLevelTerm*/) const
+                                                                       double /*overallTarget*/, Term* /*topLevelTerm*/) const
     {
         jassertfalse;
         return nullptr;
@@ -81,9 +81,8 @@ private:
 
 
 //==============================================================================
-class Expression::Helpers
+struct Expression::Helpers
 {
-public:
     typedef ReferenceCountedObjectPtr<Term> TermPtr;
 
     // This helper function is needed to work around VC6 scoping bugs
@@ -141,9 +140,9 @@ public:
     class BinaryTerm  : public Term
     {
     public:
-        BinaryTerm (Term* const left_, Term* const right_) : left (left_), right (right_)
+        BinaryTerm (Term* const l, Term* const r) : left (l), right (r)
         {
-            jassert (left_ != nullptr && right_ != nullptr);
+            jassert (l != nullptr && r != nullptr);
         }
 
         int getInputIndexFor (const Term* possibleInput) const
@@ -160,7 +159,7 @@ public:
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
         {
-            return new Constant (performFunction (left->resolve (scope, recursionDepth)->toDouble(),
+            return new Constant (performFunction (left ->resolve (scope, recursionDepth)->toDouble(),
                                                   right->resolve (scope, recursionDepth)->toDouble()), false);
         }
 
@@ -308,7 +307,7 @@ public:
     class DotOperator  : public BinaryTerm
     {
     public:
-        DotOperator (SymbolTerm* const left_, Term* const right_)  : BinaryTerm (left_, right_) {}
+        DotOperator (SymbolTerm* const l, Term* const r)  : BinaryTerm (l, r) {}
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
         {
@@ -459,7 +458,7 @@ public:
     class Add  : public BinaryTerm
     {
     public:
-        Add (Term* const left_, Term* const right_) : BinaryTerm (left_, right_) {}
+        Add (Term* const l, Term* const r) : BinaryTerm (l, r) {}
 
         Term* clone() const                     { return new Add (left->clone(), right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs + rhs; }
@@ -484,7 +483,7 @@ public:
     class Subtract  : public BinaryTerm
     {
     public:
-        Subtract (Term* const left_, Term* const right_) : BinaryTerm (left_, right_) {}
+        Subtract (Term* const l, Term* const r) : BinaryTerm (l, r) {}
 
         Term* clone() const                     { return new Subtract (left->clone(), right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs - rhs; }
@@ -512,7 +511,7 @@ public:
     class Multiply  : public BinaryTerm
     {
     public:
-        Multiply (Term* const left_, Term* const right_) : BinaryTerm (left_, right_) {}
+        Multiply (Term* const l, Term* const r) : BinaryTerm (l, r) {}
 
         Term* clone() const                     { return new Multiply (left->clone(), right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs * rhs; }
@@ -537,7 +536,7 @@ public:
     class Divide  : public BinaryTerm
     {
     public:
-        Divide (Term* const left_, Term* const right_) : BinaryTerm (left_, right_) {}
+        Divide (Term* const l, Term* const r) : BinaryTerm (l, r) {}
 
         Term* clone() const                     { return new Divide (left->clone(), right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs / rhs; }

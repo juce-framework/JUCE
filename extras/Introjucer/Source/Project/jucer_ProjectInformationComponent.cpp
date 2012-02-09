@@ -42,7 +42,8 @@ public:
                            "Select a folder containing your JUCE modules..."),
           modulesLabel (String::empty, "Module source folder:"),
           updateModulesButton ("Check for module updates..."),
-          moduleListBox (moduleList)
+          moduleListBox (moduleList),
+          copyingMessage (project_, moduleList)
     {
         moduleList.rescan (ModuleList::getLocalModulesFolder (&project));
 
@@ -58,7 +59,11 @@ public:
 
         moduleListBox.setOwner (this);
         addAndMakeVisible (&moduleListBox);
-        moduleListBox.setBounds ("4, 31, parent.width / 2 - 4, parent.height - 3");
+        moduleListBox.setBounds ("4, 31, parent.width / 2 - 4, parent.height - 32");
+
+        addAndMakeVisible (&copyingMessage);
+        copyingMessage.setBounds ("4, parent.height - 30, parent.width - 4, parent.height - 1");
+        copyingMessage.refresh();
     }
 
     void filenameComponentChanged (FilenameComponent*)
@@ -101,7 +106,12 @@ public:
         settings = nullptr;
 
         if (selectedModule != nullptr)
+        {
             addAndMakeVisible (settings = new ModuleSettingsPanel (project, moduleList, selectedModule->uid));
+            settings->setBounds ("parent.width / 2 + 1, 31, parent.width - 3, parent.height - 32");
+        }
+
+        copyingMessage.refresh();
     }
 
     void refresh()
@@ -110,6 +120,8 @@ public:
 
         if (settings != nullptr)
             settings->refreshAll();
+
+        copyingMessage.refresh();
     }
 
     void paint (Graphics& g) // (overridden to avoid drawing the name)
@@ -215,7 +227,6 @@ public:
         ModuleSettingsPanel (Project& project_, ModuleList& moduleList_, const String& moduleID_)
             : project (project_), moduleList (moduleList_), moduleID (moduleID_)
         {
-            setBounds ("parent.width / 2 + 1, 31, parent.width - 3, parent.height - 3");
             refreshAll();
         }
 
@@ -381,6 +392,60 @@ public:
         };
     };
 
+    //==============================================================================
+    class ModuleCopyingMessage  : public Component
+    {
+    public:
+        ModuleCopyingMessage (Project& project_, ModuleList& list_)
+            : project (project_), list (list_)
+        {
+        }
+
+        void paint (Graphics& g)
+        {
+            g.setFont (13.0f);
+            g.setColour (Colours::darkred);
+            g.drawFittedText (getName(), 4, 0, getWidth() - 8, getHeight(), Justification::centredRight, 4);
+        }
+
+        void refresh()
+        {
+            int numCopied, numNonCopied;
+            countCopiedModules (numCopied, numNonCopied);
+
+            if (numCopied > 0 && numNonCopied > 0)
+                setName ("Warning! Some of your modules are set to use local copies, and others are using remote references.\n"
+                         "This may create problems if some modules expect to share the same parent folder, so you may "
+                         "want to make sure that they are all either copied or not.");
+            else
+                setName (String::empty);
+
+            repaint();
+        }
+
+        void countCopiedModules (int& numCopied, int& numNonCopied)
+        {
+            numCopied = numNonCopied = 0;
+
+            for (int i = list.modules.size(); --i >= 0;)
+            {
+                const String moduleID (list.modules.getUnchecked(i)->uid);
+
+                if (project.isModuleEnabled (moduleID))
+                {
+                    if (project.shouldCopyModuleFilesLocally (moduleID).getValue())
+                        ++numCopied;
+                    else
+                        ++numNonCopied;
+                }
+            }
+        }
+
+    private:
+        Project& project;
+        ModuleList& list;
+    };
+
 private:
     Project& project;
     ModuleList moduleList;
@@ -388,6 +453,7 @@ private:
     Label modulesLabel;
     TextButton updateModulesButton;
     ModuleSelectionListBox moduleListBox;
+    ModuleCopyingMessage copyingMessage;
     ScopedPointer<ModuleSettingsPanel> settings;
 };
 
@@ -405,12 +471,12 @@ public:
         addAndMakeVisible (&exporters);
 
         mainProjectInfoPanel.backgroundColour = Colours::white.withAlpha (0.3f);
-        modulesPanelGroup.backgroundColour = Colours::white.withAlpha (0.3f);
+        modulesPanelGroup   .backgroundColour = Colours::white.withAlpha (0.3f);
     }
 
     void updateSize (int width)
     {
-        width = jmax (550, width);
+        width = jmax (550, width - 6);
 
         int y = 0;
         y += mainProjectInfoPanel.updateSize (y, width);
@@ -651,7 +717,6 @@ private:
             for (int i = 0; i < properties.size(); ++i)
             {
                 PropertyComponent* pp = properties.getUnchecked(i);
-
                 PropertyGroupList* pgl = dynamic_cast <PropertyGroupList*> (pp);
 
                 if (pgl != nullptr)
