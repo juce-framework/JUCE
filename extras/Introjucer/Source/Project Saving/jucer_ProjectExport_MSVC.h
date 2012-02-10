@@ -242,7 +242,75 @@ protected:
                                         + iconFile.getFileName().quoted(), false, false);
     }
 
-    static void writeIconFile (const Array<Image>& images, OutputStream& out)
+    static void writeBMPImage (const Image& image, const int w, const int h, MemoryOutputStream& out)
+    {
+        const int maskStride = (w / 8 + 3) & ~3;
+
+        out.writeInt (40); // bitmapinfoheader size
+        out.writeInt (w);
+        out.writeInt (h * 2);
+        out.writeShort (1); // planes
+        out.writeShort (32); // bits
+        out.writeInt (0); // compression
+        out.writeInt ((h * w * 4) + (h * maskStride)); // size image
+        out.writeInt (0); // x pixels per meter
+        out.writeInt (0); // y pixels per meter
+        out.writeInt (0); // clr used
+        out.writeInt (0); // clr important
+
+        const Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
+        const int alphaThreshold = 5;
+
+        int y;
+        for (y = h; --y >= 0;)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                const Colour pixel (bitmap.getPixelColour (x, y));
+
+                if (pixel.getAlpha() <= alphaThreshold)
+                {
+                    out.writeInt (0);
+                }
+                else
+                {
+                    out.writeByte ((char) pixel.getBlue());
+                    out.writeByte ((char) pixel.getGreen());
+                    out.writeByte ((char) pixel.getRed());
+                    out.writeByte ((char) pixel.getAlpha());
+                }
+            }
+        }
+
+        for (y = h; --y >= 0;)
+        {
+            int mask = 0, count = 0;
+
+            for (int x = 0; x < w; ++x)
+            {
+                const Colour pixel (bitmap.getPixelColour (x, y));
+
+                mask <<= 1;
+                if (pixel.getAlpha() <= alphaThreshold)
+                    mask |= 1;
+
+                if (++count == 8)
+                {
+                    out.writeByte ((char) mask);
+                    count = 0;
+                    mask = 0;
+                }
+            }
+
+            if (mask != 0)
+                out.writeByte ((char) mask);
+
+            for (int i = maskStride - w / 8; --i >= 0;)
+                out.writeByte (0);
+        }
+    }
+
+    static void writeIconFile (const Array<Image>& images, MemoryOutputStream& out)
     {
         out.writeShort (0); // reserved
         out.writeShort (1); // .ico tag
@@ -255,73 +323,20 @@ protected:
 
         for (int i = 0; i < images.size(); ++i)
         {
+            const size_t oldDataSize = dataBlock.getDataSize();
+
             const Image& image = images.getReference (i);
             const int w = image.getWidth();
             const int h = image.getHeight();
-            const int maskStride = (w / 8 + 3) & ~3;
 
-            const size_t oldDataSize = dataBlock.getDataSize();
-            dataBlock.writeInt (40); // bitmapinfoheader size
-            dataBlock.writeInt (w);
-            dataBlock.writeInt (h * 2);
-            dataBlock.writeShort (1); // planes
-            dataBlock.writeShort (32); // bits
-            dataBlock.writeInt (0); // compression
-            dataBlock.writeInt ((h * w * 4) + (h * maskStride)); // size image
-            dataBlock.writeInt (0); // x pixels per meter
-            dataBlock.writeInt (0); // y pixels per meter
-            dataBlock.writeInt (0); // clr used
-            dataBlock.writeInt (0); // clr important
-
-            const Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
-            const int alphaThreshold = 5;
-
-            int y;
-            for (y = h; --y >= 0;)
+            if (w >= 256 || h >= 256)
             {
-                for (int x = 0; x < w; ++x)
-                {
-                    const Colour pixel (bitmap.getPixelColour (x, y));
-
-                    if (pixel.getAlpha() <= alphaThreshold)
-                    {
-                        dataBlock.writeInt (0);
-                    }
-                    else
-                    {
-                        dataBlock.writeByte ((char) pixel.getBlue());
-                        dataBlock.writeByte ((char) pixel.getGreen());
-                        dataBlock.writeByte ((char) pixel.getRed());
-                        dataBlock.writeByte ((char) pixel.getAlpha());
-                    }
-                }
+                PNGImageFormat pngFormat;
+                pngFormat.writeImageToStream (image, dataBlock);
             }
-
-            for (y = h; --y >= 0;)
+            else
             {
-                int mask = 0, count = 0;
-
-                for (int x = 0; x < w; ++x)
-                {
-                    const Colour pixel (bitmap.getPixelColour (x, y));
-
-                    mask <<= 1;
-                    if (pixel.getAlpha() <= alphaThreshold)
-                        mask |= 1;
-
-                    if (++count == 8)
-                    {
-                        dataBlock.writeByte ((char) mask);
-                        count = 0;
-                        mask = 0;
-                    }
-                }
-
-                if (mask != 0)
-                    dataBlock.writeByte ((char) mask);
-
-                for (int i = maskStride - w / 8; --i >= 0;)
-                    dataBlock.writeByte (0);
+                writeBMPImage (image, w, h, dataBlock);
             }
 
             out.writeByte ((char) w);
@@ -342,21 +357,14 @@ protected:
     {
         Array<Image> images;
 
-        Image im (getBestIconForSize (16, true));
-        if (im.isValid())
-            images.add (im);
+        const int sizes[] = { 16, 32, 48, 256 };
 
-        im = getBestIconForSize (32, true);
-        if (im.isValid())
-            images.add (im);
-
-        im = getBestIconForSize (48, true);
-        if (im.isValid())
-            images.add (im);
-
-        im = getBestIconForSize (128, true);
-        if (im.isValid())
-            images.add (im);
+        for (int i = 0; i < numElementsInArray (sizes); ++i)
+        {
+            Image im (getBestIconForSize (sizes[i], true));
+            if (im.isValid())
+                images.add (im);
+        }
 
         if (images.size() == 0)
             return true;
