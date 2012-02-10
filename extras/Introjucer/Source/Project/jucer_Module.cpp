@@ -456,21 +456,17 @@ void LibraryModule::createLocalHeaderWrapper (ProjectSaver& projectSaver, const 
         << newLine;
 
     StringArray paths, guards;
-    for (int i = project.getNumExporters(); --i >= 0;)
+
+    for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
+        const RelativePath headerFromProject (getModuleRelativeToProject (*exporter)
+                                                .getChildFile (originalHeader.getFileName()));
 
-        if (exporter != nullptr)
-        {
-            const RelativePath headerFromProject (getModuleRelativeToProject (*exporter)
-                                                   .getChildFile (originalHeader.getFileName()));
+        const RelativePath fileFromHere (headerFromProject.rebased (project.getFile().getParentDirectory(),
+                                                                    localHeader.getParentDirectory(), RelativePath::unknown));
 
-            const RelativePath fileFromHere (headerFromProject.rebased (project.getFile().getParentDirectory(),
-                                                                        localHeader.getParentDirectory(), RelativePath::unknown));
-
-            paths.add (fileFromHere.toUnixStyle().quoted());
-            guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");
-        }
+        paths.add (fileFromHere.toUnixStyle().quoted());
+        guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");
     }
 
     writeGuardedInclude (out, paths, guards);

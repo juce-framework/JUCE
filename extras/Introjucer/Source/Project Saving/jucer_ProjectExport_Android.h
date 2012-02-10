@@ -303,10 +303,8 @@ private:
         if (forDebug)
             flags << " -g";
 
-        for (int i = 0; i < getNumConfigurations(); ++i)
+        for (ConfigIterator config (*this); config.next();)
         {
-            const BuildConfiguration::Ptr config (getConfiguration(i));
-
             if (config->isDebug() == forDebug)
             {
                 flags << createIncludePathFlags (*config);
@@ -327,10 +325,8 @@ private:
             defines.set ("NDEBUG", "1");
         }
 
-        for (int i = 0; i < getNumConfigurations(); ++i)
+        for (ConfigIterator config (*this); config.next();)
         {
-            const BuildConfiguration::Ptr config (getConfiguration(i));
-
             if (config->isDebug() == forDebug)
             {
                 flags << " -O" << config->getGCCOptimisationFlag();

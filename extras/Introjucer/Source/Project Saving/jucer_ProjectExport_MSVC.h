@@ -210,19 +210,18 @@ protected:
             << "Global" << newLine
             << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution" << newLine;
 
-        int i;
-        for (i = 0; i < getNumConfigurations(); ++i)
+        for (ConfigIterator i (*this); i.next();)
         {
-            const String configName (createConfigName (*getConfiguration(i)));
+            const String configName (createConfigName (*i));
             out << "\t\t" << configName << " = " << configName << newLine;
         }
 
         out << "\tEndGlobalSection" << newLine
             << "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution" << newLine;
 
-        for (i = 0; i < getNumConfigurations(); ++i)
+        for (ConfigIterator i (*this); i.next();)
         {
-            const String configName (createConfigName (*getConfiguration(i)));
+            const String configName (createConfigName (*i));
             out << "\t\t" << projectGUID << "." << configName << ".ActiveCfg = " << configName << newLine;
             out << "\t\t" << projectGUID << "." << configName << ".Build.0 = " << configName << newLine;
         }
@@ -493,10 +492,10 @@ protected:
 
         if (excludeFromBuild || useStdcall)
         {
-            for (int i = 0; i < getNumConfigurations(); ++i)
+            for (ConfigIterator i (*this); i.next();)
             {
                 XmlElement* fileConfig = fileXml->createNewChildElement ("FileConfiguration");
-                fileConfig->setAttribute ("Name", createConfigName (*getConfiguration (i)));
+                fileConfig->setAttribute ("Name", createConfigName (*i));
 
                 if (excludeFromBuild)
                     fileConfig->setAttribute ("ExcludedFromBuild", "true");
@@ -721,8 +720,8 @@ protected:
 
     void createConfigs (XmlElement& xml)
     {
-        for (int i = 0; i < getNumConfigurations(); ++i)
-            createConfig (*xml.createNewChildElement ("Configuration"), *getConfiguration(i));
+        for (ConfigIterator i (*this); i.next();)
+            createConfig (*xml.createNewChildElement ("Configuration"), *i);
     }
 
     //==============================================================================
@@ -857,9 +856,8 @@ private:
             << "!MESSAGE Possible choices for configuration are:" << newLine
             << "!MESSAGE " << newLine;
 
-        int i;
-        for (i = 0; i < getNumConfigurations(); ++i)
-            out << "!MESSAGE \"" << createConfigName (*getConfiguration (i)) << "\" (based on " << targetType << ")" << newLine;
+        for (ConfigIterator i (*this); i.next();)
+            out << "!MESSAGE \"" << createConfigName (*i) << "\" (based on " << targetType << ")" << newLine;
 
         out << "!MESSAGE " << newLine
             << "# Begin Project" << newLine
@@ -872,9 +870,8 @@ private:
 
         String targetList;
 
-        for (i = 0; i < getNumConfigurations(); ++i)
+        for (ConfigIterator config (*this); config.next();)
         {
-            const BuildConfiguration::Ptr config (getConfiguration(i));
             const String configName (createConfigName (*config));
             targetList << "# Name \"" << configName << '"' << newLine;
 
@@ -885,7 +882,7 @@ private:
             const bool isDebug = (bool) config->isDebug().getValue();
             const String extraDebugFlags (isDebug ? "/Gm /ZI /GZ" : "");
 
-            out << (i == 0 ? "!IF" : "!ELSEIF") << "  \"$(CFG)\" == \"" << configName << '"' << newLine
+            out << (config.index == 0 ? "!IF" : "!ELSEIF") << "  \"$(CFG)\" == \"" << configName << '"' << newLine
                 << "# PROP BASE Use_MFC 0" << newLine
                 << "# PROP BASE Use_Debug_Libraries " << (isDebug ? "1" : "0") << newLine
                 << "# PROP BASE Output_Dir \"" << binariesPath << '"' << newLine
@@ -996,34 +993,14 @@ private:
 
     void writeDSWFile (OutputStream& out)
     {
-        out << "Microsoft Developer Studio Workspace File, Format Version 6.00 " << newLine;
-
-        /*if (! project.isUsingWrapperFiles())
-        {
-            out << "Project: \"JUCE\"= ..\\JUCE.dsp - Package Owner=<4>" << newLine
-                << "Package=<5>" << newLine
-                << "{{{" << newLine
-                << "}}}" << newLine
-                << "Package=<4>" << newLine
-                << "{{{" << newLine
-                << "}}}" << newLine;
-        }*/
-
-        out << "Project: \"" << projectName << "\" = .\\" << getDSPFile().getFileName() << " - Package Owner=<4>" << newLine
+        out << "Microsoft Developer Studio Workspace File, Format Version 6.00 " << newLine
+            << "Project: \"" << projectName << "\" = .\\" << getDSPFile().getFileName() << " - Package Owner=<4>" << newLine
             << "Package=<5>" << newLine
             << "{{{" << newLine
             << "}}}" << newLine
             << "Package=<4>" << newLine
-            << "{{{" << newLine;
-
-        /*if (! project.isUsingWrapperFiles())
-        {
-            out << "    Begin Project Dependency" << newLine
-                << "    Project_Dep_Name JUCE" << newLine
-                << "    End Project Dependency" << newLine;
-        }*/
-
-        out << "}}}" << newLine
+            << "{{{" << newLine
+            << "}}}" << newLine
             << "Global:" << newLine
             << "Package=<5>" << newLine
             << "{{{" << newLine
@@ -1161,10 +1138,8 @@ protected:
             XmlElement* configsGroup = projectXml.createNewChildElement ("ItemGroup");
             configsGroup->setAttribute ("Label", "ProjectConfigurations");
 
-            for (int i = 0; i < getNumConfigurations(); ++i)
+            for (ConfigIterator config (*this); config.next();)
             {
-                const BuildConfiguration::Ptr config (getConfiguration(i));
-
                 XmlElement* e = configsGroup->createNewChildElement ("ProjectConfiguration");
                 e->setAttribute ("Include", createConfigName (*config));
                 e->createNewChildElement ("Configuration")->addTextElement (config->getName().toString());
@@ -1183,10 +1158,8 @@ protected:
             imports->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
         }
 
-        for (int i = 0; i < getNumConfigurations(); ++i)
+        for (ConfigIterator config (*this); config.next();)
         {
-            const BuildConfiguration::Ptr config (getConfiguration(i));
-
             XmlElement* e = projectXml.createNewChildElement ("PropertyGroup");
             setConditionAttribute (*e, *config);
             e->setAttribute ("Label", "Configuration");
@@ -1229,10 +1202,8 @@ protected:
             XmlElement* props = projectXml.createNewChildElement ("PropertyGroup");
             props->createNewChildElement ("_ProjectFileVersion")->addTextElement ("10.0.30319.1");
 
-            for (int i = 0; i < getNumConfigurations(); ++i)
+            for (ConfigIterator config (*this); config.next();)
             {
-                const BuildConfiguration::Ptr config (getConfiguration(i));
-
                 XmlElement* outdir = props->createNewChildElement ("OutDir");
                 setConditionAttribute (*outdir, *config);
                 outdir->addTextElement (getConfigTargetPath (*config) + "\\");
@@ -1247,9 +1218,8 @@ protected:
             }
         }
 
-        for (int i = 0; i < getNumConfigurations(); ++i)
+        for (ConfigIterator config (*this); config.next();)
         {
-            const BuildConfiguration::Ptr config (getConfiguration(i));
             String binariesPath (getConfigTargetPath (*config));
             String intermediatesPath (getIntermediatesPath (*config));
             const bool isDebug = (bool) config->isDebug().getValue();
@@ -1333,6 +1303,26 @@ protected:
                 bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
             }
+
+            if (msvcPostBuildCommand.isNotEmpty())
+            {
+                XmlElement* bsc = group->createNewChildElement ("PostBuildEvent");
+                bsc->createNewChildElement ("Command")->addTextElement (msvcPostBuildCommand);
+            }
+
+            //xxx
+//    <PreBuildEvent>
+//      <Command>asd</Command>
+//    </PreBuildEvent>
+//    <PreLinkEvent>
+//      <Command>dfg</Command>
+//    </PreLinkEvent>
+//    <CustomBuildStep>
+//      <Command>abc</Command>
+//    </CustomBuildStep>
+//    <CustomBuildStep>
+//      <Outputs>xyz</Outputs>
+//    </CustomBuildStep>
         }
 
         {

@@ -285,9 +285,8 @@ private:
             << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
             << newLine;
 
-        int i;
-        for (i = 0; i < getNumConfigurations(); ++i)
-            writeConfig (out, *getConfiguration(i));
+        for (ConfigIterator config (*this); config.next();)
+            writeConfig (out, *config);
 
         writeObjects (out, files);
 
@@ -309,7 +308,7 @@ private:
             << "\t-@rm -rf $(OBJDIR)" << newLine
             << newLine;
 
-        for (i = 0; i < files.size(); ++i)
+        for (int i = 0; i < files.size(); ++i)
         {
             if (shouldFileBeCompiledByDefault (files.getReference(i)))
             {

@@ -277,10 +277,8 @@ private:
             addGroup (createID ("__mainsourcegroup"), "Source", topLevelGroupIDs);
         }
 
-        for (int i = 0; i < getNumConfigurations(); ++i)
+        for (ConfigIterator config (*this); config.next();)
         {
-            const BuildConfiguration::Ptr config (getConfiguration (i));
-
             addProjectConfig (config->getName().getValue(), getProjectSettings (*config));
             addTargetConfig  (config->getName().getValue(), getTargetSettings (dynamic_cast <XcodeBuildConfiguration&> (*config)));
         }

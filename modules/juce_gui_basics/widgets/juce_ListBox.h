@@ -507,8 +507,8 @@ public:
 
     /** Repaints one of the rows.
 
-        This is a lightweight alternative to calling updateContent, and just causes a
-        repaint of the row's area.
+        This does not invoke updateContent(), it just invokes a straightforward repaint
+        for the area covered by this row.
     */
     void repaintRow (int rowNumber) noexcept;
 

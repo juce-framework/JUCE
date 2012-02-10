@@ -180,12 +180,38 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration);
     };
 
-    int getNumConfigurations() const;
-    BuildConfiguration::Ptr getConfiguration (int index) const;
     void addNewConfiguration (const BuildConfiguration* configToCopy);
     void deleteConfiguration (int index);
     bool hasConfigurationNamed (const String& name) const;
     String getUniqueConfigName (String name) const;
+
+    //==============================================================================
+    struct ConfigIterator
+    {
+        ConfigIterator (ProjectExporter& exporter_) : index (-1), exporter (exporter_) {}
+
+        bool next()
+        {
+            if (++index >= exporter.getNumConfigurations())
+                return false;
+
+            config = exporter.getConfiguration (index);
+            return true;
+        }
+
+        BuildConfiguration& operator*() const       { return *config; }
+        BuildConfiguration* operator->() const      { return config; }
+
+        BuildConfiguration::Ptr config;
+        int index;
+
+    private:
+        ProjectExporter& exporter;
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigIterator);
+    };
+
+    int getNumConfigurations() const;
+    BuildConfiguration::Ptr getConfiguration (int index) const;
 
     ValueTree getConfigurations() const;
     void createDefaultConfigs();

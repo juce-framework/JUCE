@@ -519,37 +519,31 @@ public:
     {
         exporters.clear();
 
-        for (int i = 0; i < project.getNumExporters(); ++i)
+        for (Project::ExporterIterator exporter (project); exporter.next();)
         {
             PropertyGroup* exporterGroup = exporters.createGroup();
             exporterGroup->backgroundColour = Colours::white.withAlpha (0.3f);
-            exporterGroup->addDeleteButton ("exporter " + String (i), "Deletes this export target.");
+            exporterGroup->addDeleteButton ("exporter " + String (exporter.index), "Deletes this export target.");
 
-            ScopedPointer <ProjectExporter> exp (project.createExporter (i));
-            jassert (exp != nullptr);
+            PropertyListBuilder props;
+            exporter->createPropertyEditors (props);
 
-            if (exp != nullptr)
+            PropertyGroupList* configList = new PropertyGroupList ("Configurations", "Add a New Configuration", false, true);
+            props.add (configList);
+            exporterGroup->setProperties (props);
+
+            configList->createNewButton.setName ("newconfig " + String (exporter.index));
+
+            for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
             {
-                PropertyListBuilder props;
-                exp->createPropertyEditors (props);
+                PropertyGroup* configGroup = configList->createGroup();
 
-                PropertyGroupList* configList = new PropertyGroupList ("Configurations", "Add a New Configuration", false, true);
-                props.add (configList);
-                exporterGroup->setProperties (props);
+                if (exporter->getNumConfigurations() > 1)
+                    configGroup->addDeleteButton ("config " + String (exporter.index) + "/" + String (config.index), "Deletes this configuration.");
 
-                configList->createNewButton.setName ("newconfig " + String (i));
-
-                for (int j = 0; j < exp->getNumConfigurations(); ++j)
-                {
-                    PropertyGroup* configGroup = configList->createGroup();
-
-                    if (exp->getNumConfigurations() > 1)
-                        configGroup->addDeleteButton ("config " + String (i) + "/" + String (j), "Deletes this configuration.");
-
-                    PropertyListBuilder configProps;
-                    exp->getConfiguration(j)->createPropertyEditors (configProps);
-                    configGroup->setProperties (configProps);
-                }
+                PropertyListBuilder configProps;
+                config->createPropertyEditors (configProps);
+                configGroup->setProperties (configProps);
             }
         }
     }

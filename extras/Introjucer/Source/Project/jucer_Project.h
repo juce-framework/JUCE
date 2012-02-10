@@ -194,6 +194,24 @@ public:
     void deleteExporter (int index);
     void createDefaultExporters();
 
+    struct ExporterIterator
+    {
+        ExporterIterator (Project& project);
+        ~ExporterIterator();
+
+        bool next();
+
+        ProjectExporter& operator*() const       { return *exporter; }
+        ProjectExporter* operator->() const      { return exporter; }
+
+        ScopedPointer<ProjectExporter> exporter;
+        int index;
+
+    private:
+        Project& project;
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterIterator);
+    };
+
     //==============================================================================
     struct ConfigFlag
     {

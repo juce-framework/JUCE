@@ -112,13 +112,9 @@ void Project::setMissingDefaultValues()
 
     updateOldStyleConfigList();
 
-    for (int i = 0; i < getNumExporters(); ++i)
-    {
-        ScopedPointer<ProjectExporter> exporter (createExporter(i));
-
-        if (exporter != nullptr && exporter->getNumConfigurations() == 0)
+    for (Project::ExporterIterator exporter (*this); exporter.next();)
+        if (exporter->getNumConfigurations() == 0)
             exporter->createDefaultConfigs();
-    }
 
     if (! projectRoot.getChildWithName (Tags::exporters).isValid())
         createDefaultExporters();
@@ -140,11 +136,9 @@ void Project::updateOldStyleConfigList()
     {
         projectRoot.removeChild (deprecatedConfigsList, nullptr);
 
-        for (int i = 0; i < getNumExporters(); ++i)
+        for (Project::ExporterIterator exporter (*this); exporter.next();)
         {
-            ScopedPointer<ProjectExporter> exporter (createExporter(i));
-
-            if (exporter != nullptr && exporter->getNumConfigurations() == 0)
+            if (exporter->getNumConfigurations() == 0)
             {
                 ValueTree newConfigs (deprecatedConfigsList.createCopy());
 
@@ -960,4 +954,24 @@ String Project::getFileTemplate (const String& templateName)
     }
 
     return String::fromUTF8 (data, dataSize);
+}
+
+//==============================================================================
+Project::ExporterIterator::ExporterIterator (Project& project_) : index (-1), project (project_) {}
+Project::ExporterIterator::~ExporterIterator() {}
+
+bool Project::ExporterIterator::next()
+{
+    if (++index >= project.getNumExporters())
+        return false;
+
+    exporter = project.createExporter (index);
+
+    if (exporter == nullptr)
+    {
+        jassertfalse; // corrupted project file?
+        return next();
+    }
+
+    return true;
 }

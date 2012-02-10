@@ -413,9 +413,8 @@ private:
         // keep a copy of the basic generated files group, as each exporter may modify it.
         const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
 
-        for (int i = project.getNumExporters(); --i >= 0;)
+        for (Project::ExporterIterator exporter (project); exporter.next();)
         {
-            ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
             std::cout << "Writing files for: " << exporter->getName() << std::endl;
 
             if (exporter->getTargetFolder().createDirectory())

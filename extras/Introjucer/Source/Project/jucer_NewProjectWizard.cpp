@@ -54,16 +54,9 @@ static void createFileCreationOptionComboBox (Component& setupComp,
 
 static void setExecutableNameForAllTargets (Project& project, const String& exeName)
 {
-    for (int j = project.getNumExporters(); --j >= 0;)
-    {
-        ScopedPointer<ProjectExporter> exporter (project.createExporter(j));
-
-        if (exporter != nullptr)
-        {
-            for (int i = exporter->getNumConfigurations(); --i >= 0;)
-                exporter->getConfiguration(i)->getTargetBinaryName() = exeName;
-        }
-    }
+    for (Project::ExporterIterator exporter (project); exporter.next();)
+        for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
+            config->getTargetBinaryName() = exeName;
 }
 
 //==============================================================================

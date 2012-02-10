@@ -114,15 +114,14 @@ ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& projec
     ScopedPointer <ProjectExporter> best;
     int bestPref = 0;
 
-    for (int i = 0; i < project.getNumExporters(); ++i)
+    for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        ScopedPointer <ProjectExporter> exp (project.createExporter (i));
-        const int pref = exp->getLaunchPreferenceOrderForCurrentOS();
+        const int pref = exporter->getLaunchPreferenceOrderForCurrentOS();
 
         if (pref > bestPref)
         {
             bestPref = pref;
-            best = exp;
+            best = exporter.exporter;
         }
     }
 
