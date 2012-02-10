@@ -224,7 +224,7 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
 
     while (isThreadRunning())
     {
-        if (timeOutMilliseconds > 0 && --count < 0)
+        if (timeOutMilliseconds >= 0 && --count < 0)
             return false;
 
         sleep (sleepMsPerIteration);

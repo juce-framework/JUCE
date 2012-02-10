@@ -754,7 +754,7 @@ public:
 
 protected:
     String getProjectVersionString() const    { return "8.00"; }
-    String getSolutionVersionString() const   { return "8.00" + newLine + "# Visual C++ Express 2005"; }
+    String getSolutionVersionString() const   { return "9.00" + newLine + "# Visual C++ Express 2005"; }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2005);
 };

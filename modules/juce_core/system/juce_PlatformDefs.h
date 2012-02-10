@@ -60,14 +60,12 @@
 #endif
 
 //==============================================================================
-#if JUCE_MAC || DOXYGEN
+#if JUCE_MAC || JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
   /** This will try to break into the debugger if the app is currently being debugged.
       If called by an app that's not being debugged, the behaiour isn't defined - it may crash or not, depending
       on the platform.
       @see jassert()
   */
-  #define juce_breakDebugger        { assert (false); }
-#elif JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
   #define juce_breakDebugger        { ::kill (0, SIGTRAP); }
 #elif JUCE_USE_INTRINSICS
   #ifndef __INTEL_COMPILER
