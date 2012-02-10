@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 8.00
+Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual C++ Express 2005
 Project("{62DDBD62-D03F-FBCA-D85C-731B2D53653D}") = "The Introjucer", "The Introjucer.vcproj", "{26ABE2A4-1F2F-8375-088D-D692A4408B5A}"
 EndProject

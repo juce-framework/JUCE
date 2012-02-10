@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 8.00
+Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual C++ Express 2005
 Project("{45F7ED0D-469F-7EB0-7B2E-D2EAA2170C4E}") = "JuceDemoPlugin", "JuceDemoPlugin.vcproj", "{64F92774-5695-B20A-C63E-7690CA0ECE34}"
 EndProject
