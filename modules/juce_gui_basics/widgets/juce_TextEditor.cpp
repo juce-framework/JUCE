@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 // a word or space that can't be broken down any further
 struct TextAtom
 {
@@ -2674,5 +2672,3 @@ void TextEditor::refreshFromValueTree (const ValueTree& state, ComponentBuilder&
 
     setText (state [Ids::text].toString());
 }
-
-END_JUCE_NAMESPACE

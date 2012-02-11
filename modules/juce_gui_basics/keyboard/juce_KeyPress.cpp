@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 KeyPress::KeyPress() noexcept
     : keyCode (0),
       textCharacter (0)
@@ -306,6 +304,3 @@ String KeyPress::getTextDescriptionWithIcons() const
     return getTextDescription();
    #endif
 }
-
-
-END_JUCE_NAMESPACE

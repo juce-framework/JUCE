@@ -28,10 +28,6 @@
  #pragma warning (disable: 4514 4996)
 #endif
 
-#include <locale>
-
-BEGIN_JUCE_NAMESPACE
-
 NewLine newLine;
 
 #if defined (JUCE_STRINGS_ARE_UNICODE) && ! JUCE_STRINGS_ARE_UNICODE
@@ -2395,6 +2391,3 @@ public:
 static StringTests stringUnitTests;
 
 #endif
-
-
-END_JUCE_NAMESPACE

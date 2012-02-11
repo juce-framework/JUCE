@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ActionMessage  : public Message
 {
 public:
@@ -94,6 +92,3 @@ void ActionBroadcaster::sendActionMessage (const String& message) const
     for (int i = actionListeners.size(); --i >= 0;)
         callback.postMessage (new ActionMessage (message, actionListeners.getUnchecked(i)));
 }
-
-
-END_JUCE_NAMESPACE

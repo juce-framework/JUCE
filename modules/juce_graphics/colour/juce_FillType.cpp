@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 FillType::FillType() noexcept
     : colour (0xff000000)
 {
@@ -150,5 +147,3 @@ FillType FillType::transformed (const AffineTransform& t) const
     f.transform = f.transform.followedBy (t);
     return f;
 }
-
-END_JUCE_NAMESPACE

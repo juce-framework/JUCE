@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 int64 juce_fileSetPosition (void* handle, int64 pos);
 
@@ -131,6 +130,3 @@ void FileOutputStream::writeRepeatedByte (uint8 byte, int numBytes)
         OutputStream::writeRepeatedByte (byte, numBytes);
     }
 }
-
-
-END_JUCE_NAMESPACE

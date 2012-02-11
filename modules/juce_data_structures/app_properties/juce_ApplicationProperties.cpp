@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ApplicationProperties::ApplicationProperties()
     : commonSettingsAreReadOnly (0)
 {
@@ -104,6 +102,3 @@ void ApplicationProperties::closeFiles()
     userProps = nullptr;
     commonProps = nullptr;
 }
-
-
-END_JUCE_NAMESPACE

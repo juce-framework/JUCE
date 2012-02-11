@@ -75,7 +75,9 @@
 #endif
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
+
 #include "opengl/juce_OpenGLHelpers.h"
 
 // START_AUTOINCLUDE opengl
@@ -120,6 +122,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_OPENGL_JUCEHEADER__

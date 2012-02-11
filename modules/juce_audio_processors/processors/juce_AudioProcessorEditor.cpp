@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* const owner_)
     : owner (owner_)
 {
@@ -39,6 +37,3 @@ AudioProcessorEditor::~AudioProcessorEditor()
     // filter for some reason..
     jassert (owner->getActiveEditor() != this);
 }
-
-
-END_JUCE_NAMESPACE

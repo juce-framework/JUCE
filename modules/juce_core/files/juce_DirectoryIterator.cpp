@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 
 DirectoryIterator::DirectoryIterator (const File& directory,
                                       bool isRecursive_,
@@ -138,5 +136,3 @@ float DirectoryIterator::getEstimatedProgress() const
 
     return detailedIndex / totalNumFiles;
 }
-
-END_JUCE_NAMESPACE

@@ -23,39 +23,14 @@
   ==============================================================================
 */
 
-#if JUCE_WINDOWS
- #include <winsock2.h>
- #include <ws2tcpip.h>
-
- #if JUCE_MINGW
-  #include <wspiapi.h>
- #endif
-
- #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable : 4127 4389 4018)
- #endif
-
-#else
- #if JUCE_LINUX || JUCE_ANDROID
-  #include <sys/types.h>
-  #include <sys/socket.h>
-  #include <sys/errno.h>
-  #include <unistd.h>
-  #include <netinet/in.h>
- #endif
-
- #include <fcntl.h>
- #include <netdb.h>
- #include <arpa/inet.h>
- #include <netinet/tcp.h>
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable : 4127 4389 4018)
 #endif
 
 #ifndef AI_NUMERICSERV  // (missing in older Mac SDKs)
  #define AI_NUMERICSERV 0x1000
 #endif
-
-BEGIN_JUCE_NAMESPACE
 
 #if JUCE_WINDOWS
  typedef int       juce_socklen_t;
@@ -606,5 +581,3 @@ bool DatagramSocket::isLocal() const noexcept
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DrawableComposite::DrawableComposite()
     : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f)),
       updateBoundsReentrant (false)
@@ -340,6 +338,3 @@ ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* i
 
     return tree;
 }
-
-
-END_JUCE_NAMESPACE

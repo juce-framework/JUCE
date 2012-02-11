@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 bool juce_performDragDropFiles (const StringArray&, const bool copyFiles, bool& shouldStop);
 bool juce_performDragDropText (const String&, bool& shouldStop);
@@ -437,6 +436,3 @@ bool DragAndDropTarget::shouldDrawDragImageWhenOver()         { return true; }
 void FileDragAndDropTarget::fileDragEnter (const StringArray&, int, int)  {}
 void FileDragAndDropTarget::fileDragMove  (const StringArray&, int, int)  {}
 void FileDragAndDropTarget::fileDragExit  (const StringArray&)            {}
-
-
-END_JUCE_NAMESPACE

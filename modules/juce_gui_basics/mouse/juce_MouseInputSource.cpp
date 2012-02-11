@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class MouseInputSourceInternal   : public AsyncUpdater
 {
 public:
@@ -534,6 +532,3 @@ void MouseInputSource::handleWheel (ComponentPeer* const peer, const Point<int>&
 {
     pimpl->handleWheel (peer, positionWithinPeer, Time (time), x, y);
 }
-
-
-END_JUCE_NAMESPACE

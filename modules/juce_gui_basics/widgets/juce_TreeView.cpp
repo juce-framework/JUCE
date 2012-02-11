@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class TreeViewContentComponent  : public Component,
                                   public TooltipClient,
                                   public AsyncUpdater
@@ -1839,6 +1837,3 @@ TreeViewItem::OpennessRestorer::~OpennessRestorer()
     if (oldOpenness != nullptr)
         treeViewItem.restoreOpennessState (*oldOpenness);
 }
-
-
-END_JUCE_NAMESPACE

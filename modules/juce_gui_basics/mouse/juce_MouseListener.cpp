@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 void MouseListener::mouseEnter (const MouseEvent&) {}
 void MouseListener::mouseExit (const MouseEvent&)  {}
 void MouseListener::mouseDown (const MouseEvent&)  {}
@@ -34,5 +32,3 @@ void MouseListener::mouseDrag (const MouseEvent&)  {}
 void MouseListener::mouseMove (const MouseEvent&)  {}
 void MouseListener::mouseDoubleClick (const MouseEvent&) {}
 void MouseListener::mouseWheelMove (const MouseEvent&, float, float) {}
-
-END_JUCE_NAMESPACE

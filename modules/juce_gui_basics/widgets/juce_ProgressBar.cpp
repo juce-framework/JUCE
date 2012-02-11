@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ProgressBar::ProgressBar (double& progress_)
    : progress (progress_),
      displayPercentage (true),
@@ -113,5 +111,3 @@ void ProgressBar::timerCallback()
         repaint();
     }
 }
-
-END_JUCE_NAMESPACE

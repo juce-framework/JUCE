@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DrawableShape::DrawableShape()
     : strokeType (0.0f),
       mainFill (Colours::black),
@@ -455,5 +453,3 @@ void DrawableShape::FillAndStrokeState::setStrokeType (const PathStrokeType& new
     state.setProperty (capStyle, newStrokeType.getEndStyle() == PathStrokeType::butt
                                      ? "butt" : (newStrokeType.getEndStyle() == PathStrokeType::square ? "square" : "round"), undoManager);
 }
-
-END_JUCE_NAMESPACE

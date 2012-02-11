@@ -39,6 +39,9 @@
 #include "../juce_core/native/juce_BasicNativeHeaders.h"
 #include "juce_audio_utils.h"
 
+namespace juce
+{
+
 // START_AUTOINCLUDE gui/*.cpp, players/*.cpp
 #include "gui/juce_AudioDeviceSelectorComponent.cpp"
 #include "gui/juce_AudioThumbnail.cpp"
@@ -46,3 +49,5 @@
 #include "gui/juce_MidiKeyboardComponent.cpp"
 #include "players/juce_AudioProcessorPlayer.cpp"
 // END_AUTOINCLUDE
+
+}

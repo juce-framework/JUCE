@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Drawable::Drawable()
 {
     setInterceptsMouseClicks (false, false);
@@ -228,6 +226,3 @@ void Drawable::ValueTreeWrapperBase::setID (const String& newID)
     else
         state.setProperty (ComponentBuilder::idProperty, newID, nullptr);
 }
-
-
-END_JUCE_NAMESPACE

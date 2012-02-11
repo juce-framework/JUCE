@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 TooltipWindow::TooltipWindow (Component* const parent_,
                               const int millisecondsBeforeTipAppears_)
     : Component ("tooltip"),
@@ -189,5 +187,3 @@ void TooltipWindow::timerCallback()
         }
     }
 }
-
-END_JUCE_NAMESPACE

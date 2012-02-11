@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 namespace KeyboardFocusHelpers
 {
@@ -137,6 +136,3 @@ Component* KeyboardFocusTraverser::getDefaultComponent (Component* parentCompone
 
     return comps.getFirst();
 }
-
-
-END_JUCE_NAMESPACE

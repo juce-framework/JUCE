@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ToolbarItemPalette::ToolbarItemPalette (ToolbarItemFactory& factory_,
                                         Toolbar* const toolbar_)
     : factory (factory_),
@@ -109,6 +107,3 @@ void ToolbarItemPalette::resized()
 
     itemHolder->setSize (maxX, y + height + 8);
 }
-
-
-END_JUCE_NAMESPACE

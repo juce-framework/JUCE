@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class KeyMappingEditorComponent::ChangeKeyButton  : public Button
 {
 public:
@@ -488,5 +486,3 @@ String KeyMappingEditorComponent::getDescriptionForKeyPress (const KeyPress& key
 {
     return key.getTextDescription();
 }
-
-END_JUCE_NAMESPACE

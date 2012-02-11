@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ResizableWindow::ResizableWindow (const String& name,
                                   const bool addToDesktop_)
     : TopLevelWindow (name, addToDesktop_),
@@ -621,5 +619,3 @@ void ResizableWindow::addAndMakeVisible (Component* const child, int zOrder)
     Component::addAndMakeVisible (child, zOrder);
 }
 #endif
-
-END_JUCE_NAMESPACE

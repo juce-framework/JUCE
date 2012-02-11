@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 const char* const Toolbar::toolbarDragDescriptor = "_toolbarItem_";
 
@@ -829,6 +828,3 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
     (new ToolbarCustomisationDialog (factory, this, optionFlags))
         ->enterModalState (true, 0, true);
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ImagePreviewComponent::ImagePreviewComponent()
 {
 }
@@ -118,6 +116,3 @@ void ImagePreviewComponent::paint (Graphics& g)
                           Justification::centredTop, numLines);
     }
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DynamicObject::DynamicObject()
 {
 }
@@ -77,6 +75,3 @@ void DynamicObject::clear()
 {
     properties.clear();
 }
-
-
-END_JUCE_NAMESPACE

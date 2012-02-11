@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class CodeDocumentLine
 {
 public:
@@ -965,5 +963,3 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
         sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);
     }
 }
-
-END_JUCE_NAMESPACE

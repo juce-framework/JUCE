@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ListBoxRowComponent  : public Component,
                              public TooltipClient
 {
@@ -946,6 +944,3 @@ void ListBoxModel::returnKeyPressed (int) {}
 void ListBoxModel::listWasScrolled() {}
 var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return var::null; }
 String ListBoxModel::getTooltipForRow (int)                             { return String::empty; }
-
-
-END_JUCE_NAMESPACE

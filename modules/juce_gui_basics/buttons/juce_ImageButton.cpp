@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ImageButton::ImageButton (const String& text_)
     : Button (text_),
       scaleImageToFit (true),
@@ -244,5 +242,3 @@ void ImageButton::refreshFromValueTree (const ValueTree& state, ComponentBuilder
                newOverImage, getOpacityFromVar (state[Ids::overOpacity]), getColourFromVar (state[Ids::overOverlay]),
                newDownImage, getOpacityFromVar (state[Ids::downOpacity]), getColourFromVar (state[Ids::downOverlay]));
 }
-
-END_JUCE_NAMESPACE

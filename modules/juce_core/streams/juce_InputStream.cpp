@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 char InputStream::readByte()
 {
     char temp = 0;
@@ -224,5 +222,3 @@ void InputStream::skipNextBytes (int64 numBytesToSkip)
             numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
     }
 }
-
-END_JUCE_NAMESPACE

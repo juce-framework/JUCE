@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 RelativePointPath::RelativePointPath()
     : usesNonZeroWinding (true),
       containsDynamicPoints (false)
@@ -294,6 +292,3 @@ RelativePointPath::ElementBase* RelativePointPath::CubicTo::clone() const
 {
     return new CubicTo (controlPoints[0], controlPoints[1], controlPoints[2]);
 }
-
-
-END_JUCE_NAMESPACE

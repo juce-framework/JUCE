@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 namespace
 {
     template <typename Type>
@@ -729,6 +726,3 @@ Graphics::ScopedSaveState::~ScopedSaveState()
 {
     context.restoreState();
 }
-
-
-END_JUCE_NAMESPACE

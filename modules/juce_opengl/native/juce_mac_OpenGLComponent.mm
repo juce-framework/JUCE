@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 #define ThreadSafeNSOpenGLView MakeObjCClassName(ThreadSafeNSOpenGLView)
 
@@ -112,7 +112,9 @@ END_JUCE_NAMESPACE
 - (void) rightMouseUp:   (NSEvent*) ev  { [[self superview] rightMouseUp:   ev]; }
 
 @end
-BEGIN_JUCE_NAMESPACE
+
+namespace juce
+{
 
 //==============================================================================
 class WindowedGLContext     : public OpenGLContext

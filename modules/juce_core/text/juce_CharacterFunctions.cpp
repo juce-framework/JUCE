@@ -23,14 +23,6 @@
   ==============================================================================
 */
 
-#if ! JUCE_ANDROID
- #include <cwctype>
-#endif
-
-#include <cctype>
-
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 #if JUCE_MSVC
  #pragma warning (push)
@@ -157,6 +149,3 @@ double CharacterFunctions::mulexp10 (const double value, int exponent) noexcept
 
     return negative ? (value / result) : (value * result);
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//=============================================================================
 namespace ComponentBuilderHelpers
 {
     String getStateId (const ValueTree& state)
@@ -442,5 +440,3 @@ void ComponentBuilder::refreshBasicComponentProperties (Component& comp, const V
 
     ComponentBuilderHelpers::updateComponentColours (comp, state.getChildWithName ("COLOURS"));
 }
-
-END_JUCE_NAMESPACE

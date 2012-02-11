@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ButtonPropertyComponent::ButtonPropertyComponent (const String& name,
                                                   const bool triggerOnMouseDown)
     : PropertyComponent (name)
@@ -48,5 +46,3 @@ void ButtonPropertyComponent::buttonClicked (Button*)
 {
     buttonClicked();
 }
-
-END_JUCE_NAMESPACE

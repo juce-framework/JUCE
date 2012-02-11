@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class Timer::TimerThread  : private Thread,
                             private MessageListener,
                             private DeletedAtShutdown,
@@ -382,5 +380,3 @@ void JUCE_CALLTYPE Timer::callPendingTimersSynchronously()
     if (TimerThread::instance != nullptr)
         TimerThread::instance->callTimersSynchronously();
 }
-
-END_JUCE_NAMESPACE

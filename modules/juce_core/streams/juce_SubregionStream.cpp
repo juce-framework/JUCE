@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 SubregionStream::SubregionStream (InputStream* const sourceStream,
                                   const int64 startPositionInSourceStream_,
                                   const int64 lengthOfSourceStream_,
@@ -85,5 +83,3 @@ bool SubregionStream::isExhausted()
     else
         return source->isExhausted();
 }
-
-END_JUCE_NAMESPACE

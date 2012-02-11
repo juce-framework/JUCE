@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 FileBrowserComponent::FileBrowserComponent (int flags_,
                                             const File& initialFileOrDirectory,
                                             const FileFilter* fileFilter_,
@@ -570,6 +568,3 @@ void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPa
     rootNames.add ("Desktop");
    #endif
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ApplicationCommandInfo::ApplicationCommandInfo (const CommandID commandID_) noexcept
     : commandID (commandID_),
       flags (0)
@@ -63,6 +61,3 @@ void ApplicationCommandInfo::addDefaultKeypress (const int keyCode, const Modifi
 {
     defaultKeypresses.add (KeyPress (keyCode, modifiers, 0));
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* source_,
                                             TimeSliceThread& backgroundThread_,
                                             const bool deleteSourceWhenDeleted,
@@ -270,6 +268,3 @@ int BufferingAudioSource::useTimeSlice()
 {
     return readNextBufferChunk() ? 1 : 100;
 }
-
-
-END_JUCE_NAMESPACE

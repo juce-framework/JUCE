@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 OldSchoolLookAndFeel::OldSchoolLookAndFeel()
 {
     setColour (TextButton::buttonColourId,          Colour (0xffbbbbff));
@@ -594,6 +592,3 @@ void OldSchoolLookAndFeel::positionDocumentWindowButtons (DocumentWindow&,
     if (minimiseButton != nullptr)
         minimiseButton->setBounds (x, titleBarY - 2, buttonW, titleBarH);
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 PerformanceCounter::PerformanceCounter (const String& name_,
                                         const int runsPerPrintout,
                                         const File& loggingFile)
@@ -93,5 +91,3 @@ void PerformanceCounter::printStatistics()
         totalTime = 0;
     }
 }
-
-END_JUCE_NAMESPACE

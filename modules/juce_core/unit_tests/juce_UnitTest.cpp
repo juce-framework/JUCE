@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 UnitTest::UnitTest (const String& name_)
     : name (name_), runner (nullptr)
 {
@@ -235,5 +233,3 @@ void UnitTestRunner::addFail (const String& failureMessage)
 
     if (assertOnFailure) { jassertfalse }
 }
-
-END_JUCE_NAMESPACE

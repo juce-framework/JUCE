@@ -29,7 +29,8 @@
 //=============================================================================
 #include "../juce_events/juce_events.h"
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE values, undomanager, app_properties
 #ifndef __JUCE_VALUE_JUCEHEADER__
@@ -52,6 +53,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_DATA_STRUCTURES_JUCEHEADER__

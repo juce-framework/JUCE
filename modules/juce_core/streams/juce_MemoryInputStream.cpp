@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MemoryInputStream::MemoryInputStream (const void* const sourceData,
                                       const size_t sourceDataSize,
                                       const bool keepInternalCopy)
@@ -158,5 +156,3 @@ public:
 static MemoryStreamTests memoryInputStreamUnitTests;
 
 #endif
-
-END_JUCE_NAMESPACE

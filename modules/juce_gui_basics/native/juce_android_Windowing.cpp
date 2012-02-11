@@ -23,9 +23,12 @@
   ==============================================================================
 */
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
+
 extern juce::JUCEApplicationBase* juce_CreateApplication(); // (from START_JUCE_APPLICATION)
-BEGIN_JUCE_NAMESPACE
+
+namespace juce
+{
 
 //==============================================================================
 JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activity,

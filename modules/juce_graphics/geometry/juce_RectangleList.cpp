@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 RectangleList::RectangleList() noexcept
 {
 }
@@ -516,6 +514,3 @@ Path RectangleList::toPath() const
 
     return p;
 }
-
-
-END_JUCE_NAMESPACE

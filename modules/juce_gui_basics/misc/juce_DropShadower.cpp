@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ShadowWindow  : public Component
 {
 public:
@@ -298,5 +296,3 @@ void DropShadower::bringShadowWindowsToFront()
             shadowWindows.getUnchecked(i)->toBehind (owner);
     }
 }
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class CustomTypeface::GlyphInfo
 {
 public:
@@ -409,6 +407,3 @@ EdgeTable* CustomTypeface::getEdgeTableForGlyph (int glyphNumber, const AffineTr
 
     return nullptr;
 }
-
-
-END_JUCE_NAMESPACE

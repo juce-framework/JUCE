@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ImageConvolutionKernel::ImageConvolutionKernel (const int size_)
     : values ((size_t) (size_ * size_)),
       size (size_)
@@ -245,5 +243,3 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
         }
     }
 }
-
-END_JUCE_NAMESPACE

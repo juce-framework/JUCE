@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 TextLayout::Glyph::Glyph (const int glyphCode_, const Point<float>& anchor_, float width_) noexcept
     : glyphCode (glyphCode_), anchor (anchor_), width (width_)
 {
@@ -617,5 +615,3 @@ void TextLayout::recalculateWidth()
         width = range.getLength();
     }
 }
-
-END_JUCE_NAMESPACE

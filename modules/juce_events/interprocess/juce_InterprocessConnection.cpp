@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 InterprocessConnection::InterprocessConnection (const bool callbacksOnMessageThread,
                                                 const uint32 magicMessageHeaderNumber)
     : Thread ("Juce IPC connection"),
@@ -370,6 +368,3 @@ void InterprocessConnection::run()
         }
     }
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MessageListener::MessageListener() noexcept
 {
     // are you trying to create a messagelistener before or after juce has been intialised??
@@ -56,5 +54,3 @@ bool MessageListener::isValidMessageListener() const noexcept
     return MessageManager::instance != nullptr
              && MessageManager::instance->messageListeners.contains (this);
 }
-
-END_JUCE_NAMESPACE

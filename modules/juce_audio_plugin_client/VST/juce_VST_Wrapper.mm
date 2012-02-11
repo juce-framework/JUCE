@@ -40,7 +40,8 @@
 #include "../utility/juce_PluginHostType.h"
 
 //==============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 #if ! JUCE_64BIT
 static void updateComponentPos (Component* const comp)
@@ -251,7 +252,6 @@ bool forwardCurrentKeyEventToHost (Component* comp)
    #endif
 }
 
-
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 #endif

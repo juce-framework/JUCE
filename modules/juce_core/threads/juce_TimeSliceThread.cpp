@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 TimeSliceThread::TimeSliceThread (const String& threadName)
     : Thread (threadName),
       clientBeingCalled (nullptr)
@@ -170,6 +168,3 @@ void TimeSliceThread::run()
             wait (timeToWait);
     }
 }
-
-
-END_JUCE_NAMESPACE

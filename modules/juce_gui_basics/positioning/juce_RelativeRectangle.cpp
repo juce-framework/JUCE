@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 namespace RelativeRectangleHelpers
 {
     inline void skipComma (String::CharPointerType& s)
@@ -263,6 +261,3 @@ void RelativeRectangle::applyToComponent (Component& component) const
         component.setBounds (resolve (nullptr).getSmallestIntegerContainer());
     }
 }
-
-
-END_JUCE_NAMESPACE

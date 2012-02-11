@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DrawablePath::DrawablePath()
 {
 }
@@ -572,6 +570,3 @@ ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* imageP
 
     return tree;
 }
-
-
-END_JUCE_NAMESPACE

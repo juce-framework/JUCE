@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class FileChooserDialogBox::ContentComponent  : public Component
 {
 public:
@@ -276,6 +274,3 @@ void FileChooserDialogBox::createNewFolderConfirmed (const String& nameFromDialo
         content->chooserComponent.refresh();
     }
 }
-
-
-END_JUCE_NAMESPACE

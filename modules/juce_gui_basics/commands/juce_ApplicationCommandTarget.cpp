@@ -23,10 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-
-//==============================================================================
 class ApplicationCommandTarget::MessageTarget  : public MessageListener
 {
 public:
@@ -208,6 +205,3 @@ ApplicationCommandTarget::InvocationInfo::InvocationInfo (const CommandID comman
       millisecsSinceKeyPressed (0)
 {
 }
-
-
-END_JUCE_NAMESPACE

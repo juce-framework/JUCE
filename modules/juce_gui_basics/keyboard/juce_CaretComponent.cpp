@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 CaretComponent::CaretComponent (Component* const keyFocusOwner)
     : owner (keyFocusOwner)
 {
@@ -59,5 +57,3 @@ bool CaretComponent::shouldBeShown() const
     return owner == nullptr || (owner->hasKeyboardFocus (true)
                                  && ! owner->isCurrentlyBlockedByAnotherModalComponent());
 }
-
-END_JUCE_NAMESPACE

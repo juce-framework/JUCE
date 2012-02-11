@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 namespace
 {
     int calcBufferStreamBufferSize (int requestedSize, InputStream* const source) noexcept
@@ -196,5 +194,3 @@ String BufferedInputStream::readString()
 
     return InputStream::readString();
 }
-
-END_JUCE_NAMESPACE

@@ -98,7 +98,7 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
 }
 
 //==============================================================================
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 using namespace juce;
 
@@ -320,7 +320,8 @@ private:
 
 @end
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 class WebInputStream  : public InputStream

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ResizableBorderComponent::Zone::Zone (const int zoneFlags) noexcept
     : zone (zoneFlags)
 {}
@@ -201,5 +199,3 @@ void ResizableBorderComponent::updateMouseZone (const MouseEvent& e)
         setMouseCursor (newZone.getMouseCursor());
     }
 }
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 StringPairArray::StringPairArray (const bool ignoreCase_)
     : ignoreCase (ignoreCase_)
 {
@@ -140,5 +138,3 @@ void StringPairArray::minimiseStorageOverheads()
     keys.minimiseStorageOverheads();
     values.minimiseStorageOverheads();
 }
-
-END_JUCE_NAMESPACE

@@ -25,9 +25,6 @@
 
 #if JUCE_USE_CDREADER
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 int AudioCDReader::getNumTracks() const
 {
     return trackStartSamples.size() - 1;
@@ -57,8 +54,5 @@ int AudioCDReader::getCDDBId()
     // CCLLLLTT: checksum, length, tracks
     return ((checksum & 0xff) << 24) | (length << 8) | numTracks;
 }
-
-
-END_JUCE_NAMESPACE
 
 #endif

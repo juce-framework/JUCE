@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 namespace MidiBufferHelpers
 {
@@ -293,6 +292,3 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
 
     return true;
 }
-
-
-END_JUCE_NAMESPACE

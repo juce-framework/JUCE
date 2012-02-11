@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MidiMessageSequence::MidiMessageSequence()
 {
 }
@@ -328,5 +326,3 @@ MidiMessageSequence::MidiEventHolder::MidiEventHolder (const MidiMessage& messag
 MidiMessageSequence::MidiEventHolder::~MidiEventHolder()
 {
 }
-
-END_JUCE_NAMESPACE

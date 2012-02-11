@@ -76,6 +76,9 @@
 #endif
 
 //==============================================================================
+namespace juce
+{
+
 // START_AUTOINCLUDE documents/*.cpp, code_editor/*.cpp, embedding/*.cpp, lookandfeel/*.cpp, misc/*.cpp
 #include "documents/juce_FileBasedDocument.cpp"
 #include "code_editor/juce_CodeDocument.cpp"
@@ -91,9 +94,12 @@
 #include "misc/juce_SystemTrayIconComponent.cpp"
 // END_AUTOINCLUDE
 
+}
+
 using namespace juce;
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -138,4 +144,4 @@ BEGIN_JUCE_NAMESPACE
  #endif
 #endif
 
-END_JUCE_NAMESPACE
+}

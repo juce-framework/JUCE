@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ReverbAudioSource::ReverbAudioSource (AudioSource* const inputSource, const bool deleteInputWhenDeleted)
    : input (inputSource, deleteInputWhenDeleted),
      bypass (false)
@@ -82,6 +80,3 @@ void ReverbAudioSource::setBypassed (bool b) noexcept
         reverb.reset();
     }
 }
-
-
-END_JUCE_NAMESPACE

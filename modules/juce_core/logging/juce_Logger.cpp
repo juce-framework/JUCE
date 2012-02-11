@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Logger::Logger()
 {
 }
@@ -64,5 +62,3 @@ void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) noexce
     Logger::writeToLog (m);
 }
 #endif
-
-END_JUCE_NAMESPACE

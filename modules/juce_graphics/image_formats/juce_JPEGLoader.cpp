@@ -120,8 +120,6 @@ namespace jpeglibNamespace
  #pragma warning (pop)
 #endif
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 namespace JPEGHelpers
 {
@@ -421,6 +419,3 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 
     return true;
 }
-
-
-END_JUCE_NAMESPACE

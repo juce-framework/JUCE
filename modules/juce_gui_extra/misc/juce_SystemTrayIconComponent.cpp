@@ -25,9 +25,6 @@
 
 #if JUCE_WINDOWS || JUCE_LINUX
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 SystemTrayIconComponent::SystemTrayIconComponent()
 {
     addToDesktop (0);
@@ -36,7 +33,5 @@ SystemTrayIconComponent::SystemTrayIconComponent()
 SystemTrayIconComponent::~SystemTrayIconComponent()
 {
 }
-
-END_JUCE_NAMESPACE
 
 #endif

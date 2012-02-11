@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class JSONParser
 {
 public:
@@ -635,5 +633,3 @@ public:
 static JSONTests JSONUnitTests;
 
 #endif
-
-END_JUCE_NAMESPACE

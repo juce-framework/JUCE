@@ -23,12 +23,8 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 bool KeyListener::keyStateChanged (const bool, Component*)
 {
     return false;
 }
-
-END_JUCE_NAMESPACE

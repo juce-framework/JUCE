@@ -129,6 +129,9 @@
 
 #endif
 
+namespace juce
+{
+
 // START_AUTOINCLUDE audio_io/*.cpp, midi_io/*.cpp, audio_cd/*.cpp, sources/*.cpp
 #include "audio_io/juce_AudioDeviceManager.cpp"
 #include "audio_io/juce_AudioIODevice.cpp"
@@ -140,10 +143,13 @@
 #include "sources/juce_AudioTransportSource.cpp"
 // END_AUTOINCLUDE
 
+}
+
 //==============================================================================
 using namespace juce;
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 #if JUCE_MAC
@@ -219,4 +225,4 @@ BEGIN_JUCE_NAMESPACE
 
 #endif
 
-END_JUCE_NAMESPACE
+}

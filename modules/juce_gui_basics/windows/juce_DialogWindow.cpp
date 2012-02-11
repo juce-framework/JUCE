@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DialogWindow::DialogWindow (const String& name,
                             const Colour& backgroundColour_,
                             const bool escapeKeyTriggersCloseButton_,
@@ -117,5 +115,3 @@ int DialogWindow::showModalDialog (const String& dialogTitle,
     return dw.runModalLoop();
 }
 #endif
-
-END_JUCE_NAMESPACE

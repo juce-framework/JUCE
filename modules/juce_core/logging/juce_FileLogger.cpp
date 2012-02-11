@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 FileLogger::FileLogger (const File& logFile_,
                         const String& welcomeMessage,
                         const int maxInitialFileSizeBytes)
@@ -133,5 +131,3 @@ FileLogger* FileLogger::createDefaultAppLogger (const String& logFileSubDirector
 
     return new FileLogger (logFile, welcomeMessage, maxInitialFileSizeBytes);
 }
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 FileSearchPath::FileSearchPath()
 {
 }
@@ -169,5 +167,3 @@ bool FileSearchPath::isFileInPath (const File& fileToCheck,
 
     return false;
 }
-
-END_JUCE_NAMESPACE

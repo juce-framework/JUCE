@@ -23,10 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-
-//==============================================================================
 class MD5Generator
 {
 public:
@@ -302,5 +299,3 @@ String MD5::toHexString() const
 //==============================================================================
 bool MD5::operator== (const MD5& other) const noexcept   { return memcmp (result, other.result, sizeof (result)) == 0; }
 bool MD5::operator!= (const MD5& other) const noexcept   { return ! operator== (other); }
-
-END_JUCE_NAMESPACE

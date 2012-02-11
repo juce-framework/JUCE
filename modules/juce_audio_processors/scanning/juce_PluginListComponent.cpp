@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
                                           const File& deadMansPedalFile_,
                                           PropertiesFile* const propertiesToUse_)
@@ -298,5 +296,3 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
     jassertfalse; // this method needs refactoring to work without modal loops..
 #endif
 }
-
-END_JUCE_NAMESPACE

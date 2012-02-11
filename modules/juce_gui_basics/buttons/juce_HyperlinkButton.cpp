@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 HyperlinkButton::HyperlinkButton (const String& linkText,
                                   const URL& linkURL)
    : Button (linkText),
@@ -126,5 +124,3 @@ void HyperlinkButton::refreshFromValueTree (const ValueTree& state, ComponentBui
     setButtonText (state [Ids::text].toString());
     setURL (URL (state [Ids::url].toString()));
 }
-
-END_JUCE_NAMESPACE

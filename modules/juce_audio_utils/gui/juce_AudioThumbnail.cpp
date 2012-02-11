@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 struct AudioThumbnail::MinMaxValue
 {
     MinMaxValue() noexcept
@@ -803,6 +801,3 @@ void AudioThumbnail::drawChannels (Graphics& g, const Rectangle<int>& area, doub
                      startTimeSeconds, endTimeSeconds, i, verticalZoomFactor);
     }
 }
-
-
-END_JUCE_NAMESPACE

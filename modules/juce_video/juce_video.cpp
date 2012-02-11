@@ -118,7 +118,8 @@
 //==============================================================================
 using namespace juce;
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
@@ -155,4 +156,4 @@ BEGIN_JUCE_NAMESPACE
  #endif
 #endif
 
-END_JUCE_NAMESPACE
+}

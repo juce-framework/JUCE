@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 JUCEApplicationBase::CreateInstanceFunction JUCEApplicationBase::createInstance = 0;
 JUCEApplicationBase* JUCEApplicationBase::appInstance = nullptr;
@@ -55,5 +54,3 @@ void JUCEApplicationBase::appWillTerminateByForce()
     DeletedAtShutdown::deleteAll();
     MessageManager::deleteInstance();
 }
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
                                                 AudioPluginFormat& formatToLookFor,
                                                 FileSearchPath directoriesToSearch,
@@ -122,6 +120,3 @@ void PluginDirectoryScanner::setDeadMansPedalFile (const StringArray& newContent
     if (deadMansPedalFile != File::nonexistent)
         deadMansPedalFile.replaceWithText (newContents.joinIntoString ("\n"), true, true);
 }
-
-
-END_JUCE_NAMESPACE

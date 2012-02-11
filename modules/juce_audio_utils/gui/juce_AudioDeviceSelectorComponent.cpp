@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class SimpleDeviceManagerInputLevelMeter  : public Component,
                                             public Timer
 {
@@ -1122,6 +1120,3 @@ void AudioDeviceSelectorComponent::updateAllControls()
 
     resized();
 }
-
-
-END_JUCE_NAMESPACE

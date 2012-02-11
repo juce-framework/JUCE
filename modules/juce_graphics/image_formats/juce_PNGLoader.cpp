@@ -95,8 +95,6 @@ namespace pnglibNamespace
  #pragma warning (pop)
 #endif
 
-BEGIN_JUCE_NAMESPACE
-
 using ::calloc;
 using ::malloc;
 using ::free;
@@ -354,6 +352,3 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 
     return true;
 }
-
-
-END_JUCE_NAMESPACE

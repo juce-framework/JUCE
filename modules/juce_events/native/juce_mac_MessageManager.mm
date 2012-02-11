@@ -136,7 +136,8 @@ private:
 };
 
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
+
 using namespace juce;
 
 #define JuceAppDelegate MakeObjCClassName(JuceAppDelegate)
@@ -288,7 +289,8 @@ using namespace juce;
 @end
 
 //==============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 static JuceAppDelegate* juceAppDelegate = nil;
 

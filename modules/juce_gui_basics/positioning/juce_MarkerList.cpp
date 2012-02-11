@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MarkerList::MarkerList()
 {
 }
@@ -287,5 +285,3 @@ void MarkerList::ValueTreeWrapper::readFrom (const MarkerList& markerList, UndoM
     for (int i = 0; i < markerList.getNumMarkers(); ++i)
         setMarker (*markerList.getMarker(i), undoManager);
 }
-
-END_JUCE_NAMESPACE

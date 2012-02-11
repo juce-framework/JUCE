@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ColourComponentSlider  : public Slider
 {
 public:
@@ -580,6 +578,3 @@ void ColourSelector::setSwatchColour (const int, const Colour&) const
 {
     jassertfalse; // if you've overridden getNumSwatches(), you also need to implement this method
 }
-
-
-END_JUCE_NAMESPACE

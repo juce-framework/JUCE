@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 FileSearchPathListComponent::FileSearchPathListComponent()
     : addButton ("+"),
       removeButton ("-"),
@@ -266,6 +264,3 @@ void FileSearchPathListComponent::buttonClicked (Button* button)
 
     changed();
 }
-
-
-END_JUCE_NAMESPACE

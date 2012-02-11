@@ -25,7 +25,8 @@
 
 class JuceMainMenuHandler;
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
+
 using namespace juce;
 
 #define JuceMenuCallback MakeObjCClassName(JuceMenuCallback)
@@ -44,8 +45,9 @@ using namespace juce;
 - (void) menuItemInvoked: (id) menu;
 - (void) menuNeedsUpdate: (NSMenu*) menu;
 @end
-BEGIN_JUCE_NAMESPACE
 
+namespace juce
+{
 
 //==============================================================================
 class JuceMainMenuHandler   : private MenuBarModel::Listener,
@@ -418,7 +420,7 @@ private:
 
 JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 //==============================================================================
 @implementation JuceMenuCallback
@@ -479,7 +481,9 @@ END_JUCE_NAMESPACE
 }
 
 @end
-BEGIN_JUCE_NAMESPACE
+
+namespace juce
+{
 
 //==============================================================================
 namespace MainMenuHelpers

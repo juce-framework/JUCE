@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ComponentDragger::ComponentDragger() {}
 ComponentDragger::~ComponentDragger() {}
 
@@ -63,6 +61,3 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
             componentToDrag->setBounds (bounds);
     }
 }
-
-
-END_JUCE_NAMESPACE

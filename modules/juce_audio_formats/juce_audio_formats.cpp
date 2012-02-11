@@ -84,7 +84,8 @@
 #endif
 
 //==============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 #if JUCE_ANDROID
  #include "../juce_core/native/juce_android_JNIHelpers.h"
@@ -113,4 +114,4 @@ BEGIN_JUCE_NAMESPACE
 #include "codecs/juce_WindowsMediaAudioFormat.cpp"
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}

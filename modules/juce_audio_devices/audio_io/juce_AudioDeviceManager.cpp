@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioDeviceManager::AudioDeviceSetup::AudioDeviceSetup()
     : sampleRate (0),
       bufferSize (0),
@@ -932,6 +930,3 @@ double AudioDeviceManager::getCurrentInputLevel() const
     jassert (inputLevelMeasurementEnabledCount > 0); // you need to call enableInputLevelMeasurement() before using this!
     return inputLevel;
 }
-
-
-END_JUCE_NAMESPACE

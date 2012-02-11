@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 const Colour Colours::transparentBlack (0);
 const Colour Colours::transparentWhite (0x00ffffff);
 
@@ -322,6 +319,3 @@ Colour Colours::findColourForName (const String& colourName,
 
     return defaultColour;
 }
-
-
-END_JUCE_NAMESPACE

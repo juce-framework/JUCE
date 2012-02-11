@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ChoicePropertyComponent::RemapperValueSource    : public Value::ValueSource,
                                                         public ValueListener
 {
@@ -151,6 +149,3 @@ void ChoicePropertyComponent::comboBoxChanged (ComboBox*)
             setIndex (newIndex);
     }
 }
-
-
-END_JUCE_NAMESPACE

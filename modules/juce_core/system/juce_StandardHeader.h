@@ -50,10 +50,12 @@
 #include "juce_TargetPlatform.h"  // (sets up the various JUCE_WINDOWS, JUCE_MAC, etc flags)
 
 //==============================================================================
-#define JUCE_NAMESPACE juce
-
-#define BEGIN_JUCE_NAMESPACE    namespace juce {
-#define END_JUCE_NAMESPACE      }
+#ifndef DOXYGEN
+ // These are old macros that are now deprecated: you should just use the juce namespace directly.
+ #define JUCE_NAMESPACE juce
+ #define BEGIN_JUCE_NAMESPACE    namespace juce {
+ #define END_JUCE_NAMESPACE      }
+#endif
 
 //==============================================================================
 #include "juce_PlatformDefs.h"

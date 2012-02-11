@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Desktop::Desktop()
     : mouseClickCounter (0),
       kioskModeComponent (nullptr),
@@ -448,6 +446,3 @@ bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const 
 
     return (allowedOrientations & orientation) != 0;
 }
-
-
-END_JUCE_NAMESPACE

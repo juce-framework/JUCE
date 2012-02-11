@@ -28,14 +28,6 @@
  #pragma warning (disable: 4514)
 #endif
 
-#ifndef JUCE_WINDOWS
- #include <sys/time.h>
-#else
- #include <ctime>
-#endif
-
-#include <sys/timeb.h>
-
 #if JUCE_MSVC
  #pragma warning (pop)
 
@@ -43,8 +35,6 @@
   #define USE_NEW_SECURE_TIME_FNS
  #endif
 #endif
-
-BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 namespace TimeHelpers
@@ -492,6 +482,3 @@ bool operator<  (const Time& time1, const Time& time2)      { return time1.toMil
 bool operator>  (const Time& time1, const Time& time2)      { return time1.toMilliseconds() >  time2.toMilliseconds(); }
 bool operator<= (const Time& time1, const Time& time2)      { return time1.toMilliseconds() <= time2.toMilliseconds(); }
 bool operator>= (const Time& time1, const Time& time2)      { return time1.toMilliseconds() >= time2.toMilliseconds(); }
-
-
-END_JUCE_NAMESPACE

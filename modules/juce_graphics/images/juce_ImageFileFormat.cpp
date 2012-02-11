@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
 {
     struct DefaultImageFormats
@@ -89,5 +87,3 @@ Image ImageFileFormat::loadFrom (const void* rawData, const size_t numBytes)
 
     return Image::null;
 }
-
-END_JUCE_NAMESPACE

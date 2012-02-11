@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ResizableEdgeComponent::ResizableEdgeComponent (Component* const componentToResize,
                                                 ComponentBoundsConstrainer* const constrainer_,
                                                 Edge edge_)
@@ -111,5 +109,3 @@ void ResizableEdgeComponent::mouseUp (const MouseEvent&)
     if (constrainer != nullptr)
         constrainer->resizeEnd();
 }
-
-END_JUCE_NAMESPACE

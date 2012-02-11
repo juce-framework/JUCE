@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 Image juce_createIconForFile (const File& file);
 
@@ -259,6 +258,3 @@ void FileListComponent::returnKeyPressed (int currentSelectedRow)
 {
     sendDoubleClickMessage (fileList.getFile (currentSelectedRow));
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ScrollBar::ScrollbarButton  : public Button
 {
 public:
@@ -431,5 +429,3 @@ bool ScrollBar::keyPressed (const KeyPress& key)
 
     return true;
 }
-
-END_JUCE_NAMESPACE

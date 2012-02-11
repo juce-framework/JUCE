@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ShapeButton::ShapeButton (const String& text_,
                           const Colour& normalColour_,
                           const Colour& overColour_,
@@ -119,5 +117,3 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
         g.strokePath (shape, PathStrokeType (outlineWidth), trans);
     }
 }
-
-END_JUCE_NAMESPACE

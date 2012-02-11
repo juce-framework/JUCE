@@ -128,9 +128,10 @@
 
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
-#include "wrapper/juce_BrowserPluginComponent.h"
-END_JUCE_NAMESPACE
+namespace juce
+{
+    #include "wrapper/juce_BrowserPluginComponent.h"
+}
 
 //==============================================================================
 /**

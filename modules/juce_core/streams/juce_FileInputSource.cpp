@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 FileInputSource::FileInputSource (const File& file_, bool useFileTimeInHashGeneration_)
     : file (file_), useFileTimeInHashGeneration (useFileTimeInHashGeneration_)
 {
@@ -54,6 +51,3 @@ int64 FileInputSource::hashCode() const
 
     return h;
 }
-
-
-END_JUCE_NAMESPACE

@@ -52,7 +52,7 @@ SourceCodeEditor::~SourceCodeEditor()
 
 void SourceCodeEditor::resized()
 {
-    editor.setBounds (0, 0, getWidth(), getHeight());
+    editor.setBounds (getLocalBounds());
 }
 
 bool SourceCodeEditor::isTextFile (const File& file)

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
@@ -210,5 +208,3 @@ public:
 static GZIPTests gzipTests;
 
 #endif
-
-END_JUCE_NAMESPACE

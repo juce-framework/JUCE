@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 RectanglePlacement::RectanglePlacement (const RectanglePlacement& other) noexcept
     : flags (other.flags)
 {
@@ -129,6 +127,3 @@ const AffineTransform RectanglePlacement::getTransformToFit (const Rectangle<flo
                 .scaled (scaleX, scaleY)
                 .translated (newX, newY);
 }
-
-
-END_JUCE_NAMESPACE

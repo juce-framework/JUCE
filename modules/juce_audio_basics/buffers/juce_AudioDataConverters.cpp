@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 void AudioDataConverters::convertFloatToInt16LE (const float* source, void* dest, int numSamples, const int destBytesPerSample)
 {
     const double maxVal = (double) 0x7fff;
@@ -602,6 +600,3 @@ public:
 static AudioConversionTests audioConversionUnitTests;
 
 #endif
-
-
-END_JUCE_NAMESPACE

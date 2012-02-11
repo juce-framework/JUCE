@@ -29,7 +29,8 @@
 #include "../juce_core/juce_core.h"
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE buffers, effects, midi, sources, synthesisers
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
@@ -94,6 +95,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_AUDIO_BASICS_JUCEHEADER__

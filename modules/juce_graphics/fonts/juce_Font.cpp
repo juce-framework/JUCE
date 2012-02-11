@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 namespace FontValues
 {
     float limitFontHeight (const float height) noexcept
@@ -546,6 +544,3 @@ Typeface* Font::getTypeface() const
 
     return font->typeface;
 }
-
-
-END_JUCE_NAMESPACE

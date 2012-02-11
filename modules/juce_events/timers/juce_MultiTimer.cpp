@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class MultiTimer::MultiTimerCallback    : public Timer
 {
 public:
@@ -122,6 +120,3 @@ int MultiTimer::getTimerInterval (const int timerId) const noexcept
 
     return 0;
 }
-
-
-END_JUCE_NAMESPACE

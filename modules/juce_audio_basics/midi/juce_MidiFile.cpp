@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 
 namespace MidiFileHelpers
 {
@@ -428,5 +426,3 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
     mainOut.writeIntBigEndian ((int) out.getDataSize());
     mainOut << out;
 }
-
-END_JUCE_NAMESPACE

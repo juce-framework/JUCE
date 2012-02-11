@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 NamedValueSet::NamedValue::NamedValue() noexcept
 {
 }
@@ -278,6 +276,3 @@ void NamedValueSet::copyToXmlAttributes (XmlElement& xml) const
                           i->value.toString());
     }
 }
-
-
-END_JUCE_NAMESPACE

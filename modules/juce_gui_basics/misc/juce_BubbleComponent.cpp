@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 BubbleComponent::BubbleComponent()
   : side (0),
     allowablePlacements (above | below | left | right),
@@ -191,5 +189,3 @@ void BubbleComponent::setPosition (const Rectangle<int>& rectangleToPointTo)
 
     setBounds (x, y, w, h);
 }
-
-END_JUCE_NAMESPACE

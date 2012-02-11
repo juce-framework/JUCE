@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MultiDocumentPanelWindow::MultiDocumentPanelWindow (const Colour& backgroundColour)
     : DocumentWindow (String::empty, backgroundColour,
                       DocumentWindow::maximiseButton | DocumentWindow::closeButton, false)
@@ -533,6 +531,3 @@ void MultiDocumentPanel::updateOrder()
     if (components != oldList)
         activeDocumentChanged();
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 FilenameComponent::FilenameComponent (const String& name,
                                       const File& currentFile,
                                       const bool canEditFilename,
@@ -246,5 +244,3 @@ void FilenameComponent::handleAsyncUpdate()
     Component::BailOutChecker checker (this);
     listeners.callChecked (checker, &FilenameComponentListener::filenameComponentChanged, this);
 }
-
-END_JUCE_NAMESPACE

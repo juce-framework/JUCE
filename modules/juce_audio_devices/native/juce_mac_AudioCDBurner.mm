@@ -25,7 +25,7 @@
 
 const int kilobytesPerSecond1x = 176;
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 #define OpenDiskDevice MakeObjCClassName(OpenDiskDevice)
 
@@ -326,7 +326,8 @@ END_JUCE_NAMESPACE
 @end
 
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 class AudioCDBurner::Pimpl  : public Timer

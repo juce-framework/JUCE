@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 ImagePixelData::ImagePixelData (const Image::PixelFormat format, const int w, const int h)
     : pixelFormat (format), width (w), height (h)
 {
@@ -640,5 +637,3 @@ void Image::moveImageSection (int dx, int dy,
         }
     }
 }
-
-END_JUCE_NAMESPACE

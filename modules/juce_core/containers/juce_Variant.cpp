@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 enum VariantStreamMarkers
 {
     varMarker_Int       = 1,
@@ -647,6 +645,3 @@ var var::readFromStream (InputStream& input)
 
     return var::null;
 }
-
-
-END_JUCE_NAMESPACE

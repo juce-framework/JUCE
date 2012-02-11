@@ -23,13 +23,7 @@
   ==============================================================================
 */
 
-#if ! JUCE_WINDOWS
- #include <pwd.h>
-#endif
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 File::File (const String& fullPathName)
     : fullPath (parseAbsolutePath (fullPathName))
 {
@@ -1078,5 +1072,3 @@ public:
 static FileTests fileUnitTests;
 
 #endif
-
-END_JUCE_NAMESPACE

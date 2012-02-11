@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 CPlusPlusCodeTokeniser::CPlusPlusCodeTokeniser() {}
 CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser() {}
 
@@ -609,5 +607,3 @@ bool CPlusPlusCodeTokeniser::isReservedKeyword (const String& token) noexcept
 {
     return CppTokeniser::isReservedKeyword (token.getCharPointer(), token.length());
 }
-
-END_JUCE_NAMESPACE

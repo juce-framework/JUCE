@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 StringPool& Identifier::getPool()
 {
     static StringPool pool;
@@ -73,5 +71,3 @@ bool Identifier::isValidIdentifier (const String& possibleIdentifier) noexcept
     return possibleIdentifier.isNotEmpty()
             && possibleIdentifier.containsOnly ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-:#@$%");
 }
-
-END_JUCE_NAMESPACE

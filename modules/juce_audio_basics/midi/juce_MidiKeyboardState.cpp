@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MidiKeyboardState::MidiKeyboardState()
 {
     zerostruct (noteStates);
@@ -185,6 +183,3 @@ void MidiKeyboardState::removeListener (MidiKeyboardStateListener* const listene
     const ScopedLock sl (lock);
     listeners.removeValue (listener);
 }
-
-
-END_JUCE_NAMESPACE

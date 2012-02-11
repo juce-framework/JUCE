@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 FileBasedDocument::FileBasedDocument (const String& fileExtension_,
                                       const String& fileWildcard_,
                                       const String& openFileDialogTitle_,
@@ -286,6 +284,3 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
     return userCancelledSave;
 }
 #endif
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 GlowEffect::GlowEffect()
   : radius (2.0f),
     colour (Colours::white)
@@ -60,5 +58,3 @@ void GlowEffect::applyEffect (Image& image, Graphics& g, float alpha)
     g.setOpacity (alpha);
     g.drawImageAt (image, 0, 0, false);
 }
-
-END_JUCE_NAMESPACE

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 ChildProcess::ChildProcess() {}
 ChildProcess::~ChildProcess() {}
@@ -90,6 +89,3 @@ public:
 static ChildProcessTests childProcessUnitTests;
 
 #endif
-
-
-END_JUCE_NAMESPACE

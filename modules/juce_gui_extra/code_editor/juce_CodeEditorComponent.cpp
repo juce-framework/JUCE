@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class CodeEditorComponent::CodeEditorLine
 {
 public:
@@ -1189,5 +1187,3 @@ void CodeEditorComponent::getIteratorForPosition (int position, CodeDocument::It
         }
     }
 }
-
-END_JUCE_NAMESPACE

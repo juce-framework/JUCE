@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ComponentAnimator::AnimationTask
 {
 public:
@@ -341,6 +339,3 @@ void ComponentAnimator::timerCallback()
     if (tasks.size() == 0)
         stopTimer();
 }
-
-
-END_JUCE_NAMESPACE

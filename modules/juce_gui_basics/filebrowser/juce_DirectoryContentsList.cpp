@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DirectoryContentsList::DirectoryContentsList (const FileFilter* const fileFilter_,
                                               TimeSliceThread& thread_)
    : fileFilter (fileFilter_),
@@ -268,5 +266,3 @@ bool DirectoryContentsList::addFile (const File& file,
 
     return false;
 }
-
-END_JUCE_NAMESPACE

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 Image juce_createIconForFile (const File& file);
 
@@ -269,5 +268,3 @@ void FileTreeComponent::setSelectedFile (const File& target)
 
     clearSelectedItems();
 }
-
-END_JUCE_NAMESPACE

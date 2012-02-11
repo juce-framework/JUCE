@@ -95,7 +95,8 @@ class JuceVSTWrapper;
 static bool recursionCheck = false;
 static juce::uint32 lastMasterIdleCall = 0;
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
  #if JUCE_MAC
   extern void initialiseMac();
   extern void* attachComponentToWindowRef (Component* component, void* windowRef);
@@ -108,7 +109,7 @@ BEGIN_JUCE_NAMESPACE
  #if JUCE_LINUX
   extern Display* display;
  #endif
-END_JUCE_NAMESPACE
+}
 
 
 //==============================================================================

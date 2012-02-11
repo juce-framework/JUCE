@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 //#define JUCE_ENABLE_REPAINT_DEBUGGING 1
 
@@ -575,5 +574,3 @@ int ComponentPeer::getCurrentRenderingEngine() const
 void ComponentPeer::setCurrentRenderingEngine (int /*index*/)
 {
 }
-
-END_JUCE_NAMESPACE

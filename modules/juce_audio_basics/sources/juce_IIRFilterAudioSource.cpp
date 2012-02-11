@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 IIRFilterAudioSource::IIRFilterAudioSource (AudioSource* const inputSource,
                                             const bool deleteInputWhenDeleted)
     : input (inputSource, deleteInputWhenDeleted)
@@ -73,6 +71,3 @@ void IIRFilterAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& buff
             ->processSamples (bufferToFill.buffer->getSampleData (i, bufferToFill.startSample),
                               bufferToFill.numSamples);
 }
-
-
-END_JUCE_NAMESPACE

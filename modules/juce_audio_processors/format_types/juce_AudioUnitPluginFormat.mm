@@ -25,6 +25,8 @@
 
 #if JUCE_PLUGINHOST_AU && JUCE_MAC
 
+} // (juce namespace)
+
 #include <AudioUnit/AudioUnit.h>
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
@@ -34,7 +36,8 @@
  #include <AudioUnit/AudioUnitCarbonView.h>
 #endif
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 #if JUCE_SUPPORT_CARBON
  #include "../../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
@@ -1456,8 +1459,6 @@ FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 {
     return FileSearchPath ("/(Default AudioUnit locations)");
 }
-
-END_JUCE_NAMESPACE
 
 #undef log
 

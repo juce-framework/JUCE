@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 namespace PropertyFileConstants
 {
     static const int magicNumber            = (int) ByteOrder::littleEndianInt ("PROP");
@@ -340,6 +338,3 @@ void PropertiesFile::propertyChanged()
     else if (options.millisecondsBeforeSaving == 0)
         saveIfNeeded();
 }
-
-
-END_JUCE_NAMESPACE

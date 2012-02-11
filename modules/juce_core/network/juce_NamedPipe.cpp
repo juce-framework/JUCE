@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 bool NamedPipe::openExisting (const String& pipeName)
 {
@@ -48,5 +47,3 @@ String NamedPipe::getName() const
 }
 
 // other methods for this class are implemented in the platform-specific files
-
-END_JUCE_NAMESPACE

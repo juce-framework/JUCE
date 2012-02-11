@@ -25,7 +25,7 @@
 
 #if JUCE_QUICKTIME && ! (JUCE_64BIT || JUCE_IOS)
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 #if ! JUCE_WINDOWS
  #define Point CarbonDummyPointName // (workaround to avoid definition of "Point" by old Carbon headers)
@@ -61,7 +61,8 @@ END_JUCE_NAMESPACE
  #endif
 #endif
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioProcessorPlayer::AudioProcessorPlayer()
     : processor (nullptr),
       sampleRate (0),
@@ -182,6 +180,3 @@ void AudioProcessorPlayer::handleIncomingMidiMessage (MidiInput*, const MidiMess
 {
     messageCollector.addMessageToQueue (message);
 }
-
-
-END_JUCE_NAMESPACE

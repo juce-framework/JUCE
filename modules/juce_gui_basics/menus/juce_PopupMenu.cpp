@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class PopupMenu::Item
 {
 public:
@@ -1699,6 +1697,3 @@ bool PopupMenu::MenuItemIterator::next()
 
     return true;
 }
-
-
-END_JUCE_NAMESPACE

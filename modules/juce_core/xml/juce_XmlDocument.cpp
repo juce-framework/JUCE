@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 XmlDocument::XmlDocument (const String& documentText)
     : originalText (documentText),
       input (nullptr),
@@ -853,6 +851,3 @@ String XmlDocument::getParameterEntity (const String& entity)
 
     return entity;
 }
-
-
-END_JUCE_NAMESPACE

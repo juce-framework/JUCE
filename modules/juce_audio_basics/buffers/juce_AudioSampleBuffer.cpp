@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioSampleBuffer::AudioSampleBuffer (const int numChannels_,
                                       const int numSamples) noexcept
   : numChannels (numChannels_),
@@ -552,5 +550,3 @@ float AudioSampleBuffer::getRMSLevel (const int channel,
 
     return (float) std::sqrt (sum / numSamples);
 }
-
-END_JUCE_NAMESPACE

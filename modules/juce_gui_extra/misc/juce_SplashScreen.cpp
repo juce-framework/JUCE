@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 SplashScreen::SplashScreen()
 {
     setOpaque (true);
@@ -107,5 +105,3 @@ void SplashScreen::timerCallback()
         delete this;
     }
 }
-
-END_JUCE_NAMESPACE

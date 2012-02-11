@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class AlertWindowTextEditor  : public TextEditor
 {
 public:
@@ -760,5 +758,3 @@ bool AlertWindow::showNativeDialogBox (const String& title,
     }
 }
 #endif
-
-END_JUCE_NAMESPACE

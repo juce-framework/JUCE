@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 TabBarButton::TabBarButton (const String& name, TabbedButtonBar& owner_)
     : Button (name),
       owner (owner_),
@@ -497,5 +495,3 @@ void TabbedButtonBar::currentTabChanged (const int, const String&)
 void TabbedButtonBar::popupMenuClickOnTab (const int, const String&)
 {
 }
-
-END_JUCE_NAMESPACE

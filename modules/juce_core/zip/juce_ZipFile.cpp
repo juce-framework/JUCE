@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ZipFile::ZipEntryHolder
 {
 public:
@@ -572,6 +570,3 @@ bool ZipFile::Builder::writeToStream (OutputStream& target) const
 
     return true;
 }
-
-
-END_JUCE_NAMESPACE

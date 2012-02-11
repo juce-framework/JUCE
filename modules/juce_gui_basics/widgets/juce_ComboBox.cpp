@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ComboBox::ItemInfo::ItemInfo (const String& name_, int itemId_, bool isEnabled_, bool isHeading_)
     : name (name_), itemId (itemId_), isEnabled (isEnabled_), isHeading (isHeading_)
 {
@@ -637,5 +635,3 @@ void ComboBox::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
     setTextWhenNothingSelected (state [Ids::unselectedText].toString());
     setTextWhenNoChoicesAvailable (state [Ids::noItemsText].toString());
 }
-
-END_JUCE_NAMESPACE

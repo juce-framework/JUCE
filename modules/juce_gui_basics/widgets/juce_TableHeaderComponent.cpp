@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class DragOverlayComp   : public Component
 {
 public:
@@ -930,6 +928,3 @@ void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
 void TableHeaderComponent::Listener::tableColumnDraggingChanged (TableHeaderComponent*, int)
 {
 }
-
-
-END_JUCE_NAMESPACE

@@ -113,7 +113,8 @@
 
 #include "system/juce_StandardHeader.h"
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE containers, files, json, logging, maths, memory, misc, network,
 // streams, system, text, threads, time, unit_tests, xml, zip
@@ -407,7 +408,7 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #if JUCE_MSVC
  #pragma warning (pop)

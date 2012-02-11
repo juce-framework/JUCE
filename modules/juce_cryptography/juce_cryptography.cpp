@@ -38,6 +38,9 @@
 
 #include "juce_cryptography.h"
 
+namespace juce
+{
+
 // START_AUTOINCLUDE encryption/*.cpp, hashing/*.cpp
 #include "encryption/juce_BlowFish.cpp"
 #include "encryption/juce_Primes.cpp"
@@ -45,3 +48,5 @@
 #include "hashing/juce_MD5.cpp"
 #include "hashing/juce_SHA256.cpp"
 // END_AUTOINCLUDE
+
+}

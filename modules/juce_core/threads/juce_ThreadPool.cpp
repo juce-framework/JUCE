@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ThreadPoolJob::ThreadPoolJob (const String& name)
     : jobName (name),
       pool (nullptr),
@@ -403,5 +401,3 @@ bool ThreadPool::runNextJob()
 
     return true;
 }
-
-END_JUCE_NAMESPACE

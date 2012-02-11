@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DrawableButton::DrawableButton (const String& name,
                                 const DrawableButton::ButtonStyle buttonStyle)
     : Button (name),
@@ -291,5 +289,3 @@ Drawable* DrawableButton::getDownImage() const noexcept
 
     return d;
 }
-
-END_JUCE_NAMESPACE

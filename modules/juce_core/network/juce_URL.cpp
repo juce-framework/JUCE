@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 URL::URL()
 {
 }
@@ -475,6 +473,3 @@ bool URL::launchInDefaultBrowser() const
 
     return Process::openDocument (u, String::empty);
 }
-
-
-END_JUCE_NAMESPACE

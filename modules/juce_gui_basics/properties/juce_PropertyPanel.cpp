@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class PropertySectionComponent  : public Component
 {
 public:
@@ -398,6 +396,3 @@ const String& PropertyPanel::getMessageWhenEmpty() const
 {
     return messageWhenEmpty;
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class ModalComponentManager::ModalItem  : public ComponentMovementWatcher
 {
 public:
@@ -286,5 +284,3 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
     return returnValue;
 }
 #endif
-
-END_JUCE_NAMESPACE

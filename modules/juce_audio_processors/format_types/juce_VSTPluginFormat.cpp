@@ -28,8 +28,6 @@
 //==============================================================================
 #if ! (JUCE_MAC && JUCE_64BIT)
 
-BEGIN_JUCE_NAMESPACE
-
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
  #include "../../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
 #endif
@@ -2916,9 +2914,6 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
     return FileSearchPath ("/usr/lib/vst");
    #endif
 }
-
-
-END_JUCE_NAMESPACE
 
 #endif
 #undef log

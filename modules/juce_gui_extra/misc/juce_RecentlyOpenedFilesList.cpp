@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 RecentlyOpenedFilesList::RecentlyOpenedFilesList()
     : maxNumberOfItems (10)
 {
@@ -133,6 +131,3 @@ void RecentlyOpenedFilesList::restoreFromString (const String& stringifiedVersio
 
     setMaxNumberOfItems (maxNumberOfItems);
 }
-
-
-END_JUCE_NAMESPACE

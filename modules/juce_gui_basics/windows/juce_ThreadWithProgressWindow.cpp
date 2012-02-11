@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasProgressBar,
                                                     const bool hasCancelButton,
@@ -100,5 +98,3 @@ void ThreadWithProgressWindow::timerCallback()
         alertWindow->setMessage (message);
     }
 }
-
-END_JUCE_NAMESPACE

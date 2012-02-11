@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 const SystemStats::CPUFlags& SystemStats::getCPUFlags()
 {
     static CPUFlags cpuFlags;
@@ -62,6 +60,3 @@ String SystemStats::getJUCEVersion()
 
  static JuceVersionPrinter juceVersionPrinter;
 #endif
-
-
-END_JUCE_NAMESPACE

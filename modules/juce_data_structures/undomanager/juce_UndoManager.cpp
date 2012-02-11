@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 UndoManager::UndoManager (const int maxNumberOfUnitsToKeep,
                           const int minimumTransactions)
    : totalUnitsStored (0),
@@ -274,6 +272,3 @@ int UndoManager::getNumActionsInCurrentTransaction() const
 
     return 0;
 }
-
-
-END_JUCE_NAMESPACE

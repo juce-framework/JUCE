@@ -70,7 +70,8 @@
 #endif
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE components, mouse, keyboard, buttons, drawables,
 // filebrowser, layout, lookandfeel, menus, positioning, properties,
@@ -440,6 +441,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_GUI_BASICS_JUCEHEADER__

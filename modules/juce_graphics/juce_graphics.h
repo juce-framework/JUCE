@@ -62,7 +62,8 @@
 #endif
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE colour, geometry, placement, contexts, images,
 // image_formats, fonts, effects
@@ -170,6 +171,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_GRAPHICS_JUCEHEADER__

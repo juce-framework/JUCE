@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) noexcept
     : name (other.name),
       value (other.value)
@@ -839,5 +837,3 @@ void XmlElement::deleteAllTextElements() noexcept
         child = next;
     }
 }
-
-END_JUCE_NAMESPACE

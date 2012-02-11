@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 class WebBrowserComponentInternal;
 
@@ -128,7 +128,8 @@ class WebBrowserComponentInternal;
 @end
 #endif
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 class WebBrowserComponentInternal

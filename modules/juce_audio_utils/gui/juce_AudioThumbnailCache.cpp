@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class AudioThumbnailCache::ThumbnailCacheEntry
 {
 public:
@@ -172,5 +170,3 @@ void AudioThumbnailCache::writeToStream (OutputStream& out)
     for (int i = 0; i < thumbs.size(); ++i)
         thumbs.getUnchecked(i)->write (out);
 }
-
-END_JUCE_NAMESPACE

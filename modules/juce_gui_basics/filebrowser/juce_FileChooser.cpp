@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 FileChooser::FileChooser (const String& chooserBoxTitle,
                           const File& currentFileOrDirectory,
                           const String& fileFilters,
@@ -171,6 +169,3 @@ FilePreviewComponent::FilePreviewComponent()
 FilePreviewComponent::~FilePreviewComponent()
 {
 }
-
-
-END_JUCE_NAMESPACE

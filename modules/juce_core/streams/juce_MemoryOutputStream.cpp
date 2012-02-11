@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MemoryOutputStream::MemoryOutputStream (const size_t initialSize)
   : data (internalBlock),
     position (0),
@@ -165,5 +163,3 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutput
     stream.write (streamToRead.getData(), (int) streamToRead.getDataSize());
     return stream;
 }
-
-END_JUCE_NAMESPACE

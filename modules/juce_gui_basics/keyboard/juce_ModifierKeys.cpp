@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 
 ModifierKeys::ModifierKeys() noexcept
     : flags (0)
@@ -64,6 +62,3 @@ int ModifierKeys::getNumMouseButtonsDown() const noexcept
 
     return num;
 }
-
-
-END_JUCE_NAMESPACE

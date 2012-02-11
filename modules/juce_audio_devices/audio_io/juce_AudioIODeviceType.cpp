@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioIODeviceType::AudioIODeviceType (const String& name)
     : typeName (name)
 {
@@ -76,6 +74,3 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()            
 #if ! JUCE_ANDROID
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()         { return nullptr; }
 #endif
-
-
-END_JUCE_NAMESPACE

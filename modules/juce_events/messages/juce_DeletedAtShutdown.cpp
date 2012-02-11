@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 static SpinLock deletedAtShutdownLock;
 
 DeletedAtShutdown::DeletedAtShutdown()
@@ -81,5 +79,3 @@ Array <DeletedAtShutdown*>& DeletedAtShutdown::getObjects()
     static Array <DeletedAtShutdown*> objects;
     return objects;
 }
-
-END_JUCE_NAMESPACE

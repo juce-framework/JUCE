@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 InterprocessConnectionServer::InterprocessConnectionServer()
     : Thread ("Juce IPC server")
 {
@@ -79,6 +77,3 @@ void InterprocessConnectionServer::run()
         }
     }
 }
-
-
-END_JUCE_NAMESPACE

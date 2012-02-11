@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioProcessor::AudioProcessor()
     : playHead (nullptr),
       sampleRate (0),
@@ -312,6 +310,3 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
     timeSigDenominator = 4;
     bpm = 120;
 }
-
-
-END_JUCE_NAMESPACE

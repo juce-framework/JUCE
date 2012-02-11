@@ -26,7 +26,7 @@
 class UIViewComponentPeer;
 
 //==============================================================================
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 #define JuceUIView MakeObjCClassName(JuceUIView)
 
@@ -79,7 +79,8 @@ END_JUCE_NAMESPACE
 - (void) becomeKeyWindow;
 @end
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 class UIViewComponentPeer  : public ComponentPeer,
@@ -219,7 +220,7 @@ private:
 };
 
 //==============================================================================
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 @implementation JuceUIViewController
 
@@ -370,7 +371,8 @@ juce::Point<int> juce_lastMousePos;
 
 //==============================================================================
 //==============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 UIViewComponentPeer::UIViewComponentPeer (Component* const component,

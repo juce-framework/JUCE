@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DrawableText::DrawableText()
     : colour (Colours::black),
       justification (Justification::centredLeft)
@@ -341,6 +339,3 @@ ValueTree DrawableText::createValueTree (ComponentBuilder::ImageProvider*) const
 
     return tree;
 }
-
-
-END_JUCE_NAMESPACE

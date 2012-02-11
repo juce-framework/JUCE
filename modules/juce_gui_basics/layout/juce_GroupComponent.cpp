@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 GroupComponent::GroupComponent (const String& name,
                                 const String& labelText)
     : Component (name),
@@ -93,5 +91,3 @@ void GroupComponent::refreshFromValueTree (const ValueTree& state, ComponentBuil
     setText (state [Ids::text].toString());
     setTextLabelPosition (static_cast <int> (state [Ids::justification]));
 }
-
-END_JUCE_NAMESPACE

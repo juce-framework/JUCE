@@ -23,10 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-
-//==============================================================================
 class ValueTree::SharedObject    : public SingleThreadedReferenceCountedObject
 {
 public:
@@ -1103,5 +1100,3 @@ public:
 static ValueTreeTests valueTreeTests;
 
 #endif
-
-END_JUCE_NAMESPACE

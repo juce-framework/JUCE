@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Message::Message() noexcept   : messageRecipient (nullptr) {}
 Message::~Message() {}
 
@@ -325,5 +323,3 @@ JUCE_API void JUCE_CALLTYPE shutdownJuce_GUI()
     DeletedAtShutdown::deleteAll();
     MessageManager::deleteInstance();
 }
-
-END_JUCE_NAMESPACE

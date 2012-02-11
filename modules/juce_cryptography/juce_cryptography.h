@@ -29,7 +29,8 @@
 //=============================================================================
 #include "../juce_core/juce_core.h"
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE encryption, hashing
 #ifndef __JUCE_BLOWFISH_JUCEHEADER__
@@ -49,6 +50,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_CRYPTOGRAPHY_JUCEHEADER__

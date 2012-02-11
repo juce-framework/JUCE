@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class MidiKeyboardUpDownButton  : public Button
 {
 public:
@@ -873,6 +871,3 @@ void MidiKeyboardComponent::focusLost (FocusChangeType)
 {
     resetAnyKeysInUse();
 }
-
-
-END_JUCE_NAMESPACE

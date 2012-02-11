@@ -121,7 +121,8 @@
  #include <GLES2/gl2.h>
 #endif
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 #include "native/juce_MissingGLDefinitions.h"
@@ -166,9 +167,12 @@ void OpenGLExtensionFunctions::initialise()
 #include "opengl/juce_OpenGLTexture.cpp"
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
+
 using namespace juce;
-BEGIN_JUCE_NAMESPACE
+
+namespace juce
+{
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -193,4 +197,4 @@ BEGIN_JUCE_NAMESPACE
 
 #endif
 
-END_JUCE_NAMESPACE
+}

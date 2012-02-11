@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Typeface::Typeface (const String& name_) noexcept
     : name (name_)
 {
@@ -51,5 +49,3 @@ EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransfor
 
     return nullptr;
 }
-
-END_JUCE_NAMESPACE

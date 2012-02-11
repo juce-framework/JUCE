@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4127) // "expression is constant" warning
@@ -2237,5 +2235,3 @@ const Font& LowLevelGraphicsSoftwareRenderer::getFont()                 { return
   #pragma optimize ("", on)  // resets optimisations to the project defaults
  #endif
 #endif
-
-END_JUCE_NAMESPACE

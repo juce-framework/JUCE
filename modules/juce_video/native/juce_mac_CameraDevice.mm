@@ -32,7 +32,7 @@
 
 class QTCameraDeviceInteral;
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 @interface QTCaptureCallbackDelegate    : NSObject
 {
@@ -56,7 +56,8 @@ END_JUCE_NAMESPACE
          fromConnection: (QTCaptureConnection*) connection;
 @end
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 extern Image juce_createImageFromCIImage (CIImage* im, int w, int h);
 
@@ -207,7 +208,8 @@ public:
     CriticalSection listenerLock;
 };
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
+
 @implementation QTCaptureCallbackDelegate
 
 - (QTCaptureCallbackDelegate*) initWithOwner: (CameraDevice*) owner_
@@ -271,7 +273,9 @@ END_JUCE_NAMESPACE
 }
 
 @end
-BEGIN_JUCE_NAMESPACE
+
+namespace juce
+{
 
 //==============================================================================
 class QTCaptureViewerComp : public NSViewComponent

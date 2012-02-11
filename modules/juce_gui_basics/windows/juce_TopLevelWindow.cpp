@@ -23,11 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
-/** Keeps track of the active top level window.
-*/
+/** Keeps track of the active top level window. */
 class TopLevelWindowManager  : public Timer,
                                public DeletedAtShutdown
 {
@@ -343,6 +339,3 @@ TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() noexcept
 
     return best;
 }
-
-
-END_JUCE_NAMESPACE

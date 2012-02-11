@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MouseEvent::MouseEvent (MouseInputSource& source_,
                         const Point<int>& position,
                         const ModifierKeys& mods_,
@@ -113,6 +111,3 @@ static int doubleClickTimeOutMs = 400;
 
 int MouseEvent::getDoubleClickTimeout() noexcept                        { return doubleClickTimeOutMs; }
 void MouseEvent::setDoubleClickTimeout (const int newTime) noexcept     { doubleClickTimeOutMs = newTime; }
-
-
-END_JUCE_NAMESPACE

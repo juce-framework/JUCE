@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 #if JUCE_DEBUG
 
 struct DanglingStreamChecker
@@ -312,6 +310,3 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&)
 {
     return stream << stream.getNewLineString();
 }
-
-
-END_JUCE_NAMESPACE

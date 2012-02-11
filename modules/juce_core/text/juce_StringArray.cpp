@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 StringArray::StringArray() noexcept
 {
@@ -487,5 +485,3 @@ void StringArray::minimiseStorageOverheads()
 {
     strings.minimiseStorageOverheads();
 }
-
-END_JUCE_NAMESPACE

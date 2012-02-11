@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class DocumentWindow::ButtonListenerProxy  : public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
 {
 public:
@@ -383,6 +381,3 @@ void DocumentWindow::userTriedToCloseWindow()
 {
     closeButtonPressed();
 }
-
-
-END_JUCE_NAMESPACE

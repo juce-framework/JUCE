@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 @interface JuceGLView   : UIView
 {
@@ -38,7 +38,8 @@ END_JUCE_NAMESPACE
 }
 @end
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 class GLESContext   : public OpenGLContext

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioSourcePlayer::AudioSourcePlayer()
     : source (nullptr),
       sampleRate (0),
@@ -183,5 +181,3 @@ void AudioSourcePlayer::audioDeviceStopped()
 
     tempBuffer.setSize (2, 8);
 }
-
-END_JUCE_NAMESPACE

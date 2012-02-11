@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 // tests that some co-ords aren't NaNs
 #define JUCE_CHECK_COORDS_ARE_VALID(x, y) \
     jassert (x == x && y == y);
@@ -1586,5 +1584,3 @@ bool Path::Iterator::next()
 }
 
 #undef JUCE_CHECK_COORDS_ARE_VALID
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ToolbarButton::ToolbarButton (const int itemId_, const String& buttonText,
                               Drawable* const normalImage_, Drawable* const toggledOnImage_)
    : ToolbarItemComponent (itemId_, buttonText, true),
@@ -97,6 +95,3 @@ void ToolbarButton::buttonStateChanged()
         }
     }
 }
-
-
-END_JUCE_NAMESPACE

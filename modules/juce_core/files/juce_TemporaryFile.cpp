@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 TemporaryFile::TemporaryFile (const String& suffix, const int optionFlags)
 {
     createTempFile (File::getSpecialLocation (File::tempDirectory),
@@ -113,5 +111,3 @@ bool TemporaryFile::deleteTemporaryFile() const
 
     return false;
 }
-
-END_JUCE_NAMESPACE

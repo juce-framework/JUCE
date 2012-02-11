@@ -32,7 +32,8 @@
 #include "../juce_audio_processors/juce_audio_processors.h"
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE gui, players
 #ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
@@ -52,6 +53,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_AUDIO_UTILS_JUCEHEADER__

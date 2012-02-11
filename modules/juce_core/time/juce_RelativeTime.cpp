@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 RelativeTime::RelativeTime (const double seconds_) noexcept
     : seconds (seconds_)
 {
@@ -168,6 +166,3 @@ bool operator<= (const RelativeTime& t1, const RelativeTime& t2) noexcept { retu
 
 RelativeTime operator+ (const RelativeTime&  t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t += t2; }
 RelativeTime operator- (const RelativeTime&  t1, const RelativeTime& t2) noexcept   { RelativeTime t (t1); return t -= t2; }
-
-
-END_JUCE_NAMESPACE

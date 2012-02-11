@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DirectoryContentsDisplayComponent::DirectoryContentsDisplayComponent (DirectoryContentsList& listToShow)
     : fileList (listToShow)
 {
@@ -73,6 +71,3 @@ void DirectoryContentsDisplayComponent::sendDoubleClickMessage (const File& file
         listeners.callChecked (checker, &FileBrowserListener::fileDoubleClicked, file);
     }
 }
-
-
-END_JUCE_NAMESPACE

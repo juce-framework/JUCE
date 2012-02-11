@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ChannelRemappingAudioSource::ChannelRemappingAudioSource (AudioSource* const source_,
                                                           const bool deleteSourceWhenDeleted)
    : source (source_, deleteSourceWhenDeleted),
@@ -191,6 +189,3 @@ void ChannelRemappingAudioSource::restoreFromXml (const XmlElement& e)
             remappedOutputs.add (outs[i].getIntValue());
     }
 }
-
-
-END_JUCE_NAMESPACE

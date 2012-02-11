@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class Expression::Term  : public SingleThreadedReferenceCountedObject
 {
 public:
@@ -1173,6 +1171,3 @@ String Expression::Scope::getScopeUID() const
 {
     return String::empty;
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioIODevice::AudioIODevice (const String& deviceName, const String& typeName_)
     : name (deviceName),
       typeName (typeName_)
@@ -50,6 +48,3 @@ bool AudioIODevice::showControlPanel()
 
 //==============================================================================
 void AudioIODeviceCallback::audioDeviceError (const String&) {}
-
-
-END_JUCE_NAMESPACE

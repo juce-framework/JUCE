@@ -64,8 +64,6 @@ namespace zlibNamespace
  #pragma warning (pop)
 #endif
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
 // included publicly.
@@ -274,5 +272,3 @@ unsigned long juce_crc32 (unsigned long crc, const unsigned char* buf, unsigned 
 {
     return zlibNamespace::crc32 (crc, buf, len);
 }
-
-END_JUCE_NAMESPACE

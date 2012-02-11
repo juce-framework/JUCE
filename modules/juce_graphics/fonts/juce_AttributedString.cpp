@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AttributedString::Attribute::Attribute (const Range<int>& range_, const Colour& colour_)
     : range (range_), colour (new Colour (colour_))
 {
@@ -218,5 +216,3 @@ void AttributedString::draw (Graphics& g, const Rectangle<float>& area) const
         }
     }
 }
-
-END_JUCE_NAMESPACE

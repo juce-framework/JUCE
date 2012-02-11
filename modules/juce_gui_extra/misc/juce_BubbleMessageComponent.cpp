@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 BubbleMessageComponent::BubbleMessageComponent (int fadeOutLengthMs)
     : fadeOutLength (fadeOutLengthMs),
       deleteAfterUse (false)
@@ -124,5 +122,3 @@ void BubbleMessageComponent::timerCallback()
             Desktop::getInstance().getAnimator().fadeOut (this, fadeOutLength);
     }
 }
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MACAddress::MACAddress()
     : asInt64 (0)
 {
@@ -77,6 +75,3 @@ bool MACAddress::isNull() const noexcept                                { return
 
 bool MACAddress::operator== (const MACAddress& other) const noexcept    { return asInt64 == other.asInt64; }
 bool MACAddress::operator!= (const MACAddress& other) const noexcept    { return asInt64 != other.asInt64; }
-
-
-END_JUCE_NAMESPACE

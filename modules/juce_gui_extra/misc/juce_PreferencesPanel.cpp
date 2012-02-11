@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 PreferencesPanel::PreferencesPanel()
     : buttonSize (70)
 {
@@ -143,5 +141,3 @@ void PreferencesPanel::buttonClicked (Button*)
         }
     }
 }
-
-END_JUCE_NAMESPACE

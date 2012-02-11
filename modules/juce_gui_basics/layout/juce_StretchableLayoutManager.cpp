@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 StretchableLayoutManager::StretchableLayoutManager()
     : totalSize (0)
 {
@@ -359,5 +357,3 @@ int StretchableLayoutManager::sizeToRealSize (double size, int totalSpace)
 
     return roundToInt (size);
 }
-
-END_JUCE_NAMESPACE

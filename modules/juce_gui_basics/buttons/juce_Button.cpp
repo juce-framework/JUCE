@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class Button::RepeatTimer  : public Timer
 {
 public:
@@ -692,5 +690,3 @@ int Button::getConnectedFlags (const ValueTree& state)
     if (state [Button::Ids::connectedBottom])  connected |= Button::ConnectedOnBottom;
     return connected;
 }
-
-END_JUCE_NAMESPACE

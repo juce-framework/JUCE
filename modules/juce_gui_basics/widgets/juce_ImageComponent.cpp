@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ImageComponent::ImageComponent (const String& name)
     : Component (name),
       placement (RectanglePlacement::centred)
@@ -104,5 +102,3 @@ RectanglePlacement ImageComponent::getPlacement (const ValueTree& state)
 {
     return RectanglePlacement (static_cast <int> (state [Ids::placement]));
 }
-
-END_JUCE_NAMESPACE

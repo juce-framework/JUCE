@@ -125,6 +125,9 @@
 #endif
 
 //==============================================================================
+namespace juce
+{
+
 // START_AUTOINCLUDE components/*.cpp, mouse/*.cpp, keyboard/*.cpp, buttons/*.cpp,
 // drawables/*.cpp, filebrowser/*.cpp, layout/*.cpp, lookandfeel/*.cpp,
 // menus/*.cpp, positioning/*.cpp, properties/*.cpp, widgets/*.cpp,
@@ -238,10 +241,13 @@
 #include "misc/juce_DropShadower.cpp"
 // END_AUTOINCLUDE
 
+}
+
 using namespace juce;
 
 //==============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
@@ -282,4 +288,4 @@ BEGIN_JUCE_NAMESPACE
 
 #endif
 
-END_JUCE_NAMESPACE
+}

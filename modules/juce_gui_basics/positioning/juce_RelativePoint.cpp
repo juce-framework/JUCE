@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 namespace RelativePointHelpers
 {
@@ -95,6 +94,3 @@ bool RelativePoint::isDynamic() const
 {
     return x.isDynamic() || y.isDynamic();
 }
-
-
-END_JUCE_NAMESPACE

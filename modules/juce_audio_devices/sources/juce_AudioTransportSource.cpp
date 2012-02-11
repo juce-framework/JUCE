@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioTransportSource::AudioTransportSource()
     : source (nullptr),
       resamplerSource (nullptr),
@@ -303,5 +301,3 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
     lastGain = gain;
 }
-
-END_JUCE_NAMESPACE

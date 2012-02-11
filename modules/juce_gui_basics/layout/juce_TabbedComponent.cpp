@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 namespace TabbedComponentHelpers
 {
     const Identifier deleteComponentId ("deleteByTabComp_");
@@ -307,6 +305,3 @@ void TabbedComponent::changeCallback (const int newCurrentTabIndex, const String
 
 void TabbedComponent::currentTabChanged (const int, const String&) {}
 void TabbedComponent::popupMenuClickOnTab (const int, const String&) {}
-
-
-END_JUCE_NAMESPACE

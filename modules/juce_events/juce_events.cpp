@@ -59,6 +59,9 @@
 #endif
 
 //==============================================================================
+namespace juce
+{
+
 // START_AUTOINCLUDE messages/*.cpp, broadcasters/*.cpp,
 // timers/*.cpp, interprocess/*.cpp
 #include "messages/juce_ApplicationBase.cpp"
@@ -75,10 +78,6 @@
 // END_AUTOINCLUDE
 
 //==============================================================================
-using namespace juce;
-
-BEGIN_JUCE_NAMESPACE
-
 #if JUCE_MAC
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "../juce_core/native/juce_mac_ObjCSuffix.h"
@@ -104,4 +103,4 @@ BEGIN_JUCE_NAMESPACE
 
 #endif
 
-END_JUCE_NAMESPACE
+}

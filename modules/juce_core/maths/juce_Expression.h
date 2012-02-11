@@ -258,9 +258,9 @@ public:
 private:
     //==============================================================================
     class Term;
-    class Helpers;
+    struct Helpers;
     friend class Term;
-    friend class Helpers;
+    friend struct Helpers;
     friend class ScopedPointer<Term>;
     friend class ReferenceCountedObjectPtr<Term>;
     ReferenceCountedObjectPtr<Term> term;

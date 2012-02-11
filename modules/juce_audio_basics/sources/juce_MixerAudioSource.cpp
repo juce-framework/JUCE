@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MixerAudioSource::MixerAudioSource()
     : tempBuffer (2, 0),
       currentSampleRate (0.0),
@@ -161,5 +159,3 @@ void MixerAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
         info.clearActiveBufferRegion();
     }
 }
-
-END_JUCE_NAMESPACE

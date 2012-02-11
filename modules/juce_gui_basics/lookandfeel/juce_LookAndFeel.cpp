@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 namespace LookAndFeelHelpers
 {
     void createRoundedPath (Path& p,
@@ -3057,5 +3055,3 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
     g.setColour (colour.darker().withMultipliedAlpha (1.5f));
     g.strokePath (outline, PathStrokeType (outlineThickness));
 }
-
-END_JUCE_NAMESPACE

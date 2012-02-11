@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class TableListRowComp   : public Component,
                            public TooltipClient
 {
@@ -486,5 +484,3 @@ Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code the recycles the components
     return nullptr;
 }
-
-END_JUCE_NAMESPACE

@@ -29,7 +29,8 @@
 //=============================================================================
 #include "../juce_core/juce_core.h"
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE messages, broadcasters, timers,
 // interprocess, native/juce_ScopedXLock*
@@ -86,6 +87,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_EVENTS_JUCEHEADER__

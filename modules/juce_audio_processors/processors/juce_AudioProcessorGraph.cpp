@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 const int AudioProcessorGraph::midiChannelIndex = 0x1000;
 
@@ -1516,6 +1515,3 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorG
         updateHostDisplay();
     }
 }
-
-
-END_JUCE_NAMESPACE

@@ -40,7 +40,44 @@
 #include "native/juce_BasicNativeHeaders.h"
 #include "juce_core.h"
 
+#include <locale>
+#include <cctype>
+#include <sys/timeb.h>
+
+#if ! JUCE_ANDROID
+ #include <cwctype>
+#endif
+
+#if JUCE_WINDOWS
+ #include <ctime>
+ #include <winsock2.h>
+ #include <ws2tcpip.h>
+
+ #if JUCE_MINGW
+  #include <wspiapi.h>
+ #endif
+
+#else
+ #if JUCE_LINUX || JUCE_ANDROID
+  #include <sys/types.h>
+  #include <sys/socket.h>
+  #include <sys/errno.h>
+  #include <unistd.h>
+  #include <netinet/in.h>
+ #endif
+
+ #include <pwd.h>
+ #include <fcntl.h>
+ #include <netdb.h>
+ #include <arpa/inet.h>
+ #include <netinet/tcp.h>
+ #include <sys/time.h>
+#endif
+
 //==============================================================================
+namespace juce
+{
+
 // START_AUTOINCLUDE containers/*.cpp, files/*.cpp, json/*.cpp, logging/*.cpp, maths/*.cpp,
 // memory/*.cpp, misc/*.cpp, network/*.cpp, streams/*.cpp, system/*.cpp, text/*.cpp, threads/*.cpp,
 // time/*.cpp, unit_tests/*.cpp, xml/*.cpp, zip/juce_GZIPD*.cpp, zip/juce_GZIPC*.cpp, zip/juce_Zip*.cpp
@@ -99,8 +136,6 @@
 #include "zip/juce_ZipFile.cpp"
 // END_AUTOINCLUDE
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
  #include "native/juce_osx_ObjCHelpers.h"
@@ -148,4 +183,4 @@ BEGIN_JUCE_NAMESPACE
 
 #endif
 
-END_JUCE_NAMESPACE
+}

@@ -23,10 +23,8 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 int64 juce_fileSetPosition (void* handle, int64 pos);
-
 
 //==============================================================================
 FileInputStream::FileInputStream (const File& f)
@@ -88,5 +86,3 @@ bool FileInputStream::setPosition (int64 pos)
 
     return true;
 }
-
-END_JUCE_NAMESPACE

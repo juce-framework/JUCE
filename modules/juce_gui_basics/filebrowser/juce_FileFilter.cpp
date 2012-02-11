@@ -23,14 +23,11 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 FileFilter::FileFilter (const String& filterDescription)
     : description (filterDescription)
 {
 }
-
 
 FileFilter::~FileFilter()
 {
@@ -40,6 +37,3 @@ const String& FileFilter::getDescription() const noexcept
 {
     return description;
 }
-
-
-END_JUCE_NAMESPACE

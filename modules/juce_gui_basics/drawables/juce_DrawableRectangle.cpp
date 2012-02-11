@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DrawableRectangle::DrawableRectangle()
 {
 }
@@ -184,5 +182,3 @@ ValueTree DrawableRectangle::createValueTree (ComponentBuilder::ImageProvider* i
 
     return tree;
 }
-
-END_JUCE_NAMESPACE

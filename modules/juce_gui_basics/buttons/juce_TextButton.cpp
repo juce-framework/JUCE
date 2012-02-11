@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 TextButton::TextButton (const String& name,
                         const String& toolTip)
     : Button (name)
@@ -72,5 +70,3 @@ void TextButton::changeWidthToFitText (const int newHeight)
 }
 
 const Identifier TextButton::Ids::tagType ("TEXTBUTTON");
-
-END_JUCE_NAMESPACE

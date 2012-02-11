@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 #if JUCE_INTEL
  #define JUCE_SNAP_TO_ZERO(n)    if (! (n < -1.0e-8 || n > 1.0e-8)) n = 0;
 #else
@@ -252,5 +250,3 @@ void IIRFilter::setCoefficients (double c1, double c2, double c3,
 }
 
 #undef JUCE_SNAP_TO_ZERO
-
-END_JUCE_NAMESPACE

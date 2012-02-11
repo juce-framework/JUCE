@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class MouseCursor::SharedCursorHandle
 {
 public:
@@ -186,5 +184,3 @@ void MouseCursor::hideWaitCursor()
 {
     Desktop::getInstance().getMainMouseSource().revealCursor();
 }
-
-END_JUCE_NAMESPACE

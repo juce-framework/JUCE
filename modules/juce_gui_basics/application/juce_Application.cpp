@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 #if JUCE_MAC
  extern void juce_initialiseMacMainMenu();
@@ -262,5 +261,3 @@ int JUCEApplication::main (int argc, const char* argv[])
    #endif
 }
 #endif
-
-END_JUCE_NAMESPACE

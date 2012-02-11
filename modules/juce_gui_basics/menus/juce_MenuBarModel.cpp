@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MenuBarModel::MenuBarModel() noexcept
     : manager (nullptr)
 {
@@ -86,6 +84,3 @@ void MenuBarModel::applicationCommandListChanged()
 {
     menuItemsChanged();
 }
-
-
-END_JUCE_NAMESPACE

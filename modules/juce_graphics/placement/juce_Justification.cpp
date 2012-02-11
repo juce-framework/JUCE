@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Justification::Justification (const Justification& other) noexcept
     : flags (other.flags)
 {
@@ -46,6 +44,3 @@ int Justification::getOnlyHorizontalFlags() const noexcept
 {
     return flags & (left | right | horizontallyCentred | horizontallyJustified);
 }
-
-
-END_JUCE_NAMESPACE

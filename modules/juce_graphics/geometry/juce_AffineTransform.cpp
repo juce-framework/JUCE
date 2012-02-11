@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AffineTransform::AffineTransform() noexcept
     : mat00 (1.0f), mat01 (0), mat02 (0),
       mat10 (0), mat11 (1.0f), mat12 (0)
@@ -248,6 +246,3 @@ float AffineTransform::getScaleFactor() const noexcept
 {
     return juce_hypot (mat00 + mat01, mat10 + mat11);
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 namespace MidiHelpers
 {
@@ -1049,5 +1048,3 @@ String MidiMessage::getControllerName (const int n)
 
     return isPositiveAndBelow (n, (int) 128) ? names[n] : (const char*) nullptr;
 }
-
-END_JUCE_NAMESPACE

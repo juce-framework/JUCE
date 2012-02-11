@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 #if JUCE_MSVC && JUCE_DEBUG
  #pragma optimize ("t", on)
 #endif
@@ -289,5 +287,3 @@ bool PathFlatteningIterator::next()
 #if JUCE_MSVC && JUCE_DEBUG
   #pragma optimize ("", on)  // resets optimisations to the project defaults
 #endif
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioPluginFormatManager::AudioPluginFormatManager()
 {
 }
@@ -126,6 +124,3 @@ bool AudioPluginFormatManager::doesPluginStillExist (const PluginDescription& de
 
     return false;
 }
-
-
-END_JUCE_NAMESPACE

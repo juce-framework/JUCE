@@ -71,7 +71,8 @@
 #endif
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE playback, capture
 #ifndef __JUCE_DIRECTSHOWCOMPONENT_JUCEHEADER__
@@ -85,6 +86,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_VIDEO_JUCEHEADER__

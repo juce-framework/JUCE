@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 PropertyComponent::PropertyComponent (const String& name,
                                       const int preferredHeight_)
     : Component (name),
@@ -55,6 +53,3 @@ void PropertyComponent::enablementChanged()
 {
     repaint();
 }
-
-
-END_JUCE_NAMESPACE

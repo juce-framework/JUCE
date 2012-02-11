@@ -25,8 +25,8 @@
 
 #if JUCE_MAC
 
-//==============================================================================
-END_JUCE_NAMESPACE
+} // (juce namespace)
+
 using namespace juce;
 
 #define JuceFileChooserDelegate MakeObjCClassName(JuceFileChooserDelegate)
@@ -90,7 +90,9 @@ using namespace juce;
 }
 @end
 
-BEGIN_JUCE_NAMESPACE
+
+namespace juce
+{
 
 //==============================================================================
 bool FileChooser::isPlatformDialogAvailable()

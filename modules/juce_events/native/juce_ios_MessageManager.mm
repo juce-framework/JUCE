@@ -31,7 +31,7 @@ struct CallbackMessagePayload
     bool volatile hasBeenExecuted;
 };
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 //==============================================================================
 @interface JuceCustomMessageHandler   : NSObject
@@ -65,9 +65,10 @@ END_JUCE_NAMESPACE
 
 @end
 
-BEGIN_JUCE_NAMESPACE
-
 //==============================================================================
+namespace juce
+{
+
 void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread

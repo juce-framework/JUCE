@@ -600,11 +600,14 @@ private:
     #define SUPPORT_ONLY_10_4_FONTS 1
   #endif
 
-  END_JUCE_NAMESPACE
+  } // (juce namespace)
+
   @interface NSFont (PrivateHack)
     - (NSGlyph) _defaultGlyphForChar: (unichar) theChar;
   @end
-  BEGIN_JUCE_NAMESPACE
+
+  namespace juce
+  {
 #endif
 
 //==============================================================================

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 SynthesiserSound::SynthesiserSound()
 {
 }
@@ -434,6 +432,3 @@ SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay,
 
     return nullptr;
 }
-
-
-END_JUCE_NAMESPACE

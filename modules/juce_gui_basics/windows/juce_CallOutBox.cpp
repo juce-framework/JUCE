@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 CallOutBox::CallOutBox (Component& contentComponent,
                         Component& componentToPointTo,
                         Component* const parent)
@@ -262,5 +260,3 @@ void CallOutBox::refreshPath()
 
     outline.closeSubPath();
 }
-
-END_JUCE_NAMESPACE

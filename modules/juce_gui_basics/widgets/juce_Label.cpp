@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Label::Label (const String& name,
               const String& labelText)
     : Component (name),
@@ -470,5 +468,3 @@ void Label::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
     setEditable (editMode == 2, editMode == 3, static_cast <bool> (state [Ids::focusLossDiscardsChanges]));
     setJustificationType (static_cast <int> (state [Ids::justification]));
 }
-
-END_JUCE_NAMESPACE

@@ -23,10 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AudioPluginFormat::AudioPluginFormat() noexcept {}
 AudioPluginFormat::~AudioPluginFormat() {}
-
-END_JUCE_NAMESPACE

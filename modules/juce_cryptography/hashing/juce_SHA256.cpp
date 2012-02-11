@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class SHA256Processor
 {
 public:
@@ -267,5 +265,3 @@ public:
 static SHA256Tests sha256UnitTests;
 
 #endif
-
-END_JUCE_NAMESPACE

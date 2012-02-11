@@ -89,7 +89,8 @@
 #endif
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE audio_io, midi_io, sources, audio_cd
 #ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
@@ -124,6 +125,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_AUDIO_DEVICES_JUCEHEADER__

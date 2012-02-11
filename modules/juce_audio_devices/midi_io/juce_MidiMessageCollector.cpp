@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MidiMessageCollector::MidiMessageCollector()
     : lastCallbackTime (0),
       sampleRate (44100.0001)
@@ -154,6 +152,3 @@ void MidiMessageCollector::handleIncomingMidiMessage (MidiInput*, const MidiMess
 {
     addMessageToQueue (message);
 }
-
-
-END_JUCE_NAMESPACE

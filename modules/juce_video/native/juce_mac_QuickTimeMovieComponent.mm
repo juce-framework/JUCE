@@ -25,7 +25,7 @@
 
 #if JUCE_QUICKTIME
 
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 //==============================================================================
 #define NonInterceptingQTMovieView MakeObjCClassName(NonInterceptingQTMovieView)
@@ -66,7 +66,8 @@ END_JUCE_NAMESPACE
 
 @end
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 #define theMovie (static_cast <QTMovie*> (movie))

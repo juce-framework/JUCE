@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Viewport::Viewport (const String& name)
   : Component (name),
     scrollBarThickness (0),
@@ -443,5 +441,3 @@ void Viewport::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
     setScrollBarsShown (state [Ids::showScrollBarV], state [Ids::showScrollBarH]);
     setScrollBarThickness (state [Ids::scrollBarWidth]);
 }
-
-END_JUCE_NAMESPACE

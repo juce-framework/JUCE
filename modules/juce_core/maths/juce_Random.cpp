@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 Random::Random (const int64 seedValue) noexcept
     : seed (seedValue)
 {
@@ -174,5 +172,3 @@ public:
 static RandomTests randomTests;
 
 #endif
-
-END_JUCE_NAMESPACE

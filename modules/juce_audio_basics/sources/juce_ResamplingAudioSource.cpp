@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
                                               const bool deleteInputWhenDeleted,
                                               const int numChannels_)
@@ -259,5 +257,3 @@ void ResamplingAudioSource::applyFilter (float* samples, int num, FilterState& f
         *samples++ = (float) out;
     }
 }
-
-END_JUCE_NAMESPACE

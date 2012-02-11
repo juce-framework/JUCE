@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 StretchableLayoutResizerBar::StretchableLayoutResizerBar (StretchableLayoutManager* layout_,
                                                           const int itemIndex_,
                                                           const bool isVertical_)
@@ -75,5 +73,3 @@ void StretchableLayoutResizerBar::hasBeenMoved()
     if (getParentComponent() != nullptr)
         getParentComponent()->resized();
 }
-
-END_JUCE_NAMESPACE

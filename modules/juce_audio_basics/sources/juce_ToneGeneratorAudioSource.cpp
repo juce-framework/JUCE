@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ToneGeneratorAudioSource::ToneGeneratorAudioSource()
     : frequency (1000.0),
       sampleRate (44100.0),
@@ -78,6 +76,3 @@ void ToneGeneratorAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& 
             *info.buffer->getSampleData (j, info.startSample + i) = sample;
     }
 }
-
-
-END_JUCE_NAMESPACE

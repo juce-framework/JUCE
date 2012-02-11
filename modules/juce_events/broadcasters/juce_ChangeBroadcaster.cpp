@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ChangeBroadcaster::ChangeBroadcaster() noexcept
 {
     // are you trying to create this object before or after juce has been intialised??
@@ -103,6 +101,3 @@ void ChangeBroadcaster::ChangeBroadcasterCallback::handleAsyncUpdate()
     jassert (owner != nullptr);
     owner->callListeners();
 }
-
-
-END_JUCE_NAMESPACE

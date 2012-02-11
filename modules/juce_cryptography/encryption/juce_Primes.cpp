@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 namespace PrimesHelpers
 {
     void createSmallSieve (const int numBits, BigInteger& result)
@@ -240,5 +238,3 @@ bool Primes::isProbablyPrime (const BigInteger& number, const int certainty)
         return passesMillerRabin (number, certainty);
     }
 }
-
-END_JUCE_NAMESPACE

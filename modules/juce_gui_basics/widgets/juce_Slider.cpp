@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class Slider::PopupDisplayComponent  : public BubbleComponent,
                                        public Timer
 {
@@ -1447,5 +1445,3 @@ void Slider::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
 
     setSkewFactor (static_cast <double> (state [Ids::skew]));
 }
-
-END_JUCE_NAMESPACE

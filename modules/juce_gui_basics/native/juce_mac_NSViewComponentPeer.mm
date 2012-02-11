@@ -30,8 +30,7 @@ extern AppFocusChangeCallback appFocusChangeCallback;
 typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
 extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 
-//==============================================================================
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
 @interface NSEvent (JuceDeviceDelta)
  - (CGFloat) deviceDeltaX;
@@ -141,7 +140,8 @@ END_JUCE_NAMESPACE
 - (void) zoom: (id) sender;
 @end
 
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 class NSViewComponentPeer  : public ComponentPeer
@@ -419,9 +419,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer);
 };
 
-//==============================================================================
-END_JUCE_NAMESPACE
+} // (juce namespace)
 
+//==============================================================================
 @implementation JuceNSView
 
 - (JuceNSView*) initWithOwner: (NSViewComponentPeer*) owner_
@@ -851,7 +851,8 @@ END_JUCE_NAMESPACE
 
 //==============================================================================
 //==============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 //==============================================================================
 ModifierKeys NSViewComponentPeer::currentModifiers;

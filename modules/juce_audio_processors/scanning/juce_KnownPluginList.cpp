@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 KnownPluginList::KnownPluginList()  {}
 KnownPluginList::~KnownPluginList() {}
 
@@ -437,5 +435,3 @@ int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const
 
     return isPositiveAndBelow (i, types.size()) ? i : -1;
 }
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class MarkerListScope  : public Expression::Scope
 {
 public:
@@ -338,6 +336,3 @@ void RelativeCoordinatePositionerBase::unregisterListeners()
     sourceComponents.clear();
     sourceMarkerLists.clear();
 }
-
-
-END_JUCE_NAMESPACE

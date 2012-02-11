@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 struct MidiOutput::PendingMessage
 {
     PendingMessage (const void* const data, const int len, const double timeStamp)
@@ -164,6 +162,3 @@ void MidiOutput::run()
 
     clearAllPendingMessages();
 }
-
-
-END_JUCE_NAMESPACE

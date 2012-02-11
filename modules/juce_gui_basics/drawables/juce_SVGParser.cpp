@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class SVGState
 {
 public:
@@ -1297,6 +1295,3 @@ Drawable* Drawable::createFromSVG (const XmlElement& svgDocument)
     SVGState state (&svgDocument);
     return state.parseSVGElement (svgDocument);
 }
-
-
-END_JUCE_NAMESPACE

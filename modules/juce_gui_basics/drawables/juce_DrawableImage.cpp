@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 DrawableImage::DrawableImage()
     : opacity (1.0f),
       overlayColour (0x00000000)
@@ -290,6 +288,3 @@ ValueTree DrawableImage::createValueTree (ComponentBuilder::ImageProvider* image
 
     return tree;
 }
-
-
-END_JUCE_NAMESPACE

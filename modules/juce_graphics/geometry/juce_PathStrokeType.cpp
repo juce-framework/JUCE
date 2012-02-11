@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 PathStrokeType::PathStrokeType (const float strokeThickness,
                                 const JointStyle jointStyle_,
                                 const EndCapStyle endStyle_) noexcept
@@ -742,5 +740,3 @@ void PathStrokeType::createStrokeWithArrowheads (Path& destPath,
     PathStrokeHelpers::createStroke (thickness, jointStyle, endStyle,
                                      destPath, sourcePath, transform, extraAccuracy, &head);
 }
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class AsyncUpdater::AsyncUpdaterMessage  : public CallbackMessage
 {
 public:
@@ -87,6 +85,3 @@ bool AsyncUpdater::isUpdatePending() const noexcept
 {
     return message->shouldDeliver.value != 0;
 }
-
-
-END_JUCE_NAMESPACE

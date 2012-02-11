@@ -64,6 +64,9 @@
 #endif
 
 //==============================================================================
+namespace juce
+{
+
 // START_AUTOINCLUDE colour/*.cpp, geometry/*.cpp, placement/*.cpp, contexts/*.cpp, images/*.cpp,
 // image_formats/*.cpp, fonts/*.cpp, effects/*.cpp
 #include "colour/juce_Colour.cpp"
@@ -99,8 +102,6 @@
 // END_AUTOINCLUDE
 
 //==============================================================================
-BEGIN_JUCE_NAMESPACE
-
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "../juce_core/native/juce_mac_ObjCSuffix.h"
@@ -127,4 +128,4 @@ BEGIN_JUCE_NAMESPACE
 
 #endif
 
-END_JUCE_NAMESPACE
+}

@@ -38,6 +38,9 @@
 
 #include "juce_data_structures.h"
 
+namespace juce
+{
+
 // START_AUTOINCLUDE values/*.cpp, undomanager/*.cpp, app_properties/*.cpp
 #include "values/juce_Value.cpp"
 #include "values/juce_ValueTree.cpp"
@@ -45,3 +48,5 @@
 #include "app_properties/juce_ApplicationProperties.cpp"
 #include "app_properties/juce_PropertiesFile.cpp"
 // END_AUTOINCLUDE
+
+}

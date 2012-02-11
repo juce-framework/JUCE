@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 ArrowButton::ArrowButton (const String& name,
                           float arrowDirectionInRadians,
                           const Colour& arrowColour)
@@ -72,5 +69,3 @@ void ArrowButton::updateShadowAndOffset()
     shadow.setShadowProperties ((isDown()) ? 1.2f : 3.0f,
                                 0.3f, -1, 0);
 }
-
-END_JUCE_NAMESPACE

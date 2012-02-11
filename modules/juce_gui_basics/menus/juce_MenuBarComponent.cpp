@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
     : model (nullptr),
       itemUnderMouse (-1),
@@ -345,6 +343,3 @@ void MenuBarComponent::timerCallback()
     stopTimer();
     updateItemUnderMouse (getMouseXYRelative());
 }
-
-
-END_JUCE_NAMESPACE

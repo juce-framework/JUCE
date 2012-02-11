@@ -23,10 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-
-//==============================================================================
 class ProcessorParameterPropertyComp   : public PropertyComponent,
                                          public AudioProcessorListener,
                                          public Timer
@@ -164,6 +161,3 @@ void GenericAudioProcessorEditor::resized()
 {
     panel.setBounds (getLocalBounds());
 }
-
-
-END_JUCE_NAMESPACE

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ToolbarItemFactory::ToolbarItemFactory()
 {
 }
@@ -244,6 +242,3 @@ void ToolbarItemComponent::setEditingMode (const ToolbarEditingMode newMode)
         resized();
     }
 }
-
-
-END_JUCE_NAMESPACE

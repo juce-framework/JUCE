@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 BlowFish::BlowFish (const void* const keyData, const int keyBytes)
 {
     jassert (keyData != nullptr);
@@ -273,6 +271,3 @@ void BlowFish::decrypt (uint32& data1, uint32& data2) const noexcept
     data1 = r ^ p[0];
     data2 = l ^ p[1];
 }
-
-
-END_JUCE_NAMESPACE

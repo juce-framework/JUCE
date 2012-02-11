@@ -39,7 +39,8 @@
 #endif
 
 //=============================================================================
-BEGIN_JUCE_NAMESPACE
+namespace juce
+{
 
 // START_AUTOINCLUDE documents, code_editor, embedding, lookandfeel, misc
 #ifndef __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
@@ -98,6 +99,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 // END_AUTOINCLUDE
 
-END_JUCE_NAMESPACE
+}
 
 #endif   // __JUCE_GUI_EXTRA_JUCEHEADER__

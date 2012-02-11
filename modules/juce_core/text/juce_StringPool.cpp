@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 StringPool::StringPool() noexcept   {}
 StringPool::~StringPool()           {}
 
@@ -109,5 +107,3 @@ String::CharPointerType StringPool::operator[] (const int index) const noexcept
 {
     return strings [index].getCharPointer();
 }
-
-END_JUCE_NAMESPACE

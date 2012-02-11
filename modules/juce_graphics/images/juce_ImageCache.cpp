@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 class ImageCache::Pimpl     : public Timer,
                               public DeletedAtShutdown
 {
@@ -164,6 +161,3 @@ void ImageCache::setCacheTimeout (const int millisecs)
 {
     Pimpl::getInstance()->cacheTimeout = millisecs;
 }
-
-
-END_JUCE_NAMESPACE

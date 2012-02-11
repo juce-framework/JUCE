@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ToggleButton::ToggleButton (const String& buttonText)
     : Button (buttonText)
 {
@@ -56,5 +54,3 @@ void ToggleButton::colourChanged()
 }
 
 const Identifier ToggleButton::Ids::tagType ("TOGGLEBUTTON");
-
-END_JUCE_NAMESPACE

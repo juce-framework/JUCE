@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const commandManager_)
     : commandManager (commandManager_)
 {
@@ -426,6 +424,3 @@ void KeyPressMappingSet::globalFocusChanged (Component* focusedComponent)
     if (focusedComponent != nullptr)
         focusedComponent->keyStateChanged (false);
 }
-
-
-END_JUCE_NAMESPACE

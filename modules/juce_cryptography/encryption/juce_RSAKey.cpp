@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 RSAKey::RSAKey()
 {
 }
@@ -132,6 +130,3 @@ void RSAKey::createKeyPair (RSAKey& publicKey, RSAKey& privateKey,
     privateKey.part1 = d;
     privateKey.part2 = n;
 }
-
-
-END_JUCE_NAMESPACE

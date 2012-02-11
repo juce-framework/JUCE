@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 StretchableObjectResizer::StretchableObjectResizer()
 {
 }
@@ -122,6 +120,3 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
             break;
     }
 }
-
-
-END_JUCE_NAMESPACE

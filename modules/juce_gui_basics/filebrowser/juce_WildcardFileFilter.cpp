@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 WildcardFileFilter::WildcardFileFilter (const String& fileWildcardPatterns,
                                         const String& directoryWildcardPatterns,
                                         const String& description_)
@@ -75,6 +73,3 @@ bool WildcardFileFilter::match (const File& file, const StringArray& wildcards)
 
     return false;
 }
-
-
-END_JUCE_NAMESPACE

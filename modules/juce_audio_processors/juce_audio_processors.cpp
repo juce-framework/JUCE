@@ -53,6 +53,9 @@
 #endif
 
 //==============================================================================
+namespace juce
+{
+
 // START_AUTOINCLUDE format/*.cpp, processors/*.cpp, format_types/*.cpp,
 // format_types/*.mm, scanning/*.cpp
 #include "format/juce_AudioPluginFormat.cpp"
@@ -68,3 +71,5 @@
 #include "scanning/juce_PluginDirectoryScanner.cpp"
 #include "scanning/juce_PluginListComponent.cpp"
 // END_AUTOINCLUDE
+
+}

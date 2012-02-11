@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 LocalisedStrings::LocalisedStrings (const String& fileContents)
 {
     loadFromText (fileContents);
@@ -189,6 +187,3 @@ String translate (const String& text, const String& resultIfNotFound)
 
     return resultIfNotFound;
 }
-
-
-END_JUCE_NAMESPACE

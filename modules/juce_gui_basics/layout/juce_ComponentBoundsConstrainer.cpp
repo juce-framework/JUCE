@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ComponentBoundsConstrainer::ComponentBoundsConstrainer() noexcept
     : minW (0),
       maxW (0x3fffffff),
@@ -328,6 +326,3 @@ void ComponentBoundsConstrainer::checkBounds (Rectangle<int>& bounds,
 
     jassert (! bounds.isEmpty());
 }
-
-
-END_JUCE_NAMESPACE

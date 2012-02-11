@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 AbstractFifo::AbstractFifo (const int capacity) noexcept
     : bufferSize (capacity)
 {
@@ -234,5 +232,3 @@ public:
 static AbstractFifoTests fifoUnitTests;
 
 #endif
-
-END_JUCE_NAMESPACE

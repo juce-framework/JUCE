@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ApplicationCommandManager::ApplicationCommandManager()
     : firstTarget (nullptr)
 {
@@ -313,6 +311,3 @@ void ApplicationCommandManager::globalFocusChanged (Component*)
 {
     commandStatusChanged();
 }
-
-
-END_JUCE_NAMESPACE

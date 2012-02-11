@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 void ComponentListener::componentMovedOrResized (Component&, bool, bool)    {}
 void ComponentListener::componentBroughtToFront (Component&)                {}
@@ -32,5 +31,3 @@ void ComponentListener::componentChildrenChanged (Component&)               {}
 void ComponentListener::componentParentHierarchyChanged (Component&)        {}
 void ComponentListener::componentNameChanged (Component&)                   {}
 void ComponentListener::componentBeingDeleted (Component&)                  {}
-
-END_JUCE_NAMESPACE

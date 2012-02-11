@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
     : component (component_),
       lastPeerID (0),
@@ -138,6 +136,3 @@ void ComponentMovementWatcher::unregister()
 
     registeredParentComps.clear();
 }
-
-
-END_JUCE_NAMESPACE

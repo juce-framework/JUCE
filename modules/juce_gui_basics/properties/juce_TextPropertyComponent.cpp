@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class TextPropLabel  : public Label
 {
 public:
@@ -124,6 +122,3 @@ void TextPropertyComponent::textWasEdited()
     if (getText() != newText)
         setText (newText);
 }
-
-
-END_JUCE_NAMESPACE

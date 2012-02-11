@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 BooleanPropertyComponent::BooleanPropertyComponent (const String& name,
                                                     const String& buttonTextWhenTrue,
                                                     const String& buttonTextWhenFalse)
@@ -87,5 +85,3 @@ void BooleanPropertyComponent::buttonClicked (Button*)
 {
     setState (! getState());
 }
-
-END_JUCE_NAMESPACE

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
 namespace
 {
@@ -123,6 +122,3 @@ Uuid& Uuid::operator= (const uint8* const rawData)
 
     return *this;
 }
-
-
-END_JUCE_NAMESPACE

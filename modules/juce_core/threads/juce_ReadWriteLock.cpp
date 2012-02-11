@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
 ReadWriteLock::ReadWriteLock() noexcept
     : numWaitingWriters (0),
       numWriters (0),
@@ -162,5 +159,3 @@ void ReadWriteLock::exitWrite() const noexcept
         waitEvent.signal();
     }
 }
-
-END_JUCE_NAMESPACE

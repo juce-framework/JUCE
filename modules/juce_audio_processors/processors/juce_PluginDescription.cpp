@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 PluginDescription::PluginDescription()
     : uid (0),
       isInstrument (false),
@@ -129,5 +127,3 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
 
     return false;
 }
-
-END_JUCE_NAMESPACE

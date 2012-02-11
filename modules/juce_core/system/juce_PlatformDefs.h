@@ -121,10 +121,11 @@
 
 //==============================================================================
 #ifndef DOXYGEN
-  BEGIN_JUCE_NAMESPACE
-  template <bool b> struct JuceStaticAssert;
-  template <> struct JuceStaticAssert <true> { static void dummy() {} };
-  END_JUCE_NAMESPACE
+namespace juce
+{
+    template <bool b> struct JuceStaticAssert;
+    template <> struct JuceStaticAssert <true> { static void dummy() {} };
+}
 #endif
 
 /** A compile-time assertion macro.

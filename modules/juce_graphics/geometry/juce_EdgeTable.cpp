@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
-
 const int juce_edgeTableDefaultEdgesPerLine = 32;
 
 //==============================================================================
@@ -741,5 +739,3 @@ bool EdgeTable::isEmpty() noexcept
 
     return bounds.getHeight() == 0;
 }
-
-END_JUCE_NAMESPACE

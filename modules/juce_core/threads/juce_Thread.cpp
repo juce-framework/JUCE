@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-BEGIN_JUCE_NAMESPACE
 
-//==============================================================================
 class RunningThreadsList
 {
 public:
@@ -434,5 +432,3 @@ public:
 static AtomicTests atomicUnitTests;
 
 #endif
-
-END_JUCE_NAMESPACE
