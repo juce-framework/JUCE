@@ -62,9 +62,6 @@ public:
 
         if (getInternetNeeded().toString().isEmpty())
             getInternetNeeded() = true;
-
-        androidDynamicLibs.add ("GLESv1_CM");
-        androidDynamicLibs.add ("GLESv2");
     }
 
     //==============================================================================
@@ -149,6 +146,8 @@ protected:
         AndroidBuildConfiguration (Project& project, const ValueTree& settings)
             : BuildConfiguration (project, settings)
         {
+            androidDynamicLibs.add ("GLESv1_CM");
+            androidDynamicLibs.add ("GLESv2");
         }
 
         void createPropertyEditors (PropertyListBuilder& props)
@@ -156,6 +155,8 @@ protected:
             createBasicPropertyEditors (props);
 
         }
+
+        StringArray androidDynamicLibs;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
@@ -259,26 +260,40 @@ private:
         for (int i = 0; i < files.size(); ++i)
             out << "  ../" << escapeSpaces (files.getReference(i).toUnixStyle()) << "\\" << newLine;
 
+        String debugSettings, releaseSettings;
+
         out << newLine
-            << "ifeq ($(CONFIG),Debug)" << newLine
-            << "  LOCAL_CPPFLAGS += " << createCPPFlags (true) << newLine
-            << "else" << newLine
-            << "  LOCAL_CPPFLAGS += " << createCPPFlags (false) << newLine
-            << "endif" << newLine
-            << newLine
-            << getDynamicLibs()
+            << "ifeq ($(CONFIG),Debug)" << newLine;
+        writeConfigSettings (out, true);
+        out << "else" << newLine;
+        writeConfigSettings (out, false);
+        out << "endif" << newLine
             << newLine
             << "include $(BUILD_SHARED_LIBRARY)" << newLine;
     }
 
-    String getDynamicLibs()
+    void writeConfigSettings (OutputStream& out, bool forDebug)
     {
-        if (androidDynamicLibs.size() == 0)
+        for (ConfigIterator config (*this); config.next();)
+        {
+            if (config->isDebug() == forDebug)
+            {
+                out << "  LOCAL_CPPFLAGS += " << createCPPFlags (*config) << newLine
+                    << getDynamicLibs (dynamic_cast <const AndroidBuildConfiguration&> (*config));
+
+                break;
+            }
+        }
+    }
+
+    String getDynamicLibs (const AndroidBuildConfiguration& config)
+    {
+        if (config.androidDynamicLibs.size() == 0)
             return String::empty;
 
-        String flags ("LOCAL_LDLIBS :=");
-        for (int i = 0; i < androidDynamicLibs.size(); ++i)
-            flags << " -l" << androidDynamicLibs[i];
+        String flags ("  LOCAL_LDLIBS :=");
+        for (int i = 0; i < config.androidDynamicLibs.size(); ++i)
+            flags << " -l" << config.androidDynamicLibs[i];
 
         return flags + newLine;
     }
@@ -296,27 +311,16 @@ private:
         return flags;
     }
 
-    String createCPPFlags (bool forDebug)
+    String createCPPFlags (const BuildConfiguration& config)
     {
-        String flags ("-fsigned-char -fexceptions -frtti");
-
-        if (forDebug)
-            flags << " -g";
-
-        for (ConfigIterator config (*this); config.next();)
-        {
-            if (config->isDebug() == forDebug)
-            {
-                flags << createIncludePathFlags (*config);
-                break;
-            }
-        }
-
         StringPairArray defines;
         defines.set ("JUCE_ANDROID", "1");
 
-        if (forDebug)
+        String flags ("-fsigned-char -fexceptions -frtti");
+
+        if (config.isDebug().getValue())
         {
+            flags << " -g";
             defines.set ("DEBUG", "1");
             defines.set ("_DEBUG", "1");
         }
@@ -325,17 +329,10 @@ private:
             defines.set ("NDEBUG", "1");
         }
 
-        for (ConfigIterator config (*this); config.next();)
-        {
-            if (config->isDebug() == forDebug)
-            {
-                flags << " -O" << config->getGCCOptimisationFlag();
+        flags << createIncludePathFlags (config)
+              << " -O" << config.getGCCOptimisationFlag();
 
-                defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (*config));
-                break;
-            }
-        }
-
+        defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
         return flags + createGCCPreprocessorFlags (defines);
     }
 

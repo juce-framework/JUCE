@@ -40,6 +40,35 @@ namespace MidiBufferHelpers
     {
         return getEventDataSize (d) + sizeof (int) + sizeof (uint16);
     }
+
+    int findActualEventLength (const uint8* const data, const int maxBytes) noexcept
+    {
+        unsigned int byte = (unsigned int) *data;
+        int size = 0;
+
+        if (byte == 0xf0 || byte == 0xf7)
+        {
+            const uint8* d = data + 1;
+
+            while (d < data + maxBytes)
+                if (*d++ == 0xf7)
+                    break;
+
+            size = (int) (d - data);
+        }
+        else if (byte == 0xff)
+        {
+            int n;
+            const int bytesLeft = MidiMessage::readVariableLengthVal (data + 1, n);
+            size = jmin (maxBytes, n + 2 + bytesLeft);
+        }
+        else if (byte >= 0x80)
+        {
+            size = jmin (maxBytes, MidiMessage::getMessageLengthFromFirstByte ((uint8) byte));
+        }
+
+        return size;
+    }
 }
 
 //==============================================================================
@@ -107,38 +136,6 @@ void MidiBuffer::clear (const int startSample, const int numSamples)
 void MidiBuffer::addEvent (const MidiMessage& m, const int sampleNumber)
 {
     addEvent (m.getRawData(), m.getRawDataSize(), sampleNumber);
-}
-
-namespace MidiBufferHelpers
-{
-    int findActualEventLength (const uint8* const data, const int maxBytes) noexcept
-    {
-        unsigned int byte = (unsigned int) *data;
-        int size = 0;
-
-        if (byte == 0xf0 || byte == 0xf7)
-        {
-            const uint8* d = data + 1;
-
-            while (d < data + maxBytes)
-                if (*d++ == 0xf7)
-                    break;
-
-            size = (int) (d - data);
-        }
-        else if (byte == 0xff)
-        {
-            int n;
-            const int bytesLeft = MidiMessage::readVariableLengthVal (data + 1, n);
-            size = jmin (maxBytes, n + 2 + bytesLeft);
-        }
-        else if (byte >= 0x80)
-        {
-            size = jmin (maxBytes, MidiMessage::getMessageLengthFromFirstByte ((uint8) byte));
-        }
-
-        return size;
-    }
 }
 
 void MidiBuffer::addEvent (const void* const newData, const int maxBytes, const int sampleNumber)

@@ -2349,8 +2349,8 @@ private:
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
 
-    class ComponentHelpers;
-    friend class ComponentHelpers;
+    struct ComponentHelpers;
+    friend struct ComponentHelpers;
 
     /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.

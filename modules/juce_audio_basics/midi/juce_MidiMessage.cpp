@@ -327,23 +327,22 @@ MidiMessage::MidiMessage (MidiMessage&& other) noexcept
 
 MidiMessage& MidiMessage::operator= (MidiMessage&& other) noexcept
 {
-    if (this != &other)
+    jassert (this != &other); // shouldn't be possible
+
+    timeStamp = other.timeStamp;
+    size = other.size;
+
+    freeData();
+
+    if (other.usesAllocatedData())
     {
-        timeStamp = other.timeStamp;
-        size = other.size;
-
-        freeData();
-
-        if (other.usesAllocatedData())
-        {
-            data = other.data;
-            other.setToUseInternalData();
-        }
-        else
-        {
-            setToUseInternalData();
-            preallocatedData.asInt32 = other.preallocatedData.asInt32;
-        }
+        data = other.data;
+        other.setToUseInternalData();
+    }
+    else
+    {
+        setToUseInternalData();
+        preallocatedData.asInt32 = other.preallocatedData.asInt32;
     }
 
     return *this;

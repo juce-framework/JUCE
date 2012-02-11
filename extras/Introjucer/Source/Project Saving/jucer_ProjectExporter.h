@@ -130,12 +130,7 @@ public:
     String msvcTargetSuffix;
     StringPairArray msvcExtraPreprocessorDefs;
     bool msvcIsDLL, msvcIsWindowsSubsystem, msvcNeedsDLLRuntimeLib;
-    String msvcExtraLinkerOptions, msvcDelayLoadedDLLs, msvcModuleDefinitionFile;
-    String msvcPostBuildCommand, msvcPostBuildOutputs;
-    String msvcPreBuildCommand;
-
-    //==============================================================================
-    StringArray androidDynamicLibs;
+    String msvcDelayLoadedDLLs;
 
     //==============================================================================
     StringArray extraSearchPaths;
@@ -168,6 +163,11 @@ public:
         //==============================================================================
         ValueTree config;
 
+        //==============================================================================
+        String msvcExtraLinkerOptions, msvcModuleDefinitionFile;
+        String msvcPostBuildCommand, msvcPostBuildOutputs;
+        String msvcPreBuildCommand;
+
     protected:
         Project& project;
 
@@ -188,16 +188,9 @@ public:
     //==============================================================================
     struct ConfigIterator
     {
-        ConfigIterator (ProjectExporter& exporter_) : index (-1), exporter (exporter_) {}
+        ConfigIterator (ProjectExporter& exporter);
 
-        bool next()
-        {
-            if (++index >= exporter.getNumConfigurations())
-                return false;
-
-            config = exporter.getConfiguration (index);
-            return true;
-        }
+        bool next();
 
         BuildConfiguration& operator*() const       { return *config; }
         BuildConfiguration* operator->() const      { return config; }

@@ -188,10 +188,8 @@ private:
 
 
 //==============================================================================
-class Component::ComponentHelpers
+struct Component::ComponentHelpers
 {
-public:
-    //==============================================================================
    #if JUCE_MODAL_LOOPS_PERMITTED
     static void* runModalLoopCallback (void* userData)
     {

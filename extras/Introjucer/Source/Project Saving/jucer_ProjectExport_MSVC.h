@@ -44,7 +44,15 @@ public:
             getLibraryType() = 1;
 
         projectGUID = createGUID (project.getProjectUID());
-        msvcPreBuildCommand = getPrebuildCommand().toString();
+
+        const String oldStylePrebuildCommand (getSetting (Ids::prebuildCommand).toString());
+        if (oldStylePrebuildCommand.isNotEmpty()) // update an old project format..
+        {
+            for (ConfigIterator config (*this); config.next();)
+                dynamic_cast <MSVCBuildConfiguration&> (*config).getPrebuildCommand() = oldStylePrebuildCommand;
+
+            settings.removeProperty (Ids::prebuildCommand, nullptr);
+        }
     }
 
     //==============================================================================
@@ -61,16 +69,17 @@ public:
         {
             const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
             const int libTypeValues[] = { 1, 2, 0 };
-            props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type", StringArray (libTypes), Array<var> (libTypeValues)));
+            props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type",
+                                                    StringArray (libTypes), Array<var> (libTypeValues)));
 
             props.add (new TextPropertyComponent (getSetting (Ids::libraryName_Debug), "Library Name (Debug)", 128, false),
-                       "If set, this name will override the binary name specified in the configuration settings, for a debug build. You must include the .lib or .dll suffix on this filename.");
+                       "If set, this name will override the binary name specified in the configuration settings, for a debug build. "
+                       "You must include the .lib or .dll suffix on this filename.");
 
             props.add (new TextPropertyComponent (getSetting (Ids::libraryName_Release), "Library Name (Release)", 128, false),
-                       "If set, this name will override the binary name specified in the configuration settings, for a release build. You must include the .lib or .dll suffix on this filename.");
+                       "If set, this name will override the binary name specified in the configuration settings, for a release build. "
+                       "You must include the .lib or .dll suffix on this filename.");
         }
-
-        props.add (new TextPropertyComponent (getPrebuildCommand(), "Pre-build Command", 2048, false));
     }
 
 protected:
@@ -81,7 +90,6 @@ protected:
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
     Value getLibraryType() const        { return getSetting (Ids::libraryType); }
-    Value getPrebuildCommand() const    { return getSetting (Ids::prebuildCommand); }
     bool isLibraryDLL() const           { return msvcIsDLL || (projectType.isLibrary() && getLibraryType() == 2); }
 
     //==============================================================================
@@ -93,10 +101,14 @@ protected:
         {
             if (getWarningLevel() == 0)
                 getWarningLevelValue() = 4;
+
+            msvcPreBuildCommand = getPrebuildCommand().toString();
         }
 
         Value getWarningLevelValue() const  { return getValue (Ids::winWarningLevel); }
         int getWarningLevel() const         { return getWarningLevelValue().getValue(); }
+
+        Value getPrebuildCommand() const    { return getValue (Ids::prebuildCommand); }
 
         void createPropertyEditors (PropertyListBuilder& props)
         {
@@ -107,6 +119,8 @@ protected:
 
             props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
                                                     StringArray (warningLevelNames), Array<var> (warningLevels)));
+
+            props.add (new TextPropertyComponent (getPrebuildCommand(), "Pre-build Command", 2048, false));
         }
     };
 
@@ -549,7 +563,7 @@ protected:
         return e;
     }
 
-    void createConfig (XmlElement& xml, const BuildConfiguration& config) const
+    void createConfig (XmlElement& xml, const MSVCBuildConfiguration& config) const
     {
         String binariesPath (getConfigTargetPath (config));
         String intermediatesPath (getIntermediatesPath (config));
@@ -569,19 +583,19 @@ protected:
 
         XmlElement* preBuildEvent = createToolElement (xml, "VCPreBuildEventTool");
 
-        if (msvcPreBuildCommand.isNotEmpty())
+        if (config.msvcPreBuildCommand.isNotEmpty())
         {
             preBuildEvent->setAttribute ("Description", "Pre-build");
-            preBuildEvent->setAttribute ("CommandLine", msvcPreBuildCommand);
+            preBuildEvent->setAttribute ("CommandLine", config.msvcPreBuildCommand);
         }
 
         XmlElement* customBuild = createToolElement (xml, "VCCustomBuildTool");
 
-        if (msvcPostBuildCommand.isNotEmpty())
-            customBuild->setAttribute ("CommandLine", msvcPostBuildCommand);
+        if (config.msvcPostBuildCommand.isNotEmpty())
+            customBuild->setAttribute ("CommandLine", config.msvcPostBuildCommand);
 
-        if (msvcPostBuildOutputs.isNotEmpty())
-            customBuild->setAttribute ("Outputs", msvcPostBuildOutputs);
+        if (config.msvcPostBuildOutputs.isNotEmpty())
+            customBuild->setAttribute ("Outputs", config.msvcPostBuildOutputs);
 
         createToolElement (xml, "VCXMLDataGeneratorTool");
         createToolElement (xml, "VCWebServiceProxyGeneratorTool");
@@ -667,13 +681,13 @@ protected:
             if (msvcDelayLoadedDLLs.isNotEmpty())
                 linker->setAttribute ("DelayLoadDLLs", msvcDelayLoadedDLLs);
 
-            if (msvcModuleDefinitionFile.isNotEmpty())
-                linker->setAttribute ("ModuleDefinitionFile", msvcModuleDefinitionFile);
+            if (config.msvcModuleDefinitionFile.isNotEmpty())
+                linker->setAttribute ("ModuleDefinitionFile", config.msvcModuleDefinitionFile);
 
             String extraLinkerOptions (getExtraLinkerFlags().toString());
 
-            if (msvcExtraLinkerOptions.isNotEmpty())
-                extraLinkerOptions << ' ' << msvcExtraLinkerOptions;
+            if (config.msvcExtraLinkerOptions.isNotEmpty())
+                extraLinkerOptions << ' ' << config.msvcExtraLinkerOptions;
 
             if (extraLinkerOptions.isNotEmpty())
                 linker->setAttribute ("AdditionalOptions", replacePreprocessorTokens (config, extraLinkerOptions).trim());
@@ -720,8 +734,9 @@ protected:
 
     void createConfigs (XmlElement& xml)
     {
-        for (ConfigIterator i (*this); i.next();)
-            createConfig (*xml.createNewChildElement ("Configuration"), *i);
+        for (ConfigIterator config (*this); config.next();)
+            createConfig (*xml.createNewChildElement ("Configuration"),
+                          dynamic_cast <const MSVCBuildConfiguration&> (*config));
     }
 
     //==============================================================================
@@ -1218,16 +1233,18 @@ protected:
             }
         }
 
-        for (ConfigIterator config (*this); config.next();)
+        for (ConfigIterator i (*this); i.next();)
         {
-            String binariesPath (getConfigTargetPath (*config));
-            String intermediatesPath (getIntermediatesPath (*config));
-            const bool isDebug = (bool) config->isDebug().getValue();
-            const String binaryName (File::createLegalFileName (config->getTargetBinaryName().toString()));
-            const String outputFileName (getBinaryFileForConfig (*config));
+            const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
+
+            String binariesPath (getConfigTargetPath (config));
+            String intermediatesPath (getIntermediatesPath (config));
+            const bool isDebug = (bool) config.isDebug().getValue();
+            const String binaryName (File::createLegalFileName (config.getTargetBinaryName().toString()));
+            const String outputFileName (getBinaryFileForConfig (config));
 
             XmlElement* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
-            setConditionAttribute (*group, *config);
+            setConditionAttribute (*group, config);
 
             {
                 XmlElement* midl = group->createNewChildElement ("Midl");
@@ -1244,13 +1261,13 @@ protected:
                 cl->createNewChildElement ("Optimization")->addTextElement (isDebug ? "Disabled" : "MaxSpeed");
 
                 if (isDebug)
-                    cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (*config) ? "ProgramDatabase"
-                                                                                                            : "EditAndContinue");
+                    cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (config) ? "ProgramDatabase"
+                                                                                                           : "EditAndContinue");
 
-                StringArray includePaths (getHeaderSearchPaths (*config));
+                StringArray includePaths (getHeaderSearchPaths (config));
                 includePaths.add ("%(AdditionalIncludeDirectories)");
                 cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
-                cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (*config, ";") + ";%(PreprocessorDefinitions)");
+                cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
                 cl->createNewChildElement ("RuntimeLibrary")->addTextElement (msvcNeedsDLLRuntimeLib ? (isDebug ? "MultiThreadedDLLDebug" : "MultiThreadedDLL")
                                                                                                      : (isDebug ? "MultiThreadedDebug" : "MultiThreaded"));
                 cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
@@ -1258,11 +1275,11 @@ protected:
                 cl->createNewChildElement ("AssemblerListingLocation")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
                 cl->createNewChildElement ("ObjectFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
                 cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (getWarningLevel (*config)));
+                cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (getWarningLevel (config)));
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
 
-                const String extraFlags (replacePreprocessorTokens (*config, getExtraCompilerFlags().toString()).trim());
+                const String extraFlags (replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim());
                 if (extraFlags.isNotEmpty())
                     cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
             }
@@ -1283,7 +1300,7 @@ protected:
                 link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
                 link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
 
-                if (! is64Bit (*config))
+                if (! is64Bit (config))
                     link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
                 if (! isDebug)
@@ -1294,7 +1311,7 @@ protected:
 
                 String extraLinkerOptions (getExtraLinkerFlags().toString());
                 if (extraLinkerOptions.isNotEmpty())
-                    link->createNewChildElement ("AdditionalOptions")->addTextElement (replacePreprocessorTokens (*config, extraLinkerOptions).trim()
+                    link->createNewChildElement ("AdditionalOptions")->addTextElement (replacePreprocessorTokens (config, extraLinkerOptions).trim()
                                                                                          + " %(AdditionalOptions)");
             }
 
@@ -1304,10 +1321,10 @@ protected:
                 bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
             }
 
-            if (msvcPostBuildCommand.isNotEmpty())
+            if (config.msvcPostBuildCommand.isNotEmpty())
             {
                 XmlElement* bsc = group->createNewChildElement ("PostBuildEvent");
-                bsc->createNewChildElement ("Command")->addTextElement (msvcPostBuildCommand);
+                bsc->createNewChildElement ("Command")->addTextElement (config.msvcPostBuildCommand);
             }
 
             //xxx

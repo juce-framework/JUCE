@@ -390,6 +390,21 @@ void ProjectExporter::createDefaultConfigs()
 }
 
 //==============================================================================
+ProjectExporter::ConfigIterator::ConfigIterator (ProjectExporter& exporter_)
+    : index (-1), exporter (exporter_)
+{
+}
+
+bool ProjectExporter::ConfigIterator::next()
+{
+    if (++index >= exporter.getNumConfigurations())
+        return false;
+
+    config = exporter.getConfiguration (index);
+    return true;
+}
+
+//==============================================================================
 ProjectExporter::BuildConfiguration::BuildConfiguration (Project& project_, const ValueTree& configNode)
    : config (configNode), project (project_)
 {
