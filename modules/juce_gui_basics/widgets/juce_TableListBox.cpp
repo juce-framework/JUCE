@@ -161,7 +161,7 @@ public:
                 if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                 {
                     isDragging = true;
-                    owner.startDragAndDrop (e, dragDescription);
+                    owner.startDragAndDrop (e, dragDescription, true);
                 }
             }
         }

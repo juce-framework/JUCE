@@ -27,7 +27,6 @@
 #define __JUCE_LISTBOX_JUCEHEADER__
 
 #include "../layout/juce_Viewport.h"
-class ListViewport;
 
 
 //==============================================================================
@@ -175,7 +174,7 @@ public:
         with setModel().
     */
     ListBox (const String& componentName = String::empty,
-             ListBoxModel* model = 0);
+             ListBoxModel* model = nullptr);
 
     /** Destructor. */
     ~ListBox();
@@ -268,10 +267,9 @@ public:
     void flipRowSelection (int rowNumber);
 
     /** Returns a sparse set indicating the rows that are currently selected.
-
         @see setSelectedRows
     */
-    const SparseSet<int> getSelectedRows() const;
+    SparseSet<int> getSelectedRows() const;
 
     /** Sets the rows that should be selected, based on an explicit set of ranges.
 
@@ -357,24 +355,15 @@ public:
     */
     void scrollToEnsureRowIsOnscreen (int row);
 
-    /** Returns a pointer to the scrollbar.
-
-        (Unlikely to be useful for most people).
-    */
+    /** Returns a pointer to the vertical scrollbar. */
     ScrollBar* getVerticalScrollBar() const noexcept;
 
-    /** Returns a pointer to the scrollbar.
-
-        (Unlikely to be useful for most people).
-    */
+    /** Returns a pointer to the horizontal scrollbar. */
     ScrollBar* getHorizontalScrollBar() const noexcept;
 
     /** Finds the row index that contains a given x,y position.
-
         The position is relative to the ListBox's top-left.
-
         If no row exists at this position, the method will return -1.
-
         @see getComponentForRowNumber
     */
     int getRowContainingPosition (int x, int y) const noexcept;
@@ -415,7 +404,6 @@ public:
     Component* getComponentForRowNumber (int rowNumber) const noexcept;
 
     /** Returns the row number that the given component represents.
-
         If the component isn't one of the list's rows, this will return -1.
     */
     int getRowNumberOfComponent (Component* rowComponent) const noexcept;
@@ -427,18 +415,15 @@ public:
 
     //==============================================================================
     /** Sets the height of each row in the list.
-
         The default height is 22 pixels.
-
         @see getRowHeight
     */
     void setRowHeight (int newHeight);
 
     /** Returns the height of a row in the list.
-
         @see setRowHeight
     */
-    int getRowHeight() const noexcept  { return rowHeight; }
+    int getRowHeight() const noexcept                   { return rowHeight; }
 
     /** Returns the number of rows actually visible.
 
@@ -475,7 +460,7 @@ public:
 
         @see setOutlineColour
     */
-    int getOutlineThickness() const noexcept   { return outlineThickness; }
+    int getOutlineThickness() const noexcept            { return outlineThickness; }
 
     /** Sets a component that the list should use as a header.
 
@@ -533,22 +518,29 @@ public:
     */
     Viewport* getViewport() const noexcept;
 
+    //==============================================================================
+    struct Ids
+    {
+        static const Identifier rowHeight, borderThickness;
+    };
+
+    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
 
     //==============================================================================
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&);
     /** @internal */
     bool keyStateChanged (bool isKeyDown);
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
     /** @internal */
-    void paintOverChildren (Graphics& g);
+    void paintOverChildren (Graphics&);
     /** @internal */
     void resized();
     /** @internal */
     void visibilityChanged();
     /** @internal */
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    void mouseWheelMove (const MouseEvent&, float wheelIncrementX, float wheelIncrementY);
     /** @internal */
     void mouseMove (const MouseEvent&);
     /** @internal */
@@ -558,10 +550,11 @@ public:
     /** @internal */
     void colourChanged();
     /** @internal */
-    void startDragAndDrop (const MouseEvent& e, const var& dragDescription, bool allowDraggingToOtherWindows = true);
+    void startDragAndDrop (const MouseEvent&, const var& dragDescription, bool allowDraggingToOtherWindows);
 
 private:
     //==============================================================================
+    class ListViewport;
     friend class ListViewport;
     friend class TableListBox;
     ListBoxModel* model;
@@ -573,10 +566,8 @@ private:
     bool mouseMoveSelects, multipleSelection, hasDoneInitialUpdate;
     SparseSet <int> selected;
 
-    void selectRowInternal (int rowNumber,
-                            bool dontScrollToShowThisRow,
-                            bool deselectOthersFirst,
-                            bool isMouseClick);
+    void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
+                            bool deselectOthersFirst, bool isMouseClick);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox);
 };

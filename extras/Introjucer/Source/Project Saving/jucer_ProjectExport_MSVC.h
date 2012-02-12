@@ -105,7 +105,7 @@ protected:
             msvcPreBuildCommand = getPrebuildCommand().toString();
             msvcPostBuildCommand = getPostbuildCommand().toString();
 
-            if (! shouldGenerateManifest().getValue().isBool())
+            if (shouldGenerateManifest().getValue().isVoid())
                 shouldGenerateManifest() = var (true);
         }
 

@@ -112,7 +112,7 @@ public:
                 if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                 {
                     isDragging = true;
-                    owner.startDragAndDrop (e, dragDescription);
+                    owner.startDragAndDrop (e, dragDescription, true);
                 }
             }
         }
@@ -144,10 +144,9 @@ private:
 
 
 //==============================================================================
-class ListViewport  : public Viewport
+class ListBox::ListViewport  : public Viewport
 {
 public:
-    //==============================================================================
     ListViewport (ListBox& owner_)
         : owner (owner_)
     {
@@ -329,13 +328,14 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListViewport);
 };
 
+enum { defaultListRowHeight = 22 };
 
 //==============================================================================
 ListBox::ListBox (const String& name, ListBoxModel* const model_)
     : Component (name),
       model (model_),
       totalItems (0),
-      rowHeight (22),
+      rowHeight (defaultListRowHeight),
       minimumRowWidth (0),
       outlineThickness (0),
       lastRowSelected (-1),
@@ -510,7 +510,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
         model->selectedRowsChanged (lastRowSelected);
 }
 
-const SparseSet<int> ListBox::getSelectedRows() const
+SparseSet<int> ListBox::getSelectedRows() const
 {
     return selected;
 }
@@ -926,6 +926,19 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription,
         jassertfalse;
     }
 }
+
+//==============================================================================
+const Identifier ListBox::Ids::rowHeight ("rowHeight");
+const Identifier ListBox::Ids::borderThickness ("borderThickness");
+
+void ListBox::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
+{
+    ComponentBuilder::refreshBasicComponentProperties (*this, state);
+
+    setRowHeight (state.getProperty (Ids::rowHeight, defaultListRowHeight));
+    setOutlineThickness (state.getProperty (Ids::borderThickness, 0));
+}
+
 
 //==============================================================================
 Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingComponentToUpdate)
