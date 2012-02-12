@@ -66,6 +66,11 @@ String escapeSpaces (const String& s)
     return s.replace (" ", "\\ ");
 }
 
+String addQuotesIfContainsSpaces (const String& text)
+{
+    return (text.containsChar (' ') && ! text.isQuotedString()) ? text.quoted() : text;
+}
+
 //==============================================================================
 StringPairArray parsePreprocessorDefs (const String& text)
 {

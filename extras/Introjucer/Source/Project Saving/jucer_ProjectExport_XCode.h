@@ -633,6 +633,9 @@ private:
             if (linkerFlags.size() > 0)
                 s.add ("OTHER_LDFLAGS = \"" + linkerFlags.joinIntoString (" ") + "\"");
 
+            librarySearchPaths.addArray (config.getLibrarySearchPaths());
+            librarySearchPaths.removeDuplicates (false);
+
             if (librarySearchPaths.size() > 0)
             {
                 String libPaths ("LIBRARY_SEARCH_PATHS = (\"$(inherited)\"");

@@ -58,6 +58,7 @@ namespace Ids
     DECLARE_ID (optimisation);
     DECLARE_ID (defines);
     DECLARE_ID (headerPath);
+    DECLARE_ID (libraryPath);
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);
     DECLARE_ID (osxArchitecture);

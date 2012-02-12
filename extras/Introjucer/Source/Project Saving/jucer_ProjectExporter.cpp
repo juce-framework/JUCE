@@ -439,8 +439,11 @@ void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyLi
     props.add (new TextPropertyComponent (getTargetBinaryRelativePath(), "Binary location", 1024, false),
                "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed in its default location in the build folder.");
 
-    props.add (new TextPropertyComponent (getHeaderSearchPath(), "Header search path", 16384, false),
+    props.add (new TextPropertyComponent (getHeaderSearchPath(), "Header search paths", 16384, false),
                "Extra header search paths. Use semi-colons to separate multiple paths.");
+
+    props.add (new TextPropertyComponent (getLibrarySearchPath(), "Extra library search paths", 16384, false),
+               "Extra library search paths. Use semi-colons to separate multiple paths.");
 
     props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -458,5 +461,29 @@ StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 {
     StringArray s;
     s.addTokens (getHeaderSearchPath().toString(), ";", String::empty);
+    s.trim();
+    s.removeEmptyStrings();
+    s.removeDuplicates (false);
+    return s;
+}
+
+StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
+{
+    StringArray s;
+    s.addTokens (getLibrarySearchPath().toString(), ";", String::empty);
+    s.trim();
+    s.removeEmptyStrings();
+    s.removeDuplicates (false);
+    return s;
+}
+
+String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
+{
+    String s;
+    const StringArray libraryPaths (getLibrarySearchPaths());
+
+    for (int i = 0; i < libraryPaths.size(); ++i)
+        s << " -L" << addQuotesIfContainsSpaces (libraryPaths[i]);
+
     return s;
 }

@@ -30,6 +30,7 @@ String createAlphaNumericUID();
 String createGUID (const String& seed); // Turns a seed into a windows GUID
 
 String escapeSpaces (const String& text); // replaces spaces with blackslash-space
+String addQuotesIfContainsSpaces (const String& text);
 
 StringPairArray parsePreprocessorDefs (const String& defs);
 StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs);

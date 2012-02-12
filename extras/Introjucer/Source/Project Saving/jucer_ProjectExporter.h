@@ -159,6 +159,9 @@ public:
         StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
         Value getHeaderSearchPath() const                   { return getValue (Ids::headerPath); }
         StringArray getHeaderSearchPaths() const;
+        Value getLibrarySearchPath() const                  { return getValue (Ids::libraryPath); }
+        StringArray getLibrarySearchPaths() const;
+        String getGCCLibraryPathFlags() const;
 
         //==============================================================================
         ValueTree config;

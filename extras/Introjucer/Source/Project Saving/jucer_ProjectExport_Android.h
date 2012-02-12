@@ -292,6 +292,9 @@ private:
             return String::empty;
 
         String flags ("  LOCAL_LDLIBS :=");
+
+        flags << config.getGCCLibraryPathFlags();
+
         for (int i = 0; i < config.androidDynamicLibs.size(); ++i)
             flags << " -l" << config.androidDynamicLibs[i];
 

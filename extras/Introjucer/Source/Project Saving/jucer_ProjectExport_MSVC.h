@@ -671,6 +671,10 @@ protected:
             linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
             linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
+            const StringArray librarySearchPaths (config.getLibrarySearchPaths());
+            if (librarySearchPaths.size() > 0)
+                linker->setAttribute ("AdditionalLibraryDirectories", librarySearchPaths.joinIntoString (";"));
+
             linker->setAttribute ("GenerateManifest", config.shouldGenerateManifest().getValue() ? "true" : "false");
 
             if (! isDebug)
@@ -1252,6 +1256,15 @@ protected:
                     XmlElement* manifest = props->createNewChildElement ("GenerateManifest");
                     setConditionAttribute (*manifest, config);
                     manifest->addTextElement (config.shouldGenerateManifest().getValue() ? "true" : "false");
+                }
+
+                const StringArray librarySearchPaths (config.getLibrarySearchPaths());
+
+                if (librarySearchPaths.size() > 0)
+                {
+                    XmlElement* libPath = props->createNewChildElement ("LibraryPath");
+                    setConditionAttribute (*libPath, config);
+                    libPath->addTextElement ("$(LibraryPath);" + librarySearchPaths.joinIntoString (";"));
                 }
             }
         }

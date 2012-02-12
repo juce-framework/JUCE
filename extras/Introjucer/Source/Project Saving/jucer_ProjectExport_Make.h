@@ -102,6 +102,8 @@ protected:
         MakeBuildConfiguration (Project& project, const ValueTree& settings)
             : BuildConfiguration (project, settings)
         {
+            if (getLibrarySearchPath().getValue().isVoid())
+                getLibrarySearchPath() = "/usr/X11R6/lib/";
         }
 
         void createPropertyEditors (PropertyListBuilder& props)
@@ -160,7 +162,7 @@ private:
         searchPaths.removeDuplicates (false);
 
         for (int i = 0; i < searchPaths.size(); ++i)
-            out << " -I " << FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])).quoted();
+            out << " -I " << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])));
     }
 
     void writeCppFlags (OutputStream& out, const BuildConfiguration& config)
@@ -178,14 +180,7 @@ private:
         if (makefileIsDLL)
             out << " -shared";
 
-        {
-            Array<RelativePath> libraryPaths;
-            libraryPaths.add (RelativePath ("/usr/X11R6/lib/", RelativePath::unknown));
-            libraryPaths.add (getJucePathFromTargetFolder().getChildFile ("bin"));
-
-            for (int i = 0; i < libraryPaths.size(); ++i)
-                out << " -L" << libraryPaths.getReference(i).toUnixStyle().quoted();
-        }
+        out << config.getGCCLibraryPathFlags();
 
         const char* defaultLibs[] = { "freetype", "pthread", "rt", "X11", "GL", "GLU", "Xinerama", "asound", "Xext", 0 };
         StringArray libs (defaultLibs);
