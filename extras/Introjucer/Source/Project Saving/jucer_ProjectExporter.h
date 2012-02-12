@@ -165,8 +165,7 @@ public:
 
         //==============================================================================
         String msvcExtraLinkerOptions, msvcModuleDefinitionFile;
-        String msvcPostBuildCommand, msvcPostBuildOutputs;
-        String msvcPreBuildCommand;
+        String msvcPreBuildCommand, msvcPostBuildCommand;
 
     protected:
         Project& project;

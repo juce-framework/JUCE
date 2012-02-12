@@ -315,9 +315,10 @@ namespace RTASHelpers
         {
             config->msvcExtraLinkerOptions = "/FORCE:multiple";
             config->msvcModuleDefinitionFile = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
-            config->msvcPostBuildOutputs = "\"$(TargetPath)\".rsr";
-            config->msvcPostBuildCommand = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
-                                               + "\" \"$(TargetPath)\".rsr";
+
+            if (config->msvcPostBuildCommand.isEmpty())
+                config->msvcPostBuildCommand = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
+                                                    + "\" \"$(TargetPath)\".rsr";
         }
 
         exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));

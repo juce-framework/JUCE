@@ -54,6 +54,7 @@
             GenerateDebugInformation="true"
             ProgramDatabaseFile=".\Debug\Plugin Host.pdb"
             SubSystem="2"
+            GenerateManifest="true"
             TargetMachine="1"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
@@ -110,7 +111,7 @@
             GenerateDebugInformation="false"
             ProgramDatabaseFile=".\Release\Plugin Host.pdb"
             SubSystem="2"
-            GenerateManifest="false"
+            GenerateManifest="true"
             OptimizeReferences="2"
             EnableCOMDATFolding="2"
             TargetMachine="1"/>

@@ -103,12 +103,19 @@ protected:
                 getWarningLevelValue() = 4;
 
             msvcPreBuildCommand = getPrebuildCommand().toString();
+            msvcPostBuildCommand = getPostbuildCommand().toString();
+
+            if (! shouldGenerateManifest().getValue().isBool())
+                shouldGenerateManifest() = var (true);
         }
 
-        Value getWarningLevelValue() const  { return getValue (Ids::winWarningLevel); }
-        int getWarningLevel() const         { return getWarningLevelValue().getValue(); }
+        Value getWarningLevelValue() const      { return getValue (Ids::winWarningLevel); }
+        int getWarningLevel() const             { return getWarningLevelValue().getValue(); }
 
-        Value getPrebuildCommand() const    { return getValue (Ids::prebuildCommand); }
+        Value getPrebuildCommand() const        { return getValue (Ids::prebuildCommand); }
+        Value getPostbuildCommand() const       { return getValue (Ids::postbuildCommand); }
+
+        Value shouldGenerateManifest() const    { return getValue (Ids::generateManifest); }
 
         void createPropertyEditors (PropertyListBuilder& props)
         {
@@ -120,7 +127,9 @@ protected:
             props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
                                                     StringArray (warningLevelNames), Array<var> (warningLevels)));
 
-            props.add (new TextPropertyComponent (getPrebuildCommand(), "Pre-build Command", 2048, false));
+            props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, false));
+            props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, false));
+            props.add (new BooleanPropertyComponent (shouldGenerateManifest(), "Manifest", "Generate Manifest"));
         }
     };
 
@@ -589,14 +598,7 @@ protected:
             preBuildEvent->setAttribute ("CommandLine", config.msvcPreBuildCommand);
         }
 
-        XmlElement* customBuild = createToolElement (xml, "VCCustomBuildTool");
-
-        if (config.msvcPostBuildCommand.isNotEmpty())
-            customBuild->setAttribute ("CommandLine", config.msvcPostBuildCommand);
-
-        if (config.msvcPostBuildOutputs.isNotEmpty())
-            customBuild->setAttribute ("Outputs", config.msvcPostBuildOutputs);
-
+        createToolElement (xml, "VCCustomBuildTool");
         createToolElement (xml, "VCXMLDataGeneratorTool");
         createToolElement (xml, "VCWebServiceProxyGeneratorTool");
 
@@ -669,9 +671,10 @@ protected:
             linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
             linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
+            linker->setAttribute ("GenerateManifest", config.shouldGenerateManifest().getValue() ? "true" : "false");
+
             if (! isDebug)
             {
-                linker->setAttribute ("GenerateManifest", "false");
                 linker->setAttribute ("OptimizeReferences", "2");
                 linker->setAttribute ("EnableCOMDATFolding", "2");
             }
@@ -729,7 +732,13 @@ protected:
         if (! projectType.isLibrary())
             createToolElement (xml, "VCAppVerifierTool");
 
-        createToolElement (xml, "VCPostBuildEventTool");
+        XmlElement* postBuildEvent = createToolElement (xml, "VCPostBuildEventTool");
+
+        if (config.msvcPostBuildCommand.isNotEmpty())
+        {
+            postBuildEvent->setAttribute ("Description", "Post-build");
+            postBuildEvent->setAttribute ("CommandLine", config.msvcPostBuildCommand);
+        }
     }
 
     void createConfigs (XmlElement& xml)
@@ -1217,19 +1226,33 @@ protected:
             XmlElement* props = projectXml.createNewChildElement ("PropertyGroup");
             props->createNewChildElement ("_ProjectFileVersion")->addTextElement ("10.0.30319.1");
 
-            for (ConfigIterator config (*this); config.next();)
+            for (ConfigIterator i (*this); i.next();)
             {
-                XmlElement* outdir = props->createNewChildElement ("OutDir");
-                setConditionAttribute (*outdir, *config);
-                outdir->addTextElement (getConfigTargetPath (*config) + "\\");
+                const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
 
-                XmlElement* intdir = props->createNewChildElement ("IntDir");
-                setConditionAttribute (*intdir, *config);
-                intdir->addTextElement (getConfigTargetPath (*config) + "\\");
+                {
+                    XmlElement* outdir = props->createNewChildElement ("OutDir");
+                    setConditionAttribute (*outdir, config);
+                    outdir->addTextElement (getConfigTargetPath (config) + "\\");
+                }
 
-                XmlElement* name = props->createNewChildElement ("TargetName");
-                setConditionAttribute (*name, *config);
-                name->addTextElement (getBinaryFileForConfig (*config).upToLastOccurrenceOf (".", false, false));
+                {
+                    XmlElement* intdir = props->createNewChildElement ("IntDir");
+                    setConditionAttribute (*intdir, config);
+                    intdir->addTextElement (getConfigTargetPath (config) + "\\");
+                }
+
+                {
+                    XmlElement* name = props->createNewChildElement ("TargetName");
+                    setConditionAttribute (*name, config);
+                    name->addTextElement (getBinaryFileForConfig (config).upToLastOccurrenceOf (".", false, false));
+                }
+
+                {
+                    XmlElement* manifest = props->createNewChildElement ("GenerateManifest");
+                    setConditionAttribute (*manifest, config);
+                    manifest->addTextElement (config.shouldGenerateManifest().getValue() ? "true" : "false");
+                }
             }
         }
 
@@ -1321,25 +1344,15 @@ protected:
                 bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
             }
 
-            if (config.msvcPostBuildCommand.isNotEmpty())
-            {
-                XmlElement* bsc = group->createNewChildElement ("PostBuildEvent");
-                bsc->createNewChildElement ("Command")->addTextElement (config.msvcPostBuildCommand);
-            }
+            if (config.msvcPreBuildCommand.isNotEmpty())
+                group->createNewChildElement ("PreBuildEvent")
+                     ->createNewChildElement ("Command")
+                     ->addTextElement (config.msvcPreBuildCommand);
 
-            //xxx
-//    <PreBuildEvent>
-//      <Command>asd</Command>
-//    </PreBuildEvent>
-//    <PreLinkEvent>
-//      <Command>dfg</Command>
-//    </PreLinkEvent>
-//    <CustomBuildStep>
-//      <Command>abc</Command>
-//    </CustomBuildStep>
-//    <CustomBuildStep>
-//      <Outputs>xyz</Outputs>
-//    </CustomBuildStep>
+            if (config.msvcPostBuildCommand.isNotEmpty())
+                group->createNewChildElement ("PostBuildEvent")
+                     ->createNewChildElement ("Command")
+                     ->addTextElement (config.msvcPostBuildCommand);
         }
 
         {

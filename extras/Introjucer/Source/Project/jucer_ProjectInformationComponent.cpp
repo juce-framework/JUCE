@@ -470,8 +470,8 @@ public:
         addAndMakeVisible (&modulesPanelGroup);
         addAndMakeVisible (&exporters);
 
-        mainProjectInfoPanel.backgroundColour = Colours::white.withAlpha (0.3f);
-        modulesPanelGroup   .backgroundColour = Colours::white.withAlpha (0.3f);
+        mainProjectInfoPanel.fillBackground = true;
+        modulesPanelGroup.fillBackground = true;
     }
 
     void updateSize (int width)
@@ -522,7 +522,7 @@ public:
         for (Project::ExporterIterator exporter (project); exporter.next();)
         {
             PropertyGroup* exporterGroup = exporters.createGroup();
-            exporterGroup->backgroundColour = Colours::white.withAlpha (0.3f);
+            exporterGroup->fillBackground = true;
             exporterGroup->addDeleteButton ("exporter " + String (exporter.index), "Deletes this export target.");
 
             PropertyListBuilder props;
@@ -679,7 +679,7 @@ private:
     {
     public:
         PropertyGroup()
-            : deleteButton ("Delete")
+            : deleteButton ("Delete"), fillBackground (false)
         {
             deleteButton.addListener (this);
         }
@@ -706,7 +706,7 @@ private:
 
         int updateSize (int y, int width)
         {
-            int height = 32;
+            int height = fillBackground ? 36 : 32;
 
             for (int i = 0; i < properties.size(); ++i)
             {
@@ -727,18 +727,18 @@ private:
 
         void paint (Graphics& g)
         {
-            if (! backgroundColour.isTransparent())
+            if (fillBackground)
             {
-                g.setColour (backgroundColour);
-                g.fillRect (0, 0, getWidth(), getHeight() - 10);
+                g.setColour (Colours::white.withAlpha (0.3f));
+                g.fillRect (0, 28, getWidth(), getHeight() - 38);
 
                 g.setColour (Colours::black.withAlpha (0.4f));
-                g.drawRect (0, 0, getWidth(), getHeight() - 10);
+                g.drawRect (0, 28, getWidth(), getHeight() - 38);
             }
 
             g.setFont (14.0f, Font::bold);
             g.setColour (Colours::black);
-            g.drawFittedText (getName(), 12, 0, getWidth() - 16, 28, Justification::bottomLeft, 1);
+            g.drawFittedText (getName(), 12, 0, getWidth() - 16, 26, Justification::bottomLeft, 1);
         }
 
         void buttonClicked (Button*)
@@ -750,7 +750,7 @@ private:
 
         OwnedArray<PropertyComponent> properties;
         TextButton deleteButton;
-        Colour backgroundColour;
+        bool fillBackground;
     };
 
     //==============================================================================

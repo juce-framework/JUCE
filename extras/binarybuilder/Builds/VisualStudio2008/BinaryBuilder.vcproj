@@ -54,6 +54,7 @@
             GenerateDebugInformation="true"
             ProgramDatabaseFile=".\Debug\BinaryBuilder.pdb"
             SubSystem="1"
+            GenerateManifest="true"
             TargetMachine="1"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
@@ -110,7 +111,7 @@
             GenerateDebugInformation="false"
             ProgramDatabaseFile=".\Release\BinaryBuilder.pdb"
             SubSystem="1"
-            GenerateManifest="false"
+            GenerateManifest="true"
             OptimizeReferences="2"
             EnableCOMDATFolding="2"
             TargetMachine="1"/>
