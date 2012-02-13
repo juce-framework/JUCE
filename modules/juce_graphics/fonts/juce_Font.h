@@ -211,7 +211,7 @@ public:
     int getStyleFlags() const noexcept;
 
     /** Returns a copy of this font with the given set of style flags.
-        @param newFlags     a bitwise-or'ed combination of values from the FontStyleFlags enum.
+        @param styleFlags     a bitwise-or'ed combination of values from the FontStyleFlags enum.
         @see FontStyleFlags, getStyleFlags
     */
     Font withStyle (int styleFlags) const;
@@ -258,7 +258,7 @@ public:
                             narrower, greater than 1.0 will be stretched out.
         @see getHorizontalScale
     */
-    Font withHorizontalScale (float newHorizontalScale) const;
+    Font withHorizontalScale (float scaleFactor) const;
 
     /** Changes the font's horizontal scale factor.
         @param scaleFactor  a value of 1.0 is the normal scale, less than this will be
