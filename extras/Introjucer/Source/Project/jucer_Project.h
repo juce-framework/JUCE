@@ -87,11 +87,6 @@ public:
     Value getProjectPreprocessorDefs() const            { return getProjectValue (Ids::defines); }
     StringPairArray getPreprocessorDefs() const;
 
-    Value getBigIconImageItemID() const                 { return getProjectValue ("bigIcon"); }
-    Value getSmallIconImageItemID() const               { return getProjectValue ("smallIcon"); }
-    Image getBigIcon();
-    Image getSmallIcon();
-
     //==============================================================================
     File getAppIncludeFile() const                      { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
     File getGeneratedCodeFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
@@ -268,6 +263,7 @@ private:
     ValueTree getModulesNode();
 
     void updateOldStyleConfigList();
+    void moveOldPropertyFromProjectToAllExporters (Identifier name);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project);
 };

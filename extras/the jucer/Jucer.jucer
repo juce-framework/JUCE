@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Uy86Nk" name="Jucer" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.yourcompany.Jucer" jucerVersion="3.0.0"
-              bigIcon="HFdB13">
+              bundleIdentifier="com.yourcompany.Jucer" jucerVersion="3.0.0">
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" objCExtraSuffix="wQBvzo" juceFolder="../..">
+    <XCODE_MAC targetFolder="Builds/MacOSX" objCExtraSuffix="wQBvzo" juceFolder="../.."
+               bigIcon="HFdB13">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
       </CONFIGURATIONS>
     </XCODE_MAC>
-    <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="1" juceFolder="../..">
+    <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="1" juceFolder="../.."
+            bigIcon="HFdB13">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
       </CONFIGURATIONS>
     </VS2008>
-    <VS2010 targetFolder="Builds/VisualStudio2010" libraryType="1" juceFolder="../..">
+    <VS2010 targetFolder="Builds/VisualStudio2010" libraryType="1" juceFolder="../.."
+            bigIcon="HFdB13">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
       </CONFIGURATIONS>
     </VS2010>
-    <LINUX_MAKE targetFolder="Builds/Linux" juceFolder="../..">
+    <LINUX_MAKE targetFolder="Builds/Linux" juceFolder="../.." bigIcon="HFdB13">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>

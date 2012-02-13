@@ -1009,6 +1009,12 @@ ValueTree ValueTree::readFromData (const void* const data, const size_t numBytes
     return readFromStream (in);
 }
 
+ValueTree ValueTree::readFromGZIPData (const void* const data, const size_t numBytes)
+{
+    MemoryInputStream in (data, numBytes, false);
+    GZIPDecompressorInputStream gzipStream (in);
+    return readFromStream (gzipStream);
+}
 
 //==============================================================================
 #if JUCE_UNIT_TESTS

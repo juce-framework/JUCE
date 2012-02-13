@@ -111,6 +111,8 @@ void Project::setMissingDefaultValues()
         getVersion() = "1.0.0";
 
     updateOldStyleConfigList();
+    moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
+    moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
 
     for (Project::ExporterIterator exporter (*this); exporter.next();)
         if (exporter->getNumConfigurations() == 0)
@@ -157,6 +159,17 @@ void Project::updateOldStyleConfigList()
                 exporter->settings.addChild (newConfigs, 0, nullptr);
             }
         }
+    }
+}
+
+void Project::moveOldPropertyFromProjectToAllExporters (Identifier name)
+{
+    if (projectRoot.hasProperty (name))
+    {
+        for (Project::ExporterIterator exporter (*this); exporter.next();)
+            exporter->settings.setProperty (name, projectRoot [name], nullptr);
+
+        projectRoot.removeProperty (name, nullptr);
     }
 }
 
@@ -337,32 +350,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false),
                "A unique identifier for this product, mainly for use in Mac builds. It should be something like 'com.yourcompanyname.yourproductname'");
 
-    {
-        OwnedArray<Project::Item> images;
-        findAllImageItems (images);
-
-        StringArray choices;
-        Array<var> ids;
-
-        choices.add ("<None>");
-        ids.add (var::null);
-        choices.add (String::empty);
-        ids.add (var::null);
-
-        for (int i = 0; i < images.size(); ++i)
-        {
-            choices.add (images.getUnchecked(i)->getName().toString());
-            ids.add (images.getUnchecked(i)->getID());
-        }
-
-        props.add (new ChoicePropertyComponent (getSmallIconImageItemID(), "Icon (small)", choices, ids),
-                   "Sets an icon to use for the executable.");
-
-        props.add (new ChoicePropertyComponent (getBigIconImageItemID(), "Icon (large)", choices, ids),
-                   "Sets an icon to use for the executable.");
-    }
-
-    getProjectType().createPropertyEditors(*this, props);
+    getProjectType().createPropertyEditors (*this, props);
 
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, false),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -383,16 +371,6 @@ String Project::getVersionAsHex() const
         value = (value << 8) + configs[3].getIntValue();
 
     return "0x" + String::toHexString (value);
-}
-
-Image Project::getBigIcon()
-{
-    return getMainGroup().findItemWithID (getBigIconImageItemID().toString()).loadAsImageFile();
-}
-
-Image Project::getSmallIcon()
-{
-    return getMainGroup().findItemWithID (getSmallIconImageItemID().toString()).loadAsImageFile();
 }
 
 StringPairArray Project::getPreprocessorDefs() const

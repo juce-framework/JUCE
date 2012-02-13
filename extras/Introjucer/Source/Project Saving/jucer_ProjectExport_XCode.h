@@ -388,11 +388,11 @@ private:
     {
         Array<Image> images;
 
-        Image bigIcon (project.getBigIcon());
+        Image bigIcon (getBigIcon());
         if (bigIcon.isValid())
             images.add (bigIcon);
 
-        Image smallIcon (project.getSmallIcon());
+        Image smallIcon (getSmallIcon());
         if (smallIcon.isValid())
             images.add (smallIcon);
 

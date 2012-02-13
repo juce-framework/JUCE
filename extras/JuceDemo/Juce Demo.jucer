@@ -7,11 +7,10 @@
               pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="JuceDemoAU"
-              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" icon="Duj062Top"
-              bigIcon="f4hwldS">
+              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" icon="Duj062Top">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j">
+               juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j" bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"
@@ -22,7 +21,7 @@
       </CONFIGURATIONS>
     </XCODE_MAC>
     <XCODE_IPHONE targetFolder="Builds/iOS" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-                  juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j">
+                  juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j" bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"
@@ -33,7 +32,8 @@
       </CONFIGURATIONS>
     </XCODE_IPHONE>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1">
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"
+            bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        defines="JUCE_UNIT_TESTS=1"/>
@@ -42,7 +42,8 @@
       </CONFIGURATIONS>
     </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1">
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"
+            bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        defines="JUCE_UNIT_TESTS=1"/>
@@ -50,7 +51,8 @@
                        defines="JUCE_UNIT_TESTS=1"/>
       </CONFIGURATIONS>
     </VS2008>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce">
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"
+                bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        defines="JUCE_UNIT_TESTS=1"/>
@@ -59,7 +61,8 @@
       </CONFIGURATIONS>
     </LINUX_MAKE>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../../../juce">
+            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../../../juce"
+            bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        defines="JUCE_UNIT_TESTS=1" winArchitecture="32-bit"/>
@@ -69,7 +72,7 @@
     </VS2010>
     <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"
              androidNDKPath="${user.home}/SDKs/android-ndk-r7" juceFolder="../../../juce"
-             androidInternetNeeded="1">
+             androidInternetNeeded="1" bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        defines="JUCE_UNIT_TESTS=1"/>

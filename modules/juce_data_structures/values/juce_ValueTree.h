@@ -345,6 +345,11 @@ public:
     /** Reloads a tree from a data block that was written with writeToStream(). */
     static ValueTree readFromData (const void* data, size_t numBytes);
 
+    /** Reloads a tree from a data block that was written with writeToStream() and
+        then zipped using GZIPCompressorOutputStream.
+    */
+    static ValueTree readFromGZIPData (const void* data, size_t numBytes);
+
     //==============================================================================
     /** Listener class for events that happen to a ValueTree.
 

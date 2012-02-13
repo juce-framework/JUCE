@@ -86,6 +86,12 @@ public:
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
     void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder);
 
+    Value getBigIconImageItemID() const         { return getSetting (Ids::bigIcon); }
+    Value getSmallIconImageItemID() const       { return getSetting (Ids::smallIcon); }
+    Image getBigIcon();
+    Image getSmallIcon();
+    Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough);
+
     String getExporterIdentifierMacro() const
     {
         return "JUCER_" + settings.getType().toString() + "_"
@@ -246,8 +252,6 @@ protected:
             name = name + ".a";
         return name;
     }
-
-    Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough);
 
     //==============================================================================
     static void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)
