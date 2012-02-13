@@ -54,6 +54,7 @@ Project::Project (const File& file_)
       projectRoot (Tags::projectRoot)
 {
     setFile (file_);
+    removeDefunctExporters();
     setMissingDefaultValues();
 
     setChangedFlag (false);
@@ -120,8 +121,6 @@ void Project::setMissingDefaultValues()
 
     if (! projectRoot.getChildWithName (Tags::exporters).isValid())
         createDefaultExporters();
-    else
-        removeDefunctExporters();
 
     getProjectType().setMissingProjectProperties (*this);
 
