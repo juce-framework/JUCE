@@ -96,11 +96,6 @@ public:
     {
     }
 
-    ~AddXmlElementAction()
-    {
-        delete xml;
-    }
-
     bool perform()
     {
         showCorrectTab();
@@ -125,7 +120,7 @@ public:
 
 private:
     PaintRoutine& routine;
-    XmlElement* xml;
+    ScopedPointer<XmlElement> xml;
 
     void showCorrectTab() const
     {
@@ -170,12 +165,10 @@ PaintElement* PaintRoutine::addNewElement (PaintElement* e, const int index, con
 {
     if (e != 0)
     {
-        XmlElement* const xml = e->createXml();
+        ScopedPointer<XmlElement> xml (e->createXml());
         delete e;
 
         e = addElementFromXml (*xml, index, undoable);
-
-        delete xml;
     }
 
     return e;
@@ -191,11 +184,6 @@ public:
     {
         xml = element->createXml();
         oldIndex = routine.indexOfElement (element);
-    }
-
-    ~DeleteElementAction()
-    {
-        delete xml;
     }
 
     bool perform()
@@ -215,7 +203,7 @@ public:
     int getSizeInUnits()    { return 10; }
 
 private:
-    XmlElement* xml;
+    ScopedPointer<XmlElement> xml;
     int oldIndex;
 };
 
@@ -335,7 +323,7 @@ void PaintRoutine::copySelectedToClipboard()
 void PaintRoutine::paste()
 {
     XmlDocument clip (SystemClipboard::getTextFromClipboard());
-    XmlElement* const doc = clip.getDocumentElement();
+    ScopedPointer<XmlElement> doc (clip.getDocumentElement());
 
     if (doc != 0 && doc->hasTagName (clipboardXmlTag))
     {
@@ -350,8 +338,6 @@ void PaintRoutine::paste()
                 selectedElements.addToSelection (newElement);
         }
     }
-
-    delete doc;
 }
 
 void PaintRoutine::deleteSelected()
@@ -536,12 +522,12 @@ void PaintRoutine::drawElements (Graphics& g, const Rectangle<int>& relativeTo)
 //==============================================================================
 void PaintRoutine::dropImageAt (const File& f, int x, int y)
 {
-    Drawable* d = Drawable::createFromImageFile (f);
+    ScopedPointer<Drawable> d (Drawable::createFromImageFile (f));
 
-    if (d != 0)
+    if (d != nullptr)
     {
         Rectangle<float> bounds (d->getDrawableBounds());
-        delete d;
+        d = nullptr;
 
         PaintElement* newElement
             = addNewElement (ObjectTypes::createNewImageElement (this), -1, true);

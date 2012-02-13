@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -34,12 +34,12 @@ GroupInformationComponent::GroupInformationComponent (const Project::Item& item_
     addAndMakeVisible (&list);
     list.updateContent();
     list.setRowHeight (20);
-    item.getNode().addListener (this);
+    item.state.addListener (this);
 }
 
 GroupInformationComponent::~GroupInformationComponent()
 {
-    item.getNode().removeListener (this);
+    item.state.removeListener (this);
 }
 
 void GroupInformationComponent::resized()

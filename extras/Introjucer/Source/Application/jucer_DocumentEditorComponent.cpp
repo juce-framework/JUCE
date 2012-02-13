@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -91,6 +91,7 @@ void DocumentEditorComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save" + name + " As...",
                         "Saves the current document to a different filename",
                         CommandCategories::general, 0);
+        result.setActive (document != nullptr && document->canSaveAs());
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
@@ -98,7 +99,11 @@ void DocumentEditorComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Close" + name,
                         "Closes the current document",
                         CommandCategories::general, 0);
+       #if JUCE_MAC
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+       #else
         result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+       #endif
         break;
 
     default:
@@ -115,8 +120,7 @@ bool DocumentEditorComponent::perform (const InvocationInfo& info)
         return true;
 
     case CommandIDs::saveDocumentAs:
-        jassertfalse //xxxx
-        //document.save();
+        document->saveAs();
         return true;
 
     case CommandIDs::closeDocument:

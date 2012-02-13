@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@
 #include "../jucer_Headers.h"
 #include "../Utility/jucer_JucerTreeViewBase.h"
 #include "jucer_Project.h"
-#include "jucer_ResourceFile.h"
+#include "../Project Saving/jucer_ResourceFile.h"
 #include "jucer_ProjectContentComponent.h"
 
 
@@ -65,6 +65,9 @@ public:
     virtual void addFiles (const StringArray& files, int insertIndex);
     virtual void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex);
     virtual void showMultiSelectionPopupMenu();
+
+    void launchPopupMenu (PopupMenu&); // runs asynchronously, and produces a callback to handlePopupMenuResult().
+    virtual void handlePopupMenuResult (int resultCode);
     void invokeShowDocument();
 
     virtual ProjectTreeViewBase* findTreeViewItem (const Project::Item& itemToFind);
@@ -79,14 +82,14 @@ public:
     //==============================================================================
     // TreeViewItem stuff..
     bool mightContainSubItems();
-    const String getUniqueName() const;
+    String getUniqueName() const;
     void itemOpennessChanged (bool isNowOpen);
     void refreshSubItems();
     bool canBeSelected() const                  { return true; }
     void itemDoubleClicked (const MouseEvent& e);
     void itemSelectionChanged (bool isNowSelected);
-    const String getTooltip();
-    const var getDragSourceDescription();
+    String getTooltip();
+    var getDragSourceDescription();
 
     //==============================================================================
     // Drag-and-drop stuff..

@@ -1,0 +1,69 @@
+
+
+    Juce Browser Plugin Framework
+    =============================
+    
+These classes let you wrap a normal Juce component as a Mac/Windows NPAPI plugin for use in Firefox, 
+Safari, Chrome, etc., and/or an ActiveX plugin for IE.
+
+To create your plugin, your code just needs to implement the createBrowserPlugin() function 
+to return a subclass of BrowserPluginComponent, and this acts as the plugin window.
+
+To communicate with javascript running in the host webpage, the 'var' and 'DynamicObject' juce
+classes emulate javascript objects, so you can create a javascript object that represents
+your plugin, and the webpage can invoke methods and access properties on this object. To
+get bi-directional communication between the plugin and webpage, your webpage can simply
+pass its own object to your plugin, and the plugin can call methods on this object to invoke
+javascript actions.
+
+In a similar style to audio plugins, your project has to contain a BrowserPluginCharacteristics.h
+file that defines various properties of the plugin.
+
+
+Building a Mac NPAPI Plugin with XCode
+--------------------------------------
+
+- Create a new "CFPlugin Bundle" project 
+- Add the juce wrapper source files to the project (have a look at the demo project to 
+  find out which files this includes).
+- Set up all the usual frameworks, etc, like you would for any other juce project.
+- In the project or target settings, change the "Wrapper Extension" to "plugin"
+- In your target, add a build phase "Build ResourceManager resources", and add the juce_NPAPI_MacResource.r file
+  to this step.
+- Check that your info.plist contains the same items as the demo plugin, because these need to be set for the
+  browser to recognise it as a plugin. In particular, the "Bundle OS Type Code" should be set to BRPL.
+- The finished bundle needs to be copied into "/Library/Internet Plug-Ins", so you might want to set up a
+  post-build copy step to do this automatically
+
+
+Building a Windows NPAPI plugin in Visual Studio
+------------------------------------------------
+
+- Create a new project to build a win32 DLL
+- Add the juce wrapper source files to the project (have a look at the demo project to 
+  find out which files this includes).
+- Your compiled plugin DLL must begin with the letters 'np' (in lower case) for it to be recognised as
+  a plugin, so you should make sure your target settings reflect this.
+- To include the BrowserPluginCharacteristics.h file, you may need to add an include path to wherever this
+  file lives in your project. Don't use a global include path for this - just add it to the project's 
+  search paths (both the c++ include paths and the resource include paths)
+- (Refer to the normal juce instructions for setting up other project settings such as which c++ libs to link to etc)
+- The finished plugin needs to be copied into "C:\Program Files\Mozilla Firefox\plugins", so you might want
+  to add a post-build step to copy it
+- Note that the "browser plugins/wrapper/npapi" folder contains a copy of some NPAPI header files. If you're 
+  building a closed-source project, please check the licensing details in these files to make sure
+  you're not breaking any Mozilla licensing restictions.
+
+
+Building a Windows ActiveX control for Internet Explorer
+--------------------------------------------------------
+
+- This is actually quite easy, because the same DLL that functions as an NPAPI plugin can
+  also be used as an ActiveX control.
+- Just create a windows NPAPI plugin as described above, but add the juce_ActiveX_GlueCode.cpp
+  file to the project.
+- In your BrowserPluginCharacteristics.h file, the JuceBrowserPlugin_ActiveXCLSID setting needs
+  to be given a unique GUID for your plugin.
+- Because the plugin is a COM object, it doesn't matter where the DLL lives, but it needs to
+  be registered in the normal COM way, with regsvr32.exe. Note that on Vista, this command
+  needs to be run with administrator permissions for it to be able to write to the registry.

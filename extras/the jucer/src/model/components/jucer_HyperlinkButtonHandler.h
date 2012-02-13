@@ -119,7 +119,7 @@ private:
                               "Change hyperlink URL");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getURL().toString (false);
         }

@@ -408,27 +408,23 @@ bool JucerDocument::loadFromXml (const XmlElement& xml)
 //==============================================================================
 const String JucerDocument::loadDocument (const File& file)
 {
-    String error (TRANS("Not a valid Jucer cpp file"));
-
     const File cppFile (file.withFileExtension (".cpp"));
 
     const String cppFileString (cppFile.loadFileAsString());
 
     resources.loadFromCpp (file, cppFileString);
 
-    XmlElement* const xml = pullMetaDataFromCppFile (cppFileString);
+    ScopedPointer<XmlElement> xml (pullMetaDataFromCppFile (cppFileString));
 
-    if (xml != 0)
+    if (xml != nullptr)
     {
         if (loadFromXml (*xml))
-            error = String::empty;
-        else
-            error = TRANS("Couldn't parse the XML section of this file correctly");
+            return String::empty;
 
-        delete xml;
+        return TRANS("Couldn't parse the XML section of this file correctly");
     }
 
-    return error;
+    return TRANS("Not a valid Jucer cpp file");
 }
 
 const String JucerDocument::saveDocument (const File& file)
@@ -511,10 +507,9 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
 
     fillInPaintCode (code);
 
-    XmlElement* const e = createXml();
+    ScopedPointer<XmlElement> e (createXml());
     jassert (e != 0);
     code.jucerMetadata = e->createDocument (String::empty, false, false);
-    delete e;
 
     resources.fillInGeneratedCode (code);
 

@@ -29,88 +29,80 @@
 //==============================================================================
 class MiscPage  : public Component
 {
-    FilenameComponent* templateDir;
-
 public:
     MiscPage()
+        : templateDir ("C++ template folder:",
+                       StoredSettings::getInstance()->getTemplatesDir(),
+                       true, true, false,
+                       "*.*", String::empty,
+                       "(select the directory containing template .cpp and .h files)"),
+          label (String::empty, templateDir.getName())
     {
-        addAndMakeVisible (templateDir
-            = new FilenameComponent ("C++ template folder:",
-                                     StoredSettings::getInstance()->getTemplatesDir(),
-                                     true,
-                                     true,
-                                     false,
-                                     "*.*",
-                                     String::empty,
-                                     "(select the directory containing template .cpp and .h files)"));
-
-        (new Label (String::empty, templateDir->getName()))->attachToComponent (templateDir, true);
+        addAndMakeVisible (&templateDir);
+        label.attachToComponent (&templateDir, true);
     }
 
     ~MiscPage()
     {
-        StoredSettings::getInstance()->setTemplatesDir (templateDir->getCurrentFile());
-
-        deleteAllChildren();
+        StoredSettings::getInstance()->setTemplatesDir (templateDir.getCurrentFile());
     }
 
     void resized()
     {
-        templateDir->setBounds (150, 16, getWidth() - 160, 22);
+        templateDir.setBounds (150, 16, getWidth() - 160, 22);
     }
+
+private:
+    FilenameComponent templateDir;
+    Label label;
 };
 
 //==============================================================================
 class AboutPage   : public Component
 {
-    HyperlinkButton* link;
-    Image logo;
-    TextLayout text1, text2;
-
 public:
     AboutPage()
+        : link ("www.rawmaterialsoftware.com/juce",
+                URL ("http://www.rawmaterialsoftware.com/juce")),
+          logo (ImageCache::getFromMemory (BinaryData::jules_jpg, BinaryData::jules_jpgSize))
     {
-        logo = ImageCache::getFromMemory (BinaryData::jules_jpg, BinaryData::jules_jpgSize);
+        text1.setJustification (Justification::centredTop);
+        text1.append ("Programmer Julian Storer, seen here demonstrating a beard designed to "
+                      "gain approval from the Linux programming community. Each hair of the beard "
+                      "represents one line of source code from the ", Font (13.0f));
+        text1.append ("Jucer", Font (13.0f, Font::bold));
+        text1.append (" component design tool.", Font (13.0f));
 
-        text1.appendText ("Programmer Julian Storer, seen here demonstrating a beard designed to "
-                          "gain approval from the Linux programming community. Each hair of the beard "
-                          "represents one line of source code from the ", Font (13.0f));
-        text1.appendText ("Jucer", Font (13.0f, Font::bold));
-        text1.appendText (" component design tool.", Font (13.0f));
+        text2.setJustification (Justification::centred);
+        text2.append ("Jucer v" + JUCEApplication::getInstance()->getApplicationVersion()
+                        + ", " + SystemStats::getJUCEVersion(), Font (12.0f, Font::bold));
 
-        text2.appendText ("Jucer v" + JUCEApplication::getInstance()->getApplicationVersion()
-                            + ", " + SystemStats::getJUCEVersion(), Font (14.0f, Font::bold));
-
-        addAndMakeVisible (link = new HyperlinkButton ("www.rawmaterialsoftware.com/juce",
-                                                       URL ("http://www.rawmaterialsoftware.com/juce")));
-        link->setFont (Font (10.0f, Font::bold | Font::underlined), true);
-    }
-
-    ~AboutPage()
-    {
-        deleteAllChildren();
+        addAndMakeVisible (&link);
+        link.setFont (Font (10.0f, Font::bold | Font::underlined), true);
     }
 
     void paint (Graphics& g)
     {
         g.fillAll (Colour (0xffebebeb));
-        g.drawImageWithin (logo, 0, 4, getWidth(), getHeight() - 134,
+        g.drawImageWithin (logo, 0, 4, getWidth(), getHeight() - 144,
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
                            false);
 
-        text1.drawWithin (g, 0, getHeight() - 120, getWidth(), 100, Justification::centredTop);
-        text2.drawWithin (g, 0, getHeight() - 50, getWidth(), 100, Justification::centredTop);
+        text1.draw (g, Rectangle<int> (12, getHeight() - 130, getWidth() - 24, 100).toFloat());
+        text2.draw (g, Rectangle<int> (12, getHeight() - 50, getWidth() - 24, 20).toFloat());
     }
 
     void resized()
     {
-        text1.layout (getWidth() - 24, Justification::topLeft, false);
-        text2.layout (getWidth() - 24, Justification::centred, false);
-
-        link->setSize (100, 22);
-        link->changeWidthToFitText();
-        link->setTopLeftPosition ((getWidth() - link->getWidth()) / 2, getHeight() - link->getHeight() - 10);
+        link.setSize (100, 22);
+        link.changeWidthToFitText();
+        link.setTopLeftPosition ((getWidth() - link.getWidth()) / 2, getHeight() - link.getHeight() - 10);
     }
+
+private:
+    HyperlinkButton link;
+    Image logo;
+    AttributedString text1, text2;
 };
 
 

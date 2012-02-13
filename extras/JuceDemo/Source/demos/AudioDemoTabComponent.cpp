@@ -53,7 +53,7 @@ void LiveAudioInputDisplayComp::paint (Graphics& g)
     const float midY = getHeight() * 0.5f;
     int sampleNum = (nextSample + numElementsInArray (samples) - 1);
 
-    for (int x = jmin (getWidth(), numElementsInArray (samples)); --x >= 0;)
+    for (int x = jmin (getWidth(), (int) numElementsInArray (samples)); --x >= 0;)
     {
         const float sampleSize = midY * samples [sampleNum-- % numElementsInArray (samples)];
         g.drawVerticalLine (x, midY - sampleSize, midY + sampleSize);

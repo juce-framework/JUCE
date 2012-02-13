@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ namespace
 {
     bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
     {
-        String s = item.getProject().getFileTemplate (templateName)
+        String s = item.project.getFileTemplate (templateName)
                       .replace ("FILENAME", file.getFileName(), false)
                       .replace ("DATE", Time::getCurrentTime().toString (true, true, true), false)
                       .replace ("AUTHOR", SystemStats::getFullUserName(), false)
@@ -64,7 +64,7 @@ public:
     {
         if (fillInNewCppFileTemplate (newFile, parent, "jucer_NewCppFileTemplate_cpp"))
         {
-            parent.addFile (newFile, 0);
+            parent.addFile (newFile, 0, true);
             return true;
         }
 
@@ -93,7 +93,7 @@ public:
     {
         if (fillInNewCppFileTemplate (newFile, parent, "jucer_NewCppFileTemplate_h"))
         {
-            parent.addFile (newFile, 0);
+            parent.addFile (newFile, 0, true);
             return true;
         }
 

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -23,17 +23,14 @@
   ==============================================================================
 */
 
-
 //==============================================================================
-// String::hashCode64 actually hit some dupes, so this is a more powerful version.
-int64 hashCode64 (const String& s);
-String randomHexString (Random& random, int numChars);
 String hexString8Digits (int value);
 
 String createAlphaNumericUID();
 String createGUID (const String& seed); // Turns a seed into a windows GUID
 
 String escapeSpaces (const String& text); // replaces spaces with blackslash-space
+String addQuotesIfContainsSpaces (const String& text);
 
 StringPairArray parsePreprocessorDefs (const String& defs);
 StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs);
@@ -48,28 +45,68 @@ void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX = true, bool scr
 void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text);
 void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize);
 
+void showUTF8ToolWindow();
+
+// Start a callout modally, which will delete the content comp when it's dismissed.
+void launchAsyncCallOutBox (Component& attachTo, Component* content);
+
 
 //==============================================================================
-class PropertyPanelWithTooltips  : public Component,
-                                   public Timer
+class RolloverHelpComp   : public Component,
+                           private Timer
 {
 public:
-    PropertyPanelWithTooltips();
-    ~PropertyPanelWithTooltips();
-
-    PropertyPanel& getPanel() noexcept        { return panel; }
+    RolloverHelpComp();
 
     void paint (Graphics& g);
-    void resized();
     void timerCallback();
 
 private:
-    PropertyPanel panel;
-    TextLayout layout;
     Component* lastComp;
     String lastTip;
 
-    String findTip (Component* c);
+    static String findTip (Component*);
+};
+
+//==============================================================================
+class PropertyPanelWithTooltips  : public Component
+{
+public:
+    PropertyPanelWithTooltips();
+
+    void resized();
+
+    PropertyPanel panel;
+    RolloverHelpComp rollover;
+};
+
+//==============================================================================
+class PropertyListBuilder
+{
+public:
+    PropertyListBuilder() {}
+
+    void add (PropertyComponent* propertyComp)
+    {
+        components.add (propertyComp);
+    }
+
+    void add (PropertyComponent* propertyComp, const String& tooltip)
+    {
+        propertyComp->setTooltip (tooltip);
+        add (propertyComp);
+    }
+
+    void setPreferredHeight (int height)
+    {
+        for (int j = components.size(); --j >= 0;)
+            components.getUnchecked(j)->setPreferredHeight (height);
+    }
+
+    Array <PropertyComponent*> components;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyListBuilder);
 };
 
 //==============================================================================
@@ -79,11 +116,33 @@ public:
     FloatingLabelComponent();
 
     void remove();
-    void update (Component* parent, const String& text, const Colour& textColour, int x, int y, bool toRight, bool below);
+    void update (Component* parent, const String& text, const Colour& textColour,
+                 int x, int y, bool toRight, bool below);
+
     void paint (Graphics& g);
 
 private:
     Font font;
     Colour colour;
     GlyphArrangement glyphs;
+};
+
+//==============================================================================
+// A ValueSource which takes an input source, and forwards any changes in it.
+// This class is a handy way to create sources which re-map a value.
+class ValueSourceFilter   : public Value::ValueSource,
+                            public Value::Listener
+{
+public:
+    ValueSourceFilter (const Value& source)  : sourceValue (source)
+    {
+        sourceValue.addListener (this);
+    }
+
+    void valueChanged (Value&)      { sendChangeMessage (true); }
+
+protected:
+    Value sourceValue;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter);
 };

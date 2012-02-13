@@ -35,16 +35,12 @@ public:
     {
     }
 
-    ~TreeViewDemoItem()
-    {
-    }
-
     int getItemWidth() const
     {
         return xml.getIntAttribute ("width", -1);
     }
 
-    const String getUniqueName() const
+    String getUniqueName() const
     {
         return xml.getTagName();
     }
@@ -98,7 +94,7 @@ public:
         }
     }
 
-    const var getDragSourceDescription()
+    var getDragSourceDescription()
     {
         return "TreeView Items";
     }
@@ -125,7 +121,7 @@ public:
             const String treeXmlString (BinaryData::treedemo_xml);
             XmlDocument parser (treeXmlString);
             treeXml = parser.getDocumentElement();
-            jassert (treeXml != 0);
+            jassert (treeXml != nullptr);
         }
 
         rootItem = new TreeViewDemoItem (*treeXml);
@@ -150,28 +146,29 @@ public:
 
     ~TreeViewDemo()
     {
-        fileTreeComp = 0;
-        directoryList = 0; // (need to make sure this is deleted before the TimeSliceThread)
+        treeView = nullptr;
+        fileTreeComp = nullptr;
+        directoryList = nullptr; // (need to make sure this is deleted before the TimeSliceThread)
     }
 
     void paint (Graphics& g)
     {
         g.setColour (Colours::grey);
 
-        if (treeView != 0)
+        if (treeView != nullptr)
             g.drawRect (treeView->getX(), treeView->getY(),
                         treeView->getWidth(), treeView->getHeight());
 
-        if (fileTreeComp != 0)
+        if (fileTreeComp != nullptr)
             g.drawRect (fileTreeComp->getX(), fileTreeComp->getY(),
                         fileTreeComp->getWidth(), fileTreeComp->getHeight());
     }
 
     void resized()
     {
-        if (treeView != 0)
+        if (treeView != nullptr)
             treeView->setBoundsInset (BorderSize<int> (40, 10, 10, 10));
-        else if (fileTreeComp != 0)
+        else if (fileTreeComp != nullptr)
             fileTreeComp->setBoundsInset (BorderSize<int> (40, 10, 10, 10));
 
         typeButton.changeWidthToFitText (22);
@@ -180,8 +177,8 @@ public:
 
     void showCustomTreeView()
     {
-        treeView = 0;
-        fileTreeComp = 0;
+        treeView = nullptr;
+        fileTreeComp = nullptr;
 
         addAndMakeVisible (treeView = new TreeView());
         treeView->setRootItem (rootItem);
@@ -192,8 +189,8 @@ public:
 
     void showFileTreeComp()
     {
-        treeView = 0;
-        fileTreeComp = 0;
+        treeView = nullptr;
+        fileTreeComp = nullptr;
 
         addAndMakeVisible (fileTreeComp = new FileTreeComponent (*directoryList));
         resized();
@@ -206,11 +203,11 @@ public:
         m.addItem (2, "FileTreeComponent showing the file system");
         m.addSeparator();
         m.addItem (3, "Show root item", true,
-                   treeView != 0 ? treeView->isRootItemVisible()
-                                 : fileTreeComp->isRootItemVisible());
+                   treeView != nullptr ? treeView->isRootItemVisible()
+                                       : fileTreeComp->isRootItemVisible());
         m.addItem (4, "Show open/close buttons", true,
-                   treeView != 0 ? treeView->areOpenCloseButtonsVisible()
-                                 : fileTreeComp->areOpenCloseButtonsVisible());
+                   treeView != nullptr ? treeView->areOpenCloseButtonsVisible()
+                                       : fileTreeComp->areOpenCloseButtonsVisible());
 
         m.showMenuAsync (PopupMenu::Options().withTargetComponent (&typeButton),
                          ModalCallbackFunction::forComponent (menuItemChosenCallback, this));
@@ -218,7 +215,7 @@ public:
 
     static void menuItemChosenCallback (int result, TreeViewDemo* demoComponent)
     {
-        if (demoComponent != 0)
+        if (demoComponent != nullptr)
             demoComponent->menuItemChosenCallback (result);
     }
 
@@ -234,16 +231,16 @@ public:
         }
         else if (result == 3)
         {
-            if (treeView != 0)
+            if (treeView != nullptr)
                 treeView->setRootItemVisible (! treeView->isRootItemVisible());
-            else
+            else if (fileTreeComp != nullptr)
                 fileTreeComp->setRootItemVisible (! fileTreeComp->isRootItemVisible());
         }
         else if (result == 4)
         {
-            if (treeView != 0)
+            if (treeView != nullptr)
                 treeView->setOpenCloseButtonsVisible (! treeView->areOpenCloseButtonsVisible());
-            else
+            else if (fileTreeComp != nullptr)
                 fileTreeComp->setOpenCloseButtonsVisible (! fileTreeComp->areOpenCloseButtonsVisible());
         }
     }

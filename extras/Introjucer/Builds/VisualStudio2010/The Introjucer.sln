@@ -1,5 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
-Project("{4C35D249-2981-3D26-0C2E-BDE1841F8430}") = "The Introjucer", "The Introjucer.vcxproj", "{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}"
+# Visual Studio 2010
+Project("{62DDBD62-D03F-FBCA-D85C-731B2D53653D}") = "The Introjucer", "The Introjucer.vcxproj", "{26ABE2A4-1F2F-8375-088D-D692A4408B5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -7,10 +8,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}.Debug|Win32.Build.0 = Debug|Win32
-		{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}.Release|Win32.ActiveCfg = Release|Win32
-		{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}.Release|Win32.Build.0 = Release|Win32
+		{26ABE2A4-1F2F-8375-088D-D692A4408B5A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{26ABE2A4-1F2F-8375-088D-D692A4408B5A}.Debug|Win32.Build.0 = Debug|Win32
+		{26ABE2A4-1F2F-8375-088D-D692A4408B5A}.Release|Win32.ActiveCfg = Release|Win32
+		{26ABE2A4-1F2F-8375-088D-D692A4408B5A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

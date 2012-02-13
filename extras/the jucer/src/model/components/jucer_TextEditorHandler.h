@@ -400,7 +400,7 @@ private:
                               "Change TextEditor initial text");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getProperties() ["initialText"];
         }

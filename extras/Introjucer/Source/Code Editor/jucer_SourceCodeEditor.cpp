@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ SourceCodeEditor::~SourceCodeEditor()
 
 void SourceCodeEditor::resized()
 {
-    editor.setBounds (0, 0, getWidth(), getHeight());
+    editor.setBounds (getLocalBounds());
 }
 
 bool SourceCodeEditor::isTextFile (const File& file)

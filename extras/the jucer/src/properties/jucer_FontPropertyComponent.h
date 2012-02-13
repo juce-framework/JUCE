@@ -45,7 +45,7 @@ public:
     static void preloadAllFonts();
 
     virtual void setTypefaceName (const String& newFontName) = 0;
-    virtual const String getTypefaceName() const = 0;
+    virtual String getTypefaceName() const = 0;
 
     static const Font applyNameToFont (const String& typefaceName, const Font& font);
     static const String getTypefaceNameCode (const String& typefaceName);

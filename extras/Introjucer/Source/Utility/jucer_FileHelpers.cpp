@@ -1,9 +1,24 @@
 /*
   ==============================================================================
 
-    jucer_FileUtilities.cpp
-    Created: 14 May 2010 11:24:09pm
-    Author:  Julian Storer
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-11 by Raw Material Software Ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the GNU General
+   Public License (Version 2), as published by the Free Software Foundation.
+   A copy of the license is included in the JUCE distribution, or can be found
+   online at www.gnu.org/licenses.
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.rawmaterialsoftware.com/juce for more information.
 
   ==============================================================================
 */
@@ -15,6 +30,16 @@
 //==============================================================================
 namespace FileHelpers
 {
+    int64 calculateMemoryHashCode (const void* data, const int numBytes)
+    {
+        int64 t = 0;
+
+        for (int i = 0; i < numBytes; ++i)
+            t = t * 65599 + static_cast <const uint8*> (data)[i];
+
+        return t;
+    }
+
     int64 calculateStreamHashCode (InputStream& in)
     {
         int64 t = 0;
@@ -45,18 +70,14 @@ namespace FileHelpers
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, int numBytes)
     {
-        if (file.getSize() == numBytes)
-        {
-            MemoryInputStream newStream (data, numBytes, false);
+        if (file.getSize() == numBytes
+              && calculateMemoryHashCode (data, numBytes) == calculateFileHashCode (file))
+            return true;
 
-            if (calculateStreamHashCode (newStream) == calculateFileHashCode (file))
-                return true;
-        }
-
-        TemporaryFile temp (file);
-
-        return temp.getFile().appendData (data, numBytes)
-                 && temp.overwriteTargetFileWithTemporary();
+        if (file.exists())
+            return file.replaceWithData (data, numBytes);
+        else
+            return file.appendData (data, numBytes);
     }
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData)
@@ -66,7 +87,8 @@ namespace FileHelpers
 
     bool overwriteFileWithNewDataIfDifferent (const File& file, const String& newData)
     {
-        return overwriteFileWithNewDataIfDifferent (file, newData.toUTF8(), strlen ((const char*) newData.toUTF8()));
+        const char* const utf8 = newData.toUTF8();
+        return overwriteFileWithNewDataIfDifferent (file, utf8, strlen (utf8));
     }
 
     bool containsAnyNonHiddenFiles (const File& folder)
@@ -122,56 +144,5 @@ namespace FileHelpers
         }
 
         return path1.substring (0, commonBitLength).removeCharacters ("/:").isNotEmpty();
-    }
-
-    //==============================================================================
-    bool isJuceFolder (const File& folder)
-    {
-        return folder.getFileName().containsIgnoreCase ("juce")
-                 && folder.getChildFile ("juce.h").exists()
-                 && folder.getChildFile ("juce_Config.h").exists();
-    }
-
-    static File lookInFolderForJuceFolder (const File& folder)
-    {
-        for (DirectoryIterator di (folder, false, "*juce*", File::findDirectories); di.next();)
-        {
-            if (isJuceFolder (di.getFile()))
-                return di.getFile();
-        }
-
-        return File::nonexistent;
-    }
-
-    File findParentJuceFolder (const File& file)
-    {
-        File f (file);
-
-        while (f.exists() && f.getParentDirectory() != f)
-        {
-            if (isJuceFolder (f))
-                return f;
-
-            File found = lookInFolderForJuceFolder (f);
-            if (found.exists())
-                return found;
-
-            f = f.getParentDirectory();
-        }
-
-        return File::nonexistent;
-    }
-
-    File findDefaultJuceFolder()
-    {
-        File f = findParentJuceFolder (File::getSpecialLocation (File::currentApplicationFile));
-
-        if (! f.exists())
-            f = lookInFolderForJuceFolder (File::getSpecialLocation (File::userHomeDirectory));
-
-        if (! f.exists())
-            f = lookInFolderForJuceFolder (File::getSpecialLocation (File::userDocumentsDirectory));
-
-        return f;
     }
 }

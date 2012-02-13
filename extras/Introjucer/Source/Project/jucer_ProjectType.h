@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -27,24 +27,8 @@
 #define __JUCER_PROJECTTYPE_JUCEHEADER__
 
 #include "../jucer_Headers.h"
-#include "jucer_Project.h"
+class Project;
 class ProjectExporter;
-class ProjectSaver;
-
-//==============================================================================
-class LibraryModule
-{
-public:
-    LibraryModule();
-    virtual ~LibraryModule() {}
-
-    virtual void prepareExporter (ProjectExporter&, ProjectSaver&) const = 0;
-    virtual void getHeaderFiles (Project&, StringArray& includePaths, StringArray& headerGuards) = 0;
-    virtual void addExtraSearchPaths (const ProjectExporter&, StringArray& paths) const = 0;
-    virtual void createPropertyEditors (const ProjectExporter&, Array <PropertyComponent*>&) const = 0;
-    virtual void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>&) const = 0;
-};
-
 
 //==============================================================================
 class ProjectType
@@ -72,9 +56,8 @@ public:
     static const char* getAudioPluginTypeName();
 
     virtual void setMissingProjectProperties (Project&) const = 0;
-    virtual void createPropertyEditors (const Project&, Array <PropertyComponent*>&) const = 0;
+    virtual void createPropertyEditors (const Project&, PropertyListBuilder&) const = 0;
     virtual void prepareExporter (ProjectExporter&) const = 0;
-    virtual void createRequiredModules (Project&, OwnedArray<LibraryModule>& modules) const;
 
 protected:
     ProjectType (const String& type, const String& desc);
@@ -86,4 +69,4 @@ private:
 };
 
 
-#endif  // __JUCE_PROJECTTYPE_H_C1C6BC3E__
+#endif   // __JUCER_PROJECTTYPE_JUCEHEADER__

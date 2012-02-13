@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="Uy86Nk" name="Jucer" projectType="guiapp" version="1.0.0"
+              bundleIdentifier="com.yourcompany.Jucer" jucerVersion="3.0.0">
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" objCExtraSuffix="wQBvzo" juceFolder="../.."
+               bigIcon="HFdB13">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
+    <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="1" juceFolder="../.."
+            bigIcon="HFdB13">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
+      </CONFIGURATIONS>
+    </VS2008>
+    <VS2010 targetFolder="Builds/VisualStudio2010" libraryType="1" juceFolder="../.."
+            bigIcon="HFdB13">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
+      </CONFIGURATIONS>
+    </VS2010>
+    <LINUX_MAKE targetFolder="Builds/Linux" juceFolder="../.." bigIcon="HFdB13">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Jucer"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Jucer"/>
+      </CONFIGURATIONS>
+    </LINUX_MAKE>
+  </EXPORTFORMATS>
+  <MAINGROUP id="ba5BEZ" name="Jucer">
+    <GROUP id="{417804F2-13A6-72FD-F93D-5821DBB93EBE}" name="src">
+      <GROUP id="{CBEEAC5A-1CD0-80DB-7D92-99E502259E6A}" name="model">
+        <GROUP id="{923E245A-E23A-E7BB-8B6A-34D5EC8F6373}" name="components">
+          <FILE id="K38t3w" name="jucer_ButtonHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_ButtonHandler.h"/>
+          <FILE id="PjLA9U" name="jucer_ComboBoxHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_ComboBoxHandler.h"/>
+          <FILE id="hS0VIy" name="jucer_ComponentNameProperty.h" compile="0"
+                resource="0" file="src/model/components/jucer_ComponentNameProperty.h"/>
+          <FILE id="hrX0Jg" name="jucer_ComponentTypeHandler.cpp" compile="1"
+                resource="0" file="src/model/components/jucer_ComponentTypeHandler.cpp"/>
+          <FILE id="AIlV9" name="jucer_ComponentTypeHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_ComponentTypeHandler.h"/>
+          <FILE id="I8iVP0" name="jucer_ComponentUndoableAction.h" compile="0"
+                resource="0" file="src/model/components/jucer_ComponentUndoableAction.h"/>
+          <FILE id="X8y4Ya" name="jucer_GenericComponentHandler.h" compile="0"
+                resource="0" file="src/model/components/jucer_GenericComponentHandler.h"/>
+          <FILE id="RMtu7i" name="jucer_GroupComponentHandler.h" compile="0"
+                resource="0" file="src/model/components/jucer_GroupComponentHandler.h"/>
+          <FILE id="xhwWFa" name="jucer_HyperlinkButtonHandler.h" compile="0"
+                resource="0" file="src/model/components/jucer_HyperlinkButtonHandler.h"/>
+          <FILE id="rx6Zde" name="jucer_ImageButtonHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_ImageButtonHandler.h"/>
+          <FILE id="vSPkI" name="jucer_JucerComponentHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_JucerComponentHandler.h"/>
+          <FILE id="lAIDfy" name="jucer_LabelHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_LabelHandler.h"/>
+          <FILE id="tyIuLL" name="jucer_SliderHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_SliderHandler.h"/>
+          <FILE id="lBt2l4" name="jucer_TabbedComponentHandler.h" compile="0"
+                resource="0" file="src/model/components/jucer_TabbedComponentHandler.h"/>
+          <FILE id="nGXDri" name="jucer_TextButtonHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_TextButtonHandler.h"/>
+          <FILE id="q7iUTY" name="jucer_TextEditorHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_TextEditorHandler.h"/>
+          <FILE id="G4a16H" name="jucer_ToggleButtonHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_ToggleButtonHandler.h"/>
+          <FILE id="WFl7j" name="jucer_TreeViewHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_TreeViewHandler.h"/>
+          <FILE id="qskf7" name="jucer_ViewportHandler.h" compile="0" resource="0"
+                file="src/model/components/jucer_ViewportHandler.h"/>
+        </GROUP>
+        <GROUP id="{065049A0-0EDE-41A7-35D8-2DD5279B1808}" name="documents">
+          <FILE id="DVUbt9" name="jucer_ButtonDocument.cpp" compile="1" resource="0"
+                file="src/model/documents/jucer_ButtonDocument.cpp"/>
+          <FILE id="rh8Gvr" name="jucer_ButtonDocument.h" compile="0" resource="0"
+                file="src/model/documents/jucer_ButtonDocument.h"/>
+          <FILE id="i4hFKU" name="jucer_ComponentDocument.cpp" compile="1" resource="0"
+                file="src/model/documents/jucer_ComponentDocument.cpp"/>
+          <FILE id="Rd3Y1h" name="jucer_ComponentDocument.h" compile="0" resource="0"
+                file="src/model/documents/jucer_ComponentDocument.h"/>
+        </GROUP>
+        <FILE id="JR2mUS" name="jucer_BinaryResources.cpp" compile="1" resource="0"
+              file="src/model/jucer_BinaryResources.cpp"/>
+        <FILE id="RhrtfM" name="jucer_BinaryResources.h" compile="0" resource="0"
+              file="src/model/jucer_BinaryResources.h"/>
+        <FILE id="gVEYlr" name="jucer_ComponentLayout.cpp" compile="1" resource="0"
+              file="src/model/jucer_ComponentLayout.cpp"/>
+        <FILE id="ROW15K" name="jucer_ComponentLayout.h" compile="0" resource="0"
+              file="src/model/jucer_ComponentLayout.h"/>
+        <FILE id="Qe2Zld" name="jucer_GeneratedCode.cpp" compile="1" resource="0"
+              file="src/model/jucer_GeneratedCode.cpp"/>
+        <FILE id="BfVcdz" name="jucer_GeneratedCode.h" compile="0" resource="0"
+              file="src/model/jucer_GeneratedCode.h"/>
+        <FILE id="YpSEKV" name="jucer_JucerDocument.cpp" compile="1" resource="0"
+              file="src/model/jucer_JucerDocument.cpp"/>
+        <FILE id="lKqcWg" name="jucer_JucerDocument.h" compile="0" resource="0"
+              file="src/model/jucer_JucerDocument.h"/>
+        <FILE id="EVF3I6" name="jucer_ObjectTypes.cpp" compile="1" resource="0"
+              file="src/model/jucer_ObjectTypes.cpp"/>
+        <FILE id="KCcDsM" name="jucer_ObjectTypes.h" compile="0" resource="0"
+              file="src/model/jucer_ObjectTypes.h"/>
+        <FILE id="grdvqE" name="jucer_PaintRoutine.cpp" compile="1" resource="0"
+              file="src/model/jucer_PaintRoutine.cpp"/>
+        <FILE id="sgAl3K" name="jucer_PaintRoutine.h" compile="0" resource="0"
+              file="src/model/jucer_PaintRoutine.h"/>
+        <GROUP id="{4A32664F-F74C-9796-EC36-AADA599007B5}" name="paintelements">
+          <FILE id="JYoD7Z" name="jucer_ColouredElement.cpp" compile="1" resource="0"
+                file="src/model/paintelements/jucer_ColouredElement.cpp"/>
+          <FILE id="lYggL0" name="jucer_ColouredElement.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_ColouredElement.h"/>
+          <FILE id="zYlnOn" name="jucer_ElementSiblingComponent.h" compile="0"
+                resource="0" file="src/model/paintelements/jucer_ElementSiblingComponent.h"/>
+          <FILE id="dVs54Z" name="jucer_FillType.cpp" compile="1" resource="0"
+                file="src/model/paintelements/jucer_FillType.cpp"/>
+          <FILE id="dz0oow" name="jucer_FillType.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_FillType.h"/>
+          <FILE id="Wrl9Ws" name="jucer_GradientPointComponent.h" compile="0"
+                resource="0" file="src/model/paintelements/jucer_GradientPointComponent.h"/>
+          <FILE id="v1ptpY" name="jucer_ImageResourceProperty.h" compile="0"
+                resource="0" file="src/model/paintelements/jucer_ImageResourceProperty.h"/>
+          <FILE id="ZklbHp" name="jucer_PaintElement.cpp" compile="1" resource="0"
+                file="src/model/paintelements/jucer_PaintElement.cpp"/>
+          <FILE id="DYURuh" name="jucer_PaintElement.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_PaintElement.h"/>
+          <FILE id="e6h5oz" name="jucer_PaintElementEllipse.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_PaintElementEllipse.h"/>
+          <FILE id="Z1wPM3" name="jucer_PaintElementGroup.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_PaintElementGroup.h"/>
+          <FILE id="wbGo6N" name="jucer_PaintElementImage.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_PaintElementImage.h"/>
+          <FILE id="Stmqhq" name="jucer_PaintElementPath.cpp" compile="1" resource="0"
+                file="src/model/paintelements/jucer_PaintElementPath.cpp"/>
+          <FILE id="czS48f" name="jucer_PaintElementPath.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_PaintElementPath.h"/>
+          <FILE id="uGFtpO" name="jucer_PaintElementRectangle.h" compile="0"
+                resource="0" file="src/model/paintelements/jucer_PaintElementRectangle.h"/>
+          <FILE id="MnMUB5" name="jucer_PaintElementRoundedRectangle.h" compile="0"
+                resource="0" file="src/model/paintelements/jucer_PaintElementRoundedRectangle.h"/>
+          <FILE id="y6FdP" name="jucer_PaintElementText.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_PaintElementText.h"/>
+          <FILE id="iTMbfZ" name="jucer_PaintElementUndoableAction.h" compile="0"
+                resource="0" file="src/model/paintelements/jucer_PaintElementUndoableAction.h"/>
+          <FILE id="ChRPXH" name="jucer_PointComponent.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_PointComponent.h"/>
+          <FILE id="FGErx3" name="jucer_StrokeType.cpp" compile="1" resource="0"
+                file="src/model/paintelements/jucer_StrokeType.cpp"/>
+          <FILE id="ieM2FU" name="jucer_StrokeType.h" compile="0" resource="0"
+                file="src/model/paintelements/jucer_StrokeType.h"/>
+        </GROUP>
+      </GROUP>
+      <GROUP id="{149D4669-7A36-123F-FC28-865BE524612E}" name="properties">
+        <FILE id="csyXZc" name="jucer_ColourPropertyComponent.h" compile="0"
+              resource="0" file="src/properties/jucer_ColourPropertyComponent.h"/>
+        <FILE id="FYo9Dj" name="jucer_ComponentBooleanProperty.h" compile="0"
+              resource="0" file="src/properties/jucer_ComponentBooleanProperty.h"/>
+        <FILE id="aRj3CH" name="jucer_ComponentChoiceProperty.h" compile="0"
+              resource="0" file="src/properties/jucer_ComponentChoiceProperty.h"/>
+        <FILE id="UKZevC" name="jucer_ComponentColourProperty.h" compile="0"
+              resource="0" file="src/properties/jucer_ComponentColourProperty.h"/>
+        <FILE id="NjfDNQ" name="jucer_ComponentTextProperty.h" compile="0"
+              resource="0" file="src/properties/jucer_ComponentTextProperty.h"/>
+        <FILE id="sXr24a" name="jucer_FilePropertyComponent.cpp" compile="1"
+              resource="0" file="src/properties/jucer_FilePropertyComponent.cpp"/>
+        <FILE id="AV4NWc" name="jucer_FilePropertyComponent.h" compile="0"
+              resource="0" file="src/properties/jucer_FilePropertyComponent.h"/>
+        <FILE id="B0QU9" name="jucer_FontPropertyComponent.cpp" compile="1"
+              resource="0" file="src/properties/jucer_FontPropertyComponent.cpp"/>
+        <FILE id="WZNLpi" name="jucer_FontPropertyComponent.h" compile="0"
+              resource="0" file="src/properties/jucer_FontPropertyComponent.h"/>
+        <FILE id="kZlBuw" name="jucer_JustificationProperty.h" compile="0"
+              resource="0" file="src/properties/jucer_JustificationProperty.h"/>
+        <FILE id="BlS8kG" name="jucer_PositionPropertyBase.h" compile="0" resource="0"
+              file="src/properties/jucer_PositionPropertyBase.h"/>
+      </GROUP>
+      <GROUP id="{E2F99C10-9ACF-85C5-8776-59E6D054035A}" name="templates">
+        <FILE id="BLD0kH" name="jucer_ComponentTemplate.cpp" compile="0" resource="0"
+              file="src/templates/jucer_ComponentTemplate.cpp"/>
+        <FILE id="sBGQYY" name="jucer_ComponentTemplate.h" compile="0" resource="0"
+              file="src/templates/jucer_ComponentTemplate.h"/>
+      </GROUP>
+      <GROUP id="{D059EEDE-CEF9-F85A-0AA1-C135A7F7FDD7}" name="ui">
+        <FILE id="dPCSHX" name="jucer_CommandIDs.h" compile="0" resource="0"
+              file="src/ui/jucer_CommandIDs.h"/>
+        <FILE id="fkmkk6" name="jucer_ComponentLayoutEditor.cpp" compile="1"
+              resource="0" file="src/ui/jucer_ComponentLayoutEditor.cpp"/>
+        <FILE id="dgwRZQ" name="jucer_ComponentLayoutEditor.h" compile="0"
+              resource="0" file="src/ui/jucer_ComponentLayoutEditor.h"/>
+        <FILE id="FO9xBr" name="jucer_ComponentLayoutPanel.cpp" compile="1"
+              resource="0" file="src/ui/jucer_ComponentLayoutPanel.cpp"/>
+        <FILE id="IWhxId" name="jucer_ComponentLayoutPanel.h" compile="0" resource="0"
+              file="src/ui/jucer_ComponentLayoutPanel.h"/>
+        <FILE id="ei6Lh" name="jucer_ComponentOverlayComponent.cpp" compile="1"
+              resource="0" file="src/ui/jucer_ComponentOverlayComponent.cpp"/>
+        <FILE id="pHgXol" name="jucer_ComponentOverlayComponent.h" compile="0"
+              resource="0" file="src/ui/jucer_ComponentOverlayComponent.h"/>
+        <FILE id="MsSBOe" name="jucer_EditingPanelBase.cpp" compile="1" resource="0"
+              file="src/ui/jucer_EditingPanelBase.cpp"/>
+        <FILE id="vM4JSd" name="jucer_EditingPanelBase.h" compile="0" resource="0"
+              file="src/ui/jucer_EditingPanelBase.h"/>
+        <FILE id="zNWznE" name="jucer_JucerDocumentHolder.cpp" compile="1"
+              resource="0" file="src/ui/jucer_JucerDocumentHolder.cpp"/>
+        <FILE id="XeOAyl" name="jucer_JucerDocumentHolder.h" compile="0" resource="0"
+              file="src/ui/jucer_JucerDocumentHolder.h"/>
+        <FILE id="u9rXvh" name="jucer_MainWindow.cpp" compile="1" resource="0"
+              file="src/ui/jucer_MainWindow.cpp"/>
+        <FILE id="ddW3EL" name="jucer_MainWindow.h" compile="0" resource="0"
+              file="src/ui/jucer_MainWindow.h"/>
+        <FILE id="PUW77Z" name="jucer_PaintRoutineEditor.cpp" compile="1" resource="0"
+              file="src/ui/jucer_PaintRoutineEditor.cpp"/>
+        <FILE id="bspjJy" name="jucer_PaintRoutineEditor.h" compile="0" resource="0"
+              file="src/ui/jucer_PaintRoutineEditor.h"/>
+        <FILE id="merXod" name="jucer_PaintRoutinePanel.cpp" compile="1" resource="0"
+              file="src/ui/jucer_PaintRoutinePanel.cpp"/>
+        <FILE id="wm7Qum" name="jucer_PaintRoutinePanel.h" compile="0" resource="0"
+              file="src/ui/jucer_PaintRoutinePanel.h"/>
+        <FILE id="L37nKz" name="jucer_PrefsPanel.cpp" compile="1" resource="0"
+              file="src/ui/jucer_PrefsPanel.cpp"/>
+        <FILE id="N9uuzW" name="jucer_PrefsPanel.h" compile="0" resource="0"
+              file="src/ui/jucer_PrefsPanel.h"/>
+        <FILE id="MChgPJ" name="jucer_ResourceEditorPanel.cpp" compile="1"
+              resource="0" file="src/ui/jucer_ResourceEditorPanel.cpp"/>
+        <FILE id="t307Af" name="jucer_ResourceEditorPanel.h" compile="0" resource="0"
+              file="src/ui/jucer_ResourceEditorPanel.h"/>
+        <FILE id="gbS9cJ" name="jucer_SnapGridPainter.cpp" compile="1" resource="0"
+              file="src/ui/jucer_SnapGridPainter.cpp"/>
+        <FILE id="afYG0B" name="jucer_SnapGridPainter.h" compile="0" resource="0"
+              file="src/ui/jucer_SnapGridPainter.h"/>
+        <FILE id="BM8LBg" name="jucer_TestComponent.cpp" compile="1" resource="0"
+              file="src/ui/jucer_TestComponent.cpp"/>
+        <FILE id="JG2dAT" name="jucer_TestComponent.h" compile="0" resource="0"
+              file="src/ui/jucer_TestComponent.h"/>
+      </GROUP>
+      <GROUP id="{C7C6BA2D-6E42-C323-497D-82254877017F}" name="utility">
+        <FILE id="tDZW9q" name="jucer_ColourEditorComponent.h" compile="0"
+              resource="0" file="src/utility/jucer_ColourEditorComponent.h"/>
+        <FILE id="yYoqPB" name="jucer_Colours.h" compile="0" resource="0" file="src/utility/jucer_Colours.h"/>
+        <FILE id="YaaPTF" name="jucer_StoredSettings.cpp" compile="1" resource="0"
+              file="src/utility/jucer_StoredSettings.cpp"/>
+        <FILE id="izi1dD" name="jucer_StoredSettings.h" compile="0" resource="0"
+              file="src/utility/jucer_StoredSettings.h"/>
+        <FILE id="iGQuHc" name="jucer_UtilityFunctions.cpp" compile="1" resource="0"
+              file="src/utility/jucer_UtilityFunctions.cpp"/>
+        <FILE id="ziqgIg" name="jucer_UtilityFunctions.h" compile="0" resource="0"
+              file="src/utility/jucer_UtilityFunctions.h"/>
+      </GROUP>
+      <GROUP id="{DDB85FEF-DE4B-BF1D-6446-151070FA7D34}" name="binarydata">
+        <FILE id="HFdB13" name="juce_icon.png" compile="0" resource="0" file="src/binarydata/juce_icon.png"/>
+        <FILE id="Yrnydj" name="jules.jpg" compile="0" resource="1" file="src/binarydata/jules.jpg"/>
+        <FILE id="Roq6vP" name="prefs_about.png" compile="0" resource="1" file="src/binarydata/prefs_about.png"/>
+        <FILE id="VDx5J1" name="prefs_keys.png" compile="0" resource="1" file="src/binarydata/prefs_keys.png"/>
+        <FILE id="HkKHwW" name="prefs_misc.png" compile="0" resource="1" file="src/binarydata/prefs_misc.png"/>
+      </GROUP>
+      <FILE id="VaW1a5" name="jucer_Main.cpp" compile="1" resource="0" file="src/jucer_Main.cpp"/>
+      <FILE id="qrek85" name="jucer_Headers.h" compile="0" resource="0" file="src/jucer_Headers.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_core" showAllCode="1"/>
+    <MODULE id="juce_events" showAllCode="1"/>
+    <MODULE id="juce_graphics" showAllCode="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1"/>
+    <MODULE id="juce_gui_audio" showAllCode="1"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>

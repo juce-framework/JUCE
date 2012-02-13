@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -27,15 +27,10 @@
 
 
 //==============================================================================
-int64 hashCode64 (const String& s)
-{
-    return s.hashCode64() + s.length() * s.hashCode() + s.toUpperCase().hashCode();
-}
-
 String createAlphaNumericUID()
 {
     String uid;
-    static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     Random r;
 
     uid << chars [r.nextInt (52)]; // make sure the first character is always a letter
@@ -43,21 +38,10 @@ String createAlphaNumericUID()
     for (int i = 5; --i >= 0;)
     {
         r.setSeedRandomly();
-        uid << chars [r.nextInt (numElementsInArray (chars))];
+        uid << chars [r.nextInt (62)];
     }
 
     return uid;
-}
-
-String randomHexString (Random& random, int numChars)
-{
-    String s;
-    const char hexChars[] = "0123456789ABCDEF";
-
-    while (--numChars >= 0)
-        s << hexChars [random.nextInt() & 15];
-
-    return s;
 }
 
 String hexString8Digits (int value)
@@ -67,19 +51,24 @@ String hexString8Digits (int value)
 
 String createGUID (const String& seed)
 {
-    String guid;
-    Random r (hashCode64 (seed + "_jucersalt"));
-    guid << "{" << randomHexString (r, 8); // (written as separate statements to enforce the order of execution)
-    guid << "-" << randomHexString (r, 4);
-    guid << "-" << randomHexString (r, 4);
-    guid << "-" << randomHexString (r, 4);
-    guid << "-" << randomHexString (r, 12) << "}";
-    return guid;
+    const String hex (MD5 ((seed + "_guidsalt").toUTF8()).toHexString().toUpperCase());
+
+    return "{" + hex.substring (0, 8)
+         + "-" + hex.substring (8, 12)
+         + "-" + hex.substring (12, 16)
+         + "-" + hex.substring (16, 20)
+         + "-" + hex.substring (20, 32)
+         + "}";
 }
 
 String escapeSpaces (const String& s)
 {
     return s.replace (" ", "\\ ");
+}
+
+String addQuotesIfContainsSpaces (const String& text)
+{
+    return (text.containsChar (' ') && ! text.isQuotedString()) ? text.quoted() : text;
 }
 
 //==============================================================================
@@ -234,43 +223,34 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 
 
 //==============================================================================
-PropertyPanelWithTooltips::PropertyPanelWithTooltips()
+RolloverHelpComp::RolloverHelpComp()
     : lastComp (nullptr)
 {
-    addAndMakeVisible (&panel);
+    setInterceptsMouseClicks (false, false);
     startTimer (150);
 }
 
-PropertyPanelWithTooltips::~PropertyPanelWithTooltips()
+void RolloverHelpComp::paint (Graphics& g)
 {
-}
-
-void PropertyPanelWithTooltips::paint (Graphics& g)
-{
-    g.setColour (Colour::greyLevel (0.15f));
-    g.setFont (13.0f);
+    AttributedString s;
+    s.setJustification (Justification::centredLeft);
+    s.append (lastTip, Font (14.0f), Colour::greyLevel (0.15f));
 
     TextLayout tl;
-    tl.appendText (lastTip, Font (14.0f));
-    tl.layout (getWidth() - 10, Justification::left, true); // try to make it look nice
+    tl.createLayoutWithBalancedLineLengths (s, getWidth() - 10.0f);
     if (tl.getNumLines() > 3)
-        tl.layout (getWidth() - 10, Justification::left, false); // too big, so just squash it in..
+        tl.createLayout (s, getWidth() - 10.0f);
 
-    tl.drawWithin (g, 5, panel.getBottom() + 2, getWidth() - 10,
-                   getHeight() - panel.getBottom() - 4,
-                   Justification::centredLeft);
+    tl.draw (g, getLocalBounds().toFloat());
 }
 
-void PropertyPanelWithTooltips::resized()
-{
-    panel.setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
-}
-
-void PropertyPanelWithTooltips::timerCallback()
+void RolloverHelpComp::timerCallback()
 {
     Component* newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
 
-    if (newComp != nullptr && newComp->getTopLevelComponent() != getTopLevelComponent())
+    if (newComp != nullptr
+         && (newComp->getTopLevelComponent() != getTopLevelComponent()
+              || newComp->isCurrentlyBlockedByAnotherModalComponent()))
         newComp = nullptr;
 
     if (newComp != lastComp)
@@ -282,14 +262,14 @@ void PropertyPanelWithTooltips::timerCallback()
         if (newTip != lastTip)
         {
             lastTip = newTip;
-            repaint (0, panel.getBottom(), getWidth(), getHeight());
+            repaint();
         }
     }
 }
 
-String PropertyPanelWithTooltips::findTip (Component* c)
+String RolloverHelpComp::findTip (Component* c)
 {
-    while (c != nullptr && c != this)
+    while (c != nullptr)
     {
         TooltipClient* const tc = dynamic_cast <TooltipClient*> (c);
         if (tc != nullptr)
@@ -304,6 +284,20 @@ String PropertyPanelWithTooltips::findTip (Component* c)
     }
 
     return String::empty;
+}
+
+//==============================================================================
+PropertyPanelWithTooltips::PropertyPanelWithTooltips()
+{
+    addAndMakeVisible (&panel);
+    addAndMakeVisible (&rollover);
+}
+
+void PropertyPanelWithTooltips::resized()
+{
+    panel.setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
+    rollover.setBounds (3, panel.getBottom() - 50, getWidth() - 6,
+                        getHeight() - (panel.getBottom() - 50) - 4);
 }
 
 //==============================================================================
@@ -353,4 +347,93 @@ void FloatingLabelComponent::paint (Graphics& g)
 
     g.setColour (colour);
     glyphs.draw (g, AffineTransform::translation (1.0f, 1.0f));
+}
+
+
+//==============================================================================
+class UTF8Component  : public Component,
+                       private TextEditorListener
+{
+public:
+    UTF8Component()
+        : desc (String::empty,
+                "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, ready to cut-and-paste into your source-code...")
+    {
+        setSize (400, 300);
+
+        desc.setBounds ("8, 8, parent.width - 8, 55");
+        desc.setJustificationType (Justification::centred);
+        addAndMakeVisible (&desc);
+
+        userText.setMultiLine (true, true);
+        userText.setBounds ("8, 60, parent.width - 8, parent.height / 2 - 4");
+        addAndMakeVisible (&userText);
+        userText.addListener (this);
+
+        resultText.setMultiLine (true, true);
+        resultText.setReadOnly (true);
+        resultText.setBounds ("8, parent.height / 2 + 4, parent.width - 8, parent.height - 8");
+        addAndMakeVisible (&resultText);
+
+        userText.setText (getLastText());
+    }
+
+    void textEditorTextChanged (TextEditor&)
+    {
+        update();
+    }
+
+    void textEditorEscapeKeyPressed (TextEditor&)
+    {
+        getTopLevelComponent()->exitModalState (0);
+    }
+
+    void update()
+    {
+        getLastText() = userText.getText();
+        resultText.setText (CodeHelpers::stringLiteral (getLastText()), false);
+    }
+
+private:
+    Label desc;
+    TextEditor userText, resultText;
+
+    String& getLastText()
+    {
+        static String t;
+        return t;
+    }
+};
+
+void showUTF8ToolWindow()
+{
+    UTF8Component comp;
+    DialogWindow::showModalDialog ("UTF-8 String Literal Converter", &comp,
+                                   nullptr, Colours::white, true, true);
+}
+
+//==============================================================================
+class CallOutBoxCallback  : public ModalComponentManager::Callback
+{
+public:
+    CallOutBoxCallback (Component& attachTo, Component* content_)
+        : content (content_),
+          callout (*content_, attachTo, attachTo.getTopLevelComponent())
+    {
+        callout.setVisible (true);
+        callout.enterModalState (true, this);
+    }
+
+    void modalStateFinished (int) {}
+
+private:
+    ScopedPointer<Component> content;
+    CallOutBox callout;
+
+    JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback);
+};
+
+void launchAsyncCallOutBox (Component& attachTo, Component* content)
+{
+    new CallOutBoxCallback (attachTo, content);
 }

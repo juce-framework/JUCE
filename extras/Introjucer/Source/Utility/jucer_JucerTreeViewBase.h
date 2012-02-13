@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -30,16 +30,11 @@
 
 
 //==============================================================================
-class JucerTreeViewBase   : public TreeViewItem,
-                            public TextEditorListener
+class JucerTreeViewBase   : public TreeViewItem
 {
-protected:
-    //==============================================================================
-    JucerTreeViewBase();
-    ~JucerTreeViewBase();
-
 public:
-    //==============================================================================
+    JucerTreeViewBase();
+
     int getItemWidth() const                                { return -1; }
     int getItemHeight() const                               { return 20; }
 
@@ -49,29 +44,38 @@ public:
     void itemClicked (const MouseEvent& e);
 
     //==============================================================================
+    virtual Font getFont() const;
     virtual String getRenamingName() const = 0;
     virtual String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
     virtual const Drawable* getIcon() const = 0;
-    virtual void createLeftEdgeComponents (Array<Component*>& components) = 0;
+    virtual void createLeftEdgeComponents (OwnedArray<Component>&) {}
+    virtual Component* createRightEdgeComponent()   { return nullptr; }
 
     virtual void showPopupMenu();
     virtual void showMultiSelectionPopupMenu();
 
     virtual void showRenameBox();
 
-    // Text editor listener for renaming..
-    void textEditorTextChanged (TextEditor& editor)         {}
-    void textEditorReturnKeyPressed (TextEditor& editor)    { editor.exitModalState (1); }
-    void textEditorEscapeKeyPressed (TextEditor& editor)    { editor.exitModalState (0); }
-    void textEditorFocusLost (TextEditor& editor)           { editor.exitModalState (0); }
-
     //==============================================================================
-private:
-    int numLeftHandComps;
-    const Font getFont() const;
-    int getTextX() const;
+    // To handle situations where an item gets deleted before openness is
+    // restored for it, this OpennessRestorer keeps only a pointer to the
+    // topmost tree item.
+    struct WholeTreeOpennessRestorer   : public OpennessRestorer
+    {
+        WholeTreeOpennessRestorer (TreeViewItem& item)  : OpennessRestorer (getTopLevelItem (item))
+        {}
+
+    private:
+        static TreeViewItem& getTopLevelItem (TreeViewItem& item)
+        {
+            TreeViewItem* const p = item.getParentItem();
+            return p != nullptr ? getTopLevelItem (*p) : item;
+        }
+    };
+
+    int textX;
 };
 
 

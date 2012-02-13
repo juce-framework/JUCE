@@ -7,32 +7,80 @@
               pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="JuceDemoAU"
-              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" icon="Duj062Top"
-              bigIcon="f4hwldS">
+              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" icon="Duj062Top">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j"/>
+               juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j" bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"
+                       osxArchitecture="default"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       osxSDK="default" osxCompatibility="10.4 SDK" defines="JUCE_UNIT_TESTS=1"
+                       osxArchitecture="32BitUniversal"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
     <XCODE_IPHONE targetFolder="Builds/iOS" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-                  juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j"/>
+                  juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j" bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"
+                       osxArchitecture="default"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       osxSDK="default" osxCompatibility="10.4 SDK" defines="JUCE_UNIT_TESTS=1"
+                       osxArchitecture="32BitUniversal"/>
+      </CONFIGURATIONS>
+    </XCODE_IPHONE>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"
+            bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1"/>
+      </CONFIGURATIONS>
+    </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"/>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"
+            bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1"/>
+      </CONFIGURATIONS>
+    </VS2008>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"
+                bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1"/>
+      </CONFIGURATIONS>
+    </LINUX_MAKE>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../../../juce"/>
-    <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-mac_x86"
-             androidNDKPath="${user.home}/SDKs/android-ndk-r5c" juceFolder="../../../juce"
-             androidInternetNeeded="1"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../../../juce"
+            bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1" winArchitecture="32-bit"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1" winArchitecture="32-bit"/>
+      </CONFIGURATIONS>
+    </VS2010>
+    <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"
+             androidNDKPath="${user.home}/SDKs/android-ndk-r7" juceFolder="../../../juce"
+             androidInternetNeeded="1" bigIcon="f4hwldS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
+                       defines="JUCE_UNIT_TESTS=1"/>
+      </CONFIGURATIONS>
+    </ANDROID>
   </EXPORTFORMATS>
-  <CONFIGURATIONS>
-    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                   osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"
-                   osxArchitecture="default"/>
-    <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                   osxSDK="default" osxCompatibility="10.4 SDK" defines="JUCE_UNIT_TESTS=1"
-                   osxArchitecture="32BitUniversal"/>
-  </CONFIGURATIONS>
   <MAINGROUP id="0bU7ypLe" name="Juce Demo">
     <FILE id="Bnqll1Mk0" name="ApplicationStartup.cpp" compile="1" resource="0"
           file="Source/ApplicationStartup.cpp"/>
@@ -108,15 +156,25 @@
       <FILE id="UvweoM7iM" name="treedemo.xml" compile="0" resource="1" file="Binary Data/treedemo.xml"/>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default" JUCE_ASIO="default"
-               JUCE_WASAPI="default" JUCE_DIRECTSOUND="default" JUCE_ALSA="default"
-               JUCE_QUICKTIME="default" JUCE_OPENGL="default" JUCE_USE_FLAC="default"
-               JUCE_USE_OGGVORBIS="default" JUCE_USE_CDBURNER="default" JUCE_USE_CDREADER="default"
-               JUCE_USE_CAMERA="default" JUCE_ENABLE_REPAINT_DEBUGGING="default"
-               JUCE_USE_XINERAMA="default" JUCE_USE_XSHM="default" JUCE_PLUGINHOST_VST="disabled"
-               JUCE_PLUGINHOST_AU="disabled" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
-               JUCE_WEB_BROWSER="default" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
-               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"
-               JUCE_USE_XRENDER="default" JUCE_USE_XCURSOR="default" JUCE_DIRECT2D="default"
-               JUCE_MEDIAFOUNDATION="default" JUCE_DIRECTSHOW="default"/>
+  <JUCEOPTIONS JUCE_PLUGINHOST_VST="disabled" JUCE_PLUGINHOST_AU="disabled"/>
+  <MODULES>
+    <MODULE id="juce_core" showAllCode="1"/>
+    <MODULE id="juce_audio" showAllCode="1"/>
+    <MODULE id="juce_events" showAllCode="1"/>
+    <MODULE id="juce_graphics" showAllCode="1"/>
+    <MODULE id="juce_gui" showAllCode="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1"/>
+    <MODULE id="juce_video" showAllCode="1"/>
+    <MODULE id="juce_audio_plugin_host" showAllCode="1"/>
+    <MODULE id="juce_audio_basics" showAllCode="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1"/>
+    <MODULE id="juce_opengl" showAllCode="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1"/>
+    <MODULE id="juce_gui_audio" showAllCode="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1"/>
+  </MODULES>
 </JUCERPROJECT>

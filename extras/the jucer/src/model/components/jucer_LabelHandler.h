@@ -213,7 +213,7 @@ private:
                               "Change Label text");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getText();
         }
@@ -314,8 +314,7 @@ private:
     class LabelLossOfFocusProperty   : public ComponentChoiceProperty <Label>
     {
     public:
-        LabelLossOfFocusProperty (Label* component_,
-                                  JucerDocument& document_)
+        LabelLossOfFocusProperty (Label* component_, JucerDocument& document_)
            : ComponentChoiceProperty <Label> ("focus", component_, document_)
         {
             choices.add ("loss of focus discards changes");
@@ -438,8 +437,7 @@ private:
                               public ChangeListener
     {
     public:
-        FontNameProperty (Label* const label_,
-                          JucerDocument& document_)
+        FontNameProperty (Label* const label_, JucerDocument& document_)
             : FontPropertyComponent ("font"),
               label (label_),
               document (document_)
@@ -458,7 +456,7 @@ private:
                               "Change Label typeface");
         }
 
-        const String getTypefaceName() const
+        String getTypefaceName() const
         {
             return label->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont);
         }

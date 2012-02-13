@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -23,41 +23,34 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_VALUEREMAPPERSOURCE_JUCEHEADER__
-#define __JUCER_VALUEREMAPPERSOURCE_JUCEHEADER__
+#ifndef __JUCER_VALUESOURCEHELPERS_JUCEHEADER__
+#define __JUCER_VALUESOURCEHELPERS_JUCEHEADER__
 
 
 //==============================================================================
 /**
 */
 template <typename Type>
-class NumericValueSource   : public Value::ValueSource,
-                             public Value::Listener
+class NumericValueSource   : public ValueSourceFilter
 {
 public:
-    NumericValueSource (const Value& sourceValue_)
-       : sourceValue (sourceValue_)
-    {
-        sourceValue.addListener (this);
-    }
+    NumericValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
-    void valueChanged (Value&)   { sendChangeMessage (true); }
-    var getValue() const         { return (Type) sourceValue.getValue(); }
+    var getValue() const
+    {
+        return (Type) sourceValue.getValue();
+    }
 
     void setValue (const var& newValue)
     {
-        const Type newVal = (Type) newValue;
+        const Type newVal = static_cast <Type> (newValue);
 
-        if (newVal != (Type) getValue())  // this test is important, because if a property is missing, it won't
-            sourceValue = newVal;        // create it (causing an unwanted undo action) when a control sets it to 0
+        if (newVal != static_cast <Type> (getValue()))  // this test is important, because if a property is missing, it won't
+            sourceValue = newVal;                       // create it (causing an unwanted undo action) when a control sets it to 0
     }
-
-    //==============================================================================
-protected:
-    Value sourceValue;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NumericValueSource);
 };
 
 
-#endif   // __JUCER_VALUEREMAPPERSOURCE_JUCEHEADER__
+#endif   // __JUCER_VALUESOURCEHELPERS_JUCEHEADER__

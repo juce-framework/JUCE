@@ -187,7 +187,7 @@ int main (int argc, char* argv[])
         }
     }
 
-    *header << "};\r\n\r\n"
+    *header << "}\r\n\r\n"
                "#endif\r\n";
 
     header = 0;

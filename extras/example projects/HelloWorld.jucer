@@ -12,21 +12,44 @@
               pluginAUViewClass="HelloWorldAU_V1" pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.jucehelloworld">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../.." objCExtraSuffix="JtTAKTK1s"/>
+               juceFolder="../.." objCExtraSuffix="JtTAKTK1s">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"
+                       osxSDK="1" osxCompatibility="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="HelloWorld"
+                       osxSDK="1" osxCompatibility="1"/>
+      </CONFIGURATIONS>
+    </XCODE_MAC>
     <XCODE_IPHONE targetFolder="Builds/iOS" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-                  juceFolder="../.." objCExtraSuffix="JtTAKTK1s"/>
+                  juceFolder="../.." objCExtraSuffix="JtTAKTK1s">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"
+                       osxSDK="1" osxCompatibility="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="HelloWorld"
+                       osxSDK="1" osxCompatibility="1"/>
+      </CONFIGURATIONS>
+    </XCODE_IPHONE>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="HelloWorld"/>
+      </CONFIGURATIONS>
+    </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"/>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../.."/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="HelloWorld"/>
+      </CONFIGURATIONS>
+    </VS2008>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../..">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="HelloWorld"/>
+      </CONFIGURATIONS>
+    </LINUX_MAKE>
   </EXPORTFORMATS>
-  <CONFIGURATIONS>
-    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"
-                   osxSDK="1" osxCompatibility="1"/>
-    <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="HelloWorld"
-                   osxSDK="1" osxCompatibility="1"/>
-  </CONFIGURATIONS>
   <MAINGROUP id="a0m6ZvX1F" name="HelloWorld">
     <GROUP id="GVpTv8yA5" name="Source">
       <FILE id="wm1yCLKYK" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -36,15 +59,13 @@
             file="Source/MainComponent.h"/>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default" JUCE_ASIO="default"
-               JUCE_WASAPI="default" JUCE_DIRECTSOUND="default" JUCE_ALSA="default"
-               JUCE_QUICKTIME="default" JUCE_OPENGL="default" JUCE_USE_FLAC="default"
-               JUCE_USE_OGGVORBIS="default" JUCE_USE_CDBURNER="default" JUCE_USE_CDREADER="default"
-               JUCE_USE_CAMERA="default" JUCE_ENABLE_REPAINT_DEBUGGING="default"
-               JUCE_USE_XINERAMA="default" JUCE_USE_XSHM="default" JUCE_PLUGINHOST_VST="default"
-               JUCE_PLUGINHOST_AU="default" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
-               JUCE_WEB_BROWSER="default" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
-               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"
-               JUCE_USE_XRENDER="default" JUCE_USE_XCURSOR="default" JUCE_DIRECT2D="default"
-               JUCE_DIRECTSHOW="default" JUCE_MEDIAFOUNDATION="default"/>
+  <JUCEOPTIONS/>
+  <MODULES>
+    <MODULE id="juce_core" showAllCode="1"/>
+    <MODULE id="juce_events" showAllCode="1"/>
+    <MODULE id="juce_graphics" showAllCode="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1"/>
+  </MODULES>
 </JUCERPROJECT>

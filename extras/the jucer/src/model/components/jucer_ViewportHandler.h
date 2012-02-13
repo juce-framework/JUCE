@@ -148,7 +148,7 @@ public:
                 if (filename.isNotEmpty())
                     file = code.document->getFile().getSiblingFile (filename);
 
-                JucerDocument* doc = ObjectTypes::loadDocumentFromFile (file, false);
+                ScopedPointer<JucerDocument> doc (ObjectTypes::loadDocumentFromFile (file, false));
 
                 if (doc != 0)
                 {
@@ -157,7 +157,6 @@ public:
                                                 .replaceCharacter ('\\', '/'));
 
                     className = doc->getClassName();
-                    delete doc;
                 }
                 else
                 {
@@ -577,7 +576,7 @@ private:
                               "Change Viewport content class");
         }
 
-        const String getText() const
+        String getText() const
         {
             return getViewportGenericComponentClass (component);
         }
@@ -630,7 +629,7 @@ private:
                               "Change Viewport content constructor params");
         }
 
-        const String getText() const
+        String getText() const
         {
             return getViewportConstructorParams (component);
         }

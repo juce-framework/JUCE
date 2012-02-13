@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -105,23 +105,24 @@ namespace CodeHelpers
     }
 
     static void writeEscapeChars (OutputStream& out, const char* utf8, const int numBytes,
-                                  const int maxCharsOnLine, const bool breakAtNewLines, const bool replaceSingleQuotes)
+                                  const int maxCharsOnLine, const bool breakAtNewLines,
+                                  const bool replaceSingleQuotes, const bool allowStringBreaks)
     {
         int charsOnLine = 0;
         bool lastWasHexEscapeCode = false;
 
         for (int i = 0; i < numBytes || numBytes < 0; ++i)
         {
-            const char c = utf8[i];
+            const unsigned char c = (unsigned char) utf8[i];
             bool startNewLine = false;
 
             switch (c)
             {
-                case '\t':  out << "\\t";  lastWasHexEscapeCode = false; break;
-                case '\r':  out << "\\r";  lastWasHexEscapeCode = false; break;
-                case '\n':  out << "\\n";  lastWasHexEscapeCode = false; startNewLine = breakAtNewLines; break;
-                case '\\':  out << "\\\\"; lastWasHexEscapeCode = false; break;
-                case '\"':  out << "\\\""; lastWasHexEscapeCode = false; break;
+                case '\t':  out << "\\t";  lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\r':  out << "\\r";  lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\n':  out << "\\n";  lastWasHexEscapeCode = false; charsOnLine += 2; startNewLine = breakAtNewLines; break;
+                case '\\':  out << "\\\\"; lastWasHexEscapeCode = false; charsOnLine += 2; break;
+                case '\"':  out << "\\\""; lastWasHexEscapeCode = false; charsOnLine += 2; break;
 
                 case 0:
                     if (numBytes < 0)
@@ -129,6 +130,7 @@ namespace CodeHelpers
 
                     out << "\\0";
                     lastWasHexEscapeCode = true;
+                    charsOnLine += 2;
                     break;
 
                 case '\'':
@@ -136,6 +138,7 @@ namespace CodeHelpers
                     {
                         out << "\\\'";
                         lastWasHexEscapeCode = false;
+                        charsOnLine += 2;
                         break;
                     }
 
@@ -145,23 +148,32 @@ namespace CodeHelpers
                     if (c >= 32 && c < 127 && ! (lastWasHexEscapeCode  // (have to avoid following a hex escape sequence with a valid hex digit)
                                                    && CharacterFunctions::getHexDigitValue (c) >= 0))
                     {
-                        out << c;
+                        out << (char) c;
                         lastWasHexEscapeCode = false;
+                        ++charsOnLine;
+                    }
+                    else if (allowStringBreaks && lastWasHexEscapeCode && c >= 32 && c < 127)
+                    {
+                        out << "\"\"" << (char) c;
+                        lastWasHexEscapeCode = false;
+                        charsOnLine += 3;
                     }
                     else
                     {
-                        out << (c < 16 ? "\\x0" : "\\x") << String::toHexString ((int) (unsigned int) c);
+                        out << (c < 16 ? "\\x0" : "\\x") << String::toHexString ((int) c);
                         lastWasHexEscapeCode = true;
+                        charsOnLine += 4;
                     }
 
                     break;
             }
 
-            if ((startNewLine || (maxCharsOnLine > 0 && ++charsOnLine >= maxCharsOnLine))
+            if ((startNewLine || (maxCharsOnLine > 0 && charsOnLine >= maxCharsOnLine))
                  && (numBytes < 0 || i < numBytes - 1))
             {
                 charsOnLine = 0;
                 out << "\"" << newLine << "\"";
+                lastWasHexEscapeCode = false;
             }
         }
     }
@@ -169,7 +181,7 @@ namespace CodeHelpers
     String addEscapeChars (const String& s)
     {
         MemoryOutputStream out;
-        writeEscapeChars (out, s.toUTF8().getAddress(), -1, -1, false, true);
+        writeEscapeChars (out, s.toUTF8().getAddress(), -1, -1, false, true, true);
         return out.toUTF8();
     }
 
@@ -180,7 +192,10 @@ namespace CodeHelpers
 
     String createIncludeStatement (const String& includePath)
     {
-        return "#include \"" + includePath + "\"";
+        if (includePath.startsWithChar ('<') || includePath.startsWithChar ('"'))
+            return "#include " + includePath;
+        else
+            return "#include \"" + includePath + "\"";
     }
 
     String makeHeaderGuardName (const File& file)
@@ -208,54 +223,6 @@ namespace CodeHelpers
             return CodeHelpers::addEscapeChars (text).quoted();
         else
             return "CharPointer_UTF8 (" + CodeHelpers::addEscapeChars (text).quoted() + ")";
-    }
-
-    String stringLiteralIfNotEmpty (const String& text)
-    {
-        return text.isNotEmpty() ? stringLiteral (text) : String::empty;
-    }
-
-    String boolLiteral (const bool b)
-    {
-        return b ? "true" : "false";
-    }
-
-    String floatLiteral (float v)
-    {
-        String s ((double) v, 4);
-
-        if (s.containsChar ('.'))
-        {
-            s = s.trimCharactersAtEnd ("0");
-            if (s.endsWithChar ('.'))
-                s << '0';
-
-            s << 'f';
-        }
-        else
-        {
-            s << ".0f";
-        }
-
-        return s;
-    }
-
-    String doubleLiteral (double v)
-    {
-        String s (v, 7);
-
-        if (s.containsChar ('.'))
-        {
-            s = s.trimCharactersAtEnd ("0");
-            if (s.endsWithChar ('.'))
-                s << '0';
-        }
-        else
-        {
-            s << ".0";
-        }
-
-        return s;
     }
 
     String alignFunctionCallParams (const String& call, const StringArray& parameters, const int maxLineLength)
@@ -306,87 +273,8 @@ namespace CodeHelpers
         return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
     }
 
-    String justificationToCode (const Justification& justification)
-    {
-        switch (justification.getFlags())
-        {
-            case Justification::centred:                return "Justification::centred";
-            case Justification::centredLeft:            return "Justification::centredLeft";
-            case Justification::centredRight:           return "Justification::centredRight";
-            case Justification::centredTop:             return "Justification::centredTop";
-            case Justification::centredBottom:          return "Justification::centredBottom";
-            case Justification::topLeft:                return "Justification::topLeft";
-            case Justification::topRight:               return "Justification::topRight";
-            case Justification::bottomLeft:             return "Justification::bottomLeft";
-            case Justification::bottomRight:            return "Justification::bottomRight";
-            case Justification::left:                   return "Justification::left";
-            case Justification::right:                  return "Justification::right";
-            case Justification::horizontallyCentred:    return "Justification::horizontallyCentred";
-            case Justification::top:                    return "Justification::top";
-            case Justification::bottom:                 return "Justification::bottom";
-            case Justification::verticallyCentred:      return "Justification::verticallyCentred";
-            case Justification::horizontallyJustified:  return "Justification::horizontallyJustified";
-            default:                                    jassertfalse; break;
-        }
-
-        return "Justification (" + String (justification.getFlags()) + ")";
-    }
-
-    String fontToCode (const Font& font)
-    {
-        String s ("Font (");
-        String name (font.getTypefaceName());
-
-        if (name != Font::getDefaultSansSerifFontName())
-        {
-            if (name == Font::getDefaultSerifFontName())
-                name = "Font::getDefaultSerifFontName()";
-            else if (name == Font::getDefaultMonospacedFontName())
-                name = "Font::getDefaultMonospacedFontName()";
-            else
-                name = stringLiteral (font.getTypefaceName());
-
-            s << name << ", ";
-        }
-
-        s << floatLiteral (font.getHeight());
-
-        if (font.isBold() && font.isItalic())
-            s << ", Font::bold | Font::italic";
-        else if (font.isBold())
-            s << ", Font::bold";
-        else if (font.isItalic())
-            s << ", Font::italic";
-        else if (name != Font::getDefaultSansSerifFontName()) // need this param if we're using the typeface name constructor
-            s << ", Font::plain";
-
-        return s + ")";
-    }
-
-    String castToFloat (const String& expression)
-    {
-        if (expression.containsOnly ("0123456789.f"))
-        {
-            String s (expression.getFloatValue());
-
-            if (s.containsChar (T('.')))
-                return s + "f";
-
-            return s + ".0f";
-        }
-
-        return "(float) (" + expression + ")";
-    }
-
-    String castToInt (const String& expression)
-    {
-        if (expression.containsOnly ("0123456789."))
-            return String ((int) expression.getFloatValue());
-
-        return "(int) (" + expression + ")";
-    }
-
-    void writeDataAsCppLiteral (const MemoryBlock& mb, OutputStream& out)
+    void writeDataAsCppLiteral (const MemoryBlock& mb, OutputStream& out,
+                                bool breakAtNewLines, bool allowStringBreaks)
     {
         const int maxCharsOnLine = 250;
 
@@ -423,10 +311,14 @@ namespace CodeHelpers
                 out << num << ',';
 
                 charsOnLine += 2;
+
                 if (num >= 10)
+                {
                     ++charsOnLine;
-                if (num >= 100)
-                    ++charsOnLine;
+
+                    if (num >= 100)
+                        ++charsOnLine;
+                }
 
                 if (charsOnLine >= maxCharsOnLine)
                 {
@@ -440,11 +332,13 @@ namespace CodeHelpers
         else
         {
             out << "\"";
-            writeEscapeChars (out, (const char*) data, (int) mb.getSize(), maxCharsOnLine, true, false);
+            writeEscapeChars (out, (const char*) data, (int) mb.getSize(),
+                              maxCharsOnLine, breakAtNewLines, false, allowStringBreaks);
             out << "\";";
         }
     }
 
+    //==============================================================================
     static int calculateHash (const String& s, const int hashMultiplier)
     {
         const char* t = s.toUTF8();
@@ -457,15 +351,20 @@ namespace CodeHelpers
 
     static int findBestHashMultiplier (const StringArray& strings)
     {
+        StringArray allStrings;
+
+        for (int i = strings.size(); --i >= 0;)
+            allStrings.addTokens (strings[i], "|", "");
+
         int v = 31;
 
         for (;;)
         {
             SortedSet <int> hashes;
             bool collision = false;
-            for (int i = strings.size(); --i >= 0;)
+            for (int i = allStrings.size(); --i >= 0;)
             {
-                const int hash = calculateHash (strings[i], v);
+                const int hash = calculateHash (allStrings[i], v);
                 if (hashes.contains (hash))
                 {
                     collision = true;
@@ -500,8 +399,20 @@ namespace CodeHelpers
             << indent << "{" << newLine;
 
         for (int i = 0; i < strings.size(); ++i)
-            out << indent << "    case 0x" << hexString8Digits (calculateHash (strings[i], hashMultiplier))
-                << ":  " << codeToExecute[i] << newLine;
+        {
+            StringArray matchingStrings;
+            matchingStrings.addTokens (strings[i], "|", "");
+
+            for (int j = 0; j < matchingStrings.size(); ++j)
+            {
+                out << indent << "    case 0x" << hexString8Digits (calculateHash (matchingStrings[j], hashMultiplier)) << ":";
+
+                if (j < matchingStrings.size() - 1)
+                    out << newLine;
+            }
+
+            out << "  " << codeToExecute[i] << newLine;
+        }
 
         out << indent << "    default: break;" << newLine
             << indent << "}" << newLine << newLine;

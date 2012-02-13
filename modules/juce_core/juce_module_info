@@ -1,0 +1,36 @@
+{
+  "id":             "juce_core",
+  "name":           "JUCE core classes",
+  "version":        "2.0.17",
+  "description":    "The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.",
+  "website":        "http://www.juce.com/juce",
+  "license":        "GPL/Commercial",
+
+  "dependencies":   [],
+
+  "include":        "juce_core.h",
+
+  "compile":        [ { "file": "juce_core.cpp", "target": "! xcode" },
+                      { "file": "juce_core.mm",  "target": "xcode" } ],
+
+  "browse":         [ "text/*",
+                      "maths/*",
+                      "memory/*",
+                      "containers/*",
+                      "threads/*",
+                      "time/*",
+                      "files/*",
+                      "network/*",
+                      "streams/*",
+                      "logging/*",
+                      "system/*",
+                      "xml/*",
+                      "json/*",
+                      "zip/*",
+                      "unit_tests/*",
+                      "misc/*",
+                      "native/*" ],
+
+  "OSXFrameworks":  "Cocoa IOKit",
+  "iOSFrameworks":  "Foundation"
+}

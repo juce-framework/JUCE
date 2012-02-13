@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -115,11 +115,8 @@ void StoredSettings::flush()
     const int numSwatchColours = 24;
 
     for (int i = 0; i < numSwatchColours; ++i)
-    {
-        Colour defaultCol (colours [2 + i]);
-        swatchColours.add (Colour (props->getValue ("swatchColour" + String (i),
-                                                    hexString8Digits (defaultCol.getARGB())).getHexValue32()));
-    }
+        swatchColours.add (Colour::fromString (props->getValue ("swatchColour" + String (i),
+                                                                colours [2 + i].toString())));
 }
 
 Array<File> StoredSettings::getLastProjects() const
@@ -141,23 +138,6 @@ void StoredSettings::setLastProjects (const Array<File>& files)
         s.add (files.getReference(i).getFullPathName());
 
     props->setValue ("lastProjects", s.joinIntoString ("|"));
-}
-
-File StoredSettings::getLastKnownJuceFolder() const
-{
-    File defaultJuceFolder (FileHelpers::findDefaultJuceFolder());
-    File f (props->getValue ("lastJuceFolder", defaultJuceFolder.getFullPathName()));
-
-    if ((! FileHelpers::isJuceFolder (f)) && FileHelpers::isJuceFolder (defaultJuceFolder))
-        f = defaultJuceFolder;
-
-    return f;
-}
-
-void StoredSettings::setLastKnownJuceFolder (const File& file)
-{
-    jassert (FileHelpers::isJuceFolder (file));
-    props->setValue ("lastJuceFolder", file.getFullPathName());
 }
 
 const StringArray& StoredSettings::getFontNames()

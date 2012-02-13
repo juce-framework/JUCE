@@ -54,6 +54,7 @@ public:
     void selectionChanged();
     void fileClicked (const File& file, const MouseEvent& e);
     void fileDoubleClicked (const File& file);
+    void browserRootChanged (const File&) {}
     void showFile (const File& file);
     //[/UserMethods]
 
@@ -70,6 +71,7 @@ public:
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     AudioDeviceManager& deviceManager;
+    AudioFormatManager formatManager;
     TimeSliceThread thread;
     DirectoryContentsList directoryList;
 

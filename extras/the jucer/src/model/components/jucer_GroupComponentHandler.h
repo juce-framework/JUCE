@@ -133,7 +133,7 @@ private:
                               "Change group title");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getText();
         }

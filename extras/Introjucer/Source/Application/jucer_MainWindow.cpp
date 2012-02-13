@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -30,48 +30,47 @@
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "../Project/jucer_NewProjectWizard.h"
 
-ApplicationCommandManager* commandManager = nullptr;
+ScopedPointer<ApplicationCommandManager> commandManager;
 
 
 //==============================================================================
 MainWindow::MainWindow()
-    : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(),
+    : DocumentWindow (JucerApplication::getApp()->getApplicationName(),
                       Colour::greyLevel (0.6f),
                       DocumentWindow::allButtons,
                       false)
 {
     setUsingNativeTitleBar (true);
-    setContentOwned (new ProjectContentComponent(), false);
+    createProjectContentCompIfNeeded();
 
    #if ! JUCE_MAC
-    JucerApplication* app = static_cast<JucerApplication*> (JUCEApplication::getInstance());
-    setMenuBar (app->menuModel);
+    setMenuBar (JucerApplication::getApp()->menuModel);
    #endif
 
     setResizable (true, false);
-
-    centreWithSize (700, 600);
+    centreWithSize (800, 600);
 
     // Register all the app commands..
     {
         commandManager->registerAllCommandsForTarget (this);
+        commandManager->registerAllCommandsForTarget (getProjectContentComponent());
 
-        // use a temporary one of these to harvest its commands..
-        ProjectContentComponent pcc;
-        commandManager->registerAllCommandsForTarget (&pcc);
-
+        // use some temporary objects to harvest their commands..
         DocumentEditorComponent dec (nullptr);
         commandManager->registerAllCommandsForTarget (&dec);
     }
 
-    commandManager->getKeyMappings()->resetToDefaultMappings();
+    // update key mappings..
+    {
+        commandManager->getKeyMappings()->resetToDefaultMappings();
 
-    ScopedPointer <XmlElement> keys (StoredSettings::getInstance()->getProps().getXmlValue ("keyMappings"));
+        ScopedPointer <XmlElement> keys (StoredSettings::getInstance()->getProps().getXmlValue ("keyMappings"));
 
-    if (keys != nullptr)
-        commandManager->getKeyMappings()->restoreFromXml (*keys);
+        if (keys != nullptr)
+            commandManager->getKeyMappings()->restoreFromXml (*keys);
 
-    addKeyListener (commandManager->getKeyMappings());
+        addKeyListener (commandManager->getKeyMappings());
+    }
 
     // don't want the window to take focus when the title-bar is clicked..
     setWantsKeyboardFocus (false);
@@ -96,11 +95,20 @@ MainWindow::~MainWindow()
     currentProject = nullptr;
 }
 
+void MainWindow::createProjectContentCompIfNeeded()
+{
+    if (getProjectContentComponent() == nullptr)
+    {
+        clearContentComponent();
+        setContentOwned (new ProjectContentComponent(), false);
+    }
+}
+
 void MainWindow::makeVisible()
 {
     setVisible (true);
+    addToDesktop();  // (must add before restoring size so that fullscreen will work)
     restoreWindowPosition();
-    addToDesktop();
 
     getContentComponent()->grabKeyboardFocus();
 }
@@ -115,8 +123,7 @@ void MainWindow::closeButtonPressed()
     if (! closeCurrentProject())
         return;
 
-    JucerApplication* jucer = static_cast<JucerApplication*> (JUCEApplication::getInstance());
-    jucer->closeWindow (this);
+    JucerApplication::getApp()->closeWindow (this);
 }
 
 bool MainWindow::closeProject (Project* project)
@@ -131,6 +138,11 @@ bool MainWindow::closeProject (Project* project)
 
     if (! OpenDocumentManager::getInstance()->closeAllDocumentsUsingProject (*project, true))
         return false;
+
+    ProjectContentComponent* const pcc = getProjectContentComponent();
+
+    if (pcc != nullptr)
+        pcc->saveTreeViewState();
 
     FileBasedDocument::SaveResult r = project->saveIfNeededAndUserAgrees();
 
@@ -150,6 +162,7 @@ bool MainWindow::closeCurrentProject()
 
 void MainWindow::setProject (Project* newProject)
 {
+    createProjectContentCompIfNeeded();
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
     commandManager->commandStatusChanged();
@@ -157,7 +170,7 @@ void MainWindow::setProject (Project* newProject)
     // (mustn't do this when the project is 0, because that'll happen on shutdown,
     // which will erase the list of recent projects)
     if (newProject != nullptr)
-        static_cast<JucerApplication*> (JUCEApplication::getInstance())->updateRecentProjectList();
+        JucerApplication::getApp()->updateRecentProjectList();
 }
 
 void MainWindow::restoreWindowPosition()
@@ -181,6 +194,8 @@ bool MainWindow::canOpenFile (const File& file) const
 
 bool MainWindow::openFile (const File& file)
 {
+    createProjectContentCompIfNeeded();
+
     if (file.hasFileExtension (Project::projectFileExtension))
     {
         ScopedPointer <Project> newDoc (new Project (file));
@@ -232,7 +247,7 @@ void MainWindow::activeWindowStatusChanged()
 
 void MainWindow::updateTitle (const String& documentName)
 {
-    String name (JUCEApplication::getInstance()->getApplicationName());
+    String name (JucerApplication::getApp()->getApplicationName());
 
     if (currentProject != nullptr)
         name = currentProject->getDocumentTitle() + " - " + name;
@@ -243,6 +258,12 @@ void MainWindow::updateTitle (const String& documentName)
     setName (name);
 }
 
+void MainWindow::showNewProjectWizard()
+{
+    jassert (currentProject == nullptr);
+    setContentOwned (NewProjectWizard::createComponent(), true);
+    makeVisible();
+}
 
 //==============================================================================
 ApplicationCommandTarget* MainWindow::getNextCommandTarget()

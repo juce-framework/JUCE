@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -57,6 +57,8 @@ public:
     bool closeProject (Project* project);
     bool closeCurrentProject();
 
+    void showNewProjectWizard();
+
     bool isInterestedInFileDrag (const StringArray& files);
     void filesDropped (const StringArray& filenames, int mouseX, int mouseY);
 
@@ -83,6 +85,8 @@ private:
 
         return "projectWindowPos_" + currentProject->getProjectUID();
     }
+
+    void createProjectContentCompIfNeeded();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow);
 };

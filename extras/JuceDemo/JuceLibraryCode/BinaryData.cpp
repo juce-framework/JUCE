@@ -5,30 +5,8 @@
 
 */
 
-#include "BinaryData.h"
-
-
-const char* BinaryData::getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
+namespace BinaryData
 {
-    int hash = 0;
-    if (resourceNameUTF8 != 0)
-        while (*resourceNameUTF8 != 0)
-            hash = 31 * hash + *resourceNameUTF8++;
-
-    switch (hash)
-    {
-        case 0x62032efa:  numBytes = BinaryData::cello_wavSize; return BinaryData::cello_wav;
-        case 0xaec3f52f:  numBytes = BinaryData::demo_table_data_xmlSize; return BinaryData::demo_table_data_xml;
-        case 0xae303c7c:  numBytes = BinaryData::icons_zipSize; return BinaryData::icons_zip;
-        case 0xdf2195d7:  numBytes = BinaryData::juce_pngSize; return BinaryData::juce_png;
-        case 0xdd644959:  numBytes = BinaryData::treedemo_xmlSize; return BinaryData::treedemo_xml;
-        default: break;
-    }
-
-    numBytes = 0;
-    return 0;
-}
-
 
 //================== cello.wav ==================
 static const unsigned char temp_55d084b5[] =
@@ -639,7 +617,7 @@ static const unsigned char temp_55d084b5[] =
 255,242,255,242,255,238,255,241,255,238,255,239,255,237,255,239,255,241,255,235,255,232,255,231,255,230,255,234,255,231,255,232,255,230,255,234,255,235,255,234,255,227,255,230,255,231,255,220,255,217,255,210,255,213,255,217,255,217,255,219,255,220,255,
 219,255,226,255,223,255,212,255,220,255,220,255,220,255,210,255,223,255,230,255,224,255,227,255,231,255,231,255,231,255,234,255,226,255,232,255,237,255,241,255,235,255,232,255,231,255,232,255,237,255,235,255,234,255,0,0 };
 
-const char* BinaryData::cello_wav = (const char*) temp_55d084b5;
+const char* cello_wav = (const char*) temp_55d084b5;
 
 //================== demo table data.xml ==================
 static const unsigned char temp_5a40772c[] =
@@ -693,7 +671,7 @@ static const unsigned char temp_5a40772c[] =
 "    </DATA>\r\n"
 "</DEMO_TABLE_DATA>";
 
-const char* BinaryData::demo_table_data_xml = (const char*) temp_5a40772c;
+const char* demo_table_data_xml = (const char*) temp_5a40772c;
 
 //================== icons.zip ==================
 static const unsigned char temp_a1fd9237[] =
@@ -1887,7 +1865,7 @@ static const unsigned char temp_a1fd9237[] =
 194,180,16,0,0,195,74,0,0,22,0,0,0,0,0,0,0,1,0,32,0,0,0,236,35,1,0,112,114,101,102,101,114,101,110,99,101,115,45,115,121,115,116,101,109,46,115,118,103,80,75,1,2,20,0,20,0,2,0,8,0,183,128,249,52,199,174,1,222,145,13,0,0,154,63,0,0,18,0,0,0,0,0,0,0,1,
 0,32,0,0,0,212,52,1,0,115,121,115,116,101,109,45,108,111,103,45,111,117,116,46,115,118,103,80,75,5,6,0,0,0,0,20,0,20,0,249,4,0,0,149,66,1,0,0,0,0,0 };
 
-const char* BinaryData::icons_zip = (const char*) temp_a1fd9237;
+const char* icons_zip = (const char*) temp_a1fd9237;
 
 //================== juce.png ==================
 static const unsigned char temp_ffaf8e7e[] =
@@ -2106,7 +2084,7 @@ static const unsigned char temp_ffaf8e7e[] =
 5,5,121,88,4,4,120,152,128,189,32,208,249,43,255,222,188,249,8,154,219,1,221,19,4,219,204,143,60,183,67,179,173,12,163,128,58,0,32,128,24,169,104,14,108,152,30,148,104,96,183,130,192,206,199,67,62,144,8,54,143,129,124,139,202,223,209,196,50,52,0,64,0,
 49,82,217,44,88,245,132,126,19,61,174,9,48,228,33,254,209,196,50,4,0,64,128,1,0,102,20,176,16,7,130,12,56,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* BinaryData::juce_png = (const char*) temp_ffaf8e7e;
+const char* juce_png = (const char*) temp_ffaf8e7e;
 
 //================== treedemo.xml ==================
 static const unsigned char temp_816ae700[] =
@@ -2161,4 +2139,33 @@ static const unsigned char temp_816ae700[] =
 "    </item4>\r\n"
 "</tree>";
 
-const char* BinaryData::treedemo_xml = (const char*) temp_816ae700;
+const char* treedemo_xml = (const char*) temp_816ae700;
+
+
+const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
+{
+    int hash = 0;
+    if (resourceNameUTF8 != 0)
+        while (*resourceNameUTF8 != 0)
+            hash = 31 * hash + *resourceNameUTF8++;
+
+    switch (hash)
+    {
+        case 0x62032efa:
+        case 0x877c5941:  numBytes = 46348; return cello_wav;
+        case 0xaec3f52f:
+        case 0x5ef7e0f0:  numBytes = 5239; return demo_table_data_xml;
+        case 0xae303c7c:
+        case 0xae3ee894:  numBytes = 83876; return icons_zip;
+        case 0xdf2195d7:
+        case 0xc23b6643:  numBytes = 15290; return juce_png;
+        case 0xdd644959:
+        case 0x0ff8e16f:  numBytes = 1126; return treedemo_xml;
+        default: break;
+    }
+
+    numBytes = 0;
+    return 0;
+}
+
+}

@@ -193,7 +193,7 @@ private:
                               "Change button text");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getButtonText();
         }
@@ -290,7 +290,7 @@ private:
                               "Change radio group ID");
         }
 
-        const String getText() const
+        String getText() const
         {
             return String (component->getRadioGroupId());
         }

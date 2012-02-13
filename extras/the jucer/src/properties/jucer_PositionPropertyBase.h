@@ -72,7 +72,7 @@ public:
         deleteAllChildren();
     }
 
-    const String getText() const
+    String getText() const
     {
         RelativePositionedRectangle rpr (getPosition());
         PositionedRectangle& p = rpr.rect;

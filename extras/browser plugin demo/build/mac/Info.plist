@@ -1,0 +1,44 @@
+#include "../../src/BrowserPluginCharacteristics.h"
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleName</key>
+	<string>${PRODUCT_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.${PRODUCT_NAME:identifier}</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>BRPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>CFBundleDisplayName</key>
+	<string>JuceBrowserPlugin_Desc</string>
+	<key>CFBundleShortVersionString</key>
+	<string>JuceBrowserPlugin_Version</string>
+	<key>WebPluginName</key>
+	<string>JuceBrowserPlugin_Name</string>
+	<key>WebPluginMIMETypes</key>
+	<dict>
+		<key>application/npjucedemo-plugin</key>
+		<dict>
+			<key>WebPluginExtensions</key>
+			<array>
+				<string>jucedemo</string>
+			</array>
+			<key>WebPluginTypeDescription</key>
+			<string>Juce Demo</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

@@ -79,12 +79,10 @@ MainHostWindow::MainHostWindow()
     : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(), Colours::lightgrey,
                       DocumentWindow::allButtons)
 {
-    XmlElement* const savedAudioState = appProperties->getUserSettings()
-                                            ->getXmlValue ("audioDeviceState");
+    ScopedPointer<XmlElement> savedAudioState (appProperties->getUserSettings()
+                                                   ->getXmlValue ("audioDeviceState"));
 
     deviceManager.initialise (256, 256, savedAudioState, true);
-
-    delete savedAudioState;
 
     setResizable (true, false);
     setResizeLimits (500, 400, 10000, 10000);
@@ -113,22 +111,22 @@ MainHostWindow::MainHostWindow()
 
     Process::setPriority (Process::HighPriority);
 
-#if JUCE_MAC
+   #if JUCE_MAC
     setMacMainMenu (this);
-#else
+   #else
     setMenuBar (this);
-#endif
+   #endif
 }
 
 MainHostWindow::~MainHostWindow()
 {
     delete PluginListWindow::currentPluginListWindow;
 
-#if JUCE_MAC
+   #if JUCE_MAC
     setMacMainMenu (0);
-#else
+   #else
     setMenuBar (0);
-#endif
+   #endif
 
     knownPluginList.removeChangeListener (this);
 
@@ -159,14 +157,11 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster*)
 
     // save the plugin list every time it gets chnaged, so that if we're scanning
     // and it crashes, we've still saved the previous ones
-    XmlElement* const savedPluginList = knownPluginList.createXml();
+    ScopedPointer<XmlElement> savedPluginList (knownPluginList.createXml());
 
     if (savedPluginList != 0)
     {
         appProperties->getUserSettings()->setValue ("pluginList", savedPluginList);
-
-        delete savedPluginList;
-
         appProperties->saveIfNeeded();
     }
 }
@@ -438,12 +433,9 @@ void MainHostWindow::showAudioSettings()
                                    Colours::azure,
                                    true);
 
-    XmlElement* const audioState = deviceManager.createStateXml();
+    ScopedPointer<XmlElement> audioState (deviceManager.createStateXml());
 
     appProperties->getUserSettings()->setValue ("audioDeviceState", audioState);
-
-    delete audioState;
-
     appProperties->getUserSettings()->saveIfNeeded();
 
     GraphDocumentComponent* const graphEditor = getGraphEditor();

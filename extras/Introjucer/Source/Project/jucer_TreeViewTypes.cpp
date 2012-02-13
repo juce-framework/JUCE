@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ void GroupTreeViewItem::addFiles (const StringArray& files, int insertIndex)
     {
         const File file (files[i]);
 
-        if (item.addFile (file, insertIndex))
+        if (item.addFile (file, insertIndex, true))
             ++insertIndex;
     }
 }
@@ -102,7 +102,7 @@ void GroupTreeViewItem::showDocument()
     if (pcc != nullptr)
     {
         if (isRoot())
-            pcc->setEditorComponent (new ProjectInformationComponent (item.getProject()), 0);
+            pcc->setEditorComponent (new ProjectInformationComponent (item.project), 0);
         else
             pcc->setEditorComponent (new GroupInformationComponent (item), 0);
     }
@@ -120,13 +120,17 @@ void GroupTreeViewItem::showPopupMenu()
     if (! isRoot())
         m.addItem (2, "Delete");
 
-    const int res = m.show();
-    switch (res)
+    launchPopupMenu (m);
+}
+
+void GroupTreeViewItem::handlePopupMenuResult (int resultCode)
+{
+    switch (resultCode)
     {
         case 1:     triggerAsyncRename (item); break;
         case 2:     deleteAllSelectedItems(); break;
-        case 3:     item.sortAlphabetically(); break;
-        default:    processCreateFileMenuItem (res); break;
+        case 3:     item.sortAlphabetically (false); break;
+        default:    processCreateFileMenuItem (resultCode); break;
     }
 }
 
@@ -194,7 +198,7 @@ void SourceFileTreeViewItem::setName (const String& newName)
 
     if (correspondingFile.exists() && newFile.hasFileExtension (oldFile.getFileExtension()))
     {
-        Project::Item correspondingItem (item.getProject().getMainGroup().findItemForFile (correspondingFile));
+        Project::Item correspondingItem (item.project.getMainGroup().findItemForFile (correspondingFile));
 
         if (correspondingItem.isValid())
         {
@@ -228,7 +232,7 @@ void SourceFileTreeViewItem::setName (const String& newName)
 ProjectTreeViewBase* SourceFileTreeViewItem::createSubItem (const Project::Item& child)
 {
     jassertfalse
-    return 0;
+    return nullptr;
 }
 
 void SourceFileTreeViewItem::showDocument()
@@ -242,10 +246,9 @@ void SourceFileTreeViewItem::showDocument()
 
 void SourceFileTreeViewItem::showPopupMenu()
 {
-    GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem());
-
     PopupMenu m;
 
+    GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem());
     if (parentGroup != nullptr)
     {
         parentGroup->addCreateFileMenuItems (m);
@@ -254,18 +257,24 @@ void SourceFileTreeViewItem::showPopupMenu()
 
     m.addItem (1, "Open in external editor");
     m.addItem (2,
-#if JUCE_MAC
+                 #if JUCE_MAC
                   "Reveal in Finder");
-#else
+                 #else
                   "Reveal in Explorer");
-#endif
+                 #endif
 
     m.addItem (4, "Rename File...");
     m.addSeparator();
     m.addItem (3, "Delete");
 
-    const int res = m.show();
-    switch (res)
+    launchPopupMenu (m);
+}
+
+void SourceFileTreeViewItem::handlePopupMenuResult (int resultCode)
+{
+    GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem());
+
+    switch (resultCode)
     {
         case 1:     getFile().startAsProcess(); break;
         case 2:     revealInFinder(); break;
@@ -274,7 +283,7 @@ void SourceFileTreeViewItem::showPopupMenu()
 
         default:
             if (parentGroup != nullptr)
-                parentGroup->processCreateFileMenuItem (res);
+                parentGroup->processCreateFileMenuItem (resultCode);
 
             break;
     }

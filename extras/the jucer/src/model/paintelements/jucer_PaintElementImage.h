@@ -514,7 +514,7 @@ private:
             element->resetToImageSize();
         }
 
-        const String getButtonText() const          { return "reset to image size"; }
+        String getButtonText() const          { return "reset to image size"; }
 
     private:
         PaintElementImage* const element;

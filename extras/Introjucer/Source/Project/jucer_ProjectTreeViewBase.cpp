@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -31,12 +31,12 @@
 ProjectTreeViewBase::ProjectTreeViewBase (const Project::Item& item_)
     : item (item_), isFileMissing (false)
 {
-    item.getNode().addListener (this);
+    item.state.addListener (this);
 }
 
 ProjectTreeViewBase::~ProjectTreeViewBase()
 {
-    item.getNode().removeListener (this);
+    item.state.removeListener (this);
 }
 
 //==============================================================================
@@ -48,7 +48,7 @@ String ProjectTreeViewBase::getDisplayName() const
 void ProjectTreeViewBase::setName (const String& newName)
 {
     if (item.isMainGroup())
-        item.getProject().setTitle (newName);
+        item.project.setTitle (newName);
     else
         item.getName() = newName;
 }
@@ -268,7 +268,7 @@ void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
     {
         Project::Item* const n = selectedNodes.getUnchecked(i);
 
-        if (destNode == *n || destNode.getNode().isAChildOf (n->getNode())) // Check for recursion.
+        if (destNode == *n || destNode.state.isAChildOf (n->state)) // Check for recursion.
             return;
 
         if (! destNode.canContain (*n))
@@ -282,7 +282,7 @@ void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
 
         for (int j = selectedNodes.size(); --j >= 0;)
         {
-            if (j != i && n->getNode().isAChildOf (selectedNodes.getUnchecked(j)->getNode()))
+            if (j != i && n->state.isAChildOf (selectedNodes.getUnchecked(j)->state))
             {
                 selectedNodes.remove (i);
                 break;
@@ -295,8 +295,8 @@ void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
     {
         Project::Item* selectedNode = selectedNodes.getUnchecked(i);
 
-        if (selectedNode->getNode().getParent() == destNode.getNode()
-              && indexOfNode (destNode.getNode(), selectedNode->getNode()) < insertIndex)
+        if (selectedNode->state.getParent() == destNode.state
+              && indexOfNode (destNode.state, selectedNode->state) < insertIndex)
             --insertIndex;
 
         selectedNode->removeItemFromProject();
@@ -367,7 +367,7 @@ void ProjectTreeViewBase::itemDropped (const DragAndDropTarget::SourceDetails& d
 //==============================================================================
 void ProjectTreeViewBase::treeChildrenChanged (const ValueTree& parentTree)
 {
-    if (parentTree == item.getNode())
+    if (parentTree == item.state)
     {
         refreshSubItems();
         treeHasChanged();
@@ -377,7 +377,7 @@ void ProjectTreeViewBase::treeChildrenChanged (const ValueTree& parentTree)
 
 void ProjectTreeViewBase::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
-    if (tree == item.getNode())
+    if (tree == item.state)
         repaintItem();
 }
 
@@ -406,7 +406,7 @@ bool ProjectTreeViewBase::mightContainSubItems()
     return item.getNumChildren() > 0;
 }
 
-const String ProjectTreeViewBase::getUniqueName() const
+String ProjectTreeViewBase::getUniqueName() const
 {
     jassert (item.getID().isNotEmpty());
     return item.getID();
@@ -431,21 +431,42 @@ void ProjectTreeViewBase::addSubItems()
 
 void ProjectTreeViewBase::refreshSubItems()
 {
-    OpennessRestorer openness (*this);
+    WholeTreeOpennessRestorer openness (*this);
     clearSubItems();
     addSubItems();
+}
+
+static void treeViewMultiSelectItemChosen (int resultCode, ProjectTreeViewBase* item)
+{
+    switch (resultCode)
+    {
+        case 1:     item->deleteAllSelectedItems(); break;
+        default:    break;
+    }
 }
 
 void ProjectTreeViewBase::showMultiSelectionPopupMenu()
 {
     PopupMenu m;
-    m.addItem (6, "Delete");
+    m.addItem (1, "Delete");
 
-    switch (m.show())
-    {
-        case 6:     deleteAllSelectedItems(); break;
-        default:    break;
-    }
+    m.showMenuAsync (PopupMenu::Options(),
+                     ModalCallbackFunction::create (treeViewMultiSelectItemChosen, this));
+}
+
+static void treeViewMenuItemChosen (int resultCode, ProjectTreeViewBase* item)
+{
+    item->handlePopupMenuResult (resultCode);
+}
+
+void ProjectTreeViewBase::launchPopupMenu (PopupMenu& m)
+{
+    m.showMenuAsync (PopupMenu::Options(),
+                     ModalCallbackFunction::create (treeViewMenuItemChosen, this));
+}
+
+void ProjectTreeViewBase::handlePopupMenuResult (int)
+{
 }
 
 void ProjectTreeViewBase::itemDoubleClicked (const MouseEvent& e)
@@ -487,12 +508,12 @@ void ProjectTreeViewBase::itemSelectionChanged (bool isNowSelected)
     }
 }
 
-const String ProjectTreeViewBase::getTooltip()
+String ProjectTreeViewBase::getTooltip()
 {
     return String::empty;
 }
 
-const var ProjectTreeViewBase::getDragSourceDescription()
+var ProjectTreeViewBase::getDragSourceDescription()
 {
     delayedSelectionTimer = nullptr;
     return projectItemDragType;

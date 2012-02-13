@@ -1,0 +1,29 @@
+{
+  "id":             "juce_graphics",
+  "name":           "JUCE graphics classes",
+  "version":        "2.0.17",
+  "description":    "Classes for 2D vector graphics, image loading/saving, font handling, etc.",
+  "website":        "http://www.juce.com/juce",
+  "license":        "GPL/Commercial",
+
+  "dependencies":   [ { "id": "juce_core",   "version": "matching" },
+                      { "id": "juce_events", "version": "matching" } ],
+
+  "include":        "juce_graphics.h",
+
+  "compile":        [ { "file": "juce_graphics.cpp", "target": "! xcode" },
+                      { "file": "juce_graphics.mm",  "target": "xcode" } ],
+
+  "browse":         [ "colour/*",
+                      "contexts/*",
+                      "images/*",
+                      "image_formats/*",
+                      "geometry/*",
+                      "placement/*",
+                      "fonts/*",
+                      "effects/*",
+                      "native/*" ],
+
+  "OSXFrameworks":  "Cocoa",
+  "iOSFrameworks":  "CoreGraphics CoreText QuartzCore"
+}

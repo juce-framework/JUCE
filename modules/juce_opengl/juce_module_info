@@ -1,0 +1,21 @@
+{
+  "id":             "juce_opengl",
+  "name":           "JUCE OpenGL classes",
+  "version":        "2.0.17",
+  "description":    "Classes for rendering OpenGL in a JUCE window.",
+  "website":        "http://www.juce.com/juce",
+  "license":        "GPL/Commercial",
+
+  "dependencies":   [ { "id": "juce_gui_basics",        "version": "matching" } ],
+
+  "include":        "juce_opengl.h",
+
+  "compile":        [ { "file": "juce_opengl.cpp", "target": "! xcode" },
+                      { "file": "juce_opengl.mm",  "target": "xcode" } ],
+
+  "browse":         [ "opengl/*",
+                      "native/*" ],
+
+  "OSXFrameworks":  "OpenGL",
+  "iOSFrameworks":  "OpenGLES"
+}

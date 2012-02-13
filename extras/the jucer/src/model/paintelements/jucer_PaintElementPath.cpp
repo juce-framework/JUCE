@@ -586,7 +586,7 @@ void PaintElementPath::restorePathFromString (const String& s)
 
     for (int i = 0; i < tokens.size(); ++i)
     {
-        PathPoint* p = new PathPoint (this);
+        ScopedPointer<PathPoint> p (new PathPoint (this));
 
         if (tokens[i] == "s")
         {
@@ -627,12 +627,9 @@ void PaintElementPath::restorePathFromString (const String& s)
             p->type = Path::Iterator::closePath;
         }
         else
-        {
-            delete p;
             continue;
-        }
 
-        points.add (p);
+        points.add (p.release());
     }
 }
 
@@ -644,7 +641,7 @@ void PaintElementPath::setToPath (const Path& p)
 
     while (i.next())
     {
-        PathPoint* p = new PathPoint (this);
+        ScopedPointer<PathPoint> p (new PathPoint (this));
         p->type = i.elementType;
 
         if (i.elementType == Path::Iterator::startNewSubPath)
@@ -678,11 +675,10 @@ void PaintElementPath::setToPath (const Path& p)
         }
         else
         {
-            delete p;
             continue;
         }
 
-        points.add (p);
+        points.add (p.release());
     }
 }
 
@@ -1383,7 +1379,7 @@ public:
         owner->addPoint (index, true);
     }
 
-    const String getButtonText() const      { return "Add new point"; }
+    String getButtonText() const      { return "Add new point"; }
 
 private:
     PaintElementPath* const owner;

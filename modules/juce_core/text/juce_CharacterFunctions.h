@@ -1,0 +1,532 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-11 by Raw Material Software Ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the GNU General
+   Public License (Version 2), as published by the Free Software Foundation.
+   A copy of the license is included in the JUCE distribution, or can be found
+   online at www.gnu.org/licenses.
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.rawmaterialsoftware.com/juce for more information.
+
+  ==============================================================================
+*/
+
+#ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
+#define __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
+
+
+//==============================================================================
+#if JUCE_WINDOWS && ! DOXYGEN
+ #define JUCE_NATIVE_WCHAR_IS_UTF8      0
+ #define JUCE_NATIVE_WCHAR_IS_UTF16     1
+ #define JUCE_NATIVE_WCHAR_IS_UTF32     0
+#else
+ /** This macro will be set to 1 if the compiler's native wchar_t is an 8-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF8      0
+ /** This macro will be set to 1 if the compiler's native wchar_t is a 16-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF16     0
+ /** This macro will be set to 1 if the compiler's native wchar_t is a 32-bit type. */
+ #define JUCE_NATIVE_WCHAR_IS_UTF32     1
+#endif
+
+#if JUCE_NATIVE_WCHAR_IS_UTF32 || DOXYGEN
+ /** A platform-independent 32-bit unicode character type. */
+ typedef wchar_t        juce_wchar;
+#else
+ typedef uint32         juce_wchar;
+#endif
+
+/** This macro is deprecated, but preserved for compatibility with old code. */
+#define JUCE_T(stringLiteral)   (L##stringLiteral)
+
+#if JUCE_DEFINE_T_MACRO
+ /** The 'T' macro is an alternative for using the "L" prefix in front of a string literal.
+
+     This macro is deprecated, but available for compatibility with old code if you set
+     JUCE_DEFINE_T_MACRO = 1. The fastest, most portable and best way to write your string
+     literals is as standard char strings, using escaped utf-8 character sequences for extended
+     characters, rather than trying to store them as wide-char strings.
+ */
+ #define T(stringLiteral)   JUCE_T(stringLiteral)
+#endif
+
+#undef max
+#undef min
+
+//==============================================================================
+/**
+    A set of methods for manipulating characters and character strings.
+
+    These are defined as wrappers around the basic C string handlers, to provide
+    a clean, cross-platform layer, (because various platforms differ in the
+    range of C library calls that they provide).
+
+    @see String
+*/
+class JUCE_API  CharacterFunctions
+{
+public:
+    //==============================================================================
+    static juce_wchar toUpperCase (juce_wchar character) noexcept;
+    static juce_wchar toLowerCase (juce_wchar character) noexcept;
+
+    static bool isUpperCase (juce_wchar character) noexcept;
+    static bool isLowerCase (juce_wchar character) noexcept;
+
+    static bool isWhitespace (char character) noexcept;
+    static bool isWhitespace (juce_wchar character) noexcept;
+
+    static bool isDigit (char character) noexcept;
+    static bool isDigit (juce_wchar character) noexcept;
+
+    static bool isLetter (char character) noexcept;
+    static bool isLetter (juce_wchar character) noexcept;
+
+    static bool isLetterOrDigit (char character) noexcept;
+    static bool isLetterOrDigit (juce_wchar character) noexcept;
+
+    /** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legal hex digit. */
+    static int getHexDigitValue (juce_wchar digit) noexcept;
+
+    //==============================================================================
+    template <typename CharPointerType>
+    static double readDoubleValue (CharPointerType& text) noexcept
+    {
+        double result[3] = { 0 }, accumulator[2] = { 0 };
+        int exponentAdjustment[2] = { 0 }, exponentAccumulator[2] = { -1, -1 };
+        int exponent = 0, decPointIndex = 0, digit = 0;
+        int lastDigit = 0, numSignificantDigits = 0;
+        bool isNegative = false, digitsFound = false;
+        const int maxSignificantDigits = 15 + 2;
+
+        text = text.findEndOfWhitespace();
+        juce_wchar c = *text;
+
+        switch (c)
+        {
+            case '-':   isNegative = true; // fall-through..
+            case '+':   c = *++text;
+        }
+
+        switch (c)
+        {
+            case 'n':
+            case 'N':
+                if ((text[1] == 'a' || text[1] == 'A') && (text[2] == 'n' || text[2] == 'N'))
+                    return std::numeric_limits<double>::quiet_NaN();
+                break;
+
+            case 'i':
+            case 'I':
+                if ((text[1] == 'n' || text[1] == 'N') && (text[2] == 'f' || text[2] == 'F'))
+                    return std::numeric_limits<double>::infinity();
+                break;
+        }
+
+        for (;;)
+        {
+            if (text.isDigit())
+            {
+                lastDigit = digit;
+                digit = (int) text.getAndAdvance() - '0';
+                digitsFound = true;
+
+                if (decPointIndex != 0)
+                    exponentAdjustment[1]++;
+
+                if (numSignificantDigits == 0 && digit == 0)
+                    continue;
+
+                if (++numSignificantDigits > maxSignificantDigits)
+                {
+                    if (digit > 5)
+                        ++accumulator [decPointIndex];
+                    else if (digit == 5 && (lastDigit & 1) != 0)
+                        ++accumulator [decPointIndex];
+
+                    if (decPointIndex > 0)
+                        exponentAdjustment[1]--;
+                    else
+                        exponentAdjustment[0]++;
+
+                    while (text.isDigit())
+                    {
+                        ++text;
+                        if (decPointIndex == 0)
+                            exponentAdjustment[0]++;
+                    }
+                }
+                else
+                {
+                    const double maxAccumulatorValue = (double) ((std::numeric_limits<unsigned int>::max() - 9) / 10);
+                    if (accumulator [decPointIndex] > maxAccumulatorValue)
+                    {
+                        result [decPointIndex] = mulexp10 (result [decPointIndex], exponentAccumulator [decPointIndex])
+                                                    + accumulator [decPointIndex];
+                        accumulator [decPointIndex] = 0;
+                        exponentAccumulator [decPointIndex] = 0;
+                    }
+
+                    accumulator [decPointIndex] = accumulator[decPointIndex] * 10 + digit;
+                    exponentAccumulator [decPointIndex]++;
+                }
+            }
+            else if (decPointIndex == 0 && *text == '.')
+            {
+                ++text;
+                decPointIndex = 1;
+
+                if (numSignificantDigits > maxSignificantDigits)
+                {
+                    while (text.isDigit())
+                        ++text;
+                    break;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        result[0] = mulexp10 (result[0], exponentAccumulator[0]) + accumulator[0];
+
+        if (decPointIndex != 0)
+            result[1] = mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
+
+        c = *text;
+        if ((c == 'e' || c == 'E') && digitsFound)
+        {
+            bool negativeExponent = false;
+
+            switch (*++text)
+            {
+                case '-':   negativeExponent = true; // fall-through..
+                case '+':   ++text;
+            }
+
+            while (text.isDigit())
+                exponent = (exponent * 10) + ((int) text.getAndAdvance() - '0');
+
+            if (negativeExponent)
+                exponent = -exponent;
+        }
+
+        double r = mulexp10 (result[0], exponent + exponentAdjustment[0]);
+        if (decPointIndex != 0)
+            r += mulexp10 (result[1], exponent - exponentAdjustment[1]);
+
+        return isNegative ? -r : r;
+    }
+
+    template <typename CharPointerType>
+    static double getDoubleValue (const CharPointerType& text) noexcept
+    {
+        CharPointerType t (text);
+        return readDoubleValue (t);
+    }
+
+    //==============================================================================
+    template <typename IntType, typename CharPointerType>
+    static IntType getIntValue (const CharPointerType& text) noexcept
+    {
+        IntType v = 0;
+        CharPointerType s (text.findEndOfWhitespace());
+
+        const bool isNeg = *s == '-';
+        if (isNeg)
+            ++s;
+
+        for (;;)
+        {
+            const juce_wchar c = s.getAndAdvance();
+
+            if (c >= '0' && c <= '9')
+                v = v * 10 + (IntType) (c - '0');
+            else
+                break;
+        }
+
+        return isNeg ? -v : v;
+    }
+
+    //==============================================================================
+    template <typename CharPointerType>
+    static size_t lengthUpTo (CharPointerType text, const size_t maxCharsToCount) noexcept
+    {
+        size_t len = 0;
+
+        while (len < maxCharsToCount && text.getAndAdvance() != 0)
+            ++len;
+
+        return len;
+    }
+
+    template <typename CharPointerType>
+    static size_t lengthUpTo (CharPointerType start, const CharPointerType& end) noexcept
+    {
+        size_t len = 0;
+
+        while (start < end && start.getAndAdvance() != 0)
+            ++len;
+
+        return len;
+    }
+
+    template <typename DestCharPointerType, typename SrcCharPointerType>
+    static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) noexcept
+    {
+        for (;;)
+        {
+            const juce_wchar c = src.getAndAdvance();
+
+            if (c == 0)
+                break;
+
+            dest.write (c);
+        }
+
+        dest.writeNull();
+    }
+
+    template <typename DestCharPointerType, typename SrcCharPointerType>
+    static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) noexcept
+    {
+        typename DestCharPointerType::CharType const* const startAddress = dest.getAddress();
+        maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
+
+        for (;;)
+        {
+            const juce_wchar c = src.getAndAdvance();
+            const int bytesNeeded = (int) DestCharPointerType::getBytesRequiredFor (c);
+
+            maxBytes -= bytesNeeded;
+            if (c == 0 || maxBytes < 0)
+                break;
+
+            dest.write (c);
+        }
+
+        dest.writeNull();
+
+        return (int) (getAddressDifference (dest.getAddress(), startAddress) + sizeof (typename DestCharPointerType::CharType));
+    }
+
+    template <typename DestCharPointerType, typename SrcCharPointerType>
+    static void copyWithCharLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) noexcept
+    {
+        while (--maxChars > 0)
+        {
+            const juce_wchar c = src.getAndAdvance();
+            if (c == 0)
+                break;
+
+            dest.write (c);
+        }
+
+        dest.writeNull();
+    }
+
+    template <typename CharPointerType1, typename CharPointerType2>
+    static int compare (CharPointerType1 s1, CharPointerType2 s2) noexcept
+    {
+        for (;;)
+        {
+            const int c1 = (int) s1.getAndAdvance();
+            const int c2 = (int) s2.getAndAdvance();
+
+            const int diff = c1 - c2;
+            if (diff != 0)
+                return diff < 0 ? -1 : 1;
+            else if (c1 == 0)
+                break;
+        }
+
+        return 0;
+    }
+
+    template <typename CharPointerType1, typename CharPointerType2>
+    static int compareUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) noexcept
+    {
+        while (--maxChars >= 0)
+        {
+            const int c1 = (int) s1.getAndAdvance();
+            const int c2 = (int) s2.getAndAdvance();
+
+            const int diff = c1 - c2;
+            if (diff != 0)
+                return diff < 0 ? -1 : 1;
+            else if (c1 == 0)
+                break;
+        }
+
+        return 0;
+    }
+
+    template <typename CharPointerType1, typename CharPointerType2>
+    static int compareIgnoreCase (CharPointerType1 s1, CharPointerType2 s2) noexcept
+    {
+        for (;;)
+        {
+            int c1 = (int) s1.toUpperCase();
+            int c2 = (int) s2.toUpperCase();
+            ++s1;
+            ++s2;
+
+            const int diff = c1 - c2;
+            if (diff != 0)
+                return diff < 0 ? -1 : 1;
+            else if (c1 == 0)
+                break;
+        }
+
+        return 0;
+    }
+
+    template <typename CharPointerType1, typename CharPointerType2>
+    static int compareIgnoreCaseUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) noexcept
+    {
+        while (--maxChars >= 0)
+        {
+            int c1 = s1.toUpperCase();
+            int c2 = s2.toUpperCase();
+            ++s1;
+            ++s2;
+
+            const int diff = c1 - c2;
+            if (diff != 0)
+                return diff < 0 ? -1 : 1;
+            else if (c1 == 0)
+                break;
+        }
+
+        return 0;
+    }
+
+    template <typename CharPointerType1, typename CharPointerType2>
+    static int indexOf (CharPointerType1 haystack, const CharPointerType2& needle) noexcept
+    {
+        int index = 0;
+        const int needleLength = (int) needle.length();
+
+        for (;;)
+        {
+            if (haystack.compareUpTo (needle, needleLength) == 0)
+                return index;
+
+            if (haystack.getAndAdvance() == 0)
+                return -1;
+
+            ++index;
+        }
+    }
+
+    template <typename CharPointerType1, typename CharPointerType2>
+    static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2& needle) noexcept
+    {
+        int index = 0;
+        const int needleLength = (int) needle.length();
+
+        for (;;)
+        {
+            if (haystack.compareIgnoreCaseUpTo (needle, needleLength) == 0)
+                return index;
+
+            if (haystack.getAndAdvance() == 0)
+                return -1;
+
+            ++index;
+        }
+    }
+
+    template <typename Type>
+    static int indexOfChar (Type text, const juce_wchar charToFind) noexcept
+    {
+        int i = 0;
+
+        while (! text.isEmpty())
+        {
+            if (text.getAndAdvance() == charToFind)
+                return i;
+
+            ++i;
+        }
+
+        return -1;
+    }
+
+    template <typename Type>
+    static int indexOfCharIgnoreCase (Type text, juce_wchar charToFind) noexcept
+    {
+        charToFind = CharacterFunctions::toLowerCase (charToFind);
+        int i = 0;
+
+        while (! text.isEmpty())
+        {
+            if (text.toLowerCase() == charToFind)
+                return i;
+
+            ++text;
+            ++i;
+        }
+
+        return -1;
+    }
+
+    template <typename Type>
+    static Type findEndOfWhitespace (const Type& text) noexcept
+    {
+        Type p (text);
+
+        while (p.isWhitespace())
+            ++p;
+
+        return p;
+    }
+
+    template <typename Type>
+    static Type findEndOfToken (const Type& text, const Type& breakCharacters, const Type& quoteCharacters)
+    {
+        Type t (text);
+        juce_wchar currentQuoteChar = 0;
+
+        while (! t.isEmpty())
+        {
+            const juce_wchar c = t.getAndAdvance();
+
+            if (currentQuoteChar == 0 && breakCharacters.indexOf (c) >= 0)
+            {
+                --t;
+                break;
+            }
+
+            if (quoteCharacters.indexOf (c) >= 0)
+            {
+                if (currentQuoteChar == 0)
+                    currentQuoteChar = c;
+                else if (currentQuoteChar == c)
+                    currentQuoteChar = 0;
+            }
+        }
+
+        return t;
+    }
+
+private:
+    static double mulexp10 (const double value, int exponent) noexcept;
+};
+
+
+#endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__

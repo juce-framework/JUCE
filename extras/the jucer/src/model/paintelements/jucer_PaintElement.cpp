@@ -34,11 +34,11 @@
 //==============================================================================
 PaintElement::PaintElement (PaintRoutine* owner_,
                             const String& typeName_)
-    : owner (owner_),
+    : borderThickness (4),
+      owner (owner_),
       typeName (typeName_),
       selected (false),
       dragging (false),
-      borderThickness (4),
       originalAspectRatio (1.0)
 {
     setRepaintsOnMouseActivity (true);

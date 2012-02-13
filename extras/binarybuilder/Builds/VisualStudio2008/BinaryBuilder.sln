@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
-Project("{D7FD13D0-EADB-347A-0525-9F0597899B5A}") = "BinaryBuilder", "BinaryBuilder.vcproj", "{07A3F0B4-D234-EC23-96A2-85290D0A0775}"
+Project("{A2F28A47-6FDF-69FA-BF0B-93EA87C6A63D}") = "BinaryBuilder", "BinaryBuilder.vcproj", "{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,10 +8,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{07A3F0B4-D234-EC23-96A2-85290D0A0775}.Debug|Win32.ActiveCfg = Debug|Win32
-		{07A3F0B4-D234-EC23-96A2-85290D0A0775}.Debug|Win32.Build.0 = Debug|Win32
-		{07A3F0B4-D234-EC23-96A2-85290D0A0775}.Release|Win32.ActiveCfg = Release|Win32
-		{07A3F0B4-D234-EC23-96A2-85290D0A0775}.Release|Win32.Build.0 = Release|Win32
+		{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}.Debug|Win32.Build.0 = Debug|Win32
+		{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}.Release|Win32.ActiveCfg = Release|Win32
+		{673F5875-DC2B-BECE-2E7C-55B3B1D0E91D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

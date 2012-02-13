@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -25,6 +25,39 @@
 
 #include "jucer_NewProjectWizard.h"
 #include "jucer_ProjectType.h"
+#include "jucer_Module.h"
+#include "../Project Saving/jucer_ProjectExporter.h"
+#include "../Application/jucer_Application.h"
+#include "../Application/jucer_MainWindow.h"
+
+static void createFileCreationOptionComboBox (Component& setupComp,
+                                              OwnedArray<Component>& itemsCreated,
+                                              const char** types)
+{
+    ComboBox* c = new ComboBox();
+    itemsCreated.add (c);
+    setupComp.addChildAndSetID (c, "filesToCreate");
+
+    const char* fileOptions[] = { "Create a Main.cpp file",
+                                  "Create a Main.cpp file and a basic window",
+                                  "Don't create any files", 0 };
+
+    c->addItemList (StringArray (fileOptions), 1);
+    c->setSelectedId (1, false);
+
+    Label* l = new Label (String::empty, "Files to Auto-Generate:");
+    l->attachToComponent (c, true);
+    itemsCreated.add (l);
+
+    c->setBounds ("parent.width / 2 + 160, 10, parent.width - 10, top + 22");
+}
+
+static void setExecutableNameForAllTargets (Project& project, const String& exeName)
+{
+    for (Project::ExporterIterator exporter (project); exporter.next();)
+        for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
+            config->getTargetBinaryName() = exeName;
+}
 
 //==============================================================================
 class GUIAppWizard   : public NewProjectWizard
@@ -35,20 +68,22 @@ public:
     String getName()          { return "GUI Application"; }
     String getDescription()   { return "Creates a standard application"; }
 
-    void addItemsToAlertWindow (AlertWindow& aw)
+    void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated)
     {
         const char* fileOptions[] = { "Create a Main.cpp file",
                                       "Create a Main.cpp file and a basic window",
                                       "Don't create any files", 0 };
 
-        aw.addComboBox ("files", StringArray (fileOptions), "Files to Auto-Generate");
+        createFileCreationOptionComboBox (setupComp, itemsCreated, fileOptions);
     }
 
-    String processResultsFromAlertWindow (AlertWindow& aw)
+    Result processResultsFromSetupItems (Component& setupComp)
     {
+        ComboBox* cb = dynamic_cast<ComboBox*> (setupComp.findChildWithID ("filesToCreate"));
+        jassert (cb != nullptr);
         createMainCpp = createWindow = false;
 
-        switch (aw.getComboBoxComponent ("files")->getSelectedItemIndex())
+        switch (cb->getSelectedItemIndex())
         {
             case 0:     createMainCpp = true;  break;
             case 1:     createMainCpp = createWindow = true;  break;
@@ -56,7 +91,7 @@ public:
             default:    jassertfalse; break;
         }
 
-        return String::empty;
+        return Result::ok();
     }
 
     bool initialiseProject (Project& project)
@@ -73,8 +108,7 @@ public:
 
         Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
 
-        for (int i = project.getNumConfigurations(); --i >= 0;)
-            project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
         String initCode, shutdownCode, anotherInstanceStartedCode, privateMembers, memberInitialisers;
@@ -101,8 +135,8 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainWindowCpp, windowCpp))
                 failedFiles.add (mainWindowCpp.getFullPathName());
 
-            sourceGroup.addFile (mainWindowCpp, -1);
-            sourceGroup.addFile (mainWindowH, -1);
+            sourceGroup.addFile (mainWindowCpp, -1, true);
+            sourceGroup.addFile (mainWindowH, -1, false);
         }
 
         if (createMainCpp)
@@ -122,7 +156,7 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
-            sourceGroup.addFile (mainCppFile, -1);
+            sourceGroup.addFile (mainCppFile, -1, true);
         }
 
         return true;
@@ -141,26 +175,29 @@ public:
     String getName()          { return "Console Application"; }
     String getDescription()   { return "Creates a command-line application with no GUI features"; }
 
-    void addItemsToAlertWindow (AlertWindow& aw)
+    void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated)
     {
         const char* fileOptions[] = { "Create a Main.cpp file",
                                       "Don't create any files", 0 };
 
-        aw.addComboBox ("files", StringArray (fileOptions), "Files to Auto-Generate");
+        createFileCreationOptionComboBox (setupComp, itemsCreated, fileOptions);
     }
 
-    String processResultsFromAlertWindow (AlertWindow& aw)
+    Result processResultsFromSetupItems (Component& setupComp)
     {
+        ComboBox* cb = dynamic_cast<ComboBox*> (setupComp.findChildWithID ("filesToCreate"));
+        jassert (cb != nullptr);
+
         createMainCpp = false;
 
-        switch (aw.getComboBoxComponent ("files")->getSelectedItemIndex())
+        switch (cb->getSelectedItemIndex())
         {
             case 0:     createMainCpp = true;  break;
             case 1:     break;
             default:    jassertfalse; break;
         }
 
-        return String::empty;
+        return Result::ok();
     }
 
     bool initialiseProject (Project& project)
@@ -174,8 +211,7 @@ public:
 
         Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
 
-        for (int i = project.getNumConfigurations(); --i >= 0;)
-            project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         if (createMainCpp)
         {
@@ -187,7 +223,7 @@ public:
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
-            sourceGroup.addFile (mainCppFile, -1);
+            sourceGroup.addFile (mainCppFile, -1, true);
         }
 
         return true;
@@ -206,13 +242,13 @@ public:
     String getName()          { return "Audio Plug-In"; }
     String getDescription()   { return "Creates an audio plugin project"; }
 
-    void addItemsToAlertWindow (AlertWindow& aw)
+    void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated)
     {
     }
 
-    String processResultsFromAlertWindow (AlertWindow& aw)
+    Result processResultsFromSetupItems (Component& setupComp)
     {
-        return String::empty;
+        return Result::ok();
     }
 
     bool initialiseProject (Project& project)
@@ -230,15 +266,14 @@ public:
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
         project.getProjectTypeValue() = ProjectType::getAudioPluginTypeName();
+        project.addModule ("juce_audio_plugin_client", true);
 
         Project::Item sourceGroup (project.getMainGroup().addNewSubGroup ("Source", 0));
         project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
 
-        for (int i = project.getNumConfigurations(); --i >= 0;)
-            project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
+        setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), filterCppFile));
-        appHeaders << newLine << CodeHelpers::createIncludeStatement (project.getPluginCharacteristicsFile(), filterCppFile);
 
         String filterCpp = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_cpp")
                             .replace ("FILTERHEADERS", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
@@ -275,49 +310,19 @@ public:
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
             failedFiles.add (editorHFile.getFullPathName());
 
-        sourceGroup.addFile (filterCppFile, -1);
-        sourceGroup.addFile (filterHFile, -1);
-        sourceGroup.addFile (editorCppFile, -1);
-        sourceGroup.addFile (editorHFile, -1);
+        sourceGroup.addFile (filterCppFile, -1, true);
+        sourceGroup.addFile (filterHFile, -1, false);
+        sourceGroup.addFile (editorCppFile, -1, true);
+        sourceGroup.addFile (editorHFile, -1, false);
 
         return true;
     }
 };
 
 //==============================================================================
-/*class BrowserPluginAppWizard   : public NewProjectWizard
-{
-public:
-    BrowserPluginAppWizard()  {}
-    ~BrowserPluginAppWizard() {}
-
-    String getName()          { return "Browser Plug-In"; }
-    String getDescription()   { return "Creates an audio plugin project"; }
-
-    void addItemsToAlertWindow (AlertWindow& aw)
-    {
-    }
-
-    String processResultsFromAlertWindow (AlertWindow& aw)
-    {
-        return String::empty;
-    }
-
-    bool initialiseProject (Project& project)
-    {
-        return true;
-    }
-};*/
-
 //==============================================================================
-//==============================================================================
-NewProjectWizard::NewProjectWizard()
-{
-}
-
-NewProjectWizard::~NewProjectWizard()
-{
-}
+NewProjectWizard::NewProjectWizard() {}
+NewProjectWizard::~NewProjectWizard() {}
 
 StringArray NewProjectWizard::getWizards()
 {
@@ -351,71 +356,42 @@ NewProjectWizard* NewProjectWizard::createWizard (int index)
     return 0;
 }
 
+File& NewProjectWizard::getLastWizardFolder()
+{
+   #if JUCE_WINDOWS
+    static File lastFolder (File::getSpecialLocation (File::userDocumentsDirectory));
+   #else
+    static File lastFolder (File::getSpecialLocation (File::userHomeDirectory));
+   #endif
+    return lastFolder;
+}
+
 //==============================================================================
-Project* NewProjectWizard::runWizard (Component* ownerWindow_)
+Project* NewProjectWizard::runWizard (Component* ownerWindow_,
+                                      const String& projectName,
+                                      const File& targetFolder_)
 {
     ownerWindow = ownerWindow_;
+    appTitle = projectName;
+    targetFolder = targetFolder_;
 
+    if (! targetFolder.exists())
     {
-        static File newProjectFolder;
-        FileChooser fc ("New Juce Project", newProjectFolder, "*");
-
-        if (! fc.browseForDirectory())
-            return 0;
-
-        targetFolder = newProjectFolder = fc.getResult();
-
-        if (! newProjectFolder.exists())
-        {
-            if (! newProjectFolder.createDirectory())
-                failedFiles.add (newProjectFolder.getFullPathName());
-        }
-
-        if (FileHelpers::containsAnyNonHiddenFiles (newProjectFolder))
-        {
-            if (! AlertWindow::showOkCancelBox (AlertWindow::InfoIcon, "New Juce Project",
-                                                "The folder you chose isn't empty - are you sure you want to create the project there?\n\nAny existing files with the same names may be overwritten by the new files."))
-                return 0;
-        }
+        if (! targetFolder.createDirectory())
+            failedFiles.add (targetFolder.getFullPathName());
     }
-
-    if (failedFiles.size() == 0)
+    else if (FileHelpers::containsAnyNonHiddenFiles (targetFolder))
     {
-        AlertWindow aw ("New " + getName(),
-                        "Please choose some basic project options...",
-                        AlertWindow::NoIcon, ownerWindow);
-
-        aw.addTextEditor ("name", "", "Project Name", false);
-
-        addItemsToAlertWindow (aw);
-
-        aw.addButton ("Create Project", 1, KeyPress (KeyPress::returnKey));
-        aw.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey));
-
-        for (;;)
-        {
-            if (aw.runModalLoop() == 0)
-                return 0;
-
-            appTitle = aw.getTextEditorContents ("name").trim();
-
-            String error (processResultsFromAlertWindow (aw));
-
-            if (error.isEmpty() && appTitle.isEmpty())
-                error = "Please enter a sensible project title!";
-
-            if (error.isEmpty())
-                break;
-
-            aw.setColour (AlertWindow::textColourId, Colours::red);
-            aw.setMessage (error);
-        }
+        if (! AlertWindow::showOkCancelBox (AlertWindow::InfoIcon, "New Juce Project",
+                                            "The folder you chose isn't empty - are you sure you want to create the project there?\n\nAny existing files with the same names may be overwritten by the new files."))
+            return nullptr;
     }
 
     projectFile = targetFolder.getChildFile (File::createLegalFileName (appTitle))
                               .withFileExtension (Project::projectFileExtension);
 
-    ScopedPointer <Project> project (new Project (projectFile));
+    ScopedPointer<Project> project (new Project (projectFile));
+    project->addDefaultModules (true);
 
     if (failedFiles.size() == 0)
     {
@@ -424,10 +400,10 @@ Project* NewProjectWizard::runWizard (Component* ownerWindow_)
         project->setBundleIdentifierToDefault();
 
         if (! initialiseProject (*project))
-            return 0;
+            return nullptr;
 
         if (project->save (false, true) != FileBasedDocument::savedOk)
-            return 0;
+            return nullptr;
 
         project->setChangedFlag (false);
     }
@@ -438,48 +414,154 @@ Project* NewProjectWizard::runWizard (Component* ownerWindow_)
                                      "Errors in Creating Project!",
                                      "The following files couldn't be written:\n\n"
                                         + failedFiles.joinIntoString ("\n", 0, 10));
-        return 0;
+        return nullptr;
     }
 
     return project.release();
 }
 
-Project* NewProjectWizard::runNewProjectWizard (Component* ownerWindow)
+//==============================================================================
+class NewProjectWizard::WizardComp  : public Component,
+                                      private ButtonListener,
+                                      private ComboBoxListener,
+                                      private TextEditorListener
 {
-    ScopedPointer <NewProjectWizard> wizard;
-
+public:
+    WizardComp()
+        : projectName ("Project name"),
+          nameLabel (String::empty, "Project Name:"),
+          typeLabel (String::empty, "Project Type:"),
+          fileBrowser (FileBrowserComponent::saveMode | FileBrowserComponent::canSelectDirectories,
+                       getLastWizardFolder(), nullptr, nullptr),
+          fileOutline (String::empty, "Project Folder:"),
+          createButton ("Create..."),
+          cancelButton ("Cancel")
     {
-        AlertWindow aw ("New Juce Project",
-                        "Select the type of project to create, and the location of your Juce folder",
-                        AlertWindow::NoIcon,
-                        ownerWindow);
+        setOpaque (true);
+        setSize (600, 500);
 
-        aw.addComboBox ("type", getWizards(), "Project Type");
+        addChildAndSetID (&projectName, "projectName");
+        projectName.setText ("NewProject");
+        projectName.setBounds ("100, 14, parent.width / 2 - 10, top + 22");
+        nameLabel.attachToComponent (&projectName, true);
+        projectName.addListener (this);
 
-        FilenameComponent juceFolderSelector ("Juce Library Location", StoredSettings::getInstance()->getLastKnownJuceFolder(),
-                                              true, true, false, "*", String::empty, "(Please select the folder containing Juce!)");
-        juceFolderSelector.setSize (350, 22);
+        addChildAndSetID (&projectType, "projectType");
+        projectType.addItemList (getWizards(), 1);
+        projectType.setSelectedId (1, true);
+        projectType.setBounds ("100, projectName.bottom + 4, projectName.right, top + 22");
+        typeLabel.attachToComponent (&projectType, true);
+        projectType.addListener (this);
 
-        aw.addCustomComponent (&juceFolderSelector);
+        addChildAndSetID (&fileOutline, "fileOutline");
+        fileOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
+        fileOutline.setTextLabelPosition (Justification::centred);
+        fileOutline.setBounds ("10, projectType.bottom + 20, projectType.right, parent.height - 10");
 
-        aw.addButton ("Next", 1, KeyPress (KeyPress::returnKey));
-        aw.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey));
+        addChildAndSetID (&fileBrowser, "fileBrowser");
+        fileBrowser.setBounds ("fileOutline.left + 10, fileOutline.top + 20, fileOutline.right - 10, fileOutline.bottom - 12");
+        fileBrowser.setFilenameBoxLabel ("Folder:");
 
-        for (;;)
+        addChildAndSetID (&createButton, "createButton");
+        createButton.setBounds ("right - 140, bottom - 24, parent.width - 10, parent.height - 10");
+        createButton.addListener (this);
+
+        addChildAndSetID (&cancelButton, "cancelButton");
+        cancelButton.setBounds ("right - 140, createButton.top, createButton.left - 10, createButton.bottom");
+        cancelButton.addListener (this);
+
+        updateCustomItems();
+        updateCreateButton();
+    }
+
+    void paint (Graphics& g)
+    {
+        g.fillAll (Colour::greyLevel (0.93f));
+    }
+
+    void buttonClicked (Button* b)
+    {
+        if (b == &createButton)
         {
-            if (aw.runModalLoop() == 0)
-                return 0;
+            createProject();
+        }
+        else
+        {
+            MainWindow* mw = dynamic_cast<MainWindow*> (getTopLevelComponent());
+            jassert (mw != nullptr);
 
-            if (FileHelpers::isJuceFolder (juceFolderSelector.getCurrentFile()))
-            {
-                wizard = createWizard (aw.getComboBoxComponent ("type")->getSelectedItemIndex());
-                break;
-            }
-
-            aw.setColour (AlertWindow::textColourId, Colours::red);
-            aw.setMessage ("Please select a valid Juce folder for the project to use!");
+            JucerApplication::getApp()->closeWindow (mw);
         }
     }
 
-    return wizard != nullptr ? wizard->runWizard (ownerWindow) : 0;
+    void createProject()
+    {
+        MainWindow* mw = Component::findParentComponentOfClass<MainWindow>();
+        jassert (mw != nullptr);
+
+        ScopedPointer <NewProjectWizard> wizard (createWizard());
+
+        if (wizard != nullptr)
+        {
+            Result result (wizard->processResultsFromSetupItems (*this));
+
+            if (result.failed())
+            {
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon, "Create Project", result.getErrorMessage());
+                return;
+            }
+
+            ScopedPointer<Project> project (wizard->runWizard (mw, projectName.getText(),
+                                                               fileBrowser.getSelectedFile (0)));
+
+            if (project != nullptr)
+                mw->setProject (project.release());
+        }
+    }
+
+    void updateCustomItems()
+    {
+        customItems.clear();
+
+        ScopedPointer <NewProjectWizard> wizard (createWizard());
+
+        if (wizard != nullptr)
+            wizard->addSetupItems (*this, customItems);
+    }
+
+    void comboBoxChanged (ComboBox*)
+    {
+        updateCustomItems();
+    }
+
+    void textEditorTextChanged (TextEditor&)
+    {
+        updateCreateButton();
+
+        fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
+    }
+
+private:
+    ComboBox projectType;
+    TextEditor projectName;
+    Label nameLabel, typeLabel;
+    FileBrowserComponent fileBrowser;
+    GroupComponent fileOutline;
+    TextButton createButton, cancelButton;
+    OwnedArray<Component> customItems;
+
+    NewProjectWizard* createWizard()
+    {
+        return NewProjectWizard::createWizard (projectType.getSelectedItemIndex());
+    }
+
+    void updateCreateButton()
+    {
+        createButton.setEnabled (projectName.getText().trim().isNotEmpty());
+    }
+};
+
+Component* NewProjectWizard::createComponent()
+{
+    return new WizardComp();
 }

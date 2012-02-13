@@ -284,7 +284,7 @@ public:
         }
     }
 
-    const String getTypefaceName() const throw()                    { return typefaceName; }
+    String getTypefaceName() const throw()                          { return typefaceName; }
 
     //==============================================================================
     const Justification& getJustification() const throw()           { return justification; }
@@ -382,7 +382,7 @@ private:
         }
 
         void setText (const String& newText)    { element->setText (newText, true); }
-        const String getText() const            { return element->getText(); }
+        String getText() const                  { return element->getText(); }
 
         void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
 
@@ -408,7 +408,7 @@ private:
         }
 
         void setTypefaceName (const String& newFontName)    { element->setTypefaceName (newFontName, true); }
-        const String getTypefaceName() const                { return element->getTypefaceName(); }
+        String getTypefaceName() const                      { return element->getTypefaceName(); }
 
         void changeListenerCallback (ChangeBroadcaster*)                 { refresh(); }
 
@@ -552,7 +552,7 @@ private:
             element->convertToPath();
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "convert text to a path";
         }

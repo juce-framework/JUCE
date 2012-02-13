@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -45,6 +45,7 @@ public:
     void paint (Graphics& g);
 
     void setProject (Project* project);
+    void saveTreeViewState();
 
     bool showEditorForFile (const File& f);
     bool showDocument (OpenDocumentManager::Document* doc);

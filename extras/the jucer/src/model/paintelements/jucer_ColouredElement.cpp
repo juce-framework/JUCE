@@ -179,7 +179,7 @@ public:
             owner->setStrokeFill (fill, true);
     }
 
-    const Colour getColour() const
+    Colour getColour() const
     {
         const JucerFillType fill (isForStroke ? owner->getStrokeType().fill
                                               : owner->getFillType());
@@ -1025,18 +1025,16 @@ void ColouredElement::convertToNewPathElement (const Path& path)
 {
     if (! path.isEmpty())
     {
-        PaintElementPath* newElement = new PaintElementPath (getOwner());
-        newElement->setToPath (path);
-        newElement->setFillType (fillType, false);
-        newElement->enableStroke (isStrokeEnabled(), false);
-        newElement->setStrokeType (getStrokeType().stroke, false);
-        newElement->setStrokeFill (getStrokeType().fill, false);
+        PaintElementPath newElement (getOwner());
+        newElement.setToPath (path);
+        newElement.setFillType (fillType, false);
+        newElement.enableStroke (isStrokeEnabled(), false);
+        newElement.setStrokeType (getStrokeType().stroke, false);
+        newElement.setStrokeFill (getStrokeType().fill, false);
 
-        XmlElement* xml = newElement->createXml();
-        delete newElement;
+        ScopedPointer<XmlElement> xml (newElement.createXml());
 
         PaintElement* e = getOwner()->addElementFromXml (*xml, getOwner()->indexOfElement (this), true);
-        delete xml;
 
         getOwner()->getSelectedElements().selectOnly (e);
         getOwner()->removeElement (this, true);

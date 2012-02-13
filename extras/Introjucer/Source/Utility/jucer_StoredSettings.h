@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@
 
 //==============================================================================
 /**
-    A singleton to hold the jucer's persistent settings, and to save them in a
+    A singleton to hold persistent settings, and to save them in a
     suitable PropertiesFile.
 */
 class StoredSettings
@@ -50,9 +50,6 @@ public:
     Array<File> getLastProjects() const;
     void setLastProjects (const Array<File>& files);
 
-    File getLastKnownJuceFolder() const;
-    void setLastKnownJuceFolder (const File& file);
-
     const StringArray& getFontNames();
 
     //==============================================================================
@@ -64,7 +61,7 @@ public:
         ColourSelectorWithSwatches() {}
 
         int getNumSwatches() const                                      { return StoredSettings::getInstance()->swatchColours.size(); }
-        const Colour getSwatchColour (int index) const                  { return StoredSettings::getInstance()->swatchColours [index]; }
+        Colour getSwatchColour (int index) const                        { return StoredSettings::getInstance()->swatchColours [index]; }
         void setSwatchColour (int index, const Colour& newColour) const { StoredSettings::getInstance()->swatchColours.set (index, newColour); }
     };
 

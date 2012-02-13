@@ -291,11 +291,11 @@ void PaintRoutineEditor::filesDropped (const StringArray& filenames, int x, int 
 
     if (f.existsAsFile())
     {
-        Drawable* d = Drawable::createFromImageFile (f);
+        ScopedPointer<Drawable> d (Drawable::createFromImageFile (f));
 
-        if (d != 0)
+        if (d != nullptr)
         {
-            delete d;
+            d = nullptr;
 
             document.getUndoManager().beginNewTransaction();
 

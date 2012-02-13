@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_COMMONINCLUDES_H__
-#define __JUCER_COMMONINCLUDES_H__
+#ifndef __JUCER_COMMONHEADERS_JUCEHEADER__
+#define __JUCER_COMMONHEADERS_JUCEHEADER__
 
 
 #include "../Utility/jucer_StoredSettings.h"
@@ -37,7 +37,7 @@
 #include "jucer_CommandIDs.h"
 
 //==============================================================================
-extern ApplicationCommandManager* commandManager;
+extern ScopedPointer<ApplicationCommandManager> commandManager;
 
 //==============================================================================
 const char* const projectItemDragType   = "Project Items";
@@ -48,4 +48,4 @@ const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx";
 const char* const headerFileExtensions          = "h;hpp;hxx";
 const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;h;hpp;hxx";
 
-#endif
+#endif   // __JUCER_COMMONHEADERS_JUCEHEADER__

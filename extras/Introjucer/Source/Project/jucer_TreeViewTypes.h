@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -39,9 +39,9 @@ public:
     bool acceptsFileDrop (const StringArray& files) const                   { return false; }
     bool acceptsDragItems (const OwnedArray <Project::Item>& selectedNodes) { return false; }
     ProjectTreeViewBase* createSubItem (const Project::Item& child);
-    void createLeftEdgeComponents (Array<Component*>& components)           {}
     void showDocument();
     void showPopupMenu();
+    void handlePopupMenuResult (int resultCode);
     String getDisplayName() const;
     void setName (const String& newName);
 };
@@ -59,9 +59,9 @@ public:
     void checkFileStatus();
     void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex);
     ProjectTreeViewBase* createSubItem (const Project::Item& child);
-    void createLeftEdgeComponents (Array<Component*>& components)       {}
     void showDocument();
     void showPopupMenu();
+    void handlePopupMenuResult (int resultCode);
 
     void addFiles (const StringArray& files, int insertIndex);
     void addNewGroup();

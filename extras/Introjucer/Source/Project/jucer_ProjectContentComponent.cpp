@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "jucer_ProjectInformationComponent.h"
 #include "jucer_TreeViewTypes.h"
-#include "jucer_ProjectExporter.h"
+#include "../Project Saving/jucer_ProjectExporter.h"
 
 
 //==============================================================================
@@ -59,6 +59,8 @@ void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
     {
+        PropertiesFile& settings = StoredSettings::getInstance()->getProps();
+
         if (project != nullptr)
             project->removeChangeListener (this);
 
@@ -67,7 +69,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         if (projectTree != nullptr)
         {
-            StoredSettings::getInstance()->getProps().setValue ("projectTreeviewWidth", projectTree->getWidth());
+            settings.setValue ("projectTreeviewWidth", projectTree->getWidth());
             projectTree->deleteRootItem();
             projectTree = nullptr;
         }
@@ -76,8 +78,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         if (project != nullptr)
         {
-            addAndMakeVisible (projectTree = new TreeView());
-            projectTree->setComponentID ("tree");
+            addChildAndSetID (projectTree = new TreeView(), "tree");
             projectTree->setRootItemVisible (true);
             projectTree->setMultiSelectEnabled (true);
             projectTree->setDefaultOpenness (true);
@@ -87,15 +88,15 @@ void ProjectContentComponent::setProject (Project* newProject)
             projectTree->setRootItem (new GroupTreeViewItem (project->getMainGroup()));
             projectTree->getRootItem()->setOpen (true);
 
-            String lastTreeWidth (StoredSettings::getInstance()->getProps().getValue ("projectTreeviewWidth"));
+            String lastTreeWidth (settings.getValue ("projectTreeviewWidth"));
             if (lastTreeWidth.getIntValue() < 150)
                 lastTreeWidth = "250";
 
             projectTree->setBounds ("0, 0, left + " + lastTreeWidth + ", parent.height");
 
-            addAndMakeVisible (resizerBar = new ResizableEdgeComponent (projectTree, &treeSizeConstrainer,
-                                                                        ResizableEdgeComponent::rightEdge));
-            resizerBar->setComponentID ("resizer");
+            addChildAndSetID (resizerBar = new ResizableEdgeComponent (projectTree, &treeSizeConstrainer, ResizableEdgeComponent::rightEdge),
+                              "resizer");
+
             resizerBar->setBounds ("tree.right, 0, tree.right + 4, parent.height");
 
             project->addChangeListener (this);
@@ -104,7 +105,24 @@ void ProjectContentComponent::setProject (Project* newProject)
                 invokeDirectly (CommandIDs::showProjectSettings, true);
 
             updateMissingFileStatuses();
+
+            const ScopedPointer<XmlElement> treeOpenness (settings.getXmlValue ("treeViewState_" + project->getProjectUID()));
+
+            if (treeOpenness != nullptr)
+                projectTree->restoreOpennessState (*treeOpenness, true);
         }
+    }
+}
+
+void ProjectContentComponent::saveTreeViewState()
+{
+    if (projectTree != nullptr)
+    {
+        const ScopedPointer<XmlElement> opennessState (projectTree->getOpennessState (true));
+
+        if (opennessState != nullptr)
+            StoredSettings::getInstance()->getProps()
+                .setValue ("treeViewState_" + project->getProjectUID(), opennessState);
     }
 }
 
@@ -125,8 +143,7 @@ void ProjectContentComponent::updateMissingFileStatuses()
 
 bool ProjectContentComponent::showEditorForFile (const File& f)
 {
-    return showDocument (OpenDocumentManager::getInstance()
-                           ->getDocumentForFile (project, f));
+    return showDocument (OpenDocumentManager::getInstance()->openFile (project, f));
 }
 
 bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
@@ -223,7 +240,6 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Closes the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::openInIDE:

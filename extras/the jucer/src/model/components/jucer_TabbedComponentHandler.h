@@ -191,16 +191,15 @@ public:
 
             if (isTabUsingJucerComp (t, i))
             {
-                JucerDocument* doc
-                    = ObjectTypes::loadDocumentFromFile (code.document->getFile()
-                                                            .getSiblingFile (getTabJucerFile (t, i)), false);
+                ScopedPointer<JucerDocument> doc
+                    (ObjectTypes::loadDocumentFromFile (code.document->getFile()
+                                                            .getSiblingFile (getTabJucerFile (t, i)), false));
 
                 if (doc != 0)
                 {
                     code.includeFilesCPP.add (getTabJucerFile (t, i).replace (".cpp", ".h"));
 
                     contentClassName = doc->getClassName();
-                    delete doc;
                 }
             }
             else
@@ -654,7 +653,7 @@ private:
                               "Add a new tab");
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "Create a new tab";
         }
@@ -720,7 +719,7 @@ private:
             }
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "Delete a tab...";
         }
@@ -734,15 +733,9 @@ private:
         public:
             RemoveTabAction (TabbedComponent* const comp, ComponentLayout& layout, int indexToRemove_)
                 : ComponentUndoableAction <TabbedComponent> (comp, layout),
-                  indexToRemove (indexToRemove_),
-                  previousState (0)
+                  indexToRemove (indexToRemove_)
             {
                 previousState = getTabState (comp, indexToRemove);
-            }
-
-            ~RemoveTabAction()
-            {
-                delete previousState;
             }
 
             bool perform()
@@ -767,7 +760,7 @@ private:
 
         private:
             int indexToRemove;
-            XmlElement* previousState;
+            ScopedPointer<XmlElement> previousState;
         };
     };
 
@@ -787,7 +780,7 @@ private:
                               "Change tab name");
         }
 
-        const String getText() const
+        String getText() const
         {
             return component->getTabNames() [tabIndex];
         }
@@ -855,7 +848,7 @@ private:
                               "Change tab colour");
         }
 
-        const Colour getColour() const
+        Colour getColour() const
         {
             return component->getTabBackgroundColour (tabIndex);
         }
@@ -1054,7 +1047,7 @@ private:
                               "Change TabbedComponent content class");
         }
 
-        const String getText() const
+        String getText() const
         {
             return getTabClassName (component, tabIndex);
         }
@@ -1112,7 +1105,7 @@ private:
                               "Change TabbedComponent content constructor param");
         }
 
-        const String getText() const
+        String getText() const
         {
             return getTabConstructorParams (component, tabIndex);
         }
@@ -1184,7 +1177,7 @@ private:
             }
         }
 
-        const String getButtonText() const
+        String getButtonText() const
         {
             return "Move this tab...";
         }
@@ -1209,13 +1202,12 @@ private:
             {
                 showCorrectTab();
 
-                XmlElement* const state = getTabState (getComponent(), from);
+                ScopedPointer<XmlElement> state (getTabState (getComponent(), from));
 
                 getComponent()->removeTab (from);
                 addNewTab (getComponent(), to);
 
                 restoreTabState (getComponent(), to, *state);
-                delete state;
 
                 layout.getDocument()->refreshAllPropertyComps();
                 changed();

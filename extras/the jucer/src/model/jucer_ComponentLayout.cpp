@@ -83,11 +83,6 @@ public:
     {
     }
 
-    ~AddCompAction()
-    {
-        delete xml;
-    }
-
     bool perform()
     {
         showCorrectTab();
@@ -111,7 +106,7 @@ public:
     int indexAdded;
 
 private:
-    XmlElement* xml;
+    ScopedPointer<XmlElement> xml;
     ComponentLayout& layout;
 
     static void showCorrectTab()
@@ -138,15 +133,8 @@ public:
         jassert (h != 0);
         if (h != 0)
             xml = h->createXmlFor (comp, &layout);
-        else
-            xml = 0;
 
         oldIndex = layout.indexOfComponent (comp);
-    }
-
-    ~DeleteCompAction()
-    {
-        delete xml;
     }
 
     bool perform()
@@ -168,7 +156,7 @@ public:
     }
 
 private:
-    XmlElement* xml;
+    ScopedPointer<XmlElement> xml;
     int oldIndex;
 };
 
@@ -289,7 +277,7 @@ void ComponentLayout::copySelectedToClipboard()
 void ComponentLayout::paste()
 {
     XmlDocument clip (SystemClipboard::getTextFromClipboard());
-    XmlElement* const doc = clip.getDocumentElement();
+    ScopedPointer<XmlElement> doc (clip.getDocumentElement());
 
     if (doc != 0 && doc->hasTagName (clipboardXmlTag))
     {
@@ -308,8 +296,6 @@ void ComponentLayout::paste()
                            Random::getSystemRandom().nextInt (40));
         endDragging();
     }
-
-    delete doc;
 }
 
 void ComponentLayout::deleteSelected()
@@ -369,7 +355,7 @@ void ComponentLayout::bringLostItemsBackOnScreen (int width, int height)
 
 Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, int x, int y)
 {
-    Component* c = type->createNewComponent (getDocument());
+    ScopedPointer<Component> c (type->createNewComponent (getDocument()));
     jassert (c != 0);
 
     if (c != 0)
@@ -380,11 +366,9 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
 
         c->getProperties().set ("id", nextCompUID++);
 
-        XmlElement* xml = type->createXmlFor (c, this);
-        delete c;
-
+        ScopedPointer<XmlElement> xml (type->createXmlFor (c, this));
+        c = nullptr;
         c = addComponentFromXml (*xml, true);
-        delete xml;
 
         String memberName (makeValidCppIdentifier (type->getClassName (c), true, true, false));
         setComponentMemberVariableName (c, memberName);
@@ -392,7 +376,7 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
         selected.selectOnly (c);
     }
 
-    return c;
+    return c.release();
 }
 
 

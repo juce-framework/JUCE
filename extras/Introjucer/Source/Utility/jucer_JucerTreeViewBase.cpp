@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -28,40 +28,20 @@
 
 //==============================================================================
 JucerTreeViewBase::JucerTreeViewBase()
-    : numLeftHandComps (0)
+    : textX (0)
 {
     setLinesDrawnForSubItems (false);
 }
 
-JucerTreeViewBase::~JucerTreeViewBase()
-{
-}
-
-const Font JucerTreeViewBase::getFont() const
+Font JucerTreeViewBase::getFont() const
 {
     return Font (getItemHeight() * 0.6f);
-}
-
-int JucerTreeViewBase::getTextX() const
-{
-    return (numLeftHandComps + 1) * getItemHeight() + 8;
 }
 
 void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
 {
     if (isSelected())
         g.fillAll (Colour (0x401111ee));
-
-    const int x = getTextX();
-
-    g.setColour (Colours::black);
-
-    getIcon()->drawWithin (g, Rectangle<float> (0.0f, 2.0f, height + 6.0f, height - 4.0f),
-                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
-
-    g.setFont (getFont());
-    g.setColour (isMissing() ? Colours::red : Colours::black);
-    g.drawFittedText (getDisplayName(), x, 0, width - x, height, Justification::centredLeft, 1, 0.8f);
 }
 
 void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver)
@@ -69,68 +49,119 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height
     Path p;
 
     if (isOpen())
-        p.addTriangle (width * 0.2f, height * 0.25f, width * 0.8f, height * 0.25f, width * 0.5f, height * 0.75f);
+        p.addTriangle (width * 0.2f,  height * 0.25f, width * 0.8f, height * 0.25f, width * 0.5f, height * 0.75f);
     else
-        p.addTriangle (width * 0.25f, height * 0.25f, width * 0.8f, height * 0.5f, width * 0.25f, height * 0.75f);
+        p.addTriangle (width * 0.25f, height * 0.25f, width * 0.8f, height * 0.5f,  width * 0.25f, height * 0.75f);
 
     g.setColour (Colours::lightgrey);
     g.fillPath (p);
 }
 
 //==============================================================================
-class TreeLeftHandButtonHolderComponent   : public Component
+class TreeItemComponent   : public Component
 {
 public:
-    TreeLeftHandButtonHolderComponent (const Array<Component*>& comps)
+    TreeItemComponent (JucerTreeViewBase& item_)
+        : item (item_)
     {
-        components.addArray (comps);
         setInterceptsMouseClicks (false, true);
 
-        for (int i = 0; i < comps.size(); ++i)
-            addAndMakeVisible (comps.getUnchecked(i));
+        item.createLeftEdgeComponents (leftComps);
+
+        for (int i = 0; i < leftComps.size(); ++i)
+            addAndMakeVisible (leftComps.getUnchecked(i));
+
+        addAndMakeVisible (rightHandComponent = item.createRightEdgeComponent());
+    }
+
+    void paint (Graphics& g)
+    {
+        g.setColour (Colours::black);
+
+        const int height = getHeight();
+
+        item.getIcon()->drawWithin (g, Rectangle<float> (0.0f, 2.0f, height + 6.0f, height - 4.0f),
+                                    RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
+
+        g.setFont (item.getFont());
+        g.setColour (item.isMissing() ? Colours::red : Colours::black);
+
+        const int right = rightHandComponent != nullptr ? rightHandComponent->getX() - 2
+                                                        : getWidth();
+
+        g.drawFittedText (item.getDisplayName(),
+                          item.textX, 0, right - item.textX, height, Justification::centredLeft, 1, 0.8f);
     }
 
     void resized()
     {
         const int edge = 1;
         const int itemSize = getHeight() - edge * 2;
+        item.textX = (leftComps.size() + 1) * getHeight() + 8;
 
-        for (int i = 0; i < components.size(); ++i)
-            components.getUnchecked(i)->setBounds (5 + (i + 1) * getHeight(), edge, itemSize, itemSize);
+        for (int i = 0; i < leftComps.size(); ++i)
+            leftComps.getUnchecked(i)->setBounds (5 + (i + 1) * getHeight(), edge, itemSize, itemSize);
+
+        if (rightHandComponent != nullptr)
+            rightHandComponent->setBounds (getWidth() - itemSize - edge, edge, itemSize, itemSize);
     }
 
 private:
-    OwnedArray<Component> components;
+    JucerTreeViewBase& item;
+    OwnedArray<Component> leftComps;
+    ScopedPointer<Component> rightHandComponent;
 };
 
 Component* JucerTreeViewBase::createItemComponent()
 {
-    Array<Component*> components;
-    createLeftEdgeComponents (components);
-    numLeftHandComps = components.size();
-
-    return numLeftHandComps == 0 ? 0 : new TreeLeftHandButtonHolderComponent (components);
+    return new TreeItemComponent (*this);
 }
 
 //==============================================================================
+class RenameTreeItemCallback  : public ModalComponentManager::Callback,
+                                public TextEditorListener
+{
+public:
+    RenameTreeItemCallback (JucerTreeViewBase& item_, Component& parent, const Rectangle<int>& bounds)
+        : item (item_)
+    {
+        ed.setMultiLine (false, false);
+        ed.setPopupMenuEnabled (false);
+        ed.setSelectAllWhenFocused (true);
+        ed.setFont (item.getFont());
+        ed.addListener (this);
+        ed.setText (item.getRenamingName());
+        ed.setBounds (bounds);
+
+        parent.addAndMakeVisible (&ed);
+        ed.enterModalState (true, this);
+    }
+
+    void modalStateFinished (int resultCode)
+    {
+        if (resultCode != 0)
+            item.setName (ed.getText());
+    }
+
+    void textEditorTextChanged (TextEditor&)                {}
+    void textEditorReturnKeyPressed (TextEditor& editor)    { editor.exitModalState (1); }
+    void textEditorEscapeKeyPressed (TextEditor& editor)    { editor.exitModalState (0); }
+    void textEditorFocusLost (TextEditor& editor)           { editor.exitModalState (0); }
+
+private:
+    TextEditor ed;
+    JucerTreeViewBase& item;
+
+    JUCE_DECLARE_NON_COPYABLE (RenameTreeItemCallback);
+};
+
 void JucerTreeViewBase::showRenameBox()
 {
-    TextEditor ed (String::empty);
-    ed.setMultiLine (false, false);
-    ed.setPopupMenuEnabled (false);
-    ed.setSelectAllWhenFocused (true);
-    ed.setFont (getFont());
-    ed.addListener (this);
-    ed.setText (getRenamingName());
-
     Rectangle<int> r (getItemPosition (true));
-    r.setLeft (r.getX() + getTextX());
+    r.setLeft (r.getX() + textX);
     r.setHeight (getItemHeight());
-    ed.setBounds (r);
-    getOwnerView()->addAndMakeVisible (&ed);
 
-    if (ed.runModalLoop() != 0)
-        setName (ed.getText());
+    new RenameTreeItemCallback (*this, *getOwnerView(), r);
 }
 
 void JucerTreeViewBase::itemClicked (const MouseEvent& e)

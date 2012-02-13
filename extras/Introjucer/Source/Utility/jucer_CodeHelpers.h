@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_CODEUTILITIES_H_B86AA5D2__
-#define __JUCER_CODEUTILITIES_H_B86AA5D2__
+#ifndef __JUCER_CODEHELPERS_JUCEHEADER__
+#define __JUCER_CODEHELPERS_JUCEHEADER__
 
 
 //==============================================================================
@@ -33,30 +33,22 @@ namespace CodeHelpers
     String indent (const String& code, const int numSpaces, bool indentFirstLine);
     String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates);
     String addEscapeChars (const String& text);
-    String createIncludeStatement (const File& includeFile, const File& targetFile);
+    String createIncludeStatement (const File& includedFile, const File& targetFile);
     String createIncludeStatement (const String& includePath);
     String makeHeaderGuardName (const File& file);
     String makeBinaryDataIdentifierName (const File& file);
 
     String stringLiteral (const String& text);
-    String stringLiteralIfNotEmpty (const String& text); // if the string's empty, this returns an empty string
-    String boolLiteral (bool b);
-    String floatLiteral (float v);
-    String doubleLiteral (double v);
 
     String colourToCode (const Colour& col);
-    String justificationToCode (const Justification& justification);
-    String castToFloat (const String& expression);
-    String castToInt (const String& expression);
-    String fontToCode (const Font& font);
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
 
-    void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out);
+    void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out,
+                                bool breakAtNewLines, bool allowStringBreaks);
 
     void createStringMatcher (OutputStream& out, const String& utf8PointerVariable,
                               const StringArray& strings, const StringArray& codeToExecute, const int indentLevel);
-
 }
 
 
-#endif  // __JUCER_CODEUTILITIES_H_B86AA5D2__
+#endif   // __JUCER_CODEHELPERS_JUCEHEADER__

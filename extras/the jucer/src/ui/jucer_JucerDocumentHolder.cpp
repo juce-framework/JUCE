@@ -194,7 +194,7 @@ private:
         {}
 
         void setText (const String& newText)    { document.setClassName (newText); }
-        const String getText() const            { return document.getClassName(); }
+        String getText() const                  { return document.getClassName(); }
     };
 
     //==============================================================================
@@ -206,7 +206,7 @@ private:
         {}
 
         void setText (const String& newText)    { document.setComponentName (newText); }
-        const String getText() const            { return document.getComponentName(); }
+        String getText() const                  { return document.getComponentName(); }
     };
 
     //==============================================================================
@@ -218,7 +218,7 @@ private:
         {}
 
         void setText (const String& newText)    { document.setParentClasses (newText); }
-        const String getText() const            { return document.getParentClassString(); }
+        String getText() const                  { return document.getParentClassString(); }
     };
 
     //==============================================================================
@@ -230,7 +230,7 @@ private:
         {}
 
         void setText (const String& newText)    { document.setConstructorParams (newText); }
-        const String getText() const            { return document.getConstructorParams(); }
+        String getText() const                  { return document.getConstructorParams(); }
     };
 
     //==============================================================================
@@ -244,7 +244,7 @@ private:
         }
 
         void setText (const String& newText)    { document.setVariableInitialisers (newText); }
-        const String getText() const            { return document.getVariableInitialisers(); }
+        String getText() const                  { return document.getVariableInitialisers(); }
     };
 
 
@@ -266,7 +266,7 @@ private:
                 document.setInitialSize  (document.getInitialWidth(), newText.getIntValue());
         }
 
-        const String getText() const
+        String getText() const
         {
             return String (isWidth ? document.getInitialWidth()
                                    : document.getInitialHeight());

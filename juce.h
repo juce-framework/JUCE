@@ -26,141 +26,46 @@
 #ifndef __JUCE_JUCEHEADER__
 #define __JUCE_JUCEHEADER__
 
-//==============================================================================
 /*
-    This is the main JUCE header file that applications need to include.
+    PLEASE NOTE! This file is just here to help transition old code to the newer
+    modularised layout - but it will be removed at some point in the future, so
+    you should update your projects to use the newer design as soon as possible.
 
+    Now that the library has been broken up into separate modules, instead of
+    including one giant header that includes everything, you should include the
+    headers of the modules that you want to use. By far the easiest way to do that
+    is with the introjucer, which will sort everything out for you and create a
+    single header for your app which correctly includes everything you need.
 */
+#ifdef _MSC_VER
+ #pragma message ("The juce.h file is deprecated - please include each module's header file directly, or preferably let the introjucer handle the inclusion of source code in your project.")
+#else
+ #warning "The juce.h file is deprecated - please include each module's header file directly, or preferably let the introjucer handle the inclusion of source code in your project."
+#endif
+
 //==============================================================================
-
-/* This line is here just to help catch syntax errors caused by mistakes in other header
-   files that are included before juce.h. If you hit an error at this line, it must be some
-   kind of syntax problem in whatever code immediately precedes this header.
-
-   This also acts as a sanity-check in case you're trying to build with a C or obj-C compiler
-   rather than a proper C++ one.
-*/
-namespace JuceDummyNamespace {}
-
-#define JUCE_PUBLIC_INCLUDES 1
-
-// (this includes things that need defining outside of the JUCE namespace)
-#include "src/core/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#if JUCE_MSVC
-  // this is set explicitly in case the app is using a different packing size.
-  #pragma pack (push, 8)
-  #pragma warning (push)
-  #pragma warning (disable: 4786) // (old vc6 warning about long class names)
-  #ifdef __INTEL_COMPILER
-   #pragma warning (disable: 1125)
-  #endif
-#endif
-
-// this is where all the class header files get brought in..
-#include "src/juce_core_includes.h"
-
-// if you're compiling a command-line app, you might want to just include the core headers,
-// so you can set this macro before including juce.h
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-  #include "src/juce_app_includes.h"
-#endif
-
-#if JUCE_MSVC
-  #pragma warning (pop)
-  #pragma pack (pop)
-#endif
-
-END_JUCE_NAMESPACE
+#include "modules/juce_core/juce_core.h"
+#include "modules/juce_gui_basics/juce_gui_basics.h"
+#include "modules/juce_data_structures/juce_data_structures.h"
+#include "modules/juce_events/juce_events.h"
+#include "modules/juce_graphics/juce_graphics.h"
+#include "modules/juce_video/juce_video.h"
+#include "modules/juce_opengl/juce_opengl.h"
+#include "modules/juce_audio_basics/juce_audio_basics.h"
+#include "modules/juce_audio_formats/juce_audio_formats.h"
+#include "modules/juce_audio_processors/juce_audio_processors.h"
+#include "modules/juce_audio_devices/juce_audio_devices.h"
+#include "modules/juce_cryptography/juce_cryptography.h"
+#include "modules/juce_gui_extra/juce_gui_extra.h"
+#include "modules/juce_audio_utils/juce_audio_utils.h"
 
 
 //==============================================================================
-#ifndef DONT_SET_USING_JUCE_NAMESPACE
-#ifdef JUCE_NAMESPACE
-
-  // this will obviously save a lot of typing, but can be disabled by
-  // defining DONT_SET_USING_JUCE_NAMESPACE, in case there are conflicts.
-  using namespace JUCE_NAMESPACE;
-
-  /* On the Mac, these symbols are defined in the Mac libraries, so
-     these macros make it easier to reference them without writing out
-     the namespace every time.
-
-     If you run into difficulties where these macros interfere with the contents
-     of 3rd party header files, you may need to use the juce_WithoutMacros.h file - see
-     the comments in that file for more information.
+#if ! DONT_SET_USING_JUCE_NAMESPACE
+  /* If you're not mixing JUCE with other libraries, then this will obviously save
+     a lot of typing, but can be disabled by setting DONT_SET_USING_JUCE_NAMESPACE.
   */
-  #if (JUCE_MAC || JUCE_IOS) && ! JUCE_DONT_DEFINE_MACROS
-    #define Component       JUCE_NAMESPACE::Component
-    #define MemoryBlock     JUCE_NAMESPACE::MemoryBlock
-    #define Point           JUCE_NAMESPACE::Point
-    #define Button          JUCE_NAMESPACE::Button
-  #endif
-
-  /* "Rectangle" is defined in some of the newer windows header files, so this makes
-     it easier to use the juce version explicitly.
-
-     If you run into difficulties where this macro interferes with other 3rd party header
-     files, you may need to use the juce_WithoutMacros.h file - see the comments in that
-     file for more information.
-  */
-  #if JUCE_WINDOWS && ! JUCE_DONT_DEFINE_MACROS
-    #define Rectangle       JUCE_NAMESPACE::Rectangle
-  #endif
-#endif
-#endif
-
-//==============================================================================
-/* Easy autolinking to the right JUCE libraries under win32.
-
-   Note that this can be disabled by defining DONT_AUTOLINK_TO_JUCE_LIBRARY before
-   including this header file.
-*/
-#if JUCE_MSVC
-
-  #ifndef DONT_AUTOLINK_TO_JUCE_LIBRARY
-
-    /** If you want your application to link to Juce as a DLL instead of
-        a static library (on win32), just define the JUCE_DLL macro before
-        including juce.h
-    */
-    #ifdef JUCE_DLL
-      #if JUCE_DEBUG
-        #define AUTOLINKEDLIB "JUCE_debug.lib"
-      #else
-        #define AUTOLINKEDLIB "JUCE.lib"
-      #endif
-    #else
-      #if JUCE_DEBUG
-        #ifdef _WIN64
-          #define AUTOLINKEDLIB "jucelib_static_x64_debug.lib"
-        #else
-          #define AUTOLINKEDLIB "jucelib_static_Win32_debug.lib"
-        #endif
-      #else
-        #ifdef _WIN64
-          #define AUTOLINKEDLIB "jucelib_static_x64.lib"
-        #else
-          #define AUTOLINKEDLIB "jucelib_static_Win32.lib"
-        #endif
-      #endif
-    #endif
-
-    #pragma comment(lib, AUTOLINKEDLIB)
-
-    #if ! DONT_LIST_JUCE_AUTOLINKEDLIBS
-      #pragma message("JUCE! Library to link to: " AUTOLINKEDLIB)
-    #endif
-
-    // Auto-link the other win32 libs that are needed by library calls..
-    #if ! (defined (DONT_AUTOLINK_TO_WIN32_LIBRARIES) || defined (JUCE_DLL))
-      #include "src/native/windows/juce_win32_AutoLinkLibraries.h"
-    #endif
-
-  #endif
-
+  using namespace juce;
 #endif
 
 #endif   // __JUCE_JUCEHEADER__

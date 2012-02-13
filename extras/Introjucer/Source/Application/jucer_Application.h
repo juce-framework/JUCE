@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -23,13 +23,13 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_APPLICATION_H_6595C2A8__
-#define __JUCER_APPLICATION_H_6595C2A8__
+#ifndef __JUCER_APPLICATION_JUCEHEADER__
+#define __JUCER_APPLICATION_JUCEHEADER__
 
 #include "../jucer_Headers.h"
 #include "jucer_MainWindow.h"
 #include "jucer_JuceUpdater.h"
-#include "../Project/jucer_NewProjectWizard.h"
+#include "jucer_CommandLine.h"
 
 
 //==============================================================================
@@ -37,21 +37,22 @@ class JucerApplication   : public JUCEApplication
 {
 public:
     //==============================================================================
-    JucerApplication()  {}
+    JucerApplication() {}
     ~JucerApplication() {}
 
     //==============================================================================
     void initialise (const String& commandLine)
     {
-        /* Running a command-line of the form "Jucer --resave foobar.jucer" will try to load that
-           jucer file and re-export all of its projects.
-        */
-        if (commandLine.startsWithIgnoreCase ("-resave ") || commandLine.startsWithIgnoreCase ("--resave "))
+        if (commandLine.isNotEmpty())
         {
-            Project::resaveJucerFile (File::getCurrentWorkingDirectory()
-                                        .getChildFile (commandLine.fromFirstOccurrenceOf (" ", false, false).unquoted()));
-            quit();
-            return;
+            const int appReturnCode = performCommandLine (commandLine);
+
+            if (appReturnCode != commandLineNotPerformed)
+            {
+                setApplicationReturnValue (appReturnCode);
+                quit();
+                return;
+            }
         }
 
         commandManager = new ApplicationCommandManager();
@@ -75,31 +76,39 @@ public:
                 openFile (projects.getReference(i));
         }
 
+        makeSureUserHasSelectedModuleFolder();
+
         if (mainWindows.size() == 0)
             createNewMainWindow()->makeVisible();
 
-      #if JUCE_MAC
+       #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel);
-      #endif
+       #endif
     }
 
     void shutdown()
     {
-      #if JUCE_MAC
+       #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
-      #endif
+       #endif
         menuModel = nullptr;
 
         StoredSettings::deleteInstance();
         mainWindows.clear();
 
         OpenDocumentManager::deleteInstance();
-        deleteAndZero (commandManager);
+        commandManager = nullptr;
     }
 
     //==============================================================================
     void systemRequestedQuit()
     {
+        if (cancelAnyModalComponents())
+        {
+            new AsyncQuitRetrier();
+            return;
+        }
+
         while (mainWindows.size() > 0)
         {
             if (! mainWindows[0]->closeCurrentProject())
@@ -116,10 +125,10 @@ public:
         jassert (mainWindows.contains (w));
         mainWindows.removeObject (w);
 
-      #if ! JUCE_MAC
+       #if ! JUCE_MAC
         if (mainWindows.size() == 0)
             systemRequestedQuit();
-      #endif
+       #endif
 
         updateRecentProjectList();
     }
@@ -137,11 +146,11 @@ public:
 
     bool moreThanOneInstanceAllowed()
     {
-      #ifndef JUCE_LINUX
+       #ifndef JUCE_LINUX
         return false;
-      #else
+       #else
         return true; //xxx should be false but doesn't work on linux..
-      #endif
+       #endif
     }
 
     void anotherInstanceStarted (const String& commandLine)
@@ -150,6 +159,11 @@ public:
     }
 
     virtual void doExtraInitialisation() {}
+
+    static JucerApplication* getApp()
+    {
+        return dynamic_cast<JucerApplication*> (JUCEApplication::getInstance());
+    }
 
     //==============================================================================
     class MainMenuModel  : public MenuBarModel
@@ -162,11 +176,11 @@ public:
 
         const StringArray getMenuBarNames()
         {
-            const char* const names[] = { "File", "Edit", "View", "Window", "Update", 0 };
+            const char* const names[] = { "File", "Edit", "View", "Window", "Tools", 0 };
             return StringArray ((const char**) names);
         }
 
-        const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName)
+        const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& /*menuName*/)
         {
             PopupMenu menu;
 
@@ -253,15 +267,16 @@ public:
                 menu.addSeparator();
                 menu.addCommandItem (commandManager, CommandIDs::closeAllDocuments);
             }
-            else if (topLevelMenuIndex == 4)  // "Juce" menu
+            else if (topLevelMenuIndex == 4)  // "Tools" menu
             {
-                menu.addCommandItem (commandManager, CommandIDs::showJuceVersion);
+                menu.addCommandItem (commandManager, CommandIDs::updateModules);
+                menu.addCommandItem (commandManager, CommandIDs::showUTF8Tool);
             }
 
             return menu;
         }
 
-        void menuItemSelected (int menuItemID, int topLevelMenuIndex)
+        void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
         {
             if (menuItemID >= 100 && menuItemID < 200)
             {
@@ -277,13 +292,8 @@ public:
                 MainWindow* w = getApp()->getOrCreateFrontmostWindow();
                 w->makeVisible();
                 w->getProjectContentComponent()->showDocument (doc);
+                getApp()->avoidSuperimposedWindows (w);
             }
-        }
-
-    private:
-        JucerApplication* getApp() const
-        {
-            return static_cast<JucerApplication*> (JUCEApplication::getInstance());
         }
     };
 
@@ -297,7 +307,8 @@ public:
                                   CommandIDs::showPrefs,
                                   CommandIDs::closeAllDocuments,
                                   CommandIDs::saveAll,
-                                  CommandIDs::showJuceVersion };
+                                  CommandIDs::updateModules,
+                                  CommandIDs::showUTF8Tool };
 
         commands.addArray (ids, numElementsInArray (ids));
     }
@@ -331,8 +342,12 @@ public:
             result.setActive (OpenDocumentManager::getInstance()->anyFilesNeedSaving());
             break;
 
-        case CommandIDs::showJuceVersion:
-            result.setInfo ("Download the latest JUCE version", "Checks online for any Juce updates", CommandCategories::general, 0);
+        case CommandIDs::updateModules:
+            result.setInfo ("Download the latest JUCE modules", "Checks online for any JUCE modules updates and installs them", CommandCategories::general, 0);
+            break;
+
+        case CommandIDs::showUTF8Tool:
+            result.setInfo ("UTF-8 String-Literal Helper", "Shows the UTF-8 string literal utility", CommandCategories::general, 0);
             break;
 
         default:
@@ -350,7 +365,9 @@ public:
             case CommandIDs::showPrefs:         showPrefsPanel(); break;
             case CommandIDs::saveAll:           OpenDocumentManager::getInstance()->saveAll(); break;
             case CommandIDs::closeAllDocuments: closeAllDocuments (true); break;
-            case CommandIDs::showJuceVersion:   JuceUpdater::show (mainWindows[0]); break;
+            case CommandIDs::showUTF8Tool:      showUTF8ToolWindow(); break;
+            case CommandIDs::updateModules:     runModuleUpdate (String::empty); break;
+
             default:                            return JUCEApplication::perform (info);
         }
 
@@ -365,17 +382,11 @@ public:
 
     void createNewProject()
     {
-        MainWindow* mw = createNewMainWindow();
-        ScopedPointer <Project> newProj (NewProjectWizard::runNewProjectWizard (mw));
-
-        if (newProj != nullptr)
+        if (makeSureUserHasSelectedModuleFolder())
         {
-            mw->setProject (newProj.release());
-            mw->makeVisible();
-        }
-        else
-        {
-            closeWindow (mw);
+            MainWindow* mw = getOrCreateEmptyWindow();
+            mw->showNewProjectWizard();
+            avoidSuperimposedWindows (mw);
         }
     }
 
@@ -408,6 +419,7 @@ public:
                 MainWindow* w = getOrCreateEmptyWindow();
                 w->setProject (newDoc.release());
                 w->makeVisible();
+                avoidSuperimposedWindows (w);
                 return true;
             }
         }
@@ -417,6 +429,7 @@ public:
 
             const bool ok = w->openFile (file);
             w->makeVisible();
+            avoidSuperimposedWindows (w);
             return ok;
         }
 
@@ -425,18 +438,7 @@ public:
 
     bool closeAllDocuments (bool askUserToSave)
     {
-        for (int i = OpenDocumentManager::getInstance()->getNumOpenDocuments(); --i >= 0;)
-        {
-            OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument (i);
-
-            for (int j = mainWindows.size(); --j >= 0;)
-                mainWindows.getUnchecked(j)->getProjectContentComponent()->hideDocument (doc);
-
-            if (! OpenDocumentManager::getInstance()->closeDocument (i, askUserToSave))
-                return false;
-        }
-
-        return true;
+        return OpenDocumentManager::getInstance()->closeAll (askUserToSave);
     }
 
     void updateRecentProjectList()
@@ -454,6 +456,35 @@ public:
         StoredSettings::getInstance()->setLastProjects (projects);
     }
 
+    bool makeSureUserHasSelectedModuleFolder()
+    {
+        if (! ModuleList::isLocalModulesFolderValid())
+        {
+            if (! runModuleUpdate ("Please select a location to store your local set of JUCE modules,\n"
+                                   "and download the ones that you'd like to use!"))
+            {
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                             "Introjucer",
+                                             "Unless you create a local JUCE folder containing some modules, you'll be unable to save any projects correctly!\n\n"
+                                             "Use the option on the 'Tools' menu to set this up!");
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool runModuleUpdate (const String& message)
+    {
+        ModuleList list;
+        list.rescan (ModuleList::getDefaultModulesFolder (nullptr));
+        JuceUpdater::show (list, mainWindows[0], message);
+
+        ModuleList::setLocalModulesFolder (list.getModulesFolder());
+        return ModuleList::isJuceOrModulesFolder (list.getModulesFolder());
+    }
+
     ScopedPointer<MainMenuModel> menuModel;
 
 private:
@@ -462,13 +493,9 @@ private:
     MainWindow* createNewMainWindow()
     {
         MainWindow* mw = new MainWindow();
-
-        for (int i = mainWindows.size(); --i >= 0;)
-            if (mw->getBounds() == mainWindows.getUnchecked(i)->getBounds())
-                mw->setBounds (mw->getBounds().translated (20, 20));
-
         mainWindows.add (mw);
         mw->restoreWindowPosition();
+        avoidSuperimposedWindows (mw);
         return mw;
     }
 
@@ -501,7 +528,61 @@ private:
 
         return createNewMainWindow();
     }
+
+    void avoidSuperimposedWindows (MainWindow* const mw)
+    {
+        for (int i = mainWindows.size(); --i >= 0;)
+        {
+            MainWindow* const other = mainWindows.getUnchecked(i);
+
+            const Rectangle<int> b1 (mw->getBounds());
+            const Rectangle<int> b2 (other->getBounds());
+
+            if (mw != other
+                 && std::abs (b1.getX() - b2.getX()) < 3
+                 && std::abs (b1.getY() - b2.getY()) < 3
+                 && std::abs (b1.getRight() - b2.getRight()) < 3
+                 && std::abs (b1.getBottom() - b2.getBottom()) < 3)
+            {
+                int dx = 40, dy = 30;
+
+                if (b1.getCentreX() >= mw->getScreenBounds().getCentreX())   dx = -dx;
+                if (b1.getCentreY() >= mw->getScreenBounds().getCentreY())   dy = -dy;
+
+                mw->setBounds (b1.translated (dx, dy));
+            }
+        }
+    }
+
+    //==============================================================================
+    static bool cancelAnyModalComponents()
+    {
+        const int numModal = ModalComponentManager::getInstance()->getNumModalComponents();
+
+        for (int i = numModal; --i >= 0;)
+            if (ModalComponentManager::getInstance()->getModalComponent(i) != nullptr)
+                ModalComponentManager::getInstance()->getModalComponent(i)->exitModalState (0);
+
+        return numModal > 0;
+    }
+
+    class AsyncQuitRetrier  : public Timer
+    {
+    public:
+        AsyncQuitRetrier()   { startTimer (500); }
+
+        void timerCallback()
+        {
+            stopTimer();
+            delete this;
+
+            if (getApp() != nullptr)
+                getApp()->systemRequestedQuit();
+        }
+
+        JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier);
+    };
 };
 
 
-#endif  // __JUCER_APPLICATION_H_6595C2A8__
+#endif   // __JUCER_APPLICATION_JUCEHEADER__

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -40,17 +40,9 @@ public:
         reloadFromFile();
     }
 
-    ~SourceCodeDocument()
-    {
-    }
-
     //==============================================================================
-    class Type  : public OpenDocumentManager::DocumentType
+    struct Type  : public OpenDocumentManager::DocumentType
     {
-    public:
-        Type() {}
-        ~Type() {}
-
         bool canOpenFile (const File& file)                 { return SourceCodeEditor::isTextFile (file); }
         Document* openFile (Project*, const File& file)     { return new SourceCodeDocument (file); }
     };
@@ -60,6 +52,7 @@ public:
     bool isForFile (const File& file) const             { return modDetector.getFile() == file; }
     bool isForNode (const ValueTree& node) const        { return false; }
     bool refersToProject (Project& project) const       { return false; }
+    bool canSaveAs() const                              { return true; }
     String getName() const                              { return modDetector.getFile().getFileName(); }
     String getType() const                              { return modDetector.getFile().getFileExtension() + " file"; }
     bool needsSaving() const                            { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
@@ -92,6 +85,12 @@ public:
         return true;
     }
 
+    bool saveAs()
+    {
+        jassertfalse; //xxx todo
+        return false;
+    }
+
     Component* createEditor()
     {
         CodeTokeniser* tokeniser = nullptr;
@@ -120,16 +119,10 @@ public:
         reloadFromFile();
     }
 
-    ~UnknownDocument() {}
-
     //==============================================================================
-    class Type  : public OpenDocumentManager::DocumentType
+    struct Type  : public OpenDocumentManager::DocumentType
     {
-    public:
-        Type() {}
-        ~Type() {}
-
-        bool canOpenFile (const File& file)                         { return true; }
+        bool canOpenFile (const File&)                              { return true; }
         Document* openFile (Project* project, const File& file)     { return new UnknownDocument (project, file); }
     };
 
@@ -140,6 +133,8 @@ public:
     bool refersToProject (Project& p) const         { return project == &p; }
     bool needsSaving() const                        { return false; }
     bool save()                                     { return true; }
+    bool canSaveAs() const                          { return false; }
+    bool saveAs()                                   { return false; }
     bool hasFileBeenModifiedExternally()            { return fileModificationTime != file.getLastModificationTime(); }
     void reloadFromFile()                           { fileModificationTime = file.getLastModificationTime(); }
     String getName() const                          { return file.getFileName(); }
@@ -206,7 +201,7 @@ bool OpenDocumentManager::canOpenFile (const File& file)
     return false;
 }
 
-OpenDocumentManager::Document* OpenDocumentManager::getDocumentForFile (Project* project, const File& file)
+OpenDocumentManager::Document* OpenDocumentManager::openFile (Project* project, const File& file)
 {
     for (int i = documents.size(); --i >= 0;)
         if (documents.getUnchecked(i)->isForFile (file))
@@ -223,11 +218,9 @@ OpenDocumentManager::Document* OpenDocumentManager::getDocumentForFile (Project*
         }
     }
 
-    jassert (d != nullptr);
+    jassert (d != nullptr);  // should always at least have been picked up by UnknownDocument
 
-    if (d != nullptr)
-        documents.add (d);
-
+    documents.add (d);
     commandManager->commandStatusChanged();
     return d;
 }
@@ -320,6 +313,15 @@ void OpenDocumentManager::closeFile (const File& f, bool saveIfNeeded)
         if (d->isForFile (f))
             closeDocument (i, saveIfNeeded);
     }
+}
+
+bool OpenDocumentManager::closeAll (bool askUserToSave)
+{
+    for (int i = getNumOpenDocuments(); --i >= 0;)
+        if (! closeDocument (i, askUserToSave))
+            return false;
+
+    return true;
 }
 
 bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, bool saveIfNeeded)

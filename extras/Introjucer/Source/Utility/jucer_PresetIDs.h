@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_PRESETIDS_H_40E9E82E__
-#define __JUCER_PRESETIDS_H_40E9E82E__
+#ifndef __JUCER_PRESETIDS_JUCEHEADER__
+#define __JUCER_PRESETIDS_JUCEHEADER__
 
 
 // Handy list of static Identifiers..
@@ -32,46 +32,15 @@ namespace Ids
 {
     #define DECLARE_ID(name)      const Identifier name (#name)
 
-    DECLARE_ID (text);
     DECLARE_ID (name);
     DECLARE_ID (file);
-    DECLARE_ID (font);
-    DECLARE_ID (mode);
-    DECLARE_ID (type);
     DECLARE_ID (version);
     DECLARE_ID (position);
     DECLARE_ID (source);
-    DECLARE_ID (readOnly);
-    DECLARE_ID (editMode);
-    DECLARE_ID (justification);
-    DECLARE_ID (placement);
-    DECLARE_ID (items);
-    DECLARE_ID (editable);
-    DECLARE_ID (textJustification);
-    DECLARE_ID (unselectedText);
-    DECLARE_ID (noItemsText);
-    DECLARE_ID (min);
-    DECLARE_ID (max);
     DECLARE_ID (width);
     DECLARE_ID (height);
     DECLARE_ID (background);
-    DECLARE_ID (interval);
-    DECLARE_ID (textBoxPos);
-    DECLARE_ID (textBoxWidth);
-    DECLARE_ID (textBoxHeight);
-    DECLARE_ID (skew);
-    DECLARE_ID (scrollBarV);
-    DECLARE_ID (scrollBarH);
-    DECLARE_ID (scrollbarWidth);
     DECLARE_ID (initialState);
-    DECLARE_ID (scrollbarsShown);
-    DECLARE_ID (caretVisible);
-    DECLARE_ID (popupMenuEnabled);
-    DECLARE_ID (radioGroup);
-    DECLARE_ID (connectedLeft);
-    DECLARE_ID (connectedRight);
-    DECLARE_ID (connectedTop);
-    DECLARE_ID (connectedBottom);
     DECLARE_ID (juceFolder);
     DECLARE_ID (targetFolder);
     DECLARE_ID (vstFolder);
@@ -89,11 +58,19 @@ namespace Ids
     DECLARE_ID (optimisation);
     DECLARE_ID (defines);
     DECLARE_ID (headerPath);
+    DECLARE_ID (libraryPath);
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);
     DECLARE_ID (osxArchitecture);
+    DECLARE_ID (winArchitecture);
+    DECLARE_ID (winWarningLevel);
+    DECLARE_ID (bigIcon);
+    DECLARE_ID (smallIcon);
     DECLARE_ID (jucerVersion);
     DECLARE_ID (projectType);
+    DECLARE_ID (prebuildCommand);
+    DECLARE_ID (postbuildCommand);
+    DECLARE_ID (generateManifest);
     DECLARE_ID (juceLinkage);
     DECLARE_ID (buildVST);
     DECLARE_ID (bundleIdentifier);
@@ -106,25 +83,26 @@ namespace Ids
     DECLARE_ID (createCallback);
     DECLARE_ID (parentClasses);
     DECLARE_ID (constructorParams);
+    DECLARE_ID (objectConstructionArgs);
     DECLARE_ID (memberInitialisers);
-    DECLARE_ID (lossOfFocusDiscardsChanges);
-    DECLARE_ID (url);
+    DECLARE_ID (canBeAggregated);
     DECLARE_ID (rootItemVisible);
     DECLARE_ID (openByDefault);
     DECLARE_ID (locked);
-    DECLARE_ID (image);
     DECLARE_ID (tooltip);
     DECLARE_ID (memberName);
+    DECLARE_ID (markerName);
     DECLARE_ID (focusOrder);
     DECLARE_ID (hidden);
     DECLARE_ID (useStdCall);
+    DECLARE_ID (showAllCode);
+    DECLARE_ID (useLocalCopy);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
     const Identifier class_ ("class");
-    const Identifier id_ ("id");
 
     #undef DECLARE_ID
 }
 
-#endif  // __JUCER_PRESETIDS_H_40E9E82E__
+#endif   // __JUCER_PRESETIDS_JUCEHEADER__

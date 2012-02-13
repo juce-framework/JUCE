@@ -70,7 +70,7 @@ public:
                     Justification::centredLeft, true);
     }
 
-    const var getDragSourceDescription (const SparseSet<int>& selectedRows)
+    var getDragSourceDescription (const SparseSet<int>& selectedRows)
     {
         // for our drag desctription, we'll just make a list of the selected
         // row numbers - this will be picked up by the drag target and displayed in

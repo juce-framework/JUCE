@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-10 by Raw Material Software Ltd.
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -40,7 +40,8 @@ namespace CommandIDs
     static const int openInIDE              = 0x200072;
     static const int saveAndOpenInIDE       = 0x200073;
     static const int showProjectSettings    = 0x200074;
-    static const int showJuceVersion        = 0x200075;
+    static const int updateModules          = 0x200075;
+    static const int showUTF8Tool           = 0x200076;
 
     static const int saveAll                = 0x200080;
     static const int undo                   = 0x200090;

@@ -421,7 +421,7 @@ private:
                               "Change Slider textbox size");
         }
 
-        const String getText() const
+        String getText() const
         {
             return String (isWidth ? component->getTextBoxWidth()
                                    : component->getTextBoxHeight());
@@ -507,7 +507,7 @@ private:
                               "Change Slider range");
         }
 
-        const String getText() const
+        String getText() const
         {
             Slider* s = dynamic_cast <Slider*> (component);
             jassert (s != 0);
@@ -586,7 +586,7 @@ private:
                               "Change Slider skew");
         }
 
-        const String getText() const
+        String getText() const
         {
             Slider* s = dynamic_cast <Slider*> (component);
             jassert (s != 0);
