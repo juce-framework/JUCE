@@ -131,7 +131,7 @@ public:
         If you need to know the exact typeface name being used, you can call
         Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
     */
-    const String& getTypefaceName() const noexcept              { return font->typefaceName; }
+    const String& getTypefaceName() const noexcept;
 
     //==============================================================================
     /** Returns a typeface name that represents the default sans-serif font.
@@ -173,53 +173,52 @@ public:
         This is the maximum height, from the top of the ascent to the bottom of the
         descenders.
 
-        @see setHeight, setHeightWithoutChangingWidth, getAscent
+        @see withHeight, setHeightWithoutChangingWidth, getAscent
     */
-    float getHeight() const noexcept                            { return font->height; }
+    float getHeight() const noexcept;
+
+    /** Returns a copy of this font with a new height. */
+    Font withHeight (float height) const;
 
     /** Changes the font's height.
-
-        @see getHeight, setHeightWithoutChangingWidth
+        @see getHeight, withHeight, setHeightWithoutChangingWidth
     */
     void setHeight (float newHeight);
 
     /** Changes the font's height without changing its width.
-
         This alters the horizontal scale to compensate for the change in height.
     */
     void setHeightWithoutChangingWidth (float newHeight);
 
     /** Returns the height of the font above its baseline.
-
         This is the maximum height from the baseline to the top.
-
         @see getHeight, getDescent
     */
     float getAscent() const;
 
     /** Returns the amount that the font descends below its baseline.
-
         This is calculated as (getHeight() - getAscent()).
-
         @see getAscent, getHeight
     */
     float getDescent() const;
 
     //==============================================================================
     /** Returns the font's style flags.
-
         This will return a bitwise-or'ed combination of values from the FontStyleFlags
         enum, to describe whether the font is bold, italic, etc.
-
-        @see FontStyleFlags
+        @see FontStyleFlags, withStyle
     */
-    int getStyleFlags() const noexcept                          { return font->styleFlags; }
+    int getStyleFlags() const noexcept;
+
+    /** Returns a copy of this font with the given set of style flags.
+        @param newFlags     a bitwise-or'ed combination of values from the FontStyleFlags enum.
+        @see FontStyleFlags, getStyleFlags
+    */
+    Font withStyle (int styleFlags) const;
 
     /** Changes the font's style.
-
-        @param newFlags     a bitwise-or'ed combination of values from the FontStyleFlags
-                            enum, to set the font's properties
-        @see FontStyleFlags
+        @param newFlags     a bitwise-or'ed combination of values from the FontStyleFlags enum.
+        @see FontStyleFlags, withStyle
     */
     void setStyleFlags (int newFlags);
 
@@ -243,31 +242,29 @@ public:
     /** Returns true if the font is underlined. */
     bool isUnderlined() const noexcept;
 
+
     //==============================================================================
-    /** Changes the font's horizontal scale factor.
-
-        @param scaleFactor  a value of 1.0 is the normal scale, less than this will be
-                            narrower, greater than 1.0 will be stretched out.
-    */
-    void setHorizontalScale (float scaleFactor);
-
     /** Returns the font's horizontal scale.
 
         A value of 1.0 is the normal scale, less than this will be narrower, greater
         than 1.0 will be stretched out.
 
-        @see setHorizontalScale
+        @see withHorizontalScale
     */
-    float getHorizontalScale() const noexcept               { return font->horizontalScale; }
+    float getHorizontalScale() const noexcept;
 
-    /** Changes the font's kerning.
-
-        @param extraKerning     a multiple of the font's height that will be added
-                                to space between the characters. So a value of zero is
-                                normal spacing, positive values spread the letters out,
-                                negative values make them closer together.
+    /** Returns a copy of this font with a new horizontal scale.
+        @param scaleFactor  a value of 1.0 is the normal scale, less than this will be
+                            narrower, greater than 1.0 will be stretched out.
+        @see getHorizontalScale
     */
-    void setExtraKerningFactor (float extraKerning);
+    Font withHorizontalScale (float newHorizontalScale) const;
+
+    /** Changes the font's horizontal scale factor.
+        @param scaleFactor  a value of 1.0 is the normal scale, less than this will be
+                            narrower, greater than 1.0 will be stretched out.
+    */
+    void setHorizontalScale (float scaleFactor);
 
     /** Returns the font's kerning.
 
@@ -277,8 +274,23 @@ public:
         A value of zero is normal spacing, positive values will spread the letters
         out more, and negative values make them closer together.
     */
-    float getExtraKerningFactor() const noexcept            { return font->kerning; }
+    float getExtraKerningFactor() const noexcept;
 
+    /** Returns a copy of this font with a new kerning factor.
+        @param extraKerning     a multiple of the font's height that will be added
+                                to space between the characters. So a value of zero is
+                                normal spacing, positive values spread the letters out,
+                                negative values make them closer together.
+    */
+    Font withExtraKerningFactor (float extraKerning) const;
+
+    /** Changes the font's kerning.
+        @param extraKerning     a multiple of the font's height that will be added
+                                to space between the characters. So a value of zero is
+                                normal spacing, positive values spread the letters out,
+                                negative values make them closer together.
+    */
+    void setExtraKerningFactor (float extraKerning);
 
     //==============================================================================
     /** Changes all the font's characteristics with one call. */
@@ -360,25 +372,7 @@ public:
 
 private:
     //==============================================================================
-    friend class FontGlyphAlphaMap;
-    friend class TypefaceCache;
-
-    class SharedFontInternal  : public SingleThreadedReferenceCountedObject
-    {
-    public:
-        SharedFontInternal (float height, int styleFlags) noexcept;
-        SharedFontInternal (const String& typefaceName, float height, int styleFlags) noexcept;
-        SharedFontInternal (const Typeface::Ptr& typeface) noexcept;
-        SharedFontInternal (const SharedFontInternal& other) noexcept;
-
-        bool operator== (const SharedFontInternal&) const noexcept;
-
-        String typefaceName;
-        float height, horizontalScale, kerning, ascent;
-        int styleFlags;
-        Typeface::Ptr typeface;
-    };
-
+    class SharedFontInternal;
     ReferenceCountedObjectPtr <SharedFontInternal> font;
     void dupeInternalIfShared();
 

@@ -68,12 +68,10 @@ void HyperlinkButton::setURL (const URL& newURL) noexcept
 
 Font HyperlinkButton::getFontToUse() const
 {
-    Font f (font);
-
     if (resizeFont)
-        f.setHeight (getHeight() * 0.7f);
+        return font.withHeight (getHeight() * 0.7f);
 
-    return f;
+    return font;
 }
 
 void HyperlinkButton::changeWidthToFitText()
