@@ -504,9 +504,6 @@ private:
     void createListOfChildren (OwnedArray<ValueTree>&) const;
     void reorderChildren (const OwnedArray<ValueTree>&, UndoManager*);
 
-#if JUCE_MSVC && ! DOXYGEN
- public:  // (workaround for VC6)
-#endif
     explicit ValueTree (SharedObject*);
 };
 

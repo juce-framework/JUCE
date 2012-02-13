@@ -29,10 +29,6 @@
 #include "juce_Label.h"
 #include "../buttons/juce_Button.h"
 
-#if JUCE_VC6
- #define Listener LabelListener
-#endif
-
 //==============================================================================
 /**
     A slider control for changing a value.
@@ -886,9 +882,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
 typedef Slider::Listener SliderListener;
-
-#if JUCE_VC6
- #undef Listener
-#endif
 
 #endif   // __JUCE_SLIDER_JUCEHEADER__

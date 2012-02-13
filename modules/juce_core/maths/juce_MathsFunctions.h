@@ -79,7 +79,7 @@ typedef unsigned int                uint32;
   typedef int64                     pointer_sized_int;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
   typedef uint64                    pointer_sized_uint;
-#elif JUCE_MSVC && ! JUCE_VC6
+#elif JUCE_MSVC
   /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
   typedef _W64 int                  pointer_sized_int;
   /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without truncating it. */
@@ -227,14 +227,12 @@ inline bool isPositiveAndBelow (Type valueToTest, Type upperLimit) noexcept
     return Type() <= valueToTest && valueToTest < upperLimit;
 }
 
-#if ! JUCE_VC6
 template <>
 inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast <unsigned int> (valueToTest) < static_cast <unsigned int> (upperLimit);
 }
-#endif
 
 /** Returns true if a value is at least zero, and also less than or equal to a specified upper limit.
     This is basically a quicker way to write:
@@ -248,14 +246,12 @@ inline bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) noex
     return Type() <= valueToTest && valueToTest <= upperLimit;
 }
 
-#if ! JUCE_VC6
 template <>
 inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast <unsigned int> (valueToTest) <= static_cast <unsigned int> (upperLimit);
 }
-#endif
 
 //==============================================================================
 /** Handy function to swap two values. */
@@ -265,25 +261,21 @@ inline void swapVariables (Type& variable1, Type& variable2)
     std::swap (variable1, variable2);
 }
 
-#if JUCE_VC6
- #define numElementsInArray(X) (sizeof((X)) / sizeof(0[X]))
-#else
- /** Handy function for getting the number of elements in a simple const C array.
-     E.g.
-     @code
-     static int myArray[] = { 1, 2, 3 };
+/** Handy function for getting the number of elements in a simple const C array.
+    E.g.
+    @code
+    static int myArray[] = { 1, 2, 3 };
 
-     int numElements = numElementsInArray (myArray) // returns 3
-     @endcode
- */
- template <typename Type, int N>
- inline int numElementsInArray (Type (&array)[N])
- {
-     (void) array; // (required to avoid a spurious warning in MS compilers)
-     (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
-     return N;
- }
-#endif
+    int numElements = numElementsInArray (myArray) // returns 3
+    @endcode
+*/
+template <typename Type, int N>
+inline int numElementsInArray (Type (&array)[N])
+{
+    (void) array; // (required to avoid a spurious warning in MS compilers)
+    (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
+    return N;
+}
 
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.

@@ -150,10 +150,6 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #if JUCE_VC6
-  #pragma warning (disable: 4309 4305)
- #endif
-
  #include "native/juce_win32_ComSmartPtr.h"
  #include "native/juce_win32_Files.cpp"
  #include "native/juce_win32_Network.cpp"

@@ -83,9 +83,6 @@ struct Expression::Helpers
 {
     typedef ReferenceCountedObjectPtr<Term> TermPtr;
 
-    // This helper function is needed to work around VC6 scoping bugs
-    static inline const TermPtr& getTermFor (const Expression& exp) noexcept      { return exp.term; }
-
     static void checkRecursionDepth (const int depth)
     {
         if (depth > 256)
@@ -208,7 +205,7 @@ struct Expression::Helpers
         TermPtr resolve (const Scope& scope, int recursionDepth)
         {
             checkRecursionDepth (recursionDepth);
-            return getTermFor (scope.getSymbolValue (symbol))->resolve (scope, recursionDepth + 1);
+            return scope.getSymbolValue (symbol).term->resolve (scope, recursionDepth + 1);
         }
 
         Type getType() const noexcept   { return symbolType; }
@@ -220,7 +217,7 @@ struct Expression::Helpers
         {
             checkRecursionDepth (recursionDepth);
             visitor.useSymbol (Symbol (scope.getScopeUID(), symbol));
-            getTermFor (scope.getSymbolValue (symbol))->visitAllSymbols (visitor, scope, recursionDepth + 1);
+            scope.getSymbolValue (symbol).term->visitAllSymbols (visitor, scope, recursionDepth + 1);
         }
 
         void renameSymbol (const Symbol& oldSymbol, const String& newName, const Scope& scope, int /*recursionDepth*/)
@@ -245,7 +242,7 @@ struct Expression::Helpers
         Type getType() const noexcept   { return functionType; }
         Term* clone() const             { return new Function (functionName, parameters); }
         int getNumInputs() const        { return parameters.size(); }
-        Term* getInput (int i) const    { return getTermFor (parameters [i]); }
+        Term* getInput (int i) const    { return parameters.getReference(i).term; }
         String getName() const          { return functionName; }
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
@@ -257,7 +254,7 @@ struct Expression::Helpers
             {
                 HeapBlock<double> params ((size_t) numParams);
                 for (int i = 0; i < numParams; ++i)
-                    params[i] = getTermFor (parameters.getReference(i))->resolve (scope, recursionDepth + 1)->toDouble();
+                    params[i] = parameters.getReference(i).term->resolve (scope, recursionDepth + 1)->toDouble();
 
                 result = scope.evaluateFunction (functionName, params, numParams);
             }
@@ -272,7 +269,7 @@ struct Expression::Helpers
         int getInputIndexFor (const Term* possibleInput) const
         {
             for (int i = 0; i < parameters.size(); ++i)
-                if (getTermFor (parameters.getReference(i)) == possibleInput)
+                if (parameters.getReference(i).term == possibleInput)
                     return i;
 
             return -1;
@@ -287,7 +284,7 @@ struct Expression::Helpers
 
             for (int i = 0; i < parameters.size(); ++i)
             {
-                s << getTermFor (parameters.getReference(i))->toString();
+                s << parameters.getReference(i).term->toString();
 
                 if (i < parameters.size() - 1)
                     s << ", ";

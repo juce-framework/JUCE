@@ -189,15 +189,12 @@ public:
     /** Returns the hash code that was set by setSource() or setReader(). */
     int64 getHashCode() const;
 
-   #ifndef DOXYGEN
-    class LevelDataSource;  // (this is only public to avoid a VC6 bug)
-   #endif
-
 private:
     //==============================================================================
     AudioFormatManager& formatManagerToUse;
     AudioThumbnailCache& cache;
 
+    class LevelDataSource;
     struct MinMaxValue;
     class ThumbData;
     class CachedWindow;

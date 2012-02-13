@@ -32,9 +32,6 @@
 #include "../windows/juce_TooltipWindow.h"
 #include "../layout/juce_ComponentBuilder.h"
 
-#if JUCE_VC6
- #define Listener ButtonListener
-#endif
 
 //==============================================================================
 /**
@@ -516,10 +513,6 @@ private:
 #ifndef DOXYGEN
  /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
  typedef Button::Listener ButtonListener;
-#endif
-
-#if JUCE_VC6
- #undef Listener
 #endif
 
 #endif   // __JUCE_BUTTON_JUCEHEADER__

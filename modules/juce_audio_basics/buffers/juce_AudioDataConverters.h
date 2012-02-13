@@ -332,7 +332,7 @@ public:
               typename Endianness,
               typename InterleavingType,
               typename Constness>
-    class Pointer
+    class Pointer  : private InterleavingType  // (inherited for EBCO)
     {
     public:
         //==============================================================================
@@ -352,22 +352,20 @@ public:
             For non-interleaved data, use the other constructor.
         */
         Pointer (typename Constness::VoidType* sourceData, int numInterleavedChannels) noexcept
-            : data (Constness::toVoidPtr (sourceData)),
-              interleaving (numInterleavedChannels)
+            : InterleavingType (numInterleavedChannels), data (Constness::toVoidPtr (sourceData))
         {
         }
 
         /** Creates a copy of another pointer. */
         Pointer (const Pointer& other) noexcept
-            : data (other.data),
-              interleaving (other.interleaving)
+            : InterleavingType (other), data (other.data)
         {
         }
 
         Pointer& operator= (const Pointer& other) noexcept
         {
+            InterleavingType::operator= (other);
             data = other.data;
-            interleaving.copyFrom (other.interleaving);
             return *this;
         }
 
@@ -412,10 +410,10 @@ public:
         inline Pointer& operator++() noexcept                   { advance(); return *this; }
 
         /** Moves the pointer back to the previous sample. */
-        inline Pointer& operator--() noexcept                   { interleaving.advanceDataBy (data, -1); return *this; }
+        inline Pointer& operator--() noexcept                   { this->advanceDataBy (data, -1); return *this; }
 
         /** Adds a number of samples to the pointer's position. */
-        Pointer& operator+= (int samplesToJump) noexcept        { interleaving.advanceDataBy (data, samplesToJump); return *this; }
+        Pointer& operator+= (int samplesToJump) noexcept        { this->advanceDataBy (data, samplesToJump); return *this; }
 
         /** Writes a stream of samples into this pointer from another pointer.
             This will copy the specified number of samples, converting between formats appropriately.
@@ -466,7 +464,7 @@ public:
         void clearSamples (int numSamples) const noexcept
         {
             Pointer dest (*this);
-            dest.interleaving.clear (dest.data, numSamples);
+            dest.clear (dest.data, numSamples);
         }
 
         /** Returns true if the pointer is using a floating-point format. */
@@ -482,7 +480,7 @@ public:
         int getNumInterleavedChannels() const noexcept          { return (int) this->numInterleavedChannels; }
 
         /** Returns the number of bytes between the start address of each sample. */
-        int getNumBytesBetweenSamples() const noexcept          { return interleaving.getNumBytesBetweenSamples (data); }
+        int getNumBytesBetweenSamples() const noexcept          { return InterleavingType::getNumBytesBetweenSamples (data); }
 
         /** Returns the accuracy of this format when represented as a 32-bit integer.
             This is the smallest number above 0 that can be represented in the sample format, converted to
@@ -497,10 +495,8 @@ public:
     private:
         //==============================================================================
         SampleFormat data;
-        InterleavingType interleaving;  // annoyingly, making the interleaving type a superclass to take
-                                        // advantage of EBCO causes an internal compiler error in VC6..
 
-        inline void advance() noexcept                          { interleaving.advanceData (data); }
+        inline void advance() noexcept                          { this->advanceData (data); }
 
         Pointer operator++ (int); // private to force you to use the more efficient pre-increment!
         Pointer operator-- (int);

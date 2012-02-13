@@ -28,9 +28,6 @@
 
 #include "juce_Label.h"
 
-#if JUCE_VC6
- #define Listener SliderListener
-#endif
 
 //==============================================================================
 /**
@@ -414,9 +411,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
 typedef ComboBox::Listener ComboBoxListener;
-
-#if JUCE_VC6
- #undef Listener
-#endif
 
 #endif   // __JUCE_COMBOBOX_JUCEHEADER__

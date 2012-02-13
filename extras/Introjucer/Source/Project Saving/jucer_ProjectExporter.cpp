@@ -41,7 +41,6 @@ StringArray ProjectExporter::getExporterNames()
     StringArray s;
     s.add (XCodeProjectExporter::getNameMac());
     s.add (XCodeProjectExporter::getNameiOS());
-    s.add (MSVCProjectExporterVC6::getName());
     s.add (MSVCProjectExporterVC2005::getName());
     s.add (MSVCProjectExporterVC2008::getName());
     s.add (MSVCProjectExporterVC2010::getName());
@@ -68,7 +67,6 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     {
         case 0:     exp = new XCodeProjectExporter      (project, ValueTree (XCodeProjectExporter     ::getValueTreeTypeName (false)), false); break;
         case 1:     exp = new XCodeProjectExporter      (project, ValueTree (XCodeProjectExporter     ::getValueTreeTypeName (true)), true); break;
-        case 2:     exp = new MSVCProjectExporterVC6    (project, ValueTree (MSVCProjectExporterVC6   ::getValueTreeTypeName())); break;
         case 3:     exp = new MSVCProjectExporterVC2005 (project, ValueTree (MSVCProjectExporterVC2005::getValueTreeTypeName())); break;
         case 4:     exp = new MSVCProjectExporterVC2008 (project, ValueTree (MSVCProjectExporterVC2008::getValueTreeTypeName())); break;
         case 5:     exp = new MSVCProjectExporterVC2010 (project, ValueTree (MSVCProjectExporterVC2010::getValueTreeTypeName())); break;
@@ -97,7 +95,8 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const Str
 
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
 {
-    ProjectExporter* exp = MSVCProjectExporterVC6         ::createForSettings (project, settings);
+    ProjectExporter* exp = nullptr;
+
     if (exp == nullptr)    exp = MSVCProjectExporterVC2005::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2008::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2010::createForSettings (project, settings);

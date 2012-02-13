@@ -105,7 +105,7 @@
 
  #pragma pack (push, 8) // this is set explicitly in case the app is using a different packing size.
  #pragma warning (push)
- #pragma warning (disable: 4786) // (old vc6 warning about long class names)
+ #pragma warning (disable: 4786) // (long class name warning)
  #ifdef __INTEL_COMPILER
   #pragma warning (disable: 1125)
  #endif

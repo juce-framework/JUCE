@@ -199,11 +199,8 @@ public:
         */
         void setDataReceiver (IncomingDataReceiver* receiver);
 
-       #ifndef DOXYGEN
-        class Buffer; // (only public for VC6 compatibility)
-       #endif
-
     private:
+        class Buffer;
         friend class ScopedPointer<Buffer>;
         ScopedPointer<Buffer> buffer;
     };

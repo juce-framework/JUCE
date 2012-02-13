@@ -264,6 +264,7 @@ private:
 
     void updateOldStyleConfigList();
     void moveOldPropertyFromProjectToAllExporters (Identifier name);
+    void removeDefunctExporters();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project);
 };

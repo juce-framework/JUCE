@@ -182,7 +182,7 @@ namespace JuceDummyNamespace {}
       #define JUCE_VC7_OR_EARLIER 1
 
       #if _MSC_VER < 1300
-        #define JUCE_VC6 1
+        #warning "MSVC 6.0 is no longer supported!"
       #endif
     #endif
   #endif

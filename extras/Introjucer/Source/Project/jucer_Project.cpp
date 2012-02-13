@@ -120,6 +120,8 @@ void Project::setMissingDefaultValues()
 
     if (! projectRoot.getChildWithName (Tags::exporters).isValid())
         createDefaultExporters();
+    else
+        removeDefunctExporters();
 
     getProjectType().setMissingProjectProperties (*this);
 
@@ -170,6 +172,21 @@ void Project::moveOldPropertyFromProjectToAllExporters (Identifier name)
             exporter->settings.setProperty (name, projectRoot [name], nullptr);
 
         projectRoot.removeProperty (name, nullptr);
+    }
+}
+
+void Project::removeDefunctExporters()
+{
+    ValueTree exporters (projectRoot.getChildWithName (Tags::exporters));
+
+    for (;;)
+    {
+        ValueTree oldVC6Exporter (exporters.getChildWithName ("MSVC6"));
+
+        if (oldVC6Exporter.isValid())
+            exporters.removeChild (oldVC6Exporter, nullptr);
+        else
+            break;
     }
 }
 
