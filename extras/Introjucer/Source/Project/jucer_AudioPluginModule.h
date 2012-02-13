@@ -354,6 +354,7 @@ namespace AUHelpers
             exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility");
 
             exporter.xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+            exporter.xcodeExcludedFiles64Bit = "\"*Carbon*.cpp\"";
 
             Project::Item subGroup (projectSaver.getGeneratedCodeGroup().addNewSubGroup ("Juce AU Wrapper", -1));
             subGroup.setID ("__juceappleaufiles");

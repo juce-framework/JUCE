@@ -123,6 +123,7 @@ public:
     String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
     String xcodeProductType, xcodeProductInstallPath, xcodeFileType;
     String xcodeShellScript, xcodeShellScriptTitle, xcodeOtherRezFlags;
+    String xcodeExcludedFiles64Bit;
     bool xcodeIsBundle, xcodeCreatePList, xcodeCanUseDwarf;
     StringArray xcodeFrameworks;
     Array<RelativePath> xcodeExtraLibrariesDebug, xcodeExtraLibrariesRelease;

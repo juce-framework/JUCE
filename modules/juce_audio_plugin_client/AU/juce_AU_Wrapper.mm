@@ -281,7 +281,7 @@ public:
                     NSString* bundlePath = [NSString stringWithUTF8String: (const char*) bundleFile.getFullPathName().toUTF8()];
                     NSBundle* b = [NSBundle bundleWithPath: bundlePath];
 
-                    info->mCocoaAUViewClass[0] = (CFStringRef) [[[JuceUICreationClass class] className] retain];
+                    info->mCocoaAUViewClass[0] = (CFStringRef) [NSStringFromClass ([JuceUICreationClass class]) retain];
                     info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [b bundlePath]] retain];
 
                     return noErr;

@@ -34,6 +34,7 @@ namespace
     const char* const osxVersion10_4            = "10.4 SDK";
     const char* const osxVersion10_5            = "10.5 SDK";
     const char* const osxVersion10_6            = "10.6 SDK";
+    const char* const osxVersion10_7            = "10.7 SDK";
 
     const char* const osxArch_Default           = "default";
     const char* const osxArch_Native            = "Native";
@@ -181,8 +182,8 @@ protected:
             if (getMacSDKVersion().toString().isEmpty())
                 getMacSDKVersion() = osxVersionDefault;
 
-            const char* osxVersions[] = { "Use Default", osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
-            const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
+            const char* osxVersions[] = { "Use Default", osxVersion10_4, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
+            const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
 
             props.add (new ChoicePropertyComponent (getMacSDKVersion(), "OSX Base SDK Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
                        "The version of OSX to link against in the XCode build.");
@@ -602,25 +603,23 @@ private:
             const String sdk (config.getMacSDKVersion().toString());
             const String sdkCompat (config.getMacCompatibilityVersion().toString());
 
-            if (sdk == osxVersion10_4)
-            {
-                s.add ("SDKROOT = macosx10.4");
-                gccVersion = "4.0";
-            }
-            else if (sdk == osxVersion10_5)
-            {
-                s.add ("SDKROOT = macosx10.5");
-            }
-            else if (sdk == osxVersion10_6)
-            {
-                s.add ("SDKROOT = macosx10.6");
-            }
+            if (sdk == osxVersion10_4)        { s.add ("SDKROOT = macosx10.4"); gccVersion = "4.0"; }
+            else if (sdk == osxVersion10_5)     s.add ("SDKROOT = macosx10.5");
+            else if (sdk == osxVersion10_6)     s.add ("SDKROOT = macosx10.6");
+            else if (sdk == osxVersion10_7)     s.add ("SDKROOT = macosx10.7");
 
             if (sdkCompat == osxVersion10_4)       s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4");
             else if (sdkCompat == osxVersion10_5)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5");
             else if (sdkCompat == osxVersion10_6)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6");
+            else if (sdkCompat == osxVersion10_7)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.7");
 
             s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
+
+            if (xcodeExcludedFiles64Bit.isNotEmpty())
+            {
+                s.add ("EXCLUDED_SOURCE_FILE_NAMES = \"$(EXCLUDED_SOURCE_FILE_NAMES_$(CURRENT_ARCH))\"");
+                s.add ("EXCLUDED_SOURCE_FILE_NAMES_x86_64 = " + xcodeExcludedFiles64Bit);
+            }
         }
 
         s.add ("GCC_VERSION = " + gccVersion);
