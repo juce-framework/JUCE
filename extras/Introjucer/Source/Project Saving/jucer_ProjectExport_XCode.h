@@ -174,6 +174,7 @@ protected:
         Value getMacSDKVersion() const                      { return getValue (Ids::osxSDK); }
         Value getMacCompatibilityVersion() const            { return getValue (Ids::osxCompatibility); }
         Value getMacArchitecture() const                    { return getValue (Ids::osxArchitecture); }
+        Value getCustomXcodeFlags() const                   { return getValue (Ids::customXcodeFlags); }
 
         void createPropertyEditors (PropertyListBuilder& props)
         {
@@ -202,6 +203,10 @@ protected:
 
             props.add (new ChoicePropertyComponent (getMacArchitecture(), "OSX Architecture", StringArray (osxArch), Array<var> (osxArchValues)),
                        "The type of OSX binary that will be produced.");
+
+            props.add (new TextPropertyComponent (getCustomXcodeFlags(), "Custom Xcode flags", 8192, false),
+                       "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
+                       "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
         }
     };
 
@@ -687,6 +692,11 @@ private:
 
             s.add ("GCC_PREPROCESSOR_DEFINITIONS = (" + indentList (defsList, ",") + ")");
         }
+
+        s.addTokens (config.getCustomXcodeFlags().toString(), ",", "\"'");
+        s.trim();
+        s.removeEmptyStrings();
+        s.removeDuplicates (false);
 
         return s;
     }

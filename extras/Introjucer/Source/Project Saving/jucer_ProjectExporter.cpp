@@ -464,14 +464,17 @@ void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyLi
 
     const char* optimisationLevels[] = { "No optimisation", "Optimise for size and speed", "Optimise for maximum speed", 0 };
     const int optimisationLevelValues[] = { 1, 2, 3, 0 };
-    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation", StringArray (optimisationLevels), Array<var> (optimisationLevelValues)),
+    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
+                                            StringArray (optimisationLevels), Array<var> (optimisationLevelValues)),
                "The optimisation level for this configuration");
 
     props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false),
-               "The filename to use for the destination binary executable file. Don't add a suffix to this, because platform-specific suffixes will be added for each target platform.");
+               "The filename to use for the destination binary executable file. If you don't add a suffix to this name, "
+               "a suitable platform-specific suffix will be added automatically.");
 
     props.add (new TextPropertyComponent (getTargetBinaryRelativePath(), "Binary location", 1024, false),
-               "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed in its default location in the build folder.");
+               "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed "
+               "in its default location in the build folder.");
 
     props.add (new TextPropertyComponent (getHeaderSearchPath(), "Header search paths", 16384, false),
                "Extra header search paths. Use semi-colons to separate multiple paths.");
@@ -480,7 +483,8 @@ void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyLi
                "Extra library search paths. Use semi-colons to separate multiple paths.");
 
     props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate "
+               "the items - to include a space or comma in a definition, precede it with a backslash.");
 
     props.setPreferredHeight (22);
 }

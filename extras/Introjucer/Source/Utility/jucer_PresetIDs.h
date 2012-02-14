@@ -49,8 +49,6 @@ namespace Ids
     DECLARE_ID (extraCompilerFlags);
     DECLARE_ID (extraLinkerFlags);
     DECLARE_ID (extraDefs);
-    DECLARE_ID (libraryName_Debug);
-    DECLARE_ID (libraryName_Release);
     DECLARE_ID (libraryType);
     DECLARE_ID (isDebug);
     DECLARE_ID (targetName);
@@ -59,6 +57,7 @@ namespace Ids
     DECLARE_ID (defines);
     DECLARE_ID (headerPath);
     DECLARE_ID (libraryPath);
+    DECLARE_ID (customXcodeFlags);
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);
     DECLARE_ID (osxArchitecture);

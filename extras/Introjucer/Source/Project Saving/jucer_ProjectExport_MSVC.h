@@ -33,7 +33,6 @@
 class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
-    //==============================================================================
     MSVCProjectExporterBase (Project& project_, const ValueTree& settings_, const char* const folderName)
         : ProjectExporter (project_, settings_), hasIcon (false)
     {
@@ -45,14 +44,7 @@ public:
 
         projectGUID = createGUID (project.getProjectUID());
 
-        const String oldStylePrebuildCommand (getSetting (Ids::prebuildCommand).toString());
-        if (oldStylePrebuildCommand.isNotEmpty()) // update an old project format..
-        {
-            for (ConfigIterator config (*this); config.next();)
-                dynamic_cast <MSVCBuildConfiguration&> (*config).getPrebuildCommand() = oldStylePrebuildCommand;
-
-            settings.removeProperty (Ids::prebuildCommand, nullptr);
-        }
+        updateOldSettings();
     }
 
     //==============================================================================
@@ -71,14 +63,6 @@ public:
             const int libTypeValues[] = { 1, 2, 0 };
             props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type",
                                                     StringArray (libTypes), Array<var> (libTypeValues)));
-
-            props.add (new TextPropertyComponent (getSetting (Ids::libraryName_Debug), "Library Name (Debug)", 128, false),
-                       "If set, this name will override the binary name specified in the configuration settings, for a debug build. "
-                       "You must include the .lib or .dll suffix on this filename.");
-
-            props.add (new TextPropertyComponent (getSetting (Ids::libraryName_Release), "Library Name (Release)", 128, false),
-                       "If set, this name will override the binary name specified in the configuration settings, for a release build. "
-                       "You must include the .lib or .dll suffix on this filename.");
         }
     }
 
@@ -91,6 +75,38 @@ protected:
 
     Value getLibraryType() const        { return getSetting (Ids::libraryType); }
     bool isLibraryDLL() const           { return msvcIsDLL || (projectType.isLibrary() && getLibraryType() == 2); }
+
+    void updateOldSettings()
+    {
+        {
+            const String oldStylePrebuildCommand (getSetting (Ids::prebuildCommand).toString());
+            settings.removeProperty (Ids::prebuildCommand, nullptr);
+
+            if (oldStylePrebuildCommand.isNotEmpty())
+                for (ConfigIterator config (*this); config.next();)
+                    dynamic_cast <MSVCBuildConfiguration&> (*config).getPrebuildCommand() = oldStylePrebuildCommand;
+        }
+
+        {
+            const String oldStyleLibName (getSetting ("libraryName_Debug").toString());
+            settings.removeProperty ("libraryName_Debug", nullptr);
+
+            if (oldStyleLibName.isNotEmpty())
+                for (ConfigIterator config (*this); config.next();)
+                    if (config->isDebug().getValue())
+                        config->getTargetBinaryName() = oldStyleLibName;
+        }
+
+        {
+            const String oldStyleLibName (getSetting ("libraryName_Release").toString());
+            settings.removeProperty ("libraryName_Release", nullptr);
+
+            if (oldStyleLibName.isNotEmpty())
+                for (ConfigIterator config (*this); config.next();)
+                    if (! config->isDebug().getValue())
+                        config->getTargetBinaryName() = oldStyleLibName;
+        }
+    }
 
     //==============================================================================
     class MSVCBuildConfiguration  : public BuildConfiguration
@@ -116,6 +132,16 @@ protected:
         Value getPostbuildCommand() const       { return getValue (Ids::postbuildCommand); }
 
         Value shouldGenerateManifest() const    { return getValue (Ids::generateManifest); }
+
+        String getOutputFilename (const String& suffix, bool forceSuffix) const
+        {
+            const String target (File::createLegalFileName (getTargetBinaryName().toString().trim()));
+
+            if (forceSuffix || ! target.containsChar ('.'))
+                return target.upToLastOccurrenceOf (".", false, false) + suffix;
+
+            return target;
+        }
 
         void createPropertyEditors (PropertyListBuilder& props)
         {
@@ -203,15 +229,6 @@ protected:
         searchPaths.addArray (config.getHeaderSearchPaths());
         searchPaths.removeDuplicates (false);
         return searchPaths;
-    }
-
-    String getBinaryFileForConfig (const BuildConfiguration& config) const
-    {
-        const String targetBinary (getSetting (config.isDebug().getValue() ? Ids::libraryName_Debug : Ids::libraryName_Release).toString().trim());
-        if (targetBinary.isNotEmpty())
-            return targetBinary;
-
-        return config.getTargetBinaryName().toString() + msvcTargetSuffix;
     }
 
     virtual String createConfigName (const BuildConfiguration& config) const
@@ -577,7 +594,6 @@ protected:
         String binariesPath (getConfigTargetPath (config));
         String intermediatesPath (getIntermediatesPath (config));
         const bool isDebug = (bool) config.isDebug().getValue();
-        const String binaryName (File::createLegalFileName (config.getTargetBinaryName().toString()));
 
         xml.setAttribute ("Name", createConfigName (config));
         xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (binariesPath));
@@ -609,7 +625,8 @@ protected:
             midl->setAttribute ("MkTypLibCompatible", "true");
             midl->setAttribute ("SuppressStartupBanner", "true");
             midl->setAttribute ("TargetEnvironment", "1");
-            midl->setAttribute ("TypeLibraryName", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".tlb"));
+            midl->setAttribute ("TypeLibraryName", FileHelpers::windowsStylePath (intermediatesPath + "/"
+                                                                                    + config.getOutputFilename (".tlb", true)));
             midl->setAttribute ("HeaderFileName", "");
         }
 
@@ -636,7 +653,8 @@ protected:
                                                                              : (isDebug ? 1 : 0)); // MT static
             compiler->setAttribute ("RuntimeTypeInfo", "true");
             compiler->setAttribute ("UsePrecompiledHeader", "0");
-            compiler->setAttribute ("PrecompiledHeaderFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pch"));
+            compiler->setAttribute ("PrecompiledHeaderFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
+                                                                                                + config.getOutputFilename (".pch", true)));
             compiler->setAttribute ("AssemblerListingLocation", FileHelpers::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("ObjectFile", FileHelpers::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("ProgramDataBaseFileName", FileHelpers::windowsStylePath (intermediatesPath + "/"));
@@ -657,18 +675,17 @@ protected:
 
         createToolElement (xml, "VCPreLinkEventTool");
 
-        const String outputFileName (getBinaryFileForConfig (config));
-
         if (! projectType.isLibrary())
         {
             XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
-            linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
+            linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (msvcTargetSuffix, false)));
             linker->setAttribute ("SuppressStartupBanner", "true");
 
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
-            linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
+            linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
+                                                                                            + config.getOutputFilename (".pdb", true)));
             linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
             const StringArray librarySearchPaths (config.getLibrarySearchPaths());
@@ -706,17 +723,17 @@ protected:
                 XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
                 String extraLinkerOptions (getExtraLinkerFlags().toString());
-                extraLinkerOptions << " /IMPLIB:" << FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName.upToLastOccurrenceOf (".", false, false) + ".lib");
+                extraLinkerOptions << " /IMPLIB:" << FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (".lib", true));
                 linker->setAttribute ("AdditionalOptions", replacePreprocessorTokens (config, extraLinkerOptions).trim());
 
-                linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
+                linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (msvcTargetSuffix, false)));
                 linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             }
             else
             {
                 XmlElement* librarian = createToolElement (xml, "VCLibrarianTool");
 
-                librarian->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
+                librarian->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (msvcTargetSuffix, false)));
                 librarian->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             }
         }
@@ -728,7 +745,8 @@ protected:
         {
             XmlElement* bscMake = createToolElement (xml, "VCBscMakeTool");
             bscMake->setAttribute ("SuppressStartupBanner", "true");
-            bscMake->setAttribute ("OutputFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
+            bscMake->setAttribute ("OutputFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
+                                                                                    + config.getOutputFilename (".bsc", true)));
         }
 
         createToolElement (xml, "VCFxCopTool");
@@ -1001,7 +1019,7 @@ protected:
                 {
                     XmlElement* name = props->createNewChildElement ("TargetName");
                     setConditionAttribute (*name, config);
-                    name->addTextElement (getBinaryFileForConfig (config).upToLastOccurrenceOf (".", false, false));
+                    name->addTextElement (config.getOutputFilename (String::empty, true));
                 }
 
                 {
@@ -1028,8 +1046,6 @@ protected:
             String binariesPath (getConfigTargetPath (config));
             String intermediatesPath (getIntermediatesPath (config));
             const bool isDebug = (bool) config.isDebug().getValue();
-            const String binaryName (File::createLegalFileName (config.getTargetBinaryName().toString()));
-            const String outputFileName (getBinaryFileForConfig (config));
 
             XmlElement* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
             setConditionAttribute (*group, config);
@@ -1080,12 +1096,14 @@ protected:
 
             {
                 XmlElement* link = group->createNewChildElement ("Link");
-                link->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
+                link->createNewChildElement ("OutputFile")
+                    ->addTextElement (FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (msvcTargetSuffix, false)));
                 link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                         : "%(IgnoreSpecificDefaultLibraries)");
                 link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
-                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
+                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"
+                                                                                                                        + config.getOutputFilename (".pdb", true)));
                 link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
 
                 if (! is64Bit (config))
@@ -1106,7 +1124,8 @@ protected:
             {
                 XmlElement* bsc = group->createNewChildElement ("Bscmake");
                 bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
+                bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath
+                                                                                                            + "/" + config.getOutputFilename (".bsc", true)));
             }
 
             if (config.msvcPreBuildCommand.isNotEmpty())
