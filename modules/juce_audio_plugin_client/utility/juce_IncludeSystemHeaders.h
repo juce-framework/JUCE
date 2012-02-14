@@ -47,7 +47,7 @@
  #undef Time
 
 #else
- #ifndef JUCE_SUPPORT_CARBON
+ #if ! (defined (JUCE_SUPPORT_CARBON) || JUCE_64BIT)
   #define JUCE_SUPPORT_CARBON 1
  #endif
 

@@ -79,6 +79,7 @@ public:
     //==============================================================================
     Value getObjCSuffix()       { return getSetting ("objCExtraSuffix"); }
     Value getPListToMerge()     { return getSetting ("customPList"); }
+    Value getExtraFrameworks()  { return getSetting (Ids::extraFrameworks); }
 
     int getLaunchPreferenceOrderForCurrentOS()
     {
@@ -131,6 +132,10 @@ public:
                    "You can paste the contents of an XML PList file in here, and the settings that it contains will override any "
                    "settings that the Introjucer creates. BEWARE! When doing this, be careful to remove from the XML any "
                    "values that you DO want the introjucer to change!");
+
+        props.add (new TextPropertyComponent (getExtraFrameworks(), "Extra Frameworks", 2048, false),
+                   "A comma-separated list of extra frameworks that should be added to the build. "
+                   "(Don't include the .framework extension in the name)");
     }
 
     void launchProject()
@@ -706,6 +711,8 @@ private:
         if (! projectType.isLibrary())
         {
             StringArray s (xcodeFrameworks);
+            s.addTokens (getExtraFrameworks().toString(), ",;", "\"'");
+
             s.trim();
             s.removeDuplicates (true);
             s.sort (true);

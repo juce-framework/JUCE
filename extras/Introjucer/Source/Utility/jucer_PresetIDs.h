@@ -61,6 +61,7 @@ namespace Ids
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);
     DECLARE_ID (osxArchitecture);
+    DECLARE_ID (extraFrameworks);
     DECLARE_ID (winArchitecture);
     DECLARE_ID (winWarningLevel);
     DECLARE_ID (bigIcon);

@@ -54,7 +54,7 @@
 // #error "You need to set either the JUCE_PLUGINHOST_AU anr/or JUCE_PLUGINHOST_VST flags if you're using this module!"
 #endif
 
-#ifndef JUCE_SUPPORT_CARBON
+#if ! (defined (JUCE_SUPPORT_CARBON) || JUCE_64BIT)
  #define JUCE_SUPPORT_CARBON 1
 #endif
 
