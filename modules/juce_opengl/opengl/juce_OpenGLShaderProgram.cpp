@@ -50,14 +50,13 @@ double OpenGLShaderProgram::getLanguageVersion()
    #endif
 }
 
-void OpenGLShaderProgram::addShader (const char* const code, GLenum type)
+bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
 {
     GLuint shaderID = context.extensions.glCreateShader (type);
     context.extensions.glShaderSource (shaderID, 1, (const GLchar**) &code, nullptr);
     context.extensions.glCompileShader (shaderID);
 
-   #if JUCE_DEBUG
-    GLint status = 0;
+    GLint status = GL_FALSE;
     context.extensions.glGetShaderiv (shaderID, GL_COMPILE_STATUS, &status);
 
     if (status == GL_FALSE)
@@ -65,24 +64,42 @@ void OpenGLShaderProgram::addShader (const char* const code, GLenum type)
         GLchar infoLog [16384];
         GLsizei infologLength = 0;
         context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infologLength, infoLog);
-        DBG (String (infoLog, infologLength));
+        errorLog = String (infoLog, infologLength);
+
+       #if JUCE_DEBUG
+        DBG (errorLog);
         jassertfalse;
+       #endif
+
+        return false;
     }
-   #endif
 
     context.extensions.glAttachShader (programID, shaderID);
     context.extensions.glDeleteShader (shaderID);
+    return true;
 }
 
-void OpenGLShaderProgram::link() noexcept
+bool OpenGLShaderProgram::link() noexcept
 {
     context.extensions.glLinkProgram (programID);
 
-   #if JUCE_DEBUG
-    GLint status = 0;
+    GLint status = GL_FALSE;
     context.extensions.glGetProgramiv (programID, GL_LINK_STATUS, &status);
-    jassert (status != GL_FALSE);
-   #endif
+
+    if (status == GL_FALSE)
+    {
+        GLchar infoLog [16384];
+        GLsizei infologLength = 0;
+        context.extensions.glGetProgramInfoLog (programID, sizeof (infoLog), &infologLength, infoLog);
+        errorLog = String (infoLog, infologLength);
+
+       #if JUCE_DEBUG
+        DBG (errorLog);
+        jassertfalse;
+       #endif
+    }
+
+    return status != GL_FALSE;
 }
 
 void OpenGLShaderProgram::use() const noexcept

@@ -56,14 +56,22 @@ public:
         fails to compile correctly.
 
         The shaderType parameter could be GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, etc.
+
+        @returns  true if the shader compiled successfully. If not, you can call
+                  getLastError() to find out what happened.
     */
-    void addShader (const char* const shaderSourceCode, GLenum shaderType);
+    bool addShader (const char* const shaderSourceCode, GLenum shaderType);
 
     /** Links all the compiled shaders into a usable program.
         If your app is built in debug mode, this method will assert if the program
         fails to link correctly.
+        @returns  true if the program linked successfully. If not, you can call
+                  getLastError() to find out what happened.
     */
-    void link() noexcept;
+    bool link() noexcept;
+
+    /** Get the output for the last shader compilation or link that failed. */
+    const String& getLastError() const noexcept            { return errorLog; }
 
     /** Selects this program into the current context. */
     void use() const noexcept;
@@ -132,6 +140,7 @@ public:
 
 private:
     const OpenGLContext& context;
+    String errorLog;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLShaderProgram);
 };
