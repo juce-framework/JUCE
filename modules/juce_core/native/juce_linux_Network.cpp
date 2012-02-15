@@ -101,7 +101,7 @@ public:
 
     int64 getTotalLength()
     {
-        jassertfalse; //xxx to do
+        //xxx to do
         return -1;
     }
 

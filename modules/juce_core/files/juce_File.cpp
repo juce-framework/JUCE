@@ -490,7 +490,7 @@ bool File::loadFileAsData (MemoryBlock& destBlock) const
         return false;
 
     FileInputStream in (*this);
-    return getSize() == in.readIntoMemoryBlock (destBlock);
+    return in.openedOk() && getSize() == in.readIntoMemoryBlock (destBlock);
 }
 
 String File::loadFileAsString() const
@@ -499,7 +499,8 @@ String File::loadFileAsString() const
         return String::empty;
 
     FileInputStream in (*this);
-    return in.readEntireStreamAsString();
+    return in.openedOk() ? in.readEntireStreamAsString()
+                         : String::empty;
 }
 
 void File::readLines (StringArray& destLines) const
@@ -742,22 +743,25 @@ bool File::hasIdenticalContentTo (const File& other) const
     {
         FileInputStream in1 (*this), in2 (other);
 
-        const int bufferSize = 4096;
-        HeapBlock <char> buffer1 (bufferSize), buffer2 (bufferSize);
-
-        for (;;)
+        if (in1.openedOk() && in2.openedOk())
         {
-            const int num1 = in1.read (buffer1, bufferSize);
-            const int num2 = in2.read (buffer2, bufferSize);
+            const int bufferSize = 4096;
+            HeapBlock <char> buffer1 (bufferSize), buffer2 (bufferSize);
 
-            if (num1 != num2)
-                break;
+            for (;;)
+            {
+                const int num1 = in1.read (buffer1, bufferSize);
+                const int num2 = in2.read (buffer2, bufferSize);
 
-            if (num1 <= 0)
-                return true;
+                if (num1 != num2)
+                    break;
 
-            if (memcmp (buffer1, buffer2, (size_t) num1) != 0)
-                break;
+                if (num1 <= 0)
+                    return true;
+
+                if (memcmp (buffer1, buffer2, (size_t) num1) != 0)
+                    break;
+            }
         }
     }
 

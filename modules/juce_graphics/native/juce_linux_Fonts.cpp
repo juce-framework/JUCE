@@ -183,7 +183,7 @@ public:
         const int faceIndex;
         const bool isBold, isItalic, isMonospaced, isSansSerif;
 
-        JUCE_DECLARE_NON_COPYABLE (KnownTypeface);
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownTypeface);
     };
 
     //==============================================================================
@@ -281,7 +281,7 @@ private:
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE (FTTypefaceList);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTTypefaceList);
 };
 
 juce_ImplementSingleton_SingleThreaded (FTTypefaceList)

@@ -172,6 +172,8 @@ public:
         ScopedPointer<Colour> colour;
 
         Attribute& operator= (const Attribute&);
+
+        JUCE_LEAK_DETECTOR (Attribute);
     };
 
     /** Returns the number of attributes that have been added to this string. */
@@ -202,6 +204,8 @@ private:
     WordWrap wordWrap;
     ReadingDirection readingDirection;
     OwnedArray<Attribute> attributes;
+
+    JUCE_LEAK_DETECTOR (AttributedString);
 };
 
 #endif   // __JUCE_ATTRIBUTEDSTRING_JUCEHEADER__

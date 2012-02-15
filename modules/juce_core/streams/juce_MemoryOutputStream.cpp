@@ -160,6 +160,9 @@ String MemoryOutputStream::toString() const
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead)
 {
-    stream.write (streamToRead.getData(), (int) streamToRead.getDataSize());
+    const int dataSize = (int) streamToRead.getDataSize();
+    if (dataSize > 0)
+        stream.write (streamToRead.getData(), dataSize);
+
     return stream;
 }

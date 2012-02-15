@@ -51,6 +51,7 @@ int64 FileInputStream::getTotalLength()
 
 int FileInputStream::read (void* buffer, int bytesToRead)
 {
+    jassert (openedOk());
     jassert (buffer != nullptr && bytesToRead >= 0);
 
     if (needToSeek)
@@ -79,6 +80,7 @@ int64 FileInputStream::getPosition()
 
 bool FileInputStream::setPosition (int64 pos)
 {
+    jassert (openedOk());
     pos = jlimit ((int64) 0, totalSize, pos);
 
     needToSeek |= (currentPosition != pos);
