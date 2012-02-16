@@ -72,15 +72,14 @@ namespace DirectWriteTypeLayout
                 lastOriginY = baselineOriginY;
                 ++currentLine;
 
-                if (currentLine == layout->getNumLines())
-                    return S_OK;
-
-                // The x value is only correct when dealing with LTR text
-                layout->getLine (currentLine).lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
-            }
-
-            if (currentLine < 0)
-                return S_OK;
+				if (currentLine >= layout->getNumLines())
+				{
+					jassert (currentLine == layout->getNumLines());
+					TextLayout::Line* const newLine = new TextLayout::Line();
+					layout->addLine (newLine);
+					newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY); // The x value is only correct when dealing with LTR text
+				}
+			}
 
             TextLayout::Line& glyphLine = layout->getLine (currentLine);
 
@@ -320,23 +319,21 @@ namespace DirectWriteTypeLayout
 
         layout.ensureStorageAllocated (actualLineCount);
 
+		{
+	        ComSmartPtr<CustomDirectWriteTextRenderer> textRenderer (new CustomDirectWriteTextRenderer (fontCollection));
+	        hr = dwTextLayout->Draw (&layout, textRenderer, 0, 0);
+		}
+
         HeapBlock <DWRITE_LINE_METRICS> dwLineMetrics (actualLineCount);
         hr = dwTextLayout->GetLineMetrics (dwLineMetrics, actualLineCount, &actualLineCount);
         int lastLocation = 0;
+		const int numLines = jmin ((int) actualLineCount, layout.getNumLines());
 
-        for (UINT32 i = 0; i < actualLineCount; ++i)
+        for (int i = 0; i < numLines; ++i)
         {
-            const Range<int> lineStringRange (lastLocation, (int) lastLocation + dwLineMetrics[i].length);
             lastLocation = dwLineMetrics[i].length;
-
-            TextLayout::Line* glyphLine = new TextLayout::Line();
-            layout.addLine (glyphLine);
-            glyphLine->stringRange = lineStringRange;
+            layout.getLine(i).stringRange = Range<int> (lastLocation, (int) lastLocation + dwLineMetrics[i].length);
         }
-
-        ComSmartPtr<CustomDirectWriteTextRenderer> textRenderer (new CustomDirectWriteTextRenderer (fontCollection));
-
-        hr = dwTextLayout->Draw (&layout, textRenderer, 0, 0);
     }
 }
 #endif

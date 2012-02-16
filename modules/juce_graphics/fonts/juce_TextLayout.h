@@ -96,6 +96,9 @@ public:
         Point<float> anchor;
 
         float width;
+
+    private:
+        JUCE_LEAK_DETECTOR (Glyph);
     };
 
     //==============================================================================
@@ -115,6 +118,7 @@ public:
                                      original string that was used to create it. */
     private:
         Run& operator= (const Run&);
+        JUCE_LEAK_DETECTOR (Run);
     };
 
     //==============================================================================
@@ -139,6 +143,7 @@ public:
 
     private:
         Line& operator= (const Line&);
+        JUCE_LEAK_DETECTOR (Line);
     };
 
     //==============================================================================
@@ -169,6 +174,8 @@ private:
     void createStandardLayout (const AttributedString&);
     bool createNativeLayout (const AttributedString&);
     void recalculateWidth();
+
+    JUCE_LEAK_DETECTOR (TextLayout);
 };
 
 #endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__
