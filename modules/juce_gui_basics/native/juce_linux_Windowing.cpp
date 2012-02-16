@@ -1139,15 +1139,15 @@ public:
     void setIcon (const Image& newIcon)
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
-        HeapBlock <int> data (dataSize);
+        HeapBlock <unsigned long> data (dataSize);
 
         int index = 0;
-        data[index++] = newIcon.getWidth();
-        data[index++] = newIcon.getHeight();
+        data[index++] = (unsigned long) newIcon.getWidth();
+        data[index++] = (unsigned long) newIcon.getHeight();
 
         for (int y = 0; y < newIcon.getHeight(); ++y)
             for (int x = 0; x < newIcon.getWidth(); ++x)
-                data[index++] = newIcon.getPixelAt (x, y).getARGB();
+                data[index++] = (unsigned long) newIcon.getPixelAt (x, y).getARGB();
 
         ScopedXLock xlock;
         xchangeProperty (windowH, Atoms::getCreating ("_NET_WM_ICON"), XA_CARDINAL, 32, data.getData(), dataSize);

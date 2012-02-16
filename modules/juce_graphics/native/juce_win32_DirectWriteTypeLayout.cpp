@@ -72,14 +72,14 @@ namespace DirectWriteTypeLayout
                 lastOriginY = baselineOriginY;
                 ++currentLine;
 
-				if (currentLine >= layout->getNumLines())
-				{
-					jassert (currentLine == layout->getNumLines());
-					TextLayout::Line* const newLine = new TextLayout::Line();
-					layout->addLine (newLine);
-					newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY); // The x value is only correct when dealing with LTR text
-				}
-			}
+                if (currentLine >= layout->getNumLines())
+                {
+                    jassert (currentLine == layout->getNumLines());
+                    TextLayout::Line* const newLine = new TextLayout::Line();
+                    layout->addLine (newLine);
+                    newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY); // The x value is only correct when dealing with LTR text
+                }
+            }
 
             TextLayout::Line& glyphLine = layout->getLine (currentLine);
 
@@ -319,15 +319,15 @@ namespace DirectWriteTypeLayout
 
         layout.ensureStorageAllocated (actualLineCount);
 
-		{
-	        ComSmartPtr<CustomDirectWriteTextRenderer> textRenderer (new CustomDirectWriteTextRenderer (fontCollection));
-	        hr = dwTextLayout->Draw (&layout, textRenderer, 0, 0);
-		}
+        {
+            ComSmartPtr<CustomDirectWriteTextRenderer> textRenderer (new CustomDirectWriteTextRenderer (fontCollection));
+            hr = dwTextLayout->Draw (&layout, textRenderer, 0, 0);
+        }
 
         HeapBlock <DWRITE_LINE_METRICS> dwLineMetrics (actualLineCount);
         hr = dwTextLayout->GetLineMetrics (dwLineMetrics, actualLineCount, &actualLineCount);
         int lastLocation = 0;
-		const int numLines = jmin ((int) actualLineCount, layout.getNumLines());
+        const int numLines = jmin ((int) actualLineCount, layout.getNumLines());
 
         for (int i = 0; i < numLines; ++i)
         {
