@@ -235,7 +235,8 @@ private:
            << newLine
            << "APP_STL := gnustl_static" << newLine
            << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine
-           << "APP_PLATFORM := android-7" << newLine;
+           << "APP_PLATFORM := android-7" << newLine
+           << "APP_ABI := armeabi armeabi-v7a" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }

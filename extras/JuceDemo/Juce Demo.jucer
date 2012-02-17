@@ -73,7 +73,7 @@
       </CONFIGURATIONS>
     </VS2010>
     <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"
-             androidNDKPath="${user.home}/SDKs/android-ndk-r7" juceFolder="../../../juce"
+             androidNDKPath="${user.home}/SDKs/android-ndk-r7b" juceFolder="../../../juce"
              androidInternetNeeded="1" bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
