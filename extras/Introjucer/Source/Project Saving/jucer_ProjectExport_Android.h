@@ -108,9 +108,6 @@ public:
 
         createDirectoryOrThrow (target.getChildFile ("src/com"));
         createDirectoryOrThrow (jniFolder);
-        createDirectoryOrThrow (target.getChildFile ("res/drawable-hdpi"));
-        createDirectoryOrThrow (target.getChildFile ("res/drawable-mdpi"));
-        createDirectoryOrThrow (target.getChildFile ("res/drawable-ldpi"));
         createDirectoryOrThrow (target.getChildFile ("res/values"));
         createDirectoryOrThrow (target.getChildFile ("libs"));
         createDirectoryOrThrow (target.getChildFile ("bin"));
@@ -130,12 +127,23 @@ public:
 
         writeProjectPropertiesFile (target.getChildFile ("project.properties"));
         writeLocalPropertiesFile (target.getChildFile ("local.properties"));
-
-        writeIcon (target.getChildFile ("res/drawable-hdpi/icon.png"), 72);
-        writeIcon (target.getChildFile ("res/drawable-mdpi/icon.png"), 48);
-        writeIcon (target.getChildFile ("res/drawable-ldpi/icon.png"), 36);
-
         writeStringsFile (target.getChildFile ("res/values/strings.xml"));
+
+        const Image bigIcon (getBigIcon());
+        const Image smallIcon (getSmallIcon());
+
+        if (bigIcon.isValid() && smallIcon.isValid())
+        {
+            const int step = jmax (bigIcon.getWidth(), bigIcon.getHeight()) / 8;
+            writeIcon (target.getChildFile ("res/drawable-xhdpi/icon.png"), getBestIconForSize (step * 8, false));
+            writeIcon (target.getChildFile ("res/drawable-hdpi/icon.png"),  getBestIconForSize (step * 6, false));
+            writeIcon (target.getChildFile ("res/drawable-mdpi/icon.png"),  getBestIconForSize (step * 4, false));
+            writeIcon (target.getChildFile ("res/drawable-ldpi/icon.png"),  getBestIconForSize (step * 3, false));
+        }
+        else
+        {
+            writeIcon (target.getChildFile ("res/drawable-mdpi/icon.png"), bigIcon.isValid() ? bigIcon : smallIcon);
+        }
     }
 
 protected:
@@ -424,12 +432,12 @@ private:
         overwriteFileIfDifferentOrThrow (file, mo);
     }
 
-    void writeIcon (const File& file, int size)
+    void writeIcon (const File& file, const Image& im)
     {
-        Image im (getBestIconForSize (size, false));
-
         if (im.isValid())
         {
+            createDirectoryOrThrow (file.getParentDirectory());
+
             PNGImageFormat png;
             MemoryOutputStream mo;
 

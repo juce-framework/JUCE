@@ -36,9 +36,9 @@
             bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1"/>
+                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1"/>
+                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
@@ -46,18 +46,18 @@
             bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1"/>
+                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1"/>
+                       defines="JUCE_UNIT_TESTS=1" winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2008>
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"
                 bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1"/>
+                       defines="JUCE_UNIT_TESTS=1" libraryPath="/usr/X11R6/lib/"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1"/>
+                       defines="JUCE_UNIT_TESTS=1" libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
     </LINUX_MAKE>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
@@ -65,9 +65,11 @@
             bigIcon="f4hwldS">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" winArchitecture="32-bit"/>
+                       defines="JUCE_UNIT_TESTS=1" winArchitecture="32-bit" winWarningLevel="4"
+                       generateManifest="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" winArchitecture="32-bit"/>
+                       defines="JUCE_UNIT_TESTS=1" winArchitecture="32-bit" winWarningLevel="4"
+                       generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2010>
     <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"

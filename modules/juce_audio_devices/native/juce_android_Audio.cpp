@@ -75,7 +75,7 @@ public:
           callback (0), sampleRate (0),
           numClientInputChannels (0), numDeviceInputChannels (0), numDeviceInputChannelsAvailable (2),
           numClientOutputChannels (0), numDeviceOutputChannels (0),
-          minbufferSize (0), actualBufferSize (0),
+          minBufferSizeOut (0), minBufferSizeIn (0), actualBufferSize (0),
           isRunning (false),
           outputChannelBuffer (1, 1),
           inputChannelBuffer (1, 1)
@@ -83,22 +83,20 @@ public:
         JNIEnv* env = getEnv();
         sampleRate = env->CallStaticIntMethod (AudioTrack, AudioTrack.getNativeOutputSampleRate, MODE_STREAM);
 
-        const jint outMinBuffer = env->CallStaticIntMethod (AudioTrack, AudioTrack.getMinBufferSize, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT);
+        minBufferSizeOut = (int) env->CallStaticIntMethod (AudioTrack,  AudioTrack.getMinBufferSize,  sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT);
+        minBufferSizeIn  = (int) env->CallStaticIntMethod (AudioRecord, AudioRecord.getMinBufferSize, sampleRate, CHANNEL_IN_STEREO,  ENCODING_PCM_16BIT);
 
-        jint inMinBuffer = env->CallStaticIntMethod (AudioRecord, AudioRecord.getMinBufferSize, sampleRate, CHANNEL_IN_STEREO, ENCODING_PCM_16BIT);
-        if (inMinBuffer <= 0)
+        if (minBufferSizeIn <= 0)
         {
-            inMinBuffer = env->CallStaticIntMethod (AudioRecord, AudioRecord.getMinBufferSize, sampleRate, CHANNEL_IN_MONO, ENCODING_PCM_16BIT);
+            minBufferSizeIn = env->CallStaticIntMethod (AudioRecord, AudioRecord.getMinBufferSize, sampleRate, CHANNEL_IN_MONO, ENCODING_PCM_16BIT);
 
-            if (inMinBuffer > 0)
+            if (minBufferSizeIn > 0)
                 numDeviceInputChannelsAvailable = 1;
             else
                 numDeviceInputChannelsAvailable = 0;
         }
 
-        minbufferSize = jmax (outMinBuffer, inMinBuffer) / 4;
-
-        DBG ("Audio device - min buffers: " << outMinBuffer << ", " << inMinBuffer << "; "
+        DBG ("Audio device - min buffers: " << minBufferSizeOut << ", " << minBufferSizeIn << "; "
               << sampleRate << " Hz; input chans: " << numDeviceInputChannelsAvailable);
     }
 
@@ -135,9 +133,21 @@ public:
     int getNumSampleRates()             { return 1;}
     double getSampleRate (int index)    { return sampleRate; }
 
-    int getDefaultBufferSize()              { return minbufferSize; }
-    int getNumBufferSizesAvailable()        { return 10; }
-    int getBufferSizeSamples (int index)    { return getDefaultBufferSize() + index * 128; }
+    int getDefaultBufferSize()          { return 2048; }
+    int getNumBufferSizesAvailable()    { return 50; }
+
+    int getBufferSizeSamples (int index)
+    {
+        int n = 16;
+        for (int i = 0; i < index; ++i)
+            n += n < 64 ? 16
+                        : (n < 512 ? 32
+                                   : (n < 1024 ? 64
+                                               : (n < 2048 ? 128 : 256)));
+
+        return n;
+    }
+
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
@@ -150,7 +160,7 @@ public:
             return "Sample rate not allowed";
 
         lastError = String::empty;
-        int preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : jmax (minbufferSize, bufferSize);
+        int preferredBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
 
         numDeviceInputChannels = 0;
         numDeviceOutputChannels = 0;
@@ -176,7 +186,7 @@ public:
             numDeviceOutputChannels = 2;
             outputDevice = GlobalRef (env->NewObject (AudioTrack, AudioTrack.constructor,
                                                       STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
-                                                      (jint) (actualBufferSize * numDeviceOutputChannels * sizeof (int16)), MODE_STREAM));
+                                                      (jint) (minBufferSizeOut * numDeviceOutputChannels * sizeof (int16)), MODE_STREAM));
 
             if (env->CallIntMethod (outputDevice, AudioTrack.getState) != STATE_UNINITIALIZED)
                 isRunning = true;
@@ -191,7 +201,7 @@ public:
                                                      0 /* (default audio source) */, sampleRate,
                                                      numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
                                                      ENCODING_PCM_16BIT,
-                                                     (jint) (actualBufferSize * numDeviceInputChannels * sizeof (int16))));
+                                                     (jint) (minBufferSizeIn * numDeviceInputChannels * sizeof (int16))));
 
             if (env->CallIntMethod (inputDevice, AudioRecord.getState) != STATE_UNINITIALIZED)
                 isRunning = true;
@@ -227,8 +237,8 @@ public:
         }
     }
 
-    int getOutputLatencyInSamples()                     { return 0; } // TODO
-    int getInputLatencyInSamples()                      { return 0; } // TODO
+    int getOutputLatencyInSamples()                     { return minBufferSizeOut; }
+    int getInputLatencyInSamples()                      { return minBufferSizeIn; }
     bool isOpen()                                       { return isRunning; }
     int getCurrentBufferSizeSamples()                   { return actualBufferSize; }
     int getCurrentBitDepth()                            { return 16; }
@@ -355,7 +365,7 @@ private:
     jint sampleRate;
     int numClientInputChannels, numDeviceInputChannels, numDeviceInputChannelsAvailable;
     int numClientOutputChannels, numDeviceOutputChannels;
-    int minbufferSize, actualBufferSize;
+    int minBufferSizeOut, minBufferSizeIn, actualBufferSize;
     bool isRunning;
     String lastError;
     BigInteger activeOutputChans, activeInputChans;
