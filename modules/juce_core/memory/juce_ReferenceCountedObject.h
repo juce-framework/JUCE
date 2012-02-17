@@ -219,7 +219,6 @@ public:
     }
 
     /** Copies another pointer.
-
         This will increment the object's reference-count (if it is non-null).
     */
     inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr& other) noexcept
@@ -230,12 +229,24 @@ public:
     }
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Takes-over the object from another pointer. */
     inline ReferenceCountedObjectPtr (ReferenceCountedObjectPtr&& other) noexcept
         : referencedObject (other.referencedObject)
     {
         other.referencedObject = nullptr;
     }
    #endif
+
+    /** Copies another pointer.
+        This will increment the object's reference-count (if it is non-null).
+    */
+    template <class DerivedClass>
+    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<DerivedClass>& other) noexcept
+        : referencedObject (static_cast <ReferenceCountedObjectClass*> (other.getObject()))
+    {
+        if (referencedObject != nullptr)
+            referencedObject->incReferenceCount();
+    }
 
     /** Changes this pointer to point at a different object.
 
@@ -244,24 +255,22 @@ public:
     */
     ReferenceCountedObjectPtr& operator= (const ReferenceCountedObjectPtr& other)
     {
-        ReferenceCountedObjectClass* const newObject = other.referencedObject;
+        return operator= (other.referencedObject);
+    }
 
-        if (newObject != referencedObject)
-        {
-            if (newObject != nullptr)
-                newObject->incReferenceCount();
+    /** Changes this pointer to point at a different object.
 
-            ReferenceCountedObjectClass* const oldObject = referencedObject;
-            referencedObject = newObject;
-
-            if (oldObject != nullptr)
-                oldObject->decReferenceCount();
-        }
-
-        return *this;
+        The reference count of the old object is decremented, and it might be
+        deleted if it hits zero. The new object's count is incremented.
+    */
+    template <class DerivedClass>
+    ReferenceCountedObjectPtr& operator= (const ReferenceCountedObjectPtr<DerivedClass>& other)
+    {
+        return operator= (static_cast <ReferenceCountedObjectClass*> (other.getObject()));
     }
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Takes-over the object from another pointer. */
     ReferenceCountedObjectPtr& operator= (ReferenceCountedObjectPtr&& other)
     {
         std::swap (referencedObject, other.referencedObject);
