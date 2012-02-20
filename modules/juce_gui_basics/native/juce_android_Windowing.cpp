@@ -457,6 +457,7 @@ public:
         // TODO
     }
 
+   #if USE_ANDROID_CANVAS
     StringArray getAvailableRenderingEngines()
     {
         StringArray s (ComponentPeer::getAvailableRenderingEngines());
@@ -464,7 +465,6 @@ public:
         return s;
     }
 
-   #if USE_ANDROID_CANVAS
     int getCurrentRenderingEngine() const
     {
         return usingAndroidGraphics ? 1 : 0;

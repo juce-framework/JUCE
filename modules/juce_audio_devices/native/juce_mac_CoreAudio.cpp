@@ -919,11 +919,15 @@ public:
 
     int getDefaultBufferSize()
     {
-        for (int i = 0; i < getNumBufferSizesAvailable(); ++i)
-            if (getBufferSizeSamples(i) >= 512)
-                return getBufferSizeSamples(i);
+        int best = 0;
 
-        return 512;
+        for (int i = 0; best < 512 && i < getNumBufferSizesAvailable(); ++i)
+            best = getBufferSizeSamples(i);
+
+        if (best == 0)
+            best = 512;
+
+        return best;
     }
 
     String open (const BigInteger& inputChannels,

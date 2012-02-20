@@ -54,7 +54,7 @@
         void addToFifo (const int* someData, int numItems)
         {
             int start1, size1, start2, size2;
-            prepareToWrite (numItems, start1, size1, start2, size2);
+            abstractFifo.prepareToWrite (numItems, start1, size1, start2, size2);
 
             if (size1 > 0)
                 copySomeData (myBuffer + start1, someData, size1);
@@ -62,13 +62,13 @@
             if (size2 > 0)
                 copySomeData (myBuffer + start2, someData + size1, size2);
 
-            finishedWrite (size1 + size2);
+            abstractFifo.finishedWrite (size1 + size2);
         }
 
         void readFromFifo (int* someData, int numItems)
         {
             int start1, size1, start2, size2;
-            prepareToRead (numSamples, start1, size1, start2, size2);
+            abstractFifo.prepareToRead (numSamples, start1, size1, start2, size2);
 
             if (size1 > 0)
                 copySomeData (someData, myBuffer + start1, size1);
@@ -76,7 +76,7 @@
             if (size2 > 0)
                 copySomeData (someData + size1, myBuffer + start2, size2);
 
-            finishedRead (size1 + size2);
+            abstractFifo.finishedRead (size1 + size2);
         }
 
     private:

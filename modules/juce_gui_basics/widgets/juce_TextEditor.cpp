@@ -1753,9 +1753,7 @@ void TextEditor::paintOverChildren (Graphics& g)
         else
         {
             g.drawText (textToShowWhenEmpty,
-                        leftIndent, topIndent,
-                        viewport->getWidth() - leftIndent,
-                        viewport->getHeight() - topIndent,
+                        leftIndent, 0, viewport->getWidth() - leftIndent, getHeight(),
                         Justification::centredLeft, true);
         }
     }
