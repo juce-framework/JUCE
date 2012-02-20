@@ -15,11 +15,6 @@
       <arg value="clean"/>
     </exec>
   </target>
-  <exec executable="ln" dir="${basedir}" failonerror="false">
-    <arg value="-s"/>
-    <arg value="${basedir}/../../../../../juce/modules/juce_core/native/java/"/>
-    <arg value="src/com/juce"/>
-  </exec>
   <target name="debug">
     <exec executable="${ndk.dir}/ndk-build" dir="${basedir}" failonerror="true">
       <arg value="--jobs=2"/>

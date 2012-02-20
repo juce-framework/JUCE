@@ -30,6 +30,10 @@
  #define USE_ANDROID_CANVAS 0
 #endif
 
+#if ! (defined (JUCE_ANDROID_ACTIVITY_CLASSNAME) && defined (JUCE_ANDROID_ACTIVITY_CLASSPATH))
+ #error "The JUCE_ANDROID_ACTIVITY_CLASSNAME and JUCE_ANDROID_ACTIVITY_CLASSPATH macros must be set!"
+#endif
+
 //==============================================================================
 extern JNIEnv* getEnv() noexcept;
 
@@ -226,7 +230,7 @@ private:
 
 //==============================================================================
 #define JUCE_JNI_CALLBACK(className, methodName, returnType, params) \
-  extern "C" __attribute__ ((visibility("default"))) returnType Java_com_juce_ ## className ## _ ## methodName params
+  extern "C" __attribute__ ((visibility("default"))) returnType JUCE_JOIN_MACRO (JUCE_JOIN_MACRO (Java_, className), _ ## methodName) params
 
 //==============================================================================
 class AndroidSystem
@@ -330,20 +334,20 @@ extern ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (printToConsole,   "printToConsole",       "(Ljava/lang/String;)V") \
- METHOD (createNewView,          "createNewView",        "(Z)Lcom/juce/ComponentPeerView;") \
- METHOD (deleteView,             "deleteView",           "(Lcom/juce/ComponentPeerView;)V") \
+ METHOD (createNewView,          "createNewView",        "(Z)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
+ METHOD (deleteView,             "deleteView",           "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
  METHOD (postMessage,            "postMessage",          "(J)V") \
  METHOD (finish,                 "finish",               "()V") \
  METHOD (getClipboardContent,    "getClipboardContent",  "()Ljava/lang/String;") \
  METHOD (setClipboardContent,    "setClipboardContent",  "(Ljava/lang/String;)V") \
  METHOD (excludeClipRegion,      "excludeClipRegion",    "(Landroid/graphics/Canvas;FFFF)V") \
  METHOD (renderGlyph,            "renderGlyph",          "(CLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
- STATICMETHOD (createHTTPStream, "createHTTPStream",     "(Ljava/lang/String;Z[BLjava/lang/String;ILjava/lang/StringBuffer;)Lcom/juce/JuceAppActivity$HTTPStream;") \
+ STATICMETHOD (createHTTPStream, "createHTTPStream",     "(Ljava/lang/String;Z[BLjava/lang/String;ILjava/lang/StringBuffer;)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream;") \
  METHOD (showMessageBox,         "showMessageBox",       "(Ljava/lang/String;Ljava/lang/String;J)V") \
  METHOD (showOkCancelBox,        "showOkCancelBox",      "(Ljava/lang/String;Ljava/lang/String;J)V") \
  METHOD (showYesNoCancelBox,     "showYesNoCancelBox",   "(Ljava/lang/String;Ljava/lang/String;J)V") \
 
-DECLARE_JNI_CLASS (JuceAppActivity, "com/juce/JuceAppActivity");
+DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

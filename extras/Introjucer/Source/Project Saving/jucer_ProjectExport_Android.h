@@ -42,7 +42,7 @@ public:
         if (settings.hasType (getValueTreeTypeName()))
             return new AndroidProjectExporter (project, settings);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -53,6 +53,9 @@ public:
 
         if (getTargetLocation().toString().isEmpty())
             getTargetLocation() = getDefaultBuildsRootFolder() + "Android";
+
+        if (getActivityClassPath().toString().isEmpty())
+            getActivityClassPath() = createDefaultClassName();
 
         if (getSDKPath().toString().isEmpty())
             getSDKPath() = "${user.home}/SDKs/android-sdk-macosx";
@@ -86,6 +89,9 @@ public:
     {
         ProjectExporter::createPropertyEditors (props);
 
+        props.add (new TextPropertyComponent (getActivityClassPath(), "Android Activity class name", 256, false),
+                   "The full java class name to use for the app's Activity class.");
+
         props.add (new TextPropertyComponent (getSDKPath(), "Android SDK Path", 1024, false),
                    "The path to the Android SDK folder on the target build machine");
 
@@ -96,19 +102,40 @@ public:
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
     }
 
+    Value getActivityClassPath() const          { return getSetting (Ids::androidActivityClass); }
     Value getSDKPath() const                    { return getSetting (Ids::androidSDKPath); }
     Value getNDKPath() const                    { return getSetting (Ids::androidNDKPath); }
     Value getInternetNeeded() const             { return getSetting (Ids::androidInternetNeeded); }
 
+    String createDefaultClassName() const
+    {
+        String s (project.getBundleIdentifier().toString().toLowerCase());
+
+        if (s.length() > 5
+            && s.containsChar ('.')
+            && s.containsOnly ("abcdefghijklmnopqrstuvwxyz_.")
+            && ! s.startsWithChar ('.'))
+        {
+            if (! s.endsWithChar ('.'))
+                s << ".";
+        }
+        else
+        {
+            s = "com.yourcompany.";
+        }
+
+        return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRoot(), false, true, false);
+    }
+
     //==============================================================================
-    void create()
+    void create (const OwnedArray<LibraryModule>& modules)
     {
         const File target (getTargetFolder());
         const File jniFolder (target.getChildFile ("jni"));
 
-        createDirectoryOrThrow (target.getChildFile ("src/com"));
+        copyActivityJavaFiles (modules);
         createDirectoryOrThrow (jniFolder);
-        createDirectoryOrThrow (target.getChildFile ("res/values"));
+        createDirectoryOrThrow (target.getChildFile ("res").getChildFile ("values"));
         createDirectoryOrThrow (target.getChildFile ("libs"));
         createDirectoryOrThrow (target.getChildFile ("bin"));
 
@@ -156,12 +183,19 @@ protected:
         {
             androidDynamicLibs.add ("GLESv1_CM");
             androidDynamicLibs.add ("GLESv2");
+
+            if (getArchitectures().toString().isEmpty())
+                getArchitectures() = "armeabi armeabi-v7a";
         }
+
+        Value getArchitectures() const   { return getValue (Ids::androidArchitectures); }
 
         void createPropertyEditors (PropertyListBuilder& props)
         {
             createBasicPropertyEditors (props);
 
+            props.add (new TextPropertyComponent (getArchitectures(), "Architectures", 256, false),
+                       "A list of the ARM architectures to build (for a fat binary).");
         }
 
         StringArray androidDynamicLibs;
@@ -181,7 +215,7 @@ private:
         manifest->setAttribute ("xmlns:android", "http://schemas.android.com/apk/res/android");
         manifest->setAttribute ("android:versionCode", "1");
         manifest->setAttribute ("android:versionName", "1.0");
-        manifest->setAttribute ("package", "com.juce");
+        manifest->setAttribute ("package", getActivityClassPackage());
 
         XmlElement* screens = manifest->createNewChildElement ("supports-screens");
         screens->setAttribute ("android:smallScreens", "true");
@@ -201,7 +235,7 @@ private:
         app->setAttribute ("android:icon", "@drawable/icon");
 
         XmlElement* act = app->createNewChildElement ("activity");
-        act->setAttribute ("android:name", "JuceAppActivity");
+        act->setAttribute ("android:name", getActivityName());
         act->setAttribute ("android:label", "@string/app_name");
 
         XmlElement* intent = act->createNewChildElement ("intent-filter");
@@ -226,6 +260,63 @@ private:
         }
     }
 
+    //==============================================================================
+    String getActivityName() const
+    {
+        return getActivityClassPath().toString().fromLastOccurrenceOf (".", false, false);
+    }
+
+    String getActivityClassPackage() const
+    {
+        return getActivityClassPath().toString().upToLastOccurrenceOf (".", false, false);
+    }
+
+    String getJNIActivityClassName() const
+    {
+        return getActivityClassPath().toString().replaceCharacter ('.', '/');
+    }
+
+    static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
+    {
+        for (int i = modules.size(); --i >= 0;)
+            if (modules.getUnchecked(i)->getID() == "juce_core")
+                return modules.getUnchecked(i);
+
+        return nullptr;
+    }
+
+    void copyActivityJavaFiles (const OwnedArray<LibraryModule>& modules)
+    {
+        const String className (getActivityName());
+        const String package (getActivityClassPackage());
+        String path (package.replaceCharacter ('.', File::separator));
+
+        if (path.isEmpty() || className.isEmpty())
+            throw SaveError ("Invalid Android Activity class name: " + getActivityClassPath().toString());
+
+        const File classFolder (getTargetFolder().getChildFile ("src")
+                                                 .getChildFile (path));
+        createDirectoryOrThrow (classFolder);
+
+        LibraryModule* const coreModule = getCoreModule (modules);
+
+        if (coreModule == nullptr)
+            throw SaveError ("To build an Android app, the juce_core module must be included in your project!");
+
+        File javaDestFile (classFolder.getChildFile (className + ".java"));
+
+        File javaSourceFile (coreModule->getFolder().getChildFile ("native")
+                                                    .getChildFile ("java")
+                                                    .getChildFile ("JuceAppActivity.java"));
+
+        MemoryOutputStream newFile;
+        newFile << javaSourceFile.loadFileAsString()
+                                 .replace ("JuceAppActivity", className)
+                                 .replace ("package com.juce;", "package " + package + ";");
+
+        overwriteFileIfDifferentOrThrow (javaDestFile, newFile);
+    }
+
     void writeApplicationMk (const File& file)
     {
         MemoryOutputStream mo;
@@ -235,8 +326,7 @@ private:
            << newLine
            << "APP_STL := gnustl_static" << newLine
            << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine
-           << "APP_PLATFORM := android-7" << newLine
-           << "APP_ABI := armeabi armeabi-v7a" << newLine;
+           << "APP_PLATFORM := android-7" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }
@@ -287,8 +377,11 @@ private:
         {
             if (config->isDebug() == forDebug)
             {
+                const AndroidBuildConfiguration& androidConfig = dynamic_cast <const AndroidBuildConfiguration&> (*config);
+
                 out << "  LOCAL_CPPFLAGS += " << createCPPFlags (*config) << newLine
-                    << getDynamicLibs (dynamic_cast <const AndroidBuildConfiguration&> (*config));
+                    << "  APP_ABI := " << androidConfig.getArchitectures().toString() << newLine
+                    << getDynamicLibs (androidConfig);
 
                 break;
             }
@@ -327,6 +420,8 @@ private:
     {
         StringPairArray defines;
         defines.set ("JUCE_ANDROID", "1");
+        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
+        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\\\"" + getJNIActivityClassName() + "\\\"");
 
         String flags ("-fsigned-char -fexceptions -frtti");
 
@@ -371,9 +466,6 @@ private:
 
         addNDKBuildStep (proj, "clean", "clean");
 
-        //addLinkStep (proj, "${basedir}/" + rebaseFromProjectFolderToBuildTarget (RelativePath()).toUnixStyle() + "/", "jni/app");
-        addLinkStep (proj, "${basedir}/" + getJucePathFromTargetFolder().toUnixStyle() + "/modules/juce_core/native/java/", "src/com/juce");
-
         addNDKBuildStep (proj, "debug", "CONFIG=Debug");
         addNDKBuildStep (proj, "release", "CONFIG=Release");
 
@@ -394,18 +486,6 @@ private:
 
         executable->createNewChildElement ("arg")->setAttribute ("value", "--jobs=2");
         executable->createNewChildElement ("arg")->setAttribute ("value", arg);
-    }
-
-    static void addLinkStep (XmlElement* project, const String& from, const String& to)
-    {
-        XmlElement* executable = project->createNewChildElement ("exec");
-        executable->setAttribute ("executable", "ln");
-        executable->setAttribute ("dir", "${basedir}");
-        executable->setAttribute ("failonerror", "false");
-
-        executable->createNewChildElement ("arg")->setAttribute ("value", "-s");
-        executable->createNewChildElement ("arg")->setAttribute ("value", from);
-        executable->createNewChildElement ("arg")->setAttribute ("value", to);
     }
 
     void writeProjectPropertiesFile (const File& file)

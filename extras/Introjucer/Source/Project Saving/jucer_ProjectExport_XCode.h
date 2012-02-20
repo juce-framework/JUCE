@@ -73,7 +73,7 @@ public:
         else if (settings.hasType (getValueTreeTypeName (true)))
             return new XCodeProjectExporter (project, settings, true);
 
-        return 0;
+        return nullptr;
     }
 
     //==============================================================================
@@ -144,7 +144,7 @@ public:
     }
 
     //==============================================================================
-    void create()
+    void create (const OwnedArray<LibraryModule>&)
     {
         infoPlistFile = getTargetFolder().getChildFile ("Info.plist");
 

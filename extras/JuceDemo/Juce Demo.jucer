@@ -74,12 +74,12 @@
     </VS2010>
     <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"
              androidNDKPath="${user.home}/SDKs/android-ndk-r7b" juceFolder="../../../juce"
-             androidInternetNeeded="1" bigIcon="f4hwldS">
+             androidInternetNeeded="1" bigIcon="f4hwldS" androidActivityClass="com.juce.JuceDemo">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1"/>
+                       defines="JUCE_UNIT_TESTS=1" androidArchitectures="armeabi"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1"/>
+                       defines="JUCE_UNIT_TESTS=1" androidArchitectures="armeabi armeabi-v7a"/>
       </CONFIGURATIONS>
     </ANDROID>
   </EXPORTFORMATS>

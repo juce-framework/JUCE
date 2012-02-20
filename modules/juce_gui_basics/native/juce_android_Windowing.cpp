@@ -31,8 +31,8 @@ namespace juce
 {
 
 //==============================================================================
-JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activity,
-                                                      jstring appFile, jstring appDataDir))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* env, jobject activity,
+                                                                      jstring appFile, jstring appDataDir))
 {
     android.initialise (env, activity, appFile, appDataDir);
 
@@ -47,7 +47,7 @@ JUCE_JNI_CALLBACK (JuceAppActivity, launchApp, void, (JNIEnv* env, jobject activ
         exit (0);
 }
 
-JUCE_JNI_CALLBACK (JuceAppActivity, quitApp, void, (JNIEnv* env, jobject activity))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env, jobject activity))
 {
     JUCEApplicationBase::appWillTerminateByForce();
 
@@ -79,7 +79,7 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
  METHOD (invalidate,    "invalidate",       "(IIII)V") \
  METHOD (containsPoint, "containsPoint",    "(II)Z") \
 
-DECLARE_JNI_CLASS (ComponentPeerView, "com/juce/ComponentPeerView");
+DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
 
 
@@ -565,7 +565,7 @@ Point<int> AndroidComponentPeer::lastMousePos;
 
 //==============================================================================
 #define JUCE_VIEW_CALLBACK(returnType, javaMethodName, params, juceMethodInvocation) \
-  JUCE_JNI_CALLBACK (ComponentPeerView, javaMethodName, returnType, params) \
+  JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024ComponentPeerView), javaMethodName, returnType, params) \
   { \
       AndroidComponentPeer* const peer = AndroidComponentPeer::findPeerForJavaView (env, view); \
       if (peer != nullptr) \
@@ -671,8 +671,8 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
     return 0;
 }
 
-JUCE_JNI_CALLBACK (JuceAppActivity, alertDismissed, void, (JNIEnv* env, jobject activity,
-                                                           jlong callbackAsLong, jint result))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, alertDismissed, void, (JNIEnv* env, jobject activity,
+                                                                           jlong callbackAsLong, jint result))
 {
     ModalComponentManager::Callback* callback = (ModalComponentManager::Callback*) callbackAsLong;
 
@@ -703,8 +703,8 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
     monitorCoords.add (Rectangle<int> (0, 0, android.screenWidth, android.screenHeight));
 }
 
-JUCE_JNI_CALLBACK (JuceAppActivity, setScreenSize, void, (JNIEnv* env, jobject activity,
-                                                          jint screenWidth, jint screenHeight))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv* env, jobject activity,
+                                                                          jint screenWidth, jint screenHeight))
 {
     const bool isSystemInitialised = android.screenWidth != 0;
     android.screenWidth = screenWidth;

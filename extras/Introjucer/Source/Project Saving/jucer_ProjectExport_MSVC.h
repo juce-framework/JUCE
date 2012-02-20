@@ -457,7 +457,7 @@ public:
     }
 
     //==============================================================================
-    void create()
+    void create (const OwnedArray<LibraryModule>&)
     {
         createIconFile();
 
@@ -802,7 +802,7 @@ public:
         if (settings.hasType (getValueTreeTypeName()))
             return new MSVCProjectExporterVC2005 (project, settings);
 
-        return 0;
+        return nullptr;
     }
 
 protected:
@@ -845,7 +845,7 @@ public:
     }
 
     //==============================================================================
-    void create()
+    void create (const OwnedArray<LibraryModule>&)
     {
         createIconFile();
 

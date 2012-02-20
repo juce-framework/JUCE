@@ -432,7 +432,7 @@ private:
 
                 try
                 {
-                    exporter->create();
+                    exporter->create (modules);
                 }
                 catch (ProjectExporter::SaveError& error)
                 {

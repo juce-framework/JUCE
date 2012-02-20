@@ -43,7 +43,7 @@ bool MessageManager::postMessageToSystemQueue (Message* message)
     return true;
 }
 
-JUCE_JNI_CALLBACK (JuceAppActivity, deliverMessage, void, (jobject activity, jlong value))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, deliverMessage, void, (jobject activity, jlong value))
 {
     Message* const message = (Message*) (pointer_sized_uint) value;
     MessageManager::getInstance()->deliverMessage (message);

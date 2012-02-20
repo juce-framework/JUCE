@@ -134,7 +134,10 @@ String createGCCPreprocessorFlags (const StringPairArray& defs)
         if (value.isNotEmpty())
             def << "=" << value;
 
-        s += " -D " + def.quoted();
+        if (! def.endsWithChar ('"'))
+            def = def.quoted();
+
+        s += " -D " + def;
     }
 
     return s;

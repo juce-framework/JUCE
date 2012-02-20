@@ -55,7 +55,7 @@ public:
     virtual bool usesMMFiles() const = 0;
     virtual void createPropertyEditors (PropertyListBuilder&);
     virtual void launchProject() = 0;
-    virtual void create() = 0; // may throw a SaveError
+    virtual void create (const OwnedArray<LibraryModule>&) = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
     virtual bool canCopeWithDuplicateFiles() = 0;
 

@@ -42,7 +42,7 @@ public:
         if (settings.hasType (getValueTreeTypeName()))
             return new MakefileProjectExporter (project, settings);
 
-        return 0;
+        return nullptr;
     }
 
 
@@ -82,7 +82,7 @@ public:
     }
 
     //==============================================================================
-    void create()
+    void create (const OwnedArray<LibraryModule>&)
     {
         Array<RelativePath> files;
         for (int i = 0; i < groups.size(); ++i)

@@ -5,7 +5,7 @@
   <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"/>
   <uses-permission android:name="android.permission.INTERNET"/>
   <application android:label="@string/app_name" android:icon="@drawable/icon">
-    <activity android:name="JuceAppActivity" android:label="@string/app_name">
+    <activity android:name="JuceDemo" android:label="@string/app_name">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>

@@ -44,6 +44,7 @@ public:
     String getVersion() const           { return moduleInfo ["version"].toString(); }
     String getName() const              { return moduleInfo ["name"].toString(); }
     String getDescription() const       { return moduleInfo ["description"].toString(); }
+    const File& getFolder() const       { return moduleFolder; }
 
     void writeIncludes (ProjectSaver&, OutputStream&);
     void prepareExporter (ProjectExporter&, ProjectSaver&) const;
