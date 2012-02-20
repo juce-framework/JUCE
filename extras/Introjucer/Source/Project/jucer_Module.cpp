@@ -584,8 +584,10 @@ void LibraryModule::findWildcardMatches (const File& localModuleFolder, const St
     FileSorter sorter;
 
     DirectoryIterator iter (localModuleFolder.getChildFile (path), false, wildCard);
-    while (iter.next())
-        if (! iter.getFile().isHidden())
+    bool isHiddenFile;
+
+    while (iter.next (nullptr, &isHiddenFile, nullptr, nullptr, nullptr, nullptr))
+        if (! isHiddenFile)
             tempList.addSorted (sorter, iter.getFile());
 
     result.addArray (tempList);

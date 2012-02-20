@@ -95,9 +95,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const Str
 
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
 {
-    ProjectExporter* exp = nullptr;
-
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2005::createForSettings (project, settings);
+    ProjectExporter*       exp = MSVCProjectExporterVC2005::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2008::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2010::createForSettings (project, settings);
     if (exp == nullptr)    exp = XCodeProjectExporter     ::createForSettings (project, settings);

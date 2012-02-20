@@ -110,7 +110,9 @@ private:
 
     File getFakeFile() const
     {
-        return File::getCurrentWorkingDirectory().getChildFile (path);
+        // This method gets called very often, so we'll cache this directory.
+        static const File currentWorkingDirectory (File::getCurrentWorkingDirectory());
+        return currentWorkingDirectory.getChildFile (path);
     }
 
     static bool isAbsolute (const String& path)

@@ -865,7 +865,7 @@ private:
 public:
     static int compareElements (const ValueTree* first, const ValueTree* second)
     {
-        return first->getType().toString().compare (second->getType().toString());
+        return first->getType().getCharPointer().compare (second->getType().getCharPointer());
     }
 
 private:
