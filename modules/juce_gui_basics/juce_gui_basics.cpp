@@ -248,6 +248,9 @@ using namespace juce;
 //==============================================================================
 namespace juce
 {
+#if JUCE_IOS || JUCE_WINDOWS
+ #include "native/juce_MultiTouchMapper.h"
+#endif
 
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
@@ -256,7 +259,6 @@ namespace juce
  #include "../juce_graphics/native/juce_mac_CoreGraphicsContext.h"
 
  #if JUCE_IOS
-  #include "native/juce_MultiTouchMapper.h"
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
  #else
@@ -271,7 +273,6 @@ namespace juce
 #elif JUCE_WINDOWS
  #include "../juce_core/native/juce_win32_ComSmartPtr.h"
  #include "../juce_events/native/juce_win32_HiddenMessageWindow.h"
- #include "native/juce_MultiTouchMapper.h"
  #include "native/juce_win32_Windowing.cpp"
  #include "native/juce_win32_DragAndDrop.cpp"
  #include "native/juce_win32_FileChooser.cpp"

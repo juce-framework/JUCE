@@ -74,7 +74,8 @@
     </VS2010>
     <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"
              androidNDKPath="${user.home}/SDKs/android-ndk-r7b" juceFolder="../../../juce"
-             androidInternetNeeded="1" bigIcon="f4hwldS" androidActivityClass="com.juce.JuceDemo">
+             androidInternetNeeded="1" bigIcon="f4hwldS" androidActivityClass="com.juce.JuceDemo"
+             androidMinimumSDK="7" androidMicNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        defines="JUCE_UNIT_TESTS=1" androidArchitectures="armeabi"/>

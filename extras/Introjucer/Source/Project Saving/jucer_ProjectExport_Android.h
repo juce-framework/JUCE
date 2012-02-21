@@ -63,6 +63,9 @@ public:
         if (getNDKPath().toString().isEmpty())
             getNDKPath() = "${user.home}/SDKs/android-ndk-r7";
 
+        if (getMinimumSDKVersion().toString().isEmpty())
+            getMinimumSDKVersion() = 7;
+
         if (getInternetNeeded().toString().isEmpty())
             getInternetNeeded() = true;
     }
@@ -100,12 +103,21 @@ public:
 
         props.add (new BooleanPropertyComponent (getInternetNeeded(), "Internet Access", "Specify internet access permission in the manifest"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
+
+        props.add (new BooleanPropertyComponent (getAudioRecordNeeded(), "Audio Input Required", "Specify audio record permission in the manifest"),
+                   "If enabled, this will set the android.permission.RECORD_AUDIO flag in the manifest.");
+
+        props.add (new TextPropertyComponent (getOtherPermissions(), "Custom permissions", 2048, false),
+                   "A space-separated list of other permission flags that should be added to the manifest.");
     }
 
     Value getActivityClassPath() const          { return getSetting (Ids::androidActivityClass); }
     Value getSDKPath() const                    { return getSetting (Ids::androidSDKPath); }
     Value getNDKPath() const                    { return getSetting (Ids::androidNDKPath); }
     Value getInternetNeeded() const             { return getSetting (Ids::androidInternetNeeded); }
+    Value getAudioRecordNeeded() const          { return getSetting (Ids::androidMicNeeded); }
+    Value getMinimumSDKVersion() const          { return getSetting (Ids::androidMinimumSDK); }
+    Value getOtherPermissions() const           { return getSetting (Ids::androidOtherPermissions); }
 
     String createDefaultClassName() const
     {
@@ -224,10 +236,13 @@ private:
         //screens->setAttribute ("android:xlargeScreens", "true");
         screens->setAttribute ("android:anyDensity", "true");
 
-        if (getInternetNeeded().getValue())
+        manifest->createNewChildElement ("uses-sdk")->setAttribute ("android:minSdkVersion", getMinimumSDKVersion().toString());
+
         {
-            XmlElement* permission = manifest->createNewChildElement ("uses-permission");
-            permission->setAttribute ("android:name", "android.permission.INTERNET");
+            const StringArray permissions (getPermissionsRequired());
+
+            for (int i = permissions.size(); --i >= 0;)
+                manifest->createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
         }
 
         XmlElement* app = manifest->createNewChildElement ("application");
@@ -243,6 +258,19 @@ private:
         intent->createNewChildElement ("category")->setAttribute ("android:name", "android.intent.category.LAUNCHER");
 
         return manifest;
+    }
+
+    StringArray getPermissionsRequired() const
+    {
+        StringArray s;
+        s.addTokens (getOtherPermissions().toString(), ", ", "");
+
+        if (getInternetNeeded().getValue())         s.add ("android.permission.INTERNET");
+        if (getAudioRecordNeeded().getValue())      s.add ("android.permission.RECORD_AUDIO");
+
+        s.trim();
+        s.removeDuplicates (false);
+        return s;
     }
 
     //==============================================================================

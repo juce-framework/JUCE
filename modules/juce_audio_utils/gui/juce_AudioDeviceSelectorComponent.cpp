@@ -704,20 +704,12 @@ public:
 
                     for (int i = 0; i < items.size(); i += 2)
                     {
-                        const String name (items[i]);
-                        const String name2 (items[i + 1]);
-                        String commonBit;
+                        const String& name = items[i];
 
-                        for (int j = 0; j < name.length(); ++j)
-                            if (name.substring (0, j).equalsIgnoreCase (name2.substring (0, j)))
-                                commonBit = name.substring (0, j);
-
-                        // Make sure we only split the name at a space, because otherwise, things
-                        // like "input 11" + "input 12" would become "input 11 + 2"
-                        while (commonBit.isNotEmpty() && ! CharacterFunctions::isWhitespace (commonBit.getLastCharacter()))
-                            commonBit = commonBit.dropLastCharacters (1);
-
-                        pairs.add (name.trim() + " + " + name2.substring (commonBit.length()).trim());
+                        if (i + 1 >= items.size())
+                            pairs.add (name.trim());
+                        else
+                            pairs.add (getNameForChannelPair (name, items[i + 1]));
                     }
 
                     items = pairs;
@@ -819,6 +811,22 @@ public:
         const BoxType type;
         const String noItemsMessage;
         StringArray items;
+
+        static String getNameForChannelPair (const String& name1, const String& name2)
+        {
+            String commonBit;
+
+            for (int j = 0; j < name1.length(); ++j)
+                if (name1.substring (0, j).equalsIgnoreCase (name2.substring (0, j)))
+                    commonBit = name1.substring (0, j);
+
+            // Make sure we only split the name at a space, because otherwise, things
+            // like "input 11" + "input 12" would become "input 11 + 2"
+            while (commonBit.isNotEmpty() && ! CharacterFunctions::isWhitespace (commonBit.getLastCharacter()))
+                commonBit = commonBit.dropLastCharacters (1);
+
+            return name1.trim() + " + " + name2.substring (commonBit.length()).trim();
+        }
 
         void flipEnablement (const int row)
         {

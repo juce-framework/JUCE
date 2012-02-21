@@ -102,6 +102,9 @@ namespace Ids
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
+    DECLARE_ID (androidMicNeeded);
+    DECLARE_ID (androidMinimumSDK);
+    DECLARE_ID (androidOtherPermissions);
     const Identifier class_ ("class");
 
     #undef DECLARE_ID
