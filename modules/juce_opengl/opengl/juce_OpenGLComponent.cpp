@@ -330,6 +330,7 @@ void OpenGLComponent::updateContext()
 void OpenGLComponent::deleteContext()
 {
     const ScopedLock sl (contextLock);
+
     if (context != nullptr)
     {
         if (context->makeActive())
@@ -344,6 +345,14 @@ void OpenGLComponent::deleteContext()
     }
 
     needToDeleteContext = false;
+}
+
+bool OpenGLComponent::rebuildContext()
+{
+    needToDeleteContext = true;
+    updateContext();
+
+    return context != nullptr && context->makeActive();
 }
 
 void OpenGLComponent::updateContextPosition()

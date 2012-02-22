@@ -61,10 +61,10 @@ public:
             getSDKPath() = "${user.home}/SDKs/android-sdk-macosx";
 
         if (getNDKPath().toString().isEmpty())
-            getNDKPath() = "${user.home}/SDKs/android-ndk-r7";
+            getNDKPath() = "${user.home}/SDKs/android-ndk-r7b";
 
         if (getMinimumSDKVersion().toString().isEmpty())
-            getMinimumSDKVersion() = 7;
+            getMinimumSDKVersion() = 8;
 
         if (getInternetNeeded().toString().isEmpty())
             getInternetNeeded() = true;
@@ -100,6 +100,9 @@ public:
 
         props.add (new TextPropertyComponent (getNDKPath(), "Android NDK Path", 1024, false),
                    "The path to the Android NDK folder on the target build machine");
+
+        props.add (new TextPropertyComponent (getMinimumSDKVersion(), "Minimum SDK version", 32, false),
+                   "The number of the minimum version of the Android SDK that the app requires");
 
         props.add (new BooleanPropertyComponent (getInternetNeeded(), "Internet Access", "Specify internet access permission in the manifest"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
@@ -354,7 +357,7 @@ private:
            << newLine
            << "APP_STL := gnustl_static" << newLine
            << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine
-           << "APP_PLATFORM := android-7" << newLine;
+           << "APP_PLATFORM := android-8" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }
@@ -522,7 +525,7 @@ private:
         mo << "# This file is used to override default values used by the Ant build system." << newLine
            << "# It is automatically generated - DO NOT EDIT IT or your changes will be lost!." << newLine
            << newLine
-           << "target=Google Inc.:Google APIs:7" << newLine
+           << "target=Google Inc.:Google APIs:8" << newLine
            << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);

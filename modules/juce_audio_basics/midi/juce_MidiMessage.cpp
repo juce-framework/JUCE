@@ -557,7 +557,7 @@ MidiMessage MidiMessage::controllerEvent (const int channel, const int controlle
 
 MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const float velocity) noexcept
 {
-    return noteOn (channel, noteNumber, (uint8) (velocity * 127.0f));
+    return noteOn (channel, noteNumber, (uint8) (velocity * 127.0f + 0.5f));
 }
 
 MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const uint8 velocity) noexcept

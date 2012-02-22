@@ -74,6 +74,7 @@ private:
     ComponentBoundsConstrainer treeSizeConstrainer;
 
     void updateMainWindowTitle();
+    bool reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent);
 };

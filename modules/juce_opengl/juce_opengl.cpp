@@ -193,6 +193,7 @@ namespace juce
  #include "native/juce_linux_OpenGLComponent.cpp"
 
 #elif JUCE_ANDROID
+ #include "../juce_core/native/juce_android_JNIHelpers.h"
  #include "native/juce_android_OpenGLComponent.cpp"
 
 #endif

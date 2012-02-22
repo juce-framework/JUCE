@@ -415,6 +415,51 @@ void showUTF8ToolWindow()
                                    nullptr, Colours::white, true, true);
 }
 
+bool cancelAnyModalComponents()
+{
+    const int numModal = ModalComponentManager::getInstance()->getNumModalComponents();
+
+    for (int i = numModal; --i >= 0;)
+        if (ModalComponentManager::getInstance()->getModalComponent(i) != nullptr)
+            ModalComponentManager::getInstance()->getModalComponent(i)->exitModalState (0);
+
+    return numModal > 0;
+}
+
+//==============================================================================
+class AsyncCommandRetrier  : public Timer
+{
+public:
+    AsyncCommandRetrier (const ApplicationCommandTarget::InvocationInfo& info_)
+        : info (info_)
+    {
+        info.originatingComponent = nullptr;
+        startTimer (500);
+    }
+
+    void timerCallback()
+    {
+        stopTimer();
+        commandManager->invoke (info, true);
+        delete this;
+    }
+
+    ApplicationCommandTarget::InvocationInfo info;
+
+    JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier);
+};
+
+bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
+{
+    if (cancelAnyModalComponents())
+    {
+        new AsyncCommandRetrier (info);
+        return true;
+    }
+
+    return false;
+}
+
 //==============================================================================
 class CallOutBoxCallback  : public ModalComponentManager::Callback
 {

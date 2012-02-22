@@ -35,6 +35,7 @@ namespace Ids
     DECLARE_ID (name);
     DECLARE_ID (file);
     DECLARE_ID (version);
+    DECLARE_ID (companyName);
     DECLARE_ID (position);
     DECLARE_ID (source);
     DECLARE_ID (width);
@@ -49,6 +50,7 @@ namespace Ids
     DECLARE_ID (extraCompilerFlags);
     DECLARE_ID (extraLinkerFlags);
     DECLARE_ID (extraDefs);
+    DECLARE_ID (projectType);
     DECLARE_ID (libraryType);
     DECLARE_ID (isDebug);
     DECLARE_ID (targetName);
@@ -67,7 +69,6 @@ namespace Ids
     DECLARE_ID (bigIcon);
     DECLARE_ID (smallIcon);
     DECLARE_ID (jucerVersion);
-    DECLARE_ID (projectType);
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
     DECLARE_ID (generateManifest);

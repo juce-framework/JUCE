@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="SLvvV6j" name="Juce Demo" projectType="guiapp" juceLinkage="amalg_multi"
-              jucerVersion="3.0.0" version="1.0.0" bundleIdentifier="com.rawmaterialsoftware.jucedemo"
+              jucerVersion="3.0.0" version="2.0.0" bundleIdentifier="com.rawmaterialsoftware.jucedemo"
               buildVST="1" buildRTAS="0" buildAU="1" pluginName="Juce Demo"
               pluginDesc="Juce Demo" pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
               pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="JuceDemoAU"
-              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" icon="Duj062Top">
+              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" icon="Duj062Top"
+              companyName="Raw Material Software Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../../../juce" objCExtraSuffix="JSLvvV6j" bigIcon="f4hwldS">
@@ -75,7 +76,7 @@
     <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"
              androidNDKPath="${user.home}/SDKs/android-ndk-r7b" juceFolder="../../../juce"
              androidInternetNeeded="1" bigIcon="f4hwldS" androidActivityClass="com.juce.JuceDemo"
-             androidMinimumSDK="7" androidMicNeeded="1">
+             androidMinimumSDK="8" androidMicNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        defines="JUCE_UNIT_TESTS=1" androidArchitectures="armeabi"/>

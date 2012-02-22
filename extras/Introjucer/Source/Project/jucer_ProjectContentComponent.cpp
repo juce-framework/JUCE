@@ -300,13 +300,19 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     {
     case CommandIDs::saveProject:
         if (project != nullptr)
-            project->save (true, true);
+        {
+            if (! reinvokeCommandAfterClosingPropertyEditors (info))
+                project->save (true, true);
+        }
 
         break;
 
     case CommandIDs::saveProjectAs:
         if (project != nullptr)
-            project->saveAsInteractive (true);
+        {
+            if (! reinvokeCommandAfterClosingPropertyEditors (info))
+                project->saveAsInteractive (true);
+        }
 
         break;
 
@@ -315,7 +321,10 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
             MainWindow* mw = Component::findParentComponentOfClass ((MainWindow*) 0);
 
             if (mw != nullptr)
-                mw->closeCurrentProject();
+            {
+                if (! reinvokeCommandAfterClosingPropertyEditors (info))
+                    mw->closeCurrentProject();
+            }
         }
 
         break;
@@ -331,12 +340,18 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         break;
 
     case CommandIDs::saveAndOpenInIDE:
-        if (project != nullptr && project->save (true, true) == FileBasedDocument::savedOk)
+        if (project != nullptr)
         {
-            ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
+            if (! reinvokeCommandAfterClosingPropertyEditors (info))
+            {
+                if (project->save (true, true) == FileBasedDocument::savedOk)
+                {
+                    ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
 
-            if (exporter != nullptr)
-                exporter->launchProject();
+                    if (exporter != nullptr)
+                        exporter->launchProject();
+                }
+            }
         }
         break;
 
@@ -361,4 +376,15 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     }
 
     return true;
+}
+
+bool ProjectContentComponent::reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo& info)
+{
+    if (reinvokeCommandAfterCancellingModalComps (info))
+    {
+        grabKeyboardFocus(); // to force any open labels to close their text editors
+        return true;
+    }
+
+    return false;
 }

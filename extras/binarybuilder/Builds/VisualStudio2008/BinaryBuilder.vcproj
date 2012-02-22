@@ -973,6 +973,7 @@
       <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>
       <File RelativePath="..\..\..\..\modules\juce_core\juce_core.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
+      <File RelativePath="resources.rc"/>
     </Filter>
   </Files>
   <Globals/>

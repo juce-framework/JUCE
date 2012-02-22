@@ -34,7 +34,7 @@ class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
     MSVCProjectExporterBase (Project& project_, const ValueTree& settings_, const char* const folderName)
-        : ProjectExporter (project_, settings_), hasIcon (false)
+        : ProjectExporter (project_, settings_)
     {
         if (getTargetLocation().toString().isEmpty())
             getTargetLocation() = getDefaultBuildsRootFolder() + folderName;
@@ -69,7 +69,6 @@ public:
 protected:
     String projectGUID;
     File rcFile, iconFile;
-    bool hasIcon;
 
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
@@ -274,13 +273,6 @@ protected:
     }
 
     //==============================================================================
-    static bool writeRCFile (const File& file, const File& iconFile)
-    {
-        return file.deleteFile()
-                && file.appendText ("IDI_ICON1 ICON DISCARDABLE "
-                                        + iconFile.getFileName().quoted(), false, false);
-    }
-
     static void writeBMPImage (const Image& image, const int w, const int h, MemoryOutputStream& out)
     {
         const int maskStride = (w / 8 + 3) & ~3;
@@ -392,31 +384,97 @@ protected:
         out << dataBlock;
     }
 
-    bool createIconFile()
+    bool hasResourceFile() const
     {
-        Array<Image> images;
+        return ! projectType.isLibrary();
+    }
 
-        const int sizes[] = { 16, 32, 48, 256 };
-
-        for (int i = 0; i < numElementsInArray (sizes); ++i)
+    void createResourcesAndIcon()
+    {
+        if (hasResourceFile())
         {
-            Image im (getBestIconForSize (sizes[i], true));
-            if (im.isValid())
-                images.add (im);
+            Array<Image> images;
+            const int sizes[] = { 16, 32, 48, 256 };
+
+            for (int i = 0; i < numElementsInArray (sizes); ++i)
+            {
+                Image im (getBestIconForSize (sizes[i], true));
+                if (im.isValid())
+                    images.add (im);
+            }
+
+            if (images.size() > 0)
+            {
+                iconFile = getTargetFolder().getChildFile ("icon.ico");
+
+                MemoryOutputStream mo;
+                writeIconFile (images, mo);
+                overwriteFileIfDifferentOrThrow (iconFile, mo);
+            }
+
+            createRCFile();
         }
+    }
 
-        if (images.size() == 0)
-            return true;
-
-        MemoryOutputStream mo;
-        writeIconFile (images, mo);
-
-        iconFile = getTargetFolder().getChildFile ("icon.ico");
+    void createRCFile()
+    {
         rcFile = getTargetFolder().getChildFile ("resources.rc");
 
-        hasIcon = FileHelpers::overwriteFileWithNewDataIfDifferent (iconFile, mo)
-                    && writeRCFile (rcFile, iconFile);
-        return hasIcon;
+        const String version (project.getVersion().toString());
+
+        MemoryOutputStream mo;
+
+        mo << "#undef  WIN32_LEAN_AND_MEAN" << newLine
+           << "#define WIN32_LEAN_AND_MEAN" << newLine
+           << "#include <windows.h>" << newLine
+           << newLine
+           << "VS_VERSION_INFO VERSIONINFO" << newLine
+           << "FILEVERSION  " << getCommaSeparatedVersionNumber (version) << newLine
+           << "BEGIN" << newLine
+           << "  BLOCK \"StringFileInfo\"" << newLine
+           << "  BEGIN" << newLine
+           << "    BLOCK \"040904E4\"" << newLine
+           << "    BEGIN" << newLine;
+
+        writeRCValue (mo, "CompanyName", project.getCompanyName().toString());
+        writeRCValue (mo, "FileDescription", project.getProjectName().toString());
+        writeRCValue (mo, "FileVersion", version);
+        writeRCValue (mo, "ProductName", project.getProjectName().toString());
+        writeRCValue (mo, "ProductVersion", version);
+
+        mo << "    END" << newLine
+           << "  END" << newLine
+           << newLine
+           << "  BLOCK \"VarFileInfo\"" << newLine
+           << "  BEGIN" << newLine
+           << "    VALUE \"Translation\", 0x409, 65001" << newLine
+           << "  END" << newLine
+           << "END" << newLine;
+
+        if (iconFile != File::nonexistent)
+           mo << newLine
+              << "IDI_ICON1 ICON DISCARDABLE " << iconFile.getFileName().quoted();
+
+        overwriteFileIfDifferentOrThrow (rcFile, mo);
+    }
+
+    static void writeRCValue (MemoryOutputStream& mo, const String& name, const String& value)
+    {
+        if (value.isNotEmpty())
+            mo << "      VALUE \"" << name << "\",  \""
+               << CodeHelpers::addEscapeChars (value) << "\\0\"" << newLine;
+    }
+
+    static String getCommaSeparatedVersionNumber (const String& version)
+    {
+        StringArray versionParts;
+        versionParts.addTokens (version, ",.", "");
+        versionParts.trim();
+        versionParts.removeEmptyStrings();
+        while (versionParts.size() < 4)
+            versionParts.add ("0");
+
+        return versionParts.joinIntoString (",");
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase);
@@ -459,9 +517,9 @@ public:
     //==============================================================================
     void create (const OwnedArray<LibraryModule>&)
     {
-        createIconFile();
+        createResourcesAndIcon();
 
-        if (hasIcon)
+        if (hasResourceFile())
         {
             for (int i = 0; i < groups.size(); ++i)
             {
@@ -469,11 +527,15 @@ public:
 
                 if (group.getID() == ProjectSaver::getGeneratedGroupID())
                 {
-                    group.addFile (iconFile, -1, true);
-                    group.addFile (rcFile, -1, true);
+                    if (iconFile != File::nonexistent)
+                    {
+                        group.addFile (iconFile, -1, true);
+                        group.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
+                    }
 
-                    group.findItemForFile (iconFile).getShouldAddToResourceValue() = false;
+                    group.addFile (rcFile, -1, true);
                     group.findItemForFile (rcFile).getShouldAddToResourceValue() = false;
+
                     break;
                 }
             }
@@ -847,7 +909,7 @@ public:
     //==============================================================================
     void create (const OwnedArray<LibraryModule>&)
     {
-        createIconFile();
+        createResourcesAndIcon();
 
         {
             XmlElement projectXml ("Project");
@@ -1148,19 +1210,18 @@ protected:
                     addFilesToCompile (groups.getReference(i), *cppFiles, *headerFiles, false);
         }
 
-        if (hasIcon)
+        if (iconFile != File::nonexistent)
         {
-            {
-                XmlElement* iconGroup = projectXml.createNewChildElement ("ItemGroup");
-                XmlElement* e = iconGroup->createNewChildElement ("None");
-                e->setAttribute ("Include", ".\\" + iconFile.getFileName());
-            }
+            XmlElement* iconGroup = projectXml.createNewChildElement ("ItemGroup");
+            XmlElement* e = iconGroup->createNewChildElement ("None");
+            e->setAttribute ("Include", ".\\" + iconFile.getFileName());
+        }
 
-            {
-                XmlElement* rcGroup = projectXml.createNewChildElement ("ItemGroup");
-                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
-                e->setAttribute ("Include", ".\\" + rcFile.getFileName());
-            }
+        if (hasResourceFile())
+        {
+            XmlElement* rcGroup = projectXml.createNewChildElement ("ItemGroup");
+            XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+            e->setAttribute ("Include", ".\\" + rcFile.getFileName());
         }
 
         {
@@ -1302,19 +1363,18 @@ protected:
 
         if (iconFile.exists())
         {
-            {
-                XmlElement* iconGroup = filterXml.createNewChildElement ("ItemGroup");
-                XmlElement* e = iconGroup->createNewChildElement ("None");
-                e->setAttribute ("Include", ".\\" + iconFile.getFileName());
-                e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
-            }
+            XmlElement* iconGroup = filterXml.createNewChildElement ("ItemGroup");
+            XmlElement* e = iconGroup->createNewChildElement ("None");
+            e->setAttribute ("Include", ".\\" + iconFile.getFileName());
+            e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
+        }
 
-            {
-                XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
-                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
-                e->setAttribute ("Include", ".\\" + rcFile.getFileName());
-                e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
-            }
+        if (hasResourceFile())
+        {
+            XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
+            XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+            e->setAttribute ("Include", ".\\" + rcFile.getFileName());
+            e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
         }
     }
 

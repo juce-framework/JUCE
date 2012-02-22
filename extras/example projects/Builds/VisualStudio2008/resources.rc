@@ -3,17 +3,17 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  3,0,0,0
+FILEVERSION  1,0,0,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "CompanyName",  "Raw Material Software Ltd.\0"
-      VALUE "FileDescription",  "The Introjucer\0"
-      VALUE "FileVersion",  "3.0.0\0"
-      VALUE "ProductName",  "The Introjucer\0"
-      VALUE "ProductVersion",  "3.0.0\0"
+      VALUE "FileDescription",  "HelloWorld\0"
+      VALUE "FileVersion",  "1.0.0\0"
+      VALUE "ProductName",  "HelloWorld\0"
+      VALUE "ProductVersion",  "1.0.0\0"
     END
   END
 
@@ -22,5 +22,3 @@ BEGIN
     VALUE "Translation", 0x409, 65001
   END
 END
-
-IDI_ICON1 ICON DISCARDABLE "icon.ico"

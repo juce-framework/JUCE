@@ -74,12 +74,15 @@ public:
     //==============================================================================
     // project types
     const ProjectType& getProjectType() const;
-    Value getProjectTypeValue() const                   { return getProjectValue ("projectType"); }
+    Value getProjectTypeValue() const                   { return getProjectValue (Ids::projectType); }
 
-    Value getVersion() const                            { return getProjectValue ("version"); }
+    Value getVersion() const                            { return getProjectValue (Ids::version); }
     String getVersionAsHex() const;
+
     Value getBundleIdentifier() const                   { return getProjectValue (Ids::bundleIdentifier); }
     void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
+
+    Value getCompanyName() const                        { return getProjectValue (Ids::companyName); }
 
     //==============================================================================
     Value getProjectValue (const Identifier& name) const  { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }

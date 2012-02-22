@@ -10,7 +10,8 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="TheIntrojucerAU" pluginAUViewClass="TheIntrojucerAU_V1"
-              pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.introjucer">
+              pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.introjucer"
+              companyName="Raw Material Software Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../.." documentExtensions=".jucer" objCExtraSuffix="zNNCr"
@@ -26,31 +27,39 @@
             rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"
             bigIcon="rVgowdy">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
+                       winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
+                       winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
             rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"
             bigIcon="rVgowdy">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
+                       winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
+                       winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2008>
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../.."
                 bigIcon="rVgowdy">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
+                       libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
+                       libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
     </LINUX_MAKE>
     <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
             rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="../.."
             bigIcon="rVgowdy">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Introjucer"
+                       winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Introjucer"
+                       winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
       </CONFIGURATIONS>
     </VS2010>
   </EXPORTFORMATS>

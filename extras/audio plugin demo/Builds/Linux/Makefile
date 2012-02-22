@@ -55,6 +55,7 @@ OBJECTS := \
   $(OBJDIR)/juce_events_584896b4.o \
   $(OBJDIR)/juce_graphics_f9afc18.o \
   $(OBJDIR)/juce_gui_basics_90929794.o \
+  $(OBJDIR)/juce_gui_extra_b81d9e1c.o \
   $(OBJDIR)/juce_RTAS_DigiCode1_6dea9489.o \
   $(OBJDIR)/juce_RTAS_DigiCode2_6df8ac0a.o \
   $(OBJDIR)/juce_RTAS_DigiCode3_6e06c38b.o \
@@ -134,6 +135,11 @@ $(OBJDIR)/juce_graphics_f9afc18.o: ../../../../modules/juce_graphics/juce_graphi
 $(OBJDIR)/juce_gui_basics_90929794.o: ../../../../modules/juce_gui_basics/juce_gui_basics.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_gui_basics.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_gui_extra_b81d9e1c.o: ../../../../modules/juce_gui_extra/juce_gui_extra.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_gui_extra.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RTAS_DigiCode1_6dea9489.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode1.cpp

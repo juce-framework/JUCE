@@ -178,7 +178,7 @@ int SystemStats::getCpuSpeedInMegaherz()
 
 int SystemStats::getMemorySizeInMegabytes()
 {
-   #if __ANDROID_API__ > 7
+   #if __ANDROID_API__ >= 9
     struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)

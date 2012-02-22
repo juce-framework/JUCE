@@ -8,7 +8,8 @@
               pluginWantsMidiIn="1" pluginProducesMidiOut="1" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="1" pluginAUExportPrefix="JuceDemoProjectAU"
               pluginAUViewClass="JuceDemoProjectAU_V1" pluginRTASCategory=""
-              bundleIdentifier="com.rawmaterialsoftware.JuceDemoPlugin" jucerVersion="3.0.0">
+              bundleIdentifier="com.rawmaterialsoftware.JuceDemoPlugin" jucerVersion="3.0.0"
+              companyName="Raw Material Software Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../.." objCExtraSuffix="JuceDemo">
@@ -22,22 +23,28 @@
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
             rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
+                       winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"
+                       winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
             rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
+                       winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"
+                       winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2008>
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../.."
                 rtasFolder="~/SDKs/PT_80_SDK">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
+                       libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemoPlugin"
+                       libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
     </LINUX_MAKE>
   </EXPORTFORMATS>
@@ -67,5 +74,6 @@
     <MODULE id="juce_audio_utils" showAllCode="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1"/>
     <MODULE id="juce_audio_formats" showAllCode="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
 </JUCERPROJECT>

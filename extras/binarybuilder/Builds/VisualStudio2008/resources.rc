@@ -9,9 +9,9 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
-      VALUE "FileDescription",  "Jucer\0"
+      VALUE "FileDescription",  "BinaryBuilder\0"
       VALUE "FileVersion",  "1.0.0\0"
-      VALUE "ProductName",  "Jucer\0"
+      VALUE "ProductName",  "BinaryBuilder\0"
       VALUE "ProductVersion",  "1.0.0\0"
     END
   END
@@ -21,5 +21,3 @@ BEGIN
     VALUE "Translation", 0x409, 65001
   END
 END
-
-IDI_ICON1 ICON DISCARDABLE "icon.ico"

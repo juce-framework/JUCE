@@ -4400,6 +4400,7 @@
       <File RelativePath="..\..\..\..\modules\juce_opengl\juce_opengl.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_video\juce_video.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
+      <File RelativePath="resources.rc"/>
     </Filter>
   </Files>
   <Globals/>

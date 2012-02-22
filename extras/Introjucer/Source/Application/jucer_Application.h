@@ -555,17 +555,6 @@ private:
     }
 
     //==============================================================================
-    static bool cancelAnyModalComponents()
-    {
-        const int numModal = ModalComponentManager::getInstance()->getNumModalComponents();
-
-        for (int i = numModal; --i >= 0;)
-            if (ModalComponentManager::getInstance()->getModalComponent(i) != nullptr)
-                ModalComponentManager::getInstance()->getModalComponent(i)->exitModalState (0);
-
-        return numModal > 0;
-    }
-
     class AsyncQuitRetrier  : public Timer
     {
     public:

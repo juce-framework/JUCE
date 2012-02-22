@@ -443,6 +443,7 @@ private:
         addPlistDictionaryKey (dict, "CFBundleSignature",           xcodeBundleSignature);
         addPlistDictionaryKey (dict, "CFBundleShortVersionString",  project.getVersion().toString());
         addPlistDictionaryKey (dict, "CFBundleVersion",             project.getVersion().toString());
+        addPlistDictionaryKey (dict, "NSHumanReadableCopyright",    project.getCompanyName().toString());
 
         StringArray documentExtensions;
         documentExtensions.addTokens (replacePreprocessorDefs (getAllPreprocessorDefs(), getSetting ("documentExtensions").toString()),

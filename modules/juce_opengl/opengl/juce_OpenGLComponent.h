@@ -229,6 +229,17 @@ public:
     */
     void deleteContext();
 
+    /** Tries to synchronously delete and re-create the context.
+        If the context doesn't exist already, this will try to create one.
+        If it exists, it'll first delete the existing one, and create a new one.
+        You may need to call this if you require a temporary context for some reason
+        before the normal call to newOpenGLContextCreated() is made.
+
+        @returns true if a new context has been successfully created - this may not be
+        possible on all platforms.
+    */
+    bool rebuildContext();
+
     /** If this component is backed by a frame buffer, this returns its ID number, or
         0 if the component has no accessible framebuffer.
     */
