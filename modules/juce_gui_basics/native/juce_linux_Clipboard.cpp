@@ -158,6 +158,8 @@ void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
             Atom* atoms = reinterpret_cast<Atom*> (data.getData());
             atoms[0] = ClipboardHelpers::atom_UTF8_STRING;
             atoms[1] = XA_STRING;
+
+            evt.target = XA_ATOM;
         }
     }
     else
