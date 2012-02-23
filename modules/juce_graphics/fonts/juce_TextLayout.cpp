@@ -354,6 +354,9 @@ namespace TextLayoutHelpers
 
                     if (t->line != nextToken->line)
                     {
+                        if (currentRun == nullptr)
+                            currentRun = new TextLayout::Run();
+
                         addRun (currentLine, currentRun.release(), t, runStartPosition, charPosition);
                         currentLine->stringRange = Range<int> (lineStartPosition, charPosition);
                         layout.addLine (currentLine.release());
