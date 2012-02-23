@@ -306,11 +306,13 @@ namespace RTASHelpers
                                                                                                                  .toWindowsStyle().quoted()));
 
         String msvcPathToRTASFolder (exporter.getJucePathFromTargetFolder()
-                                             .getChildFile ("modules/juce_audio_plugin_client/RTAS")
+                                             .getChildFile ("juce_audio_plugin_client/RTAS")
                                              .toWindowsStyle() + "\\");
 
         exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll";
-        exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
+
+        if (! exporter.getExtraLinkerFlags().toString().contains ("/FORCE:multiple"))
+            exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
 
         for (ProjectExporter::ConfigIterator config (exporter); config.next();)
         {

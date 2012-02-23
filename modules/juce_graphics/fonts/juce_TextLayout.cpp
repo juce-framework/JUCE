@@ -371,19 +371,16 @@ namespace TextLayoutHelpers
             if ((text.getJustification().getFlags() & (Justification::right | Justification::horizontallyCentred)) != 0)
             {
                 const int totalW = (int) layout.getWidth();
+                const bool isCentred = (text.getJustification().getFlags() & Justification::horizontallyCentred) != 0;
 
                 for (int i = 0; i < layout.getNumLines(); ++i)
                 {
-                    const int lineW = getLineWidth (i);
-                    float dx = 0;
+                    float dx = (float) (totalW - getLineWidth (i));
 
-                    if ((text.getJustification().getFlags() & Justification::right) != 0)
-                        dx = (float) (totalW - lineW);
-                    else
-                        dx = (totalW - lineW) / 2.0f;
+                    if (isCentred)
+                        dx /= 2.0f;
 
-                    TextLayout::Line& glyphLine = layout.getLine (i);
-                    glyphLine.lineOrigin.x += dx;
+                    layout.getLine(i).lineOrigin.x += dx;
                 }
             }
         }
