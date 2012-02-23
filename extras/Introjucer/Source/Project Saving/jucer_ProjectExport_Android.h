@@ -196,9 +196,6 @@ protected:
         AndroidBuildConfiguration (Project& project, const ValueTree& settings)
             : BuildConfiguration (project, settings)
         {
-            androidDynamicLibs.add ("GLESv1_CM");
-            androidDynamicLibs.add ("GLESv2");
-
             if (getArchitectures().toString().isEmpty())
                 getArchitectures() = "armeabi armeabi-v7a";
         }
@@ -212,8 +209,6 @@ protected:
             props.add (new TextPropertyComponent (getArchitectures(), "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary).");
         }
-
-        StringArray androidDynamicLibs;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
@@ -421,15 +416,18 @@ private:
 
     String getDynamicLibs (const AndroidBuildConfiguration& config)
     {
-        if (config.androidDynamicLibs.size() == 0)
-            return String::empty;
-
         String flags ("  LOCAL_LDLIBS :=");
 
         flags << config.getGCCLibraryPathFlags();
 
-        for (int i = 0; i < config.androidDynamicLibs.size(); ++i)
-            flags << " -l" << config.androidDynamicLibs[i];
+        {
+            StringArray libs;
+            libs.add ("GLESv1_CM");
+            libs.add ("GLESv2");
+
+            for (int i = 0; i < libs.size(); ++i)
+                flags << " -l" << libs[i];
+        }
 
         return flags + newLine;
     }

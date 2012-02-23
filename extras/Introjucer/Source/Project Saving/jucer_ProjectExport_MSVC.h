@@ -117,9 +117,6 @@ protected:
             if (getWarningLevel() == 0)
                 getWarningLevelValue() = 4;
 
-            msvcPreBuildCommand = getPrebuildCommand().toString();
-            msvcPostBuildCommand = getPostbuildCommand().toString();
-
             if (shouldGenerateManifest().getValue().isVoid())
                 shouldGenerateManifest() = var (true);
         }
@@ -670,10 +667,10 @@ protected:
 
         XmlElement* preBuildEvent = createToolElement (xml, "VCPreBuildEventTool");
 
-        if (config.msvcPreBuildCommand.isNotEmpty())
+        if (config.getPrebuildCommand().toString().isNotEmpty())
         {
             preBuildEvent->setAttribute ("Description", "Pre-build");
-            preBuildEvent->setAttribute ("CommandLine", config.msvcPreBuildCommand);
+            preBuildEvent->setAttribute ("CommandLine", config.getPrebuildCommand().toString());
         }
 
         createToolElement (xml, "VCCustomBuildTool");
@@ -767,13 +764,10 @@ protected:
             if (msvcDelayLoadedDLLs.isNotEmpty())
                 linker->setAttribute ("DelayLoadDLLs", msvcDelayLoadedDLLs);
 
-            if (config.msvcModuleDefinitionFile.isNotEmpty())
-                linker->setAttribute ("ModuleDefinitionFile", config.msvcModuleDefinitionFile);
+            if (config.getValue (Ids::msvcModuleDefinitionFile).toString().isNotEmpty())
+                linker->setAttribute ("ModuleDefinitionFile", config.getValue (Ids::msvcModuleDefinitionFile).toString());
 
             String extraLinkerOptions (getExtraLinkerFlags().toString());
-
-            if (config.msvcExtraLinkerOptions.isNotEmpty())
-                extraLinkerOptions << ' ' << config.msvcExtraLinkerOptions;
 
             if (extraLinkerOptions.isNotEmpty())
                 linker->setAttribute ("AdditionalOptions", replacePreprocessorTokens (config, extraLinkerOptions).trim());
@@ -818,10 +812,10 @@ protected:
 
         XmlElement* postBuildEvent = createToolElement (xml, "VCPostBuildEventTool");
 
-        if (config.msvcPostBuildCommand.isNotEmpty())
+        if (config.getPostbuildCommand().toString().isNotEmpty())
         {
             postBuildEvent->setAttribute ("Description", "Post-build");
-            postBuildEvent->setAttribute ("CommandLine", config.msvcPostBuildCommand);
+            postBuildEvent->setAttribute ("CommandLine", config.getPostbuildCommand().toString());
         }
     }
 
@@ -1190,19 +1184,19 @@ protected:
                                                                                                             + "/" + config.getOutputFilename (".bsc", true)));
             }
 
-            if (config.msvcPreBuildCommand.isNotEmpty())
+            if (config.getPrebuildCommand().toString().isNotEmpty())
                 group->createNewChildElement ("PreBuildEvent")
                      ->createNewChildElement ("Command")
-                     ->addTextElement (config.msvcPreBuildCommand);
+                     ->addTextElement (config.getPrebuildCommand().toString());
 
-            if (config.msvcPostBuildCommand.isNotEmpty())
+            if (config.getPostbuildCommand().toString().isNotEmpty())
                 group->createNewChildElement ("PostBuildEvent")
                      ->createNewChildElement ("Command")
-                     ->addTextElement (config.msvcPostBuildCommand);
+                     ->addTextElement (config.getPostbuildCommand().toString());
         }
 
         {
-            XmlElement* cppFiles = projectXml.createNewChildElement ("ItemGroup");
+            XmlElement* cppFiles    = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* headerFiles = projectXml.createNewChildElement ("ItemGroup");
 
             for (int i = 0; i < groups.size(); ++i)

@@ -170,19 +170,14 @@ public:
         StringArray getLibrarySearchPaths() const;
         String getGCCLibraryPathFlags() const;
 
-        //==============================================================================
-        ValueTree config;
-
-        //==============================================================================
-        String msvcExtraLinkerOptions, msvcModuleDefinitionFile;
-        String msvcPreBuildCommand, msvcPostBuildCommand;
-
-    protected:
-        Project& project;
-
         Value getValue (const Identifier& name) const       { return config.getPropertyAsValue (name, getUndoManager()); }
         UndoManager* getUndoManager() const                 { return project.getUndoManagerFor (config); }
 
+        //==============================================================================
+        ValueTree config;
+        Project& project;
+
+    protected:
         void createBasicPropertyEditors (PropertyListBuilder&);
 
     private:

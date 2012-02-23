@@ -66,6 +66,7 @@ namespace Ids
     DECLARE_ID (extraFrameworks);
     DECLARE_ID (winArchitecture);
     DECLARE_ID (winWarningLevel);
+    DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);
     DECLARE_ID (smallIcon);
     DECLARE_ID (jucerVersion);

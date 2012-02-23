@@ -310,15 +310,15 @@ namespace RTASHelpers
                                              .toWindowsStyle() + "\\");
 
         exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll";
+        exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
 
         for (ProjectExporter::ConfigIterator config (exporter); config.next();)
         {
-            config->msvcExtraLinkerOptions = "/FORCE:multiple";
-            config->msvcModuleDefinitionFile = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
+            config->getValue (Ids::msvcModuleDefinitionFile) = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
 
-            if (config->msvcPostBuildCommand.isEmpty())
-                config->msvcPostBuildCommand = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
-                                                    + "\" \"$(TargetPath)\".rsr";
+            if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
+                config->getValue (Ids::postbuildCommand) = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
+                                                                + "\" \"$(TargetPath)\".rsr";
         }
 
         exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
