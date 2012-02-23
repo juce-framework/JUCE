@@ -1783,7 +1783,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
    #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
 
    #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
-    NSViewComponentPeer* peer = dynamic_cast<NSViewComponentPeer*> (kioskModeComponent->getPeer());
+    NSViewComponentPeer* const peer = dynamic_cast<NSViewComponentPeer*> (kioskModeComponent->getPeer());
 
     if (peer != nullptr
          && peer->hasNativeTitleBar()
@@ -1797,12 +1797,21 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
     {
         if (enableOrDisable)
         {
+            if (peer->hasNativeTitleBar())
+                [peer->window setStyleMask: NSBorderlessWindowMask];
+
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
             kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
         }
         else
         {
+            if (peer->hasNativeTitleBar())
+            {
+                [peer->window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (peer->getStyleFlags()))];
+                peer->setTitle (peer->component->getName()); // required to force the OS to update the title
+            }
+
             [NSApp setPresentationOptions: NSApplicationPresentationDefault];
         }
     }
