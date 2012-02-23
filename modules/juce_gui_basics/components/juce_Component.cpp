@@ -674,8 +674,11 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
             bounds.setPosition (topLeft);
             peer->setBounds (topLeft.x, topLeft.y, getWidth(), getHeight(), false);
-
             peer->setVisible (isVisible());
+
+            peer = ComponentPeer::getPeerFor (this);
+            if (peer == nullptr)
+                return;
 
             if (wasFullscreen)
             {

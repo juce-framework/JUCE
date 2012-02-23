@@ -130,11 +130,11 @@ LookAndFeel::LookAndFeel()
     jassert (Colours::white == Colour (0xffffffff));
 
     // set up the standard set of colours..
-    const int textButtonColour = 0xffbbbbff;
-    const int textHighlightColour = 0x401111ee;
-    const int standardOutlineColour = 0xb2808080;
+    const uint32 textButtonColour      = 0xffbbbbff;
+    const uint32 textHighlightColour   = 0x401111ee;
+    const uint32 standardOutlineColour = 0xb2808080;
 
-    static const int standardColours[] =
+    static const uint32 standardColours[] =
     {
         TextButton::buttonColourId,                 textButtonColour,
         TextButton::buttonOnColourId,               0xff4444ff,

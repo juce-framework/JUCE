@@ -133,13 +133,13 @@ public:
             NSOpenGLPFAMPSafe,
             NSOpenGLPFAClosestPolicy,
             NSOpenGLPFANoRecovery,
-            NSOpenGLPFAColorSize,   pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits,
-            NSOpenGLPFAAlphaSize,   pixelFormat.alphaBits,
-            NSOpenGLPFADepthSize,   pixelFormat.depthBufferBits,
-            NSOpenGLPFAStencilSize, pixelFormat.stencilBufferBits,
-            NSOpenGLPFAAccumSize,   pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
-                                        + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits,
-            pixelFormat.multisamplingLevel > 0 ? NSOpenGLPFASamples : 0, pixelFormat.multisamplingLevel,
+            NSOpenGLPFAColorSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits),
+            NSOpenGLPFAAlphaSize,   (NSOpenGLPixelFormatAttribute) pixelFormat.alphaBits,
+            NSOpenGLPFADepthSize,   (NSOpenGLPixelFormatAttribute) pixelFormat.depthBufferBits,
+            NSOpenGLPFAStencilSize, (NSOpenGLPixelFormatAttribute) pixelFormat.stencilBufferBits,
+            NSOpenGLPFAAccumSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
+                                        + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits),
+            pixelFormat.multisamplingLevel > 0 ? NSOpenGLPFASamples : (NSOpenGLPixelFormatAttribute) 0, (NSOpenGLPixelFormatAttribute) pixelFormat.multisamplingLevel,
             0
         };
 

@@ -168,7 +168,7 @@ const Colour Colours::yellowgreen (0xff9acd32);
 Colour Colours::findColourForName (const String& colourName,
                                    const Colour& defaultColour)
 {
-    static const int presets[] =
+    static const uint32 presets[] =
     {
         // (first value is the string's hashcode, second is ARGB)
 
@@ -311,11 +311,11 @@ Colour Colours::findColourForName (const String& colourName,
         0xe1b5130f, 0xff9acd32  /* yellowgreen */
     };
 
-    const int hash = colourName.trim().toLowerCase().hashCode();
+    const uint32 hash = (uint32) colourName.trim().toLowerCase().hashCode();
 
     for (int i = 0; i < numElementsInArray (presets); i += 2)
         if (presets [i] == hash)
-            return Colour ((uint32) presets [i + 1]);
+            return Colour (presets [i + 1]);
 
     return defaultColour;
 }
