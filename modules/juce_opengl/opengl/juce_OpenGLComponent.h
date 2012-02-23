@@ -35,6 +35,9 @@
 #endif
 
 class OpenGLGraphicsContext;
+#if JUCE_ANDROID
+class AndroidGLContext;
+#endif
 
 //==============================================================================
 /**
@@ -61,9 +64,9 @@ public:
         */
         openGLDefault = 8,
 
-       #if JUCE_IOS
-        openGLES1 = 1,  /**< On the iPhone, this selects openGL ES 1.0 */
-        openGLES2 = 2,  /**< On the iPhone, this selects openGL ES 2.0 */
+       #if JUCE_IOS || JUCE_ANDROID
+        openGLES1 = 1,  /**< This selects openGL ES 1.0 */
+        openGLES2 = 2,  /**< This selects openGL ES 2.0 */
        #endif
 
         /** If this flag is enabled, the component will launch a background thread to
@@ -289,6 +292,10 @@ private:
     void paintSelf (OpenGLGraphicsContext&);
 
     int renderAndSwapBuffers();  // (This method has been deprecated)
+
+   #if JUCE_ANDROID
+    friend class AndroidGLContext;
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLComponent);
 };

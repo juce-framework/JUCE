@@ -119,7 +119,7 @@ public:
     /** Returns the inverse of this point. */
     Point operator-() const noexcept                                    { return Point (-x, -y); }
 
-    /** Returns the straight-line distance between this point and another one. */
+    /** Returns the straight-line distance between this point and the origin. */
     ValueType getDistanceFromOrigin() const noexcept                    { return juce_hypot (x, y); }
 
     /** Returns the straight-line distance between this point and another one. */

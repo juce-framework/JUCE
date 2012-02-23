@@ -78,6 +78,7 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
  METHOD (hasFocus,      "hasFocus",         "()Z") \
  METHOD (invalidate,    "invalidate",       "(IIII)V") \
  METHOD (containsPoint, "containsPoint",    "(II)Z") \
+ METHOD (createGLView,  "createGLView",     "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$OpenGLView;") \
 
 DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
@@ -585,6 +586,11 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void*)
     return new AndroidComponentPeer (this, styleFlags);
 }
 
+jobject createOpenGLView (ComponentPeer* peer)
+{
+    jobject parentView = static_cast <jobject> (peer->getNativeHandle());
+    return getEnv()->CallObjectMethod (parentView, ComponentPeerView.createGLView);
+}
 
 //==============================================================================
 bool Desktop::canUseSemiTransparentWindows() noexcept

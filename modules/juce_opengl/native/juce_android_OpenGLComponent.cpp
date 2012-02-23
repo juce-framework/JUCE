@@ -23,22 +23,187 @@
   ==============================================================================
 */
 
-// TODO
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (layout,        "layout",       "(IIII)V") \
+ METHOD (invalidate,    "invalidate",   "(IIII)V") \
+
+DECLARE_JNI_CLASS (OpenGLView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$OpenGLView");
+#undef JNI_CLASS_MEMBERS
+
+jobject createOpenGLView (ComponentPeer*);
+
+//==============================================================================
+class AndroidGLContext   : public OpenGLContext
+{
+public:
+    AndroidGLContext (OpenGLComponent* const component_,
+                      ComponentPeer* peer,
+                      const OpenGLPixelFormat& pixelFormat,
+                      const AndroidGLContext* const sharedContext,
+                      const bool isGLES2_)
+        : component (component_),
+          lastWidth (0), lastHeight (0),
+          isGLES2 (isGLES2_),
+          isInsideGLCallback (false)
+    {
+        getContextList().add (this);
+
+        jassert (peer != nullptr);
+
+        glView = GlobalRef (createOpenGLView (peer));
+    }
+
+    ~AndroidGLContext()
+    {
+        properties.clear(); // to release any stored programs, etc that may be held in properties.
+
+        android.activity.callVoidMethod (JuceAppActivity.deleteView, glView.get());
+        glView.clear();
+
+        getContextList().removeValue (this);
+    }
+
+    //==============================================================================
+    bool makeActive() const noexcept                { return isInsideGLCallback; }
+    bool makeInactive() const noexcept              { return true; }
+    bool isActive() const noexcept                  { return isInsideGLCallback; }
+
+    void swapBuffers() {}
+
+    void* getRawContext() const noexcept            { return 0; }
+    unsigned int getFrameBufferID() const           { return 0; }
+
+    int getWidth() const                            { return lastWidth; }
+    int getHeight() const                           { return lastHeight; }
+
+    bool areShadersAvailable() const                { return isGLES2; }
+
+    void updateWindowPosition (const Rectangle<int>& bounds)
+    {
+        if (lastWidth != bounds.getWidth() || lastHeight != bounds.getHeight())
+        {
+            lastWidth  = bounds.getWidth();
+            lastHeight = bounds.getHeight();
+
+            glView.callVoidMethod (OpenGLView.layout,
+                                   bounds.getX(), bounds.getY(),
+                                   lastWidth, lastHeight);
+        }
+    }
+
+    bool setSwapInterval (const int /*numFramesPerSwap*/)   { return false; }
+    int getSwapInterval() const                             { return 0; }
+
+    //==============================================================================
+    void contextCreatedCallback()
+    {
+        isInsideGLCallback = true;
+
+        if (component != nullptr)
+            dynamic_cast <OpenGLComponent*> (component.get())->newOpenGLContextCreated();
+
+        isInsideGLCallback = false;
+    }
+
+    void renderCallback()
+    {
+        isInsideGLCallback = true;
+
+        if (component != nullptr)
+            dynamic_cast <OpenGLComponent*> (component.get())->performRender();
+
+        isInsideGLCallback = false;
+    }
+
+    //==============================================================================
+    static Array<AndroidGLContext*>& getContextList()
+    {
+        static Array <AndroidGLContext*> contexts;
+        return contexts;
+    }
+
+    static AndroidGLContext* findContextFor (JNIEnv* env, jobject glView)
+    {
+        const Array<AndroidGLContext*>& contexts = getContextList();
+
+        for (int i = contexts.size(); --i >= 0;)
+        {
+            AndroidGLContext* const c = contexts.getUnchecked(i);
+
+            if (env->IsSameObject (c->glView.get(), glView))
+                return c;
+        }
+
+        return nullptr;
+    }
+
+    static bool isAnyContextActive()
+    {
+        const Array<AndroidGLContext*>& contexts = getContextList();
+
+        for (int i = contexts.size(); --i >= 0;)
+        {
+            const AndroidGLContext* const c = contexts.getUnchecked(i);
+
+            if (c->isInsideGLCallback)
+                return true;
+        }
+
+        return false;
+    }
+
+    //==============================================================================
+    GlobalRef glView;
+
+private:
+    WeakReference<Component> component;
+    int lastWidth, lastHeight;
+    bool isGLES2;
+    bool isInsideGLCallback;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidGLContext);
+};
+
+//==============================================================================
 OpenGLContext* OpenGLComponent::createContext()
 {
+    ComponentPeer* peer = getTopLevelComponent()->getPeer();
+
+    if (peer != nullptr)
+        return new AndroidGLContext (this, peer, preferredPixelFormat,
+                                     dynamic_cast <const AndroidGLContext*> (contextToShareListsWith),
+                                     (flags & openGLES2) != 0);
+
     return nullptr;
 }
 
-void* OpenGLComponent::getNativeWindowHandle() const
+void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
 {
-    return nullptr;
-}
+    const ScopedLock sl (contextLock);
 
-void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>&)
-{
+    if (context != nullptr)
+        static_cast <AndroidGLContext*> (context.get())->updateWindowPosition (bounds);
 }
 
 bool OpenGLHelpers::isContextActive()
 {
-    return false;
+    return AndroidGLContext::isAnyContextActive();
+}
+
+//==============================================================================
+JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView), contextCreated, void, (JNIEnv* env, jobject view))
+{
+    AndroidGLContext* const context = AndroidGLContext::findContextFor (env, view);
+
+    if (context != nullptr)
+        context->contextCreatedCallback();
+}
+
+JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView), render, void, (JNIEnv* env, jobject view))
+{
+    AndroidGLContext* const context = AndroidGLContext::findContextFor (env, view);
+
+    if (context != nullptr)
+        context->renderCallback();
 }

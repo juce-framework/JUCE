@@ -55,14 +55,14 @@ void JNIClassBase::release (JNIEnv* env)
 
 void JNIClassBase::initialiseAllClasses (JNIEnv* env)
 {
-    Array<JNIClassBase*>& classes = getClasses();
+    const Array<JNIClassBase*>& classes = getClasses();
     for (int i = classes.size(); --i >= 0;)
         classes.getUnchecked(i)->initialise (env);
 }
 
 void JNIClassBase::releaseAllClasses (JNIEnv* env)
 {
-    Array<JNIClassBase*>& classes = getClasses();
+    const Array<JNIClassBase*>& classes = getClasses();
     for (int i = classes.size(); --i >= 0;)
         classes.getUnchecked(i)->release (env);
 }

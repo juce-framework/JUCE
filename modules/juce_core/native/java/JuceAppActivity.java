@@ -32,6 +32,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.*;
 import android.graphics.*;
+import android.opengl.*;
 import android.text.ClipboardManager;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -39,6 +40,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.HttpURLConnection;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 //==============================================================================
 public final class JuceAppActivity   extends Activity
@@ -72,9 +75,9 @@ public final class JuceAppActivity   extends Activity
     }
 
     //==============================================================================
-    public native void launchApp (String appFile, String appDataDir);
-    public native void quitApp();
-    public native void setScreenSize (int screenWidth, int screenHeight);
+    private native void launchApp (String appFile, String appDataDir);
+    private native void quitApp();
+    private native void setScreenSize (int screenWidth, int screenHeight);
 
     //==============================================================================
     public static final void printToConsole (String s)
@@ -111,7 +114,10 @@ public final class JuceAppActivity   extends Activity
 
     public final void deleteView (ComponentPeerView view)
     {
-        viewHolder.removeView (view);
+        ViewGroup group = (ViewGroup) (view.getParent());
+
+        if (group != null)
+            group.removeView (view);
     }
 
     final class ViewHolder  extends ViewGroup
@@ -237,12 +243,13 @@ public final class JuceAppActivity   extends Activity
     public native void alertDismissed (long callback, int id);
 
     //==============================================================================
-    public class ComponentPeerView extends View
-                                   implements View.OnFocusChangeListener
+    public final class ComponentPeerView extends ViewGroup
+                                         implements View.OnFocusChangeListener
     {
         public ComponentPeerView (Context context, boolean opaque_)
         {
             super (context);
+            setWillNotDraw (false);
             opaque = opaque_;
 
             setFocusable (true);
@@ -257,6 +264,7 @@ public final class JuceAppActivity   extends Activity
         @Override
         public void draw (Canvas canvas)
         {
+            super.draw (canvas);
             handlePaint (canvas);
         }
 
@@ -292,11 +300,16 @@ public final class JuceAppActivity   extends Activity
         @Override
         protected void onSizeChanged (int w, int h, int oldw, int oldh)
         {
+            super.onSizeChanged (w, h, oldw, oldh);
             viewSizeChanged();
         }
 
         @Override
-        protected void onLayout (boolean changed, int left, int top, int right, int bottom) {}
+        protected void onLayout (boolean changed, int left, int top, int right, int bottom)
+        {
+            for (int i = getChildCount(); --i >= 0;)
+                requestTransparentRegion (getChildAt (i));
+        }
 
         private native void viewSizeChanged();
 
@@ -318,6 +331,63 @@ public final class JuceAppActivity   extends Activity
         {
             return true; //xxx needs to check overlapping views
         }
+
+        public OpenGLView createGLView()
+        {
+            OpenGLView glView = new OpenGLView (getContext());
+            addView (glView);
+            return glView;
+        }
+    }
+
+    //==============================================================================
+    public final class OpenGLView   extends GLSurfaceView
+                                    implements GLSurfaceView.Renderer
+    {
+        OpenGLView (Context context)
+        {
+            super (context);
+
+            setEGLContextClientVersion (2);
+            getHolder().setFormat(PixelFormat.TRANSLUCENT);
+            setVisibility (VISIBLE);
+            setRenderer (this);
+
+            //setRenderMode (RENDERMODE_CONTINUOUSLY);
+            //requestRender();
+        }
+
+        @Override
+        public void onSurfaceCreated (GL10 unused, EGLConfig config)
+        {
+            // contextCreated();
+        }
+
+        @Override
+        public void onDrawFrame (GL10 unused)
+        {
+            //GLES20.glClearColor (1.0f, 0.5f, 0.0f, 1.0f);
+            //GLES20.glClear (GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+            // render();
+        }
+
+        @Override
+        public void onSurfaceChanged (GL10 unused, int width, int height)
+        {
+            //GLES20.glViewport (0, 0, width, height);
+        }
+
+        @Override
+        protected void onLayout (boolean changed, int left, int top, int right, int bottom)
+        {
+            super.onLayout (changed, left, top, right, bottom);
+            requestLayout();
+            ((ViewGroup) getParent()).requestTransparentRegion (this);
+        }
+
+        private native void contextCreated();
+        private native void render();
     }
 
     //==============================================================================
@@ -344,7 +414,7 @@ public final class JuceAppActivity   extends Activity
         c.setMatrix (matrix);
         c.drawPath (p, paint);
 
-        int sizeNeeded = w * h;
+        final int sizeNeeded = w * h;
         if (cachedRenderArray.length < sizeNeeded)
             cachedRenderArray = new int [sizeNeeded];
 
@@ -393,25 +463,10 @@ public final class JuceAppActivity   extends Activity
             return num;
         }
 
-        public final long getPosition()
-        {
-            return position;
-        }
-
-        public final long getTotalLength()
-        {
-            return -1;
-        }
-
-        public final boolean isExhausted()
-        {
-            return false;
-        }
-
-        public final boolean setPosition (long newPos)
-        {
-            return false;
-        }
+        public final long getPosition()                 { return position; }
+        public final long getTotalLength()              { return -1; }
+        public final boolean isExhausted()              { return false; }
+        public final boolean setPosition (long newPos)  { return false; }
 
         private HttpURLConnection connection;
         private InputStream inputStream;
@@ -419,7 +474,8 @@ public final class JuceAppActivity   extends Activity
     }
 
     public static final HTTPStream createHTTPStream (String address, boolean isPost, byte[] postData,
-                                                     String headers, int timeOutMs, java.lang.StringBuffer responseHeaders)
+                                                     String headers, int timeOutMs,
+                                                     java.lang.StringBuffer responseHeaders)
     {
         try
         {

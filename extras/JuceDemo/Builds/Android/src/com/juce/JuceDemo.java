@@ -114,7 +114,10 @@ public final class JuceDemo   extends Activity
 
     public final void deleteView (ComponentPeerView view)
     {
-        viewHolder.removeView (view);
+        ViewGroup group = (ViewGroup) (view.getParent());
+
+        if (group != null)
+            group.removeView (view);
     }
 
     final class ViewHolder  extends ViewGroup
@@ -246,6 +249,7 @@ public final class JuceDemo   extends Activity
         public ComponentPeerView (Context context, boolean opaque_)
         {
             super (context);
+            setWillNotDraw (false);
             opaque = opaque_;
 
             setFocusable (true);
@@ -260,6 +264,7 @@ public final class JuceDemo   extends Activity
         @Override
         public void draw (Canvas canvas)
         {
+            super.draw (canvas);
             handlePaint (canvas);
         }
 
@@ -295,11 +300,16 @@ public final class JuceDemo   extends Activity
         @Override
         protected void onSizeChanged (int w, int h, int oldw, int oldh)
         {
+            super.onSizeChanged (w, h, oldw, oldh);
             viewSizeChanged();
         }
 
         @Override
-        protected void onLayout (boolean changed, int left, int top, int right, int bottom) {}
+        protected void onLayout (boolean changed, int left, int top, int right, int bottom)
+        {
+            for (int i = getChildCount(); --i >= 0;)
+                requestTransparentRegion (getChildAt (i));
+        }
 
         private native void viewSizeChanged();
 
@@ -321,38 +331,59 @@ public final class JuceDemo   extends Activity
         {
             return true; //xxx needs to check overlapping views
         }
+
+        public OpenGLView createGLView()
+        {
+            OpenGLView glView = new OpenGLView (getContext());
+            addView (glView);
+            return glView;
+        }
     }
 
     //==============================================================================
-    public final class OpenGLView extends GLSurfaceView
-                                  implements GLSurfaceView.Renderer
+    public final class OpenGLView   extends GLSurfaceView
+                                    implements GLSurfaceView.Renderer
     {
-        public OpenGLView (ComponentPeerView parent)
+        OpenGLView (Context context)
         {
-        	super (parent.getContext());
+            super (context);
 
             setEGLContextClientVersion (2);
+            getHolder().setFormat(PixelFormat.TRANSLUCENT);
+            setVisibility (VISIBLE);
             setRenderer (this);
 
-        	parent.addView (this);
+            //setRenderMode (RENDERMODE_CONTINUOUSLY);
+            //requestRender();
         }
 
+        @Override
         public void onSurfaceCreated (GL10 unused, EGLConfig config)
         {
-            contextCreated();
+            // contextCreated();
         }
 
+        @Override
         public void onDrawFrame (GL10 unused)
         {
-            GLES20.glClearColor (1.0f, 0.5f, 0.0f, 1.0f);
-            GLES20.glClear (GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+            //GLES20.glClearColor (1.0f, 0.5f, 0.0f, 1.0f);
+            //GLES20.glClear (GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-            render();
+            // render();
         }
 
+        @Override
         public void onSurfaceChanged (GL10 unused, int width, int height)
         {
-            GLES20.glViewport (0, 0, width, height);
+            //GLES20.glViewport (0, 0, width, height);
+        }
+
+        @Override
+        protected void onLayout (boolean changed, int left, int top, int right, int bottom)
+        {
+            super.onLayout (changed, left, top, right, bottom);
+            requestLayout();
+            ((ViewGroup) getParent()).requestTransparentRegion (this);
         }
 
         private native void contextCreated();

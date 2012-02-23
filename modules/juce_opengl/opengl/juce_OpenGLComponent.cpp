@@ -220,7 +220,11 @@ void OpenGLComponent::stopRenderThread()
 
 //==============================================================================
 OpenGLComponent::OpenGLComponent (const int flags_)
+   #if JUCE_ANDROID
+    : flags (flags_ & ~useBackgroundThread),
+   #else
     : flags (flags_),
+   #endif
       contextToShareListsWith (nullptr),
       needToUpdateViewport (true),
       needToDeleteContext (false),
