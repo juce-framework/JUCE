@@ -75,6 +75,7 @@ private:
 
     void updateMainWindowTitle();
     bool reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo&);
+    bool canProjectBeLaunched() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent);
 };
