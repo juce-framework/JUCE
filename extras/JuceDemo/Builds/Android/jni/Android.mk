@@ -48,11 +48,11 @@ LOCAL_SRC_FILES := \
 ifeq ($(CONFIG),Debug)
   LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -g -I "../../JuceLibraryCode" -O0 -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/JuceDemo\" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1"
   APP_ABI := armeabi
-  LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2
+  LOCAL_LDLIBS := -llog -lGLESv1_CM -lGLESv2
 else
   LOCAL_CPPFLAGS += -fsigned-char -fexceptions -frtti -I "../../JuceLibraryCode" -Os -D "JUCE_ANDROID=1" -D "JUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_JuceDemo" -D JUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/JuceDemo\" -D "NDEBUG=1" -D "JUCE_UNIT_TESTS=1" -D "JUCER_ANDROID_7F0E4A25=1"
   APP_ABI := armeabi armeabi-v7a
-  LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2
+  LOCAL_LDLIBS := -llog -lGLESv1_CM -lGLESv2
 endif
 
 include $(BUILD_SHARED_LIBRARY)

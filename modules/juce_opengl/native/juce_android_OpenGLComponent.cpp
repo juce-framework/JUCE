@@ -25,8 +25,8 @@
 
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (layout,        "layout",       "(IIII)V") \
- METHOD (invalidate,    "invalidate",   "(IIII)V") \
+ METHOD (layout,        "layout",        "(IIII)V") \
+ METHOD (requestRender, "requestRender", "()V") \
 
 DECLARE_JNI_CLASS (OpenGLView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$OpenGLView");
 #undef JNI_CLASS_MEMBERS
@@ -47,9 +47,8 @@ public:
           isGLES2 (isGLES2_),
           isInsideGLCallback (false)
     {
-        getContextList().add (this);
-
         jassert (peer != nullptr);
+        getContextList().add (this);
 
         glView = GlobalRef (createOpenGLView (peer));
     }
@@ -71,7 +70,7 @@ public:
 
     void swapBuffers() {}
 
-    void* getRawContext() const noexcept            { return 0; }
+    void* getRawContext() const noexcept            { return glView.get(); }
     unsigned int getFrameBufferID() const           { return 0; }
 
     int getWidth() const                            { return lastWidth; }
@@ -189,6 +188,14 @@ void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
 bool OpenGLHelpers::isContextActive()
 {
     return AndroidGLContext::isAnyContextActive();
+}
+
+void triggerAndroidOpenGLRepaint (OpenGLContext* context)
+{
+    AndroidGLContext* c = dynamic_cast <AndroidGLContext*> (context);
+
+    if (c != nullptr)
+        c->glView.callVoidMethod (OpenGLView.requestRender);
 }
 
 //==============================================================================

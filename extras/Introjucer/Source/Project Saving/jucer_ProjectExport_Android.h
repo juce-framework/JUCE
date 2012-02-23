@@ -243,6 +243,13 @@ private:
                 manifest->createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
         }
 
+        if (project.isModuleEnabled ("juce_opengl"))
+        {
+            XmlElement* feature = manifest->createNewChildElement ("uses-feature");
+            feature->setAttribute ("android:glEsVersion", "0x00020000");
+            feature->setAttribute ("android:required", "true");
+        }
+
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");
         app->setAttribute ("android:icon", "@drawable/icon");
@@ -422,6 +429,7 @@ private:
 
         {
             StringArray libs;
+            libs.add ("log");
             libs.add ("GLESv1_CM");
             libs.add ("GLESv2");
 

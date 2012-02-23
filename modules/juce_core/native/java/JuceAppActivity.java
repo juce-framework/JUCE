@@ -347,43 +347,26 @@ public final class JuceAppActivity   extends Activity
         OpenGLView (Context context)
         {
             super (context);
-
             setEGLContextClientVersion (2);
-            getHolder().setFormat(PixelFormat.TRANSLUCENT);
-            setVisibility (VISIBLE);
             setRenderer (this);
-
-            //setRenderMode (RENDERMODE_CONTINUOUSLY);
-            //requestRender();
         }
 
         @Override
         public void onSurfaceCreated (GL10 unused, EGLConfig config)
         {
-            // contextCreated();
-        }
-
-        @Override
-        public void onDrawFrame (GL10 unused)
-        {
-            //GLES20.glClearColor (1.0f, 0.5f, 0.0f, 1.0f);
-            //GLES20.glClear (GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-            // render();
+            contextCreated();
         }
 
         @Override
         public void onSurfaceChanged (GL10 unused, int width, int height)
         {
-            //GLES20.glViewport (0, 0, width, height);
+            contextCreated();
         }
 
         @Override
-        protected void onLayout (boolean changed, int left, int top, int right, int bottom)
+        public void onDrawFrame (GL10 unused)
         {
-            super.onLayout (changed, left, top, right, bottom);
-            requestLayout();
-            ((ViewGroup) getParent()).requestTransparentRegion (this);
+            render();
         }
 
         private native void contextCreated();

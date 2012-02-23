@@ -333,7 +333,6 @@ extern ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- STATICMETHOD (printToConsole,   "printToConsole",       "(Ljava/lang/String;)V") \
  METHOD (createNewView,          "createNewView",        "(Z)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
  METHOD (deleteView,             "deleteView",           "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
  METHOD (postMessage,            "postMessage",          "(J)V") \
