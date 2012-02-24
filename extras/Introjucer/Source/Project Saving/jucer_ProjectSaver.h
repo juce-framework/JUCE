@@ -94,7 +94,7 @@ public:
     {
         if (! generatedCodeFolder.createDirectory())
         {
-            errors.add ("Couldn't create folder: " + generatedCodeFolder.getFullPathName());
+            addError ("Couldn't create folder: " + generatedCodeFolder.getFullPathName());
             return Project::Item (project, ValueTree::invalid);
         }
 
@@ -141,7 +141,7 @@ public:
     {
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (f, newData))
         {
-            errors.add ("Can't write to file: " + f.getFullPathName());
+            addError ("Can't write to file: " + f.getFullPathName());
             return false;
         }
 
@@ -372,7 +372,7 @@ private:
             }
             else
             {
-                errors.add ("Can't create binary resources file: " + binaryDataCpp.getFullPathName());
+                addError ("Can't create binary resources file: " + binaryDataCpp.getFullPathName());
             }
         }
         else
@@ -417,10 +417,10 @@ private:
 
     void writeProjects (const OwnedArray<LibraryModule>& modules)
     {
+        ThreadPool threadPool (4, false, 30000);
+
         // keep a copy of the basic generated files group, as each exporter may modify it.
         const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
-
-        ThreadPool threadPool (4, false, 30000);
 
         for (Project::ExporterIterator exporter (project); exporter.next();)
         {

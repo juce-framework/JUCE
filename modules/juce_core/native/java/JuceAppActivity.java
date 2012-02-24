@@ -492,4 +492,9 @@ public final class JuceAppActivity   extends Activity
 
         return null;
     }
+
+    public final void launchURL (String url)
+    {
+        startActivity (new Intent (Intent.ACTION_VIEW, Uri.parse (url)));
+    }
 }

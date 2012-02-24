@@ -228,10 +228,10 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 //==============================================================================
 bool Process::openDocument (const String& fileName, const String& parameters)
 {
-
+    const LocalRef<jstring> t (javaString (fileName));
+    android.activity.callVoidMethod (JuceAppActivity.launchURL, t.get());
 }
 
 void File::revealToUser() const
 {
-
 }
