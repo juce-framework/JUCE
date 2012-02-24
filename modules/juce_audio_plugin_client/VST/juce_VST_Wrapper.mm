@@ -129,7 +129,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
     // HIView into the host's carbon window, and then catching events to see when it gets repositioned
     HIViewRef dummyView = 0;
     HIImageViewCreate (0, &dummyView);
-    HIRect r = { {0, 0}, {comp->getWidth(), comp->getHeight()} };
+    HIRect r = { {0, 0}, { (float) comp->getWidth(), (float) comp->getHeight()} };
     HIViewSetFrame (dummyView, &r);
     HIViewAddSubview (parentView, dummyView);
     comp->getProperties().set ("dummyViewRef", String::toHexString ((pointer_sized_int) (void*) dummyView));
