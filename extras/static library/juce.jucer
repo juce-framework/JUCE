@@ -15,17 +15,21 @@
     <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="1" juceFolder="../../../juce">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="jucedebug"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
+                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       winWarningLevel="4" generateManifest="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="juce"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
+                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       winWarningLevel="4" generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2008>
     <VS2010 targetFolder="Builds/VisualStudio2010" libraryType="1" juceFolder="../../../juce">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="jucedebug"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
+                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="juce"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
+                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"/>
       </CONFIGURATIONS>
     </VS2010>
   </EXPORTFORMATS>
@@ -52,6 +56,7 @@
     <MODULE id="juce_core"/>
     <MODULE id="juce_audio_basics"/>
     <MODULE id="juce_core"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
   <JUCEOPTIONS/>
 </JUCERPROJECT>
