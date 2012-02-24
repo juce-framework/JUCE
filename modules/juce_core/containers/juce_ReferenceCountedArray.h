@@ -61,12 +61,13 @@ public:
     }
 
     /** Creates a copy of another array */
-    ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) noexcept
+    template <class OtherObjectClass>
+    ReferenceCountedArray (const ReferenceCountedArray<OtherObjectClass, TypeOfCriticalSectionToUse>& other) noexcept
     {
         const ScopedLockType lock (other.getLock());
-        numUsed = other.numUsed;
+        numUsed = other.size();
         data.setAllocatedSize (numUsed);
-        memcpy (data.elements, other.data.elements, numUsed * sizeof (ObjectClass*));
+        memcpy (data.elements, other.getRawDataPointer(), numUsed * sizeof (ObjectClass*));
 
         for (int i = numUsed; --i >= 0;)
             if (data.elements[i] != nullptr)
@@ -77,19 +78,15 @@ public:
 
         Any existing objects in this array will first be released.
     */
-    ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) noexcept
+    template <class OtherObjectClass>
+    ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<OtherObjectClass, TypeOfCriticalSectionToUse>& other) noexcept
     {
-        if (this != &other)
-        {
-            ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse> otherCopy (other);
-            swapWithArray (otherCopy);
-        }
-
+        ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse> otherCopy (other);
+        swapWithArray (otherCopy);
         return *this;
     }
 
     /** Destructor.
-
         Any objects in the array will be released, and may be deleted if not referenced from elsewhere.
     */
     ~ReferenceCountedArray()
@@ -191,6 +188,15 @@ public:
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [numUsed - 1]
                            : static_cast <ObjectClass*> (nullptr);
+    }
+
+    /** Returns a pointer to the actual array data.
+        This pointer will only be valid until the next time a non-const method
+        is called on the array.
+    */
+    inline ObjectClass** getRawDataPointer() const noexcept
+    {
+        return data.elements;
     }
 
     //==============================================================================
