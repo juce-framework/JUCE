@@ -85,6 +85,7 @@ public:
 
 private:
     Array <String> strings;
+    CriticalSection lock;
 };
 
 

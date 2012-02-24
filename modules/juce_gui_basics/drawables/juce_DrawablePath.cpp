@@ -261,7 +261,7 @@ RelativePoint DrawablePath::ValueTreeWrapper::Element::getControlPoint (const in
     return RelativePoint (state [index == 0 ? point1 : (index == 1 ? point2 : point3)].toString());
 }
 
-Value DrawablePath::ValueTreeWrapper::Element::getControlPointValue (int index, UndoManager* undoManager) const
+Value DrawablePath::ValueTreeWrapper::Element::getControlPointValue (int index, UndoManager* undoManager)
 {
     jassert (index >= 0 && index < getNumControlPoints());
     return state.getPropertyAsValue (index == 0 ? point1 : (index == 1 ? point2 : point3), undoManager);

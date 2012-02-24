@@ -79,9 +79,9 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     File target (exp->getTargetFolder());
 
     if (FileHelpers::shouldPathsBeRelative (juceFolder.getFullPathName(), project.getFile().getFullPathName()))
-        exp->getJuceFolder() = juceFolder.getRelativePathFrom (project.getFile().getParentDirectory());
+        exp->getJuceFolderValue() = juceFolder.getRelativePathFrom (project.getFile().getParentDirectory());
     else
-        exp->getJuceFolder() = juceFolder.getFullPathName();
+        exp->getJuceFolderValue() = juceFolder.getFullPathName();
 
     exp->createDefaultConfigs();
 
@@ -150,12 +150,12 @@ ProjectExporter::~ProjectExporter()
 
 File ProjectExporter::getTargetFolder() const
 {
-    return project.resolveFilename (getTargetLocation().toString());
+    return project.resolveFilename (getTargetLocationString());
 }
 
 String ProjectExporter::getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const
 {
-    String juceFolderPath (getJuceFolder().toString());
+    String juceFolderPath (getJuceFolderString());
 
     if (juceFolderPath.startsWithChar ('<'))
     {
@@ -177,7 +177,7 @@ String ProjectExporter::getIncludePathForFileInJuceFolder (const String& pathFro
 
 RelativePath ProjectExporter::getJucePathFromProjectFolder() const
 {
-    return RelativePath (getJuceFolder().toString(), RelativePath::projectFolder);
+    return RelativePath (getJuceFolderString(), RelativePath::projectFolder);
 }
 
 RelativePath ProjectExporter::getJucePathFromTargetFolder() const
@@ -197,10 +197,10 @@ bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) c
 
 void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getTargetLocation(), "Target Project Folder", 1024, false),
+    props.add (new TextPropertyComponent (getTargetLocationValue(), "Target Project Folder", 1024, false),
                "The location of the folder in which the " + name + " project will be created. This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
-    props.add (new TextPropertyComponent (getJuceFolder(), "Local JUCE folder", 1024, false),
+    props.add (new TextPropertyComponent (getJuceFolderValue(), "Local JUCE folder", 1024, false),
                "The location of the Juce library folder that the " + name + " project will use to when compiling. This can be an absolute path, or relative to the jucer project folder, but it must be valid on the filesystem of the machine you use to actually do the compiling.");
 
     OwnedArray<LibraryModule> modules;
@@ -232,7 +232,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
         for (int i = 0; i < images.size(); ++i)
         {
-            choices.add (images.getUnchecked(i)->getName().toString());
+            choices.add (images.getUnchecked(i)->getName());
             ids.add (images.getUnchecked(i)->getID());
         }
 
@@ -247,7 +247,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 StringPairArray ProjectExporter::getAllPreprocessorDefs (const ProjectExporter::BuildConfiguration& config) const
 {
     StringPairArray defs (mergePreprocessorDefs (config.getAllPreprocessorDefs(),
-                                                 parsePreprocessorDefs (getExporterPreprocessorDefs().toString())));
+                                                 parsePreprocessorDefs (getExporterPreprocessorDefsString())));
     defs.set (getExporterIdentifierMacro(), "1");
     return defs;
 }
@@ -255,7 +255,7 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs (const ProjectExporter::
 StringPairArray ProjectExporter::getAllPreprocessorDefs() const
 {
     StringPairArray defs (mergePreprocessorDefs (project.getPreprocessorDefs(),
-                                                 parsePreprocessorDefs (getExporterPreprocessorDefs().toString())));
+                                                 parsePreprocessorDefs (getExporterPreprocessorDefsString())));
     defs.set (getExporterIdentifierMacro(), "1");
     return defs;
 }
@@ -369,23 +369,23 @@ void ProjectExporter::createDefaultConfigs()
         const bool debugConfig = i == 0;
 
         config->getName() = debugConfig ? "Debug" : "Release";
-        config->isDebug() = debugConfig;
+        config->isDebugValue() = debugConfig;
         config->getOptimisationLevel() = debugConfig ? 1 : 2;
         config->getTargetBinaryName() = project.getProjectFilenameRoot();
     }
 }
 
-Image ProjectExporter::getBigIcon()
+Image ProjectExporter::getBigIcon() const
 {
-    return project.getMainGroup().findItemWithID (getBigIconImageItemID().toString()).loadAsImageFile();
+    return project.getMainGroup().findItemWithID (settings [Ids::bigIcon]).loadAsImageFile();
 }
 
-Image ProjectExporter::getSmallIcon()
+Image ProjectExporter::getSmallIcon() const
 {
-    return project.getMainGroup().findItemWithID (getSmallIconImageItemID().toString()).loadAsImageFile();
+    return project.getMainGroup().findItemWithID (settings [Ids::smallIcon]).loadAsImageFile();
 }
 
-Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBigEnough)
+Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const
 {
     Image im;
 
@@ -436,6 +436,20 @@ bool ProjectExporter::ConfigIterator::next()
     return true;
 }
 
+ProjectExporter::ConstConfigIterator::ConstConfigIterator (const ProjectExporter& exporter_)
+    : index (-1), exporter (exporter_)
+{
+}
+
+bool ProjectExporter::ConstConfigIterator::next()
+{
+    if (++index >= exporter.getNumConfigurations())
+        return false;
+
+    config = exporter.getConfiguration (index);
+    return true;
+}
+
 //==============================================================================
 ProjectExporter::BuildConfiguration::BuildConfiguration (Project& project_, const ValueTree& configNode)
    : config (configNode), project (project_)
@@ -448,16 +462,16 @@ ProjectExporter::BuildConfiguration::~BuildConfiguration()
 
 String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
 {
-    const int level = (int) getOptimisationLevel().getValue();
+    const int level = getOptimisationLevelInt();
     return String (level <= 1 ? "0" : (level == 2 ? "s" : "3"));
 }
 
 void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getName(), "Name", 96, false),
+    props.add (new TextPropertyComponent (getNameValue(), "Name", 96, false),
                "The name of this configuration.");
 
-    props.add (new BooleanPropertyComponent (isDebug(), "Debug mode", "Debugging enabled"),
+    props.add (new BooleanPropertyComponent (isDebugValue(), "Debug mode", "Debugging enabled"),
                "If enabled, this means that the configuration should be built with debug synbols.");
 
     const char* optimisationLevels[] = { "No optimisation", "Optimise for size and speed", "Optimise for maximum speed", 0 };
@@ -474,10 +488,10 @@ void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyLi
                "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed "
                "in its default location in the build folder.");
 
-    props.add (new TextPropertyComponent (getHeaderSearchPath(), "Header search paths", 16384, false),
+    props.add (new TextPropertyComponent (getHeaderSearchPathValue(), "Header search paths", 16384, false),
                "Extra header search paths. Use semi-colons to separate multiple paths.");
 
-    props.add (new TextPropertyComponent (getLibrarySearchPath(), "Extra library search paths", 16384, false),
+    props.add (new TextPropertyComponent (getLibrarySearchPathValue(), "Extra library search paths", 16384, false),
                "Extra library search paths. Use semi-colons to separate multiple paths.");
 
     props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false),
@@ -490,13 +504,13 @@ void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyLi
 StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() const
 {
     return mergePreprocessorDefs (project.getPreprocessorDefs(),
-                                  parsePreprocessorDefs (getBuildConfigPreprocessorDefs().toString()));
+                                  parsePreprocessorDefs (getBuildConfigPreprocessorDefsString()));
 }
 
 StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 {
     StringArray s;
-    s.addTokens (getHeaderSearchPath().toString(), ";", String::empty);
+    s.addTokens (getHeaderSearchPathString(), ";", String::empty);
     s.trim();
     s.removeEmptyStrings();
     s.removeDuplicates (false);
@@ -506,7 +520,7 @@ StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 {
     StringArray s;
-    s.addTokens (getLibrarySearchPath().toString(), ";", String::empty);
+    s.addTokens (getLibrarySearchPathString(), ";", String::empty);
     s.trim();
     s.removeEmptyStrings();
     s.removeDuplicates (false);

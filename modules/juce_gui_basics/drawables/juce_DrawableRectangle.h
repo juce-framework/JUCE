@@ -83,7 +83,7 @@ public:
 
         void setCornerSize (const RelativePoint& cornerSize, UndoManager*);
         RelativePoint getCornerSize() const;
-        Value getCornerSizeValue (UndoManager*) const;
+        Value getCornerSizeValue (UndoManager*);
 
         static const Identifier topLeft, topRight, bottomLeft, cornerSize;
     };

@@ -42,7 +42,7 @@ ProjectTreeViewBase::~ProjectTreeViewBase()
 //==============================================================================
 String ProjectTreeViewBase::getDisplayName() const
 {
-    return item.getName().toString();
+    return item.getName();
 }
 
 void ProjectTreeViewBase::setName (const String& newName)
@@ -50,7 +50,7 @@ void ProjectTreeViewBase::setName (const String& newName)
     if (item.isMainGroup())
         item.project.setTitle (newName);
     else
-        item.getName() = newName;
+        item.getNameValue() = newName;
 }
 
 //==============================================================================

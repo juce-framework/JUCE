@@ -203,7 +203,7 @@ public:
         it needs to change the value. Attaching a Value::Listener to the value object will provide
         callbacks whenever the property changes.
     */
-    Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager) const;
+    Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager);
 
     //==============================================================================
     /** Returns the number of child nodes belonging to this one.

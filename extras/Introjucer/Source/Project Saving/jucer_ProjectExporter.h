@@ -55,7 +55,7 @@ public:
     virtual bool usesMMFiles() const = 0;
     virtual void createPropertyEditors (PropertyListBuilder&);
     virtual void launchProject() = 0;
-    virtual void create (const OwnedArray<LibraryModule>&) = 0; // may throw a SaveError
+    virtual void create (const OwnedArray<LibraryModule>&) const = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
     virtual bool canCopeWithDuplicateFiles() = 0;
 
@@ -71,14 +71,19 @@ public:
     Project& getProject() noexcept              { return project; }
     const Project& getProject() const noexcept  { return project; }
 
-    const ValueTree& getSettings() const                { return settings; }
-    Value getSetting (const Identifier& name_) const    { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
+    Value getSetting (const Identifier& name_)  { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
 
-    Value getJuceFolder() const                 { return getSetting (Ids::juceFolder); }
-    Value getTargetLocation() const             { return getSetting (Ids::targetFolder); }
+    Value getJuceFolderValue()                  { return getSetting (Ids::juceFolder); }
+    String getJuceFolderString() const          { return settings [Ids::juceFolder]; }
 
-    Value getExtraCompilerFlags() const         { return getSetting (Ids::extraCompilerFlags); }
-    Value getExtraLinkerFlags() const           { return getSetting (Ids::extraLinkerFlags); }
+    Value getTargetLocationValue()              { return getSetting (Ids::targetFolder); }
+    String getTargetLocationString() const      { return settings [Ids::targetFolder]; }
+
+    Value getExtraCompilerFlags()               { return getSetting (Ids::extraCompilerFlags); }
+    String getExtraCompilerFlagsString() const  { return settings [Ids::extraCompilerFlags]; }
+
+    Value getExtraLinkerFlags()                 { return getSetting (Ids::extraLinkerFlags); }
+    String getExtraLinkerFlagsString() const    { return settings [Ids::extraLinkerFlags]; }
 
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
     String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
@@ -86,11 +91,11 @@ public:
     RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
     void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder);
 
-    Value getBigIconImageItemID() const         { return getSetting (Ids::bigIcon); }
-    Value getSmallIconImageItemID() const       { return getSetting (Ids::smallIcon); }
-    Image getBigIcon();
-    Image getSmallIcon();
-    Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough);
+    Value getBigIconImageItemID()               { return getSetting (Ids::bigIcon); }
+    Value getSmallIconImageItemID()             { return getSetting (Ids::smallIcon); }
+    Image getBigIcon() const;
+    Image getSmallIcon() const;
+    Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
 
     String getExporterIdentifierMacro() const
     {
@@ -155,22 +160,37 @@ public:
         virtual void createPropertyEditors (PropertyListBuilder&) = 0;
 
         //==============================================================================
-        Value getName() const                               { return getValue (Ids::name); }
-        Value isDebug() const                               { return getValue (Ids::isDebug); }
-        Value getTargetBinaryName() const                   { return getValue (Ids::targetName); }
+        Value getNameValue()                                { return getValue (Ids::name); }
+        String getName() const                              { return config [Ids::name]; }
+
+        Value isDebugValue()                                { return getValue (Ids::isDebug); }
+        bool isDebug() const                                { return config [Ids::isDebug]; }
+
+        Value getTargetBinaryName()                         { return getValue (Ids::targetName); }
+        String getTargetBinaryNameString() const            { return config [Ids::targetName]; }
+
         // the path relative to the build folder in which the binary should go
-        Value getTargetBinaryRelativePath() const           { return getValue (Ids::binaryPath); }
-        Value getOptimisationLevel() const                  { return getValue (Ids::optimisation); }
+        Value getTargetBinaryRelativePath()                 { return getValue (Ids::binaryPath); }
+        String getTargetBinaryRelativePathString() const    { return config [Ids::binaryPath]; }
+
+        Value getOptimisationLevel()                        { return getValue (Ids::optimisation); }
+        int getOptimisationLevelInt() const                 { return config [Ids::optimisation]; }
         String getGCCOptimisationFlag() const;
-        Value getBuildConfigPreprocessorDefs() const        { return getValue (Ids::defines); }
+
+        Value getBuildConfigPreprocessorDefs()              { return getValue (Ids::defines); }
+        String getBuildConfigPreprocessorDefsString() const { return config [Ids::defines]; }
         StringPairArray getAllPreprocessorDefs() const; // includes inherited definitions
-        Value getHeaderSearchPath() const                   { return getValue (Ids::headerPath); }
+
+        Value getHeaderSearchPathValue()                    { return getValue (Ids::headerPath); }
+        String getHeaderSearchPathString() const            { return config [Ids::headerPath]; }
         StringArray getHeaderSearchPaths() const;
-        Value getLibrarySearchPath() const                  { return getValue (Ids::libraryPath); }
+
+        Value getLibrarySearchPathValue()                   { return getValue (Ids::libraryPath); }
+        String getLibrarySearchPathString() const           { return config [Ids::libraryPath]; }
         StringArray getLibrarySearchPaths() const;
         String getGCCLibraryPathFlags() const;
 
-        Value getValue (const Identifier& name) const       { return config.getPropertyAsValue (name, getUndoManager()); }
+        Value getValue (const Identifier& name)             { return config.getPropertyAsValue (name, getUndoManager()); }
         UndoManager* getUndoManager() const                 { return project.getUndoManagerFor (config); }
 
         //==============================================================================
@@ -207,6 +227,23 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigIterator);
     };
 
+    struct ConstConfigIterator
+    {
+        ConstConfigIterator (const ProjectExporter& exporter);
+
+        bool next();
+
+        const BuildConfiguration& operator*() const       { return *config; }
+        const BuildConfiguration* operator->() const      { return config; }
+
+        BuildConfiguration::Ptr config;
+        int index;
+
+    private:
+        const ProjectExporter& exporter;
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConstConfigIterator);
+    };
+
     int getNumConfigurations() const;
     BuildConfiguration::Ptr getConfiguration (int index) const;
 
@@ -216,7 +253,8 @@ public:
     static const Identifier configurations, configuration;
 
     //==============================================================================
-    Value getExporterPreprocessorDefs() const   { return getSetting (Ids::extraDefs); }
+    Value getExporterPreprocessorDefs()                 { return getSetting (Ids::extraDefs); }
+    String getExporterPreprocessorDefsString() const    { return settings [Ids::extraDefs]; }
 
     // includes exporter, project + config defs
     StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config) const;

@@ -601,7 +601,7 @@ public:
                     for (int j = configList->groups.size(); --j >= 0;)
                     {
                         PropertyGroup& configGroup = *configList->groups.getUnchecked(j);
-                        configGroup.setName ("Configuration: " + exp->getConfiguration (j)->getName().toString().quoted());
+                        configGroup.setName ("Configuration: " + exp->getConfiguration (j)->getName().quoted());
                         configGroup.repaint();
                     }
                 }

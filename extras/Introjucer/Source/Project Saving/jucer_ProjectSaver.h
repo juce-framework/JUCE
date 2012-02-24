@@ -154,6 +154,7 @@ private:
     Project::Item generatedFilesGroup;
     String extraAppConfigContent;
     StringArray errors;
+    CriticalSection errorLock;
 
     File appConfigFile, binaryDataCpp;
 
@@ -340,7 +341,7 @@ private:
             << "namespace ProjectInfo" << newLine
             << "{" << newLine
             << "    const char* const  projectName    = " << CodeHelpers::addEscapeChars (project.getProjectName().toString()).quoted() << ";" << newLine
-            << "    const char* const  versionString  = " << CodeHelpers::addEscapeChars (project.getVersion().toString()).quoted() << ";" << newLine
+            << "    const char* const  versionString  = " << CodeHelpers::addEscapeChars (project.getVersionString()).quoted() << ";" << newLine
             << "    const int          versionNumber  = " << project.getVersionAsHex() << ";" << newLine
             << "}" << newLine
             << newLine
@@ -408,15 +409,21 @@ private:
             sortGroupRecursively (group.getChild(i));
     }
 
+    void addError (const String& message)
+    {
+        const ScopedLock sl (errorLock);
+        errors.add (message);
+    }
+
     void writeProjects (const OwnedArray<LibraryModule>& modules)
     {
         // keep a copy of the basic generated files group, as each exporter may modify it.
         const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
 
+        ThreadPool threadPool (4, false, 30000);
+
         for (Project::ExporterIterator exporter (project); exporter.next();)
         {
-            std::cout << "Writing files for: " << exporter->getName() << std::endl;
-
             if (exporter->getTargetFolder().createDirectory())
             {
                 exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
@@ -430,21 +437,51 @@ private:
                 sortGroupRecursively (generatedFilesGroup);
                 exporter->groups.add (generatedFilesGroup);
 
-                try
-                {
-                    exporter->create (modules);
-                }
-                catch (ProjectExporter::SaveError& error)
-                {
-                    errors.add (error.message);
-                }
+                threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules));
             }
             else
             {
-                errors.add ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
+                addError ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
             }
         }
+
+        while (threadPool.getNumJobs() > 0)
+            Thread::sleep (10);
     }
+
+    class ExporterJob   : public ThreadPoolJob
+    {
+    public:
+        ExporterJob (ProjectSaver& owner_, ProjectExporter* exporter_,
+                     const OwnedArray<LibraryModule>& modules_)
+            : ThreadPoolJob ("export"),
+              owner (owner_), exporter (exporter_), modules (modules_)
+        {
+        }
+
+        JobStatus runJob()
+        {
+            try
+            {
+                exporter->create (modules);
+                std::cout << "Finished saving: " << exporter->getName() << std::endl;
+            }
+            catch (ProjectExporter::SaveError& error)
+            {
+                owner.addError (error.message);
+            }
+
+            return jobHasFinishedAndShouldBeDeleted;
+        }
+
+    private:
+        ProjectSaver& owner;
+        ScopedPointer<ProjectExporter> exporter;
+        const OwnedArray<LibraryModule>& modules;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterJob);
+    };
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSaver);
 };

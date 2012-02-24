@@ -30,27 +30,27 @@
 //==============================================================================
 namespace
 {
-    Value shouldBuildVST (const Project& project)                       { return project.getProjectValue ("buildVST"); }
-    Value shouldBuildRTAS (const Project& project)                      { return project.getProjectValue ("buildRTAS"); }
-    Value shouldBuildAU (const Project& project)                        { return project.getProjectValue ("buildAU"); }
+    Value shouldBuildVST (Project& project)                       { return project.getProjectValue ("buildVST"); }
+    Value shouldBuildRTAS (Project& project)                      { return project.getProjectValue ("buildRTAS"); }
+    Value shouldBuildAU (Project& project)                        { return project.getProjectValue ("buildAU"); }
 
-    Value getPluginName (const Project& project)                        { return project.getProjectValue ("pluginName"); }
-    Value getPluginDesc (const Project& project)                        { return project.getProjectValue ("pluginDesc"); }
-    Value getPluginManufacturer (const Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
-    Value getPluginManufacturerCode (const Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
-    Value getPluginCode (const Project& project)                        { return project.getProjectValue ("pluginCode"); }
-    Value getPluginChannelConfigs (const Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
-    Value getPluginIsSynth (const Project& project)                     { return project.getProjectValue ("pluginIsSynth"); }
-    Value getPluginWantsMidiInput (const Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
-    Value getPluginProducesMidiOut (const Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
-    Value getPluginSilenceInProducesSilenceOut (const Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
-    Value getPluginTailLengthSeconds (const Project& project)           { return project.getProjectValue ("pluginTailLength"); }
-    Value getPluginEditorNeedsKeyFocus (const Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
-    Value getPluginAUExportPrefix (const Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
-    Value getPluginAUCocoaViewClassName (const Project& project)        { return project.getProjectValue ("pluginAUViewClass"); }
-    Value getPluginRTASCategory (const Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
+    Value getPluginName (Project& project)                        { return project.getProjectValue ("pluginName"); }
+    Value getPluginDesc (Project& project)                        { return project.getProjectValue ("pluginDesc"); }
+    Value getPluginManufacturer (Project& project)                { return project.getProjectValue ("pluginManufacturer"); }
+    Value getPluginManufacturerCode (Project& project)            { return project.getProjectValue ("pluginManufacturerCode"); }
+    Value getPluginCode (Project& project)                        { return project.getProjectValue ("pluginCode"); }
+    Value getPluginChannelConfigs (Project& project)              { return project.getProjectValue ("pluginChannelConfigs"); }
+    Value getPluginIsSynth (Project& project)                     { return project.getProjectValue ("pluginIsSynth"); }
+    Value getPluginWantsMidiInput (Project& project)              { return project.getProjectValue ("pluginWantsMidiIn"); }
+    Value getPluginProducesMidiOut (Project& project)             { return project.getProjectValue ("pluginProducesMidiOut"); }
+    Value getPluginSilenceInProducesSilenceOut (Project& project) { return project.getProjectValue ("pluginSilenceInIsSilenceOut"); }
+    Value getPluginTailLengthSeconds (Project& project)           { return project.getProjectValue ("pluginTailLength"); }
+    Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
+    Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
+    Value getPluginAUCocoaViewClassName (Project& project)        { return project.getProjectValue ("pluginAUViewClass"); }
+    Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
 
-    String getPluginRTASCategoryCode (const Project& project)
+    String getPluginRTASCategoryCode (Project& project)
     {
         if (static_cast <bool> (getPluginIsSynth (project).getValue()))
             return "ePlugInCategory_SWGenerators";
@@ -105,7 +105,7 @@ namespace
         flags.set ("JucePlugin_TailLengthSeconds",           String (static_cast <double> (getPluginTailLengthSeconds (project).getValue())));
         flags.set ("JucePlugin_EditorRequiresKeyboardFocus", valueToBool (getPluginEditorNeedsKeyFocus (project)));
         flags.set ("JucePlugin_VersionCode",                 project.getVersionAsHex());
-        flags.set ("JucePlugin_VersionString",               project.getVersion().toString().quoted());
+        flags.set ("JucePlugin_VersionString",               project.getVersionString().quoted());
         flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
         flags.set ("JucePlugin_VSTCategory",                 static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kPlugCategSynth" : "kPlugCategEffect");
         flags.set ("JucePlugin_AUMainType",                  static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kAudioUnitType_MusicDevice" : "kAudioUnitType_Effect");
@@ -140,9 +140,9 @@ namespace
 //==============================================================================
 namespace VSTHelpers
 {
-    static Value getVSTFolder (const ProjectExporter& exporter)         { return exporter.getSetting (Ids::vstFolder); }
+    static Value getVSTFolder (ProjectExporter& exporter)         { return exporter.getSetting (Ids::vstFolder); }
 
-    static void addVSTFolderToPath (const ProjectExporter& exporter, StringArray& searchPaths)
+    static void addVSTFolderToPath (ProjectExporter& exporter, StringArray& searchPaths)
     {
         const String vstFolder (getVSTFolder (exporter).toString());
 
@@ -157,13 +157,13 @@ namespace VSTHelpers
         }
     }
 
-    static void createVSTPathEditor (const ProjectExporter& exporter, PropertyListBuilder& props)
+    static void createVSTPathEditor (ProjectExporter& exporter, PropertyListBuilder& props)
     {
         props.add (new TextPropertyComponent (getVSTFolder (exporter), "VST Folder", 1024, false),
                   "If you're building a VST, this must be the folder containing the VST SDK. This should be an absolute path.");
     }
 
-    static void fixMissingVSTValues (const ProjectExporter& exporter)
+    static void fixMissingVSTValues (ProjectExporter& exporter)
     {
         if (getVSTFolder(exporter).toString().isEmpty())
             getVSTFolder(exporter) = (exporter.isVisualStudio() ? "c:\\SDKs\\vstsdk2.4"
@@ -191,7 +191,7 @@ namespace VSTHelpers
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
     }
 
-    static void createPropertyEditors (const ProjectExporter& exporter, PropertyListBuilder& props)
+    static void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
     {
         fixMissingVSTValues (exporter);
         createVSTPathEditor (exporter, props);
@@ -201,9 +201,9 @@ namespace VSTHelpers
 //==============================================================================
 namespace RTASHelpers
 {
-    static Value getRTASFolder (const ProjectExporter& exporter)        { return exporter.getSetting (Ids::rtasFolder); }
+    static Value getRTASFolder (ProjectExporter& exporter)        { return exporter.getSetting (Ids::rtasFolder); }
 
-    static void fixMissingRTASValues (const ProjectExporter& exporter)
+    static void fixMissingRTASValues (ProjectExporter& exporter)
     {
         if (getRTASFolder (exporter).toString().isEmpty())
         {
@@ -331,7 +331,7 @@ namespace RTASHelpers
         addExtraSearchPaths (exporter);
     }
 
-    static void createPropertyEditors (const ProjectExporter& exporter, PropertyListBuilder& props)
+    static void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
     {
         if (exporter.isXcode() || exporter.isVisualStudio())
         {

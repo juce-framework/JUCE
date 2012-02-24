@@ -52,8 +52,8 @@ public:
     {
         name = getNameLinux();
 
-        if (getTargetLocation().toString().isEmpty())
-            getTargetLocation() = getDefaultBuildsRootFolder() + "Linux";
+        if (getTargetLocationString().isEmpty())
+            getTargetLocationValue() = getDefaultBuildsRootFolder() + "Linux";
     }
 
     //==============================================================================
@@ -82,7 +82,7 @@ public:
     }
 
     //==============================================================================
-    void create (const OwnedArray<LibraryModule>&)
+    void create (const OwnedArray<LibraryModule>&) const
     {
         Array<RelativePath> files;
         for (int i = 0; i < groups.size(); ++i)
@@ -102,8 +102,8 @@ protected:
         MakeBuildConfiguration (Project& project, const ValueTree& settings)
             : BuildConfiguration (project, settings)
         {
-            if (getLibrarySearchPath().getValue().isVoid())
-                getLibrarySearchPath() = "/usr/X11R6/lib/";
+            if (getLibrarySearchPathValue().getValue().isVoid())
+                getLibrarySearchPathValue() = "/usr/X11R6/lib/";
         }
 
         void createPropertyEditors (PropertyListBuilder& props)
@@ -119,7 +119,7 @@ protected:
 
 private:
     //==============================================================================
-    void findAllFilesToCompile (const Project::Item& projectItem, Array<RelativePath>& results)
+    void findAllFilesToCompile (const Project::Item& projectItem, Array<RelativePath>& results) const
     {
         if (projectItem.isGroup())
         {
@@ -133,12 +133,12 @@ private:
         }
     }
 
-    void writeDefineFlags (OutputStream& out, const BuildConfiguration& config)
+    void writeDefineFlags (OutputStream& out, const BuildConfiguration& config) const
     {
         StringPairArray defines;
         defines.set ("LINUX", "1");
 
-        if (config.isDebug().getValue())
+        if (config.isDebug())
         {
             defines.set ("DEBUG", "1");
             defines.set ("_DEBUG", "1");
@@ -151,7 +151,7 @@ private:
         out << createGCCPreprocessorFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (config)));
     }
 
-    void writeHeaderPathFlags (OutputStream& out, const BuildConfiguration& config)
+    void writeHeaderPathFlags (OutputStream& out, const BuildConfiguration& config) const
     {
         StringArray searchPaths (extraSearchPaths);
         searchPaths.addArray (config.getHeaderSearchPaths());
@@ -165,7 +165,7 @@ private:
             out << " -I " << addQuotesIfContainsSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i])));
     }
 
-    void writeCppFlags (OutputStream& out, const BuildConfiguration& config)
+    void writeCppFlags (OutputStream& out, const BuildConfiguration& config) const
     {
         out << "  CPPFLAGS := $(DEPFLAGS)";
         writeDefineFlags (out, config);
@@ -173,7 +173,7 @@ private:
         out << newLine;
     }
 
-    void writeLinkerFlags (OutputStream& out, const BuildConfiguration& config)
+    void writeLinkerFlags (OutputStream& out, const BuildConfiguration& config) const
     {
         out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)";
 
@@ -188,23 +188,23 @@ private:
         for (int i = 0; i < libs.size(); ++i)
             out << " -l" << libs[i];
 
-        out << " " << replacePreprocessorTokens (config, getExtraLinkerFlags().toString()).trim()
+        out << " " << replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim()
             << newLine;
     }
 
-    void writeConfig (OutputStream& out, const BuildConfiguration& config)
+    void writeConfig (OutputStream& out, const BuildConfiguration& config) const
     {
         const String buildDirName ("build");
-        const String intermediatesDirName (buildDirName + "/intermediate/" + config.getName().toString());
+        const String intermediatesDirName (buildDirName + "/intermediate/" + config.getName());
         String outputDir (buildDirName);
 
-        if (config.getTargetBinaryRelativePath().toString().isNotEmpty())
+        if (config.getTargetBinaryRelativePathString().isNotEmpty())
         {
-            RelativePath binaryPath (config.getTargetBinaryRelativePath().toString(), RelativePath::projectFolder);
+            RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
             outputDir = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
         }
 
-        out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName().toString()) << ")" << newLine;
+        out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName()) << ")" << newLine;
         out << "  BINDIR := " << escapeSpaces (buildDirName) << newLine
             << "  LIBDIR := " << escapeSpaces (buildDirName) << newLine
             << "  OBJDIR := " << escapeSpaces (intermediatesDirName) << newLine
@@ -214,7 +214,7 @@ private:
 
         out << "  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH)";
 
-        if (config.isDebug().getValue())
+        if (config.isDebug())
             out << " -g -ggdb";
 
         if (makefileIsDLL)
@@ -222,7 +222,7 @@ private:
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
 
-        out << "  CXXFLAGS += $(CFLAGS) " << replacePreprocessorTokens (config, getExtraCompilerFlags().toString()).trim() << newLine;
+        out << "  CXXFLAGS += $(CFLAGS) " << replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim() << newLine;
 
         writeLinkerFlags (out, config);
 
@@ -232,7 +232,7 @@ private:
         writeHeaderPathFlags (out, config);
         out << newLine;
 
-        String targetName (config.getTargetBinaryName().getValue().toString());
+        String targetName (config.getTargetBinaryNameString());
 
         if (projectType.isLibrary())
             targetName = getLibbedFilename (targetName);
@@ -249,7 +249,7 @@ private:
         out << "endif" << newLine << newLine;
     }
 
-    void writeObjects (OutputStream& out, const Array<RelativePath>& files)
+    void writeObjects (OutputStream& out, const Array<RelativePath>& files) const
     {
         out << "OBJECTS := \\" << newLine;
 
@@ -260,14 +260,14 @@ private:
         out << newLine;
     }
 
-    void writeMakefile (OutputStream& out, const Array<RelativePath>& files)
+    void writeMakefile (OutputStream& out, const Array<RelativePath>& files) const
     {
         out << "# Automatically generated makefile, created by the Introjucer" << newLine
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
             << newLine;
 
         out << "ifndef CONFIG" << newLine
-            << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName().toString()) << newLine
+            << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName()) << newLine
             << "endif" << newLine
             << newLine;
 
@@ -280,7 +280,7 @@ private:
             << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
             << newLine;
 
-        for (ConfigIterator config (*this); config.next();)
+        for (ConstConfigIterator config (*this); config.next();)
             writeConfig (out, *config);
 
         writeObjects (out, files);

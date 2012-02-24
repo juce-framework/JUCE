@@ -97,7 +97,7 @@ public:
             int getNumControlPoints() const noexcept;
 
             RelativePoint getControlPoint (int index) const;
-            Value getControlPointValue (int index, UndoManager*) const;
+            Value getControlPointValue (int index, UndoManager*);
             RelativePoint getStartPoint() const;
             RelativePoint getEndPoint() const;
             void setControlPoint (int index, const RelativePoint& point, UndoManager*);

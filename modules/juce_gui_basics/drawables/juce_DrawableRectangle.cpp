@@ -153,7 +153,7 @@ RelativePoint DrawableRectangle::ValueTreeWrapper::getCornerSize() const
     return RelativePoint (state [cornerSize]);
 }
 
-Value DrawableRectangle::ValueTreeWrapper::getCornerSizeValue (UndoManager* undoManager) const
+Value DrawableRectangle::ValueTreeWrapper::getCornerSizeValue (UndoManager* undoManager)
 {
     return state.getPropertyAsValue (cornerSize, undoManager);
 }

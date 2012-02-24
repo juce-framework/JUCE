@@ -53,7 +53,7 @@ public:
 
     //==============================================================================
     ValueTree getProjectRoot() const                    { return projectRoot; }
-    Value getProjectName()                              { return getMainGroup().getName(); }
+    Value getProjectName()                              { return getMainGroup().getNameValue(); }
     String getProjectFilenameRoot()                     { return File::createLegalFileName (getDocumentTitle()); }
     String getProjectUID() const                        { return projectRoot [ComponentBuilder::idProperty]; }
 
@@ -74,20 +74,22 @@ public:
     //==============================================================================
     // project types
     const ProjectType& getProjectType() const;
-    Value getProjectTypeValue() const                   { return getProjectValue (Ids::projectType); }
+    Value getProjectTypeValue()                         { return getProjectValue (Ids::projectType); }
+    String getProjectTypeString() const                 { return projectRoot [Ids::projectType]; }
 
-    Value getVersion() const                            { return getProjectValue (Ids::version); }
+    Value getVersionValue()                             { return getProjectValue (Ids::version); }
+    String getVersionString() const                     { return projectRoot [Ids::version]; }
     String getVersionAsHex() const;
 
-    Value getBundleIdentifier() const                   { return getProjectValue (Ids::bundleIdentifier); }
+    Value getBundleIdentifier()                         { return getProjectValue (Ids::bundleIdentifier); }
     void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
 
-    Value getCompanyName() const                        { return getProjectValue (Ids::companyName); }
+    Value getCompanyName()                              { return getProjectValue (Ids::companyName); }
 
     //==============================================================================
-    Value getProjectValue (const Identifier& name) const  { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
+    Value getProjectValue (const Identifier& name)      { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
 
-    Value getProjectPreprocessorDefs() const            { return getProjectValue (Ids::defines); }
+    Value getProjectPreprocessorDefs()                  { return getProjectValue (Ids::defines); }
     StringPairArray getPreprocessorDefs() const;
 
     //==============================================================================
@@ -134,7 +136,8 @@ public:
         Image loadAsImageFile() const;
 
         //==============================================================================
-        Value getName() const;
+        Value getNameValue();
+        String getName() const;
         File getFile() const;
         String getFilePath() const;
         void setFile (const File& file);
@@ -144,11 +147,13 @@ public:
 
         bool shouldBeAddedToTargetProject() const;
         bool shouldBeCompiled() const;
-        Value getShouldCompileValue() const;
+        Value getShouldCompileValue();
         bool shouldBeAddedToBinaryResources() const;
-        Value getShouldAddToResourceValue() const;
-        Value getShouldInhibitWarningsValue() const;
-        Value getShouldUseStdCallValue() const;
+        Value getShouldAddToResourceValue();
+        Value getShouldInhibitWarningsValue();
+        bool shouldInhibitWarnings() const;
+        Value getShouldUseStdCallValue();
+        bool shouldUseStdCall() const;
 
         //==============================================================================
         bool canContain (const Item& child) const;

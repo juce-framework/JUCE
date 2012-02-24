@@ -242,7 +242,7 @@ public:
     bool removeAllJobs (bool interruptRunningJobs,
                         int timeOutMilliseconds,
                         bool deleteInactiveJobs = false,
-                        JobSelector* selectedJobsToRemove = 0);
+                        JobSelector* selectedJobsToRemove = nullptr);
 
     /** Returns the number of jobs currently running or queued.
     */

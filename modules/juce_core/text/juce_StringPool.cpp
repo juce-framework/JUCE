@@ -30,8 +30,11 @@ StringPool::~StringPool()           {}
 namespace StringPoolHelpers
 {
     template <class StringType>
-    const String::CharPointerType getPooledStringFromArray (Array<String>& strings, StringType newString)
+    String::CharPointerType getPooledStringFromArray (Array<String>& strings,
+                                                      StringType newString,
+                                                      const CriticalSection& lock)
     {
+        const ScopedLock sl (lock);
         int start = 0;
         int end = strings.size();
 
@@ -79,7 +82,7 @@ String::CharPointerType StringPool::getPooledString (const String& s)
     if (s.isEmpty())
         return String::empty.getCharPointer();
 
-    return StringPoolHelpers::getPooledStringFromArray (strings, s);
+    return StringPoolHelpers::getPooledStringFromArray (strings, s, lock);
 }
 
 String::CharPointerType StringPool::getPooledString (const char* const s)
@@ -87,7 +90,7 @@ String::CharPointerType StringPool::getPooledString (const char* const s)
     if (s == nullptr || *s == 0)
         return String::empty.getCharPointer();
 
-    return StringPoolHelpers::getPooledStringFromArray (strings, s);
+    return StringPoolHelpers::getPooledStringFromArray (strings, s, lock);
 }
 
 String::CharPointerType StringPool::getPooledString (const wchar_t* const s)
@@ -95,7 +98,7 @@ String::CharPointerType StringPool::getPooledString (const wchar_t* const s)
     if (s == nullptr || *s == 0)
         return String::empty.getCharPointer();
 
-    return StringPoolHelpers::getPooledStringFromArray (strings, s);
+    return StringPoolHelpers::getPooledStringFromArray (strings, s, lock);
 }
 
 int StringPool::size() const noexcept

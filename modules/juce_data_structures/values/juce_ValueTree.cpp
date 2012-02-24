@@ -24,7 +24,7 @@
 */
 
 
-class ValueTree::SharedObject    : public SingleThreadedReferenceCountedObject
+class ValueTree::SharedObject  : public ReferenceCountedObject
 {
 public:
     typedef ReferenceCountedObjectPtr<SharedObject> Ptr;
@@ -828,7 +828,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (ValueTreePropertyValueSource);
 };
 
-Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager) const
+Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager)
 {
     return Value (new ValueTreePropertyValueSource (*this, name, undoManager));
 }

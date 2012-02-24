@@ -106,7 +106,7 @@ File ModuleList::getDefaultModulesFolder (Project* project)
 
         if (exp != nullptr)
         {
-            File f (project->resolveFilename (exp->getJuceFolder().toString()));
+            File f (project->resolveFilename (exp->getJuceFolderString()));
             f = getModulesFolderForJuceOrModulesFolder (f);
 
             if (ModuleList::isModulesFolder (f))
@@ -375,7 +375,7 @@ File LibraryModule::getInclude (const File& folder) const
 
 RelativePath LibraryModule::getModuleRelativeToProject (ProjectExporter& exporter) const
 {
-    RelativePath p (exporter.getJuceFolder().toString(), RelativePath::projectFolder);
+    RelativePath p (exporter.getJuceFolderString(), RelativePath::projectFolder);
     if (p.getFileName() != "modules")
         p = p.getChildFile ("modules");
 
@@ -512,7 +512,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
     }
 }
 
-void LibraryModule::createPropertyEditors (const ProjectExporter& exporter, PropertyListBuilder& props) const
+void LibraryModule::createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props) const
 {
     if (isVSTPluginHost (exporter.getProject()))
         VSTHelpers::createVSTPathEditor (exporter, props);

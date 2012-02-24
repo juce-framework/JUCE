@@ -72,7 +72,7 @@ public:
     {
     }
 
-    void createPropertyEditors (const Project&, PropertyListBuilder&) const
+    void createPropertyEditors (Project&, PropertyListBuilder&) const
     {
     }
 
@@ -104,7 +104,7 @@ public:
     {
     }
 
-    void createPropertyEditors (const Project& project, PropertyListBuilder& props) const
+    void createPropertyEditors (Project& project, PropertyListBuilder& props) const
     {
     }
 
@@ -135,7 +135,7 @@ public:
     {
     }
 
-    void createPropertyEditors (const Project&, PropertyListBuilder&) const
+    void createPropertyEditors (Project&, PropertyListBuilder&) const
     {
     }
 
@@ -191,7 +191,7 @@ public:
         }
     }
 
-    void createPropertyEditors (const Project& project, PropertyListBuilder& props) const
+    void createPropertyEditors (Project& project, PropertyListBuilder& props) const
     {
         props.add (new BooleanPropertyComponent (shouldBuildVST (project), "Build VST", "Enabled"),
                    "Whether the project should produce a VST plugin.");

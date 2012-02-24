@@ -74,7 +74,7 @@ Project::~Project()
 void Project::setTitle (const String& newTitle)
 {
     projectRoot.setProperty (Ids::name, newTitle, getUndoManagerFor (projectRoot));
-    getMainGroup().getName() = newTitle;
+    getMainGroup().getNameValue() = newTitle;
 }
 
 const String Project::getDocumentTitle()
@@ -109,7 +109,7 @@ void Project::setMissingDefaultValues()
         getProjectTypeValue() = ProjectType::getGUIAppTypeName();
 
     if (! projectRoot.hasProperty (Ids::version))
-        getVersion() = "1.0.0";
+        getVersionValue() = "1.0.0";
 
     updateOldStyleConfigList();
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
@@ -327,7 +327,7 @@ String Project::getRelativePathForFile (const File& file) const
 //==============================================================================
 const ProjectType& Project::getProjectType() const
 {
-    const ProjectType* type = ProjectType::findType (getProjectTypeValue().toString());
+    const ProjectType* type = ProjectType::findType (getProjectTypeString());
     jassert (type != nullptr);
 
     if (type == nullptr)
@@ -345,7 +345,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (getProjectName(), "Project Name", 256, false),
                "The name of the project.");
 
-    props.add (new TextPropertyComponent (getVersion(), "Project Version", 16, false),
+    props.add (new TextPropertyComponent (getVersionValue(), "Project Version", 16, false),
                "The project's version number, This should be in the format major.minor.point");
 
     props.add (new TextPropertyComponent (getCompanyName(), "Company Name", 256, false),
@@ -380,7 +380,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 String Project::getVersionAsHex() const
 {
     StringArray configs;
-    configs.addTokens (getVersion().toString(), ",.", String::empty);
+    configs.addTokens (getVersionString(), ",.", String::empty);
     configs.trim();
     configs.removeEmptyStrings();
 
@@ -394,7 +394,7 @@ String Project::getVersionAsHex() const
 
 StringPairArray Project::getPreprocessorDefs() const
 {
-    return parsePreprocessorDefs (getProjectPreprocessorDefs().toString());
+    return parsePreprocessorDefs (projectRoot [Ids::defines]);
 }
 
 //==============================================================================
@@ -450,7 +450,7 @@ Project::Item Project::Item::createGroup (Project& project, const String& name, 
     Item group (project, ValueTree (Tags::group));
     group.setID (uid);
     group.initialiseMissingProperties();
-    group.getName() = name;
+    group.getNameValue() = name;
     return group;
 }
 
@@ -491,14 +491,17 @@ bool Project::Item::canContain (const Item& child) const
 
 bool Project::Item::shouldBeAddedToTargetProject() const    { return isFile(); }
 
-bool Project::Item::shouldBeCompiled() const                { return getShouldCompileValue().getValue(); }
-Value Project::Item::getShouldCompileValue() const          { return state.getPropertyAsValue (Ids::compile, getUndoManager()); }
+Value Project::Item::getShouldCompileValue()                { return state.getPropertyAsValue (Ids::compile, getUndoManager()); }
+bool Project::Item::shouldBeCompiled() const                { return state [Ids::compile]; }
 
-bool Project::Item::shouldBeAddedToBinaryResources() const  { return getShouldAddToResourceValue().getValue(); }
-Value Project::Item::getShouldAddToResourceValue() const    { return state.getPropertyAsValue (Ids::resource, getUndoManager()); }
+Value Project::Item::getShouldAddToResourceValue()          { return state.getPropertyAsValue (Ids::resource, getUndoManager()); }
+bool Project::Item::shouldBeAddedToBinaryResources() const  { return state [Ids::resource]; }
 
-Value Project::Item::getShouldInhibitWarningsValue() const  { return state.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
-Value Project::Item::getShouldUseStdCallValue() const       { return state.getPropertyAsValue (Ids::useStdCall, nullptr); }
+Value Project::Item::getShouldInhibitWarningsValue()        { return state.getPropertyAsValue (Ids::noWarnings, getUndoManager()); }
+bool Project::Item::shouldInhibitWarnings() const           { return state [Ids::noWarnings]; }
+
+Value Project::Item::getShouldUseStdCallValue()             { return state.getPropertyAsValue (Ids::useStdCall, nullptr); }
+bool Project::Item::shouldUseStdCall() const                { return state [Ids::useStdCall]; }
 
 String Project::Item::getFilePath() const
 {
@@ -586,8 +589,8 @@ File Project::Item::determineGroupFolder() const
     {
         f = parent.determineGroupFolder();
 
-        if (f.getChildFile (getName().toString()).isDirectory())
-            f = f.getChildFile (getName().toString());
+        if (f.getChildFile (getName()).isDirectory())
+            f = f.getChildFile (getName());
     }
     else
     {
@@ -616,9 +619,14 @@ void Project::Item::initialiseMissingProperties()
     }
 }
 
-Value Project::Item::getName() const
+Value Project::Item::getNameValue()
 {
     return state.getPropertyAsValue (Ids::name, getUndoManager());
+}
+
+String Project::Item::getName() const
+{
+    return state [Ids::name];
 }
 
 void Project::Item::addChild (const Item& newChild, int insertIndex)
@@ -731,7 +739,7 @@ void Project::Item::addFileUnchecked (const File& file, int insertIndex, const b
 {
     Item item (project, ValueTree (Tags::file));
     item.initialiseMissingProperties();
-    item.getName() = file.getFileName();
+    item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile && file.hasFileExtension ("cpp;mm;c;m;cc;cxx;r");
     item.getShouldAddToResourceValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
 
@@ -746,7 +754,7 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
 {
     Item item (project, ValueTree (Tags::file));
     item.initialiseMissingProperties();
-    item.getName() = file.getFileName();
+    item.getNameValue() = file.getFileName();
     item.getShouldCompileValue() = shouldCompile;
     item.getShouldAddToResourceValue() = project.shouldBeAddedToBinaryResourcesByDefault (file);
 
@@ -789,7 +797,7 @@ const char* const Project::configFlagDisabled = "disabled";
 
 Value Project::getConfigFlag (const String& name)
 {
-    const ValueTree configNode (getConfigNode());
+    ValueTree configNode (getConfigNode());
     Value v (configNode.getPropertyAsValue (name, getUndoManagerFor (configNode)));
 
     if (v.getValue().toString().isEmpty())
@@ -918,7 +926,7 @@ void Project::addNewExporter (const String& exporterName)
     ScopedPointer<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
 
     ValueTree exporters (getExporters());
-    exporters.addChild (exp->getSettings(), -1, getUndoManagerFor (exporters));
+    exporters.addChild (exp->settings, -1, getUndoManagerFor (exporters));
 }
 
 void Project::deleteExporter (int index)

@@ -114,7 +114,7 @@ public:
         const int x2 = compileButton.isVisible() ? compileButton.getX() - 4
                                                  : getWidth() - 4;
 
-        g.drawText (item.getName().toString(), x, 0, x2 - x, getHeight(), Justification::centredLeft, true);
+        g.drawText (item.getName(), x, 0, x2 - x, getHeight(), Justification::centredLeft, true);
 
         g.setColour (Colours::lightgrey);
         g.fillRect (0, getHeight() - 1, getWidth(), 1);

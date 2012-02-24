@@ -48,7 +48,7 @@ public:
 
     void writeIncludes (ProjectSaver&, OutputStream&);
     void prepareExporter (ProjectExporter&, ProjectSaver&) const;
-    void createPropertyEditors (const ProjectExporter&, PropertyListBuilder&) const;
+    void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
 
     static String getInfoFileName()     { return "juce_module_info"; }
