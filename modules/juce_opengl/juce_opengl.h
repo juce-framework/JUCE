@@ -33,6 +33,7 @@
 
 #if JUCE_IOS || JUCE_ANDROID
  #define JUCE_OPENGL_ES 1
+ #define JUCE_USE_OPENGL_FIXED_FUNCTION 0
 #endif
 
 #if JUCE_WINDOWS
@@ -63,7 +64,7 @@
  #include <OpenGL/gl.h>
  #include "OpenGL/glext.h"
 #elif JUCE_ANDROID
- #include <GLES/gl.h>
+ #include <GLES2/gl2.h>
 #endif
 
 #if (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX) && ! defined (JUCE_USE_OPENGL_SHADERS)

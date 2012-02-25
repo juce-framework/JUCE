@@ -140,7 +140,7 @@ const Type findMinimum (const Type* data, int numValues)
     return result;
 }
 
-/** Scans an array of values, returning the minimum value that it contains. */
+/** Scans an array of values, returning the maximum value that it contains. */
 template <typename Type>
 const Type findMaximum (const Type* values, int numValues)
 {
@@ -152,7 +152,7 @@ const Type findMaximum (const Type* values, int numValues)
     while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
     {
         const Type& v = *values++;
-        if (result > v)  result = v;
+        if (result < v)  result = v;
     }
 
     return result;

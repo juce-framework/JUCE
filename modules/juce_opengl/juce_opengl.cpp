@@ -117,7 +117,6 @@
  #ifndef GL_GLEXT_PROTOTYPES
   #define GL_GLEXT_PROTOTYPES 1
  #endif
- #include <GLES/glext.h>
  #include <GLES2/gl2.h>
 #endif
 
@@ -131,14 +130,24 @@ namespace juce
 void OpenGLExtensionFunctions::initialise()
 {
    #if JUCE_WINDOWS || JUCE_LINUX
-    #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams)    name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+    #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams) \
+        name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
     #undef JUCE_INIT_GL_FUNCTION
    #endif
 }
 
+    struct XYZ
+    {
+        XYZ (const char* name) { DBG (name); }
+        ~XYZ() { DBG ("out"); }
+    };
+
 #if JUCE_OPENGL_ES
- #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams) inline returnType OpenGLExtensionFunctions::name params { return ::name callparams; }
+ #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams) \
+    inline returnType OpenGLExtensionFunctions::name params { XYZ xx (#name); return ::name callparams; }
+
  JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
  #undef JUCE_DECLARE_GL_FUNCTION
 #endif

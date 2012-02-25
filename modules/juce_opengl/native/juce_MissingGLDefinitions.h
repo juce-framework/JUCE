@@ -50,7 +50,7 @@ namespace
    #endif
 
    #ifndef GL_DEPTH24_STENCIL8
-    #define GL_DEPTH24_STENCIL8  GL_DEPTH24_STENCIL8_OES
+    enum { GL_DEPTH24_STENCIL8 = 0x88F0 };
    #endif
 
    #if JUCE_WINDOWS
