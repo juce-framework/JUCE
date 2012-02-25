@@ -49,7 +49,7 @@ namespace
     #define GL_RGBA8 GL_RGBA
    #endif
 
-   #ifndef GL_DEPTH24_STENCIL8
+   #if (! defined (GL_DEPTH24_STENCIL8)) && ! JUCE_WINDOWS
     enum { GL_DEPTH24_STENCIL8 = 0x88F0 };
    #endif
 
