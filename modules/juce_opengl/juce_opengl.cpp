@@ -138,15 +138,9 @@ void OpenGLExtensionFunctions::initialise()
    #endif
 }
 
-    struct XYZ
-    {
-        XYZ (const char* name) { DBG (name); }
-        ~XYZ() { DBG ("out"); }
-    };
-
 #if JUCE_OPENGL_ES
  #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams) \
-    inline returnType OpenGLExtensionFunctions::name params { XYZ xx (#name); return ::name callparams; }
+    inline returnType OpenGLExtensionFunctions::name params { return ::name callparams; }
 
  JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
  #undef JUCE_DECLARE_GL_FUNCTION
