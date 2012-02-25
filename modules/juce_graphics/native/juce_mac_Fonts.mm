@@ -33,7 +33,8 @@
 
 namespace CoreTextTypeLayout
 {
-    CTFontRef createCTFont (const Font& font, float fontSize, bool& needsItalicTransform)
+    CTFontRef createCTFont (const Font& font, const float fontSize,
+                            const bool applyScaleFactor, bool& needsItalicTransform)
     {
         CFStringRef cfName = font.getTypefaceName().toCFString();
         CTFontRef ctFontRef = CTFontCreateWithName (cfName, fontSize, nullptr);
@@ -67,27 +68,21 @@ namespace CoreTextTypeLayout
                     ctFontRef = newFont;
                 }
             }
+
+            if (applyScaleFactor)
+            {
+                CGFontRef cgFontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
+                const int totalHeight = std::abs (CGFontGetAscent (cgFontRef)) + std::abs (CGFontGetDescent (cgFontRef));
+                const float factor = CGFontGetUnitsPerEm (cgFontRef) / (float) totalHeight;
+                CGFontRelease (cgFontRef);
+
+                CTFontRef newFont = CTFontCreateCopyWithAttributes (ctFontRef, fontSize * factor, nullptr, nullptr);
+                CFRelease (ctFontRef);
+                ctFontRef = newFont;
+            }
         }
 
         return ctFontRef;
-    }
-
-    float getFontHeightToCGSizeFactor (const Font& font)
-    {
-        static float factor = 0;
-
-        if (factor == 0) // (This factor seems to be a constant for all fonts..)
-        {
-            bool needsItalicTransform = false;
-            CTFontRef tempFont = createCTFont (font, 1024, needsItalicTransform);
-            CGFontRef cgFontRef = CTFontCopyGraphicsFont (tempFont, nullptr);
-            const int totalHeight = std::abs (CGFontGetAscent (cgFontRef)) + std::abs (CGFontGetDescent (cgFontRef));
-            factor = CGFontGetUnitsPerEm (cgFontRef) / (float) totalHeight;
-            CGFontRelease (cgFontRef);
-            CFRelease (tempFont);
-        }
-
-        return factor;
     }
 
     //==============================================================================
@@ -170,8 +165,7 @@ namespace CoreTextTypeLayout
             {
                 const Font& f = *attr->getFont();
                 bool needsItalicTransform = false;
-                CTFontRef ctFontRef = createCTFont (f, f.getHeight() * getFontHeightToCGSizeFactor (f),
-                                                    needsItalicTransform);
+                CTFontRef ctFontRef = createCTFont (f, f.getHeight(), true, needsItalicTransform);
 
                 CFAttributedStringSetAttribute (attribString, CFRangeMake (range.getStart(), range.getLength()),
                                                 kCTFontAttributeName, ctFontRef);
@@ -244,19 +238,6 @@ namespace CoreTextTypeLayout
         return attribString;
     }
 
-    float getTextHeight (CTFrameRef frame, const CGRect& bounds)
-    {
-        CFArrayRef lines = CTFrameGetLines (frame);
-        CFIndex numLines = CFArrayGetCount (lines);
-        CFIndex lastLineIndex = numLines - 1;
-        CGFloat descent;
-        CTLineRef line = (CTLineRef) CFArrayGetValueAtIndex (lines, lastLineIndex);
-        CTLineGetTypographicBounds (line, nullptr,  &descent, nullptr);
-        CGPoint lastLineOrigin;
-        CTFrameGetLineOrigins (frame, CFRangeMake (lastLineIndex, 1), &lastLineOrigin);
-        return bounds.size.height - lastLineOrigin.y + descent;
-    }
-
     void drawToCGContext (const AttributedString& text, const Rectangle<float>& area,
                           const CGContextRef& context, const float flipHeight)
     {
@@ -269,27 +250,11 @@ namespace CoreTextTypeLayout
                                     (CGFloat) area.getWidth(), (CGFloat) area.getHeight());
         CGPathAddRect (path, nullptr, bounds);
 
-        CTFrameRef frame = CTFramesetterCreateFrame (framesetter, CFRangeMake (0, 0), path, NULL);
+        CTFrameRef frame = CTFramesetterCreateFrame (framesetter, CFRangeMake (0, 0), path, nullptr);
         CFRelease (framesetter);
         CGPathRelease (path);
 
-        float dy = 0;
-        if (text.getJustification().getOnlyVerticalFlags() == Justification::bottom)
-            dy = bounds.size.height - getTextHeight (frame, bounds);
-        else if (text.getJustification().getOnlyVerticalFlags() == Justification::verticallyCentred)
-            dy = (bounds.size.height - getTextHeight (frame, bounds)) / 2.0f;
-
-        if (dy != 0)
-        {
-            CGContextSaveGState (context);
-            CGContextTranslateCTM (context, 0, -dy);
-        }
-
         CTFrameDraw (frame, context);
-
-        if (dy != 0)
-            CGContextRestoreGState (context);
-
         CFRelease (frame);
     }
 
@@ -405,7 +370,7 @@ public:
           unitsToHeightScaleFactor (0.0f)
     {
         bool needsItalicTransform = false;
-        ctFontRef = CoreTextTypeLayout::createCTFont (font, 1024.0f, needsItalicTransform);
+        ctFontRef = CoreTextTypeLayout::createCTFont (font, 1024.0f, false, needsItalicTransform);
 
         if (ctFontRef != nullptr)
         {
