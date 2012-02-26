@@ -228,6 +228,7 @@ const String Project::loadDocument (const File& file)
     StoredSettings::getInstance()->flush();
     projectRoot = newTree;
 
+    removeDefunctExporters();
     setMissingDefaultValues();
 
     return String::empty;
