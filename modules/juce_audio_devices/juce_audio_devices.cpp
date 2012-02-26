@@ -150,12 +150,12 @@ using namespace juce;
 
 namespace juce
 {
+ #include "native/juce_MidiDataConcatenator.h"
 
 //==============================================================================
 #if JUCE_MAC
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
  #include "../juce_core/native/juce_mac_ObjCSuffix.h"
- #include "native/juce_MidiDataConcatenator.h"
  #include "native/juce_mac_CoreAudio.cpp"
  #include "native/juce_mac_CoreMidi.cpp"
 
@@ -170,12 +170,10 @@ namespace juce
 //==============================================================================
 #elif JUCE_IOS
  #include "native/juce_ios_Audio.cpp"
- #include "native/juce_MidiDataConcatenator.h"
  #include "native/juce_mac_CoreMidi.cpp"
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #include "native/juce_MidiDataConcatenator.h"
  #include "../juce_core/native/juce_win32_ComSmartPtr.h"
  #include "../juce_events/native/juce_win32_HiddenMessageWindow.h"
 
