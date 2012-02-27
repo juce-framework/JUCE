@@ -107,6 +107,10 @@ namespace Ids
     DECLARE_ID (androidMicNeeded);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
+    DECLARE_ID (androidKeyStore);
+    DECLARE_ID (androidKeyStorePass);
+    DECLARE_ID (androidKeyAlias);
+    DECLARE_ID (androidKeyAliasPass);
     const Identifier class_ ("class");
 
     #undef DECLARE_ID

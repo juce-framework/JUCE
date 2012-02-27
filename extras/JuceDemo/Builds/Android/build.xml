@@ -11,20 +11,24 @@
   <taskdef name="setup" classname="com.android.ant.SetupTask" classpathref="android.antlibs"/>
   <target name="clean">
     <exec executable="${ndk.dir}/ndk-build" dir="${basedir}" failonerror="true">
-      <arg value="--jobs=2"/>
       <arg value="clean"/>
     </exec>
   </target>
-  <target name="debug">
+  <target name="-pre-build">
+    <condition property="makefileConfig" value="Debug" else="Release">
+      <equals arg1="${ant.project.invoked-targets}" arg2="debug"/>
+    </condition>
+    <condition property="ndkDebugValue" value="NDK_DEBUG=1" else="NDK_DEBUG=0">
+      <equals arg1="${ant.project.invoked-targets}" arg2="debug"/>
+    </condition>
+    <condition property="app_abis" value="armeabi armeabi-v7a" else="armeabi armeabi-v7a">
+      <equals arg1="${ant.project.invoked-targets}" arg2="debug"/>
+    </condition>
     <exec executable="${ndk.dir}/ndk-build" dir="${basedir}" failonerror="true">
       <arg value="--jobs=2"/>
-      <arg value="CONFIG=Debug"/>
-    </exec>
-  </target>
-  <target name="release">
-    <exec executable="${ndk.dir}/ndk-build" dir="${basedir}" failonerror="true">
-      <arg value="--jobs=2"/>
-      <arg value="CONFIG=Release"/>
+      <arg value="CONFIG=${makefileConfig}"/>
+      <arg value="${ndkDebugValue}"/>
+      <arg value="APP_ABI=${app_abis}"/>
     </exec>
   </target>
   <import file="${sdk.dir}/tools/ant/build.xml"/>

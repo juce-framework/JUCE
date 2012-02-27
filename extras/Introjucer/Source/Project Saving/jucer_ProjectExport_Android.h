@@ -57,17 +57,19 @@ public:
         if (getActivityClassPath().isEmpty())
             getActivityClassPathValue() = createDefaultClassName();
 
-        if (getSDKPathString().isEmpty())
-            getSDKPathValue() = "${user.home}/SDKs/android-sdk-macosx";
-
-        if (getNDKPathString().isEmpty())
-            getNDKPathValue() = "${user.home}/SDKs/android-ndk-r7b";
+        if (getSDKPathString().isEmpty())       getSDKPathValue() = "${user.home}/SDKs/android-sdk";
+        if (getNDKPathString().isEmpty())       getNDKPathValue() = "${user.home}/SDKs/android-ndk";
 
         if (getMinimumSDKVersionString().isEmpty())
             getMinimumSDKVersionValue() = 8;
 
         if (getInternetNeededValue().toString().isEmpty())
             getInternetNeededValue() = true;
+
+        if (getKeyStoreValue().getValue().isVoid())         getKeyStoreValue()      = "${user.home}/.android/debug.keystore";
+        if (getKeyStorePassValue().getValue().isVoid())     getKeyStorePassValue()  = "android";
+        if (getKeyAliasValue().getValue().isVoid())         getKeyAliasValue()      = "androiddebugkey";
+        if (getKeyAliasPassValue().getValue().isVoid())     getKeyAliasPassValue()  = "android";
     }
 
     //==============================================================================
@@ -112,6 +114,15 @@ public:
 
         props.add (new TextPropertyComponent (getOtherPermissionsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
+
+        props.add (new TextPropertyComponent (getKeyStoreValue(), "Key Signing: key.store", 2048, false),
+                   "The key.store value, used when signing the package.");
+        props.add (new TextPropertyComponent (getKeyStorePassValue(), "Key Signing: key.store.password", 2048, false),
+                   "The key.store password, used when signing the package.");
+        props.add (new TextPropertyComponent (getKeyAliasValue(), "Key Signing: key.alias", 2048, false),
+                   "The key.alias value, used when signing the package.");
+        props.add (new TextPropertyComponent (getKeyAliasPassValue(), "Key Signing: key.alias.password", 2048, false),
+                   "The key.alias password, used when signing the package.");
     }
 
     Value getActivityClassPathValue()      { return getSetting (Ids::androidActivityClass); }
@@ -120,6 +131,16 @@ public:
     String getSDKPathString() const        { return settings [Ids::androidSDKPath]; }
     Value getNDKPathValue()                { return getSetting (Ids::androidNDKPath); }
     String getNDKPathString() const        { return settings [Ids::androidNDKPath]; }
+
+    Value getKeyStoreValue()               { return getSetting (Ids::androidKeyStore); }
+    String getKeyStoreString() const       { return settings [Ids::androidKeyStore]; }
+    Value getKeyStorePassValue()           { return getSetting (Ids::androidKeyStorePass); }
+    String getKeyStorePassString() const   { return settings [Ids::androidKeyStorePass]; }
+    Value getKeyAliasValue()               { return getSetting (Ids::androidKeyAlias); }
+    String getKeyAliasString() const       { return settings [Ids::androidKeyAlias]; }
+    Value getKeyAliasPassValue()           { return getSetting (Ids::androidKeyAliasPass); }
+    String getKeyAliasPassString() const   { return settings [Ids::androidKeyAliasPass]; }
+
     Value getInternetNeededValue()         { return getSetting (Ids::androidInternetNeeded); }
     bool getInternetNeeded() const         { return settings [Ids::androidInternetNeeded]; }
     Value getAudioRecordNeededValue()      { return getSetting (Ids::androidMicNeeded); }
@@ -421,7 +442,6 @@ private:
                 const AndroidBuildConfiguration& androidConfig = dynamic_cast <const AndroidBuildConfiguration&> (*config);
 
                 out << "  LOCAL_CPPFLAGS += " << createCPPFlags (*config) << newLine
-                    << "  APP_ABI := " << androidConfig.getArchitectures() << newLine
                     << getDynamicLibs (androidConfig);
 
                 break;
@@ -438,7 +458,6 @@ private:
         {
             StringArray libs;
             libs.add ("log");
-            libs.add ("GLESv1_CM");
             libs.add ("GLESv2");
 
             for (int i = 0; i < libs.size(); ++i)
@@ -509,28 +528,67 @@ private:
         taskdef->setAttribute ("classname", "com.android.ant.SetupTask");
         taskdef->setAttribute ("classpathref", "android.antlibs");
 
-        addNDKBuildStep (proj, "clean", "clean");
+        {
+            XmlElement* target = proj->createNewChildElement ("target");
+            target->setAttribute ("name", "clean");
 
-        addNDKBuildStep (proj, "debug", "CONFIG=Debug");
-        addNDKBuildStep (proj, "release", "CONFIG=Release");
+            XmlElement* executable = target->createNewChildElement ("exec");
+            executable->setAttribute ("executable", "${ndk.dir}/ndk-build");
+            executable->setAttribute ("dir", "${basedir}");
+            executable->setAttribute ("failonerror", "true");
+
+            executable->createNewChildElement ("arg")->setAttribute ("value", "clean");
+        }
+
+        {
+            XmlElement* target = proj->createNewChildElement ("target");
+            target->setAttribute ("name", "-pre-build");
+
+            addDebugConditionClause (target, "makefileConfig", "Debug", "Release");
+            addDebugConditionClause (target, "ndkDebugValue", "NDK_DEBUG=1", "NDK_DEBUG=0");
+
+            String debugABIs, releaseABIs;
+
+            for (ConstConfigIterator config (*this); config.next();)
+            {
+                const AndroidBuildConfiguration& androidConfig = dynamic_cast <const AndroidBuildConfiguration&> (*config);
+
+                if (config->isDebug())
+                    debugABIs = androidConfig.getArchitectures();
+                else
+                    releaseABIs = androidConfig.getArchitectures();
+            }
+
+            addDebugConditionClause (target, "app_abis", debugABIs, releaseABIs);
+
+            XmlElement* executable = target->createNewChildElement ("exec");
+            executable->setAttribute ("executable", "${ndk.dir}/ndk-build");
+            executable->setAttribute ("dir", "${basedir}");
+            executable->setAttribute ("failonerror", "true");
+
+            executable->createNewChildElement ("arg")->setAttribute ("value", "--jobs=2");
+            executable->createNewChildElement ("arg")->setAttribute ("value", "CONFIG=${makefileConfig}");
+            executable->createNewChildElement ("arg")->setAttribute ("value", "${ndkDebugValue}");
+            executable->createNewChildElement ("arg")->setAttribute ("value", "APP_ABI=${app_abis}");
+
+        }
 
         proj->createNewChildElement ("import")->setAttribute ("file", "${sdk.dir}/tools/ant/build.xml");
 
         return proj;
     }
 
-    static void addNDKBuildStep (XmlElement* project, const String& type, const String& arg)
+    void addDebugConditionClause (XmlElement* target, const String& property,
+                                  const String& debugValue, const String& releaseValue) const
     {
-        XmlElement* target = project->createNewChildElement ("target");
-        target->setAttribute ("name", type);
+        XmlElement* condition = target->createNewChildElement ("condition");
+        condition->setAttribute ("property", property);
+        condition->setAttribute ("value", debugValue);
+        condition->setAttribute ("else", releaseValue);
 
-        XmlElement* executable = target->createNewChildElement ("exec");
-        executable->setAttribute ("executable", "${ndk.dir}/ndk-build");
-        executable->setAttribute ("dir", "${basedir}");
-        executable->setAttribute ("failonerror", "true");
-
-        executable->createNewChildElement ("arg")->setAttribute ("value", "--jobs=2");
-        executable->createNewChildElement ("arg")->setAttribute ("value", arg);
+        XmlElement* equals = condition->createNewChildElement ("equals");
+        equals->setAttribute ("arg1", "${ant.project.invoked-targets}");
+        equals->setAttribute ("arg2", "debug");
     }
 
     void writeProjectPropertiesFile (const File& file) const
@@ -553,6 +611,10 @@ private:
            << newLine
            << "sdk.dir=" << escapeSpaces (replacePreprocessorDefs (getAllPreprocessorDefs(), getSDKPathString())) << newLine
            << "ndk.dir=" << escapeSpaces (replacePreprocessorDefs (getAllPreprocessorDefs(), getNDKPathString())) << newLine
+           << "key.store=" << getKeyStoreString() << newLine
+           << "key.alias=" << getKeyAliasString() << newLine
+           << "key.store.password=" << getKeyStorePassString() << newLine
+           << "key.alias.password=" << getKeyAliasPassString() << newLine
            << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);

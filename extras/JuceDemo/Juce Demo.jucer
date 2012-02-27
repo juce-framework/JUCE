@@ -73,13 +73,15 @@
                        generateManifest="1"/>
       </CONFIGURATIONS>
     </VS2010>
-    <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk-macosx"
-             androidNDKPath="${user.home}/SDKs/android-ndk-r7b" juceFolder="../../../juce"
+    <ANDROID targetFolder="Builds/Android" androidSDKPath="${user.home}/SDKs/android-sdk"
+             androidNDKPath="${user.home}/SDKs/android-ndk" juceFolder="../../../juce"
              androidInternetNeeded="1" bigIcon="f4hwldS" androidActivityClass="com.juce.JuceDemo"
-             androidMinimumSDK="8" androidMicNeeded="1">
+             androidMinimumSDK="8" androidMicNeeded="1" androidKeyStore="${user.home}/.android/debug.keystore"
+             androidKeyStorePass="android" androidKeyAlias="androiddebugkey"
+             androidKeyAliasPass="android">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                       defines="JUCE_UNIT_TESTS=1" androidArchitectures="armeabi"/>
+                       defines="JUCE_UNIT_TESTS=1" androidArchitectures="armeabi armeabi-v7a"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
                        defines="JUCE_UNIT_TESTS=1" androidArchitectures="armeabi armeabi-v7a"/>
       </CONFIGURATIONS>
