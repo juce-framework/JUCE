@@ -368,7 +368,7 @@ void ProjectExporter::createDefaultConfigs()
 
         const bool debugConfig = i == 0;
 
-        config->getName() = debugConfig ? "Debug" : "Release";
+        config->getNameValue() = debugConfig ? "Debug" : "Release";
         config->isDebugValue() = debugConfig;
         config->getOptimisationLevel() = debugConfig ? 1 : 2;
         config->getTargetBinaryName() = project.getProjectFilenameRoot();
