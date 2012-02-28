@@ -231,6 +231,14 @@ public:
                                view.callIntMethod (ComponentPeerView.getHeight));
     }
 
+    void handleScreenSizeChange()
+    {
+        ComponentPeer::handleScreenSizeChange();
+
+        if (isFullScreen())
+            setFullScreen (true);
+    }
+
     Point<int> getScreenPosition() const
     {
         return Point<int> (view.callIntMethod (ComponentPeerView.getLeft),
@@ -706,7 +714,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 //==============================================================================
 void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
-    monitorCoords.add (Rectangle<int> (0, 0, android.screenWidth, android.screenHeight));
+    monitorCoords.add (Rectangle<int> (android.screenWidth, android.screenHeight));
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv* env, jobject activity,

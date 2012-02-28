@@ -224,7 +224,7 @@ public:
         A peer implementation must call this if the monitor arrangement changes or the available
         screen size changes.
     */
-    void handleScreenSizeChange();
+    virtual void handleScreenSizeChange();
 
     //==============================================================================
     /** This is called to repaint the component into the given context. */
