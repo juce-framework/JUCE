@@ -170,8 +170,8 @@ public:
     {
         ++multiplier;
 
-        argb = ((multiplier * getAG()) & 0xff00ff00)
-                | (((multiplier * getRB()) >> 8) & 0x00ff00ff);
+        argb = ((((uint32) multiplier) * getAG()) & 0xff00ff00)
+                | (((((uint32) multiplier) * getRB()) >> 8) & 0x00ff00ff);
     }
 
     forcedinline void multiplyAlpha (const float multiplier) noexcept
@@ -315,7 +315,7 @@ public:
         b = (uint8) (argb);
     }
 
-    forcedinline uint32 getARGB() const noexcept                { return 0xff000000 | b | (g << 8) | (r << 16); }
+    forcedinline uint32 getARGB() const noexcept                { return 0xff000000 | b | (((uint32) g) << 8) | (((uint32) r) << 16); }
     forcedinline uint32 getUnpremultipliedARGB() const noexcept { return getARGB(); }
 
     forcedinline uint32 getRB() const noexcept      { return b | (uint32) (r << 16); }

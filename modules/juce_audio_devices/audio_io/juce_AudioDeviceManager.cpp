@@ -665,7 +665,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
     else
     {
         for (int i = 0; i < numOutputChannels; ++i)
-            zeromem (outputChannelData[i], sizeof (float) * numSamples);
+            zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
     }
 
     if (testSound != nullptr)

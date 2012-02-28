@@ -40,6 +40,10 @@
     to an object. If you use the assignment operator to assign a different object to a
     ScopedPointer, the old one will be automatically deleted.
 
+    Important note: The class is designed to hold a pointer to an object, NOT to an array!
+    It calls delete on its payload, not delete[], so do not give it an array to hold! For
+    that kind of purpose, you should be using HeapBlock or Array instead.
+
     A const ScopedPointer is guaranteed not to lose ownership of its object or change the
     object to which it points during its lifetime. This means that making a copy of a const
     ScopedPointer is impossible, as that would involve the new copy taking ownership from the

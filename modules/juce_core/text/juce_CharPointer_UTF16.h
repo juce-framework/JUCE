@@ -483,9 +483,9 @@ public:
 private:
     CharType* data;
 
-    static int findNullIndex (const CharType* const t) noexcept
+    static unsigned int findNullIndex (const CharType* const t) noexcept
     {
-        int n = 0;
+        unsigned int n = 0;
 
         while (t[n] != 0)
             ++n;

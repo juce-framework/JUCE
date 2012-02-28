@@ -56,12 +56,12 @@ namespace PrimesHelpers
 
         do
         {
-            const int prime = (index << 1) + 1;
+            const unsigned int prime = ((unsigned int) index << 1) + 1;
 
             BigInteger r (base), remainder;
             r.divideBy (prime, remainder);
 
-            int i = prime - remainder.getBitRangeAsInt (0, 32);
+            unsigned int i = prime - remainder.getBitRangeAsInt (0, 32);
 
             if (r.isZero())
                 i += prime;
@@ -73,7 +73,7 @@ namespace PrimesHelpers
 
             while (i < numBits)
             {
-                result.setBit (i);
+                result.setBit ((int) i);
                 i += prime;
             }
 
@@ -222,9 +222,9 @@ bool Primes::isProbablyPrime (const BigInteger& number, const int certainty)
 
     if (number.getHighestBit() <= 10)
     {
-        const int num = number.getBitRangeAsInt (0, 10);
+        const unsigned int num = number.getBitRangeAsInt (0, 10);
 
-        for (int i = num / 2; --i > 1;)
+        for (unsigned int i = num / 2; --i > 1;)
             if (num % i == 0)
                 return false;
 

@@ -112,14 +112,14 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
             for (i = 0; i < numOutputs; ++i)
             {
                 channels[numActiveChans] = outputChans[i];
-                memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * numSamples);
+                memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * (size_t) numSamples);
                 ++numActiveChans;
             }
 
             for (i = numOutputs; i < numInputs; ++i)
             {
                 channels[numActiveChans] = tempBuffer.getSampleData (i - numOutputs, 0);
-                memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * numSamples);
+                memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * (size_t) numSamples);
                 ++numActiveChans;
             }
         }
@@ -128,14 +128,14 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
             for (i = 0; i < numInputs; ++i)
             {
                 channels[numActiveChans] = outputChans[i];
-                memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * numSamples);
+                memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * (size_t) numSamples);
                 ++numActiveChans;
             }
 
             for (i = numInputs; i < numOutputs; ++i)
             {
                 channels[numActiveChans] = outputChans[i];
-                zeromem (channels[numActiveChans], sizeof (float) * numSamples);
+                zeromem (channels[numActiveChans], sizeof (float) * (size_t) numSamples);
                 ++numActiveChans;
             }
         }
@@ -157,7 +157,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
     {
         for (int i = 0; i < totalNumOutputChannels; ++i)
             if (outputChannelData[i] != nullptr)
-                zeromem (outputChannelData[i], sizeof (float) * numSamples);
+                zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
     }
 }
 

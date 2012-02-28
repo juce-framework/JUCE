@@ -49,7 +49,7 @@ public:
 
         count[1] += (uint32) (dataSize >> 29);
 
-        const size_t spaceLeft = 64 - bufferPos;
+        const size_t spaceLeft = 64 - (size_t) bufferPos;
         size_t i = 0;
 
         if (dataSize >= spaceLeft)
@@ -132,13 +132,13 @@ public:
         encode (encodedLength, count, 8);
 
         // Pad out to 56 mod 64.
-        const int index = (uint32) ((count[0] >> 3) & 0x3f);
+        const int index = (count[0] >> 3) & 0x3f;
 
         const int paddingLength = (index < 56) ? (56 - index)
                                                : (120 - index);
 
         uint8 paddingBuffer[64] = { 0x80 }; // first byte is 0x80, remaining bytes are zero.
-        processBlock (paddingBuffer, paddingLength);
+        processBlock (paddingBuffer, (size_t) paddingLength);
 
         processBlock (encodedLength, 8);
 
@@ -279,7 +279,7 @@ void MD5::processStream (InputStream& input, int64 numBytesToRead)
             break;
 
         numBytesToRead -= bytesRead;
-        generator.processBlock (tempBuffer, bytesRead);
+        generator.processBlock (tempBuffer, (size_t) bytesRead);
     }
 
     generator.finish (result);

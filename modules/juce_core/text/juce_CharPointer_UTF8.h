@@ -352,7 +352,7 @@ public:
                     ++numExtraBytes;
             }
 
-            *data++ = (CharType) ((0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
+            *data++ = (CharType) ((uint32) (0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
 
             while (--numExtraBytes >= 0)
                 *data++ = (CharType) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));

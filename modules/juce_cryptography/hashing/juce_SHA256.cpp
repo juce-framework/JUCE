@@ -77,7 +77,7 @@ public:
         length += 64;
     }
 
-    void processFinalBlock (const void* const data, int numBytes) noexcept
+    void processFinalBlock (const void* const data, unsigned int numBytes) noexcept
     {
         jassert (numBytes < 64);
 
@@ -126,7 +126,7 @@ public:
 
             if (bytesRead < sizeof (buffer))
             {
-                processFinalBlock (buffer, bytesRead);
+                processFinalBlock (buffer, (unsigned int) bytesRead);
                 break;
             }
 
