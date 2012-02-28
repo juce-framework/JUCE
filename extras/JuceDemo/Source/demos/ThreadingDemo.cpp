@@ -177,10 +177,6 @@ public:
     {
     }
 
-    ~DemoThreadPoolJob()
-    {
-    }
-
     JobStatus runJob()
     {
         // this is the code that runs this job. It'll be repeatedly called until we return
@@ -252,7 +248,7 @@ public:
             while (balls.size() < 5)
                 addABall();
 
-            startTimer (2000);
+            startTimer (300);
         }
     }
 
@@ -276,7 +272,7 @@ public:
             addAndMakeVisible (newBall);
             newBall->parentSizeChanged();
 
-            pool.addJob (newBall);
+            pool.addJob (newBall, false);
         }
         else
         {

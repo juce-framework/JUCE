@@ -53,7 +53,6 @@ class JUCE_API  ThreadPoolJob
 public:
     //==============================================================================
     /** Creates a thread pool job object.
-
         After creating your job, add it to a thread pool with ThreadPool::addJob().
     */
     explicit ThreadPoolJob (const String& name);
@@ -80,9 +79,6 @@ public:
         jobHasFinished = 0,     /**< indicates that the job has finished and can be
                                      removed from the pool. */
 
-        jobHasFinishedAndShouldBeDeleted,  /**< indicates that the job has finished and that it
-                                                should be automatically deleted by the pool. */
-
         jobNeedsRunningAgain    /**< indicates that the job would like to be called
                                      again when a thread is free. */
     };
@@ -106,7 +102,7 @@ public:
 
     //==============================================================================
     /** Returns true if this job is currently running its runJob() method. */
-    bool isRunning() const                  { return isActive; }
+    bool isRunning() const noexcept                     { return isActive; }
 
     /** Returns true if something is trying to interrupt this job and make it stop.
 
@@ -115,7 +111,7 @@ public:
 
         @see signalJobShouldExit()
     */
-    bool shouldExit() const                 { return shouldStop; }
+    bool shouldExit() const noexcept                    { return shouldStop; }
 
     /** Calling this will cause the shouldExit() method to return true, and the job
         should (if it's been implemented correctly) stop as soon as possible.
@@ -150,22 +146,19 @@ class JUCE_API  ThreadPool
 public:
     //==============================================================================
     /** Creates a thread pool.
-
-        Once you've created a pool, you can give it some things to do with the addJob()
-        method.
-
-        @param numberOfThreads              the maximum number of actual threads to run.
-        @param startThreadsOnlyWhenNeeded   if this is true, then no threads will be started
-                                            until there are some jobs to run. If false, then
-                                            all the threads will be fired-up immediately so that
-                                            they're ready for action
-        @param stopThreadsWhenNotUsedTimeoutMs  if this timeout is > 0, then if any threads have been
-                                            inactive for this length of time, they will automatically
-                                            be stopped until more jobs come along and they're needed
+        Once you've created a pool, you can give it some jobs by calling addJob().
+        @param numberOfThreads  the number of threads to run. These will be started
+                                immediately, and will run until the pool is deleted.
     */
-    ThreadPool (int numberOfThreads,
-                bool startThreadsOnlyWhenNeeded = true,
-                int stopThreadsWhenNotUsedTimeoutMs = 5000);
+    ThreadPool (int numberOfThreads);
+
+    /** Creates a thread pool with one thread per CPU core.
+        Once you've created a pool, you can give it some jobs by calling addJob().
+        If you want to specify the number of threads, use the other constructor; this
+        one creates a pool which has one thread for each CPU core.
+        @see SystemStats::getNumCpus()
+    */
+    ThreadPool();
 
     /** Destructor.
 
@@ -200,8 +193,17 @@ public:
         the job's ThreadPoolJob::runJob() method. Depending on the return value of the
         runJob() method, the pool will either remove the job from the pool or add it to
         the back of the queue to be run again.
+
+        If deleteJobWhenFinished is true, then the job object will be owned and deleted by
+        the pool when not needed - if you do this, make sure that your object's destructor
+        is thread-safe.
+
+        If deleteJobWhenFinished is false, the pointer will be used but not deleted, and
+        the caller is responsible for making sure the object is not deleted before it has
+        been removed from the pool.
     */
-    void addJob (ThreadPoolJob* job);
+    void addJob (ThreadPoolJob* job,
+                 bool deleteJobWhenFinished);
 
     /** Tries to remove a job from the pool.
 
@@ -230,10 +232,6 @@ public:
                                     methods called to try to interrupt them
         @param timeOutMilliseconds  the length of time this method should wait for all the jobs to finish
                                     before giving up and returning false
-        @param deleteInactiveJobs   if true, any jobs that aren't currently running will be deleted. If false,
-                                    they will simply be removed from the pool. Jobs that are already running when
-                                    this method is called can choose whether they should be deleted by
-                                    returning jobHasFinishedAndShouldBeDeleted from their runJob() method.
         @param selectedJobsToRemove if this is non-zero, the JobSelector object is asked to decide which
                                     jobs should be removed. If it is zero, all jobs are removed
         @returns    true if all jobs are successfully stopped and removed; false if the timeout period
@@ -241,7 +239,6 @@ public:
     */
     bool removeAllJobs (bool interruptRunningJobs,
                         int timeOutMilliseconds,
-                        bool deleteInactiveJobs = false,
                         JobSelector* selectedJobsToRemove = nullptr);
 
     /** Returns the number of jobs currently running or queued.
@@ -277,7 +274,6 @@ public:
                              int timeOutMilliseconds) const;
 
     /** Returns a list of the names of all the jobs currently running or queued.
-
         If onlyReturnActiveJobs is true, only the ones currently running are returned.
     */
     StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
@@ -292,19 +288,25 @@ public:
 
 private:
     //==============================================================================
-    const int threadStopTimeout;
-    int priority;
-    class ThreadPoolThread;
-    friend class OwnedArray <ThreadPoolThread>;
-    OwnedArray <ThreadPoolThread> threads;
     Array <ThreadPoolJob*> jobs;
 
+    class ThreadPoolThread;
+    friend class ThreadPoolThread;
+    friend class OwnedArray <ThreadPoolThread>;
+    OwnedArray <ThreadPoolThread> threads;
+
     CriticalSection lock;
-    uint32 lastJobEndTime;
     WaitableEvent jobFinishedSignal;
 
-    friend class ThreadPoolThread;
     bool runNextJob();
+    ThreadPoolJob* pickNextJobToRun();
+    void addToDeleteList (OwnedArray<ThreadPoolJob>&, ThreadPoolJob*) const;
+    void createThreads (int numThreads);
+    void stopThreads();
+
+    // Note that this method has changed, and no longer has a parameter to indicate
+    // whether the jobs should be deleted - see the new method for details.
+    void removeAllJobs (bool, int, bool);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPool);
 };

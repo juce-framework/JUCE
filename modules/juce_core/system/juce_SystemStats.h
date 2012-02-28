@@ -112,6 +112,9 @@ public:
     //==============================================================================
     // CPU and memory information..
 
+    /** Returns the number of CPUs. */
+    static int getNumCpus() noexcept            { return getCPUFlags().numCpus; }
+
     /** Returns the approximate CPU speed.
 
         @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
@@ -136,9 +139,6 @@ public:
 
     /** Checks whether AMD 3DNOW instructions are available. */
     static bool has3DNow() noexcept             { return getCPUFlags().has3DNow; }
-
-    /** Returns the number of CPUs. */
-    static int getNumCpus() noexcept            { return getCPUFlags().numCpus; }
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.

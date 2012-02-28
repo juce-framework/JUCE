@@ -417,7 +417,7 @@ private:
 
     void writeProjects (const OwnedArray<LibraryModule>& modules)
     {
-        ThreadPool threadPool (4, false, 30000);
+        ThreadPool threadPool;
 
         // keep a copy of the basic generated files group, as each exporter may modify it.
         const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
@@ -437,7 +437,7 @@ private:
                 sortGroupRecursively (generatedFilesGroup);
                 exporter->groups.add (generatedFilesGroup);
 
-                threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules));
+                threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
             }
             else
             {
@@ -471,7 +471,7 @@ private:
                 owner.addError (error.message);
             }
 
-            return jobHasFinishedAndShouldBeDeleted;
+            return jobHasFinished;
         }
 
     private:
