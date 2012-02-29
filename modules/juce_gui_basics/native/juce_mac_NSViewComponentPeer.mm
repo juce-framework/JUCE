@@ -303,7 +303,7 @@ public:
     //==============================================================================
     NSWindow* window;
     JuceNSView* view;
-    bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics, usingOpenGL, recursiveToFrontCall;
+    bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics, recursiveToFrontCall;
 
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
@@ -319,15 +319,11 @@ private:
             if (Process::isForegroundProcess())
             {
                 currentlyFocusedPeer->handleFocusGain();
-
                 ModalComponentManager::getInstance()->bringModalComponentsToFront();
             }
             else
             {
                 currentlyFocusedPeer->handleFocusLoss();
-
-                // turn kiosk mode off if we lose focus..
-                Desktop::getInstance().setKioskModeComponent (nullptr);
             }
         }
     }
@@ -935,7 +931,6 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
      #else
       usingCoreGraphics (false),
      #endif
-      usingOpenGL (false),
       recursiveToFrontCall (false)
 {
     appFocusChangeCallback = appFocusChanged;
