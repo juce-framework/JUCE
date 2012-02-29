@@ -281,8 +281,6 @@ public:
                        const RectangleList& maskedRegion,
                        const uint8 updateLayeredWindowAlpha) noexcept
     {
-        static HDRAWDIB hdd = createDrawDIB();
-
         SetMapMode (dc, MM_TEXT);
 
         if (transparent)
@@ -327,20 +325,11 @@ public:
                 }
             }
 
-            if (hdd == 0)
-            {
-                StretchDIBits (dc,
-                               x, y, width, height,
-                               0, 0, width, height,
-                               bitmapData, (const BITMAPINFO*) &bitmapInfo,
-                               DIB_RGB_COLORS, SRCCOPY);
-            }
-            else
-            {
-                DrawDibDraw (hdd, dc, x, y, -1, -1,
-                             (BITMAPINFOHEADER*) &bitmapInfo, bitmapData,
-                             0, 0, width, height, 0);
-            }
+            StretchDIBits (dc,
+                           x, y, width, height,
+                           0, 0, width, height,
+                           bitmapData, (const BITMAPINFO*) &bitmapInfo,
+                           DIB_RGB_COLORS, SRCCOPY);
 
             if (! maskedRegion.isEmpty())
                 RestoreDC (dc, savedDC);
@@ -357,16 +346,6 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsBitmapImage);
-
-    static HDRAWDIB createDrawDIB() noexcept
-    {
-        HDC dc = GetDC (0);
-        const int n = GetDeviceCaps (dc, BITSPIXEL);
-        ReleaseDC (0, dc);
-
-        // only open if we're not palettised
-        return n > 8 ? DrawDibOpen() : 0;
-    }
 };
 
 //==============================================================================
@@ -1052,7 +1031,8 @@ private:
 
         Image& getImage (const bool transparent, const int w, const int h)
         {
-            const Image::PixelFormat format = transparent ? Image::ARGB : Image::RGB;
+            static bool alwaysUseARGB = isGraphicsCard32Bit(); // NB: for 32-bit cards, it's faster to use a 32-bit image.
+            const Image::PixelFormat format = (transparent || alwaysUseARGB) ? Image::ARGB : Image::RGB;
 
             if ((! image.isValid()) || image.getWidth() < w || image.getHeight() < h || image.getFormat() != format)
                 image = Image (new WindowsBitmapImage (format, (w + 31) & ~31, (h + 31) & ~31, false));
@@ -1069,6 +1049,14 @@ private:
 
     private:
         Image image;
+
+        static bool isGraphicsCard32Bit()
+        {
+            HDC dc = GetDC (0);
+            const int bitsPerPixel = GetDeviceCaps (dc, BITSPIXEL);
+            ReleaseDC (0, dc);
+            return bitsPerPixel > 24;
+        }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryImage);
     };

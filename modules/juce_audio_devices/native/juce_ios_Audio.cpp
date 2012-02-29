@@ -217,7 +217,7 @@ private:
     {
         OSStatus err = noErr;
 
-        if (audioInputIsAvailable)
+        if (audioInputIsAvailable && numInputChannels > 0)
             err = AudioUnitRender (audioUnit, flags, time, 1, numFrames, data);
 
         const ScopedLock sl (callbackLock);

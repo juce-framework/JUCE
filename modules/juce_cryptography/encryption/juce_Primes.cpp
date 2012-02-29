@@ -71,7 +71,7 @@ namespace PrimesHelpers
 
             i = (i - 1) >> 1;
 
-            while (i < numBits)
+            while (i < (unsigned int) numBits)
             {
                 result.setBit ((int) i);
                 i += prime;
