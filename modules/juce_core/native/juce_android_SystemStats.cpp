@@ -100,7 +100,7 @@ ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
 
 JNIEnv* getEnv() noexcept
 {
-    return threadLocalJNIEnvHolder.get();
+    return threadLocalJNIEnvHolder.getOrAttach();
 }
 
 //==============================================================================

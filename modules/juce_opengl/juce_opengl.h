@@ -67,7 +67,7 @@
  #include <GLES2/gl2.h>
 #endif
 
-#if (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX) && ! defined (JUCE_USE_OPENGL_SHADERS)
+#if (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_ANDROID) && ! defined (JUCE_USE_OPENGL_SHADERS)
  #define JUCE_USE_OPENGL_SHADERS 1
 #endif
 

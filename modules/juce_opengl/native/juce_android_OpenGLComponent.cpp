@@ -87,7 +87,7 @@ public:
 
             glView.callVoidMethod (OpenGLView.layout,
                                    bounds.getX(), bounds.getY(),
-                                   lastWidth, lastHeight);
+                                   bounds.getRight(), bounds.getBottom());
         }
     }
 
@@ -172,7 +172,7 @@ OpenGLContext* OpenGLComponent::createContext()
     if (peer != nullptr)
         return new AndroidGLContext (this, peer, preferredPixelFormat,
                                      dynamic_cast <const AndroidGLContext*> (contextToShareListsWith),
-                                     (flags & openGLES2) != 0);
+                                     (flags & openGLES1) == 0);
 
     return nullptr;
 }

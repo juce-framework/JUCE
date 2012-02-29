@@ -266,13 +266,15 @@ public:
         addEnv (env);
     }
 
-    void attach()
+    JNIEnv* attach()
     {
         JNIEnv* env = nullptr;
         jvm->AttachCurrentThread (&env, 0);
 
-        if (env != 0)
+        if (env != nullptr)
             addEnv (env);
+
+        return env;
     }
 
     void detach()
@@ -287,6 +289,17 @@ public:
                 threads[i] = 0;
     }
 
+    JNIEnv* getOrAttach() noexcept
+    {
+        JNIEnv* env = get();
+
+        if (env == nullptr)
+            env = attach();
+
+        jassert (env != nullptr);
+        return env;
+    }
+
     JNIEnv* get() const noexcept
     {
         const pthread_t thisThread = pthread_self();
@@ -298,7 +311,7 @@ public:
         return nullptr;
     }
 
-    enum { maxThreads = 16 };
+    enum { maxThreads = 32 };
 
 private:
     JavaVM* jvm;

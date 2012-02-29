@@ -30,6 +30,8 @@
       <arg value="${ndkDebugValue}"/>
       <arg value="APP_ABI=${app_abis}"/>
     </exec>
+    <delete file="${out.final.file}"/>
+    <delete file="${out.packaged.file}"/>
   </target>
   <import file="${sdk.dir}/tools/ant/build.xml"/>
 </project>

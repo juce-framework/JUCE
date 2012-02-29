@@ -571,6 +571,8 @@ private:
             executable->createNewChildElement ("arg")->setAttribute ("value", "${ndkDebugValue}");
             executable->createNewChildElement ("arg")->setAttribute ("value", "APP_ABI=${app_abis}");
 
+            target->createNewChildElement ("delete")->setAttribute ("file", "${out.final.file}");
+            target->createNewChildElement ("delete")->setAttribute ("file", "${out.packaged.file}");
         }
 
         proj->createNewChildElement ("import")->setAttribute ("file", "${sdk.dir}/tools/ant/build.xml");
