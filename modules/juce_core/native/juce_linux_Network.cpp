@@ -363,7 +363,9 @@ private:
                                                                         "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
                                                                         "." JUCE_STRINGIFY(JUCE_BUILDNUMBER));
         writeValueIfNotPresent (header, userHeaders, "Connection:", "Close");
-        writeValueIfNotPresent (header, userHeaders, "Content-Length:", String ((int) postData.getSize()));
+
+        if (isPost)
+            writeValueIfNotPresent (header, userHeaders, "Content-Length:", String ((int) postData.getSize()));
 
         header << "\r\n" << userHeaders
                << "\r\n" << postData;
