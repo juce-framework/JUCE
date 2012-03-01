@@ -1698,7 +1698,7 @@ public:
         JUCE_CHECK_OPENGL_ERROR
         activeTextures.disableTextures (shaderQuadQueue);
         blendMode.setPremultipliedBlendingMode (shaderQuadQueue);
-        JUCE_CHECK_OPENGL_ERROR;
+        JUCE_CHECK_OPENGL_ERROR
 
         if (maskArea != nullptr)
         {

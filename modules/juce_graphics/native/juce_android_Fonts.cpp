@@ -109,7 +109,7 @@ public:
         descent = paint.callFloatMethod (Paint.descent) / standardSize;
 
         const float height = ascent + descent;
-        unitsToHeightScaleFactor = 1.0f / 256.0f;//(height * standardSize);
+        unitsToHeightScaleFactor = 1.0f / 256.0f;
     }
 
     float getAscent() const    { return ascent; }

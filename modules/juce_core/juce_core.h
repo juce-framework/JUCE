@@ -51,7 +51,11 @@
     @see jassert, jassertfalse, Logger
 */
 #ifndef JUCE_LOG_ASSERTIONS
- #define JUCE_LOG_ASSERTIONS 0
+ #if JUCE_ANDROID
+  #define JUCE_LOG_ASSERTIONS 1
+ #else
+  #define JUCE_LOG_ASSERTIONS 0
+ #endif
 #endif
 
 //=============================================================================

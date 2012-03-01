@@ -259,7 +259,7 @@ OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
     : imageWidth (image.getWidth()),
       imageHeight (image.getHeight())
 {
-    JUCE_CHECK_OPENGL_ERROR;
+    JUCE_CHECK_OPENGL_ERROR
     OpenGLFrameBuffer* const fb = OpenGLImageType::getFrameBufferFrom (image);
 
     if (fb != nullptr)
@@ -278,7 +278,7 @@ OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
         fullHeightProportion = imageHeight / (float) texture->getHeight();
     }
 
-    JUCE_CHECK_OPENGL_ERROR;
+    JUCE_CHECK_OPENGL_ERROR
 }
 
 OpenGLTextureFromImage::~OpenGLTextureFromImage() {}

@@ -51,14 +51,14 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum
 
     if (textureID == 0)
     {
-        JUCE_CHECK_OPENGL_ERROR;
+        JUCE_CHECK_OPENGL_ERROR
         glGenTextures (1, &textureID);
         glBindTexture (GL_TEXTURE_2D, textureID);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        JUCE_CHECK_OPENGL_ERROR;
+        JUCE_CHECK_OPENGL_ERROR
     }
     else
     {
@@ -67,10 +67,10 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum
     }
 
     glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
-    JUCE_CHECK_OPENGL_ERROR;
+    JUCE_CHECK_OPENGL_ERROR
     glTexImage2D (GL_TEXTURE_2D, 0, type == GL_ALPHA ? GL_ALPHA : GL_RGBA,
                   w, h, 0, type, GL_UNSIGNED_BYTE, pixels);
-    JUCE_CHECK_OPENGL_ERROR;
+    JUCE_CHECK_OPENGL_ERROR
 }
 
 template <class PixelType>

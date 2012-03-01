@@ -223,20 +223,18 @@ JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenG
         if (context != nullptr)
         {
             context->contextCreatedCallback();
+            JUCE_CHECK_OPENGL_ERROR
             return;
         }
 
         Thread::sleep (20);
     }
 
-    DBG ("*** GL start failure!");
     jassertfalse;
 }
 
 JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView), render, void, (JNIEnv* env, jobject view))
 {
-    JUCE_CHECK_OPENGL_ERROR
-
     AndroidGLContext* const context = AndroidGLContext::findContextFor (env, view);
 
     if (context != nullptr)

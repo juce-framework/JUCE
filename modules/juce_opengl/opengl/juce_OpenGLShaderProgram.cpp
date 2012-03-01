@@ -76,7 +76,7 @@ bool OpenGLShaderProgram::addShader (const char* const code, GLenum type)
 
     context.extensions.glAttachShader (programID, shaderID);
     context.extensions.glDeleteShader (shaderID);
-    JUCE_CHECK_OPENGL_ERROR;
+    JUCE_CHECK_OPENGL_ERROR
     return true;
 }
 
@@ -100,7 +100,7 @@ bool OpenGLShaderProgram::link() noexcept
        #endif
     }
 
-    JUCE_CHECK_OPENGL_ERROR;
+    JUCE_CHECK_OPENGL_ERROR
     return status != GL_FALSE;
 }
 
