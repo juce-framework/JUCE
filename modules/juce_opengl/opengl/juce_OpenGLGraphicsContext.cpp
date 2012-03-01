@@ -224,10 +224,11 @@ public:
         ShaderProgramHolder (OpenGLContext& context, const char* fragmentShader)
             : program (context)
         {
+            JUCE_CHECK_OPENGL_ERROR
             program.addShader ("attribute vec2 position;"
                                "attribute vec4 colour;"
                                "uniform vec4 screenBounds;"
-                               "varying " JUCE_LOWP " vec4 frontColour;"
+                               "varying " JUCE_MEDIUMP " vec4 frontColour;"
                                "varying " JUCE_HIGHP " vec2 pixelPos;"
                                "void main()"
                                "{"
@@ -240,6 +241,7 @@ public:
 
             program.addShader (fragmentShader, GL_FRAGMENT_SHADER);
             program.link();
+            JUCE_CHECK_OPENGL_ERROR
         }
 
         OpenGLShaderProgram program;
@@ -298,7 +300,7 @@ public:
     };
 
     //==============================================================================
-    #define JUCE_DECLARE_VARYING_COLOUR   "varying " JUCE_LOWP " vec4 frontColour;"
+    #define JUCE_DECLARE_VARYING_COLOUR   "varying " JUCE_MEDIUMP " vec4 frontColour;"
     #define JUCE_DECLARE_VARYING_PIXELPOS "varying " JUCE_HIGHP " vec2 pixelPos;"
 
     struct SolidColourProgram  : public ShaderBase
@@ -311,6 +313,12 @@ public:
                                    "}")
         {}
     };
+
+   #if JUCE_ANDROID
+    #define JUCE_DECLARE_SWIZZLE_FUNCTION "\n" JUCE_MEDIUMP " vec4 swizzleRGBOrder (in " JUCE_MEDIUMP " vec4 c) { return vec4 (c.b, c.g, c.r, c.a); }\n"
+   #else
+    #define JUCE_DECLARE_SWIZZLE_FUNCTION "\n" JUCE_MEDIUMP " vec4 swizzleRGBOrder (in " JUCE_MEDIUMP " vec4 c) { return c; }\n"
+   #endif
 
     #define JUCE_DECLARE_MASK_UNIFORMS  "uniform sampler2D maskTexture;" \
                                         "uniform ivec4 maskBounds;"
@@ -357,13 +365,13 @@ public:
     #define JUCE_DECLARE_RADIAL_UNIFORMS  "uniform sampler2D gradientTexture;" JUCE_DECLARE_MATRIX_UNIFORM
     #define JUCE_MATRIX_TIMES_FRAGCOORD   "(mat2 (matrix[0], matrix[3], matrix[1], matrix[4]) * pixelPos" \
                                           " + vec2 (matrix[2], matrix[5]))"
-    #define JUCE_GET_TEXTURE_COLOUR       "(frontColour.a * texture2D (gradientTexture, vec2 (gradientPos, 0.5)))"
+    #define JUCE_GET_TEXTURE_COLOUR       "(frontColour.a * swizzleRGBOrder (texture2D (gradientTexture, vec2 (gradientPos, 0.5))))"
 
     struct RadialGradientProgram  : public ShaderBase
     {
         RadialGradientProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_VARYING_PIXELPOS
-                          JUCE_DECLARE_RADIAL_UNIFORMS JUCE_DECLARE_VARYING_COLOUR
+                          JUCE_DECLARE_RADIAL_UNIFORMS JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_MEDIUMP " float gradientPos = length (" JUCE_MATRIX_TIMES_FRAGCOORD ");"
@@ -380,7 +388,7 @@ public:
         RadialGradientMaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_VARYING_PIXELPOS
                           JUCE_DECLARE_RADIAL_UNIFORMS JUCE_DECLARE_VARYING_COLOUR
-                          JUCE_DECLARE_MASK_UNIFORMS
+                          JUCE_DECLARE_MASK_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_MEDIUMP " float gradientPos = length (" JUCE_MATRIX_TIMES_FRAGCOORD ");"
@@ -406,7 +414,8 @@ public:
     };
 
     #define JUCE_DECLARE_LINEAR_UNIFORMS  "uniform sampler2D gradientTexture;" \
-                                          "uniform " JUCE_MEDIUMP " vec4 gradientInfo;" JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
+                                          "uniform " JUCE_MEDIUMP " vec4 gradientInfo;" \
+                                          JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
     #define JUCE_CALC_LINEAR_GRAD_POS1    JUCE_MEDIUMP " float gradientPos = (pixelPos.y - (gradientInfo.y + (gradientInfo.z * (pixelPos.x - gradientInfo.x)))) / gradientInfo.w;"
     #define JUCE_CALC_LINEAR_GRAD_POS2    JUCE_MEDIUMP " float gradientPos = (pixelPos.x - (gradientInfo.x + (gradientInfo.z * (pixelPos.y - gradientInfo.y)))) / gradientInfo.w;"
 
@@ -414,6 +423,7 @@ public:
     {
         LinearGradient1Program (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (y2 - y1) / (x2 - x1), w = length
+                          JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS1
@@ -429,7 +439,7 @@ public:
     {
         LinearGradient1MaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (y2 - y1) / (x2 - x1), w = length
-                          JUCE_DECLARE_MASK_UNIFORMS
+                          JUCE_DECLARE_MASK_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS1
@@ -447,6 +457,7 @@ public:
     {
         LinearGradient2Program (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (x2 - x1) / (y2 - y1), y = y1, w = length
+                          JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS2
@@ -462,7 +473,7 @@ public:
     {
         LinearGradient2MaskedProgram (OpenGLContext& context)
             : ShaderBase (context, JUCE_DECLARE_LINEAR_UNIFORMS  // gradientInfo: x = x1, y = y1, z = (x2 - x1) / (y2 - y1), y = y1, w = length
-                          JUCE_DECLARE_MASK_UNIFORMS
+                          JUCE_DECLARE_MASK_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_CALC_LINEAR_GRAD_POS2
@@ -519,14 +530,14 @@ public:
     #define JUCE_DECLARE_IMAGE_UNIFORMS "uniform sampler2D imageTexture;" \
                                         "uniform " JUCE_MEDIUMP " vec4 imageLimits;" \
                                         JUCE_DECLARE_MATRIX_UNIFORM JUCE_DECLARE_VARYING_COLOUR JUCE_DECLARE_VARYING_PIXELPOS
-    #define JUCE_GET_IMAGE_PIXEL        "texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y))"
+    #define JUCE_GET_IMAGE_PIXEL        "swizzleRGBOrder (texture2D (imageTexture, vec2 (texturePos.x, 1.0 - texturePos.y)))"
     #define JUCE_CLAMP_TEXTURE_COORD    JUCE_HIGHP " vec2 texturePos = clamp (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageLimits.xy, imageLimits.zw);"
     #define JUCE_MOD_TEXTURE_COORD      JUCE_HIGHP " vec2 texturePos = clamp (mod (" JUCE_MATRIX_TIMES_FRAGCOORD ", imageLimits.zw + imageLimits.xy), imageLimits.xy, imageLimits.zw);"
 
     struct ImageProgram  : public ShaderBase
     {
         ImageProgram (OpenGLContext& context)
-            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS
+            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_CLAMP_TEXTURE_COORD
@@ -541,7 +552,7 @@ public:
     struct ImageMaskedProgram  : public ShaderBase
     {
         ImageMaskedProgram (OpenGLContext& context)
-            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_MASK_UNIFORMS
+            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_MASK_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_CLAMP_TEXTURE_COORD
@@ -558,7 +569,7 @@ public:
     struct TiledImageProgram  : public ShaderBase
     {
         TiledImageProgram (OpenGLContext& context)
-            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS
+            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_MOD_TEXTURE_COORD
@@ -573,7 +584,7 @@ public:
     struct TiledImageMaskedProgram  : public ShaderBase
     {
         TiledImageMaskedProgram (OpenGLContext& context)
-            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_MASK_UNIFORMS
+            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_MASK_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_MOD_TEXTURE_COORD
@@ -590,7 +601,7 @@ public:
     struct CopyTextureProgram  : public ShaderBase
     {
         CopyTextureProgram (OpenGLContext& context)
-            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS
+            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_MOD_TEXTURE_COORD
@@ -605,11 +616,11 @@ public:
     struct MaskTextureProgram  : public ShaderBase
     {
         MaskTextureProgram (OpenGLContext& context)
-            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS
+            : ShaderBase (context, JUCE_DECLARE_IMAGE_UNIFORMS JUCE_DECLARE_SWIZZLE_FUNCTION
                           "void main()"
                           "{"
                             JUCE_HIGHP " vec2 texturePos = " JUCE_MATRIX_TIMES_FRAGCOORD ";"
-                            "const float roundingError = 0.00001;"
+                            JUCE_HIGHP " float roundingError = 0.00001;"
                             "if (texturePos.x >= imageLimits.x - roundingError"
                                  "&& texturePos.y >= imageLimits.y - roundingError"
                                  "&& texturePos.x <= imageLimits.z + roundingError"
@@ -946,7 +957,9 @@ struct StateHelpers
                     if ((texturesEnabled & (1 << i)) != (textureIndexMask & (1 << i)))
                     {
                         setActiveTexture (i);
+                        JUCE_CHECK_OPENGL_ERROR
 
+                       #if ! JUCE_ANDROID
                         if ((textureIndexMask & (1 << i)) != 0)
                             glEnable (GL_TEXTURE_2D);
                         else
@@ -954,6 +967,9 @@ struct StateHelpers
                             glDisable (GL_TEXTURE_2D);
                             currentTextureID[i] = 0;
                         }
+
+                        JUCE_CHECK_OPENGL_ERROR
+                       #endif
                     }
                 }
 
@@ -977,6 +993,7 @@ struct StateHelpers
         template <class QuadQueueType>
         void setTwoTextureMode (QuadQueueType& quadQueue, GLuint texture1, GLuint texture2)
         {
+            JUCE_CHECK_OPENGL_ERROR
             setTexturesEnabled (quadQueue, 3);
 
             if (currentActiveTexture == 0)
@@ -992,6 +1009,7 @@ struct StateHelpers
                 setActiveTexture (0);
                 bindTexture (texture1);
             }
+            JUCE_CHECK_OPENGL_ERROR
         }
 
         void setActiveTexture (const int index) noexcept
@@ -1000,9 +1018,11 @@ struct StateHelpers
             {
                 currentActiveTexture = index;
                 context.extensions.glActiveTexture (GL_TEXTURE0 + index);
+                JUCE_CHECK_OPENGL_ERROR
 
                #if JUCE_USE_OPENGL_FIXED_FUNCTION
                 context.extensions.glClientActiveTexture (GL_TEXTURE0 + index);
+                JUCE_CHECK_OPENGL_ERROR
                #endif
             }
         }
@@ -1013,6 +1033,7 @@ struct StateHelpers
             {
                 currentTextureID [currentActiveTexture] = textureID;
                 glBindTexture (GL_TEXTURE_2D, textureID);
+                JUCE_CHECK_OPENGL_ERROR
             }
             else
             {
@@ -1085,6 +1106,7 @@ struct StateHelpers
                     activeGradientIndex = (activeGradientIndex + 1) % numGradientTexturesToCache;
                 }
 
+                JUCE_CHECK_OPENGL_ERROR;
                 PixelARGB lookup [gradientTextureSize];
                 gradient.createLookupTable (lookup, gradientTextureSize);
                 gradientTextures.getUnchecked (activeGradientIndex)->loadARGB (lookup, gradientTextureSize, 1);
@@ -1118,6 +1140,8 @@ struct StateHelpers
 
         void initialise() noexcept
         {
+            JUCE_CHECK_OPENGL_ERROR
+
             for (int i = 0, v = 0; i < numQuads * 6; i += 6, v += 4)
             {
                 indexData[i] = (GLushort) v;
@@ -1130,6 +1154,8 @@ struct StateHelpers
             context.extensions.glBindBuffer (GL_ARRAY_BUFFER, buffers[0]);
             context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
             context.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, sizeof (indexData), indexData, GL_STATIC_DRAW);
+
+            JUCE_CHECK_OPENGL_ERROR
         }
 
         void add (const int x, const int y, const int w, const int h, const PixelARGB& colour) noexcept
@@ -1252,6 +1278,8 @@ struct StateHelpers
 
                 currentBounds = bounds;
                 shader.set2DBounds (bounds.toFloat());
+
+                JUCE_CHECK_OPENGL_ERROR
             }
             else if (bounds != currentBounds)
             {
@@ -1305,12 +1333,15 @@ public:
         // This object can only be created and used when the current thread has an active OpenGL context.
         jassert (OpenGLHelpers::isContextActive());
 
+        JUCE_CHECK_OPENGL_ERROR
         target.makeActiveFor2D();
         blendMode.resync();
 
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
         currentColour.resync();
        #endif
+
+        JUCE_CHECK_OPENGL_ERROR
 
        #ifdef GL_COLOR_ARRAY
         glDisableClientState (GL_COLOR_ARRAY);
@@ -1341,6 +1372,7 @@ public:
         }
        #endif
 
+        JUCE_CHECK_OPENGL_ERROR
         activeTextures.clear();
 
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
@@ -1352,6 +1384,8 @@ public:
        #if JUCE_USE_OPENGL_SHADERS
         shaderQuadQueue.initialise();
        #endif
+
+        JUCE_CHECK_OPENGL_ERROR
     }
 
     ~GLState()
@@ -1378,6 +1412,8 @@ public:
        #if JUCE_USE_OPENGL_FIXED_FUNCTION
         quadQueue.flush();
        #endif
+
+        JUCE_CHECK_OPENGL_ERROR
     }
 
    #if JUCE_USE_OPENGL_FIXED_FUNCTION
@@ -1653,13 +1689,16 @@ public:
     void setShader (ShaderPrograms::ShaderBase& shader)
     {
         currentShader.setShader (target, shaderQuadQueue, shader);
+        JUCE_CHECK_OPENGL_ERROR
     }
 
     void setShaderForGradientFill (const ColourGradient& g, const AffineTransform& transform,
                                    const int maskTextureID, const Rectangle<int>* const maskArea)
     {
+        JUCE_CHECK_OPENGL_ERROR
         activeTextures.disableTextures (shaderQuadQueue);
         blendMode.setPremultipliedBlendingMode (shaderQuadQueue);
+        JUCE_CHECK_OPENGL_ERROR;
 
         if (maskArea != nullptr)
         {
@@ -1749,6 +1788,8 @@ public:
 
         if (maskParams != nullptr)
             maskParams->setBounds (*maskArea, target, 1);
+
+        JUCE_CHECK_OPENGL_ERROR
     }
 
     void setShaderForTiledImageFill (const OpenGLTextureFromImage& image, const AffineTransform& transform,

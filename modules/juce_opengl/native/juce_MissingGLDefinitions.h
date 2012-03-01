@@ -53,6 +53,13 @@ namespace
     enum { GL_DEPTH24_STENCIL8 = 0x88F0 };
    #endif
 
+   #if JUCE_ANDROID
+    enum { JUCE_RGBA_FORMAT = GL_RGBA };
+   #else
+    enum { JUCE_RGBA_FORMAT = GL_BGRA_EXT };
+   #endif
+
+
    #if JUCE_WINDOWS
     enum
     {

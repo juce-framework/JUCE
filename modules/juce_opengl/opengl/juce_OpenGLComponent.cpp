@@ -407,16 +407,22 @@ unsigned int OpenGLComponent::getFrameBufferID() const
 
 bool OpenGLComponent::performRender()
 {
+    JUCE_CHECK_OPENGL_ERROR
+
     const ScopedLock sl (contextLock);
 
    #if JUCE_LINUX
     updateContext();
    #endif
 
+    JUCE_CHECK_OPENGL_ERROR
+
     if (context != nullptr)
     {
         if (! makeCurrentRenderingTarget())
             return false;
+
+        JUCE_CHECK_OPENGL_ERROR
 
         if (needToUpdateViewport)
         {
@@ -424,7 +430,9 @@ bool OpenGLComponent::performRender()
             glViewport (0, 0, getWidth(), getHeight());
         }
 
+        JUCE_CHECK_OPENGL_ERROR
         renderOpenGL();
+        JUCE_CHECK_OPENGL_ERROR
 
         if ((flags & allowSubComponents) != 0)
         {
@@ -440,6 +448,7 @@ bool OpenGLComponent::performRender()
 
             const Rectangle<int> bounds (getLocalBounds());
             OpenGLFrameBuffer& frameBuffer = cachedImage->getFrameBuffer (bounds.getWidth(), bounds.getHeight());
+            JUCE_CHECK_OPENGL_ERROR
 
             if (needToRepaint)
             {
@@ -455,26 +464,33 @@ bool OpenGLComponent::performRender()
 
                     {
                         OpenGLGraphicsContext g (*getCurrentContext(), frameBuffer);
+                        JUCE_CHECK_OPENGL_ERROR
                         g.clipToRectangleList (invalid);
 
                         g.setFill (Colours::transparentBlack);
                         g.fillRect (bounds, true);
                         g.setFill (Colours::black);
 
+                        JUCE_CHECK_OPENGL_ERROR
                         paintSelf (g);
+                        JUCE_CHECK_OPENGL_ERROR
                     }
 
                     makeCurrentRenderingTarget();
                 }
             }
 
+            JUCE_CHECK_OPENGL_ERROR
+           #if ! JUCE_ANDROID
             glEnable (GL_TEXTURE_2D);
+           #endif
             context->extensions.glActiveTexture (GL_TEXTURE0);
             glBindTexture (GL_TEXTURE_2D, frameBuffer.getTextureID());
 
             jassert (bounds.getPosition() == Point<int>());
             context->copyTexture (bounds, bounds);
             glBindTexture (GL_TEXTURE_2D, 0);
+            JUCE_CHECK_OPENGL_ERROR
         }
 
         swapBuffers();

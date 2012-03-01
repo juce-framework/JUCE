@@ -187,7 +187,9 @@ void OpenGLHelpers::drawQuad3D (float x1, float y1, float z1,
 
 void OpenGLHelpers::drawTriangleStrip (const GLfloat* const vertices, const GLfloat* const textureCoords, const int numVertices) noexcept
 {
+   #if ! JUCE_ANDROID
     glEnable (GL_TEXTURE_2D);
+   #endif
     glDisableClientState (GL_COLOR_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);
     glEnableClientState (GL_VERTEX_ARRAY);
@@ -257,6 +259,7 @@ OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
     : imageWidth (image.getWidth()),
       imageHeight (image.getHeight())
 {
+    JUCE_CHECK_OPENGL_ERROR;
     OpenGLFrameBuffer* const fb = OpenGLImageType::getFrameBufferFrom (image);
 
     if (fb != nullptr)
@@ -274,6 +277,8 @@ OpenGLTextureFromImage::OpenGLTextureFromImage (const Image& image)
         fullWidthProportion  = imageWidth  / (float) texture->getWidth();
         fullHeightProportion = imageHeight / (float) texture->getHeight();
     }
+
+    JUCE_CHECK_OPENGL_ERROR;
 }
 
 OpenGLTextureFromImage::~OpenGLTextureFromImage() {}

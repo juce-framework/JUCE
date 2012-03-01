@@ -82,12 +82,6 @@ public final class JuceAppActivity   extends Activity
     private native void setScreenSize (int screenWidth, int screenHeight);
 
     //==============================================================================
-    public static final void printToConsole (String s)
-    {
-        android.util.Log.i ("Juce", s);
-    }
-
-    //==============================================================================
     public native void deliverMessage (long value);
     private android.os.Handler messageHandler = new android.os.Handler();
 
@@ -351,6 +345,7 @@ public final class JuceAppActivity   extends Activity
             super (context);
             setEGLContextClientVersion (2);
             setRenderer (this);
+            setRenderMode (RENDERMODE_WHEN_DIRTY);
         }
 
         @Override

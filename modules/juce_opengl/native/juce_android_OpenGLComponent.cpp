@@ -48,9 +48,11 @@ public:
           isInsideGLCallback (false)
     {
         jassert (peer != nullptr);
-        getContextList().add (this);
 
         glView = GlobalRef (createOpenGLView (peer));
+
+        const ScopedLock sl (getContextListLock());
+        getContextList().add (this);
     }
 
     ~AndroidGLContext()
@@ -60,6 +62,7 @@ public:
         android.activity.callVoidMethod (JuceAppActivity.deleteView, glView.get());
         glView.clear();
 
+        const ScopedLock sl (getContextListLock());
         getContextList().removeValue (this);
     }
 
@@ -97,6 +100,8 @@ public:
     //==============================================================================
     void contextCreatedCallback()
     {
+        properties.clear();
+
         isInsideGLCallback = true;
 
         if (component != nullptr)
@@ -116,6 +121,12 @@ public:
     }
 
     //==============================================================================
+    static CriticalSection& getContextListLock()
+    {
+        static CriticalSection lock;
+        return lock;
+    }
+
     static Array<AndroidGLContext*>& getContextList()
     {
         static Array <AndroidGLContext*> contexts;
@@ -124,6 +135,7 @@ public:
 
     static AndroidGLContext* findContextFor (JNIEnv* env, jobject glView)
     {
+        const ScopedLock sl (getContextListLock());
         const Array<AndroidGLContext*>& contexts = getContextList();
 
         for (int i = contexts.size(); --i >= 0;)
@@ -139,6 +151,7 @@ public:
 
     static bool isAnyContextActive()
     {
+        const ScopedLock sl (getContextListLock());
         const Array<AndroidGLContext*>& contexts = getContextList();
 
         for (int i = contexts.size(); --i >= 0;)
@@ -201,14 +214,29 @@ void triggerAndroidOpenGLRepaint (OpenGLContext* context)
 //==============================================================================
 JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView), contextCreated, void, (JNIEnv* env, jobject view))
 {
-    AndroidGLContext* const context = AndroidGLContext::findContextFor (env, view);
+    JUCE_CHECK_OPENGL_ERROR
 
-    if (context != nullptr)
-        context->contextCreatedCallback();
+    for (int i = 100; --i >= 0;)
+    {
+        AndroidGLContext* const context = AndroidGLContext::findContextFor (env, view);
+
+        if (context != nullptr)
+        {
+            context->contextCreatedCallback();
+            return;
+        }
+
+        Thread::sleep (20);
+    }
+
+    DBG ("*** GL start failure!");
+    jassertfalse;
 }
 
 JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView), render, void, (JNIEnv* env, jobject view))
 {
+    JUCE_CHECK_OPENGL_ERROR
+
     AndroidGLContext* const context = AndroidGLContext::findContextFor (env, view);
 
     if (context != nullptr)
