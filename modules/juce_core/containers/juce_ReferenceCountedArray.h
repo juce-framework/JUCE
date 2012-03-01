@@ -61,8 +61,7 @@ public:
     }
 
     /** Creates a copy of another array */
-    template <class OtherObjectClass>
-    ReferenceCountedArray (const ReferenceCountedArray<OtherObjectClass, TypeOfCriticalSectionToUse>& other) noexcept
+    ReferenceCountedArray (const ReferenceCountedArray& other) noexcept
     {
         const ScopedLockType lock (other.getLock());
         numUsed = other.size();
@@ -74,8 +73,31 @@ public:
                 data.elements[i]->incReferenceCount();
     }
 
-    /** Copies another array into this one.
+    /** Creates a copy of another array */
+    template <class OtherObjectClass, class OtherCriticalSection>
+    ReferenceCountedArray (const ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>& other) noexcept
+    {
+        const typename ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>::ScopedLockType lock (other.getLock());
+        numUsed = other.size();
+        data.setAllocatedSize (numUsed);
+        memcpy (data.elements, other.getRawDataPointer(), numUsed * sizeof (ObjectClass*));
 
+        for (int i = numUsed; --i >= 0;)
+            if (data.elements[i] != nullptr)
+                data.elements[i]->incReferenceCount();
+    }
+
+    /** Copies another array into this one.
+        Any existing objects in this array will first be released.
+    */
+    ReferenceCountedArray& operator= (const ReferenceCountedArray& other) noexcept
+    {
+        ReferenceCountedArray otherCopy (other);
+        swapWithArray (otherCopy);
+        return *this;
+    }
+
+    /** Copies another array into this one.
         Any existing objects in this array will first be released.
     */
     template <class OtherObjectClass>
