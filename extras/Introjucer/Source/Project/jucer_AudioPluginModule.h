@@ -311,16 +311,19 @@ namespace RTASHelpers
 
         exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll";
 
-        if (! exporter.getExtraLinkerFlags().toString().contains ("/FORCE:multiple"))
-            exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
-
-        for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+        if (exporter.isVisualStudio())
         {
-            config->getValue (Ids::msvcModuleDefinitionFile) = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
+            if (! exporter.getExtraLinkerFlags().toString().contains ("/FORCE:multiple"))
+                exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
 
-            if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
-                config->getValue (Ids::postbuildCommand) = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
-                                                                + "\" \"$(TargetPath)\".rsr";
+            for (ProjectExporter::ConfigIterator config (exporter); config.next();)
+            {
+                config->getValue (Ids::msvcModuleDefinitionFile) = msvcPathToRTASFolder + "juce_RTAS_WinExports.def";
+
+                if (config->getValue (Ids::postbuildCommand).toString().isEmpty())
+                    config->getValue (Ids::postbuildCommand) = "copy /Y \"" + msvcPathToRTASFolder + "juce_RTAS_WinResources.rsr"
+                                                                    + "\" \"$(TargetPath)\".rsr";
+            }
         }
 
         exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
