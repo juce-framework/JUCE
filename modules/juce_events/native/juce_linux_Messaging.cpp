@@ -314,7 +314,7 @@ void MessageManager::doPlatformSpecificInitialisation()
 
     if (display != 0)  // This is not fatal! we can run headless.
     {
-        // Create a context to store user data associated with Windows we create in WindowDriver
+        // Create a context to store user data associated with Windows we create
         windowHandleXContext = XUniqueContext();
 
         // We're only interested in client messages for this window, which are always sent

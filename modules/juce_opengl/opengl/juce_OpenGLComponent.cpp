@@ -407,15 +407,11 @@ unsigned int OpenGLComponent::getFrameBufferID() const
 
 bool OpenGLComponent::performRender()
 {
-    JUCE_CHECK_OPENGL_ERROR
-
     const ScopedLock sl (contextLock);
 
    #if JUCE_LINUX
     updateContext();
    #endif
-
-    JUCE_CHECK_OPENGL_ERROR
 
     if (context != nullptr)
     {
