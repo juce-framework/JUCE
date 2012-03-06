@@ -44,17 +44,24 @@ void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& 
 {
     Graphics::ScopedSaveState ss (g);
 
-    const float oldOpacity = getAlpha();
-    setAlpha (opacity);
     g.addTransform (AffineTransform::translation ((float) -(originRelativeToComponent.x),
                                                   (float) -(originRelativeToComponent.y))
                         .followedBy (getTransform())
                         .followedBy (transform));
 
     if (! g.isClipEmpty())
-        paintEntireComponent (g, false);
-
-    setAlpha (oldOpacity);
+    {
+        if (opacity < 1.0f)
+        {
+            g.beginTransparencyLayer (opacity);
+            paintEntireComponent (g, true);
+            g.endTransparencyLayer();
+        }
+        else
+        {
+            paintEntireComponent (g, true);
+        }
+    }
 }
 
 void Drawable::drawAt (Graphics& g, float x, float y, float opacity) const

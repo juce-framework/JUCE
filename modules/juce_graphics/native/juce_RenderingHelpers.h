@@ -103,7 +103,7 @@ public:
         }
         else
         {
-            complexTransform = complexTransform.translated ((float) dx, (float) dx);
+            complexTransform = complexTransform.translated ((float) dx, (float) dy);
         }
     }
 
