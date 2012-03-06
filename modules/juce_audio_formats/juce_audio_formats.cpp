@@ -80,7 +80,9 @@
   #endif
  #endif
 
- #include <wmsdk.h>
+ #if JUCE_USE_WINDOWS_MEDIA_FORMAT
+  #include <wmsdk.h>
+ #endif
 #endif
 
 //==============================================================================

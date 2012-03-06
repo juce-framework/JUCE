@@ -27,12 +27,17 @@
 
 // these are in the windows SDK, but need to be repeated here for GCC..
 #ifndef GET_APPCOMMAND_LPARAM
- #define FAPPCOMMAND_MASK                  0xF000
  #define GET_APPCOMMAND_LPARAM(lParam)     ((short) (HIWORD (lParam) & ~FAPPCOMMAND_MASK))
+
+ #define FAPPCOMMAND_MASK                  0xF000
  #define APPCOMMAND_MEDIA_NEXTTRACK        11
  #define APPCOMMAND_MEDIA_PREVIOUSTRACK    12
  #define APPCOMMAND_MEDIA_STOP             13
  #define APPCOMMAND_MEDIA_PLAY_PAUSE       14
+#endif
+
+#ifndef WM_APPCOMMAND
+ #define WM_APPCOMMAND                     0x0319
 #endif
 
 extern void juce_repeatLastProcessPriority();
@@ -44,21 +49,22 @@ extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 
 static bool shouldDeactivateTitleBar = true;
 
+void* getUser32Function (const char* functionName) // (NB: this function also used from other modules)
+{
+    HMODULE user32Mod = GetModuleHandleA ("user32.dll");
+    jassert (user32Mod != 0);
+
+    return static_cast <void*> (GetProcAddress (user32Mod, functionName));
+}
+
 //==============================================================================
 typedef BOOL (WINAPI* UpdateLayeredWinFunc) (HWND, HDC, POINT*, SIZE*, HDC, POINT*, COLORREF, BLENDFUNCTION*, DWORD);
 static UpdateLayeredWinFunc updateLayeredWindow = nullptr;
 
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
-    if (updateLayeredWindow == 0)
-    {
-        if (! juce_IsRunningInWine())
-        {
-            HMODULE user32Mod = GetModuleHandle (_T("user32.dll"));
-            jassert (user32Mod != 0);
-            updateLayeredWindow = (UpdateLayeredWinFunc) GetProcAddress (user32Mod, "UpdateLayeredWindow");
-        }
-    }
+    if (updateLayeredWindow == nullptr && ! juce_IsRunningInWine())
+        updateLayeredWindow = (UpdateLayeredWinFunc) getUser32Function ("UpdateLayeredWindow");
 
     return updateLayeredWindow != 0;
 }
@@ -103,12 +109,9 @@ static bool canUseMultiTouch()
     {
         hasCheckedForMultiTouch = true;
 
-        HMODULE user32Mod = GetModuleHandle (_T("user32.dll"));
-        jassert (user32Mod != 0);
-
-        registerTouchWindow   = (RegisterTouchWindowFunc)   GetProcAddress (user32Mod, "RegisterTouchWindow");
-        getTouchInputInfo     = (GetTouchInputInfoFunc)     GetProcAddress (user32Mod, "GetTouchInputInfo");
-        closeTouchInputHandle = (CloseTouchInputHandleFunc) GetProcAddress (user32Mod, "CloseTouchInputHandle");
+        registerTouchWindow   = (RegisterTouchWindowFunc)   getUser32Function ("RegisterTouchWindow");
+        getTouchInputInfo     = (GetTouchInputInfoFunc)     getUser32Function ("GetTouchInputInfo");
+        closeTouchInputHandle = (CloseTouchInputHandleFunc) getUser32Function ("CloseTouchInputHandle");
     }
 
     return registerTouchWindow != nullptr;

@@ -102,7 +102,9 @@
  #include <shlwapi.h>
  #include <mmsystem.h>
 
- #if ! JUCE_MINGW
+ #if JUCE_MINGW
+  #include <basetyps.h>
+ #else
   #include <crtdbg.h>
   #include <comutil.h>
  #endif

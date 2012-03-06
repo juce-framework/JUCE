@@ -704,16 +704,20 @@ bool Process::openDocument (const String& fileName, const String& parameters)
 
 void File::revealToUser() const
 {
-   #pragma warning (push)
-   #pragma warning (disable: 4090) // (alignment warning)
+   #if JUCE_MINGW
+    jassertfalse; // not supported in MinGW..
+   #else
+    #pragma warning (push)
+    #pragma warning (disable: 4090) // (alignment warning)
     ITEMIDLIST* const itemIDList = ILCreateFromPath (fullPath.toWideCharPointer());
-   #pragma warning (pop)
+    #pragma warning (pop)
 
     if (itemIDList != nullptr)
     {
         SHOpenFolderAndSelectItems (itemIDList, 0, nullptr, 0);
         ILFree (itemIDList);
     }
+   #endif
 }
 
 //==============================================================================

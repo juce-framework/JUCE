@@ -154,7 +154,7 @@ BEGIN_JUCE_NAMESPACE
 extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 
 #if JUCE_LOG_ASSERTIONS
- extern JUCE_API void juce_LogAssertion (const char* filename, int lineNum) noexcept;
+ extern JUCE_API void logAssertion (const char* filename, int lineNum) noexcept;
 #endif
 
 #include "../memory/juce_Memory.h"

@@ -54,7 +54,7 @@
  #include <ws2tcpip.h>
 
  #if JUCE_MINGW
-  #include <wspiapi.h>
+  #include <ws2spi.h>
  #endif
 
 #else

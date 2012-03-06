@@ -52,7 +52,7 @@
 // Debugging and assertion macros
 
 #if JUCE_LOG_ASSERTIONS
- #define juce_LogCurrentAssertion    juce_LogAssertion (__FILE__, __LINE__);
+ #define juce_LogCurrentAssertion    juce::logAssertion (__FILE__, __LINE__);
 #elif JUCE_DEBUG
  #define juce_LogCurrentAssertion    std::cerr << "JUCE Assertion failure in " << __FILE__ << ", line " << __LINE__ << std::endl;
 #else

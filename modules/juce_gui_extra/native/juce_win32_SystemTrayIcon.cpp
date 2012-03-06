@@ -23,9 +23,12 @@
   ==============================================================================
 */
 
+// (these functions are from juce_win32_Windowing.cpp)
+extern void* getUser32Function (const char*);
+
 namespace IconConverters
 {
-    extern HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY);
+    extern HICON createHICONFromImage (const Image&, BOOL isIcon, int hotspotX, int hotspotY);
 }
 
 //==============================================================================
@@ -184,14 +187,6 @@ private:
     WNDPROC originalWndProc;
     const DWORD taskbarCreatedMessage;
     enum { WM_TRAYNOTIFY = WM_USER + 100 };
-
-    static void* getUser32Function (const char* functionName)
-    {
-        HMODULE user32Mod = GetModuleHandle (_T("user32.dll"));
-        jassert (user32Mod != 0);
-
-        return GetProcAddress (user32Mod, functionName);
-    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
 };

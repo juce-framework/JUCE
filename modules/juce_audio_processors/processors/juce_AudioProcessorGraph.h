@@ -85,8 +85,7 @@ public:
         NamedValueSet properties;
 
         //==============================================================================
-        /** A convenient typedef for referring to a pointer to a node object.
-        */
+        /** A convenient typedef for referring to a pointer to a node object. */
         typedef ReferenceCountedObjectPtr <Node> Ptr;
 
     private:
@@ -96,9 +95,9 @@ public:
         const ScopedPointer<AudioProcessor> processor;
         bool isPrepared;
 
-        Node (uint32 nodeId, AudioProcessor* processor) noexcept;
+        Node (uint32 nodeId, AudioProcessor*) noexcept;
 
-        void prepare (double sampleRate, int blockSize, AudioProcessorGraph* graph);
+        void prepare (double sampleRate, int blockSize, AudioProcessorGraph*);
         void unprepare();
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node);
@@ -161,15 +160,13 @@ public:
     int getNumNodes() const                                         { return nodes.size(); }
 
     /** Returns a pointer to one of the nodes in the graph.
-
-        This will return 0 if the index is out of range.
+        This will return nullptr if the index is out of range.
         @see getNodeForId
     */
     Node* getNode (const int index) const                           { return nodes [index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
-
-        If no such node was found, this returns 0.
+        If no such node was found, this returns nullptr.
         @see getNode
     */
     Node* getNodeForId (const uint32 nodeId) const;
@@ -202,7 +199,7 @@ public:
 
     /** Searches for a connection between some specified channels.
 
-        If no such connection is found, this returns 0.
+        If no such connection is found, this returns nullptr.
     */
     const Connection* getConnectionBetween (uint32 sourceNodeId,
                                             int sourceChannelIndex,
@@ -307,7 +304,7 @@ public:
         /** Returns the mode of this processor. */
         IODeviceType getType() const                                { return type; }
 
-        /** Returns the parent graph to which this processor belongs, or 0 if it
+        /** Returns the parent graph to which this processor belongs, or nullptr if it
             hasn't yet been added to one. */
         AudioProcessorGraph* getParentGraph() const                 { return graph; }
 
@@ -321,11 +318,11 @@ public:
         ~AudioGraphIOProcessor();
 
         const String getName() const;
-        void fillInPluginDescription (PluginDescription& d) const;
+        void fillInPluginDescription (PluginDescription&) const;
 
         void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
         void releaseResources();
-        void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
+        void processBlock (AudioSampleBuffer&, MidiBuffer&);
 
         const String getInputChannelName (int channelIndex) const;
         const String getOutputChannelName (int channelIndex) const;
@@ -353,7 +350,7 @@ public:
         void setStateInformation (const void* data, int sizeInBytes);
 
         /** @internal */
-        void setParentGraph (AudioProcessorGraph* graph);
+        void setParentGraph (AudioProcessorGraph*);
 
     private:
         const IODeviceType type;
@@ -369,7 +366,7 @@ public:
 
     void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
     void releaseResources();
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
+    void processBlock (AudioSampleBuffer&, MidiBuffer&);
 
     const String getInputChannelName (int channelIndex) const;
     const String getOutputChannelName (int channelIndex) const;

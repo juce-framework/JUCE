@@ -71,7 +71,7 @@ void AudioFormatManager::registerBasicFormats()
 
    #if JUCE_MAC || JUCE_IOS
     registerFormat (new CoreAudioFormat(), false);
-   #elif JUCE_WINDOWS
+   #elif JUCE_USE_WINDOWS_MEDIA_FORMAT
     registerFormat (new WindowsMediaAudioFormat(), false);
    #elif JUCE_USE_MP3AUDIOFORMAT
     // The software MP3 decoder is only used as a default format if

@@ -99,7 +99,7 @@ namespace ActiveXHelpers
                If you don't call AddRef then others crash (e.g. QuickTime).. Bit of a catch-22, so letting it leak is probably preferable.
             */
             if (lplpFrame != nullptr) { frame->AddRef(); *lplpFrame = frame; }
-            if (lplpDoc != nullptr)   *lplpDoc = 0;
+            if (lplpDoc != nullptr)   *lplpDoc = nullptr;
             lpFrameInfo->fMDIApp = FALSE;
             lpFrameInfo->hwndFrame = window;
             lpFrameInfo->haccel = 0;
@@ -146,7 +146,7 @@ namespace ActiveXHelpers
 
         JUCE_COMRESULT SaveObject()                                  { return E_NOTIMPL; }
         JUCE_COMRESULT GetMoniker (DWORD, DWORD, IMoniker**)         { return E_NOTIMPL; }
-        JUCE_COMRESULT GetContainer (LPOLECONTAINER* ppContainer)    { *ppContainer = 0; return E_NOINTERFACE; }
+        JUCE_COMRESULT GetContainer (LPOLECONTAINER* ppContainer)    { *ppContainer = nullptr; return E_NOINTERFACE; }
         JUCE_COMRESULT ShowObject()                                  { return S_OK; }
         JUCE_COMRESULT OnShowWindow (BOOL)                           { return E_NOTIMPL; }
         JUCE_COMRESULT RequestNewObjectLayout()                      { return E_NOTIMPL; }
@@ -190,7 +190,7 @@ namespace ActiveXHelpers
             case WM_MBUTTONUP:
             case WM_RBUTTONUP:
                 peer->handleMouseEvent (0, Point<int> (GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left,
-                                                       GET_Y_LPARAM (lParam) + activeXRect.top - peerRect.top),
+                                                       GET_Y_LPARAM (lParam) + activeXRect.top  - peerRect.top),
                                         ModifierKeys::getCurrentModifiersRealtime(),
                                         getMouseEventTime());
                 break;

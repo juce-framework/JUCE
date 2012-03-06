@@ -63,6 +63,18 @@
  #define JUCE_USE_MP3AUDIOFORMAT 0
 #endif
 
+/** Config: JUCE_USE_WINDOWS_MEDIA_FORMAT
+    Enables the Windows Media SDK codecs.
+*/
+#ifndef JUCE_USE_WINDOWS_MEDIA_FORMAT
+ #define JUCE_USE_WINDOWS_MEDIA_FORMAT 1
+#endif
+
+#if ! JUCE_MSVC
+ #undef JUCE_USE_WINDOWS_MEDIA_FORMAT
+ #define JUCE_USE_WINDOWS_MEDIA_FORMAT 0
+#endif
+
 //=============================================================================
 namespace juce
 {
