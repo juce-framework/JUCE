@@ -60,31 +60,27 @@ void MixerAudioSource::addInputSource (AudioSource* input, const bool deleteWhen
     }
 }
 
-void MixerAudioSource::removeInputSource (AudioSource* input, const bool deleteInput)
+void MixerAudioSource::removeInputSource (AudioSource* const input)
 {
     if (input != nullptr)
     {
-        int index;
+        ScopedPointer<AudioSource> toDelete;
 
         {
             const ScopedLock sl (lock);
+            const int index = inputs.indexOf (input);
 
-            index = inputs.indexOf (input);
+            if (index < 0)
+                return;
 
-            if (index >= 0)
-            {
-                inputsToDelete.shiftBits (index, 1);
-                inputs.remove (index);
-            }
+            if (inputsToDelete [index])
+                toDelete = input;
+
+            inputsToDelete.shiftBits (index, 1);
+            inputs.remove (index);
         }
 
-        if (index >= 0)
-        {
-            input->releaseResources();
-
-            if (deleteInput)
-                delete input;
-        }
+        input->releaseResources();
     }
 }
 
@@ -98,7 +94,12 @@ void MixerAudioSource::removeAllInputs()
         for (int i = inputs.size(); --i >= 0;)
             if (inputsToDelete[i])
                 toDelete.add (inputs.getUnchecked(i));
+
+        inputs.clear();
     }
+
+    for (int i = toDelete.size(); --i >= 0;)
+        toDelete.getUnchecked(i)->releaseResources();
 }
 
 void MixerAudioSource::prepareToPlay (int samplesPerBlockExpected, double sampleRate)

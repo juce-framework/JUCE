@@ -41,8 +41,7 @@ class JUCE_API  MixerAudioSource  : public AudioSource
 {
 public:
     //==============================================================================
-    /** Creates a MixerAudioSource.
-    */
+    /** Creates a MixerAudioSource. */
     MixerAudioSource();
 
     /** Destructor. */
@@ -58,41 +57,29 @@ public:
 
         @param newInput             the source to add to the mixer
         @param deleteWhenRemoved    if true, then this source will be deleted when
-                                    the mixer is deleted or when removeAllInputs() is
-                                    called (unless the source is previously removed
-                                    with the removeInputSource method)
+                                    no longer needed by the mixer.
     */
     void addInputSource (AudioSource* newInput, bool deleteWhenRemoved);
 
     /** Removes an input source.
-
-        If the mixer is running, this will remove the source but not call its
-        releaseResources() method, so the caller might want to do this manually.
-
-        @param input            the source to remove
-        @param deleteSource     whether to delete this source after it's been removed
+        If the source was added by calling addInputSource() with the deleteWhenRemoved
+        flag set, it will be deleted by this method.
     */
-    void removeInputSource (AudioSource* input, bool deleteSource);
+    void removeInputSource (AudioSource* input);
 
     /** Removes all the input sources.
-
-        If the mixer is running, this will remove the sources but not call their
-        releaseResources() method, so the caller might want to do this manually.
-
-        Any sources which were added with the deleteWhenRemoved flag set will be
-        deleted by this method.
+        Any sources which were added by calling addInputSource() with the deleteWhenRemoved
+        flag set will be deleted by this method.
     */
     void removeAllInputs();
 
     //==============================================================================
     /** Implementation of the AudioSource method.
-
         This will call prepareToPlay() on all its input sources.
     */
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate);
 
     /** Implementation of the AudioSource method.
-
         This will call releaseResources() on all its input sources.
     */
     void releaseResources();
