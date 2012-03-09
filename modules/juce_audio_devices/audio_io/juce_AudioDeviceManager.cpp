@@ -111,6 +111,7 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>&
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_iOSAudio());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ALSA());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_JACK());
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_OpenSLES());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Android());
 }
 
@@ -149,23 +150,24 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
         }
 
         currentDeviceType = e->getStringAttribute ("deviceType");
-        if (currentDeviceType.isEmpty())
+
+        if (findType (currentDeviceType) == nullptr)
         {
             AudioIODeviceType* const type = findType (setup.inputDeviceName, setup.outputDeviceName);
 
             if (type != nullptr)
                 currentDeviceType = type->getTypeName();
             else if (availableDeviceTypes.size() > 0)
-                currentDeviceType = availableDeviceTypes[0]->getTypeName();
+                currentDeviceType = availableDeviceTypes.getUnchecked(0)->getTypeName();
         }
 
         setup.bufferSize = e->getIntAttribute ("audioDeviceBufferSize");
         setup.sampleRate = e->getDoubleAttribute ("audioDeviceRate");
 
-        setup.inputChannels.parseString (e->getStringAttribute ("audioDeviceInChans", "11"), 2);
+        setup.inputChannels .parseString (e->getStringAttribute ("audioDeviceInChans",  "11"), 2);
         setup.outputChannels.parseString (e->getStringAttribute ("audioDeviceOutChans", "11"), 2);
 
-        setup.useDefaultInputChannels = ! e->hasAttribute ("audioDeviceInChans");
+        setup.useDefaultInputChannels  = ! e->hasAttribute ("audioDeviceInChans");
         setup.useDefaultOutputChannels = ! e->hasAttribute ("audioDeviceOutChans");
 
         error = setAudioDeviceSetup (setup, true);
@@ -261,6 +263,17 @@ void AudioDeviceManager::scanDevicesIfNeeded()
         for (int i = availableDeviceTypes.size(); --i >= 0;)
             availableDeviceTypes.getUnchecked(i)->scanForDevices();
     }
+}
+
+AudioIODeviceType* AudioDeviceManager::findType (const String& typeName)
+{
+    scanDevicesIfNeeded();
+
+    for (int i = availableDeviceTypes.size(); --i >= 0;)
+        if (availableDeviceTypes.getUnchecked(i)->getTypeName() == typeName)
+            return availableDeviceTypes.getUnchecked(i);
+
+    return nullptr;
 }
 
 AudioIODeviceType* AudioDeviceManager::findType (const String& inputName, const String& outputName)

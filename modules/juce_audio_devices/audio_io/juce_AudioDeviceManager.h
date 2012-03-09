@@ -509,6 +509,7 @@ private:
     void insertDefaultDeviceNames (AudioDeviceSetup&) const;
 
     AudioIODeviceType* findType (const String& inputName, const String& outputName);
+    AudioIODeviceType* findType (const String& typeName);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceManager);
 };

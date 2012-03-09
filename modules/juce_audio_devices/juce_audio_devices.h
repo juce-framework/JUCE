@@ -73,6 +73,17 @@
  #define JUCE_JACK 0
 #endif
 
+/** Config: JUCE_USE_ANDROID_OPENSLES
+    Enables OpenSLES devices (Android only).
+*/
+#ifndef JUCE_USE_ANDROID_OPENSLES
+ #if JUCE_ANDROID_API_VERSION > 8
+  #define JUCE_USE_ANDROID_OPENSLES 1
+ #else
+  #define JUCE_USE_ANDROID_OPENSLES 0
+ #endif
+#endif
+
 //=============================================================================
 /** Config: JUCE_USE_CDREADER
     Enables the AudioCDReader class (on supported platforms).

@@ -74,3 +74,7 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()            
 #if ! JUCE_ANDROID
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()         { return nullptr; }
 #endif
+
+#if ! (JUCE_ANDROID && JUCE_USE_ANDROID_OPENSLES)
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()        { return nullptr; }
+#endif

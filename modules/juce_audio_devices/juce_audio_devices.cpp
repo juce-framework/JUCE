@@ -123,9 +123,16 @@
      Juce with low latency audio support, just set the JUCE_JACK flag to 0.
   */
   #include <jack/jack.h>
-  //#include <jack/transport.h>
  #endif
  #undef SIZEOF
+
+//==============================================================================
+#elif JUCE_ANDROID
+
+ #if JUCE_USE_ANDROID_OPENSLES
+  #include <SLES/OpenSLES.h>
+  #include <SLES/OpenSLES_Android.h>
+ #endif
 
 #endif
 
@@ -220,6 +227,10 @@ namespace juce
  #include "../juce_core/native/juce_android_JNIHelpers.h"
  #include "native/juce_android_Audio.cpp"
  #include "native/juce_android_Midi.cpp"
+
+ #if JUCE_USE_ANDROID_OPENSLES
+  #include "native/juce_android_OpenSL.cpp"
+ #endif
 
 #endif
 

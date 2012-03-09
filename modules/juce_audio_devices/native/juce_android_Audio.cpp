@@ -63,6 +63,8 @@ enum
     STATE_UNINITIALIZED = 0
 };
 
+const char* const javaAudioTypeName = "Android Audio";
+
 //==============================================================================
 class AndroidAudioIODevice  : public AudioIODevice,
                               public Thread
@@ -70,7 +72,7 @@ class AndroidAudioIODevice  : public AudioIODevice,
 public:
     //==============================================================================
     AndroidAudioIODevice (const String& deviceName)
-        : AudioIODevice (deviceName, "Audio"),
+        : AudioIODevice (deviceName, javaAudioTypeName),
           Thread ("audio"),
           callback (0), sampleRate (0),
           numClientInputChannels (0), numDeviceInputChannels (0), numDeviceInputChannelsAvailable (2),
@@ -396,23 +398,14 @@ private:
 class AndroidAudioIODeviceType  : public AudioIODeviceType
 {
 public:
-    AndroidAudioIODeviceType()
-        : AudioIODeviceType ("Android Audio")
-    {
-    }
+    AndroidAudioIODeviceType()  : AudioIODeviceType (javaAudioTypeName) {}
 
     //==============================================================================
     void scanForDevices() {}
+    StringArray getDeviceNames (bool wantInputNames) const              { return StringArray (javaAudioTypeName); }
     int getDefaultDeviceIndex (bool forInput) const                     { return 0; }
     int getIndexOfDevice (AudioIODevice* device, bool asInput) const    { return device != nullptr ? 0 : -1; }
     bool hasSeparateInputsAndOutputs() const                            { return false; }
-
-    StringArray getDeviceNames (bool wantInputNames) const
-    {
-        StringArray s;
-        s.add ("Android Audio");
-        return s;
-    }
 
     AudioIODevice* createDevice (const String& outputDeviceName,
                                  const String& inputDeviceName)
@@ -432,7 +425,6 @@ public:
     }
 
 private:
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidAudioIODeviceType);
 };
 

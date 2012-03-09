@@ -388,7 +388,7 @@ private:
            << newLine
            << "APP_STL := gnustl_static" << newLine
            << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine
-           << "APP_PLATFORM := android-8" << newLine;
+           << "APP_PLATFORM := " << getAppPlatform() << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
     }
@@ -484,6 +484,7 @@ private:
     {
         StringPairArray defines;
         defines.set ("JUCE_ANDROID", "1");
+        defines.set ("JUCE_ANDROID_API_VERSION", getMinimumSDKVersionString());
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\\\"" + getJNIActivityClassName() + "\\\"");
 
@@ -593,13 +594,22 @@ private:
         equals->setAttribute ("arg2", "debug");
     }
 
+    String getAppPlatform() const
+    {
+        int ndkVersion = getMinimumSDKVersionString().getIntValue();
+        if (ndkVersion == 9)
+            ndkVersion = 10; // (doesn't seem to be a version '9')
+
+        return "android-" + String (ndkVersion);
+    }
+
     void writeProjectPropertiesFile (const File& file) const
     {
         MemoryOutputStream mo;
         mo << "# This file is used to override default values used by the Ant build system." << newLine
            << "# It is automatically generated - DO NOT EDIT IT or your changes will be lost!." << newLine
            << newLine
-           << "target=Google Inc.:Google APIs:8" << newLine
+           << "target=" << getAppPlatform() << newLine
            << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
