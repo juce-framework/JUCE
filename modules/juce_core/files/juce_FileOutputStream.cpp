@@ -119,6 +119,8 @@ bool FileOutputStream::write (const void* const src, const int numBytes)
 
 void FileOutputStream::writeRepeatedByte (uint8 byte, int numBytes)
 {
+    jassert (numBytes >= 0);
+
     if (bytesInBuffer + numBytes < bufferSize)
     {
         memset (buffer + bytesInBuffer, byte, (size_t) numBytes);

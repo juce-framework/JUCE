@@ -219,7 +219,9 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                                      const int lineWrapLength) const
 {
     using namespace XmlOutputFunctions;
-    writeSpaces (outputStream, indentationLevel);
+
+    if (indentationLevel >= 0)
+        writeSpaces (outputStream, indentationLevel);
 
     if (! isTextElement())
     {
