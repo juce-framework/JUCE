@@ -462,8 +462,8 @@ private:
                 {
                     if (j != reusableInputIndex)
                     {
-                        const int srcIndex = getBufferContaining (sourceNodes.getUnchecked(j),
-                                                                  sourceOutputChans.getUnchecked(j));
+                        int srcIndex = getBufferContaining (sourceNodes.getUnchecked(j),
+                                                            sourceOutputChans.getUnchecked(j));
                         if (srcIndex >= 0)
                         {
                             const int nodeDelay = getNodeDelay (sourceNodes.getUnchecked (j));
@@ -481,13 +481,11 @@ private:
                                     const int bufferToDelay = getFreeBuffer (false);
                                     renderingOps.add (new CopyChannelOp (srcIndex, bufferToDelay));
                                     renderingOps.add (new DelayChannelOp (bufferToDelay, maxLatency - nodeDelay));
-                                    renderingOps.add (new AddChannelOp (bufferToDelay, bufIndex));
+                                    srcIndex = bufferToDelay;
                                 }
                             }
-                            else
-                            {
-                                renderingOps.add (new AddChannelOp (srcIndex, bufIndex));
-                            }
+
+                            renderingOps.add (new AddChannelOp (srcIndex, bufIndex));
                         }
                     }
                 }
