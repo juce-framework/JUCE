@@ -203,6 +203,12 @@ namespace RTASHelpers
 {
     static Value getRTASFolder (ProjectExporter& exporter)        { return exporter.getSetting (Ids::rtasFolder); }
 
+    static RelativePath getRTASFolderRelativePath (ProjectExporter& exporter)
+    {
+        return exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (getRTASFolder (exporter).toString(),
+                                                                            RelativePath::projectFolder));
+    }
+
     static void fixMissingRTASValues (ProjectExporter& exporter)
     {
         if (getRTASFolder (exporter).toString().isEmpty())
@@ -216,7 +222,7 @@ namespace RTASHelpers
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
     {
-        RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
+        RelativePath rtasFolder (getRTASFolderRelativePath (exporter));
 
         if (exporter.isVisualStudio())
         {
@@ -301,9 +307,9 @@ namespace RTASHelpers
         exporter.msvcTargetSuffix = ".dpm";
         exporter.msvcNeedsDLLRuntimeLib = true;
 
-        RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
+        RelativePath rtasFolder (getRTASFolderRelativePath (exporter));
         exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
-                                                                                                                 .toWindowsStyle().quoted()));
+                                                                                                                 .toWindowsStyle()).quoted());
 
         String msvcPathToRTASFolder (exporter.getJucePathFromTargetFolder()
                                              .getChildFile ("juce_audio_plugin_client/RTAS")
