@@ -50,6 +50,10 @@
  //#define JUCE_JACK
 #endif
 
+#ifndef    JUCE_USE_ANDROID_OPENSLES
+ //#define JUCE_USE_ANDROID_OPENSLES
+#endif
+
 #ifndef    JUCE_USE_CDREADER
  //#define JUCE_USE_CDREADER
 #endif
@@ -71,6 +75,10 @@
 
 #ifndef    JUCE_USE_MP3AUDIOFORMAT
  //#define JUCE_USE_MP3AUDIOFORMAT
+#endif
+
+#ifndef    JUCE_USE_WINDOWS_MEDIA_FORMAT
+ //#define JUCE_USE_WINDOWS_MEDIA_FORMAT
 #endif
 
 //==============================================================================

@@ -61,8 +61,8 @@ public:
     explicit Value (const var& initialValue);
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
-    Value (Value&& other) noexcept;
-    Value& operator= (Value&& other) noexcept;
+    Value (Value&&) noexcept;
+    Value& operator= (Value&&) noexcept;
    #endif
 
     /** Destructor. */
@@ -221,11 +221,11 @@ private:
 
     // This is disallowed to avoid confusion about whether it should
     // do a by-value or by-reference copy.
-    Value& operator= (const Value& other);
+    Value& operator= (const Value&);
 };
 
 /** Writes a Value to an OutputStream as a UTF8 string. */
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream&, const Value&);
 
 /** This typedef is just for compatibility with old code - newer code should use the Value::Listener class directly. */
 typedef Value::Listener ValueListener;

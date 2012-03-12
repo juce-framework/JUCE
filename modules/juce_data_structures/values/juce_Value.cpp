@@ -148,7 +148,7 @@ var Value::getValue() const
 
 Value::operator var() const
 {
-    return getValue();
+    return value->getValue();
 }
 
 void Value::setValue (const var& newValue)

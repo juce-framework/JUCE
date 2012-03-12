@@ -1204,7 +1204,7 @@ protected:
 
             for (int i = 0; i < groups.size(); ++i)
                 if (groups.getReference(i).getNumChildren() > 0)
-                    addFilesToCompile (groups.getReference(i), *cppFiles, *headerFiles, false);
+                    addFilesToCompile (groups.getReference(i), *cppFiles, *headerFiles);
         }
 
         if (iconFile != File::nonexistent)
@@ -1256,9 +1256,7 @@ protected:
                 e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
 
             if (useStdcall)
-            {
-                jassertfalse;
-            }
+                e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
         }
         else if (file.hasFileExtension (headerFileExtensions))
         {
@@ -1266,18 +1264,12 @@ protected:
         }
     }
 
-    void addFilesToCompile (const Array<RelativePath>& files, XmlElement& cpps, XmlElement& headers, bool useStdCall) const
-    {
-        for (int i = 0; i < files.size(); ++i)
-            addFileToCompile (files.getReference(i), cpps, headers, false, useStdCall);
-    }
-
-    void addFilesToCompile (const Project::Item& projectItem, XmlElement& cpps, XmlElement& headers, bool useStdCall) const
+    void addFilesToCompile (const Project::Item& projectItem, XmlElement& cpps, XmlElement& headers) const
     {
         if (projectItem.isGroup())
         {
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addFilesToCompile (projectItem.getChild(i), cpps, headers, useStdCall);
+                addFilesToCompile (projectItem.getChild(i), cpps, headers);
         }
         else
         {
@@ -1286,7 +1278,7 @@ protected:
                 const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
                 if (path.hasFileExtension (headerFileExtensions) || (path.hasFileExtension ("cpp;cc;c;cxx")))
-                    addFileToCompile (path, cpps, headers, ! projectItem.shouldBeCompiled(), useStdCall);
+                    addFileToCompile (path, cpps, headers, ! projectItem.shouldBeCompiled(), projectItem.shouldUseStdCall());
             }
         }
     }
