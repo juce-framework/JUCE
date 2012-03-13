@@ -792,14 +792,12 @@ public:
     TargetClass* findParentComponentOfClass (TargetClass* const dummyParameter = nullptr) const
     {
         (void) dummyParameter;
-        Component* p = parentComponent;
-        while (p != nullptr)
+
+        for (Component* p = parentComponent; p != nullptr; p = p->parentComponent)
         {
-            TargetClass* target = dynamic_cast <TargetClass*> (p);
+            TargetClass* const target = dynamic_cast <TargetClass*> (p);
             if (target != nullptr)
                 return target;
-
-            p = p->parentComponent;
         }
 
         return nullptr;
@@ -2337,7 +2335,7 @@ private:
     void internalRepaint (const Rectangle<int>&);
     void internalRepaintUnchecked (const Rectangle<int>&, bool);
     Component* removeChildComponent (int index, bool sendParentEvents, bool sendChildEvents);
-    void moveChildInternal (int sourceIndex, int destIndex);
+    void reorderChildInternal (int sourceIndex, int destIndex);
     void paintComponentAndChildren (Graphics&);
     void paintWithinParentContext (Graphics&);
     void sendMovedResizedMessages (bool wasMoved, bool wasResized);

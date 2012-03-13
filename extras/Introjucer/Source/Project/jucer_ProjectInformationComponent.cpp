@@ -393,19 +393,29 @@ public:
     };
 
     //==============================================================================
-    class ModuleCopyingMessage  : public Component
+    class ModuleCopyingInfo  : public Component,
+                               public ButtonListener,
+                               public Timer
     {
     public:
-        ModuleCopyingMessage (Project& project_, ModuleList& list_)
-            : project (project_), list (list_)
+        ModuleCopyingInfo (Project& project_, ModuleList& list_)
+            : project (project_), list (list_),
+              copyModeButton ("Set Copying Mode...")
         {
+            addAndMakeVisible (&copyModeButton);
+            copyModeButton.setBounds ("4, parent.height / 2 - 10, 160, parent.height / 2 + 10");
+            copyModeButton.addListener (this);
+
+            startTimer (1500);
         }
 
         void paint (Graphics& g)
         {
-            g.setFont (13.0f);
+            g.setFont (11.0f);
             g.setColour (Colours::darkred);
-            g.drawFittedText (getName(), 4, 0, getWidth() - 8, getHeight(), Justification::centredRight, 4);
+            g.drawFittedText (getName(), copyModeButton.getRight() + 10, 0,
+                              getWidth() - copyModeButton.getRight() - 16, getHeight(),
+                              Justification::centredRight, 4);
         }
 
         void refresh()
@@ -413,14 +423,18 @@ public:
             int numCopied, numNonCopied;
             countCopiedModules (numCopied, numNonCopied);
 
-            if (numCopied > 0 && numNonCopied > 0)
-                setName ("Warning! Some of your modules are set to use local copies, and others are using remote references.\n"
-                         "This may create problems if some modules expect to share the same parent folder, so you may "
-                         "want to make sure that they are all either copied or not.");
-            else
-                setName (String::empty);
+            String newName;
 
-            repaint();
+            if (numCopied > 0 && numNonCopied > 0)
+                newName = "Warning! Some of your modules are set to use local copies, and others are using remote references.\n"
+                          "This may create problems if some modules expect to share the same parent folder, so you may "
+                          "want to make sure that they are all either copied or not.";
+
+            if (newName != getName())
+            {
+                setName (newName);
+                repaint();
+            }
         }
 
         void countCopiedModules (int& numCopied, int& numNonCopied)
@@ -441,9 +455,39 @@ public:
             }
         }
 
+        void buttonClicked (Button*)
+        {
+            PopupMenu menu;
+            menu.addItem (1, "Enable local copying for all modules");
+            menu.addItem (2, "Disable local copying for all modules");
+
+            menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&copyModeButton),
+                                ModalCallbackFunction::forComponent (copyMenuItemChosen, this));
+        }
+
+        static void copyMenuItemChosen (int resultCode, ModuleCopyingInfo* comp)
+        {
+            if (resultCode > 0 && comp != nullptr)
+                comp->setCopyModeForAllModules (resultCode == 1);
+        }
+
+        void setCopyModeForAllModules (bool copyEnabled)
+        {
+            for (int i = list.modules.size(); --i >= 0;)
+                project.shouldCopyModuleFilesLocally (list.modules.getUnchecked(i)->uid) = copyEnabled;
+
+            refresh();
+        }
+
+        void timerCallback()
+        {
+            refresh();
+        }
+
     private:
         Project& project;
         ModuleList& list;
+        TextButton copyModeButton;
     };
 
 private:
@@ -453,7 +497,7 @@ private:
     Label modulesLabel;
     TextButton updateModulesButton;
     ModuleSelectionListBox moduleListBox;
-    ModuleCopyingMessage copyingMessage;
+    ModuleCopyingInfo copyingMessage;
     ScopedPointer<ModuleSettingsPanel> settings;
 };
 
