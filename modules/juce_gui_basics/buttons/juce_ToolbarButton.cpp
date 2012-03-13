@@ -54,6 +54,22 @@ void ToolbarButton::contentAreaChanged (const Rectangle<int>&)
     buttonStateChanged();
 }
 
+void ToolbarButton::setCurrentImage (Drawable* const newImage)
+{
+    if (newImage != currentImage)
+    {
+        removeChildComponent (currentImage);
+        currentImage = newImage;
+
+        if (currentImage != nullptr)
+        {
+            enablementChanged();
+            addAndMakeVisible (currentImage);
+            updateDrawable();
+        }
+    }
+}
+
 void ToolbarButton::updateDrawable()
 {
     if (currentImage != nullptr)
@@ -75,23 +91,18 @@ void ToolbarButton::enablementChanged()
     updateDrawable();
 }
 
-void ToolbarButton::buttonStateChanged()
+Drawable* ToolbarButton::getImageToUse() const
 {
-    Drawable* d = normalImage;
+    if (getStyle() == Toolbar::textOnly)
+        return nullptr;
 
     if (getToggleState() && toggledOnImage != nullptr)
-        d = toggledOnImage;
+        return toggledOnImage;
 
-    if (d != currentImage)
-    {
-        removeChildComponent (currentImage);
-        currentImage = d;
+    return normalImage;
+}
 
-        if (d != nullptr)
-        {
-            enablementChanged();
-            addAndMakeVisible (d);
-            updateDrawable();
-        }
-    }
+void ToolbarButton::buttonStateChanged()
+{
+    setCurrentImage (getImageToUse());
 }

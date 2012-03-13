@@ -23,44 +23,7 @@
   ==============================================================================
 */
 
-static ThreadLocalValue<Thread*>& getCurrentThreadHolder()
-{
-    static ThreadLocalValue<Thread*> tls;
-    return tls;
-}
 
-void Thread::threadEntryPoint()
-{
-    getCurrentThreadHolder() = this;
-
-    JUCE_TRY
-    {
-        if (threadName.isNotEmpty())
-            setCurrentThreadName (threadName);
-
-        if (startSuspensionEvent.wait (10000))
-        {
-            jassert (getCurrentThreadId() == threadId);
-
-            if (affinityMask != 0)
-                setCurrentThreadAffinityMask (affinityMask);
-
-            run();
-        }
-    }
-    JUCE_CATCH_ALL_ASSERT
-
-    getCurrentThreadHolder().releaseCurrentThreadStorage();
-    closeThreadHandle();
-}
-
-// used to wrap the incoming call from the platform-specific code
-void JUCE_API juce_threadEntryPoint (void* userData)
-{
-    static_cast <Thread*> (userData)->threadEntryPoint();
-}
-
-//==============================================================================
 Thread::Thread (const String& threadName_)
     : threadName (threadName_),
       threadHandle (nullptr),
@@ -83,6 +46,64 @@ Thread::~Thread()
     jassert (! isThreadRunning());
 
     stopThread (100);
+}
+
+//==============================================================================
+// Use a ref-counted object to hold this shared data, so that it can outlive its static
+// shared pointer when threads are still running during static shutdown.
+struct CurrentThreadHolder   : public ReferenceCountedObject
+{
+    CurrentThreadHolder() noexcept {}
+
+    typedef ReferenceCountedObjectPtr <CurrentThreadHolder> Ptr;
+    ThreadLocalValue<Thread*> value;
+
+    JUCE_DECLARE_NON_COPYABLE (CurrentThreadHolder);
+};
+
+static char currentThreadHolderLock [sizeof (SpinLock)]; // (statically initialised to zeros).
+
+static CurrentThreadHolder::Ptr getCurrentThreadHolder()
+{
+    static CurrentThreadHolder::Ptr currentThreadHolder;
+    SpinLock::ScopedLockType lock (*reinterpret_cast <SpinLock*> (currentThreadHolderLock));
+
+    if (currentThreadHolder == nullptr)
+        currentThreadHolder = new CurrentThreadHolder();
+
+    return currentThreadHolder;
+}
+
+void Thread::threadEntryPoint()
+{
+    const CurrentThreadHolder::Ptr currentThreadHolder (getCurrentThreadHolder());
+    currentThreadHolder->value = this;
+
+    JUCE_TRY
+    {
+        if (threadName.isNotEmpty())
+            setCurrentThreadName (threadName);
+
+        if (startSuspensionEvent.wait (10000))
+        {
+            jassert (getCurrentThreadId() == threadId);
+
+            if (affinityMask != 0)
+                setCurrentThreadAffinityMask (affinityMask);
+
+            run();
+        }
+    }
+    JUCE_CATCH_ALL_ASSERT
+
+    currentThreadHolder->value.releaseCurrentThreadStorage();
+    closeThreadHandle();
+}
+
+// used to wrap the incoming call from the platform-specific code
+void JUCE_API juce_threadEntryPoint (void* userData)
+{
+    static_cast <Thread*> (userData)->threadEntryPoint();
 }
 
 //==============================================================================
@@ -118,6 +139,11 @@ void Thread::startThread (const int priority)
 bool Thread::isThreadRunning() const
 {
     return threadHandle != nullptr;
+}
+
+Thread* Thread::getCurrentThread()
+{
+    return getCurrentThreadHolder()->value.get();
 }
 
 //==============================================================================
@@ -209,12 +235,6 @@ bool Thread::wait (const int timeOutMilliseconds) const
 void Thread::notify() const
 {
     defaultEvent.signal();
-}
-
-//==============================================================================
-Thread* Thread::getCurrentThread()
-{
-    return *getCurrentThreadHolder();
 }
 
 //==============================================================================

@@ -74,9 +74,9 @@ public:
     bool getToolbarItemSizes (int toolbarDepth, bool isToolbarVertical, int& preferredSize,
                               int& minSize, int& maxSize);
     /** @internal */
-    void paintButtonArea (Graphics& g, int width, int height, bool isMouseOver, bool isMouseDown);
+    void paintButtonArea (Graphics&, int width, int height, bool isMouseOver, bool isMouseDown);
     /** @internal */
-    void contentAreaChanged (const Rectangle<int>& newBounds);
+    void contentAreaChanged (const Rectangle<int>&);
     /** @internal */
     void buttonStateChanged();
     /** @internal */
@@ -90,6 +90,8 @@ private:
     Drawable* currentImage;
 
     void updateDrawable();
+    Drawable* getImageToUse() const;
+    void setCurrentImage (Drawable*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarButton);
 };
