@@ -816,31 +816,31 @@ extern "C" void* threadEntryProc (void* userData)
 
 void Thread::launchThread()
 {
-    threadHandle_ = 0;
+    threadHandle = 0;
     pthread_t handle = 0;
 
     if (pthread_create (&handle, 0, threadEntryProc, this) == 0)
     {
         pthread_detach (handle);
-        threadHandle_ = (void*) handle;
-        threadId_ = (ThreadID) threadHandle_;
+        threadHandle = (void*) handle;
+        threadId = (ThreadID) threadHandle;
     }
 }
 
 void Thread::closeThreadHandle()
 {
-    threadId_ = 0;
-    threadHandle_ = 0;
+    threadId = 0;
+    threadHandle = 0;
 }
 
 void Thread::killThread()
 {
-    if (threadHandle_ != 0)
+    if (threadHandle != 0)
     {
        #if JUCE_ANDROID
         jassertfalse; // pthread_cancel not available!
        #else
-        pthread_cancel ((pthread_t) threadHandle_);
+        pthread_cancel ((pthread_t) threadHandle);
        #endif
     }
 }

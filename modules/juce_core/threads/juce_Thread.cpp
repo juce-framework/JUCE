@@ -23,119 +23,34 @@
   ==============================================================================
 */
 
-
-class RunningThreadsList
+static ThreadLocalValue<Thread*>& getCurrentThreadHolder()
 {
-public:
-    RunningThreadsList()
-    {
-    }
+    static ThreadLocalValue<Thread*> tls;
+    return tls;
+}
 
-    ~RunningThreadsList()
-    {
-        // Some threads are still running! Make sure you stop all your
-        // threads cleanly before your app quits!
-        jassert (threads.size() == 0);
-    }
-
-    void add (Thread* const thread)
-    {
-        const SpinLock::ScopedLockType sl (lock);
-        jassert (! threads.contains (thread));
-        threads.add (thread);
-    }
-
-    void remove (Thread* const thread)
-    {
-        const SpinLock::ScopedLockType sl (lock);
-        jassert (threads.contains (thread));
-        threads.removeValue (thread);
-    }
-
-    int size() const noexcept
-    {
-        return threads.size();
-    }
-
-    Thread* getThreadWithID (const Thread::ThreadID targetID) const noexcept
-    {
-        const SpinLock::ScopedLockType sl (lock);
-
-        for (int i = threads.size(); --i >= 0;)
-        {
-            Thread* const t = threads.getUnchecked(i);
-
-            if (t->getThreadId() == targetID)
-                return t;
-        }
-
-        return nullptr;
-    }
-
-    void stopAll (const int timeOutMilliseconds)
-    {
-        signalAllThreadsToStop();
-
-        for (;;)
-        {
-            Thread* firstThread = getFirstThread();
-
-            if (firstThread != nullptr)
-                firstThread->stopThread (timeOutMilliseconds);
-            else
-                break;
-        }
-    }
-
-    static RunningThreadsList& getInstance()
-    {
-        static RunningThreadsList runningThreads;
-        return runningThreads;
-    }
-
-private:
-    Array<Thread*> threads;
-    SpinLock lock;
-
-    void signalAllThreadsToStop()
-    {
-        const SpinLock::ScopedLockType sl (lock);
-
-        for (int i = threads.size(); --i >= 0;)
-            threads.getUnchecked(i)->signalThreadShouldExit();
-    }
-
-    Thread* getFirstThread() const
-    {
-        const SpinLock::ScopedLockType sl (lock);
-        return threads.getFirst();
-    }
-};
-
-
-//==============================================================================
 void Thread::threadEntryPoint()
 {
-    RunningThreadsList::getInstance().add (this);
+    getCurrentThreadHolder() = this;
 
     JUCE_TRY
     {
-        if (threadName_.isNotEmpty())
-            setCurrentThreadName (threadName_);
+        if (threadName.isNotEmpty())
+            setCurrentThreadName (threadName);
 
-        if (startSuspensionEvent_.wait (10000))
+        if (startSuspensionEvent.wait (10000))
         {
-            jassert (getCurrentThreadId() == threadId_);
+            jassert (getCurrentThreadId() == threadId);
 
-            if (affinityMask_ != 0)
-                setCurrentThreadAffinityMask (affinityMask_);
+            if (affinityMask != 0)
+                setCurrentThreadAffinityMask (affinityMask);
 
             run();
         }
     }
     JUCE_CATCH_ALL_ASSERT
 
-    RunningThreadsList::getInstance().remove (this);
+    getCurrentThreadHolder().releaseCurrentThreadStorage();
     closeThreadHandle();
 }
 
@@ -145,15 +60,14 @@ void JUCE_API juce_threadEntryPoint (void* userData)
     static_cast <Thread*> (userData)->threadEntryPoint();
 }
 
-
 //==============================================================================
-Thread::Thread (const String& threadName)
-    : threadName_ (threadName),
-      threadHandle_ (nullptr),
-      threadId_ (0),
-      threadPriority_ (5),
-      affinityMask_ (0),
-      threadShouldExit_ (false)
+Thread::Thread (const String& threadName_)
+    : threadName (threadName_),
+      threadHandle (nullptr),
+      threadId (0),
+      threadPriority (5),
+      affinityMask (0),
+      shouldExit (false)
 {
 }
 
@@ -176,13 +90,13 @@ void Thread::startThread()
 {
     const ScopedLock sl (startStopLock);
 
-    threadShouldExit_ = false;
+    shouldExit = false;
 
-    if (threadHandle_ == nullptr)
+    if (threadHandle == nullptr)
     {
         launchThread();
-        setThreadPriority (threadHandle_, threadPriority_);
-        startSuspensionEvent_.signal();
+        setThreadPriority (threadHandle, threadPriority);
+        startSuspensionEvent.signal();
     }
 }
 
@@ -190,9 +104,9 @@ void Thread::startThread (const int priority)
 {
     const ScopedLock sl (startStopLock);
 
-    if (threadHandle_ == nullptr)
+    if (threadHandle == nullptr)
     {
-        threadPriority_ = priority;
+        threadPriority = priority;
         startThread();
     }
     else
@@ -203,13 +117,13 @@ void Thread::startThread (const int priority)
 
 bool Thread::isThreadRunning() const
 {
-    return threadHandle_ != nullptr;
+    return threadHandle != nullptr;
 }
 
 //==============================================================================
 void Thread::signalThreadShouldExit()
 {
-    threadShouldExit_ = true;
+    shouldExit = true;
 }
 
 bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
@@ -256,62 +170,51 @@ void Thread::stopThread (const int timeOutMilliseconds)
 
             killThread();
 
-            RunningThreadsList::getInstance().remove (this);
-            threadHandle_ = nullptr;
-            threadId_ = 0;
+            threadHandle = nullptr;
+            threadId = 0;
         }
     }
 }
 
 //==============================================================================
-bool Thread::setPriority (const int priority)
+bool Thread::setPriority (const int newPriority)
 {
     const ScopedLock sl (startStopLock);
 
-    if (setThreadPriority (threadHandle_, priority))
+    if (setThreadPriority (threadHandle, newPriority))
     {
-        threadPriority_ = priority;
+        threadPriority = newPriority;
         return true;
     }
 
     return false;
 }
 
-bool Thread::setCurrentThreadPriority (const int priority)
+bool Thread::setCurrentThreadPriority (const int newPriority)
 {
-    return setThreadPriority (0, priority);
+    return setThreadPriority (0, newPriority);
 }
 
-void Thread::setAffinityMask (const uint32 affinityMask)
+void Thread::setAffinityMask (const uint32 newAffinityMask)
 {
-    affinityMask_ = affinityMask;
+    affinityMask = newAffinityMask;
 }
 
 //==============================================================================
 bool Thread::wait (const int timeOutMilliseconds) const
 {
-    return defaultEvent_.wait (timeOutMilliseconds);
+    return defaultEvent.wait (timeOutMilliseconds);
 }
 
 void Thread::notify() const
 {
-    defaultEvent_.signal();
+    defaultEvent.signal();
 }
 
 //==============================================================================
-int Thread::getNumRunningThreads()
-{
-    return RunningThreadsList::getInstance().size();
-}
-
 Thread* Thread::getCurrentThread()
 {
-    return RunningThreadsList::getInstance().getThreadWithID (getCurrentThreadId());
-}
-
-void Thread::stopAllThreads (const int timeOutMilliseconds)
-{
-    RunningThreadsList::getInstance().stopAll (timeOutMilliseconds);
+    return *getCurrentThreadHolder();
 }
 
 //==============================================================================

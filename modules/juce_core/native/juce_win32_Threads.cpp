@@ -125,25 +125,25 @@ static unsigned int __stdcall threadEntryProc (void* userData)
 void Thread::launchThread()
 {
     unsigned int newThreadId;
-    threadHandle_ =  (void*) _beginthreadex (0, 0, &threadEntryProc, this, 0, &newThreadId);
-    threadId_ = (ThreadID) newThreadId;
+    threadHandle = (void*) _beginthreadex (0, 0, &threadEntryProc, this, 0, &newThreadId);
+    threadId = (ThreadID) newThreadId;
 }
 
 void Thread::closeThreadHandle()
 {
-    CloseHandle ((HANDLE) threadHandle_);
-    threadId_ = 0;
-    threadHandle_ = 0;
+    CloseHandle ((HANDLE) threadHandle);
+    threadId = 0;
+    threadHandle = 0;
 }
 
 void Thread::killThread()
 {
-    if (threadHandle_ != 0)
+    if (threadHandle != 0)
     {
        #if JUCE_DEBUG
-        OutputDebugString (_T("** Warning - Forced thread termination **\n"));
+        OutputDebugStringA ("** Warning - Forced thread termination **\n");
        #endif
-        TerminateThread (threadHandle_, 0);
+        TerminateThread (threadHandle, 0);
     }
 }
 

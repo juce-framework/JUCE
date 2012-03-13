@@ -142,7 +142,7 @@ public:
 
         @see signalThreadShouldExit
     */
-    inline bool threadShouldExit() const                { return threadShouldExit_; }
+    inline bool threadShouldExit() const                { return shouldExit; }
 
     /** Waits for the thread to stop.
 
@@ -248,44 +248,30 @@ public:
 
         @see getCurrentThreadId
     */
-    ThreadID getThreadId() const noexcept                           { return threadId_; }
+    ThreadID getThreadId() const noexcept                           { return threadId; }
 
     /** Returns the name of the thread.
 
         This is the name that gets set in the constructor.
     */
-    const String& getThreadName() const                             { return threadName_; }
+    const String& getThreadName() const                             { return threadName; }
 
     /** Changes the name of the caller thread.
         Different OSes may place different length or content limits on this name.
     */
     static void setCurrentThreadName (const String& newThreadName);
 
-    //==============================================================================
-    /** Returns the number of currently-running threads.
-
-        @returns  the number of Thread objects known to be currently running.
-        @see stopAllThreads
-    */
-    static int getNumRunningThreads();
-
-    /** Tries to stop all currently-running threads.
-
-        This will attempt to stop all the threads known to be running at the moment.
-    */
-    static void stopAllThreads (int timeoutInMillisecs);
-
 
 private:
     //==============================================================================
-    const String threadName_;
-    void* volatile threadHandle_;
-    ThreadID threadId_;
+    const String threadName;
+    void* volatile threadHandle;
+    ThreadID threadId;
     CriticalSection startStopLock;
-    WaitableEvent startSuspensionEvent_, defaultEvent_;
-    int threadPriority_;
-    uint32 affinityMask_;
-    bool volatile threadShouldExit_;
+    WaitableEvent startSuspensionEvent, defaultEvent;
+    int threadPriority;
+    uint32 affinityMask;
+    bool volatile shouldExit;
 
    #ifndef DOXYGEN
     friend void JUCE_API juce_threadEntryPoint (void*);
@@ -295,7 +281,7 @@ private:
     void closeThreadHandle();
     void killThread();
     void threadEntryPoint();
-    static bool setThreadPriority (void*, int priority);
+    static bool setThreadPriority (void*, int);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread);
 };
