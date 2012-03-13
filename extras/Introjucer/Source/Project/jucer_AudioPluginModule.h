@@ -222,7 +222,7 @@ namespace RTASHelpers
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
     {
-        RelativePath rtasFolder (getRTASFolderRelativePath (exporter));
+        RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
 
         if (exporter.isVisualStudio())
         {
