@@ -25,6 +25,15 @@
 
 const char* const openSLTypeName = "Android OpenSL";
 
+bool isOpenSLAvailable()
+{
+    DynamicLibrary library;
+    return library.open ("libOpenSLES.so");
+}
+
+const unsigned short openSLRates[] = { 8000, 16000, 32000, 44100, 48000 };
+const unsigned short openSLBufferSizes[] = { 256, 512, 768, 1024, 1280, 1600, 2048, 3072 };
+
 //==============================================================================
 class OpenSLAudioIODevice  : public AudioIODevice,
                              public Thread
@@ -36,6 +45,14 @@ public:
           callback (nullptr), sampleRate (0), deviceOpen (false),
           inputBuffer (2, 2), outputBuffer (2, 2)
     {
+        // OpenSL has piss-poor support for determining latency, so the only way I can find to
+        // get a number for this is by asking the AudioTrack/AudioRecord classes..
+        AndroidAudioIODevice javaDevice (String::empty);
+
+        // this is a total guess about how to calculate this: assuming that internally the
+        // hardware probably uses 3 buffers, so the latency is about 2/3 of it.. YMMV
+        inputLatency  = (javaDevice.minBufferSizeIn  * 2) / 3;
+        outputLatency = (javaDevice.minBufferSizeOut * 2) / 3;
     }
 
     ~OpenSLAudioIODevice()
@@ -60,29 +77,22 @@ public:
         return s;
     }
 
-    int getNumSampleRates()             { return 5;}
+    int getNumSampleRates()                 { return numElementsInArray (openSLRates); }
+
     double getSampleRate (int index)
     {
-        int rates[] = { 8000, 16000, 32000, 44100, 48000 };
-        jassert (index >= 0 && index < numElementsInArray (rates));
-        return rates [index];
+        jassert (index >= 0 && index < getNumSampleRates());
+        return (int) openSLRates [index];
     }
 
-    int getDefaultBufferSize()          { return 2048; }
-    int getNumBufferSizesAvailable()    { return 50; }
+    int getDefaultBufferSize()              { return 2048; }
+    int getNumBufferSizesAvailable()        { return numElementsInArray (openSLBufferSizes); }
 
     int getBufferSizeSamples (int index)
     {
-        int n = 16;
-        for (int i = 0; i < index; ++i)
-            n += n < 64 ? 16
-                        : (n < 512 ? 32
-                                   : (n < 1024 ? 64
-                                               : (n < 2048 ? 128 : 256)));
-
-        return n;
+        jassert (index >= 0 && index < getNumBufferSizesAvailable());
+        return (int) openSLBufferSizes [index];
     }
-
 
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
@@ -131,8 +141,8 @@ public:
         player = nullptr;
     }
 
-    int getOutputLatencyInSamples()                     { return 0; }
-    int getInputLatencyInSamples()                      { return 0; }
+    int getOutputLatencyInSamples()                     { return outputLatency; }
+    int getInputLatencyInSamples()                      { return inputLatency; }
     bool isOpen()                                       { return deviceOpen; }
     int getCurrentBufferSizeSamples()                   { return actualBufferSize; }
     int getCurrentBitDepth()                            { return 16; }
@@ -200,6 +210,7 @@ private:
     CriticalSection callbackLock;
     AudioIODeviceCallback* callback;
     int actualBufferSize, sampleRate;
+    int inputLatency, outputLatency;
     bool deviceOpen;
     String lastError;
     BigInteger activeOutputChans, activeInputChans;
@@ -608,6 +619,5 @@ private:
 //==============================================================================
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()
 {
-    DynamicLibrary library;
-    return library.open ("libOpenSLES.so") ? new OpenSLAudioDeviceType() : nullptr;
+    return isOpenSLAvailable() ? new OpenSLAudioDeviceType() : nullptr;
 }

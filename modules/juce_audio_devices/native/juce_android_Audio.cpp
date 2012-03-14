@@ -74,11 +74,10 @@ public:
     AndroidAudioIODevice (const String& deviceName)
         : AudioIODevice (deviceName, javaAudioTypeName),
           Thread ("audio"),
-          callback (0), sampleRate (0),
+          minBufferSizeOut (0), minBufferSizeIn (0), callback (0), sampleRate (0),
           numClientInputChannels (0), numDeviceInputChannels (0), numDeviceInputChannelsAvailable (2),
           numClientOutputChannels (0), numDeviceOutputChannels (0),
-          minBufferSizeOut (0), minBufferSizeIn (0), actualBufferSize (0),
-          isRunning (false),
+          actualBufferSize (0), isRunning (false),
           outputChannelBuffer (1, 1),
           inputChannelBuffer (1, 1)
     {
@@ -239,8 +238,8 @@ public:
         }
     }
 
-    int getOutputLatencyInSamples()                     { return minBufferSizeOut; }
-    int getInputLatencyInSamples()                      { return minBufferSizeIn; }
+    int getOutputLatencyInSamples()                     { return (minBufferSizeOut * 3) / 4; }
+    int getInputLatencyInSamples()                      { return (minBufferSizeIn * 3) / 4; }
     bool isOpen()                                       { return isRunning; }
     int getCurrentBufferSizeSamples()                   { return actualBufferSize; }
     int getCurrentBitDepth()                            { return 16; }
@@ -360,6 +359,8 @@ public:
         }
     }
 
+    int minBufferSizeOut, minBufferSizeIn;
+
 private:
     //==================================================================================================
     CriticalSection callbackLock;
@@ -367,7 +368,7 @@ private:
     jint sampleRate;
     int numClientInputChannels, numDeviceInputChannels, numDeviceInputChannelsAvailable;
     int numClientOutputChannels, numDeviceOutputChannels;
-    int minBufferSizeOut, minBufferSizeIn, actualBufferSize;
+    int actualBufferSize;
     bool isRunning;
     String lastError;
     BigInteger activeOutputChans, activeInputChans;
@@ -430,7 +431,14 @@ private:
 
 
 //==============================================================================
+extern bool isOpenSLAvailable();
+
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()
 {
+   #if JUCE_USE_ANDROID_OPENSLES
+    if (isOpenSLAvailable())
+        return nullptr;
+   #endif
+
     return new AndroidAudioIODeviceType();
 }
