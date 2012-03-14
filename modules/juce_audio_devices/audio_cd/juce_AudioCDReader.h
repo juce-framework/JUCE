@@ -57,7 +57,7 @@ public:
 
         @param index    the index of one of the available CDs - use getAvailableCDNames()
                         to find out how many there are.
-        @returns        a new AudioCDReader object, or 0 if it couldn't be created. The
+        @returns        a new AudioCDReader object, or nullptr if it couldn't be created. The
                         caller will be responsible for deleting the object returned.
     */
     static AudioCDReader* createReaderForCD (const int index);
@@ -70,23 +70,19 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples);
 
-    /** Checks whether the CD has been removed from the drive.
-    */
+    /** Checks whether the CD has been removed from the drive. */
     bool isCDStillPresent() const;
 
-    /** Returns the total number of tracks (audio + data).
-    */
+    /** Returns the total number of tracks (audio + data). */
     int getNumTracks() const;
 
     /** Finds the sample offset of the start of a track.
-
         @param trackNum     the track number, where trackNum = 0 is the first track
                             and trackNum = getNumTracks() means the end of the CD.
     */
     int getPositionOfTrackStart (int trackNum) const;
 
     /** Returns true if a given track is an audio track.
-
         @param trackNum     the track number, where 0 is the first track.
     */
     bool isTrackAudio (int trackNum) const;
@@ -105,7 +101,6 @@ public:
     void refreshTrackLengths();
 
     /** Enables scanning for indexes within tracks.
-
         @see getLastIndex
     */
     void enableIndexScanning (bool enabled);
@@ -126,7 +121,6 @@ public:
     int getLastIndex() const;
 
     /** Scans a track to find the position of any indexes within it.
-
         @param trackNumber  the track to look in, where 0 is the first track on the disc
         @returns    an array of sample positions of any index points found (not including
                     the index that marks the start of the track)
@@ -134,14 +128,12 @@ public:
     Array<int> findIndexesInTrack (const int trackNumber);
 
     /** Returns the CDDB id number for the CD.
-
         It's not a great way of identifying a disc, but it's traditional.
     */
     int getCDDBId();
 
     /** Tries to eject the disk.
-
-        Of course this might not be possible, if some other process is using it.
+        Ejecting the disk might not actually be possible, e.g. if some other process is using it.
     */
     void ejectDisk();
 

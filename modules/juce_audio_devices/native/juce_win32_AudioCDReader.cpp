@@ -993,7 +993,12 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int deviceIndex)
         HANDLE h = createSCSIDeviceHandle (list [deviceIndex].scsiDriveLetter);
 
         if (h != INVALID_HANDLE_VALUE)
-            return new AudioCDReader (new CDDeviceWrapper (list [deviceIndex], h));
+        {
+            ScopedPointer<AudioCDReader> cd (new AudioCDReader (new CDDeviceWrapper (list [deviceIndex], h)));
+
+            if (cd->lengthInSamples > 0)
+                return cd.release();
+        }
     }
 
     return nullptr;
