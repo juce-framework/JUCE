@@ -23,7 +23,11 @@
   ==============================================================================
 */
 
-#define CHECK_MESSAGE_MANAGER_IS_LOCKED     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+#define CHECK_MESSAGE_MANAGER_IS_LOCKED \
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
+#define CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || getPeer() == nullptr);
 
 Component* Component::currentlyFocusedComponent = nullptr;
 
@@ -411,7 +415,7 @@ void Component::setName (const String& name)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (componentName != name)
     {
@@ -442,7 +446,7 @@ void Component::setVisible (bool shouldBeVisible)
     {
         // if component methods are being called from threads other than the message
         // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-        CHECK_MESSAGE_MANAGER_IS_LOCKED
+        CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
         const WeakReference<Component> safePointer (this);
         flags.visibleFlag = shouldBeVisible;
@@ -788,7 +792,7 @@ void Component::toFront (const bool setAsForeground)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (flags.hasHeavyweightPeerFlag)
     {
@@ -965,6 +969,11 @@ int Component::getScreenY() const   { return getScreenPosition().y; }
 Point<int> Component::getScreenPosition() const       { return localPointToGlobal (Point<int>()); }
 Rectangle<int> Component::getScreenBounds() const     { return localAreaToGlobal (getLocalBounds()); }
 
+Rectangle<int> Component::getParentMonitorArea() const
+{
+    return Desktop::getInstance().getMonitorAreaContaining (getScreenBounds().getCentre());
+}
+
 Point<int> Component::getLocalPoint (const Component* source, const Point<int>& point) const
 {
     return ComponentHelpers::convertCoordinate (this, source, point);
@@ -1008,7 +1017,7 @@ void Component::setBounds (const int x, const int y, int w, int h)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     if (w < 0) w = 0;
     if (h < 0) h = 0;
@@ -1302,10 +1311,9 @@ bool Component::contains (const Point<int>& point)
     if (ComponentHelpers::hitTest (*this, point))
     {
         if (parentComponent != nullptr)
-        {
             return parentComponent->contains (ComponentHelpers::convertToParentSpace (*this, point));
-        }
-        else if (flags.hasHeavyweightPeerFlag)
+
+        if (flags.hasHeavyweightPeerFlag)
         {
             const ComponentPeer* const peer = getPeer();
 
@@ -1357,7 +1365,10 @@ void Component::addChildComponent (Component* const child, int zOrder)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
+
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || ! isShowing());
+
 
     if (child != nullptr && child->parentComponent != this)
     {
@@ -1424,7 +1435,7 @@ Component* Component::removeChildComponent (const int index, bool sendParentEven
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
     Component* const child = childComponentList [index];
 
@@ -1793,14 +1804,14 @@ void Component::internalRepaint (const Rectangle<int>& area)
 
 void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool isEntireComponent)
 {
-    // if component methods are being called from threads other than the message
-    // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
-
     if (flags.visibleFlag)
     {
         if (flags.hasHeavyweightPeerFlag)
         {
+            // if component methods are being called from threads other than the message
+            // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
+            CHECK_MESSAGE_MANAGER_IS_LOCKED
+
             ComponentPeer* const peer = getPeer();
 
             if (peer != nullptr)
@@ -2380,7 +2391,6 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
                          source.getLastMouseDownTime(),
                          source.getNumberOfMultipleClicks(),
                          source.hasMouseMovedSignificantlySincePressed());
-
     mouseUp (me);
 
     if (checker.shouldBailOut())
@@ -2417,7 +2427,6 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
                          source.getLastMouseDownTime(),
                          source.getNumberOfMultipleClicks(),
                          source.hasMouseMovedSignificantlySincePressed());
-
     mouseDrag (me);
 
     if (checker.shouldBailOut())
@@ -2431,10 +2440,6 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 void Component::internalMouseMove (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
     Desktop& desktop = Desktop::getInstance();
-    BailOutChecker checker (this);
-
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                         this, this, time, relativePos, time, 0, false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2443,6 +2448,10 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
     }
     else
     {
+        BailOutChecker checker (this);
+
+        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                             this, this, time, relativePos, time, 0, false);
         mouseMove (me);
 
         if (checker.shouldBailOut())
@@ -2493,7 +2502,7 @@ void Component::sendFakeMouseMove() const
         mainMouse.triggerFakeMove();
 }
 
-void Component::beginDragAutoRepeat (const int interval)
+void JUCE_CALLTYPE Component::beginDragAutoRepeat (const int interval)
 {
     Desktop::getInstance().beginDragAutoRepeat (interval);
 }
@@ -2868,12 +2877,6 @@ Point<int> Component::getMouseXYRelative() const
 }
 
 //==============================================================================
-Rectangle<int> Component::getParentMonitorArea() const
-{
-    return Desktop::getInstance().getMonitorAreaContaining (getScreenBounds().getCentre());
-}
-
-//==============================================================================
 void Component::addKeyListener (KeyListener* const newListener)
 {
     if (keyListeners == nullptr)
@@ -2888,15 +2891,8 @@ void Component::removeKeyListener (KeyListener* const listenerToRemove)
         keyListeners->removeValue (listenerToRemove);
 }
 
-bool Component::keyPressed (const KeyPress&)
-{
-    return false;
-}
-
-bool Component::keyStateChanged (const bool /*isKeyDown*/)
-{
-    return false;
-}
+bool Component::keyPressed (const KeyPress&)                { return false; }
+bool Component::keyStateChanged (const bool /*isKeyDown*/)  { return false; }
 
 void Component::modifierKeysChanged (const ModifierKeys& modifiers)
 {
@@ -2907,7 +2903,6 @@ void Component::modifierKeysChanged (const ModifierKeys& modifiers)
 void Component::internalModifierKeysChanged()
 {
     sendFakeMouseMove();
-
     modifierKeysChanged (ModifierKeys::getCurrentModifiers());
 }
 

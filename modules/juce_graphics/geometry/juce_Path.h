@@ -738,7 +738,20 @@ private:
     friend class Path::Iterator;
     ArrayAllocationBase <float, DummyCriticalSection> data;
     size_t numElements;
-    float pathXMin, pathXMax, pathYMin, pathYMax;
+
+    struct PathBounds
+    {
+        PathBounds() noexcept;
+        Rectangle<float> getRectangle() const noexcept;
+        void reset() noexcept;
+        void reset (float, float) noexcept;
+        void extend (float, float) noexcept;
+        void extend (float, float, float, float) noexcept;
+
+        float pathXMin, pathXMax, pathYMin, pathYMax;
+    };
+
+    PathBounds bounds;
     bool useNonZeroWinding;
 
     static const float lineMarker;

@@ -61,15 +61,64 @@ const float Path::quadMarker           = 100003.0f;
 const float Path::cubicMarker          = 100004.0f;
 const float Path::closeSubPathMarker   = 100005.0f;
 
+//==============================================================================
+Path::PathBounds::PathBounds() noexcept
+    : pathXMin (0), pathXMax (0), pathYMin (0), pathYMax (0)
+{
+}
+
+Rectangle<float> Path::PathBounds::getRectangle() const noexcept
+{
+    return Rectangle<float> (pathXMin, pathYMin, pathXMax - pathXMin, pathYMax - pathYMin);
+}
+
+void Path::PathBounds::reset() noexcept
+{
+    pathXMin = pathYMin = pathYMax = pathXMax = 0;
+}
+
+void Path::PathBounds::reset (const float x, const float y) noexcept
+{
+    pathXMin = pathXMax = x;
+    pathYMin = pathYMax = y;
+}
+
+void Path::PathBounds::extend (const float x, const float y) noexcept
+{
+    pathXMin = jmin (pathXMin, x);
+    pathXMax = jmax (pathXMax, x);
+    pathYMin = jmin (pathYMin, y);
+    pathYMax = jmax (pathYMax, y);
+}
+
+void Path::PathBounds::extend (const float x1, const float y1, const float x2, const float y2) noexcept
+{
+    if (x1 < x2)
+    {
+        pathXMin = jmin (pathXMin, x1);
+        pathXMax = jmax (pathXMax, x2);
+    }
+    else
+    {
+        pathXMin = jmin (pathXMin, x2);
+        pathXMax = jmax (pathXMax, x1);
+    }
+
+    if (y1 < y2)
+    {
+        pathYMin = jmin (pathYMin, y1);
+        pathYMax = jmax (pathYMax, y2);
+    }
+    else
+    {
+        pathYMin = jmin (pathYMin, y2);
+        pathYMax = jmax (pathYMax, y1);
+    }
+}
 
 //==============================================================================
 Path::Path()
-    : numElements (0),
-      pathXMin (0),
-      pathXMax (0),
-      pathYMin (0),
-      pathYMax (0),
-      useNonZeroWinding (true)
+   : numElements (0), useNonZeroWinding (true)
 {
 }
 
@@ -79,10 +128,7 @@ Path::~Path()
 
 Path::Path (const Path& other)
     : numElements (other.numElements),
-      pathXMin (other.pathXMin),
-      pathXMax (other.pathXMax),
-      pathYMin (other.pathYMin),
-      pathYMax (other.pathYMax),
+      bounds (other.bounds),
       useNonZeroWinding (other.useNonZeroWinding)
 {
     if (numElements > 0)
@@ -99,10 +145,7 @@ Path& Path::operator= (const Path& other)
         data.ensureAllocatedSize ((int) other.numElements);
 
         numElements = other.numElements;
-        pathXMin = other.pathXMin;
-        pathXMax = other.pathXMax;
-        pathYMin = other.pathYMin;
-        pathYMax = other.pathYMax;
+        bounds = other.bounds;
         useNonZeroWinding = other.useNonZeroWinding;
 
         if (numElements > 0)
@@ -116,10 +159,7 @@ Path& Path::operator= (const Path& other)
 Path::Path (Path&& other) noexcept
     : data (static_cast <ArrayAllocationBase <float, DummyCriticalSection>&&> (other.data)),
       numElements (other.numElements),
-      pathXMin (other.pathXMin),
-      pathXMax (other.pathXMax),
-      pathYMin (other.pathYMin),
-      pathYMax (other.pathYMax),
+      bounds (other.bounds),
       useNonZeroWinding (other.useNonZeroWinding)
 {
 }
@@ -128,10 +168,7 @@ Path& Path::operator= (Path&& other) noexcept
 {
     data = static_cast <ArrayAllocationBase <float, DummyCriticalSection>&&> (other.data);
     numElements = other.numElements;
-    pathXMin = other.pathXMin;
-    pathXMax = other.pathXMax;
-    pathYMin = other.pathYMin;
-    pathYMax = other.pathYMax;
+    bounds = other.bounds;
     useNonZeroWinding = other.useNonZeroWinding;
     return *this;
 }
@@ -157,20 +194,17 @@ bool Path::operator!= (const Path& other) const noexcept
 void Path::clear() noexcept
 {
     numElements = 0;
-    pathXMin = 0;
-    pathYMin = 0;
-    pathYMax = 0;
-    pathXMax = 0;
+    bounds.reset();
 }
 
 void Path::swapWithPath (Path& other) noexcept
 {
     data.swapWith (other.data);
     std::swap (numElements, other.numElements);
-    std::swap (pathXMin, other.pathXMin);
-    std::swap (pathXMax, other.pathXMax);
-    std::swap (pathYMin, other.pathYMin);
-    std::swap (pathYMax, other.pathYMax);
+    std::swap (bounds.pathXMin, other.bounds.pathXMin);
+    std::swap (bounds.pathXMax, other.bounds.pathXMax);
+    std::swap (bounds.pathYMin, other.bounds.pathYMin);
+    std::swap (bounds.pathYMax, other.bounds.pathYMax);
     std::swap (useNonZeroWinding, other.useNonZeroWinding);
 }
 
@@ -212,9 +246,7 @@ bool Path::isEmpty() const noexcept
 
 Rectangle<float> Path::getBounds() const noexcept
 {
-    return Rectangle<float> (pathXMin, pathYMin,
-                             pathXMax - pathXMin,
-                             pathYMax - pathYMin);
+    return bounds.getRectangle();
 }
 
 Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const noexcept
@@ -228,17 +260,9 @@ void Path::startNewSubPath (const float x, const float y)
     JUCE_CHECK_COORDS_ARE_VALID (x, y);
 
     if (numElements == 0)
-    {
-        pathXMin = pathXMax = x;
-        pathYMin = pathYMax = y;
-    }
+        bounds.reset (x, y);
     else
-    {
-        pathXMin = jmin (pathXMin, x);
-        pathXMax = jmax (pathXMax, x);
-        pathYMin = jmin (pathYMin, y);
-        pathYMax = jmax (pathYMax, y);
-    }
+        bounds.extend (x, y);
 
     data.ensureAllocatedSize ((int) numElements + 3);
 
@@ -265,10 +289,7 @@ void Path::lineTo (const float x, const float y)
     data.elements [numElements++] = x;
     data.elements [numElements++] = y;
 
-    pathXMin = jmin (pathXMin, x);
-    pathXMax = jmax (pathXMax, x);
-    pathYMin = jmin (pathYMin, y);
-    pathYMax = jmax (pathYMax, y);
+    bounds.extend (x, y);
 }
 
 void Path::lineTo (const Point<float>& end)
@@ -293,10 +314,7 @@ void Path::quadraticTo (const float x1, const float y1,
     data.elements [numElements++] = x2;
     data.elements [numElements++] = y2;
 
-    pathXMin = jmin (pathXMin, x1, x2);
-    pathXMax = jmax (pathXMax, x1, x2);
-    pathYMin = jmin (pathYMin, y1, y2);
-    pathYMax = jmax (pathYMax, y1, y2);
+    bounds.extend (x1, y1, x2, y2);
 }
 
 void Path::quadraticTo (const Point<float>& controlPoint,
@@ -327,10 +345,8 @@ void Path::cubicTo (const float x1, const float y1,
     data.elements [numElements++] = x3;
     data.elements [numElements++] = y3;
 
-    pathXMin = jmin (pathXMin, x1, x2, x3);
-    pathXMax = jmax (pathXMax, x1, x2, x3);
-    pathYMin = jmin (pathYMin, y1, y2, y3);
-    pathYMax = jmax (pathYMax, y1, y2, y3);
+    bounds.extend (x1, y1, x2, y2);
+    bounds.extend (x3, y3);
 }
 
 void Path::cubicTo (const Point<float>& controlPoint1,
@@ -388,17 +404,17 @@ void Path::addRectangle (const float x, const float y,
 
     if (numElements == 0)
     {
-        pathXMin = x1;
-        pathXMax = x2;
-        pathYMin = y1;
-        pathYMax = y2;
+        bounds.pathXMin = x1;
+        bounds.pathXMax = x2;
+        bounds.pathYMin = y1;
+        bounds.pathYMax = y2;
     }
     else
     {
-        pathXMin = jmin (pathXMin, x1);
-        pathXMax = jmax (pathXMax, x2);
-        pathYMin = jmin (pathYMin, y1);
-        pathYMax = jmax (pathYMax, y2);
+        bounds.pathXMin = jmin (bounds.pathXMin, x1);
+        bounds.pathXMax = jmax (bounds.pathXMax, x2);
+        bounds.pathYMin = jmin (bounds.pathYMin, y1);
+        bounds.pathYMax = jmax (bounds.pathYMax, y2);
     }
 
     data.elements [numElements++] = moveMarker;
@@ -751,42 +767,30 @@ void Path::addBubble (float x, float y,
 void Path::addPath (const Path& other)
 {
     size_t i = 0;
+    const float* const d = other.data.elements;
 
     while (i < other.numElements)
     {
-        const float type = other.data.elements [i++];
+        const float type = d[i++];
 
         if (type == moveMarker)
         {
-            startNewSubPath (other.data.elements [i],
-                             other.data.elements [i + 1]);
-
+            startNewSubPath (d[i], d[i + 1]);
             i += 2;
         }
         else if (type == lineMarker)
         {
-            lineTo (other.data.elements [i],
-                    other.data.elements [i + 1]);
-
+            lineTo (d[i], d[i + 1]);
             i += 2;
         }
         else if (type == quadMarker)
         {
-            quadraticTo (other.data.elements [i],
-                         other.data.elements [i + 1],
-                         other.data.elements [i + 2],
-                         other.data.elements [i + 3]);
+            quadraticTo (d[i], d[i + 1], d[i + 2], d[i + 3]);
             i += 4;
         }
         else if (type == cubicMarker)
         {
-            cubicTo (other.data.elements [i],
-                     other.data.elements [i + 1],
-                     other.data.elements [i + 2],
-                     other.data.elements [i + 3],
-                     other.data.elements [i + 4],
-                     other.data.elements [i + 5]);
-
+            cubicTo (d[i], d[i + 1], d[i + 2], d[i + 3], d[i + 4], d[i + 5]);
             i += 6;
         }
         else if (type == closeSubPathMarker)
@@ -805,10 +809,11 @@ void Path::addPath (const Path& other,
                     const AffineTransform& transformToApply)
 {
     size_t i = 0;
+    const float* const d = other.data.elements;
 
     while (i < other.numElements)
     {
-        const float type = other.data.elements [i++];
+        const float type = d [i++];
 
         if (type == closeSubPathMarker)
         {
@@ -816,8 +821,8 @@ void Path::addPath (const Path& other,
         }
         else
         {
-            float x = other.data.elements [i++];
-            float y = other.data.elements [i++];
+            float x = d[i++];
+            float y = d[i++];
             transformToApply.transformPoint (x, y);
 
             if (type == moveMarker)
@@ -830,18 +835,18 @@ void Path::addPath (const Path& other,
             }
             else if (type == quadMarker)
             {
-                float x2 = other.data.elements [i++];
-                float y2 = other.data.elements [i++];
+                float x2 = d [i++];
+                float y2 = d [i++];
                 transformToApply.transformPoint (x2, y2);
 
                 quadraticTo (x, y, x2, y2);
             }
             else if (type == cubicMarker)
             {
-                float x2 = other.data.elements [i++];
-                float y2 = other.data.elements [i++];
-                float x3 = other.data.elements [i++];
-                float y3 = other.data.elements [i++];
+                float x2 = d [i++];
+                float y2 = d [i++];
+                float x3 = d [i++];
+                float y3 = d [i++];
                 transformToApply.transformPoints (x2, y2, x3, y3);
 
                 cubicTo (x, y, x2, y2, x3, y3);
@@ -858,70 +863,49 @@ void Path::addPath (const Path& other,
 //==============================================================================
 void Path::applyTransform (const AffineTransform& transform) noexcept
 {
-    size_t i = 0;
-    pathYMin = pathXMin = 0;
-    pathYMax = pathXMax = 0;
-    bool setMaxMin = false;
+    bounds.reset();
+    bool firstPoint = true;
+    float* d = data.elements;
+    float* const end = d + numElements;
 
-    while (i < numElements)
+    while (d < end)
     {
-        const float type = data.elements [i++];
+        const float type = *d++;
 
         if (type == moveMarker)
         {
-            transform.transformPoint (data.elements [i], data.elements [i + 1]);
+            transform.transformPoint (d[0], d[1]);
 
-            if (setMaxMin)
+            if (firstPoint)
             {
-                pathXMin = jmin (pathXMin, data.elements [i]);
-                pathXMax = jmax (pathXMax, data.elements [i]);
-                pathYMin = jmin (pathYMin, data.elements [i + 1]);
-                pathYMax = jmax (pathYMax, data.elements [i + 1]);
+                firstPoint = false;
+                bounds.reset (d[0], d[1]);
             }
             else
             {
-                pathXMin = pathXMax = data.elements [i];
-                pathYMin = pathYMax = data.elements [i + 1];
-                setMaxMin = true;
+                bounds.extend (d[0], d[1]);
             }
 
-            i += 2;
+            d += 2;
         }
         else if (type == lineMarker)
         {
-            transform.transformPoint (data.elements [i], data.elements [i + 1]);
-
-            pathXMin = jmin (pathXMin, data.elements [i]);
-            pathXMax = jmax (pathXMax, data.elements [i]);
-            pathYMin = jmin (pathYMin, data.elements [i + 1]);
-            pathYMax = jmax (pathYMax, data.elements [i + 1]);
-
-            i += 2;
+            transform.transformPoint (d[0], d[1]);
+            bounds.extend (d[0], d[1]);
+            d += 2;
         }
         else if (type == quadMarker)
         {
-            transform.transformPoints (data.elements [i], data.elements [i + 1],
-                                       data.elements [i + 2], data.elements [i + 3]);
-
-            pathXMin = jmin (pathXMin, data.elements [i], data.elements [i + 2]);
-            pathXMax = jmax (pathXMax, data.elements [i], data.elements [i + 2]);
-            pathYMin = jmin (pathYMin, data.elements [i + 1], data.elements [i + 3]);
-            pathYMax = jmax (pathYMax, data.elements [i + 1], data.elements [i + 3]);
-
-            i += 4;
+            transform.transformPoints (d[0], d[1], d[2], d[3]);
+            bounds.extend (d[0], d[1], d[2], d[3]);
+            d += 4;
         }
         else if (type == cubicMarker)
         {
-            transform.transformPoints (data.elements [i], data.elements [i + 1],
-                                       data.elements [i + 2], data.elements [i + 3],
-                                       data.elements [i + 4], data.elements [i + 5]);
-
-            pathXMin = jmin (pathXMin, data.elements [i], data.elements [i + 2], data.elements [i + 4]);
-            pathXMax = jmax (pathXMax, data.elements [i], data.elements [i + 2], data.elements [i + 4]);
-            pathYMin = jmin (pathYMin, data.elements [i + 1], data.elements [i + 3], data.elements [i + 5]);
-            pathYMax = jmax (pathYMax, data.elements [i + 1], data.elements [i + 3], data.elements [i + 5]);
-
-            i += 6;
+            transform.transformPoints (d[0], d[1], d[2], d[3], d[4], d[5]);
+            bounds.extend (d[0], d[1], d[2], d[3]);
+            bounds.extend (d[4], d[5]);
+            d += 6;
         }
     }
 }
@@ -983,8 +967,8 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
 //==============================================================================
 bool Path::contains (const float x, const float y, const float tolerance) const
 {
-    if (x <= pathXMin || x >= pathXMax
-         || y <= pathYMin || y >= pathYMax)
+    if (x <= bounds.pathXMin || x >= bounds.pathXMax
+         || y <= bounds.pathYMin || y >= bounds.pathYMax)
         return false;
 
     PathFlatteningIterator i (*this, AffineTransform::identity, tolerance);

@@ -1612,7 +1612,7 @@ public:
 
         @see mouseDrag, Desktop::beginDragAutoRepeat
     */
-    static void beginDragAutoRepeat (int millisecondsBetweenCallbacks);
+    static void JUCE_CALLTYPE beginDragAutoRepeat (int millisecondsBetweenCallbacks);
 
     /** Causes automatic repaints when the mouse enters or exits this component.
 
