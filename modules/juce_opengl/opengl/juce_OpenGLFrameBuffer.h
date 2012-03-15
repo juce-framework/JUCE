@@ -95,6 +95,9 @@ public:
     /** Deselects this buffer as the current OpenGL rendering target. */
     void releaseAsRenderingTarget();
 
+    /** Returns the ID of this framebuffer, or 0 if it isn't initialised. */
+    GLuint getFrameBufferID() const;
+
     /** Returns the current frame buffer ID for the current context. */
     static GLuint getCurrentFrameBufferTarget();
 

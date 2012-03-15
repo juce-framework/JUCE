@@ -32,7 +32,7 @@ public:
           width (width_),
           height (height_),
           textureID (0),
-          frameBufferHandle (0),
+          frameBufferID (0),
           depthOrStencilBuffer (0),
           hasDepthBuffer (false),
           hasStencilBuffer (false),
@@ -47,8 +47,8 @@ public:
             return;
        #endif
 
-        context.extensions.glGenFramebuffers (1, &frameBufferHandle);
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle);
+        context.extensions.glGenFramebuffers (1, &frameBufferID);
+        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
         JUCE_CHECK_OPENGL_ERROR
 
         glGenTextures (1, &textureID);
@@ -102,15 +102,15 @@ public:
         if (depthOrStencilBuffer != 0)
             context.extensions.glDeleteRenderbuffers (1, &depthOrStencilBuffer);
 
-        if (frameBufferHandle != 0)
-            context.extensions.glDeleteFramebuffers (1, &frameBufferHandle);
+        if (frameBufferID != 0)
+            context.extensions.glDeleteFramebuffers (1, &frameBufferID);
 
         JUCE_CHECK_OPENGL_ERROR
     }
 
     void bind()
     {
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle);
+        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
         JUCE_CHECK_OPENGL_ERROR
     }
 
@@ -122,7 +122,7 @@ public:
 
     OpenGLContext& context;
     const int width, height;
-    GLuint textureID, frameBufferHandle, depthOrStencilBuffer;
+    GLuint textureID, frameBufferID, depthOrStencilBuffer;
     bool hasDepthBuffer, hasStencilBuffer, ok;
 
 private:
@@ -214,7 +214,7 @@ bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
         glEnable (GL_TEXTURE_2D);
        #endif
         glBindTexture (GL_TEXTURE_2D, p->textureID);
-        pimpl->context.copyTexture (area, area);
+        pimpl->context.copyTexture (area, area, area.getWidth(), area.getHeight());
         glBindTexture (GL_TEXTURE_2D, 0);
         JUCE_CHECK_OPENGL_ERROR
 
@@ -270,6 +270,11 @@ bool OpenGLFrameBuffer::makeCurrentRenderingTarget()
 
     pimpl->bind();
     return true;
+}
+
+GLuint OpenGLFrameBuffer::getFrameBufferID() const
+{
+    return pimpl != nullptr ? pimpl->frameBufferID : 0;
 }
 
 GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget()
@@ -339,7 +344,7 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     glDrawTexiOES (area.getX(), area.getY(), 1, area.getWidth(), area.getHeight());
     glBindTexture (GL_TEXTURE_2D, 0);
    #else
-    pimpl->context.copyTexture (area, area);
+    pimpl->context.copyTexture (area, area, pimpl->width, pimpl->height);
    #endif
 
     pimpl->context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, 0);

@@ -127,7 +127,8 @@ bool OpenGLContext::areShadersAvailable() const
 }
 
 void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
-                                 const Rectangle<int>& anchorPosAndTextureSize)
+                                 const Rectangle<int>& anchorPosAndTextureSize,
+                                 int contextWidth, int contextHeight)
 {
     glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable (GL_BLEND);
@@ -138,9 +139,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         struct OverlayShaderProgram  : public ReferenceCountedObject
         {
             OverlayShaderProgram (OpenGLContext& context)
-                : program (context),
-                  builder (program),
-                  params (program)
+                : program (context), builder (program), params (program)
             {}
 
             static const OverlayShaderProgram& select (OpenGLContext& context)
@@ -225,7 +224,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
 
         const OverlayShaderProgram& program = OverlayShaderProgram::select (*this);
-        program.params.set ((float) getWidth(), (float) getHeight(), anchorPosAndTextureSize.toFloat());
+        program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat());
 
         extensions.glVertexAttribPointer (program.params.positionAttribute.attributeID, 2, GL_SHORT, GL_FALSE, 4, vertices);
         extensions.glEnableVertexAttribArray (program.params.positionAttribute.attributeID);
@@ -241,26 +240,29 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
    #if JUCE_USE_OPENGL_FIXED_FUNCTION
     {
-        (void) anchorPosAndTextureSize; // xxx need to scissor
-        const GLshort left   = (GLshort) targetClipArea.getX();
-        const GLshort right  = (GLshort) targetClipArea.getRight();
-        const GLshort top    = (GLshort) (getHeight() - targetClipArea.getY());
-        const GLshort bottom = (GLshort) (getHeight() - targetClipArea.getBottom());
-        const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
-
-        OpenGLHelpers::prepareFor2D (getWidth(), getHeight());
+        glEnable (GL_SCISSOR_TEST);
+        glScissor (targetClipArea.getX(), contextHeight - targetClipArea.getBottom(),
+                   targetClipArea.getWidth(), targetClipArea.getHeight());
 
         glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_NORMAL_ARRAY);
         glEnableClientState (GL_VERTEX_ARRAY);
         glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+        OpenGLHelpers::prepareFor2D (contextWidth, contextHeight);
 
         const GLfloat textureCoords[] = { 0, 0, 1.0f, 0, 0, 1.0f, 1.0f, 1.0f };
         glTexCoordPointer (2, GL_FLOAT, 0, textureCoords);
+
+        const GLshort left   = (GLshort) anchorPosAndTextureSize.getX();
+        const GLshort right  = (GLshort) anchorPosAndTextureSize.getRight();
+        const GLshort top    = (GLshort) (contextHeight - anchorPosAndTextureSize.getY());
+        const GLshort bottom = (GLshort) (contextHeight - anchorPosAndTextureSize.getBottom());
+        const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
         glVertexPointer (2, GL_SHORT, 0, vertices);
 
         glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        glDisable (GL_SCISSOR_TEST);
     }
    #endif
 }

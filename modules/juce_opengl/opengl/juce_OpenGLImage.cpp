@@ -38,10 +38,10 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new OpenGLGraphicsContext (context, frameBuffer);
+        return createOpenGLGraphicsContext (context, frameBuffer);
     }
 
-    ImageType* createType() const                       { return new OpenGLImageType(); }
+    ImageType* createType() const     { return new OpenGLImageType(); }
 
     ImagePixelData* clone()
     {

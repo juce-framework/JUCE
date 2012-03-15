@@ -28,59 +28,23 @@
 
 
 //==============================================================================
-/** A LowLevelGraphicsContext for rendering into an OpenGL framebuffer or window.
+/** Creates a graphics context object that will render into the given OpenGL target.
+    The caller is responsible for deleting this object when no longer needed.
 */
-class JUCE_API  OpenGLGraphicsContext   : public LowLevelGraphicsContext
-{
-public:
-    explicit OpenGLGraphicsContext (OpenGLComponent& target);
-    OpenGLGraphicsContext (OpenGLContext& context, OpenGLFrameBuffer& target);
-    OpenGLGraphicsContext (OpenGLContext& context, unsigned int frameBufferID, int width, int height);
-    ~OpenGLGraphicsContext();
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLComponent& target);
 
-    bool isVectorDevice() const;
-    void setOrigin (int x, int y);
-    void addTransform (const AffineTransform&);
-    float getScaleFactor();
-    bool clipToRectangle (const Rectangle<int>&);
-    bool clipToRectangleList (const RectangleList&);
-    void excludeClipRectangle (const Rectangle<int>&);
-    void clipToPath (const Path& path, const AffineTransform&);
-    void clipToImageAlpha (const Image& sourceImage, const AffineTransform&);
-    bool clipRegionIntersects (const Rectangle<int>&);
-    Rectangle<int> getClipBounds() const;
-    bool isClipEmpty() const;
+/** Creates a graphics context object that will render into the given OpenGL target.
+    The caller is responsible for deleting this object when no longer needed.
+*/
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context,
+                                                      OpenGLFrameBuffer& target);
 
-    void saveState();
-    void restoreState();
+/** Creates a graphics context object that will render into the given OpenGL target.
+    The caller is responsible for deleting this object when no longer needed.
+*/
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context,
+                                                      unsigned int frameBufferID,
+                                                      int width, int height);
 
-    void beginTransparencyLayer (float opacity);
-    void endTransparencyLayer();
-
-    void setFill (const FillType& fillType);
-    void setOpacity (float newOpacity);
-    void setInterpolationQuality (Graphics::ResamplingQuality);
-
-    void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
-    void fillPath (const Path& path, const AffineTransform& transform);
-    void drawImage (const Image& sourceImage, const AffineTransform& transform);
-    void drawLine (const Line <float>& line);
-    void drawVerticalLine (int x, float top, float bottom);
-    void drawHorizontalLine (int y, float left, float right);
-
-    void setFont (const Font&);
-    const Font& getFont();
-
-    void drawGlyph (int glyphNumber, const AffineTransform&);
-
-   #ifndef DOXYGEN
-    class SavedState;
-    class GLState;
-   #endif
-
-private:
-    ScopedPointer<GLState> glState;
-    RenderingHelpers::SavedStateStack<SavedState> stack;
-};
 
 #endif   // __JUCE_OPENGLGRAPHICSCONTEXT_JUCEHEADER__

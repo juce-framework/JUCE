@@ -112,9 +112,14 @@ public:
         @param anchorPosAndTextureSize  the position of this rectangle is the texture's top-left
                                         anchor position in the target space, and the size must be
                                         the total size of the texture.
+        @param contextWidth     the width of the context or framebuffer that is being drawn into,
+                                used for scaling of the coordinates.
+        @param contextHeight    the height of the context or framebuffer that is being drawn into,
+                                used for vertical flipping of the y coordinates.
     */
     void copyTexture (const Rectangle<int>& targetClipArea,
-                      const Rectangle<int>& anchorPosAndTextureSize);
+                      const Rectangle<int>& anchorPosAndTextureSize,
+                      int contextWidth, int contextHeight);
 
 protected:
     //==============================================================================

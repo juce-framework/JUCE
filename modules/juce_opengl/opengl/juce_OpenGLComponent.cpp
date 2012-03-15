@@ -121,6 +121,26 @@ public:
         return frameBuffer;
     }
 
+    void clearRegionInFrameBuffer (const RectangleList& list)
+    {
+        glClearColor (0, 0, 0, 0);
+        glEnable (GL_SCISSOR_TEST);
+
+        const GLuint previousFrameBufferTarget = OpenGLFrameBuffer::getCurrentFrameBufferTarget();
+        frameBuffer.makeCurrentRenderingTarget();
+
+        for (RectangleList::Iterator i (list); i.next();)
+        {
+            const Rectangle<int>& r = *i.getRectangle();
+            glScissor (r.getX(), owner.getHeight() - r.getBottom(), r.getWidth(), r.getHeight());
+            glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        }
+
+        glDisable (GL_SCISSOR_TEST);
+        owner.getCurrentContext()->extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
+        JUCE_CHECK_OPENGL_ERROR
+    }
+
     RectangleList validArea;
 
 private:
@@ -152,7 +172,9 @@ public:
 
     void componentVisibilityChanged()
     {
-        if (! owner.isShowing())
+        if (owner.isShowing())
+            owner.triggerRepaint();
+        else
             owner.stopRenderThread();
     }
 
@@ -172,34 +194,54 @@ public:
     {
     }
 
-    void run()
+    virtual void initialise()
     {
        #if JUCE_LINUX
+        MessageManagerLock mml (this);
+
+        if (mml.lockWasGained())
         {
-            MessageManagerLock mml (this);
-
-            if (! mml.lockWasGained())
-                return;
-
             owner.updateContext();
             owner.updateContextPosition();
         }
        #endif
+    }
 
-        while (! threadShouldExit())
-        {
-            const uint32 startOfRendering = Time::getMillisecondCounter();
-
-            if (! owner.performRender())
-                break;
-
-            const int elapsed = (int) (Time::getMillisecondCounter() - startOfRendering);
-            Thread::sleep (jmax (1, (1000 / 60) - elapsed));
-        }
-
+    virtual void shutdown()
+    {
        #if JUCE_LINUX
         owner.deleteContext();
        #endif
+    }
+
+    virtual bool renderFrame()
+    {
+        return owner.performRender();
+    }
+
+    virtual void waitForNextFrame (const uint32 frameRenderStartTime)
+    {
+        const int defaultFPS = 60;
+
+        const int elapsed = (int) (Time::getMillisecondCounter() - frameRenderStartTime);
+        Thread::sleep (jmax (1, (1000 / defaultFPS) - elapsed));
+    }
+
+    void run()
+    {
+        initialise();
+
+        while (! threadShouldExit())
+        {
+            const uint32 frameRenderStartTime = Time::getMillisecondCounter();
+
+            if (! renderFrame())
+                break;
+
+            waitForNextFrame (frameRenderStartTime);
+        }
+
+        shutdown();
     }
 
 private:
@@ -458,17 +500,14 @@ bool OpenGLComponent::performRender()
                 {
                     jassert (getCurrentContext() != nullptr);
 
+                    cachedImage->clearRegionInFrameBuffer (invalid);
+
                     {
-                        OpenGLGraphicsContext g (*getCurrentContext(), frameBuffer);
+                        ScopedPointer<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (*getCurrentContext(), frameBuffer));
                         JUCE_CHECK_OPENGL_ERROR
-                        g.clipToRectangleList (invalid);
 
-                        g.setFill (Colours::transparentBlack);
-                        g.fillRect (bounds, true);
-                        g.setFill (Colours::black);
-
-                        JUCE_CHECK_OPENGL_ERROR
-                        paintSelf (g);
+                        g->clipToRectangleList (invalid);
+                        paintSelf (*g);
                         JUCE_CHECK_OPENGL_ERROR
                     }
 
@@ -484,7 +523,7 @@ bool OpenGLComponent::performRender()
             glBindTexture (GL_TEXTURE_2D, frameBuffer.getTextureID());
 
             jassert (bounds.getPosition() == Point<int>());
-            context->copyTexture (bounds, bounds);
+            context->copyTexture (bounds, bounds, context->getWidth(), context->getHeight());
             glBindTexture (GL_TEXTURE_2D, 0);
             JUCE_CHECK_OPENGL_ERROR
         }
@@ -495,9 +534,9 @@ bool OpenGLComponent::performRender()
     return true;
 }
 
-void OpenGLComponent::paintSelf (OpenGLGraphicsContext& glRenderer)
+void OpenGLComponent::paintSelf (LowLevelGraphicsContext& context)
 {
-    Graphics g (&glRenderer);
+    Graphics g (&context);
 
    #if JUCE_ENABLE_REPAINT_DEBUGGING
     g.saveState();

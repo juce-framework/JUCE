@@ -157,8 +157,9 @@ public:
 
     void drawBackground2DStuff()
     {
-        OpenGLGraphicsContext glRenderer (*this); // Create an OpenGLGraphicsContext that will draw into this GL window..
-        Graphics g (&glRenderer);          // ..and then wrap it in a normal Graphics object so we can draw with it.
+        // Create an OpenGLGraphicsContext that will draw into this GL window..
+        ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (*this));
+        Graphics g (glRenderer);
 
         // This stuff just creates a spinning star shape and fills it..
         Path p;

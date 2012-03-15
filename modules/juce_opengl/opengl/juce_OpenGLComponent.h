@@ -289,7 +289,7 @@ private:
     void updateEmbeddedPosition (const Rectangle<int>&);
     void startRenderThread();
     bool performRender();
-    void paintSelf (OpenGLGraphicsContext&);
+    void paintSelf (LowLevelGraphicsContext&);
 
     int renderAndSwapBuffers();  // (This method has been deprecated)
 

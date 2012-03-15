@@ -322,7 +322,7 @@ protected:
     //==============================================================================
     /** @internal */
     void paint (Graphics& g);
-    /** (if overriding this, make sure you call ResizableWindow::resized() in your subclass) */
+    /** (if overriding this, make sure you call ResizableWindow::moved() in your subclass) */
     void moved();
     /** (if overriding this, make sure you call ResizableWindow::resized() in your subclass) */
     void resized();
