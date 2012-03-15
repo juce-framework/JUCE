@@ -34,16 +34,18 @@ public:
           callback (nullptr),
           floatData (1, 2)
     {
+        getSessionHolder().activeDevices.add (this);
+
         numInputChannels = 2;
         numOutputChannels = 2;
         preferredBufferSize = 0;
 
-        AudioSessionInitialize (0, 0, interruptionListenerStatic, this);
         updateDeviceInfo();
     }
 
     ~IPhoneAudioIODevice()
     {
+        getSessionHolder().activeDevices.removeValue (this);
         close();
     }
 
@@ -336,6 +338,31 @@ private:
         }
     }
 
+    //==================================================================================================
+    struct AudioSessionHolder
+    {
+        AudioSessionHolder()
+        {
+            AudioSessionInitialize (0, 0, interruptionListenerCallback, this);
+        }
+
+        static void interruptionListenerCallback (void* client, UInt32 interruptionType)
+        {
+            const Array <IPhoneAudioIODevice*>& activeDevices = static_cast <AudioSessionHolder*> (client)->activeDevices;
+
+            for (int i = activeDevices.size(); --i >= 0;)
+                activeDevices.getUnchecked(i)->interruptionListener (interruptionType);
+        }
+
+        Array <IPhoneAudioIODevice*> activeDevices;
+    };
+
+    static AudioSessionHolder& getSessionHolder()
+    {
+        static AudioSessionHolder audioSessionHolder;
+        return audioSessionHolder;
+    }
+
     void interruptionListener (const UInt32 interruptionType)
     {
         /*if (interruptionType == kAudioSessionBeginInterruption)
@@ -371,11 +398,6 @@ private:
     static void routingChangedStatic (void* client, AudioSessionPropertyID, UInt32 /*inDataSize*/, const void* propertyValue)
     {
         static_cast <IPhoneAudioIODevice*> (client)->routingChanged (propertyValue);
-    }
-
-    static void interruptionListenerStatic (void* client, UInt32 interruptionType)
-    {
-        static_cast <IPhoneAudioIODevice*> (client)->interruptionListener (interruptionType);
     }
 
     //==================================================================================================
