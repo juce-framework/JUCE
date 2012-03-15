@@ -98,22 +98,41 @@ File ModuleList::getModulesFolderForJuceOrModulesFolder (const File& f)
     return f;
 }
 
+File ModuleList::getModulesFolderForExporter (const ProjectExporter& exporter)
+{
+    File f (exporter.getProject().resolveFilename (exporter.getJuceFolderString()));
+    f = getModulesFolderForJuceOrModulesFolder (f);
+    return f;
+}
+
 File ModuleList::getDefaultModulesFolder (Project* project)
 {
     if (project != nullptr)
     {
-        ScopedPointer <ProjectExporter> exp (ProjectExporter::createPlatformDefaultExporter (*project));
-
-        if (exp != nullptr)
         {
-            File f (project->resolveFilename (exp->getJuceFolderString()));
-            f = getModulesFolderForJuceOrModulesFolder (f);
+            // Try the platform default exporter first..
+            ScopedPointer <ProjectExporter> exp (ProjectExporter::createPlatformDefaultExporter (*project));
+
+            if (exp != nullptr)
+            {
+                const File f (getModulesFolderForExporter (*exp));
+
+                if (ModuleList::isModulesFolder (f))
+                    return f;
+            }
+        }
+
+        // If that didn't work, try all the other exporters..
+        for (Project::ExporterIterator exporter (*project); exporter.next();)
+        {
+            const File f (getModulesFolderForExporter (*exporter));
 
             if (ModuleList::isModulesFolder (f))
                 return f;
         }
     }
 
+    // Fall back to a default..
    #if JUCE_WINDOWS
     return File::getSpecialLocation (File::userDocumentsDirectory)
    #else

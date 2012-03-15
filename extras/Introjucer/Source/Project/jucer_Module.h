@@ -133,6 +133,7 @@ public:
     static void setLocalModulesFolder (const File& newFile);
 
     static File getModulesFolderForJuceOrModulesFolder (const File& f);
+    static File getModulesFolderForExporter (const ProjectExporter&);
 
     StringArray getExtraDependenciesNeeded (Project&, const Module&);
 
