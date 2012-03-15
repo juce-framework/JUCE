@@ -199,6 +199,8 @@ public:
     int getWidth() const                            { return [view frame].size.width; }
     int getHeight() const                           { return [view frame].size.height; }
 
+    void updateWindowPosition (const Rectangle<int>&) {}
+
     void swapBuffers()
     {
         [renderContext flushBuffer];
@@ -242,10 +244,6 @@ void* OpenGLComponent::getNativeWindowHandle() const
 {
     return context != nullptr ? static_cast<WindowedGLContext*> (context.get())->getNativeWindowHandle()
                               : nullptr;
-}
-
-void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>&)
-{
 }
 
 //==============================================================================

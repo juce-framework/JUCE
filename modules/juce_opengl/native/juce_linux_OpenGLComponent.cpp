@@ -199,14 +199,6 @@ OpenGLContext* OpenGLComponent::createContext()
     return (c->renderContext != 0) ? c.release() : nullptr;
 }
 
-void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
-{
-    const ScopedLock sl (contextLock);
-
-    if (context != nullptr)
-        static_cast<WindowedGLContext*> (context.get())->updateWindowPosition (bounds);
-}
-
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
 {

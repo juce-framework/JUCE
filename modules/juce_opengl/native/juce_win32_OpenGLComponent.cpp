@@ -99,6 +99,14 @@ public:
     int getWidth() const                            { return component->getWidth(); }
     int getHeight() const                           { return component->getHeight(); }
 
+    void updateWindowPosition (const Rectangle<int>& bounds)
+    {
+        if (nativeWindow != nullptr)
+            SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
+                          bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
+                          SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+    }
+
     bool setPixelFormat (const OpenGLPixelFormat& pixelFormat)
     {
         makeActive();
@@ -272,20 +280,6 @@ OpenGLContext* OpenGLComponent::createContext()
 void* OpenGLComponent::getNativeWindowHandle() const
 {
     return context != nullptr ? static_cast<WindowedGLContext*> (context.get())->getNativeWindowHandle() : nullptr;
-}
-
-void OpenGLComponent::updateEmbeddedPosition (const Rectangle<int>& bounds)
-{
-    const ScopedLock sl (contextLock);
-
-    if (context != nullptr)
-    {
-        ComponentPeer* peer = static_cast<WindowedGLContext*> (context.get())->nativeWindow;
-
-        SetWindowPos ((HWND) peer->getNativeHandle(), 0,
-                      bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-    }
 }
 
 //==============================================================================

@@ -2212,7 +2212,7 @@ private:
 
 LowLevelGraphicsContext* createOpenGLContext (const Target& target)
 {
-   #if JUCE_USE_OPENGL_SHADERSxxx
+   #if JUCE_USE_OPENGL_SHADERS
     if (target.context.areShadersAvailable())
         return new ShaderContext (target);
    #endif
@@ -2226,10 +2226,11 @@ LowLevelGraphicsContext* createOpenGLContext (const Target& target)
 //==============================================================================
 LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLComponent& target)
 {
-    jassert (target.getCurrentContext() != nullptr); // must have a valid context when this is called!
+    OpenGLContext* const context = target.getCurrentContext();
+    jassert (context != nullptr); // must have a valid context when this is called!
 
-    return createOpenGLGraphicsContext (*target.getCurrentContext(), target.getFrameBufferID(),
-                                        target.getWidth(), target.getHeight());
+    return createOpenGLGraphicsContext (*context, context->getFrameBufferID(),
+                                        context->getWidth(), context->getHeight());
 }
 
 LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context, OpenGLFrameBuffer& target)

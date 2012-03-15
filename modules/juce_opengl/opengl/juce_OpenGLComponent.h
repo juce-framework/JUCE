@@ -217,15 +217,6 @@ public:
     void triggerRepaint();
 
     //==============================================================================
-    /** This returns a critical section that can be used to lock the current context.
-
-        Because the context that is used by this component can change, e.g. when the
-        component is shown or hidden, then if you're rendering to it on a background
-        thread, this allows you to lock the context for the duration of your rendering
-        routine.
-    */
-    CriticalSection& getContextLock() noexcept      { return contextLock; }
-
     /** Delete the context.
         You should only need to call this if you've written a custom thread - if so, make
         sure that your thread calls this before it terminates.
@@ -243,11 +234,6 @@ public:
     */
     bool rebuildContext();
 
-    /** If this component is backed by a frame buffer, this returns its ID number, or
-        0 if the component has no accessible framebuffer.
-    */
-    unsigned int getFrameBufferID() const;
-
     //==============================================================================
     /** Returns the native handle of an embedded heavyweight window, if there is one.
 
@@ -262,11 +248,6 @@ public:
 private:
     const int flags;
 
-    class OpenGLComponentRenderThread;
-    friend class OpenGLComponentRenderThread;
-    friend class ScopedPointer <OpenGLComponentRenderThread>;
-    ScopedPointer <OpenGLComponentRenderThread> renderThread;
-
     class OpenGLComponentWatcher;
     friend class OpenGLComponentWatcher;
     friend class ScopedPointer <OpenGLComponentWatcher>;
@@ -276,20 +257,17 @@ private:
 
     CriticalSection contextLock;
     OpenGLPixelFormat preferredPixelFormat;
-    bool needToUpdateViewport, needToDeleteContext, needToRepaint;
+    bool needToDeleteContext;
 
     class OpenGLCachedComponentImage;
     friend class OpenGLCachedComponentImage;
     OpenGLCachedComponentImage* cachedImage;
+    OpenGLCachedComponentImage* getGLCachedImage();
 
     OpenGLContext* createContext();
     void updateContext();
-    void updateContextPosition();
     void recreateContextAsync();
-    void updateEmbeddedPosition (const Rectangle<int>&);
     void startRenderThread();
-    bool performRender();
-    void paintSelf (LowLevelGraphicsContext&);
 
     int renderAndSwapBuffers();  // (This method has been deprecated)
 

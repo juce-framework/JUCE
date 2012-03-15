@@ -82,6 +82,9 @@ public:
     /** Returns the height of this context */
     virtual int getHeight() const = 0;
 
+    /** Updates the native context's area within its parent. */
+    virtual void updateWindowPosition (const Rectangle<int>&) = 0;
+
     /** If this context is backed by a frame buffer, this returns its ID number, or
         0 if the context has no accessible framebuffer.
     */
