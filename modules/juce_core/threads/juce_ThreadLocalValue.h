@@ -26,7 +26,8 @@
 #ifndef __JUCE_THREADLOCALVALUE_JUCEHEADER__
 #define __JUCE_THREADLOCALVALUE_JUCEHEADER__
 
-#if ! (JUCE_MSVC || (JUCE_MAC && defined (__clang__)))
+#if ! (JUCE_MSVC || (JUCE_MAC && defined (__clang__) && defined (MAC_OS_X_VERSION_10_7) \
+                      && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7))
  #define JUCE_NO_COMPILER_THREAD_LOCAL 1
 #endif
 
