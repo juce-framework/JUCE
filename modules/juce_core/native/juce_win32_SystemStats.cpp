@@ -114,7 +114,7 @@ SystemStats::CPUFlags::CPUFlags()
    #endif
 
     SYSTEM_INFO systemInfo;
-    GetSystemInfo (&systemInfo);
+    GetNativeSystemInfo (&systemInfo);
     numCpus = (int) systemInfo.dwNumberOfProcessors;
 }
 
@@ -344,7 +344,7 @@ bool Time::setSystemTimeToThisTime() const
 int SystemStats::getPageSize()
 {
     SYSTEM_INFO systemInfo;
-    GetSystemInfo (&systemInfo);
+    GetNativeSystemInfo (&systemInfo);
 
     return (int) systemInfo.dwPageSize;
 }

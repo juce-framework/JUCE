@@ -227,12 +227,6 @@ public:
     }
 
     //======================================================================
-    HWND getNativeWindowHandle() const
-    {
-        return nativeWindow != nullptr ? nativeWindow->getHandle() : 0;
-    }
-
-    //======================================================================
     void updateWindowPosition (const Rectangle<int>& newBounds)
     {
         nativeWindow->setWindowPosition (newBounds);
@@ -537,8 +531,6 @@ private:
 
             if (c != nullptr)
             {
-                jassert (c->getNativeWindowHandle() == hwnd);
-
                 switch (msg)
                 {
                     case WM_ERASEBKGND:       return 1;

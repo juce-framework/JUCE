@@ -241,9 +241,9 @@ String URL::getDomain() const
     const int end1 = url.indexOfChar (start, '/');
     const int end2 = url.indexOfChar (start, ':');
 
-    const int end = (end1 < 0 || end2 < 0) ? jmax (end1, end2)
-                                           : jmin (end1, end2);
-
+    const int end = (end1 < 0 && end2 < 0) ? std::numeric_limits<int>::max()
+                                           : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
+                                                                     : jmin (end1, end2));
     return url.substring (start, end);
 }
 
