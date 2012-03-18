@@ -117,6 +117,11 @@ static bool canUseMultiTouch()
     return registerTouchWindow != nullptr;
 }
 
+static inline Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
+{
+    return Rectangle<int>::leftTopRightBottom ((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
+}
+
 //==============================================================================
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
@@ -602,8 +607,7 @@ public:
     {
         RECT r;
         GetWindowRect (hwnd, &r);
-
-        Rectangle<int> bounds (r.left, r.top, r.right - r.left, r.bottom - r.top);
+        Rectangle<int> bounds (rectangleFromRECT (r));
 
         HWND parentH = GetParent (hwnd);
         if (parentH != 0)
@@ -1357,7 +1361,7 @@ private:
             if (GetUpdateRect (hwnd, &r, false))
             {
                 direct2DContext->start();
-                direct2DContext->clipToRectangle (Rectangle<int> (r.left, r.top, r.right - r.left, r.bottom - r.top));
+                direct2DContext->clipToRectangle (rectangleFromRECT (r));
                 handlePaint (*direct2DContext);
                 direct2DContext->end();
             }
@@ -1412,7 +1416,7 @@ private:
                 Image& offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
 
                 RectangleList contextClip;
-                const Rectangle<int> clipBounds (0, 0, w, h);
+                const Rectangle<int> clipBounds (w, h);
 
                 bool needToPaintAll = true;
 
@@ -1954,7 +1958,7 @@ private:
     {
         if (isConstrainedNativeWindow())
         {
-            Rectangle<int> pos (r->left, r->top, r->right - r->left, r->bottom - r->top);
+            Rectangle<int> pos (rectangleFromRECT (*r));
 
             constrainer->checkBounds (pos, windowBorder.addedTo (component->getBounds()),
                                       Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
@@ -3027,7 +3031,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
 {
     Array <Rectangle<int> >* const monitorCoords = (Array <Rectangle<int> >*) userInfo;
-    monitorCoords->add (Rectangle<int> (r->left, r->top, r->right - r->left, r->bottom - r->top));
+    monitorCoords->add (rectangleFromRECT (*r));
     return TRUE;
 }
 
@@ -3044,8 +3048,7 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
     {
         RECT r;
         GetWindowRect (GetDesktopWindow(), &r);
-
-        monitorCoords.add (Rectangle<int> (r.left, r.top, r.right - r.left, r.bottom - r.top));
+        monitorCoords.add (rectangleFromRECT (r));
     }
 
     if (clipToWorkArea)
@@ -3055,12 +3058,7 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
         SystemParametersInfo (SPI_GETWORKAREA, 0, &r, 0);
 
         Rectangle<int>& screen = monitorCoords.getReference (0);
-
-        screen.setPosition (jmax (screen.getX(), (int) r.left),
-                            jmax (screen.getY(), (int) r.top));
-
-        screen.setSize (jmin (screen.getRight(),  (int) r.right)  - screen.getX(),
-                        jmin (screen.getBottom(), (int) r.bottom) - screen.getY());
+        screen = screen.getIntersection (rectangleFromRECT (r));
     }
 }
 

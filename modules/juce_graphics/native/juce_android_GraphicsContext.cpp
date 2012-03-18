@@ -411,7 +411,7 @@ public:
         const int bottom = env->GetIntField (rect, RectClass.bottom);
         env->DeleteLocalRef (rect);
 
-        return Rectangle<int> (left, top, right - left, bottom - top);
+        return Rectangle<int>::leftTopRightBottom (left, top, right, bottom);
     }
 
     bool isClipEmpty() const

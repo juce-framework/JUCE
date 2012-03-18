@@ -2124,7 +2124,7 @@ void Component::setPositioner (Positioner* newPositioner)
 //==============================================================================
 Rectangle<int> Component::getLocalBounds() const noexcept
 {
-    return Rectangle<int> (getWidth(), getHeight());
+    return bounds.withZeroOrigin();
 }
 
 Rectangle<int> Component::getBoundsInParent() const noexcept
