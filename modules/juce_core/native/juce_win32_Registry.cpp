@@ -89,14 +89,14 @@ String WindowsRegistry::getValue (const String& regValuePath, const String& defa
     return defaultValue;
 }
 
-void WindowsRegistry::setValue (const String& regValuePath, const String& value)
+bool WindowsRegistry::setValue (const String& regValuePath, const String& value)
 {
     const RegistryKeyWrapper key (regValuePath, true);
 
-    if (key.key != 0)
-        RegSetValueEx (key.key, key.wideCharValueName, 0, REG_SZ,
-                       (const BYTE*) value.toWideCharPointer(),
-                       (DWORD) CharPointer_UTF16::getBytesRequiredFor (value.getCharPointer()));
+    return key.key != 0
+        && RegSetValueEx (key.key, key.wideCharValueName, 0, REG_SZ,
+                          (const BYTE*) value.toWideCharPointer(),
+                          (DWORD) CharPointer_UTF16::getBytesRequiredFor (value.getCharPointer())) == ERROR_SUCCESS;
 }
 
 bool WindowsRegistry::valueExists (const String& regValuePath)
@@ -130,20 +130,21 @@ void WindowsRegistry::deleteKey (const String& regKeyPath)
         RegDeleteKey (key.key, key.wideCharValueName);
 }
 
-void WindowsRegistry::registerFileAssociation (const String& fileExtension,
+bool WindowsRegistry::registerFileAssociation (const String& fileExtension,
                                                const String& symbolicDescription,
                                                const String& fullDescription,
                                                const File& targetExecutable,
-                                               int iconResourceNumber)
+                                               const int iconResourceNumber,
+                                               const bool registerForCurrentUserOnly)
 {
-    setValue ("HKEY_CLASSES_ROOT\\" + fileExtension + "\\", symbolicDescription);
+    const char* const root = registerForCurrentUserOnly ? "HKEY_CURRENT_USER\\Software\\Classes\\"
+                                                        : "HKEY_CLASSES_ROOT\\";
+    const String key (root + symbolicDescription);
 
-    const String key ("HKEY_CLASSES_ROOT\\" + symbolicDescription);
-
-    if (iconResourceNumber != 0)
-        setValue (key + "\\DefaultIcon\\",
-                  targetExecutable.getFullPathName() + "," + String (-iconResourceNumber));
-
-    setValue (key + "\\", fullDescription);
-    setValue (key + "\\shell\\open\\command\\", targetExecutable.getFullPathName() + " %1");
+    return setValue (root + fileExtension + "\\", symbolicDescription)
+        && setValue (key + "\\", fullDescription)
+        && setValue (key + "\\shell\\open\\command\\", targetExecutable.getFullPathName() + " \"%1\"")
+        && (iconResourceNumber == 0
+              || setValue (key + "\\DefaultIcon\\",
+                           targetExecutable.getFullPathName() + "," + String (-iconResourceNumber)));
 }

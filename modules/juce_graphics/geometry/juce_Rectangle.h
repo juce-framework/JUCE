@@ -140,19 +140,13 @@ public:
 
     //==============================================================================
     /** Returns the rectangle's top-left position as a Point. */
-    const Point<ValueType>& getPosition() const noexcept                                            { return pos; }
+    inline const Point<ValueType>& getPosition() const noexcept                                     { return pos; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    void setPosition (const Point<ValueType>& newPos) noexcept                                      { pos = newPos; }
+    inline void setPosition (const Point<ValueType>& newPos) noexcept                               { pos = newPos; }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    void setPosition (const ValueType newX, const ValueType newY) noexcept                          { pos.setXY (newX, newY); }
-
-    /** Returns a rectangle with the same size as this one, but a new position. */
-    Rectangle withPosition (const ValueType newX, const ValueType newY) const noexcept              { return Rectangle (newX, newY, w, h); }
-
-    /** Returns a rectangle with the same size as this one, but a new position. */
-    Rectangle withPosition (const Point<ValueType>& newPos) const noexcept                          { return Rectangle (newPos.x, newPos.y, w, h); }
+    inline void setPosition (const ValueType newX, const ValueType newY) noexcept                   { pos.setXY (newX, newY); }
 
     /** Returns the rectangle's top-left position as a Point. */
     const Point<ValueType>& getTopLeft() const noexcept                                             { return pos; }
@@ -169,49 +163,51 @@ public:
     /** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
     void setSize (const ValueType newWidth, const ValueType newHeight) noexcept                     { w = newWidth; h = newHeight; }
 
-    /** Returns a rectangle with the same position as this one, but a new size. */
-    Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, newWidth, newHeight); }
-
     /** Changes all the rectangle's co-ordinates. */
     void setBounds (const ValueType newX, const ValueType newY,
-                    const ValueType newWidth, const ValueType newHeight) noexcept
-    {
-        pos.x = newX; pos.y = newY; w = newWidth; h = newHeight;
-    }
+                    const ValueType newWidth, const ValueType newHeight) noexcept                   { pos.x = newX; pos.y = newY; w = newWidth; h = newHeight; }
 
     /** Changes the rectangle's X coordinate */
-    void setX (const ValueType newX) noexcept                       { pos.x = newX; }
+    inline void setX (const ValueType newX) noexcept                        { pos.x = newX; }
 
     /** Changes the rectangle's Y coordinate */
-    void setY (const ValueType newY) noexcept                       { pos.y = newY; }
+    inline void setY (const ValueType newY) noexcept                        { pos.y = newY; }
 
     /** Changes the rectangle's width */
-    void setWidth (const ValueType newWidth) noexcept               { w = newWidth; }
+    inline void setWidth (const ValueType newWidth) noexcept                { w = newWidth; }
 
     /** Changes the rectangle's height */
-    void setHeight (const ValueType newHeight) noexcept             { h = newHeight; }
+    inline void setHeight (const ValueType newHeight) noexcept              { h = newHeight; }
 
     /** Returns a rectangle which has the same size and y-position as this one, but with a different x-position. */
-    Rectangle withX (const ValueType newX) const noexcept                                     { return Rectangle (newX, pos.y, w, h); }
+    Rectangle withX (const ValueType newX) const noexcept                   { return Rectangle (newX, pos.y, w, h); }
 
     /** Returns a rectangle which has the same size and x-position as this one, but with a different y-position. */
-    Rectangle withY (const ValueType newY) const noexcept                                     { return Rectangle (pos.x, newY, w, h); }
+    Rectangle withY (const ValueType newY) const noexcept                   { return Rectangle (pos.x, newY, w, h); }
+
+    /** Returns a rectangle with the same size as this one, but a new position. */
+    Rectangle withPosition (const ValueType newX, const ValueType newY) const noexcept   { return Rectangle (newX, newY, w, h); }
+
+    /** Returns a rectangle with the same size as this one, but a new position. */
+    Rectangle withPosition (const Point<ValueType>& newPos) const noexcept  { return Rectangle (newPos.x, newPos.y, w, h); }
+
+    /** Returns a rectangle whose size is the same as this one, but whose top-left position is (0, 0). */
+    Rectangle withZeroOrigin() const noexcept                               { return Rectangle (w, h); }
 
     /** Returns a rectangle which has the same position and height as this one, but with a different width. */
-    Rectangle withWidth (const ValueType newWidth) const noexcept                             { return Rectangle (pos.x, pos.y, newWidth, h); }
+    Rectangle withWidth (const ValueType newWidth) const noexcept           { return Rectangle (pos.x, pos.y, newWidth, h); }
 
     /** Returns a rectangle which has the same position and width as this one, but with a different height. */
-    Rectangle withHeight (const ValueType newHeight) const noexcept                           { return Rectangle (pos.x, pos.y, w, newHeight); }
+    Rectangle withHeight (const ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, w, newHeight); }
+
+    /** Returns a rectangle with the same position as this one, but a new size. */
+    Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const noexcept         { return Rectangle (pos.x, pos.y, newWidth, newHeight); }
 
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
         @see withLeft
     */
-    void setLeft (const ValueType newLeft) noexcept
-    {
-        w = jmax (ValueType(), pos.x + w - newLeft);
-        pos.x = newLeft;
-    }
+    void setLeft (const ValueType newLeft) noexcept                   { w = jmax (ValueType(), pos.x + w - newLeft); pos.x = newLeft; }
 
     /** Returns a new rectangle with a different x position, but the same right-hand edge as this one.
         If the new x is beyond the right of the current right-hand edge, the width will be set to zero.
@@ -223,11 +219,7 @@ public:
         If the y is moved to be below the current bottom edge, the height will be set to zero.
         @see withTop
     */
-    void setTop (const ValueType newTop) noexcept
-    {
-        h = jmax (ValueType(), pos.y + h - newTop);
-        pos.y = newTop;
-    }
+    void setTop (const ValueType newTop) noexcept                     { h = jmax (ValueType(), pos.y + h - newTop); pos.y = newTop; }
 
     /** Returns a new rectangle with a different y position, but the same bottom edge as this one.
         If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
@@ -239,11 +231,7 @@ public:
         If the new right is below the current X value, the X will be pushed down to match it.
         @see getRight, withRight
     */
-    void setRight (const ValueType newRight) noexcept
-    {
-        pos.x = jmin (pos.x, newRight);
-        w = newRight - pos.x;
-    }
+    void setRight (const ValueType newRight) noexcept                 { pos.x = jmin (pos.x, newRight); w = newRight - pos.x; }
 
     /** Returns a new rectangle with a different right-hand edge position, but the same left-hand edge as this one.
         If the new right edge is below the current left-hand edge, the width will be set to zero.
@@ -255,11 +243,7 @@ public:
         If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
         @see getBottom, withBottom
     */
-    void setBottom (const ValueType newBottom) noexcept
-    {
-        pos.y = jmin (pos.y, newBottom);
-        h = newBottom - pos.y;
-    }
+    void setBottom (const ValueType newBottom) noexcept               { pos.y = jmin (pos.y, newBottom); h = newBottom - pos.y; }
 
     /** Returns a new rectangle with a different bottom edge position, but the same top edge as this one.
         If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
@@ -425,16 +409,10 @@ public:
 
     //==============================================================================
     /** Returns true if the two rectangles are identical. */
-    bool operator== (const Rectangle& other) const noexcept
-    {
-        return pos == other.pos && w == other.w && h == other.h;
-    }
+    bool operator== (const Rectangle& other) const noexcept     { return pos == other.pos && w == other.w && h == other.h; }
 
     /** Returns true if the two rectangles are not identical. */
-    bool operator!= (const Rectangle& other) const noexcept
-    {
-        return pos != other.pos || w != other.w || h != other.h;
-    }
+    bool operator!= (const Rectangle& other) const noexcept     { return pos != other.pos || w != other.w || h != other.h; }
 
     /** Returns true if this co-ordinate is inside the rectangle. */
     bool contains (const ValueType xCoord, const ValueType yCoord) const noexcept
@@ -473,7 +451,6 @@ public:
     }
 
     /** Returns the region that is the overlap between this and another rectangle.
-
         If the two rectangles don't overlap, the rectangle returned will be empty.
     */
     Rectangle getIntersection (const Rectangle& other) const noexcept
@@ -716,16 +693,19 @@ public:
         StringArray toks;
         toks.addTokens (stringVersion.trim(), ",; \t\r\n", String::empty);
 
-        return Rectangle (toks[0].trim().getIntValue(),
-                          toks[1].trim().getIntValue(),
-                          toks[2].trim().getIntValue(),
-                          toks[3].trim().getIntValue());
+        return Rectangle (parseIntAfterSpace (toks[0]),
+                          parseIntAfterSpace (toks[1]),
+                          parseIntAfterSpace (toks[2]),
+                          parseIntAfterSpace (toks[3]));
     }
 
 private:
     friend class RectangleList;
     Point<ValueType> pos;
     ValueType w, h;
+
+    static int parseIntAfterSpace (const String& s) noexcept
+        { return s.getCharPointer().findEndOfWhitespace().getIntValue32(); }
 };
 
 

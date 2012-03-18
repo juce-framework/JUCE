@@ -74,11 +74,11 @@ public:
     /** @internal */
     void paint (Graphics& g);
 
+    /** @internal */
+    static ReferenceCountedObject* attachViewToComponent (Component&, void*);
 
 private:
-    class Pimpl;
-    friend class Pimpl;
-    ScopedPointer<Pimpl> pimpl;
+    ReferenceCountedObjectPtr<ReferenceCountedObject> attachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponent);
 };

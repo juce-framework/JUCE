@@ -49,7 +49,7 @@ public:
         This will take care of creating any groups needed to get to the given
         registry value.
     */
-    static void setValue (const String& regValuePath,
+    static bool setValue (const String& regValuePath,
                           const String& value);
 
     /** Returns true if the given value exists in the registry. */
@@ -72,12 +72,17 @@ public:
         @param iconResourceNumber   the icon that gets displayed for the file type will be
                                     found by looking up this resource number in the
                                     executable. Pass 0 here to not use an icon
+        @param registerForCurrentUserOnly   if false, this will try to register the association
+                                    for all users (you might not have permission to do this
+                                    unless running in an installer). If true, it will register the
+                                    association in HKEY_CURRENT_USER.
     */
-    static void registerFileAssociation (const String& fileExtension,
+    static bool registerFileAssociation (const String& fileExtension,
                                          const String& symbolicDescription,
                                          const String& fullDescription,
                                          const File& targetExecutable,
-                                         int iconResourceNumber);
+                                         int iconResourceNumber,
+                                         bool registerForCurrentUserOnly);
 
 private:
     WindowsRegistry();

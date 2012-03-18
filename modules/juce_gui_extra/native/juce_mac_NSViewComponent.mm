@@ -23,10 +23,11 @@
   ==============================================================================
 */
 
-class NSViewComponent::Pimpl  : public ComponentMovementWatcher
+class NSViewAttachment  : public ReferenceCountedObject,
+                          public ComponentMovementWatcher
 {
 public:
-    Pimpl (NSView* const view_, Component& owner_)
+    NSViewAttachment (NSView* const view_, Component& owner_)
         : ComponentMovementWatcher (&owner_),
           view (view_),
           owner (owner_),
@@ -38,7 +39,7 @@ public:
             componentPeerChanged();
     }
 
-    ~Pimpl()
+    ~NSViewAttachment()
     {
         removeFromParent();
         [view release];
@@ -96,12 +97,6 @@ public:
         componentPeerChanged();
     }
 
-    Rectangle<int> getViewBounds() const
-    {
-        NSRect r = [view frame];
-        return Rectangle<int> ((int) r.size.width, (int) r.size.height);
-    }
-
     NSView* const view;
 
 private:
@@ -115,7 +110,7 @@ private:
                                         // override the call and use it as a sign that they're being deleted, which breaks everything..
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewAttachment);
 };
 
 //==============================================================================
@@ -126,22 +121,31 @@ void NSViewComponent::setView (void* const view)
 {
     if (view != getView())
     {
-        pimpl = nullptr;
+        attachment = nullptr;
 
         if (view != nullptr)
-            pimpl = new Pimpl ((NSView*) view, *this);
+            attachment = attachViewToComponent (*this, view);
     }
 }
 
 void* NSViewComponent::getView() const
 {
-    return pimpl == nullptr ? nullptr : pimpl->view;
+    return attachment != nullptr ? static_cast <NSViewAttachment*> (attachment.getObject())->view
+                                 : nullptr;
 }
 
 void NSViewComponent::resizeToFitView()
 {
-    if (pimpl != nullptr)
-        setBounds (pimpl->getViewBounds());
+    if (attachment != nullptr)
+    {
+        NSRect r = [static_cast <NSViewAttachment*> (attachment.getObject())->view frame];
+        setBounds (Rectangle<int> ((int) r.size.width, (int) r.size.height));
+    }
 }
 
 void NSViewComponent::paint (Graphics&) {}
+
+ReferenceCountedObject* NSViewComponent::attachViewToComponent (Component& comp, void* const view)
+{
+    return new NSViewAttachment ((NSView*) view, comp);
+}

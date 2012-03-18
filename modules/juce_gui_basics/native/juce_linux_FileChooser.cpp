@@ -58,16 +58,20 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     ChildProcess child;
     if (child.start (command))
     {
-        const String result (child.readAllProcessOutput());
-        StringArray tokens;
+        const String result (child.readAllProcessOutput().trim());
 
-        if (selectMultipleFiles)
-            tokens.addTokens (result, separator, "\"");
-        else
-            tokens.add (result);
+        if (result.isNotEmpty())
+        {
+            StringArray tokens;
 
-        for (int i = 0; i < tokens.size(); i++)
-            results.add (File (tokens[i]));
+            if (selectMultipleFiles)
+                tokens.addTokens (result, separator, "\"");
+            else
+                tokens.add (result);
+
+            for (int i = 0; i < tokens.size(); i++)
+                results.add (File (tokens[i]));
+        }
 
         child.waitForProcessToFinish (60 * 1000);
     }
