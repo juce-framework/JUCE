@@ -46,6 +46,7 @@ public:
     const String getDocumentTitle();
     const String loadDocument (const File& file);
     const String saveDocument (const File& file);
+    String saveResourcesOnly (const File& file);
     const File getLastDocumentOpened();
     void setLastDocumentOpened (const File& file);
 

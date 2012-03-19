@@ -42,16 +42,14 @@ public:
           generatedFilesGroup (Project::Item::createGroup (project, getJuceCodeGroupName(), "__generatedcode__"))
     {
         generatedFilesGroup.setID (getGeneratedGroupID());
-
-        if (generatedCodeFolder.exists())
-            deleteNonHiddenFilesIn (generatedCodeFolder);
     }
 
     Project& getProject() noexcept      { return project; }
 
     String save()
     {
-        jassert (generatedFilesGroup.getNumChildren() == 0); // this method can't be called more than once!
+        if (generatedCodeFolder.exists())
+            deleteNonHiddenFilesIn (generatedCodeFolder);
 
         const File oldFile (project.getFile());
         project.setFile (projectFile);
@@ -87,6 +85,12 @@ public:
         if (errors.size() > 0)
             project.setFile (oldFile);
 
+        return errors[0];
+    }
+
+    String saveResourcesOnly()
+    {
+        writeBinaryDataFiles();
         return errors[0];
     }
 

@@ -36,9 +36,9 @@ namespace
         return File::getCurrentWorkingDirectory().getChildFile (filename.unquoted());
     }
 
-    bool checkArgumentCount (const StringArray& tokens, int minNumArgs)
+    bool checkArgumentCount (const StringArray& args, int minNumArgs)
     {
-        if (tokens.size() < minNumArgs)
+        if (args.size() < minNumArgs)
         {
             std::cout << "Not enough arguments!" << std::endl;
             return false;
@@ -51,34 +51,43 @@ namespace
     /* Running a command-line of the form "introjucer --resave foobar.jucer" will try to load
        that project and re-export all of its targets.
     */
-    int resaveProject (const File& file)
+    int resaveProject (const StringArray& args, bool justSaveResources)
     {
-        if (! file.exists())
+        if (! checkArgumentCount (args, 2))
+            return 1;
+
+        const File projectFile (getFile (args[1]));
+
+        if (! projectFile.exists())
         {
-            std::cout << "The file " << file.getFullPathName() << " doesn't exist!" << std::endl;
+            std::cout << "The file " << projectFile.getFullPathName() << " doesn't exist!" << std::endl;
             return 1;
         }
 
-        if (! file.hasFileExtension (Project::projectFileExtension))
+        if (! projectFile.hasFileExtension (Project::projectFileExtension))
         {
-            std::cout << file.getFullPathName() << " isn't a valid jucer project file!" << std::endl;
+            std::cout << projectFile.getFullPathName() << " isn't a valid jucer project file!" << std::endl;
             return 1;
         }
 
-        Project newDoc (file);
+        Project proj (projectFile);
 
-        if (! newDoc.loadFrom (file, true))
+        if (! proj.loadFrom (projectFile, true))
         {
-            std::cout << "Failed to load the project file: " << file.getFullPathName() << std::endl;
+            std::cout << "Failed to load the project file: " << projectFile.getFullPathName() << std::endl;
             return 1;
         }
 
-        std::cout << "The Introjucer - Re-saving file: " << file.getFullPathName() << std::endl;
-        String error (newDoc.saveDocument (file));
+        std::cout << (justSaveResources ? "The Introjucer - Re-saving project resources: "
+                                        : "The Introjucer - Re-saving file: ")
+                  << projectFile.getFullPathName() << std::endl;
+
+        String error (justSaveResources ? proj.saveResourcesOnly (projectFile)
+                                        : proj.saveDocument (projectFile));
 
         if (error.isNotEmpty())
         {
-            std::cout << "Error when writing project: " << error << std::endl;
+            std::cout << "Error when saving: " << error << std::endl;
             return 1;
         }
 
@@ -134,12 +143,12 @@ namespace
         return 0;
     }
 
-    int buildModules (const StringArray& tokens, const bool buildAllWithIndex)
+    int buildModules (const StringArray& args, const bool buildAllWithIndex)
     {
-        if (! checkArgumentCount (tokens, 3))
+        if (! checkArgumentCount (args, 3))
             return 1;
 
-        const File targetFolder (getFile (tokens[1]));
+        const File targetFolder (getFile (args[1]));
 
         if (! targetFolder.isDirectory())
         {
@@ -149,7 +158,7 @@ namespace
 
         if (buildAllWithIndex)
         {
-            const File folderToSearch (getFile (tokens[2]));
+            const File folderToSearch (getFile (args[2]));
             DirectoryIterator i (folderToSearch, false, "*", File::findDirectories);
             var infoList;
 
@@ -177,9 +186,9 @@ namespace
         }
         else
         {
-            for (int i = 2; i < tokens.size(); ++i)
+            for (int i = 2; i < args.size(); ++i)
             {
-                const int result = zipModule (targetFolder, getFile (tokens[i]));
+                const int result = zipModule (targetFolder, getFile (args[i]));
 
                 if (result != 0)
                     return result;
@@ -197,7 +206,7 @@ namespace
 
         for (int i = 0; i < list.modules.size(); ++i)
         {
-            ModuleList::Module* m = list.modules.getUnchecked(i);
+            const ModuleList::Module* m = list.modules.getUnchecked(i);
 
             std::cout << m->uid << ": " << m->version << std::endl;
         }
@@ -205,12 +214,12 @@ namespace
         return 0;
     }
 
-    int showStatus (const StringArray& tokens)
+    int showStatus (const StringArray& args)
     {
-        if (! checkArgumentCount (tokens, 2))
+        if (! checkArgumentCount (args, 2))
             return 1;
 
-        const File projectFile (getFile (tokens[1]));
+        const File projectFile (getFile (args[1]));
 
         Project proj (projectFile);
 
@@ -235,29 +244,58 @@ namespace
 
         return 0;
     }
+
+    bool matchArgument (const String& arg, const String& possible)
+    {
+        return arg == possible
+            || arg == "-" + possible
+            || arg == "--" + possible;
+    }
+
+    //==============================================================================
+    int showHelp()
+    {
+        std::cout << "The Introjucer!" << std::endl
+                  << std::endl
+                  << "Usage: " << std::endl
+                  << std::endl
+                  << " introjucer --resave project_file" << std::endl
+                  << "    Resaves all files and resources in a project." << std::endl
+                  << std::endl
+                  << " introjucer --resave-resources project_file" << std::endl
+                  << "    Resaves just the binary resources for a project." << std::endl
+                  << std::endl
+                  << " introjucer --listmodules" << std::endl
+                  << "    Displays a list of modules available from the website." << std::endl
+                  << std::endl
+                  << " introjucer --status project_file" << std::endl
+                  << "    Displays information about a project." << std::endl
+                  << std::endl
+                  << " introjucer --buildmodule target_folder module_folder" << std::endl
+                  << "    Zips a module into a downloadable file format." << std::endl
+                  << std::endl
+                  << " introjucer --buildallmodules target_folder module_folder" << std::endl
+                  << "    Zips all modules in a given folder and creates an index for them." << std::endl
+                  << std::endl;
+
+        return 0;
+    }
 }
 
 //==============================================================================
 int performCommandLine (const String& commandLine)
 {
-    StringArray tokens;
-    tokens.addTokens (commandLine, true);
-    tokens.trim();
+    StringArray args;
+    args.addTokens (commandLine, true);
+    args.trim();
 
-    if (tokens[0] == "-resave" || tokens[0] == "--resave" || tokens[0] == "resave")
-        return resaveProject (getFile (tokens[1]));
-
-    if (tokens[0] == "buildmodule")
-        return buildModules (tokens, false);
-
-    if (tokens[0] == "buildallmodules")
-        return buildModules (tokens, true);
-
-    if (tokens[0] == "listmodules")
-        return listModules();
-
-    if (tokens[0] == "status")
-        return showStatus (tokens);
+    if (matchArgument (args[0], "help"))                return showHelp();
+    if (matchArgument (args[0], "resave"))              return resaveProject (args, false);
+    if (matchArgument (args[0], "resave-resources"))    return resaveProject (args, true);
+    if (matchArgument (args[0], "buildmodule"))         return buildModules (args, false);
+    if (matchArgument (args[0], "buildallmodules"))     return buildModules (args, true);
+    if (matchArgument (args[0], "listmodules"))         return listModules();
+    if (matchArgument (args[0], "status"))              return showStatus (args);
 
     return commandLineNotPerformed;
 }

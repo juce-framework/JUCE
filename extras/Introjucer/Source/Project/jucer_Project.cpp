@@ -245,6 +245,12 @@ const String Project::saveDocument (const File& file)
     return saver.save();
 }
 
+String Project::saveResourcesOnly (const File& file)
+{
+    ProjectSaver saver (*this, file);
+    return saver.saveResourcesOnly();
+}
+
 //==============================================================================
 File Project::lastDocumentOpened;
 
