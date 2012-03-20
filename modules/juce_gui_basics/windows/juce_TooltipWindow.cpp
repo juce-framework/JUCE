@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 TooltipWindow::TooltipWindow (Component* const parent_,
                               const int millisecondsBeforeTipAppears_)
     : Component ("tooltip"),

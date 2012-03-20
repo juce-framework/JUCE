@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 bool juce_performDragDropFiles (const StringArray&, const bool copyFiles, bool& shouldStop);
 bool juce_performDragDropText (const String&, bool& shouldStop);
 

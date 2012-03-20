@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace PropertyFileConstants
 {
     static const int magicNumber            = (int) ByteOrder::littleEndianInt ("PROP");

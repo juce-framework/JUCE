@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ReverbAudioSource::ReverbAudioSource (AudioSource* const inputSource, const bool deleteInputWhenDeleted)
    : input (inputSource, deleteInputWhenDeleted),
      bypass (false)

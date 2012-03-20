@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 KnownPluginList::KnownPluginList()  {}
 KnownPluginList::~KnownPluginList() {}
 

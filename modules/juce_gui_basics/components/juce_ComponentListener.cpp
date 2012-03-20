@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 void ComponentListener::componentMovedOrResized (Component&, bool, bool)    {}
 void ComponentListener::componentBroughtToFront (Component&)                {}
 void ComponentListener::componentVisibilityChanged (Component&)             {}

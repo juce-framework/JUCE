@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 MenuBarModel::MenuBarModel() noexcept
     : manager (nullptr)
 {

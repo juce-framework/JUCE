@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ProgressBar::ProgressBar (double& progress_)
    : progress (progress_),
      displayPercentage (true),

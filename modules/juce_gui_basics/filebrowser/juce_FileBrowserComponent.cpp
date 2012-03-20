@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 FileBrowserComponent::FileBrowserComponent (int flags_,
                                             const File& initialFileOrDirectory,
                                             const FileFilter* fileFilter_,

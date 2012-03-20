@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class TableListRowComp   : public Component,
                            public TooltipClient
 {

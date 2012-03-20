@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace TabbedComponentHelpers
 {
     const Identifier deleteComponentId ("deleteByTabComp_");

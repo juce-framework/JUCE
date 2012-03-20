@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioIODevice::AudioIODevice (const String& deviceName, const String& typeName_)
     : name (deviceName),
       typeName (typeName_)

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
                                           const File& deadMansPedalFile_,
                                           PropertiesFile* const propertiesToUse_)

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 MessageListener::MessageListener() noexcept
 {
     // are you trying to create a messagelistener before or after juce has been intialised??

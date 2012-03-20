@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 static SpinLock deletedAtShutdownLock;
 
 DeletedAtShutdown::DeletedAtShutdown()

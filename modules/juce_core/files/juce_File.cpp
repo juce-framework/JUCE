@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 File::File (const String& fullPathName)
     : fullPath (parseAbsolutePath (fullPathName))
 {

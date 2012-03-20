@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace KeyboardFocusHelpers
 {
     // This will sort a set of components, so that they are ordered in terms of

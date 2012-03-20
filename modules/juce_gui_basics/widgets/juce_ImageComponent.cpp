@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ImageComponent::ImageComponent (const String& name)
     : Component (name),
       placement (RectanglePlacement::centred)

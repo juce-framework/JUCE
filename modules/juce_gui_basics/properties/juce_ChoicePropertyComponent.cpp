@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class ChoicePropertyComponent::RemapperValueSource    : public Value::ValueSource,
                                                         public ValueListener
 {

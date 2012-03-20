@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ImageConvolutionKernel::ImageConvolutionKernel (const int size_)
     : values ((size_t) (size_ * size_)),
       size (size_)

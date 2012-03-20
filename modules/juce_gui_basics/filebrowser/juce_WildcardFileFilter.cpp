@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 WildcardFileFilter::WildcardFileFilter (const String& fileWildcardPatterns,
                                         const String& directoryWildcardPatterns,
                                         const String& description_)

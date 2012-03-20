@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class FileChooserDialogBox::ContentComponent  : public Component
 {
 public:

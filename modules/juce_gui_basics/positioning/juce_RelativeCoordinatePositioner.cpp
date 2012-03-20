@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class MarkerListScope  : public Expression::Scope
 {
 public:

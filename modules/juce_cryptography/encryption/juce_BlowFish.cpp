@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 BlowFish::BlowFish (const void* const keyData, const int keyBytes)
 {
     jassert (keyData != nullptr);

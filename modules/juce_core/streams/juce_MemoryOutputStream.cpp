@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 MemoryOutputStream::MemoryOutputStream (const size_t initialSize)
   : data (internalBlock),
     position (0),

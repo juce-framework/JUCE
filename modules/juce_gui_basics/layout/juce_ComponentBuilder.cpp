@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace ComponentBuilderHelpers
 {
     String getStateId (const ValueTree& state)

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ChangeBroadcaster::ChangeBroadcaster() noexcept
 {
     // are you trying to create this object before or after juce has been intialised??

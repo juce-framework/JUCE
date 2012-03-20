@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 XmlDocument::XmlDocument (const String& documentText)
     : originalText (documentText),
       input (nullptr),

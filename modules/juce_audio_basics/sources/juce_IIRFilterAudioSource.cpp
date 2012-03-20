@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 IIRFilterAudioSource::IIRFilterAudioSource (AudioSource* const inputSource,
                                             const bool deleteInputWhenDeleted)
     : input (inputSource, deleteInputWhenDeleted)

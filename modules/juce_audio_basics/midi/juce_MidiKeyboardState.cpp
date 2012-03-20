@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 MidiKeyboardState::MidiKeyboardState()
 {
     zerostruct (noteStates);

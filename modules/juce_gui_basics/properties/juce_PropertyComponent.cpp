@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 PropertyComponent::PropertyComponent (const String& name,
                                       const int preferredHeight_)
     : Component (name),

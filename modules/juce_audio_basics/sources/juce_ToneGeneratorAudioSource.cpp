@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ToneGeneratorAudioSource::ToneGeneratorAudioSource()
     : frequency (1000.0),
       sampleRate (44100.0),

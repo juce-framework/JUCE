@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ResizableCornerComponent::ResizableCornerComponent (Component* const componentToResize,
                                                     ComponentBoundsConstrainer* const constrainer_)
    : component (componentToResize),

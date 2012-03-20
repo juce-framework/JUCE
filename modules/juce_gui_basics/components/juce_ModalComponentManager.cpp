@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class ModalComponentManager::ModalItem  : public ComponentMovementWatcher
 {
 public:

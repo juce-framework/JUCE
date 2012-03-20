@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
 {
     struct DefaultImageFormats

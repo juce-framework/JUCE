@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 PerformanceCounter::PerformanceCounter (const String& name_,
                                         const int runsPerPrintout,
                                         const File& loggingFile)

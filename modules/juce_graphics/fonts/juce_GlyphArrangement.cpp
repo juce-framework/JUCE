@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 PositionedGlyph::PositionedGlyph (const Font& font_, const juce_wchar character_, const int glyph_,
                                   const float x_, const float y_, const float w_, const bool whitespace_)
     : font (font_), character (character_), glyph (glyph_),

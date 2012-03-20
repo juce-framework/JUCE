@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const commandManager_)
     : commandManager (commandManager_)
 {

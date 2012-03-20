@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 DrawableButton::DrawableButton (const String& name,
                                 const DrawableButton::ButtonStyle buttonStyle)
     : Button (name),

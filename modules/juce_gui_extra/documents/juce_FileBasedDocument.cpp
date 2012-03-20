@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 FileBasedDocument::FileBasedDocument (const String& fileExtension_,
                                       const String& fileWildcard_,
                                       const String& openFileDialogTitle_,

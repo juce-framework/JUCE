@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace FontValues
 {
     float limitFontHeight (const float height) noexcept

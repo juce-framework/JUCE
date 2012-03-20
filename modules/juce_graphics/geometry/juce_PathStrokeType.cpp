@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 PathStrokeType::PathStrokeType (const float strokeThickness,
                                 const JointStyle jointStyle_,
                                 const EndCapStyle endStyle_) noexcept

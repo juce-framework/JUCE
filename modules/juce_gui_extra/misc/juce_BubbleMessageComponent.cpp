@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 BubbleMessageComponent::BubbleMessageComponent (int fadeOutLengthMs)
     : fadeOutLength (fadeOutLengthMs),
       deleteAfterUse (false)

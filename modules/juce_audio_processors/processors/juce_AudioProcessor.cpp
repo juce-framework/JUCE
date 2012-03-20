@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioProcessor::AudioProcessor()
     : playHead (nullptr),
       sampleRate (0),

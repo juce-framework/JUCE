@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 DialogWindow::DialogWindow (const String& name,
                             const Colour& backgroundColour_,
                             const bool escapeKeyTriggersCloseButton_,

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioDeviceManager::AudioDeviceSetup::AudioDeviceSetup()
     : sampleRate (0),
       bufferSize (0),

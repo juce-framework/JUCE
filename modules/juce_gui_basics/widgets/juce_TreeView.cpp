@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class TreeViewContentComponent  : public Component,
                                   public TooltipClient,
                                   public AsyncUpdater

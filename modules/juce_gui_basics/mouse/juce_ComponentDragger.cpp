@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ComponentDragger::ComponentDragger() {}
 ComponentDragger::~ComponentDragger() {}
 

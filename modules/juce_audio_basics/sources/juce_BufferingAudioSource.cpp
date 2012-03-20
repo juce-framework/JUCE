@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* source_,
                                             TimeSliceThread& backgroundThread_,
                                             const bool deleteSourceWhenDeleted,

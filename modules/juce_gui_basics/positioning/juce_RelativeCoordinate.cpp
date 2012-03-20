@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 const String RelativeCoordinate::Strings::parent ("parent");
 const String RelativeCoordinate::Strings::left ("left");
 const String RelativeCoordinate::Strings::right ("right");

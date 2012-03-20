@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioTransportSource::AudioTransportSource()
     : source (nullptr),
       resamplerSource (nullptr),

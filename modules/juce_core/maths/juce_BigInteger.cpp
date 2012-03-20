@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace
 {
     inline size_t bitToIndex (const int bit) noexcept   { return (size_t) (bit >> 5); }

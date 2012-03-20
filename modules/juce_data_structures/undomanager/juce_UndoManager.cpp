@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 UndoManager::UndoManager (const int maxNumberOfUnitsToKeep,
                           const int minimumTransactions)
    : totalUnitsStored (0),

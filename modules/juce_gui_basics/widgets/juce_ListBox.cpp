@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class ListBoxRowComponent  : public Component,
                              public TooltipClient
 {

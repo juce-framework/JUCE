@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ResizableEdgeComponent::ResizableEdgeComponent (Component* const componentToResize,
                                                 ComponentBoundsConstrainer* const constrainer_,
                                                 Edge edge_)

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 DrawableText::DrawableText()
     : colour (Colours::black),
       justification (Justification::centredLeft)

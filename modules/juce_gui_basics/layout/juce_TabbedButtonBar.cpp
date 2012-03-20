@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 TabBarButton::TabBarButton (const String& name, TabbedButtonBar& owner_)
     : Button (name),
       owner (owner_),

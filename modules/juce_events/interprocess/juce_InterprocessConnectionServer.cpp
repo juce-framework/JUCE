@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 InterprocessConnectionServer::InterprocessConnectionServer()
     : Thread ("Juce IPC server")
 {

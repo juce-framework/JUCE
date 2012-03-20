@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 TemporaryFile::TemporaryFile (const String& suffix, const int optionFlags)
 {
     createTempFile (File::getSpecialLocation (File::tempDirectory),

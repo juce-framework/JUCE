@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 MouseEvent::MouseEvent (MouseInputSource& source_,
                         const Point<int>& position,
                         const ModifierKeys& mods_,

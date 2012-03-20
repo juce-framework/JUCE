@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 bool NamedPipe::openExisting (const String& pipeName)
 {
     currentPipeName = pipeName;

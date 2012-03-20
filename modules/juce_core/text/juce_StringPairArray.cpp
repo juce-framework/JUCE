@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 StringPairArray::StringPairArray (const bool ignoreCase_)
     : ignoreCase (ignoreCase_)
 {

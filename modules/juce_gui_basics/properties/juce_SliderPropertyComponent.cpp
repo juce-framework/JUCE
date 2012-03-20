@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 SliderPropertyComponent::SliderPropertyComponent (const String& name,
                                                   const double rangeMin,
                                                   const double rangeMax,

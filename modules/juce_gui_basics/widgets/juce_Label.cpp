@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Label::Label (const String& name,
               const String& labelText)
     : Component (name),

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 DirectoryIterator::DirectoryIterator (const File& directory,
                                       bool isRecursive_,
                                       const String& wildCard_,

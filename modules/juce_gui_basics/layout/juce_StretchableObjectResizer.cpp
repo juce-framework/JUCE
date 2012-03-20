@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 StretchableObjectResizer::StretchableObjectResizer()
 {
 }

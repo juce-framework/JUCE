@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioProcessorPlayer::AudioProcessorPlayer()
     : processor (nullptr),
       sampleRate (0),

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Message::Message() noexcept   : messageRecipient (nullptr) {}
 Message::~Message() {}
 

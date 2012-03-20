@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 UnitTest::UnitTest (const String& name_)
     : name (name_), runner (nullptr)
 {

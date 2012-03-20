@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 StringPool::StringPool() noexcept   {}
 StringPool::~StringPool()           {}
 

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace PrimesHelpers
 {
     void createSmallSieve (const int numBits, BigInteger& result)

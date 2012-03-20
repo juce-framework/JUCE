@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Thread::Thread (const String& threadName_)
     : threadName (threadName_),
       threadHandle (nullptr),

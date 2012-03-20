@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
     : model (nullptr),
       itemUnderMouse (-1),

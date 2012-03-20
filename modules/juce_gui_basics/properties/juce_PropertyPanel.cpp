@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class PropertySectionComponent  : public Component
 {
 public:

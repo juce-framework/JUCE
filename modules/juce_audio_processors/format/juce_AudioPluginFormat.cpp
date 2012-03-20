@@ -23,6 +23,5 @@
   ==============================================================================
 */
 
-
 AudioPluginFormat::AudioPluginFormat() noexcept {}
 AudioPluginFormat::~AudioPluginFormat() {}

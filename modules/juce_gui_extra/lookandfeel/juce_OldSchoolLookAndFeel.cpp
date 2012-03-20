@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 OldSchoolLookAndFeel::OldSchoolLookAndFeel()
 {
     setColour (TextButton::buttonColourId,          Colour (0xffbbbbff));

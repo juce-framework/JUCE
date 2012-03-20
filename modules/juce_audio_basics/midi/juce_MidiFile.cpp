@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace MidiFileHelpers
 {
     void writeVariableLengthInt (OutputStream& out, unsigned int v)

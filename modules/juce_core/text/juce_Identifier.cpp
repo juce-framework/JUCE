@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 StringPool& Identifier::getPool()
 {
     static StringPool pool;

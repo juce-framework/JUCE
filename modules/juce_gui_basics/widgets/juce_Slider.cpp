@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class Slider::PopupDisplayComponent  : public BubbleComponent,
                                        public Timer
 {

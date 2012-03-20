@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
                                               const bool deleteInputWhenDeleted,
                                               const int numChannels_)

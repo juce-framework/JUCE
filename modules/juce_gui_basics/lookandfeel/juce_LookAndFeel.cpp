@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace LookAndFeelHelpers
 {
     void createRoundedPath (Path& p,

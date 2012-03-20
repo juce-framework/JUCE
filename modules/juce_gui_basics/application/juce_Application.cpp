@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 #if JUCE_MAC
  extern void juce_initialiseMacMainMenu();
 #endif

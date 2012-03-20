@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 GroupComponent::GroupComponent (const String& name,
                                 const String& labelText)
     : Component (name),

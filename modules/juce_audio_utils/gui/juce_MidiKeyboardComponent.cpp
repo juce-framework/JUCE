@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class MidiKeyboardUpDownButton  : public Button
 {
 public:

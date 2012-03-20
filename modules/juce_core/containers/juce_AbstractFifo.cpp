@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AbstractFifo::AbstractFifo (const int capacity) noexcept
     : bufferSize (capacity)
 {

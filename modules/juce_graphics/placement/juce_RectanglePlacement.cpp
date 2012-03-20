@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 RectanglePlacement::RectanglePlacement (const RectanglePlacement& other) noexcept
     : flags (other.flags)
 {

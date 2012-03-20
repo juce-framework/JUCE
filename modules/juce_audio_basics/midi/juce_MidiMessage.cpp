@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace MidiHelpers
 {
     inline uint8 initialByte (const int type, const int channel) noexcept

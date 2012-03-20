@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Desktop::Desktop()
     : mouseClickCounter (0),
       kioskModeComponent (nullptr),

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 CallOutBox::CallOutBox (Component& contentComponent,
                         Component& componentToPointTo,
                         Component* const parent)

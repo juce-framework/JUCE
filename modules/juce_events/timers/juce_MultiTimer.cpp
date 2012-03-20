@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class MultiTimer::MultiTimerCallback    : public Timer
 {
 public:

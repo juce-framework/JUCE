@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioPluginFormatManager::AudioPluginFormatManager()
 {
 }

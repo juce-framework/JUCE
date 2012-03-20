@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class ScrollBar::ScrollbarButton  : public Button
 {
 public:

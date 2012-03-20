@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class Expression::Term  : public SingleThreadedReferenceCountedObject
 {
 public:

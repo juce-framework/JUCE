@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 CPlusPlusCodeTokeniser::CPlusPlusCodeTokeniser() {}
 CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser() {}
 

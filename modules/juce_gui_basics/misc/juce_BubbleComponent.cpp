@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 BubbleComponent::BubbleComponent()
   : side (0),
     allowablePlacements (above | below | left | right),

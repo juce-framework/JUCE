@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 StretchableLayoutResizerBar::StretchableLayoutResizerBar (StretchableLayoutManager* layout_,
                                                           const int itemIndex_,
                                                           const bool isVertical_)

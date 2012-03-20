@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 FilenameComponent::FilenameComponent (const String& name,
                                       const File& currentFile,
                                       const bool canEditFilename,

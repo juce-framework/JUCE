@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ShapeButton::ShapeButton (const String& text_,
                           const Colour& normalColour_,
                           const Colour& overColour_,

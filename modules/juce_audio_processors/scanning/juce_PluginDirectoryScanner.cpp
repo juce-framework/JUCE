@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
                                                 AudioPluginFormat& formatToLookFor,
                                                 FileSearchPath directoriesToSearch,

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 BooleanPropertyComponent::BooleanPropertyComponent (const String& name,
                                                     const String& buttonTextWhenTrue,
                                                     const String& buttonTextWhenFalse)

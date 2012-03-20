@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
     : component (component_),
       lastPeerID (0),

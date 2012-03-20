@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AttributedString::Attribute::Attribute (const Range<int>& range_, const Colour& colour_)
     : range (range_), colour (new Colour (colour_))
 {

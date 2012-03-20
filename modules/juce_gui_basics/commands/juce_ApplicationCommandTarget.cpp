@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class ApplicationCommandTarget::MessageTarget  : public MessageListener
 {
 public:

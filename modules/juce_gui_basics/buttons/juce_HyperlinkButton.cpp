@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 HyperlinkButton::HyperlinkButton (const String& linkText,
                                   const URL& linkURL)
    : Button (linkText),

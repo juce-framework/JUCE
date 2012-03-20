@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ThreadPoolJob::ThreadPoolJob (const String& name)
     : jobName (name),
       pool (nullptr),

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace MidiBufferHelpers
 {
     inline int getEventTime (const void* const d) noexcept

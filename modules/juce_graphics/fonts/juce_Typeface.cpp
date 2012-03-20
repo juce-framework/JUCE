@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Typeface::Typeface (const String& name_) noexcept
     : name (name_)
 {

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 MidiMessageCollector::MidiMessageCollector()
     : lastCallbackTime (0),
       sampleRate (44100.0001)

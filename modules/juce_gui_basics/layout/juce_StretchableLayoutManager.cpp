@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 StretchableLayoutManager::StretchableLayoutManager()
     : totalSize (0)
 {

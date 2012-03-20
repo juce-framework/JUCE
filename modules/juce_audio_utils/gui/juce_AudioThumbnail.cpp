@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 struct AudioThumbnail::MinMaxValue
 {
     MinMaxValue() noexcept

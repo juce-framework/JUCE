@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 bool KeyListener::keyStateChanged (const bool, Component*)
 {
     return false;

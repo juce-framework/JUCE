@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ChannelRemappingAudioSource::ChannelRemappingAudioSource (AudioSource* const source_,
                                                           const bool deleteSourceWhenDeleted)
    : source (source_, deleteSourceWhenDeleted),

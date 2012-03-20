@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ChildProcess::ChildProcess() {}
 ChildProcess::~ChildProcess() {}
 

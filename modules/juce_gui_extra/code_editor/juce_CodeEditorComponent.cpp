@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class CodeEditorComponent::CodeEditorLine
 {
 public:

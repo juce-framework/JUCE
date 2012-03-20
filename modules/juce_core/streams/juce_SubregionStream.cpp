@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 SubregionStream::SubregionStream (InputStream* const sourceStream,
                                   const int64 startPositionInSourceStream_,
                                   const int64 lengthOfSourceStream_,

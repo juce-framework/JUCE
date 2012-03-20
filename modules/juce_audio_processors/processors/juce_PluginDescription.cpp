@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 PluginDescription::PluginDescription()
     : uid (0),
       isInstrument (false),

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ToolbarItemPalette::ToolbarItemPalette (ToolbarItemFactory& factory_,
                                         Toolbar* const toolbar_)
     : factory (factory_),

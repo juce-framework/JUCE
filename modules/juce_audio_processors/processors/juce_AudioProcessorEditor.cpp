@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* const owner_)
     : owner (owner_)
 {

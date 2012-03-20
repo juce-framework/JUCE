@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 PropertySet::PropertySet (const bool ignoreCaseOfKeyNames)
     : properties (ignoreCaseOfKeyNames),
       fallbackProperties (nullptr),

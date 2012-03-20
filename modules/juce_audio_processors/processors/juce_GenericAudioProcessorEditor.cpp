@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class ProcessorParameterPropertyComp   : public PropertyComponent,
                                          public AudioProcessorListener,
                                          public Timer

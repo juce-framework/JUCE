@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 FileChooser::FileChooser (const String& chooserBoxTitle,
                           const File& currentFileOrDirectory,
                           const String& fileFilters,

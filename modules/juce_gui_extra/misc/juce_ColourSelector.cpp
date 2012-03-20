@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class ColourComponentSlider  : public Slider
 {
 public:

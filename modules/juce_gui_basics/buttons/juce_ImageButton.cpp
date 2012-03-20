@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ImageButton::ImageButton (const String& text_)
     : Button (text_),
       scaleImageToFit (true),

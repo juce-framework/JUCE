@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 RecentlyOpenedFilesList::RecentlyOpenedFilesList()
     : maxNumberOfItems (10)
 {

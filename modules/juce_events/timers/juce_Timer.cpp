@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class Timer::TimerThread  : private Thread,
                             private MessageListener,
                             private DeletedAtShutdown,

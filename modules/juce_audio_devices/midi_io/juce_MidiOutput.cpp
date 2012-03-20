@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 struct MidiOutput::PendingMessage
 {
     PendingMessage (const void* const data, const int len, const double timeStamp)

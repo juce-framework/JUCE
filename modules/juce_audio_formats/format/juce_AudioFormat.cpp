@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioFormat::AudioFormat (const String& name, const StringArray& extensions)
   : formatName (name),
     fileExtensions (extensions)

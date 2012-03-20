@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Result::Result (const String& message) noexcept
     : errorMessage (message)
 {

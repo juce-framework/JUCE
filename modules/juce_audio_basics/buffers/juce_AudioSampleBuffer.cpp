@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioSampleBuffer::AudioSampleBuffer (const int numChannels_,
                                       const int numSamples) noexcept
   : numChannels (numChannels_),

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioIODeviceType::AudioIODeviceType (const String& name)
     : typeName (name)
 {

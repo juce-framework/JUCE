@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasProgressBar,
                                                     const bool hasCancelButton,

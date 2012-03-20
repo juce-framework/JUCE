@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) noexcept
     : name (other.name),
       value (other.value)

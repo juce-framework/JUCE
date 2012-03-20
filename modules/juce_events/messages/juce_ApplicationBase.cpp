@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 JUCEApplicationBase::CreateInstanceFunction JUCEApplicationBase::createInstance = 0;
 JUCEApplicationBase* JUCEApplicationBase::appInstance = nullptr;
 

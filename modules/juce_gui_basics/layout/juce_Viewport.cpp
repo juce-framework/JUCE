@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Viewport::Viewport (const String& name)
   : Component (name),
     scrollBarThickness (0),

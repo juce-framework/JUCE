@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ComboBox::ItemInfo::ItemInfo (const String& name_, int itemId_, bool isEnabled_, bool isHeading_)
     : name (name_), itemId (itemId_), isEnabled (isEnabled_), isHeading (isHeading_)
 {

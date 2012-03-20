@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 DrawableShape::DrawableShape()
     : strokeType (0.0f),
       mainFill (Colours::black),

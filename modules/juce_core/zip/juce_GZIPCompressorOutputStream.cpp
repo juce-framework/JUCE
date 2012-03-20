@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:

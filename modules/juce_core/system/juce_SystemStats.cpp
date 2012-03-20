@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 const SystemStats::CPUFlags& SystemStats::getCPUFlags()
 {
     static CPUFlags cpuFlags;

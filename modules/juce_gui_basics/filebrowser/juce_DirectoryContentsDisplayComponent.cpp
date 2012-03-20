@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 DirectoryContentsDisplayComponent::DirectoryContentsDisplayComponent (DirectoryContentsList& listToShow)
     : fileList (listToShow)
 {

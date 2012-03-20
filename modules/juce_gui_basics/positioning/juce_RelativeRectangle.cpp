@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 namespace RelativeRectangleHelpers
 {
     inline void skipComma (String::CharPointerType& s)

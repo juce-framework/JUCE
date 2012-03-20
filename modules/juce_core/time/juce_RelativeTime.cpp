@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 RelativeTime::RelativeTime (const double seconds_) noexcept
     : seconds (seconds_)
 {

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 // a word or space that can't be broken down any further
 struct TextAtom
 {

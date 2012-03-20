@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 RelativePointPath::RelativePointPath()
     : usesNonZeroWinding (true),
       containsDynamicPoints (false)

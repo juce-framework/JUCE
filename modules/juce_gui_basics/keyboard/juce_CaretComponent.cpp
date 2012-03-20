@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 CaretComponent::CaretComponent (Component* const keyFocusOwner)
     : owner (keyFocusOwner)
 {

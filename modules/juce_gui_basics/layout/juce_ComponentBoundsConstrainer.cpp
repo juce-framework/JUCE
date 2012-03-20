@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ComponentBoundsConstrainer::ComponentBoundsConstrainer() noexcept
     : minW (0),
       maxW (0x3fffffff),

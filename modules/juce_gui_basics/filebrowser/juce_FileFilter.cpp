@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 FileFilter::FileFilter (const String& filterDescription)
     : description (filterDescription)
 {

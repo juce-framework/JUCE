@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 FileSearchPathListComponent::FileSearchPathListComponent()
     : addButton ("+"),
       removeButton ("-"),

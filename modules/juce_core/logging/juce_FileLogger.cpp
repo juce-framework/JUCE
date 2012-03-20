@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 FileLogger::FileLogger (const File& logFile_,
                         const String& welcomeMessage,
                         const int maxInitialFileSizeBytes)

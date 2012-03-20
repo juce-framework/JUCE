@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 TextButton::TextButton (const String& name,
                         const String& toolTip)
     : Button (name)

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 LocalisedStrings::LocalisedStrings (const String& fileContents)
 {
     loadFromText (fileContents);

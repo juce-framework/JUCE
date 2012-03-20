@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Justification::Justification (const Justification& other) noexcept
     : flags (other.flags)
 {

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class AsyncUpdater::AsyncUpdaterMessage  : public CallbackMessage
 {
 public:

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ResizableBorderComponent::Zone::Zone (const int zoneFlags) noexcept
     : zone (zoneFlags)
 {}

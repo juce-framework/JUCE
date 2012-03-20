@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 AudioSourcePlayer::AudioSourcePlayer()
     : source (nullptr),
       sampleRate (0),

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 Drawable::Drawable()
 {
     setInterceptsMouseClicks (false, false);

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class SimpleDeviceManagerInputLevelMeter  : public Component,
                                             public Timer
 {

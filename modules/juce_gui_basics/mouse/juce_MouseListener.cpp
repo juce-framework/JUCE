@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 void MouseListener::mouseEnter (const MouseEvent&) {}
 void MouseListener::mouseExit (const MouseEvent&)  {}
 void MouseListener::mouseDown (const MouseEvent&)  {}

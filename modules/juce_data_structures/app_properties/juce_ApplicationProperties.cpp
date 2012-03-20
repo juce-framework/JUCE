@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ApplicationProperties::ApplicationProperties()
     : commonSettingsAreReadOnly (0)
 {

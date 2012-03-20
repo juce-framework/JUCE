@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class KeyMappingEditorComponent::ChangeKeyButton  : public Button
 {
 public:

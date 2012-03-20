@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 class ValueTree::SharedObject  : public ReferenceCountedObject
 {
 public:

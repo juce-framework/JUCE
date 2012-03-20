@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ResizableWindow::ResizableWindow (const String& name,
                                   const bool addToDesktop_)
     : TopLevelWindow (name, addToDesktop_),

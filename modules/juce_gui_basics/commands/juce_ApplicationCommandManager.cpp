@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ApplicationCommandManager::ApplicationCommandManager()
     : firstTarget (nullptr)
 {

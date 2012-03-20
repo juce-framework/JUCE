@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 InterprocessConnection::InterprocessConnection (const bool callbacksOnMessageThread,
                                                 const uint32 magicMessageHeaderNumber)
     : Thread ("Juce IPC connection"),

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 ToggleButton::ToggleButton (const String& buttonText)
     : Button (buttonText)
 {

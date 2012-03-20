@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 DirectoryContentsList::DirectoryContentsList (const FileFilter* const fileFilter_,
                                               TimeSliceThread& thread_)
    : fileFilter (fileFilter_),
