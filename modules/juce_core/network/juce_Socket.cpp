@@ -196,7 +196,7 @@ namespace SocketHelpers
 
     bool connectSocket (int volatile& handle,
                         const bool isDatagram,
-                        void** serverAddress,
+                        struct addrinfo** const serverAddress,
                         const String& hostName,
                         const int portNumber,
                         const int timeOutMillisecs) noexcept
@@ -207,7 +207,8 @@ namespace SocketHelpers
         hints.ai_flags = AI_NUMERICSERV;
 
         struct addrinfo* info = nullptr;
-        if (getaddrinfo (hostName.toUTF8(), String (portNumber).toUTF8(), &hints, &info) != 0 || info == 0)
+        if (getaddrinfo (hostName.toUTF8(), String (portNumber).toUTF8(), &hints, &info) != 0
+             || info == nullptr)
             return false;
 
         if (handle < 0)
@@ -221,11 +222,10 @@ namespace SocketHelpers
 
         if (isDatagram)
         {
-            struct sockaddr* s = new struct sockaddr();
-            *s = *(info->ai_addr);
-            *serverAddress = s;
+            if (*serverAddress != nullptr)
+                freeaddrinfo (*serverAddress);
 
-            freeaddrinfo (info);
+            *serverAddress = info;
             return true;
         }
 
@@ -341,7 +341,7 @@ bool StreamingSocket::connect (const String& remoteHostName,
     portNumber = remotePortNumber;
     isListener = false;
 
-    connected = SocketHelpers::connectSocket (handle, false, 0, remoteHostName,
+    connected = SocketHelpers::connectSocket (handle, false, nullptr, remoteHostName,
                                               remotePortNumber, timeOutMillisecs);
 
     if (! (connected && SocketHelpers::resetSocketOptions (handle, false, false)))
@@ -428,9 +428,9 @@ StreamingSocket* StreamingSocket::waitForNextConnection() const
 
     if (connected && isListener)
     {
-        struct sockaddr address;
-        juce_socklen_t len = sizeof (sockaddr);
-        const int newSocket = (int) accept (handle, &address, &len);
+        struct sockaddr_storage address;
+        juce_socklen_t len = sizeof (address);
+        const int newSocket = (int) accept (handle, (struct sockaddr*) &address, &len);
 
         if (newSocket >= 0 && connected)
             return new StreamingSocket (inet_ntoa (((struct sockaddr_in*) &address)->sin_addr),
@@ -453,7 +453,7 @@ DatagramSocket::DatagramSocket (const int localPortNumber, const bool allowBroad
       handle (-1),
       connected (true),
       allowBroadcast (allowBroadcast_),
-      serverAddress (0)
+      serverAddress (nullptr)
 {
     SocketHelpers::initSockets();
 
@@ -468,7 +468,7 @@ DatagramSocket::DatagramSocket (const String& hostName_, const int portNumber_,
       handle (handle_),
       connected (true),
       allowBroadcast (false),
-      serverAddress (0)
+      serverAddress (nullptr)
 {
     SocketHelpers::initSockets();
 
@@ -480,8 +480,8 @@ DatagramSocket::~DatagramSocket()
 {
     close();
 
-    delete static_cast <struct sockaddr*> (serverAddress);
-    serverAddress = 0;
+    if (serverAddress != nullptr)
+        freeaddrinfo (static_cast <struct addrinfo*> (serverAddress));
 }
 
 void DatagramSocket::close()
@@ -514,7 +514,7 @@ bool DatagramSocket::connect (const String& remoteHostName,
     hostName = remoteHostName;
     portNumber = remotePortNumber;
 
-    connected = SocketHelpers::connectSocket (handle, true, &serverAddress,
+    connected = SocketHelpers::connectSocket (handle, true, (struct addrinfo**) &serverAddress,
                                               remoteHostName, remotePortNumber,
                                               timeOutMillisecs);
 
@@ -529,19 +529,16 @@ bool DatagramSocket::connect (const String& remoteHostName,
 
 DatagramSocket* DatagramSocket::waitForNextConnection() const
 {
-    struct sockaddr address;
-    juce_socklen_t len = sizeof (sockaddr);
-
     while (waitUntilReady (true, -1) == 1)
     {
+        struct sockaddr_storage address;
+        juce_socklen_t len = sizeof (address);
         char buf[1];
 
-        if (recvfrom (handle, buf, 0, 0, &address, &len) > 0)
-        {
+        if (recvfrom (handle, buf, 0, 0, (struct sockaddr*) &address, &len) > 0)
             return new DatagramSocket (inet_ntoa (((struct sockaddr_in*) &address)->sin_addr),
                                        ntohs (((struct sockaddr_in*) &address)->sin_port),
                                        -1, -1);
-        }
     }
 
     return nullptr;
@@ -564,12 +561,12 @@ int DatagramSocket::read (void* destBuffer, const int maxBytesToRead, const bool
 int DatagramSocket::write (const void* sourceBuffer, const int numBytesToWrite)
 {
     // You need to call connect() first to set the server address..
-    jassert (serverAddress != 0 && connected);
+    jassert (serverAddress != nullptr && connected);
 
     return connected ? (int) sendto (handle, (const char*) sourceBuffer,
                                      numBytesToWrite, 0,
-                                     (const struct sockaddr*) serverAddress,
-                                     sizeof (struct sockaddr_in))
+                                     static_cast <const struct addrinfo*> (serverAddress)->ai_addr,
+                                     static_cast <const struct addrinfo*> (serverAddress)->ai_addrlen)
                      : -1;
 }
 
