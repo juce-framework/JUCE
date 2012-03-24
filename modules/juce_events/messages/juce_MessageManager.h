@@ -26,7 +26,6 @@
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
 #define __JUCE_MESSAGEMANAGER_JUCEHEADER__
 
-#include "juce_CallbackMessage.h"
 class MessageManagerLock;
 class ThreadPoolJob;
 class ActionListener;
@@ -40,9 +39,10 @@ typedef void* (MessageCallbackFunction) (void* userData);
 
 
 //==============================================================================
-/** Delivers Message objects to MessageListeners, and handles the event-dispatch loop.
+/**
+    This class is in charge of the application's event-dispatch loop.
 
-    @see Message, MessageListener, MessageManagerLock, JUCEApplication
+    @see Message, CallbackMessage, MessageManagerLock, JUCEApplication
 */
 class JUCE_API  MessageManager
 {
@@ -50,6 +50,9 @@ public:
     //==============================================================================
     /** Returns the global instance of the MessageManager. */
     static MessageManager* getInstance();
+
+    /** Returns the global instance of the MessageManager, or nullptr if it doesn't exist. */
+    static MessageManager* getInstanceWithoutCreating() noexcept;
 
     /** Deletes the global MessageManager instance.
         Does nothing if no instance had been created.
@@ -157,9 +160,27 @@ public:
     void deregisterBroadcastListener (ActionListener* listener);
 
     //==============================================================================
+    /** Internal class used as the base class for all message objects.
+        You shouldn't need to use this directly - see the CallbackMessage or Message
+        classes instead.
+    */
+    class JUCE_API  MessageBase  : public ReferenceCountedObject
+    {
+    public:
+        MessageBase() noexcept {}
+        virtual ~MessageBase() {}
+
+        virtual void messageCallback() = 0;
+        void post();
+
+        typedef ReferenceCountedObjectPtr<MessageBase> Ptr;
+
+        JUCE_DECLARE_NON_COPYABLE (MessageBase);
+    };
+
+    //==============================================================================
    #ifndef DOXYGEN
     // Internal methods - do not use!
-    void deliverMessage (Message*);
     void deliverBroadcastMessage (const String&);
     ~MessageManager() noexcept;
    #endif
@@ -168,26 +189,20 @@ private:
     //==============================================================================
     MessageManager() noexcept;
 
-    friend class MessageListener;
-    friend class ChangeBroadcaster;
-    friend class ActionBroadcaster;
-    friend class CallbackMessage;
     static MessageManager* instance;
 
-    SortedSet <const MessageListener*> messageListeners;
-    ScopedPointer <ActionBroadcaster> broadcaster;
-
+    friend class MessageBase;
     class QuitMessage;
     friend class QuitMessage;
+    friend class MessageManagerLock;
+
+    ScopedPointer <ActionBroadcaster> broadcaster;
     bool quitMessagePosted, quitMessageReceived;
     Thread::ThreadID messageThreadId;
-
-    friend class MessageManagerLock;
     Thread::ThreadID volatile threadWithLock;
     CriticalSection lockingLock;
 
-    void postMessageToQueue (Message*);
-    static bool postMessageToSystemQueue (Message*);
+    static bool postMessageToSystemQueue (MessageBase*);
     static void* exitModalLoopCallback (void*);
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();

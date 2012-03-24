@@ -26,7 +26,7 @@
 #ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
 #define __JUCE_MESSAGELISTENER_JUCEHEADER__
 
-#include "juce_Message.h"
+#include "juce_MessageManager.h"
 
 
 //==============================================================================
@@ -37,19 +37,11 @@
 */
 class JUCE_API  MessageListener
 {
-protected:
-    //==============================================================================
-    /** Creates a MessageListener. */
-    MessageListener() noexcept;
-
 public:
     //==============================================================================
-    /** Destructor.
+    MessageListener() noexcept;
 
-        When a MessageListener is deleted, it removes itself from a global list
-        of registered listeners, so that the isValidMessageListener() method
-        will no longer return true.
-    */
+    /** Destructor. */
     virtual ~MessageListener();
 
     //==============================================================================
@@ -68,25 +60,15 @@ public:
         This method can be called safely by any thread.
 
         @param message      the message object to send - this will be deleted
-                            automatically by the message queue, so don't keep any
-                            references to it after calling this method.
+                            automatically by the message queue, so make sure it's
+                            allocated on the heap, not the stack!
         @see handleMessage
     */
     void postMessage (Message* message) const;
 
-    //==============================================================================
-    /** Checks whether this MessageListener has been deleted.
-
-        Although not foolproof, this method is safe to call on dangling or null
-        pointers. A list of active MessageListeners is kept internally, so this
-        checks whether the object is on this list or not.
-
-        Note that it's possible to get a false-positive here, if an object is
-        deleted and another is subsequently created that happens to be at the
-        exact same memory location, but I can't think of a good way of avoiding
-        this.
-    */
-    bool isValidMessageListener() const noexcept;
+private:
+    WeakReference<MessageListener>::Master masterReference;
+    friend class WeakReference<MessageListener>;
 };
 
 

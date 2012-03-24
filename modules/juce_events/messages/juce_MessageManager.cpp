@@ -23,22 +23,7 @@
   ==============================================================================
 */
 
-Message::Message() noexcept   : messageRecipient (nullptr) {}
-Message::~Message() {}
-
-//==============================================================================
-CallbackMessage::CallbackMessage() noexcept {}
-CallbackMessage::~CallbackMessage() {}
-
-void CallbackMessage::post()
-{
-    MessageManager* const mm = MessageManager::instance;
-    if (mm != nullptr)
-        mm->postMessageToQueue (this);
-}
-
-//==============================================================================
-class MessageManager::QuitMessage   : public CallbackMessage
+class MessageManager::QuitMessage   : public MessageManager::MessageBase
 {
 public:
     QuitMessage() {}
@@ -55,8 +40,6 @@ private:
 };
 
 //==============================================================================
-MessageManager* MessageManager::instance = nullptr;
-
 MessageManager::MessageManager() noexcept
   : quitMessagePosted (false),
     quitMessageReceived (false),
@@ -73,12 +56,11 @@ MessageManager::~MessageManager() noexcept
 
     doPlatformSpecificShutdown();
 
-    // If you hit this assertion, then you've probably leaked some kind of MessageListener object..
-    jassert (messageListeners.size() == 0);
-
     jassert (instance == this);
     instance = nullptr;  // do this last in case this instance is still needed by doPlatformSpecificShutdown()
 }
+
+MessageManager* MessageManager::instance = nullptr;
 
 MessageManager* MessageManager::getInstance()
 {
@@ -91,37 +73,23 @@ MessageManager* MessageManager::getInstance()
     return instance;
 }
 
+inline MessageManager* MessageManager::getInstanceWithoutCreating() noexcept
+{
+    return instance;
+}
+
 void MessageManager::deleteInstance()
 {
     deleteAndZero (instance);
 }
 
-void MessageManager::postMessageToQueue (Message* const message)
-{
-    if (quitMessagePosted || ! postMessageToSystemQueue (message))
-        Message::Ptr deleter (message); // (this will delete messages that were just created with a 0 ref count)
-}
-
 //==============================================================================
-void MessageManager::deliverMessage (Message* const message)
+void MessageManager::MessageBase::post()
 {
-    JUCE_TRY
-    {
-        MessageListener* const recipient = message->messageRecipient;
+    MessageManager* const mm = MessageManager::instance;
 
-        if (recipient == nullptr)
-        {
-            CallbackMessage* const callbackMessage = dynamic_cast <CallbackMessage*> (message);
-
-            if (callbackMessage != nullptr)
-                callbackMessage->messageCallback();
-        }
-        else if (messageListeners.contains (recipient))
-        {
-            recipient->handleMessage (*message);
-        }
-    }
-    JUCE_CATCH_EXCEPTION
+    if (mm == nullptr || mm->quitMessagePosted || ! postMessageToSystemQueue (this))
+        Ptr deleter (this); // (this will delete messages that were just created with a 0 ref count)
 }
 
 //==============================================================================
@@ -166,7 +134,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 #endif
 
 //==============================================================================
-class AsyncFunctionCallback   : public CallbackMessage
+class AsyncFunctionCallback   : public MessageManager::MessageBase
 {
 public:
     AsyncFunctionCallback (MessageCallbackFunction* const f, void* const param)
@@ -258,10 +226,10 @@ bool MessageManager::currentThreadHasLockedMessageManager() const noexcept
     accessed from another thread inside a MM lock, you're screwed. (this is exactly what happens
     in Cocoa).
 */
-class MessageManagerLock::BlockingMessage   : public CallbackMessage
+class MessageManagerLock::BlockingMessage   : public MessageManager::MessageBase
 {
 public:
-    BlockingMessage() {}
+    BlockingMessage() noexcept {}
 
     void messageCallback()
     {

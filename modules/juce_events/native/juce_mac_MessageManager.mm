@@ -96,7 +96,7 @@ public:
         delete this;
     }
 
-    void postMessage (Message* const m)
+    void postMessage (MessageManager::MessageBase* const m)
     {
         messageQueue.post (m);
     }
@@ -360,7 +360,7 @@ void MessageManager::doPlatformSpecificShutdown()
     }
 }
 
-bool MessageManager::postMessageToSystemQueue (Message* message)
+bool MessageManager::postMessageToSystemQueue (MessageBase* message)
 {
     juceAppDelegate->redirector->postMessage (message);
     return true;

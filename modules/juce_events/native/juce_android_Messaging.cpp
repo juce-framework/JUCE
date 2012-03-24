@@ -36,7 +36,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
 }
 
 //==============================================================================
-bool MessageManager::postMessageToSystemQueue (Message* message)
+bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
     message->incReferenceCount();
     getEnv()->CallVoidMethod (android.activity, JuceAppActivity.postMessage, (jlong) (pointer_sized_uint) message);
@@ -45,9 +45,13 @@ bool MessageManager::postMessageToSystemQueue (Message* message)
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, deliverMessage, void, (jobject activity, jlong value))
 {
-    Message* const message = (Message*) (pointer_sized_uint) value;
-    MessageManager::getInstance()->deliverMessage (message);
-    message->decReferenceCount();
+    JUCE_TRY
+    {
+        MessageManager::MessageBase* const message = (MessageManager::MessageBase*) (pointer_sized_uint) value;
+        message->messageCallback();
+        message->decReferenceCount();
+    }
+    JUCE_CATCH_EXCEPTION
 }
 
 //==============================================================================

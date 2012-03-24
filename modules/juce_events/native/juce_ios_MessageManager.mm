@@ -58,45 +58,27 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 }
 
 //==============================================================================
-struct MessageDispatchSystem
-{
-    MessageDispatchSystem()
-        : juceCustomMessageHandler (nil)
-    {
-        juceCustomMessageHandler = [[JuceCustomMessageHandler alloc] init];
-    }
-
-    ~MessageDispatchSystem()
-    {
-        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceCustomMessageHandler];
-        [juceCustomMessageHandler release];
-    }
-
-    JuceCustomMessageHandler* juceCustomMessageHandler;
-    MessageQueue messageQueue;
-};
-
-static ScopedPointer<MessageDispatchSystem> dispatcher;
+static ScopedPointer<MessageQueue> messageQueue;
 
 void MessageManager::doPlatformSpecificInitialisation()
 {
-    if (dispatcher == nullptr)
-        dispatcher = new MessageDispatchSystem();
+    if (messageQueue == nullptr)
+        messageQueue = new MessageQueue();
 }
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    dispatcher = nullptr;
+    messageQueue = nullptr;
 }
 
-bool MessageManager::postMessageToSystemQueue (Message* message)
+bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
-    if (dispatcher != nullptr)
-        dispatcher->messageQueue.post (message);
+    if (messageQueue != nullptr)
+        messageQueue->post (message);
 
     return true;
 }
 
-void MessageManager::broadcastMessage (const String& value)
+void MessageManager::broadcastMessage (const String&)
 {
 }

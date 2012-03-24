@@ -53,7 +53,7 @@ public:
         CFRelease (runLoopSource);
     }
 
-    void post (Message* const message)
+    void post (MessageManager::MessageBase* const message)
     {
         messages.add (message);
         CFRunLoopSourceSignal (runLoopSource);
@@ -61,20 +61,26 @@ public:
     }
 
 private:
-    ReferenceCountedArray <Message, CriticalSection> messages;
+    ReferenceCountedArray <MessageManager::MessageBase, CriticalSection> messages;
     CriticalSection lock;
     CFRunLoopRef runLoop;
     CFRunLoopSourceRef runLoopSource;
 
     bool deliverNextMessage()
     {
-        const Message::Ptr nextMessage (messages.removeAndReturn (0));
+        const MessageManager::MessageBase::Ptr nextMessage (messages.removeAndReturn (0));
 
         if (nextMessage == nullptr)
             return false;
 
         JUCE_AUTORELEASEPOOL
-        MessageManager::getInstance()->deliverMessage (nextMessage);
+
+        JUCE_TRY
+        {
+            nextMessage->messageCallback();
+        }
+        JUCE_CATCH_EXCEPTION
+
         return true;
     }
 

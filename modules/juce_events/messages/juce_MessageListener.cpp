@@ -23,33 +23,29 @@
   ==============================================================================
 */
 
+Message::Message() noexcept {}
+Message::~Message() {}
+
+void Message::messageCallback()
+{
+    MessageListener* const r = recipient;
+    if (r != nullptr)
+        r->handleMessage (*this);
+}
+
 MessageListener::MessageListener() noexcept
 {
-    // are you trying to create a messagelistener before or after juce has been intialised??
-    jassert (MessageManager::instance != nullptr);
-
-    if (MessageManager::instance != nullptr)
-        MessageManager::instance->messageListeners.add (this);
+    // Are you trying to create a messagelistener before or after juce has been intialised??
+    jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
 }
 
 MessageListener::~MessageListener()
 {
-    if (MessageManager::instance != nullptr)
-        MessageManager::instance->messageListeners.removeValue (this);
+    masterReference.clear();
 }
 
 void MessageListener::postMessage (Message* const message) const
 {
-    message->messageRecipient = const_cast <MessageListener*> (this);
-
-    if (MessageManager::instance == nullptr)
-        MessageManager::getInstance();
-
-    MessageManager::instance->postMessageToQueue (message);
-}
-
-bool MessageListener::isValidMessageListener() const noexcept
-{
-    return MessageManager::instance != nullptr
-             && MessageManager::instance->messageListeners.contains (this);
+    message->recipient = const_cast <MessageListener*> (this);
+    message->post();
 }

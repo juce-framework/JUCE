@@ -26,33 +26,34 @@
 #ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
 #define __JUCE_CALLBACKMESSAGE_JUCEHEADER__
 
-#include "juce_Message.h"
+#include "juce_MessageManager.h"
 
 
 //==============================================================================
 /**
-    A message that calls a custom function when it gets delivered.
+    A message that invokes a callback method when it gets delivered.
 
     You can use this class to fire off actions that you want to be performed later
     on the message thread.
 
-    Unlike other Message objects, these don't get sent to a MessageListener, you
-    just call the post() method to send them, and when they arrive, your
-    messageCallback() method will automatically be invoked.
+    To use it, create a subclass of CallbackMessage which implements the messageCallback()
+    method, then call post() to dispatch it. The event thread will then invoke your
+    messageCallback() method later on, and will automatically delete the message object
+    afterwards.
 
-    Always create an instance of a CallbackMessage on the heap, as it will be
+    Always create a new instance of a CallbackMessage on the heap, as it will be
     deleted automatically after the message has been delivered.
 
-    @see MessageListener, MessageManager, ActionListener, ChangeListener
+    @see MessageManager, MessageListener, ActionListener, ChangeListener
 */
-class JUCE_API  CallbackMessage   : public Message
+class JUCE_API  CallbackMessage   : public MessageManager::MessageBase
 {
 public:
     //==============================================================================
-    CallbackMessage() noexcept;
+    CallbackMessage() noexcept {}
 
     /** Destructor. */
-    ~CallbackMessage();
+    ~CallbackMessage() {}
 
     //==============================================================================
     /** Called when the message is delivered.
@@ -65,17 +66,7 @@ public:
     */
     virtual void messageCallback() = 0;
 
-    /** Instead of sending this message to a MessageListener, just call this method
-        to post it to the event queue.
-
-        After you've called this, this object will belong to the MessageManager,
-        which will delete it later. So make sure you don't delete the object yourself,
-        call post() more than once, or call post() on a stack-based obect!
-    */
-    void post();
-
 private:
-    //==============================================================================
     // Avoid the leak-detector because for plugins, the host can unload our DLL with undelivered
     // messages still in the system event queue. These aren't harmful, but can cause annoying assertions.
     JUCE_DECLARE_NON_COPYABLE (CallbackMessage);

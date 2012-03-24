@@ -59,7 +59,7 @@ public:
     }
 
     //==============================================================================
-    void postMessage (Message* msg)
+    void postMessage (MessageManager::MessageBase* const msg)
     {
         const int maxBytesInSocketQueue = 128;
 
@@ -133,7 +133,7 @@ public:
 
 private:
     CriticalSection lock;
-    ReferenceCountedArray <Message> queue;
+    ReferenceCountedArray <MessageManager::MessageBase> queue;
     int fd[2];
     int bytesInSocket;
     int totalEventCount;
@@ -173,7 +173,7 @@ private:
         return true;
     }
 
-    Message::Ptr popNextMessage()
+    MessageManager::MessageBase::Ptr popNextMessage()
     {
         const ScopedLock sl (lock);
 
@@ -192,12 +192,17 @@ private:
 
     bool dispatchNextInternalMessage()
     {
-        const Message::Ptr msg (popNextMessage());
+        const MessageManager::MessageBase::Ptr msg (popNextMessage());
 
         if (msg == nullptr)
             return false;
 
-        MessageManager::getInstance()->deliverMessage (msg);
+        JUCE_TRY
+        {
+            msg->messageCallback();
+        }
+        JUCE_CATCH_EXCEPTION
+
         return true;
     }
 };
@@ -346,7 +351,7 @@ void MessageManager::doPlatformSpecificShutdown()
     }
 }
 
-bool MessageManager::postMessageToSystemQueue (Message* message)
+bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
     if (LinuxErrorHandling::errorOccurred)
         return false;

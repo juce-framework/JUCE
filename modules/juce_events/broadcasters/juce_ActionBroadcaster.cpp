@@ -53,7 +53,7 @@ void ActionBroadcaster::CallbackReceiver::handleMessage (const Message& message)
 ActionBroadcaster::ActionBroadcaster()
 {
     // are you trying to create this object before or after juce has been intialised??
-    jassert (MessageManager::instance != nullptr);
+    jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
 
     callback.owner = this;
 }
@@ -61,7 +61,7 @@ ActionBroadcaster::ActionBroadcaster()
 ActionBroadcaster::~ActionBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
-    jassert (MessageManager::instance != nullptr);
+    jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
 }
 
 void ActionBroadcaster::addActionListener (ActionListener* const listener)

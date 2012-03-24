@@ -27,39 +27,35 @@
 #define __JUCE_MESSAGE_JUCEHEADER__
 
 class MessageListener;
-class MessageManager;
 
 
 //==============================================================================
-/** The base class for objects that can be delivered to a MessageListener.
+/** The base class for objects that can be sent to a MessageListener.
 
     If you want to send a message that carries some kind of custom data, just
     create a subclass of Message with some appropriate member variables to hold
     your data.
 
+    Always create a new instance of a Message object on the heap, as it will be
+    deleted automatically after the message has been delivered.
+
     @see MessageListener, MessageManager, ActionListener, ChangeListener
 */
-class JUCE_API  Message  : public ReferenceCountedObject
+class JUCE_API  Message  : public MessageManager::MessageBase
 {
 public:
     //==============================================================================
-    /** Creates an uninitialised message.
-
-        The class's variables will also be left uninitialised.
-    */
+    /** Creates an uninitialised message. */
     Message() noexcept;
+    ~Message();
 
-    /** Destructor. */
-    virtual ~Message();
-
-    /** A typedef for pointers to messages. */
-    typedef ReferenceCountedObjectPtr <Message> Ptr;
+    typedef ReferenceCountedObjectPtr<Message> Ptr;
 
     //==============================================================================
 private:
     friend class MessageListener;
-    friend class MessageManager;
-    MessageListener* messageRecipient;
+    WeakReference<MessageListener> recipient;
+    void messageCallback();
 
     // Avoid the leak-detector because for plugins, the host can unload our DLL with undelivered
     // messages still in the system event queue. These aren't harmful, but can cause annoying assertions.
