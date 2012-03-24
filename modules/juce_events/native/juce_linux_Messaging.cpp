@@ -360,49 +360,6 @@ void MessageManager::broadcastMessage (const String& value)
     /* TODO */
 }
 
-
-//==============================================================================
-class AsyncFunctionCaller   : public AsyncUpdater
-{
-public:
-    static void* call (MessageCallbackFunction* func_, void* parameter_)
-    {
-        if (MessageManager::getInstance()->isThisTheMessageThread())
-            return func_ (parameter_);
-
-        AsyncFunctionCaller caller (func_, parameter_);
-        caller.triggerAsyncUpdate();
-        caller.finished.wait();
-        return caller.result;
-    }
-
-    void handleAsyncUpdate()
-    {
-        result = (*func) (parameter);
-        finished.signal();
-    }
-
-private:
-    WaitableEvent finished;
-    MessageCallbackFunction* func;
-    void* parameter;
-    void* volatile result;
-
-    AsyncFunctionCaller (MessageCallbackFunction* func_, void* parameter_)
-        : result (nullptr), func (func_), parameter (parameter_)
-    {}
-
-    JUCE_DECLARE_NON_COPYABLE (AsyncFunctionCaller);
-};
-
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func, void* parameter)
-{
-    if (LinuxErrorHandling::errorOccurred)
-        return nullptr;
-
-    return AsyncFunctionCaller::call (func, parameter);
-}
-
 // this function expects that it will NEVER be called simultaneously for two concurrent threads
 bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 {

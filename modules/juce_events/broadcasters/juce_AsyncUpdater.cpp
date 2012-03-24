@@ -41,6 +41,8 @@ public:
 
 private:
     AsyncUpdater& owner;
+
+    JUCE_DECLARE_NON_COPYABLE (AsyncUpdaterMessage);
 };
 
 //==============================================================================

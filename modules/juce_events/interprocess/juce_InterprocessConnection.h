@@ -192,15 +192,12 @@ private:
     //==============================================================================
     friend class InterprocessConnectionServer;
 
-    void initialiseWithSocket (StreamingSocket* socket_);
-    void initialiseWithPipe (NamedPipe* pipe_);
-
-    void handleMessage (const Message& message);
-
+    void initialiseWithSocket (StreamingSocket*);
+    void initialiseWithPipe (NamedPipe*);
+    void handleMessage (const Message&);
     void connectionMadeInt();
     void connectionLostInt();
-    void deliverDataInt (const MemoryBlock& data);
-
+    void deliverDataInt (const MemoryBlock&);
     bool readNextMessageInt();
     void run();
 

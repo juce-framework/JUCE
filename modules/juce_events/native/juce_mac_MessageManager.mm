@@ -91,20 +91,6 @@ public:
             (*appFocusChangeCallback)();
     }
 
-    struct CallbackMessagePayload
-    {
-        MessageCallbackFunction* function;
-        void* parameter;
-        void* volatile result;
-        bool volatile hasBeenExecuted;
-    };
-
-    virtual void performCallback (CallbackMessagePayload* pl)
-    {
-        pl->result = (*pl->function) (pl->parameter);
-        pl->hasBeenExecuted = true;
-    }
-
     virtual void deleteSelf()
     {
         delete this;
@@ -159,7 +145,6 @@ using namespace juce;
 - (void) applicationDidBecomeActive: (NSNotification*) aNotification;
 - (void) applicationDidResignActive: (NSNotification*) aNotification;
 - (void) applicationWillUnhide: (NSNotification*) aNotification;
-- (void) performCallback: (id) info;
 - (void) broadcastMessageCallback: (NSNotification*) info;
 - (void) dummyMethod;
 @end
@@ -259,22 +244,6 @@ using namespace juce;
 {
     (void) notification;
     redirector->focusChanged();
-}
-
-- (void) performCallback: (id) info
-{
-    if ([info isKindOfClass: [NSData class]])
-    {
-        AppDelegateRedirector::CallbackMessagePayload* pl
-            = (AppDelegateRedirector::CallbackMessagePayload*) [((NSData*) info) bytes];
-
-        if (pl != nullptr)
-            redirector->performCallback (pl);
-    }
-    else
-    {
-        jassertfalse; // should never get here!
-    }
 }
 
 - (void) broadcastMessageCallback: (NSNotification*) n
@@ -405,35 +374,4 @@ void MessageManager::broadcastMessage (const String& message)
     [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegateRedirector::getBroacastEventName()
                                                                    object: nil
                                                                  userInfo: info];
-}
-
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* data)
-{
-    if (isThisTheMessageThread())
-    {
-        return (*callback) (data);
-    }
-    else
-    {
-        // If a thread has a MessageManagerLock and then tries to call this method, it'll
-        // deadlock because the message manager is blocked from running, so can never
-        // call your function..
-        jassert (! MessageManager::getInstance()->currentThreadHasLockedMessageManager());
-
-        JUCE_AUTORELEASEPOOL
-
-        AppDelegateRedirector::CallbackMessagePayload cmp;
-        cmp.function = callback;
-        cmp.parameter = data;
-        cmp.result = 0;
-        cmp.hasBeenExecuted = false;
-
-        [juceAppDelegate performSelectorOnMainThread: @selector (performCallback:)
-                                          withObject: [NSData dataWithBytesNoCopy: &cmp
-                                                                           length: sizeof (cmp)
-                                                                     freeWhenDone: NO]
-                                       waitUntilDone: YES];
-
-        return cmp.result;
-    }
 }

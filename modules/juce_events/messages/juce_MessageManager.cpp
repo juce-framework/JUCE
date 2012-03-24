@@ -32,16 +32,27 @@ CallbackMessage::~CallbackMessage() {}
 
 void CallbackMessage::post()
 {
-    if (MessageManager::instance != nullptr)
-        MessageManager::instance->postMessageToQueue (this);
+    MessageManager* const mm = MessageManager::instance;
+    if (mm != nullptr)
+        mm->postMessageToQueue (this);
 }
 
 //==============================================================================
-struct QuitMessage   : public Message
+class MessageManager::QuitMessage   : public CallbackMessage
 {
-    QuitMessage() noexcept {}
-};
+public:
+    QuitMessage() {}
 
+    void messageCallback()
+    {
+        MessageManager* const mm = MessageManager::instance;
+        if (mm != nullptr)
+            mm->quitMessageReceived = true;
+    }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuitMessage);
+};
 
 //==============================================================================
 MessageManager* MessageManager::instance = nullptr;
@@ -103,13 +114,7 @@ void MessageManager::deliverMessage (Message* const message)
             CallbackMessage* const callbackMessage = dynamic_cast <CallbackMessage*> (message);
 
             if (callbackMessage != nullptr)
-            {
                 callbackMessage->messageCallback();
-            }
-            else if (dynamic_cast <QuitMessage*> (message) != nullptr)
-            {
-                quitMessageReceived = true;
-            }
         }
         else if (messageListeners.contains (recipient))
         {
@@ -130,8 +135,7 @@ void MessageManager::runDispatchLoop()
 
 void MessageManager::stopDispatchLoop()
 {
-    postMessageToQueue (new QuitMessage());
-    quitMessagePosted = true;
+    (new QuitMessage())->post();
 }
 
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
@@ -160,6 +164,41 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 }
 
 #endif
+
+//==============================================================================
+class AsyncFunctionCallback   : public CallbackMessage
+{
+public:
+    AsyncFunctionCallback (MessageCallbackFunction* const f, void* const param)
+        : result (nullptr), func (f), parameter (param)
+    {}
+
+    void messageCallback()
+    {
+        result = (*func) (parameter);
+        finished.signal();
+    }
+
+    WaitableEvent finished;
+    void* volatile result;
+
+private:
+    MessageCallbackFunction* const func;
+    void* const parameter;
+
+    JUCE_DECLARE_NON_COPYABLE (AsyncFunctionCallback);
+};
+
+void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* const func, void* const parameter)
+{
+    if (MessageManager::getInstance()->isThisTheMessageThread())
+        return func (parameter);
+
+    const ReferenceCountedObjectPtr<AsyncFunctionCallback> message (new AsyncFunctionCallback (func, parameter));
+    message->post();
+    message->finished.wait();
+    return message->result;
+}
 
 //==============================================================================
 void MessageManager::deliverBroadcastMessage (const String& value)
@@ -249,25 +288,27 @@ MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSi
 
 bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob* const job)
 {
-    if (MessageManager::instance == nullptr)
+    MessageManager* const mm = MessageManager::instance;
+
+    if (mm == nullptr)
         return false;
 
-    if (MessageManager::instance->currentThreadHasLockedMessageManager())
+    if (mm->currentThreadHasLockedMessageManager())
         return true;
 
     if (threadToCheck == nullptr && job == nullptr)
     {
-        MessageManager::instance->lockingLock.enter();
+        mm->lockingLock.enter();
     }
     else
     {
-        while (! MessageManager::instance->lockingLock.tryEnter())
+        while (! mm->lockingLock.tryEnter())
         {
             if ((threadToCheck != nullptr && threadToCheck->threadShouldExit())
                   || (job != nullptr && job->shouldExit()))
                 return false;
 
-            Thread::sleep (1);
+            Thread::yield();
         }
     }
 
@@ -281,14 +322,14 @@ bool MessageManagerLock::attemptLock (Thread* const threadToCheck, ThreadPoolJob
         {
             blockingMessage->releaseEvent.signal();
             blockingMessage = nullptr;
-            MessageManager::instance->lockingLock.exit();
+            mm->lockingLock.exit();
             return false;
         }
     }
 
-    jassert (MessageManager::instance->threadWithLock == 0);
+    jassert (mm->threadWithLock == 0);
 
-    MessageManager::instance->threadWithLock = Thread::getCurrentThreadId();
+    mm->threadWithLock = Thread::getCurrentThreadId();
     return true;
 }
 
@@ -296,15 +337,17 @@ MessageManagerLock::~MessageManagerLock() noexcept
 {
     if (blockingMessage != nullptr)
     {
-        jassert (MessageManager::instance == nullptr || MessageManager::instance->currentThreadHasLockedMessageManager());
+        MessageManager* const mm = MessageManager::instance;
+
+        jassert (mm == nullptr || mm->currentThreadHasLockedMessageManager());
 
         blockingMessage->releaseEvent.signal();
         blockingMessage = nullptr;
 
-        if (MessageManager::instance != nullptr)
+        if (mm != nullptr)
         {
-            MessageManager::instance->threadWithLock = 0;
-            MessageManager::instance->lockingLock.exit();
+            mm->threadWithLock = 0;
+            mm->lockingLock.exit();
         }
     }
 }

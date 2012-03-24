@@ -23,52 +23,6 @@
   ==============================================================================
 */
 
-struct CallbackMessagePayload
-{
-    MessageCallbackFunction* function;
-    void* parameter;
-    void* volatile result;
-    bool volatile hasBeenExecuted;
-};
-
-} // (juce namespace)
-
-//==============================================================================
-@interface JuceCustomMessageHandler   : NSObject
-{
-}
-
-- (void) performCallback: (id) info;
-
-@end
-
-//==============================================================================
-@implementation JuceCustomMessageHandler
-
-- (void) performCallback: (id) info
-{
-    if ([info isKindOfClass: [NSData class]])
-    {
-        juce::CallbackMessagePayload* pl = (juce::CallbackMessagePayload*) [((NSData*) info) bytes];
-
-        if (pl != nullptr)
-        {
-            pl->result = (*pl->function) (pl->parameter);
-            pl->hasBeenExecuted = true;
-        }
-    }
-    else
-    {
-        jassertfalse; // should never get here!
-    }
-}
-
-@end
-
-//==============================================================================
-namespace juce
-{
-
 void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
@@ -145,37 +99,4 @@ bool MessageManager::postMessageToSystemQueue (Message* message)
 
 void MessageManager::broadcastMessage (const String& value)
 {
-}
-
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* data)
-{
-    if (isThisTheMessageThread())
-    {
-        return (*callback) (data);
-    }
-    else
-    {
-        jassert (dispatcher != nullptr); // trying to call this when the juce system isn't initialised..
-
-        // If a thread has a MessageManagerLock and then tries to call this method, it'll
-        // deadlock because the message manager is blocked from running, so can never
-        // call your function..
-        jassert (! MessageManager::getInstance()->currentThreadHasLockedMessageManager());
-
-        JUCE_AUTORELEASEPOOL
-
-        CallbackMessagePayload cmp;
-        cmp.function = callback;
-        cmp.parameter = data;
-        cmp.result = 0;
-        cmp.hasBeenExecuted = false;
-
-        [dispatcher->juceCustomMessageHandler performSelectorOnMainThread: @selector (performCallback:)
-                                                               withObject: [NSData dataWithBytesNoCopy: &cmp
-                                                                                                length: sizeof (cmp)
-                                                                                          freeWhenDone: NO]
-                                                            waitUntilDone: YES];
-
-        return cmp.result;
-    }
 }

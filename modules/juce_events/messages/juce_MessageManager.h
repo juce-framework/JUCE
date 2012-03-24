@@ -177,7 +177,8 @@ private:
     SortedSet <const MessageListener*> messageListeners;
     ScopedPointer <ActionBroadcaster> broadcaster;
 
-    friend class JUCEApplication;
+    class QuitMessage;
+    friend class QuitMessage;
     bool quitMessagePosted, quitMessageReceived;
     Thread::ThreadID messageThreadId;
 
@@ -185,7 +186,7 @@ private:
     Thread::ThreadID volatile threadWithLock;
     CriticalSection lockingLock;
 
-    void postMessageToQueue (Message* message);
+    void postMessageToQueue (Message*);
     static bool postMessageToSystemQueue (Message*);
     static void* exitModalLoopCallback (void*);
     static void doPlatformSpecificInitialisation();

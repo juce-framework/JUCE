@@ -33,7 +33,6 @@ namespace WindowsMessageHelpers
 {
     const unsigned int specialId             = WM_APP + 0x4400;
     const unsigned int broadcastId           = WM_APP + 0x4403;
-    const unsigned int specialCallbackId     = WM_APP + 0x4402;
 
     const TCHAR messageWindowName[] = _T("JUCEWindow");
     ScopedPointer<HiddenMessageWindow> messageWindow;
@@ -45,12 +44,7 @@ namespace WindowsMessageHelpers
         {
             if (h == juce_messageWindowHandle)
             {
-                if (message == specialCallbackId)
-                {
-                    MessageCallbackFunction* const func = (MessageCallbackFunction*) wParam;
-                    return (LRESULT) (*func) ((void*) lParam);
-                }
-                else if (message == specialId)
+                if (message == specialId)
                 {
                     // these are trapped early in the dispatch call, but must also be checked
                     // here in case there are windows modal dialog boxes doing their own
@@ -140,26 +134,6 @@ bool MessageManager::postMessageToSystemQueue (Message* message)
 {
     message->incReferenceCount();
     return PostMessage (juce_messageWindowHandle, WindowsMessageHelpers::specialId, 0, (LPARAM) message) != 0;
-}
-
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* callback, void* userData)
-{
-    if (MessageManager::getInstance()->isThisTheMessageThread())
-    {
-        return (*callback) (userData);
-    }
-    else
-    {
-        // If a thread has a MessageManagerLock and then tries to call this method, it'll
-        // deadlock because the message manager is blocked from running, and can't
-        // call your function..
-        jassert (! MessageManager::getInstance()->currentThreadHasLockedMessageManager());
-
-        return (void*) SendMessage (juce_messageWindowHandle,
-                                    WindowsMessageHelpers::specialCallbackId,
-                                    (WPARAM) callback,
-                                    (LPARAM) userData);
-    }
 }
 
 void MessageManager::broadcastMessage (const String& value)
