@@ -27,7 +27,6 @@
 #define __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 
 #include "juce_ActionListener.h"
-#include "../messages/juce_MessageListener.h"
 
 
 //==============================================================================
@@ -71,17 +70,12 @@ public:
 
 private:
     //==============================================================================
-    class CallbackReceiver  : public MessageListener
-    {
-    public:
-        CallbackReceiver();
-        void handleMessage (const Message&);
+    friend class WeakReference<ActionBroadcaster>;
+    WeakReference<ActionBroadcaster>::Master masterReference;
 
-        ActionBroadcaster* owner;
-    };
+    class ActionMessage;
+    friend class ActionMessage;
 
-    friend class CallbackReceiver;
-    CallbackReceiver callback;
     SortedSet <ActionListener*> actionListeners;
     CriticalSection actionListenerLock;
 

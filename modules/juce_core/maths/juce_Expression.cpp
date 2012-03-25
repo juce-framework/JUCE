@@ -574,25 +574,34 @@ struct Expression::Helpers
 
     static Constant* findTermToAdjust (Term* const term, const bool mustBeFlagged)
     {
+        jassert (term != nullptr);
+
+        if (term->getType() == constantType)
         {
-            Constant* const c = dynamic_cast<Constant*> (term);
-            if (c != nullptr && (c->isResolutionTarget || ! mustBeFlagged))
+            Constant* const c = static_cast<Constant*> (term);
+            if (c->isResolutionTarget || ! mustBeFlagged)
                 return c;
         }
 
-        if (dynamic_cast<Function*> (term) != nullptr)
+        if (term->getType() == functionType)
             return nullptr;
 
-        int i;
         const int numIns = term->getNumInputs();
-        for (i = 0; i < numIns; ++i)
+
+        for (int i = 0; i < numIns; ++i)
         {
-            Constant* const c = dynamic_cast<Constant*> (term->getInput (i));
-            if (c != nullptr && (c->isResolutionTarget || ! mustBeFlagged))
-                return c;
+            Term* const input = term->getInput (i);
+
+            if (input->getType() == constantType)
+            {
+                Constant* const c = static_cast<Constant*> (input);
+
+                if (c->isResolutionTarget || ! mustBeFlagged)
+                    return c;
+            }
         }
 
-        for (i = 0; i < numIns; ++i)
+        for (int i = 0; i < numIns; ++i)
         {
             Constant* const c = findTermToAdjust (term->getInput (i), mustBeFlagged);
             if (c != nullptr)

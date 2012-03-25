@@ -133,14 +133,14 @@ public:
         passed-in will be valid. If the exception is of unknown type, this pointer
         will be null.
     */
-    virtual void unhandledException (const std::exception* e,
+    virtual void unhandledException (const std::exception*,
                                      const String& sourceFilename,
                                      int lineNumber) = 0;
 
     //==============================================================================
     /** Returns true if this executable is running as an app (as opposed to being a plugin
         or other kind of shared library. */
-    static inline bool isStandaloneApp() noexcept                   { return createInstance != 0; }
+    static inline bool isStandaloneApp() noexcept                   { return createInstance != nullptr; }
 
     //==============================================================================
    #ifndef DOXYGEN

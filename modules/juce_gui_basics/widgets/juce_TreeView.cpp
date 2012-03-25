@@ -441,7 +441,7 @@ public:
 
     bool keyPressed (const KeyPress& key)
     {
-        TreeView* const tree = dynamic_cast <TreeView*> (getParentComponent());
+        Component* const tree = getParentComponent();
 
         return (tree != nullptr && tree->keyPressed (key))
                  || Viewport::keyPressed (key);

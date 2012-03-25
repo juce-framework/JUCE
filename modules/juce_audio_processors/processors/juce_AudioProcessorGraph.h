@@ -97,6 +97,7 @@ public:
 
         Node (uint32 nodeId, AudioProcessor*) noexcept;
 
+        void setParentGraph (AudioProcessorGraph*) const;
         void prepare (double sampleRate, int blockSize, AudioProcessorGraph*);
         void unprepare();
 

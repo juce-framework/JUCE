@@ -234,12 +234,13 @@ public:
 
 private:
     //==============================================================================
-    class MessageTarget;
-    friend class MessageTarget;
-    friend class ScopedPointer<MessageTarget>;
-    ScopedPointer<MessageTarget> messageInvoker;
+    WeakReference<ApplicationCommandTarget>::Master masterReference;
+    friend class WeakReference<ApplicationCommandTarget>;
 
-    bool tryToInvoke (const InvocationInfo& info, bool async);
+    class CommandMessage;
+    friend class CommandMessage;
+
+    bool tryToInvoke (const InvocationInfo&, bool async);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandTarget);
 };

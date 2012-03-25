@@ -228,13 +228,12 @@ void FileListComponent::paintListBoxItem (int, Graphics&, int, int, bool)
 
 Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, Component* existingComponentToUpdate)
 {
-    FileListItemComponent* comp = dynamic_cast <FileListItemComponent*> (existingComponentToUpdate);
+    jassert (existingComponentToUpdate == nullptr || dynamic_cast <FileListItemComponent*> (existingComponentToUpdate) != nullptr);
+
+    FileListItemComponent* comp = static_cast <FileListItemComponent*> (existingComponentToUpdate);
 
     if (comp == nullptr)
-    {
-        delete existingComponentToUpdate;
         comp = new FileListItemComponent (*this, fileList.getTimeSliceThread());
-    }
 
     DirectoryContentsList::FileInfo fileInfo;
     comp->update (fileList.getDirectory(),

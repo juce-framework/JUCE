@@ -37,6 +37,7 @@ InterprocessConnection::~InterprocessConnection()
 {
     callbackConnectionState = false;
     disconnect();
+    masterReference.clear();
 }
 
 
@@ -188,43 +189,27 @@ void InterprocessConnection::initialiseWithPipe (NamedPipe* const pipe_)
 }
 
 //==============================================================================
-struct ConnectionStateMessage  : public Message
+struct ConnectionStateMessage  : public MessageManager::MessageBase
 {
-    ConnectionStateMessage (bool connectionMade_) noexcept
-        : connectionMade (connectionMade_)
+    ConnectionStateMessage (InterprocessConnection* owner_, bool connectionMade_) noexcept
+        : owner (owner_), connectionMade (connectionMade_)
     {}
 
+    void messageCallback()
+    {
+        InterprocessConnection* const ipc = owner;
+        if (ipc != nullptr)
+        {
+            if (connectionMade)
+                ipc->connectionMade();
+            else
+                ipc->connectionLost();
+        }
+    }
+
+    WeakReference<InterprocessConnection> owner;
     bool connectionMade;
 };
-
-struct DataDeliveryMessage  : public Message
-{
-    DataDeliveryMessage (const MemoryBlock& data_)
-        : data (data_)
-    {}
-
-    MemoryBlock data;
-};
-
-void InterprocessConnection::handleMessage (const Message& message)
-{
-    const ConnectionStateMessage* m = dynamic_cast <const ConnectionStateMessage*> (&message);
-
-    if (m != nullptr)
-    {
-        if (m->connectionMade)
-            connectionMade();
-        else
-            connectionLost();
-    }
-    else
-    {
-        const DataDeliveryMessage* d = dynamic_cast <const DataDeliveryMessage*> (&message);
-
-        if (d != nullptr)
-            messageReceived (d->data);
-    }
-}
 
 void InterprocessConnection::connectionMadeInt()
 {
@@ -233,7 +218,7 @@ void InterprocessConnection::connectionMadeInt()
         callbackConnectionState = true;
 
         if (useMessageThread)
-            postMessage (new ConnectionStateMessage (true));
+            (new ConnectionStateMessage (this, true))->post();
         else
             connectionMade();
     }
@@ -246,18 +231,35 @@ void InterprocessConnection::connectionLostInt()
         callbackConnectionState = false;
 
         if (useMessageThread)
-            postMessage (new ConnectionStateMessage (false));
+            (new ConnectionStateMessage (this, false))->post();
         else
             connectionLost();
     }
 }
+
+struct DataDeliveryMessage  : public Message
+{
+    DataDeliveryMessage (InterprocessConnection* owner_, const MemoryBlock& data_)
+        : owner (owner_), data (data_)
+    {}
+
+    void messageCallback()
+    {
+        InterprocessConnection* const ipc = owner;
+        if (ipc != nullptr)
+            ipc->messageReceived (data);
+    }
+
+    WeakReference<InterprocessConnection> owner;
+    MemoryBlock data;
+};
 
 void InterprocessConnection::deliverDataInt (const MemoryBlock& data)
 {
     jassert (callbackConnectionState);
 
     if (useMessageThread)
-        postMessage (new DataDeliveryMessage (data));
+        (new DataDeliveryMessage (this, data))->post();
     else
         messageReceived (data);
 }

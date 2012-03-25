@@ -897,12 +897,7 @@ void AudioProcessorGraph::Node::prepare (const double sampleRate, const int bloc
     if (! isPrepared)
     {
         isPrepared = true;
-
-        AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
-            = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (static_cast<AudioProcessor*> (processor));
-
-        if (ioProc != nullptr)
-            ioProc->setParentGraph (graph);
+        setParentGraph (graph);
 
         processor->setPlayConfigDetails (processor->getNumInputChannels(),
                                          processor->getNumOutputChannels(),
@@ -919,6 +914,15 @@ void AudioProcessorGraph::Node::unprepare()
         isPrepared = false;
         processor->releaseResources();
     }
+}
+
+void AudioProcessorGraph::Node::setParentGraph (AudioProcessorGraph* const graph) const
+{
+    AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
+        = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (processor.get());
+
+    if (ioProc != nullptr)
+        ioProc->setParentGraph (graph);
 }
 
 //==============================================================================
@@ -983,12 +987,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
     nodes.add (n);
     triggerAsyncUpdate();
 
-    AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
-        = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (static_cast<AudioProcessor*> (n->processor));
-
-    if (ioProc != nullptr)
-        ioProc->setParentGraph (this);
-
+    n->setParentGraph (this);
     return n;
 }
 
@@ -1000,12 +999,7 @@ bool AudioProcessorGraph::removeNode (const uint32 nodeId)
     {
         if (nodes.getUnchecked(i)->nodeId == nodeId)
         {
-            AudioProcessorGraph::AudioGraphIOProcessor* const ioProc
-                = dynamic_cast <AudioProcessorGraph::AudioGraphIOProcessor*> (static_cast<AudioProcessor*> (nodes.getUnchecked(i)->processor));
-
-            if (ioProc != nullptr)
-                ioProc->setParentGraph (nullptr);
-
+            nodes.getUnchecked(i)->setParentGraph (nullptr);
             nodes.remove (i);
             triggerAsyncUpdate();
 

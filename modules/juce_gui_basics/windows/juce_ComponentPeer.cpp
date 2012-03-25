@@ -434,7 +434,7 @@ bool ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
     updateCurrentModifiers();
 
     FileDragAndDropTarget* lastTarget
-        = dynamic_cast<FileDragAndDropTarget*> (static_cast<Component*> (dragAndDropTargetComponent));
+        = dynamic_cast<FileDragAndDropTarget*> (dragAndDropTargetComponent.get());
 
     FileDragAndDropTarget* newTarget = nullptr;
 
@@ -468,8 +468,7 @@ bool ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
     if (newTarget == nullptr)
         return false;
 
-    Component* const targetComp = dynamic_cast <Component*> (newTarget);
-    const Point<int> pos (targetComp->getLocalPoint (component, position));
+    const Point<int> pos (dragAndDropTargetComponent->getLocalPoint (component, position));
     newTarget->fileDragMove (files, pos.getX(), pos.getY());
     return true;
 }
@@ -515,16 +514,14 @@ bool ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
 
     if (dragAndDropTargetComponent != nullptr)
     {
-        FileDragAndDropTarget* const target
-            = dynamic_cast<FileDragAndDropTarget*> (static_cast<Component*> (dragAndDropTargetComponent));
+        Component* const targetComp = dragAndDropTargetComponent;
+        FileDragAndDropTarget* const target = dynamic_cast<FileDragAndDropTarget*> (targetComp);
 
         dragAndDropTargetComponent = nullptr;
         lastDragAndDropCompUnderMouse = nullptr;
 
         if (target != nullptr)
         {
-            Component* const targetComp = dynamic_cast <Component*> (target);
-
             if (targetComp->isCurrentlyBlockedByAnotherModalComponent())
             {
                 targetComp->internalModalInputAttempt();

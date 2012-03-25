@@ -23,37 +23,26 @@
   ==============================================================================
 */
 
-class ApplicationCommandTarget::MessageTarget  : public MessageListener
+class ApplicationCommandTarget::CommandMessage  : public MessageManager::MessageBase
 {
 public:
-    MessageTarget (ApplicationCommandTarget& owner_)
-        : owner (owner_)
+    CommandMessage (ApplicationCommandTarget* const owner_, const InvocationInfo& info_)
+        : owner (owner_), info (info_)
     {
     }
 
-    void handleMessage (const Message& message)
+    void messageCallback()
     {
-        jassert (dynamic_cast <const InvokedMessage*> (&message) != nullptr);
-
-        owner.tryToInvoke (dynamic_cast <const InvokedMessage&> (message).info, false);
+        ApplicationCommandTarget* const target = owner;
+        if (target != nullptr)
+            target->tryToInvoke (info, false);
     }
-
-    struct InvokedMessage   : public Message
-    {
-        InvokedMessage (const InvocationInfo& info_)
-            : info (info_)
-        {}
-
-        const InvocationInfo info;
-
-    private:
-        JUCE_DECLARE_NON_COPYABLE (InvokedMessage);
-    };
 
 private:
-    ApplicationCommandTarget& owner;
+    WeakReference<ApplicationCommandTarget> owner;
+    const InvocationInfo info;
 
-    JUCE_DECLARE_NON_COPYABLE (MessageTarget);
+    JUCE_DECLARE_NON_COPYABLE (CommandMessage);
 };
 
 //==============================================================================
@@ -63,7 +52,7 @@ ApplicationCommandTarget::ApplicationCommandTarget()
 
 ApplicationCommandTarget::~ApplicationCommandTarget()
 {
-    messageInvoker = nullptr;
+    masterReference.clear();
 }
 
 //==============================================================================
@@ -73,10 +62,7 @@ bool ApplicationCommandTarget::tryToInvoke (const InvocationInfo& info, const bo
     {
         if (async)
         {
-            if (messageInvoker == nullptr)
-                messageInvoker = new MessageTarget (*this);
-
-            messageInvoker->postMessage (new MessageTarget::InvokedMessage (info));
+            (new CommandMessage (this, info))->post();
             return true;
         }
         else

@@ -26,7 +26,6 @@
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 #define __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 
-#include "../messages/juce_MessageListener.h"
 class InterprocessConnectionServer;
 class MemoryBlock;
 
@@ -49,8 +48,7 @@ class MemoryBlock;
 
     @see InterprocessConnectionServer, Socket, NamedPipe
 */
-class JUCE_API  InterprocessConnection    : public Thread,
-                                            private MessageListener
+class JUCE_API  InterprocessConnection    : public Thread
 {
 public:
     //==============================================================================
@@ -181,6 +179,8 @@ public:
 
 private:
     //==============================================================================
+    WeakReference<InterprocessConnection>::Master masterReference;
+    friend class WeakReference<InterprocessConnection>;
     CriticalSection pipeAndSocketLock;
     ScopedPointer <StreamingSocket> socket;
     ScopedPointer <NamedPipe> pipe;
@@ -189,12 +189,9 @@ private:
     const uint32 magicMessageHeader;
     int pipeReceiveMessageTimeout;
 
-    //==============================================================================
     friend class InterprocessConnectionServer;
-
     void initialiseWithSocket (StreamingSocket*);
     void initialiseWithPipe (NamedPipe*);
-    void handleMessage (const Message&);
     void connectionMadeInt();
     void connectionLostInt();
     void deliverDataInt (const MemoryBlock&);

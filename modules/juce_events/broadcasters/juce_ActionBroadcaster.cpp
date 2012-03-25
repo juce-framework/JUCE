@@ -23,45 +23,46 @@
   ==============================================================================
 */
 
-class ActionMessage  : public Message
+class ActionBroadcaster::ActionMessage  : public MessageManager::MessageBase
 {
 public:
-    ActionMessage (const String& messageText, ActionListener* const listener_) noexcept
-        : message (messageText),
+    ActionMessage (const ActionBroadcaster* const broadcaster_,
+                   const String& messageText,
+                   ActionListener* const listener_) noexcept
+        : broadcaster (const_cast <ActionBroadcaster*> (broadcaster_)),
+          message (messageText),
           listener (listener_)
+    {}
+
+    void messageCallback()
     {
+        const ActionBroadcaster* const b = broadcaster;
+
+        if (b != nullptr && b->actionListeners.contains (listener))
+            listener->actionListenerCallback (message);
     }
 
+private:
+    WeakReference<ActionBroadcaster> broadcaster;
     const String message;
     ActionListener* const listener;
 
-private:
     JUCE_DECLARE_NON_COPYABLE (ActionMessage);
 };
-
-ActionBroadcaster::CallbackReceiver::CallbackReceiver() {}
-
-void ActionBroadcaster::CallbackReceiver::handleMessage (const Message& message)
-{
-    const ActionMessage& am = static_cast <const ActionMessage&> (message);
-
-    if (owner->actionListeners.contains (am.listener))
-        am.listener->actionListenerCallback (am.message);
-}
 
 //==============================================================================
 ActionBroadcaster::ActionBroadcaster()
 {
     // are you trying to create this object before or after juce has been intialised??
     jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
-
-    callback.owner = this;
 }
 
 ActionBroadcaster::~ActionBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
     jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
+
+    masterReference.clear();
 }
 
 void ActionBroadcaster::addActionListener (ActionListener* const listener)
@@ -89,5 +90,5 @@ void ActionBroadcaster::sendActionMessage (const String& message) const
     const ScopedLock sl (actionListenerLock);
 
     for (int i = actionListeners.size(); --i >= 0;)
-        callback.postMessage (new ActionMessage (message, actionListeners.getUnchecked(i)));
+        (new ActionMessage (this, message, actionListeners.getUnchecked(i)))->post();
 }

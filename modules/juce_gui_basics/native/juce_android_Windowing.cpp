@@ -375,53 +375,43 @@ public:
     //==============================================================================
     void handlePaintCallback (JNIEnv* env, jobject canvas)
     {
-       #if USE_ANDROID_CANVAS
-        if (usingAndroidGraphics)
+        jobject rect = env->CallObjectMethod (canvas, CanvasMinimal.getClipBounds);
+        const int left   = env->GetIntField (rect, RectClass.left);
+        const int top    = env->GetIntField (rect, RectClass.top);
+        const int right  = env->GetIntField (rect, RectClass.right);
+        const int bottom = env->GetIntField (rect, RectClass.bottom);
+        env->DeleteLocalRef (rect);
+
+        const Rectangle<int> clip (left, top, right - left, bottom - top);
+
+        const int sizeNeeded = clip.getWidth() * clip.getHeight();
+        if (sizeAllocated < sizeNeeded)
         {
-            AndroidLowLevelGraphicsContext g (canvas);
-            handlePaint (g);
+            buffer.clear();
+            sizeAllocated = sizeNeeded;
+            buffer = GlobalRef (env->NewIntArray (sizeNeeded));
         }
-        else
-       #endif
+
+        jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0);
+
+        if (dest != 0)
         {
-            jobject rect = env->CallObjectMethod (canvas, CanvasMinimal.getClipBounds);
-            const int left   = env->GetIntField (rect, RectClass.left);
-            const int top    = env->GetIntField (rect, RectClass.top);
-            const int right  = env->GetIntField (rect, RectClass.right);
-            const int bottom = env->GetIntField (rect, RectClass.bottom);
-            env->DeleteLocalRef (rect);
-
-            const Rectangle<int> clip (left, top, right - left, bottom - top);
-
-            const int sizeNeeded = clip.getWidth() * clip.getHeight();
-            if (sizeAllocated < sizeNeeded)
             {
-                buffer.clear();
-                sizeAllocated = sizeNeeded;
-                buffer = GlobalRef (env->NewIntArray (sizeNeeded));
-            }
+                Image temp (new PreallocatedImage (clip.getWidth(), clip.getHeight(),
+                                                   dest, ! component->isOpaque()));
 
-            jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0);
-
-            if (dest != 0)
-            {
                 {
-                    Image temp (new PreallocatedImage (clip.getWidth(), clip.getHeight(),
-                                                       dest, ! component->isOpaque()));
-
-                    {
-                        LowLevelGraphicsSoftwareRenderer g (temp);
-                        g.setOrigin (-clip.getX(), -clip.getY());
-                        handlePaint (g);
-                    }
+                    LowLevelGraphicsSoftwareRenderer g (temp);
+                    g.setOrigin (-clip.getX(), -clip.getY());
+                    handlePaint (g);
                 }
-
-                env->ReleaseIntArrayElements ((jintArray) buffer.get(), dest, 0);
-
-                env->CallVoidMethod (canvas, CanvasMinimal.drawBitmap, (jintArray) buffer.get(), 0, clip.getWidth(),
-                                     (jfloat) clip.getX(), (jfloat) clip.getY(),
-                                     clip.getWidth(), clip.getHeight(), true, (jobject) 0);
             }
+
+            env->ReleaseIntArrayElements ((jintArray) buffer.get(), dest, 0);
+
+            env->CallVoidMethod (canvas, CanvasMinimal.drawBitmap, (jintArray) buffer.get(), 0, clip.getWidth(),
+                                 (jfloat) clip.getX(), (jfloat) clip.getY(),
+                                 clip.getWidth(), clip.getHeight(), true, (jobject) 0);
         }
     }
 

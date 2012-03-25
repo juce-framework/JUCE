@@ -100,7 +100,8 @@ public:
             {
                 const bool wasVisible = isVisible();
                 setVisible (false);
-                finalTarget = findTarget (e.getScreenPosition(), details.localPosition);
+                Component* unused;
+                finalTarget = findTarget (e.getScreenPosition(), details.localPosition, unused);
 
                 if (wasVisible) // fade the component and remove it - it'll be deleted later by the timer callback
                     dismissWithAnimation (finalTarget == nullptr);
@@ -131,8 +132,8 @@ public:
 
         setNewScreenPos (screenPos);
 
-        DragAndDropTarget* const newTarget = findTarget (screenPos, details.localPosition);
-        Component* newTargetComp = dynamic_cast <Component*> (newTarget);
+        Component* newTargetComp;
+        DragAndDropTarget* const newTarget = findTarget (screenPos, details.localPosition, newTargetComp);
 
         setVisible (newTarget == nullptr || newTarget->shouldDrawDragImageWhenOver());
 
@@ -185,7 +186,8 @@ private:
         return dynamic_cast <DragAndDropTarget*> (currentlyOverComp.get());
     }
 
-    DragAndDropTarget* findTarget (const Point<int>& screenPos, Point<int>& relativePos) const
+    DragAndDropTarget* findTarget (const Point<int>& screenPos, Point<int>& relativePos,
+                                   Component*& resultComponent) const
     {
         Component* hit = getParentComponent();
 
@@ -205,12 +207,14 @@ private:
             if (ddt != nullptr && ddt->isInterestedInDragSource (details))
             {
                 relativePos = hit->getLocalPoint (nullptr, screenPos);
+                resultComponent = hit;
                 return ddt;
             }
 
             hit = hit->getParentComponent();
         }
 
+        resultComponent = nullptr;
         return nullptr;
     }
 
@@ -304,14 +308,6 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
 
     if (dragImageComponent == nullptr)
     {
-        Component* const thisComp = dynamic_cast <Component*> (this);
-
-        if (thisComp == nullptr)
-        {
-            jassertfalse;   // Your DragAndDropContainer needs to be a Component!
-            return;
-        }
-
         MouseInputSource* draggingSource = Desktop::getInstance().getDraggingMouseSource (0);
 
         if (draggingSource == nullptr || ! draggingSource->isDragging())
@@ -382,7 +378,17 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
                                                | ComponentPeer::windowIgnoresKeyPresses);
         }
         else
+        {
+            Component* const thisComp = dynamic_cast <Component*> (this);
+
+            if (thisComp == nullptr)
+            {
+                jassertfalse;   // Your DragAndDropContainer needs to be a Component!
+                return;
+            }
+
             thisComp->addChildComponent (dragImageComponent);
+        }
 
         static_cast <DragImageComponent*> (dragImageComponent.get())->updateLocation (false, lastMouseDown);
         dragImageComponent->setVisible (true);
