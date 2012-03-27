@@ -28,12 +28,13 @@
 #if JUCE_OPENGL
 
 //==============================================================================
-class DemoOpenGLCanvas  : public OpenGLComponent,
+class DemoOpenGLCanvas  : public Component,
+                          public OpenGLRenderer,
                           public Timer
 {
 public:
     DemoOpenGLCanvas()
-        : OpenGLComponent (openGLDefault), rotation (0.0f),
+        : rotation (0.0f),
           textScrollPos (200)
     {
         infoLabel.setText ("These sliders demonstrate how components can be added as children "
@@ -59,12 +60,15 @@ public:
         addAndMakeVisible (&sizeSlider);
         sizeSlider.setBounds ("parent.width * 0.05, parent.height - 35, parent.width * 0.6, top + 24");
 
+        openGLContext.setRenderer (this, true);
+        openGLContext.attachTo (*this);
+
         startTimer (1000 / 30);
     }
 
     ~DemoOpenGLCanvas()
     {
-        stopRenderThread();
+        openGLContext.detach();
     }
 
     // when the component creates a new internal context, this is called, and
@@ -75,7 +79,7 @@ public:
         dynamicTextureImage = Image (Image::ARGB, 128, 128, true, OpenGLImageType());
     }
 
-    void releaseOpenGLContext()
+    void openGLContextClosing()
     {
         // We have to make sure we release any openGL images before the
         // GL context gets closed..
@@ -91,7 +95,7 @@ public:
     void mouseDrag (const MouseEvent& e)
     {
         draggableOrientation.mouseDrag (e.getPosition());
-        triggerRepaint();
+        openGLContext.triggerRepaint();
     }
 
     void resized()
@@ -99,13 +103,20 @@ public:
         draggableOrientation.setViewport (getLocalBounds());
     }
 
+    void paint (Graphics&) {}
+
     void renderOpenGL()
     {
         OpenGLHelpers::clear (Colours::darkgrey.withAlpha (1.0f));
 
-        updateTextureImage();  // this will update our dynamically-changing texture image.
+		{
+			MessageManagerLock mm (Thread::getCurrentThread());
+			if (! mm.lockWasGained())
+				return;
 
-        drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
+			updateTextureImage();  // this will update our dynamically-changing texture image.
+			drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
+		}
 
         // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
         // we'll put back any important settings before doing our normal GL 3D drawing..
@@ -158,7 +169,7 @@ public:
     void drawBackground2DStuff()
     {
         // Create an OpenGLGraphicsContext that will draw into this GL window..
-        ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (*this));
+        ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext));
         Graphics g (glRenderer);
 
         // This stuff just creates a spinning star shape and fills it..
@@ -179,10 +190,11 @@ public:
     {
         rotation += (float) speedSlider.getValue();
         textScrollPos += 1.4f;
-        triggerRepaint();
+        openGLContext.triggerRepaint();
     }
 
 private:
+    OpenGLContext openGLContext;
     Image logoImage, dynamicTextureImage;
     float rotation, textScrollPos;
     Draggable3DOrientation draggableOrientation;

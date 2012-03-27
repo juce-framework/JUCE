@@ -58,8 +58,7 @@
  #include <GL/gl.h>
  #undef KeyPress
 #elif JUCE_IOS
- #include <OpenGLES/ES1/gl.h>
- #include <OpenGLES/ES1/glext.h>
+ #include <OpenGLES/ES2/gl.h>
 #elif JUCE_MAC
  #include <OpenGL/gl.h>
  #include "OpenGL/glext.h"
@@ -67,7 +66,7 @@
  #include <GLES2/gl2.h>
 #endif
 
-#if (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_ANDROID) && ! defined (JUCE_USE_OPENGL_SHADERS)
+#if ! defined (JUCE_USE_OPENGL_SHADERS)
  #define JUCE_USE_OPENGL_SHADERS 1
 #endif
 
@@ -87,9 +86,6 @@ namespace juce
 #endif
 #ifndef __JUCE_MATRIX3D_JUCEHEADER__
  #include "opengl/juce_Matrix3D.h"
-#endif
-#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
- #include "opengl/juce_OpenGLComponent.h"
 #endif
 #ifndef __JUCE_OPENGLCONTEXT_JUCEHEADER__
  #include "opengl/juce_OpenGLContext.h"

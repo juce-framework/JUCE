@@ -357,7 +357,7 @@ public final class JuceDemo   extends Activity
         @Override
         public void onSurfaceChanged (GL10 unused, int width, int height)
         {
-            contextCreated();
+            contextChangedSize();
         }
 
         @Override
@@ -367,6 +367,7 @@ public final class JuceDemo   extends Activity
         }
 
         private native void contextCreated();
+        private native void contextChangedSize();
         private native void render();
     }
 

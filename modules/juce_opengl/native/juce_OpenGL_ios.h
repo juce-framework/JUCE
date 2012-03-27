@@ -41,129 +41,161 @@
 namespace juce
 {
 
-//==============================================================================
-class GLESContext   : public OpenGLContext
+class OpenGLContext::NativeContext
 {
 public:
-    GLESContext (UIView* parentView,
-                 Component* const component_,
-                 const OpenGLPixelFormat& pixelFormat,
-                 const GLESContext* const sharedContext,
-                 const bool isGLES2_)
-        : component (component_), glLayer (nil), context (nil),
-          useDepthBuffer (pixelFormat.depthBufferBits > 0), isGLES2 (isGLES2_),
-          frameBufferHandle (0), colorBufferHandle (0),
-          depthBufferHandle (0), lastWidth (0), lastHeight (0)
+    NativeContext (Component& component,
+                   const OpenGLPixelFormat& pixelFormat,
+                   const NativeContext* const contextToShareWith)
+        : frameBufferHandle (0), colorBufferHandle (0), depthBufferHandle (0),
+          lastWidth (0), lastHeight (0), needToRebuildBuffers (false),
+          swapFrames (0), useDepthBuffer (pixelFormat.depthBufferBits > 0)
     {
-        view = [[JuceGLView alloc] initWithFrame: CGRectMake (0, 0, 64, 64)];
+        JUCE_AUTORELEASEPOOL
+        ComponentPeer* const peer = component.getPeer();
+        jassert (peer != nullptr);
+
+        const Rectangle<int> bounds (peer->getComponent()->getLocalArea (&component, component.getLocalBounds()));
+        lastWidth  = bounds.getWidth();
+        lastHeight = bounds.getHeight();
+
+        view = [[JuceGLView alloc] initWithFrame: getCGRectFor (bounds)];
         view.opaque = YES;
         view.hidden = NO;
         view.backgroundColor = [UIColor blackColor];
         view.userInteractionEnabled = NO;
 
         glLayer = (CAEAGLLayer*) [view layer];
-        [parentView addSubview: view];
+        [((UIView*) peer->getNativeHandle()) addSubview: view];
 
-        NSUInteger apiType = isGLES2_ ? kEAGLRenderingAPIOpenGLES2
-                                      : kEAGLRenderingAPIOpenGLES1;
+        context = [EAGLContext alloc];
 
-        if (sharedContext != nullptr)
-            context = [[EAGLContext alloc] initWithAPI: apiType
-                                            sharegroup: [sharedContext->context sharegroup]];
+        const NSUInteger type = kEAGLRenderingAPIOpenGLES2;
+
+        if (contextToShareWith != nullptr)
+            [context initWithAPI: type  sharegroup: [contextToShareWith->context sharegroup]];
         else
-            context = [[EAGLContext alloc] initWithAPI: apiType];
+            [context initWithAPI: type];
 
+        // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
+        // so causes myserious timing-related failures.
+        [EAGLContext setCurrentContext: context];
         createGLBuffers();
+        [EAGLContext setCurrentContext: nil];
     }
 
-    ~GLESContext()
+    ~NativeContext()
     {
-        properties.clear(); // to release any stored programs, etc that may be held in properties.
-        makeInactive();
         [context release];
         context = nil;
 
         [view removeFromSuperview];
         [view release];
+    }
+
+    void initialiseOnRenderThread()
+    {
+    }
+
+    void shutdownOnRenderThread()
+    {
+        JUCE_CHECK_OPENGL_ERROR
         freeGLBuffers();
     }
 
+    bool createdOk() const noexcept             { return getRawContext() != nullptr; }
+    void* getRawContext() const noexcept        { return glLayer; }
+    GLuint getFrameBufferID() const noexcept    { return frameBufferHandle; }
+
     bool makeActive() const noexcept
     {
-        jassert (context != nil);
+        if (! [EAGLContext setCurrentContext: context])
+            return false;
 
-        [EAGLContext setCurrentContext: context];
         glBindFramebuffer (GL_FRAMEBUFFER, frameBufferHandle);
         return true;
+    }
+
+    bool makeInactive() const noexcept
+    {
+        return (! isActive()) || [EAGLContext setCurrentContext: nil];
+    }
+
+    bool isActive() const noexcept
+    {
+        return [EAGLContext currentContext] == context;
     }
 
     void swapBuffers()
     {
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
         [context presentRenderbuffer: GL_RENDERBUFFER];
-    }
 
-    bool makeInactive() const noexcept
-    {
-        return [EAGLContext setCurrentContext: nil];
-    }
-
-    bool isActive() const noexcept                  { return [EAGLContext currentContext] == context; }
-
-    void* getRawContext() const noexcept            { return glLayer; }
-    unsigned int getFrameBufferID() const           { return (unsigned int) frameBufferHandle; }
-
-    int getWidth() const                            { return lastWidth; }
-    int getHeight() const                           { return lastHeight; }
-
-    bool areShadersAvailable() const                { return isGLES2; }
-
-    void updateWindowPosition (const Rectangle<int>& bounds)
-    {
-        // For some strange reason, the view seems to fail unless its width is a multiple of 8...
-        view.frame = CGRectMake ((CGFloat) bounds.getX(), (CGFloat) bounds.getY(),
-                                 (CGFloat) (bounds.getWidth() & ~7),
-                                 (CGFloat) bounds.getHeight());
-
-        if (lastWidth != bounds.getWidth() || lastHeight != bounds.getHeight())
+        if (needToRebuildBuffers)
         {
-            lastWidth = bounds.getWidth();
-            lastHeight = bounds.getHeight();
+            needToRebuildBuffers = false;
+
             freeGLBuffers();
             createGLBuffers();
+            makeActive();
         }
     }
 
-    bool setSwapInterval (const int numFramesPerSwap)
+    void updateWindowPosition (const Rectangle<int>& bounds)
     {
-        numFrames = numFramesPerSwap;
-        return true;
+        view.frame = getCGRectFor (bounds);
+
+        if (lastWidth != bounds.getWidth() || lastHeight != bounds.getHeight())
+        {
+            lastWidth  = bounds.getWidth();
+            lastHeight = bounds.getHeight();
+            needToRebuildBuffers = true;
+        }
     }
 
-    int getSwapInterval() const
+    bool setSwapInterval (const int numFramesPerSwap) noexcept
     {
-        return numFrames;
+        swapFrames = numFramesPerSwap;
+        return false;
     }
+
+    int getSwapInterval() const noexcept    { return swapFrames; }
+
+private:
+    JuceGLView* view;
+    CAEAGLLayer* glLayer;
+    EAGLContext* context;
+    GLuint frameBufferHandle, colorBufferHandle, depthBufferHandle;
+    int volatile lastWidth, lastHeight;
+    bool volatile needToRebuildBuffers;
+    int swapFrames;
+    bool useDepthBuffer;
 
     //==============================================================================
+    static CGRect getCGRectFor (const Rectangle<int>& bounds)
+    {
+        return CGRectMake ((CGFloat) bounds.getX(),
+                           (CGFloat) bounds.getY(),
+                           (CGFloat) bounds.getWidth(),
+                           (CGFloat) bounds.getHeight());
+    }
+
     void createGLBuffers()
     {
-        makeActive();
-
         glGenFramebuffers (1, &frameBufferHandle);
         glGenRenderbuffers (1, &colorBufferHandle);
-        glGenRenderbuffers (1, &depthBufferHandle);
 
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
         bool ok = [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: glLayer];
         jassert (ok); (void) ok;
 
-        GLint width, height;
-        glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-        glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
-
         if (useDepthBuffer)
         {
+            GLint width, height;
+            glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+            glGetRenderbufferParameteriv (GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+
+            glGenRenderbuffers (1, &depthBufferHandle);
             glBindRenderbuffer (GL_RENDERBUFFER, depthBufferHandle);
             glRenderbufferStorage (GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
         }
@@ -177,10 +209,12 @@ public:
             glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferHandle);
 
         jassert (glCheckFramebufferStatus (GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+        JUCE_CHECK_OPENGL_ERROR
     }
 
     void freeGLBuffers()
     {
+        JUCE_CHECK_OPENGL_ERROR
         [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: nil];
 
         if (frameBufferHandle != 0)
@@ -200,34 +234,12 @@ public:
             glDeleteRenderbuffers (1, &depthBufferHandle);
             depthBufferHandle = 0;
         }
+
+        JUCE_CHECK_OPENGL_ERROR
     }
 
-private:
-    WeakReference<Component> component;
-    JuceGLView* view;
-    CAEAGLLayer* glLayer;
-    EAGLContext* context;
-    bool useDepthBuffer, isGLES2;
-    GLuint frameBufferHandle, colorBufferHandle, depthBufferHandle;
-    int numFrames;
-    int lastWidth, lastHeight;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GLESContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext);
 };
-
-
-OpenGLContext* OpenGLComponent::createContext()
-{
-    JUCE_AUTORELEASEPOOL
-    ComponentPeer* peer = getPeer();
-
-    if (peer != nullptr)
-        return new GLESContext ((UIView*) peer->getNativeHandle(), this, preferredPixelFormat,
-                                dynamic_cast <const GLESContext*> (contextToShareListsWith),
-                                (flags & openGLES2) != 0);
-
-    return nullptr;
-}
 
 //==============================================================================
 bool OpenGLHelpers::isContextActive()

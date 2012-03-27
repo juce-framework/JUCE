@@ -599,9 +599,6 @@ public:
 //==============================================================================
 struct StateHelpers
 {
-    struct ActiveTextures;
-
-    //==============================================================================
     struct BlendingMode
     {
         BlendingMode() noexcept
@@ -742,8 +739,7 @@ struct StateHelpers
 
         void clear() noexcept
         {
-            for (int i = 0; i < numElementsInArray (currentTextureID); ++i)
-                currentTextureID[i] = 0;
+            zeromem (currentTextureID, sizeof (currentTextureID));
         }
 
         void clearCurrent() noexcept
@@ -774,7 +770,7 @@ struct StateHelpers
                             currentTextureID[i] = 0;
                         }
 
-                        JUCE_CHECK_OPENGL_ERROR
+                        clearGLError();
                        #endif
                     }
                 }
@@ -1054,13 +1050,13 @@ struct StateHelpers
             : context (context_),
               activeShader (nullptr)
         {
-            const Identifier programValueID ("GraphicsContextPrograms");
-            programs = dynamic_cast <ShaderPrograms*> (context.properties [programValueID].getObject());
+            const char programValueID[] = "GraphicsContextPrograms";
+            programs = static_cast <ShaderPrograms*> (context.getAssociatedObject (programValueID).getObject());
 
             if (programs == nullptr)
             {
                 programs = new ShaderPrograms (context);
-                context.properties.set (programValueID, var (programs));
+                context.setAssociatedObject (programValueID, programs);
             }
         }
 
@@ -2188,6 +2184,7 @@ public:
        #if ! JUCE_ANDROID
         target.context.extensions.glActiveTexture (GL_TEXTURE0);
         glEnable (GL_TEXTURE_2D);
+        clearGLError();
        #endif
 
         OpenGLTexture texture;
@@ -2217,20 +2214,17 @@ LowLevelGraphicsContext* createOpenGLContext (const Target& target)
         return new ShaderContext (target);
    #endif
 
-    Image tempImage (Image::ARGB, target.bounds.getWidth(), target.bounds.getHeight(), true);
+    Image tempImage (Image::ARGB, target.bounds.getWidth(), target.bounds.getHeight(), true, SoftwareImageType());
     return new NonShaderContext (target, tempImage);
 }
 
 }
 
 //==============================================================================
-LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLComponent& target)
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context)
 {
-    OpenGLContext* const context = target.getCurrentContext();
-    jassert (context != nullptr); // must have a valid context when this is called!
-
-    return createOpenGLGraphicsContext (*context, context->getFrameBufferID(),
-                                        context->getWidth(), context->getHeight());
+    return createOpenGLGraphicsContext (context, context.getFrameBufferID(),
+                                        context.getWidth(), context.getHeight());
 }
 
 LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context, OpenGLFrameBuffer& target)

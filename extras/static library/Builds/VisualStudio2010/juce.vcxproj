@@ -1125,9 +1125,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_win32_WebBrowserComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLComponent.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1143,19 +1140,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLImage.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLPixelFormat.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLShaderProgram.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_opengl\native\juce_android_OpenGLComponent.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_opengl\native\juce_linux_OpenGLComponent.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_opengl\native\juce_win32_OpenGLComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.cpp">
@@ -1579,7 +1570,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Draggable3DOrientation.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Matrix3D.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLGraphicsContext.h"/>
@@ -1591,6 +1581,11 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Quaternion.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_Vector3D.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_android.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_ios.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_linux.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_osx.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_win32.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGLExtensions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\juce_opengl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_DirectShowComponent.h"/>

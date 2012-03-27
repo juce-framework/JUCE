@@ -30,7 +30,7 @@
 //==============================================================================
 @interface ThreadSafeNSOpenGLView  : NSOpenGLView
 {
-    CriticalSection* contextLock;
+    juce::CriticalSection* contextLock;
     bool needsUpdate;
 }
 
@@ -47,8 +47,9 @@
 - (id) initWithFrame: (NSRect) frameRect
          pixelFormat: (NSOpenGLPixelFormat*) format
 {
-    contextLock = new CriticalSection();
+    contextLock = new juce::CriticalSection();
     self = [super initWithFrame: frameRect pixelFormat: format];
+    needsUpdate = true;
 
     if (self != nil)
         [[NSNotificationCenter defaultCenter] addObserver: self
@@ -67,7 +68,7 @@
 
 - (bool) makeActive
 {
-    const ScopedLock sl (*contextLock);
+    const juce::ScopedLock sl (*contextLock);
 
     if ([self openGLContext] == nil)
         return false;
@@ -85,26 +86,26 @@
 
 - (void) makeInactive
 {
-    const ScopedLock sl (*contextLock);
+    const juce::ScopedLock sl (*contextLock);
     [NSOpenGLContext clearCurrentContext];
 }
 
 - (void) _surfaceNeedsUpdate: (NSNotification*) notification
 {
     (void) notification;
-    const ScopedLock sl (*contextLock);
+    const juce::ScopedLock sl (*contextLock);
     needsUpdate = true;
 }
 
 - (void) update
 {
-    const ScopedLock sl (*contextLock);
+    const juce::ScopedLock sl (*contextLock);
     needsUpdate = true;
 }
 
 - (void) reshape
 {
-    const ScopedLock sl (*contextLock);
+    const juce::ScopedLock sl (*contextLock);
     needsUpdate = true;
 }
 
@@ -117,16 +118,13 @@ namespace juce
 {
 
 //==============================================================================
-class WindowedGLContext     : public OpenGLContext
+class OpenGLContext::NativeContext
 {
 public:
-    WindowedGLContext (OpenGLComponent& component,
-                       const OpenGLPixelFormat& pixelFormat,
-                       NSOpenGLContext* sharedContext)
-        : renderContext (nil)
+    NativeContext (Component& component,
+                   const OpenGLPixelFormat& pixelFormat,
+                   const NativeContext* contextToShareWith)
     {
-        extensions.initialise();
-
         NSOpenGLPixelFormatAttribute attribs[] =
         {
             NSOpenGLPFADoubleBuffer,
@@ -139,7 +137,8 @@ public:
             NSOpenGLPFAStencilSize, (NSOpenGLPixelFormatAttribute) pixelFormat.stencilBufferBits,
             NSOpenGLPFAAccumSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
                                         + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits),
-            pixelFormat.multisamplingLevel > 0 ? NSOpenGLPFASamples : (NSOpenGLPixelFormatAttribute) 0, (NSOpenGLPixelFormatAttribute) pixelFormat.multisamplingLevel,
+            pixelFormat.multisamplingLevel > 0 ? NSOpenGLPFASamples : (NSOpenGLPixelFormatAttribute) 0,
+            (NSOpenGLPixelFormatAttribute) pixelFormat.multisamplingLevel,
             0
         };
 
@@ -148,28 +147,34 @@ public:
         view = [[ThreadSafeNSOpenGLView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                                  pixelFormat: format];
 
+        NSOpenGLContext* const sharedContext
+            = contextToShareWith != nullptr ? contextToShareWith->renderContext : nil;
+
         renderContext = [[[NSOpenGLContext alloc] initWithFormat: format
                                                     shareContext: sharedContext] autorelease];
 
-        const GLint swapInterval = 1;
-        [renderContext setValues: &swapInterval forParameter: NSOpenGLCPSwapInterval];
+        setSwapInterval (1);
 
         [view setOpenGLContext: renderContext];
         [format release];
 
-        component.setView (view);
+        viewAttachment = NSViewComponent::attachViewToComponent (component, view);
     }
 
-    ~WindowedGLContext()
+    ~NativeContext()
     {
-        properties.clear(); // to release any stored programs, etc that may be held in properties.
-
-        makeInactive();
         [renderContext clearDrawable];
         [renderContext setView: nil];
         [view setOpenGLContext: nil];
         renderContext = nil;
     }
+
+    void initialiseOnRenderThread() {}
+    void shutdownOnRenderThread() {}
+
+    bool createdOk() const noexcept             { return getRawContext() != nullptr; }
+    void* getRawContext() const noexcept        { return static_cast <void*> (renderContext); }
+    GLuint getFrameBufferID() const noexcept    { return 0; }
 
     bool makeActive() const noexcept
     {
@@ -179,7 +184,7 @@ public:
             [renderContext setView: view];
 
         [view makeActive];
-        return isActive();
+        return true;
     }
 
     bool makeInactive() const noexcept
@@ -193,20 +198,14 @@ public:
         return [NSOpenGLContext currentContext] == renderContext;
     }
 
-    void* getRawContext() const noexcept            { return renderContext; }
-    unsigned int getFrameBufferID() const           { return 0; }
-
-    int getWidth() const                            { return [view frame].size.width; }
-    int getHeight() const                           { return [view frame].size.height; }
-
-    void updateWindowPosition (const Rectangle<int>&) {}
-
     void swapBuffers()
     {
         [renderContext flushBuffer];
     }
 
-    bool setSwapInterval (const int numFramesPerSwap)
+    void updateWindowPosition (const Rectangle<int>&) {}
+
+    bool setSwapInterval (int numFramesPerSwap)
     {
         [renderContext setValues: (const GLint*) &numFramesPerSwap
                     forParameter: NSOpenGLCPSwapInterval];
@@ -218,33 +217,17 @@ public:
         GLint numFrames = 0;
         [renderContext getValues: &numFrames
                     forParameter: NSOpenGLCPSwapInterval];
+
         return numFrames;
     }
 
-    void* getNativeWindowHandle() const     { return view; }
-
-    //==============================================================================
+private:
     NSOpenGLContext* renderContext;
     ThreadSafeNSOpenGLView* view;
+    ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
 
-private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext);
 };
-
-//==============================================================================
-OpenGLContext* OpenGLComponent::createContext()
-{
-    ScopedPointer<WindowedGLContext> c (new WindowedGLContext (*this, preferredPixelFormat,
-                                                               contextToShareListsWith != nullptr ? (NSOpenGLContext*) contextToShareListsWith->getRawContext() : nil));
-
-    return (c->renderContext != nil) ? c.release() : nullptr;
-}
-
-void* OpenGLComponent::getNativeWindowHandle() const
-{
-    return context != nullptr ? static_cast<WindowedGLContext*> (context.get())->getNativeWindowHandle()
-                              : nullptr;
-}
 
 //==============================================================================
 bool OpenGLHelpers::isContextActive()

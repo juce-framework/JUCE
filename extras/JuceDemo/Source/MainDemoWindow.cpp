@@ -38,20 +38,27 @@ public:
         : mainWindow (mainWindow_),
           currentDemoId (0)
     {
+        setOpaque (true);
         invokeDirectly (showRendering, true);
+    }
+
+    ~ContentComp()
+    {
+       #if JUCE_OPENGL
+        openGLContext.detach();
+       #endif
+    }
+
+    void paint (Graphics& g)
+    {
+        g.fillAll (Colours::white);
     }
 
     //==============================================================================
     void showDemo (Component* demoComp)
     {
         currentDemo = demoComp;
-
-       #if JUCE_OPENGL
-        if (openGLWrapperComp != nullptr)
-            openGLWrapperComp->addAndMakeVisible (currentDemo);
-        else
-       #endif
-            addAndMakeVisible (currentDemo);
+        addAndMakeVisible (currentDemo);
 
         currentDemo->setBounds ("0, 0, parent.width, parent.height");
     }
@@ -112,8 +119,12 @@ public:
             {
                 menu.addSeparator();
 
-                const int currentEngine = openGLWrapperComp != nullptr ? engines.size() - 1
-                                                                       : getPeer()->getCurrentRenderingEngine();
+                int currentEngine = getPeer()->getCurrentRenderingEngine();
+
+               #if JUCE_OPENGL
+                if (openGLContext.isAttached())
+                    currentEngine = engines.size() - 1;
+               #endif
 
                 for (int i = 0; i < engines.size(); ++i)
                     menu.addItem (5001 + i, "Use " + engines[i], true, i == currentEngine);
@@ -149,19 +160,9 @@ public:
     {
        #if JUCE_OPENGL
         if (shouldUseOpenGL && currentDemoId != showOpenGL)
-        {
-            if (openGLWrapperComp == nullptr)
-            {
-                addAndMakeVisible (openGLWrapperComp = new DemoOpenGLComp (currentDemo));
-                openGLWrapperComp->setBounds ("0, 0, parent.width, parent.height");
-            }
-        }
+            openGLContext.attachTo (*this);
         else
-        {
-            openGLWrapperComp = nullptr;
-            addAndMakeVisible (currentDemo);
-            resized();
-        }
+            openGLContext.detach();
        #endif
     }
 
@@ -509,41 +510,15 @@ private:
     ScopedPointer<Component> currentDemo;
     int currentDemoId;
 
+   #if JUCE_OPENGL
+    OpenGLContext openGLContext;
+   #endif
+
     TooltipWindow tooltipWindow; // to add tooltips to an application, you
                                  // just need to create one of these and leave it
                                  // there to do its work..
 
     //==============================================================================
-   #if JUCE_OPENGL
-    class DemoOpenGLComp  : public OpenGLComponent
-    {
-    public:
-        DemoOpenGLComp (Component* contentComp)
-            : OpenGLComponent (useBackgroundThread | allowSubComponents)
-        {
-            addAndMakeVisible (contentComp);
-        }
-
-        ~DemoOpenGLComp()
-        {
-            // It's essential to call this method before our class is destroyed, to
-            // make sure that the background renderer thread doesn't try to call it
-            // while it's being dismantled..
-            stopRenderThread();
-        }
-
-        void newOpenGLContextCreated()   {}
-        void renderOpenGL()   {}
-
-        void paint (Graphics& g)
-        {
-            g.fillAll (Colours::azure);
-        }
-    };
-
-    ScopedPointer<DemoOpenGLComp> openGLWrapperComp;
-   #endif
-
     StringArray getRenderingEngines()
     {
         StringArray renderingEngines (getPeer()->getAvailableRenderingEngines());

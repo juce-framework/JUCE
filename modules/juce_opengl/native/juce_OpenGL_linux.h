@@ -27,23 +27,15 @@ extern Display* display;
 extern XContext windowHandleXContext;
 
 //==============================================================================
-class WindowedGLContext   : public OpenGLContext
+class OpenGLContext::NativeContext
 {
 public:
-    WindowedGLContext (Component* const component,
-                       const OpenGLPixelFormat& pixelFormat,
-                       GLXContext sharedContext)
-        : renderContext (0),
-          embeddedWindow (0),
-          swapInterval (0)
+    NativeContext (Component& component,
+                   const OpenGLPixelFormat& pixelFormat,
+                   const NativeContext* contextToShareWith_)
+        : renderContext (0), embeddedWindow (0), swapFrames (0), bestVisual (0),
+          contextToShareWith (contextToShareWith_)
     {
-        extensions.initialise();
-
-        jassert (component != nullptr);
-        ComponentPeer* const peer = component->getTopLevelComponent()->getPeer();
-        if (peer == nullptr)
-            return;
-
         ScopedXLock xlock;
         XSync (display, False);
 
@@ -64,13 +56,11 @@ public:
             None
         };
 
-        XVisualInfo* const bestVisual = glXChooseVisual (display, DefaultScreen (display), attribs);
-
-        if (bestVisual == 0)
+        bestVisual = glXChooseVisual (display, DefaultScreen (display), attribs);
+        if (bestVisual == nullptr)
             return;
 
-        renderContext = glXCreateContext (display, bestVisual, sharedContext, GL_TRUE);
-
+        ComponentPeer* const peer = component.getPeer();
         Window windowH = (Window) peer->getNativeHandle();
 
         Colormap colourMap = XCreateColormap (display, windowH, bestVisual->visual, AllocNone);
@@ -79,9 +69,14 @@ public:
         swa.border_pixel = 0;
         swa.event_mask = ExposureMask | StructureNotifyMask;
 
+        const Rectangle<int> bounds (component.getTopLevelComponent()
+                                        ->getLocalArea (&component, component.getLocalBounds()));
+
         embeddedWindow = XCreateWindow (display, windowH,
-                                        0, 0, 1, 1, 0,
-                                        bestVisual->depth,
+                                        bounds.getX(), bounds.getY(),
+                                        jmax (1, bounds.getWidth()),
+                                        jmax (1, bounds.getHeight()),
+                                        0, bestVisual->depth,
                                         InputOutput,
                                         bestVisual->visual,
                                         CWBorderPixel | CWColormap | CWEventMask,
@@ -92,58 +87,58 @@ public:
         XMapWindow (display, embeddedWindow);
         XFreeColormap (display, colourMap);
 
-        XFree (bestVisual);
         XSync (display, False);
-
-        makeActive();
-        extensions.initialise();
-        makeInactive();
     }
 
-    ~WindowedGLContext()
+    ~NativeContext()
     {
-        ScopedXLock xlock;
-
-        properties.clear(); // to release any stored programs, etc that may be held in properties.
-        makeInactive();
-
-        if (renderContext != 0)
+        if (embeddedWindow != 0)
         {
             ScopedXLock xlock;
-            glXDestroyContext (display, renderContext);
-            renderContext = nullptr;
+            XUnmapWindow (display, embeddedWindow);
+            XDestroyWindow (display, embeddedWindow);
         }
 
-        XUnmapWindow (display, embeddedWindow);
-        XDestroyWindow (display, embeddedWindow);
+        if (bestVisual != nullptr)
+            XFree (bestVisual);
+    }
+
+    void initialiseOnRenderThread()
+    {
+        ScopedXLock xlock;
+        renderContext = glXCreateContext (display, bestVisual,
+                                          contextToShareWith != nullptr ? contextToShareWith->renderContext : 0,
+                                          GL_TRUE);
+        makeActive();
+    }
+
+    void shutdownOnRenderThread()
+    {
+        makeInactive();
+        glXDestroyContext (display, renderContext);
+        renderContext = nullptr;
     }
 
     bool makeActive() const noexcept
     {
-        jassert (renderContext != 0);
-
-        ScopedXLock xlock;
-        return glXMakeCurrent (display, embeddedWindow, renderContext)
-                && XSync (display, False);
+        return renderContext != 0
+                 && glXMakeCurrent (display, embeddedWindow, renderContext);
     }
 
     bool makeInactive() const noexcept
     {
-        ScopedXLock xlock;
         return (! isActive()) || glXMakeCurrent (display, None, 0);
     }
 
     bool isActive() const noexcept
     {
-        ScopedXLock xlock;
-        return glXGetCurrentContext() == renderContext;
+        return glXGetCurrentContext() == renderContext && renderContext != 0;
     }
 
-    unsigned int getFrameBufferID() const           { return 0; }
-    void* getRawContext() const noexcept            { return renderContext; }
-
-    int getWidth() const                            { return bounds.getWidth(); }
-    int getHeight() const                           { return bounds.getHeight(); }
+    void swapBuffers()
+    {
+        glXSwapBuffers (display, embeddedWindow);
+    }
 
     void updateWindowPosition (const Rectangle<int>& newBounds)
     {
@@ -151,18 +146,13 @@ public:
 
         ScopedXLock xlock;
         XMoveResizeWindow (display, embeddedWindow,
-                           bounds.getX(), bounds.getY(), jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()));
+                           bounds.getX(), bounds.getY(),
+                           jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()));
     }
 
-    void swapBuffers()
+    bool setSwapInterval (int numFramesPerSwap)
     {
-        ScopedXLock xlock;
-        glXSwapBuffers (display, embeddedWindow);
-    }
-
-    bool setSwapInterval (const int newSwapInterval)
-    {
-        if (newSwapInterval == swapInterval)
+        if (numFramesPerSwap == swapFrames)
             return true;
 
         PFNGLXSWAPINTERVALSGIPROC GLXSwapIntervalSGI
@@ -170,34 +160,30 @@ public:
 
         if (GLXSwapIntervalSGI != nullptr)
         {
-            swapInterval = newSwapInterval;
-            GLXSwapIntervalSGI (newSwapInterval);
+            swapFrames = numFramesPerSwap;
+            GLXSwapIntervalSGI (numFramesPerSwap);
             return true;
         }
 
         return false;
     }
 
-    int getSwapInterval() const    { return swapInterval; }
+    int getSwapInterval() const                 { return swapFrames; }
+    bool createdOk() const noexcept             { return true; }
+    void* getRawContext() const noexcept        { return renderContext; }
+    GLuint getFrameBufferID() const noexcept    { return 0; }
 
+private:
     GLXContext renderContext;
     Window embeddedWindow;
 
-private:
-    int swapInterval;
+    int swapFrames;
     Rectangle<int> bounds;
+    XVisualInfo* bestVisual;
+    const NativeContext* contextToShareWith;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowedGLContext);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext);
 };
-
-//==============================================================================
-OpenGLContext* OpenGLComponent::createContext()
-{
-    ScopedPointer<WindowedGLContext> c (new WindowedGLContext (this, preferredPixelFormat,
-                                                               contextToShareListsWith != 0 ? (GLXContext) contextToShareListsWith->getRawContext() : 0));
-
-    return (c->renderContext != 0) ? c.release() : nullptr;
-}
 
 //==============================================================================
 bool OpenGLHelpers::isContextActive()

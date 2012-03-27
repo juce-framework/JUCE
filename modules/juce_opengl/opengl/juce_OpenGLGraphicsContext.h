@@ -27,11 +27,10 @@
 #define __JUCE_OPENGLGRAPHICSCONTEXT_JUCEHEADER__
 
 
-//==============================================================================
 /** Creates a graphics context object that will render into the given OpenGL target.
     The caller is responsible for deleting this object when no longer needed.
 */
-LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLComponent& target);
+LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& target);
 
 /** Creates a graphics context object that will render into the given OpenGL target.
     The caller is responsible for deleting this object when no longer needed.
