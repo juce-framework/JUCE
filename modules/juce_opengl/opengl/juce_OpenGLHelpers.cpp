@@ -189,6 +189,7 @@ void OpenGLHelpers::drawTriangleStrip (const GLfloat* const vertices, const GLfl
 {
    #if ! JUCE_ANDROID
     glEnable (GL_TEXTURE_2D);
+    clearGLError();
    #endif
     glDisableClientState (GL_COLOR_ARRAY);
     glDisableClientState (GL_NORMAL_ARRAY);

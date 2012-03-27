@@ -35,8 +35,7 @@ public:
             mm->quitMessageReceived = true;
     }
 
-private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QuitMessage);
+    JUCE_DECLARE_NON_COPYABLE (QuitMessage);
 };
 
 //==============================================================================
@@ -239,8 +238,7 @@ public:
 
     WaitableEvent lockedEvent, releaseEvent;
 
-private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockingMessage);
+    JUCE_DECLARE_NON_COPYABLE (BlockingMessage);
 };
 
 //==============================================================================

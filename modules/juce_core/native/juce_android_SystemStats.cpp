@@ -98,9 +98,27 @@ jfieldID JNIClassBase::resolveStaticField (JNIEnv* env, const char* fieldName, c
 //==============================================================================
 ThreadLocalJNIEnvHolder threadLocalJNIEnvHolder;
 
+#if JUCE_DEBUG
+static bool systemInitialised = false;
+#endif
+
 JNIEnv* getEnv() noexcept
 {
+   #if JUCE_DEBUG
+    if (! systemInitialised)
+    {
+        DBG ("*** Call to getEnv() when system not initialised");
+        jassertfalse;
+        exit (0);
+    }
+   #endif
+
     return threadLocalJNIEnvHolder.getOrAttach();
+}
+
+extern "C" jint JNI_OnLoad (JavaVM*, void*)
+{
+    return JNI_VERSION_1_2;
 }
 
 //==============================================================================
@@ -111,9 +129,14 @@ AndroidSystem::AndroidSystem() : screenWidth (0), screenHeight (0)
 void AndroidSystem::initialise (JNIEnv* env, jobject activity_,
                                 jstring appFile_, jstring appDataDir_)
 {
+    screenWidth = screenHeight = 0;
     JNIClassBase::initialiseAllClasses (env);
 
     threadLocalJNIEnvHolder.initialise (env);
+   #if JUCE_DEBUG
+    systemInitialised = true;
+   #endif
+
     activity = GlobalRef (activity_);
     appFile = juceString (env, appFile_);
     appDataDir = juceString (env, appDataDir_);
@@ -122,6 +145,11 @@ void AndroidSystem::initialise (JNIEnv* env, jobject activity_,
 void AndroidSystem::shutdown (JNIEnv* env)
 {
     activity.clear();
+
+   #if JUCE_DEBUG
+    systemInitialised = false;
+   #endif
+
     JNIClassBase::releaseAllClasses (env);
 }
 

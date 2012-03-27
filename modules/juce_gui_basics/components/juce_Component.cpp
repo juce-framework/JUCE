@@ -750,7 +750,11 @@ private:
 
 void Component::setCachedComponentImage (CachedComponentImage* newCachedImage)
 {
-    cachedImage = newCachedImage;
+    if (cachedImage != newCachedImage)
+    {
+        cachedImage = newCachedImage;
+        repaint();
+    }
 }
 
 void Component::setBufferedToImage (const bool shouldBeBuffered)

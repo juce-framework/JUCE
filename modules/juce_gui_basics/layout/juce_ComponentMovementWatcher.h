@@ -67,6 +67,9 @@ public:
     */
     virtual void componentVisibilityChanged() = 0;
 
+    /** Returns the component that's being watched. */
+    Component* getComponent() const noexcept         { return component; }
+
     //==============================================================================
     /** @internal */
     void componentParentHierarchyChanged (Component& component);

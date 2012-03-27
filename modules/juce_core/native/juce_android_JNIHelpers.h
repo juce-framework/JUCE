@@ -258,6 +258,11 @@ public:
 
     void initialise (JNIEnv* env)
     {
+        // NB: the DLL can be left loaded by the JVM, so the same static
+        // objects can end up being reused by subsequent runs of the app
+        zeromem (threads, sizeof (threads));
+        zeromem (envs, sizeof (envs));
+
         env->GetJavaVM (&jvm);
         addEnv (env);
     }

@@ -63,11 +63,10 @@ public:
 
         if (topComp->getPeer() != nullptr)
         {
-            const Point<int> pos (topComp->getLocalPoint (&owner, Point<int>()));
+            const Rectangle<int> area (topComp->getLocalArea (&owner, owner.getLocalBounds()));
 
-            NSRect r = NSMakeRect ((float) pos.getX(), (float) pos.getY(), (float) owner.getWidth(), (float) owner.getHeight());
+            NSRect r = NSMakeRect ((float) area.getX(), (float) area.getY(), (float) area.getWidth(), (float) area.getHeight());
             r.origin.y = [[view superview] frame].size.height - (r.origin.y + r.size.height);
-
             [view setFrame: r];
         }
     }
@@ -83,7 +82,7 @@ public:
 
             if (peer != nullptr)
             {
-                NSView* peerView = (NSView*) peer->getNativeHandle();
+                NSView* const peerView = (NSView*) peer->getNativeHandle();
                 [peerView addSubview: view];
                 componentMovedOrResized (false, false);
             }
