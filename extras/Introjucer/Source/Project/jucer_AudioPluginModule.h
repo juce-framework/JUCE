@@ -307,9 +307,10 @@ namespace RTASHelpers
         exporter.msvcTargetSuffix = ".dpm";
         exporter.msvcNeedsDLLRuntimeLib = true;
 
-        RelativePath rtasFolder (getRTASFolderRelativePath (exporter));
-        exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
-                                                                                                                 .toWindowsStyle()).quoted());
+        exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path",
+                                                CodeHelpers::addEscapeChars (getRTASFolderRelativePath (exporter)
+                                                                                .getChildFile ("WinBag")
+                                                                                .toWindowsStyle()).quoted());
 
         String msvcPathToRTASFolder (exporter.getJucePathFromTargetFolder()
                                              .getChildFile ("juce_audio_plugin_client/RTAS")
@@ -332,6 +333,7 @@ namespace RTASHelpers
             }
         }
 
+        RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
         exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
         exporter.xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
 
