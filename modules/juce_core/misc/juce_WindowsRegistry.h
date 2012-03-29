@@ -37,20 +37,38 @@ class WindowsRegistry
 public:
     //==============================================================================
     /** Returns a string from the registry.
-
         The path is a string for the entire path of a value in the registry,
         e.g. "HKEY_CURRENT_USER\Software\foo\bar"
     */
     static String getValue (const String& regValuePath,
                             const String& defaultValue = String::empty);
 
-    /** Sets a registry value as a string.
-
-        This will take care of creating any groups needed to get to the given
-        registry value.
+    /** Reads a binary block from the registry.
+        The path is a string for the entire path of a value in the registry,
+        e.g. "HKEY_CURRENT_USER\Software\foo\bar"
+        @returns a DWORD indicating the type of the key.
     */
-    static bool setValue (const String& regValuePath,
-                          const String& value);
+    static uint32 getBinaryValue (const String& regValuePath, MemoryBlock& resultData);
+
+    /** Sets a registry value as a string.
+        This will take care of creating any groups needed to get to the given registry value.
+    */
+    static bool setValue (const String& regValuePath, const String& value);
+
+    /** Sets a registry value as a DWORD.
+        This will take care of creating any groups needed to get to the given registry value.
+    */
+    static bool setValue (const String& regValuePath, uint32 value);
+
+    /** Sets a registry value as a QWORD.
+        This will take care of creating any groups needed to get to the given registry value.
+    */
+    static bool setValue (const String& regValuePath, uint64 value);
+
+    /** Sets a registry value as a binary block.
+        This will take care of creating any groups needed to get to the given registry value.
+    */
+    static bool setValue (const String& regValuePath, const MemoryBlock& value);
 
     /** Returns true if the given value exists in the registry. */
     static bool valueExists (const String& regValuePath);

@@ -60,6 +60,17 @@ struct RegistryKeyWrapper
             RegCloseKey (key);
     }
 
+    static bool setValue (const String& regValuePath, const DWORD type,
+                          const void* data, size_t dataSize)
+    {
+        const RegistryKeyWrapper key (regValuePath, true);
+
+        return key.key != 0
+                && RegSetValueEx (key.key, key.wideCharValueName, 0, type,
+                                  reinterpret_cast <const BYTE*> (data),
+                                  (DWORD) dataSize) == ERROR_SUCCESS;
+    }
+
     HKEY key;
     const wchar_t* wideCharValueName;
     String valueName;
@@ -67,23 +78,42 @@ struct RegistryKeyWrapper
     JUCE_DECLARE_NON_COPYABLE (RegistryKeyWrapper);
 };
 
-String WindowsRegistry::getValue (const String& regValuePath, const String& defaultValue)
+uint32 WindowsRegistry::getBinaryValue (const String& regValuePath, MemoryBlock& result)
 {
     const RegistryKeyWrapper key (regValuePath, false);
 
     if (key.key != 0)
     {
-        WCHAR buffer [2048];
-        unsigned long bufferSize = sizeof (buffer);
-        DWORD type = REG_SZ;
-
-        if (RegQueryValueEx (key.key, key.wideCharValueName, 0, &type, (LPBYTE) buffer, &bufferSize) == ERROR_SUCCESS)
+        for (unsigned long bufferSize = 1024; ; bufferSize *= 2)
         {
-            if (type == REG_SZ)
-                return buffer;
-            else if (type == REG_DWORD)
-                return String ((int) *(DWORD*) buffer);
+            result.setSize (bufferSize, false);
+            DWORD type = REG_NONE;
+
+            const LONG err = RegQueryValueEx (key.key, key.wideCharValueName, 0, &type,
+                                              (LPBYTE) result.getData(), &bufferSize);
+
+            if (err == ERROR_SUCCESS)
+            {
+                result.setSize (bufferSize, false);
+                return type;
+            }
+
+            if (err != ERROR_MORE_DATA)
+                break;
         }
+    }
+
+    return REG_NONE;
+}
+
+String WindowsRegistry::getValue (const String& regValuePath, const String& defaultValue)
+{
+    MemoryBlock buffer;
+    switch (getBinaryValue (regValuePath, buffer))
+    {
+        case REG_SZ:    return static_cast <const WCHAR*> (buffer.getData());
+        case REG_DWORD: return String ((int) *reinterpret_cast<const DWORD*> (buffer.getData()));
+        default:        break;
     }
 
     return defaultValue;
@@ -91,12 +121,23 @@ String WindowsRegistry::getValue (const String& regValuePath, const String& defa
 
 bool WindowsRegistry::setValue (const String& regValuePath, const String& value)
 {
-    const RegistryKeyWrapper key (regValuePath, true);
+    return RegistryKeyWrapper::setValue (regValuePath, REG_SZ, value.toWideCharPointer(),
+                                         CharPointer_UTF16::getBytesRequiredFor (value.getCharPointer()));
+}
 
-    return key.key != 0
-        && RegSetValueEx (key.key, key.wideCharValueName, 0, REG_SZ,
-                          (const BYTE*) value.toWideCharPointer(),
-                          (DWORD) CharPointer_UTF16::getBytesRequiredFor (value.getCharPointer())) == ERROR_SUCCESS;
+bool WindowsRegistry::setValue (const String& regValuePath, const uint32 value)
+{
+    return RegistryKeyWrapper::setValue (regValuePath, REG_DWORD, &value, sizeof (value));
+}
+
+bool WindowsRegistry::setValue (const String& regValuePath, const uint64 value)
+{
+    return RegistryKeyWrapper::setValue (regValuePath, REG_QWORD, &value, sizeof (value));
+}
+
+bool WindowsRegistry::setValue (const String& regValuePath, const MemoryBlock& value)
+{
+    return RegistryKeyWrapper::setValue (regValuePath, REG_BINARY, value.getData(), value.getSize());
 }
 
 bool WindowsRegistry::valueExists (const String& regValuePath)
@@ -106,12 +147,14 @@ bool WindowsRegistry::valueExists (const String& regValuePath)
     if (key.key == 0)
         return false;
 
-    unsigned char buffer [2048];
+    unsigned char buffer [512];
     unsigned long bufferSize = sizeof (buffer);
     DWORD type = 0;
 
-    return RegQueryValueEx (key.key, key.wideCharValueName,
-                            0, &type, buffer, &bufferSize) == ERROR_SUCCESS;
+    const LONG result = RegQueryValueEx (key.key, key.wideCharValueName,
+                                         0, &type, buffer, &bufferSize);
+
+    return result == ERROR_SUCCESS || result == ERROR_MORE_DATA;
 }
 
 void WindowsRegistry::deleteValue (const String& regValuePath)
