@@ -39,7 +39,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
     message->incReferenceCount();
-    getEnv()->CallVoidMethod (android.activity, JuceAppActivity.postMessage, (jlong) (pointer_sized_uint) message);
+    android.activity.callVoidMethod (JuceAppActivity.postMessage, (jlong) (pointer_sized_uint) message);
     return true;
 }
 
@@ -63,19 +63,18 @@ void MessageManager::runDispatchLoop()
 {
 }
 
-class QuitCallback  : public CallbackMessage
-{
-public:
-    QuitCallback() {}
-
-    void messageCallback()
-    {
-        android.activity.callVoidMethod (JuceAppActivity.finish);
-    }
-};
-
 void MessageManager::stopDispatchLoop()
 {
+    struct QuitCallback  : public CallbackMessage
+    {
+        QuitCallback() {}
+
+        void messageCallback()
+        {
+            android.activity.callVoidMethod (JuceAppActivity.finish);
+        }
+    };
+
     (new QuitCallback())->post();
     quitMessagePosted = true;
 }

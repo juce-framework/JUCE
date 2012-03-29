@@ -158,8 +158,11 @@ private:
 
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* const func, void* const parameter)
 {
-    if (MessageManager::getInstance()->isThisTheMessageThread())
+    if (isThisTheMessageThread())
         return func (parameter);
+
+    // If this thread has the message manager locked, then this will deadlock!
+    jassert (! currentThreadHasLockedMessageManager());
 
     const ReferenceCountedObjectPtr<AsyncFunctionCallback> message (new AsyncFunctionCallback (func, parameter));
     message->post();

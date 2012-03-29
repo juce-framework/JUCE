@@ -270,7 +270,7 @@ public:
     JNIEnv* attach()
     {
         JNIEnv* env = nullptr;
-        jvm->AttachCurrentThread (&env, 0);
+        jvm->AttachCurrentThread (&env, nullptr);
 
         if (env != nullptr)
             addEnv (env);

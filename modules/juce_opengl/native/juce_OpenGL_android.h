@@ -42,11 +42,10 @@ public:
         : component (component_),
           isInsideGLCallback (false)
     {
-        glView = GlobalRef (createOpenGLView (component.getPeer()));
-
         {
-            const ScopedLock sl (getContextListLock());
-            getContextList().add (this);
+            const ScopedLock sl (contextListLock);
+            glView = GlobalRef (createOpenGLView (component.getPeer()));
+            contextList.add (this);
         }
 
         updateWindowPosition (component.getTopLevelComponent()
@@ -56,8 +55,8 @@ public:
     ~NativeContext()
     {
         {
-            const ScopedLock sl (getContextListLock());
-            getContextList().removeValue (this);
+            const ScopedLock sl (contextListLock);
+            contextList.removeValue (this);
         }
 
         android.activity.callVoidMethod (JuceAppActivity.deleteView, glView.get());
@@ -95,6 +94,10 @@ public:
         }
     }
 
+    void contextChangedSize()
+    {
+    }
+
     void triggerRepaint()
     {
         glView.callVoidMethod (OpenGLView.requestRender);
@@ -107,12 +110,11 @@ public:
     //==============================================================================
     static NativeContext* findContextFor (JNIEnv* env, jobject glView)
     {
-        const ScopedLock sl (getContextListLock());
-        const ContextArray& contexts = getContextList();
+        const ScopedLock sl (contextListLock);
 
-        for (int i = contexts.size(); --i >= 0;)
+        for (int i = contextList.size(); --i >= 0;)
         {
-            NativeContext* const c = contexts.getUnchecked(i);
+            NativeContext* const c = contextList.getUnchecked(i);
 
             if (env->IsSameObject (c->glView.get(), glView))
                 return c;
@@ -123,12 +125,11 @@ public:
 
     static NativeContext* getActiveContext() noexcept
     {
-        const ScopedLock sl (getContextListLock());
-        const ContextArray& contexts = getContextList();
+        const ScopedLock sl (contextListLock);
 
-        for (int i = contexts.size(); --i >= 0;)
+        for (int i = contextList.size(); --i >= 0;)
         {
-            NativeContext* const c = contexts.getUnchecked(i);
+            NativeContext* const c = contextList.getUnchecked(i);
 
             if (c->isInsideGLCallback)
                 return c;
@@ -144,22 +145,15 @@ private:
     Rectangle<int> lastBounds;
     bool isInsideGLCallback;
 
-    static CriticalSection& getContextListLock()
-    {
-        static CriticalSection lock;
-        return lock;
-    }
-
     typedef Array<NativeContext*> ContextArray;
-
-    static ContextArray& getContextList()
-    {
-        static ContextArray contexts;
-        return contexts;
-    }
+    static CriticalSection contextListLock;
+    static ContextArray contextList;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext);
 };
+
+CriticalSection OpenGLContext::NativeContext::contextListLock;
+OpenGLContext::NativeContext::ContextArray OpenGLContext::NativeContext::contextList;
 
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
@@ -168,34 +162,34 @@ bool OpenGLHelpers::isContextActive()
 }
 
 //==============================================================================
-JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView), contextCreated, void, (JNIEnv* env, jobject view))
+#define GL_VIEW_CLASS_NAME    JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView)
+
+JUCE_JNI_CALLBACK (GL_VIEW_CLASS_NAME, contextCreated, void, (JNIEnv* env, jobject view))
 {
     threadLocalJNIEnvHolder.getOrAttach();
 
-    JUCE_CHECK_OPENGL_ERROR
+    OpenGLContext::NativeContext* const context = OpenGLContext::NativeContext::findContextFor (env, view);
 
-    for (int i = 100; --i >= 0;)
+    if (context != nullptr)
     {
-        OpenGLContext::NativeContext* const context = OpenGLContext::NativeContext::findContextFor (env, view);
-
-        if (context != nullptr)
-        {
-            context->contextCreatedCallback();
-            JUCE_CHECK_OPENGL_ERROR
-            return;
-        }
-
-        Thread::sleep (20);
+        context->contextCreatedCallback();
+        JUCE_CHECK_OPENGL_ERROR
     }
-
-    jassertfalse;
+    else
+    {
+        jassertfalse;
+    }
 }
 
-JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView), contextChangedSize, void, (JNIEnv* env, jobject view))
+JUCE_JNI_CALLBACK (GL_VIEW_CLASS_NAME, contextChangedSize, void, (JNIEnv* env, jobject view))
 {
+    OpenGLContext::NativeContext* const context = OpenGLContext::NativeContext::findContextFor (env, view);
+
+    if (context != nullptr)
+        context->contextChangedSize();
 }
 
-JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024OpenGLView), render, void, (JNIEnv* env, jobject view))
+JUCE_JNI_CALLBACK (GL_VIEW_CLASS_NAME, render, void, (JNIEnv* env, jobject view))
 {
     OpenGLContext::NativeContext* const context = OpenGLContext::NativeContext::findContextFor (env, view);
 

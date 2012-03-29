@@ -111,14 +111,9 @@ public:
         }
         else
         {
-            class ViewDeleter  : public CallbackMessage
+            struct ViewDeleter  : public CallbackMessage
             {
-            public:
-                ViewDeleter (const GlobalRef& view_)
-                    : view (view_)
-                {
-                    post();
-                }
+                ViewDeleter (const GlobalRef& view_) : view (view_) {}
 
                 void messageCallback()
                 {
@@ -129,7 +124,7 @@ public:
                 GlobalRef view;
             };
 
-            new ViewDeleter (view);
+            (new ViewDeleter (view))->post();
         }
 
         view.clear();
@@ -148,14 +143,11 @@ public:
         }
         else
         {
-            class VisibilityChanger  : public CallbackMessage
+            struct VisibilityChanger  : public CallbackMessage
             {
-            public:
                 VisibilityChanger (const GlobalRef& view_, bool shouldBeVisible_)
                     : view (view_), shouldBeVisible (shouldBeVisible_)
-                {
-                    post();
-                }
+                {}
 
                 void messageCallback()
                 {
@@ -167,7 +159,7 @@ public:
                 bool shouldBeVisible;
             };
 
-            new VisibilityChanger (view, shouldBeVisible);
+            (new VisibilityChanger (view, shouldBeVisible))->post();
         }
     }
 
@@ -714,8 +706,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
     android.screenWidth = screenWidth;
     android.screenHeight = screenHeight;
 
-    if (isSystemInitialised)
-        Desktop::getInstance().refreshMonitorSizes();
+    Desktop::getInstance().refreshMonitorSizes();
 }
 
 //==============================================================================

@@ -906,7 +906,7 @@ void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
 ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     if ([NSEvent respondsToSelector: @selector (modifierFlags)])
-        NSViewComponentPeer::updateModifiers ([NSEvent modifierFlags]);
+        NSViewComponentPeer::updateModifiers ((NSUInteger) [NSEvent modifierFlags]);
 
     return NSViewComponentPeer::currentModifiers;
 }
