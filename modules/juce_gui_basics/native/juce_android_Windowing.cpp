@@ -45,6 +45,8 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
     JUCEApplication* app = dynamic_cast <JUCEApplication*> (JUCEApplicationBase::createInstance());
     if (! app->initialiseApp (String::empty))
         exit (0);
+
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env, jobject activity))
@@ -386,7 +388,7 @@ public:
 
         jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0);
 
-        if (dest != 0)
+        if (dest != nullptr)
         {
             {
                 Image temp (new PreallocatedImage (clip.getWidth(), clip.getHeight(),
@@ -415,26 +417,23 @@ public:
         }
         else
         {
-            class ViewRepainter  : public CallbackMessage
+            struct ViewRepainter  : public CallbackMessage
             {
-            public:
                 ViewRepainter (const GlobalRef& view_, const Rectangle<int>& area_)
-                    : view (view_), area (area_)
-                {
-                    post();
-                }
+                    : view (view_), area (area_) {}
 
                 void messageCallback()
                 {
-                    view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
+                    view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(),
+                                         area.getRight(), area.getBottom());
                 }
 
             private:
                 GlobalRef view;
-                const Rectangle<int>& area;
+                const Rectangle<int> area;
             };
 
-            new ViewRepainter (view, area);
+            (new ViewRepainter (view, area))->post();
         }
     }
 
@@ -447,29 +446,6 @@ public:
     {
         // TODO
     }
-
-   #if USE_ANDROID_CANVAS
-    StringArray getAvailableRenderingEngines()
-    {
-        StringArray s (ComponentPeer::getAvailableRenderingEngines());
-        s.add ("Android Canvas Renderer");
-        return s;
-    }
-
-    int getCurrentRenderingEngine() const
-    {
-        return usingAndroidGraphics ? 1 : 0;
-    }
-
-    void setCurrentRenderingEngine (int index)
-    {
-        if (usingAndroidGraphics != (index > 0))
-        {
-            usingAndroidGraphics = index > 0;
-            component->repaint();
-        }
-    }
-   #endif
 
     //==============================================================================
     static AndroidComponentPeer* findPeerForJavaView (JNIEnv* env, jobject viewToFind)

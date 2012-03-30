@@ -105,7 +105,7 @@ public:
         If you want an array of zero values, you can use the calloc() method instead.
     */
     explicit HeapBlock (const size_t numElements)
-        : data (static_cast <ElementType*> (::malloc (numElements * sizeof (ElementType))))
+        : data (static_cast <ElementType*> (std::malloc (numElements * sizeof (ElementType))))
     {
         throwOnAllocationFailure();
     }
@@ -116,7 +116,7 @@ public:
     */
     ~HeapBlock()
     {
-        ::free (data);
+        std::free (data);
     }
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
@@ -203,8 +203,8 @@ public:
     */
     void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
-        ::free (data);
-        data = static_cast <ElementType*> (::malloc (newNumElements * elementSize));
+        std::free (data);
+        data = static_cast <ElementType*> (std::malloc (newNumElements * elementSize));
         throwOnAllocationFailure();
     }
 
@@ -213,8 +213,8 @@ public:
     */
     void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
-        ::free (data);
-        data = static_cast <ElementType*> (::calloc (newNumElements, elementSize));
+        std::free (data);
+        data = static_cast <ElementType*> (std::calloc (newNumElements, elementSize));
         throwOnAllocationFailure();
     }
 
@@ -224,12 +224,12 @@ public:
     */
     void allocate (const size_t newNumElements, const bool initialiseToZero)
     {
-        ::free (data);
+        std::free (data);
 
         if (initialiseToZero)
-            data = static_cast <ElementType*> (::calloc (newNumElements, sizeof (ElementType)));
+            data = static_cast <ElementType*> (std::calloc (newNumElements, sizeof (ElementType)));
         else
-            data = static_cast <ElementType*> (::malloc (newNumElements * sizeof (ElementType)));
+            data = static_cast <ElementType*> (std::malloc (newNumElements * sizeof (ElementType)));
 
         throwOnAllocationFailure();
     }
@@ -242,9 +242,9 @@ public:
     void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         if (data == nullptr)
-            data = static_cast <ElementType*> (::malloc (newNumElements * elementSize));
+            data = static_cast <ElementType*> (std::malloc (newNumElements * elementSize));
         else
-            data = static_cast <ElementType*> (::realloc (data, newNumElements * elementSize));
+            data = static_cast <ElementType*> (std::realloc (data, newNumElements * elementSize));
 
         throwOnAllocationFailure();
     }
@@ -254,7 +254,7 @@ public:
     */
     void free()
     {
-        ::free (data);
+        std::free (data);
         data = nullptr;
     }
 

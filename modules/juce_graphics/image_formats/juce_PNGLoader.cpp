@@ -50,12 +50,12 @@ namespace pnglibNamespace
 #if JUCE_INCLUDE_PNGLIB_CODE || ! defined (JUCE_INCLUDE_PNGLIB_CODE)
 
   #if _MSC_VER != 1310
-   using ::calloc; // (causes conflict in VS.NET 2003)
-   using ::malloc;
-   using ::free;
+   using std::calloc; // (causes conflict in VS.NET 2003)
+   using std::malloc;
+   using std::free;
   #endif
 
-  using ::abs;
+  using std::abs;
   #define PNG_INTERNAL
   #define NO_DUMMY_DECL
   #define PNG_SETJMP_NOT_SUPPORTED
@@ -94,10 +94,6 @@ namespace pnglibNamespace
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
-
-using ::calloc;
-using ::malloc;
-using ::free;
 
 //==============================================================================
 namespace PNGHelpers

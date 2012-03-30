@@ -103,6 +103,7 @@ void MessageManager::runDispatchLoop()
 void MessageManager::stopDispatchLoop()
 {
     (new QuitMessage())->post();
+    quitMessagePosted = true;
 }
 
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)

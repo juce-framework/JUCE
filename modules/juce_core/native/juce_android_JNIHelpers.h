@@ -108,7 +108,7 @@ template <typename JavaType>
 class LocalRef
 {
 public:
-    explicit inline LocalRef (JavaType obj_) noexcept   : obj (obj_){}
+    explicit inline LocalRef (JavaType obj_) noexcept   : obj (obj_) {}
     inline LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
     ~LocalRef()                                         { clear(); }
 
@@ -143,8 +143,7 @@ namespace
 {
     String juceString (JNIEnv* env, jstring s)
     {
-        jboolean isCopy;
-        const char* const utf8 = env->GetStringUTFChars (s, &isCopy);
+        const char* const utf8 = env->GetStringUTFChars (s, nullptr);
         CharPointer_UTF8 utf8CP (utf8);
         const String result (utf8CP);
         env->ReleaseStringUTFChars (s, utf8);

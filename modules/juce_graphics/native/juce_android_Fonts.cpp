@@ -180,28 +180,30 @@ public:
 
         const Rectangle<int> bounds (left, top, right - left, bottom - top);
 
-        if (bounds.isEmpty())
-            return nullptr;
+        EdgeTable* et = nullptr;
 
-        jint* const maskDataElements = env->GetIntArrayElements (maskData, 0);
-
-        EdgeTable* et = new EdgeTable (bounds);
-
-        const jint* mask = maskDataElements;
-
-        for (int y = top; y < bottom; ++y)
+        if (! bounds.isEmpty())
         {
-           #if JUCE_LITTLE_ENDIAN
-            const uint8* const lineBytes = ((const uint8*) mask) + 3;
-           #else
-            const uint8* const lineBytes = (const uint8*) mask;
-           #endif
+            et = new EdgeTable (bounds);
 
-            et->clipLineToMask (left, y, lineBytes, 4, bounds.getWidth());
-            mask += bounds.getWidth();
+            jint* const maskDataElements = env->GetIntArrayElements (maskData, 0);
+            const jint* mask = maskDataElements;
+
+            for (int y = top; y < bottom; ++y)
+            {
+               #if JUCE_LITTLE_ENDIAN
+                const uint8* const lineBytes = ((const uint8*) mask) + 3;
+               #else
+                const uint8* const lineBytes = (const uint8*) mask;
+               #endif
+
+                et->clipLineToMask (left, y, lineBytes, 4, bounds.getWidth());
+                mask += bounds.getWidth();
+            }
+
+            env->ReleaseIntArrayElements (maskData, maskDataElements, 0);
         }
 
-        env->ReleaseIntArrayElements (maskData, maskDataElements, 0);
         env->DeleteLocalRef (maskData);
         return et;
     }

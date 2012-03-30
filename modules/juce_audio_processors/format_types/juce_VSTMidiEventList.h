@@ -169,8 +169,8 @@ private:
 
     static VstEvent* allocateVSTEvent()
     {
-        VstEvent* const e = (VstEvent*) ::calloc (1, sizeof (VstMidiEvent) > sizeof (VstMidiSysexEvent) ? sizeof (VstMidiEvent)
-                                                                                                        : sizeof (VstMidiSysexEvent));
+        VstEvent* const e = (VstEvent*) std::calloc (1, sizeof (VstMidiEvent) > sizeof (VstMidiSysexEvent) ? sizeof (VstMidiEvent)
+                                                                                                           : sizeof (VstMidiSysexEvent));
         e->type = kVstMidiType;
         e->byteSize = sizeof (VstMidiEvent);
         return e;
@@ -181,7 +181,7 @@ private:
         if (e->type == kVstSysExType)
             delete[] (((VstMidiSysexEvent*) e)->sysexDump);
 
-        ::free (e);
+        std::free (e);
     }
 };
 

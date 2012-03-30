@@ -104,7 +104,6 @@
 #endif
 
 #if JUCE_MSVC
- #include <malloc.h>
  #pragma warning (pop)
 #endif
 
