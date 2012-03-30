@@ -105,6 +105,9 @@ namespace juce
 #ifndef __JUCE_OPENGLPIXELFORMAT_JUCEHEADER__
  #include "opengl/juce_OpenGLPixelFormat.h"
 #endif
+#ifndef __JUCE_OPENGLRENDERER_JUCEHEADER__
+ #include "opengl/juce_OpenGLRenderer.h"
+#endif
 #ifndef __JUCE_OPENGLSHADERPROGRAM_JUCEHEADER__
  #include "opengl/juce_OpenGLShaderProgram.h"
 #endif

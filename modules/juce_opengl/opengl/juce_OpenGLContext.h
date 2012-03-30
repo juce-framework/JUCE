@@ -28,54 +28,22 @@
 
 #include "juce_OpenGLPixelFormat.h"
 #include "../native/juce_OpenGLExtensions.h"
+#include "juce_OpenGLRenderer.h"
 
-//==============================================================================
-/**
-    A base class that should be implemented by classes which want to render openGL
-    on a background thread.
-
-    @see OpenGLContext
-*/
-class JUCE_API  OpenGLRenderer
-{
-public:
-    OpenGLRenderer() {}
-    virtual ~OpenGLRenderer() {}
-
-    /** Called when a new GL context has been created.
-        You can use this as an opportunity to create your textures, shaders, etc.
-        When the method is invoked, the new GL context will be active.
-        Note that this callback will be made on a background thread, so make sure
-        that your implementation is thread-safe.
-    */
-    virtual void newOpenGLContextCreated() = 0;
-
-    /** Called when you should render the next openGL frame.
-        Note that this callback will be made on a background thread, so make sure
-        that your implementation is thread-safe.
-    */
-    virtual void renderOpenGL() = 0;
-
-    /** Called when the current openGL context is about to close.
-        You can use this opportunity to release any GL resources that you may have
-        created.
-
-        Note that this callback will be made on a background thread, so make sure
-        that your implementation is thread-safe.
-
-        (Also note that on Android, this callback won't happen, because there's currently
-        no way to implement it..)
-    */
-    virtual void openGLContextClosing() = 0;
-};
 
 //==============================================================================
 /**
     Creates an OpenGL context, which can be attached to a component.
 
-    To render some OpenGL in a component, you should create an instance of an OpenGLContext,
-    and call attachTo() to make it use your component as its render target.
-    To free the context, either call detach(), or delete the OpenGLContext.
+    To render some OpenGL, you should create an instance of an OpenGLContext,
+    and call attachTo() to make it use a component as its render target.
+
+    To provide threaded rendering, you can supply an OpenGLRenderer object that
+    will be used to render each frame.
+
+    Before your target component or OpenGLRenderer is deleted, you MUST call
+    detach() or delete the OpenGLContext to allow the background thread to
+    stop and the native resources to be freed safely.
 
     @see OpenGLRenderer
 */
@@ -159,6 +127,7 @@ public:
 
     /** Asynchronously causes a repaint to be made. */
     void triggerRepaint();
+
 
     //==============================================================================
     /** Returns the width of this context */
@@ -256,6 +225,8 @@ public:
                       const Rectangle<int>& anchorPosAndTextureSize,
                       int contextWidth, int contextHeight);
 
+
+    //==============================================================================
    #ifndef DOXYGEN
     class NativeContext;
    #endif
@@ -275,7 +246,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLContext);
 };
-
 
 
 #endif   // __JUCE_OPENGLCONTEXT_JUCEHEADER__
