@@ -50,7 +50,7 @@ public:
             initialiseGLExtensions();
 
             const int wglFormat = wglChoosePixelFormatExtension (pixelFormat);
-            makeInactive();
+            wglMakeCurrent (0, 0);
 
             if (wglFormat != pixFormat && wglFormat != 0)
             {
@@ -92,11 +92,6 @@ public:
     bool makeActive() const noexcept
     {
         return wglMakeCurrent (dc, renderContext) != FALSE;
-    }
-
-    bool makeInactive() const noexcept
-    {
-        return (! isActive()) || (wglMakeCurrent (0, 0) != FALSE);
     }
 
     bool isActive() const noexcept

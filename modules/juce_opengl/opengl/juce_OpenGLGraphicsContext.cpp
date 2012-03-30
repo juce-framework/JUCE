@@ -1021,7 +1021,7 @@ struct StateHelpers
             GLuint colour;
         };
 
-       #if ! JUCE_MAC
+       #if ! (JUCE_MAC || JUCE_ANDROID || JUCE_IOS)
         enum { numQuads = 64 }; // (had problems with my drivers segfaulting when these buffers are any larger)
        #else
         enum { numQuads = 8192 };
@@ -1051,7 +1051,7 @@ struct StateHelpers
               activeShader (nullptr)
         {
             const char programValueID[] = "GraphicsContextPrograms";
-            programs = static_cast <ShaderPrograms*> (context.getAssociatedObject (programValueID).getObject());
+            programs = static_cast <ShaderPrograms*> (context.getAssociatedObject (programValueID));
 
             if (programs == nullptr)
             {
@@ -1154,6 +1154,9 @@ public:
        #if defined (GL_INDEX_ARRAY)
         glDisableClientState (GL_INDEX_ARRAY);
        #endif
+
+        target.context.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
+        target.context.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     void flush()

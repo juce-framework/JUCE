@@ -31,6 +31,10 @@
 
 //==============================================================================
 /**
+    A base class that should be implemented by classes which want to render openGL
+    on a background thread.
+
+    @see OpenGLContext
 */
 class JUCE_API  OpenGLRenderer
 {
@@ -38,24 +42,42 @@ public:
     OpenGLRenderer() {}
     virtual ~OpenGLRenderer() {}
 
-    /**
+    /** Called when a new GL context has been created.
+        You can use this as an opportunity to create your textures, shaders, etc.
+        When the method is invoked, the new GL context will be active.
+        Note that this callback will be made on a background thread, so make sure
+        that your implementation is thread-safe.
     */
     virtual void newOpenGLContextCreated() = 0;
 
-    /**
+    /** Called when you should render the next openGL frame.
+        Note that this callback will be made on a background thread, so make sure
+        that your implementation is thread-safe.
     */
     virtual void renderOpenGL() = 0;
 
-    /**
+    /** Called when the current openGL context is about to close.
+        You can use this opportunity to release any GL resources that you may have
+        created.
+
+        Note that this callback will be made on a background thread, so make sure
+        that your implementation is thread-safe.
+
+        (Also note that on Android, this callback won't happen, because there's currently
+        no way to implement it..)
     */
     virtual void openGLContextClosing() = 0;
 };
 
 //==============================================================================
 /**
-    A base class for types of OpenGL context.
+    Creates an OpenGL context, which can be attached to a component.
 
-    An OpenGLComponent will supply its own context for drawing in its window.
+    To render some OpenGL in a component, you should create an instance of an OpenGLContext,
+    and call attachTo() to make it use your component as its render target.
+    To free the context, either call detach(), or delete the OpenGLContext.
+
+    @see OpenGLRenderer
 */
 class JUCE_API  OpenGLContext
 {
@@ -66,30 +88,66 @@ public:
     ~OpenGLContext();
 
     //==============================================================================
-    /** */
-    void setRenderer (OpenGLRenderer* rendererToUse,
-                      bool shouldAlsoPaintComponent) noexcept;
+    /** Gives the context an OpenGLRenderer to use to do the drawing.
+        The object that you give it will not be owned by the context, so it's the caller's
+        responsibility to manage its lifetime and make sure that it doesn't get deleted
+        while the context may be using it. To stop the context using a renderer, just call
+        this method with a null pointer.
+        Note: This must be called BEFORE attaching your context to a target component!
+    */
+    void setRenderer (OpenGLRenderer* rendererToUse) noexcept;
 
-    /** */
-    void attachTo (Component& component);
+    /** Enables or disables the use of the GL context to perform 2D rendering
+        of the component to which it is attached.
+        If this is false, then only your OpenGLRenderer will be used to perform
+        any rendering. If true, then each time your target's paint() method needs
+        to be called, an OpenGLGraphicsContext will be used to render it, (after
+        calling your OpenGLRenderer if there is one).
 
-    /** */
-    void attachTo (Component& component,
-                   const OpenGLPixelFormat& preferredPixelFormat,
-                   const OpenGLContext* contextToShareWith);
-    /** */
-    void detach();
+        By default this is set to true. If you're not using any paint() method functionality
+        and are doing all your rendering in an OpenGLRenderer, you should disable it
+        to improve performance.
 
-    /** */
-    bool isAttached() const noexcept;
+        Note: This must be called BEFORE attaching your context to a target component!
+    */
+    void setComponentPaintingEnabled (bool shouldPaintComponent) noexcept;
+
+    /** Sets the pixel format which you'd like to use for the target GL surface.
+        Note: This must be called BEFORE attaching your context to a target component!
+    */
+    void setPixelFormat (const OpenGLPixelFormat& preferredPixelFormat) noexcept;
+
+    /** Provides a context with which you'd like this context's resources to be shared.
+        The object passed-in here must not be deleted while the context may still be
+        using it! To turn off sharing, you can call this method with a null pointer.
+        Note: This must be called BEFORE attaching your context to a target component!
+    */
+    void setContextToShareWith (const OpenGLContext* contextToShareWith) noexcept;
 
     //==============================================================================
-    /** Makes this context the currently active one. */
-    bool makeActive() const noexcept;
-    /** If this context is currently active, it is disactivated. */
-    bool makeInactive() const noexcept;
-    /** Returns true if this context is currently active. */
-    bool isActive() const noexcept;
+    /** Attaches the context to a target component.
+
+        If the component is not fully visible, this call will wait until the component
+        is shown before actually creating a native context for it.
+
+        When a native context is created, a thread is started, and will be used to call
+        the OpenGLRenderer methods. The context will be floated above the target component,
+        and when the target moves, it will track it. If the component is hidden/shown, the
+        context may be deleted and re-created.
+    */
+    void attachTo (Component& component);
+
+    /** Detaches the context from its target component and deletes any native resources.
+        If the context has not been attached, this will do nothing. Otherwise, it will block
+        until the context and its thread have been cleaned up.
+    */
+    void detach();
+
+    /** Returns true if the context is attached to a component and is on-screen.
+        Note that if you call attachTo() for a non-visible component, this method will
+        return false until the component is made visible.
+    */
+    bool isAttached() const noexcept;
 
     /** Returns the component to which this context is currently attached, or nullptr. */
     Component* getTargetComponent() const noexcept;
@@ -98,6 +156,56 @@ public:
         nullptr if no context is active.
     */
     static OpenGLContext* getCurrentContext();
+
+    /** Asynchronously causes a repaint to be made. */
+    void triggerRepaint();
+
+    //==============================================================================
+    /** Returns the width of this context */
+    inline int getWidth() const noexcept                    { return width; }
+
+    /** Returns the height of this context */
+    inline int getHeight() const noexcept                   { return height; }
+
+    /** If this context is backed by a frame buffer, this returns its ID number,
+        or 0 if the context does not use a framebuffer.
+    */
+    unsigned int getFrameBufferID() const noexcept;
+
+    /** Returns true if shaders can be used in this context. */
+    bool areShadersAvailable() const;
+
+    /** This structure holds a set of dynamically loaded GL functions for use on this context. */
+    OpenGLExtensionFunctions extensions;
+
+    //==============================================================================
+    /** This retrieves an object that was previously stored with setAssociatedObject().
+        If no object is found with the given name, this will return nullptr.
+        This method must only be called from within the GL rendering methods.
+        @see setAssociatedObject
+    */
+    ReferenceCountedObject* getAssociatedObject (const char* name) const;
+
+    /** Attaches a named object to the context, which will be deleted when the context is
+        destroyed.
+
+        This allows you to store an object which will be released before the context is
+        deleted. The main purpose is for caching GL objects such as shader programs, which
+        will become invalid when the context is deleted.
+
+        This method must only be called from within the GL rendering methods.
+    */
+    void setAssociatedObject (const char* name, ReferenceCountedObject* newObject);
+
+    //==============================================================================
+    /** Makes this context the currently active one.
+        You should never need to call this in normal use - the context will already be
+        active when OpenGLRenderer::renderOpenGL() is invoked.
+    */
+    bool makeActive() const noexcept;
+
+    /** Returns true if this context is currently active for the calling thread. */
+    bool isActive() const noexcept;
 
     //==============================================================================
     /** Swaps the buffers (if the context can do this).
@@ -121,45 +229,6 @@ public:
         See setSwapInterval() for info about the value returned.
     */
     int getSwapInterval() const;
-
-    /** */
-    void triggerRepaint();
-
-    //==============================================================================
-    /** Returns the width of this context */
-    inline int getWidth() const noexcept                    { return width; }
-
-    /** Returns the height of this context */
-    inline int getHeight() const noexcept                   { return height; }
-
-    /** If this context is backed by a frame buffer, this returns its ID number,
-        or 0 if the context has no accessible framebuffer.
-    */
-    unsigned int getFrameBufferID() const noexcept;
-
-    /** Returns true if shaders can be used in this context. */
-    bool areShadersAvailable() const;
-
-    /** This structure holds a set of dynamically loaded GL functions for use on this context. */
-    OpenGLExtensionFunctions extensions;
-
-    /** This retrieves an object that was previously stored with setAssociatedObject().
-        If no object is found with the given name, this will return nullptr.
-        This method must only be called from within the GL rendering methods.
-        @see setAssociatedObject
-    */
-    ReferenceCountedObjectPtr<ReferenceCountedObject> getAssociatedObject (const char* name) const;
-
-    /** Attaches a named object to the context, which will be deleted when the context is
-        destroyed.
-
-        This allows you to store an object which will be released before the context is
-        deleted. The main purpose is for caching GL objects such as shader programs, which
-        will become invalid when the context is deleted.
-
-        This method must only be called from within the GL rendering methods.
-    */
-    void setAssociatedObject (const char* name, ReferenceCountedObject* newObject);
 
     //==============================================================================
     /** Returns an OS-dependent handle to some kind of underlting OS-provided GL context.
@@ -197,6 +266,8 @@ private:
     NativeContext* nativeContext;
     OpenGLRenderer* renderer;
     ScopedPointer<Attachment> attachment;
+    OpenGLPixelFormat pixelFormat;
+    const OpenGLContext* contextToShareWith;
     int width, height;
     bool renderComponents;
 

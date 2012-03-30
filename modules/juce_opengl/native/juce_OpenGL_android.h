@@ -72,7 +72,6 @@ public:
     }
 
     bool makeActive() const noexcept            { return isInsideGLCallback; }
-    bool makeInactive() const noexcept          { return true; }
     bool isActive() const noexcept              { return isInsideGLCallback; }
 
     void swapBuffers() const noexcept           {}

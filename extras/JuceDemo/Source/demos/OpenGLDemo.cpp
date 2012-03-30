@@ -60,7 +60,8 @@ public:
         addAndMakeVisible (&sizeSlider);
         sizeSlider.setBounds ("parent.width * 0.05, parent.height - 35, parent.width * 0.6, top + 24");
 
-        openGLContext.setRenderer (this, true);
+        openGLContext.setRenderer (this);
+        openGLContext.setComponentPaintingEnabled (true);
         openGLContext.attachTo (*this);
 
         startTimer (1000 / 30);

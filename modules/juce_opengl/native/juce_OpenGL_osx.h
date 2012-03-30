@@ -36,7 +36,6 @@
 
 - (id) initWithFrame: (NSRect) frameRect pixelFormat: (NSOpenGLPixelFormat*) format;
 - (bool) makeActive;
-- (void) makeInactive;
 - (void) reshape;
 - (void) rightMouseDown: (NSEvent*) ev;
 - (void) rightMouseUp: (NSEvent*) ev;
@@ -82,12 +81,6 @@
     }
 
     return true;
-}
-
-- (void) makeInactive
-{
-    const juce::ScopedLock sl (*contextLock);
-    [NSOpenGLContext clearCurrentContext];
 }
 
 - (void) _surfaceNeedsUpdate: (NSNotification*) notification
@@ -184,12 +177,6 @@ public:
             [renderContext setView: view];
 
         [view makeActive];
-        return true;
-    }
-
-    bool makeInactive() const noexcept
-    {
-        [view makeInactive];
         return true;
     }
 

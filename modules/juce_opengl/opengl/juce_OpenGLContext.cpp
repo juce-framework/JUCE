@@ -350,11 +350,8 @@ void OpenGLContext::NativeContext::renderCallback()
 class OpenGLContext::Attachment  : public ComponentMovementWatcher
 {
 public:
-    Attachment (OpenGLContext& context_, Component& comp,
-                const OpenGLPixelFormat& pixelFormat_,
-                const OpenGLContext* contextToShareWith_)
-       : ComponentMovementWatcher (&comp), context (context_),
-         pixelFormat (pixelFormat_), contextToShareWith (contextToShareWith_)
+    Attachment (OpenGLContext& context_, Component& comp)
+       : ComponentMovementWatcher (&comp), context (context_)
     {
         if (canBeAttached (comp))
             attach();
@@ -418,8 +415,6 @@ public:
 
 private:
     OpenGLContext& context;
-    OpenGLPixelFormat pixelFormat;
-    const OpenGLContext* contextToShareWith;
 
     static bool canBeAttached (const Component& comp) noexcept
     {
@@ -435,7 +430,8 @@ private:
     {
         Component* const comp = getComponent();
         comp->setCachedComponentImage (new CachedImage (context, *comp,
-                                                        pixelFormat, contextToShareWith));
+                                                        context.pixelFormat,
+                                                        context.contextToShareWith));
     }
 
     void detach()
@@ -446,7 +442,7 @@ private:
 
 //==============================================================================
 OpenGLContext::OpenGLContext()
-    : nativeContext (nullptr), renderer (nullptr),
+    : nativeContext (nullptr), renderer (nullptr), contextToShareWith (nullptr),
       width (0), height (0), renderComponents (true)
 {
 }
@@ -456,37 +452,55 @@ OpenGLContext::~OpenGLContext()
     detach();
 }
 
-void OpenGLContext::setRenderer (OpenGLRenderer* rendererToUse,
-                                 bool shouldAlsoPaintComponent) noexcept
+void OpenGLContext::setRenderer (OpenGLRenderer* rendererToUse) noexcept
 {
     // This method must not be called when the context has already been attached!
     // Call it before attaching your context, or use detach() first, before calling this!
     jassert (nativeContext == nullptr);
 
     renderer = rendererToUse;
-    renderComponents = shouldAlsoPaintComponent;
 }
 
-void OpenGLContext::attachTo (Component& component,
-                              const OpenGLPixelFormat& pixelFormat,
-                              const OpenGLContext* contextToShareWith)
+void OpenGLContext::setComponentPaintingEnabled (bool shouldPaintComponent) noexcept
 {
-    if (getTargetComponent() != &component)
-    {
-        detach();
+    // This method must not be called when the context has already been attached!
+    // Call it before attaching your context, or use detach() first, before calling this!
+    jassert (nativeContext == nullptr);
 
-        width = component.getWidth();
-        height = component.getHeight();
+    renderComponents = shouldPaintComponent;
+}
 
-        attachment = new Attachment (*this, component,
-                                     pixelFormat, contextToShareWith);
-    }
+void OpenGLContext::setPixelFormat (const OpenGLPixelFormat& preferredPixelFormat) noexcept
+{
+    // This method must not be called when the context has already been attached!
+    // Call it before attaching your context, or use detach() first, before calling this!
+    jassert (nativeContext == nullptr);
+
+    pixelFormat = preferredPixelFormat;
+}
+
+void OpenGLContext::setContextToShareWith (const OpenGLContext* context) noexcept
+{
+    // This method must not be called when the context has already been attached!
+    // Call it before attaching your context, or use detach() first, before calling this!
+    jassert (nativeContext == nullptr);
+
+    contextToShareWith = context;
 }
 
 void OpenGLContext::attachTo (Component& component)
 {
     component.repaint();
-    attachTo (component, OpenGLPixelFormat(), nullptr);
+
+    if (getTargetComponent() != &component)
+    {
+        detach();
+
+        width  = component.getWidth();
+        height = component.getHeight();
+
+        attachment = new Attachment (*this, component);
+    }
 }
 
 void OpenGLContext::detach()
@@ -522,7 +536,6 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 }
 
 bool OpenGLContext::makeActive() const noexcept     { return nativeContext != nullptr && nativeContext->makeActive(); }
-bool OpenGLContext::makeInactive() const noexcept   { return nativeContext != nullptr && nativeContext->makeInactive(); }
 bool OpenGLContext::isActive() const noexcept       { return nativeContext != nullptr && nativeContext->isActive(); }
 
 void OpenGLContext::triggerRepaint()
@@ -575,7 +588,7 @@ bool OpenGLContext::areShadersAvailable() const
     return c != nullptr && c->shadersAvailable;
 }
 
-ReferenceCountedObjectPtr<ReferenceCountedObject> OpenGLContext::getAssociatedObject (const char* name) const
+ReferenceCountedObject* OpenGLContext::getAssociatedObject (const char* name) const
 {
     jassert (name != nullptr);
 
@@ -635,7 +648,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
             static const OverlayShaderProgram& select (OpenGLContext& context)
             {
                 static const char programValueID[] = "juceGLComponentOverlayShader";
-                OverlayShaderProgram* program = static_cast <OverlayShaderProgram*> (context.getAssociatedObject (programValueID).getObject());
+                OverlayShaderProgram* program = static_cast <OverlayShaderProgram*> (context.getAssociatedObject (programValueID));
 
                 if (program == nullptr)
                 {
@@ -716,7 +729,9 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         JUCE_CHECK_OPENGL_ERROR
 
         glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+
         extensions.glUseProgram (0);
+        extensions.glDisableVertexAttribArray (program.params.positionAttribute.attributeID);
     }
     #if JUCE_USE_OPENGL_FIXED_FUNCTION
     else

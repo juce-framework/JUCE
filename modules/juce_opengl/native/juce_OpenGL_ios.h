@@ -116,11 +116,6 @@ public:
         return true;
     }
 
-    bool makeInactive() const noexcept
-    {
-        return (! isActive()) || [EAGLContext setCurrentContext: nil];
-    }
-
     bool isActive() const noexcept
     {
         return [EAGLContext currentContext] == context;

@@ -114,7 +114,7 @@ public:
 
     void shutdownOnRenderThread()
     {
-        makeInactive();
+        glXMakeCurrent (display, None, 0);
         glXDestroyContext (display, renderContext);
         renderContext = nullptr;
     }
@@ -123,11 +123,6 @@ public:
     {
         return renderContext != 0
                  && glXMakeCurrent (display, embeddedWindow, renderContext);
-    }
-
-    bool makeInactive() const noexcept
-    {
-        return (! isActive()) || glXMakeCurrent (display, None, 0);
     }
 
     bool isActive() const noexcept

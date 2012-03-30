@@ -142,7 +142,9 @@ void OpenGLTexture::release()
 {
     if (textureID != 0)
     {
-        glDeleteTextures (1, &textureID);
+        if (OpenGLHelpers::isContextActive())
+            glDeleteTextures (1, &textureID);
+
         textureID = 0;
         width = 0;
         height = 0;
