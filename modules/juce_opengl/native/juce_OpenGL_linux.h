@@ -142,7 +142,8 @@ public:
         ScopedXLock xlock;
         XMoveResizeWindow (display, embeddedWindow,
                            bounds.getX(), bounds.getY(),
-                           jmax (1, bounds.getWidth()), jmax (1, bounds.getHeight()));
+                           jmax (1, bounds.getWidth()),
+                           jmax (1, bounds.getHeight()));
     }
 
     bool setSwapInterval (int numFramesPerSwap)

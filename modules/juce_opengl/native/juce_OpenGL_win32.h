@@ -81,28 +81,12 @@ public:
         releaseDC();
     }
 
-    void initialiseOnRenderThread()
-    {
-    }
+    void initialiseOnRenderThread() {}
+    void shutdownOnRenderThread() {}
 
-    void shutdownOnRenderThread()
-    {
-    }
-
-    bool makeActive() const noexcept
-    {
-        return wglMakeCurrent (dc, renderContext) != FALSE;
-    }
-
-    bool isActive() const noexcept
-    {
-        return wglGetCurrentContext() == renderContext;
-    }
-
-    void swapBuffers() const noexcept
-    {
-        SwapBuffers (dc);
-    }
+    bool makeActive() const noexcept        { return wglMakeCurrent (dc, renderContext) != FALSE; }
+    bool isActive() const noexcept          { return wglGetCurrentContext() == renderContext; }
+    void swapBuffers() const noexcept       { SwapBuffers (dc); }
 
     bool setSwapInterval (int numFramesPerSwap)
     {

@@ -147,7 +147,7 @@ public:
 
     bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept
     {
-        return otherType.toDouble (otherData) == data.doubleValue;
+        return std::abs (otherType.toDouble (otherData) - data.doubleValue) < std::numeric_limits<double>::epsilon();
     }
 
     void writeToStream (const ValueUnion& data, OutputStream& output) const

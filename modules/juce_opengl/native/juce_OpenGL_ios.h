@@ -93,9 +93,7 @@ public:
         [view release];
     }
 
-    void initialiseOnRenderThread()
-    {
-    }
+    void initialiseOnRenderThread() {}
 
     void shutdownOnRenderThread()
     {

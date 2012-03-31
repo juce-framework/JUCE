@@ -59,10 +59,11 @@ public:
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
     virtual bool canCopeWithDuplicateFiles() = 0;
 
-    virtual bool isXcode() const            { return false; }
-    virtual bool isVisualStudio() const     { return false; }
-    virtual bool isLinux() const            { return false; }
-    virtual bool isOSX() const              { return false; }
+    virtual bool isXcode() const                { return false; }
+    virtual bool isVisualStudio() const         { return false; }
+    virtual int getVisualStudioVersion() const  { return 0; }
+    virtual bool isLinux() const                { return false; }
+    virtual bool isOSX() const                  { return false; }
 
     //==============================================================================
     String getName() const                      { return name; }

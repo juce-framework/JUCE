@@ -494,6 +494,7 @@ public:
 
     static const char* getName()                    { return "Visual Studio 2008"; }
     static const char* getValueTreeTypeName()       { return "VS2008"; }
+    int getVisualStudioVersion() const              { return 9; }
 
     void launchProject()                            { getSLNFile().startAsProcess(); }
 
@@ -846,6 +847,7 @@ public:
 
     static const char* getName()                    { return "Visual Studio 2005"; }
     static const char* getValueTreeTypeName()       { return "VS2005"; }
+    int getVisualStudioVersion() const              { return 8; }
 
     int getLaunchPreferenceOrderForCurrentOS()
     {
@@ -883,6 +885,7 @@ public:
 
     static const char* getName()                    { return "Visual Studio 2010"; }
     static const char* getValueTreeTypeName()       { return "VS2010"; }
+    int getVisualStudioVersion() const              { return 10; }
 
     int getLaunchPreferenceOrderForCurrentOS()
     {

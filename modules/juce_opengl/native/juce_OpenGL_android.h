@@ -63,13 +63,8 @@ public:
         glView.clear();
     }
 
-    void initialiseOnRenderThread()
-    {
-    }
-
-    void shutdownOnRenderThread()
-    {
-    }
+    void initialiseOnRenderThread() {}
+    void shutdownOnRenderThread() {}
 
     bool makeActive() const noexcept            { return isInsideGLCallback; }
     bool isActive() const noexcept              { return isInsideGLCallback; }
@@ -93,10 +88,6 @@ public:
         }
     }
 
-    void contextChangedSize()
-    {
-    }
-
     void triggerRepaint()
     {
         glView.callVoidMethod (OpenGLView.requestRender);
@@ -104,6 +95,7 @@ public:
 
     //==============================================================================
     void contextCreatedCallback();
+    void contextChangedSize() {}
     void renderCallback();
 
     //==============================================================================
@@ -168,16 +160,10 @@ JUCE_JNI_CALLBACK (GL_VIEW_CLASS_NAME, contextCreated, void, (JNIEnv* env, jobje
     threadLocalJNIEnvHolder.getOrAttach();
 
     OpenGLContext::NativeContext* const context = OpenGLContext::NativeContext::findContextFor (env, view);
+    jassert (context != nullptr);
 
     if (context != nullptr)
-    {
         context->contextCreatedCallback();
-        JUCE_CHECK_OPENGL_ERROR
-    }
-    else
-    {
-        jassertfalse;
-    }
 }
 
 JUCE_JNI_CALLBACK (GL_VIEW_CLASS_NAME, contextChangedSize, void, (JNIEnv* env, jobject view))
