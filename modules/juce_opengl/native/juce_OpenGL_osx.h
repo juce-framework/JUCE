@@ -219,5 +219,5 @@ private:
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
 {
-    return CGLGetCurrentContext() != 0;
+    return [NSOpenGLContext currentContext] != nil;
 }
