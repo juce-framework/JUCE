@@ -539,6 +539,9 @@ protected:
             return;
         }
 
+        juceFilter->m_hasSideChain = false;
+        juceFilter->m_playPositionSamples = mRTGlobals->mRTASPlayPosition;
+
        #if JucePlugin_WantsMidiInput
         midiEvents.clear();
 

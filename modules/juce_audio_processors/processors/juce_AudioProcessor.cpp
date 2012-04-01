@@ -31,7 +31,8 @@ AudioProcessor::AudioProcessor()
       numOutputChannels (0),
       latencySamples (0),
       suspended (false),
-      nonRealtime (false)
+      nonRealtime (false),
+      m_isInitialized (false)
 {
 }
 
@@ -308,4 +309,53 @@ void AudioPlayHead::CurrentPositionInfo::resetToDefault()
     timeSigNumerator = 4;
     timeSigDenominator = 4;
     bpm = 120;
+}
+
+String AudioProcessor::parameterValueToText(int param, float value) const {
+    return String(parameterValueFromScaled(param, value), 2);
+}
+
+float AudioProcessor::parameterTextToValue(int param, const String& text) const {
+    return parameterValueToScaled(param, text.getFloatValue());
+}
+
+const String AudioProcessor::getParameterText(int index)
+{
+    return parameterValueToText(index, getParameter(index));
+}
+
+#if _MSC_VER
+static inline float roundf(float val) { return floorf(val + 0.5f); }
+#endif // _MSC_VER
+
+float AudioProcessor::parameterValueFromScaled(int param, float scaled) const {
+    ParamInfo info = parameterInfo(param);
+    float minVal = info.minVal, maxVal = info.maxVal;
+    if (info.paramType == eParamTypeHz) {
+        minVal = logf(minVal);
+        maxVal = logf(maxVal);
+    }
+    float val = minVal + scaled * (maxVal - minVal);
+    if (info.paramType == eParamTypeHz)
+        val = roundf(expf(val));
+    return val;
+}
+
+float AudioProcessor::parameterValueToScaled(int param, float value) const {
+    ParamInfo info = parameterInfo(param);
+    float minVal = info.minVal, maxVal = info.maxVal;
+    if (info.paramType == eParamTypeHz) {
+        value = logf(value);
+        minVal = logf(minVal);
+        maxVal = logf(maxVal);
+    }
+    return (value - minVal) / (maxVal - minVal);
+}
+
+float AudioProcessor::getParameter(int index) {
+    return parameterValueToScaled(index, getParameterValue(index));
+}
+
+void AudioProcessor::setParameter(int index, float value) {
+    setParameterValue(index, parameterValueFromScaled(index, value));
 }

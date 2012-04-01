@@ -30,6 +30,20 @@
 #include "juce_AudioProcessorListener.h"
 #include "juce_AudioPlayHead.h"
 
+enum ParamType {
+    eParamTypeGeneric,
+    eParamTypeBool,
+    eParamTypeHz
+};
+
+struct ParamInfo {
+    std::string name;
+    std::string key;
+    float defaultVal;
+    float minVal;
+    float maxVal;
+    ParamType paramType;
+};
 
 //==============================================================================
 /**
@@ -57,6 +71,19 @@ protected:
     AudioProcessor();
 
 public:
+    bool m_isInitialized;
+    bool m_hasSideChain; // wrapper fills this in
+    int m_playPositionSamples;
+
+    virtual ParamInfo parameterInfo(int i) const = 0;
+    virtual float getParameterValue(int index) const = 0;
+    virtual void setParameterValue(int index, float value) = 0;
+    virtual float parameterValueFromScaled(int param, float scaled) const;
+    virtual float parameterValueToScaled(int param, float val) const;
+    // We should get these contributed back to the juce.
+    virtual String parameterValueToText(int param, float value) const;
+    virtual float parameterTextToValue(int param, const String& text) const;
+
     /** Destructor. */
     virtual ~AudioProcessor();
 
@@ -373,10 +400,10 @@ public:
         It's also likely to be called by non-UI threads, so the code in here should
         be thread-aware.
     */
-    virtual float getParameter (int parameterIndex) = 0;
+    virtual float getParameter (int parameterIndex);
 
     /** Returns the value of a parameter as a text string. */
-    virtual const String getParameterText (int parameterIndex) = 0;
+    virtual const String getParameterText (int parameterIndex);
 
     /** The host will call this method to change the value of one of the filter's parameters.
 
@@ -392,7 +419,7 @@ public:
         The value passed will be between 0 and 1.0.
     */
     virtual void setParameter (int parameterIndex,
-                               float newValue) = 0;
+                               float newValue);
 
     /** Your filter can call this when it needs to change one of its parameters.
 

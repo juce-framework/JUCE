@@ -87,6 +87,8 @@ static const int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelC
 
 #if JucePlugin_IsSynth
  #define JuceAUBaseClass MusicDeviceBase
+#elif SrJucePlugin_WantSideChain
+ #define JuceAUBaseClass AUBase
 #else
  #define JuceAUBaseClass AUMIDIEffectBase
 #endif
@@ -153,10 +155,13 @@ public:
     //==============================================================================
     JuceAU (AudioUnit component)
       #if JucePlugin_IsSynth
-        : MusicDeviceBase (component, 0, 1),
+        : MusicDeviceBase(component, 0, 1)
+      #elif SrJucePlugin_WantSideChain
+        : AUBase (component, 2, 1),
       #else
         : AUMIDIEffectBase (component),
       #endif
+          juceFilter (0),
           bufferSpace (2, 16),
           prepared (false)
     {
@@ -238,6 +243,18 @@ public:
                     return noErr;
                 }
             }
+            else if (inID == kAudioUnitProperty_ParameterStringFromValue)
+            {
+                outDataSize = sizeof (AudioUnitParameterStringFromValue);
+                outWritable = false;
+                return noErr;
+            }
+            else if (inID == kAudioUnitProperty_ParameterValueFromString)
+            {
+                outDataSize = sizeof (AudioUnitParameterValueFromString);
+                outWritable = false;
+                return noErr;
+            }
         }
 
         return JuceAUBaseClass::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
@@ -286,6 +303,18 @@ public:
 
                     return noErr;
                 }
+            }
+            else if (inID == kAudioUnitProperty_ParameterStringFromValue)
+            {
+                AudioUnitParameterStringFromValue* data = (AudioUnitParameterStringFromValue*) outData;
+                data->outString = juceFilter->parameterValueToText(data->inParamID, *data->inValue).toCFString();
+                return noErr;
+            }
+            else if (inID == kAudioUnitProperty_ParameterValueFromString)
+            {
+                AudioUnitParameterValueFromString* data = (AudioUnitParameterValueFromString*) outData;
+                data->outValue = juceFilter->parameterTextToValue(data->inParamID, juce::String::fromCFString(data->inString));
+                return noErr;
             }
         }
 
@@ -414,10 +443,29 @@ public:
 
             AUBase::FillInParameterName (outParameterInfo, name.toCFString(), false);
 
+            ParamInfo paramInfo = juceFilter->parameterInfo(inParameterID);
+            outParameterInfo.defaultValue = paramInfo.defaultVal;
+            AudioUnitParameterUnit unit = kAudioUnitParameterUnit_Generic;
+            switch(paramInfo.paramType)
+            {
+                case juce::eParamTypeGeneric:
+                    unit = kAudioUnitParameterUnit_Generic;
+                    break;
+                case juce::eParamTypeBool:
+                    unit = kAudioUnitParameterUnit_Boolean;
+                    break;
+                case juce::eParamTypeHz:
+                    unit = kAudioUnitParameterUnit_Hertz;
+                    break;
+                default:
+                    assert(0);
+            }
+            outParameterInfo.unit = unit;
+            if (unit != kAudioUnitParameterUnit_Boolean) {
+                outParameterInfo.flags |= kAudioUnitParameterFlag_ValuesHaveStrings;
+            }
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = 1.0f;
-            outParameterInfo.defaultValue = 0.0f;
-            outParameterInfo.unit = kAudioUnitParameterUnit_Generic;
 
             return noErr;
         }
@@ -653,7 +701,7 @@ public:
                   GetSampleRate(),
                   GetMaxFramesPerSlice());
 
-            bufferSpace.setSize (juceFilter->getNumInputChannels() + juceFilter->getNumOutputChannels(),
+            bufferSpace.setSize (juceFilter->getNumInputChannels()*2 + juceFilter->getNumOutputChannels(),
                                  GetMaxFramesPerSlice() + 32);
 
             juceFilter->prepareToPlay (GetSampleRate(), GetMaxFramesPerSlice());
@@ -663,188 +711,203 @@ public:
             incomingEvents.ensureSize (2048);
             incomingEvents.clear();
 
-            channels.calloc (jmax (juceFilter->getNumInputChannels(),
+            channels.calloc (jmax (juceFilter->getNumInputChannels()*2,
                                    juceFilter->getNumOutputChannels()) + 4);
 
             prepared = true;
         }
     }
 
+    // Based on Render from AUEffectBase
     ComponentResult Render (AudioUnitRenderActionFlags &ioActionFlags,
                             const AudioTimeStamp& inTimeStamp,
-                            UInt32 nFrames)
+                            UInt32 numSamples)
     {
-        lastSMPTETime = inTimeStamp.mSMPTETime;
+        if (!HasInput(0))
+            return kAudioUnitErr_NoConnection;
 
-       #if ! JucePlugin_IsSynth
-        return JuceAUBaseClass::Render (ioActionFlags, inTimeStamp, nFrames);
-       #else
-        // synths can't have any inputs..
-        AudioBufferList inBuffer;
-        inBuffer.mNumberBuffers = 0;
+        juceFilter->m_playPositionSamples = inTimeStamp.mSampleTime;
 
-        return ProcessBufferLists (ioActionFlags, inBuffer, GetOutput(0)->GetBufferList(), nFrames);
-       #endif
-    }
+#if SrJucePlugin_WantSideChain
+        const bool hasSideChain = HasInput(1);
+#else // SrJucePlugin_WantSideChain
+        const bool hasSideChain = false;
+#endif // SrJucePlugin_WantSideChain
+        juceFilter->m_hasSideChain = hasSideChain;
 
-    OSStatus ProcessBufferLists (AudioUnitRenderActionFlags& ioActionFlags,
-                                 const AudioBufferList& inBuffer,
-                                 AudioBufferList& outBuffer,
-                                 UInt32 numSamples)
-    {
-        if (juceFilter != nullptr)
+        ComponentResult result;
+        AUOutputElement *theOutput = GetOutput(0);	// throws if error
+        AUInputElement *theInput = GetInput(0);
+        result = theInput->PullInput(ioActionFlags, inTimeStamp, 0 /* element */, numSamples);
+        if (noErr != result)
+            return result;
+        if (hasSideChain) {
+            result = GetInput(1)->PullInput(ioActionFlags, inTimeStamp, 1 /* element */, numSamples);
+            if (noErr != result)
+                return result;
+        }
+
+        theOutput->SetBufferList(theInput->GetBufferList() );
+
+        if (0 == juceFilter)
+            return noErr;
+
+        const AudioBufferList& inBuffer = theInput->GetBufferList();
+        AudioBufferList& outBuffer = theOutput->GetBufferList();
+
+        jassert (prepared);
+
+        int numOutChans = 0;
+        int nextSpareBufferChan = 0;
+        bool needToReinterleave = false;
+        const int numIn = juceFilter->getNumInputChannels() * (HasInput(1) ? 2 : 1);
+        const int numOut = juceFilter->getNumOutputChannels();
+
+        unsigned int i;
+        for (i = 0; i < outBuffer.mNumberBuffers; ++i)
         {
-            jassert (prepared);
+            AudioBuffer& buf = outBuffer.mBuffers[i];
 
-            int numOutChans = 0;
-            int nextSpareBufferChan = 0;
-            bool needToReinterleave = false;
-            const int numIn = juceFilter->getNumInputChannels();
-            const int numOut = juceFilter->getNumOutputChannels();
+            if (buf.mNumberChannels == 1)
+            {
+                channels [numOutChans++] = (float*) buf.mData;
+            }
+            else
+            {
+                needToReinterleave = true;
 
-            unsigned int i;
+                for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
+                    channels [numOutChans++] = bufferSpace.getSampleData (nextSpareBufferChan++);
+            }
+
+            if (numOutChans >= numOut)
+                break;
+        }
+
+        int numInChans = 0;
+#if SrJucePlugin_WantSideChain
+        const int numSideChainBufs = HasInput(1) ? GetInput(1)->GetBufferList().mNumberBuffers : 0;
+#else // SrJucePlugin_WantSideChain
+        const int numSideChainBufs = 0;
+#endif // SrJucePlugin_WantSideChain
+        for (i = 0; i < inBuffer.mNumberBuffers + numSideChainBufs; ++i)
+        {
+            const AudioBuffer& buf = i < inBuffer.mNumberBuffers ? inBuffer.mBuffers[i] : GetInput(1)->GetBufferList().mBuffers[i-inBuffer.mNumberBuffers];
+
+            if (buf.mNumberChannels == 1)
+            {
+                if (numInChans < numOutChans)
+                    memcpy (channels [numInChans], (const float*) buf.mData, sizeof (float) * numSamples);
+                else
+                    channels [numInChans] = (float*) buf.mData;
+
+                ++numInChans;
+            }
+            else
+            {
+                // need to de-interleave..
+                for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numInChans < numIn; ++subChan)
+                {
+                    float* dest;
+
+                    if (numInChans < numOutChans)
+                    {
+                        dest = channels [numInChans++];
+                    }
+                    else
+                    {
+                        dest = bufferSpace.getSampleData (nextSpareBufferChan++);
+                        channels [numInChans++] = dest;
+                    }
+
+                    const float* src = ((const float*) buf.mData) + subChan;
+
+                    for (int j = numSamples; --j >= 0;)
+                    {
+                        *dest++ = *src;
+                        src += buf.mNumberChannels;
+                    }
+                }
+            }
+
+            if (numInChans >= numIn)
+                break;
+        }
+
+        {
+            const ScopedLock sl (incomingMidiLock);
+            midiEvents.clear();
+            incomingEvents.swapWith (midiEvents);
+        }
+
+        {
+            AudioSampleBuffer buffer (channels, jmax (numIn, numOut), numSamples);
+
+            const ScopedLock sl (juceFilter->getCallbackLock());
+
+            if (juceFilter->isSuspended())
+            {
+                for (int i = 0; i < numOut; ++i)
+                    zeromem (channels [i], sizeof (float) * numSamples);
+            }
+            else
+            {
+                juceFilter->processBlock (buffer, midiEvents);
+            }
+        }
+
+        if (! midiEvents.isEmpty())
+        {
+#if JucePlugin_ProducesMidiOutput
+            const JUCE_NAMESPACE::uint8* midiEventData;
+            int midiEventSize, midiEventPosition;
+            MidiBuffer::Iterator i (midiEvents);
+
+            while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
+            {
+                jassert (((unsigned int) midiEventPosition) < (unsigned int) numSamples);
+
+
+
+                //xxx
+            }
+#else
+            // if your plugin creates midi messages, you'll need to set
+            // the JucePlugin_ProducesMidiOutput macro to 1 in your
+            // JucePluginCharacteristics.h file
+            //jassert (midiEvents.getNumEvents() <= numMidiEventsComingIn);
+#endif
+            midiEvents.clear();
+        }
+
+        if (needToReinterleave)
+        {
+            nextSpareBufferChan = 0;
+
             for (i = 0; i < outBuffer.mNumberBuffers; ++i)
             {
                 AudioBuffer& buf = outBuffer.mBuffers[i];
 
-                if (buf.mNumberChannels == 1)
+                if (buf.mNumberChannels > 1)
                 {
-                    channels [numOutChans++] = (float*) buf.mData;
-                }
-                else
-                {
-                    needToReinterleave = true;
-
-                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
-                        channels [numOutChans++] = bufferSpace.getSampleData (nextSpareBufferChan++);
-                }
-
-                if (numOutChans >= numOut)
-                    break;
-            }
-
-            int numInChans = 0;
-
-            for (i = 0; i < inBuffer.mNumberBuffers; ++i)
-            {
-                const AudioBuffer& buf = inBuffer.mBuffers[i];
-
-                if (buf.mNumberChannels == 1)
-                {
-                    if (numInChans < numOutChans)
-                        memcpy (channels [numInChans], (const float*) buf.mData, sizeof (float) * numSamples);
-                    else
-                        channels [numInChans] = (float*) buf.mData;
-
-                    ++numInChans;
-                }
-                else
-                {
-                    // need to de-interleave..
-                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numInChans < numIn; ++subChan)
+                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
                     {
-                        float* dest;
-
-                        if (numInChans < numOutChans)
-                        {
-                            dest = channels [numInChans++];
-                        }
-                        else
-                        {
-                            dest = bufferSpace.getSampleData (nextSpareBufferChan++);
-                            channels [numInChans++] = dest;
-                        }
-
-                        const float* src = ((const float*) buf.mData) + subChan;
+                        const float* src = bufferSpace.getSampleData (nextSpareBufferChan++);
+                        float* dest = ((float*) buf.mData) + subChan;
 
                         for (int j = numSamples; --j >= 0;)
                         {
-                            *dest++ = *src;
-                            src += buf.mNumberChannels;
-                        }
-                    }
-                }
-
-                if (numInChans >= numIn)
-                    break;
-            }
-
-            {
-                const ScopedLock sl (incomingMidiLock);
-                midiEvents.clear();
-                incomingEvents.swapWith (midiEvents);
-            }
-
-            {
-                AudioSampleBuffer buffer (channels, jmax (numIn, numOut), numSamples);
-
-                const ScopedLock sl (juceFilter->getCallbackLock());
-
-                if (juceFilter->isSuspended())
-                {
-                    for (int i = 0; i < numOut; ++i)
-                        zeromem (channels [i], sizeof (float) * numSamples);
-                }
-                else
-                {
-                    juceFilter->processBlock (buffer, midiEvents);
-                }
-            }
-
-            if (! midiEvents.isEmpty())
-            {
-               #if JucePlugin_ProducesMidiOutput
-                const juce::uint8* midiEventData;
-                int midiEventSize, midiEventPosition;
-                MidiBuffer::Iterator i (midiEvents);
-
-                while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
-                {
-                    jassert (isPositiveAndBelow (midiEventPosition, (int) numSamples));
-
-
-
-                    //xxx
-                }
-               #else
-                // if your plugin creates midi messages, you'll need to set
-                // the JucePlugin_ProducesMidiOutput macro to 1 in your
-                // JucePluginCharacteristics.h file
-                //jassert (midiEvents.getNumEvents() <= numMidiEventsComingIn);
-               #endif
-
-                midiEvents.clear();
-            }
-
-            if (needToReinterleave)
-            {
-                nextSpareBufferChan = 0;
-
-                for (i = 0; i < outBuffer.mNumberBuffers; ++i)
-                {
-                    AudioBuffer& buf = outBuffer.mBuffers[i];
-
-                    if (buf.mNumberChannels > 1)
-                    {
-                        for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
-                        {
-                            const float* src = bufferSpace.getSampleData (nextSpareBufferChan++);
-                            float* dest = ((float*) buf.mData) + subChan;
-
-                            for (int j = numSamples; --j >= 0;)
-                            {
-                                *dest = *src++;
-                                dest += buf.mNumberChannels;
-                            }
+                            *dest = *src++;
+                            dest += buf.mNumberChannels;
                         }
                     }
                 }
             }
-
-           #if ! JucePlugin_SilenceInProducesSilenceOut
-            ioActionFlags &= ~kAudioUnitRenderAction_OutputIsSilence;
-           #endif
         }
+
+#if ! JucePlugin_SilenceInProducesSilenceOut
+        ioActionFlags &= ~kAudioUnitRenderAction_OutputIsSilence;
+#endif
 
         return noErr;
     }

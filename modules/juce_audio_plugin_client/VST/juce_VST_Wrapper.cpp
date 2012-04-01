@@ -488,11 +488,15 @@ public:
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
 
+			// Bugfix: The following commented out code was probably written to handle hosts in which the previous check doesn't work.
+			// Unfortunately in Samplitude audio rendering threads can run in normal priority, resulting in reporting non-realtime mode incorrectly.
+			/*
            #if JUCE_WINDOWS
             if (GetThreadPriority (GetCurrentThread()) <= THREAD_PRIORITY_NORMAL
                   && GetThreadPriority (GetCurrentThread()) >= THREAD_PRIORITY_LOWEST)
                 filter->setNonRealtime (true);
            #endif
+		    */
         }
 
        #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
@@ -548,6 +552,8 @@ public:
 
                 {
                     AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
+                    filter->m_hasSideChain = false;
+                    filter->m_playPositionSamples = getTimeInfo(0)->samplePos;
                     filter->processBlock (chans, midiEvents);
                 }
 
