@@ -307,9 +307,7 @@ namespace RTASHelpers
             exporter.msvcTargetSuffix = ".dpm";
             exporter.msvcNeedsDLLRuntimeLib = true;
 
-            String winbag (CodeHelpers::addEscapeChars (getRTASFolderRelativePath (exporter)
-                                                         .getChildFile ("WinBag")
-                                                         .toWindowsStyle()).quoted());
+            String winbag (getRTASFolderRelativePath (exporter).getChildFile ("WinBag").toWindowsStyle());
 
             // (VS10 automatically adds escape characters to the quotes for this definition)
             winbag = (exporter.getVisualStudioVersion() < 10) ? CodeHelpers::addEscapeChars (winbag.quoted())
