@@ -795,6 +795,8 @@ public:
         }
     }
 
+    bool isConnected() const noexcept  { return connected; }
+
     HANDLE pipeH, cancelEvent;
     bool connected, isPipe;
 };
@@ -806,6 +808,11 @@ NamedPipe::NamedPipe()
 NamedPipe::~NamedPipe()
 {
     close();
+}
+
+bool NamedPipe::isOpen() const
+{
+    return pimpl != nullptr && pimpl->connected;
 }
 
 void NamedPipe::cancelPendingReads()

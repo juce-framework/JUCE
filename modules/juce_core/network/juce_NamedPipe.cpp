@@ -35,11 +35,6 @@ bool NamedPipe::createNewPipe (const String& pipeName)
     return openInternal (pipeName, true);
 }
 
-bool NamedPipe::isOpen() const
-{
-    return pimpl != nullptr;
-}
-
 String NamedPipe::getName() const
 {
     return currentPipeName;
