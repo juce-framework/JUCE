@@ -113,6 +113,10 @@
  #undef KeyPress
 
 //==============================================================================
+#elif JUCE_MAC
+ #include <OpenGL/CGLCurrent.h>
+
+//==============================================================================
 #elif JUCE_ANDROID
  #ifndef GL_GLEXT_PROTOTYPES
   #define GL_GLEXT_PROTOTYPES 1
@@ -132,9 +136,14 @@ void OpenGLExtensionFunctions::initialise()
    #if JUCE_WINDOWS || JUCE_LINUX
     #define JUCE_INIT_GL_FUNCTION(name, returnType, params, callparams) \
         name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+    #define JUCE_INIT_GL_FUNCTION_EXT(name, returnType, params, callparams) \
+        name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name); \
+        if (name == nullptr) \
+            name = (type_ ## name) OpenGLHelpers::getExtensionFunction (JUCE_STRINGIFY (name ## EXT));
 
-    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION)
+    JUCE_GL_EXTENSION_FUNCTIONS (JUCE_INIT_GL_FUNCTION, JUCE_INIT_GL_FUNCTION_EXT)
     #undef JUCE_INIT_GL_FUNCTION
+    #undef JUCE_INIT_GL_FUNCTION_EXT
    #endif
 }
 
@@ -142,7 +151,7 @@ void OpenGLExtensionFunctions::initialise()
  #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams) \
     inline returnType OpenGLExtensionFunctions::name params { return ::name callparams; }
 
- JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
+ JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
  #undef JUCE_DECLARE_GL_FUNCTION
 #endif
 

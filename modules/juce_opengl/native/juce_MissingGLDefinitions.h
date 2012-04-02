@@ -107,15 +107,7 @@ namespace
         GL_SHADING_LANGUAGE_VERSION     = 0x8B8C,
         GL_FRAGMENT_SHADER              = 0x8B30,
         GL_VERTEX_SHADER                = 0x8B31,
-        GL_FRAMEBUFFER                  = 0x8D40,
-        GL_RENDERBUFFER                 = 0x8D41,
-        GL_FRAMEBUFFER_BINDING          = 0x8CA6,
-        GL_COLOR_ATTACHMENT0            = 0x8CE0,
-        GL_DEPTH_ATTACHMENT             = 0x8D00,
-        GL_STENCIL_ATTACHMENT           = 0x8D20,
-        GL_FRAMEBUFFER_COMPLETE         = 0x8CD5,
         GL_DEPTH24_STENCIL8             = 0x88F0,
-        GL_RENDERBUFFER_DEPTH_SIZE      = 0x8D54,
         GL_ARRAY_BUFFER                 = 0x8892,
         GL_ELEMENT_ARRAY_BUFFER         = 0x8893,
         GL_STATIC_DRAW                  = 0x88E4,
@@ -125,5 +117,37 @@ namespace
     typedef char GLchar;
     typedef pointer_sized_int GLsizeiptr;
     typedef pointer_sized_int GLintptr;
+   #endif
+
+   #ifndef GL_COLOR_ATTACHMENT0
+    #define GL_COLOR_ATTACHMENT0        0x8CE0
+   #endif
+
+   #ifndef GL_DEPTH_ATTACHMENT
+    #define GL_DEPTH_ATTACHMENT         0x8D00
+   #endif
+
+   #ifndef GL_FRAMEBUFFER
+    #define GL_FRAMEBUFFER              0x8D40
+   #endif
+
+   #ifndef GL_FRAMEBUFFER_BINDING
+    #define GL_FRAMEBUFFER_BINDING      0x8CA6
+   #endif
+
+   #ifndef GL_FRAMEBUFFER_COMPLETE
+    #define GL_FRAMEBUFFER_COMPLETE     0x8CD5
+   #endif
+
+   #ifndef GL_RENDERBUFFER
+    #define GL_RENDERBUFFER             0x8D41
+   #endif
+
+   #ifndef GL_RENDERBUFFER_DEPTH_SIZE
+    #define GL_RENDERBUFFER_DEPTH_SIZE  0x8D54
+   #endif
+
+   #ifndef GL_STENCIL_ATTACHMENT
+    #define GL_STENCIL_ATTACHMENT       0x8D20
    #endif
 }
