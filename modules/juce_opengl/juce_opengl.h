@@ -62,8 +62,16 @@
 #elif JUCE_MAC
  #include <OpenGL/gl.h>
  #include "OpenGL/glext.h"
+ #include <AvailabilityMacros.h>
+ #if JUCE_PPC || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6)
+  #define JUCE_USE_OPENGL_3 0
+ #endif
 #elif JUCE_ANDROID
  #include <GLES2/gl2.h>
+#endif
+
+#if ! defined (JUCE_USE_OPENGL_3)
+ #define JUCE_USE_OPENGL_3 1
 #endif
 
 #if ! defined (JUCE_USE_OPENGL_SHADERS)
@@ -72,6 +80,17 @@
 
 #ifndef JUCE_USE_OPENGL_FIXED_FUNCTION
  #define JUCE_USE_OPENGL_FIXED_FUNCTION 1
+#endif
+
+#if !JUCE_USE_OPENGL_3 && ! defined (GL_FRAMEBUFFER)
+ #define GL_COLOR_ATTACHMENT0 GL_COLOR_ATTACHMENT0_EXT
+ #define GL_DEPTH_ATTACHMENT GL_DEPTH_ATTACHMENT_EXT
+ #define GL_FRAMEBUFFER GL_FRAMEBUFFER_EXT
+ #define GL_FRAMEBUFFER_BINDING GL_FRAMEBUFFER_BINDING_EXT
+ #define GL_FRAMEBUFFER_COMPLETE GL_FRAMEBUFFER_COMPLETE_EXT
+ #define GL_RENDERBUFFER GL_RENDERBUFFER_EXT
+ #define GL_RENDERBUFFER_DEPTH_SIZE GL_RENDERBUFFER_DEPTH_SIZE_EXT
+ #define GL_STENCIL_ATTACHMENT GL_STENCIL_ATTACHMENT_EXT
 #endif
 
 //=============================================================================
