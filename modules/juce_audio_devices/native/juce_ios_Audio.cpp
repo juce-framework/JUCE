@@ -126,6 +126,7 @@ public:
         if (isRunning)
         {
             isRunning = false;
+            AudioSessionRemovePropertyListenerWithUserData (kAudioSessionProperty_AudioRouteChange, routingChangedStatic, this);
             AudioSessionSetActive (false);
 
             if (audioUnit != 0)
