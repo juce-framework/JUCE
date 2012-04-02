@@ -74,6 +74,10 @@
  #include <sys/time.h>
 #endif
 
+#if JUCE_MAC || JUCE_IOS
+ #include <xlocale.h>
+#endif
+
 #if JUCE_ANDROID
  #include <android/log.h>
 #endif

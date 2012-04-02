@@ -414,18 +414,6 @@ namespace NumberToStringConverters
         return t;
     }
 
-    char getDecimalPoint()
-    {
-        static char dp = (char)
-           #if JUCE_VC7_OR_EARLIER
-            std::_USE (std::locale(), std::numpunct <char>).decimal_point();
-           #else
-            std::use_facet <std::numpunct <char> > (std::locale()).decimal_point();
-           #endif
-
-        return dp;
-    }
-
     char* doubleToString (char* buffer, const int numChars, double n, int numDecPlaces, size_t& len) noexcept
     {
         if (numDecPlaces > 0 && n > -1.0e20 && n < 1.0e20)
@@ -438,7 +426,7 @@ namespace NumberToStringConverters
             while (numDecPlaces >= 0 || v > 0)
             {
                 if (numDecPlaces == 0)
-                    *--t = (char) getDecimalPoint();
+                    *--t = '.';
 
                 *--t = (char) ('0' + (v % 10));
 
@@ -454,13 +442,21 @@ namespace NumberToStringConverters
         }
         else
         {
-            len = (size_t) sprintf (buffer, "%.9g", n);
+            // Use a locale-free sprintf where possible (not available on linux AFAICT)
+           #if JUCE_WINDOWS
+            len = (size_t) _sprintf_l (buffer, "%.9g", nullptr, n);
+           #elif JUCE_MAC || JUCE_IOS
+            len = (size_t)  sprintf_l (buffer, nullptr, "%.9g", n);
+           #else
+            len = (size_t)  sprintf (buffer, "%.9g", n);
+           #endif
+
             return buffer;
         }
     }
 
     template <typename IntegerType>
-    const String::CharPointerType createFromInteger (const IntegerType number)
+    String::CharPointerType createFromInteger (const IntegerType number)
     {
         char buffer [32];
         char* const end = buffer + numElementsInArray (buffer);
@@ -469,7 +465,7 @@ namespace NumberToStringConverters
         return StringHolder::createFromFixedLength (start, (size_t) (end - start - 1));
     }
 
-    const String::CharPointerType createFromDouble (const double number, const int numberOfDecimalPlaces)
+    String::CharPointerType createFromDouble (const double number, const int numberOfDecimalPlaces)
     {
         char buffer [48];
         size_t len;
