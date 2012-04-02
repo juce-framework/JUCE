@@ -157,6 +157,7 @@ void TabbedComponent::addTab (const String& tabName,
         contentComponent->getProperties().set (TabbedComponentHelpers::deleteComponentId, true);
 
     tabs->addTab (tabName, tabBackgroundColour, insertIndex);
+    resized();
 }
 
 void TabbedComponent::setTabName (const int tabIndex, const String& newName)
