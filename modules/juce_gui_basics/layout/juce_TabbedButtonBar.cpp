@@ -207,14 +207,16 @@ void TabbedButtonBar::addTab (const String& tabName,
         if (! isPositiveAndBelow (insertIndex, tabs.size()))
             insertIndex = tabs.size();
 
+        TabInfo* const currentTab = tabs [currentTabIndex];
+
         TabInfo* newTab = new TabInfo();
         newTab->name = tabName;
         newTab->colour = tabBackgroundColour;
         newTab->component = createTabButton (tabName, insertIndex);
-
         jassert (newTab->component != nullptr);
 
         tabs.insert (insertIndex, newTab);
+        currentTabIndex = tabs.indexOf (currentTab);
         addAndMakeVisible (newTab->component, insertIndex);
 
         resized();
@@ -238,22 +240,20 @@ void TabbedButtonBar::setTabName (const int tabIndex, const String& newName)
 
 void TabbedButtonBar::removeTab (const int tabIndex)
 {
-    if (tabs [tabIndex] != nullptr)
-    {
-        const int oldTabIndex = currentTabIndex;
-        if (currentTabIndex == tabIndex)
-            currentTabIndex = -1;
+    if (tabIndex == currentTabIndex)
+        setCurrentTabIndex (-1);
 
-        tabs.remove (tabIndex);
-        resized();
-
-        setCurrentTabIndex (jlimit (0, jmax (0, tabs.size() - 1), oldTabIndex));
-    }
+    TabInfo* const currentTab = tabs [currentTabIndex];
+    tabs.remove (tabIndex);
+    currentTabIndex = tabs.indexOf (currentTab);
+    resized();
 }
 
 void TabbedButtonBar::moveTab (const int currentIndex, const int newIndex)
 {
+    TabInfo* const currentTab = tabs [currentTabIndex];
     tabs.move (currentIndex, newIndex);
+    currentTabIndex = tabs.indexOf (currentTab);
     resized();
 }
 

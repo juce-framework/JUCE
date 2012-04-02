@@ -122,10 +122,10 @@ public:
     */
     void setCurrentThreadAsMessageThread();
 
-    /** Returns the ID of the current message thread, as set by setCurrentMessageThread().
+    /** Returns the ID of the current message thread, as set by setCurrentThreadAsMessageThread().
 
         (Best to ignore this method unless you really know what you're doing..)
-        @see setCurrentMessageThread
+        @see setCurrentThreadAsMessageThread
     */
     Thread::ThreadID getCurrentMessageThread() const noexcept            { return messageThreadId; }
 

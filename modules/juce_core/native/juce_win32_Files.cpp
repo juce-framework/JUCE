@@ -42,9 +42,13 @@ namespace WindowsFileHelpers
         return (int64) ((reinterpret_cast<const ULARGE_INTEGER*> (ft)->QuadPart - literal64bit (116444736000000000)) / 10000);
     }
 
-    void timeToFileTime (const int64 time, FILETIME* const ft)
+    FILETIME* timeToFileTime (const int64 time, FILETIME* const ft) noexcept
     {
+        if (time <= 0)
+            return nullptr;
+
         reinterpret_cast<ULARGE_INTEGER*> (ft)->QuadPart = (ULONGLONG) (time * 10000 + literal64bit (116444736000000000));
+        return ft;
     }
 
     String getDriveFromPath (String path)
@@ -87,6 +91,14 @@ namespace WindowsFileHelpers
             return File (String (path));
 
         return File::nonexistent;
+    }
+
+    File getModuleFileName (HINSTANCE moduleHandle)
+    {
+        WCHAR dest [MAX_PATH + 256];
+        dest[0] = 0;
+        GetModuleFileName (moduleHandle, dest, (DWORD) numElementsInArray (dest));
+        return File (String (dest));
     }
 
     Result getResultForLastError()
@@ -367,8 +379,8 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
     if (GetFileAttributesEx (fullPath.toWideCharPointer(), GetFileExInfoStandard, &attributes))
     {
         modificationTime = fileTimeToTime (&attributes.ftLastWriteTime);
-        creationTime = fileTimeToTime (&attributes.ftCreationTime);
-        accessTime = fileTimeToTime (&attributes.ftLastAccessTime);
+        creationTime     = fileTimeToTime (&attributes.ftCreationTime);
+        accessTime       = fileTimeToTime (&attributes.ftLastAccessTime);
     }
     else
     {
@@ -387,14 +399,11 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
     if (h != INVALID_HANDLE_VALUE)
     {
         FILETIME m, a, c;
-        timeToFileTime (modificationTime, &m);
-        timeToFileTime (accessTime, &a);
-        timeToFileTime (creationTime, &c);
 
         ok = SetFileTime (h,
-                          creationTime > 0     ? &c : 0,
-                          accessTime > 0       ? &a : 0,
-                          modificationTime > 0 ? &m : 0) != 0;
+                          timeToFileTime (creationTime, &c),
+                          timeToFileTime (accessTime, &a),
+                          timeToFileTime (modificationTime, &m)) != 0;
 
         CloseHandle (h);
     }
@@ -517,22 +526,10 @@ File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
         case invokedExecutableFile:
         case currentExecutableFile:
         case currentApplicationFile:
-        {
-            HINSTANCE moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
-
-            WCHAR dest [MAX_PATH + 256];
-            dest[0] = 0;
-            GetModuleFileName (moduleHandle, dest, (DWORD) numElementsInArray (dest));
-            return File (String (dest));
-        }
+            return WindowsFileHelpers::getModuleFileName ((HINSTANCE) Process::getCurrentModuleInstanceHandle());
 
         case hostApplicationPath:
-        {
-            WCHAR dest [MAX_PATH + 256];
-            dest[0] = 0;
-            GetModuleFileName (0, dest, (DWORD) numElementsInArray (dest));
-            return File (String (dest));
-        }
+            return WindowsFileHelpers::getModuleFileName (0);
 
         default:
             jassertfalse; // unknown type?
