@@ -142,8 +142,19 @@ public:
     void prepareExporter (ProjectExporter& exporter) const
     {
         exporter.xcodeCreatePList = false;
-        exporter.xcodeFileType = "archive.ar";
-        exporter.xcodeProductType = "com.apple.product-type.library.static";
+
+        if (exporter.getSetting (Ids::libraryType) == 2)
+        {
+            exporter.xcodeFileType = "compiled.mach-o.dylib";
+            exporter.xcodeProductType = "com.apple.product-type.library.dynamic";
+            exporter.xcodeBundleExtension = ".dylib";
+        }
+        else
+        {
+            exporter.xcodeFileType = "archive.ar";
+            exporter.xcodeProductType = "com.apple.product-type.library.static";
+        }
+
         exporter.xcodeProductInstallPath = String::empty;
 
         exporter.makefileTargetSuffix = ".so";
