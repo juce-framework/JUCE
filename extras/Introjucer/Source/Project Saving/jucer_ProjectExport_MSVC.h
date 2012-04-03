@@ -1181,6 +1181,13 @@ protected:
                 if (extraLinkerOptions.isNotEmpty())
                     link->createNewChildElement ("AdditionalOptions")->addTextElement (replacePreprocessorTokens (config, extraLinkerOptions).trim()
                                                                                          + " %(AdditionalOptions)");
+
+                if (msvcDelayLoadedDLLs.isNotEmpty())
+                    link->createNewChildElement ("DelayLoadDLLs")->addTextElement (msvcDelayLoadedDLLs);
+
+                if (config.config [Ids::msvcModuleDefinitionFile].toString().isNotEmpty())
+                    link->createNewChildElement ("ModuleDefinitionFile")
+                        ->addTextElement (config.config [Ids::msvcModuleDefinitionFile].toString());
             }
 
             {

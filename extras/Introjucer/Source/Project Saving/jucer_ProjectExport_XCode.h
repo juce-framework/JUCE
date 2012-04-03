@@ -631,8 +631,7 @@ private:
             const String sdk (config.getMacSDKVersion());
             const String sdkCompat (config.getMacCompatibilityVersion());
 
-            if (sdk == osxVersion10_4)        { s.add ("SDKROOT = macosx10.4"); gccVersion = "4.0"; }
-            else if (sdk == osxVersion10_5)     s.add ("SDKROOT = macosx10.5");
+            if (sdk == osxVersion10_5)     s.add ("SDKROOT = macosx10.5");
             else if (sdk == osxVersion10_6)     s.add ("SDKROOT = macosx10.6");
             else if (sdk == osxVersion10_7)     s.add ("SDKROOT = macosx10.7");
 
@@ -642,6 +641,7 @@ private:
             else if (sdkCompat == osxVersion10_7)  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.7");
 
             s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
+            s.add ("SDKROOT_ppc = macosx10.5");
 
             if (xcodeExcludedFiles64Bit.isNotEmpty())
             {
