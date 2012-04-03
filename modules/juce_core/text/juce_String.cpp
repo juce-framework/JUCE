@@ -444,7 +444,7 @@ namespace NumberToStringConverters
         {
             // Use a locale-free sprintf where possible (not available on linux AFAICT)
            #if JUCE_WINDOWS
-            len = (size_t) _sprintf_l (buffer, "%.9g", nullptr, n);
+            len = (size_t) _sprintf_l (buffer, "%.9g", _create_locale (LC_NUMERIC, "C"), n);
            #elif JUCE_MAC || JUCE_IOS
             len = (size_t)  sprintf_l (buffer, nullptr, "%.9g", n);
            #else
