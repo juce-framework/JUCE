@@ -156,6 +156,9 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
  extern JUCE_API void logAssertion (const char* filename, int lineNum) noexcept;
 #endif
 
+#undef max
+#undef min
+
 #include "../memory/juce_Memory.h"
 #include "../maths/juce_MathsFunctions.h"
 #include "../memory/juce_ByteOrder.h"

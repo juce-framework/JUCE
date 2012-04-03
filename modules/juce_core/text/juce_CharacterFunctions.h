@@ -62,45 +62,57 @@
  #define T(stringLiteral)   JUCE_T(stringLiteral)
 #endif
 
-#undef max
-#undef min
-
 //==============================================================================
 /**
-    A set of methods for manipulating characters and character strings.
+    A collection of functions for manipulating characters and character strings.
 
-    These are defined as wrappers around the basic C string handlers, to provide
-    a clean, cross-platform layer, (because various platforms differ in the
-    range of C library calls that they provide).
+    Most of these methods are designed for internal use by the String and CharPointer
+    classes, but some of them may be useful to call directly.
 
-    @see String
+    @see String, CharPointer_UTF8, CharPointer_UTF16, CharPointer_UTF32
 */
 class JUCE_API  CharacterFunctions
 {
 public:
     //==============================================================================
+    /** Converts a character to upper-case. */
     static juce_wchar toUpperCase (juce_wchar character) noexcept;
+    /** Converts a character to lower-case. */
     static juce_wchar toLowerCase (juce_wchar character) noexcept;
 
+    /** Checks whether a unicode character is upper-case. */
     static bool isUpperCase (juce_wchar character) noexcept;
+    /** Checks whether a unicode character is lower-case. */
     static bool isLowerCase (juce_wchar character) noexcept;
 
+    /** Checks whether a character is whitespace. */
     static bool isWhitespace (char character) noexcept;
+    /** Checks whether a character is whitespace. */
     static bool isWhitespace (juce_wchar character) noexcept;
 
+    /** Checks whether a character is a digit. */
     static bool isDigit (char character) noexcept;
+    /** Checks whether a character is a digit. */
     static bool isDigit (juce_wchar character) noexcept;
 
+    /** Checks whether a character is alphabetic. */
     static bool isLetter (char character) noexcept;
+    /** Checks whether a character is alphabetic. */
     static bool isLetter (juce_wchar character) noexcept;
 
+    /** Checks whether a character is alphabetic or numeric. */
     static bool isLetterOrDigit (char character) noexcept;
+    /** Checks whether a character is alphabetic or numeric. */
     static bool isLetterOrDigit (juce_wchar character) noexcept;
 
     /** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legal hex digit. */
     static int getHexDigitValue (juce_wchar digit) noexcept;
 
     //==============================================================================
+    /** Parses a character string to read a floating-point number.
+        Note that this will advance the pointer that is passed in, leaving it at
+        the end of the number.
+    */
     template <typename CharPointerType>
     static double readDoubleValue (CharPointerType& text) noexcept
     {
@@ -231,14 +243,15 @@ public:
         return isNegative ? -r : r;
     }
 
+    /** Parses a character string, to read a floating-point value. */
     template <typename CharPointerType>
-    static double getDoubleValue (const CharPointerType& text) noexcept
+    static double getDoubleValue (CharPointerType text) noexcept
     {
-        CharPointerType t (text);
-        return readDoubleValue (t);
+        return readDoubleValue (text);
     }
 
     //==============================================================================
+    /** Parses a character string, to read an integer value. */
     template <typename IntType, typename CharPointerType>
     static IntType getIntValue (const CharPointerType& text) noexcept
     {
@@ -263,6 +276,8 @@ public:
     }
 
     //==============================================================================
+    /** Counts the number of characters in a given string, stopping if the count exceeds
+        a specified limit. */
     template <typename CharPointerType>
     static size_t lengthUpTo (CharPointerType text, const size_t maxCharsToCount) noexcept
     {
@@ -274,6 +289,8 @@ public:
         return len;
     }
 
+    /** Counts the number of characters in a given string, stopping if the count exceeds
+        a specified end-pointer. */
     template <typename CharPointerType>
     static size_t lengthUpTo (CharPointerType start, const CharPointerType& end) noexcept
     {
@@ -285,6 +302,7 @@ public:
         return len;
     }
 
+    /** Copies null-terminated characters from one string to another. */
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) noexcept
     {
@@ -301,6 +319,8 @@ public:
         dest.writeNull();
     }
 
+    /** Copies characters from one string to another, up to a null terminator
+        or a given byte size limit. */
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static int copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxBytes) noexcept
     {
@@ -324,6 +344,8 @@ public:
         return (int) (getAddressDifference (dest.getAddress(), startAddress) + sizeof (typename DestCharPointerType::CharType));
     }
 
+    /** Copies characters from one string to another, up to a null terminator
+        or a given maximum number of characters. */
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static void copyWithCharLimit (DestCharPointerType& dest, SrcCharPointerType src, int maxChars) noexcept
     {
@@ -339,6 +361,7 @@ public:
         dest.writeNull();
     }
 
+    /** Compares two null-terminated character strings. */
     template <typename CharPointerType1, typename CharPointerType2>
     static int compare (CharPointerType1 s1, CharPointerType2 s2) noexcept
     {
@@ -357,6 +380,7 @@ public:
         return 0;
     }
 
+    /** Compares two null-terminated character strings, up to a given number of characters. */
     template <typename CharPointerType1, typename CharPointerType2>
     static int compareUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) noexcept
     {
@@ -375,6 +399,7 @@ public:
         return 0;
     }
 
+    /** Compares two null-terminated character strings, using a case-independant match. */
     template <typename CharPointerType1, typename CharPointerType2>
     static int compareIgnoreCase (CharPointerType1 s1, CharPointerType2 s2) noexcept
     {
@@ -395,6 +420,7 @@ public:
         return 0;
     }
 
+    /** Compares two null-terminated character strings, using a case-independent match. */
     template <typename CharPointerType1, typename CharPointerType2>
     static int compareIgnoreCaseUpTo (CharPointerType1 s1, CharPointerType2 s2, int maxChars) noexcept
     {
@@ -415,6 +441,9 @@ public:
         return 0;
     }
 
+    /** Finds the character index of a given substring in another string.
+        Returns -1 if the substring is not found.
+    */
     template <typename CharPointerType1, typename CharPointerType2>
     static int indexOf (CharPointerType1 haystack, const CharPointerType2& needle) noexcept
     {
@@ -433,6 +462,10 @@ public:
         }
     }
 
+    /** Finds the character index of a given substring in another string, using
+        a case-independent match.
+        Returns -1 if the substring is not found.
+    */
     template <typename CharPointerType1, typename CharPointerType2>
     static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2& needle) noexcept
     {
@@ -451,6 +484,9 @@ public:
         }
     }
 
+    /** Finds the character index of a given character in another string.
+        Returns -1 if the character is not found.
+    */
     template <typename Type>
     static int indexOfChar (Type text, const juce_wchar charToFind) noexcept
     {
@@ -467,6 +503,10 @@ public:
         return -1;
     }
 
+    /** Finds the character index of a given character in another string, using
+        a case-independent match.
+        Returns -1 if the character is not found.
+    */
     template <typename Type>
     static int indexOfCharIgnoreCase (Type text, juce_wchar charToFind) noexcept
     {
@@ -485,6 +525,10 @@ public:
         return -1;
     }
 
+    /** Returns a pointer to the first non-whitespace character in a string.
+        If the string contains only whitespace, this will return a pointer
+        to its null terminator.
+    */
     template <typename Type>
     static Type findEndOfWhitespace (const Type& text) noexcept
     {
@@ -496,6 +540,9 @@ public:
         return p;
     }
 
+    /** Returns a pointer to the first character in the string which is found in
+        the breakCharacters string.
+    */
     template <typename Type>
     static Type findEndOfToken (const Type& text, const Type& breakCharacters, const Type& quoteCharacters)
     {
