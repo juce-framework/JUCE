@@ -98,7 +98,6 @@ namespace juce
  #include "../juce_core/native/juce_win32_ComSmartPtr.h"
 #endif
 
-// START_AUTOINCLUDE format/*.cpp, sampler/*.cpp, codecs/*.cpp
 #include "format/juce_AudioFormat.cpp"
 #include "format/juce_AudioFormatManager.cpp"
 #include "format/juce_AudioFormatReader.cpp"
@@ -113,7 +112,9 @@ namespace juce
 #include "codecs/juce_OggVorbisAudioFormat.cpp"
 #include "codecs/juce_QuickTimeAudioFormat.cpp"
 #include "codecs/juce_WavAudioFormat.cpp"
-#include "codecs/juce_WindowsMediaAudioFormat.cpp"
-// END_AUTOINCLUDE
+
+#if JUCE_WINDOWS && JUCE_USE_WINDOWS_MEDIA_FORMAT
+ #include "codecs/juce_WindowsMediaAudioFormat.cpp"
+#endif
 
 }

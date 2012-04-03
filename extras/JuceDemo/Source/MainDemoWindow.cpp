@@ -160,7 +160,7 @@ public:
     {
        #if JUCE_OPENGL
         if (shouldUseOpenGL && currentDemoId != showOpenGL)
-            openGLContext.attachTo (*this);
+            openGLContext.attachTo (*getTopLevelComponent());
         else
             openGLContext.detach();
        #endif

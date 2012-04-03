@@ -101,17 +101,21 @@ public:
     }
 
     //==============================================================================
-    void ensureFrameBufferSize (int width, int height)
+    bool ensureFrameBufferSize (int width, int height)
     {
         const int fbW = cachedImageFrameBuffer.getWidth();
         const int fbH = cachedImageFrameBuffer.getHeight();
 
         if (fbW != width || fbH != height || ! cachedImageFrameBuffer.isValid())
         {
-            cachedImageFrameBuffer.initialise (context, width, height);
+            if (! cachedImageFrameBuffer.initialise (context, width, height))
+                return false;
+
             validArea.clear();
             JUCE_CHECK_OPENGL_ERROR
         }
+
+        return true;
     }
 
     void clearRegionInFrameBuffer (const RectangleList& list)
@@ -169,7 +173,8 @@ public:
             jassert (get (component) == this);
 
             const Rectangle<int> bounds (component.getLocalBounds());
-            ensureFrameBufferSize (bounds.getWidth(), bounds.getHeight());
+            if (! ensureFrameBufferSize (bounds.getWidth(), bounds.getHeight()))
+                return;
 
             RectangleList invalid (bounds);
             invalid.subtract (validArea);

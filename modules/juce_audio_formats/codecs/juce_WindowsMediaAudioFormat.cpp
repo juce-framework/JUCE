@@ -23,8 +23,6 @@
   ==============================================================================
 */
 
-#if JUCE_WINDOWS
-
 namespace WindowsMediaCodec
 {
 
@@ -345,5 +343,3 @@ AudioFormatWriter* WindowsMediaAudioFormat::createWriterFor (OutputStream* /*str
     jassertfalse; // not yet implemented!
     return nullptr;
 }
-
-#endif

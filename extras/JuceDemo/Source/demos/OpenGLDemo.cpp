@@ -138,16 +138,17 @@ public:
         OpenGLFrameBuffer* tex1 = OpenGLImageType::getFrameBufferFrom (logoImage);
         OpenGLFrameBuffer* tex2 = OpenGLImageType::getFrameBufferFrom (dynamicTextureImage);
 
-        jassert (tex1 != nullptr && tex2 != nullptr); // (this would mean that our images weren't created correctly)
-
-        // This draws the sides of our spinning cube.
-        // I've used some of the juce helper functions, but you can also just use normal GL calls here too.
-        tex1->draw3D (-1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f, Colours::white);
-        tex1->draw3D (-1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, Colours::white);
-        tex1->draw3D (-1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, Colours::white);
-        tex2->draw3D (-1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f, Colours::white);
-        tex2->draw3D ( 1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, Colours::white);
-        tex2->draw3D (-1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, Colours::white);
+        if (tex1 != nullptr && tex2 != nullptr)
+        {
+            // This draws the sides of our spinning cube.
+            // I've used some of the juce helper functions, but you can also just use normal GL calls here too.
+            tex1->draw3D (-1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f, Colours::white);
+            tex1->draw3D (-1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, Colours::white);
+            tex1->draw3D (-1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, Colours::white);
+            tex2->draw3D (-1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f, Colours::white);
+            tex2->draw3D ( 1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f, Colours::white);
+            tex2->draw3D (-1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, Colours::white);
+        }
        #endif
     }
 
@@ -156,34 +157,41 @@ public:
         // This image is a special framebuffer-backed image, so when we draw to it, the context
         // will render directly into its framebuffer
 
-        dynamicTextureImage.clear (dynamicTextureImage.getBounds(),
-                                   Colours::red.withRotatedHue (fabsf (::sinf (rotation / 300.0f))).withAlpha (0.7f));
+        if (dynamicTextureImage.isValid())
+        {
+            dynamicTextureImage.clear (dynamicTextureImage.getBounds(),
+                                       Colours::red.withRotatedHue (fabsf (::sinf (rotation / 300.0f))).withAlpha (0.7f));
 
-        Graphics g (dynamicTextureImage);
+            Graphics g (dynamicTextureImage);
 
-        g.setFont (dynamicTextureImage.getHeight() / 3.0f);
-        g.setColour (Colours::black);
-        drawScrollingMessage (g, dynamicTextureImage.getHeight() / 2);
+            g.setFont (dynamicTextureImage.getHeight() / 3.0f);
+            g.setColour (Colours::black);
+            drawScrollingMessage (g, dynamicTextureImage.getHeight() / 2);
+        }
     }
 
     void drawBackground2DStuff()
     {
         // Create an OpenGLGraphicsContext that will draw into this GL window..
         ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext));
-        Graphics g (glRenderer);
 
-        // This stuff just creates a spinning star shape and fills it..
-        Path p;
-        const float scale = getHeight() * 0.4f;
-        p.addStar (Point<float> (getWidth() * 0.7f, getHeight() * 0.4f), 7,
-                   scale * (float) sizeSlider.getValue(), scale,
-                   rotation / 50.0f);
+        if (createOpenGLGraphicsContext != nullptr)
+        {
+            Graphics g (glRenderer);
 
-        g.setGradientFill (ColourGradient (Colours::green.withRotatedHue (fabsf (::sinf (rotation / 300.0f))),
-                                           0, 0,
-                                           Colours::green.withRotatedHue (fabsf (::cosf (rotation / -431.0f))),
-                                           0, (float) getHeight(), false));
-        g.fillPath (p);
+            // This stuff just creates a spinning star shape and fills it..
+            Path p;
+            const float scale = getHeight() * 0.4f;
+            p.addStar (Point<float> (getWidth() * 0.7f, getHeight() * 0.4f), 7,
+                       scale * (float) sizeSlider.getValue(), scale,
+                       rotation / 50.0f);
+
+            g.setGradientFill (ColourGradient (Colours::green.withRotatedHue (fabsf (::sinf (rotation / 300.0f))),
+                                               0, 0,
+                                               Colours::green.withRotatedHue (fabsf (::cosf (rotation / -431.0f))),
+                                               0, (float) getHeight(), false));
+            g.fillPath (p);
+        }
     }
 
     void timerCallback()
@@ -207,13 +215,17 @@ private:
     {
         Image image (Image::ARGB, 256, 256, true, OpenGLImageType());
 
-        Graphics g (image);
+        if (image.isValid())
+        {
+            Graphics g (image);
 
-        g.fillAll (Colours::lightgrey.withAlpha (0.8f));
-        g.drawImageWithin (ImageFileFormat::loadFrom (BinaryData::juce_png, BinaryData::juce_pngSize),
-                           0, 0, image.getWidth(), image.getHeight(), RectanglePlacement::stretchToFit);
+            g.fillAll (Colours::lightgrey.withAlpha (0.8f));
+            g.drawImageWithin (ImageFileFormat::loadFrom (BinaryData::juce_png, BinaryData::juce_pngSize),
+                               0, 0, image.getWidth(), image.getHeight(), RectanglePlacement::stretchToFit);
 
-        drawRandomStars (g, image.getWidth(), image.getHeight());
+            drawRandomStars (g, image.getWidth(), image.getHeight());
+        }
+
         return image;
     }
 

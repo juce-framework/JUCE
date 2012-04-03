@@ -52,7 +52,11 @@ struct Target
 
     void makeActive() const noexcept
     {
-        context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
+       #if JUCE_WINDOWS
+        if (context.extensions.glBindFramebuffer != nullptr)
+       #endif
+            context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
+
         glViewport (0, 0, bounds.getWidth(), bounds.getHeight());
         glDisable (GL_DEPTH_TEST);
     }
@@ -2199,7 +2203,12 @@ public:
                                                                    texture.getHeight()),
                                     target.bounds.getWidth(), target.bounds.getHeight());
         glBindTexture (GL_TEXTURE_2D, 0);
-        target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
+
+       #if JUCE_WINDOWS
+        if (target.context.extensions.glBindFramebuffer != nullptr)
+       #endif
+            target.context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, previousFrameBufferTarget);
+
         JUCE_CHECK_OPENGL_ERROR
     }
 

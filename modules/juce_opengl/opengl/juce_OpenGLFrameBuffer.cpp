@@ -35,8 +35,7 @@ public:
           frameBufferID (0),
           depthOrStencilBuffer (0),
           hasDepthBuffer (false),
-          hasStencilBuffer (false),
-          ok (true)
+          hasStencilBuffer (false)
     {
         // Framebuffer objects can only be created when the current thread has an active OpenGL
         // context. You'll need to create this object in one of the OpenGLContext's callbacks.
@@ -111,6 +110,11 @@ public:
         }
     }
 
+    bool createdOk() const
+    {
+        return frameBufferID != 0 && textureID != 0;
+    }
+
     void bind()
     {
         context.extensions.glBindFramebuffer (GL_FRAMEBUFFER, frameBufferID);
@@ -126,7 +130,7 @@ public:
     OpenGLContext& context;
     const int width, height;
     GLuint textureID, frameBufferID, depthOrStencilBuffer;
-    bool hasDepthBuffer, hasStencilBuffer, ok;
+    bool hasDepthBuffer, hasStencilBuffer;
 
 private:
     bool checkStatus() noexcept
@@ -180,7 +184,7 @@ bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int heigh
     pimpl = nullptr;
     pimpl = new Pimpl (context, width, height, false, false);
 
-    if (! pimpl->ok)
+    if (! pimpl->createdOk())
         pimpl = nullptr;
 
     return pimpl != nullptr;

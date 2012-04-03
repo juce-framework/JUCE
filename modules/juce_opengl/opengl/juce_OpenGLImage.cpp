@@ -32,8 +32,11 @@ public:
           pixelStride (4),
           lineStride (width * pixelStride)
     {
-        frameBuffer.initialise (context, width, height);
-        frameBuffer.clear (Colours::transparentBlack);
+    }
+
+    bool initialise()
+    {
+        return frameBuffer.initialise (context, width, height);
     }
 
     LowLevelGraphicsContext* createLowLevelContext()
@@ -175,17 +178,18 @@ int OpenGLImageType::getTypeID() const
     return 3;
 }
 
-ImagePixelData* OpenGLImageType::create (Image::PixelFormat, int width, int height, bool shouldClearImage) const
+ImagePixelData* OpenGLImageType::create (Image::PixelFormat, int width, int height, bool /*shouldClearImage*/) const
 {
     OpenGLContext* currentContext = OpenGLContext::getCurrentContext();
     jassert (currentContext != nullptr); // an OpenGL image can only be created when a valid context is active!
 
-    OpenGLFrameBufferImage* im = new OpenGLFrameBufferImage (*currentContext, width, height);
+    ScopedPointer<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (*currentContext, width, height));
 
-    if (shouldClearImage)
-        im->frameBuffer.clear (Colours::transparentBlack);
+    if (! im->initialise())
+        return nullptr;
 
-    return im;
+    im->frameBuffer.clear (Colours::transparentBlack);
+    return im.release();
 }
 
 OpenGLFrameBuffer* OpenGLImageType::getFrameBufferFrom (const Image& image)
