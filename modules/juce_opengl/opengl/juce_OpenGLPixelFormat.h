@@ -47,9 +47,8 @@ public:
                        int depthBufferBits = 16,
                        int stencilBufferBits = 0) noexcept;
 
-    OpenGLPixelFormat (const OpenGLPixelFormat&) noexcept;
-    OpenGLPixelFormat& operator= (const OpenGLPixelFormat&) noexcept;
     bool operator== (const OpenGLPixelFormat&) const noexcept;
+    bool operator!= (const OpenGLPixelFormat&) const noexcept;
 
     //==============================================================================
     int redBits;          /**< The number of bits per pixel to use for the red channel. */
@@ -66,9 +65,6 @@ public:
     int accumulationBufferAlphaBits;  /**< The number of bits per pixel to use for an accumulation buffer's alpha channel. */
 
     uint8 multisamplingLevel;         /**< The number of samples to use for full-scene multisampled anti-aliasing (if available). */
-
-private:
-    JUCE_LEAK_DETECTOR (OpenGLPixelFormat);
 };
 
 

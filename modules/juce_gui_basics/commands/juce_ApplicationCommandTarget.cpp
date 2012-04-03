@@ -84,8 +84,7 @@ ApplicationCommandTarget* ApplicationCommandTarget::findFirstTargetParentCompone
     Component* c = dynamic_cast <Component*> (this);
 
     if (c != nullptr)
-        // (unable to use the syntax findParentComponentOfClass <ApplicationCommandTarget> () because of a VC6 compiler bug)
-        return c->findParentComponentOfClass ((ApplicationCommandTarget*) nullptr);
+        return c->findParentComponentOfClass<ApplicationCommandTarget>();
 
     return nullptr;
 }

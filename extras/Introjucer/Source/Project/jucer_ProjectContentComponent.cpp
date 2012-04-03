@@ -191,7 +191,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumen
 
 void ProjectContentComponent::updateMainWindowTitle()
 {
-    MainWindow* mw = Component::findParentComponentOfClass ((MainWindow*) 0);
+    MainWindow* mw = findParentComponentOfClass<MainWindow>();
 
     if (mw != nullptr)
         mw->updateTitle (currentDocument != nullptr ? currentDocument->getName() : String::empty);
@@ -329,7 +329,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
     case CommandIDs::closeProject:
         {
-            MainWindow* mw = Component::findParentComponentOfClass ((MainWindow*) 0);
+            MainWindow* mw = findParentComponentOfClass<MainWindow>();
 
             if (mw != nullptr)
             {

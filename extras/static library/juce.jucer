@@ -4,14 +4,6 @@
               juceLinkage="none" bundleIdentifier="com.rawmaterialsoftware.juce"
               jucerVersion="3.0.0">
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" objCExtraSuffix="cbgo2s" juceFolder="../../../juce">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="jucedebug"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="juce"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
-      </CONFIGURATIONS>
-    </XCODE_MAC>
     <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="1" juceFolder="../../../juce">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="jucedebug"

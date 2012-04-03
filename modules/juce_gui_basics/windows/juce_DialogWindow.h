@@ -87,7 +87,7 @@ public:
         the DialogWindow that is created. To find a pointer to this window from your
         contentComponent, you can do something like this:
         @code
-        Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) nullptr);
+        Dialogwindow* dw = contentComponent->findParentComponentOfClass<DialogWindow>();
 
         if (dw != nullptr)
             dw->exitModalState (1234);
@@ -130,7 +130,7 @@ public:
         the DialogWindow that is created. To find a pointer to this window from your
         contentComponent, you can do something like this:
         @code
-        Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) nullptr);
+        Dialogwindow* dw = contentComponent->findParentComponentOfClass<DialogWindow>();
 
         if (dw != nullptr)
             dw->exitModalState (1234);
