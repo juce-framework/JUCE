@@ -41,7 +41,7 @@ bool OpenGLTexture::isValidSize (int width, int height)
 void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum type)
 {
     // Texture objects can only be created when the current thread has an active OpenGL
-    // context. You'll need to make an OpenGLComponent active before calling this.
+    // context. You'll need to create this object in one of the OpenGLContext's callbacks.
     jassert (OpenGLHelpers::isContextActive());
 
     jassert (isValidSize (w, h)); // Perhaps these dimensions must be a power-of-two?

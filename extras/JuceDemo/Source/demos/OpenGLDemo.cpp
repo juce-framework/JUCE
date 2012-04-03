@@ -37,9 +37,8 @@ public:
         : rotation (0.0f),
           textScrollPos (200)
     {
-        infoLabel.setText ("These sliders demonstrate how components can be added as children "
-                           "of an OpenGLComponent, in which case, their content will be rendered into "
-                           "an OpenGL framebuffer and efficiently overlaid onto your GL content.", false);
+        infoLabel.setText ("These sliders demonstrate how components and 2D graphics can be rendered "
+                           "using OpenGL by using the OpenGLContext class.", false);
         infoLabel.setInterceptsMouseClicks (false, false);
         addAndMakeVisible (&infoLabel);
         infoLabel.setBounds ("parent.width * 0.05, bottom - 150, parent.width * 0.4, parent.height - 60");

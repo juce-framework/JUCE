@@ -165,7 +165,7 @@ public:
 
             needsUpdate = false;
 
-            // you mustn't set your own cached image object for an OpenGLComponent!
+            // you mustn't set your own cached image object when attaching a GL context!
             jassert (get (component) == this);
 
             const Rectangle<int> bounds (component.getLocalBounds());

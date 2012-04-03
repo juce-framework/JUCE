@@ -430,9 +430,9 @@ bool isPowerOfTwo (IntegerType value)
    return (value & (value - 1)) == 0;
 }
 
-/** Returns the next power-of-two which is equal to or greater than the given integer.
+/** Returns the smallest power-of-two which is equal to or greater than the given integer.
 */
-inline int nextPowerOfTwo (int n)
+inline int nextPowerOfTwo (int n) noexcept
 {
     --n;
     n |= (n >> 1);

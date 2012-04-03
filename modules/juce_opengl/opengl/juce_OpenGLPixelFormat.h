@@ -29,9 +29,9 @@
 
 //==============================================================================
 /**
-    Represents the various properties of an OpenGL bitmap format.
+    Represents the various properties of an OpenGL pixel format.
 
-    @see OpenGLComponent::setPixelFormat
+    @see OpenGLContext::setPixelFormat
 */
 class JUCE_API  OpenGLPixelFormat
 {

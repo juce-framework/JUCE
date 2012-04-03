@@ -39,7 +39,7 @@ public:
           ok (true)
     {
         // Framebuffer objects can only be created when the current thread has an active OpenGL
-        // context. You'll need to make an OpenGLComponent active before calling this.
+        // context. You'll need to create this object in one of the OpenGLContext's callbacks.
         jassert (OpenGLHelpers::isContextActive());
 
        #if JUCE_WINDOWS || JUCE_LINUX

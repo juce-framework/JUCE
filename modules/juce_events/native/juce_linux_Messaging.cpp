@@ -239,7 +239,7 @@ namespace LinuxErrorHandling
 
         XGetErrorText (display, event->error_code, errorStr, 64);
         XGetErrorDatabaseText (display, "XRequest", String (event->request_code).toUTF8(), "Unknown", requestStr, 64);
-        DBG ("ERROR: X returned " + String (errorStr) + " for operation " + String (requestStr));
+        DBG ("ERROR: X returned " << errorStr << " for operation " << requestStr);
        #endif
 
         return 0;
