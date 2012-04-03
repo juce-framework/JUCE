@@ -143,6 +143,8 @@ public:
         if (! context.makeActive())
             return false;
 
+        NativeContext::Locker locker (*nativeContext);
+
         JUCE_CHECK_OPENGL_ERROR
         glViewport (0, 0, component.getWidth(), component.getHeight());
 

@@ -154,6 +154,8 @@ public:
 
     int getSwapInterval() const noexcept    { return swapFrames; }
 
+    struct Locker { Locker (NativeContext&) {} };
+
 private:
     JuceGLView* view;
     CAEAGLLayer* glLayer;

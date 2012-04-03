@@ -185,6 +185,22 @@ public:
         return [NSOpenGLContext currentContext] == renderContext;
     }
 
+    struct Locker
+    {
+        Locker (NativeContext& nc) : cglContext ((CGLContextObj) [nc.renderContext CGLContextObj])
+        {
+            CGLLockContext (cglContext);
+        }
+
+        ~Locker()
+        {
+            CGLUnlockContext (cglContext);
+        }
+
+    private:
+        CGLContextObj cglContext;
+    };
+
     void swapBuffers()
     {
         [renderContext flushBuffer];

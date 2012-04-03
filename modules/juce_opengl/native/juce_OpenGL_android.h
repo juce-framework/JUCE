@@ -129,6 +129,8 @@ public:
         return nullptr;
     }
 
+    struct Locker { Locker (NativeContext&) {} };
+
     Component& component;
 
 private:

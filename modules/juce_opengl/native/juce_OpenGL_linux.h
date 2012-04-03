@@ -169,6 +169,8 @@ public:
     void* getRawContext() const noexcept        { return renderContext; }
     GLuint getFrameBufferID() const noexcept    { return 0; }
 
+    struct Locker { Locker (NativeContext&) {} };
+
 private:
     GLXContext renderContext;
     Window embeddedWindow;

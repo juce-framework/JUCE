@@ -112,6 +112,8 @@ public:
     void* getRawContext() const noexcept            { return renderContext; }
     unsigned int getFrameBufferID() const noexcept  { return 0; }
 
+    struct Locker { Locker (NativeContext&) {} };
+
 private:
     Component dummyComponent;
     ScopedPointer<ComponentPeer> nativeWindow;
