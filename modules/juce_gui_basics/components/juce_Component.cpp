@@ -1810,6 +1810,14 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
 {
     if (flags.visibleFlag)
     {
+        if (cachedImage != nullptr)
+        {
+            if (isEntireComponent)
+                cachedImage->invalidateAll();
+            else
+                cachedImage->invalidate (area);
+        }
+
         if (flags.hasHeavyweightPeerFlag)
         {
             // if component methods are being called from threads other than the message
@@ -1823,14 +1831,6 @@ void Component::internalRepaintUnchecked (const Rectangle<int>& area, const bool
         }
         else
         {
-            if (cachedImage != nullptr)
-            {
-                if (isEntireComponent)
-                    cachedImage->invalidateAll();
-                else
-                    cachedImage->invalidate (area);
-            }
-
             if (parentComponent != nullptr)
                 parentComponent->internalRepaint (ComponentHelpers::convertToParentSpace (*this, area));
         }
