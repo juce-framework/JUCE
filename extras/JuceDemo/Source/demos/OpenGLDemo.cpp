@@ -175,7 +175,7 @@ public:
         // Create an OpenGLGraphicsContext that will draw into this GL window..
         ScopedPointer<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext));
 
-        if (createOpenGLGraphicsContext != nullptr)
+        if (glRenderer != nullptr)
         {
             Graphics g (glRenderer);
 
