@@ -43,6 +43,13 @@ public:
     static String getValue (const String& regValuePath,
                             const String& defaultValue = String::empty);
 
+    /** Returns a string from the WOW64 registry.
+        The path is a string for the entire path of a value in the registry,
+        e.g. "HKEY_CURRENT_USER\Software\foo\bar"
+    */
+    static String getValueWow64 (const String& regValuePath,
+                                 const String& defaultValue = String::empty);
+
     /** Reads a binary block from the registry.
         The path is a string for the entire path of a value in the registry,
         e.g. "HKEY_CURRENT_USER\Software\foo\bar"

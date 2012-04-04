@@ -25,7 +25,7 @@
 
 struct RegistryKeyWrapper
 {
-    RegistryKeyWrapper (String name, const bool createForWriting)
+    RegistryKeyWrapper (String name, const bool createForWriting, const DWORD wow64Flags)
         : key (0), wideCharValueName (nullptr)
     {
         HKEY rootKey = 0;
@@ -48,9 +48,9 @@ struct RegistryKeyWrapper
 
             if (createForWriting)
                 RegCreateKeyEx (rootKey, wideCharName, 0, 0, REG_OPTION_NON_VOLATILE,
-                                (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result);
+                                KEY_WRITE | KEY_QUERY_VALUE | wow64Flags, 0, &key, &result);
             else
-                RegOpenKeyEx (rootKey, wideCharName, 0, KEY_READ, &key);
+                RegOpenKeyEx (rootKey, wideCharName, 0, KEY_READ | wow64Flags, &key);
         }
     }
 
@@ -63,12 +63,53 @@ struct RegistryKeyWrapper
     static bool setValue (const String& regValuePath, const DWORD type,
                           const void* data, size_t dataSize)
     {
-        const RegistryKeyWrapper key (regValuePath, true);
+        const RegistryKeyWrapper key (regValuePath, true, 0);
 
         return key.key != 0
                 && RegSetValueEx (key.key, key.wideCharValueName, 0, type,
                                   reinterpret_cast <const BYTE*> (data),
                                   (DWORD) dataSize) == ERROR_SUCCESS;
+    }
+
+    static uint32 getBinaryValue (const String& regValuePath, MemoryBlock& result, DWORD wow64Flags)
+    {
+        const RegistryKeyWrapper key (regValuePath, false, wow64Flags);
+
+        if (key.key != 0)
+        {
+            for (unsigned long bufferSize = 1024; ; bufferSize *= 2)
+            {
+                result.setSize (bufferSize, false);
+                DWORD type = REG_NONE;
+
+                const LONG err = RegQueryValueEx (key.key, key.wideCharValueName, 0, &type,
+                                                  (LPBYTE) result.getData(), &bufferSize);
+
+                if (err == ERROR_SUCCESS)
+                {
+                    result.setSize (bufferSize, false);
+                    return type;
+                }
+
+                if (err != ERROR_MORE_DATA)
+                    break;
+            }
+        }
+
+        return REG_NONE;
+    }
+
+    static String getValue (const String& regValuePath, const String& defaultValue, DWORD wow64Flags)
+    {
+        MemoryBlock buffer;
+        switch (getBinaryValue (regValuePath, buffer, wow64Flags))
+        {
+            case REG_SZ:    return static_cast <const WCHAR*> (buffer.getData());
+            case REG_DWORD: return String ((int) *reinterpret_cast<const DWORD*> (buffer.getData()));
+            default:        break;
+        }
+
+        return defaultValue;
     }
 
     HKEY key;
@@ -80,43 +121,17 @@ struct RegistryKeyWrapper
 
 uint32 WindowsRegistry::getBinaryValue (const String& regValuePath, MemoryBlock& result)
 {
-    const RegistryKeyWrapper key (regValuePath, false);
-
-    if (key.key != 0)
-    {
-        for (unsigned long bufferSize = 1024; ; bufferSize *= 2)
-        {
-            result.setSize (bufferSize, false);
-            DWORD type = REG_NONE;
-
-            const LONG err = RegQueryValueEx (key.key, key.wideCharValueName, 0, &type,
-                                              (LPBYTE) result.getData(), &bufferSize);
-
-            if (err == ERROR_SUCCESS)
-            {
-                result.setSize (bufferSize, false);
-                return type;
-            }
-
-            if (err != ERROR_MORE_DATA)
-                break;
-        }
-    }
-
-    return REG_NONE;
+    return RegistryKeyWrapper::getBinaryValue (regValuePath, result, 0);
 }
 
 String WindowsRegistry::getValue (const String& regValuePath, const String& defaultValue)
 {
-    MemoryBlock buffer;
-    switch (getBinaryValue (regValuePath, buffer))
-    {
-        case REG_SZ:    return static_cast <const WCHAR*> (buffer.getData());
-        case REG_DWORD: return String ((int) *reinterpret_cast<const DWORD*> (buffer.getData()));
-        default:        break;
-    }
+    return RegistryKeyWrapper::getValue (regValuePath, defaultValue, 0);
+}
 
-    return defaultValue;
+String WindowsRegistry::getValueWow64 (const String& regValuePath, const String& defaultValue)
+{
+    return RegistryKeyWrapper::getValue (regValuePath, defaultValue, KEY_WOW64_64KEY);
 }
 
 bool WindowsRegistry::setValue (const String& regValuePath, const String& value)
@@ -142,7 +157,7 @@ bool WindowsRegistry::setValue (const String& regValuePath, const MemoryBlock& v
 
 bool WindowsRegistry::valueExists (const String& regValuePath)
 {
-    const RegistryKeyWrapper key (regValuePath, false);
+    const RegistryKeyWrapper key (regValuePath, false, 0);
 
     if (key.key == 0)
         return false;
@@ -159,7 +174,7 @@ bool WindowsRegistry::valueExists (const String& regValuePath)
 
 void WindowsRegistry::deleteValue (const String& regValuePath)
 {
-    const RegistryKeyWrapper key (regValuePath, true);
+    const RegistryKeyWrapper key (regValuePath, true, 0);
 
     if (key.key != 0)
         RegDeleteValue (key.key, key.wideCharValueName);
@@ -167,7 +182,7 @@ void WindowsRegistry::deleteValue (const String& regValuePath)
 
 void WindowsRegistry::deleteKey (const String& regKeyPath)
 {
-    const RegistryKeyWrapper key (regKeyPath, true);
+    const RegistryKeyWrapper key (regKeyPath, true, 0);
 
     if (key.key != 0)
         RegDeleteKey (key.key, key.wideCharValueName);
