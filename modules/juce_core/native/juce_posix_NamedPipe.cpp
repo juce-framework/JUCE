@@ -169,6 +169,7 @@ void NamedPipe::cancelPendingReads()
 
 void NamedPipe::close()
 {
+    cancelPendingReads();
     ScopedPointer<Pimpl> deleter (pimpl); // (clears the pimpl member variable before deleting it)
 }
 
