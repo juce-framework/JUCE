@@ -140,7 +140,7 @@ bool JUCEApplication::initialiseApp (const String& commandLine)
 {
     commandLineParameters = commandLine.trim();
 
-   #if ! JUCE_IOS
+   #if ! (JUCE_IOS || JUCE_ANDROID)
     jassert (appLock == nullptr); // initialiseApp must only be called once!
 
     if (! moreThanOneInstanceAllowed())
@@ -165,7 +165,7 @@ bool JUCEApplication::initialiseApp (const String& commandLine)
     juce_initialiseMacMainMenu(); // needs to be called after the app object has created, to get its name
    #endif
 
-   #if ! JUCE_IOS
+   #if ! (JUCE_IOS || JUCE_ANDROID)
     broadcastCallback = new AppBroadcastCallback();
    #endif
 

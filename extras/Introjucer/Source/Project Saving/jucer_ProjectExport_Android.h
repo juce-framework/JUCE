@@ -441,7 +441,9 @@ private:
             {
                 const AndroidBuildConfiguration& androidConfig = dynamic_cast <const AndroidBuildConfiguration&> (*config);
 
-                out << "  LOCAL_CPPFLAGS += " << createCPPFlags (*config) << newLine
+                out << "  LOCAL_CPPFLAGS += " << createCPPFlags (androidConfig)
+                    << (" " + replacePreprocessorTokens (androidConfig, getExtraCompilerFlagsString()).trim()).trimEnd()
+                    << newLine
                     << getDynamicLibs (androidConfig);
 
                 break;
@@ -502,7 +504,8 @@ private:
         }
 
         flags << createIncludePathFlags (config)
-              << " -O" << config.getGCCOptimisationFlag();
+              << " -O" << config.getGCCOptimisationFlag()
+              << " -std=c++0x";
 
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
         return flags + createGCCPreprocessorFlags (defines);
