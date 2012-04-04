@@ -114,7 +114,8 @@
 
 //==============================================================================
 #elif JUCE_MAC
- #include <OpenGL/CGLCurrent.h>
+ #include <OpenGL/CGLCurrent.h> // These are both just needed with the 10.5 SDK
+ #include <OpenGL/OpenGL.h>
 
 //==============================================================================
 #elif JUCE_ANDROID
