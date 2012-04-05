@@ -471,6 +471,44 @@ public:
             insert (index, newObject);  // no match, so insert the new one
     }
 
+    /** Finds the index of an object in the array, assuming that the array is sorted.
+
+        This will use a comparator to do a binary-chop to find the index of the given
+        element, if it exists. If the array isn't sorted, the behaviour of this
+        method will be unpredictable.
+
+        @param comparator           the comparator to use to compare the elements - see the sort()
+                                    method for details about the form this object should take
+        @param objectToLookFor      the object to search for
+        @returns                    the index of the element, or -1 if it's not found
+        @see addSorted, sort
+    */
+    template <class ElementComparator>
+    int indexOfSorted (ElementComparator& comparator,
+                       const ObjectClass* const objectToLookFor) const noexcept
+    {
+        (void) comparator;
+        const ScopedLockType lock (getLock());
+        int s = 0, e = numUsed;
+
+        while (s < e)
+        {
+            if (comparator.compareElements (objectToLookFor, data.elements [s]) == 0)
+                return s;
+
+            const int halfway = (s + e) / 2;
+            if (halfway == s)
+                break;
+
+            if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
+                s = halfway;
+            else
+                e = halfway;
+        }
+
+        return -1;
+    }
+
     //==============================================================================
     /** Removes an object from the array.
 

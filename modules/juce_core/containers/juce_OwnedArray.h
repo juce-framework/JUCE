@@ -475,35 +475,26 @@ public:
     int indexOfSorted (ElementComparator& comparator,
                        const ObjectClass* const objectToLookFor) const noexcept
     {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
+        (void) comparator;
         const ScopedLockType lock (getLock());
+        int s = 0, e = numUsed;
 
-        int start = 0;
-        int end_ = numUsed;
-
-        for (;;)
+        while (s < e)
         {
-            if (start >= end_)
-            {
-                return -1;
-            }
-            else if (comparator.compareElements (objectToLookFor, data.elements [start]) == 0)
-            {
-                return start;
-            }
-            else
-            {
-                const int halfway = (start + end_) >> 1;
+            if (comparator.compareElements (objectToLookFor, data.elements [s]) == 0)
+                return s;
 
-                if (halfway == start)
-                    return -1;
-                else if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
-                    start = halfway;
-                else
-                    end_ = halfway;
-            }
+            const int halfway = (s + e) / 2;
+            if (halfway == s)
+                break;
+
+            if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
+                s = halfway;
+            else
+                e = halfway;
         }
+
+        return -1;
     }
 
     //==============================================================================

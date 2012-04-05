@@ -209,24 +209,24 @@ public:
 
     /** Returns true if this executable is running as an app (as opposed to being a plugin
         or other kind of shared library. */
-    static inline bool isStandaloneApp() noexcept                   { return createInstance != 0; }
+    static inline bool isStandaloneApp() noexcept                   { return createInstance != nullptr; }
 
     //==============================================================================
     /** @internal */
     ApplicationCommandTarget* getNextCommandTarget();
     /** @internal */
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
+    void getCommandInfo (CommandID, ApplicationCommandInfo&);
     /** @internal */
-    void getAllCommands (Array <CommandID>& commands);
+    void getAllCommands (Array <CommandID>&);
     /** @internal */
-    bool perform (const InvocationInfo& info);
+    bool perform (const InvocationInfo&);
 
     //==============================================================================
    #ifndef DOXYGEN
     // The following methods are internal calls - not for public use.
     static int main (const String& commandLine);
     static int main (int argc, const char* argv[]);
-    static void sendUnhandledException (const std::exception* e, const char* sourceFile, int lineNumber);
+    static void sendUnhandledException (const std::exception*, const char* sourceFile, int lineNumber);
     bool initialiseApp (const String& commandLine);
     int shutdownApp();
    #endif
