@@ -571,9 +571,18 @@ File juce_getExecutableFile()
    #if JUCE_ANDROID
     return File (android.appFile);
    #else
-    Dl_info exeInfo;
-    dladdr ((void*) juce_getExecutableFile, &exeInfo);  // (can't be a const void* on android)
-    return File::getCurrentWorkingDirectory().getChildFile (CharPointer_UTF8 (exeInfo.dli_fname));
+    struct DLAddrReader
+    {
+        static String getFilename()
+        {
+            Dl_info exeInfo;
+            dladdr ((void*) juce_getExecutableFile, &exeInfo);
+            return CharPointer_UTF8 (exeInfo.dli_fname);
+        }
+    };
+
+    static String filename (DLAddrReader::getFilename());
+    return File::getCurrentWorkingDirectory().getChildFile (filename);
    #endif
 }
 
