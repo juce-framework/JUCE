@@ -48,6 +48,7 @@ namespace
     Value getPluginEditorNeedsKeyFocus (Project& project)         { return project.getProjectValue ("pluginEditorRequiresKeys"); }
     Value getPluginAUExportPrefix (Project& project)              { return project.getProjectValue ("pluginAUExportPrefix"); }
     Value getPluginAUCocoaViewClassName (Project& project)        { return project.getProjectValue ("pluginAUViewClass"); }
+    Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
     Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
 
     String getPluginRTASCategoryCode (Project& project)
@@ -59,6 +60,16 @@ namespace
         if (s.isEmpty())
             s = "ePlugInCategory_None";
 
+        return s;
+    }
+
+    String getAUMainTypeString (Project& project)
+    {
+        String s (getPluginAUMainType (project).toString());
+
+        if (s.isEmpty())
+            s = static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kAudioUnitType_MusicDevice"
+                                                                           : "kAudioUnitType_Effect";
         return s;
     }
 
@@ -108,7 +119,7 @@ namespace
         flags.set ("JucePlugin_VersionString",               project.getVersionString().quoted());
         flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
         flags.set ("JucePlugin_VSTCategory",                 static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kPlugCategSynth" : "kPlugCategEffect");
-        flags.set ("JucePlugin_AUMainType",                  static_cast <bool> (getPluginIsSynth (project).getValue()) ? "kAudioUnitType_MusicDevice" : "kAudioUnitType_Effect");
+        flags.set ("JucePlugin_AUMainType",                  getAUMainTypeString (project));
         flags.set ("JucePlugin_AUSubType",                   "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AUExportPrefix",              getPluginAUExportPrefix (project).toString());
         flags.set ("JucePlugin_AUExportPrefixQuoted",        getPluginAUExportPrefix (project).toString().quoted());

@@ -23,6 +23,16 @@
   ==============================================================================
 */
 
+int64 InputStream::getNumBytesRemaining()
+{
+    int64 len = getTotalLength();
+
+    if (len >= 0)
+        len -= getPosition();
+
+    return len;
+}
+
 char InputStream::readByte()
 {
     char temp = 0;
