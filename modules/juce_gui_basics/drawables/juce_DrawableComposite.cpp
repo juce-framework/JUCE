@@ -34,7 +34,8 @@ DrawableComposite::DrawableComposite()
 }
 
 DrawableComposite::DrawableComposite (const DrawableComposite& other)
-    : bounds (other.bounds),
+    : Drawable (other),
+      bounds (other.bounds),
       markersX (other.markersX),
       markersY (other.markersY),
       updateBoundsReentrant (false)

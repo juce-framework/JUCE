@@ -29,6 +29,12 @@ Drawable::Drawable()
     setPaintingIsUnclipped (true);
 }
 
+Drawable::Drawable (const Drawable& other)
+{
+    setName (other.getName());
+    setComponentID (other.getComponentID());
+}
+
 Drawable::~Drawable()
 {
 }

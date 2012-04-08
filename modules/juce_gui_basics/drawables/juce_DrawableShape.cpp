@@ -31,7 +31,8 @@ DrawableShape::DrawableShape()
 }
 
 DrawableShape::DrawableShape (const DrawableShape& other)
-    : strokeType (other.strokeType),
+    : Drawable (other),
+      strokeType (other.strokeType),
       mainFill (other.mainFill),
       strokeFill (other.strokeFill)
 {

@@ -207,11 +207,11 @@ protected:
     friend class DrawableShape;
 
     /** @internal */
-    void transformContextToCorrectOrigin (Graphics& g);
+    void transformContextToCorrectOrigin (Graphics&);
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
-    void setBoundsToEnclose (const Rectangle<float>& area);
+    void setBoundsToEnclose (const Rectangle<float>&);
 
     Point<int> originRelativeToComponent;
 
@@ -243,12 +243,15 @@ protected:
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Positioner);
     };
+
+    Drawable (const Drawable&);
   #endif
 
 private:
     void nonConstDraw (Graphics& g, float opacity, const AffineTransform& transform);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Drawable);
+    Drawable& operator= (const Drawable&);
+    JUCE_LEAK_DETECTOR (Drawable);
 };
 
 
