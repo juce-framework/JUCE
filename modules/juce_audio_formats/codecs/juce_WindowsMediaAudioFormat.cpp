@@ -256,11 +256,7 @@ private:
 
     void checkCoInitialiseCalled()
     {
-        APTTYPE dummy1;
-        APTTYPEQUALIFIER dummy2;
-
-        if (CoGetApartmentType (&dummy1, &dummy2) == CO_E_NOTINITIALIZED)
-            CoInitialize (0);
+        CoInitialize (0);
     }
 
     void scanFileForDetails()
