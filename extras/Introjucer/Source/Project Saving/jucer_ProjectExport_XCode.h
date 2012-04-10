@@ -337,20 +337,23 @@ private:
 
     static Image fixMacIconImageSize (Image& image)
     {
+        const int validSizes[] = { 16, 32, 48, 128 };
+
         const int w = image.getWidth();
         const int h = image.getHeight();
 
-        if (w != h || (w != 16 && w != 32 && w != 48 && w != 64))
+        int bestSize = 16;
+
+        for (int i = 0; i < numElementsInArray (validSizes); ++i)
         {
-            const int newSize = w >= 128 ? 128 : (w >= 64 ? 64 : (w >= 32 ? 32 : 16));
-            Image newIm (Image::ARGB, newSize, newSize, true, SoftwareImageType());
-            Graphics g (newIm);
-            g.drawImageWithin (image, 0, 0, newSize, newSize,
-                               RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
-            return newIm;
+            if (w == h && w == validSizes[i])
+                return image;
+
+            if (jmax (w, h) > validSizes[i])
+                bestSize = validSizes[i];
         }
 
-        return image;
+        return rescaleImageForIcon (image, bestSize);
     }
 
     void writeIcnsFile (const Array<Image>& images, OutputStream& out) const
@@ -363,17 +366,15 @@ private:
 
             const int w = image.getWidth();
             const int h = image.getHeight();
+            jassert (w == h);
 
             const char* type = nullptr;
             const char* maskType = nullptr;
 
-            if (w == h)
-            {
-                if (w == 16)  { type = "is32"; maskType = "s8mk"; }
-                if (w == 32)  { type = "il32"; maskType = "l8mk"; }
-                if (w == 48)  { type = "ih32"; maskType = "h8mk"; }
-                if (w == 128) { type = "it32"; maskType = "t8mk"; }
-            }
+            if (w == 16)  { type = "is32"; maskType = "s8mk"; }
+            if (w == 32)  { type = "il32"; maskType = "l8mk"; }
+            if (w == 48)  { type = "ih32"; maskType = "h8mk"; }
+            if (w == 128) { type = "it32"; maskType = "t8mk"; }
 
             if (type != nullptr)
             {

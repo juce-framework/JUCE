@@ -318,6 +318,8 @@ protected:
         }
     }
 
+    static Image rescaleImageForIcon (Image image, int iconSize);
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter);
 };
