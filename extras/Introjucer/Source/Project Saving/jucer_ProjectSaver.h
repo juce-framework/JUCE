@@ -46,8 +46,34 @@ public:
 
     Project& getProject() noexcept      { return project; }
 
-    String save()
+    struct SaveThread  : public ThreadWithProgressWindow
     {
+    public:
+        SaveThread (ProjectSaver& saver_)
+            : ThreadWithProgressWindow ("Saving...", true, false), saver (saver_)
+        {}
+
+        void run()
+        {
+            setProgress (-1);
+            result = saver.save (false);
+        }
+
+        ProjectSaver& saver;
+        String result;
+
+        JUCE_DECLARE_NON_COPYABLE (SaveThread);
+    };
+
+    String save (bool showProgressBox)
+    {
+        if (showProgressBox)
+        {
+            SaveThread thread (*this);
+            thread.runThread();
+            return thread.result;
+        }
+
         if (generatedCodeFolder.exists())
             deleteNonHiddenFilesIn (generatedCodeFolder);
 
