@@ -43,9 +43,7 @@
 #include <intrin.h>
 #include <windows.h>
 
-#pragma pack (push, 8)
 #include "../utility/juce_IncludeModuleHeaders.h"
-#pragma pack (pop)
 
 //==============================================================================
 void JUCE_CALLTYPE attachSubWindow (void* hostWindow,

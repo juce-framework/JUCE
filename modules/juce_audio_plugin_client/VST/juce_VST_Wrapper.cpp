@@ -62,7 +62,7 @@
 
     Then, you'll need to make sure your include path contains your "vstsdk2.4" directory.
 */
-#ifdef __GNUC__
+#ifndef _MSC_VER
  #define __cdecl
 #endif
 
@@ -77,17 +77,9 @@
 #endif
 
 //==============================================================================
-#ifdef _MSC_VER
- #pragma pack (push, 8)
-#endif
-
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_PluginHostType.h"
-
-#ifdef _MSC_VER
- #pragma pack (pop)
-#endif
 
 #undef MemoryBlock
 
