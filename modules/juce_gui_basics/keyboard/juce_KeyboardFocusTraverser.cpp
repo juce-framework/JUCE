@@ -79,7 +79,7 @@ namespace KeyboardFocusHelpers
         }
     }
 
-    Component* findFocusContainer (Component* c)
+    static Component* findFocusContainer (Component* c)
     {
         c = c->getParentComponent();
 
@@ -90,7 +90,7 @@ namespace KeyboardFocusHelpers
         return c;
     }
 
-    Component* getIncrementedComponent (Component* const current, const int delta)
+    static Component* getIncrementedComponent (Component* const current, const int delta)
     {
         Component* focusContainer = findFocusContainer (current);
 

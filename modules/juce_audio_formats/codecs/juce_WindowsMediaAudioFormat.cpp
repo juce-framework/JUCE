@@ -50,7 +50,7 @@ public:
         if (bytesRead != nullptr)
             *bytesRead = numRead;
 
-        return numRead == (int) numBytes ? S_OK : S_FALSE;
+        return (numRead == (int) numBytes) ? S_OK : S_FALSE;
     }
 
     JUCE_COMRESULT Seek (LARGE_INTEGER position, DWORD origin, ULARGE_INTEGER* resultPosition)

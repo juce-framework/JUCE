@@ -55,7 +55,7 @@ void File::findFileSystemRoots (Array<File>& destArray)
 //==============================================================================
 namespace FileHelpers
 {
-    bool isFileOnDriveType (const File& f, const char* const* types)
+    static bool isFileOnDriveType (const File& f, const char* const* types)
     {
         struct statfs buf;
 
@@ -71,7 +71,7 @@ namespace FileHelpers
         return false;
     }
 
-    bool isHiddenFile (const String& path)
+    static bool isHiddenFile (const String& path)
     {
       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
         JUCE_AUTORELEASEPOOL
@@ -101,7 +101,7 @@ namespace FileHelpers
     }
   #endif
 
-    bool launchExecutable (const String& pathAndArguments)
+    static bool launchExecutable (const String& pathAndArguments)
     {
         const char* const argv[4] = { "/bin/sh", "-c", pathAndArguments.toUTF8(), 0 };
 

@@ -159,7 +159,7 @@ namespace XmlOutputFunctions
     }
    #endif
 
-    bool isLegalXmlChar (const uint32 c) noexcept
+    static bool isLegalXmlChar (const uint32 c) noexcept
     {
         static const unsigned char legalChars[] = { 0, 0, 0, 0, 187, 255, 255, 175, 255, 255, 255, 191, 254, 255, 255, 127 };
 
@@ -167,7 +167,7 @@ namespace XmlOutputFunctions
                  && (legalChars [c >> 3] & (1 << (c & 7))) != 0;
     }
 
-    void escapeIllegalXmlChars (OutputStream& outputStream, const String& text, const bool changeNewLines)
+    static void escapeIllegalXmlChars (OutputStream& outputStream, const String& text, const bool changeNewLines)
     {
         String::CharPointerType t (text.getCharPointer());
 
@@ -207,7 +207,7 @@ namespace XmlOutputFunctions
         }
     }
 
-    void writeSpaces (OutputStream& out, const int numSpaces)
+    static void writeSpaces (OutputStream& out, const int numSpaces)
     {
         out.writeRepeatedByte (' ', numSpaces);
     }

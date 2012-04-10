@@ -347,7 +347,7 @@ String String::charToString (const juce_wchar character)
 namespace NumberToStringConverters
 {
     // pass in a pointer to the END of a buffer..
-    char* numberToString (char* t, const int64 n) noexcept
+    static char* numberToString (char* t, const int64 n) noexcept
     {
         *--t = 0;
         int64 v = (n >= 0) ? n : -n;
@@ -365,7 +365,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    char* numberToString (char* t, uint64 v) noexcept
+    static char* numberToString (char* t, uint64 v) noexcept
     {
         *--t = 0;
 
@@ -379,7 +379,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    char* numberToString (char* t, const int n) noexcept
+    static char* numberToString (char* t, const int n) noexcept
     {
         if (n == (int) 0x80000000) // (would cause an overflow)
             return numberToString (t, (int64) n);
@@ -400,7 +400,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    char* numberToString (char* t, unsigned int v) noexcept
+    static char* numberToString (char* t, unsigned int v) noexcept
     {
         *--t = 0;
 
@@ -414,7 +414,7 @@ namespace NumberToStringConverters
         return t;
     }
 
-    char* doubleToString (char* buffer, const int numChars, double n, int numDecPlaces, size_t& len) noexcept
+    static char* doubleToString (char* buffer, const int numChars, double n, int numDecPlaces, size_t& len) noexcept
     {
         if (numDecPlaces > 0 && n > -1.0e20 && n < 1.0e20)
         {
@@ -465,7 +465,7 @@ namespace NumberToStringConverters
         return StringHolder::createFromFixedLength (start, (size_t) (end - start - 1));
     }
 
-    String::CharPointerType createFromDouble (const double number, const int numberOfDecimalPlaces)
+    static String::CharPointerType createFromDouble (const double number, const int numberOfDecimalPlaces)
     {
         char buffer [48];
         size_t len;

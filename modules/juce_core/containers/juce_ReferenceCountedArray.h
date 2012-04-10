@@ -329,7 +329,7 @@ public:
             const int numToMove = numUsed - indexToInsertAt;
 
             if (numToMove > 0)
-                memmove (e + 1, e, numToMove * sizeof (ObjectClass*));
+                memmove (e + 1, e, sizeof (ObjectClass*) * (size_t) numToMove);
 
             *e = newObject;
 
@@ -538,7 +538,7 @@ public:
             const int numberToShift = numUsed - indexToRemove;
 
             if (numberToShift > 0)
-                memmove (e, e + 1, numberToShift * sizeof (ObjectClass*));
+                memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numberToShift);
 
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
@@ -573,7 +573,7 @@ public:
             const int numberToShift = numUsed - indexToRemove;
 
             if (numberToShift > 0)
-                memmove (e, e + 1, numberToShift * sizeof (ObjectClass*));
+                memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numberToShift);
 
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
@@ -715,13 +715,13 @@ public:
                 {
                     memmove (data.elements + currentIndex,
                              data.elements + currentIndex + 1,
-                             (newIndex - currentIndex) * sizeof (ObjectClass*));
+                             sizeof (ObjectClass*) * (size_t) (newIndex - currentIndex));
                 }
                 else
                 {
                     memmove (data.elements + newIndex + 1,
                              data.elements + newIndex,
-                             (currentIndex - newIndex) * sizeof (ObjectClass*));
+                             sizeof (ObjectClass*) * (size_t) (currentIndex - newIndex));
                 }
 
                 data.elements [newIndex] = value;

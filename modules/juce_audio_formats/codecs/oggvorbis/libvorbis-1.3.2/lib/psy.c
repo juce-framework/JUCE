@@ -52,7 +52,7 @@ void _vp_global_free(vorbis_look_psy_global *look){
   }
 }
 
-void _vi_gpsy_free(vorbis_info_psy_global *i){
+static void _vi_gpsy_free(vorbis_info_psy_global *i){
   if(i){
     memset(i,0,sizeof(*i));
     _ogg_free(i);

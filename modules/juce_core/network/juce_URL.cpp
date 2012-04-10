@@ -104,7 +104,7 @@ URL::~URL()
 
 namespace URLHelpers
 {
-    String getMangledParameters (const URL& url)
+    static String getMangledParameters (const URL& url)
     {
         jassert (url.getParameterNames().size() == url.getParameterValues().size());
         String p;
@@ -122,7 +122,7 @@ namespace URLHelpers
         return p;
     }
 
-    int findEndOfScheme (const String& url)
+    static int findEndOfScheme (const String& url)
     {
         int i = 0;
 
@@ -133,7 +133,7 @@ namespace URLHelpers
         return url[i] == ':' ? i + 1 : 0;
     }
 
-    int findStartOfNetLocation (const String& url)
+    static int findStartOfNetLocation (const String& url)
     {
         int start = findEndOfScheme (url);
         while (url[start] == '/')
@@ -142,12 +142,12 @@ namespace URLHelpers
         return start;
     }
 
-    int findStartOfPath (const String& url)
+    static int findStartOfPath (const String& url)
     {
         return url.indexOfChar (findStartOfNetLocation (url), '/') + 1;
     }
 
-    void createHeadersAndPostData (const URL& url, String& headers, MemoryBlock& postData)
+    static void createHeadersAndPostData (const URL& url, String& headers, MemoryBlock& postData)
     {
         MemoryOutputStream data (postData, false);
 
@@ -202,7 +202,7 @@ namespace URLHelpers
         }
     }
 
-    void concatenatePaths (String& path, const String& suffix)
+    static void concatenatePaths (String& path, const String& suffix)
     {
         if (! path.endsWithChar ('/'))
             path << '/';

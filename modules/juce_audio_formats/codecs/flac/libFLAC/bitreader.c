@@ -388,7 +388,7 @@ FLAC__uint16 FLAC__bitreader_get_read_crc16(FLAC__BitReader *br)
 		for( ; br->crc16_align < br->consumed_bits; br->crc16_align += 8)
 			br->read_crc16 = FLAC__CRC16_UPDATE((unsigned)((tail >> (FLAC__BITS_PER_WORD-8-br->crc16_align)) & 0xff), br->read_crc16);
 	}
-	return br->read_crc16;
+	return (FLAC__uint16) br->read_crc16;
 }
 
 FLaC__INLINE FLAC__bool FLAC__bitreader_is_consumed_byte_aligned(const FLAC__BitReader *br)

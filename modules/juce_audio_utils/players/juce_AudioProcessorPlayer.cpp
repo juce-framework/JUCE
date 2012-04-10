@@ -91,14 +91,14 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         for (i = 0; i < numOutputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
-            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * numSamples);
+            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
             ++totalNumChans;
         }
 
         for (i = numOutputChannels; i < numInputChannels; ++i)
         {
             channels[totalNumChans] = tempBuffer.getSampleData (i - numOutputChannels, 0);
-            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * numSamples);
+            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
             ++totalNumChans;
         }
     }
@@ -107,14 +107,14 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         for (i = 0; i < numInputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
-            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * numSamples);
+            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
             ++totalNumChans;
         }
 
         for (i = numInputChannels; i < numOutputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
-            zeromem (channels[totalNumChans], sizeof (float) * numSamples);
+            zeromem (channels[totalNumChans], sizeof (float) * (size_t) numSamples);
             ++totalNumChans;
         }
     }
@@ -130,7 +130,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         if (processor->isSuspended())
         {
             for (i = 0; i < numOutputChannels; ++i)
-                zeromem (outputChannelData[i], sizeof (float) * numSamples);
+                zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
         }
         else
         {

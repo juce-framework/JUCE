@@ -123,7 +123,7 @@ public:
             uint8 buffer [64];
             const int bytesRead = input.read (buffer, (int) jmin (numBytesToRead, (int64) sizeof (buffer)));
 
-            if (bytesRead < sizeof (buffer))
+            if (bytesRead < (int) sizeof (buffer))
             {
                 processFinalBlock (buffer, (unsigned int) bytesRead);
                 break;

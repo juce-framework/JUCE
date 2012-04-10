@@ -87,7 +87,7 @@ int64 Random::nextInt64() noexcept
 
 bool Random::nextBool() noexcept
 {
-    return (nextInt() & 0x80000000) != 0;
+    return (nextInt() & 0x40000000) != 0;
 }
 
 float Random::nextFloat() noexcept

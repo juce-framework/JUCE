@@ -411,9 +411,9 @@ Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPositio
 //==============================================================================
 namespace ComponentPeerHelpers
 {
-    FileDragAndDropTarget* findDragAndDropTarget (Component* c,
-                                                  const StringArray& files,
-                                                  FileDragAndDropTarget* const lastOne)
+    static FileDragAndDropTarget* findDragAndDropTarget (Component* c,
+                                                         const StringArray& files,
+                                                         FileDragAndDropTarget* const lastOne)
     {
         while (c != nullptr)
         {

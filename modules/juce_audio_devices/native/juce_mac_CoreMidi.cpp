@@ -25,7 +25,7 @@
 
 namespace CoreMidiHelpers
 {
-    bool logError (const OSStatus err, const int lineNum)
+    static bool logError (const OSStatus err, const int lineNum)
     {
         if (err == noErr)
             return true;
@@ -39,7 +39,7 @@ namespace CoreMidiHelpers
     #define CHECK_ERROR(a) CoreMidiHelpers::logError (a, __LINE__)
 
     //==============================================================================
-    String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
+    static String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
     {
         String result;
         CFStringRef str = 0;
@@ -101,7 +101,7 @@ namespace CoreMidiHelpers
         return result;
     }
 
-    String getConnectedEndpointName (MIDIEndpointRef endpoint)
+    static String getConnectedEndpointName (MIDIEndpointRef endpoint)
     {
         String result;
 
@@ -113,7 +113,7 @@ namespace CoreMidiHelpers
 
         if (connections != 0)
         {
-            numConnections = (int) (CFDataGetLength (connections) / sizeof (MIDIUniqueID));
+            numConnections = ((int) CFDataGetLength (connections)) / (int) sizeof (MIDIUniqueID);
 
             if (numConnections > 0)
             {
@@ -121,7 +121,7 @@ namespace CoreMidiHelpers
 
                 for (int i = 0; i < numConnections; ++i, ++pid)
                 {
-                    MIDIUniqueID uid = ByteOrder::swapIfLittleEndian ((uint32) *pid);
+                    MIDIUniqueID uid = (MIDIUniqueID) ByteOrder::swapIfLittleEndian ((uint32) *pid);
                     MIDIObjectRef connObject;
                     MIDIObjectType connObjectType;
                     OSStatus err = MIDIObjectFindByUniqueID (uid, &connObject, &connObjectType);
@@ -170,7 +170,7 @@ namespace CoreMidiHelpers
         return getEndpointName (endpoint, false);
     }
 
-    MIDIClientRef getGlobalMidiClient()
+    static MIDIClientRef getGlobalMidiClient()
     {
         static MIDIClientRef globalMidiClient = 0;
 
@@ -273,7 +273,7 @@ namespace CoreMidiHelpers
         MidiDataConcatenator concatenator;
     };
 
-    void midiInputProc (const MIDIPacketList* pktlist, void* readProcRefCon, void* /*srcConnRefCon*/)
+    static void midiInputProc (const MIDIPacketList* pktlist, void* readProcRefCon, void* /*srcConnRefCon*/)
     {
         static_cast <MidiPortAndCallback*> (readProcRefCon)->handlePackets (pktlist);
     }
@@ -313,7 +313,7 @@ MidiOutput* MidiOutput::openDevice (int index)
 
     if (isPositiveAndBelow (index, (int) MIDIGetNumberOfDestinations()))
     {
-        MIDIEndpointRef endPoint = MIDIGetDestination (index);
+        MIDIEndpointRef endPoint = MIDIGetDestination ((ItemCount) index);
 
         CFStringRef pname;
         if (CHECK_ERROR (MIDIObjectGetStringProperty (endPoint, kMIDIPropertyName, &pname)))
@@ -373,15 +373,15 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
         int pos = 0, bytesLeft = message.getRawDataSize();
         const int numPackets = (bytesLeft + maxPacketSize - 1) / maxPacketSize;
         HeapBlock <MIDIPacketList> packets;
-        packets.malloc (32 * numPackets + message.getRawDataSize(), 1);
-        packets->numPackets = numPackets;
+        packets.malloc ((size_t) (32 * numPackets + message.getRawDataSize()), 1);
+        packets->numPackets = (UInt32) numPackets;
 
         MIDIPacket* p = packets->packet;
 
         for (int i = 0; i < numPackets; ++i)
         {
             p->timeStamp = timeStamp;
-            p->length = jmin (maxPacketSize, bytesLeft);
+            p->length = (UInt16) jmin (maxPacketSize, bytesLeft);
             memcpy (p->data, message.getRawData() + pos, p->length);
             pos += p->length;
             bytesLeft -= p->length;
@@ -395,7 +395,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
         MIDIPacketList packets;
         packets.numPackets = 1;
         packets.packet[0].timeStamp = timeStamp;
-        packets.packet[0].length = message.getRawDataSize();
+        packets.packet[0].length = (UInt16) message.getRawDataSize();
         *(int*) (packets.packet[0].data) = *(const int*) message.getRawData();
 
         mpe->send (&packets);
@@ -439,7 +439,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 
     if (isPositiveAndBelow (index, (int) MIDIGetNumberOfSources()))
     {
-        MIDIEndpointRef endPoint = MIDIGetSource (index);
+        MIDIEndpointRef endPoint = MIDIGetSource ((ItemCount) index);
 
         if (endPoint != 0)
         {

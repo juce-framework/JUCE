@@ -25,12 +25,12 @@
 
 namespace ComponentBuilderHelpers
 {
-    String getStateId (const ValueTree& state)
+    static String getStateId (const ValueTree& state)
     {
         return state [ComponentBuilder::idProperty].toString();
     }
 
-    Component* removeComponentWithID (OwnedArray<Component>& components, const String& compId)
+    static Component* removeComponentWithID (OwnedArray<Component>& components, const String& compId)
     {
         jassert (compId.isNotEmpty());
 
@@ -45,7 +45,7 @@ namespace ComponentBuilderHelpers
         return nullptr;
     }
 
-    Component* findComponentWithID (Component& c, const String& compId)
+    static Component* findComponentWithID (Component& c, const String& compId)
     {
         jassert (compId.isNotEmpty());
         if (c.getComponentID() == compId)
@@ -62,8 +62,8 @@ namespace ComponentBuilderHelpers
         return nullptr;
     }
 
-    Component* createNewComponent (ComponentBuilder::TypeHandler& type,
-                                   const ValueTree& state, Component* parent)
+    static Component* createNewComponent (ComponentBuilder::TypeHandler& type,
+                                          const ValueTree& state, Component* parent)
     {
         Component* const c = type.addNewComponentFromState (state, parent);
         jassert (c != nullptr && c->getParentComponent() == parent);
@@ -71,7 +71,7 @@ namespace ComponentBuilderHelpers
         return c;
     }
 
-    void updateComponent (ComponentBuilder& builder, const ValueTree& state)
+    static void updateComponent (ComponentBuilder& builder, const ValueTree& state)
     {
         Component* topLevelComp = builder.getManagedComponent();
 
@@ -96,7 +96,7 @@ namespace ComponentBuilderHelpers
         }
     }
 
-    void updateComponentColours (Component& component, const ValueTree& colourState)
+    static void updateComponentColours (Component& component, const ValueTree& colourState)
     {
         NamedValueSet& properties = component.getProperties();
 

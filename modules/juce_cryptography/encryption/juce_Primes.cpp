@@ -25,7 +25,7 @@
 
 namespace PrimesHelpers
 {
-    void createSmallSieve (const int numBits, BigInteger& result)
+    static void createSmallSieve (const int numBits, BigInteger& result)
     {
         result.setBit (numBits);
         result.clearBit (numBits); // to enlarge the array
@@ -43,8 +43,8 @@ namespace PrimesHelpers
         while (n <= (numBits >> 1));
     }
 
-    void bigSieve (const BigInteger& base, const int numBits, BigInteger& result,
-                   const BigInteger& smallSieve, const int smallSieveSize)
+    static void bigSieve (const BigInteger& base, const int numBits, BigInteger& result,
+                          const BigInteger& smallSieve, const int smallSieveSize)
     {
         jassert (! base[0]); // must be even!
 
@@ -81,8 +81,8 @@ namespace PrimesHelpers
         while (index < smallSieveSize);
     }
 
-    bool findCandidate (const BigInteger& base, const BigInteger& sieve,
-                        const int numBits, BigInteger& result, const int certainty)
+    static bool findCandidate (const BigInteger& base, const BigInteger& sieve,
+                               const int numBits, BigInteger& result, const int certainty)
     {
         for (int i = 0; i < numBits; ++i)
         {
@@ -98,7 +98,7 @@ namespace PrimesHelpers
         return false;
     }
 
-    bool passesMillerRabin (const BigInteger& n, int iterations)
+    static bool passesMillerRabin (const BigInteger& n, int iterations)
     {
         const BigInteger one (1), two (2);
         const BigInteger nMinusOne (n - one);

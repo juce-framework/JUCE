@@ -56,7 +56,7 @@ bool AudioFormatReader::read (int* const* destSamples,
 
         for (int i = numDestChannels; --i >= 0;)
             if (destSamples[i] != nullptr)
-                zeromem (destSamples[i], sizeof (int) * silence);
+                zeromem (destSamples[i], sizeof (int) * (size_t) silence);
 
         startOffsetInDestBuffer += silence;
         numSamplesToRead -= silence;
@@ -89,13 +89,13 @@ bool AudioFormatReader::read (int* const* destSamples,
             if (lastFullChannel != nullptr)
                 for (int i = (int) numChannels; i < numDestChannels; ++i)
                     if (destSamples[i] != nullptr)
-                        memcpy (destSamples[i], lastFullChannel, sizeof (int) * numSamplesToRead);
+                        memcpy (destSamples[i], lastFullChannel, sizeof (int) * (size_t) numSamplesToRead);
         }
         else
         {
             for (int i = (int) numChannels; i < numDestChannels; ++i)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i], sizeof (int) * numSamplesToRead);
+                    zeromem (destSamples[i], sizeof (int) * (size_t) numSamplesToRead);
         }
     }
 
@@ -158,7 +158,7 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
             // if this is a stereo buffer and the source was mono, dupe the first channel..
             memcpy (buffer->getSampleData (1, startSample),
                     buffer->getSampleData (0, startSample),
-                    sizeof (float) * numSamples);
+                    sizeof (float) * (size_t) numSamples);
         }
     }
 }

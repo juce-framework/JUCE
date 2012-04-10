@@ -1025,7 +1025,7 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
 
 }
 
-float *vorbis_window(vorbis_dsp_state *v,int W){
+static float *vorbis_window(vorbis_dsp_state *v,int W){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=(codec_setup_info*) vi->codec_setup;
   int hs=ci->halfrate_flag;

@@ -705,7 +705,7 @@ void BigInteger::shiftLeft (int bits, const int startBit)
         if (wordsToMove > 0)
         {
             for (int i = (int) top; --i >= 0;)
-                values [i + wordsToMove] = values [i];
+                values [(size_t) i + wordsToMove] = values [i];
 
             for (size_t j = 0; j < wordsToMove; ++j)
                 values [j] = 0;

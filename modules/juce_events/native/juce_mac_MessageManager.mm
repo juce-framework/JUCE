@@ -303,9 +303,10 @@ void MessageManager::stopDispatchLoop()
 #if JUCE_MODAL_LOOPS_PERMITTED
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
+    jassert (millisecondsToRunFor >= 0);
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-    uint32 endTime = Time::getMillisecondCounter() + millisecondsToRunFor;
+    uint32 endTime = Time::getMillisecondCounter() + (uint32) millisecondsToRunFor;
 
     while (! quitMessagePosted)
     {
@@ -330,6 +331,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 #endif
 
 //==============================================================================
+void initialiseNSApplication();
 void initialiseNSApplication()
 {
     JUCE_AUTORELEASEPOOL

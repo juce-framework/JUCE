@@ -2219,6 +2219,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NonShaderContext);
 };
 
+LowLevelGraphicsContext* createOpenGLContext (const Target&);
 LowLevelGraphicsContext* createOpenGLContext (const Target& target)
 {
    #if JUCE_USE_OPENGL_SHADERS

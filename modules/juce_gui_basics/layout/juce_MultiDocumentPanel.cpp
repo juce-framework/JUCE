@@ -115,7 +115,7 @@ MultiDocumentPanel::~MultiDocumentPanel()
 //==============================================================================
 namespace MultiDocHelpers
 {
-    bool shouldDeleteComp (Component* const c)
+    static bool shouldDeleteComp (Component* const c)
     {
         return c->getProperties() ["mdiDocumentDelete_"];
     }

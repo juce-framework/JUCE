@@ -116,6 +116,7 @@ private:
 
 juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
 
+void juce_CheckCurrentlyFocusedTopLevelWindow();
 void juce_CheckCurrentlyFocusedTopLevelWindow()
 {
     if (TopLevelWindowManager::getInstanceWithoutCreating() != nullptr)

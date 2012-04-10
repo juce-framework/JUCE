@@ -1455,7 +1455,7 @@ void TreeViewItem::setDrawsInLeftMargin (bool canDrawInLeftMargin) noexcept
 
 namespace TreeViewHelpers
 {
-    int calculateDepth (const TreeViewItem* item, const bool rootIsVisible) noexcept
+    static int calculateDepth (const TreeViewItem* item, const bool rootIsVisible) noexcept
     {
         jassert (item != nullptr);
         int depth = rootIsVisible ? 0 : -1;

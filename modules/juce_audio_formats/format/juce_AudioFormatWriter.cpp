@@ -151,14 +151,15 @@ bool AudioFormatWriter::writeFromAudioSampleBuffer (const AudioSampleBuffer& sou
     }
     else
     {
-        tempBuffer.malloc (numSamples * numChannels);
+        tempBuffer.malloc (((size_t) numSamples) * (size_t) numChannels);
 
         for (unsigned int i = 0; i < numChannels; ++i)
         {
             typedef AudioData::Pointer <AudioData::Int32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DestSampleType;
             typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceSampleType;
 
-            DestSampleType destData (chans[i] = tempBuffer + i * numSamples);
+            chans[i] = tempBuffer + (int) i * numSamples;
+            DestSampleType destData (chans[i]);
             SourceSampleType sourceData (source.getSampleData ((int) i, startSample));
             destData.convertSamples (sourceData, numSamples);
         }

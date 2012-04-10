@@ -70,7 +70,7 @@ private:
 //==============================================================================
 namespace CustomTypefaceHelpers
 {
-    juce_wchar readChar (InputStream& in)
+    static juce_wchar readChar (InputStream& in)
     {
         uint32 n = (uint32) (uint16) in.readShort();
 
@@ -85,7 +85,7 @@ namespace CustomTypefaceHelpers
         return (juce_wchar) n;
     }
 
-    void writeChar (OutputStream& out, juce_wchar charToWrite)
+    static void writeChar (OutputStream& out, juce_wchar charToWrite)
     {
         if (charToWrite >= 0x10000)
         {

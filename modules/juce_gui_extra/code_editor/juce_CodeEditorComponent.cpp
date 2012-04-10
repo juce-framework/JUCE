@@ -760,7 +760,7 @@ bool CodeEditorComponent::moveCaretToTop (const bool selecting)
 
 namespace CodeEditorHelpers
 {
-    int findFirstNonWhitespaceChar (const String& line) noexcept
+    static int findFirstNonWhitespaceChar (const String& line) noexcept
     {
         String::CharPointerType t (line.getCharPointer());
         int i = 0;

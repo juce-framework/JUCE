@@ -131,7 +131,7 @@ public:
         lengthInSamples = (unsigned int) info.total_samples;
         numChannels = info.channels;
 
-        reservoir.setSize ((int) numChannels, 2 * info.max_blocksize, false, false, true);
+        reservoir.setSize ((int) numChannels, 2 * (int) info.max_blocksize, false, false, true);
     }
 
     // returns the number of samples read
@@ -157,7 +157,7 @@ public:
                     if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
                                 reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
-                                sizeof (int) * num);
+                                sizeof (int) * (size_t) num);
 
                 startOffsetInDestBuffer += num;
                 startSampleInFile += num;
@@ -194,7 +194,7 @@ public:
         {
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
         }
 
         return true;
@@ -252,14 +252,14 @@ public:
     static FlacNamespace::FLAC__StreamDecoderTellStatus tellCallback_ (const FlacNamespace::FLAC__StreamDecoder*, FlacNamespace::FLAC__uint64* absolute_byte_offset, void* client_data)
     {
         using namespace FlacNamespace;
-        *absolute_byte_offset = static_cast <const FlacReader*> (client_data)->input->getPosition();
+        *absolute_byte_offset = (uint64) static_cast <const FlacReader*> (client_data)->input->getPosition();
         return FLAC__STREAM_DECODER_TELL_STATUS_OK;
     }
 
     static FlacNamespace::FLAC__StreamDecoderLengthStatus lengthCallback_ (const FlacNamespace::FLAC__StreamDecoder*, FlacNamespace::FLAC__uint64* stream_length, void* client_data)
     {
         using namespace FlacNamespace;
-        *stream_length = static_cast <const FlacReader*> (client_data)->input->getTotalLength();
+        *stream_length = (uint64) static_cast <const FlacReader*> (client_data)->input->getTotalLength();
         return FLAC__STREAM_DECODER_LENGTH_STATUS_OK;
     }
 
@@ -274,7 +274,7 @@ public:
                                                                          void* client_data)
     {
         using namespace FlacNamespace;
-        static_cast <FlacReader*> (client_data)->useSamples (buffer, frame->header.blocksize);
+        static_cast <FlacReader*> (client_data)->useSamples (buffer, (int) frame->header.blocksize);
         return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
     }
 
@@ -305,7 +305,7 @@ class FlacWriter  : public AudioFormatWriter
 public:
     //==============================================================================
     FlacWriter (OutputStream* const out, double sampleRate_,
-                int numChannels_, int bitsPerSample_, int qualityOptionIndex)
+                uint32 numChannels_, uint32 bitsPerSample_, int qualityOptionIndex)
         : AudioFormatWriter (out, TRANS (flacFormatName),
                              sampleRate_, numChannels_, bitsPerSample_)
     {
@@ -313,7 +313,7 @@ public:
         encoder = FLAC__stream_encoder_new();
 
         if (qualityOptionIndex > 0)
-            FLAC__stream_encoder_set_compression_level (encoder, jmin (8, qualityOptionIndex));
+            FLAC__stream_encoder_set_compression_level (encoder, (uint32) jmin (8, qualityOptionIndex));
 
         FLAC__stream_encoder_set_do_mid_side_stereo (encoder, numChannels == 2);
         FLAC__stream_encoder_set_loose_mid_side_stereo (encoder, numChannels == 2);
@@ -354,11 +354,11 @@ public:
 
         HeapBlock<int*> channels;
         HeapBlock<int> temp;
-        const int bitsToShift = 32 - bitsPerSample;
+        const int bitsToShift = 32 - (int) bitsPerSample;
 
         if (bitsToShift > 0)
         {
-            temp.malloc (numSamples * numChannels);
+            temp.malloc (numChannels * (size_t) numSamples);
             channels.calloc (numChannels + 1);
 
             for (unsigned int i = 0; i < numChannels; ++i)
@@ -366,7 +366,7 @@ public:
                 if (samplesToWrite[i] == nullptr)
                     break;
 
-                int* const destData = temp.getData() + i * numSamples;
+                int* const destData = temp.getData() + i * (size_t) numSamples;
                 channels[i] = destData;
 
                 for (int j = 0; j < numSamples; ++j)
@@ -376,7 +376,7 @@ public:
             samplesToWrite = const_cast <const int**> (channels.getData());
         }
 
-        return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, numSamples) != 0;
+        return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, (size_t) numSamples) != 0;
     }
 
     bool writeData (const void* const data, const int size) const
@@ -518,8 +518,8 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
 {
     if (getPossibleBitDepths().contains (bitsPerSample))
     {
-        ScopedPointer<FlacWriter> w (new FlacWriter (out, sampleRate, numberOfChannels, bitsPerSample, qualityOptionIndex));
-
+        ScopedPointer<FlacWriter> w (new FlacWriter (out, sampleRate, numberOfChannels,
+                                                     (uint32) bitsPerSample, qualityOptionIndex));
         if (w->ok)
             return w.release();
     }

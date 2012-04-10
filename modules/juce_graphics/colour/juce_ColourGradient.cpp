@@ -168,7 +168,7 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
             jassert (index >= 0 && index < numEntries);
 
             lookupTable[index] = pix1;
-            lookupTable[index].tween (pix2, (uint32) (i << 8) / numToDo);
+            lookupTable[index].tween (pix2, (uint32) ((i << 8) / numToDo));
             ++index;
         }
 

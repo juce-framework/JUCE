@@ -65,13 +65,13 @@ void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) noexc
 
 namespace XmlIdentifierChars
 {
-    bool isIdentifierCharSlow (const juce_wchar c) noexcept
+    static bool isIdentifierCharSlow (const juce_wchar c) noexcept
     {
         return CharacterFunctions::isLetterOrDigit (c)
                  || c == '_' || c == '-' || c == ':' || c == '.';
     }
 
-    bool isIdentifierChar (const juce_wchar c) noexcept
+    static bool isIdentifierChar (const juce_wchar c) noexcept
     {
         static const uint32 legalChars[] = { 0, 0x7ff6000, 0x87fffffe, 0x7fffffe, 0 };
 

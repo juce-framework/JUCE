@@ -86,7 +86,7 @@ namespace AiffFileHelpers
         {
             if (values.getAllKeys().contains ("MidiUnityNote", true))
             {
-                block.setSize ((sizeof (InstChunk) + 3) & ~3, true);
+                block.setSize ((sizeof (InstChunk) + 3) & ~(size_t) 3, true);
                 InstChunk* const inst = static_cast <InstChunk*> (block.getData());
 
                 inst->baseNote      = (int8) values.getValue ("MidiUnityNote", "60").getIntValue();
@@ -117,7 +117,7 @@ namespace AiffFileHelpers
     //==============================================================================
     namespace MarkChunk
     {
-        bool metaDataContainsZeroIdentifiers (const StringPairArray& values)
+        static bool metaDataContainsZeroIdentifiers (const StringPairArray& values)
         {
             // (zero cue identifiers are valid for WAV but not for AIFF)
             const String cueString ("Cue");
@@ -145,7 +145,7 @@ namespace AiffFileHelpers
             return false;
         }
 
-        void create (MemoryBlock& block, const StringPairArray& values)
+        static void create (MemoryBlock& block, const StringPairArray& values)
         {
             const int numCues = values.getValue ("NumCuePoints", "0").getIntValue();
 
@@ -205,7 +205,7 @@ namespace AiffFileHelpers
     //==============================================================================
     namespace COMTChunk
     {
-        void create (MemoryBlock& block, const StringPairArray& values)
+        static void create (MemoryBlock& block, const StringPairArray& values)
         {
             const int numNotes = values.getValue ("NumCueNotes", "0").getIntValue();
 
@@ -321,7 +321,7 @@ public:
 
                         const int offset = input->readIntBigEndian();
                         dataChunkStart = input->getPosition() + 4 + offset;
-                        lengthInSamples = (bytesPerFrame > 0) ? jmin (lengthInSamples, (int64) (length / bytesPerFrame)) : 0;
+                        lengthInSamples = (bytesPerFrame > 0) ? jmin (lengthInSamples, ((int64) length) / (int64) bytesPerFrame) : 0;
                     }
                     else if (type == chunkName ("MARK"))
                     {
@@ -407,7 +407,7 @@ public:
         {
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
 
             numSamples = (int) samplesAvailable;
         }
@@ -517,7 +517,7 @@ public:
         if (writeFailed)
             return false;
 
-        const int bytes = numChannels * numSamples * bitsPerSample / 8;
+        const size_t bytes = (size_t) numSamples * numChannels * bitsPerSample / 8;
         tempBlock.ensureSize ((size_t) bytes, false);
 
         switch (bitsPerSample)
@@ -530,7 +530,7 @@ public:
         }
 
         if (bytesWritten + bytes >= (size_t) 0xfff00000
-             || ! output->write (tempBlock.getData(), bytes))
+             || ! output->write (tempBlock.getData(), (int) bytes))
         {
             // failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage
@@ -542,7 +542,7 @@ public:
         else
         {
             bytesWritten += bytes;
-            lengthInSamples += numSamples;
+            lengthInSamples += (uint64) numSamples;
 
             return true;
         }
@@ -550,7 +550,7 @@ public:
 
 private:
     MemoryBlock tempBlock, markChunk, comtChunk, instChunk;
-    uint32 lengthInSamples, bytesWritten;
+    uint64 lengthInSamples, bytesWritten;
     int64 headerPosition;
     bool writeFailed;
 

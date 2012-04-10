@@ -33,7 +33,7 @@ namespace RelativeRectangleHelpers
             ++s;
     }
 
-    bool dependsOnSymbolsOtherThanThis (const Expression& e)
+    static bool dependsOnSymbolsOtherThanThis (const Expression& e)
     {
         if (e.getType() == Expression::operatorType && e.getSymbolOrFunction() == ".")
             return true;

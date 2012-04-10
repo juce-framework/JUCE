@@ -453,7 +453,7 @@ public:
             const int numberToShift = numUsed - indexToRemove;
 
             if (numberToShift > 0)
-                memmove (e, e + 1, numberToShift * sizeof (ElementType));
+                memmove (e, e + 1, sizeof (ElementType) * (size_t) numberToShift);
 
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
@@ -580,7 +580,7 @@ private:
         const int numberToMove = numUsed - indexToInsertAt;
 
         if (numberToMove > 0)
-            memmove (insertPos + 1, insertPos, numberToMove * sizeof (ElementType));
+            memmove (insertPos + 1, insertPos, sizeof (ElementType) * (size_t) numberToMove);
 
         *insertPos = newElement;
         ++numUsed;
