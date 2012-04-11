@@ -106,6 +106,9 @@ public:
         props.add (new TextPropertyComponent (getMinimumSDKVersionValue(), "Minimum SDK version", 32, false),
                    "The number of the minimum version of the Android SDK that the app requires");
 
+        props.add (new BooleanPropertyComponent (getCPP11EnabledValue(), "Enable C++11 features", "Enable the -std=c++0x flag"),
+                   "If enabled, this will set the -std=c++0x flag for the build.");
+
         props.add (new BooleanPropertyComponent (getInternetNeededValue(), "Internet Access", "Specify internet access permission in the manifest"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
 
@@ -149,6 +152,9 @@ public:
     String getMinimumSDKVersionString() const { return settings [Ids::androidMinimumSDK]; }
     Value getOtherPermissionsValue()       { return getSetting (Ids::androidOtherPermissions); }
     String getOtherPermissions() const     { return settings [Ids::androidOtherPermissions]; }
+
+    Value getCPP11EnabledValue()           { return getSetting (Ids::androidCpp11); }
+    bool isCPP11Enabled() const            { return settings [Ids::androidCpp11]; }
 
     String createDefaultClassName() const
     {
@@ -504,8 +510,10 @@ private:
         }
 
         flags << createIncludePathFlags (config)
-              << " -O" << config.getGCCOptimisationFlag()
-              << " -std=c++0x";
+              << " -O" << config.getGCCOptimisationFlag();
+
+        if (isCPP11Enabled())
+            flags << " -std=c++0x";
 
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config));
         return flags + createGCCPreprocessorFlags (defines);
