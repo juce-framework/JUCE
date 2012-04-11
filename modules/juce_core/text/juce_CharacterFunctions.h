@@ -48,8 +48,10 @@
  typedef uint32         juce_wchar;
 #endif
 
-/** This macro is deprecated, but preserved for compatibility with old code. */
-#define JUCE_T(stringLiteral)   (L##stringLiteral)
+#ifndef DOXYGEN
+ /** This macro is deprecated, but preserved for compatibility with old code. */
+ #define JUCE_T(stringLiteral)   (L##stringLiteral)
+#endif
 
 #if JUCE_DEFINE_T_MACRO
  /** The 'T' macro is an alternative for using the "L" prefix in front of a string literal.

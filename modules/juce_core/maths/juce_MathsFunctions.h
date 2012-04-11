@@ -298,24 +298,6 @@ inline int64 abs64 (const int64 n) noexcept
     return (n >= 0) ? n : -n;
 }
 
-/** This templated negate function will negate pointers as well as integers */
-template <typename Type>
-inline Type juce_negate (Type n) noexcept
-{
-    return sizeof (Type) == 1 ? (Type) -(signed char) n
-        : (sizeof (Type) == 2 ? (Type) -(short) n
-        : (sizeof (Type) == 4 ? (Type) -(int) n
-        : ((Type) -(int64) n)));
-}
-
-/** This templated negate function will negate pointers as well as integers */
-template <typename Type>
-inline Type* juce_negate (Type* n) noexcept
-{
-    return (Type*) -(pointer_sized_int) n;
-}
-
-
 //==============================================================================
 /** A predefined value for Pi, at double-precision.
 

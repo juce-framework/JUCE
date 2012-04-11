@@ -157,6 +157,23 @@ private:
 
     Type operator++ (int); // better to just use pre-increment with atomics..
     Type operator-- (int);
+
+    /** This templated negate function will negate pointers as well as integers */
+    template <typename ValueType>
+    inline ValueType negateValue (ValueType n) noexcept
+    {
+        return sizeof (ValueType) == 1 ? (ValueType) -(signed char) n
+            : (sizeof (ValueType) == 2 ? (ValueType) -(short) n
+            : (sizeof (ValueType) == 4 ? (ValueType) -(int) n
+            : ((ValueType) -(int64) n)));
+    }
+
+    /** This templated negate function will negate pointers as well as integers */
+    template <typename PointerType>
+    inline PointerType* negateValue (PointerType* n) noexcept
+    {
+        return reinterpret_cast <PointerType*> (-reinterpret_cast <pointer_sized_int> (n));
+    }
 };
 
 
@@ -286,7 +303,7 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) noexcept
 template <typename Type>
 inline Type Atomic<Type>::operator-= (const Type amountToSubtract) noexcept
 {
-    return operator+= (juce_negate (amountToSubtract));
+    return operator+= (negateValue (amountToSubtract));
 }
 
 template <typename Type>
