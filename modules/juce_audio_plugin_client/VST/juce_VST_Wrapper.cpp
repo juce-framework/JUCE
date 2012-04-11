@@ -655,7 +655,7 @@ public:
 
     bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
     {
-        const VstTimeInfo* const ti = getTimeInfo (kVstPpqPosValid | kVstTempoValid | kVstBarsValid //| kVstCyclePosValid
+        const VstTimeInfo* const ti = getTimeInfo (kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid
                                                    | kVstTimeSigValid | kVstSmpteValid | kVstClockValid);
 
         if (ti == nullptr || ti->sampleRate <= 0)
@@ -665,12 +665,12 @@ public:
 
         if ((ti->flags & kVstTimeSigValid) != 0)
         {
-            info.timeSigNumerator = ti->timeSigNumerator;
+            info.timeSigNumerator   = ti->timeSigNumerator;
             info.timeSigDenominator = ti->timeSigDenominator;
         }
         else
         {
-            info.timeSigNumerator = 4;
+            info.timeSigNumerator   = 4;
             info.timeSigDenominator = 4;
         }
 
@@ -713,7 +713,19 @@ public:
         }
 
         info.isRecording = (ti->flags & kVstTransportRecording) != 0;
-        info.isPlaying   = (ti->flags & kVstTransportPlaying) != 0 || info.isRecording;
+        info.isPlaying   = (ti->flags & (kVstTransportRecording | kVstTransportPlaying)) != 0;
+        info.isLooping   = (ti->flags & kVstTransportCycleActive) != 0;
+
+        if ((ti->flags & kVstCyclePosValid) != 0)
+        {
+            info.ppqLoopStart = ti->cycleStartPos;
+            info.ppqLoopEnd   = ti->cycleEndPos;
+        }
+        else
+        {
+            info.ppqLoopStart = 0;
+            info.ppqLoopEnd = 0;
+        }
 
         return true;
     }

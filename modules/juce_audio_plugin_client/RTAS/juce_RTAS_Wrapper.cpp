@@ -722,6 +722,9 @@ protected:
         info.isRecording = false;
         info.ppqPosition = ticks / 960000.0;
         info.ppqPositionOfLastBarStart = 0; //xxx no idea how to get this correctly..
+        info.isLooping = false;
+        info.ppqLoopStart = 0;
+        info.ppqLoopEnd = 0;
 
         // xxx incorrect if there are tempo changes, but there's no
         // other way of getting this info..

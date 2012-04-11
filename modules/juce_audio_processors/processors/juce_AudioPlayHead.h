@@ -106,6 +106,21 @@ public:
         */
         bool isRecording;
 
+        /** The current cycle start position in pulses-per-quarter-note.
+            Note that not all hosts or plugin formats may provide this value.
+            @see isLooping
+        */
+        double ppqLoopStart;
+
+        /** The current cycle end position in pulses-per-quarter-note.
+            Note that not all hosts or plugin formats may provide this value.
+            @see isLooping
+        */
+        double ppqLoopEnd;
+
+        /** True if the transport is currently looping. */
+        bool isLooping;
+
         //==============================================================================
         bool operator== (const CurrentPositionInfo& other) const noexcept;
         bool operator!= (const CurrentPositionInfo& other) const noexcept;

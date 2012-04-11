@@ -499,6 +499,9 @@ public:
         info.ppqPositionOfLastBarStart = 0;
         info.isPlaying = false;
         info.isRecording = false;
+        info.isLooping = false;
+        info.ppqLoopStart = 0;
+        info.ppqLoopEnd = 0;
 
         switch (lastSMPTETime.mType)
         {
