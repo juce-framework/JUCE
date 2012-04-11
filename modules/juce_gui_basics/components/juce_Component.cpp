@@ -2384,61 +2384,67 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
 
 void Component::internalMouseUp (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const ModifierKeys& oldModifiers)
 {
-    BailOutChecker checker (this);
-
-    if (flags.repaintOnMouseActivityFlag)
-        repaint();
-
-    const MouseEvent me (source, relativePos,
-                         oldModifiers, this, this, time,
-                         getLocalPoint (nullptr, source.getLastMouseDownPosition()),
-                         source.getLastMouseDownTime(),
-                         source.getNumberOfMultipleClicks(),
-                         source.hasMouseMovedSignificantlySincePressed());
-    mouseUp (me);
-
-    if (checker.shouldBailOut())
-        return;
-
-    Desktop& desktop = Desktop::getInstance();
-    desktop.getMouseListeners().callChecked (checker, &MouseListener::mouseUp, me);
-
-    MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseUp, me);
-
-    if (checker.shouldBailOut())
-        return;
-
-    // check for double-click
-    if (me.getNumberOfClicks() >= 2)
+    if (! isCurrentlyBlockedByAnotherModalComponent())
     {
-        mouseDoubleClick (me);
+        BailOutChecker checker (this);
+
+        if (flags.repaintOnMouseActivityFlag)
+            repaint();
+
+        const MouseEvent me (source, relativePos,
+                             oldModifiers, this, this, time,
+                             getLocalPoint (nullptr, source.getLastMouseDownPosition()),
+                             source.getLastMouseDownTime(),
+                             source.getNumberOfMultipleClicks(),
+                             source.hasMouseMovedSignificantlySincePressed());
+        mouseUp (me);
 
         if (checker.shouldBailOut())
             return;
 
-        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseDoubleClick, me);
-        MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDoubleClick, me);
+        Desktop& desktop = Desktop::getInstance();
+        desktop.getMouseListeners().callChecked (checker, &MouseListener::mouseUp, me);
+
+        MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseUp, me);
+
+        if (checker.shouldBailOut())
+            return;
+
+        // check for double-click
+        if (me.getNumberOfClicks() >= 2)
+        {
+            mouseDoubleClick (me);
+
+            if (checker.shouldBailOut())
+                return;
+
+            desktop.mouseListeners.callChecked (checker, &MouseListener::mouseDoubleClick, me);
+            MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDoubleClick, me);
+        }
     }
 }
 
 void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
-    BailOutChecker checker (this);
+    if (! isCurrentlyBlockedByAnotherModalComponent())
+    {
+        BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos,
-                         source.getCurrentModifiers(), this, this, time,
-                         getLocalPoint (nullptr, source.getLastMouseDownPosition()),
-                         source.getLastMouseDownTime(),
-                         source.getNumberOfMultipleClicks(),
-                         source.hasMouseMovedSignificantlySincePressed());
-    mouseDrag (me);
+        const MouseEvent me (source, relativePos,
+                             source.getCurrentModifiers(), this, this, time,
+                             getLocalPoint (nullptr, source.getLastMouseDownPosition()),
+                             source.getLastMouseDownTime(),
+                             source.getNumberOfMultipleClicks(),
+                             source.hasMouseMovedSignificantlySincePressed());
+        mouseDrag (me);
 
-    if (checker.shouldBailOut())
-        return;
+        if (checker.shouldBailOut())
+            return;
 
-    Desktop::getInstance().getMouseListeners().callChecked (checker, &MouseListener::mouseDrag, me);
+        Desktop::getInstance().getMouseListeners().callChecked (checker, &MouseListener::mouseDrag, me);
 
-    MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDrag, me);
+        MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDrag, me);
+    }
 }
 
 void Component::internalMouseMove (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
