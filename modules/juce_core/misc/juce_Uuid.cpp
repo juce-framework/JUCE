@@ -45,51 +45,40 @@ Uuid::Uuid()
     // into the mix too, to make it very very unlikely that two UUIDs will ever be the same..
 
     static Random r1 (getRandomSeedFromMACAddresses());
-
-    value.asInt64[0] = r1.nextInt64();
-    value.asInt64[1] = r1.nextInt64();
-
     Random r2;
 
-    for (int i = 4; --i >= 0;)
-        value.asInt[i] ^= r2.nextInt();
+    for (size_t i = 0; i < sizeof (uuid); ++i)
+        uuid[i] = (uint8) (r1.nextInt() ^ r2.nextInt());
 }
 
-Uuid::~Uuid() noexcept
+Uuid::~Uuid() noexcept {}
+
+Uuid::Uuid (const Uuid& other) noexcept
 {
+    memcpy (uuid, other.uuid, sizeof (uuid));
 }
 
-Uuid::Uuid (const Uuid& other)
-    : value (other.value)
+Uuid& Uuid::operator= (const Uuid& other) noexcept
 {
-}
-
-Uuid& Uuid::operator= (const Uuid& other)
-{
-    value = other.value;
+    memcpy (uuid, other.uuid, sizeof (uuid));
     return *this;
 }
 
-bool Uuid::operator== (const Uuid& other) const
-{
-    return value.asInt64[0] == other.value.asInt64[0]
-        && value.asInt64[1] == other.value.asInt64[1];
-}
-
-bool Uuid::operator!= (const Uuid& other) const
-{
-    return ! operator== (other);
-}
+bool Uuid::operator== (const Uuid& other) const noexcept    { return memcmp (uuid, other.uuid, sizeof (uuid)) == 0; }
+bool Uuid::operator!= (const Uuid& other) const noexcept    { return ! operator== (other); }
 
 bool Uuid::isNull() const noexcept
 {
-    return (value.asInt64 [0] == 0) && (value.asInt64 [1] == 0);
+    for (size_t i = 0; i < sizeof (uuid); ++i)
+        if (uuid[i] != 0)
+            return false;
+
+    return true;
 }
 
-//==============================================================================
 String Uuid::toString() const
 {
-    return String::toHexString (value.asBytes, sizeof (value.asBytes), 0);
+    return String::toHexString (uuid, sizeof (uuid), 0);
 }
 
 Uuid::Uuid (const String& uuidString)
@@ -101,23 +90,22 @@ Uuid& Uuid::operator= (const String& uuidString)
 {
     MemoryBlock mb;
     mb.loadFromHexString (uuidString);
-    mb.ensureSize (sizeof (value.asBytes), true);
-    mb.copyTo (value.asBytes, 0, sizeof (value.asBytes));
+    mb.ensureSize (sizeof (uuid), true);
+    mb.copyTo (uuid, 0, sizeof (uuid));
     return *this;
 }
 
-//==============================================================================
 Uuid::Uuid (const uint8* const rawData)
 {
     operator= (rawData);
 }
 
-Uuid& Uuid::operator= (const uint8* const rawData)
+Uuid& Uuid::operator= (const uint8* const rawData) noexcept
 {
     if (rawData != nullptr)
-        memcpy (value.asBytes, rawData, sizeof (value.asBytes));
+        memcpy (uuid, rawData, sizeof (uuid));
     else
-        zeromem (value.asBytes, sizeof (value.asBytes));
+        zeromem (uuid, sizeof (uuid));
 
     return *this;
 }

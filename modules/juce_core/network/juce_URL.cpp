@@ -450,18 +450,9 @@ String URL::addEscapeChars (const String& s, const bool isParameter)
         if (! (CharacterFunctions::isLetterOrDigit (c)
                  || legalChars.indexOf ((juce_wchar) c) >= 0))
         {
-            if (c == ' ')
-            {
-                utf8.set (i, '+');
-            }
-            else
-            {
-                static const char hexDigits[] = "0123456789abcdef";
-
-                utf8.set (i, '%');
-                utf8.insert (++i, hexDigits [((uint8) c) >> 4]);
-                utf8.insert (++i, hexDigits [c & 15]);
-            }
+            utf8.set (i, '%');
+            utf8.insert (++i, "0123456789abcdef" [((uint8) c) >> 4]);
+            utf8.insert (++i, "0123456789abcdef" [c & 15]);
         }
     }
 
