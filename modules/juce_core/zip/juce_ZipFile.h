@@ -43,7 +43,7 @@ class JUCE_API  ZipFile
 {
 public:
     /** Creates a ZipFile based for a file. */
-    ZipFile (const File& file);
+    explicit ZipFile (const File& file);
 
     //==============================================================================
     /** Creates a ZipFile for a given stream.
@@ -58,14 +58,14 @@ public:
         The stream will not be owned or deleted by this class - if you want the ZipFile to
         manage the stream's lifetime, use the other constructor.
     */
-    ZipFile (InputStream& inputStream);
+    explicit ZipFile (InputStream& inputStream);
 
     /** Creates a ZipFile for an input source.
 
         The inputSource object will be owned by the zip file, which will delete
         it later when not needed.
     */
-    ZipFile (InputSource* inputSource);
+    explicit ZipFile (InputSource* inputSource);
 
     /** Destructor. */
     ~ZipFile();
@@ -198,8 +198,11 @@ public:
         void addFile (const File& fileToAdd, int compressionLevel,
                       const String& storedPathName = String::empty);
 
-        /** Generates the zip file, writing it to the specified stream. */
-        bool writeToStream (OutputStream& target) const;
+        /** Generates the zip file, writing it to the specified stream.
+            If the progress parameter is non-null, it will be updated with an approximate
+            progress status between 0 and 1.0
+        */
+        bool writeToStream (OutputStream& target, double* progress) const;
 
         //==============================================================================
     private:

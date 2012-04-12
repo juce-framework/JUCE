@@ -130,7 +130,7 @@ namespace
         TemporaryFile temp (targetFile);
         ScopedPointer<FileOutputStream> out (temp.getFile().createOutputStream());
 
-        bool ok = out != nullptr && zip.writeToStream (*out);
+        bool ok = out != nullptr && zip.writeToStream (*out, nullptr);
         out = nullptr;
         ok = ok && temp.overwriteTargetFileWithTemporary();
 

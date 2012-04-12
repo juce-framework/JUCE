@@ -541,18 +541,22 @@ void ZipFile::Builder::addFile (const File& fileToAdd, const int compressionLeve
     items.add (new Item (fileToAdd, compressionLevel, storedPathName));
 }
 
-bool ZipFile::Builder::writeToStream (OutputStream& target) const
+bool ZipFile::Builder::writeToStream (OutputStream& target, double* const progress) const
 {
     const int64 fileStart = target.getPosition();
 
-    int i;
-    for (i = 0; i < items.size(); ++i)
+    for (int i = 0; i < items.size(); ++i)
+    {
+        if (progress != nullptr)
+            *progress = (i + 0.5) / items.size();
+
         if (! items.getUnchecked (i)->writeData (target, fileStart))
             return false;
+    }
 
     const int64 directoryStart = target.getPosition();
 
-    for (i = 0; i < items.size(); ++i)
+    for (int i = 0; i < items.size(); ++i)
         if (! items.getUnchecked (i)->writeDirectoryEntry (target))
             return false;
 
@@ -566,6 +570,9 @@ bool ZipFile::Builder::writeToStream (OutputStream& target) const
     target.writeInt ((int) (directoryEnd - directoryStart));
     target.writeInt ((int) (directoryStart - fileStart));
     target.writeShort (0);
+
+    if (progress != nullptr)
+        *progress = 1.0;
 
     return true;
 }
