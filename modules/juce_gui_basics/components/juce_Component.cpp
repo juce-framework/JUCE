@@ -568,12 +568,20 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
         if (peer != nullptr)
         {
+            ScopedPointer<ComponentPeer> oldPeerToDelete (peer);
+
             wasFullscreen = peer->isFullScreen();
             wasMinimised = peer->isMinimised();
             currentConstainer = peer->getConstrainer();
             oldNonFullScreenBounds = peer->getNonFullScreenBounds();
 
-            removeFromDesktop();
+            flags.hasHeavyweightPeerFlag = false;
+            Desktop::getInstance().removeDesktopComponent (this);
+            internalHierarchyChanged(); // give comps a chance to react to the peer change before the old peer is deleted.
+
+            if (safePointer == nullptr)
+                return;
+
             setTopLeftPosition (topLeft);
         }
 

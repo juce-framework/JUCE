@@ -97,6 +97,7 @@
  #include <X11/Xmd.h>
  #include <X11/keysym.h>
  #include <X11/cursorfont.h>
+ #include <unistd.h>
 
  #if JUCE_USE_XINERAMA
   /* If you're trying to use Xinerama, you'll need to install the "libxinerama-dev" package..  */
