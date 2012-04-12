@@ -379,13 +379,14 @@ private:
 
     int midiChannel, midiInChannelMask;
     float velocity;
-    int noteUnderMouse, mouseDownNote;
+
+    Array<int> mouseOverNotes, mouseDownNotes;
     BigInteger keysPressed, keysCurrentlyDrawnDown;
     bool shouldCheckState;
 
     int rangeStart, rangeEnd;
     float firstKey;
-    bool canScroll, mouseDragging, useMousePositionForVelocity, shouldCheckMousePos;
+    bool canScroll, useMousePositionForVelocity, shouldCheckMousePos;
     ScopedPointer<Button> scrollDown, scrollUp;
 
     Array <KeyPress> keyPresses;
@@ -397,10 +398,11 @@ private:
     static const uint8 blackNotes[];
 
     void getKeyPos (int midiNoteNumber, int& x, int& w) const;
-    int xyToNote (const Point<int>& pos, float& mousePositionVelocity);
-    int remappedXYToNote (const Point<int>& pos, float& mousePositionVelocity) const;
+    int xyToNote (const Point<int>&, float& mousePositionVelocity);
+    int remappedXYToNote (const Point<int>&, float& mousePositionVelocity) const;
     void resetAnyKeysInUse();
-    void updateNoteUnderMouse (const Point<int>& pos);
+    void updateNoteUnderMouse (const Point<int>&, bool isDown, int fingerNum);
+    void updateNoteUnderMouse (const MouseEvent&, bool isDown);
     void repaintNote (const int midiNoteNumber);
     void setLowestVisibleKeyFloat (float noteNumber);
     Rectangle<int> getWhiteNotePos (int noteNumber) const;

@@ -71,14 +71,11 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& state_,
       midiChannel (1),
       midiInChannelMask (0xffff),
       velocity (1.0f),
-      noteUnderMouse (-1),
-      mouseDownNote (-1),
       shouldCheckState (false),
       rangeStart (0),
       rangeEnd (127),
       firstKey (12 * 4.0f),
       canScroll (true),
-      mouseDragging (false),
       useMousePositionForVelocity (true),
       shouldCheckMousePos (false),
       keyMappingOctave (6),
@@ -90,8 +87,12 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& state_,
     // initialise with a default set of querty key-mappings..
     const char* const keymap = "awsedftgyhujkolp;";
 
-    for (int i = String (keymap).length(); --i >= 0;)
+    for (int i = 0; keymap[i] != 0; ++i)
         setKeyPressForNote (KeyPress (keymap[i], 0, 0), i);
+
+    const int numSources = Desktop::getInstance().getNumMouseSources();
+    mouseOverNotes.insertMultiple (0, -1, numSources);
+    mouseDownNotes.insertMultiple (0, -1, numSources);
 
     setOpaque (true);
     setWantsKeyboardFocus (true);
@@ -104,7 +105,6 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& state_,
 MidiKeyboardComponent::~MidiKeyboardComponent()
 {
     state.removeListener (this);
-    jassert (mouseDownNote < 0 && keysPressed.countNumberOfSetBits() == 0); // leaving stuck notes!
 }
 
 //==============================================================================
@@ -366,7 +366,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
 
                 drawWhiteNote (noteNum, g, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
                                state.isNoteOnForChannels (midiInChannelMask, noteNum),
-                               noteUnderMouse == noteNum, lineColour, textColour);
+                               mouseOverNotes.contains (noteNum), lineColour, textColour);
             }
         }
     }
@@ -430,7 +430,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
 
                 drawBlackNote (noteNum, g, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
                                state.isNoteOnForChannels (midiInChannelMask, noteNum),
-                               noteUnderMouse == noteNum, blackNoteColour);
+                               mouseOverNotes.contains (noteNum), blackNoteColour);
             }
         }
     }
@@ -667,51 +667,73 @@ void MidiKeyboardComponent::handleNoteOff (MidiKeyboardState*, int /*midiChannel
 //==============================================================================
 void MidiKeyboardComponent::resetAnyKeysInUse()
 {
-    if (keysPressed.countNumberOfSetBits() > 0 || mouseDownNote > 0)
+    if (keysPressed.countNumberOfSetBits() > 0 || mouseDownNotes.size() > 0)
     {
         state.allNotesOff (midiChannel);
         keysPressed.clear();
-        mouseDownNote = -1;
+
+        for (int i = mouseDownNotes.size(); --i >= 0;)
+        {
+            mouseDownNotes.set (i, -1);
+            mouseOverNotes.set (i, -1);
+        }
     }
 }
 
-void MidiKeyboardComponent::updateNoteUnderMouse (const Point<int>& pos)
+void MidiKeyboardComponent::updateNoteUnderMouse (const MouseEvent& e, bool isDown)
+{
+    updateNoteUnderMouse (e.getPosition(), isDown, e.source.getIndex());
+}
+
+void MidiKeyboardComponent::updateNoteUnderMouse (const Point<int>& pos, bool isDown, int fingerNum)
 {
     float mousePositionVelocity = 0.0f;
-    const int newNote = (mouseDragging || isMouseOver())
-                            ? xyToNote (pos, mousePositionVelocity) : -1;
+    const int newNote = xyToNote (pos, mousePositionVelocity);
+    const int oldNote = mouseOverNotes.getUnchecked (fingerNum);
 
-    if (noteUnderMouse != newNote)
+    if (oldNote != newNote)
     {
-        if (mouseDownNote >= 0)
-        {
-            state.noteOff (midiChannel, mouseDownNote);
-            mouseDownNote = -1;
-        }
-
-        if (mouseDragging && newNote >= 0)
-        {
-            if (! useMousePositionForVelocity)
-                mousePositionVelocity = 1.0f;
-
-            state.noteOn (midiChannel, newNote, mousePositionVelocity * velocity);
-            mouseDownNote = newNote;
-        }
-
-        repaintNote (noteUnderMouse);
-        noteUnderMouse = newNote;
-        repaintNote (noteUnderMouse);
+        repaintNote (oldNote);
+        repaintNote (newNote);
+        mouseOverNotes.set (fingerNum, newNote);
     }
-    else if (mouseDownNote >= 0 && ! mouseDragging)
+
+    int oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
+
+    if (isDown)
     {
-        state.noteOff (midiChannel, mouseDownNote);
-        mouseDownNote = -1;
+        if (newNote != oldNoteDown)
+        {
+            if (oldNoteDown >= 0)
+            {
+                mouseDownNotes.set (fingerNum, -1);
+
+                if (! mouseDownNotes.contains (oldNoteDown))
+                    state.noteOff (midiChannel, oldNoteDown);
+            }
+
+            if (newNote >= 0)
+            {
+                if (! useMousePositionForVelocity)
+                    mousePositionVelocity = 1.0f;
+
+                state.noteOn (midiChannel, newNote, mousePositionVelocity * velocity);
+                mouseDownNotes.set (fingerNum, newNote);
+            }
+        }
+    }
+    else if (oldNoteDown >= 0)
+    {
+        mouseDownNotes.set (fingerNum, -1);
+
+        if (! mouseDownNotes.contains (oldNoteDown))
+            state.noteOff (midiChannel, oldNoteDown);
     }
 }
 
 void MidiKeyboardComponent::mouseMove (const MouseEvent& e)
 {
-    updateNoteUnderMouse (e.getPosition());
+    updateNoteUnderMouse (e, false);
     shouldCheckMousePos = false;
 }
 
@@ -723,7 +745,7 @@ void MidiKeyboardComponent::mouseDrag (const MouseEvent& e)
     if (newNote >= 0)
         mouseDraggedToKey (newNote, e);
 
-    updateNoteUnderMouse (e.getPosition());
+    updateNoteUnderMouse (e, true);
 }
 
 bool MidiKeyboardComponent::mouseDownOnKey (int /*midiNoteNumber*/, const MouseEvent&)
@@ -739,34 +761,28 @@ void MidiKeyboardComponent::mouseDown (const MouseEvent& e)
 {
     float mousePositionVelocity;
     const int newNote = xyToNote (e.getPosition(), mousePositionVelocity);
-    mouseDragging = false;
 
     if (newNote >= 0 && mouseDownOnKey (newNote, e))
     {
-        repaintNote (noteUnderMouse);
-        noteUnderMouse = -1;
-        mouseDragging = true;
-
-        updateNoteUnderMouse (e.getPosition());
+        updateNoteUnderMouse (e, true);
         shouldCheckMousePos = true;
     }
 }
 
 void MidiKeyboardComponent::mouseUp (const MouseEvent& e)
 {
-    mouseDragging = false;
-    updateNoteUnderMouse (e.getPosition());
+    updateNoteUnderMouse (e, false);
     shouldCheckMousePos = false;
 }
 
 void MidiKeyboardComponent::mouseEnter (const MouseEvent& e)
 {
-    updateNoteUnderMouse (e.getPosition());
+    updateNoteUnderMouse (e, false);
 }
 
 void MidiKeyboardComponent::mouseExit (const MouseEvent& e)
 {
-    updateNoteUnderMouse (e.getPosition());
+    updateNoteUnderMouse (e, false);
 }
 
 void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, float ix, float iy)
@@ -794,7 +810,17 @@ void MidiKeyboardComponent::timerCallback()
     }
 
     if (shouldCheckMousePos)
-        updateNoteUnderMouse (getMouseXYRelative());
+    {
+        Desktop& desktop = Desktop::getInstance();
+
+        for (int i = desktop.getNumMouseSources(); --i >= 0;)
+        {
+            MouseInputSource* source = desktop.getMouseSource (i);
+            jassert (source != nullptr);
+            updateNoteUnderMouse (getLocalPoint (nullptr, source->getScreenPosition()),
+                                  source->isDragging(), source->getIndex());
+        }
+    }
 }
 
 //==============================================================================
