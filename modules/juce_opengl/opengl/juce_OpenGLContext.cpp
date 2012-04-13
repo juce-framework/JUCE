@@ -444,6 +444,7 @@ private:
     void detach()
     {
         getComponent()->setCachedComponentImage (nullptr);
+        context.nativeContext = nullptr;
     }
 };
 
