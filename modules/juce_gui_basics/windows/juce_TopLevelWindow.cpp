@@ -55,8 +55,7 @@ public:
             TopLevelWindow* tlw = dynamic_cast <TopLevelWindow*> (c);
 
             if (tlw == nullptr && c != nullptr)
-                // (unable to use the syntax findParentComponentOfClass <TopLevelWindow> () because of a VC6 compiler bug)
-                tlw = c->findParentComponentOfClass ((TopLevelWindow*) nullptr);
+                tlw = c->findParentComponentOfClass<TopLevelWindow>();
 
             if (tlw != nullptr)
                 active = tlw;
@@ -117,6 +116,7 @@ private:
 
 juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
 
+void juce_CheckCurrentlyFocusedTopLevelWindow();
 void juce_CheckCurrentlyFocusedTopLevelWindow()
 {
     if (TopLevelWindowManager::getInstanceWithoutCreating() != nullptr)

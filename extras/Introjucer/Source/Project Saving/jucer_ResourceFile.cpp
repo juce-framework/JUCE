@@ -175,6 +175,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
     cpp << newLine
         << newLine
+        << "const char* getNamedResource (const char*, int&) throw();" << newLine
         << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
         << "{" << newLine;
 

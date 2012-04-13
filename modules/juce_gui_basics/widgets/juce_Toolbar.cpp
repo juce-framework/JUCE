@@ -561,7 +561,7 @@ void Toolbar::itemDragMove (const SourceDetails& dragSourceDetails)
         {
             if (tc->getEditingMode() == ToolbarItemComponent::editableOnPalette)
             {
-                ToolbarItemPalette* const palette = tc->findParentComponentOfClass ((ToolbarItemPalette*) nullptr);
+                ToolbarItemPalette* const palette = tc->findParentComponentOfClass<ToolbarItemPalette>();
 
                 if (palette != nullptr)
                     palette->replaceComponent (tc);
@@ -789,7 +789,7 @@ private:
         {
             Colour background;
 
-            DialogWindow* const dw = findParentComponentOfClass ((DialogWindow*) nullptr);
+            DialogWindow* const dw = findParentComponentOfClass<DialogWindow>();
 
             if (dw != nullptr)
                 background = dw->getBackgroundColour();

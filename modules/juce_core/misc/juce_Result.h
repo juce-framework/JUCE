@@ -110,7 +110,7 @@ public:
 private:
     String errorMessage;
 
-    explicit Result (const String& errorMessage) noexcept;
+    explicit Result (const String&) noexcept;
 
     // These casts are private to prevent people trying to use the Result object in numeric contexts
     operator int() const;

@@ -382,7 +382,7 @@ void DrawablePath::ValueTreeWrapper::Element::convertToPathBreak (UndoManager* u
 
 namespace DrawablePathHelpers
 {
-    Point<float> findCubicSubdivisionPoint (float proportion, const Point<float> points[4])
+    static Point<float> findCubicSubdivisionPoint (float proportion, const Point<float> points[4])
     {
         const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
                            mid2 (points[1] + (points[2] - points[1]) * proportion),
@@ -394,7 +394,7 @@ namespace DrawablePathHelpers
         return newCp1 + (newCp2 - newCp1) * proportion;
     }
 
-    Point<float> findQuadraticSubdivisionPoint (float proportion, const Point<float> points[3])
+    static Point<float> findQuadraticSubdivisionPoint (float proportion, const Point<float> points[3])
     {
         const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
                            mid2 (points[1] + (points[2] - points[1]) * proportion);

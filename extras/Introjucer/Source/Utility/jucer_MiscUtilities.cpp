@@ -159,7 +159,7 @@ String replacePreprocessorDefs (const StringPairArray& definitions, String sourc
 //==============================================================================
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 {
-    Viewport* const viewport = e.eventComponent->findParentComponentOfClass ((Viewport*) 0);
+    Viewport* const viewport = e.eventComponent->findParentComponentOfClass<Viewport>();
 
     if (viewport != nullptr)
     {

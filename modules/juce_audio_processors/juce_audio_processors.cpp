@@ -52,6 +52,10 @@
  #endif
 #endif
 
+#if JUCE_PLUGINHOST_VST && JUCE_LINUX
+ #include <X11/Xlib.h>
+#endif
+
 //==============================================================================
 namespace juce
 {

@@ -50,11 +50,18 @@ public:
         Note that this is the number of bytes available from the start of the
         stream, not from the current position.
 
-        If the size of the stream isn't actually known, this may return -1.
+        If the size of the stream isn't actually known, this will return -1.
+
+        @see getNumBytesRemaining
     */
     virtual int64 getTotalLength() = 0;
 
-    //==============================================================================
+    /** Returns the number of bytes available for reading, or a negative value if
+        the remaining length is not known.
+        @see getTotalLength
+    */
+    int64 getNumBytesRemaining();
+
     /** Returns true if the stream has no more data to read. */
     virtual bool isExhausted() = 0;
 

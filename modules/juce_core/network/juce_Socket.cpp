@@ -41,7 +41,7 @@
 //==============================================================================
 namespace SocketHelpers
 {
-    void initSockets()
+    static void initSockets()
     {
        #if JUCE_WINDOWS
         static bool socketsStarted = false;
@@ -57,7 +57,7 @@ namespace SocketHelpers
        #endif
     }
 
-    bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) noexcept
+    static bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) noexcept
     {
         const int sndBufSize = 65536;
         const int rcvBufSize = 65536;
@@ -70,7 +70,7 @@ namespace SocketHelpers
                                : (setsockopt (handle, IPPROTO_TCP, TCP_NODELAY, (const char*) &one, sizeof (one)) == 0));
     }
 
-    bool bindSocketToPort (const int handle, const int port) noexcept
+    static bool bindSocketToPort (const int handle, const int port) noexcept
     {
         if (handle <= 0 || port <= 0)
             return false;
@@ -83,10 +83,10 @@ namespace SocketHelpers
         return bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) >= 0;
     }
 
-    int readSocket (const int handle,
-                    void* const destBuffer, const int maxBytesToRead,
-                    bool volatile& connected,
-                    const bool blockUntilSpecifiedAmountHasArrived) noexcept
+    static int readSocket (const int handle,
+                           void* const destBuffer, const int maxBytesToRead,
+                           bool volatile& connected,
+                           const bool blockUntilSpecifiedAmountHasArrived) noexcept
     {
         int bytesRead = 0;
 
@@ -121,7 +121,7 @@ namespace SocketHelpers
         return bytesRead;
     }
 
-    int waitForReadiness (const int handle, const bool forReading, const int timeoutMsecs) noexcept
+    static int waitForReadiness (const int handle, const bool forReading, const int timeoutMsecs) noexcept
     {
         struct timeval timeout;
         struct timeval* timeoutp;
@@ -174,7 +174,7 @@ namespace SocketHelpers
         return FD_ISSET (handle, forReading ? &rset : &wset) ? 1 : 0;
     }
 
-    bool setSocketBlockingState (const int handle, const bool shouldBlock) noexcept
+    static bool setSocketBlockingState (const int handle, const bool shouldBlock) noexcept
     {
        #if JUCE_WINDOWS
         u_long nonBlocking = shouldBlock ? 0 : (u_long) 1;
@@ -194,12 +194,12 @@ namespace SocketHelpers
        #endif
     }
 
-    bool connectSocket (int volatile& handle,
-                        const bool isDatagram,
-                        struct addrinfo** const serverAddress,
-                        const String& hostName,
-                        const int portNumber,
-                        const int timeOutMillisecs) noexcept
+    static bool connectSocket (int volatile& handle,
+                               const bool isDatagram,
+                               struct addrinfo** const serverAddress,
+                               const String& hostName,
+                               const int portNumber,
+                               const int timeOutMillisecs) noexcept
     {
         struct addrinfo hints = { 0 };
         hints.ai_family = AF_UNSPEC;

@@ -39,7 +39,7 @@ AudioSampleBuffer::AudioSampleBuffer (const AudioSampleBuffer& other) noexcept
     size (other.size)
 {
     allocateData();
-    const size_t numBytes = size * sizeof (float);
+    const size_t numBytes = sizeof (float) * (size_t) size;
 
     for (int i = 0; i < numChannels; ++i)
         memcpy (channels[i], other.channels[i], numBytes);
@@ -47,8 +47,8 @@ AudioSampleBuffer::AudioSampleBuffer (const AudioSampleBuffer& other) noexcept
 
 void AudioSampleBuffer::allocateData()
 {
-    const size_t channelListSize = (numChannels + 1) * sizeof (float*);
-    allocatedBytes = (int) (numChannels * size * sizeof (float) + channelListSize + 32);
+    const size_t channelListSize = sizeof (float*) * (size_t) (numChannels + 1);
+    allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (float) + channelListSize + 32;
     allocatedData.malloc (allocatedBytes);
     channels = reinterpret_cast <float**> (allocatedData.getData());
 
@@ -109,7 +109,7 @@ void AudioSampleBuffer::allocateChannels (float** const dataToReferTo, int offse
     }
     else
     {
-        allocatedData.malloc (numChannels + 1, sizeof (float*));
+        allocatedData.malloc ((size_t) numChannels + 1, sizeof (float*));
         channels = reinterpret_cast <float**> (allocatedData.getData());
     }
 
@@ -130,7 +130,7 @@ AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& other)
     {
         setSize (other.getNumChannels(), other.getNumSamples(), false, false, false);
 
-        const size_t numBytes = size * sizeof (float);
+        const size_t numBytes = sizeof (float) * (size_t) size;
 
         for (int i = 0; i < numChannels; ++i)
             memcpy (channels[i], other.channels[i], numBytes);
@@ -154,15 +154,15 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
 
     if (newNumSamples != size || newNumChannels != numChannels)
     {
-        const size_t channelListSize = (newNumChannels + 1) * sizeof (float*);
-        const size_t newTotalBytes = (newNumChannels * newNumSamples * sizeof (float)) + channelListSize + 32;
+        const size_t channelListSize = sizeof (float*) * (size_t) (newNumChannels + 1);
+        const size_t newTotalBytes = ((size_t) newNumChannels * (size_t) newNumSamples * sizeof (float)) + channelListSize + 32;
 
         if (keepExistingContent)
         {
             HeapBlock <char, true> newData;
             newData.allocate (newTotalBytes, clearExtraSpace);
 
-            const size_t numBytesToCopy = sizeof (float) * jmin (newNumSamples, size);
+            const size_t numBytesToCopy = sizeof (float) * (size_t) jmin (newNumSamples, size);
 
             float** const newChannels = reinterpret_cast <float**> (newData.getData());
             float* newChan = reinterpret_cast <float*> (newData + channelListSize);
@@ -178,7 +178,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
                 memcpy (newChannels[i], channels[i], numBytesToCopy);
 
             allocatedData.swapWith (newData);
-            allocatedBytes = (int) newTotalBytes;
+            allocatedBytes = newTotalBytes;
             channels = newChannels;
         }
         else
@@ -212,7 +212,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
 void AudioSampleBuffer::clear() noexcept
 {
     for (int i = 0; i < numChannels; ++i)
-        zeromem (channels[i], size * sizeof (float));
+        zeromem (channels[i], sizeof (float) * (size_t) size);
 }
 
 void AudioSampleBuffer::clear (const int startSample,
@@ -221,7 +221,7 @@ void AudioSampleBuffer::clear (const int startSample,
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
     for (int i = 0; i < numChannels; ++i)
-        zeromem (channels [i] + startSample, numSamples * sizeof (float));
+        zeromem (channels [i] + startSample, sizeof (float) * (size_t) numSamples);
 }
 
 void AudioSampleBuffer::clear (const int channel,
@@ -231,7 +231,7 @@ void AudioSampleBuffer::clear (const int channel,
     jassert (isPositiveAndBelow (channel, numChannels));
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
-    zeromem (channels [channel] + startSample, numSamples * sizeof (float));
+    zeromem (channels [channel] + startSample, sizeof (float) * (size_t) numSamples);
 }
 
 void AudioSampleBuffer::applyGain (const int channel,
@@ -248,7 +248,7 @@ void AudioSampleBuffer::applyGain (const int channel,
 
         if (gain == 0.0f)
         {
-            zeromem (d, sizeof (float) * numSamples);
+            zeromem (d, sizeof (float) * (size_t) numSamples);
         }
         else
         {
@@ -403,7 +403,7 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
     {
         memcpy (channels [destChannel] + destStartSample,
                 source.channels [sourceChannel] + sourceStartSample,
-                sizeof (float) * numSamples);
+                sizeof (float) * (size_t) numSamples);
     }
 }
 
@@ -420,7 +420,7 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
     {
         memcpy (channels [destChannel] + destStartSample,
                 source,
-                sizeof (float) * numSamples);
+                sizeof (float) * (size_t) numSamples);
     }
 }
 
@@ -442,7 +442,7 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
         {
             if (gain == 0)
             {
-                zeromem (d, sizeof (float) * numSamples);
+                zeromem (d, sizeof (float) * (size_t) numSamples);
             }
             else
             {
@@ -452,7 +452,7 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
         }
         else
         {
-            memcpy (d, source, sizeof (float) * numSamples);
+            memcpy (d, source, sizeof (float) * (size_t) numSamples);
         }
     }
 }

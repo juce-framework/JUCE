@@ -88,7 +88,7 @@ struct Expression::Helpers
             throw EvaluationError ("Recursive symbol references");
     }
 
-    friend class Expression::Term; // (also only needed as a VC6 workaround)
+    friend class Expression::Term;
 
     //==============================================================================
     /** An exception that can be thrown by Expression::evaluate(). */

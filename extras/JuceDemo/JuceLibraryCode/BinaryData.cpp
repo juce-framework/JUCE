@@ -2142,6 +2142,7 @@ static const unsigned char temp_816ae700[] =
 const char* treedemo_xml = (const char*) temp_816ae700;
 
 
+const char* getNamedResource (const char*, int&) throw();
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
 {
     int hash = 0;

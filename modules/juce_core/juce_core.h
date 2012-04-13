@@ -26,6 +26,15 @@
 #ifndef __JUCE_CORE_JUCEHEADER__
 #define __JUCE_CORE_JUCEHEADER__
 
+/* This line is here as a sanity-check to catch syntax errors caused by mistakes in 3rd-party
+   header files that have been included prior to this one. If you hit an error at this line,
+   there's probably some kind of syntax problem in whatever code immediately precedes this header.
+
+   It also causes an error if you attempt to build using a C or obj-C compiler rather than a C++ one.
+*/
+namespace DummyNamespaceStatementToCatchSyntaxErrors {}
+
+//==============================================================================
 #include "system/juce_TargetPlatform.h"
 
 //=============================================================================
@@ -106,8 +115,6 @@
 //=============================================================================
 #if JUCE_MSVC
  #pragma warning (disable: 4251) // (DLL build warning, must be disabled before pushing the warning state)
-
- #pragma pack (push, 8) // this is set explicitly in case the app is using a different packing size.
  #pragma warning (push)
  #pragma warning (disable: 4786) // (long class name warning)
  #ifdef __INTEL_COMPILER
@@ -416,7 +423,6 @@ namespace juce
 
 #if JUCE_MSVC
  #pragma warning (pop)
- #pragma pack (pop)
 #endif
 
 #endif   // __JUCE_CORE_JUCEHEADER__

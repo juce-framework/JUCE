@@ -32,7 +32,7 @@ namespace PathHelpers
 {
     const float ellipseAngularIncrement = 0.05f;
 
-    String nextToken (String::CharPointerType& t)
+    static String nextToken (String::CharPointerType& t)
     {
         t = t.findEndOfWhitespace();
 

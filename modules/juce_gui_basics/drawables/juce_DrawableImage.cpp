@@ -32,7 +32,8 @@ DrawableImage::DrawableImage()
 }
 
 DrawableImage::DrawableImage (const DrawableImage& other)
-    : image (other.image),
+    : Drawable (other),
+      image (other.image),
       opacity (other.opacity),
       overlayColour (other.overlayColour),
       bounds (other.bounds)

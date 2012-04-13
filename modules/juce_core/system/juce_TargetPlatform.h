@@ -40,15 +40,6 @@
 */
 
 //==============================================================================
-/* This line is here as a sanity-check to catch syntax errors caused by mistakes in 3rd-party
-   header files that have been included before this one. If you hit an error at this line, there
-   must be some kind of syntax problem in whatever code immediately precedes this header.
-
-   It also causes an error if you attempt to build using a C or obj-C compiler rather than a C++ one.
-*/
-namespace JuceDummyNamespace {}
-
-//==============================================================================
 #if (defined (_WIN32) || defined (_WIN64))
   #define       JUCE_WIN32 1
   #define       JUCE_WINDOWS 1

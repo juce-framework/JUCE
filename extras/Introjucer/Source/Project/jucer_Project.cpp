@@ -236,13 +236,18 @@ const String Project::loadDocument (const File& file)
 
 const String Project::saveDocument (const File& file)
 {
+    return saveProject (file, true);
+}
+
+String Project::saveProject (const File& file, bool showProgressBox)
+{
     updateProjectSettings();
     sanitiseConfigFlags();
 
     StoredSettings::getInstance()->recentFiles.addFile (file);
 
     ProjectSaver saver (*this, file);
-    return saver.save();
+    return saver.save (showProgressBox);
 }
 
 String Project::saveResourcesOnly (const File& file)

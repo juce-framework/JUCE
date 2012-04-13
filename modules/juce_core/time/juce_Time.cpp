@@ -39,7 +39,7 @@
 //==============================================================================
 namespace TimeHelpers
 {
-    struct tm  millisToLocal (const int64 millis) noexcept
+    static struct tm millisToLocal (const int64 millis) noexcept
     {
         struct tm result;
         const int64 seconds = millis / 1000;
@@ -93,13 +93,14 @@ namespace TimeHelpers
         return result;
     }
 
-    int extendedModulo (const int64 value, const int modulo) noexcept
+    static int extendedModulo (const int64 value, const int modulo) noexcept
     {
         return (int) (value >= 0 ? (value % modulo)
                                  : (value - ((value / modulo) + 1) * modulo));
     }
 
-    int doFTime (CharPointer_UTF32 dest, const size_t maxChars, const String& format, const struct tm* const tm) noexcept
+    static int doFTime (CharPointer_UTF32 dest, const size_t maxChars,
+                        const String& format, const struct tm* const tm) noexcept
     {
        #if JUCE_ANDROID
         HeapBlock <char> tempDest;

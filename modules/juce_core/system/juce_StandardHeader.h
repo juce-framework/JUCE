@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      2
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        19
+#define JUCE_BUILDNUMBER        20
 
 /** Current Juce version number.
 
@@ -155,6 +155,9 @@ extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger();
 #if JUCE_LOG_ASSERTIONS
  extern JUCE_API void logAssertion (const char* filename, int lineNum) noexcept;
 #endif
+
+#undef max
+#undef min
 
 #include "../memory/juce_Memory.h"
 #include "../maths/juce_MathsFunctions.h"

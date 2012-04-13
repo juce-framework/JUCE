@@ -40,7 +40,7 @@ namespace MidiBufferHelpers
         return getEventDataSize (d) + sizeof (int) + sizeof (uint16);
     }
 
-    int findActualEventLength (const uint8* const data, const int maxBytes) noexcept
+    static int findActualEventLength (const uint8* const data, const int maxBytes) noexcept
     {
         unsigned int byte = (unsigned int) *data;
         int size = 0;
@@ -126,7 +126,7 @@ void MidiBuffer::clear (const int startSample, const int numSamples)
         const int bytesToMove = bytesUsed - (int) (end - getData());
 
         if (bytesToMove > 0)
-            memmove (start, end, bytesToMove);
+            memmove (start, end, (size_t) bytesToMove);
 
         bytesUsed -= (int) (end - start);
     }
@@ -143,23 +143,23 @@ void MidiBuffer::addEvent (const void* const newData, const int maxBytes, const 
 
     if (numBytes > 0)
     {
-        int spaceNeeded = bytesUsed + numBytes + sizeof (int) + sizeof (uint16);
-        data.ensureSize ((spaceNeeded + spaceNeeded / 2 + 8) & ~7);
+        size_t spaceNeeded = (size_t) bytesUsed + (size_t) numBytes + sizeof (int) + sizeof (uint16);
+        data.ensureSize ((spaceNeeded + spaceNeeded / 2 + 8) & ~(size_t) 7);
 
         uint8* d = findEventAfter (getData(), sampleNumber);
         const int bytesToMove = bytesUsed - (int) (d - getData());
 
         if (bytesToMove > 0)
-            memmove (d + numBytes + sizeof (int) + sizeof (uint16), d, bytesToMove);
+            memmove (d + numBytes + sizeof (int) + sizeof (uint16), d, (size_t) bytesToMove);
 
         *reinterpret_cast <int*> (d) = sampleNumber;
         d += sizeof (int);
         *reinterpret_cast <uint16*> (d) = (uint16) numBytes;
         d += sizeof (uint16);
 
-        memcpy (d, newData, numBytes);
+        memcpy (d, newData, (size_t) numBytes);
 
-        bytesUsed += numBytes + sizeof (int) + sizeof (uint16);
+        bytesUsed += sizeof (int) + sizeof (uint16) + (size_t) numBytes;
     }
 }
 

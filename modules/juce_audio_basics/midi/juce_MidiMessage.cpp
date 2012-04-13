@@ -115,7 +115,7 @@ MidiMessage::MidiMessage (const void* const d, const int dataSize, const double 
     else
         data = new uint8 [dataSize];
 
-    memcpy (data, d, dataSize);
+    memcpy (data, d, (size_t) dataSize);
 
     // check that the length matches the data..
     jassert (size > 3 || data[0] >= 0xf0 || getMessageLengthFromFirstByte (data[0]) == size);
@@ -164,7 +164,7 @@ MidiMessage::MidiMessage (const MidiMessage& other)
     if (other.usesAllocatedData())
     {
         data = new uint8 [size];
-        memcpy (data, other.data, size);
+        memcpy (data, other.data, (size_t) size);
     }
     else
     {
@@ -180,7 +180,7 @@ MidiMessage::MidiMessage (const MidiMessage& other, const double newTimeStamp)
     if (other.usesAllocatedData())
     {
         data = new uint8 [size];
-        memcpy (data, other.data, size);
+        memcpy (data, other.data, (size_t) size);
     }
     else
     {
@@ -247,7 +247,7 @@ MidiMessage::MidiMessage (const void* src_, int sz, int& numBytesUsed, const uin
 
             data = new uint8 [size - numVariableLengthSysexBytes];
             *data = (uint8) byte;
-            memcpy (data + 1, src + numVariableLengthSysexBytes, size - numVariableLengthSysexBytes - 1);
+            memcpy (data + 1, src + numVariableLengthSysexBytes, (size_t) (size - numVariableLengthSysexBytes - 1));
         }
         else if (byte == 0xff)
         {
@@ -257,7 +257,7 @@ MidiMessage::MidiMessage (const void* src_, int sz, int& numBytesUsed, const uin
 
             data = new uint8 [size];
             *data = (uint8) byte;
-            memcpy (data + 1, src, size - 1);
+            memcpy (data + 1, src, (size_t) size - 1);
         }
         else
         {
@@ -295,7 +295,7 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
         if (other.usesAllocatedData())
         {
             data = new uint8 [size];
-            memcpy (data, other.data, size);
+            memcpy (data, other.data, (size_t) size);
         }
         else
         {
@@ -404,7 +404,7 @@ int MidiMessage::getNoteNumber() const noexcept
 void MidiMessage::setNoteNumber (const int newNoteNumber) noexcept
 {
     if (isNoteOnOrOff())
-        data[1] = (char) (newNoteNumber & 127);
+        data[1] = (uint8) (newNoteNumber & 127);
 }
 
 uint8 MidiMessage::getVelocity() const noexcept
@@ -622,10 +622,10 @@ bool MidiMessage::isSysEx() const noexcept
 
 MidiMessage MidiMessage::createSysExMessage (const uint8* sysexData, const int dataSize)
 {
-    HeapBlock<uint8> m (dataSize + 2);
+    HeapBlock<uint8> m ((size_t) dataSize + 2);
 
     m[0] = 0xf0;
-    memcpy (m + 1, sysexData, dataSize);
+    memcpy (m + 1, sysexData, (size_t) dataSize);
     m[dataSize + 1] = 0xf7;
 
     return MidiMessage (m, dataSize + 2);
@@ -682,7 +682,7 @@ bool MidiMessage::isTextMetaEvent() const noexcept
 
 String MidiMessage::getTextFromTextMetaEvent() const
 {
-    return String (reinterpret_cast <const char*> (getMetaEventData()), getMetaEventLength());
+    return String (reinterpret_cast <const char*> (getMetaEventData()), (size_t) getMetaEventLength());
 }
 
 bool MidiMessage::isTrackNameEvent() const noexcept         { return (data[1] == 3)    && (*data == 0xff); }

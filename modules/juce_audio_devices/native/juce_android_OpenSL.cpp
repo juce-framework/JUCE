@@ -31,8 +31,8 @@ bool isOpenSLAvailable()
     return library.open ("libOpenSLES.so");
 }
 
-const unsigned short openSLRates[] = { 8000, 16000, 32000, 44100, 48000 };
-const unsigned short openSLBufferSizes[] = { 256, 512, 768, 1024, 1280, 1600, 2048, 3072 };
+const unsigned short openSLRates[]       = { 8000, 16000, 32000, 44100, 48000 };
+const unsigned short openSLBufferSizes[] = { 256, 512, 768, 1024, 1280, 1600 }; // must all be multiples of the block size
 
 //==============================================================================
 class OpenSLAudioIODevice  : public AudioIODevice,
@@ -49,10 +49,15 @@ public:
         // get a number for this is by asking the AudioTrack/AudioRecord classes..
         AndroidAudioIODevice javaDevice (String::empty);
 
-        // this is a total guess about how to calculate this: assuming that internally the
-        // hardware probably uses 3 buffers, so the latency is about 2/3 of it.. YMMV
-        inputLatency  = (javaDevice.minBufferSizeIn  * 2) / 3;
-        outputLatency = (javaDevice.minBufferSizeOut * 2) / 3;
+        // this is a total guess about how to calculate the latency, but seems to vaguely agree
+        // with the devices I've tested.. YMMV
+        inputLatency  = ((javaDevice.minBufferSizeIn  * 2) / 3);
+        outputLatency = ((javaDevice.minBufferSizeOut * 2) / 3);
+
+        const int longestLatency = jmax (inputLatency, outputLatency);
+        const int totalLatency = inputLatency + outputLatency;
+        inputLatency  = ((longestLatency * inputLatency)  / totalLatency) & ~15;
+        outputLatency = ((longestLatency * outputLatency) / totalLatency) & ~15;
     }
 
     ~OpenSLAudioIODevice()
@@ -85,7 +90,7 @@ public:
         return (int) openSLRates [index];
     }
 
-    int getDefaultBufferSize()              { return 2048; }
+    int getDefaultBufferSize()              { return 1024; }
     int getNumBufferSizesAvailable()        { return numElementsInArray (openSLBufferSizes); }
 
     int getBufferSizeSamples (int index)
@@ -124,18 +129,14 @@ public:
 
         startThread (8);
 
-        if (recorder != nullptr)    recorder->start();
-        if (player != nullptr)      player->start();
-
         deviceOpen = true;
-
         return lastError;
     }
 
     void close()
     {
         stop();
-        stopThread (2000);
+        stopThread (6000);
         deviceOpen = false;
         recorder = nullptr;
         player = nullptr;
@@ -175,15 +176,18 @@ public:
 
     void run()
     {
+        if (recorder != nullptr)    recorder->start();
+        if (player != nullptr)      player->start();
+
         while (! threadShouldExit())
         {
+            if (player != nullptr && ! threadShouldExit())
+                player->writeBuffer (outputBuffer, *this);
+
             if (recorder != nullptr)
                 recorder->readNextBlock (inputBuffer, *this);
 
             invokeCallback();
-
-            if (player != nullptr && ! threadShouldExit())
-                player->writeBuffer (outputBuffer, *this);
         }
     }
 
@@ -297,9 +301,8 @@ private:
     //==================================================================================================
     struct BufferList
     {
-        BufferList (const int numChannels_, const int numSamples_ = 256, const int numBuffers_ = 16)
-            : numChannels (numChannels_), numSamples (numSamples_), numBuffers (numBuffers_),
-              bufferSpace (numChannels_ * numSamples_ * numBuffers_), nextBlock (0)
+        BufferList (const int numChannels_)
+            : numChannels (numChannels_), bufferSpace (numChannels_ * numSamples * numBuffers), nextBlock (0)
         {
         }
 
@@ -307,7 +310,7 @@ private:
         {
             while (numBlocksOut.get() == numBuffers)
             {
-                Thread::sleep (1);
+                dataArrived.wait (1);
 
                 if (threadToCheck.threadShouldExit())
                     return nullptr;
@@ -324,17 +327,19 @@ private:
             return bufferSpace + nextBlock * numChannels * numSamples;
         }
 
-        void bufferReturned()           { --numBlocksOut; }
-        void bufferSent()               { ++numBlocksOut; }
+        void bufferReturned()           { --numBlocksOut; dataArrived.signal(); }
+        void bufferSent()               { ++numBlocksOut; dataArrived.signal(); }
 
         int getBufferSizeBytes() const  { return numChannels * numSamples * sizeof (int16); }
 
-        const int numChannels, numSamples, numBuffers;
+        const int numChannels;
+        enum { numSamples = 256, numBuffers = 16 };
 
     private:
         HeapBlock<int16> bufferSpace;
         int nextBlock;
         Atomic<int> numBlocksOut;
+        WaitableEvent dataArrived;
     };
 
     //==================================================================================================
@@ -482,6 +487,7 @@ private:
                     check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_RECORD, &recorderRecord));
                     check ((*recorderObject)->GetInterface (recorderObject, *engine.SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recorderBufferQueue));
                     check ((*recorderBufferQueue)->RegisterCallback (recorderBufferQueue, staticCallback, this));
+                    check ((*recorderRecord)->SetRecordState (recorderRecord, SL_RECORDSTATE_STOPPED));
 
                     for (int i = bufferList.numBuffers; --i >= 0;)
                     {
@@ -517,6 +523,7 @@ private:
         {
             jassert (buffer.getNumChannels() == bufferList.numChannels);
             jassert (buffer.getNumSamples() < bufferList.numSamples * bufferList.numBuffers);
+            jassert ((buffer.getNumSamples() % bufferList.numSamples) == 0);
 
             int offset = 0;
             int numSamples = buffer.getNumSamples();
@@ -524,6 +531,9 @@ private:
             while (numSamples > 0)
             {
                 int16* const srcBuffer = bufferList.waitForFreeBuffer (thread);
+
+                if (srcBuffer == nullptr)
+                    break;
 
                 for (int i = 0; i < bufferList.numChannels; ++i)
                 {

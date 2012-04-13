@@ -74,8 +74,7 @@ void MultiDocumentPanelWindow::updateOrder()
 
 MultiDocumentPanel* MultiDocumentPanelWindow::getOwner() const noexcept
 {
-    // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
-    return findParentComponentOfClass ((MultiDocumentPanel*) nullptr);
+    return findParentComponentOfClass<MultiDocumentPanel>();
 }
 
 
@@ -88,14 +87,9 @@ public:
     {
     }
 
-    ~MDITabbedComponentInternal()
-    {
-    }
-
     void currentTabChanged (int, const String&)
     {
-        // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
-        MultiDocumentPanel* const owner = findParentComponentOfClass ((MultiDocumentPanel*) nullptr);
+        MultiDocumentPanel* const owner = findParentComponentOfClass<MultiDocumentPanel>();
 
         if (owner != nullptr)
             owner->updateOrder();
@@ -121,7 +115,7 @@ MultiDocumentPanel::~MultiDocumentPanel()
 //==============================================================================
 namespace MultiDocHelpers
 {
-    bool shouldDeleteComp (Component* const c)
+    static bool shouldDeleteComp (Component* const c)
     {
         return c->getProperties() ["mdiDocumentDelete_"];
     }

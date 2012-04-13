@@ -488,7 +488,7 @@ namespace juce
 //==============================================================================
 namespace MainMenuHelpers
 {
-    NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName, const PopupMenu* extraItems)
+    static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName, const PopupMenu* extraItems)
     {
         if (extraItems != nullptr && JuceMainMenuHandler::instance != nullptr && extraItems->getNumItems() > 0)
         {
@@ -547,7 +547,7 @@ namespace MainMenuHelpers
     }
 
     // Since our app has no NIB, this initialises a standard app menu...
-    void rebuildMainMenu (const PopupMenu* extraItems)
+    static void rebuildMainMenu (const PopupMenu* extraItems)
     {
         // this can't be used in a plugin!
         jassert (JUCEApplication::isStandaloneApp());

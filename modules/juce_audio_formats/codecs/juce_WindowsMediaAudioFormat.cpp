@@ -50,7 +50,7 @@ public:
         if (bytesRead != nullptr)
             *bytesRead = numRead;
 
-        return numRead == (int) numBytes ? S_OK : S_FALSE;
+        return (numRead == (int) numBytes) ? S_OK : S_FALSE;
     }
 
     JUCE_COMRESULT Seek (LARGE_INTEGER position, DWORD origin, ULARGE_INTEGER* resultPosition)
@@ -140,7 +140,7 @@ public:
 
         if (wmCreateSyncReader != nullptr)
         {
-            CoInitialize (0);
+            checkCoInitialiseCalled();
 
             HRESULT hr = wmCreateSyncReader (nullptr, WMT_RIGHT_PLAYBACK, wmSyncReader.resetAndGetPointerAddress());
 
@@ -172,6 +172,8 @@ public:
     {
         if (sampleRate <= 0)
             return false;
+
+        checkCoInitialiseCalled();
 
         if (startSampleInFile != currentPosition)
         {
@@ -251,6 +253,11 @@ private:
     int64 currentPosition;
     MemoryBlock buffer;
     int bufferStart, bufferEnd;
+
+    void checkCoInitialiseCalled()
+    {
+        CoInitialize (0);
+    }
 
     void scanFileForDetails()
     {

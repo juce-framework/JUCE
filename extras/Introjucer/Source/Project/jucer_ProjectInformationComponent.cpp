@@ -376,7 +376,7 @@ public:
                 for (int i = missingDependencies.size(); --i >= 0;)
                     project.addModule (missingDependencies[i], isModuleCopiedLocally);
 
-                ModulesPanel* mp = findParentComponentOfClass ((ModulesPanel*) nullptr);
+                ModulesPanel* mp = findParentComponentOfClass<ModulesPanel>();
                 if (mp != nullptr)
                     mp->refresh();
             }
@@ -787,7 +787,7 @@ private:
 
         void buttonClicked (Button*)
         {
-            ProjectSettingsComponent* psc = findParentComponentOfClass ((ProjectSettingsComponent*) nullptr);
+            ProjectSettingsComponent* psc = findParentComponentOfClass<ProjectSettingsComponent>();
             if (psc != nullptr)
                 psc->deleteButtonClicked (deleteButton.getName());
         }
@@ -860,7 +860,7 @@ private:
 
         void buttonClicked (Button*)
         {
-            ProjectSettingsComponent* psc = findParentComponentOfClass ((ProjectSettingsComponent*) nullptr);
+            ProjectSettingsComponent* psc = findParentComponentOfClass<ProjectSettingsComponent>();
             if (psc != nullptr)
                 psc->newItemButtonClicked (createNewButton);
         }

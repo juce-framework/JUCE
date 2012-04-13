@@ -388,9 +388,13 @@ File File::getChildFile (String relativePath) const
 
         while (relativePath[0] == '.')
         {
-            if (relativePath[1] == '.')
+            const juce_wchar secondChar = relativePath[1];
+
+            if (secondChar == '.')
             {
-                if (relativePath[2] == 0 || relativePath[2] == separator)
+                const juce_wchar thirdChar = relativePath[2];
+
+                if (thirdChar == 0 || thirdChar == separator)
                 {
                     const int lastSlash = path.lastIndexOfChar (separator);
                     if (lastSlash >= 0)
@@ -403,7 +407,7 @@ File File::getChildFile (String relativePath) const
                     break;
                 }
             }
-            else if (relativePath[1] == separator)
+            else if (secondChar == separator)
             {
                 relativePath = relativePath.substring (2);
             }

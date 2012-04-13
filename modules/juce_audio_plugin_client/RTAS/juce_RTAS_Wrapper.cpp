@@ -90,15 +90,12 @@
 
 //==============================================================================
 #ifdef _MSC_VER
- #pragma pack (push, 8)
  #pragma warning (disable: 4263 4264)
 #endif
 
 #include "../utility/juce_IncludeModuleHeaders.h"
 
 #ifdef _MSC_VER
- #pragma pack (pop)
-
  #if JUCE_DEBUGxxx // (the debug lib in the 8.0 SDK fails to link, so we'll stick to the release one...)
   #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Debug\\lib\\"
  #else
@@ -728,6 +725,9 @@ protected:
         info.isRecording = false;
         info.ppqPosition = ticks / 960000.0;
         info.ppqPositionOfLastBarStart = 0; //xxx no idea how to get this correctly..
+        info.isLooping = false;
+        info.ppqLoopStart = 0;
+        info.ppqLoopEnd = 0;
 
         // xxx incorrect if there are tempo changes, but there's no
         // other way of getting this info..

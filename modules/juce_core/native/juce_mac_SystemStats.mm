@@ -43,7 +43,7 @@ void Logger::outputDebugString (const String& text)
 namespace SystemStatsHelpers
 {
    #if JUCE_INTEL
-    void doCPUID (uint32& a, uint32& b, uint32& c, uint32& d, uint32 type)
+    static void doCPUID (uint32& a, uint32& b, uint32& c, uint32& d, uint32 type)
     {
         uint32 la = a, lb = b, lc = c, ld = d;
 

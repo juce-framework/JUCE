@@ -319,7 +319,7 @@ public:
         {
         case CommandIDs::newProject:
             result.setInfo ("New Project...", "Creates a new Jucer project", CommandCategories::general, 0);
-            result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
+            result.defaultKeypresses.add (KeyPress ('n', ModifierKeys::commandModifier, 0));
             break;
 
         case CommandIDs::open:

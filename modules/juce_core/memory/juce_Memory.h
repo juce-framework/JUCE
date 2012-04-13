@@ -27,20 +27,6 @@
 #define __JUCE_MEMORY_JUCEHEADER__
 
 //==============================================================================
-#if JUCE_MSVC || DOXYGEN
- /** This is a compiler-independent way of declaring a variable as being thread-local.
-
-     E.g.
-     @code
-     juce_ThreadLocal int myVariable;
-     @endcode
- */
- #define juce_ThreadLocal    __declspec(thread)
-#else
- #define juce_ThreadLocal    __thread
-#endif
-
-//==============================================================================
 #if JUCE_MINGW
  /** This allocator is not defined in mingw gcc. */
  #define alloca              __builtin_alloca

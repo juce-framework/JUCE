@@ -358,8 +358,8 @@ namespace WavFileHelpers
     //==============================================================================
     namespace ListChunk
     {
-        void appendLabelOrNoteChunk (const StringPairArray& values, const String& prefix,
-                                     const int chunkType, MemoryOutputStream& out)
+        static void appendLabelOrNoteChunk (const StringPairArray& values, const String& prefix,
+                                            const int chunkType, MemoryOutputStream& out)
         {
             const String label (values.getValue (prefix + "Text", prefix));
             const int labelLength = label.getNumBytesAsUTF8() + 1;
@@ -374,7 +374,7 @@ namespace WavFileHelpers
                 out.writeByte (0);
         }
 
-        void appendExtraChunk (const StringPairArray& values, const String& prefix, MemoryOutputStream& out)
+        static void appendExtraChunk (const StringPairArray& values, const String& prefix, MemoryOutputStream& out)
         {
             const String text (values.getValue (prefix + "Text", prefix));
 
@@ -396,7 +396,7 @@ namespace WavFileHelpers
                 out.writeByte (0);
         }
 
-        void create (MemoryBlock& block, const StringPairArray& values)
+        static void create (MemoryBlock& block, const StringPairArray& values)
         {
             const int numCueLabels  = values.getValue ("NumCueLabels", "0").getIntValue();
             const int numCueNotes   = values.getValue ("NumCueNotes", "0").getIntValue();
@@ -1032,7 +1032,7 @@ AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out, double sa
 
 namespace WavFileHelpers
 {
-    bool slowCopyWavFileWithNewMetadata (const File& file, const StringPairArray& metadata)
+    static bool slowCopyWavFileWithNewMetadata (const File& file, const StringPairArray& metadata)
     {
         TemporaryFile tempFile (file);
 

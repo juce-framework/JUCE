@@ -83,7 +83,7 @@ namespace
                   << projectFile.getFullPathName() << std::endl;
 
         String error (justSaveResources ? proj.saveResourcesOnly (projectFile)
-                                        : proj.saveDocument (projectFile));
+                                        : proj.saveProject (projectFile, false));
 
         if (error.isNotEmpty())
         {
@@ -130,7 +130,7 @@ namespace
         TemporaryFile temp (targetFile);
         ScopedPointer<FileOutputStream> out (temp.getFile().createOutputStream());
 
-        bool ok = out != nullptr && zip.writeToStream (*out);
+        bool ok = out != nullptr && zip.writeToStream (*out, nullptr);
         out = nullptr;
         ok = ok && temp.overwriteTargetFileWithTemporary();
 

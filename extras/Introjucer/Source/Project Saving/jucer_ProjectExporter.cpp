@@ -408,11 +408,23 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
         im = im1.isValid() ? im1 : im2;
     }
 
+    if (returnNullIfNothingBigEnough && im.getWidth() < size && im.getHeight() < size)
+        return Image::null;
+
+    return rescaleImageForIcon (im, size);
+}
+
+Image ProjectExporter::rescaleImageForIcon (Image im, const int size)
+{
+    im = SoftwareImageType().convert (im);
+
     if (size == im.getWidth() && size == im.getHeight())
         return im;
 
-    if (returnNullIfNothingBigEnough && im.getWidth() < size && im.getHeight() < size)
-        return Image::null;
+    // (scale it down in stages for better resampling)
+    while (im.getWidth() > 2 * size && im.getHeight() > 2 * size)
+        im = im.rescaled (im.getWidth() / 2,
+                          im.getHeight() / 2);
 
     Image newIm (Image::ARGB, size, size, true, SoftwareImageType());
     Graphics g (newIm);
@@ -420,6 +432,7 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
                        RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
     return newIm;
 }
+
 
 //==============================================================================
 ProjectExporter::ConfigIterator::ConfigIterator (ProjectExporter& exporter_)

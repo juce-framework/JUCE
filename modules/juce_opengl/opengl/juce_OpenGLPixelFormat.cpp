@@ -41,48 +41,22 @@ OpenGLPixelFormat::OpenGLPixelFormat (const int bitsPerRGBComponent,
 {
 }
 
-OpenGLPixelFormat::OpenGLPixelFormat (const OpenGLPixelFormat& other) noexcept
-    : redBits (other.redBits),
-      greenBits (other.greenBits),
-      blueBits (other.blueBits),
-      alphaBits (other.alphaBits),
-      depthBufferBits (other.depthBufferBits),
-      stencilBufferBits (other.stencilBufferBits),
-      accumulationBufferRedBits (other.accumulationBufferRedBits),
-      accumulationBufferGreenBits (other.accumulationBufferGreenBits),
-      accumulationBufferBlueBits (other.accumulationBufferBlueBits),
-      accumulationBufferAlphaBits (other.accumulationBufferAlphaBits),
-      multisamplingLevel (other.multisamplingLevel)
-{
-}
-
-OpenGLPixelFormat& OpenGLPixelFormat::operator= (const OpenGLPixelFormat& other) noexcept
-{
-    redBits = other.redBits;
-    greenBits = other.greenBits;
-    blueBits = other.blueBits;
-    alphaBits = other.alphaBits;
-    depthBufferBits = other.depthBufferBits;
-    stencilBufferBits = other.stencilBufferBits;
-    accumulationBufferRedBits = other.accumulationBufferRedBits;
-    accumulationBufferGreenBits = other.accumulationBufferGreenBits;
-    accumulationBufferBlueBits = other.accumulationBufferBlueBits;
-    accumulationBufferAlphaBits = other.accumulationBufferAlphaBits;
-    multisamplingLevel = other.multisamplingLevel;
-    return *this;
-}
-
 bool OpenGLPixelFormat::operator== (const OpenGLPixelFormat& other) const noexcept
 {
     return redBits == other.redBits
             && greenBits == other.greenBits
-            && blueBits == other.blueBits
+            && blueBits  == other.blueBits
             && alphaBits == other.alphaBits
             && depthBufferBits == other.depthBufferBits
             && stencilBufferBits == other.stencilBufferBits
-            && accumulationBufferRedBits == other.accumulationBufferRedBits
+            && accumulationBufferRedBits   == other.accumulationBufferRedBits
             && accumulationBufferGreenBits == other.accumulationBufferGreenBits
-            && accumulationBufferBlueBits == other.accumulationBufferBlueBits
+            && accumulationBufferBlueBits  == other.accumulationBufferBlueBits
             && accumulationBufferAlphaBits == other.accumulationBufferAlphaBits
             && multisamplingLevel == other.multisamplingLevel;
+}
+
+bool OpenGLPixelFormat::operator!= (const OpenGLPixelFormat& other) const noexcept
+{
+    return ! operator== (other);
 }

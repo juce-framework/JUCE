@@ -25,12 +25,12 @@
 
 namespace LookAndFeelHelpers
 {
-    void createRoundedPath (Path& p,
-                            const float x, const float y,
-                            const float w, const float h,
-                            const float cs,
-                            const bool curveTopLeft, const bool curveTopRight,
-                            const bool curveBottomLeft, const bool curveBottomRight) noexcept
+    static void createRoundedPath (Path& p,
+                                   const float x, const float y,
+                                   const float w, const float h,
+                                   const float cs,
+                                   const bool curveTopLeft, const bool curveTopRight,
+                                   const bool curveBottomLeft, const bool curveBottomRight) noexcept
     {
         const float cs2 = 2.0f * cs;
 
@@ -77,10 +77,10 @@ namespace LookAndFeelHelpers
         p.closeSubPath();
     }
 
-    Colour createBaseColour (const Colour& buttonColour,
-                             const bool hasKeyboardFocus,
-                             const bool isMouseOverButton,
-                             const bool isButtonDown) noexcept
+    static Colour createBaseColour (const Colour& buttonColour,
+                                    const bool hasKeyboardFocus,
+                                    const bool isMouseOverButton,
+                                    const bool isButtonDown) noexcept
     {
         const float sat = hasKeyboardFocus ? 1.3f : 0.9f;
         const Colour baseColour (buttonColour.withMultipliedSaturation (sat));
@@ -93,7 +93,7 @@ namespace LookAndFeelHelpers
         return baseColour;
     }
 
-    TextLayout layoutTooltipText (const String& text, const Colour& colour) noexcept
+    static TextLayout layoutTooltipText (const String& text, const Colour& colour) noexcept
     {
         const float tooltipFontSize = 13.0f;
         const int maxToolTipWidth = 400;

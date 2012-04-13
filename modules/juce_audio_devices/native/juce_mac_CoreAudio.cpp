@@ -79,10 +79,10 @@ public:
     void allocateTempBuffers()
     {
         const int tempBufSize = bufferSize + 4;
-        audioBuffer.calloc ((numInputChans + numOutputChans) * tempBufSize);
+        audioBuffer.calloc ((size_t) ((numInputChans + numOutputChans) * tempBufSize));
 
-        tempInputBuffers.calloc (numInputChans + 2);
-        tempOutputBuffers.calloc (numOutputChans + 2);
+        tempInputBuffers.calloc ((size_t) numInputChans + 2);
+        tempOutputBuffers.calloc ((size_t) numOutputChans + 2);
 
         int i, count = 0;
         for (i = 0; i < numInputChans; ++i)
@@ -110,7 +110,7 @@ public:
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, bufList)))
             {
-                const int numStreams = bufList->mNumberBuffers;
+                const int numStreams = (int) bufList->mNumberBuffers;
 
                 for (int i = 0; i < numStreams; ++i)
                 {
@@ -123,11 +123,11 @@ public:
                         {
                             char channelName [256] = { 0 };
                             UInt32 nameSize = sizeof (channelName);
-                            UInt32 channelNum = chanNum + 1;
+                            UInt32 channelNum = (UInt32) chanNum + 1;
                             pa.mSelector = kAudioDevicePropertyChannelName;
 
                             if (AudioObjectGetPropertyData (deviceID, &pa, sizeof (channelNum), &channelNum, &nameSize, channelName) == noErr)
-                                name = String::fromUTF8 (channelName, nameSize);
+                                name = String::fromUTF8 (channelName, (int) nameSize);
                         }
 
                         if (input)
@@ -135,8 +135,8 @@ public:
                             if (activeInputChans[chanNum])
                             {
                                 inputChannelInfo [numInputChannelInfos].streamNum = i;
-                                inputChannelInfo [numInputChannelInfos].dataOffsetSamples = j;
-                                inputChannelInfo [numInputChannelInfos].dataStrideSamples = b.mNumberChannels;
+                                inputChannelInfo [numInputChannelInfos].dataOffsetSamples = (int) j;
+                                inputChannelInfo [numInputChannelInfos].dataStrideSamples = (int) b.mNumberChannels;
                                 ++numInputChannelInfos;
                             }
 
@@ -150,8 +150,8 @@ public:
                             if (activeOutputChans[chanNum])
                             {
                                 outputChannelInfo [numOutputChannelInfos].streamNum = i;
-                                outputChannelInfo [numOutputChannelInfos].dataOffsetSamples = j;
-                                outputChannelInfo [numOutputChannelInfos].dataStrideSamples = b.mNumberChannels;
+                                outputChannelInfo [numOutputChannelInfos].dataOffsetSamples = (int) j;
+                                outputChannelInfo [numOutputChannelInfos].dataStrideSamples = (int) b.mNumberChannels;
                                 ++numOutputChannelInfos;
                             }
 
@@ -199,7 +199,7 @@ public:
         pa.mSelector = kAudioDevicePropertyBufferFrameSize;
         if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &framesPerBuf)))
         {
-            bufferSize = framesPerBuf;
+            bufferSize = (int) framesPerBuf;
             allocateTempBuffers();
         }
 
@@ -294,10 +294,10 @@ public:
         inChanNames.clear();
         outChanNames.clear();
 
-        inputChannelInfo.calloc (numInputChans + 2);
+        inputChannelInfo.calloc ((size_t) numInputChans + 2);
         numInputChannelInfos = 0;
 
-        outputChannelInfo.calloc (numOutputChans + 2);
+        outputChannelInfo.calloc ((size_t) numOutputChans + 2);
         numOutputChannelInfos = 0;
 
         fillInChannelInfo (true);
@@ -431,7 +431,7 @@ public:
         else
         {
             // change buffer size
-            UInt32 framesPerBuf = bufferSizeSamples;
+            UInt32 framesPerBuf = (UInt32) bufferSizeSamples;
             pa.mSelector = kAudioDevicePropertyBufferFrameSize;
 
             if (! OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, sizeof (framesPerBuf), &framesPerBuf)))
@@ -1233,7 +1233,7 @@ private:
 
             if (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, bufList) == noErr)
             {
-                const int numStreams = bufList->mNumberBuffers;
+                const int numStreams = (int) bufList->mNumberBuffers;
 
                 for (int i = 0; i < numStreams; ++i)
                 {

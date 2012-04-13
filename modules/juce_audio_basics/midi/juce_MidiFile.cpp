@@ -25,7 +25,7 @@
 
 namespace MidiFileHelpers
 {
-    void writeVariableLengthInt (OutputStream& out, unsigned int v)
+    static void writeVariableLengthInt (OutputStream& out, unsigned int v)
     {
         unsigned int buffer = v & 0x7f;
 
@@ -46,9 +46,9 @@ namespace MidiFileHelpers
         }
     }
 
-    bool parseMidiHeader (const uint8* &data, short& timeFormat, short& fileType, short& numberOfTracks) noexcept
+    static bool parseMidiHeader (const uint8* &data, short& timeFormat, short& fileType, short& numberOfTracks) noexcept
     {
-        unsigned int ch = (int) ByteOrder::bigEndianInt (data);
+        unsigned int ch = ByteOrder::bigEndianInt (data);
         data += 4;
 
         if (ch != ByteOrder::bigEndianInt ("MThd"))
@@ -88,9 +88,9 @@ namespace MidiFileHelpers
         return true;
     }
 
-    double convertTicksToSeconds (const double time,
-                                  const MidiMessageSequence& tempoEvents,
-                                  const int timeFormat)
+    static double convertTicksToSeconds (const double time,
+                                         const MidiMessageSequence& tempoEvents,
+                                         const int timeFormat)
     {
         if (timeFormat > 0)
         {
@@ -261,7 +261,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
 
         if (size > 16 && MidiFileHelpers::parseMidiHeader (d, timeFormat, fileType, expectedTracks))
         {
-            size -= (int) (d - static_cast <const uint8*> (data.getData()));
+            size -= (size_t) (d - static_cast <const uint8*> (data.getData()));
 
             int track = 0;
 
@@ -278,7 +278,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
                 if (chunkType == (int) ByteOrder::bigEndianInt ("MTrk"))
                     readNextTrack (d, chunkSize);
 
-                size -= chunkSize + 8;
+                size -= (size_t) chunkSize + 8;
                 d += chunkSize;
                 ++track;
             }
@@ -384,7 +384,7 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
         {
             const int tick = roundToInt (mm.getTimeStamp());
             const int delta = jmax (0, tick - lastTick);
-            MidiFileHelpers::writeVariableLengthInt (out, delta);
+            MidiFileHelpers::writeVariableLengthInt (out, (uint32) delta);
             lastTick = tick;
 
             const uint8* data = mm.getRawData();
@@ -407,7 +407,7 @@ void MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
                 ++data;
                 --dataSize;
 
-                MidiFileHelpers::writeVariableLengthInt (out, dataSize);
+                MidiFileHelpers::writeVariableLengthInt (out, (uint32) dataSize);
             }
 
             out.write (data, dataSize);

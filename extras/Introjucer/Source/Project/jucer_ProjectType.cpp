@@ -253,6 +253,9 @@ public:
                    "In an AU, this is the name of Cocoa class that creates the UI. Some hosts bizarrely display the class-name, so you might want to make it reflect your plugin. But the name must be "
                    "UNIQUE to this exact version of your plugin, to avoid objective-C linkage mix-ups that happen when different plugins containing the same class-name are loaded simultaneously.");
 
+        props.add (new TextPropertyComponent (getPluginAUMainType (project), "Plugin AU Main Type", 128, false),
+                   "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");
+
         props.add (new TextPropertyComponent (getPluginRTASCategory (project), "Plugin RTAS Category", 64, false),
                    "(Leave this blank if your plugin is a synth). This is one of the RTAS categories from FicPluginEnums.h, such as: ePlugInCategory_None, ePlugInCategory_EQ, ePlugInCategory_Dynamics, "
                    "ePlugInCategory_PitchShift, ePlugInCategory_Reverb, ePlugInCategory_Delay, "

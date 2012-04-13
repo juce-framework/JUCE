@@ -390,7 +390,7 @@ public:
             const int numberToMove = numUsed - indexToInsertAt;
 
             if (numberToMove > 0)
-                memmove (insertPos + 1, insertPos, numberToMove * sizeof (ElementType));
+                memmove (insertPos + 1, insertPos, ((size_t) numberToMove) * sizeof (ElementType));
 
             new (insertPos) ElementType (newElement);
             ++numUsed;
@@ -426,7 +426,7 @@ public:
             {
                 insertPos = data.elements + indexToInsertAt;
                 const int numberToMove = numUsed - indexToInsertAt;
-                memmove (insertPos + numberOfTimesToInsertIt, insertPos, numberToMove * sizeof (ElementType));
+                memmove (insertPos + numberOfTimesToInsertIt, insertPos, ((size_t) numberToMove) * sizeof (ElementType));
             }
             else
             {
@@ -731,7 +731,7 @@ public:
             const int numberToShift = numUsed - indexToRemove;
 
             if (numberToShift > 0)
-                memmove (e, e + 1, numberToShift * sizeof (ElementType));
+                memmove (e, e + 1, ((size_t) numberToShift) * sizeof (ElementType));
 
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
@@ -795,7 +795,7 @@ public:
 
             const int numToShift = numUsed - endIndex;
             if (numToShift > 0)
-                memmove (e, e + numberToRemove, numToShift * sizeof (ElementType));
+                memmove (e, e + numberToRemove, ((size_t) numToShift) * sizeof (ElementType));
 
             numUsed -= numberToRemove;
 
@@ -932,13 +932,13 @@ public:
                 {
                     memmove (data.elements + currentIndex,
                              data.elements + currentIndex + 1,
-                             (newIndex - currentIndex) * sizeof (ElementType));
+                             sizeof (ElementType) * (size_t) (newIndex - currentIndex));
                 }
                 else
                 {
                     memmove (data.elements + newIndex + 1,
                              data.elements + newIndex,
-                             (currentIndex - newIndex) * sizeof (ElementType));
+                             sizeof (ElementType) * (size_t) (currentIndex - newIndex));
                 }
 
                 memcpy (data.elements + newIndex, tempCopy, sizeof (ElementType));

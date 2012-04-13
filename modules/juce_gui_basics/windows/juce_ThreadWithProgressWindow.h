@@ -45,10 +45,6 @@
         {
         }
 
-        ~MyTask()
-        {
-        }
-
         void run()
         {
             for (int i = 0; i < thingsToDo; ++i)

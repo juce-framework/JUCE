@@ -566,14 +566,24 @@ MemoryMappedFile::~MemoryMappedFile()
 }
 
 //==============================================================================
+File juce_getExecutableFile();
 File juce_getExecutableFile()
 {
    #if JUCE_ANDROID
     return File (android.appFile);
    #else
-    Dl_info exeInfo;
-    dladdr ((void*) juce_getExecutableFile, &exeInfo);  // (can't be a const void* on android)
-    return File::getCurrentWorkingDirectory().getChildFile (CharPointer_UTF8 (exeInfo.dli_fname));
+    struct DLAddrReader
+    {
+        static String getFilename()
+        {
+            Dl_info exeInfo;
+            dladdr ((void*) juce_getExecutableFile, &exeInfo);
+            return CharPointer_UTF8 (exeInfo.dli_fname);
+        }
+    };
+
+    static String filename (DLAddrReader::getFilename());
+    return File::getCurrentWorkingDirectory().getChildFile (filename);
    #endif
 }
 
@@ -652,12 +662,14 @@ int File::getVolumeSerialNumber() const
 }
 
 //==============================================================================
+void juce_runSystemCommand (const String&);
 void juce_runSystemCommand (const String& command)
 {
     int result = system (command.toUTF8());
     (void) result;
 }
 
+String juce_getOutputFromCommand (const String&);
 String juce_getOutputFromCommand (const String& command)
 {
     // slight bodge here, as we just pipe the output into a temp file and read it...
@@ -796,6 +808,7 @@ void InterProcessLock::exit()
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
+extern "C" void* threadEntryProc (void*);
 extern "C" void* threadEntryProc (void* userData)
 {
     JUCE_AUTORELEASEPOOL
@@ -848,6 +861,7 @@ void Thread::killThread()
 void Thread::setCurrentThreadName (const String& name)
 {
    #if JUCE_IOS || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+    JUCE_AUTORELEASEPOOL
     [[NSThread currentThread] setName: juceStringToNS (name)];
    #elif JUCE_LINUX
     prctl (PR_SET_NAME, name.toUTF8().getAddress(), 0, 0, 0);

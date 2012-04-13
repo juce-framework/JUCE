@@ -34,7 +34,8 @@ DrawableText::DrawableText()
 }
 
 DrawableText::DrawableText (const DrawableText& other)
-    : bounds (other.bounds),
+    : Drawable (other),
+      bounds (other.bounds),
       fontHeight (other.fontHeight),
       fontHScale (other.fontHScale),
       font (other.font),

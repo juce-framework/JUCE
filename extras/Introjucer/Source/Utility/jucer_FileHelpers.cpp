@@ -30,7 +30,7 @@
 //==============================================================================
 namespace FileHelpers
 {
-    int64 calculateMemoryHashCode (const void* data, const int numBytes)
+    static int64 calculateMemoryHashCode (const void* data, const int numBytes)
     {
         int64 t = 0;
 
@@ -112,7 +112,7 @@ namespace FileHelpers
         return path.replaceCharacter ('/', '\\');
     }
 
-    String appendPath (const String& path, const String& subpath)
+    static String appendPath (const String& path, const String& subpath)
     {
         if (File::isAbsolutePath (subpath)
              || subpath.startsWithChar ('$')

@@ -27,7 +27,7 @@
 
 using namespace juce;
 
-#if JUCE_MAC
+#if JUCE_MAC && ! DOXYGEN
  #define Point     juce::Point
  #define Component juce::Component
 #endif

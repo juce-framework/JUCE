@@ -281,7 +281,7 @@ public:
             const int numToMove = numUsed - indexToInsertAt;
 
             if (numToMove > 0)
-                memmove (e + 1, e, numToMove * sizeof (ObjectClass*));
+                memmove (e + 1, e, sizeof (ObjectClass*) * (size_t) numToMove);
 
             *e = const_cast <ObjectClass*> (newObject);
             ++numUsed;
@@ -475,35 +475,26 @@ public:
     int indexOfSorted (ElementComparator& comparator,
                        const ObjectClass* const objectToLookFor) const noexcept
     {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
+        (void) comparator;
         const ScopedLockType lock (getLock());
+        int s = 0, e = numUsed;
 
-        int start = 0;
-        int end_ = numUsed;
-
-        for (;;)
+        while (s < e)
         {
-            if (start >= end_)
-            {
-                return -1;
-            }
-            else if (comparator.compareElements (objectToLookFor, data.elements [start]) == 0)
-            {
-                return start;
-            }
-            else
-            {
-                const int halfway = (start + end_) >> 1;
+            if (comparator.compareElements (objectToLookFor, data.elements [s]) == 0)
+                return s;
 
-                if (halfway == start)
-                    return -1;
-                else if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
-                    start = halfway;
-                else
-                    end_ = halfway;
-            }
+            const int halfway = (s + e) / 2;
+            if (halfway == s)
+                break;
+
+            if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
+                s = halfway;
+            else
+                e = halfway;
         }
+
+        return -1;
     }
 
     //==============================================================================
@@ -536,7 +527,7 @@ public:
                 const int numToShift = numUsed - indexToRemove;
 
                 if (numToShift > 0)
-                    memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+                    memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numToShift);
             }
         }
 
@@ -571,7 +562,7 @@ public:
             const int numToShift = numUsed - indexToRemove;
 
             if (numToShift > 0)
-                memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+                memmove (e, e + 1, sizeof (ObjectClass*) * (size_t) numToShift);
 
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
@@ -718,13 +709,13 @@ public:
                 {
                     memmove (data.elements + currentIndex,
                              data.elements + currentIndex + 1,
-                             (newIndex - currentIndex) * sizeof (ObjectClass*));
+                             sizeof (ObjectClass*) * (size_t) (newIndex - currentIndex));
                 }
                 else
                 {
                     memmove (data.elements + newIndex + 1,
                              data.elements + newIndex,
-                             (currentIndex - newIndex) * sizeof (ObjectClass*));
+                             sizeof (ObjectClass*) * (size_t) (currentIndex - newIndex));
                 }
 
                 data.elements [newIndex] = value;

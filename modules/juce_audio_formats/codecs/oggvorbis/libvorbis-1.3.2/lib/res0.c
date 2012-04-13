@@ -66,7 +66,7 @@ typedef struct {
 
 } vorbis_look_residue0;
 
-void res0_free_info(vorbis_info_residue *i){
+static void res0_free_info(vorbis_info_residue *i){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)i;
   if(info){
     memset(info,0,sizeof(*info));
@@ -74,7 +74,7 @@ void res0_free_info(vorbis_info_residue *i){
   }
 }
 
-void res0_free_look(vorbis_look_residue *i){
+static void res0_free_look(vorbis_look_residue *i){
   int j;
   if(i){
 
@@ -173,7 +173,7 @@ static int icount(unsigned int v){
 }
 
 
-void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
+static void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   int j,acc=0;
   oggpack_write(opb,info->begin,24);
@@ -203,7 +203,7 @@ void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
 }
 
 /* vorbis_info is for range checking */
-vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
+static vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int j,acc=0;
   vorbis_info_residue0 *info=(vorbis_info_residue0*) _ogg_calloc(1,sizeof(*info));
   codec_setup_info     *ci=(codec_setup_info*) vi->codec_setup;
@@ -267,7 +267,7 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   return(NULL);
 }
 
-vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
+static vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
                                vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)_ogg_calloc(1,sizeof(*look));
@@ -716,7 +716,7 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
   return(0);
 }
 
-int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+static int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
                  float **in,int *nonzero,int ch){
   int i,used=0;
   for(i=0;i<ch;i++)
@@ -728,7 +728,7 @@ int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
     return(0);
 }
 
-int res1_forward(oggpack_buffer *opb,vorbis_block *vb,vorbis_look_residue *vl,
+static int res1_forward(oggpack_buffer *opb,vorbis_block *vb,vorbis_look_residue *vl,
                  int **in,int *nonzero,int ch, long **partword, int submap){
   int i,used=0;
   for(i=0;i<ch;i++)
@@ -742,7 +742,7 @@ int res1_forward(oggpack_buffer *opb,vorbis_block *vb,vorbis_look_residue *vl,
   }
 }
 
-long **res1_class(vorbis_block *vb,vorbis_look_residue *vl,
+static long **res1_class(vorbis_block *vb,vorbis_look_residue *vl,
                   int **in,int *nonzero,int ch){
   int i,used=0;
   for(i=0;i<ch;i++)
@@ -754,7 +754,7 @@ long **res1_class(vorbis_block *vb,vorbis_look_residue *vl,
     return(0);
 }
 
-int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+static int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
                  float **in,int *nonzero,int ch){
   int i,used=0;
   for(i=0;i<ch;i++)
@@ -766,7 +766,7 @@ int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
     return(0);
 }
 
-long **res2_class(vorbis_block *vb,vorbis_look_residue *vl,
+static long **res2_class(vorbis_block *vb,vorbis_look_residue *vl,
                   int **in,int *nonzero,int ch){
   int i,used=0;
   for(i=0;i<ch;i++)
@@ -780,7 +780,7 @@ long **res2_class(vorbis_block *vb,vorbis_look_residue *vl,
 /* res2 is slightly more different; all the channels are interleaved
    into a single vector and encoded. */
 
-int res2_forward(oggpack_buffer *opb,
+static int res2_forward(oggpack_buffer *opb,
                  vorbis_block *vb,vorbis_look_residue *vl,
                  int **in,int *nonzero,int ch, long **partword,int submap){
   long i,j,k,n=vb->pcmend/2,used=0;
@@ -804,7 +804,7 @@ int res2_forward(oggpack_buffer *opb,
 }
 
 /* duplicate code here as speed is somewhat more important */
-int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+static int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
                  float **in,int *nonzero,int ch){
   long i,k,l,s;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;

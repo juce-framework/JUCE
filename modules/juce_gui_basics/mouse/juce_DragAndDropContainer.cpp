@@ -416,7 +416,7 @@ String DragAndDropContainer::getCurrentDragDescription() const
 
 DragAndDropContainer* DragAndDropContainer::findParentDragContainerFor (Component* c)
 {
-    return c == nullptr ? nullptr : c->findParentComponentOfClass ((DragAndDropContainer*) nullptr);
+    return c != nullptr ? c->findParentComponentOfClass<DragAndDropContainer>() : nullptr;
 }
 
 bool DragAndDropContainer::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails&, StringArray&, bool&)

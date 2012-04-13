@@ -136,9 +136,9 @@ namespace KeyPressHelpers
         { "cmd",       ModifierKeys::commandModifier }
     };
 
-    const char* numberPadPrefix() noexcept      { return "numpad "; }
+    static const char* numberPadPrefix() noexcept      { return "numpad "; }
 
-    int getNumpadKeyCode (const String& desc)
+    static int getNumpadKeyCode (const String& desc)
     {
         if (desc.containsIgnoreCase (numberPadPrefix()))
         {

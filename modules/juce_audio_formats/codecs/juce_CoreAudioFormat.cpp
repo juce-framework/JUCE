@@ -129,7 +129,7 @@ public:
         {
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
 
             numSamples = (int) samplesAvailable;
         }
@@ -149,20 +149,20 @@ public:
         while (numSamples > 0)
         {
             const int numThisTime = jmin (8192, numSamples);
-            const int numBytes = numThisTime * sizeof (float);
+            const size_t numBytes = sizeof (float) * (size_t) numThisTime;
 
             audioDataBlock.ensureSize (numBytes * numChannels, false);
             float* data = static_cast<float*> (audioDataBlock.getData());
 
-            for (int j = numChannels; --j >= 0;)
+            for (int j = (int) numChannels; --j >= 0;)
             {
                 bufferList->mBuffers[j].mNumberChannels = 1;
-                bufferList->mBuffers[j].mDataByteSize = numBytes;
+                bufferList->mBuffers[j].mDataByteSize = (UInt32) numBytes;
                 bufferList->mBuffers[j].mData = data;
                 data += numThisTime;
             }
 
-            UInt32 numFramesToRead = numThisTime;
+            UInt32 numFramesToRead = (UInt32) numThisTime;
             OSStatus status = ExtAudioFileRead (audioFileRef, &numFramesToRead, bufferList);
             if (status != noErr)
                 return false;
@@ -171,7 +171,7 @@ public:
             {
                 if (destSamples[i] != nullptr)
                 {
-                    if (i < numChannels)
+                    if (i < (int) numChannels)
                         memcpy (destSamples[i] + startOffsetInDestBuffer, bufferList->mBuffers[i].mData, numBytes);
                     else
                         zeromem (destSamples[i] + startOffsetInDestBuffer, numBytes);
@@ -210,7 +210,7 @@ private:
         CoreAudioReader* const reader = static_cast<CoreAudioReader*> (inClientData);
 
         reader->input->setPosition (inPosition);
-        *actualCount = reader->input->read (buffer, requestCount);
+        *actualCount = (UInt32) reader->input->read (buffer, (int) requestCount);
 
         return noErr;
     }

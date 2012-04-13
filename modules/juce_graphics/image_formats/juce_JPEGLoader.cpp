@@ -131,12 +131,12 @@ namespace JPEGHelpers
 
     struct JPEGDecodingFailure {};
 
-    void fatalErrorHandler (j_common_ptr)            { throw JPEGDecodingFailure(); }
-    void silentErrorCallback1 (j_common_ptr)         {}
-    void silentErrorCallback2 (j_common_ptr, int)    {}
-    void silentErrorCallback3 (j_common_ptr, char*)  {}
+    static void fatalErrorHandler (j_common_ptr)            { throw JPEGDecodingFailure(); }
+    static void silentErrorCallback1 (j_common_ptr)         {}
+    static void silentErrorCallback2 (j_common_ptr, int)    {}
+    static void silentErrorCallback3 (j_common_ptr, char*)  {}
 
-    void setupSilentErrorHandler (struct jpeg_error_mgr& err)
+    static void setupSilentErrorHandler (struct jpeg_error_mgr& err)
     {
         zerostruct (err);
 
@@ -148,9 +148,9 @@ namespace JPEGHelpers
     }
 
     //==============================================================================
-    void dummyCallback1 (j_decompress_ptr) {}
+    static void dummyCallback1 (j_decompress_ptr) {}
 
-    void jpegSkip (j_decompress_ptr decompStruct, long num)
+    static void jpegSkip (j_decompress_ptr decompStruct, long num)
     {
         decompStruct->src->next_input_byte += num;
 
@@ -158,7 +158,7 @@ namespace JPEGHelpers
         decompStruct->src->bytes_in_buffer -= num;
     }
 
-    boolean jpegFill (j_decompress_ptr)
+    static boolean jpegFill (j_decompress_ptr)
     {
         return 0;
     }
@@ -172,9 +172,9 @@ namespace JPEGHelpers
         char* buffer;
     };
 
-    void jpegWriteInit (j_compress_ptr) {}
+    static void jpegWriteInit (j_compress_ptr) {}
 
-    void jpegWriteTerminate (j_compress_ptr cinfo)
+    static void jpegWriteTerminate (j_compress_ptr cinfo)
     {
         JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
 
@@ -182,7 +182,7 @@ namespace JPEGHelpers
         dest->output->write (dest->buffer, (int) numToWrite);
     }
 
-    boolean jpegWriteFlush (j_compress_ptr cinfo)
+    static boolean jpegWriteFlush (j_compress_ptr cinfo)
     {
         JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
 

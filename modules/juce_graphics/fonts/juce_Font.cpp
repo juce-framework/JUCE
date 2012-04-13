@@ -25,7 +25,7 @@
 
 namespace FontValues
 {
-    float limitFontHeight (const float height) noexcept
+    static float limitFontHeight (const float height) noexcept
     {
         return jlimit (0.1f, 10000.0f, height);
     }

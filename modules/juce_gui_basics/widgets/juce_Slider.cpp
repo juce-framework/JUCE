@@ -979,14 +979,14 @@ void Slider::focusOfChildComponentChanged (FocusChangeType)
 
 namespace SliderHelpers
 {
-    double smallestAngleBetween (double a1, double a2) noexcept
+    static double smallestAngleBetween (double a1, double a2) noexcept
     {
         return jmin (std::abs (a1 - a2),
                      std::abs (a1 + double_Pi * 2.0 - a2),
                      std::abs (a2 + double_Pi * 2.0 - a1));
     }
 
-    void sliderMenuCallback (int result, Slider* slider)
+    static void sliderMenuCallback (int result, Slider* slider)
     {
         if (slider != nullptr)
         {

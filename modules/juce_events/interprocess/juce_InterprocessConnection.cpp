@@ -106,10 +106,7 @@ void InterprocessConnection::disconnect()
         socket->close();
 
     if (pipe != nullptr)
-    {
-        pipe->cancelPendingReads();
         pipe->close();
-    }
 
     stopThread (4000);
 

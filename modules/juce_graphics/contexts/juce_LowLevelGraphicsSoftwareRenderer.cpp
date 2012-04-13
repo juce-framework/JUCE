@@ -526,7 +526,7 @@ private:
 
     static forcedinline void copyRow (PixelRGB* dest, PixelRGB* src, int width) noexcept
     {
-        memcpy (dest, src, width * sizeof (PixelRGB));
+        memcpy (dest, src, sizeof (PixelRGB) * (size_t) width);
     }
 
     JUCE_DECLARE_NON_COPYABLE (ImageFillEdgeTableRenderer);
@@ -748,17 +748,17 @@ private:
                        (uint8) (c[PixelARGB::indexB] >> 16));
     }
 
-    void render2PixelAverageX (PixelARGB* const dest, const uint8* src, const int subPixelX) noexcept
+    void render2PixelAverageX (PixelARGB* const dest, const uint8* src, const uint32 subPixelX) noexcept
     {
         uint32 c[4] = { 128, 128, 128, 128 };
 
-        uint32 weight = (uint32) (256 - subPixelX);
+        uint32 weight = 256 - subPixelX;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
         c[3] += weight * src[3];
 
-        weight = (uint32) subPixelX;
+        weight = subPixelX;
         c[0] += weight * src[4];
         c[1] += weight * src[5];
         c[2] += weight * src[6];
@@ -770,11 +770,11 @@ private:
                        (uint8) (c[PixelARGB::indexB] >> 8));
     }
 
-    void render2PixelAverageY (PixelARGB* const dest, const uint8* src, const int subPixelY) noexcept
+    void render2PixelAverageY (PixelARGB* const dest, const uint8* src, const uint32 subPixelY) noexcept
     {
         uint32 c[4] = { 128, 128, 128, 128 };
 
-        uint32 weight = (uint32) (256 - subPixelY);
+        uint32 weight = 256 - subPixelY;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
@@ -782,7 +782,7 @@ private:
 
         src += this->srcData.lineStride;
 
-        weight = (uint32) subPixelY;
+        weight = subPixelY;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
@@ -795,28 +795,28 @@ private:
     }
 
     //==============================================================================
-    void render4PixelAverage (PixelRGB* const dest, const uint8* src, const int subPixelX, const int subPixelY) noexcept
+    void render4PixelAverage (PixelRGB* const dest, const uint8* src, const uint32 subPixelX, const uint32 subPixelY) noexcept
     {
         uint32 c[3] = { 256 * 128, 256 * 128, 256 * 128 };
 
-        uint32 weight = (uint32) ((256 - subPixelX) * (256 - subPixelY));
+        uint32 weight = (256 - subPixelX) * (256 - subPixelY);
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
 
-        weight = (uint32) (subPixelX * (256 - subPixelY));
+        weight = subPixelX * (256 - subPixelY);
         c[0] += weight * src[3];
         c[1] += weight * src[4];
         c[2] += weight * src[5];
 
         src += this->srcData.lineStride;
 
-        weight = (uint32) ((256 - subPixelX) * subPixelY);
+        weight = (256 - subPixelX) * subPixelY;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
 
-        weight = (uint32) (subPixelX * subPixelY);
+        weight = subPixelX * subPixelY;
         c[0] += weight * src[3];
         c[1] += weight * src[4];
         c[2] += weight * src[5];
@@ -827,11 +827,11 @@ private:
                        (uint8) (c[PixelRGB::indexB] >> 16));
     }
 
-    void render2PixelAverageX (PixelRGB* const dest, const uint8* src, const int subPixelX) noexcept
+    void render2PixelAverageX (PixelRGB* const dest, const uint8* src, const uint32 subPixelX) noexcept
     {
         uint32 c[3] = { 128, 128, 128 };
 
-        const uint32 weight = (uint32) (256 - subPixelX);
+        const uint32 weight = 256 - subPixelX;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
@@ -846,11 +846,11 @@ private:
                        (uint8) (c[PixelRGB::indexB] >> 8));
     }
 
-    void render2PixelAverageY (PixelRGB* const dest, const uint8* src, const int subPixelY) noexcept
+    void render2PixelAverageY (PixelRGB* const dest, const uint8* src, const uint32 subPixelY) noexcept
     {
         uint32 c[3] = { 128, 128, 128 };
 
-        const uint32 weight = (uint32) (256 - subPixelY);
+        const uint32 weight = 256 - subPixelY;
         c[0] += weight * src[0];
         c[1] += weight * src[1];
         c[2] += weight * src[2];
@@ -868,7 +868,7 @@ private:
     }
 
     //==============================================================================
-    void render4PixelAverage (PixelAlpha* const dest, const uint8* src, const int subPixelX, const int subPixelY) noexcept
+    void render4PixelAverage (PixelAlpha* const dest, const uint8* src, const uint32 subPixelX, const uint32 subPixelY) noexcept
     {
         uint32 c = 256 * 128;
         c += src[0] * ((256 - subPixelX) * (256 - subPixelY));
@@ -880,7 +880,7 @@ private:
         *((uint8*) dest) = (uint8) (c >> 16);
     }
 
-    void render2PixelAverageX (PixelAlpha* const dest, const uint8* src, const int subPixelX) noexcept
+    void render2PixelAverageX (PixelAlpha* const dest, const uint8* src, const uint32 subPixelX) noexcept
     {
         uint32 c = 128;
         c += src[0] * (256 - subPixelX);
@@ -888,7 +888,7 @@ private:
         *((uint8*) dest) = (uint8) (c >> 8);
     }
 
-    void render2PixelAverageY (PixelAlpha* const dest, const uint8* src, const int subPixelY) noexcept
+    void render2PixelAverageY (PixelAlpha* const dest, const uint8* src, const uint32 subPixelY) noexcept
     {
         uint32 c = 128;
         c += src[0] * (256 - subPixelY);

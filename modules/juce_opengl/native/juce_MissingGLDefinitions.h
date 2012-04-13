@@ -23,44 +23,67 @@
   ==============================================================================
 */
 
-#if JUCE_WINDOWS
- #define JUCE_DECLARE_GL_EXTENSION_FUNCTION(name, returnType, params, callparams) \
-   typedef returnType (__stdcall *type_ ## name) params; static type_ ## name name = nullptr;
-#else
- #define JUCE_DECLARE_GL_EXTENSION_FUNCTION(name, returnType, params, callparams) \
-   typedef returnType (*type_ ## name) params; static type_ ## name name = nullptr;
+#ifndef GL_CLAMP_TO_EDGE
+ #define GL_CLAMP_TO_EDGE        0x812f
 #endif
 
+#ifndef GL_NUM_EXTENSIONS
+ #define GL_NUM_EXTENSIONS       0x821d
+#endif
+
+#ifndef GL_BGRA_EXT
+ #define GL_BGRA_EXT             0x80e1
+#endif
+
+#ifndef GL_DEPTH24_STENCIL8
+ #define GL_DEPTH24_STENCIL8     0x88F0
+#endif
+
+#ifndef GL_RGBA8
+ #define GL_RGBA8                GL_RGBA
+#endif
+
+#if JUCE_ANDROID
+ #define JUCE_RGBA_FORMAT        GL_RGBA
+#else
+ #define JUCE_RGBA_FORMAT        GL_BGRA_EXT
+#endif
+
+#ifndef GL_COLOR_ATTACHMENT0
+ #define GL_COLOR_ATTACHMENT0    0x8CE0
+#endif
+
+#ifndef GL_DEPTH_ATTACHMENT
+ #define GL_DEPTH_ATTACHMENT     0x8D00
+#endif
+
+#ifndef GL_FRAMEBUFFER
+ #define GL_FRAMEBUFFER          0x8D40
+#endif
+
+#ifndef GL_FRAMEBUFFER_BINDING
+ #define GL_FRAMEBUFFER_BINDING  0x8CA6
+#endif
+
+#ifndef GL_FRAMEBUFFER_COMPLETE
+ #define GL_FRAMEBUFFER_COMPLETE 0x8CD5
+#endif
+
+#ifndef GL_RENDERBUFFER
+ #define GL_RENDERBUFFER         0x8D41
+#endif
+
+#ifndef GL_RENDERBUFFER_DEPTH_SIZE
+ #define GL_RENDERBUFFER_DEPTH_SIZE  0x8D54
+#endif
+
+#ifndef GL_STENCIL_ATTACHMENT
+ #define GL_STENCIL_ATTACHMENT   0x8D20
+#endif
+
+#if JUCE_WINDOWS
 namespace
 {
-   #ifndef GL_BGRA_EXT
-    enum { GL_BGRA_EXT = 0x80e1 };
-   #endif
-
-   #ifndef GL_CLAMP_TO_EDGE
-    enum { GL_CLAMP_TO_EDGE = 0x812f };
-   #endif
-
-   #ifndef GL_NUM_EXTENSIONS
-    enum { GL_NUM_EXTENSIONS = 0x821d };
-   #endif
-
-   #ifndef GL_RGBA8
-    #define GL_RGBA8 GL_RGBA
-   #endif
-
-   #if (! defined (GL_DEPTH24_STENCIL8)) && ! JUCE_WINDOWS
-    enum { GL_DEPTH24_STENCIL8 = 0x88F0 };
-   #endif
-
-   #if JUCE_ANDROID
-    enum { JUCE_RGBA_FORMAT = GL_RGBA };
-   #else
-    enum { JUCE_RGBA_FORMAT = GL_BGRA_EXT };
-   #endif
-
-
-   #if JUCE_WINDOWS
     enum
     {
         WGL_NUMBER_PIXEL_FORMATS_ARB    = 0x2000,
@@ -107,7 +130,6 @@ namespace
         GL_SHADING_LANGUAGE_VERSION     = 0x8B8C,
         GL_FRAGMENT_SHADER              = 0x8B30,
         GL_VERTEX_SHADER                = 0x8B31,
-        GL_DEPTH24_STENCIL8             = 0x88F0,
         GL_ARRAY_BUFFER                 = 0x8892,
         GL_ELEMENT_ARRAY_BUFFER         = 0x8893,
         GL_STATIC_DRAW                  = 0x88E4,
@@ -117,37 +139,5 @@ namespace
     typedef char GLchar;
     typedef pointer_sized_int GLsizeiptr;
     typedef pointer_sized_int GLintptr;
-   #endif
-
-   #ifndef GL_COLOR_ATTACHMENT0
-    #define GL_COLOR_ATTACHMENT0        0x8CE0
-   #endif
-
-   #ifndef GL_DEPTH_ATTACHMENT
-    #define GL_DEPTH_ATTACHMENT         0x8D00
-   #endif
-
-   #ifndef GL_FRAMEBUFFER
-    #define GL_FRAMEBUFFER              0x8D40
-   #endif
-
-   #ifndef GL_FRAMEBUFFER_BINDING
-    #define GL_FRAMEBUFFER_BINDING      0x8CA6
-   #endif
-
-   #ifndef GL_FRAMEBUFFER_COMPLETE
-    #define GL_FRAMEBUFFER_COMPLETE     0x8CD5
-   #endif
-
-   #ifndef GL_RENDERBUFFER
-    #define GL_RENDERBUFFER             0x8D41
-   #endif
-
-   #ifndef GL_RENDERBUFFER_DEPTH_SIZE
-    #define GL_RENDERBUFFER_DEPTH_SIZE  0x8D54
-   #endif
-
-   #ifndef GL_STENCIL_ATTACHMENT
-    #define GL_STENCIL_ATTACHMENT       0x8D20
-   #endif
 }
+#endif

@@ -320,7 +320,7 @@ void ProjectTreeViewBase::getAllSelectedNodesInTree (Component* componentInTree,
     TreeView* tree = dynamic_cast <TreeView*> (componentInTree);
 
     if (tree == nullptr)
-        tree = componentInTree->findParentComponentOfClass ((TreeView*) 0);
+        tree = componentInTree->findParentComponentOfClass<TreeView>();
 
     if (tree != nullptr)
     {

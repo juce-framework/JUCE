@@ -1112,6 +1112,7 @@ static const unsigned char temp_ee6f0c0f[] =
 const char* juce_icon_png = (const char*) temp_ee6f0c0f;
 
 
+const char* getNamedResource (const char*, int&) throw();
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
 {
     int hash = 0;
