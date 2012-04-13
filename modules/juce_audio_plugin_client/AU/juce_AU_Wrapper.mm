@@ -444,7 +444,10 @@ public:
             AUBase::FillInParameterName (outParameterInfo, name.toCFString(), false);
 
             ParamInfo paramInfo = juceFilter->parameterInfo(inParameterID);
-            outParameterInfo.defaultValue = paramInfo.defaultVal;
+            outParameterInfo.defaultValue =
+                juceFilter->parameterValueToScaled(
+                    inParameterID,
+                    paramInfo.defaultVal);
             AudioUnitParameterUnit unit = kAudioUnitParameterUnit_Generic;
             switch(paramInfo.paramType)
             {
