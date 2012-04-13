@@ -5,14 +5,15 @@
               jucerVersion="3.0.0" defines="JUCE_DLL_BUILD=1">
   <EXPORTFORMATS>
     <VS2008 targetFolder="Builds/VisualStudio2008" libraryType="2" juceFolder="../../../juce"
-            extraDefs=""/>
+            extraDefs="">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="jucedebug"
+                       winWarningLevel="4" generateManifest="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="juce"
+                       winWarningLevel="4" generateManifest="1"/>
+      </CONFIGURATIONS>
+    </VS2008>
   </EXPORTFORMATS>
-  <CONFIGURATIONS>
-    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="jucedebug"
-                   osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
-    <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="juce"
-                   osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
-  </CONFIGURATIONS>
   <MAINGROUP id="tNa6Wh" name="juce_dll">
     <GROUP id="N2ZGxS" name="Source"/>
   </MAINGROUP>
