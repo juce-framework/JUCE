@@ -79,7 +79,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     File target (exp->getTargetFolder());
 
     if (FileHelpers::shouldPathsBeRelative (juceFolder.getFullPathName(), project.getFile().getFullPathName()))
-        exp->getJuceFolderValue() = juceFolder.getRelativePathFrom (project.getFile().getParentDirectory());
+        exp->getJuceFolderValue() = FileHelpers::getRelativePathFrom (juceFolder, project.getFile().getParentDirectory());
     else
         exp->getJuceFolderValue() = juceFolder.getFullPathName();
 

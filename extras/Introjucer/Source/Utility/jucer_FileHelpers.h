@@ -43,6 +43,10 @@ namespace FileHelpers
     String windowsStylePath (const String& path);
 
     bool shouldPathsBeRelative (String path1, String path2);
+    bool isAbsolutePath (const String& path);
+
+    // A windows-aware version of File::getRelativePath()
+    String getRelativePathFrom (const File& file, const File& sourceFolder);
 }
 
 //==============================================================================

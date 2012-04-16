@@ -306,8 +306,8 @@ File Project::resolveFilename (String filename) const
     filename = replacePreprocessorDefs (getPreprocessorDefs(), filename)
                 .replaceCharacter ('\\', '/');
 
-    if (File::isAbsolutePath (filename))
-        return File (filename);
+    if (FileHelpers::isAbsolutePath (filename))
+        return File::createFileWithoutCheckingPath (filename); // (avoid assertions for windows-style paths)
 
     return getFile().getSiblingFile (filename);
 }
@@ -330,7 +330,7 @@ String Project::getRelativePathForFile (const File& file) const
     if (p1.upToFirstOccurrenceOf (File::separatorString, true, false)
           .equalsIgnoreCase (p2.upToFirstOccurrenceOf (File::separatorString, true, false)))
     {
-        filename = file.getRelativePathFrom (relativePathBase);
+        filename = FileHelpers::getRelativePathFrom (file, relativePathBase);
     }
 
     return filename;

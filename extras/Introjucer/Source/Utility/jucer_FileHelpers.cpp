@@ -112,12 +112,19 @@ namespace FileHelpers
         return path.replaceCharacter ('/', '\\');
     }
 
+    bool isAbsolutePath (const String& path)
+    {
+        return File::isAbsolutePath (path)
+                || path.startsWithChar ('/') // (needed because File::isAbsolutePath will ignore forward-slashes on Windows)
+                || path.startsWithChar ('$')
+                || path.startsWithChar ('~')
+                || (CharacterFunctions::isLetter (path[0]) && path[1] == ':')
+                || path.startsWithIgnoreCase ("smb:");
+    }
+
     static String appendPath (const String& path, const String& subpath)
     {
-        if (File::isAbsolutePath (subpath)
-             || subpath.startsWithChar ('$')
-             || subpath.startsWithChar ('~')
-             || (CharacterFunctions::isLetter (subpath[0]) && subpath[1] == ':'))
+        if (isAbsolutePath (subpath))
             return subpath.replaceCharacter ('\\', '/');
 
         String path1 (path.replaceCharacter ('\\', '/'));
@@ -144,5 +151,16 @@ namespace FileHelpers
         }
 
         return path1.substring (0, commonBitLength).removeCharacters ("/:").isNotEmpty();
+    }
+
+    String getRelativePathFrom (const File& file, const File& sourceFolder)
+    {
+       #if ! JUCE_WINDOWS
+        // On a non-windows machine, we can't know if a drive-letter path may be relative or not.
+        if (CharacterFunctions::isLetter (file.getFullPathName()[0]) && file.getFullPathName()[1] == ':')
+            return file.getFullPathName();
+       #endif
+
+        return file.getRelativePathFrom (sourceFolder);
     }
 }

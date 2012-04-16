@@ -187,7 +187,7 @@ namespace CodeHelpers
 
     String createIncludeStatement (const File& includeFile, const File& targetFile)
     {
-        return createIncludeStatement (FileHelpers::unixStylePath (includeFile.getRelativePathFrom (targetFile.getParentDirectory())));
+        return createIncludeStatement (FileHelpers::unixStylePath (FileHelpers::getRelativePathFrom (includeFile, targetFile.getParentDirectory())));
     }
 
     String createIncludeStatement (const String& includePath)
