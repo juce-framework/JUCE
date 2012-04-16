@@ -103,14 +103,30 @@ private:
 #define JUCE_COMRESULT  HRESULT __stdcall
 
 //==============================================================================
+template <class ComClass>
+class ComBaseClassHelperBase   : public ComClass
+{
+public:
+    ComBaseClassHelperBase()  : refCount (1) {}
+    virtual ~ComBaseClassHelperBase() {}
+
+    ULONG __stdcall AddRef()    { return ++refCount; }
+    ULONG __stdcall Release()   { const ULONG r = --refCount; if (r == 0) delete this; return r; }
+
+    void resetReferenceCount() noexcept     { refCount = 0; }
+
+protected:
+    ULONG refCount;
+};
+
 /** Handy base class for writing COM objects, providing ref-counting and a basic QueryInterface method.
 */
 template <class ComClass>
-class ComBaseClassHelper   : public ComClass
+class ComBaseClassHelper   : public ComBaseClassHelperBase <ComClass>
 {
 public:
-    ComBaseClassHelper()  : refCount (1) {}
-    virtual ~ComBaseClassHelper() {}
+    ComBaseClassHelper() {}
+    ~ComBaseClassHelper() {}
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
@@ -125,14 +141,6 @@ public:
         *result = 0;
         return E_NOINTERFACE;
     }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { const ULONG r = --refCount; if (r == 0) delete this; return r; }
-
-    void resetReferenceCount() noexcept     { refCount = 0; }
-
-protected:
-    ULONG refCount;
 };
 
 #endif   // __JUCE_WIN32_COMSMARTPTR_JUCEHEADER__
