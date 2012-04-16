@@ -101,7 +101,7 @@ public:
             NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0];
 
             if (floatingChildWindow != nil)
-                [getOwnerWindow() addChildWindow: c
+                [getOwnerWindow() addChildWindow: floatingChildWindow
                                          ordered: NSWindowAbove];
 
             EventTypeSpec windowEventTypes[] =
