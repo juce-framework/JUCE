@@ -17,7 +17,7 @@
                        osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"
                        osxArchitecture="default"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                       osxSDK="default" osxCompatibility="10.4 SDK" defines="JUCE_UNIT_TESTS=1"
+                       osxSDK="default" osxCompatibility="10.5 SDK" defines="JUCE_UNIT_TESTS=1"
                        osxArchitecture="32BitUniversal"/>
       </CONFIGURATIONS>
     </XCODE_MAC>
