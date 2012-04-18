@@ -93,6 +93,9 @@ private:
     KnownPluginList knownPluginList;
     KnownPluginList::SortMethod pluginSortMethod;
 
+    class PluginListWindow;
+    ScopedPointer <PluginListWindow> pluginListWindow;
+
     void showAudioSettings();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainHostWindow);
