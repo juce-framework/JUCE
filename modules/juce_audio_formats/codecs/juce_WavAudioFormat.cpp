@@ -85,7 +85,7 @@ namespace WavFileHelpers
         uint8 reserved[190];
         char codingHistory[1];
 
-        void copyTo (StringPairArray& values) const
+        void copyTo (StringPairArray& values, const int totalSize) const
         {
             values.set (WavAudioFormat::bwavDescription, String::fromUTF8 (description, 256));
             values.set (WavAudioFormat::bwavOriginator, String::fromUTF8 (originator, 32));
@@ -98,7 +98,8 @@ namespace WavFileHelpers
             const int64 time = (((int64)timeHigh) << 32) + timeLow;
 
             values.set (WavAudioFormat::bwavTimeReference, String (time));
-            values.set (WavAudioFormat::bwavCodingHistory, String::fromUTF8 (codingHistory));
+            values.set (WavAudioFormat::bwavCodingHistory,
+                        String::fromUTF8 (codingHistory, totalSize - offsetof (BWAVChunk, codingHistory)));
         }
 
         static MemoryBlock createFrom (const StringPairArray& values)
@@ -591,7 +592,7 @@ public:
                     HeapBlock <BWAVChunk> bwav;
                     bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
                     input->read (bwav, (int) length);
-                    bwav->copyTo (metadataValues);
+                    bwav->copyTo (metadataValues, (int) length);
                 }
                 else if (chunkType == chunkName ("smpl"))
                 {
