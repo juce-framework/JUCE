@@ -544,7 +544,9 @@ public:
                         }
                         else
                         {
-                            input->skipNextBytes (10); // skip over bitsPerSample and speakerPosition mask
+                            input->skipNextBytes (6); // skip over bitsPerSample
+                            metadataValues.set ("ChannelMask", String (input->readInt()));
+
                             ExtensibleWavSubFormat subFormat;
                             subFormat.data1 = (uint32) input->readInt();
                             subFormat.data2 = (uint16) input->readShort();
