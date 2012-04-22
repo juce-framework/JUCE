@@ -487,10 +487,7 @@ public:
 
     ScopedPointer<MainMenuModel> menuModel;
 
-private:
-    OwnedArray <MainWindow> mainWindows;
-
-    MainWindow* createNewMainWindow()
+    virtual MainWindow* createNewMainWindow()
     {
         MainWindow* mw = new MainWindow();
         mainWindows.add (mw);
@@ -498,6 +495,9 @@ private:
         avoidSuperimposedWindows (mw);
         return mw;
     }
+
+private:
+    OwnedArray <MainWindow> mainWindows;
 
     MainWindow* getOrCreateFrontmostWindow()
     {

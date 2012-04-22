@@ -49,12 +49,13 @@ public:
 
     //==============================================================================
     bool loadedOk() const                               { return true; }
-    bool isForFile (const File& file) const             { return modDetector.getFile() == file; }
+    bool isForFile (const File& file) const             { return getFile() == file; }
     bool isForNode (const ValueTree& node) const        { return false; }
     bool refersToProject (Project& project) const       { return false; }
     bool canSaveAs() const                              { return true; }
-    String getName() const                              { return modDetector.getFile().getFileName(); }
-    String getType() const                              { return modDetector.getFile().getFileExtension() + " file"; }
+    String getName() const                              { return getFile().getFileName(); }
+    String getType() const                              { return getFile().getFileExtension() + " file"; }
+    File getFile() const                                { return modDetector.getFile(); }
     bool needsSaving() const                            { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
     bool hasFileBeenModifiedExternally()                { return modDetector.hasBeenModified(); }
     void fileHasBeenRenamed (const File& newFile)       { modDetector.fileHasBeenRenamed (newFile); }
@@ -138,6 +139,7 @@ public:
     bool hasFileBeenModifiedExternally()            { return fileModificationTime != file.getLastModificationTime(); }
     void reloadFromFile()                           { fileModificationTime = file.getLastModificationTime(); }
     String getName() const                          { return file.getFileName(); }
+    File getFile() const                            { return file; }
     Component* createEditor()                       { return new ItemPreviewComponent (file); }
     Component* createViewer()                       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile)   { file = newFile; }

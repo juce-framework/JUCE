@@ -51,6 +51,7 @@ public:
     bool showDocument (OpenDocumentManager::Document* doc);
     void hideDocument (OpenDocumentManager::Document* doc);
     bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);
+    OpenDocumentManager::Document* getCurrentDocument() const   { return currentDocument; }
 
     void updateMissingFileStatuses();
 
