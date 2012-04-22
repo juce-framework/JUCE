@@ -96,6 +96,14 @@ public:
 
             embeddedView = attachView (wrapperWindow, HIViewGetRoot (wrapperWindow));
 
+            // Check for the plugin creating its own floating window, and if there is one,
+            // we need to reparent it to make it visible..
+            NSWindow* floatingChildWindow = [[carbonWindow childWindows] objectAtIndex: 0];
+
+            if (floatingChildWindow != nil)
+                [getOwnerWindow() addChildWindow: floatingChildWindow
+                                         ordered: NSWindowAbove];
+
             EventTypeSpec windowEventTypes[] =
             {
                 { kEventClassWindow, kEventWindowGetClickActivation },

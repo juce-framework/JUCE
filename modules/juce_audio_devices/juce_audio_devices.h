@@ -28,9 +28,7 @@
 
 #include "../juce_events/juce_events.h"
 #include "../juce_audio_basics/juce_audio_basics.h"
-#if JUCE_USE_CDREADER
 #include "../juce_audio_formats/juce_audio_formats.h"
-#endif
 
 //=============================================================================
 /** Config: JUCE_ASIO

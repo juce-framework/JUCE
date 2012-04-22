@@ -23,6 +23,29 @@
   ==============================================================================
 */
 
+interface ISampleGrabberCB  : public IUnknown
+{
+    virtual STDMETHODIMP SampleCB (double, IMediaSample*) = 0;
+    virtual STDMETHODIMP BufferCB (double, BYTE*, long) = 0;
+};
+
+interface ISampleGrabber  : public IUnknown
+{
+    virtual HRESULT STDMETHODCALLTYPE SetOneShot (BOOL) = 0;
+    virtual HRESULT STDMETHODCALLTYPE SetMediaType (const AM_MEDIA_TYPE*) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetConnectedMediaType (AM_MEDIA_TYPE*) = 0;
+    virtual HRESULT STDMETHODCALLTYPE SetBufferSamples (BOOL) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetCurrentBuffer (long*, long*) = 0;
+    virtual HRESULT STDMETHODCALLTYPE GetCurrentSample (IMediaSample**) = 0;
+    virtual HRESULT STDMETHODCALLTYPE SetCallback (ISampleGrabberCB*, long) = 0;
+};
+
+static const IID IID_ISampleGrabberCB  = { 0x0579154A, 0x2B53, 0x4994, { 0xB0, 0xD0, 0xE7, 0x73, 0x14, 0x8E, 0xFF, 0x85 } };
+static const IID IID_ISampleGrabber    = { 0x6B652FFF, 0x11FE, 0x4fce, { 0x92, 0xAD, 0x02, 0x66, 0xB5, 0xD7, 0xC7, 0x8F } };
+static const CLSID CLSID_SampleGrabber = { 0xC1F400A0, 0x3F08, 0x11d3, { 0x9F, 0x0B, 0x00, 0x60, 0x08, 0x03, 0x9E, 0x37 } };
+static const CLSID CLSID_NullRenderer  = { 0xC1F400A4, 0x3F08, 0x11d3, { 0x9F, 0x0B, 0x00, 0x60, 0x08, 0x03, 0x9E, 0x37 } };
+
+//==============================================================================
 class DShowCameraDeviceInteral  : public ChangeBroadcaster
 {
 public:
@@ -89,7 +112,7 @@ public:
         if (FAILED (hr))
             return;
 
-        hr = sampleGrabberBase.QueryInterface (sampleGrabber);
+        hr = sampleGrabberBase.QueryInterface (IID_ISampleGrabber, sampleGrabber);
         if (FAILED (hr))
             return;
 
@@ -396,7 +419,6 @@ public:
         }
     }
 
-
     //==============================================================================
     class DShowCaptureViewerComp   : public Component,
                                      public ChangeListener
@@ -656,19 +678,21 @@ private:
     }
 
     //==============================================================================
-    class GrabberCallback   : public ComBaseClassHelper <ISampleGrabberCB>
+    class GrabberCallback   : public ComBaseClassHelperBase <ISampleGrabberCB>
     {
     public:
-        GrabberCallback (DShowCameraDeviceInteral& owner_)
-            : owner (owner_)
+        GrabberCallback (DShowCameraDeviceInteral& owner_)  : owner (owner_) {}
+
+        JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
         {
+            if (refId == IID_ISampleGrabberCB)  { AddRef(); *result = dynamic_cast <ISampleGrabberCB*> (this); return S_OK; }
+            if (refId == IID_IUnknown)          { AddRef(); *result = dynamic_cast <IUnknown*> (this); return S_OK; }
+
+            *result = nullptr;
+            return E_NOINTERFACE;
         }
 
-        //==============================================================================
-        STDMETHODIMP SampleCB (double /*SampleTime*/, IMediaSample* /*pSample*/)
-        {
-            return E_FAIL;
-        }
+        STDMETHODIMP SampleCB (double /*SampleTime*/, IMediaSample* /*pSample*/)  { return E_FAIL; }
 
         STDMETHODIMP BufferCB (double time, BYTE* buffer, long bufferSize)
         {
@@ -679,8 +703,7 @@ private:
     private:
         DShowCameraDeviceInteral& owner;
 
-        GrabberCallback (const GrabberCallback&);
-        GrabberCallback& operator= (const GrabberCallback&);
+        JUCE_DECLARE_NON_COPYABLE (GrabberCallback);
     };
 
     ComSmartPtr <GrabberCallback> callback;

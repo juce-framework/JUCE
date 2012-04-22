@@ -77,23 +77,8 @@
 
  #if JUCE_USE_CAMERA || JUCE_DIRECTSHOW
   /* If you're using the camera classes, you'll need access to a few DirectShow headers.
-
-     These files are provided in the normal Windows SDK, but some Microsoft plonker
-     didn't realise that qedit.h doesn't actually compile without the rest of the DirectShow SDK..
-     Microsoft's suggested fix for this is to hack their qedit.h file! See:
-     http://social.msdn.microsoft.com/Forums/en-US/windowssdk/thread/ed097d2c-3d68-4f48-8448-277eaaf68252
-     .. which is a bit of a bodge, but a lot less hassle than installing the full DShow SDK.
-
-     An alternative workaround is to create a dummy dxtrans.h file and put it in your include path.
-     The dummy file just needs to contain the following content:
-        #define __IDxtCompositor_INTERFACE_DEFINED__
-        #define __IDxtAlphaSetter_INTERFACE_DEFINED__
-        #define __IDxtJpeg_INTERFACE_DEFINED__
-        #define __IDxtKey_INTERFACE_DEFINED__
-    ..and that should be enough to convince qedit.h that you have the SDK!
-  */
+     These files are provided in the normal Windows SDK. */
   #include <dshow.h>
-  #include <qedit.h>
   #include <dshowasf.h>
  #endif
 

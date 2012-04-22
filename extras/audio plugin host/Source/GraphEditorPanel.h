@@ -67,7 +67,7 @@ public:
     //==============================================================================
 private:
     FilterGraph& graph;
-    ConnectorComponent* draggingConnector;
+    ScopedPointer<ConnectorComponent> draggingConnector;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphEditorPanel);
 };

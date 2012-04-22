@@ -52,6 +52,7 @@
 #elif JUCE_IOS
  #import <AudioToolbox/AudioToolbox.h>
  #import <AVFoundation/AVFoundation.h>
+ #import <CoreMIDI/MIDIServices.h>
 
 //==============================================================================
 #elif JUCE_WINDOWS

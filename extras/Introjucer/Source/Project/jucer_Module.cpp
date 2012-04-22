@@ -679,7 +679,7 @@ void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<Fil
 
     for (int i = 0; i < sourceFiles.size(); ++i)
     {
-        const String pathWithinModule (sourceFiles.getReference(i).getRelativePathFrom (localModuleFolder));
+        const String pathWithinModule (FileHelpers::getRelativePathFrom (sourceFiles.getReference(i), localModuleFolder));
 
         // (Note: in exporters like MSVC we have to avoid adding the same file twice, even if one of those instances
         // is flagged as being excluded from the build, because this overrides the other and it fails to compile)
@@ -689,7 +689,7 @@ void LibraryModule::addBrowsableCode (ProjectExporter& exporter, const Array<Fil
                                pathWithinModule);
     }
 
-    sourceGroup.addFile (localModuleFolder.getChildFile (moduleFile.getRelativePathFrom (moduleFolder)), -1, false);
+    sourceGroup.addFile (localModuleFolder.getChildFile (FileHelpers::getRelativePathFrom (moduleFile, moduleFolder)), -1, false);
     sourceGroup.addFile (getInclude (localModuleFolder), -1, false);
 
     exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);

@@ -60,7 +60,7 @@ public:
 
         You can use its operator= method to point it at a proper file.
     */
-    File()   {}
+    File() noexcept  {}
 
     /** Creates a file from an absolute path.
 
@@ -78,7 +78,7 @@ public:
     File (const File& other);
 
     /** Destructor. */
-    ~File()  {}
+    ~File() noexcept  {}
 
     /** Sets the file based on an absolute pathname.
 
@@ -925,7 +925,7 @@ public:
 
         Best to avoid this unless you really know what you're doing.
     */
-    static File createFileWithoutCheckingPath (const String& path);
+    static File createFileWithoutCheckingPath (const String& path) noexcept;
 
     /** Adds a separator character to the end of a path if it doesn't already have one. */
     static String addTrailingSeparator (const String& path);

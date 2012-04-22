@@ -29,19 +29,18 @@
 
 
 //==============================================================================
-class PluginListWindow  : public DocumentWindow
+class MainHostWindow::PluginListWindow  : public DocumentWindow
 {
 public:
-    PluginListWindow (KnownPluginList& knownPluginList)
+    PluginListWindow (MainHostWindow& owner_)
         : DocumentWindow ("Available Plugins", Colours::white,
-                          DocumentWindow::minimiseButton | DocumentWindow::closeButton)
+                          DocumentWindow::minimiseButton | DocumentWindow::closeButton),
+          owner (owner_)
     {
-        currentPluginListWindow = this;
-
         const File deadMansPedalFile (appProperties->getUserSettings()
                                         ->getFile().getSiblingFile ("RecentlyCrashedPluginsList"));
 
-        setContentOwned (new PluginListComponent (knownPluginList,
+        setContentOwned (new PluginListComponent (owner.knownPluginList,
                                                   deadMansPedalFile,
                                                   appProperties->getUserSettings()), true);
 
@@ -58,21 +57,18 @@ public:
         appProperties->getUserSettings()->setValue ("listWindowPos", getWindowStateAsString());
 
         clearContentComponent();
-
-        jassert (currentPluginListWindow == this);
-        currentPluginListWindow = 0;
     }
 
     void closeButtonPressed()
     {
-        delete this;
+        owner.pluginListWindow = nullptr;
     }
 
-    static PluginListWindow* currentPluginListWindow;
+private:
+    MainHostWindow& owner;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListWindow);
 };
-
-PluginListWindow* PluginListWindow::currentPluginListWindow = 0;
-
 
 //==============================================================================
 MainHostWindow::MainHostWindow()
@@ -120,12 +116,12 @@ MainHostWindow::MainHostWindow()
 
 MainHostWindow::~MainHostWindow()
 {
-    delete PluginListWindow::currentPluginListWindow;
+    pluginListWindow = nullptr;
 
    #if JUCE_MAC
-    setMacMainMenu (0);
+    setMacMainMenu (nullptr);
    #else
-    setMenuBar (0);
+    setMenuBar (nullptr);
    #endif
 
     knownPluginList.removeChangeListener (this);
@@ -141,8 +137,10 @@ void MainHostWindow::closeButtonPressed()
 
 bool MainHostWindow::tryToQuitApplication()
 {
-    if (getGraphEditor() != 0
-        && getGraphEditor()->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+    PluginWindow::closeAllCurrentlyOpenWindows();
+
+    if (getGraphEditor() == nullptr
+         || getGraphEditor()->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
     {
         JUCEApplication::quit();
         return true;
@@ -159,7 +157,7 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster*)
     // and it crashes, we've still saved the previous ones
     ScopedPointer<XmlElement> savedPluginList (knownPluginList.createXml());
 
-    if (savedPluginList != 0)
+    if (savedPluginList != nullptr)
     {
         appProperties->getUserSettings()->setValue ("pluginList", savedPluginList);
         appProperties->saveIfNeeded();
@@ -168,7 +166,7 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster*)
 
 const StringArray MainHostWindow::getMenuBarNames()
 {
-    const char* const names[] = { "File", "Plugins", "Options", 0 };
+    const char* const names[] = { "File", "Plugins", "Options", nullptr };
 
     return StringArray (names);
 }
@@ -203,7 +201,6 @@ const PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const St
         menu.addSubMenu ("Create plugin", pluginsMenu);
         menu.addSeparator();
         menu.addItem (250, "Delete all plugins");
-
     }
     else if (topLevelMenuIndex == 2)
     {
@@ -212,10 +209,10 @@ const PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const St
         menu.addCommandItem (commandManager, CommandIDs::showPluginListEditor);
 
         PopupMenu sortTypeMenu;
-        sortTypeMenu.addItem (200, "List plugins in default order", true, pluginSortMethod == KnownPluginList::defaultOrder);
+        sortTypeMenu.addItem (200, "List plugins in default order",      true, pluginSortMethod == KnownPluginList::defaultOrder);
         sortTypeMenu.addItem (201, "List plugins in alphabetical order", true, pluginSortMethod == KnownPluginList::sortAlphabetically);
-        sortTypeMenu.addItem (202, "List plugins by category", true, pluginSortMethod == KnownPluginList::sortByCategory);
-        sortTypeMenu.addItem (203, "List plugins by manufacturer", true, pluginSortMethod == KnownPluginList::sortByManufacturer);
+        sortTypeMenu.addItem (202, "List plugins by category",           true, pluginSortMethod == KnownPluginList::sortByCategory);
+        sortTypeMenu.addItem (203, "List plugins by manufacturer",       true, pluginSortMethod == KnownPluginList::sortByManufacturer);
         sortTypeMenu.addItem (204, "List plugins based on the directory structure", true, pluginSortMethod == KnownPluginList::sortByFileSystemLocation);
         menu.addSubMenu ("Plugin menu type", sortTypeMenu);
 
@@ -235,7 +232,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
 
     if (menuItemID == 250)
     {
-        if (graphEditor != 0)
+        if (graphEditor != nullptr)
             graphEditor->graph.clear();
     }
     else if (menuItemID >= 100 && menuItemID < 200)
@@ -244,28 +241,23 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
         recentFiles.restoreFromString (appProperties->getUserSettings()
                                             ->getValue ("recentFilterGraphFiles"));
 
-        if (graphEditor != 0 && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+        if (graphEditor != nullptr && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
             graphEditor->graph.loadFrom (recentFiles.getFile (menuItemID - 100), true);
     }
     else if (menuItemID >= 200 && menuItemID < 210)
     {
-        if (menuItemID == 200)
-            pluginSortMethod = KnownPluginList::defaultOrder;
-        else if (menuItemID == 201)
-            pluginSortMethod = KnownPluginList::sortAlphabetically;
-        else if (menuItemID == 202)
-            pluginSortMethod = KnownPluginList::sortByCategory;
-        else if (menuItemID == 203)
-            pluginSortMethod = KnownPluginList::sortByManufacturer;
-        else if (menuItemID == 204)
-            pluginSortMethod = KnownPluginList::sortByFileSystemLocation;
+             if (menuItemID == 200)     pluginSortMethod = KnownPluginList::defaultOrder;
+        else if (menuItemID == 201)     pluginSortMethod = KnownPluginList::sortAlphabetically;
+        else if (menuItemID == 202)     pluginSortMethod = KnownPluginList::sortByCategory;
+        else if (menuItemID == 203)     pluginSortMethod = KnownPluginList::sortByManufacturer;
+        else if (menuItemID == 204)     pluginSortMethod = KnownPluginList::sortByFileSystemLocation;
 
         appProperties->getUserSettings()->setValue ("pluginSortMethod", (int) pluginSortMethod);
     }
     else
     {
         createPlugin (getChosenType (menuItemID),
-                      proportionOfWidth (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
+                      proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
                       proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f));
     }
 }
@@ -274,7 +266,7 @@ void MainHostWindow::createPlugin (const PluginDescription* desc, int x, int y)
 {
     GraphDocumentComponent* const graphEditor = getGraphEditor();
 
-    if (graphEditor != 0)
+    if (graphEditor != nullptr)
         graphEditor->createNewPlugin (desc, x, y);
 }
 
@@ -291,13 +283,9 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
 const PluginDescription* MainHostWindow::getChosenType (const int menuID) const
 {
     if (menuID >= 1 && menuID < 1 + internalTypes.size())
-    {
         return internalTypes [menuID - 1];
-    }
-    else
-    {
-        return knownPluginList.getType (knownPluginList.getIndexChosenByMenu (menuID));
-    }
+
+    return knownPluginList.getType (knownPluginList.getIndexChosenByMenu (menuID));
 }
 
 //==============================================================================
@@ -373,26 +361,26 @@ bool MainHostWindow::perform (const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::open:
-        if (graphEditor != 0 && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+        if (graphEditor != nullptr && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
             graphEditor->graph.loadFromUserSpecifiedFile (true);
 
         break;
 
     case CommandIDs::save:
-        if (graphEditor != 0)
+        if (graphEditor != nullptr)
             graphEditor->graph.save (true, true);
         break;
 
     case CommandIDs::saveAs:
-        if (graphEditor != 0)
+        if (graphEditor != nullptr)
             graphEditor->graph.saveAs (File::nonexistent, true, true, true);
         break;
 
     case CommandIDs::showPluginListEditor:
-        if (PluginListWindow::currentPluginListWindow == 0)
-            PluginListWindow::currentPluginListWindow = new PluginListWindow (knownPluginList);
+        if (pluginListWindow == nullptr)
+            pluginListWindow = new PluginListWindow (*this);
 
-        PluginListWindow::currentPluginListWindow->toFront (true);
+        pluginListWindow->toFront (true);
         break;
 
     case CommandIDs::showAudioSettings:
@@ -400,15 +388,7 @@ bool MainHostWindow::perform (const InvocationInfo& info)
         break;
 
     case CommandIDs::aboutBox:
-        {
-/*            AboutBoxComponent aboutComp;
-
-            DialogWindow::showModalDialog ("About",
-                                           &aboutComp,
-                                           this, Colours::white,
-                                           true, false, false);
-  */      }
-
+        // TODO
         break;
 
     default:
@@ -440,7 +420,7 @@ void MainHostWindow::showAudioSettings()
 
     GraphDocumentComponent* const graphEditor = getGraphEditor();
 
-    if (graphEditor != 0)
+    if (graphEditor != nullptr)
         graphEditor->graph.removeIllegalConnections();
 }
 
@@ -463,29 +443,25 @@ void MainHostWindow::fileDragExit (const StringArray&)
 
 void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 {
-    if (files.size() == 1 && File (files[0]).hasFileExtension (filenameSuffix))
-    {
-        GraphDocumentComponent* const graphEditor = getGraphEditor();
+    GraphDocumentComponent* const graphEditor = getGraphEditor();
 
-        if (graphEditor != 0
-             && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+    if (graphEditor != nullptr)
+    {
+        if (files.size() == 1 && File (files[0]).hasFileExtension (filenameSuffix))
         {
-            graphEditor->graph.loadFrom (File (files[0]), true);
+            if (graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+                graphEditor->graph.loadFrom (File (files[0]), true);
         }
-    }
-    else
-    {
-        OwnedArray <PluginDescription> typesFound;
-        knownPluginList.scanAndAddDragAndDroppedFiles (files, typesFound);
+        else
+        {
+            OwnedArray <PluginDescription> typesFound;
+            knownPluginList.scanAndAddDragAndDroppedFiles (files, typesFound);
 
-        GraphDocumentComponent* const graphEditor = getGraphEditor();
+            Point<int> pos (graphEditor->getLocalPoint (this, Point<int> (x, y)));
 
-        Point<int> pos (x, y);
-        if (graphEditor != 0)
-            pos = graphEditor->getLocalPoint (this, pos);
-
-        for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-            createPlugin (typesFound.getUnchecked(i), pos.getX(), pos.getY());
+            for (int i = 0; i < jmin (5, typesFound.size()); ++i)
+                createPlugin (typesFound.getUnchecked(i), pos.getX(), pos.getY());
+        }
     }
 }
 

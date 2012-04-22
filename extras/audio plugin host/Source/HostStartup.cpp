@@ -73,7 +73,7 @@ public:
         if (commandLine.isNotEmpty() && mainWindow->getGraphEditor() != 0)
         {
            #if JUCE_MAC
-            if (! commandLine.trimStart().startsWith ("-psn"))
+            if (! commandLine.trimStart().startsWith ("-"))
            #endif
                 mainWindow->getGraphEditor()->graph.loadFrom (File::getCurrentWorkingDirectory()
                                                                 .getChildFile (commandLine), true);

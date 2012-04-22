@@ -171,7 +171,7 @@ protected:
     //==============================================================================
     String getIntermediatesPath (const BuildConfiguration& config) const
     {
-        return ".\\" + File::createLegalFileName (config.getName().trim());
+        return prependDot (File::createLegalFileName (config.getName().trim()));
     }
 
     String getConfigTargetPath (const BuildConfiguration& config) const
@@ -185,8 +185,8 @@ protected:
         if (binaryRelPath.isAbsolute())
             return binaryRelPath.toWindowsStyle();
 
-        return ".\\" + binaryRelPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder)
-                                    .toWindowsStyle();
+        return prependDot (binaryRelPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder)
+                                        .toWindowsStyle());
     }
 
     String getPreprocessorDefs (const BuildConfiguration& config, const String& joinString) const
@@ -475,6 +475,12 @@ protected:
             versionParts.add ("0");
 
         return versionParts.joinIntoString (",");
+    }
+
+    static String prependDot (const String& filename)
+    {
+        return FileHelpers::isAbsolutePath (filename) ? filename
+                                                      : (".\\" + filename);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase);
@@ -1221,14 +1227,14 @@ protected:
         {
             XmlElement* iconGroup = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* e = iconGroup->createNewChildElement ("None");
-            e->setAttribute ("Include", ".\\" + iconFile.getFileName());
+            e->setAttribute ("Include", prependDot (iconFile.getFileName()));
         }
 
         if (hasResourceFile())
         {
             XmlElement* rcGroup = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
-            e->setAttribute ("Include", ".\\" + rcFile.getFileName());
+            e->setAttribute ("Include", prependDot (rcFile.getFileName()));
         }
 
         {
@@ -1364,7 +1370,7 @@ protected:
         {
             XmlElement* iconGroup = filterXml.createNewChildElement ("ItemGroup");
             XmlElement* e = iconGroup->createNewChildElement ("None");
-            e->setAttribute ("Include", ".\\" + iconFile.getFileName());
+            e->setAttribute ("Include", prependDot (iconFile.getFileName()));
             e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
         }
 
@@ -1372,7 +1378,7 @@ protected:
         {
             XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
             XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
-            e->setAttribute ("Include", ".\\" + rcFile.getFileName());
+            e->setAttribute ("Include", prependDot (rcFile.getFileName()));
             e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
         }
     }

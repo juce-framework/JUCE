@@ -53,7 +53,7 @@ public:
     }
 
     RelativePath (const File& file, const File& rootFolder, const RootFolder root_)
-        : path (file.getRelativePathFrom (rootFolder).replaceCharacter ('\\', '/')), root (root_)
+        : path (FileHelpers::getRelativePathFrom (file, rootFolder).replaceCharacter ('\\', '/')), root (root_)
     {
     }
 
@@ -67,7 +67,7 @@ public:
 
     String getFileExtension() const                         { return getFakeFile().getFileExtension(); }
     bool hasFileExtension (const String& extension) const   { return getFakeFile().hasFileExtension (extension); }
-    bool isAbsolute() const                                 { return isAbsolute (path); }
+    bool isAbsolute() const                                 { return FileHelpers::isAbsolutePath (path); }
 
     RelativePath withFileExtension (const String& extension) const
     {
@@ -85,7 +85,7 @@ public:
 
     RelativePath getChildFile (const String& subpath) const
     {
-        if (isAbsolute (subpath))
+        if (FileHelpers::isAbsolutePath (subpath))
             return RelativePath (subpath, root);
 
         String p (toUnixStyle());
@@ -100,7 +100,7 @@ public:
         if (isAbsolute())
             return RelativePath (path, newRootType);
 
-        return RelativePath (originalRoot.getChildFile (toUnixStyle()).getRelativePathFrom (newRoot), newRootType);
+        return RelativePath (FileHelpers::getRelativePathFrom (originalRoot.getChildFile (toUnixStyle()), newRoot), newRootType);
     }
 
 private:
@@ -113,16 +113,6 @@ private:
         // This method gets called very often, so we'll cache this directory.
         static const File currentWorkingDirectory (File::getCurrentWorkingDirectory());
         return currentWorkingDirectory.getChildFile (path);
-    }
-
-    static bool isAbsolute (const String& path)
-    {
-        return File::isAbsolutePath (path)
-                || path.startsWithChar ('/') // (needed because File::isAbsolutePath will ignore forward-slashes on Windows)
-                || path.startsWithChar ('$')
-                || path.startsWithChar ('~')
-                || (CharacterFunctions::isLetter (path[0]) && path[1] == ':')
-                || path.startsWithIgnoreCase ("smb:");
     }
 };
 
