@@ -62,13 +62,6 @@
 #endif
 
 //==============================================================================
-#if JUCE_LINUX
- #define Font       juce::Font
- #define KeyPress   juce::KeyPress
- #define Drawable   juce::Drawable
- #define Time       juce::Time
-#endif
-
 #include "juce_VSTMidiEventList.h"
 
 #if ! JUCE_WINDOWS
@@ -1208,7 +1201,7 @@ public:
         return pluginWantsKeys;
     }
 
-    bool keyPressed (const KeyPress&)
+    bool keyPressed (const juce::KeyPress&)
     {
         return pluginWantsKeys;
     }

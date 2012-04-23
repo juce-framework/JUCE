@@ -54,6 +54,7 @@ public:
         virtual bool refersToProject (Project& project) const = 0;
         virtual String getName() const = 0;
         virtual String getType() const = 0;
+        virtual File getFile() const = 0;
         virtual bool needsSaving() const = 0;
         virtual bool save() = 0;
         virtual bool canSaveAs() const = 0;

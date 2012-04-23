@@ -182,6 +182,7 @@
  #include <sys/file.h>
  #include <sys/prctl.h>
  #include <signal.h>
+ #include <stddef.h>
 
 //==============================================================================
 #elif JUCE_ANDROID
