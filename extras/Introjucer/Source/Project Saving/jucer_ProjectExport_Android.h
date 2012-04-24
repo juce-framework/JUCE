@@ -82,6 +82,7 @@ public:
        #endif
     }
 
+    bool isAndroid() const                      { return true; }
     bool isPossibleForCurrentProject()          { return projectType.isGUIApplication(); }
     bool usesMMFiles() const                    { return false; }
     bool canCopeWithDuplicateFiles()            { return false; }

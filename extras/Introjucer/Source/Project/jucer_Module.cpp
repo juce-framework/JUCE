@@ -582,16 +582,23 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
 }
 
 //==============================================================================
+static bool exporterTargetMatches (const String& test, String target)
+{
+    target = target.trim();
+
+    if (target.startsWithChar ('!'))
+        return ! exporterTargetMatches (test, target.substring (1).trimStart());
+
+    return target == test || target.isEmpty();
+}
+
 bool LibraryModule::fileTargetMatches (ProjectExporter& exporter, const String& target)
 {
-    if (target.startsWithChar ('!'))
-        return ! fileTargetMatches (exporter, target.substring (1).trim());
-
-    if (target == "xcode")  return exporter.isXcode();
-    if (target == "msvc")   return exporter.isVisualStudio();
-    if (target == "linux")  return exporter.isLinux();
-
-    return true;
+    if (exporter.isXcode())         return exporterTargetMatches ("xcode", target);
+    if (exporter.isVisualStudio())  return exporterTargetMatches ("msvc", target);
+    if (exporter.isLinux())         return exporterTargetMatches ("linux", target);
+    if (exporter.isAndroid())       return exporterTargetMatches ("android", target);
+    return target.isEmpty();
 }
 
 void LibraryModule::findWildcardMatches (const File& localModuleFolder, const String& wildcardPath, Array<File>& result) const
@@ -638,6 +645,35 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
 
                 if (file ["stdcall"])
                     item.getShouldUseStdCallValue() = true;
+            }
+        }
+    }
+}
+
+void LibraryModule::getLocalCompiledFiles (Array<File>& result) const
+{
+    const var compileArray (moduleInfo ["compile"]); // careful to keep this alive while the array is in use!
+    const Array<var>* const files = compileArray.getArray();
+
+    if (files != nullptr)
+    {
+        for (int i = 0; i < files->size(); ++i)
+        {
+            const var& file = files->getReference(i);
+            const String filename (file ["file"].toString());
+
+            if (filename.isNotEmpty()
+                  #if JUCE_MAC
+                   && exporterTargetMatches ("xcode", file ["target"].toString())
+                  #elif JUCE_WINDOWS
+                   && exporterTargetMatches ("msvc",  file ["target"].toString())
+                  #elif JUCE_LINUX
+                   && exporterTargetMatches ("linux", file ["target"].toString())
+                  #endif
+                )
+            {
+                const File compiledFile (moduleFolder.getChildFile (filename));
+                result.add (compiledFile);
             }
         }
     }

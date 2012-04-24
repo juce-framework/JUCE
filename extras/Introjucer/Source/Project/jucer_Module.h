@@ -50,6 +50,7 @@ public:
     void prepareExporter (ProjectExporter&, ProjectSaver&) const;
     void createPropertyEditors (ProjectExporter&, PropertyListBuilder&) const;
     void getConfigFlags (Project&, OwnedArray<Project::ConfigFlag>& flags) const;
+    void getLocalCompiledFiles (Array<File>& files) const;
 
     static String getInfoFileName()     { return "juce_module_info"; }
 

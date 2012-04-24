@@ -115,13 +115,6 @@ void Project::setMissingDefaultValues()
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
 
-    for (Project::ExporterIterator exporter (*this); exporter.next();)
-        if (exporter->getNumConfigurations() == 0)
-            exporter->createDefaultConfigs();
-
-    if (! projectRoot.getChildWithName (Tags::exporters).isValid())
-        createDefaultExporters();
-
     getProjectType().setMissingProjectProperties (*this);
 
     if (! projectRoot.hasProperty (Ids::bundleIdentifier))
