@@ -538,13 +538,13 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
     {
         Desktop& desktop = Desktop::getInstance();
-        RectangleList allMonitors (desktop.getAllMonitorDisplayAreas());
+        RectangleList allMonitors (desktop.getDisplays().getRectangleList (true));
         allMonitors.clipTo (newPos);
         const Rectangle<int> onScreenArea (allMonitors.getBounds());
 
         if (onScreenArea.getWidth() * onScreenArea.getHeight() < 32 * 32)
         {
-            const Rectangle<int> screen (desktop.getMonitorAreaContaining (newPos.getCentre()));
+            const Rectangle<int> screen (desktop.getDisplays().getDisplayContaining (newPos.getCentre()).userArea);
 
             newPos.setSize (jmin (newPos.getWidth(),  screen.getWidth()),
                             jmin (newPos.getHeight(), screen.getHeight()));

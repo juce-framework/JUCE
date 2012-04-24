@@ -1961,7 +1961,7 @@ private:
             Rectangle<int> pos (rectangleFromRECT (*r));
 
             constrainer->checkBounds (pos, windowBorder.addedTo (component->getBounds()),
-                                      Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                      Desktop::getInstance().getDisplays().getTotalBounds (true),
                                       wParam == WMSZ_TOP    || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_TOPRIGHT,
                                       wParam == WMSZ_LEFT   || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_BOTTOMLEFT,
                                       wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
@@ -1986,7 +1986,7 @@ private:
                 const Rectangle<int> current (windowBorder.addedTo (component->getBounds()));
 
                 constrainer->checkBounds (pos, current,
-                                          Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                          Desktop::getInstance().getDisplays().getTotalBounds (true),
                                           pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
                                           pos.getX() != current.getX() && pos.getRight() == current.getRight(),
                                           pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
@@ -2079,7 +2079,7 @@ private:
 
     void doSettingChange()
     {
-        Desktop::getInstance().refreshMonitorSizes();
+        const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
 
         if (fullScreen && ! isMinimised())
         {
@@ -3024,7 +3024,7 @@ String SystemClipboard::getTextFromClipboard()
 void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
     if (enableOrDisable)
-        kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
+        kioskModeComponent->setBounds (getDisplays().getMainDisplay().totalArea);
 }
 
 //==============================================================================
@@ -3035,30 +3035,37 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
     return TRUE;
 }
 
-void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
+void Desktop::Displays::findDisplays()
 {
-    EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);
+    Array <Rectangle<int> > monitors;
+    EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitors);
 
     // make sure the first in the list is the main monitor
-    for (int i = 1; i < monitorCoords.size(); ++i)
-        if (monitorCoords[i].getX() == 0 && monitorCoords[i].getY() == 0)
-            monitorCoords.swap (i, 0);
+    for (int i = 1; i < monitors.size(); ++i)
+        if (monitors.getReference(i).getX() == 0 && monitors.getReference(i).getY() == 0)
+            monitors.swap (i, 0);
 
-    if (monitorCoords.size() == 0)
+    if (monitors.size() == 0)
     {
         RECT r;
         GetWindowRect (GetDesktopWindow(), &r);
-        monitorCoords.add (rectangleFromRECT (r));
+        monitors.add (rectangleFromRECT (r));
     }
 
-    if (clipToWorkArea)
-    {
-        // clip the main monitor to the active non-taskbar area
-        RECT r;
-        SystemParametersInfo (SPI_GETWORKAREA, 0, &r, 0);
+    RECT workArea;
+    SystemParametersInfo (SPI_GETWORKAREA, 0, &workArea, 0);
 
-        Rectangle<int>& screen = monitorCoords.getReference (0);
-        screen = screen.getIntersection (rectangleFromRECT (r));
+    for (int i = 0; i < monitors.size(); ++i)
+    {
+        Display d;
+        d.userArea = d.totalArea = monitors.getReference(i);
+        d.isMain = (i == 0);
+        d.scale = 1.0;
+
+        if (i == 0)
+            d.userArea = d.userArea.getIntersection (rectangleFromRECT (workArea));
+
+        displays.add (d);
     }
 }
 

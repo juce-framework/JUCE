@@ -276,13 +276,21 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return convertToJuceOrientation ([[UIApplication sharedApplication] statusBarOrientation]);
 }
 
-void Desktop::getCurrentMonitorPositions (Array <Rectangle <int> >& monitorCoords, const bool clipToWorkArea)
+void Desktop::Displays::findDisplays()
 {
     JUCE_AUTORELEASEPOOL
-    monitorCoords.clear();
 
-    CGRect r = clipToWorkArea ? [[UIScreen mainScreen] applicationFrame]
-                              : [[UIScreen mainScreen] bounds];
+    UIScreen* s = [UIScreen mainScreen];
 
-    monitorCoords.add (UIViewComponentPeer::realScreenPosToRotated (convertToRectInt (r)));
+    Display d;
+    d.userArea  = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s applicationFrame]));
+    d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds]));
+    d.isMain = true;
+
+    if ([s respondsToSelector: @selector (scale)])
+        d.scale = s.scale;
+    else
+        d.scale = 1.0;
+
+    displays.add (d);
 }

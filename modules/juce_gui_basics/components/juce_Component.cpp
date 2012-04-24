@@ -363,7 +363,7 @@ struct Component::ComponentHelpers
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
     {
         return comp.getParentComponent() != nullptr ? comp.getParentComponent()->getLocalBounds()
-                                                    : Desktop::getInstance().getMainMonitorArea();
+                                                    : Desktop::getInstance().getDisplays().getMainDisplay().userArea;
     }
 };
 
@@ -983,7 +983,7 @@ Rectangle<int> Component::getScreenBounds() const     { return localAreaToGlobal
 
 Rectangle<int> Component::getParentMonitorArea() const
 {
-    return Desktop::getInstance().getMonitorAreaContaining (getScreenBounds().getCentre());
+    return Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).userArea;
 }
 
 Point<int> Component::getLocalPoint (const Component* source, const Point<int>& point) const

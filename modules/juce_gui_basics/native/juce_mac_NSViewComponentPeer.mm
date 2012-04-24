@@ -1131,6 +1131,7 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
 
         Rectangle<int> pos (convertToRectInt (r));
         Rectangle<int> original (convertToRectInt (current));
+        const Rectangle<int> screenBounds (Desktop::getInstance().getDisplays().getTotalBounds (true));
 
        #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_6
         if ([window inLiveResize])
@@ -1139,14 +1140,12 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
              && [window performSelector: @selector (inLiveResize)])
        #endif
         {
-            constrainer->checkBounds (pos, original,
-                                      Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+            constrainer->checkBounds (pos, original, screenBounds,
                                       false, false, true, true);
         }
         else
         {
-            constrainer->checkBounds (pos, original,
-                                      Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+            constrainer->checkBounds (pos, original, screenBounds,
                                       pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
                                       pos.getX() != original.getX() && pos.getRight() == original.getRight(),
                                       pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
@@ -1797,7 +1796,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
-            kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
+            kioskModeComponent->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
             peer->becomeKeyWindow();
         }
         else
@@ -1815,7 +1814,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
     if (enableOrDisable)
     {
         SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
-        kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
+        kioskModeComponent->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
     }
     else
     {

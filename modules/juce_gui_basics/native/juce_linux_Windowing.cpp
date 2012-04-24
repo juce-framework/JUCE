@@ -959,7 +959,7 @@ public:
         if (fullScreen != shouldBeFullScreen)
         {
             if (shouldBeFullScreen)
-                r = Desktop::getInstance().getMainMonitorArea();
+                r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
 
             if (! r.isEmpty())
                 setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
@@ -2588,7 +2588,7 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
     if (enableOrDisable)
-        kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
+        kioskModeComponent->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
 }
 
 //==============================================================================
@@ -2627,7 +2627,7 @@ void juce_windowMessageReceive (XEvent* event)
 }
 
 //==============================================================================
-void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool /*clipToWorkArea*/)
+void Desktop::Displays::findDisplays()
 {
     if (display == 0)
         return;
@@ -2638,8 +2638,8 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
     ScopedXLock xlock;
     if (XQueryExtension (display, "XINERAMA", &major_opcode, &first_event, &first_error))
     {
-        typedef Bool (*tXineramaIsActive) (Display*);
-        typedef XineramaScreenInfo* (*tXineramaQueryScreens) (Display*, int*);
+        typedef Bool (*tXineramaIsActive) (::Display*);
+        typedef XineramaScreenInfo* (*tXineramaQueryScreens) (::Display*, int*);
 
         static tXineramaIsActive xXineramaIsActive = 0;
         static tXineramaQueryScreens xXineramaQueryScreens = 0;
@@ -2665,21 +2665,24 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
             int numMonitors = 0;
             XineramaScreenInfo* const screens = xXineramaQueryScreens (display, &numMonitors);
 
-            if (screens != 0)
+            if (screens != nullptr)
             {
-                for (int i = numMonitors; --i >= 0;)
+                for (int index = 0; index < numMonitors; ++index)
                 {
-                    int index = screens[i].screen_number;
-
-                    if (index >= 0)
+                    for (int j = numMonitors; --j >= 0;)
                     {
-                        while (monitorCoords.size() < index)
-                            monitorCoords.add (Rectangle<int>());
+                        if (screens[j].screen_number == index)
+                        {
+                            Display d;
+                            d.userArea = d.totalArea = Rectangle<int> (screens[j].x_org,
+                                                                       screens[j].y_org,
+                                                                       screens[j].width,
+                                                                       screens[j].height);
+                            d.isMain = (index == 0);
+                            d.scale = 1.0;
 
-                        monitorCoords.set (index, Rectangle<int> (screens[i].x_org,
-                                                                  screens[i].y_org,
-                                                                  screens[i].width,
-                                                                  screens[i].height));
+                            displays.add (d);
+                        }
                     }
                 }
 
@@ -2688,7 +2691,7 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
         }
     }
 
-    if (monitorCoords.size() == 0)
+    if (displays.size() == 0)
   #endif
     {
         Atom hints = Atoms::getIfExists ("_NET_WORKAREA");
@@ -2713,18 +2716,30 @@ void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords
                     const long* const position = (const long*) data;
 
                     if (actualType == XA_CARDINAL && actualFormat == 32 && nitems == 4)
-                        monitorCoords.add (Rectangle<int> (position[0], position[1],
-                                                           position[2], position[3]));
+                    {
+                        Display d;
+                        d.userArea = d.totalArea = Rectangle<int> (position[0], position[1],
+                                                                   position[2], position[3]);
+                        d.isMain = (displays.size() == 0);
+                        d.scale = 1.0;
+
+                        displays.add (d);
+                    }
 
                     XFree (data);
                 }
             }
         }
 
-        if (monitorCoords.size() == 0)
+        if (displays.size() == 0)
         {
-            monitorCoords.add (Rectangle<int> (DisplayWidth (display, DefaultScreen (display)),
-                                               DisplayHeight (display, DefaultScreen (display))));
+            Display d;
+            d.userArea = d.totalArea = Rectangle<int> (DisplayWidth (display, DefaultScreen (display)),
+                                                       DisplayHeight (display, DefaultScreen (display)));
+            d.isMain = true;
+            d.scale = 1.0;
+
+            displays.add (d);
         }
     }
 }
