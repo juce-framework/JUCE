@@ -503,7 +503,8 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getSansSerifNames (allFonts);
 
-        const char* targets[] = { "Verdana", "Bitstream Vera Sans", "Luxi Sans", "Sans", 0 };
+        const char* targets[] = { "Verdana", "Bitstream Vera Sans", "Luxi Sans",
+                                  "Liberation Sans", "DejaVu Sans", "Sans", 0 };
         return pickBestFont (allFonts, targets);
     }
 
@@ -512,7 +513,8 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getSerifNames (allFonts);
 
-        const char* targets[] = { "Bitstream Vera Serif", "Times", "Nimbus Roman", "Serif", 0 };
+        const char* targets[] = { "Bitstream Vera Serif", "Times", "Nimbus Roman",
+                                  "Liberation Serif", "DejaVu Serif", "Serif", 0 };
         return pickBestFont (allFonts, targets);
     }
 
@@ -521,7 +523,8 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getMonospacedNames (allFonts);
 
-        const char* targets[] = { "Bitstream Vera Sans Mono", "Courier", "Sans Mono", "Mono", 0 };
+        const char* targets[] = { "Bitstream Vera Sans Mono", "Courier", "Sans Mono",
+                                  "Liberation Mono", "DejaVu Mono", "Mono", 0 };
         return pickBestFont (allFonts, targets);
     }
 
