@@ -96,7 +96,7 @@ int AudioThumbnailCache::findOldestThumb() const
     return oldest;
 }
 
-bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode)
+bool AudioThumbnailCache::loadThumb (AudioThumbnailBase& thumb, const int64 hashCode)
 {
     const ScopedLock sl (lock);
     ThumbnailCacheEntry* te = findThumbFor (hashCode);
@@ -113,7 +113,7 @@ bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode
     return false;
 }
 
-void AudioThumbnailCache::storeThumb (const AudioThumbnail& thumb,
+void AudioThumbnailCache::storeThumb (const AudioThumbnailBase& thumb,
                                       const int64 hashCode)
 {
     const ScopedLock sl (lock);

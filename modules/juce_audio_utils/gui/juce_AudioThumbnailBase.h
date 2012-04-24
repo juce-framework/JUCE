@@ -23,56 +23,32 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
-#define __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+#ifndef __JUCE_AUDIOTHUMBNAILBASE_JUCEHEADER__
+#define __JUCE_AUDIOTHUMBNAILBASE_JUCEHEADER__
 
 class AudioThumbnailCache;
 
-
 //==============================================================================
 /**
-    Makes it easy to quickly draw scaled views of the waveform shape of an
-    audio file.
+    Provides a base for classes that can store and draw scaled views of an
+    audio waveform.
 
-    To use this class, just create an AudioThumbNail class for the file you want
-    to draw, call setSource to tell it which file or resource to use, then call
-    drawChannel() to draw it.
+    Typically, you'll want to use the derived class AudioThumbnail, which provides
+    a concrete implementation.
 
-    The class will asynchronously scan the wavefile to create its scaled-down view,
-    so you should make your UI repaint itself as this data comes in. To do this, the
-    AudioThumbnail is a ChangeBroadcaster, and will broadcast a message when its
-    listeners should repaint themselves.
-
-    The thumbnail stores an internal low-res version of the wave data, and this can
-    be loaded and saved to avoid having to scan the file again.
-
-    @see AudioThumbnailCache, AudioThumbnailBase
+    @see AudioThumbnail, AudioThumbnailCache
 */
-class JUCE_API  AudioThumbnail    : public AudioThumbnailBase
+class JUCE_API  AudioThumbnailBase    : public ChangeBroadcaster,
+                                        public AudioFormatWriter::ThreadedWriter::IncomingDataReceiver
 {
 public:
     //==============================================================================
-    /** Creates an audio thumbnail.
-
-        @param sourceSamplesPerThumbnailSample  when creating a stored, low-res version
-                        of the audio data, this is the scale at which it should be done. (This
-                        number is the number of original samples that will be averaged for each
-                        low-res sample)
-        @param formatManagerToUse   the audio format manager that is used to open the file
-        @param cacheToUse   an instance of an AudioThumbnailCache - this provides a background
-                            thread and storage that is used to by the thumbnail, and the cache
-                            object can be shared between multiple thumbnails
-    */
-    AudioThumbnail (int sourceSamplesPerThumbnailSample,
-                    AudioFormatManager& formatManagerToUse,
-                    AudioThumbnailCache& cacheToUse);
-
-    /** Destructor. */
-    ~AudioThumbnail();
+    AudioThumbnailBase() {}
+    virtual ~AudioThumbnailBase() {}
 
     //==============================================================================
     /** Clears and resets the thumbnail. */
-    void clear();
+    virtual void clear() = 0;
 
     /** Specifies the file or stream that contains the audio file.
 
@@ -86,7 +62,7 @@ public:
         @returns true if the source could be opened as a valid audio file, false if this failed for
         some reason.
     */
-    bool setSource (InputSource* newSource);
+    virtual bool setSource (InputSource* newSource) = 0;
 
     /** Gives the thumbnail an AudioFormatReader to use directly.
         This will start parsing the audio in a background thread (unless the hash code
@@ -98,19 +74,7 @@ public:
         should use the setSource() method instead, which will only open the file when
         it needs to.
     */
-    void setReader (AudioFormatReader* newReader, int64 hashCode);
-
-    /** Resets the thumbnail, ready for adding data with the specified format.
-        If you're going to generate a thumbnail yourself, call this before using addBlock()
-        to add the data.
-    */
-    void reset (int numChannels, double sampleRate, int64 totalSamplesInSource = 0);
-
-    /** Adds a block of level data to the thumbnail.
-        Call reset() before using this, to tell the thumbnail about the data format.
-    */
-    void addBlock (int64 sampleNumberInSource, const AudioSampleBuffer& newData,
-                   int startOffsetInBuffer, int numSamples);
+    virtual void setReader (AudioFormatReader* newReader, int64 hashCode) = 0;
 
     //==============================================================================
     /** Reloads the low res thumbnail data from an input stream.
@@ -119,21 +83,21 @@ public:
         previously have been created by the saveTo() method.
         @see saveTo
     */
-    void loadFrom (InputStream& input);
+    virtual void loadFrom (InputStream& input) = 0;
 
     /** Saves the low res thumbnail data to an output stream.
 
         The data that is written can later be reloaded using loadFrom().
         @see loadFrom
     */
-    void saveTo (OutputStream& output) const;
+    virtual void saveTo (OutputStream& output) const = 0;
 
     //==============================================================================
     /** Returns the number of channels in the file. */
-    int getNumChannels() const noexcept;
+    virtual int getNumChannels() const noexcept = 0;
 
     /** Returns the length of the audio file, in seconds. */
-    double getTotalLength() const noexcept;
+    virtual double getTotalLength() const noexcept = 0;
 
     /** Draws the waveform for a channel.
 
@@ -145,12 +109,12 @@ public:
         the rectangle vertically, but you can also specify an extra vertical scale factor
         with the verticalZoomFactor parameter.
     */
-    void drawChannel (Graphics& g,
-                      const Rectangle<int>& area,
-                      double startTimeSeconds,
-                      double endTimeSeconds,
-                      int channelNum,
-                      float verticalZoomFactor);
+    virtual void drawChannel (Graphics& g,
+                              const Rectangle<int>& area,
+                              double startTimeSeconds,
+                              double endTimeSeconds,
+                              int channelNum,
+                              float verticalZoomFactor) = 0;
 
     /** Draws the waveforms for all channels in the thumbnail.
 
@@ -159,69 +123,34 @@ public:
 
         @see drawChannel
     */
-    void drawChannels (Graphics& g,
-                       const Rectangle<int>& area,
-                       double startTimeSeconds,
-                       double endTimeSeconds,
-                       float verticalZoomFactor);
+    virtual void drawChannels (Graphics& g,
+                               const Rectangle<int>& area,
+                               double startTimeSeconds,
+                               double endTimeSeconds,
+                               float verticalZoomFactor) = 0;
 
     /** Returns true if the low res preview is fully generated. */
-    bool isFullyLoaded() const noexcept;
+    virtual bool isFullyLoaded() const noexcept = 0;
 
     /** Returns the number of samples that have been set in the thumbnail. */
-    int64 getNumSamplesFinished() const noexcept;
+    virtual int64 getNumSamplesFinished() const noexcept = 0;
 
     /** Returns the highest level in the thumbnail.
         Note that because the thumb only stores low-resolution data, this isn't
         an accurate representation of the highest value, it's only a rough approximation.
     */
-    float getApproximatePeak() const;
+    virtual float getApproximatePeak() const = 0;
 
     /** Reads the approximate min and max levels from a section of the thumbnail.
         The lowest and highest samples are returned in minValue and maxValue, but obviously
         because the thumb only stores low-resolution data, these numbers will only be a rough
         approximation of the true values.
     */
-    void getApproximateMinMax (double startTime, double endTime, int channelIndex,
-                               float& minValue, float& maxValue) const noexcept;
+    virtual void getApproximateMinMax (double startTime, double endTime, int channelIndex,
+                                       float& minValue, float& maxValue) const noexcept = 0;
 
     /** Returns the hash code that was set by setSource() or setReader(). */
-    int64 getHashCode() const;
-
-private:
-    //==============================================================================
-    AudioFormatManager& formatManagerToUse;
-    AudioThumbnailCache& cache;
-
-    class LevelDataSource;
-    struct MinMaxValue;
-    class ThumbData;
-    class CachedWindow;
-
-    friend class LevelDataSource;
-    friend class ScopedPointer<LevelDataSource>;
-    friend class ThumbData;
-    friend class OwnedArray<ThumbData>;
-    friend class CachedWindow;
-    friend class ScopedPointer<CachedWindow>;
-
-    ScopedPointer<LevelDataSource> source;
-    ScopedPointer<CachedWindow> window;
-    OwnedArray<ThumbData> channels;
-
-    int32 samplesPerThumbSample;
-    int64 totalSamples, numSamplesFinished;
-    int32 numChannels;
-    double sampleRate;
-    CriticalSection lock;
-
-    void clearChannelData();
-    bool setDataSource (LevelDataSource* newSource);
-    void setLevels (const MinMaxValue* const* values, int thumbIndex, int numChans, int numValues);
-    void createChannels (int length);
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnail);
+    virtual int64 getHashCode() const = 0;
 };
 
-
-#endif   // __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+#endif
