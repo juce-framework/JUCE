@@ -43,14 +43,15 @@ public:
 
     ~SourceCodeEditor();
 
-    static bool isTextFile (const File& file);
-    static bool isCppFile (const File& file);
+    static SourceCodeEditor* createFor (OpenDocumentManager::Document* document,
+                                        CodeDocument& codeDocument);
 
+    //==============================================================================
     void resized();
 
-private:
     CodeEditorComponent editor;
 
+private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceCodeEditor);
 };
 

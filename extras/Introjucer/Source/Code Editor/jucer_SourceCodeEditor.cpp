@@ -44,6 +44,8 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
     font.setTypefaceName (Font::getDefaultMonospacedFontName());
    #endif
     editor.setFont (font);
+
+    editor.setTabSize (4, true);
 }
 
 SourceCodeEditor::~SourceCodeEditor()
@@ -55,12 +57,16 @@ void SourceCodeEditor::resized()
     editor.setBounds (getLocalBounds());
 }
 
-bool SourceCodeEditor::isTextFile (const File& file)
+SourceCodeEditor* SourceCodeEditor::createFor (OpenDocumentManager::Document* document,
+                                               CodeDocument& codeDocument)
 {
-    return file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;xml;plist;rtf;html;htm;php;py;rb;cs");
-}
+    CodeTokeniser* tokeniser = nullptr;
 
-bool SourceCodeEditor::isCppFile (const File& file)
-{
-    return file.hasFileExtension (sourceOrHeaderFileExtensions);
+    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
+    {
+        static CPlusPlusCodeTokeniser cppTokeniser;
+        tokeniser = &cppTokeniser;
+    }
+
+    return new SourceCodeEditor (document, codeDocument, tokeniser);
 }

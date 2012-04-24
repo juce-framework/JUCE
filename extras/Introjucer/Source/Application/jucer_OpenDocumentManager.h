@@ -52,6 +52,7 @@ public:
         virtual bool isForFile (const File& file) const = 0;
         virtual bool isForNode (const ValueTree& node) const = 0;
         virtual bool refersToProject (Project& project) const = 0;
+        virtual Project* getProject() const = 0;
         virtual String getName() const = 0;
         virtual String getType() const = 0;
         virtual File getFile() const = 0;
