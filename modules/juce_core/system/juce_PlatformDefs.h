@@ -73,7 +73,11 @@
   #endif
   #define juce_breakDebugger        { __debugbreak(); }
 #elif JUCE_GCC || JUCE_MAC
-  #define juce_breakDebugger        { asm ("int $3"); }
+  #if JUCE_NO_INLINE_ASM
+   #define juce_breakDebugger       { }
+  #else
+   #define juce_breakDebugger       { asm ("int $3"); }
+  #endif
 #else
   #define juce_breakDebugger        { __asm int 3 }
 #endif

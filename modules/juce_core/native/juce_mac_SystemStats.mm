@@ -42,7 +42,7 @@ void Logger::outputDebugString (const String& text)
 //==============================================================================
 namespace SystemStatsHelpers
 {
-   #if JUCE_INTEL
+   #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
     static void doCPUID (uint32& a, uint32& b, uint32& c, uint32& d, uint32 type)
     {
         uint32 la = a, lb = b, lc = c, ld = d;
@@ -64,7 +64,7 @@ namespace SystemStatsHelpers
 //==============================================================================
 SystemStats::CPUFlags::CPUFlags()
 {
-   #if JUCE_INTEL
+   #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
     uint32 familyModel = 0, extFeatures = 0, features = 0, dummy = 0;
     SystemStatsHelpers::doCPUID (familyModel, extFeatures, dummy, features, 1);
 
@@ -155,7 +155,7 @@ int SystemStats::getMemorySizeInMegabytes()
 
 String SystemStats::getCpuVendor()
 {
-   #if JUCE_INTEL
+   #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
     uint32 dummy = 0;
     uint32 vendor[4] = { 0 };
 
