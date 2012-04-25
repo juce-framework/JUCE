@@ -217,11 +217,11 @@ namespace juce
     #define JUCE_CATCH_EXCEPTION \
       catch (const std::exception& e)  \
       { \
-          JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__); \
+          juce::JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__); \
       } \
       catch (...) \
       { \
-          JUCEApplication::sendUnhandledException (nullptr, __FILE__, __LINE__); \
+          juce::JUCEApplication::sendUnhandledException (nullptr, __FILE__, __LINE__); \
       }
   #endif
 

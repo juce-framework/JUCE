@@ -2310,6 +2310,9 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
 
 void Component::internalMouseExit (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
+    if (isCurrentlyBlockedByAnotherModalComponent() && source.getComponentUnderMouse() != this)
+        return;
+
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
