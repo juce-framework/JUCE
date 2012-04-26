@@ -146,9 +146,6 @@ void BufferingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info
         }
 
         nextPlayPos += info.numSamples;
-
-        if (source->isLooping() && nextPlayPos > 0)
-            nextPlayPos %= source->getTotalLength();
     }
 }
 
