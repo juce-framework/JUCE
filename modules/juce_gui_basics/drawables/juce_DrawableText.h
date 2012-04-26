@@ -51,11 +51,14 @@ public:
     /** Sets the text to display.*/
     void setText (const String& newText);
 
+    /** Returns the currently displayed text */
+    const String& getText() const noexcept              { return text;}
+
     /** Sets the colour of the text. */
     void setColour (const Colour& newColour);
 
     /** Returns the current text colour. */
-    const Colour& getColour() const noexcept                { return colour; }
+    const Colour& getColour() const noexcept            { return colour; }
 
     /** Sets the font to use.
         Note that the font height and horizontal scale are set as RelativeCoordinates using
