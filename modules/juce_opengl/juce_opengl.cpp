@@ -58,7 +58,6 @@
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
   #pragma comment(lib, "OpenGL32.Lib")
-  #pragma comment(lib, "GlU32.Lib")
  #endif
 
  #if JUCE_QUICKTIME && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES

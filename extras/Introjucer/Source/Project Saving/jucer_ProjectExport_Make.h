@@ -182,7 +182,7 @@ private:
 
         out << config.getGCCLibraryPathFlags();
 
-        const char* defaultLibs[] = { "dl", "freetype", "pthread", "rt", "X11", "GL", "GLU", "Xinerama", "asound", "Xext", 0 };
+        const char* defaultLibs[] = { "dl", "freetype", "pthread", "rt", "X11", "GL", "Xinerama", "asound", "Xext", 0 };
         StringArray libs (defaultLibs);
 
         for (int i = 0; i < libs.size(); ++i)
