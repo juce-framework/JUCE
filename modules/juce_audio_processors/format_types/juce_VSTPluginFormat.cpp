@@ -46,6 +46,8 @@
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4996)
+#else
+ #define __cdecl
 #endif
 
 /*  Obviously you're going to need the Steinberg vstsdk2.4 folder in

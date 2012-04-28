@@ -110,11 +110,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         int numToDo = jmin (sampsNeeded - sampsInBuffer,
                             bufferSize - endOfBufferPos);
 
-        AudioSourceChannelInfo readInfo;
-        readInfo.buffer = &buffer;
-        readInfo.numSamples = numToDo;
-        readInfo.startSample = endOfBufferPos;
-
+        AudioSourceChannelInfo readInfo (&buffer, endOfBufferPos, numToDo);
         input->getNextAudioBlock (readInfo);
 
         if (localRatio > 1.0001)

@@ -156,7 +156,7 @@ public:
     */
     void prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept;
 
-    /** Called after reading from the FIFO, to indicate that this many items have been added.
+    /** Called after writing from the FIFO, to indicate that this many items have been added.
         @see prepareToWrite
     */
     void finishedWrite (int numWritten) noexcept;

@@ -252,11 +252,7 @@ void BufferingAudioSource::readBufferSection (const int64 start, const int lengt
     if (source->getNextReadPosition() != start)
         source->setNextReadPosition (start);
 
-    AudioSourceChannelInfo info;
-    info.buffer = &buffer;
-    info.startSample = bufferOffset;
-    info.numSamples = length;
-
+    AudioSourceChannelInfo info (&buffer, bufferOffset, length);
     source->getNextAudioBlock (info);
 }
 
