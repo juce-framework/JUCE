@@ -262,7 +262,7 @@ public:
     {
         AttributedString s;
         s.setJustification (Justification::topLeft);
-        s.append (getName(), getFont());
+        s.append (getText(), getFont());
 
         TextLayout text;
         text.createLayoutWithBalancedLineLengths (s, width - 8.0f);
