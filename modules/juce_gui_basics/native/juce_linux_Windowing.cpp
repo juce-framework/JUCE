@@ -1284,7 +1284,7 @@ public:
             keyCode = (int) unicodeChar;
 
             if (keyCode < 0x20)
-                keyCode = XKeycodeToKeysym (display, keyEvent->keycode, currentModifiers.isShiftDown() ? 1 : 0);
+                keyCode = XkbKeycodeToKeysym (display, keyEvent->keycode, currentModifiers.isShiftDown() ? 1 : 0, 0);
 
             keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
         }
@@ -1387,7 +1387,7 @@ public:
 
             {
                 ScopedXLock xlock;
-                sym = XKeycodeToKeysym (display, keyEvent->keycode, 0);
+                sym = XkbKeycodeToKeysym (display, keyEvent->keycode, 0, 0);
             }
 
             const ModifierKeys oldMods (currentModifiers);
