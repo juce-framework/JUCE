@@ -222,10 +222,29 @@ public:
     }
 
     //==============================================================================
-    void getFamilyNames (StringArray& familyNames) const
+    StringArray findAllFamilyNames() const
     {
+        StringArray s;
+
         for (int i = 0; i < faces.size(); i++)
-            familyNames.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
+            s.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
+
+        return s;
+    }
+
+    StringArray findAllTypefaceStyles (const String& family) const
+    {
+        StringArray s;
+
+        for (int i = 0; i < faces.size(); i++)
+        {
+            const KnownTypeface* const face = faces.getUnchecked(i);
+
+            if (face->family == family)
+                s.addIfNotAlreadyThere (FontStyleHelpers::getStyleName (face->isBold, face->isItalic));
+        }
+
+        return s;
     }
 
     void getMonospacedNames (StringArray& monoSpaced) const
@@ -298,14 +317,13 @@ public:
         if (faceWrapper != nullptr)
         {
             setCharacteristics (font.getTypefaceName(),
+                                font.getTypefaceStyle(),
                                 faceWrapper->face->ascender / (float) (faceWrapper->face->ascender - faceWrapper->face->descender),
-                                font.isBold(), font.isItalic(),
                                 L' ');
         }
         else
         {
-            DBG ("Failed to create typeface: " << font.getTypefaceName() << " "
-                  << (font.isBold() ? 'B' : ' ') << (font.isItalic() ? 'I' : ' '));
+            DBG ("Failed to create typeface: " << font.toString());
         }
     }
 
@@ -457,10 +475,12 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 
 StringArray Font::findAllTypefaceNames()
 {
-    StringArray s;
-    FTTypefaceList::getInstance()->getFamilyNames (s);
-    s.sort (true);
-    return s;
+    return FTTypefaceList::getInstance()->findAllFamilyNames();
+}
+
+StringArray Font::findAllTypefaceStyles (const String& family)
+{
+    return FTTypefaceList::getInstance()->findAllTypefaceStyles (family);
 }
 
 //==============================================================================
@@ -480,17 +500,16 @@ private:
     {
         const StringArray choices (choicesArray);
 
-        int j;
-        for (j = 0; j < choices.size(); ++j)
+        for (int j = 0; j < choices.size(); ++j)
             if (names.contains (choices[j], true))
                 return choices[j];
 
-        for (j = 0; j < choices.size(); ++j)
+        for (int j = 0; j < choices.size(); ++j)
             for (int i = 0; i < names.size(); ++i)
                 if (names[i].startsWithIgnoreCase (choices[j]))
                     return names[i];
 
-        for (j = 0; j < choices.size(); ++j)
+        for (int j = 0; j < choices.size(); ++j)
             for (int i = 0; i < names.size(); ++i)
                 if (names[i].containsIgnoreCase (choices[j]))
                     return names[i];

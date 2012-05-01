@@ -102,13 +102,13 @@ namespace CustomTypefaceHelpers
 
 //==============================================================================
 CustomTypeface::CustomTypeface()
-    : Typeface (String::empty)
+    : Typeface (String::empty, String::empty)
 {
     clear();
 }
 
 CustomTypeface::CustomTypeface (InputStream& serialisedTypefaceStream)
-    : Typeface (String::empty)
+    : Typeface (String::empty, String::empty)
 {
     clear();
 
@@ -116,8 +116,11 @@ CustomTypeface::CustomTypeface (InputStream& serialisedTypefaceStream)
     BufferedInputStream in (gzin, 32768);
 
     name = in.readString();
-    isBold = in.readBool();
-    isItalic = in.readBool();
+
+    const bool isBold   = in.readBool();
+    const bool isItalic = in.readBool();
+    style = FontStyleHelpers::getStyleName (isBold, isItalic);
+
     ascent = in.readFloat();
     defaultCharacter = CustomTypefaceHelpers::readChar (in);
 
@@ -153,19 +156,27 @@ void CustomTypeface::clear()
 {
     defaultCharacter = 0;
     ascent = 1.0f;
-    isBold = isItalic = false;
+    style = "Regular";
     zeromem (lookupTable, sizeof (lookupTable));
     glyphs.clear();
 }
 
-void CustomTypeface::setCharacteristics (const String& name_, const float ascent_, const bool isBold_,
-                                         const bool isItalic_, const juce_wchar defaultCharacter_) noexcept
+void CustomTypeface::setCharacteristics (const String& name_, const float ascent_, const bool isBold,
+                                         const bool isItalic, const juce_wchar defaultCharacter_) noexcept
 {
     name = name_;
     defaultCharacter = defaultCharacter_;
     ascent = ascent_;
-    isBold = isBold_;
-    isItalic = isItalic_;
+    style = FontStyleHelpers::getStyleName (isBold, isItalic);
+}
+
+void CustomTypeface::setCharacteristics (const String& name_, const String& style_, const float ascent_,
+                                         const juce_wchar defaultCharacter_) noexcept
+{
+    name = name_;
+    style = style_;
+    defaultCharacter = defaultCharacter_;
+    ascent = ascent_;
 }
 
 void CustomTypeface::addGlyph (const juce_wchar character, const Path& path, const float width) noexcept
@@ -216,7 +227,7 @@ bool CustomTypeface::loadGlyphIfPossible (const juce_wchar /*characterNeeded*/)
 
 void CustomTypeface::addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_wchar characterStartIndex, int numCharacters) noexcept
 {
-    setCharacteristics (name, typefaceToCopy.getAscent(), isBold, isItalic, defaultCharacter);
+    setCharacteristics (name, style, typefaceToCopy.getAscent(), defaultCharacter);
 
     for (int i = 0; i < numCharacters; ++i)
     {
@@ -256,8 +267,8 @@ bool CustomTypeface::writeToStream (OutputStream& outputStream)
     GZIPCompressorOutputStream out (&outputStream);
 
     out.writeString (name);
-    out.writeBool (isBold);
-    out.writeBool (isItalic);
+    out.writeBool (FontStyleHelpers::isBold (style));
+    out.writeBool (FontStyleHelpers::isItalic (style));
     out.writeFloat (ascent);
     CustomTypefaceHelpers::writeChar (out, defaultCharacter);
     out.writeInt (glyphs.size());

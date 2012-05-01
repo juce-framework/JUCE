@@ -23,8 +23,45 @@
   ==============================================================================
 */
 
-Typeface::Typeface (const String& name_) noexcept
-    : name (name_)
+namespace FontStyleHelpers
+{
+    static const char* getStyleName (const bool bold,
+                                     const bool italic) noexcept
+    {
+        if (bold && ! italic)   return "Bold";
+        if (italic && ! bold)   return "Italic";
+        if (bold && italic)     return "Bold Italic";
+        return "Regular";
+    }
+
+    static bool isBold (const String& style) noexcept
+    {
+        return style.containsWholeWordIgnoreCase ("Bold");
+    }
+
+    static bool isItalic (const String& style) noexcept
+    {
+        return style.containsWholeWordIgnoreCase ("Italic")
+            || style.containsWholeWordIgnoreCase ("Oblique");
+    }
+
+    static bool isPlaceholderFamilyName (const String& family)
+    {
+        return family == Font::getDefaultSansSerifFontName()
+            || family == Font::getDefaultSerifFontName()
+            || family == Font::getDefaultMonospacedFontName();
+    }
+
+    static String getConcreteFamilyNameFromPlaceholder (const String& family)
+    {
+        const Font f (family, Font::getDefaultStyle(), 15.0f);
+        return Font::getDefaultTypefaceForFont (f)->getName();
+    }
+}
+
+//==============================================================================
+Typeface::Typeface (const String& name_, const String& style_) noexcept
+    : name (name_), style (style_)
 {
 }
 
@@ -34,7 +71,7 @@ Typeface::~Typeface()
 
 Typeface::Ptr Typeface::getFallbackTypeface()
 {
-    const Font fallbackFont (Font::getFallbackFontName(), 10, 0);
+    const Font fallbackFont (Font::getFallbackFontName(), Font::getFallbackFontStyle(), 10.0f);
     return fallbackFont.getTypeface();
 }
 

@@ -38,7 +38,7 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
 
    #if JUCE_MAC
     Font font (10.6f);
-    font.setTypefaceName ("Menlo Regular");
+    font.setTypefaceName ("Menlo");
    #else
     Font font (10.0f);
     font.setTypefaceName (Font::getDefaultMonospacedFontName());

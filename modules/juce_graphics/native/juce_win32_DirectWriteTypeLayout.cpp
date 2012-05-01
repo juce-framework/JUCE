@@ -89,8 +89,8 @@ namespace DirectWriteTypeLayout
             glyphLine.ascent  = jmax (glyphLine.ascent,  scaledFontSize (dwFontMetrics.ascent,  dwFontMetrics, glyphRun));
             glyphLine.descent = jmax (glyphLine.descent, scaledFontSize (dwFontMetrics.descent, dwFontMetrics, glyphRun));
 
-            int styleFlags = 0;
-            const String fontName (getFontName (glyphRun, styleFlags));
+            String fontFamily, fontStyle;
+            getFontFamilyAndStyle (glyphRun, fontFamily, fontStyle);
 
             TextLayout::Run* const glyphRunLayout = new TextLayout::Run (Range<int> (runDescription->textPosition,
                                                                                      runDescription->textPosition + runDescription->stringLength),
@@ -102,7 +102,7 @@ namespace DirectWriteTypeLayout
             const float totalHeight = std::abs ((float) dwFontMetrics.ascent) + std::abs ((float) dwFontMetrics.descent);
             const float fontHeightToEmSizeFactor = (float) dwFontMetrics.designUnitsPerEm / totalHeight;
 
-            glyphRunLayout->font = Font (fontName, glyphRun->fontEmSize / fontHeightToEmSizeFactor, styleFlags);
+            glyphRunLayout->font = Font (fontFamily, fontStyle, glyphRun->fontEmSize / fontHeightToEmSizeFactor);
             glyphRunLayout->colour = getColourOf (static_cast<ID2D1SolidColorBrush*> (clientDrawingEffect));
 
             const Point<float> lineOrigin (layout->getLine (currentLine).lineOrigin);
@@ -145,62 +145,29 @@ namespace DirectWriteTypeLayout
             return Colour::fromFloatRGBA (colour.r, colour.g, colour.b, colour.a);
         }
 
-        String getFontName (DWRITE_GLYPH_RUN const* glyphRun, int& styleFlags) const
+        void getFontFamilyAndStyle (DWRITE_GLYPH_RUN const* glyphRun, String& family, String& style) const
         {
             ComSmartPtr<IDWriteFont> dwFont;
-
             HRESULT hr = fontCollection->GetFontFromFontFace (glyphRun->fontFace, dwFont.resetAndGetPointerAddress());
             jassert (dwFont != nullptr);
 
-            if (dwFont->GetWeight() == DWRITE_FONT_WEIGHT_BOLD) styleFlags |= Font::bold;
-            if (dwFont->GetStyle() == DWRITE_FONT_STYLE_ITALIC) styleFlags |= Font::italic;
+            {
+                ComSmartPtr<IDWriteFontFamily> dwFontFamily;
+                hr = dwFont->GetFontFamily (dwFontFamily.resetAndGetPointerAddress());
+                family = getFontFamilyName (dwFontFamily);
+            }
 
-            ComSmartPtr<IDWriteFontFamily> dwFontFamily;
-            hr = dwFont->GetFontFamily (dwFontFamily.resetAndGetPointerAddress());
-            jassert (dwFontFamily != nullptr);
-
-            // Get the Font Family Names
-            ComSmartPtr<IDWriteLocalizedStrings> dwFamilyNames;
-            hr = dwFontFamily->GetFamilyNames (dwFamilyNames.resetAndGetPointerAddress());
-            jassert (dwFamilyNames != nullptr);
-
-            UINT32 index = 0;
-            BOOL exists = false;
-            hr = dwFamilyNames->FindLocaleName (L"en-us", &index, &exists);
-            if (! exists)
-                index = 0;
-
-            UINT32 length = 0;
-            hr = dwFamilyNames->GetStringLength (index, &length);
-
-            HeapBlock <wchar_t> name (length + 1);
-            hr = dwFamilyNames->GetString (index, name, length + 1);
-
-            return String (name);
+            style = getFontFaceName (dwFont);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomDirectWriteTextRenderer);
     };
 
     //==================================================================================================
-    float getFontHeightToEmSizeFactor (const Font& font, IDWriteFontCollection& dwFontCollection)
+    float getFontHeightToEmSizeFactor (IDWriteFont* const dwFont)
     {
-        BOOL fontFound = false;
-        uint32 fontIndex;
-        dwFontCollection.FindFamilyName (font.getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
-
-        if (! fontFound)
-            fontIndex = 0;
-
-        ComSmartPtr<IDWriteFontFamily> dwFontFamily;
-        HRESULT hr = dwFontCollection.GetFontFamily (fontIndex, dwFontFamily.resetAndGetPointerAddress());
-
-        ComSmartPtr<IDWriteFont> dwFont;
-        hr = dwFontFamily->GetFirstMatchingFont (DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL,
-                                                 dwFont.resetAndGetPointerAddress());
-
         ComSmartPtr<IDWriteFontFace> dwFontFace;
-        hr = dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress());
+        dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress());
 
         DWRITE_FONT_METRICS dwFontMetrics;
         dwFontFace->GetMetrics (&dwFontMetrics);
@@ -251,13 +218,35 @@ namespace DirectWriteTypeLayout
 
         if (font != nullptr)
         {
-            textLayout->SetFontFamilyName (font->getTypefaceName().toWideCharPointer(), range);
+            BOOL fontFound = false;
+            uint32 fontIndex;
+            fontCollection->FindFamilyName (font->getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
 
-            const float fontHeightToEmSizeFactor = getFontHeightToEmSizeFactor (*font, *fontCollection);
+            if (! fontFound)
+                fontIndex = 0;
+
+            ComSmartPtr<IDWriteFontFamily> fontFamily;
+            HRESULT hr = fontCollection->GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress());
+
+            ComSmartPtr<IDWriteFont> dwFont;
+            uint32 fontFacesCount = 0;
+            fontFacesCount = fontFamily->GetFontCount();
+
+            for (uint32 i = 0; i < fontFacesCount; ++i)
+            {
+                hr = fontFamily->GetFont (i, dwFont.resetAndGetPointerAddress());
+
+                if (attr.getFont()->getTypefaceStyle() == getFontFaceName (dwFont))
+                    break;
+            }
+
+            textLayout->SetFontFamilyName (attr.getFont()->getTypefaceName().toWideCharPointer(), range);
+            textLayout->SetFontWeight (dwFont->GetWeight(), range);
+            textLayout->SetFontStretch (dwFont->GetStretch(), range);
+            textLayout->SetFontStyle (dwFont->GetStyle(), range);
+
+            const float fontHeightToEmSizeFactor = getFontHeightToEmSizeFactor (dwFont);
             textLayout->SetFontSize (font->getHeight() * fontHeightToEmSizeFactor, range);
-
-            if (font->isBold())     textLayout->SetFontWeight (DWRITE_FONT_WEIGHT_BOLD, range);
-            if (font->isItalic())   textLayout->SetFontStyle (DWRITE_FONT_STYLE_ITALIC, range);
         }
 
         if (attr.getColour() != nullptr)
@@ -290,7 +279,21 @@ namespace DirectWriteTypeLayout
         HRESULT hr = direct2dFactory->CreateDCRenderTarget (&d2dRTProp, renderTarget.resetAndGetPointerAddress());
 
         Font defaultFont;
-        const float defaultFontHeightToEmSizeFactor = getFontHeightToEmSizeFactor (defaultFont, *fontCollection);
+        BOOL fontFound = false;
+        uint32 fontIndex;
+        fontCollection->FindFamilyName (defaultFont.getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
+
+        if (! fontFound)
+            fontIndex = 0;
+
+        ComSmartPtr<IDWriteFontFamily> dwFontFamily;
+        hr = fontCollection->GetFontFamily (fontIndex, dwFontFamily.resetAndGetPointerAddress());
+
+        ComSmartPtr<IDWriteFont> dwFont;
+        hr = dwFontFamily->GetFirstMatchingFont (DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL,
+                                                 dwFont.resetAndGetPointerAddress());
+
+        const float defaultFontHeightToEmSizeFactor = getFontHeightToEmSizeFactor (dwFont);
 
         jassert (directWriteFactory != nullptr);
 

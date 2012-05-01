@@ -24,6 +24,47 @@
 */
 
 #if JUCE_USE_DIRECTWRITE
+namespace
+{
+    static String getLocalisedName (IDWriteLocalizedStrings* names)
+    {
+        jassert (names != nullptr);
+
+        uint32 index = 0;
+        BOOL exists = false;
+        HRESULT hr = names->FindLocaleName (L"en-us", &index, &exists);
+        if (! exists)
+            index = 0;
+
+        uint32 length = 0;
+        hr = names->GetStringLength (index, &length);
+
+        HeapBlock<wchar_t> name (length + 1);
+        hr = names->GetString (index, name, length + 1);
+
+        return static_cast <const wchar_t*> (name);
+    }
+
+    static String getFontFamilyName (IDWriteFontFamily* family)
+    {
+        jassert (family != nullptr);
+        ComSmartPtr<IDWriteLocalizedStrings> familyNames;
+        HRESULT hr = family->GetFamilyNames (familyNames.resetAndGetPointerAddress());
+        jassert (SUCCEEDED (hr)); (void) hr;
+        return getLocalisedName (familyNames);
+    }
+
+    static String getFontFaceName (IDWriteFont* font)
+    {
+        jassert (font != nullptr);
+        ComSmartPtr<IDWriteLocalizedStrings> faceNames;
+        HRESULT hr = font->GetFaceNames (faceNames.resetAndGetPointerAddress());
+        jassert (SUCCEEDED (hr)); (void) hr;
+
+        return getLocalisedName (faceNames);
+    }
+}
+
 class Direct2DFactories
 {
 public:
@@ -86,7 +127,7 @@ class WindowsDirectWriteTypeface  : public Typeface
 {
 public:
     WindowsDirectWriteTypeface (const Font& font, IDWriteFontCollection* fontCollection)
-        : Typeface (font.getTypefaceName()),
+        : Typeface (font.getTypefaceName(), font.getTypefaceStyle()),
           ascent (0.0f)
     {
         jassert (fontCollection != nullptr);
@@ -102,12 +143,22 @@ public:
         ComSmartPtr<IDWriteFontFamily> dwFontFamily;
         hr = fontCollection->GetFontFamily (fontIndex, dwFontFamily.resetAndGetPointerAddress());
 
-        // Get a specific font in the font family using certain weight and style flags
+        // Get a specific font in the font family using typeface style
         ComSmartPtr<IDWriteFont> dwFont;
-        DWRITE_FONT_WEIGHT dwWeight = font.isBold() ? DWRITE_FONT_WEIGHT_BOLD  : DWRITE_FONT_WEIGHT_NORMAL;
-        DWRITE_FONT_STYLE dwStyle = font.isItalic() ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
+        uint32 fontFacesCount = 0;
+        fontFacesCount = dwFontFamily->GetFontCount();
 
-        hr = dwFontFamily->GetFirstMatchingFont (dwWeight, DWRITE_FONT_STRETCH_NORMAL, dwStyle, dwFont.resetAndGetPointerAddress());
+        for (uint32 i = 0; i < fontFacesCount; ++i)
+        {
+            hr = dwFontFamily->GetFont (i, dwFont.resetAndGetPointerAddress());
+
+            ComSmartPtr<IDWriteLocalizedStrings> faceNames;
+            hr = dwFont->GetFaceNames (faceNames.resetAndGetPointerAddress());
+
+            if (font.getTypefaceStyle() == getLocalisedName (faceNames))
+                break;
+        }
+
         hr = dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress());
 
         DWRITE_FONT_METRICS dwFontMetrics;

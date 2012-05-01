@@ -55,10 +55,16 @@ public:
     typedef ReferenceCountedObjectPtr <Typeface> Ptr;
 
     //==============================================================================
-    /** Returns the name of the typeface.
+    /** Returns the font family of the typeface.
         @see Font::getTypefaceName
     */
     const String& getName() const noexcept      { return name; }
+
+    //==============================================================================
+    /** Returns the font style of the typeface.
+        @see Font::getTypefaceStyle
+    */
+    const String& getStyle() const noexcept     { return style; }
 
     //==============================================================================
     /** Creates a new system typeface. */
@@ -122,9 +128,9 @@ public:
 
 protected:
     //==============================================================================
-    String name;
+    String name, style;
 
-    explicit Typeface (const String& name) noexcept;
+    Typeface (const String& name, const String& style) noexcept;
 
     static Ptr getFallbackTypeface();
 
