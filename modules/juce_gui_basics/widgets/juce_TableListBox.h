@@ -86,7 +86,9 @@ public:
         This method will be called whenever a custom component might need to be updated - e.g.
         when the table is changed, or TableListBox::updateContent() is called.
 
-        If you don't need a custom component for the specified cell, then return 0.
+        If you don't need a custom component for the specified cell, then return nullptr.
+        (Bear in mind that even if you're not creating a new component, you may still need to
+        delete existingComponentToUpdate if it's non-null).
 
         If you do want a custom component, and the existingComponentToUpdate is null, then
         this method must create a new component suitable for the cell, and return it.
