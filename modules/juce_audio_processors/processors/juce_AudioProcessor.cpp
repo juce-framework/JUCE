@@ -76,6 +76,12 @@ void AudioProcessor::setPlayConfigDetails (const int numIns,
     blockSize = blockSize_;
 }
 
+void AudioProcessor::setSpeakerArrangement (const String& inputs, const String& outputs)
+{
+    inputSpeakerArrangement  = inputs;
+    outputSpeakerArrangement = outputs;
+}
+
 void AudioProcessor::setNonRealtime (const bool nonRealtime_) noexcept
 {
     nonRealtime = nonRealtime_;
