@@ -542,7 +542,8 @@ bool Project::Item::renameFile (const File& newFile)
 {
     const File oldFile (getFile());
 
-    if (oldFile.moveFileTo (newFile))
+    if (oldFile.moveFileTo (newFile)
+         || (newFile.exists() && ! oldFile.exists()))
     {
         setFile (newFile);
         OpenDocumentManager::getInstance()->fileHasBeenRenamed (oldFile, newFile);
