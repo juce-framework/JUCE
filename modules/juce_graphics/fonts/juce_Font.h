@@ -129,7 +129,7 @@ public:
         or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font family names,
         but are generic font family names that are used to represent the various default fonts.
         If you need to know the exact typeface font family being used, you can call
-        Font::getTypeface()->getFamily(), which will give you the platform-specific font family.
+        Font::getTypeface()->getName(), which will give you the platform-specific font family.
 
         If a suitable font isn't found on the machine, it'll just use a default instead.
     */
@@ -144,7 +144,7 @@ public:
         but are generic font familiy names that are used to represent the various default fonts.
 
         If you need to know the exact typeface font family being used, you can call
-        Font::getTypeface()->getFamily(), which will give you the platform-specific font family.
+        Font::getTypeface()->getName(), which will give you the platform-specific font family.
     */
     const String& getTypefaceName() const noexcept;
 
@@ -162,6 +162,9 @@ public:
 
     */
     const String& getTypefaceStyle() const noexcept;
+
+    /** Returns a list of the styles that this font can use. */
+    StringArray getAvailableStyles() const;
 
     //==============================================================================
     /** Returns a typeface font family that represents the default sans-serif font.

@@ -232,11 +232,14 @@ Font::Font()
 Font::Font (const float fontHeight, const int styleFlags)
     : font (new SharedFontInternal (Font::getDefaultStyle(), FontValues::limitFontHeight (fontHeight)))
 {
-    setStyleFlags(styleFlags);
+    setStyleFlags (styleFlags);
 }
 
 Font::Font (const String& typefaceName, const float fontHeight, const int styleFlags)
-    : font (new SharedFontInternal (typefaceName, Font::getDefaultStyle(), FontValues::limitFontHeight (fontHeight)))
+    : font (new SharedFontInternal (typefaceName,
+                                    FontStyleHelpers::getStyleName ((styleFlags & bold) != 0,
+                                                                    (styleFlags & italic) != 0),
+                                    FontValues::limitFontHeight (fontHeight)))
 {
     setStyleFlags (styleFlags);
 }
@@ -358,6 +361,11 @@ void Font::setTypefaceStyle (const String& typefaceStyle)
         font->typeface = nullptr;
         font->ascent = 0;
     }
+}
+
+StringArray Font::getAvailableStyles() const
+{
+    return findAllTypefaceStyles (getTypeface()->getName());
 }
 
 Typeface* Font::getTypeface() const

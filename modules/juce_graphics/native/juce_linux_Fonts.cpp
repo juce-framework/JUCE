@@ -170,39 +170,31 @@ public:
         KnownTypeface (const File& file_, const int faceIndex_, const FTFaceWrapper& face)
            : file (file_),
              family (face.face->family_name),
+             style (face.face->style_name),
              faceIndex (faceIndex_),
-             isBold   ((face.face->style_flags & FT_STYLE_FLAG_BOLD) != 0),
-             isItalic ((face.face->style_flags & FT_STYLE_FLAG_ITALIC) != 0),
              isMonospaced ((face.face->face_flags & FT_FACE_FLAG_FIXED_WIDTH) != 0),
              isSansSerif (isFaceSansSerif (family))
         {
         }
 
         const File file;
-        const String family;
+        const String family, style;
         const int faceIndex;
-        const bool isBold, isItalic, isMonospaced, isSansSerif;
+        const bool isMonospaced, isSansSerif;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownTypeface);
     };
 
     //==============================================================================
-    FTFaceWrapper::Ptr createFace (const String& fontName, const bool bold, const bool italic)
+    FTFaceWrapper::Ptr createFace (const String& fontName, const String& fontStyle)
     {
-        const KnownTypeface* ftFace = matchTypeface (fontName, bold, italic);
+        const KnownTypeface* ftFace = matchTypeface (fontName, fontStyle);
 
         if (ftFace == nullptr)
-        {
-            ftFace = matchTypeface (fontName, ! bold, italic);
+            ftFace = matchTypeface (fontName, "Regular");
 
-            if (ftFace == nullptr)
-            {
-                ftFace = matchTypeface (fontName, bold, ! italic);
-
-                if (ftFace == nullptr)
-                    ftFace = matchTypeface (fontName, ! bold, ! italic);
-            }
-        }
+        if (ftFace == nullptr)
+            ftFace = matchTypeface (fontName, String::empty);
 
         if (ftFace != nullptr)
         {
@@ -241,7 +233,7 @@ public:
             const KnownTypeface* const face = faces.getUnchecked(i);
 
             if (face->family == family)
-                s.addIfNotAlreadyThere (FontStyleHelpers::getStyleName (face->isBold, face->isItalic));
+                s.addIfNotAlreadyThere (face->style);
         }
 
         return s;
@@ -274,15 +266,14 @@ private:
     FTLibWrapper::Ptr library;
     OwnedArray<KnownTypeface> faces;
 
-    const KnownTypeface* matchTypeface (const String& familyName, const bool wantBold, const bool wantItalic) const noexcept
+    const KnownTypeface* matchTypeface (const String& familyName, const String& style) const noexcept
     {
         for (int i = 0; i < faces.size(); ++i)
         {
             const KnownTypeface* const face = faces.getUnchecked(i);
 
             if (face->family == familyName
-                  && face->isBold == wantBold
-                  && face->isItalic == wantItalic)
+                  && (face->style.equalsIgnoreCase (style) || style.isEmpty()))
                 return face;
         }
 
@@ -312,7 +303,7 @@ class FreeTypeTypeface   : public CustomTypeface
 public:
     FreeTypeTypeface (const Font& font)
         : faceWrapper (FTTypefaceList::getInstance()
-                           ->createFace (font.getTypefaceName(), font.isBold(), font.isItalic()))
+                           ->createFace (font.getTypefaceName(), font.getTypefaceStyle()))
     {
         if (faceWrapper != nullptr)
         {
