@@ -53,7 +53,6 @@ StringArray ProjectExporter::getDefaultExporters()
 {
     StringArray s;
     s.add (XCodeProjectExporter::getNameMac());
-    s.add (MSVCProjectExporterVC2008::getName());
     s.add (MSVCProjectExporterVC2010::getName());
     s.add (MakefileProjectExporter::getNameLinux());
     return s;

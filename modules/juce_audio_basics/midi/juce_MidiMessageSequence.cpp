@@ -118,8 +118,8 @@ double MidiMessageSequence::getEventTime (const int index) const
 }
 
 //==============================================================================
-void MidiMessageSequence::addEvent (const MidiMessage& newMessage,
-                                    double timeAdjustment)
+MidiMessageSequence::MidiEventHolder* MidiMessageSequence::addEvent (const MidiMessage& newMessage,
+                                                                     double timeAdjustment)
 {
     MidiEventHolder* const newOne = new MidiEventHolder (newMessage);
 
@@ -132,6 +132,7 @@ void MidiMessageSequence::addEvent (const MidiMessage& newMessage,
             break;
 
     list.insert (i + 1, newOne);
+    return newOne;
 }
 
 void MidiMessageSequence::deleteEvent (const int index,

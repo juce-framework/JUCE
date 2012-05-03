@@ -41,7 +41,22 @@ StringArray Font::findAllTypefaceNames()
     File ("/system/fonts").findChildFiles (fonts, File::findFiles, false, "*.ttf");
 
     for (int i = 0; i < fonts.size(); ++i)
-        results.add (fonts.getReference(i).getFileNameWithoutExtension());
+        results.addIfNotAlreadyThere (fonts.getReference(i).getFileNameWithoutExtension()
+                                        .upToLastOccurrenceOf ("-", false, false));
+
+    return results;
+}
+
+StringArray Font::findAllTypefaceStyles (const String& family)
+{
+    StringArray results ("Regular");
+
+    Array<File> fonts;
+    File ("/system/fonts").findChildFiles (fonts, File::findFiles, false, family + "-*.ttf");
+
+    for (int i = 0; i < fonts.size(); ++i)
+        results.addIfNotAlreadyThere (fonts.getReference(i).getFileNameWithoutExtension()
+                                        .fromLastOccurrenceOf ("-", false, false));
 
     return results;
 }
@@ -79,24 +94,27 @@ class AndroidTypeface   : public Typeface
 {
 public:
     AndroidTypeface (const Font& font)
-        : Typeface (font.getTypefaceName()),
+        : Typeface (font.getTypefaceName(), font.getTypefaceStyle()),
           ascent (0),
           descent (0)
     {
-        jint flags = 0;
-        if (font.isBold()) flags = 1;
-        if (font.isItalic()) flags += 2;
+        JNIEnv* const env = getEnv();
 
-        JNIEnv* env = getEnv();
+        const bool isBold   = style.contains ("Bold");
+        const bool isItalic = style.contains ("Italic");
 
-        File fontFile (File ("/system/fonts").getChildFile (name).withFileExtension (".ttf"));
+        File fontFile (getFontFile (name, style));
+
+        if (! fontFile.exists())
+            fontFile = findFontFile (name, isBold, isItalic);
 
         if (fontFile.exists())
             typeface = GlobalRef (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.createFromFile,
                                                                javaString (fontFile.getFullPathName()).get()));
         else
             typeface = GlobalRef (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.create,
-                                                               javaString (getName()).get(), flags));
+                                                               javaString (getName()).get(),
+                                                               (isBold ? 1 : 0) + (isItalic ? 2 : 0)));
 
         rect = GlobalRef (env->NewObject (RectClass, RectClass.constructor, 0, 0, 0, 0));
 
@@ -212,6 +230,41 @@ public:
     float ascent, descent, unitsToHeightScaleFactor;
 
 private:
+    static File findFontFile (const String& family,
+                              const bool bold, const bool italic)
+    {
+        File file;
+
+        if (bold || italic)
+        {
+            String suffix;
+            if (bold)   suffix = "Bold";
+            if (italic) suffix << "Italic";
+
+            file = getFontFile (family, suffix);
+
+            if (file.exists())
+                return file;
+        }
+
+        file = getFontFile (family, "Regular");
+
+        if (! file.exists())
+            file = getFontFile (family, String::empty);
+
+        return file;
+    }
+
+    static File getFontFile (const String& family, const String& style)
+    {
+        String path ("/system/fonts/" + family);
+
+        if (style.isNotEmpty())
+            path << '-' << style;
+
+        return File (path + ".ttf");
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidTypeface);
 };
 

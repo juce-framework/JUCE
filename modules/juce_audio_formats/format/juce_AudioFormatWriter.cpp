@@ -116,10 +116,7 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source, int numSample
     {
         const int numToDo = jmin (numSamplesToRead, samplesPerBlock);
 
-        AudioSourceChannelInfo info;
-        info.buffer = &tempBuffer;
-        info.startSample = 0;
-        info.numSamples = numToDo;
+        AudioSourceChannelInfo info (&tempBuffer, 0, numToDo);
         info.clearActiveBufferRegion();
 
         source.getNextAudioBlock (info);

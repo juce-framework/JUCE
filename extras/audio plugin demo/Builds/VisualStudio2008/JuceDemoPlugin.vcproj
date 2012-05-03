@@ -1003,6 +1003,7 @@
             </FileConfiguration>
           </File>
           <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnail.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailBase.h"/>
           <File RelativePath="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.cpp">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">

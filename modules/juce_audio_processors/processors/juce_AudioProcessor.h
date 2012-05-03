@@ -172,7 +172,7 @@ public:
 
         If the host hasn't supplied a playhead object, this will return 0.
     */
-    AudioPlayHead* getPlayHead() const noexcept               { return playHead; }
+    AudioPlayHead* getPlayHead() const noexcept                 { return playHead; }
 
 
     //==============================================================================
@@ -181,7 +181,7 @@ public:
         This can be called from your processBlock() method - it's not guaranteed
         to be valid at any other time, and may return 0 if it's unknown.
     */
-    double getSampleRate() const noexcept                     { return sampleRate; }
+    double getSampleRate() const noexcept                       { return sampleRate; }
 
     /** Returns the current typical block size that is being used.
 
@@ -192,7 +192,7 @@ public:
         processBlock, it's just the normal one. The actual block sizes used may be
         larger or smaller than this, and will vary between successive calls.
     */
-    int getBlockSize() const noexcept                         { return blockSize; }
+    int getBlockSize() const noexcept                           { return blockSize; }
 
     //==============================================================================
     /** Returns the number of input channels that the host will be sending the filter.
@@ -204,7 +204,7 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
     */
-    int getNumInputChannels() const noexcept                  { return numInputChannels; }
+    int getNumInputChannels() const noexcept                    { return numInputChannels; }
 
     /** Returns the number of output channels that the host will be sending the filter.
 
@@ -215,18 +215,33 @@ public:
         Note that this method is only valid during or after the prepareToPlay()
         method call. Until that point, the number of channels will be unknown.
     */
-    int getNumOutputChannels() const noexcept                 { return numOutputChannels; }
+    int getNumOutputChannels() const noexcept                   { return numOutputChannels; }
 
-    /** Returns the name of one of the input channels, as returned by the host.
+    /** Returns a string containing a whitespace-separated list of speaker types
+        corresponding to each input channel.
+        For example in a 5.1 arrangement, the string may be "L R C Lfe Ls Rs"
+        If the speaker arrangement is unknown, the returned string will be empty.
+    */
+    const String& getInputSpeakerArrangement() const noexcept   { return inputSpeakerArrangement; }
 
-        The host might not supply very useful names for channels, and this might be
+    /** Returns a string containing a whitespace-separated list of speaker types
+        corresponding to each output channel.
+        For example in a 5.1 arrangement, the string may be "L R C Lfe Ls Rs"
+        If the speaker arrangement is unknown, the returned string will be empty.
+    */
+    const String& getOutputSpeakerArrangement() const noexcept  { return outputSpeakerArrangement; }
+
+    //==============================================================================
+    /** Returns the name of one of the processor's input channels.
+
+        The processor might not supply very useful names for channels, and this might be
         something like "1", "2", "left", "right", etc.
     */
     virtual const String getInputChannelName (int channelIndex) const = 0;
 
-    /** Returns the name of one of the output channels, as returned by the host.
+    /** Returns the name of one of the processor's output channels.
 
-        The host might not supply very useful names for channels, and this might be
+        The processor might not supply very useful names for channels, and this might be
         something like "1", "2", "left", "right", etc.
     */
     virtual const String getOutputChannelName (int channelIndex) const = 0;
@@ -243,7 +258,7 @@ public:
         The host will call this to find the latency - the filter itself should set this value
         by calling setLatencySamples() as soon as it can during its initialisation.
     */
-    int getLatencySamples() const noexcept                            { return latencySamples; }
+    int getLatencySamples() const noexcept                      { return latencySamples; }
 
     /** The filter should call this to set the number of samples delay that it introduces.
 
@@ -270,7 +285,7 @@ public:
 
         @see suspendProcessing
     */
-    const CriticalSection& getCallbackLock() const noexcept             { return callbackLock; }
+    const CriticalSection& getCallbackLock() const noexcept     { return callbackLock; }
 
     /** Enables and disables the processing callback.
 
@@ -372,8 +387,7 @@ public:
     //==============================================================================
     /** Returns the active editor, if there is one.
 
-        Bear in mind this can return 0, even if an editor has previously been
-        opened.
+        Bear in mind this can return nullptr, even if an editor has previously been opened.
     */
     AudioProcessorEditor* getActiveEditor() const noexcept             { return activeEditor; }
 
@@ -568,12 +582,13 @@ public:
 
     //==============================================================================
     /** Not for public use - this is called before deleting an editor component. */
-    void editorBeingDeleted (AudioProcessorEditor* editor) noexcept;
+    void editorBeingDeleted (AudioProcessorEditor*) noexcept;
 
     /** Not for public use - this is called to initialise the processor before playing. */
-    void setPlayConfigDetails (int numIns, int numOuts,
-                               double sampleRate,
-                               int blockSize) noexcept;
+    void setPlayConfigDetails (int numIns, int numOuts, double sampleRate, int blockSize) noexcept;
+
+    /** Not for public use - this is called to initialise the processor before playing. */
+    void setSpeakerArrangement (const String& inputs, const String& outputs);
 
 protected:
     //==============================================================================
@@ -608,6 +623,7 @@ private:
     int blockSize, numInputChannels, numOutputChannels, latencySamples;
     bool suspended, nonRealtime;
     CriticalSection callbackLock, listenerLock;
+    String inputSpeakerArrangement, outputSpeakerArrangement;
 
    #if JUCE_DEBUG
     BigInteger changingParams;

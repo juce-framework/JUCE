@@ -158,8 +158,8 @@ public:
                                 that will be inserted
         @see updateMatchedPairs
     */
-    void addEvent (const MidiMessage& newMessage,
-                   double timeAdjustment = 0);
+    MidiEventHolder* addEvent (const MidiMessage& newMessage,
+                               double timeAdjustment = 0);
 
     /** Deletes one of the events in the sequence.
 

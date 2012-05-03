@@ -831,11 +831,10 @@ public:
     public:
         static int compareElements (const short* const first, const short* const second) noexcept
         {
-            if (first[0] < second[0])       return -1;
-            else if (first[0] > second[0])  return 1;
-            else if (first[1] < second[1])  return -1;
-            else if (first[1] > second[1])  return 1;
-
+            if (first[0] < second[0])  return -1;
+            if (first[0] > second[0])  return 1;
+            if (first[1] < second[1])  return -1;
+            if (first[1] > second[1])  return 1;
             return 0;
         }
     };
@@ -859,19 +858,62 @@ public:
 
             if (inCountMatches && outCountMatches)
             {
-                speakerIn = (VstSpeakerArrangementType) pluginInput->type;
+                speakerIn  = (VstSpeakerArrangementType) pluginInput->type;
                 speakerOut = (VstSpeakerArrangementType) pluginOutput->type;
-                numInChans = pluginInput->numChannels;
+                numInChans  = pluginInput->numChannels;
                 numOutChans = pluginOutput->numChannels;
 
                 filter->setPlayConfigDetails (numInChans, numOutChans,
                                               filter->getSampleRate(),
                                               filter->getBlockSize());
+
+                filter->setSpeakerArrangement (getSpeakerArrangementString (speakerIn),
+                                               getSpeakerArrangementString (speakerOut));
                 return true;
             }
         }
 
+        filter->setSpeakerArrangement (String::empty, String::empty);
         return false;
+    }
+
+    static const char* getSpeakerArrangementString (VstSpeakerArrangementType type) noexcept
+    {
+        switch (type)
+        {
+            case kSpeakerArrMono:           return "M";
+            case kSpeakerArrStereo:         return "L R";
+            case kSpeakerArrStereoSurround: return "Ls Rs";
+            case kSpeakerArrStereoCenter:   return "Lc Rc";
+            case kSpeakerArrStereoSide:     return "Sl Sr";
+            case kSpeakerArrStereoCLfe:     return "C Lfe";
+            case kSpeakerArr30Cine:         return "L R C";
+            case kSpeakerArr30Music:        return "L R S";
+            case kSpeakerArr31Cine:         return "L R C Lfe";
+            case kSpeakerArr31Music:        return "L R Lfe S";
+            case kSpeakerArr40Cine:         return "L R C S";
+            case kSpeakerArr40Music:        return "L R Ls Rs";
+            case kSpeakerArr41Cine:         return "L R C Lfe S";
+            case kSpeakerArr41Music:        return "L R Lfe Ls Rs";
+            case kSpeakerArr50:             return "L R C Ls Rs" ;
+            case kSpeakerArr51:             return "L R C Lfe Ls Rs";
+            case kSpeakerArr60Cine:         return "L R C Ls Rs Cs";
+            case kSpeakerArr60Music:        return "L R Ls Rs Sl Sr ";
+            case kSpeakerArr61Cine:         return "L R C Lfe Ls Rs Cs";
+            case kSpeakerArr61Music:        return "L R Lfe Ls Rs Sl Sr";
+            case kSpeakerArr70Cine:         return "L R C Ls Rs Lc Rc ";
+            case kSpeakerArr70Music:        return "L R C Ls Rs Sl Sr";
+            case kSpeakerArr71Cine:         return "L R C Lfe Ls Rs Lc Rc";
+            case kSpeakerArr71Music:        return "L R C Lfe Ls Rs Sl Sr";
+            case kSpeakerArr80Cine:         return "L R C Ls Rs Lc Rc Cs";
+            case kSpeakerArr80Music:        return "L R C Ls Rs Cs Sl Sr";
+            case kSpeakerArr81Cine:         return "L R C Lfe Ls Rs Lc Rc Cs";
+            case kSpeakerArr81Music:        return "L R C Lfe Ls Rs Cs Sl Sr" ;
+            case kSpeakerArr102:            return "L R C Lfe Ls Rs Tfl Tfc Tfr Trl Trr Lfe2";
+            default:                        break;
+        }
+
+        return nullptr;
     }
 
     //==============================================================================

@@ -140,10 +140,7 @@ void MixerAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
             tempBuffer.setSize (jmax (1, info.buffer->getNumChannels()),
                                 info.buffer->getNumSamples());
 
-            AudioSourceChannelInfo info2;
-            info2.buffer = &tempBuffer;
-            info2.numSamples = info.numSamples;
-            info2.startSample = 0;
+            AudioSourceChannelInfo info2 (&tempBuffer, 0, info.numSamples);
 
             for (int i = 1; i < inputs.size(); ++i)
             {

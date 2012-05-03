@@ -67,34 +67,6 @@ public:
     static Desktop& JUCE_CALLTYPE getInstance();
 
     //==============================================================================
-    /** Returns a list of the positions of all the monitors available.
-
-        The first rectangle in the list will be the main monitor area.
-
-        If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
-        or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
-    */
-    RectangleList getAllMonitorDisplayAreas (bool clippedToWorkArea = true) const;
-
-    /** Returns the position and size of the main monitor.
-
-        If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
-        or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
-    */
-    Rectangle<int> getMainMonitorArea (bool clippedToWorkArea = true) const noexcept;
-
-    /** Returns the position and size of the monitor which contains this co-ordinate.
-
-        If none of the monitors contains the point, this will just return the
-        main monitor.
-
-        If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
-        or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
-    */
-    Rectangle<int> getMonitorAreaContaining (const Point<int>& position, bool clippedToWorkArea = true) const;
-
-
-    //==============================================================================
     /** Returns the mouse position.
 
         The co-ordinates are relative to the top-left of the main monitor.
@@ -338,12 +310,60 @@ public:
     bool isOrientationEnabled (DisplayOrientation orientation) const noexcept;
 
     //==============================================================================
-    /** Tells this object to refresh its idea of what the screen resolution is.
+    class JUCE_API  Displays
+    {
+    public:
+        /** Contains details about a display device. */
+        struct Display
+        {
+            /** This is the bounds of the area of this display which isn't covered by
+                OS-dependent objects like the taskbar, menu bar, etc. */
+            Rectangle<int> userArea;
 
-        (Called internally by the native code).
-    */
-    void refreshMonitorSizes();
+            /** This is the total physical area of this display, including any taskbars, etc */
+            Rectangle<int> totalArea;
 
+            /** This is the scale-factor of this display.
+                For higher-resolution displays, this may be a value greater than 1.0
+            */
+            double scale;
+
+            /** This will be true if this is the user's main screen. */
+            bool isMain;
+        };
+
+        /** Returns the display which acts as user's main screen. */
+        const Display& getMainDisplay() const noexcept;
+
+        /** Returns the display which contains a particular point.
+            If the point lies outside all the displays, the nearest one will be returned.
+        */
+        const Display& getDisplayContaining (const Point<int>& position) const noexcept;
+
+        /** Returns a RectangleList made up of all the displays. */
+        RectangleList getRectangleList (bool userAreasOnly) const;
+
+        /** Returns the smallest bounding box which contains all the displays. */
+        Rectangle<int> getTotalBounds (bool userAreasOnly) const;
+
+        /** The list of displays. */
+        Array<Display> displays;
+
+       #ifndef DOXYGEN
+        /** @internal */
+        void refresh();
+       #endif
+
+    private:
+        friend class Desktop;
+        Displays();
+        ~Displays();
+        void findDisplays();
+    };
+
+    const Displays& getDisplays() const noexcept       { return displays; }
+
+    //==============================================================================
     /** True if the OS supports semitransparent windows */
     static bool canUseSemiTransparentWindows() noexcept;
 
@@ -365,7 +385,8 @@ private:
     ListenerList <FocusChangeListener> focusListeners;
 
     Array <Component*> desktopComponents;
-    Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
+
+    Displays displays;
 
     Point<int> lastFakeMouseMove;
     void sendMouseMove();
@@ -389,15 +410,11 @@ private:
     void resetTimer();
     ListenerList <MouseListener>& getMouseListeners();
 
-    int getNumDisplayMonitors() const noexcept;
-    Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const noexcept;
-    static void getCurrentMonitorPositions (Array <Rectangle<int> >&, const bool clipToWorkArea);
-
     void addDesktopComponent (Component*);
     void removeDesktopComponent (Component*);
     void componentBroughtToFront (Component*);
 
-    static void setKioskComponent (Component*, bool enableOrDisable, bool allowMenusAndBars);
+    void setKioskComponent (Component*, bool enableOrDisable, bool allowMenusAndBars);
 
     void triggerFocusCallback();
     void handleAsyncUpdate();

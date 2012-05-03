@@ -144,7 +144,7 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* const compone
         if (peer != nullptr)
             border = peer->getFrameSize();
 
-        limits = Desktop::getInstance().getMonitorAreaContaining (bounds.getCentre());
+        limits = Desktop::getInstance().getDisplays().getDisplayContaining (bounds.getCentre()).userArea;
     }
     else
     {

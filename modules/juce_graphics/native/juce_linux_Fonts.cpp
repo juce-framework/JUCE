@@ -170,39 +170,31 @@ public:
         KnownTypeface (const File& file_, const int faceIndex_, const FTFaceWrapper& face)
            : file (file_),
              family (face.face->family_name),
+             style (face.face->style_name),
              faceIndex (faceIndex_),
-             isBold   ((face.face->style_flags & FT_STYLE_FLAG_BOLD) != 0),
-             isItalic ((face.face->style_flags & FT_STYLE_FLAG_ITALIC) != 0),
              isMonospaced ((face.face->face_flags & FT_FACE_FLAG_FIXED_WIDTH) != 0),
              isSansSerif (isFaceSansSerif (family))
         {
         }
 
         const File file;
-        const String family;
+        const String family, style;
         const int faceIndex;
-        const bool isBold, isItalic, isMonospaced, isSansSerif;
+        const bool isMonospaced, isSansSerif;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownTypeface);
     };
 
     //==============================================================================
-    FTFaceWrapper::Ptr createFace (const String& fontName, const bool bold, const bool italic)
+    FTFaceWrapper::Ptr createFace (const String& fontName, const String& fontStyle)
     {
-        const KnownTypeface* ftFace = matchTypeface (fontName, bold, italic);
+        const KnownTypeface* ftFace = matchTypeface (fontName, fontStyle);
 
         if (ftFace == nullptr)
-        {
-            ftFace = matchTypeface (fontName, ! bold, italic);
+            ftFace = matchTypeface (fontName, "Regular");
 
-            if (ftFace == nullptr)
-            {
-                ftFace = matchTypeface (fontName, bold, ! italic);
-
-                if (ftFace == nullptr)
-                    ftFace = matchTypeface (fontName, ! bold, ! italic);
-            }
-        }
+        if (ftFace == nullptr)
+            ftFace = matchTypeface (fontName, String::empty);
 
         if (ftFace != nullptr)
         {
@@ -222,10 +214,29 @@ public:
     }
 
     //==============================================================================
-    void getFamilyNames (StringArray& familyNames) const
+    StringArray findAllFamilyNames() const
     {
+        StringArray s;
+
         for (int i = 0; i < faces.size(); i++)
-            familyNames.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
+            s.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
+
+        return s;
+    }
+
+    StringArray findAllTypefaceStyles (const String& family) const
+    {
+        StringArray s;
+
+        for (int i = 0; i < faces.size(); i++)
+        {
+            const KnownTypeface* const face = faces.getUnchecked(i);
+
+            if (face->family == family)
+                s.addIfNotAlreadyThere (face->style);
+        }
+
+        return s;
     }
 
     void getMonospacedNames (StringArray& monoSpaced) const
@@ -255,15 +266,14 @@ private:
     FTLibWrapper::Ptr library;
     OwnedArray<KnownTypeface> faces;
 
-    const KnownTypeface* matchTypeface (const String& familyName, const bool wantBold, const bool wantItalic) const noexcept
+    const KnownTypeface* matchTypeface (const String& familyName, const String& style) const noexcept
     {
         for (int i = 0; i < faces.size(); ++i)
         {
             const KnownTypeface* const face = faces.getUnchecked(i);
 
             if (face->family == familyName
-                  && face->isBold == wantBold
-                  && face->isItalic == wantItalic)
+                  && (face->style.equalsIgnoreCase (style) || style.isEmpty()))
                 return face;
         }
 
@@ -293,19 +303,18 @@ class FreeTypeTypeface   : public CustomTypeface
 public:
     FreeTypeTypeface (const Font& font)
         : faceWrapper (FTTypefaceList::getInstance()
-                           ->createFace (font.getTypefaceName(), font.isBold(), font.isItalic()))
+                           ->createFace (font.getTypefaceName(), font.getTypefaceStyle()))
     {
         if (faceWrapper != nullptr)
         {
             setCharacteristics (font.getTypefaceName(),
+                                font.getTypefaceStyle(),
                                 faceWrapper->face->ascender / (float) (faceWrapper->face->ascender - faceWrapper->face->descender),
-                                font.isBold(), font.isItalic(),
                                 L' ');
         }
         else
         {
-            DBG ("Failed to create typeface: " << font.getTypefaceName() << " "
-                  << (font.isBold() ? 'B' : ' ') << (font.isItalic() ? 'I' : ' '));
+            DBG ("Failed to create typeface: " << font.toString());
         }
     }
 
@@ -457,10 +466,12 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 
 StringArray Font::findAllTypefaceNames()
 {
-    StringArray s;
-    FTTypefaceList::getInstance()->getFamilyNames (s);
-    s.sort (true);
-    return s;
+    return FTTypefaceList::getInstance()->findAllFamilyNames();
+}
+
+StringArray Font::findAllTypefaceStyles (const String& family)
+{
+    return FTTypefaceList::getInstance()->findAllTypefaceStyles (family);
 }
 
 //==============================================================================
@@ -480,17 +491,16 @@ private:
     {
         const StringArray choices (choicesArray);
 
-        int j;
-        for (j = 0; j < choices.size(); ++j)
+        for (int j = 0; j < choices.size(); ++j)
             if (names.contains (choices[j], true))
                 return choices[j];
 
-        for (j = 0; j < choices.size(); ++j)
+        for (int j = 0; j < choices.size(); ++j)
             for (int i = 0; i < names.size(); ++i)
                 if (names[i].startsWithIgnoreCase (choices[j]))
                     return names[i];
 
-        for (j = 0; j < choices.size(); ++j)
+        for (int j = 0; j < choices.size(); ++j)
             for (int i = 0; i < names.size(); ++i)
                 if (names[i].containsIgnoreCase (choices[j]))
                     return names[i];
@@ -503,7 +513,8 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getSansSerifNames (allFonts);
 
-        const char* targets[] = { "Verdana", "Bitstream Vera Sans", "Luxi Sans", "Sans", 0 };
+        const char* targets[] = { "Verdana", "Bitstream Vera Sans", "Luxi Sans",
+                                  "Liberation Sans", "DejaVu Sans", "Sans", 0 };
         return pickBestFont (allFonts, targets);
     }
 
@@ -512,7 +523,8 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getSerifNames (allFonts);
 
-        const char* targets[] = { "Bitstream Vera Serif", "Times", "Nimbus Roman", "Serif", 0 };
+        const char* targets[] = { "Bitstream Vera Serif", "Times", "Nimbus Roman",
+                                  "Liberation Serif", "DejaVu Serif", "Serif", 0 };
         return pickBestFont (allFonts, targets);
     }
 
@@ -521,7 +533,8 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getMonospacedNames (allFonts);
 
-        const char* targets[] = { "Bitstream Vera Sans Mono", "Courier", "Sans Mono", "Mono", 0 };
+        const char* targets[] = { "Bitstream Vera Sans Mono", "Courier", "Sans Mono",
+                                  "Liberation Mono", "DejaVu Mono", "Mono", 0 };
         return pickBestFont (allFonts, targets);
     }
 

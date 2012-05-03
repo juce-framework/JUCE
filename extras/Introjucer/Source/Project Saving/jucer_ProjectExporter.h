@@ -64,6 +64,7 @@ public:
     virtual int getVisualStudioVersion() const  { return 0; }
     virtual bool isLinux() const                { return false; }
     virtual bool isOSX() const                  { return false; }
+    virtual bool isAndroid() const              { return false; }
 
     //==============================================================================
     String getName() const                      { return name; }

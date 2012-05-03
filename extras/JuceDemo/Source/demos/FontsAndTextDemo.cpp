@@ -29,17 +29,16 @@
 //==============================================================================
 class FontsAndTextDemo  : public Component,
                           public ListBoxModel,
-                          public ButtonListener,
+                          public ComboBoxListener,
                           public SliderListener
 {
 public:
     //==============================================================================
     FontsAndTextDemo()
-        : boldButton ("Bold"),
-          italicButton ("Italic"),
-          sizeLabel (String::empty, "Size"),
-          kerningLabel (String::empty, "Kerning"),
-          horizontalScaleLabel (String::empty, "Scale")
+        : sizeLabel (String::empty, "Size:"),
+          kerningLabel (String::empty, "Kerning:"),
+          horizontalScaleLabel (String::empty, "Scale:"),
+          styleLabel (String::empty, "Style:")
     {
         setName ("Fonts");
 
@@ -55,13 +54,12 @@ public:
 
         textBox.setMultiLine (true, true);
         textBox.setReturnKeyStartsNewLine (true);
-        textBox.setText ("The Quick Brown Fox Jumps Over The Lazy Dog\n\nAa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789");
+        textBox.setText ("The Quick Brown Fox Jumps Over The Lazy Dog\n\n"
+                         "Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789");
 
-        addAndMakeVisible (&boldButton);
-        boldButton.addListener (this);
-
-        addAndMakeVisible (&italicButton);
-        italicButton.addListener (this);
+        addAndMakeVisible (&fontStylesComboBox);
+        fontStylesComboBox.addListener (this);
+        styleLabel.attachToComponent (&fontStylesComboBox, true);
 
         addAndMakeVisible (&sizeSlider);
         sizeSlider.setRange (3.0, 150.0, 0.1);
@@ -97,10 +95,6 @@ public:
         addAndMakeVisible (verticalDividerBar);
     }
 
-    ~FontsAndTextDemo()
-    {
-    }
-
     void resized()
     {
         // lay out the list box and vertical divider..
@@ -118,8 +112,7 @@ public:
         sizeSlider.setBounds (x, getHeight() - 106, getWidth() - x, 22);
         kerningSlider.setBounds (x, getHeight() - 82, getWidth() - x, 22);
         horizontalScaleSlider.setBounds (x, getHeight() - 58, getWidth() - x, 22);
-        boldButton.setBounds (x, getHeight() - 34, (getWidth() - x) / 2, 22);
-        italicButton.setBounds (x + (getWidth() - x) / 2, getHeight() - 34, (getWidth() - x) / 2, 22);
+        fontStylesComboBox.setBounds (x, getHeight() - 34, (getWidth() - x) / 2, 22);
     }
 
     // implements the ListBoxModel method
@@ -159,12 +152,30 @@ public:
         Font font (fonts [listBox->getSelectedRow()]);
 
         font.setHeight ((float) sizeSlider.getValue());
-        font.setBold (boldButton.getToggleState());
-        font.setItalic (italicButton.getToggleState());
         font.setExtraKerningFactor ((float) kerningSlider.getValue());
         font.setHorizontalScale ((float) horizontalScaleSlider.getValue());
 
+        updateStylesList (font);
+        font.setTypefaceStyle (fontStylesComboBox.getText());
+
         textBox.applyFontToAllText (font);
+    }
+
+    void updateStylesList (const Font& newFont)
+    {
+        const StringArray newStyles (newFont.getAvailableStyles());
+
+        if (newStyles != currentStyleList)
+        {
+            currentStyleList = newStyles;
+
+            fontStylesComboBox.clear();
+
+            for (int i = 0; i < newStyles.size(); ++i)
+                fontStylesComboBox.addItem (newStyles[i], i + 1);
+
+            fontStylesComboBox.setSelectedItemIndex (0);
+        }
     }
 
     void selectedRowsChanged (int /*lastRowselected*/)
@@ -179,18 +190,23 @@ public:
 
     void sliderValueChanged (Slider*)
     {
-        // (this is called when the size slider is moved)
+        updatePreviewBoxText();
+    }
+
+    void comboBoxChanged (ComboBox*)
+    {
         updatePreviewBoxText();
     }
 
 private:
     Array<Font> fonts;
+    StringArray currentStyleList;
 
     ScopedPointer<ListBox> listBox;
     TextEditor textBox;
-    ToggleButton boldButton, italicButton;
+    ComboBox fontStylesComboBox;
     Slider sizeSlider, kerningSlider, horizontalScaleSlider;
-    Label sizeLabel, kerningLabel, horizontalScaleLabel;
+    Label sizeLabel, kerningLabel, horizontalScaleLabel, styleLabel;
 
     StretchableLayoutManager verticalLayout;
     ScopedPointer<StretchableLayoutResizerBar> verticalDividerBar;

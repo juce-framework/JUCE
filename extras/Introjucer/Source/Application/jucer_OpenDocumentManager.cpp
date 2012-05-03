@@ -33,8 +33,8 @@ class SourceCodeDocument  : public OpenDocumentManager::Document
 {
 public:
     //==============================================================================
-    SourceCodeDocument (const File& file_)
-        : modDetector (file_)
+    SourceCodeDocument (Project* project_, const File& file_)
+        : modDetector (file_), project (project_)
     {
         codeDoc = new CodeDocument();
         reloadFromFile();
@@ -43,15 +43,16 @@ public:
     //==============================================================================
     struct Type  : public OpenDocumentManager::DocumentType
     {
-        bool canOpenFile (const File& file)                 { return SourceCodeEditor::isTextFile (file); }
-        Document* openFile (Project*, const File& file)     { return new SourceCodeDocument (file); }
+        bool canOpenFile (const File& file)                     { return file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;xml;plist;rtf;html;htm;php;py;rb;cs"); }
+        Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }
     };
 
     //==============================================================================
     bool loadedOk() const                               { return true; }
     bool isForFile (const File& file) const             { return getFile() == file; }
     bool isForNode (const ValueTree& node) const        { return false; }
-    bool refersToProject (Project& project) const       { return false; }
+    bool refersToProject (Project& p) const             { return project == &p; }
+    Project* getProject() const                         { return project; }
     bool canSaveAs() const                              { return true; }
     String getName() const                              { return getFile().getFileName(); }
     String getType() const                              { return getFile().getFileExtension() + " file"; }
@@ -92,22 +93,13 @@ public:
         return false;
     }
 
-    Component* createEditor()
-    {
-        CodeTokeniser* tokeniser = nullptr;
-
-        if (SourceCodeEditor::isCppFile (modDetector.getFile()))
-            tokeniser = &cppTokeniser;
-
-        return new SourceCodeEditor (this, *codeDoc, tokeniser);
-    }
-
+    Component* createEditor()       { return SourceCodeEditor::createFor (this, *codeDoc); }
     Component* createViewer()       { return createEditor(); }
 
 private:
     FileModificationDetector modDetector;
     ScopedPointer <CodeDocument> codeDoc;
-    CPlusPlusCodeTokeniser cppTokeniser;
+    Project* project;
 };
 
 //==============================================================================
@@ -132,6 +124,7 @@ public:
     bool isForFile (const File& file_) const        { return file == file_; }
     bool isForNode (const ValueTree& node_) const   { return false; }
     bool refersToProject (Project& p) const         { return project == &p; }
+    Project* getProject() const                     { return project; }
     bool needsSaving() const                        { return false; }
     bool save()                                     { return true; }
     bool canSaveAs() const                          { return false; }

@@ -154,9 +154,10 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
         jassert (desc != nullptr);
 
         if (addType (*desc))
+        {
             addedOne = true;
-
-        typesFound.add (new PluginDescription (*desc));
+            typesFound.add (new PluginDescription (*desc));
+        }
     }
 
     return addedOne;

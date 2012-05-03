@@ -274,11 +274,7 @@ const int kilobytesPerSecond1x = 176;
         if (numSamples > 0)
         {
             juce::AudioSampleBuffer tempBuffer (2, numSamples);
-
-            juce::AudioSourceChannelInfo info;
-            info.buffer = &tempBuffer;
-            info.startSample = 0;
-            info.numSamples = numSamples;
+            juce::AudioSourceChannelInfo info (tempBuffer);
 
             source->getNextAudioBlock (info);
 

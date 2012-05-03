@@ -285,7 +285,7 @@ public:
 
     static void displayReconfigurationCallBack (CGDirectDisplayID, CGDisplayChangeSummaryFlags, void*)
     {
-        Desktop::getInstance().refreshMonitorSizes();
+        const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
     juce_DeclareSingleton_SingleThreaded_Minimal (DisplaySettingsChangeCallback);
@@ -296,29 +296,39 @@ private:
 
 juce_ImplementSingleton_SingleThreaded (DisplaySettingsChangeCallback);
 
-void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
+static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
+{
+    r.origin.y = mainScreenBottom - (r.origin.y + r.size.height);
+    return convertToRectInt (r);
+}
+
+void Desktop::Displays::findDisplays()
 {
     JUCE_AUTORELEASEPOOL
 
     DisplaySettingsChangeCallback::getInstance();
 
-    monitorCoords.clear();
     NSArray* screens = [NSScreen screens];
-    const CGFloat mainScreenBottom = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
+    const CGFloat mainScreenBottom = [[screens objectAtIndex: 0] frame].size.height;
 
     for (unsigned int i = 0; i < [screens count]; ++i)
     {
         NSScreen* s = (NSScreen*) [screens objectAtIndex: i];
 
-        NSRect r = clipToWorkArea ? [s visibleFrame]
-                                  : [s frame];
+        Display d;
+        d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom);
+        d.totalArea = convertDisplayRect ([s frame], mainScreenBottom);
+        d.isMain = (i == 0);
 
-        r.origin.y = mainScreenBottom - (r.origin.y + r.size.height);
+       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
+        if ([s respondsToSelector: @selector (backingScaleFactor)])
+            d.scale = s.backingScaleFactor;
+        else
+       #endif
+            d.scale = 1.0;
 
-        monitorCoords.add (convertToRectInt (r));
+        displays.add (d);
     }
-
-    jassert (monitorCoords.size() > 0);
 }
 
 //==============================================================================

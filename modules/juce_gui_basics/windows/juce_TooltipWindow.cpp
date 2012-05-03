@@ -72,15 +72,16 @@ void TooltipWindow::showFor (const String& tip)
 
     Point<int> mousePos (Desktop::getMousePosition());
     Rectangle<int> parentArea;
+    Component* const parent = getParentComponent();
 
-    if (getParentComponent() != nullptr)
+    if (parent != nullptr)
     {
-        mousePos = getParentComponent()->getLocalPoint (nullptr, mousePos);
-        parentArea = getParentComponent()->getLocalBounds();
+        mousePos   = parent->getLocalPoint (nullptr, mousePos);
+        parentArea = parent->getLocalBounds();
     }
     else
     {
-        parentArea = Desktop::getInstance().getMonitorAreaContaining (mousePos);
+        parentArea = Desktop::getInstance().getDisplays().getDisplayContaining (mousePos).userArea;
     }
 
     int w, h;
@@ -98,18 +99,16 @@ void TooltipWindow::showFor (const String& tip)
     else
         y += 6;
 
-    x = jlimit (parentArea.getX(), parentArea.getRight() - w, x);
+    x = jlimit (parentArea.getX(), parentArea.getRight()  - w, x);
     y = jlimit (parentArea.getY(), parentArea.getBottom() - h, y);
 
     setBounds (x, y, w, h);
     setVisible (true);
 
-    if (getParentComponent() == nullptr)
-    {
+    if (parent == nullptr)
         addToDesktop (ComponentPeer::windowHasDropShadow
                         | ComponentPeer::windowIsTemporary
                         | ComponentPeer::windowIgnoresKeyPresses);
-    }
 
     toFront (false);
 }

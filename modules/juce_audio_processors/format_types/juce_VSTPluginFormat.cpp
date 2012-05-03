@@ -46,6 +46,8 @@
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4996)
+#else
+ #define __cdecl
 #endif
 
 /*  Obviously you're going to need the Steinberg vstsdk2.4 folder in
@@ -2173,7 +2175,7 @@ namespace
                 return 0;
             }
 
-            case audioMasterVersion:                        return 0x2400;
+            case audioMasterVersion:                        return 2400;
             case audioMasterCurrentId:                      return shellUIDToCreate;
             case audioMasterGetNumAutomatableParameters:    return 0;
             case audioMasterGetAutomationState:             return 1;

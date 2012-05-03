@@ -159,6 +159,8 @@ public:
             sourceGroup.addFile (mainCppFile, -1, true);
         }
 
+        project.createDefaultExporters();
+
         return true;
     }
 

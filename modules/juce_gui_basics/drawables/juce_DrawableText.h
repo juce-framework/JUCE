@@ -51,11 +51,14 @@ public:
     /** Sets the text to display.*/
     void setText (const String& newText);
 
+    /** Returns the currently displayed text */
+    const String& getText() const noexcept                              { return text;}
+
     /** Sets the colour of the text. */
     void setColour (const Colour& newColour);
 
     /** Returns the current text colour. */
-    const Colour& getColour() const noexcept                { return colour; }
+    const Colour& getColour() const noexcept                            { return colour; }
 
     /** Sets the font to use.
         Note that the font height and horizontal scale are set as RelativeCoordinates using
@@ -65,8 +68,14 @@ public:
     */
     void setFont (const Font& newFont, bool applySizeAndScale);
 
+    /** Returns the current font. */
+    const Font& getFont() const noexcept                                { return font; }
+
     /** Changes the justification of the text within the bounding box. */
     void setJustification (const Justification& newJustification);
+
+    /** Returns the current justification. */
+    const Justification& getJustification() const noexcept              { return justification; }
 
     /** Returns the parallelogram that defines the text bounding box. */
     const RelativeParallelogram& getBoundingBox() const noexcept        { return bounds; }

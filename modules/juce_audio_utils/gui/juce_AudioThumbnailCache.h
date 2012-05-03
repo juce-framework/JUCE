@@ -26,7 +26,7 @@
 #ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 #define __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 
-#include "juce_AudioThumbnail.h"
+#include "juce_AudioThumbnailBase.h"
 
 
 //==============================================================================
@@ -64,14 +64,14 @@ public:
         This is called automatically by the AudioThumbnail class, so you shouldn't
         normally need to call it directly.
     */
-    bool loadThumb (AudioThumbnail& thumb, int64 hashCode);
+    bool loadThumb (AudioThumbnailBase& thumb, int64 hashCode);
 
     /** Stores the cachable data from the specified thumb in this cache.
 
         This is called automatically by the AudioThumbnail class, so you shouldn't
         normally need to call it directly.
     */
-    void storeThumb (const AudioThumbnail& thumb, int64 hashCode);
+    void storeThumb (const AudioThumbnailBase& thumb, int64 hashCode);
 
     //==============================================================================
     /** Attempts to re-load a saved cache of thumbnails from a stream.

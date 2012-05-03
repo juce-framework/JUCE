@@ -118,12 +118,12 @@ inline uint32 ByteOrder::swap (uint32 n)
 {
    #if JUCE_MAC || JUCE_IOS
     return OSSwapInt32 (n);
-   #elif JUCE_GCC && JUCE_INTEL
+   #elif JUCE_GCC && JUCE_INTEL && ! JUCE_NO_INLINE_ASM
     asm("bswap %%eax" : "=a"(n) : "a"(n));
     return n;
    #elif JUCE_USE_INTRINSICS
     return _byteswap_ulong (n);
-   #elif JUCE_MSVC
+   #elif JUCE_MSVC && ! JUCE_NO_INLINE_ASM
     __asm {
         mov eax, n
         bswap eax

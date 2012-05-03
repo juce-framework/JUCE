@@ -420,7 +420,7 @@ public:
                                         synchronously; if false, it will be asynchronous
         @param allowNudgingOfOtherValues  if false, this value will be restricted to being below the
                                         max value (in a two-value slider) or the mid value (in a three-value
-                                        slider). If false, then if this value goes beyond those values,
+                                        slider). If true, then if this value goes beyond those values,
                                         it will push them along with it.
         @see getMinValue, setMaxValue, setValue
     */
@@ -462,7 +462,7 @@ public:
                                         synchronously; if false, it will be asynchronous
         @param allowNudgingOfOtherValues  if false, this value will be restricted to being above the
                                         min value (in a two-value slider) or the mid value (in a three-value
-                                        slider). If false, then if this value goes beyond those values,
+                                        slider). If true, then if this value goes beyond those values,
                                         it will push them along with it.
         @see getMaxValue, setMinValue, setValue
     */

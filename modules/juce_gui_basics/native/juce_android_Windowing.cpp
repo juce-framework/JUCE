@@ -261,7 +261,7 @@ public:
 
     void setFullScreen (bool shouldBeFullScreen)
     {
-        Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getMainMonitorArea()
+        Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getMainDisplay().userArea
                                              : lastNonFullscreenBounds);
 
         if ((! shouldBeFullScreen) && r.isEmpty())
@@ -670,9 +670,14 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 }
 
 //==============================================================================
-void Desktop::getCurrentMonitorPositions (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
+void Desktop::Displays::findDisplays()
 {
-    monitorCoords.add (Rectangle<int> (android.screenWidth, android.screenHeight));
+    Display d;
+    d.userArea = d.totalArea = Rectangle<int> (android.screenWidth, android.screenHeight);
+    d.isMain = true;
+    d.scale = 1.0;
+
+    displays.add (d);
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv* env, jobject activity,
@@ -682,7 +687,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, setScreenSize, void, (JNIEnv
     android.screenWidth = screenWidth;
     android.screenHeight = screenHeight;
 
-    Desktop::getInstance().refreshMonitorSizes();
+    const_cast <Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
 }
 
 //==============================================================================

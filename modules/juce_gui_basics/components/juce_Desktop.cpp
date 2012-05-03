@@ -29,7 +29,6 @@ Desktop::Desktop()
       allowedOrientations (allOrientations)
 {
     createMouseInputSources();
-    refreshMonitorSizes();
 }
 
 Desktop::~Desktop()
@@ -53,79 +52,6 @@ Desktop& JUCE_CALLTYPE Desktop::getInstance()
 }
 
 Desktop* Desktop::instance = nullptr;
-
-//==============================================================================
-void Desktop::refreshMonitorSizes()
-{
-    Array <Rectangle<int> > oldClipped, oldUnclipped;
-    oldClipped.swapWithArray (monitorCoordsClipped);
-    oldUnclipped.swapWithArray (monitorCoordsUnclipped);
-
-    getCurrentMonitorPositions (monitorCoordsClipped, true);
-    getCurrentMonitorPositions (monitorCoordsUnclipped, false);
-    jassert (monitorCoordsClipped.size() == monitorCoordsUnclipped.size());
-
-    if (oldClipped != monitorCoordsClipped
-         || oldUnclipped != monitorCoordsUnclipped)
-    {
-        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-        {
-            ComponentPeer* const p = ComponentPeer::getPeer (i);
-            if (p != nullptr)
-                p->handleScreenSizeChange();
-        }
-    }
-}
-
-int Desktop::getNumDisplayMonitors() const noexcept
-{
-    return monitorCoordsClipped.size();
-}
-
-Rectangle<int> Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const noexcept
-{
-    return clippedToWorkArea ? monitorCoordsClipped [index]
-                             : monitorCoordsUnclipped [index];
-}
-
-RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWorkArea) const
-{
-    RectangleList rl;
-
-    for (int i = 0; i < getNumDisplayMonitors(); ++i)
-        rl.addWithoutMerging (getDisplayMonitorCoordinates (i, clippedToWorkArea));
-
-    return rl;
-}
-
-Rectangle<int> Desktop::getMainMonitorArea (const bool clippedToWorkArea) const noexcept
-{
-    return getDisplayMonitorCoordinates (0, clippedToWorkArea);
-}
-
-Rectangle<int> Desktop::getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea) const
-{
-    Rectangle<int> best (getMainMonitorArea (clippedToWorkArea));
-    double bestDistance = 1.0e10;
-
-    for (int i = getNumDisplayMonitors(); --i >= 0;)
-    {
-        const Rectangle<int> rect (getDisplayMonitorCoordinates (i, clippedToWorkArea));
-
-        if (rect.contains (position))
-            return rect;
-
-        const double distance = rect.getCentre().getDistanceFrom (position);
-
-        if (distance < bestDistance)
-        {
-            bestDistance = distance;
-            best = rect;
-        }
-    }
-
-    return best;
-}
 
 //==============================================================================
 int Desktop::getNumComponents() const noexcept
@@ -396,6 +322,94 @@ void Desktop::sendMouseMove()
                 mouseListeners.callChecked (checker, &MouseListener::mouseDrag, me);
             else
                 mouseListeners.callChecked (checker, &MouseListener::mouseMove, me);
+        }
+    }
+}
+
+
+//==============================================================================
+Desktop::Displays::Displays()   { refresh(); }
+Desktop::Displays::~Displays()  {}
+
+const Desktop::Displays::Display& Desktop::Displays::getMainDisplay() const noexcept
+{
+    jassert (displays.getReference(0).isMain);
+    return displays.getReference(0);
+}
+
+const Desktop::Displays::Display& Desktop::Displays::getDisplayContaining (const Point<int>& position) const noexcept
+{
+    const Display* best = &displays.getReference(0);
+    double bestDistance = 1.0e10;
+
+    for (int i = displays.size(); --i >= 0;)
+    {
+        const Display& d = displays.getReference(i);
+
+        if (d.totalArea.contains (position))
+        {
+            best = &d;
+            break;
+        }
+
+        const double distance = d.totalArea.getCentre().getDistanceFrom (position);
+
+        if (distance < bestDistance)
+        {
+            bestDistance = distance;
+            best = &d;
+        }
+    }
+
+    return *best;
+}
+
+RectangleList Desktop::Displays::getRectangleList (bool userAreasOnly) const
+{
+    RectangleList rl;
+
+    for (int i = 0; i < displays.size(); ++i)
+    {
+        const Display& d = displays.getReference(i);
+        rl.addWithoutMerging (userAreasOnly ? d.userArea : d.totalArea);
+    }
+
+    return rl;
+}
+
+Rectangle<int> Desktop::Displays::getTotalBounds (bool userAreasOnly) const
+{
+    return getRectangleList (userAreasOnly).getBounds();
+}
+
+bool operator== (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept
+{
+    return d1.userArea == d2.userArea
+        && d1.totalArea == d2.totalArea
+        && d1.scale == d2.scale
+        && d1.isMain == d2.isMain;
+}
+
+bool operator!= (const Desktop::Displays::Display& d1, const Desktop::Displays::Display& d2) noexcept
+{
+    return ! (d1 == d2);
+}
+
+void Desktop::Displays::refresh()
+{
+    Array<Display> oldDisplays;
+    oldDisplays.swapWithArray (displays);
+
+    findDisplays();
+    jassert (displays.size() > 0);
+
+    if (oldDisplays != displays)
+    {
+        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+        {
+            ComponentPeer* const p = ComponentPeer::getPeer (i);
+            if (p != nullptr)
+                p->handleScreenSizeChange();
         }
     }
 }

@@ -377,10 +377,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
     while (ok)
     {
         {
-            AudioSourceChannelInfo info;
-            info.buffer = &sourceBuffer;
-            info.numSamples = samplesPerBlock;
-            info.startSample = 0;
+            AudioSourceChannelInfo info (&sourceBuffer, 0, samplesPerBlock);
             sourceBuffer.clear();
 
             source->getNextAudioBlock (info);

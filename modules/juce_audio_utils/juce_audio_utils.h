@@ -35,9 +35,11 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE gui, players
 #ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
  #include "gui/juce_AudioDeviceSelectorComponent.h"
+#endif
+#ifndef __JUCE_AUDIOTHUMBNAILBASE_JUCEHEADER__
+ #include "gui/juce_AudioThumbnailBase.h"
 #endif
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
  #include "gui/juce_AudioThumbnail.h"
@@ -51,7 +53,6 @@ namespace juce
 #ifndef __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
  #include "players/juce_AudioProcessorPlayer.h"
 #endif
-// END_AUTOINCLUDE
 
 }
 

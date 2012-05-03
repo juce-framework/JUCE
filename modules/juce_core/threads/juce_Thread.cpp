@@ -204,6 +204,11 @@ void Thread::stopThread (const int timeOutMilliseconds)
 //==============================================================================
 bool Thread::setPriority (const int newPriority)
 {
+    // NB: deadlock possible if you try to set the thread prio from the thread itself,
+    // so using setCurrentThreadPriority instead in that case.
+    if (getCurrentThreadId() == getThreadId())
+        return setCurrentThreadPriority (newPriority);
+
     const ScopedLock sl (startStopLock);
 
     if (setThreadPriority (threadHandle, newPriority))

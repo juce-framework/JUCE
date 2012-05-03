@@ -115,13 +115,6 @@ void Project::setMissingDefaultValues()
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
 
-    for (Project::ExporterIterator exporter (*this); exporter.next();)
-        if (exporter->getNumConfigurations() == 0)
-            exporter->createDefaultConfigs();
-
-    if (! projectRoot.getChildWithName (Tags::exporters).isValid())
-        createDefaultExporters();
-
     getProjectType().setMissingProjectProperties (*this);
 
     if (! projectRoot.hasProperty (Ids::bundleIdentifier))
@@ -549,7 +542,8 @@ bool Project::Item::renameFile (const File& newFile)
 {
     const File oldFile (getFile());
 
-    if (oldFile.moveFileTo (newFile))
+    if (oldFile.moveFileTo (newFile)
+         || (newFile.exists() && ! oldFile.exists()))
     {
         setFile (newFile);
         OpenDocumentManager::getInstance()->fileHasBeenRenamed (oldFile, newFile);

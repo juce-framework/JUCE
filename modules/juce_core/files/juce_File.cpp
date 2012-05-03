@@ -229,6 +229,9 @@ bool File::moveFileTo (const File& newFile) const
     if (newFile.fullPath == fullPath)
         return true;
 
+    if (! exists())
+        return false;
+
    #if ! NAMES_ARE_CASE_SENSITIVE
     if (*this != newFile)
    #endif

@@ -621,13 +621,13 @@ private:
     //==============================================================================
     void calculateWindowPos (const Rectangle<int>& target, const bool alignToRectangle)
     {
-        const Rectangle<int> mon (Desktop::getInstance()
-                                     .getMonitorAreaContaining (target.getCentre(),
-                                                               #if JUCE_MAC
-                                                                true));
-                                                               #else
-                                                                false)); // on windows, don't stop the menu overlapping the taskbar
-                                                               #endif
+        const Rectangle<int> mon (Desktop::getInstance().getDisplays()
+                                     .getDisplayContaining (target.getCentre())
+                                                           #if JUCE_MAC
+                                                            .userArea);
+                                                           #else
+                                                            .totalArea); // on windows, don't stop the menu overlapping the taskbar
+                                                           #endif
 
         const int maxMenuHeight = mon.getHeight() - 24;
 
@@ -796,7 +796,8 @@ private:
                                                 windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
                                           currentY);
 
-                    const Rectangle<int> mon (Desktop::getInstance().getMonitorAreaContaining (windowPos.getPosition(), true));
+                    const Rectangle<int> mon (Desktop::getInstance().getDisplays()
+                                                .getDisplayContaining (windowPos.getPosition()).userArea);
 
                     int deltaY = wantedY - currentY;
 

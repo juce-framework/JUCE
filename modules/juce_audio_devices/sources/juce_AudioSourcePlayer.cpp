@@ -75,7 +75,6 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
     if (source != nullptr)
     {
-        AudioSourceChannelInfo info;
         int i, numActiveChans = 0, numInputs = 0, numOutputs = 0;
 
         // messy stuff needed to compact the channels down into an array
@@ -141,14 +140,11 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
         AudioSampleBuffer buffer (channels, numActiveChans, numSamples);
 
-        info.buffer = &buffer;
-        info.startSample = 0;
-        info.numSamples = numSamples;
-
+        AudioSourceChannelInfo info (&buffer, 0, numSamples);
         source->getNextAudioBlock (info);
 
         for (i = info.buffer->getNumChannels(); --i >= 0;)
-            info.buffer->applyGainRamp (i, info.startSample, info.numSamples, lastGain, gain);
+            buffer.applyGainRamp (i, info.startSample, info.numSamples, lastGain, gain);
 
         lastGain = gain;
     }
