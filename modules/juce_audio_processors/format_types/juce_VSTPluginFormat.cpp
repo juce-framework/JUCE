@@ -2175,7 +2175,7 @@ namespace
                 return 0;
             }
 
-            case audioMasterVersion:                        return 0x2400;
+            case audioMasterVersion:                        return 2400;
             case audioMasterCurrentId:                      return shellUIDToCreate;
             case audioMasterGetNumAutomatableParameters:    return 0;
             case audioMasterGetAutomationState:             return 1;
