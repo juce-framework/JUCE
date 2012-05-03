@@ -148,14 +148,14 @@ public:
         uint32 fontFacesCount = 0;
         fontFacesCount = dwFontFamily->GetFontCount();
 
-        for (uint32 i = 0; i < fontFacesCount; ++i)
+        for (int i = fontFacesCount; --i >= 0;)
         {
             hr = dwFontFamily->GetFont (i, dwFont.resetAndGetPointerAddress());
 
             ComSmartPtr<IDWriteLocalizedStrings> faceNames;
             hr = dwFont->GetFaceNames (faceNames.resetAndGetPointerAddress());
 
-            if (font.getTypefaceStyle() == getLocalisedName (faceNames))
+            if (i == 0 || font.getTypefaceStyle() == getLocalisedName (faceNames))
                 break;
         }
 
