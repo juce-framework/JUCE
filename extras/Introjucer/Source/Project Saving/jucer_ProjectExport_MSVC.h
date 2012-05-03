@@ -1140,8 +1140,8 @@ protected:
                 includePaths.add ("%(AdditionalIncludeDirectories)");
                 cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                 cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
-                cl->createNewChildElement ("RuntimeLibrary")->addTextElement (msvcNeedsDLLRuntimeLib ? (isDebug ? "MultiThreadedDLLDebug" : "MultiThreadedDLL")
-                                                                                                     : (isDebug ? "MultiThreadedDebug" : "MultiThreaded"));
+                cl->createNewChildElement ("RuntimeLibrary")->addTextElement (msvcNeedsDLLRuntimeLib ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
+                                                                                                     : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
                 cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
                 cl->createNewChildElement ("PrecompiledHeader");
                 cl->createNewChildElement ("AssemblerListingLocation")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
