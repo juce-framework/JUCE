@@ -232,7 +232,7 @@ namespace DirectWriteTypeLayout
             uint32 fontFacesCount = 0;
             fontFacesCount = fontFamily->GetFontCount();
 
-            for (uint32 i = 0; i < fontFacesCount; ++i)
+            for (int i = fontFacesCount; --i >= 0;)
             {
                 hr = fontFamily->GetFont (i, dwFont.resetAndGetPointerAddress());
 
@@ -281,7 +281,7 @@ namespace DirectWriteTypeLayout
         Font defaultFont;
         BOOL fontFound = false;
         uint32 fontIndex;
-        fontCollection->FindFamilyName (defaultFont.getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
+        fontCollection->FindFamilyName (defaultFont.getTypeface()->getName().toWideCharPointer(), &fontIndex, &fontFound);
 
         if (! fontFound)
             fontIndex = 0;
