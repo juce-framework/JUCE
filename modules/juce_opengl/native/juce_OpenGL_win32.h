@@ -50,7 +50,7 @@ public:
             initialiseGLExtensions();
 
             const int wglFormat = wglChoosePixelFormatExtension (pixelFormat);
-            wglMakeCurrent (0, 0);
+            deactivateCurrentContext();
 
             if (wglFormat != pixFormat && wglFormat != 0)
             {
@@ -84,6 +84,7 @@ public:
     void initialiseOnRenderThread() {}
     void shutdownOnRenderThread() {}
 
+    static void deactivateCurrentContext()  { wglMakeCurrent (0, 0); }
     bool makeActive() const noexcept        { return wglMakeCurrent (dc, renderContext) != FALSE; }
     bool isActive() const noexcept          { return wglGetCurrentContext() == renderContext; }
     void swapBuffers() const noexcept       { SwapBuffers (dc); }

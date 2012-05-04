@@ -185,6 +185,11 @@ public:
         return [NSOpenGLContext currentContext] == renderContext;
     }
 
+    static void deactivateCurrentContext()
+    {
+        [NSOpenGLContext clearCurrentContext];
+    }
+
     struct Locker
     {
         Locker (NativeContext& nc) : cglContext ((CGLContextObj) [nc.renderContext CGLContextObj])

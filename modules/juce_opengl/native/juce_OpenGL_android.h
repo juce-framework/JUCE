@@ -68,6 +68,7 @@ public:
 
     bool makeActive() const noexcept            { return isInsideGLCallback; }
     bool isActive() const noexcept              { return isInsideGLCallback; }
+    static void deactivateCurrentContext()      {}
 
     void swapBuffers() const noexcept           {}
     bool setSwapInterval (const int)            { return false; }

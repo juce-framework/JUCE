@@ -81,7 +81,7 @@ public:
         // so causes myserious timing-related failures.
         [EAGLContext setCurrentContext: context];
         createGLBuffers();
-        [EAGLContext setCurrentContext: nil];
+        deactivateCurrentContext();
     }
 
     ~NativeContext()
@@ -117,6 +117,11 @@ public:
     bool isActive() const noexcept
     {
         return [EAGLContext currentContext] == context;
+    }
+
+    static void deactivateCurrentContext()
+    {
+        [EAGLContext setCurrentContext: nil];
     }
 
     void swapBuffers()
