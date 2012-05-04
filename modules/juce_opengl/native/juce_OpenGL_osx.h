@@ -163,7 +163,7 @@ public:
     }
 
     void initialiseOnRenderThread() {}
-    void shutdownOnRenderThread() {}
+    void shutdownOnRenderThread()               { deactivateCurrentContext(); }
 
     bool createdOk() const noexcept             { return getRawContext() != nullptr; }
     void* getRawContext() const noexcept        { return static_cast <void*> (renderContext); }
@@ -183,6 +183,11 @@ public:
     bool isActive() const noexcept
     {
         return [NSOpenGLContext currentContext] == renderContext;
+    }
+
+    static void deactivateCurrentContext()
+    {
+        [NSOpenGLContext clearCurrentContext];
     }
 
     struct Locker

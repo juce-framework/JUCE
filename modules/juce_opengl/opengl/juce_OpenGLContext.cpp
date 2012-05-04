@@ -545,6 +545,7 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 
 bool OpenGLContext::makeActive() const noexcept     { return nativeContext != nullptr && nativeContext->makeActive(); }
 bool OpenGLContext::isActive() const noexcept       { return nativeContext != nullptr && nativeContext->isActive(); }
+void OpenGLContext::deactivateCurrentContext()      { NativeContext::deactivateCurrentContext(); }
 
 void OpenGLContext::triggerRepaint()
 {

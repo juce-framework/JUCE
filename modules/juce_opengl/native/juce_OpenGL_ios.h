@@ -81,7 +81,7 @@ public:
         // so causes myserious timing-related failures.
         [EAGLContext setCurrentContext: context];
         createGLBuffers();
-        [EAGLContext setCurrentContext: nil];
+        deactivateCurrentContext();
     }
 
     ~NativeContext()
@@ -99,6 +99,7 @@ public:
     {
         JUCE_CHECK_OPENGL_ERROR
         freeGLBuffers();
+        deactivateCurrentContext();
     }
 
     bool createdOk() const noexcept             { return getRawContext() != nullptr; }
@@ -117,6 +118,11 @@ public:
     bool isActive() const noexcept
     {
         return [EAGLContext currentContext] == context;
+    }
+
+    static void deactivateCurrentContext()
+    {
+        [EAGLContext setCurrentContext: nil];
     }
 
     void swapBuffers()

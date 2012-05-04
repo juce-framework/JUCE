@@ -176,6 +176,11 @@ public:
     /** Returns true if this context is currently active for the calling thread. */
     bool isActive() const noexcept;
 
+    /** If any context is active on the current thread, this deactivates it.
+        Note that on some platforms, like Android, this isn't possible.
+    */
+    static void deactivateCurrentContext();
+
     //==============================================================================
     /** Swaps the buffers (if the context can do this).
         There's normally no need to call this directly - the buffers will be swapped

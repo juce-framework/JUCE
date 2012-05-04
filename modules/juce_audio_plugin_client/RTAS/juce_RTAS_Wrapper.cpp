@@ -90,12 +90,15 @@
 
 //==============================================================================
 #ifdef _MSC_VER
+ #pragma pack (push, 8)
  #pragma warning (disable: 4263 4264)
 #endif
 
 #include "../utility/juce_IncludeModuleHeaders.h"
 
 #ifdef _MSC_VER
+ #pragma pack (pop)
+
  #if JUCE_DEBUGxxx // (the debug lib in the 8.0 SDK fails to link, so we'll stick to the release one...)
   #define PT_LIB_PATH  JucePlugin_WinBag_path "\\Debug\\lib\\"
  #else

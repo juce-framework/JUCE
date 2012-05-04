@@ -114,7 +114,7 @@ public:
 
     void shutdownOnRenderThread()
     {
-        glXMakeCurrent (display, None, 0);
+        deactivateCurrentContext();
         glXDestroyContext (display, renderContext);
         renderContext = nullptr;
     }
@@ -128,6 +128,11 @@ public:
     bool isActive() const noexcept
     {
         return glXGetCurrentContext() == renderContext && renderContext != 0;
+    }
+
+    static void deactivateCurrentContext()
+    {
+        glXMakeCurrent (display, None, 0);
     }
 
     void swapBuffers()
