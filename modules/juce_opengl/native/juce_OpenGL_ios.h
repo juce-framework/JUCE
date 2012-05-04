@@ -99,6 +99,7 @@ public:
     {
         JUCE_CHECK_OPENGL_ERROR
         freeGLBuffers();
+        deactivateCurrentContext();
     }
 
     bool createdOk() const noexcept             { return getRawContext() != nullptr; }

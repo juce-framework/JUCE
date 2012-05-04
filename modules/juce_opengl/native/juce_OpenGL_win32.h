@@ -82,7 +82,7 @@ public:
     }
 
     void initialiseOnRenderThread() {}
-    void shutdownOnRenderThread() {}
+    void shutdownOnRenderThread()           { deactivateCurrentContext(); }
 
     static void deactivateCurrentContext()  { wglMakeCurrent (0, 0); }
     bool makeActive() const noexcept        { return wglMakeCurrent (dc, renderContext) != FALSE; }
