@@ -202,6 +202,17 @@ String SystemStats::getComputerName()
     return String::empty;
 }
 
+static String getLocaleValue (CFStringRef key)
+{
+    CFLocaleRef cfLocale = CFLocaleCopyCurrent();
+    const String result (String::fromCFString ((CFStringRef) CFLocaleGetValue (cfLocale, key)));
+    CFRelease (cfLocale);
+    return result;
+}
+
+String SystemStats::getUserLanguage()   { return getLocaleValue (kCFLocaleLanguageCode); }
+String SystemStats::getUserRegion()     { return getLocaleValue (kCFLocaleCountryCode); }
+
 //==============================================================================
 class HiResCounterHandler
 {

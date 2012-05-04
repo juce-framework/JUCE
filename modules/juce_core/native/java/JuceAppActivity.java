@@ -495,4 +495,12 @@ public final class JuceAppActivity   extends Activity
     {
         startActivity (new Intent (Intent.ACTION_VIEW, Uri.parse (url)));
     }
+
+    public static final String getLocaleValue (boolean isRegion)
+    {
+        java.util.Locale locale = java.util.Locale.getDefault();
+
+        return isRegion ? locale.getDisplayCountry  (java.util.Locale.US)
+                        : locale.getDisplayLanguage (java.util.Locale.US);
+    }
 }

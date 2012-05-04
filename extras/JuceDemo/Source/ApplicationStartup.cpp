@@ -114,6 +114,7 @@ private:
           << "Full user name: "   << SystemStats::getFullUserName() << newLine
           << "Host name: "        << SystemStats::getComputerName() << newLine
           << "Operating system: " << SystemStats::getOperatingSystemName() << newLine
+          << "Locale: "           << SystemStats::getUserLanguage() << "-" << SystemStats::getUserRegion() << newLine
 
           << "Memory size: "    << SystemStats::getMemorySizeInMegabytes() << "MB" << newLine
           << "Number of CPUs: " << SystemStats::getNumCpus() << newLine

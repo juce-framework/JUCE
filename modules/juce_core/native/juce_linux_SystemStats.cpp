@@ -119,6 +119,17 @@ String SystemStats::getComputerName()
     return String::empty;
 }
 
+String getLocaleValue (nl_item key)
+{
+    const char* oldLocale = ::setlocale (LC_ALL, "");
+    return String (const_cast <const char*> (nl_langinfo (key)));
+    ::setlocale (LC_ALL, oldLocale);
+}
+
+String SystemStats::getUserLanguage()   { return getLocaleValue (_NL_IDENTIFICATION_LANGUAGE); }
+String SystemStats::getUserRegion()     { return getLocaleValue (_NL_IDENTIFICATION_TERRITORY); }
+
+
 //==============================================================================
 SystemStats::CPUFlags::CPUFlags()
 {
