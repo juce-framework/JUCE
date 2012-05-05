@@ -30,7 +30,7 @@ public:
     CachedImage (OpenGLContext& context_,
                  Component& component_,
                  const OpenGLPixelFormat& pixelFormat,
-                 const OpenGLContext* contextToShareWith)
+                 void* contextToShareWith)
         : Thread ("OpenGL Rendering"),
           context (context_), component (component_),
          #if JUCE_OPENGL_ES
@@ -40,9 +40,7 @@ public:
          #endif
           needsUpdate (true)
     {
-        nativeContext = new NativeContext (component, pixelFormat,
-                                           contextToShareWith != nullptr ? contextToShareWith->nativeContext
-                                                                         : nullptr);
+        nativeContext = new NativeContext (component, pixelFormat, contextToShareWith);
 
         if (nativeContext->createdOk())
         {
@@ -487,13 +485,13 @@ void OpenGLContext::setPixelFormat (const OpenGLPixelFormat& preferredPixelForma
     pixelFormat = preferredPixelFormat;
 }
 
-void OpenGLContext::setContextToShareWith (const OpenGLContext* context) noexcept
+void OpenGLContext::setNativeSharedContext (void* nativeContextToShareWith) noexcept
 {
     // This method must not be called when the context has already been attached!
     // Call it before attaching your context, or use detach() first, before calling this!
     jassert (nativeContext == nullptr);
 
-    contextToShareWith = context;
+    contextToShareWith = nativeContextToShareWith;
 }
 
 void OpenGLContext::attachTo (Component& component)

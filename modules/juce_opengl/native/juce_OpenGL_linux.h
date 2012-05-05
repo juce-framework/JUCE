@@ -32,7 +32,7 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixelFormat,
-                   const NativeContext* contextToShareWith_)
+                   void* contextToShareWith_)
         : renderContext (0), embeddedWindow (0), swapFrames (0), bestVisual (0),
           contextToShareWith (contextToShareWith_)
     {
@@ -106,9 +106,7 @@ public:
     void initialiseOnRenderThread()
     {
         ScopedXLock xlock;
-        renderContext = glXCreateContext (display, bestVisual,
-                                          contextToShareWith != nullptr ? contextToShareWith->renderContext : 0,
-                                          GL_TRUE);
+        renderContext = glXCreateContext (display, bestVisual, contextToShareWith, GL_TRUE);
         makeActive();
     }
 
@@ -183,7 +181,7 @@ private:
     int swapFrames;
     Rectangle<int> bounds;
     XVisualInfo* bestVisual;
-    const NativeContext* contextToShareWith;
+    void* contextToShareWith;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext);
 };

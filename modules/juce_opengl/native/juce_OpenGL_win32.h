@@ -31,7 +31,7 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixelFormat,
-                   const NativeContext* contextToShareWith)
+                   void* contextToShareWith)
     {
         createNativeWindow (component);
 
@@ -68,7 +68,7 @@ public:
             }
 
             if (contextToShareWith != nullptr)
-                wglShareLists (contextToShareWith->renderContext, renderContext);
+                wglShareLists (contextToShareWith, renderContext);
 
             component.getTopLevelComponent()->repaint();
             component.repaint();

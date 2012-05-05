@@ -86,11 +86,12 @@ public:
     void setPixelFormat (const OpenGLPixelFormat& preferredPixelFormat) noexcept;
 
     /** Provides a context with which you'd like this context's resources to be shared.
-        The object passed-in here must not be deleted while the context may still be
-        using it! To turn off sharing, you can call this method with a null pointer.
+        The object passed-in here is a platform-dependent native context object, and
+        must not be deleted while this context may still be using it! To turn off sharing,
+        you can call this method with a null pointer.
         Note: This must be called BEFORE attaching your context to a target component!
     */
-    void setContextToShareWith (const OpenGLContext* contextToShareWith) noexcept;
+    void setNativeSharedContext (void* nativeContextToShareWith) noexcept;
 
     //==============================================================================
     /** Attaches the context to a target component.
@@ -243,7 +244,7 @@ private:
     OpenGLRenderer* renderer;
     ScopedPointer<Attachment> attachment;
     OpenGLPixelFormat pixelFormat;
-    const OpenGLContext* contextToShareWith;
+    void* contextToShareWith;
     int width, height;
     bool renderComponents;
 
