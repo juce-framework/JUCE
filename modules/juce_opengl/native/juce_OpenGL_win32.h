@@ -68,7 +68,7 @@ public:
             }
 
             if (contextToShareWith != nullptr)
-                wglShareLists (contextToShareWith, renderContext);
+                wglShareLists ((HGLRC) contextToShareWith, renderContext);
 
             component.getTopLevelComponent()->repaint();
             component.repaint();
