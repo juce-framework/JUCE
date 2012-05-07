@@ -37,7 +37,7 @@ public:
     //==============================================================================
     MidiDataConcatenator (const int initialBufferSize)
         : pendingData ((size_t) initialBufferSize),
-          pendingBytes (0), runningStatus (0), pendingDataTime (0)
+          pendingDataTime (0), pendingBytes (0), runningStatus (0)
     {
     }
 
@@ -164,8 +164,9 @@ private:
     }
 
     MemoryBlock pendingData;
-    int pendingBytes, runningStatus;
     double pendingDataTime;
+    int pendingBytes;
+    uint8 runningStatus;
 
     JUCE_DECLARE_NON_COPYABLE (MidiDataConcatenator);
 };
