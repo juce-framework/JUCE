@@ -57,6 +57,14 @@ namespace FontStyleHelpers
         const Font f (family, Font::getDefaultStyle(), 15.0f);
         return Font::getDefaultTypefaceForFont (f)->getName();
     }
+
+    static String getConcreteFamilyName (const Font& font)
+    {
+        const String& family = font.getTypefaceName();
+
+        return isPlaceholderFamilyName (family) ? getConcreteFamilyNameFromPlaceholder (family)
+                                                : family;
+    }
 }
 
 //==============================================================================
