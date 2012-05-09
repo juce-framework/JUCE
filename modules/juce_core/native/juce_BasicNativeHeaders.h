@@ -142,17 +142,17 @@
   #endif
  #endif
 
- /* Used with DynamicLibrary to simplify importing functions
+ /* Used with DynamicLibrary to simplify importing functions from a win32 DLL.
 
+    dll: the DynamicLibrary object
     functionName: function to import
     localFunctionName: name you want to use to actually call it (must be different)
     returnType: the return type
-    object: the DynamicLibrary to use
     params: list of params (bracketed)
  */
- #define JUCE_DLL_FUNCTION(functionName, localFunctionName, returnType, object, params) \
+ #define JUCE_LOAD_WINAPI_FUNCTION(dll, functionName, localFunctionName, returnType, params) \
     typedef returnType (WINAPI *type##localFunctionName) params; \
-    type##localFunctionName localFunctionName = (type##localFunctionName)object.getFunction (#functionName);
+    type##localFunctionName localFunctionName = (type##localFunctionName) dll.getFunction (#functionName);
 
 //==============================================================================
 #elif JUCE_LINUX

@@ -370,7 +370,7 @@ namespace MACAddressHelpers
     void getViaGetAdaptersInfo (Array<MACAddress>& result)
     {
         DynamicLibrary dll ("iphlpapi.dll");
-        JUCE_DLL_FUNCTION (GetAdaptersInfo, getAdaptersInfo, DWORD, dll, (PIP_ADAPTER_INFO, PULONG))
+        JUCE_LOAD_WINAPI_FUNCTION (dll, GetAdaptersInfo, getAdaptersInfo, DWORD, (PIP_ADAPTER_INFO, PULONG))
 
         if (getAdaptersInfo != nullptr)
         {
@@ -392,7 +392,7 @@ namespace MACAddressHelpers
     void getViaNetBios (Array<MACAddress>& result)
     {
         DynamicLibrary dll ("netapi32.dll");
-        JUCE_DLL_FUNCTION (Netbios, NetbiosCall, UCHAR, dll, (PNCB))
+        JUCE_LOAD_WINAPI_FUNCTION (dll, Netbios, NetbiosCall, UCHAR, (PNCB))
 
         if (NetbiosCall != 0)
         {
@@ -449,10 +449,9 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
                                         const String& bodyText,
                                         const StringArray& filesToAttach)
 {
-    typedef ULONG (WINAPI *MAPISendMailType) (LHANDLE, ULONG, lpMapiMessage, ::FLAGS, ULONG);
-
-    DynamicLibrary mapiLib ("MAPI32.dll");
-    MAPISendMailType mapiSendMail = (MAPISendMailType) mapiLib.getFunction ("MAPISendMail");
+    DynamicLibrary dll ("MAPI32.dll");
+    JUCE_LOAD_WINAPI_FUNCTION (dll, MAPISendMail, mapiSendMail,
+                               ULONG, (LHANDLE, ULONG, lpMapiMessage, ::FLAGS, ULONG))
 
     if (mapiSendMail == nullptr)
         return false;
