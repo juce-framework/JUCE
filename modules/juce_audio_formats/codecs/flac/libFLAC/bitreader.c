@@ -129,7 +129,7 @@ static const unsigned char byte_to_unary_table[] = {
 #endif
 
 #ifndef FLaC__INLINE
-#define FLaC__INLINE
+#define FLaC__INLINE inline
 #endif
 
 /* WATCHOUT: assembly routines rely on the order in which these fields are declared */

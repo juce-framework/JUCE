@@ -281,10 +281,8 @@ namespace
         return value == -1 ? getResultForErrno() : Result::ok();
     }
 
-    int getFD (void* handle) noexcept
-    {
-        return (int) (pointer_sized_int) handle;
-    }
+    int getFD (void* handle) noexcept        { return (int) (pointer_sized_int) handle; }
+    void* fdToVoidPointer (int fd) noexcept  { return (void*) (pointer_sized_int) fd; }
 }
 
 bool File::isDirectory() const
@@ -420,7 +418,7 @@ void FileInputStream::openHandle()
     const int f = open (file.getFullPathName().toUTF8(), O_RDONLY, 00644);
 
     if (f != -1)
-        fileHandle = (void*) f;
+        fileHandle = fdToVoidPointer (f);
     else
         status = getResultForErrno();
 }
@@ -465,7 +463,7 @@ void FileOutputStream::openHandle()
 
             if (currentPosition >= 0)
             {
-                fileHandle = (void*) f;
+                fileHandle = fdToVoidPointer (f);
             }
             else
             {
@@ -483,7 +481,7 @@ void FileOutputStream::openHandle()
         const int f = open (file.getFullPathName().toUTF8(), O_RDWR + O_CREAT, 00644);
 
         if (f != -1)
-            fileHandle = (void*) f;
+            fileHandle = fdToVoidPointer (f);
         else
             status = getResultForErrno();
     }

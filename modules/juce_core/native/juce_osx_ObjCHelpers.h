@@ -33,22 +33,22 @@
 namespace
 {
     //==============================================================================
-    String nsStringToJuce (NSString* s)
+    static inline String nsStringToJuce (NSString* s)
     {
         return CharPointer_UTF8 ([s UTF8String]);
     }
 
-    NSString* juceStringToNS (const String& s)
+    static inline NSString* juceStringToNS (const String& s)
     {
         return [NSString stringWithUTF8String: s.toUTF8()];
     }
 
-    NSString* nsStringLiteral (const char* const s) noexcept
+    static inline NSString* nsStringLiteral (const char* const s) noexcept
     {
         return [NSString stringWithUTF8String: s];
     }
 
-    NSString* nsEmptyString() noexcept
+    static inline NSString* nsEmptyString() noexcept
     {
         return [NSString string];
     }

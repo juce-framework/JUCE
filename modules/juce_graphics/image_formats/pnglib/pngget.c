@@ -847,20 +847,18 @@ png_get_asm_flags (png_structp png_ptr)
 
 /* this function was added to libpng 1.2.0 and should exist by default */
 png_uint_32 PNGAPI
-png_get_asm_flagmask (int flag_select)
+png_get_asm_flagmask (int)
 {
     /* obsolete, to be removed from libpng-1.4.0 */
-    flag_select=flag_select;
     return 0L;
 }
 
     /* GRR:  could add this:   && defined(PNG_MMX_CODE_SUPPORTED) */
 /* this function was added to libpng 1.2.0 */
 png_uint_32 PNGAPI
-png_get_mmx_flagmask (int flag_select, int *compilerID)
+png_get_mmx_flagmask (int, int *compilerID)
 {
     /* obsolete, to be removed from libpng-1.4.0 */
-    flag_select=flag_select;
     *compilerID = -1;   /* unknown (i.e., no asm/MMX code compiled) */
     return 0L;
 }

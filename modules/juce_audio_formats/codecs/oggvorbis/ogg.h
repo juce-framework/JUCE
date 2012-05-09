@@ -42,7 +42,7 @@ typedef struct {
 } ogg_page;
 
 
-static ogg_uint32_t ogg_bitreverse(ogg_uint32_t x){
+static inline ogg_uint32_t ogg_bitreverse(ogg_uint32_t x){
   x=    ((x>>16)&0x0000ffffUL) | ((x<<16)&0xffff0000UL);
   x=    ((x>> 8)&0x00ff00ffUL) | ((x<< 8)&0xff00ff00UL);
   x=    ((x>> 4)&0x0f0f0f0fUL) | ((x<< 4)&0xf0f0f0f0UL);
