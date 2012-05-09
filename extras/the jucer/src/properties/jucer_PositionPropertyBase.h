@@ -342,7 +342,7 @@ public:
 
         Rectangle<int> parentArea;
 
-        if (component->findParentComponentOfClass ((ComponentLayoutEditor*) 0) != 0)
+        if (component->findParentComponentOfClass<ComponentLayoutEditor>() != 0)
         {
             parentArea.setSize (component->getParentWidth(), component->getParentHeight());
         }

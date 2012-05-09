@@ -202,7 +202,7 @@ private:
 
     GraphEditorPanel* getGraphPanel() const noexcept
     {
-        return findParentComponentOfClass ((GraphEditorPanel*) nullptr);
+        return findParentComponentOfClass<GraphEditorPanel>();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PinComponent);
@@ -450,7 +450,7 @@ private:
 
     GraphEditorPanel* getGraphPanel() const noexcept
     {
-        return findParentComponentOfClass ((GraphEditorPanel*) nullptr);
+        return findParentComponentOfClass<GraphEditorPanel>();
     }
 
     FilterComponent (const FilterComponent&);
@@ -688,7 +688,7 @@ private:
 
     GraphEditorPanel* getGraphPanel() const noexcept
     {
-        return findParentComponentOfClass ((GraphEditorPanel*) nullptr);
+        return findParentComponentOfClass<GraphEditorPanel>();
     }
 
     void getDistancesFromEnds (int x, int y, double& distanceFromStart, double& distanceFromEnd) const
@@ -730,7 +730,7 @@ void GraphEditorPanel::mouseDown (const MouseEvent& e)
     {
         PopupMenu m;
 
-        MainHostWindow* const mainWindow = findParentComponentOfClass ((MainHostWindow*) nullptr);
+        MainHostWindow* const mainWindow = findParentComponentOfClass<MainHostWindow>();
 
         if (mainWindow != nullptr)
         {
