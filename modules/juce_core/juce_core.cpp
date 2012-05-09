@@ -66,6 +66,10 @@
   #include <netinet/in.h>
  #endif
 
+ #if JUCE_LINUX
+  #include <langinfo.h>
+ #endif
+
  #include <pwd.h>
  #include <fcntl.h>
  #include <netdb.h>

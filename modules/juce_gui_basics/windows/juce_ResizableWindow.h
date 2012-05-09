@@ -317,6 +317,7 @@ public:
     JUCE_DEPRECATED (void setContentComponent (Component* newContentComponent,
                                                bool deleteOldOne = true,
                                                bool resizeToFit = false));
+    using TopLevelWindow::addToDesktop;
 
 protected:
     //==============================================================================

@@ -181,7 +181,7 @@ namespace VSTHelpers
                                                                 : "~/SDKs/vstsdk2.4");
     }
 
-    static void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         fixMissingVSTValues (exporter);
         writePluginCharacteristicsFile (projectSaver);
@@ -202,7 +202,7 @@ namespace VSTHelpers
             exporter.extraSearchPaths.add (juceWrapperFolder.toUnixStyle());
     }
 
-    static void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
+    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
     {
         fixMissingVSTValues (exporter);
         createVSTPathEditor (exporter, props);
@@ -309,7 +309,7 @@ namespace RTASHelpers
         }
     }
 
-    static void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& moduleFolder)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& moduleFolder)
     {
         fixMissingRTASValues (exporter);
 
@@ -358,7 +358,7 @@ namespace RTASHelpers
         addExtraSearchPaths (exporter);
     }
 
-    static void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
+    static inline void createPropertyEditors (ProjectExporter& exporter, PropertyListBuilder& props)
     {
         if (exporter.isXcode() || exporter.isVisualStudio())
         {
@@ -373,7 +373,7 @@ namespace RTASHelpers
 //==============================================================================
 namespace AUHelpers
 {
-    static void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
+    static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
     {
         writePluginCharacteristicsFile (projectSaver);
 

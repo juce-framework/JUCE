@@ -148,6 +148,7 @@ namespace JPEGHelpers
     }
 
     //==============================================================================
+   #if ! JUCE_USING_COREIMAGE_LOADER
     static void dummyCallback1 (j_decompress_ptr) {}
 
     static void jpegSkip (j_decompress_ptr decompStruct, long num)
@@ -162,6 +163,7 @@ namespace JPEGHelpers
     {
         return 0;
     }
+   #endif
 
     //==============================================================================
     const int jpegBufferSize = 512;
@@ -226,13 +228,13 @@ bool JPEGImageFormat::canUnderstand (InputStream& in)
     return false;
 }
 
-#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
+#if JUCE_USING_COREIMAGE_LOADER
  Image juce_loadWithCoreImage (InputStream& input);
 #endif
 
 Image JPEGImageFormat::decodeImage (InputStream& in)
 {
-#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
+#if JUCE_USING_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);
 #else
     using namespace jpeglibNamespace;

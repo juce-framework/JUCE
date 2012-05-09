@@ -100,14 +100,15 @@ namespace PNGHelpers
 {
     using namespace pnglibNamespace;
 
-    static void JUCE_CDECL readCallback (png_structp png, png_bytep data, png_size_t length)
-    {
-        static_cast<InputStream*> (png_get_io_ptr (png))->read (data, (int) length);
-    }
-
     static void JUCE_CDECL writeDataCallback (png_structp png, png_bytep data, png_size_t length)
     {
         static_cast<OutputStream*> (png_get_io_ptr (png))->write (data, (int) length);
+    }
+
+   #if ! JUCE_USING_COREIMAGE_LOADER
+    static void JUCE_CDECL readCallback (png_structp png, png_bytep data, png_size_t length)
+    {
+        static_cast<InputStream*> (png_get_io_ptr (png))->read (data, (int) length);
     }
 
     struct PNGErrorStruct {};
@@ -116,6 +117,7 @@ namespace PNGHelpers
     {
         throw PNGErrorStruct();
     }
+   #endif
 }
 
 //==============================================================================
@@ -135,13 +137,13 @@ bool PNGImageFormat::canUnderstand (InputStream& in)
             && header[3] == 'G';
 }
 
-#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
+#if JUCE_USING_COREIMAGE_LOADER
  Image juce_loadWithCoreImage (InputStream& input);
 #endif
 
 Image PNGImageFormat::decodeImage (InputStream& in)
 {
-#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
+#if JUCE_USING_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);
 #else
     using namespace pnglibNamespace;

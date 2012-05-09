@@ -208,19 +208,27 @@ public:
         snd_seq_event_t event;
         snd_seq_ev_clear (&event);
 
-        snd_midi_event_encode (midiParser,
-                               message.getRawData(),
-                               message.getRawDataSize(),
-                               &event);
+        long numBytes = (long) message.getRawDataSize();
+        const uint8* data = message.getRawData();
 
-        snd_midi_event_reset_encode (midiParser);
+        while (numBytes > 0)
+        {
+            const long numSent = snd_midi_event_encode (midiParser, data, numBytes, &event);
+            if (numSent <= 0)
+                break;
 
-        snd_seq_ev_set_source (&event, 0);
-        snd_seq_ev_set_subs (&event);
-        snd_seq_ev_set_direct (&event);
+            numBytes -= numSent;
+            data += numSent;
 
-        snd_seq_event_output (seqHandle, &event);
+            snd_seq_ev_set_source (&event, 0);
+            snd_seq_ev_set_subs (&event);
+            snd_seq_ev_set_direct (&event);
+
+            snd_seq_event_output (seqHandle, &event);
+        }
+
         snd_seq_drain_output (seqHandle);
+        snd_midi_event_reset_encode (midiParser);
     }
 
 private:

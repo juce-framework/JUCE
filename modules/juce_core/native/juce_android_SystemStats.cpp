@@ -172,6 +172,14 @@ namespace AndroidStatsHelpers
                                                                                           SystemClass.getProperty,
                                                                                           javaString (name).get())));
     }
+
+    //==============================================================================
+    String getLocaleValue (bool isRegion)
+    {
+        return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (JuceAppActivity,
+                                                                                          JuceAppActivity.getLocaleValue,
+                                                                                          isRegion)));
+    }
 }
 
 //==============================================================================
@@ -249,6 +257,12 @@ String SystemStats::getComputerName()
 
     return String::empty;
 }
+
+
+
+String SystemStats::getUserLanguage()   { return AndroidStatsHelpers::getLocaleValue (false); }
+String SystemStats::getUserRegion()     { return AndroidStatsHelpers::getLocaleValue (true); }
+
 
 //==============================================================================
 SystemStats::CPUFlags::CPUFlags()
