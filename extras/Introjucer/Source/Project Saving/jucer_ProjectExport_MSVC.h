@@ -117,8 +117,7 @@ protected:
             if (getWarningLevel() == 0)
                 getWarningLevelValue() = 4;
 
-            if (shouldGenerateManifestValue().getValue().isVoid())
-                shouldGenerateManifestValue() = var (true);
+            setValueIfVoid (shouldGenerateManifestValue(), true);
         }
 
         Value getWarningLevelValue()            { return getValue (Ids::winWarningLevel); }

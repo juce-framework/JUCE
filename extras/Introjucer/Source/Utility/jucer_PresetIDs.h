@@ -76,6 +76,8 @@ namespace Ids
     DECLARE_ID (juceLinkage);
     DECLARE_ID (buildVST);
     DECLARE_ID (bundleIdentifier);
+    DECLARE_ID (aaxIdentifier);
+    DECLARE_ID (aaxFolder);
     DECLARE_ID (compile);
     DECLARE_ID (noWarnings);
     DECLARE_ID (resource);

@@ -103,7 +103,7 @@ void Project::setMissingDefaultValues()
     getMainGroup().initialiseMissingProperties();
 
     if (getDocumentTitle().isEmpty())
-        setTitle ("Juce Project");
+        setTitle ("JUCE Project");
 
     if (! projectRoot.hasProperty (Ids::projectType))
         getProjectTypeValue() = ProjectType::getGUIAppTypeName();
@@ -116,9 +116,6 @@ void Project::setMissingDefaultValues()
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
 
     getProjectType().setMissingProjectProperties (*this);
-
-    if (! projectRoot.hasProperty (Ids::bundleIdentifier))
-        setBundleIdentifierToDefault();
 
     if (! projectRoot.getChildWithName (Tags::modulesGroup).isValid())
         addDefaultModules (false);

@@ -84,7 +84,10 @@ public:
     String getVersionAsHex() const;
 
     Value getBundleIdentifier()                         { return getProjectValue (Ids::bundleIdentifier); }
-    void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
+    String getDefaultBundleIdentifier()                 { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
+
+    Value getAAXIdentifier()                            { return getProjectValue (Ids::aaxIdentifier); }
+    String getDefaultAAXIdentifier()                    { return getDefaultBundleIdentifier(); }
 
     Value getCompanyName()                              { return getProjectValue (Ids::companyName); }
 

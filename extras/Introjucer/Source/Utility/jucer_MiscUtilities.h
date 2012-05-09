@@ -37,6 +37,8 @@ StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const Stri
 String createGCCPreprocessorFlags (const StringPairArray& defs);
 String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString);
 
+void setValueIfVoid (Value value, const var& defaultValue);
+
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);
 

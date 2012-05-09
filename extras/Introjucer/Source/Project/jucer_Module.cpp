@@ -526,8 +526,9 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
     if (isPluginClient())
     {
         if (shouldBuildVST  (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver);
-        if (shouldBuildRTAS (project).getValue())  RTASHelpers::prepareExporter (exporter, projectSaver, localFolder);
         if (shouldBuildAU   (project).getValue())  AUHelpers::prepareExporter (exporter, projectSaver);
+        if (shouldBuildRTAS (project).getValue())  RTASHelpers::prepareExporter (exporter, projectSaver, localFolder);
+        if (shouldBuildAAX  (project).getValue())  AAXHelpers::prepareExporter (exporter, projectSaver, localFolder);
     }
 }
 
@@ -540,6 +541,7 @@ void LibraryModule::createPropertyEditors (ProjectExporter& exporter, PropertyLi
     {
         if (shouldBuildVST  (exporter.getProject()).getValue())  VSTHelpers::createPropertyEditors (exporter, props);
         if (shouldBuildRTAS (exporter.getProject()).getValue())  RTASHelpers::createPropertyEditors (exporter, props);
+        if (shouldBuildAAX  (exporter.getProject()).getValue())  AAXHelpers::createPropertyEditors (exporter, props);
     }
 }
 
