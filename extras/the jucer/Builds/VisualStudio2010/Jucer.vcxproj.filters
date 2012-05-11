@@ -325,21 +325,6 @@
     <ClCompile Include="..\..\src\utility\jucer_UtilityFunctions.cpp">
       <Filter>Jucer\src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\binarydata\juce_icon.png">
-      <Filter>Jucer\src\binarydata</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\binarydata\jules.jpg">
-      <Filter>Jucer\src\binarydata</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\binarydata\prefs_about.png">
-      <Filter>Jucer\src\binarydata</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\binarydata\prefs_keys.png">
-      <Filter>Jucer\src\binarydata</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\binarydata\prefs_misc.png">
-      <Filter>Jucer\src\binarydata</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\jucer_Main.cpp">
       <Filter>Jucer\src</Filter>
     </ClCompile>
@@ -562,9 +547,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_Threads.cpp">
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\juce_module_info">
-      <Filter>Juce Modules\juce_core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_Value.cpp">
       <Filter>Juce Modules\juce_data_structures\values</Filter>
     </ClCompile>
@@ -579,9 +561,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\app_properties\juce_PropertiesFile.cpp">
       <Filter>Juce Modules\juce_data_structures\app_properties</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_module_info">
-      <Filter>Juce Modules\juce_data_structures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_ApplicationBase.cpp">
       <Filter>Juce Modules\juce_events\messages</Filter>
@@ -630,9 +609,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp">
       <Filter>Juce Modules\juce_events\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_events\juce_module_info">
-      <Filter>Juce Modules\juce_events</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\colour\juce_Colour.cpp">
       <Filter>Juce Modules\juce_graphics\colour</Filter>
@@ -750,9 +726,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_win32_Fonts.cpp">
       <Filter>Juce Modules\juce_graphics\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_module_info">
-      <Filter>Juce Modules\juce_graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\components\juce_Component.cpp">
       <Filter>Juce Modules\juce_gui_basics\components</Filter>
@@ -1120,9 +1093,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_win32_Windowing.cpp">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_module_info">
-      <Filter>Juce Modules\juce_gui_basics</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeDocument.cpp">
       <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
@@ -1188,9 +1158,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_win32_WebBrowserComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\juce_module_info">
-      <Filter>Juce Modules\juce_gui_extra</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
       <Filter>Juce Library Code</Filter>
@@ -2369,6 +2336,39 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\src\binarydata\juce_icon.png">
+      <Filter>Jucer\src\binarydata</Filter>
+    </None>
+    <None Include="..\..\src\binarydata\jules.jpg">
+      <Filter>Jucer\src\binarydata</Filter>
+    </None>
+    <None Include="..\..\src\binarydata\prefs_about.png">
+      <Filter>Jucer\src\binarydata</Filter>
+    </None>
+    <None Include="..\..\src\binarydata\prefs_keys.png">
+      <Filter>Jucer\src\binarydata</Filter>
+    </None>
+    <None Include="..\..\src\binarydata\prefs_misc.png">
+      <Filter>Jucer\src\binarydata</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_core\juce_module_info">
+      <Filter>Juce Modules\juce_core</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_data_structures\juce_module_info">
+      <Filter>Juce Modules\juce_data_structures</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_events\juce_module_info">
+      <Filter>Juce Modules\juce_events</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_graphics\juce_module_info">
+      <Filter>Juce Modules\juce_graphics</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_gui_basics\juce_module_info">
+      <Filter>Juce Modules\juce_gui_basics</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info">
+      <Filter>Juce Modules\juce_gui_extra</Filter>
+    </None>
     <None Include=".\icon.ico">
       <Filter>Juce Library Code</Filter>
     </None>

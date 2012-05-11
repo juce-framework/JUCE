@@ -1597,6 +1597,22 @@
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\modules\juce_audio_basics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_audio_devices\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_audio_processors\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_audio_utils\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_core\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_cryptography\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_data_structures\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_events\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_graphics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_gui_basics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_opengl\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_video\juce_module_info"/>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
   <ImportGroup Label="ExtensionTargets"/>
 </Project>

@@ -1326,6 +1326,17 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\src\binarydata\juce_icon.png"/>
+    <None Include="..\..\src\binarydata\jules.jpg"/>
+    <None Include="..\..\src\binarydata\prefs_about.png"/>
+    <None Include="..\..\src\binarydata\prefs_keys.png"/>
+    <None Include="..\..\src\binarydata\prefs_misc.png"/>
+    <None Include="..\..\..\..\modules\juce_core\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_data_structures\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_events\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_graphics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_gui_basics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info"/>
     <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>

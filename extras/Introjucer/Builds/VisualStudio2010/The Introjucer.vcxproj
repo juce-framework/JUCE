@@ -1329,6 +1329,16 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt"/>
+    <None Include="..\..\Source\BinaryData\brushed_aluminium.png"/>
+    <None Include="..\..\Source\BinaryData\juce_icon.png"/>
+    <None Include="..\..\..\..\modules\juce_core\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_cryptography\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_data_structures\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_events\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_graphics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_gui_basics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info"/>
     <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>

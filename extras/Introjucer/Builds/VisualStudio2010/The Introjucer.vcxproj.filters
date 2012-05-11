@@ -304,12 +304,6 @@
     <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp">
       <Filter>The Introjucer\Code Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\brushed_aluminium.png">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
@@ -326,9 +320,6 @@
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_WindowTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\juce_icon.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
@@ -550,9 +541,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_Threads.cpp">
       <Filter>Juce Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\juce_module_info">
-      <Filter>Juce Modules\juce_core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_cryptography\encryption\juce_BlowFish.cpp">
       <Filter>Juce Modules\juce_cryptography\encryption</Filter>
     </ClCompile>
@@ -568,9 +556,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_cryptography\hashing\juce_SHA256.cpp">
       <Filter>Juce Modules\juce_cryptography\hashing</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_cryptography\juce_module_info">
-      <Filter>Juce Modules\juce_cryptography</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_Value.cpp">
       <Filter>Juce Modules\juce_data_structures\values</Filter>
     </ClCompile>
@@ -585,9 +570,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\app_properties\juce_PropertiesFile.cpp">
       <Filter>Juce Modules\juce_data_structures\app_properties</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_module_info">
-      <Filter>Juce Modules\juce_data_structures</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\messages\juce_ApplicationBase.cpp">
       <Filter>Juce Modules\juce_events\messages</Filter>
@@ -636,9 +618,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp">
       <Filter>Juce Modules\juce_events\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_events\juce_module_info">
-      <Filter>Juce Modules\juce_events</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\colour\juce_Colour.cpp">
       <Filter>Juce Modules\juce_graphics\colour</Filter>
@@ -756,9 +735,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_win32_Fonts.cpp">
       <Filter>Juce Modules\juce_graphics\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_module_info">
-      <Filter>Juce Modules\juce_graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\components\juce_Component.cpp">
       <Filter>Juce Modules\juce_gui_basics\components</Filter>
@@ -1126,9 +1102,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_win32_Windowing.cpp">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\juce_module_info">
-      <Filter>Juce Modules\juce_gui_basics</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_CodeDocument.cpp">
       <Filter>Juce Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
@@ -1194,9 +1167,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_win32_WebBrowserComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\juce_module_info">
-      <Filter>Juce Modules\juce_gui_extra</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
       <Filter>Juce Library Code</Filter>
@@ -2312,6 +2282,36 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\brushed_aluminium.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\juce_icon.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_core\juce_module_info">
+      <Filter>Juce Modules\juce_core</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_cryptography\juce_module_info">
+      <Filter>Juce Modules\juce_cryptography</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_data_structures\juce_module_info">
+      <Filter>Juce Modules\juce_data_structures</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_events\juce_module_info">
+      <Filter>Juce Modules\juce_events</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_graphics\juce_module_info">
+      <Filter>Juce Modules\juce_graphics</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_gui_basics\juce_module_info">
+      <Filter>Juce Modules\juce_gui_basics</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info">
+      <Filter>Juce Modules\juce_gui_extra</Filter>
+    </None>
     <None Include=".\icon.ico">
       <Filter>Juce Library Code</Filter>
     </None>

@@ -139,6 +139,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
     header << "namespace " << namespaceName << newLine << "{" << newLine;
 
     StringArray returnCodes;
+    bool containsAnyImages = false;
 
     for (int i = 0; i < files.size(); ++i)
     {
@@ -149,11 +150,14 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
         returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableName + ";");
 
-        ScopedPointer <InputStream> fileStream (file.createInputStream());
-        jassert (fileStream != nullptr);
+        FileInputStream fileStream (file);
+        jassert (fileStream.openedOk());
 
-        if (fileStream != nullptr)
+        if (fileStream.openedOk())
         {
+            containsAnyImages = containsAnyImages
+                                 || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
+
             const String tempVariable ("temp_" + String::toHexString (file.hashCode()));
 
             header << "    extern const char*   " << variableName << ";" << newLine;
@@ -164,7 +168,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
             {
                 MemoryBlock data;
-                fileStream->readIntoMemoryBlock (data);
+                fileStream.readIntoMemoryBlock (data);
                 CodeHelpers::writeDataAsCppLiteral (data, cpp, true, true);
             }
 
@@ -187,31 +191,34 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
         << newLine
         << "}" << newLine;
 
-    header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
-           << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
-           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
-           << newLine
-           << "    //==============================================================================" << newLine
-           << "    // This class acts as an ImageProvider that will access the BinaryData images" << newLine
-           << "    class ImageProvider  : public juce::ComponentBuilder::ImageProvider" << newLine
-           << "    {" << newLine
-           << "    public:" << newLine
-           << "        ImageProvider() noexcept {}" << newLine
-          << newLine
-           << "        juce::Image getImageForIdentifier (const juce::var& imageIdentifier)" << newLine
-           << "        {" << newLine
-           << "            int dataSize = 0;" << newLine
-           << "            const char* const data = getNamedResource (imageIdentifier.toString().toUTF8(), dataSize);" << newLine
-           << newLine
-           << "            if (data != nullptr)" << newLine
-           << "                return juce::ImageCache::getFromMemory (data, dataSize);" << newLine
-           << newLine
-           << "            return juce::Image();" << newLine
-           << "        }" << newLine
-           << newLine
-           << "        juce::var getIdentifierForImage (const juce::Image&)  { return juce::var(); }" << newLine
-           << "    };" << newLine
-           << "}" << newLine;
+    if (containsAnyImages)
+    {
+        header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
+               << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
+               << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
+               << newLine
+               << "    //==============================================================================" << newLine
+               << "    // This class acts as an ImageProvider that will access the BinaryData images" << newLine
+               << "    class ImageProvider  : public juce::ComponentBuilder::ImageProvider" << newLine
+               << "    {" << newLine
+               << "    public:" << newLine
+               << "        ImageProvider() noexcept {}" << newLine
+              << newLine
+               << "        juce::Image getImageForIdentifier (const juce::var& imageIdentifier)" << newLine
+               << "        {" << newLine
+               << "            int dataSize = 0;" << newLine
+               << "            const char* const data = getNamedResource (imageIdentifier.toString().toUTF8(), dataSize);" << newLine
+               << newLine
+               << "            if (data != nullptr)" << newLine
+               << "                return juce::ImageCache::getFromMemory (data, dataSize);" << newLine
+               << newLine
+               << "            return juce::Image();" << newLine
+               << "        }" << newLine
+               << newLine
+               << "        juce::var getIdentifierForImage (const juce::Image&)  { return juce::var(); }" << newLine
+               << "    };" << newLine
+               << "}" << newLine;
+    }
 
     return true;
 }

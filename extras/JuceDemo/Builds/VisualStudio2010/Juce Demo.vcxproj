@@ -1631,6 +1631,26 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Binary Data\cello.wav"/>
+    <None Include="..\..\Binary Data\demo table data.xml"/>
+    <None Include="..\..\Binary Data\icons.zip"/>
+    <None Include="..\..\Binary Data\juce.png"/>
+    <None Include="..\..\Binary Data\juce_icon.png"/>
+    <None Include="..\..\Binary Data\treedemo.xml"/>
+    <None Include="..\..\..\..\modules\juce_audio_basics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_audio_devices\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_audio_processors\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_audio_utils\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_core\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_cryptography\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_data_structures\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_events\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_graphics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_gui_basics\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_gui_extra\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_opengl\juce_module_info"/>
+    <None Include="..\..\..\..\modules\juce_video\juce_module_info"/>
     <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>
