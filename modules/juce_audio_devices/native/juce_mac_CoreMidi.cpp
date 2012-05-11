@@ -359,24 +359,27 @@ MidiOutput::~MidiOutput()
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    CoreMidiHelpers::MidiPortAndEndpoint* const mpe = static_cast<CoreMidiHelpers::MidiPortAndEndpoint*> (internal);
-
    #if JUCE_IOS
     const MIDITimeStamp timeStamp = mach_absolute_time();
    #else
     const MIDITimeStamp timeStamp = AudioGetCurrentHostTime();
    #endif
 
+    HeapBlock <MIDIPacketList> allocatedPackets;
+    MIDIPacketList stackPacket;
+    MIDIPacketList* packetToSend = &stackPacket;
+    const size_t dataSize = (size_t) message.getRawDataSize();
+
     if (message.isSysEx())
     {
         const int maxPacketSize = 256;
-        int pos = 0, bytesLeft = message.getRawDataSize();
+        int pos = 0, bytesLeft = (int) dataSize;
         const int numPackets = (bytesLeft + maxPacketSize - 1) / maxPacketSize;
-        HeapBlock <MIDIPacketList> packets;
-        packets.malloc ((size_t) (32 * numPackets + message.getRawDataSize()), 1);
-        packets->numPackets = (UInt32) numPackets;
+        allocatedPackets.malloc ((size_t) (32 * numPackets + dataSize), 1);
+        packetToSend = allocatedPackets;
+        packetToSend->numPackets = (UInt32) numPackets;
 
-        MIDIPacket* p = packets->packet;
+        MIDIPacket* p = packetToSend->packet;
 
         for (int i = 0; i < numPackets; ++i)
         {
@@ -387,19 +390,30 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
             bytesLeft -= p->length;
             p = MIDIPacketNext (p);
         }
+    }
+    else if (dataSize < 65536) // max packet size
+    {
+        const size_t stackCapacity = sizeof (stackPacket.packet->data);
 
-        mpe->send (packets);
+        if (dataSize > stackCapacity)
+        {
+            allocatedPackets.malloc ((sizeof (MIDIPacketList) - stackCapacity) + dataSize, 1);
+            packetToSend = allocatedPackets;
+        }
+
+        packetToSend->numPackets = 1;
+        MIDIPacket& p = *(packetToSend->packet);
+        p.timeStamp = timeStamp;
+        p.length = (UInt16) dataSize;
+        memcpy (p.data, message.getRawData(), dataSize);
     }
     else
     {
-        MIDIPacketList packets;
-        packets.numPackets = 1;
-        packets.packet[0].timeStamp = timeStamp;
-        packets.packet[0].length = (UInt16) message.getRawDataSize();
-        *(int*) (packets.packet[0].data) = *(const int*) message.getRawData();
-
-        mpe->send (&packets);
+        jassertfalse; // packet too large to send!
+        return;
     }
+
+    static_cast<CoreMidiHelpers::MidiPortAndEndpoint*> (internal)->send (packetToSend);
 }
 
 //==============================================================================

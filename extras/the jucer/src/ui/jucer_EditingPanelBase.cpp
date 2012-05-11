@@ -129,7 +129,7 @@ private:
 
         void mouseDown (const MouseEvent& e)
         {
-            Viewport* viewport = findParentComponentOfClass ((Viewport*) 0);
+            Viewport* viewport = findParentComponentOfClass<Viewport>();
 
             if (viewport != 0)
             {
@@ -140,7 +140,7 @@ private:
 
         void mouseDrag (const MouseEvent& e)
         {
-            Viewport* viewport = findParentComponentOfClass ((Viewport*) 0);
+            Viewport* viewport = findParentComponentOfClass<Viewport>();
 
             if (viewport != 0)
             {

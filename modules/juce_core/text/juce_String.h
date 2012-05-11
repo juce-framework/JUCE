@@ -1049,7 +1049,7 @@ public:
     */
     CharPointer_UTF8 toUTF8() const;
 
-    /** Returns a pointer to a UTF-32 version of this string.
+    /** Returns a pointer to a UTF-16 version of this string.
 
         Because it returns a reference to the string's internal data, the pointer
         that is returned must not be stored anywhere, as it can be deleted whenever the
@@ -1133,7 +1133,7 @@ public:
     */
     int copyToUTF16 (CharPointer_UTF16::CharType* destBuffer, int maxBufferSizeBytes) const noexcept;
 
-    /** Copies the string to a buffer as UTF-16 characters.
+    /** Copies the string to a buffer as UTF-32 characters.
 
         Returns the number of bytes copied to the buffer, including the terminating null
         character.

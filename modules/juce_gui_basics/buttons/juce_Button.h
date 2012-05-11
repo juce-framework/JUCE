@@ -435,31 +435,33 @@ protected:
     /** @internal */
     void handleCommandMessage (int commandId);
     /** @internal */
-    void mouseEnter (const MouseEvent& e);
+    void mouseEnter (const MouseEvent&);
     /** @internal */
-    void mouseExit (const MouseEvent& e);
+    void mouseExit (const MouseEvent&);
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&);
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&);
     /** @internal */
-    void mouseUp (const MouseEvent& e);
+    void mouseUp (const MouseEvent&);
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&);
     /** @internal */
-    bool keyPressed (const KeyPress& key, Component* originatingComponent);
+    bool keyPressed (const KeyPress&, Component*);
     /** @internal */
-    bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
+    bool keyStateChanged (bool isKeyDown, Component*);
     /** @internal */
-    void paint (Graphics& g);
+    using Component::keyStateChanged;
+    /** @internal */
+    void paint (Graphics&);
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
     void visibilityChanged();
     /** @internal */
-    void focusGained (FocusChangeType cause);
+    void focusGained (FocusChangeType);
     /** @internal */
-    void focusLost (FocusChangeType cause);
+    void focusLost (FocusChangeType);
     /** @internal */
     void enablementChanged();
     /** @internal */
@@ -467,7 +469,7 @@ protected:
     /** @internal */
     void applicationCommandListChanged();
     /** @internal */
-    void valueChanged (Value& value);
+    void valueChanged (Value&);
 
 private:
     //==============================================================================

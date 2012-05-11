@@ -785,14 +785,10 @@ public:
         For example findParentComponentOfClass \<MyComp\>() would return the first parent
         component that can be dynamically cast to a MyComp, or will return 0 if none
         of the parents are suitable.
-
-        N.B. The dummy parameter is needed to work around a VC6 compiler bug.
     */
     template <class TargetClass>
-    TargetClass* findParentComponentOfClass (TargetClass* const dummyParameter = nullptr) const
+    TargetClass* findParentComponentOfClass() const
     {
-        (void) dummyParameter;
-
         for (Component* p = parentComponent; p != nullptr; p = p->parentComponent)
         {
             TargetClass* const target = dynamic_cast <TargetClass*> (p);

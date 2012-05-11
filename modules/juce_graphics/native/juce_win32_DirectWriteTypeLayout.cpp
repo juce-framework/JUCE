@@ -220,7 +220,8 @@ namespace DirectWriteTypeLayout
         {
             BOOL fontFound = false;
             uint32 fontIndex;
-            fontCollection->FindFamilyName (font->getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
+            fontCollection->FindFamilyName (FontStyleHelpers::getConcreteFamilyName (*font).toWideCharPointer(),
+                                            &fontIndex, &fontFound);
 
             if (! fontFound)
                 fontIndex = 0;
@@ -236,7 +237,7 @@ namespace DirectWriteTypeLayout
             {
                 hr = fontFamily->GetFont (i, dwFont.resetAndGetPointerAddress());
 
-                if (attr.getFont()->getTypefaceStyle() == getFontFaceName (dwFont))
+                if (font->getTypefaceStyle() == getFontFaceName (dwFont))
                     break;
             }
 

@@ -412,7 +412,7 @@ JucerDocumentHolder::~JucerDocumentHolder()
 
 bool JucerDocumentHolder::close()
 {
-    MainWindow* const mw = findParentComponentOfClass ((MainWindow*) 0);
+    MainWindow* const mw = findParentComponentOfClass<MainWindow>();
 
     if (mw != 0)
         return mw->closeDocument (this);

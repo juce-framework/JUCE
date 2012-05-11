@@ -72,7 +72,8 @@ public:
     {
         if (direct2dDll.open ("d2d1.dll"))
         {
-            JUCE_DLL_FUNCTION (D2D1CreateFactory, d2d1CreateFactory, HRESULT, direct2dDll, (D2D1_FACTORY_TYPE, REFIID, D2D1_FACTORY_OPTIONS*, void**))
+            JUCE_LOAD_WINAPI_FUNCTION (direct2dDll, D2D1CreateFactory, d2d1CreateFactory,
+                                       HRESULT, (D2D1_FACTORY_TYPE, REFIID, D2D1_FACTORY_OPTIONS*, void**))
 
             if (d2d1CreateFactory != nullptr)
             {
@@ -86,7 +87,8 @@ public:
 
         if (directWriteDll.open ("DWrite.dll"))
         {
-            JUCE_DLL_FUNCTION (DWriteCreateFactory, dWriteCreateFactory, HRESULT, directWriteDll, (DWRITE_FACTORY_TYPE, REFIID, IUnknown**))
+            JUCE_LOAD_WINAPI_FUNCTION (directWriteDll, DWriteCreateFactory, dWriteCreateFactory,
+                                       HRESULT, (DWRITE_FACTORY_TYPE, REFIID, IUnknown**))
 
             if (dWriteCreateFactory != nullptr)
             {

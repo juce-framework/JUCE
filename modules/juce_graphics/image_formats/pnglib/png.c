@@ -690,9 +690,8 @@ png_convert_to_rfc1123(png_structp png_ptr, png_timep ptime)
 #endif /* defined(PNG_READ_SUPPORTED) || defined(PNG_WRITE_SUPPORTED) */
 
 png_charp PNGAPI
-png_get_copyright(png_structp png_ptr)
+png_get_copyright(png_structp)
 {
-   png_ptr = png_ptr;  /* silence compiler warning about unused png_ptr */
    return ((png_charp) "\n libpng version 1.2.21 - October 4, 2007\n\
    Copyright (c) 1998-2007 Glenn Randers-Pehrson\n\
    Copyright (c) 1996-1997 Andreas Dilger\n\
@@ -708,26 +707,23 @@ png_get_copyright(png_structp png_ptr)
  * it is guaranteed that png.c uses the correct version of png.h.
  */
 png_charp PNGAPI
-png_get_libpng_ver(png_structp png_ptr)
+png_get_libpng_ver(png_structp)
 {
    /* Version of *.c files used when building libpng */
-   png_ptr = png_ptr;  /* silence compiler warning about unused png_ptr */
    return ((png_charp) PNG_LIBPNG_VER_STRING);
 }
 
 png_charp PNGAPI
-png_get_header_ver(png_structp png_ptr)
+png_get_header_ver(png_structp)
 {
    /* Version of *.h files used when building libpng */
-   png_ptr = png_ptr;  /* silence compiler warning about unused png_ptr */
    return ((png_charp) PNG_LIBPNG_VER_STRING);
 }
 
 png_charp PNGAPI
-png_get_header_version(png_structp png_ptr)
+png_get_header_version(png_structp)
 {
    /* Returns longer string containing both version and date */
-   png_ptr = png_ptr;  /* silence compiler warning about unused png_ptr */
    return ((png_charp) PNG_HEADER_VERSION_STRING
 #ifndef PNG_READ_SUPPORTED
    "     (NO READ SUPPORT)"

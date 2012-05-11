@@ -253,7 +253,7 @@ png_default_error(png_structp, png_const_charp error_message)
    PNG_ABORT();
 #endif
 #ifdef PNG_NO_CONSOLE_IO
-   error_message = error_message; /* make compiler happy */
+   (void) error_message; /* make compiler happy */
 #endif
 }
 

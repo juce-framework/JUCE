@@ -71,6 +71,12 @@ String addQuotesIfContainsSpaces (const String& text)
     return (text.containsChar (' ') && ! text.isQuotedString()) ? text.quoted() : text;
 }
 
+void setValueIfVoid (Value value, const var& defaultValue)
+{
+    if (value.getValue().isVoid())
+        value = defaultValue;
+}
+
 //==============================================================================
 StringPairArray parsePreprocessorDefs (const String& text)
 {

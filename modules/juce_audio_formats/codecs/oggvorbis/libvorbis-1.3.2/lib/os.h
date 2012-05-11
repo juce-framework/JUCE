@@ -94,7 +94,7 @@ typedef ogg_int16_t vorbis_fpu_control;
 
 static inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
   ogg_int16_t ret;
-  ogg_int16_t temp;
+  ogg_int16_t temp = 0;
   __asm__ __volatile__("fnstcw %0\n\t"
           "movw %0,%%dx\n\t"
           "andw $62463,%%dx\n\t"

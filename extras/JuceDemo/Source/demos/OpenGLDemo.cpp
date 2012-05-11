@@ -109,14 +109,14 @@ public:
     {
         OpenGLHelpers::clear (Colours::darkgrey.withAlpha (1.0f));
 
-		{
-			MessageManagerLock mm (Thread::getCurrentThread());
-			if (! mm.lockWasGained())
-				return;
+        {
+            MessageManagerLock mm (Thread::getCurrentThread());
+            if (! mm.lockWasGained())
+                return;
 
-			updateTextureImage();  // this will update our dynamically-changing texture image.
-			drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
-		}
+            updateTextureImage();  // this will update our dynamically-changing texture image.
+            drawBackground2DStuff(); // draws some 2D content to demonstrate the OpenGLGraphicsContext class
+        }
 
         // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
         // we'll put back any important settings before doing our normal GL 3D drawing..

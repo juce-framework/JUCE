@@ -370,3 +370,15 @@ String SystemStats::getComputerName()
     GetComputerName (text, &len);
     return String (text, len);
 }
+
+static String getLocaleValue (LCTYPE key, const char* defaultValue)
+{
+    TCHAR buffer [256] = { 0 };
+    if (GetLocaleInfo (LOCALE_USER_DEFAULT, key, buffer, 255) > 0)
+        return buffer;
+
+    return defaultValue;
+}
+
+String SystemStats::getUserLanguage()   { return getLocaleValue (LOCALE_SISO639LANGNAME,  "en"); }
+String SystemStats::getUserRegion()     { return getLocaleValue (LOCALE_SISO3166CTRYNAME, "US"); }

@@ -210,7 +210,7 @@ private:
 
         void buttonClicked()
         {
-            MainWindow* const mw = findParentComponentOfClass ((MainWindow*) 0);
+            MainWindow* const mw = findParentComponentOfClass<MainWindow>();
 
             jassert (mw != 0);
             if (mw != 0)

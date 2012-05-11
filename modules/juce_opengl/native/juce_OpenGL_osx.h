@@ -116,7 +116,7 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixelFormat,
-                   const NativeContext* contextToShareWith)
+                   void* contextToShareWith)
     {
         NSOpenGLPixelFormatAttribute attribs[] =
         {
@@ -140,11 +140,8 @@ public:
         view = [[ThreadSafeNSOpenGLView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                                  pixelFormat: format];
 
-        NSOpenGLContext* const sharedContext
-            = contextToShareWith != nullptr ? contextToShareWith->renderContext : nil;
-
         renderContext = [[[NSOpenGLContext alloc] initWithFormat: format
-                                                    shareContext: sharedContext] autorelease];
+                                                    shareContext: (NSOpenGLContext*) contextToShareWith] autorelease];
 
         setSwapInterval (1);
 

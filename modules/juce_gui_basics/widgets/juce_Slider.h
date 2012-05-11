@@ -51,24 +51,9 @@
     @see Slider::Listener
 */
 class JUCE_API  Slider  : public Component,
-                          public SettableTooltipClient,
-                          public AsyncUpdater,
-                          public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
-                          public LabelListener,
-                          public ValueListener
+                          public SettableTooltipClient
 {
 public:
-    //==============================================================================
-    /** Creates a slider.
-
-        When created, you'll need to set up the slider's style and range with setSliderStyle(),
-        setRange(), etc.
-    */
-    explicit Slider (const String& componentName = String::empty);
-
-    /** Destructor. */
-    ~Slider();
-
     //==============================================================================
     /** The types of slider available.
 
@@ -100,6 +85,38 @@ public:
                                      @see setMinValue, setMaxValue */
     };
 
+    /** The position of the slider's text-entry box.
+
+        @see setTextBoxStyle
+    */
+    enum TextEntryBoxPosition
+    {
+        NoTextBox,              /**< Doesn't display a text box.  */
+        TextBoxLeft,            /**< Puts the text box to the left of the slider, vertically centred.  */
+        TextBoxRight,           /**< Puts the text box to the right of the slider, vertically centred.  */
+        TextBoxAbove,           /**< Puts the text box above the slider, horizontally centred.  */
+        TextBoxBelow            /**< Puts the text box below the slider, horizontally centred.  */
+    };
+
+    //==============================================================================
+    /** Creates a slider.
+        When created, you can set up the slider's style and range with setSliderStyle(), setRange(), etc.
+    */
+    Slider();
+
+    /** Creates a slider.
+        When created, you can set up the slider's style and range with setSliderStyle(), setRange(), etc.
+    */
+    explicit Slider (const String& componentName);
+
+    /** Creates a slider with some explicit options.
+    */
+    Slider (SliderStyle style, TextEntryBoxPosition textBoxPosition);
+
+    /** Destructor. */
+    ~Slider();
+
+    //==============================================================================
     /** Changes the type of slider interface being used.
 
         @param newStyle         the type of interface
@@ -111,7 +128,7 @@ public:
 
         @see setSliderStyle
     */
-    SliderStyle getSliderStyle() const noexcept                 { return style; }
+    SliderStyle getSliderStyle() const noexcept;
 
     //==============================================================================
     /** Changes the properties of a rotary slider.
@@ -138,7 +155,7 @@ public:
     void setMouseDragSensitivity (int distanceForFullScaleDrag);
 
     /** Returns the current sensitivity value set by setMouseDragSensitivity(). */
-    int getMouseDragSensitivity() const noexcept                { return pixelsForFullDragExtent; }
+    int getMouseDragSensitivity() const noexcept;
 
     //==============================================================================
     /** Changes the way the the mouse is used when dragging the slider.
@@ -154,7 +171,7 @@ public:
     /** Returns true if velocity-based mode is active.
         @see setVelocityBasedMode
     */
-    bool getVelocityBasedMode() const noexcept                  { return isVelocityBased; }
+    bool getVelocityBasedMode() const noexcept;
 
     /** Changes aspects of the scaling used when in velocity-sensitive mode.
 
@@ -177,22 +194,22 @@ public:
     /** Returns the velocity sensitivity setting.
         @see setVelocityModeParameters
     */
-    double getVelocitySensitivity() const noexcept              { return velocityModeSensitivity; }
+    double getVelocitySensitivity() const noexcept;
 
     /** Returns the velocity threshold setting.
         @see setVelocityModeParameters
     */
-    int getVelocityThreshold() const noexcept                   { return velocityModeThreshold; }
+    int getVelocityThreshold() const noexcept;
 
     /** Returns the velocity offset setting.
         @see setVelocityModeParameters
     */
-    double getVelocityOffset() const noexcept                   { return velocityModeOffset; }
+    double getVelocityOffset() const noexcept;
 
     /** Returns the velocity user key setting.
         @see setVelocityModeParameters
     */
-    bool getVelocityModeIsSwappable() const noexcept            { return userKeyOverridesVelocity; }
+    bool getVelocityModeIsSwappable() const noexcept;
 
     //==============================================================================
     /** Sets up a skew factor to alter the way values are distributed.
@@ -227,7 +244,7 @@ public:
 
         @see setSkewFactor, setSkewFactorFromMidPoint
     */
-    double getSkewFactor() const noexcept                       { return skewFactor; }
+    double getSkewFactor() const noexcept;
 
     //==============================================================================
     /** Used by setIncDecButtonsMode().
@@ -253,19 +270,6 @@ public:
     void setIncDecButtonsMode (IncDecButtonMode mode);
 
     //==============================================================================
-    /** The position of the slider's text-entry box.
-
-        @see setTextBoxStyle
-    */
-    enum TextEntryBoxPosition
-    {
-        NoTextBox,              /**< Doesn't display a text box.  */
-        TextBoxLeft,            /**< Puts the text box to the left of the slider, vertically centred.  */
-        TextBoxRight,           /**< Puts the text box to the right of the slider, vertically centred.  */
-        TextBoxAbove,           /**< Puts the text box above the slider, horizontally centred.  */
-        TextBoxBelow            /**< Puts the text box below the slider, horizontally centred.  */
-    };
-
     /** Changes the location and properties of the text-entry box.
 
         @param newPosition          where it should go (or NoTextBox to not have one at all)
@@ -285,17 +289,17 @@ public:
     /** Returns the status of the text-box.
         @see setTextBoxStyle
     */
-    const TextEntryBoxPosition getTextBoxPosition() const noexcept          { return textBoxPos; }
+    TextEntryBoxPosition getTextBoxPosition() const noexcept;
 
     /** Returns the width used for the text-box.
         @see setTextBoxStyle
     */
-    int getTextBoxWidth() const noexcept                                    { return textBoxWidth; }
+    int getTextBoxWidth() const noexcept;
 
     /** Returns the height used for the text-box.
         @see setTextBoxStyle
     */
-    int getTextBoxHeight() const noexcept                                   { return textBoxHeight; }
+    int getTextBoxHeight() const noexcept;
 
     /** Makes the text-box editable.
 
@@ -309,7 +313,7 @@ public:
     /** Returns true if the text-box is read-only.
         @see setTextBoxStyle
     */
-    bool isTextBoxEditable() const                                          { return editableText; }
+    bool isTextBoxEditable() const noexcept;
 
     /** If the text-box is editable, this will give it the focus so that the user can
         type directly into it.
@@ -357,7 +361,7 @@ public:
         your own Value object.
         @see Value, getMaxValue, getMinValueObject
     */
-    Value& getValueObject()                                                 { return currentValue; }
+    Value& getValueObject() noexcept;
 
     //==============================================================================
     /** Sets the limits that the slider's value can take.
@@ -374,17 +378,17 @@ public:
     /** Returns the current maximum value.
         @see setRange
     */
-    double getMaximum() const                                               { return maximum; }
+    double getMaximum() const noexcept;
 
     /** Returns the current minimum value.
         @see setRange
     */
-    double getMinimum() const                                               { return minimum; }
+    double getMinimum() const noexcept;
 
     /** Returns the current step-size for values.
         @see setRange
     */
-    double getInterval() const                                              { return interval; }
+    double getInterval() const noexcept;
 
     //==============================================================================
     /** For a slider with two or three thumbs, this returns the lower of its values.
@@ -403,7 +407,7 @@ public:
         your own Value object.
         @see Value, getMinValue, getMaxValueObject
     */
-    Value& getMinValueObject() noexcept                                     { return valueMin; }
+    Value& getMinValueObject() noexcept;
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -445,7 +449,7 @@ public:
         your own Value object.
         @see Value, getMaxValue, getMinValueObject
     */
-    Value& getMaxValueObject() noexcept                                     { return valueMax; }
+    Value& getMaxValueObject() noexcept;
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -586,7 +590,7 @@ public:
     void setSliderSnapsToMousePosition (bool shouldSnapToMouse);
 
     /** Returns true if setSliderSnapsToMousePosition() has been enabled. */
-    bool getSliderSnapsToMousePosition() const noexcept         { return snapsToMousePos; }
+    bool getSliderSnapsToMousePosition() const noexcept;
 
     /** If enabled, this gives the slider a pop-up bubble which appears while the
         slider is being dragged.
@@ -630,7 +634,7 @@ public:
         This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
         the maximum-value thumb, or -1 if none is currently down.
     */
-    int getThumbBeingDragged() const noexcept               { return sliderBeingDragged; }
+    int getThumbBeingDragged() const noexcept;
 
     //==============================================================================
     /** Callback to indicate that the user is about to start dragging the slider.
@@ -744,16 +748,14 @@ public:
 
     //==============================================================================
     /** This can be called to force the text box to update its contents.
-
         (Not normally needed, as this is done automatically).
     */
     void updateText();
 
-
     /** True if the slider moves horizontally. */
-    bool isHorizontal() const;
+    bool isHorizontal() const noexcept;
     /** True if the slider moves vertically. */
-    bool isVertical() const;
+    bool isVertical() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the slider.
@@ -790,92 +792,43 @@ public:
 protected:
     //==============================================================================
     /** @internal */
-    void labelTextChanged (Label*);
-    /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
     /** @internal */
     void resized();
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&);
     /** @internal */
-    void mouseUp (const MouseEvent& e);
+    void mouseUp (const MouseEvent&);
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&);
     /** @internal */
-    void mouseDoubleClick (const MouseEvent& e);
+    void mouseDoubleClick (const MouseEvent&);
     /** @internal */
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    void mouseWheelMove (const MouseEvent&, float wheelIncrementX, float wheelIncrementY);
     /** @internal */
-    void modifierKeysChanged (const ModifierKeys& modifiers);
-    /** @internal */
-    void buttonClicked (Button* button);
+    void modifierKeysChanged (const ModifierKeys&);
     /** @internal */
     void lookAndFeelChanged();
     /** @internal */
     void enablementChanged();
     /** @internal */
-    void focusOfChildComponentChanged (FocusChangeType cause);
-    /** @internal */
-    void handleAsyncUpdate();
+    void focusOfChildComponentChanged (FocusChangeType);
     /** @internal */
     void colourChanged();
-    /** @internal */
-    void valueChanged (Value& value);
 
     /** Returns the best number of decimal places to use when displaying numbers.
         This is calculated from the slider's interval setting.
     */
-    int getNumDecimalPlacesToDisplay() const noexcept       { return numDecimalPlaces; }
+    int getNumDecimalPlacesToDisplay() const noexcept;
 
 private:
     //==============================================================================
-    ListenerList <Listener> listeners;
-    Value currentValue, valueMin, valueMax;
-    double lastCurrentValue, lastValueMin, lastValueMax;
-    double minimum, maximum, interval, doubleClickReturnValue;
-    double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
-    double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
-    int velocityModeThreshold;
-    float rotaryStart, rotaryEnd;
-    int numDecimalPlaces;
-    Point<int> mouseDragStartPos, mousePosWhenLastDragged;
-    int sliderRegionStart, sliderRegionSize;
-    int sliderBeingDragged;
-    int pixelsForFullDragExtent;
-    Rectangle<int> sliderRect;
-    String textSuffix;
+    class Pimpl;
+    friend class Pimpl;
+    friend class ScopedPointer<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
 
-    SliderStyle style;
-    TextEntryBoxPosition textBoxPos;
-    int textBoxWidth, textBoxHeight;
-    IncDecButtonMode incDecButtonMode;
-
-    bool editableText : 1, doubleClickToValue : 1;
-    bool isVelocityBased : 1, userKeyOverridesVelocity : 1, rotaryStop : 1;
-    bool incDecButtonsSideBySide : 1, sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
-    bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1;
-    bool scrollWheelEnabled : 1, snapsToMousePos : 1;
-    ScopedPointer<Label> valueBox;
-    ScopedPointer<Button> incButton, decButton;
-
-    class PopupDisplayComponent;
-    friend class PopupDisplayComponent;
-    friend class ScopedPointer <PopupDisplayComponent>;
-    ScopedPointer <PopupDisplayComponent> popupDisplay;
-    Component* parentForPopupDisplay;
-
-    void showPopupMenu();
-    int getThumbIndexAt (const MouseEvent&);
-    void handleRotaryDrag (const MouseEvent&);
-    void handleAbsoluteDrag (const MouseEvent&);
-    void handleVelocityDrag (const MouseEvent&);
-    float getLinearSliderPos (double value);
-    void restoreMouseIfHidden();
-    void sendDragStart();
-    void sendDragEnd();
-    double constrainedValue (double value) const;
-    void triggerChangeMessage (bool synchronous);
-    bool incDecDragDirectionIsHorizontal() const;
+    void init (SliderStyle, TextEntryBoxPosition);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider);
 };

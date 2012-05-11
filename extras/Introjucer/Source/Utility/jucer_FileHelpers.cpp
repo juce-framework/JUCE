@@ -122,7 +122,7 @@ namespace FileHelpers
                 || path.startsWithIgnoreCase ("smb:");
     }
 
-    static String appendPath (const String& path, const String& subpath)
+    String appendPath (const String& path, const String& subpath)
     {
         if (isAbsolutePath (subpath))
             return subpath.replaceCharacter ('\\', '/');

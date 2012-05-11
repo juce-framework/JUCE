@@ -63,6 +63,12 @@
  #undef SIZEOF
 #endif
 
+#if (JUCE_MAC || JUCE_IOS) && USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
+ #define JUCE_USING_COREIMAGE_LOADER 1
+#else
+ #define JUCE_USING_COREIMAGE_LOADER 0
+#endif
+
 //==============================================================================
 namespace juce
 {
