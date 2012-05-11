@@ -21,9 +21,10 @@
                       { "file": "RTAS/juce_RTAS_MacUtilities.mm", "target": "xcode" },
                       { "file": "RTAS/juce_RTAS_WinResources.rsr", "target": "msvc" },
                       { "file": "RTAS/juce_RTAS_WinUtilities.cpp", "target": "msvc", "warnings": "disabled", "stdcall": "1" },
-                      { "file": "RTAS/juce_RTAS_Wrapper.cpp", "warnings": "disabled", "warnings": "disabled", "stdcall": "1" },
+                      { "file": "RTAS/juce_RTAS_Wrapper.cpp", "warnings": "disabled", "stdcall": "1" },
                       { "file": "AU/juce_AU_Resources.r", "target": "xcode" },
-                      { "file": "AU/juce_AU_Wrapper.mm", "target": "xcode" } 
+                      { "file": "AU/juce_AU_Wrapper.mm", "target": "xcode" },
+                      { "file": "AAX/juce_AAX_Wrapper.cpp" }
                     ],
 
   "browse":         [ "AU/*.cpp",
@@ -33,6 +34,7 @@
                       "RTAS/*.mm",
                       "RTAS/*.h",
                       "VST/*",
+                      "AAX/*",
                       "utility/*"
                     ]
 }

@@ -132,6 +132,10 @@ namespace
         flags.set ("JucePlugin_RTASManufacturerCode",        "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_RTASProductId",               "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AAXIdentifier",               project.getAAXIdentifier().toString());
+        flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
+        flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
+        flags.set ("JucePlugin_AAXPluginId",                 "JucePlugin_PluginCode");
+        flags.set ("JucePlugin_AAXCategory",                 "AAX_ePlugInCategory_None");
 
         MemoryOutputStream mem;
 
@@ -481,7 +485,9 @@ namespace AAXHelpers
     {
         RelativePath aaxFolder (getAAXFolder (exporter).toString(), RelativePath::projectFolder);
 
+        exporter.addToExtraSearchPaths (aaxFolder);
         exporter.addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces"));
+        exporter.addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces").getChildFile ("ACF"));
     }
 
     static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver, const File& moduleFolder)
