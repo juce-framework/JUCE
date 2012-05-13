@@ -127,6 +127,11 @@ public:
             object.release();
     }
 
+    /** Returns true if the target object will be deleted when this pointer
+        object is deleted.
+    */
+    bool willDeleteObject() const noexcept                          { return shouldDelete; }
+
     //==============================================================================
     /** Swaps this object with another OptionalScopedPointer.
         The two objects simply exchange their states.

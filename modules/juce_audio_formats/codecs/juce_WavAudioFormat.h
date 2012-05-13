@@ -94,8 +94,6 @@ public:
     /** Metadata property name used by wav readers and writers for adding
         a BWAV chunk to the file.
 
-        This is a
-
         @see AudioFormatReader::metadataValues, createWriterFor
     */
     static const char* const bwavCodingHistory;
