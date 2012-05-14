@@ -156,11 +156,8 @@ public:
         }
 
         exporter.xcodeProductInstallPath = String::empty;
-
         exporter.makefileTargetSuffix = ".so";
-
         exporter.msvcTargetSuffix = exporter.getSetting (Ids::libraryType) == 2 ? ".dll" : ".lib";
-
         exporter.msvcExtraPreprocessorDefs.set ("_LIB", "");
     }
 };
@@ -176,30 +173,28 @@ public:
 
     void setMissingProjectProperties (Project& project) const
     {
-        if (! project.getProjectRoot().hasProperty (Ids::buildVST))
-        {
-            const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (project.getProjectName().toString(), false, true, false));
+        const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (project.getProjectName().toString(), false, true, false));
 
-            shouldBuildVST (project) = true;
-            shouldBuildRTAS (project) = false;
-            shouldBuildAU (project) = true;
+        setValueIfVoid (shouldBuildVST (project), true);
+        setValueIfVoid (shouldBuildAU (project),  true);
 
-            getPluginName (project) = project.getProjectName().toString();
-            getPluginDesc (project) = project.getProjectName().toString();
-            getPluginManufacturer (project) = "yourcompany";
-            getPluginManufacturerCode (project) = "Manu";
-            getPluginCode (project) = "Plug";
-            getPluginChannelConfigs (project) = "{1, 1}, {2, 2}";
-            getPluginIsSynth (project) = false;
-            getPluginWantsMidiInput (project) = false;
-            getPluginProducesMidiOut (project) = false;
-            getPluginSilenceInProducesSilenceOut (project) = false;
-            getPluginTailLengthSeconds (project) = 0;
-            getPluginEditorNeedsKeyFocus (project) = false;
-            getPluginAUExportPrefix (project) = sanitisedProjectName + "AU";
-            getPluginAUCocoaViewClassName (project) = sanitisedProjectName + "AU_V1";
-            getPluginRTASCategory (project) = String::empty;
-        }
+        setValueIfVoid (getPluginName (project),                   project.getProjectName().toString());
+        setValueIfVoid (getPluginDesc (project),                   project.getProjectName().toString());
+        setValueIfVoid (getPluginManufacturer (project),           "yourcompany");
+        setValueIfVoid (getPluginManufacturerCode (project),       "Manu");
+        setValueIfVoid (getPluginCode (project),                   "Plug");
+        setValueIfVoid (getPluginChannelConfigs (project),         "{1, 1}, {2, 2}");
+        setValueIfVoid (getPluginIsSynth (project),                false);
+        setValueIfVoid (getPluginWantsMidiInput (project),         false);
+        setValueIfVoid (getPluginProducesMidiOut (project),        false);
+        setValueIfVoid (getPluginSilenceInProducesSilenceOut (project), false);
+        setValueIfVoid (getPluginTailLengthSeconds (project),      0);
+        setValueIfVoid (getPluginEditorNeedsKeyFocus (project),    false);
+        setValueIfVoid (getPluginAUExportPrefix (project),         sanitisedProjectName + "AU");
+        setValueIfVoid (getPluginAUCocoaViewClassName (project),   sanitisedProjectName + "AU_V1");
+        setValueIfVoid (getPluginRTASCategory (project),           String::empty);
+        setValueIfVoid (project.getBundleIdentifier(),             project.getDefaultBundleIdentifier());
+        setValueIfVoid (project.getAAXIdentifier(),                project.getDefaultAAXIdentifier());
     }
 
     void createPropertyEditors (Project& project, PropertyListBuilder& props) const
@@ -210,6 +205,8 @@ public:
                    "Whether the project should produce an AudioUnit plugin.");
         props.add (new BooleanPropertyComponent (shouldBuildRTAS (project), "Build RTAS", "Enabled"),
                    "Whether the project should produce an RTAS plugin.");
+//        props.add (new BooleanPropertyComponent (shouldBuildAAX (project), "Build AAX", "Enabled"),
+//                   "Whether the project should produce an AAX plugin.");
 
         props.add (new TextPropertyComponent (getPluginName (project), "Plugin Name", 128, false),
                    "The name of your plugin (keep it short!)");

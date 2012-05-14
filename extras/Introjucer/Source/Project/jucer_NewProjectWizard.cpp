@@ -399,7 +399,6 @@ Project* NewProjectWizard::runWizard (Component* ownerWindow_,
     {
         project->setFile (projectFile);
         project->setTitle (appTitle);
-        project->setBundleIdentifierToDefault();
 
         if (! initialiseProject (*project))
             return nullptr;

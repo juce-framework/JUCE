@@ -102,8 +102,7 @@ protected:
         MakeBuildConfiguration (Project& project, const ValueTree& settings)
             : BuildConfiguration (project, settings)
         {
-            if (getLibrarySearchPathValue().getValue().isVoid())
-                getLibrarySearchPathValue() = "/usr/X11R6/lib/";
+            setValueIfVoid (getLibrarySearchPathValue(), "/usr/X11R6/lib/");
         }
 
         void createPropertyEditors (PropertyListBuilder& props)

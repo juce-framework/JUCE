@@ -330,7 +330,8 @@ public:
         cancelPendingUpdate();
 
         Component::BailOutChecker checker (&owner);
-        listeners.callChecked (checker, &SliderListener::sliderValueChanged, &owner);  // (can't use Slider::Listener due to idiotic VC2005 bug)
+        Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
+        listeners.callChecked (checker, &SliderListener::sliderValueChanged, slider);  // (can't use Slider::Listener due to idiotic VC2005 bug)
     }
 
     void sendDragStart()
@@ -338,7 +339,8 @@ public:
         owner.startedDragging();
 
         Component::BailOutChecker checker (&owner);
-        listeners.callChecked (checker, &SliderListener::sliderDragStarted, &owner);
+        Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
+        listeners.callChecked (checker, &SliderListener::sliderDragStarted, slider);
     }
 
     void sendDragEnd()
@@ -348,7 +350,8 @@ public:
         sliderBeingDragged = -1;
 
         Component::BailOutChecker checker (&owner);
-        listeners.callChecked (checker, &SliderListener::sliderDragEnded, &owner);
+        Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
+        listeners.callChecked (checker, &SliderListener::sliderDragEnded, slider);
     }
 
     void buttonClicked (Button* button)

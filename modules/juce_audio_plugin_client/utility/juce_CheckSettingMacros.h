@@ -26,7 +26,8 @@
 // The following checks should cause a compile error if you've forgotten to
 // define all your plugin settings properly..
 
-#if ! (JucePlugin_Build_VST || JucePlugin_Build_AU || JucePlugin_Build_RTAS || JucePlugin_Build_Standalone || JucePlugin_Build_LV2)
+#if ! (JucePlugin_Build_VST || JucePlugin_Build_AU || JucePlugin_Build_RTAS || JucePlugin_Build_AAX \
+        || JucePlugin_Build_Standalone || JucePlugin_Build_LV2)
  #error "You need to enable at least one plugin format!"
 #endif
 
@@ -102,4 +103,8 @@
 
 #if JucePlugin_Build_LV2 && ! defined (JucePlugin_LV2URI)
  #error "You need to define the JucePlugin_LV2URI value!"
+#endif
+
+#if JucePlugin_Build_AAX && ! defined (JucePlugin_AAXIdentifier)
+ #error "You need to define the JucePlugin_AAXIdentifier value!"
 #endif

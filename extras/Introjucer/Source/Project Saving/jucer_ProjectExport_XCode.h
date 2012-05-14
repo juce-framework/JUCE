@@ -62,8 +62,7 @@ public:
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX");
 
-        if (settings ["objCExtraSuffix"].isVoid())
-            getObjCSuffixValue() = createAlphaNumericUID();
+        setValueIfVoid (getObjCSuffixValue(), createAlphaNumericUID());
     }
 
     static XCodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
@@ -665,6 +664,7 @@ private:
 
         s.add ("GCC_VERSION = " + gccVersion);
         s.add ("CLANG_CXX_LANGUAGE_STANDARD = \"c++0x\"");
+        //s.add ("CLANG_CXX_LIBRARY = \"libc++\"");
 
         {
             StringArray linkerFlags, librarySearchPaths;

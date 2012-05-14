@@ -134,9 +134,8 @@ public:
           currentPosition (0),
           bufferStart (0), bufferEnd (0)
     {
-        typedef HRESULT (*WMCreateSyncReaderType) (IUnknown*, DWORD, IWMSyncReader**);
-        WMCreateSyncReaderType wmCreateSyncReader = nullptr;
-        wmCreateSyncReader = (WMCreateSyncReaderType) wmvCoreLib.getFunction ("WMCreateSyncReader");
+        JUCE_LOAD_WINAPI_FUNCTION (wmvCoreLib, WMCreateSyncReader, wmCreateSyncReader,
+                                   HRESULT, (IUnknown*, DWORD, IWMSyncReader**))
 
         if (wmCreateSyncReader != nullptr)
         {

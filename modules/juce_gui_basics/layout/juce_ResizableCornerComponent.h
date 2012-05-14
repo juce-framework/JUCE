@@ -37,7 +37,7 @@
     a larger component and it will automatically resize its parent when it gets dragged
     around.
 
-    @see ResizableFrameComponent
+    @see ResizableBorderComponent
 */
 class JUCE_API  ResizableCornerComponent  : public Component
 {

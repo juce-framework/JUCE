@@ -118,9 +118,9 @@ public:
 
     void filesDropped (const StringArray& files, int /*x*/, int /*y*/)
     {
-        AudioDemoPlaybackPage* demoPage = findParentComponentOfClass ((AudioDemoPlaybackPage*) 0);
+        AudioDemoPlaybackPage* demoPage = findParentComponentOfClass<AudioDemoPlaybackPage>();
 
-        if (demoPage != 0)
+        if (demoPage != nullptr)
             demoPage->showFile (File (files[0]));
     }
 
