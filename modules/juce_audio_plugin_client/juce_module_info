@@ -24,7 +24,8 @@
                       { "file": "RTAS/juce_RTAS_Wrapper.cpp", "warnings": "disabled", "stdcall": "1" },
                       { "file": "AU/juce_AU_Resources.r", "target": "xcode" },
                       { "file": "AU/juce_AU_Wrapper.mm", "target": "xcode" },
-                      { "file": "AAX/juce_AAX_Wrapper.cpp" }
+                      { "file": "AAX/juce_AAX_Wrapper.cpp" },
+                      { "file": "AAX/juce_AAX_Wrapper.mm", "target": "xcode" }
                     ],
 
   "browse":         [ "AU/*.cpp",

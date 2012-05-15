@@ -219,14 +219,15 @@ namespace VSTHelpers
 //==============================================================================
 namespace RTASHelpers
 {
-    static Value getRTASFolder (ProjectExporter& exporter)        { return exporter.getSetting (Ids::rtasFolder); }
+    static Value getRTASFolder (ProjectExporter& exporter)             { return exporter.getSetting (Ids::rtasFolder); }
+    static RelativePath getRTASFolderPath (ProjectExporter& exporter)  { return RelativePath (exporter.getSettingString (Ids::rtasFolder),
+                                                                                              RelativePath::projectFolder); }
 
     static bool isExporterSupported (ProjectExporter& exporter)   { return exporter.isVisualStudio() || exporter.isXcode(); }
 
     static RelativePath getRTASFolderRelativePath (ProjectExporter& exporter)
     {
-        return exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (getRTASFolder (exporter).toString(),
-                                                                            RelativePath::projectFolder));
+        return exporter.rebaseFromProjectFolderToBuildTarget (getRTASFolderPath (exporter));
     }
 
     static void fixMissingRTASValues (ProjectExporter& exporter)
@@ -242,7 +243,7 @@ namespace RTASHelpers
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
     {
-        RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
+        RelativePath rtasFolder (getRTASFolderPath (exporter));
 
         if (exporter.isVisualStudio())
         {
@@ -359,7 +360,7 @@ namespace RTASHelpers
             {
                 exporter.xcodeCanUseDwarf = false;
 
-                RelativePath rtasFolder (getRTASFolder (exporter).toString(), RelativePath::projectFolder);
+                RelativePath rtasFolder (getRTASFolderPath (exporter));
                 exporter.xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
                 exporter.xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
             }
@@ -467,9 +468,11 @@ namespace AUHelpers
 //==============================================================================
 namespace AAXHelpers
 {
-    static Value getAAXFolder (ProjectExporter& exporter)        { return exporter.getSetting (Ids::aaxFolder); }
+    static Value getAAXFolder (ProjectExporter& exporter)             { return exporter.getSetting (Ids::aaxFolder); }
+    static RelativePath getAAXFolderPath (ProjectExporter& exporter)  { return RelativePath (exporter.getSettingString (Ids::aaxFolder),
+                                                                                             RelativePath::projectFolder); }
 
-    static bool isExporterSupported (ProjectExporter& exporter)  { return exporter.isVisualStudio() || exporter.isXcode(); }
+    static bool isExporterSupported (ProjectExporter& exporter)       { return exporter.isVisualStudio() || exporter.isXcode(); }
 
     static RelativePath getAAXFolderRelativePath (ProjectExporter& exporter)
     {
@@ -490,7 +493,7 @@ namespace AAXHelpers
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
     {
-        RelativePath aaxFolder (getAAXFolder (exporter).toString(), RelativePath::projectFolder);
+        const RelativePath aaxFolder (getAAXFolderPath (exporter));
 
         exporter.addToExtraSearchPaths (aaxFolder);
         exporter.addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces"));
@@ -503,13 +506,16 @@ namespace AAXHelpers
         {
             fixMissingAAXValues (exporter);
 
+            const RelativePath aaxFolder (getAAXFolderPath (exporter));
+
             if (exporter.isVisualStudio())
             {
-                //  XXX todo
+                exporter.msvcTargetSuffix = ".aax";
             }
             else
             {
-                //  XXX todo
+                exporter.xcodeExtraLibrariesDebug.add   (aaxFolder.getChildFile ("Libs/Debug/libAAXLibrary.a"));
+                exporter.xcodeExtraLibrariesRelease.add (aaxFolder.getChildFile ("Libs/Release/libAAXLibrary.a"));
             }
 
             writePluginCharacteristicsFile (projectSaver);

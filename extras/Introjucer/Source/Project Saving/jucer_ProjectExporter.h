@@ -73,19 +73,20 @@ public:
     Project& getProject() noexcept              { return project; }
     const Project& getProject() const noexcept  { return project; }
 
-    Value getSetting (const Identifier& name_)  { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
+    Value getSetting (const Identifier& name)   { return settings.getPropertyAsValue (name, project.getUndoManagerFor (settings)); }
+    String getSettingString (const Identifier& name) const  { return settings [name]; }
 
     Value getJuceFolderValue()                  { return getSetting (Ids::juceFolder); }
-    String getJuceFolderString() const          { return settings [Ids::juceFolder]; }
+    String getJuceFolderString() const          { return getSettingString (Ids::juceFolder); }
 
     Value getTargetLocationValue()              { return getSetting (Ids::targetFolder); }
-    String getTargetLocationString() const      { return settings [Ids::targetFolder]; }
+    String getTargetLocationString() const      { return getSettingString (Ids::targetFolder); }
 
     Value getExtraCompilerFlags()               { return getSetting (Ids::extraCompilerFlags); }
-    String getExtraCompilerFlagsString() const  { return settings [Ids::extraCompilerFlags]; }
+    String getExtraCompilerFlagsString() const  { return getSettingString (Ids::extraCompilerFlags); }
 
     Value getExtraLinkerFlags()                 { return getSetting (Ids::extraLinkerFlags); }
-    String getExtraLinkerFlagsString() const    { return settings [Ids::extraLinkerFlags]; }
+    String getExtraLinkerFlagsString() const    { return getSettingString (Ids::extraLinkerFlags); }
 
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
     String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
@@ -102,7 +103,7 @@ public:
     String getExporterIdentifierMacro() const
     {
         return "JUCER_" + settings.getType().toString() + "_"
-                + String::toHexString (settings [Ids::targetFolder].toString().hashCode()).toUpperCase();
+                + String::toHexString (getSettingString (Ids::targetFolder).hashCode()).toUpperCase();
     }
 
     // An exception that can be thrown by the create() method.
@@ -256,7 +257,7 @@ public:
 
     //==============================================================================
     Value getExporterPreprocessorDefs()                 { return getSetting (Ids::extraDefs); }
-    String getExporterPreprocessorDefsString() const    { return settings [Ids::extraDefs]; }
+    String getExporterPreprocessorDefsString() const    { return getSettingString (Ids::extraDefs); }
 
     // includes exporter, project + config defs
     StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config) const;

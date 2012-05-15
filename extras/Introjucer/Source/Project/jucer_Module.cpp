@@ -527,8 +527,8 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
     {
         if (shouldBuildVST  (project).getValue())  VSTHelpers::prepareExporter (exporter, projectSaver);
         if (shouldBuildAU   (project).getValue())  AUHelpers::prepareExporter (exporter, projectSaver);
-        if (shouldBuildRTAS (project).getValue())  RTASHelpers::prepareExporter (exporter, projectSaver, localFolder);
         if (shouldBuildAAX  (project).getValue())  AAXHelpers::prepareExporter (exporter, projectSaver, localFolder);
+        if (shouldBuildRTAS (project).getValue())  RTASHelpers::prepareExporter (exporter, projectSaver, localFolder);
     }
 }
 
