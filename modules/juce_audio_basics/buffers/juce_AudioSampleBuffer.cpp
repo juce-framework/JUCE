@@ -62,7 +62,7 @@ void AudioSampleBuffer::allocateData()
     channels [numChannels] = 0;
 }
 
-AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
+AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
                                       const int numChannels_,
                                       const int numSamples) noexcept
     : numChannels (numChannels_),
@@ -73,7 +73,7 @@ AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
     allocateChannels (dataToReferTo, 0);
 }
 
-AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
+AudioSampleBuffer::AudioSampleBuffer (float* const* dataToReferTo,
                                       const int numChannels_,
                                       const int startSample,
                                       const int numSamples) noexcept
@@ -100,7 +100,7 @@ void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
     allocateChannels (dataToReferTo, 0);
 }
 
-void AudioSampleBuffer::allocateChannels (float** const dataToReferTo, int offset)
+void AudioSampleBuffer::allocateChannels (float* const* const dataToReferTo, int offset)
 {
     // (try to avoid doing a malloc here, as that'll blow up things like Pro-Tools)
     if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))

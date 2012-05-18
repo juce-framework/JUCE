@@ -63,7 +63,7 @@ public:
         @param numSamples       the number of samples to use - this must correspond to the
                                 size of the arrays passed in
     */
-    AudioSampleBuffer (float** dataToReferTo,
+    AudioSampleBuffer (float* const* dataToReferTo,
                        int numChannels,
                        int numSamples) noexcept;
 
@@ -83,7 +83,7 @@ public:
         @param numSamples       the number of samples to use - this must correspond to the
                                 size of the arrays passed in
     */
-    AudioSampleBuffer (float** dataToReferTo,
+    AudioSampleBuffer (float* const* dataToReferTo,
                        int numChannels,
                        int startSample,
                        int numSamples) noexcept;
@@ -421,7 +421,7 @@ private:
     float* preallocatedChannelSpace [32];
 
     void allocateData();
-    void allocateChannels (float** dataToReferTo, int offset);
+    void allocateChannels (float* const* dataToReferTo, int offset);
 
     JUCE_LEAK_DETECTOR (AudioSampleBuffer);
 };
