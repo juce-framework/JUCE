@@ -891,6 +891,14 @@ void VSTPluginInstance::initialise()
     if (initialised || effect == 0)
         return;
 
+   #if JUCE_WINDOWS
+    // On Windows it's highly advisable to create your plugins using the message thread,
+    // because many plugins need a chance to create HWNDs that will get their
+    // messages delivered by the main message thread, and that's not possible from
+    // a background thread.
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+   #endif
+
     log ("Initialising VST: " + module->pluginName);
     initialised = true;
 
