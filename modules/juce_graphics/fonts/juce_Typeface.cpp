@@ -34,6 +34,12 @@ namespace FontStyleHelpers
         return "Regular";
     }
 
+    static const char* getStyleName (const int styleFlags) noexcept
+    {
+        return getStyleName ((styleFlags & Font::bold) != 0,
+                             (styleFlags & Font::italic) != 0);
+    }
+
     static bool isBold (const String& style) noexcept
     {
         return style.containsWholeWordIgnoreCase ("Bold");

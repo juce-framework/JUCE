@@ -1312,9 +1312,7 @@ public:
 
     void paint (Graphics& g)
     {
-        Font f (getLookAndFeel().getPopupMenuFont());
-        f.setBold (true);
-        g.setFont (f);
+        g.setFont (getLookAndFeel().getPopupMenuFont().boldened());
         g.setColour (findColour (PopupMenu::headerTextColourId));
 
         g.drawFittedText (getName(),

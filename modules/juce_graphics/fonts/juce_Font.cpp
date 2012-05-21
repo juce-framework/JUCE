@@ -155,27 +155,40 @@ void Typeface::setTypefaceCacheSize (int numFontsToCache)
 class Font::SharedFontInternal  : public SingleThreadedReferenceCountedObject
 {
 public:
-    SharedFontInternal (const String& typefaceStyle_, const float height_) noexcept
+    SharedFontInternal() noexcept
+        : typefaceName (Font::getDefaultSansSerifFontName()),
+          typefaceStyle (Font::getDefaultStyle()),
+          height (FontValues::defaultFontHeight),
+          horizontalScale (1.0f),
+          kerning (0),
+          ascent (0),
+          underline (false),
+          typeface (TypefaceCache::getInstance()->getDefaultTypeface())
+    {
+    }
+
+    SharedFontInternal (const String& typefaceStyle_, const float height_,
+                        const bool underline_) noexcept
         : typefaceName (Font::getDefaultSansSerifFontName()),
           typefaceStyle (typefaceStyle_),
           height (height_),
           horizontalScale (1.0f),
           kerning (0),
           ascent (0),
-          underline (false),
-          typeface (typefaceStyle_ == Font::getDefaultStyle()
-                        ? TypefaceCache::getInstance()->getDefaultTypeface() : nullptr)
+          underline (underline_),
+          typeface (nullptr)
     {
     }
 
-    SharedFontInternal (const String& typefaceName_, const String& typefaceStyle_, const float height_) noexcept
+    SharedFontInternal (const String& typefaceName_, const String& typefaceStyle_,
+                        const float height_, const bool underline_) noexcept
         : typefaceName (typefaceName_),
           typefaceStyle (typefaceStyle_),
           height (height_),
           horizontalScale (1.0f),
           kerning (0),
           ascent (0),
-          underline (false),
+          underline (underline_),
           typeface (nullptr)
     {
         if (typefaceName.isEmpty())
@@ -225,32 +238,32 @@ public:
 
 //==============================================================================
 Font::Font()
-    : font (new SharedFontInternal (Font::getDefaultStyle(), FontValues::defaultFontHeight))
+    : font (new SharedFontInternal())
 {
 }
 
 Font::Font (const float fontHeight, const int styleFlags)
-    : font (new SharedFontInternal (Font::getDefaultStyle(), FontValues::limitFontHeight (fontHeight)))
+    : font (new SharedFontInternal (FontStyleHelpers::getStyleName (styleFlags),
+                                    FontValues::limitFontHeight (fontHeight),
+                                    (styleFlags & underlined) != 0))
 {
-    setStyleFlags (styleFlags);
 }
 
 Font::Font (const String& typefaceName, const float fontHeight, const int styleFlags)
     : font (new SharedFontInternal (typefaceName,
-                                    FontStyleHelpers::getStyleName ((styleFlags & bold) != 0,
-                                                                    (styleFlags & italic) != 0),
-                                    FontValues::limitFontHeight (fontHeight)))
+                                    FontStyleHelpers::getStyleName (styleFlags),
+                                    FontValues::limitFontHeight (fontHeight),
+                                    (styleFlags & underlined) != 0))
 {
-    setStyleFlags (styleFlags);
 }
 
 Font::Font (const String& typefaceStyle, float fontHeight)
-    : font (new SharedFontInternal (typefaceStyle, FontValues::limitFontHeight (fontHeight)))
+    : font (new SharedFontInternal (typefaceStyle, FontValues::limitFontHeight (fontHeight), false))
 {
 }
 
 Font::Font (const String& typefaceName, const String& typefaceStyle, float fontHeight)
-    : font (new SharedFontInternal (typefaceName, typefaceStyle, FontValues::limitFontHeight (fontHeight)))
+    : font (new SharedFontInternal (typefaceName, typefaceStyle, FontValues::limitFontHeight (fontHeight), false))
 {
 }
 
@@ -463,8 +476,7 @@ void Font::setStyleFlags (const int newFlags)
     if (getStyleFlags() != newFlags)
     {
         dupeInternalIfShared();
-        font->typefaceStyle = FontStyleHelpers::getStyleName ((newFlags & bold) != 0,
-                                                              (newFlags & italic) != 0);
+        font->typefaceStyle = FontStyleHelpers::getStyleName (newFlags);
         font->underline = (newFlags & underlined) != 0;
         font->typeface = nullptr;
         font->ascent = 0;
@@ -550,15 +562,8 @@ void Font::setExtraKerningFactor (const float extraKerning)
 Font Font::boldened() const             { return withStyle (getStyleFlags() | bold); }
 Font Font::italicised() const           { return withStyle (getStyleFlags() | italic); }
 
-bool Font::isBold() const noexcept
-{
-    return FontStyleHelpers::isBold (font->typefaceStyle);
-}
-
-bool Font::isItalic() const noexcept
-{
-    return FontStyleHelpers::isItalic (font->typefaceStyle);
-}
+bool Font::isBold() const noexcept      { return FontStyleHelpers::isBold   (font->typefaceStyle); }
+bool Font::isItalic() const noexcept    { return FontStyleHelpers::isItalic (font->typefaceStyle); }
 
 void Font::setBold (const bool shouldBeBold)
 {
