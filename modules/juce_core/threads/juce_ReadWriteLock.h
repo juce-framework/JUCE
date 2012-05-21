@@ -129,7 +129,14 @@ private:
     WaitableEvent waitEvent;
     mutable int numWaitingWriters, numWriters;
     mutable Thread::ThreadID writerThreadId;
-    mutable Array <Thread::ThreadID> readerThreads;
+
+    struct ThreadRecursionCount
+    {
+        Thread::ThreadID threadID;
+        int count;
+    };
+
+    mutable Array <ThreadRecursionCount> readerThreads;
 
     JUCE_DECLARE_NON_COPYABLE (ReadWriteLock);
 };

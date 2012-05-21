@@ -679,30 +679,23 @@ public:
                             // avoids getting warning messages about the parameter being unused
 
         const ScopedLockType lock (getLock());
-        int start = 0;
-        int end_ = numUsed;
 
-        for (;;)
+        for (int s = 0, e = numUsed;;)
         {
-            if (start >= end_)
-            {
+            if (s >= e)
                 return -1;
-            }
-            else if (comparator.compareElements (elementToLookFor, data.elements [start]) == 0)
-            {
-                return start;
-            }
-            else
-            {
-                const int halfway = (start + end_) >> 1;
 
-                if (halfway == start)
-                    return -1;
-                else if (comparator.compareElements (elementToLookFor, data.elements [halfway]) >= 0)
-                    start = halfway;
-                else
-                    end_ = halfway;
-            }
+            if (comparator.compareElements (elementToLookFor, data.elements [s]) == 0)
+                return s;
+
+            const int halfway = (s + e) / 2;
+            if (halfway == s)
+                return -1;
+
+            if (comparator.compareElements (elementToLookFor, data.elements [halfway]) >= 0)
+                s = halfway;
+            else
+                e = halfway;
         }
     }
 
@@ -733,9 +726,7 @@ public:
             if (numberToShift > 0)
                 memmove (e, e + 1, ((size_t) numberToShift) * sizeof (ElementType));
 
-            if ((numUsed << 1) < data.numAllocated)
-                minimiseStorageOverheads();
-
+            minimiseStorageAfterRemoval();
             return removed;
         }
         else
@@ -798,9 +789,7 @@ public:
                 memmove (e, e + numberToRemove, ((size_t) numToShift) * sizeof (ElementType));
 
             numUsed -= numberToRemove;
-
-            if ((numUsed << 1) < data.numAllocated)
-                minimiseStorageOverheads();
+            minimiseStorageAfterRemoval();
         }
     }
 
@@ -820,9 +809,7 @@ public:
             data.elements [numUsed - i].~ElementType();
 
         numUsed -= howManyToRemove;
-
-        if ((numUsed << 1) < data.numAllocated)
-            minimiseStorageOverheads();
+        minimiseStorageAfterRemoval();
     }
 
     /** Removes any elements which are also in another array.
@@ -1028,6 +1015,12 @@ private:
     {
         for (int i = 0; i < numUsed; ++i)
             data.elements[i].~ElementType();
+    }
+
+    void minimiseStorageAfterRemoval()
+    {
+        if (data.numAllocated > numUsed * 2)
+            data.shrinkToNoMoreThan (jmax (numUsed, 64 / (int) sizeof (ElementType)));
     }
 };
 
