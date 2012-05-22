@@ -200,6 +200,8 @@ protected:
         String getMacArchitecture() const              { return config [Ids::osxArchitecture]; }
         Value getCustomXcodeFlagsValue()               { return getValue (Ids::customXcodeFlags); }
         String getCustomXcodeFlags() const             { return config [Ids::customXcodeFlags]; }
+        Value getCppLibTypeValue()                     { return getValue (Ids::cppLibType); }
+        String getCppLibType() const                   { return config [Ids::cppLibType]; }
 
         void createPropertyEditors (PropertyListBuilder& props)
         {
@@ -232,6 +234,14 @@ protected:
             props.add (new TextPropertyComponent (getCustomXcodeFlagsValue(), "Custom Xcode flags", 8192, false),
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
                        "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
+
+            const char* cppLibNames[] = { "Use Default", "Use LLVM libc++", 0 };
+            Array<var> cppLibValues;
+            cppLibValues.add (var::null);
+            cppLibValues.add ("libc++");
+
+            props.add (new ChoicePropertyComponent (getCppLibTypeValue(), "C++ Library", StringArray (cppLibNames), cppLibValues),
+                       "The type of C++ std lib that will be linked.");
         }
     };
 
@@ -664,7 +674,9 @@ private:
 
         s.add ("GCC_VERSION = " + gccVersion);
         s.add ("CLANG_CXX_LANGUAGE_STANDARD = \"c++0x\"");
-        //s.add ("CLANG_CXX_LIBRARY = \"libc++\"");
+
+        if (config.getCppLibType().isNotEmpty())
+            s.add ("CLANG_CXX_LIBRARY = " + config.getCppLibType().quoted());
 
         {
             StringArray linkerFlags, librarySearchPaths;
