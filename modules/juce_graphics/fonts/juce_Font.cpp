@@ -152,7 +152,7 @@ void Typeface::setTypefaceCacheSize (int numFontsToCache)
 }
 
 //==============================================================================
-class Font::SharedFontInternal  : public SingleThreadedReferenceCountedObject
+class Font::SharedFontInternal  : public ReferenceCountedObject
 {
 public:
     SharedFontInternal() noexcept

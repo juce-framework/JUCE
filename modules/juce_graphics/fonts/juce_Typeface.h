@@ -47,7 +47,7 @@ class AffineTransform;
 
     @see CustomTypeface, Font
 */
-class JUCE_API  Typeface  : public SingleThreadedReferenceCountedObject
+class JUCE_API  Typeface  : public ReferenceCountedObject
 {
 public:
     //==============================================================================
