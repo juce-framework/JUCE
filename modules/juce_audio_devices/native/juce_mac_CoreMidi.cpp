@@ -39,19 +39,24 @@ namespace CoreMidiHelpers
     #define CHECK_ERROR(a) CoreMidiHelpers::logError (a, __LINE__)
 
     //==============================================================================
-    static String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
+    static String getMidiObjectName (MIDIObjectRef entity)
     {
         String result;
         CFStringRef str = 0;
-
-        MIDIObjectGetStringProperty (endpoint, kMIDIPropertyName, &str);
+        MIDIObjectGetStringProperty (entity, kMIDIPropertyName, &str);
 
         if (str != 0)
         {
             result = String::fromCFString (str);
             CFRelease (str);
-            str = 0;
         }
+
+        return result;
+    }
+
+    static String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
+    {
+        String result (getMidiObjectName (endpoint));
 
         MIDIEntityRef entity = 0;
         MIDIEndpointGetEntity (endpoint, &entity);
@@ -60,41 +65,29 @@ namespace CoreMidiHelpers
             return result; // probably virtual
 
         if (result.isEmpty())
-        {
-            // endpoint name has zero length - try the entity
-            MIDIObjectGetStringProperty (entity, kMIDIPropertyName, &str);
-
-            if (str != 0)
-            {
-                result += String::fromCFString (str);
-                CFRelease (str);
-                str = 0;
-            }
-        }
+            result = getMidiObjectName (entity);  // endpoint name is empty - try the entity
 
         // now consider the device's name
         MIDIDeviceRef device = 0;
         MIDIEntityGetDevice (entity, &device);
-        if (device == 0)
-            return result;
 
-        MIDIObjectGetStringProperty (device, kMIDIPropertyName, &str);
-
-        if (str != 0)
+        if (device != 0)
         {
-            const String s (String::fromCFString (str));
-            CFRelease (str);
+            const String deviceName (getMidiObjectName (device));
 
-            // if an external device has only one entity, throw away
-            // the endpoint name and just use the device name
-            if (isExternal && MIDIDeviceGetNumberOfEntities (device) < 2)
+            if (deviceName.isNotEmpty())
             {
-                result = s;
-            }
-            else if (! result.startsWithIgnoreCase (s))
-            {
-                // prepend the device name to the entity name
-                result = (s + " " + result).trimEnd();
+                // if an external device has only one entity, throw away
+                // the endpoint name and just use the device name
+                if (isExternal && MIDIDeviceGetNumberOfEntities (device) < 2)
+                {
+                    result = deviceName;
+                }
+                else if (! result.startsWithIgnoreCase (deviceName))
+                {
+                    // prepend the device name to the entity name
+                    result = (deviceName + " " + result).trimEnd();
+                }
             }
         }
 
@@ -139,14 +132,7 @@ namespace CoreMidiHelpers
                         else
                         {
                             // Connected to an external device (10.2) (or something else, catch-all)
-                            CFStringRef str = 0;
-                            MIDIObjectGetStringProperty (connObject, kMIDIPropertyName, &str);
-
-                            if (str != 0)
-                            {
-                                s = String::fromCFString (str);
-                                CFRelease (str);
-                            }
+                            s = getMidiObjectName (connObject);
                         }
 
                         if (s.isNotEmpty())
@@ -168,6 +154,34 @@ namespace CoreMidiHelpers
 
         // Here, either the endpoint had no connections, or we failed to obtain names for any of them.
         return getEndpointName (endpoint, false);
+    }
+
+    static StringArray findDevices (const bool forInput)
+    {
+        // Since OSX 10.6, the CoreMidi functions that fetch the list of midi
+        // devices only work correctly when called from the message thread!
+        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
+        const ItemCount num = forInput ? MIDIGetNumberOfSources()
+                                       : MIDIGetNumberOfDestinations();
+        StringArray s;
+
+        for (ItemCount i = 0; i < num; ++i)
+        {
+            MIDIEndpointRef dest = forInput ? MIDIGetSource (i)
+                                            : MIDIGetDestination (i);
+            String name;
+
+            if (dest != 0)
+                name = getConnectedEndpointName (dest);
+
+            if (name.isEmpty())
+                name = "<error>";
+
+            s.add (name);
+        }
+
+        return s;
     }
 
     static MIDIClientRef getGlobalMidiClient()
@@ -280,32 +294,8 @@ namespace CoreMidiHelpers
 }
 
 //==============================================================================
-StringArray MidiOutput::getDevices()
-{
-    StringArray s;
-
-    const ItemCount num = MIDIGetNumberOfDestinations();
-    for (ItemCount i = 0; i < num; ++i)
-    {
-        MIDIEndpointRef dest = MIDIGetDestination (i);
-        String name;
-
-        if (dest != 0)
-            name = CoreMidiHelpers::getConnectedEndpointName (dest);
-
-        if (name.isEmpty())
-            name = "<error>";
-
-        s.add (name);
-    }
-
-    return s;
-}
-
-int MidiOutput::getDefaultDeviceIndex()
-{
-    return 0;
-}
+StringArray MidiOutput::getDevices()        { return CoreMidiHelpers::findDevices (false); }
+int MidiOutput::getDefaultDeviceIndex()     { return 0; }
 
 MidiOutput* MidiOutput::openDevice (int index)
 {
@@ -417,32 +407,8 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 }
 
 //==============================================================================
-StringArray MidiInput::getDevices()
-{
-    StringArray s;
-
-    const ItemCount num = MIDIGetNumberOfSources();
-    for (ItemCount i = 0; i < num; ++i)
-    {
-        MIDIEndpointRef source = MIDIGetSource (i);
-        String name;
-
-        if (source != 0)
-            name = CoreMidiHelpers::getConnectedEndpointName (source);
-
-        if (name.isEmpty())
-            name = "<error>";
-
-        s.add (name);
-    }
-
-    return s;
-}
-
-int MidiInput::getDefaultDeviceIndex()
-{
-    return 0;
-}
+StringArray MidiInput::getDevices()     { return CoreMidiHelpers::findDevices (true); }
+int MidiInput::getDefaultDeviceIndex()  { return 0; }
 
 MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 {
