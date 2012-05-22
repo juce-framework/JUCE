@@ -240,7 +240,7 @@ String Project::saveProject (const File& file, bool isCommandLineApp)
     updateProjectSettings();
     sanitiseConfigFlags();
 
-    if (isCommandLineApp)
+    if (! isCommandLineApp)
         registerRecentFile (file);
 
     ProjectSaver saver (*this, file);
