@@ -79,7 +79,10 @@
 namespace juce
 {
 
-#include "../juce_core/native/juce_osx_ObjCHelpers.h"
+#if JUCE_MAC || JUCE_IOS
+ #include "../juce_core/native/juce_osx_ObjCHelpers.h"
+#endif
+
 #include "documents/juce_FileBasedDocument.cpp"
 #include "code_editor/juce_CodeDocument.cpp"
 #include "code_editor/juce_CodeEditorComponent.cpp"
