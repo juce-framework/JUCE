@@ -83,7 +83,7 @@ namespace
                   << projectFile.getFullPathName() << std::endl;
 
         String error (justSaveResources ? proj.saveResourcesOnly (projectFile)
-                                        : proj.saveProject (projectFile, false));
+                                        : proj.saveProject (projectFile, true));
 
         if (error.isNotEmpty())
         {

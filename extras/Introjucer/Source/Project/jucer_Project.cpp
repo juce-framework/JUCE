@@ -232,7 +232,7 @@ const String Project::loadDocument (const File& file)
 
 const String Project::saveDocument (const File& file)
 {
-    return saveProject (file, true);
+    return saveProject (file, false);
 }
 
 String Project::saveProject (const File& file, bool isCommandLineApp)
