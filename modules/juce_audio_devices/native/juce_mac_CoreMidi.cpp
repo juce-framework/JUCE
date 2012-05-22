@@ -149,19 +149,14 @@ namespace CoreMidiHelpers
             CFRelease (connections);
         }
 
-        if (result.isNotEmpty())
-            return result;
+        if (result.isEmpty())  // Here, either the endpoint had no connections, or we failed to obtain names for them.
+            result = getEndpointName (endpoint, false);
 
-        // Here, either the endpoint had no connections, or we failed to obtain names for any of them.
-        return getEndpointName (endpoint, false);
+        return result;
     }
 
     static StringArray findDevices (const bool forInput)
     {
-        // Since OSX 10.6, the CoreMidi functions that fetch the list of midi
-        // devices only work correctly when called from the message thread!
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
-
         const ItemCount num = forInput ? MIDIGetNumberOfSources()
                                        : MIDIGetNumberOfDestinations();
         StringArray s;
@@ -184,20 +179,30 @@ namespace CoreMidiHelpers
         return s;
     }
 
+    static void globalSystemChangeCallback (const MIDINotification*, void*)
+    {
+        // TODO.. Should pass-on this notification..
+    }
+
+    static String getGlobalMidiClientName()
+    {
+        JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
+        return app != nullptr ? app->getApplicationName() : "JUCE";
+    }
+
     static MIDIClientRef getGlobalMidiClient()
     {
         static MIDIClientRef globalMidiClient = 0;
 
         if (globalMidiClient == 0)
         {
-            String name ("JUCE");
+            // Since OSX 10.6, the MIDIClientCreate function will only work
+            // correctly when called from the message thread!
+            jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-            if (JUCEApplicationBase::getInstance() != nullptr)
-                name = JUCEApplicationBase::getInstance()->getApplicationName();
-
-            CFStringRef appName = name.toCFString();
-            CHECK_ERROR (MIDIClientCreate (appName, 0, 0, &globalMidiClient));
-            CFRelease (appName);
+            CFStringRef name = getGlobalMidiClientName().toCFString();
+            CHECK_ERROR (MIDIClientCreate (name, &globalSystemChangeCallback, 0, &globalMidiClient));
+            CFRelease (name);
         }
 
         return globalMidiClient;
