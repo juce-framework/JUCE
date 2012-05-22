@@ -693,8 +693,7 @@ protected:
             midl->setAttribute ("MkTypLibCompatible", "true");
             midl->setAttribute ("SuppressStartupBanner", "true");
             midl->setAttribute ("TargetEnvironment", "1");
-            midl->setAttribute ("TypeLibraryName", FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                    + config.getOutputFilename (".tlb", true)));
+            midl->setAttribute ("TypeLibraryName", "$(IntDir)\\" + config.getOutputFilename (".tlb", true));
             midl->setAttribute ("HeaderFileName", "");
         }
 
@@ -721,11 +720,10 @@ protected:
                                                                              : (isDebug ? 1 : 0)); // MT static
             compiler->setAttribute ("RuntimeTypeInfo", "true");
             compiler->setAttribute ("UsePrecompiledHeader", "0");
-            compiler->setAttribute ("PrecompiledHeaderFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                                + config.getOutputFilename (".pch", true)));
-            compiler->setAttribute ("AssemblerListingLocation", FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("ObjectFile", FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("ProgramDataBaseFileName", FileHelpers::windowsStylePath (intermediatesPath + "/"));
+            compiler->setAttribute ("PrecompiledHeaderFile", "$(IntDir)\\" + config.getOutputFilename (".pch", true));
+            compiler->setAttribute ("AssemblerListingLocation", "$(IntDir)\\");
+            compiler->setAttribute ("ObjectFile", "$(IntDir)\\");
+            compiler->setAttribute ("ProgramDataBaseFileName", "$(IntDir)\\");
             compiler->setAttribute ("WarningLevel", String (getWarningLevel (config)));
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
@@ -752,8 +750,7 @@ protected:
 
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
-            linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                            + config.getOutputFilename (".pdb", true)));
+            linker->setAttribute ("ProgramDatabaseFile", "$(IntDir)\\" + config.getOutputFilename (".pdb", true));
             linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
             const StringArray librarySearchPaths (config.getLibrarySearchPaths());
@@ -810,8 +807,7 @@ protected:
         {
             XmlElement* bscMake = createToolElement (xml, "VCBscMakeTool");
             bscMake->setAttribute ("SuppressStartupBanner", "true");
-            bscMake->setAttribute ("OutputFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                    + config.getOutputFilename (".bsc", true)));
+            bscMake->setAttribute ("OutputFile", "$(IntDir)\\" + config.getOutputFilename (".bsc", true));
         }
 
         createToolElement (xml, "VCFxCopTool");
@@ -1080,7 +1076,7 @@ protected:
                 {
                     XmlElement* intdir = props->createNewChildElement ("IntDir");
                     setConditionAttribute (*intdir, config);
-                    intdir->addTextElement (getConfigTargetPath (config) + "\\");
+                    intdir->addTextElement (getIntermediatesPath (config) + "\\");
                 }
 
                 {
@@ -1143,9 +1139,9 @@ protected:
                                                                                                      : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
                 cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
                 cl->createNewChildElement ("PrecompiledHeader");
-                cl->createNewChildElement ("AssemblerListingLocation")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-                cl->createNewChildElement ("ObjectFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-                cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
+                cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
+                cl->createNewChildElement ("ObjectFileName")->addTextElement ("$(IntDir)\\");
+                cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement ("$(IntDir)\\");
                 cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (getWarningLevel (config)));
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
@@ -1169,8 +1165,7 @@ protected:
                 link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                         : "%(IgnoreSpecificDefaultLibraries)");
                 link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
-                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                                                        + config.getOutputFilename (".pdb", true)));
+                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement ("$(IntDir)\\" + config.getOutputFilename (".pdb", true));
                 link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
 
                 if (! is64Bit (config))
@@ -1198,8 +1193,7 @@ protected:
             {
                 XmlElement* bsc = group->createNewChildElement ("Bscmake");
                 bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath
-                                                                                                            + "/" + config.getOutputFilename (".bsc", true)));
+                bsc->createNewChildElement ("OutputFile")->addTextElement ("$(IntDir)\\" + config.getOutputFilename (".bsc", true));
             }
 
             if (config.getPrebuildCommandString().isNotEmpty())

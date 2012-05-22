@@ -26,7 +26,7 @@
             MkTypLibCompatible="true"
             SuppressStartupBanner="true"
             TargetEnvironment="1"
-            TypeLibraryName=".\Debug\HelloWorld.tlb"
+            TypeLibraryName="$(IntDir)\HelloWorld.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
             Optimization="0"
@@ -37,10 +37,10 @@
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Debug\HelloWorld.pch"
-            AssemblerListingLocation=".\Debug\"
-            ObjectFile=".\Debug\"
-            ProgramDataBaseFileName=".\Debug\"
+            PrecompiledHeaderFile="$(IntDir)\HelloWorld.pch"
+            AssemblerListingLocation="$(IntDir)\"
+            ObjectFile="$(IntDir)\"
+            ProgramDataBaseFileName="$(IntDir)\"
             WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
@@ -52,7 +52,7 @@
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"
             GenerateDebugInformation="true"
-            ProgramDatabaseFile=".\Debug\HelloWorld.pdb"
+            ProgramDatabaseFile="$(IntDir)\HelloWorld.pdb"
             SubSystem="2"
             GenerateManifest="true"
             TargetMachine="1"/>
@@ -61,7 +61,7 @@
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Debug\HelloWorld.bsc"/>
+            OutputFile="$(IntDir)\HelloWorld.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
@@ -83,7 +83,7 @@
             MkTypLibCompatible="true"
             SuppressStartupBanner="true"
             TargetEnvironment="1"
-            TypeLibraryName=".\Release\HelloWorld.tlb"
+            TypeLibraryName="$(IntDir)\HelloWorld.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
             Optimization="1"
@@ -94,10 +94,10 @@
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Release\HelloWorld.pch"
-            AssemblerListingLocation=".\Release\"
-            ObjectFile=".\Release\"
-            ProgramDataBaseFileName=".\Release\"
+            PrecompiledHeaderFile="$(IntDir)\HelloWorld.pch"
+            AssemblerListingLocation="$(IntDir)\"
+            ObjectFile="$(IntDir)\"
+            ProgramDataBaseFileName="$(IntDir)\"
             WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
@@ -109,7 +109,7 @@
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames=""
             GenerateDebugInformation="false"
-            ProgramDatabaseFile=".\Release\HelloWorld.pdb"
+            ProgramDatabaseFile="$(IntDir)\HelloWorld.pdb"
             SubSystem="2"
             GenerateManifest="true"
             OptimizeReferences="2"
@@ -120,7 +120,7 @@
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Release\HelloWorld.bsc"/>
+            OutputFile="$(IntDir)\HelloWorld.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
