@@ -202,6 +202,13 @@ void Project::addDefaultModules (bool shouldCopyFilesLocally)
 }
 
 //==============================================================================
+static void registerRecentFile (const File& file)
+{
+    RecentlyOpenedFilesList::registerRecentFileNatively (file);
+    StoredSettings::getInstance()->recentFiles.addFile (file);
+    StoredSettings::getInstance()->flush();
+}
+
 const String Project::loadDocument (const File& file)
 {
     ScopedPointer <XmlElement> xml (XmlDocument::parse (file));
@@ -214,8 +221,7 @@ const String Project::loadDocument (const File& file)
     if (! newTree.hasType (Tags::projectRoot))
         return "The document contains errors and couldn't be parsed!";
 
-    StoredSettings::getInstance()->recentFiles.addFile (file);
-    StoredSettings::getInstance()->flush();
+    registerRecentFile (file);
     projectRoot = newTree;
 
     removeDefunctExporters();
@@ -229,15 +235,16 @@ const String Project::saveDocument (const File& file)
     return saveProject (file, true);
 }
 
-String Project::saveProject (const File& file, bool showProgressBox)
+String Project::saveProject (const File& file, bool isCommandLineApp)
 {
     updateProjectSettings();
     sanitiseConfigFlags();
 
-    StoredSettings::getInstance()->recentFiles.addFile (file);
+    if (isCommandLineApp)
+        registerRecentFile (file);
 
     ProjectSaver saver (*this, file);
-    return saver.save (showProgressBox);
+    return saver.save (isCommandLineApp);
 }
 
 String Project::saveResourcesOnly (const File& file)

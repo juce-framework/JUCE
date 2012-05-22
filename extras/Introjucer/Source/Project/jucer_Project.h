@@ -46,7 +46,7 @@ public:
     const String getDocumentTitle();
     const String loadDocument (const File& file);
     const String saveDocument (const File& file);
-    String saveProject (const File& file, bool showProgressBox);
+    String saveProject (const File& file, bool isCommandLineApp);
     String saveResourcesOnly (const File& file);
     const File getLastDocumentOpened();
     void setLastDocumentOpened (const File& file);

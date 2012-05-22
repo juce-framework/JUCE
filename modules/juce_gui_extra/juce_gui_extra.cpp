@@ -79,7 +79,7 @@
 namespace juce
 {
 
-// START_AUTOINCLUDE documents/*.cpp, code_editor/*.cpp, embedding/*.cpp, lookandfeel/*.cpp, misc/*.cpp
+#include "../juce_core/native/juce_osx_ObjCHelpers.h"
 #include "documents/juce_FileBasedDocument.cpp"
 #include "code_editor/juce_CodeDocument.cpp"
 #include "code_editor/juce_CodeEditorComponent.cpp"
@@ -92,7 +92,6 @@ namespace juce
 #include "misc/juce_RecentlyOpenedFilesList.cpp"
 #include "misc/juce_SplashScreen.cpp"
 #include "misc/juce_SystemTrayIconComponent.cpp"
-// END_AUTOINCLUDE
 
 }
 
