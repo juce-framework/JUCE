@@ -174,13 +174,13 @@ public:
             setApplicationCommandManagerToWatch (commandManager);
         }
 
-        const StringArray getMenuBarNames()
+        StringArray getMenuBarNames()
         {
             const char* const names[] = { "File", "Edit", "View", "Window", "Tools", 0 };
             return StringArray ((const char**) names);
         }
 
-        const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& /*menuName*/)
+        PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& /*menuName*/)
         {
             PopupMenu menu;
 

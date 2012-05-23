@@ -223,15 +223,15 @@ void MainWindow::activeWindowStatusChanged()
 }
 
 //==============================================================================
-const StringArray MainWindow::getMenuBarNames()
+StringArray MainWindow::getMenuBarNames()
 {
     const char* const names[] = { "File", "Edit", "View", 0 };
 
     return StringArray (names);
 }
 
-const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
-                                             const String& menuName)
+PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
+                                       const String& menuName)
 {
     PopupMenu menu;
 

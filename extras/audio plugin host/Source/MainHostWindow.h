@@ -68,8 +68,8 @@ public:
     void fileDragExit (const StringArray& files);
     void filesDropped (const StringArray& files, int, int);
 
-    const StringArray getMenuBarNames();
-    const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName);
+    StringArray getMenuBarNames();
+    PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName);
     void menuItemSelected (int menuItemID, int topLevelMenuIndex);
     ApplicationCommandTarget* getNextCommandTarget();
     void getAllCommands (Array <CommandID>& commands);

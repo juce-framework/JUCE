@@ -507,12 +507,11 @@ private:
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(),
                                                              newFile.getRelativePathFrom (document.getFile().getParentDirectory())
-                                                                    .replaceCharacter ('\\', '/')
-),
+                                                                    .replaceCharacter ('\\', '/')),
                               "Change Jucer component file");
         }
 
-        const File getFile() const
+        File getFile() const
         {
             const String filename (getViewportJucerComponentFile (component));
 

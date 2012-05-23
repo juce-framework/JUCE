@@ -183,7 +183,7 @@ private:
                                           .replaceCharacter ('\\', '/'));
         }
 
-        const File getFile() const
+        File getFile() const
         {
             return component->findFile();
         }
