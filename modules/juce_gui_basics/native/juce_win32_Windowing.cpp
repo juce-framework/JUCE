@@ -920,7 +920,7 @@ public:
             if (ownerInfo == nullptr)
                 return S_FALSE;
 
-            ownerInfo->owner.handleFileDragExit (ownerInfo->files);
+            ownerInfo->owner.handleDragExit (ownerInfo->dragInfo);
             return S_OK;
         }
 
@@ -929,7 +929,8 @@ public:
             if (ownerInfo == nullptr)
                 return S_FALSE;
 
-            const bool wasWanted = ownerInfo->owner.handleFileDragMove (ownerInfo->files, ownerInfo->getMousePos (mousePos));
+            ownerInfo->dragInfo.position = ownerInfo->getMousePos (mousePos);
+            const bool wasWanted = ownerInfo->owner.handleDragMove (ownerInfo->dragInfo);
             *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
             return S_OK;
         }
@@ -939,7 +940,8 @@ public:
             HRESULT hr = updateFileList (pDataObject);
             if (SUCCEEDED (hr))
             {
-                const bool wasWanted = ownerInfo->owner.handleFileDragDrop (ownerInfo->files, ownerInfo->getMousePos (mousePos));
+                ownerInfo->dragInfo.position = ownerInfo->getMousePos (mousePos);
+                const bool wasWanted = ownerInfo->owner.handleDragDrop (ownerInfo->dragInfo);
                 *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
                 hr = S_OK;
             }
@@ -971,46 +973,83 @@ public:
                     if (len == 0)
                         break;
 
-                    files.add (String (names + i, len));
+                    dragInfo.files.add (String (names + i, len));
                     i += len + 1;
                 }
             }
 
             HWNDComponentPeer& owner;
-            StringArray files;
+            ComponentPeer::DragInfo dragInfo;
 
             JUCE_DECLARE_NON_COPYABLE (OwnerInfo);
         };
 
         ScopedPointer<OwnerInfo> ownerInfo;
 
-        HRESULT updateFileList (IDataObject* const pDataObject)
+        struct DroppedData
+        {
+            DroppedData (IDataObject* const dataObject, const CLIPFORMAT type)
+                : data (nullptr)
+            {
+                FORMATETC format = { type, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+                STGMEDIUM resetMedium = { TYMED_HGLOBAL, { 0 }, 0 };
+                medium = resetMedium;
+
+                if (SUCCEEDED (error = dataObject->GetData (&format, &medium)))
+                {
+                    dataSize = GlobalSize (medium.hGlobal);
+                    data = GlobalLock (medium.hGlobal);
+                }
+            }
+
+            ~DroppedData()
+            {
+                if (data != nullptr)
+                    GlobalUnlock (medium.hGlobal);
+            }
+
+            HRESULT error;
+            STGMEDIUM medium;
+            void* data;
+            SIZE_T dataSize;
+        };
+
+        HRESULT updateFileList (IDataObject* const dataObject)
         {
             if (ownerInfo == nullptr)
                 return S_FALSE;
 
-            ownerInfo->files.clear();
+            ownerInfo->dragInfo.files.clear();
+            ownerInfo->dragInfo.text = String::empty;
 
-            FORMATETC format = { CF_HDROP, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-            STGMEDIUM medium = { TYMED_HGLOBAL, { 0 }, 0 };
+            DroppedData textData (dataObject, CF_UNICODETEXT);
 
-            HRESULT hr = pDataObject->GetData (&format, &medium);
-
-            if (SUCCEEDED (hr))
+            if (SUCCEEDED (textData.error))
             {
-                const SIZE_T totalLen = GlobalSize (medium.hGlobal);
-                const LPDROPFILES dropFiles = (const LPDROPFILES) GlobalLock (medium.hGlobal);
-                const void* const names = addBytesToPointer (dropFiles, sizeof (DROPFILES));
+                ownerInfo->dragInfo.text = String (CharPointer_UTF16 ((LPCWCHAR) textData.data),
+                                                   CharPointer_UTF16 ((LPCWCHAR) addBytesToPointer (textData.data, textData.dataSize)));
+            }
+            else
+            {
+                DroppedData fileData (dataObject, CF_HDROP);
 
-                if (dropFiles->fWide)
-                    ownerInfo->parseFileList (static_cast <const WCHAR*> (names), totalLen);
+                if (SUCCEEDED (fileData.error))
+                {
+                    const LPDROPFILES dropFiles = static_cast <const LPDROPFILES> (fileData.data);
+                    const void* const names = addBytesToPointer (dropFiles, sizeof (DROPFILES));
+
+                    if (dropFiles->fWide)
+                        ownerInfo->parseFileList (static_cast <const WCHAR*> (names), fileData.dataSize);
+                    else
+                        ownerInfo->parseFileList (static_cast <const char*>  (names), fileData.dataSize);
+                }
                 else
-                    ownerInfo->parseFileList (static_cast <const char*>  (names), totalLen);
-
-                GlobalUnlock (medium.hGlobal);
+                {
+                    return fileData.error;
+                }
             }
 
-            return hr;
+            return S_OK;
         }
 
         JUCE_DECLARE_NON_COPYABLE (JuceDropTarget);

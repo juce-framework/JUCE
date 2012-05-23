@@ -311,9 +311,16 @@ public:
 
     void handleUserClosingWindow();
 
-    bool handleFileDragMove (const StringArray& files, const Point<int>& position);
-    bool handleFileDragExit (const StringArray& files);
-    bool handleFileDragDrop (const StringArray& files, const Point<int>& position);
+    struct DragInfo
+    {
+        StringArray files;
+        String text;
+        Point<int> position;
+    };
+
+    bool handleDragMove (const DragInfo&);
+    bool handleDragExit (const DragInfo&);
+    bool handleDragDrop (const DragInfo&);
 
     //==============================================================================
     /** Resets the masking region.
@@ -384,6 +391,7 @@ private:
     static ComponentPeer* getPeerFor (const Component* component) noexcept;
 
     void setLastDragDropTarget (Component* comp);
+    bool finishDrag (bool);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer);
 };

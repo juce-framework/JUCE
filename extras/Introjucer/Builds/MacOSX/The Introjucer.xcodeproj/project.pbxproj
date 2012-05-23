@@ -206,6 +206,7 @@
 		3419904525A3F1FF0CC50687 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_FileBasedDocument.cpp"; path = "../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.cpp"; sourceTree = "SOURCE_ROOT"; };
 		352DA3794CAAE2400AE8F2E0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_data_structures.h"; path = "../../../../modules/juce_data_structures/juce_data_structures.h"; sourceTree = "SOURCE_ROOT"; };
 		35AF9D5F0603CF6CE2D355A1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_RelativeCoordinatePositioner.cpp"; path = "../../../../modules/juce_gui_basics/positioning/juce_RelativeCoordinatePositioner.cpp"; sourceTree = "SOURCE_ROOT"; };
+		35BF11530EF0D771FD94ABDC = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TextDragAndDropTarget.h"; path = "../../../../modules/juce_gui_basics/mouse/juce_TextDragAndDropTarget.h"; sourceTree = "SOURCE_ROOT"; };
 		35CB48D497F35BF3F6998F5D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "jucer_ProjectExporter.h"; path = "../../Source/Project Saving/jucer_ProjectExporter.h"; sourceTree = "SOURCE_ROOT"; };
 		364D1A9B113320407A7E57B9 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		37A0A38C2B5825B9A302879C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ReferenceCountedArray.h"; path = "../../../../modules/juce_core/containers/juce_ReferenceCountedArray.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1256,6 +1257,7 @@
 				199722DD9BA0E30C0506941E,
 				2FBA1138907F4DE651870008,
 				B20A5F49C7E6342B71770D18,
+				35BF11530EF0D771FD94ABDC,
 				BDEBB0AC32DDA8C16FFE6011 ); name = mouse; sourceTree = "<group>"; };
 		A186EF5D092D513F30A4FE23 = { isa = PBXGroup; children = (
 				148FC834CE2CAE18477AB708,

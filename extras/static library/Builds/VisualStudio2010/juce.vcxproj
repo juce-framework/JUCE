@@ -1441,6 +1441,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInputSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TextDragAndDropTarget.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\keyboard\juce_CaretComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\keyboard\juce_KeyboardFocusTraverser.h"/>

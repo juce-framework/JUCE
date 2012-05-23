@@ -2750,6 +2750,7 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_TextDragAndDropTarget.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h"/>
         </Filter>
         <Filter Name="keyboard">

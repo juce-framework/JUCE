@@ -2263,8 +2263,9 @@ private:
     //==============================================================================
     void resetDragAndDrop()
     {
-        dragAndDropFiles.clear();
-        lastDropPos = Point<int> (-1, -1);
+        dragInfo.files.clear();
+        dragInfo.text = String::empty;
+        dragInfo.position = Point<int> (-1, -1);
         dragAndDropCurrentMimeType = 0;
         dragAndDropSourceWindow = 0;
         srcMimeTypeAtomList.clear();
@@ -2312,10 +2313,10 @@ private:
         {
             sendDragAndDropLeave();
 
-            if (dragAndDropFiles.size() > 0)
-                handleFileDragExit (dragAndDropFiles);
+            if (dragInfo.files.size() > 0)
+                handleDragExit (dragInfo);
 
-            dragAndDropFiles.clear();
+            dragInfo.files.clear();
         }
     }
 
@@ -2330,10 +2331,9 @@ private:
                             (int) clientMsg->data.l[2] & 0xffff);
         dropPos -= getScreenPosition();
 
-        if (lastDropPos != dropPos)
+        if (dragInfo.position != dropPos)
         {
-            lastDropPos = dropPos;
-            dragAndDropTimestamp = clientMsg->data.l[3];
+            dragInfo.position = dropPos;
 
             Atom targetAction = Atoms::XdndActionCopy;
 
@@ -2348,32 +2348,31 @@ private:
 
             sendDragAndDropStatus (true, targetAction);
 
-            if (dragAndDropFiles.size() == 0)
+            if (dragInfo.files.size() == 0)
                 updateDraggedFileList (clientMsg);
 
-            if (dragAndDropFiles.size() > 0)
-                handleFileDragMove (dragAndDropFiles, dropPos);
+            if (dragInfo.files.size() > 0)
+                handleDragMove (dragInfo);
         }
     }
 
     void handleDragAndDropDrop (const XClientMessageEvent* const clientMsg)
     {
-        if (dragAndDropFiles.size() == 0)
+        if (dragInfo.files.size() == 0)
             updateDraggedFileList (clientMsg);
 
-        const StringArray files (dragAndDropFiles);
-        const Point<int> lastPos (lastDropPos);
+        DragInfo dragInfoCopy (dragInfo);
 
         sendDragAndDropFinish();
         resetDragAndDrop();
 
-        if (files.size() > 0)
-            handleFileDragDrop (files, lastPos);
+        if (dragInfoCopy.files.size() > 0)
+            handleDragDrop (dragInfoCopy);
     }
 
     void handleDragAndDropEnter (const XClientMessageEvent* const clientMsg)
     {
-        dragAndDropFiles.clear();
+        dragInfo.files.clear();
         srcMimeTypeAtomList.clear();
 
         dragAndDropCurrentMimeType = 0;
@@ -2437,7 +2436,7 @@ private:
 
     void handleDragAndDropSelection (const XEvent* const evt)
     {
-        dragAndDropFiles.clear();
+        dragInfo.files.clear();
 
         if (evt->xselection.property != 0)
         {
@@ -2475,36 +2474,31 @@ private:
             }
 
             for (int i = 0; i < lines.size(); ++i)
-                dragAndDropFiles.add (URL::removeEscapeChars (lines[i].fromFirstOccurrenceOf ("file://", false, true)));
+                dragInfo.files.add (URL::removeEscapeChars (lines[i].fromFirstOccurrenceOf ("file://", false, true)));
 
-            dragAndDropFiles.trim();
-            dragAndDropFiles.removeEmptyStrings();
+            dragInfo.files.trim();
+            dragInfo.files.removeEmptyStrings();
         }
     }
 
     void updateDraggedFileList (const XClientMessageEvent* const clientMsg)
     {
-        dragAndDropFiles.clear();
+        dragInfo.files.clear();
 
         if (dragAndDropSourceWindow != None
              && dragAndDropCurrentMimeType != 0)
         {
-            dragAndDropTimestamp = clientMsg->data.l[2];
-
             ScopedXLock xlock;
             XConvertSelection (display,
                                Atoms::XdndSelection,
                                dragAndDropCurrentMimeType,
                                Atoms::getCreating ("JXSelectionWindowProperty"),
                                windowH,
-                               dragAndDropTimestamp);
+                               clientMsg->data.l[2]);
         }
     }
 
-    StringArray dragAndDropFiles;
-    int dragAndDropTimestamp;
-    Point<int> lastDropPos;
-
+    DragInfo dragInfo;
     Atom dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
 

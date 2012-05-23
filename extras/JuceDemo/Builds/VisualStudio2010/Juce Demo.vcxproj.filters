@@ -2352,6 +2352,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h">
       <Filter>Juce Modules\juce_gui_basics\mouse</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TextDragAndDropTarget.h">
+      <Filter>Juce Modules\juce_gui_basics\mouse</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h">
       <Filter>Juce Modules\juce_gui_basics\mouse</Filter>
     </ClInclude>
