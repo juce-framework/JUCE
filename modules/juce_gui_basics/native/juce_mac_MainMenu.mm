@@ -119,9 +119,7 @@ public:
             while ([menu numberOfItems] > 0)
                 [menu removeItemAtIndex: 0];
 
-            PopupMenu::MenuItemIterator iter (menuToCopy);
-
-            while (iter.next())
+            for (PopupMenu::MenuItemIterator iter (menuToCopy); iter.next();)
                 addMenuItem (iter, menu, menuId, tag);
 
             [menu setAutoenablesItems: false];
@@ -135,8 +133,7 @@ public:
         // a new menu and replacing the old one with it, that problem seems to be avoided..
         NSMenu* menu = [[NSMenu alloc] initWithTitle: juceStringToNS (name)];
 
-        PopupMenu::MenuItemIterator iter (menuToCopy);
-        while (iter.next())
+        for (PopupMenu::MenuItemIterator iter (menuToCopy); iter.next();)
             addMenuItem (iter, menu, menuId, tag);
 
         [menu setAutoenablesItems: false];
@@ -306,9 +303,7 @@ private:
         [m setAutoenablesItems: false];
         [m setDelegate: callback];
 
-        PopupMenu::MenuItemIterator iter (menu);
-
-        while (iter.next())
+        for (PopupMenu::MenuItemIterator iter (menu); iter.next();)
             addMenuItem (iter, m, topLevelMenuId, topLevelIndex);
 
         [m update];
@@ -492,9 +487,7 @@ namespace MainMenuHelpers
     {
         if (extraItems != nullptr && JuceMainMenuHandler::instance != nullptr && extraItems->getNumItems() > 0)
         {
-            PopupMenu::MenuItemIterator iter (*extraItems);
-
-            while (iter.next())
+            for (PopupMenu::MenuItemIterator iter (*extraItems); iter.next();)
                 JuceMainMenuHandler::instance->addMenuItem (iter, menu, 0, -1);
 
             [menu addItem: [NSMenuItem separatorItem]];
