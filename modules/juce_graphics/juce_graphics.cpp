@@ -114,12 +114,12 @@ namespace juce
 
 #elif JUCE_WINDOWS
  #include "../juce_core/native/juce_win32_ComSmartPtr.h"
- #if JUCE_DIRECT2D
-  #include "native/juce_win32_Direct2DGraphicsContext.cpp"
- #endif
  #include "native/juce_win32_DirectWriteTypeface.cpp"
  #include "native/juce_win32_DirectWriteTypeLayout.cpp"
  #include "native/juce_win32_Fonts.cpp"
+ #if JUCE_DIRECT2D
+  #include "native/juce_win32_Direct2DGraphicsContext.cpp"
+ #endif
 
 #elif JUCE_LINUX
  #include "native/juce_linux_Fonts.cpp"

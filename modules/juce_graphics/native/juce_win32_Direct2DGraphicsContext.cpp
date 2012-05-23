@@ -23,36 +23,6 @@
   ==============================================================================
 */
 
-class SharedD2DFactory  : public DeletedAtShutdown
-{
-public:
-    SharedD2DFactory()
-    {
-        jassertfalse; //xxx Direct2D support isn't ready for use yet!
-
-        D2D1CreateFactory (D2D1_FACTORY_TYPE_SINGLE_THREADED, d2dFactory.resetAndGetPointerAddress());
-        DWriteCreateFactory (DWRITE_FACTORY_TYPE_SHARED, __uuidof (IDWriteFactory), (IUnknown**) directWriteFactory.resetAndGetPointerAddress());
-
-        if (directWriteFactory != nullptr)
-            directWriteFactory->GetSystemFontCollection (systemFonts.resetAndGetPointerAddress());
-    }
-
-    ~SharedD2DFactory()
-    {
-        clearSingletonInstance();
-    }
-
-    juce_DeclareSingleton (SharedD2DFactory, false);
-
-    ComSmartPtr <ID2D1Factory> d2dFactory;
-    ComSmartPtr <IDWriteFactory> directWriteFactory;
-    ComSmartPtr <IDWriteFontCollection> systemFonts;
-};
-
-juce_ImplementSingleton (SharedD2DFactory)
-
-
-//==============================================================================
 class Direct2DLowLevelGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
@@ -68,10 +38,13 @@ public:
         D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties();
         D2D1_HWND_RENDER_TARGET_PROPERTIES propsHwnd = D2D1::HwndRenderTargetProperties (hwnd, size);
 
-        HRESULT hr = SharedD2DFactory::getInstance()->d2dFactory->CreateHwndRenderTarget (props, propsHwnd, renderingTarget.resetAndGetPointerAddress());
-        // xxx check for error
-
-        hr = renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), colourBrush.resetAndGetPointerAddress());
+        const Direct2DFactories& factories = Direct2DFactories::getInstance();
+        if (factories.d2dFactory != nullptr)
+        {
+            HRESULT hr = factories.d2dFactory->CreateHwndRenderTarget (props, propsHwnd, renderingTarget.resetAndGetPointerAddress());
+            jassert (SUCCEEDED (hr)); (void) hr;
+            hr = renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), colourBrush.resetAndGetPointerAddress());
+        }
     }
 
     ~Direct2DLowLevelGraphicsContext()
@@ -115,7 +88,7 @@ public:
         currentState->origin.addXY (x, y);
     }
 
-    void addTransform (const AffineTransform& transform)
+    void addTransform (const AffineTransform& /*transform*/)
     {
         //xxx todo
         jassertfalse;
@@ -123,7 +96,7 @@ public:
 
     float getScaleFactor()
     {
-        jassertfalse; //xxx
+        //xxx
         return 1.0f;
     }
 
@@ -184,7 +157,7 @@ public:
         currentState = states.getLast();
     }
 
-    void beginTransparencyLayer (float opacity)
+    void beginTransparencyLayer (float /*opacity*/)
     {
         jassertfalse; //xxx todo
     }
@@ -208,7 +181,7 @@ public:
     {
     }
 
-    void fillRect (const Rectangle<int>& r, bool replaceExistingContents)
+    void fillRect (const Rectangle<int>& r, bool /*replaceExistingContents*/)
     {
         currentState->createBrush();
         renderingTarget->FillRectangle (rectangleToRectF (r + currentState->origin), currentState->currentBrush);
@@ -228,7 +201,7 @@ public:
         const int x = currentState->origin.getX();
         const int y = currentState->origin.getY();
 
-        renderingTarget->SetTransform (transformToMatrix (transform) * D2D1::Matrix3x2F::Translation (x, y));
+        renderingTarget->SetTransform (transformToMatrix (transform) * D2D1::Matrix3x2F::Translation ((FLOAT) x, (FLOAT) y));
 
         D2D1_SIZE_U size;
         size.width = image.getWidth();
@@ -272,8 +245,8 @@ public:
         x += currentState->origin.getX();
         const int y = currentState->origin.getY();
 
-        renderingTarget->DrawLine (D2D1::Point2F (x, y + top),
-                                   D2D1::Point2F (x, y + bottom),
+        renderingTarget->DrawLine (D2D1::Point2F ((FLOAT) x, y + top),
+                                   D2D1::Point2F ((FLOAT) x, y + bottom),
                                    currentState->currentBrush);
     }
 
@@ -285,8 +258,8 @@ public:
         y += currentState->origin.getY();
         const int x = currentState->origin.getX();
 
-        renderingTarget->DrawLine (D2D1::Point2F (x + left, y),
-                                   D2D1::Point2F (x + right, y),
+        renderingTarget->DrawLine (D2D1::Point2F (x + left, (FLOAT) y),
+                                   D2D1::Point2F (x + right, (FLOAT) y),
                                    currentState->currentBrush);
     }
 
@@ -302,39 +275,33 @@ public:
 
     void drawGlyph (int glyphNumber, const AffineTransform& transform)
     {
-        const float x = currentState->origin.getX();
-        const float y = currentState->origin.getY();
+        const float x = (float) currentState->origin.getX();
+        const float y = (float) currentState->origin.getY();
 
         currentState->createBrush();
         currentState->createFont();
 
-        float kerning = currentState->font.getExtraKerningFactor(); // xxx why does removing this line mess up the kerning??
         float hScale = currentState->font.getHorizontalScale();
 
         renderingTarget->SetTransform (D2D1::Matrix3x2F::Scale (hScale, 1) * transformToMatrix (transform) * D2D1::Matrix3x2F::Translation (x, y));
 
-        float dpiX = 0, dpiY = 0;
-        SharedD2DFactory::getInstance()->d2dFactory->GetDesktopDpi (&dpiX, &dpiY);
-
-        UINT32 glyphNum = glyphNumber;
-        UINT16 glyphNum1 = 0; // xxx needs a better name - what is this for?
-        currentState->currentFontFace->GetGlyphIndices (&glyphNum, 1, &glyphNum1);
-
+        const UINT16 glyphIndices = (UINT16) glyphNumber;
+        const FLOAT glyphAdvances = 0;
         DWRITE_GLYPH_OFFSET offset;
         offset.advanceOffset = 0;
         offset.ascenderOffset = 0;
-        float glyphAdvances = 0;
 
-        DWRITE_GLYPH_RUN glyph;
-        glyph.fontFace = currentState->currentFontFace;
-        glyph.glyphCount = 1;
-        glyph.glyphIndices = &glyphNum1;
-        glyph.isSideways = FALSE;
-        glyph.glyphAdvances = &glyphAdvances;
-        glyph.glyphOffsets = &offset;
-        glyph.fontEmSize = (float) currentState->font.getHeight() * dpiX / 96.0f  * (1 + currentState->fontScaling) / 2;
+        DWRITE_GLYPH_RUN glyphRun;
+        glyphRun.fontFace = currentState->currentFontFace;
+        glyphRun.fontEmSize = (FLOAT) (currentState->font.getHeight() * currentState->fontHeightToEmSizeFactor);
+        glyphRun.glyphCount = 1;
+        glyphRun.glyphIndices = &glyphIndices;
+        glyphRun.glyphAdvances = &glyphAdvances;
+        glyphRun.glyphOffsets = &offset;
+        glyphRun.isSideways = FALSE;
+        glyphRun.bidiLevel = 0;
 
-        renderingTarget->DrawGlyphRun (D2D1::Point2F (0, 0), &glyph, currentState->currentBrush);
+        renderingTarget->DrawGlyphRun (D2D1::Point2F (0, 0), &glyphRun, currentState->currentBrush);
         renderingTarget->SetTransform (D2D1::IdentityMatrix());
     }
 
@@ -344,7 +311,7 @@ public:
     public:
         SavedState (Direct2DLowLevelGraphicsContext& owner_)
           : owner (owner_), currentBrush (0),
-            fontScaling (1.0f), currentFontFace (0),
+            fontHeightToEmSizeFactor (1.0f), currentFontFace (0),
             clipsRect (false), shouldClipRect (false),
             clipsRectList (false), shouldClipRectList (false),
             clipsComplex (false), shouldClipComplex (false),
@@ -572,35 +539,11 @@ public:
 
         void createFont()
         {
-            // xxx The font shouldn't be managed by the graphics context.
-            // The correct way to handle font lifetimes is to use a subclass of Typeface - see
-            // OSXTypeface and WindowsTypeface classes. D2D support could probably just be added to the
-            // WindowsTypeface class.
-
-            if (currentFontFace == 0)
+            if (currentFontFace == nullptr)
             {
-                WindowsTypeface* systemType = dynamic_cast<WindowsTypeface*> (font.getTypeface());
-                fontScaling = systemType->getAscent();
-
-                BOOL fontFound;
-                uint32 fontIndex;
-
-                IDWriteFontCollection* fonts = SharedD2DFactory::getInstance()->systemFonts;
-
-                fonts->FindFamilyName (systemType->getName(), &fontIndex, &fontFound);
-                if (! fontFound)
-                    fontIndex = 0;
-
-                ComSmartPtr <IDWriteFontFamily> fontFam;
-                fonts->GetFontFamily (fontIndex, fontFam.resetAndGetPointerAddress());
-
-                ComSmartPtr <IDWriteFont> font;
-                DWRITE_FONT_WEIGHT weight = this->font.isBold() ? DWRITE_FONT_WEIGHT_BOLD  : DWRITE_FONT_WEIGHT_NORMAL;
-                DWRITE_FONT_STYLE style = this->font.isItalic() ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
-                fontFam->GetFirstMatchingFont (weight, DWRITE_FONT_STRETCH_NORMAL, style, font.resetAndGetPointerAddress());
-
-                font->CreateFontFace (localFontFace.resetAndGetPointerAddress());
-                currentFontFace = localFontFace;
+                WindowsDirectWriteTypeface* typeface = dynamic_cast<WindowsDirectWriteTypeface*> (font.getTypeface());
+                currentFontFace = typeface->getIDWriteFontFace();
+                fontHeightToEmSizeFactor = typeface->getFontHeightToEmSizeFactor();
             }
         }
 
@@ -676,7 +619,7 @@ public:
                     for (int i = fillType.gradient->getNumColours(); --i >= 0;)
                     {
                         stops[i].color = colourToD2D (fillType.gradient->getColour(i));
-                        stops[i].position = fillType.gradient->getColourPosition(i);
+                        stops[i].position = (FLOAT) fillType.gradient->getColourPosition(i);
                     }
 
                     owner.renderingTarget->CreateGradientStopCollection (stops.getData(), numColors, gradientStops.resetAndGetPointerAddress());
@@ -724,7 +667,7 @@ public:
         Point<int> origin;
 
         Font font;
-        float fontScaling;
+        float fontHeightToEmSizeFactor;
         IDWriteFontFace* currentFontFace;
         ComSmartPtr <IDWriteFontFace> localFontFace;
 
@@ -787,7 +730,7 @@ private:
     static const D2D1_POINT_2F pointTransformed (int x, int y, const AffineTransform& transform = AffineTransform::identity)
     {
         transform.transformPoint (x, y);
-        return D2D1::Point2F (x, y);
+        return D2D1::Point2F ((FLOAT) x, (FLOAT) y);
     }
 
     static void rectToGeometrySink (const Rectangle<int>& rect, ID2D1GeometrySink* sink)
@@ -802,7 +745,7 @@ private:
     static ID2D1PathGeometry* rectListToPathGeometry (const RectangleList& clipRegion)
     {
         ID2D1PathGeometry* p = nullptr;
-        SharedD2DFactory::getInstance()->d2dFactory->CreatePathGeometry (&p);
+        Direct2DFactories::getInstance().d2dFactory->CreatePathGeometry (&p);
 
         ComSmartPtr <ID2D1GeometrySink> sink;
         HRESULT hr = p->Open (sink.resetAndGetPointerAddress()); // xxx handle error
@@ -880,7 +823,7 @@ private:
     static ID2D1PathGeometry* pathToPathGeometry (const Path& path, const AffineTransform& transform, const Point<int>& point)
     {
         ID2D1PathGeometry* p = nullptr;
-        SharedD2DFactory::getInstance()->d2dFactory->CreatePathGeometry (&p);
+        Direct2DFactories::getInstance().d2dFactory->CreatePathGeometry (&p);
 
         ComSmartPtr <ID2D1GeometrySink> sink;
         HRESULT hr = p->Open (sink.resetAndGetPointerAddress());
