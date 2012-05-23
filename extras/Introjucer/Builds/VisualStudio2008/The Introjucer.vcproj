@@ -48,7 +48,7 @@
             PreprocessorDefinitions="_DEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLinkerTool"
-            OutputFile=".\Debug\Introjucer.exe"
+            OutputFile="$(OutDir)\Introjucer.exe"
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"
             GenerateDebugInformation="true"
@@ -105,7 +105,7 @@
             PreprocessorDefinitions="NDEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLinkerTool"
-            OutputFile=".\Release\Introjucer.exe"
+            OutputFile="$(OutDir)\Introjucer.exe"
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames=""
             GenerateDebugInformation="false"

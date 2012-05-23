@@ -41,7 +41,7 @@
             PreprocessorDefinitions="_DEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLibrarianTool"
-            OutputFile=".\Debug\jucedebug.lib"
+            OutputFile="$(OutDir)\jucedebug.lib"
             IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
@@ -84,7 +84,7 @@
             PreprocessorDefinitions="NDEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLibrarianTool"
-            OutputFile=".\Release\juce.lib"
+            OutputFile="$(OutDir)\juce.lib"
             IgnoreDefaultLibraryNames=""/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>

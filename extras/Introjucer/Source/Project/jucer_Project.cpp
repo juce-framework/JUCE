@@ -244,7 +244,7 @@ String Project::saveProject (const File& file, bool isCommandLineApp)
         registerRecentFile (file);
 
     ProjectSaver saver (*this, file);
-    return saver.save (isCommandLineApp);
+    return saver.save (! isCommandLineApp);
 }
 
 String Project::saveResourcesOnly (const File& file)
