@@ -43,12 +43,12 @@ public:
 
     //==============================================================================
     // FileBasedDocument stuff..
-    const String getDocumentTitle();
-    const String loadDocument (const File& file);
-    const String saveDocument (const File& file);
-    String saveProject (const File& file, bool isCommandLineApp);
-    String saveResourcesOnly (const File& file);
-    const File getLastDocumentOpened();
+    String getDocumentTitle();
+    Result loadDocument (const File& file);
+    Result saveDocument (const File& file);
+    Result saveProject (const File& file, bool isCommandLineApp);
+    Result saveResourcesOnly (const File& file);
+    File getLastDocumentOpened();
     void setLastDocumentOpened (const File& file);
 
     void setTitle (const String& newTitle);

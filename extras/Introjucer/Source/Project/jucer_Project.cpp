@@ -77,7 +77,7 @@ void Project::setTitle (const String& newTitle)
     getMainGroup().getNameValue() = newTitle;
 }
 
-const String Project::getDocumentTitle()
+String Project::getDocumentTitle()
 {
     return getProjectName().toString();
 }
@@ -209,17 +209,17 @@ static void registerRecentFile (const File& file)
     StoredSettings::getInstance()->flush();
 }
 
-const String Project::loadDocument (const File& file)
+Result Project::loadDocument (const File& file)
 {
     ScopedPointer <XmlElement> xml (XmlDocument::parse (file));
 
     if (xml == nullptr || ! xml->hasTagName (Tags::projectRoot.toString()))
-        return "Not a valid Jucer project!";
+        return Result::fail ("Not a valid Jucer project!");
 
     ValueTree newTree (ValueTree::fromXml (*xml));
 
     if (! newTree.hasType (Tags::projectRoot))
-        return "The document contains errors and couldn't be parsed!";
+        return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
     projectRoot = newTree;
@@ -227,15 +227,15 @@ const String Project::loadDocument (const File& file)
     removeDefunctExporters();
     setMissingDefaultValues();
 
-    return String::empty;
+    return Result::ok();
 }
 
-const String Project::saveDocument (const File& file)
+Result Project::saveDocument (const File& file)
 {
     return saveProject (file, false);
 }
 
-String Project::saveProject (const File& file, bool isCommandLineApp)
+Result Project::saveProject (const File& file, bool isCommandLineApp)
 {
     updateProjectSettings();
     sanitiseConfigFlags();
@@ -247,7 +247,7 @@ String Project::saveProject (const File& file, bool isCommandLineApp)
     return saver.save (! isCommandLineApp);
 }
 
-String Project::saveResourcesOnly (const File& file)
+Result Project::saveResourcesOnly (const File& file)
 {
     ProjectSaver saver (*this, file);
     return saver.saveResourcesOnly();
@@ -256,7 +256,7 @@ String Project::saveResourcesOnly (const File& file)
 //==============================================================================
 File Project::lastDocumentOpened;
 
-const File Project::getLastDocumentOpened()
+File Project::getLastDocumentOpened()
 {
     return lastDocumentOpened;
 }

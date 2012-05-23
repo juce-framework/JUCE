@@ -233,7 +233,7 @@ void FilterGraph::clear()
 }
 
 //==============================================================================
-const String FilterGraph::getDocumentTitle()
+String FilterGraph::getDocumentTitle()
 {
     if (! getFile().exists())
         return "Unnamed";
@@ -241,29 +241,29 @@ const String FilterGraph::getDocumentTitle()
     return getFile().getFileNameWithoutExtension();
 }
 
-const String FilterGraph::loadDocument (const File& file)
+Result FilterGraph::loadDocument (const File& file)
 {
     XmlDocument doc (file);
     ScopedPointer<XmlElement> xml (doc.getDocumentElement());
 
     if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
-        return "Not a valid filter graph file";
+        return Result::fail ("Not a valid filter graph file");
 
     restoreFromXml (*xml);
-    return String::empty;
+    return Result::ok();
 }
 
-const String FilterGraph::saveDocument (const File& file)
+Result FilterGraph::saveDocument (const File& file)
 {
     ScopedPointer<XmlElement> xml (createXml());
 
     if (! xml->writeToFile (file, String::empty))
-        return "Couldn't write to the file";
+        return Result::fail ("Couldn't write to the file");
 
-    return String::empty;
+    return Result::ok();
 }
 
-const File FilterGraph::getLastDocumentOpened()
+File FilterGraph::getLastDocumentOpened()
 {
     RecentlyOpenedFilesList recentFiles;
     recentFiles.restoreFromString (appProperties->getUserSettings()

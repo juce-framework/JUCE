@@ -50,7 +50,8 @@ public:
     {
     public:
         SaveThread (ProjectSaver& saver_)
-            : ThreadWithProgressWindow ("Saving...", true, false), saver (saver_)
+            : ThreadWithProgressWindow ("Saving...", true, false),
+              saver (saver_), result (Result::ok())
         {}
 
         void run()
@@ -60,12 +61,12 @@ public:
         }
 
         ProjectSaver& saver;
-        String result;
+        Result result;
 
         JUCE_DECLARE_NON_COPYABLE (SaveThread);
     };
 
-    String save (bool showProgressBox)
+    Result save (bool showProgressBox)
     {
         if (showProgressBox)
         {
@@ -111,15 +112,22 @@ public:
             writeReadmeFile();
 
         if (errors.size() > 0)
+        {
             project.setFile (oldFile);
+            return Result::fail (errors[0]);
+        }
 
-        return errors[0];
+        return Result::ok();
     }
 
-    String saveResourcesOnly()
+    Result saveResourcesOnly()
     {
         writeBinaryDataFiles();
-        return errors[0];
+
+        if (errors.size() > 0)
+            return Result::fail (errors[0]);
+
+        return Result::ok();
     }
 
     Project::Item saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData)

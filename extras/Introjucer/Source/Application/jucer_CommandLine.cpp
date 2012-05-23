@@ -82,12 +82,12 @@ namespace
                                         : "The Introjucer - Re-saving file: ")
                   << projectFile.getFullPathName() << std::endl;
 
-        String error (justSaveResources ? proj.saveResourcesOnly (projectFile)
+        Result error (justSaveResources ? proj.saveResourcesOnly (projectFile)
                                         : proj.saveProject (projectFile, true));
 
-        if (error.isNotEmpty())
+        if (error.failed())
         {
-            std::cout << "Error when saving: " << error << std::endl;
+            std::cout << "Error when saving: " << error.getErrorMessage() << std::endl;
             return 1;
         }
 
@@ -222,8 +222,9 @@ namespace
         const File projectFile (getFile (args[1]));
 
         Project proj (projectFile);
+        const Result result (proj.loadDocument (projectFile));
 
-        if (proj.loadDocument (projectFile).isNotEmpty())
+        if (result.failed())
         {
             std::cout << "Failed to load project: " << projectFile.getFullPathName() << std::endl;
             return 1;
