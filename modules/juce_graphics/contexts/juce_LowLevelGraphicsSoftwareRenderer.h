@@ -27,10 +27,7 @@
 #define __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 
 #include "juce_LowLevelGraphicsContext.h"
-
-#ifndef DOXYGEN
 #include "../native/juce_RenderingHelpers.h"
-#endif
 
 //==============================================================================
 /**
@@ -44,8 +41,9 @@ class JUCE_API  LowLevelGraphicsSoftwareRenderer    : public LowLevelGraphicsCon
 {
 public:
     //==============================================================================
-    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn);
-    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn, const Point<int>& origin, const RectangleList& initialClip);
+    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto);
+    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOnto, const Point<int>& origin,
+                                      const RectangleList& initialClip);
     ~LowLevelGraphicsSoftwareRenderer();
 
     bool isVectorDevice() const;
@@ -76,8 +74,7 @@ public:
 
     void drawImage (const Image&, const AffineTransform&);
 
-    void drawLine (const Line <float>& line);
-
+    void drawLine (const Line <float>&);
     void drawVerticalLine (int x, float top, float bottom);
     void drawHorizontalLine (int x, float top, float bottom);
 
@@ -86,12 +83,8 @@ public:
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform&);
 
-   #ifndef DOXYGEN
-    class SavedState;
-   #endif
-
 protected:
-    RenderingHelpers::SavedStateStack<SavedState> savedState;
+    RenderingHelpers::SavedStateStack <RenderingHelpers::SoftwareRendererSavedState> savedState;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsSoftwareRenderer);
 };
