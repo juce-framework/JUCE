@@ -60,8 +60,8 @@ public:
     void activeWindowStatusChanged();
 
     //==============================================================================
-    const StringArray getMenuBarNames ();
-    const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName);
+    StringArray getMenuBarNames ();
+    PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName);
     void menuItemSelected (int menuItemID, int topLevelMenuIndex);
 
     //==============================================================================
