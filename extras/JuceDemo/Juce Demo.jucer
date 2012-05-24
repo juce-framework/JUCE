@@ -26,10 +26,10 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="default" defines="JUCE_UNIT_TESTS=1"
-                       osxArchitecture="default"/>
+                       osxArchitecture="default" iosCompatibility="default"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="10.4 SDK" defines="JUCE_UNIT_TESTS=1"
-                       osxArchitecture="32BitUniversal"/>
+                       osxArchitecture="32BitUniversal" iosCompatibility="default"/>
       </CONFIGURATIONS>
     </XCODE_IPHONE>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"

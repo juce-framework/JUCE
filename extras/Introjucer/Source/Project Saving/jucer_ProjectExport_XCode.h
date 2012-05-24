@@ -187,49 +187,71 @@ protected:
     class XcodeBuildConfiguration  : public BuildConfiguration
     {
     public:
-        XcodeBuildConfiguration (Project& project, const ValueTree& settings)
-            : BuildConfiguration (project, settings)
+        XcodeBuildConfiguration (Project& project, const ValueTree& settings, const bool iOS_)
+            : BuildConfiguration (project, settings), iOS (iOS_)
         {
         }
 
-        Value getMacSDKVersionValue()                  { return getValue (Ids::osxSDK); }
-        String getMacSDKVersion() const                { return config [Ids::osxSDK]; }
-        Value getMacCompatibilityVersionValue()        { return getValue (Ids::osxCompatibility); }
-        String getMacCompatibilityVersion() const      { return config [Ids::osxCompatibility]; }
-        Value getMacArchitectureValue()                { return getValue (Ids::osxArchitecture); }
-        String getMacArchitecture() const              { return config [Ids::osxArchitecture]; }
-        Value getCustomXcodeFlagsValue()               { return getValue (Ids::customXcodeFlags); }
-        String getCustomXcodeFlags() const             { return config [Ids::customXcodeFlags]; }
-        Value getCppLibTypeValue()                     { return getValue (Ids::cppLibType); }
-        String getCppLibType() const                   { return config [Ids::cppLibType]; }
+        Value  getMacSDKVersionValue()                 { return getValue (Ids::osxSDK); }
+        String getMacSDKVersion() const                { return config   [Ids::osxSDK]; }
+        Value  getMacCompatibilityVersionValue()       { return getValue (Ids::osxCompatibility); }
+        String getMacCompatibilityVersion() const      { return config   [Ids::osxCompatibility]; }
+        Value  getiOSCompatibilityVersionValue()       { return getValue (Ids::iosCompatibility); }
+        String getiOSCompatibilityVersion() const      { return config   [Ids::iosCompatibility]; }
+        Value  getMacArchitectureValue()               { return getValue (Ids::osxArchitecture); }
+        String getMacArchitecture() const              { return config   [Ids::osxArchitecture]; }
+        Value  getCustomXcodeFlagsValue()              { return getValue (Ids::customXcodeFlags); }
+        String getCustomXcodeFlags() const             { return config   [Ids::customXcodeFlags]; }
+        Value  getCppLibTypeValue()                    { return getValue (Ids::cppLibType); }
+        String getCppLibType() const                   { return config   [Ids::cppLibType]; }
 
         void createPropertyEditors (PropertyListBuilder& props)
         {
             createBasicPropertyEditors (props);
 
-            if (getMacSDKVersion().isEmpty())
-                getMacSDKVersionValue() = osxVersionDefault;
+            if (iOS)
+            {
+                if (getiOSCompatibilityVersion().isEmpty())
+                    getiOSCompatibilityVersionValue() = osxVersionDefault;
 
-            const char* osxVersions[] = { "Use Default", osxVersion10_4, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
-            const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
+                const char* iosVersions[]      = { "Use Default",     "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", 0 };
+                const char* iosVersionValues[] = { osxVersionDefault, "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", 0 };
 
-            props.add (new ChoicePropertyComponent (getMacSDKVersionValue(), "OSX Base SDK Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
-                       "The version of OSX to link against in the XCode build.");
+                props.add (new ChoicePropertyComponent (getiOSCompatibilityVersionValue(), "iOS Deployment Target",
+                                                        StringArray (iosVersions), Array<var> (iosVersionValues)),
+                           "The minimum version of iOS that the target binary will run on.");
+            }
+            else
+            {
+                if (getMacSDKVersion().isEmpty())
+                    getMacSDKVersionValue() = osxVersionDefault;
 
-            if (getMacCompatibilityVersion().isEmpty())
-                getMacCompatibilityVersionValue() = osxVersionDefault;
+                if (getMacCompatibilityVersion().isEmpty())
+                    getMacCompatibilityVersionValue() = osxVersionDefault;
 
-            props.add (new ChoicePropertyComponent (getMacCompatibilityVersionValue(), "OSX Compatibility Version", StringArray (osxVersions), Array<var> (osxVersionValues)),
-                       "The minimum version of OSX that the target binary will be compatible with.");
+                const char* osxVersions[]      = { "Use Default",     osxVersion10_4, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
+                const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
 
-            const char* osxArch[] = { "Use Default", "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
-            const char* osxArchValues[] = { osxArch_Default, osxArch_Native, osxArch_32BitUniversal, osxArch_64BitUniversal, osxArch_64Bit, 0 };
+                props.add (new ChoicePropertyComponent (getMacSDKVersionValue(), "OSX Base SDK Version",
+                                                        StringArray (osxVersions), Array<var> (osxVersionValues)),
+                           "The version of OSX to link against in the XCode build.");
 
-            if (getMacArchitecture().isEmpty())
-                getMacArchitectureValue() = osxArch_Default;
+                props.add (new ChoicePropertyComponent (getMacCompatibilityVersionValue(), "OSX Compatibility Version",
+                                                        StringArray (osxVersions), Array<var> (osxVersionValues)),
+                           "The minimum version of OSX that the target binary will be compatible with.");
 
-            props.add (new ChoicePropertyComponent (getMacArchitectureValue(), "OSX Architecture", StringArray (osxArch), Array<var> (osxArchValues)),
-                       "The type of OSX binary that will be produced.");
+                if (getMacArchitecture().isEmpty())
+                    getMacArchitectureValue() = osxArch_Default;
+
+                const char* osxArch[] = { "Use Default", "Native architecture of build machine",
+                                          "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
+                const char* osxArchValues[] = { osxArch_Default, osxArch_Native, osxArch_32BitUniversal,
+                                                osxArch_64BitUniversal, osxArch_64Bit, 0 };
+
+                props.add (new ChoicePropertyComponent (getMacArchitectureValue(), "OSX Architecture",
+                                                        StringArray (osxArch), Array<var> (osxArchValues)),
+                           "The type of OSX binary that will be produced.");
+            }
 
             props.add (new TextPropertyComponent (getCustomXcodeFlagsValue(), "Custom Xcode flags", 8192, false),
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
@@ -243,11 +265,13 @@ protected:
             props.add (new ChoicePropertyComponent (getCppLibTypeValue(), "C++ Library", StringArray (cppLibNames), cppLibValues),
                        "The type of C++ std lib that will be linked.");
         }
+
+        bool iOS;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& settings) const
     {
-        return new XcodeBuildConfiguration (project, settings);
+        return new XcodeBuildConfiguration (project, settings, iOS);
     }
 
 private:
@@ -320,8 +344,9 @@ private:
 
         for (ConstConfigIterator config (*this); config.next();)
         {
-            addProjectConfig (config->getName(), getProjectSettings (*config));
-            addTargetConfig  (config->getName(), getTargetSettings (dynamic_cast <const XcodeBuildConfiguration&> (*config)));
+            const XcodeBuildConfiguration& xcodeConfig = dynamic_cast <const XcodeBuildConfiguration&> (*config);
+            addProjectConfig (config->getName(), getProjectSettings (xcodeConfig));
+            addTargetConfig  (config->getName(), getTargetSettings (xcodeConfig));
         }
 
         addConfigList (projectConfigs, createID ("__projList"));
@@ -552,7 +577,7 @@ private:
         flags.removeEmptyStrings (true);
     }
 
-    StringArray getProjectSettings (const BuildConfiguration& config) const
+    StringArray getProjectSettings (const XcodeBuildConfiguration& config) const
     {
         StringArray s;
         s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
@@ -581,6 +606,10 @@ private:
             s.add ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = \"iPhone Developer\"");
             s.add ("SDKROOT = iphoneos");
             s.add ("TARGETED_DEVICE_FAMILY = \"1,2\"");
+
+            const String iosVersion (config.getiOSCompatibilityVersion());
+            if (iosVersion.isNotEmpty() && iosVersion != osxVersionDefault)
+                s.add ("IPHONEOS_DEPLOYMENT_TARGET = " + iosVersion);
         }
 
         s.add ("ZERO_LINK = NO");
