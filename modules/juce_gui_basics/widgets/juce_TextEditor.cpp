@@ -865,6 +865,7 @@ public:
     {
         setWantsKeyboardFocus (false);
         setInterceptsMouseClicks (false, true);
+        setMouseCursor (MouseCursor::IBeamCursor);
 
         owner.getTextValue().addListener (this);
     }
@@ -887,11 +888,6 @@ public:
     void timerCallback()
     {
         owner.timerCallbackInt();
-    }
-
-    MouseCursor getMouseCursor()
-    {
-        return owner.getMouseCursor();
     }
 
     void valueChanged (Value&)
@@ -985,6 +981,7 @@ TextEditor::TextEditor (const String& name,
       dragType (notDragging)
 {
     setOpaque (true);
+    setMouseCursor (MouseCursor::IBeamCursor);
 
     addAndMakeVisible (viewport = new TextEditorViewport (*this));
     viewport->setViewedComponent (textHolder = new TextHolderComponent (*this));
@@ -1168,9 +1165,6 @@ void TextEditor::setCaretVisible (const bool shouldCaretBeVisible)
     {
         caret = nullptr;
     }
-
-    setMouseCursor (shouldCaretBeVisible ? MouseCursor::IBeamCursor
-                                         : MouseCursor::NormalCursor);
 }
 
 void TextEditor::updateCaretPosition()
@@ -2228,8 +2222,6 @@ void TextEditor::handleCommandMessage (const int commandId)
 
 void TextEditor::enablementChanged()
 {
-    setMouseCursor (isReadOnly() ? MouseCursor::NormalCursor
-                                 : MouseCursor::IBeamCursor);
     repaint();
 }
 
