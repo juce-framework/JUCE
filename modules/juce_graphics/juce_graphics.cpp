@@ -57,6 +57,10 @@
  #import <QuartzCore/QuartzCore.h>
  #import <CoreText/CoreText.h>
 
+ #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2
+  #error "JUCE no longer supports targets earlier than iOS 3.2"
+ #endif
+
 #elif JUCE_LINUX
  #include <ft2build.h>
  #include FT_FREETYPE_H

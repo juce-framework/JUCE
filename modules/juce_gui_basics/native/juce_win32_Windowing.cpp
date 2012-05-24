@@ -1285,10 +1285,6 @@ private:
                                L"", type, 0, 0, 0, 0, parentToAddTo, 0,
                                (HINSTANCE) Process::getCurrentModuleInstanceHandle(), 0);
 
-       #if JUCE_DIRECT2D
-        setCurrentRenderingEngine (1);
-       #endif
-
         if (hwnd != 0)
         {
             SetWindowLongPtr (hwnd, 0, 0);
