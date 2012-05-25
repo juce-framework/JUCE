@@ -935,8 +935,12 @@ public:
             addChildComponent (bmc);
         }
 
-        bmc->showAt (button, "This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing at a component or somewhere on the screen.\n\nThe message bubbles will disappear after a timeout period, or when the mouse is clicked.",
-                     2000, true, true);
+        AttributedString text ("This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing "
+                               "at a component or somewhere on the screen.\n\n"
+                               "The message bubbles will disappear after a timeout period, or when the mouse is clicked.");
+        text.setJustification (Justification::centred);
+
+        bmc->showAt (button, text, 2000, true, true);
     }
 
     static const Colour getRandomBrightColour()

@@ -77,7 +77,7 @@ public:
                                                 it becomes invisible
     */
     void showAt (int x, int y,
-                 const String& message,
+                 const AttributedString& message,
                  int numMillisecondsBeforeRemoving,
                  bool removeWhenMouseClicked = true,
                  bool deleteSelfAfterUse = false);
@@ -100,7 +100,7 @@ public:
                                                 it becomes invisible
     */
     void showAt (Component* component,
-                 const String& message,
+                 const AttributedString& message,
                  int numMillisecondsBeforeRemoving,
                  bool removeWhenMouseClicked = true,
                  bool deleteSelfAfterUse = false);
@@ -121,7 +121,7 @@ private:
     int64 expiryTime;
     bool deleteAfterUse;
 
-    void createLayout (const String&);
+    void createLayout (const AttributedString&);
     void init (int numMillisecondsBeforeRemoving,
                bool removeWhenMouseClicked,
                bool deleteSelfAfterUse);
