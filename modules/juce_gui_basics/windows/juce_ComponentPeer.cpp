@@ -92,12 +92,12 @@ void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int>& po
     mouse->handleEvent (this, positionWithinPeer, time, newMods);
 }
 
-void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int>& positionWithinPeer, const int64 time, const float x, const float y)
+void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int>& positionWithinPeer, const int64 time, const MouseWheelDetails& wheel)
 {
     MouseInputSource* const mouse = Desktop::getInstance().getMouseSource (touchIndex);
     jassert (mouse != nullptr); // not enough sources!
 
-    mouse->handleWheel (this, positionWithinPeer, time, x, y);
+    mouse->handleWheel (this, positionWithinPeer, time, wheel);
 }
 
 //==============================================================================

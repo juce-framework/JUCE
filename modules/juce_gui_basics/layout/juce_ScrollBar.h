@@ -289,21 +289,21 @@ public:
 
     //==============================================================================
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&);
     /** @internal */
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */
     void lookAndFeelChanged();
     /** @internal */
     void handleAsyncUpdate();
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&);
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&);
     /** @internal */
-    void mouseUp   (const MouseEvent& e);
+    void mouseUp   (const MouseEvent&);
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
     /** @internal */
     void resized();
 

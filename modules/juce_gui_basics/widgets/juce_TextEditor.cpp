@@ -1875,10 +1875,10 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
     moveCaretTo (tokenStart, true);
 }
 
-void TextEditor::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
+void TextEditor::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! viewport->useMouseWheelMoveIfNeeded (e, wheelIncrementX, wheelIncrementY))
-        Component::mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+    if (! viewport->useMouseWheelMoveIfNeeded (e, wheel))
+        Component::mouseWheelMove (e, wheel);
 }
 
 //==============================================================================

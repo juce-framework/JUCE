@@ -785,10 +785,11 @@ void MidiKeyboardComponent::mouseExit (const MouseEvent& e)
     updateNoteUnderMouse (e, false);
 }
 
-void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, float ix, float iy)
+void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel)
 {
-    const float amount = (orientation == horizontalKeyboard && ix != 0)
-                            ? ix : (orientation == verticalKeyboardFacingLeft ? iy : -iy);
+    const float amount = (orientation == horizontalKeyboard && wheel.deltaX != 0)
+                            ? wheel.deltaX : (orientation == verticalKeyboardFacingLeft ? wheel.deltaY
+                                                                                         : -wheel.deltaY);
 
     setLowestVisibleKeyFloat (firstKey - amount * keyWidth);
 }

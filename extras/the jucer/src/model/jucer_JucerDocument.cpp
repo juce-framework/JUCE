@@ -291,7 +291,7 @@ void JucerDocument::getOptionalMethods (StringArray& baseClasses,
     addMethod ("Component", "void", "mouseDrag (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "void", "mouseUp (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "void", "mouseDoubleClick (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("Component", "void", "mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)", "", baseClasses, returnValues, methods, initialContents);
 
     addMethod ("Component", "bool", "keyPressed (const KeyPress& key)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "bool", "keyStateChanged (const bool isKeyDown)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);

@@ -256,13 +256,13 @@ public:
     /** @internal */
     void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
     /** @internal */
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&);
     /** @internal */
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+    void componentMovedOrResized (Component&, bool wasMoved, bool wasResized);
     /** @internal */
-    bool useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    bool useMouseWheelMoveIfNeeded (const MouseEvent&, const MouseWheelDetails&);
 
 private:
     //==============================================================================

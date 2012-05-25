@@ -1617,7 +1617,7 @@ class SliderLabelComp : public Label
 public:
     SliderLabelComp() : Label (String::empty, String::empty) {}
 
-    void mouseWheelMove (const MouseEvent&, float, float) {}
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) {}
 };
 
 Label* LookAndFeel::createSliderTextBox (Slider& slider)

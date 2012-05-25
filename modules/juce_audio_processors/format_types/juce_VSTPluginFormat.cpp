@@ -1719,9 +1719,7 @@ private:
         }
     }
 
-    void mouseWheelMove (const MouseEvent& e,
-                         float incrementX,
-                         float incrementY)
+    void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
     {
         if (pluginWindow != 0)
         {
@@ -1736,7 +1734,7 @@ private:
             ev.xbutton.x_root = e.getScreenX();
             ev.xbutton.y_root = e.getScreenY();
 
-            translateJuceToXMouseWheelModifiers (e, incrementY, ev);
+            translateJuceToXMouseWheelModifiers (e, wheel.deltaY, ev);
             sendEventToChild (&ev);
 
             // TODO - put a usleep here ?

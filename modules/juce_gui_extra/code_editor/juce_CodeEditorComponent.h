@@ -221,27 +221,27 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&);
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&);
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&);
     /** @internal */
-    void mouseUp (const MouseEvent& e);
+    void mouseUp (const MouseEvent&);
     /** @internal */
-    void mouseDoubleClick (const MouseEvent& e);
+    void mouseDoubleClick (const MouseEvent&);
     /** @internal */
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */
-    void focusGained (FocusChangeType cause);
+    void focusGained (FocusChangeType);
     /** @internal */
-    void focusLost (FocusChangeType cause);
+    void focusLost (FocusChangeType);
     /** @internal */
     void timerCallback();
     /** @internal */
-    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
+    void scrollBarMoved (ScrollBar*, double newRangeStart);
     /** @internal */
     void handleAsyncUpdate();
     /** @internal */

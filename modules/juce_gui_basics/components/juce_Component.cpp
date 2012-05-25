@@ -114,8 +114,8 @@ public:
         }
     }
 
-    static void sendWheelEvent (Component& comp, Component::BailOutChecker& checker, const MouseEvent& e,
-                                const float wheelIncrementX, const float wheelIncrementY)
+    static void sendWheelEvent (Component& comp, Component::BailOutChecker& checker,
+                                const MouseEvent& e, const MouseWheelDetails& wheel)
     {
         {
             MouseListenerList* const list = comp.mouseListeners;
@@ -124,7 +124,7 @@ public:
             {
                 for (int i = list->listeners.size(); --i >= 0;)
                 {
-                    list->listeners.getUnchecked(i)->mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+                    list->listeners.getUnchecked(i)->mouseWheelMove (e, wheel);
 
                     if (checker.shouldBailOut())
                         return;
@@ -144,7 +144,7 @@ public:
 
                 for (int i = list->numDeepMouseListeners; --i >= 0;)
                 {
-                    list->listeners.getUnchecked(i)->mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+                    list->listeners.getUnchecked(i)->mouseWheelMove (e, wheel);
 
                     if (checker2.shouldBailOut())
                         return;
@@ -2176,12 +2176,11 @@ void Component::mouseDrag  (const MouseEvent&)          {}
 void Component::mouseMove  (const MouseEvent&)          {}
 void Component::mouseDoubleClick (const MouseEvent&)    {}
 
-void Component::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
+void Component::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
     // the base class just passes this event up to its parent..
     if (parentComponent != nullptr)
-        parentComponent->mouseWheelMove (e.getEventRelativeTo (parentComponent),
-                                         wheelIncrementX, wheelIncrementY);
+        parentComponent->mouseWheelMove (e.getEventRelativeTo (parentComponent), wheel);
 }
 
 
@@ -2485,13 +2484,10 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
 }
 
 void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos,
-                                    const Time& time, const float amountX, const float amountY)
+                                    const Time& time, const MouseWheelDetails& wheel)
 {
     Desktop& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
-
-    const float wheelIncrementX = amountX / 256.0f;
-    const float wheelIncrementY = amountY / 256.0f;
 
     const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
                          this, this, time, relativePos, time, 0, false);
@@ -2499,19 +2495,19 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
         // allow blocked mouse-events to go to global listeners..
-        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseWheelMove, me, wheelIncrementX, wheelIncrementY);
+        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseWheelMove, me, wheel);
     }
     else
     {
-        mouseWheelMove (me, wheelIncrementX, wheelIncrementY);
+        mouseWheelMove (me, wheel);
 
         if (checker.shouldBailOut())
             return;
 
-        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseWheelMove, me, wheelIncrementX, wheelIncrementY);
+        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseWheelMove, me, wheel);
 
         if (! checker.shouldBailOut())
-            MouseListenerList::sendWheelEvent (*this, checker, me, wheelIncrementX, wheelIncrementY);
+            MouseListenerList::sendWheelEvent (*this, checker, me, wheel);
     }
 }
 

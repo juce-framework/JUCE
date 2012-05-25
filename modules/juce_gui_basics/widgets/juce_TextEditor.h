@@ -511,7 +511,7 @@ public:
     /** @internal */
     void mouseDoubleClick (const MouseEvent& e);
     /** @internal */
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */
     bool keyPressed (const KeyPress& key);
     /** @internal */

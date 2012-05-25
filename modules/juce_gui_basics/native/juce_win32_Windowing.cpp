@@ -1693,7 +1693,7 @@ private:
     void doMouseWheel (const Point<int>& globalPos, const WPARAM wParam, const bool isVertical)
     {
         updateKeyModifiers();
-        const float amount = jlimit (-1000.0f, 1000.0f, 0.75f * (short) HIWORD (wParam));
+        const float amount = jlimit (-1000.0f, 1000.0f, 0.5f * (short) HIWORD (wParam));
 
         // Because Windows stupidly sends all wheel events to the window with the keyboard
         // focus, we have to redirect them here according to the mouse pos..
@@ -1703,9 +1703,13 @@ private:
         if (peer == nullptr)
             peer = this;
 
-        peer->handleMouseWheel (0, peer->globalToLocal (globalPos), getMouseEventTime(),
-                                isVertical ? 0.0f : -amount,
-                                isVertical ? amount : 0.0f);
+        MouseWheelDetails wheel;
+        wheel.deltaX = isVertical ? 0.0f : amount / -256.0f;
+        wheel.deltaY = isVertical ? amount / 256.0f : 0.0f;
+        wheel.isReversed = false;
+        wheel.isSmooth = false;
+
+        peer->handleMouseWheel (0, peer->globalToLocal (globalPos), getMouseEventTime(), wheel);
     }
 
     void doTouchEvent (const int numInputs, HTOUCHINPUT eventHandle)

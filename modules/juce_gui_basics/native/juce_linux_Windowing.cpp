@@ -1403,8 +1403,14 @@ public:
 
     void handleWheelEvent (const XButtonPressedEvent* const buttonPressEvent, const float amount)
     {
+        MouseWheelDetails wheel;
+        wheel.deltaX = 0.0f;
+        wheel.deltaY = amount;
+        wheel.isReversed = false;
+        wheel.isSmooth = false;
+
         handleMouseWheel (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y),
-                          getEventTime (buttonPressEvent->time), 0, amount);
+                          getEventTime (buttonPressEvent->time), wheel);
     }
 
     void handleButtonPressEvent (const XButtonPressedEvent* const buttonPressEvent, int buttonModifierFlag)
@@ -1421,8 +1427,8 @@ public:
 
         switch (pointerMap [buttonPressEvent->button - Button1])
         {
-            case Keys::WheelUp:         handleWheelEvent (buttonPressEvent, 84.0f); break;
-            case Keys::WheelDown:       handleWheelEvent (buttonPressEvent, -84.0f); break;
+            case Keys::WheelUp:         handleWheelEvent (buttonPressEvent,  50.0f / 256.0f); break;
+            case Keys::WheelDown:       handleWheelEvent (buttonPressEvent, -50.0f / 256.0f); break;
             case Keys::LeftButton:      handleButtonPressEvent (buttonPressEvent, ModifierKeys::leftButtonModifier); break;
             case Keys::RightButton:     handleButtonPressEvent (buttonPressEvent, ModifierKeys::rightButtonModifier); break;
             case Keys::MiddleButton:    handleButtonPressEvent (buttonPressEvent, ModifierKeys::middleButtonModifier); break;
@@ -2509,12 +2515,12 @@ private:
     void initialisePointerMap()
     {
         const int numButtons = XGetPointerMapping (display, 0, 0);
+        pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
 
         if (numButtons == 2)
         {
             pointerMap[0] = Keys::LeftButton;
             pointerMap[1] = Keys::RightButton;
-            pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
         }
         else if (numButtons >= 3)
         {

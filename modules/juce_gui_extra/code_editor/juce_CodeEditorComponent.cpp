@@ -986,17 +986,26 @@ void CodeEditorComponent::mouseDoubleClick (const MouseEvent& e)
     moveCaretTo (tokenStart, true);
 }
 
-void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
+void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if ((verticalScrollBar.isVisible() && wheelIncrementY != 0)
-         || (horizontalScrollBar.isVisible() && wheelIncrementX != 0))
+    if ((verticalScrollBar.isVisible() && wheel.deltaY != 0)
+         || (horizontalScrollBar.isVisible() && wheel.deltaX != 0))
     {
-        verticalScrollBar.mouseWheelMove (e, 0, wheelIncrementY);
-        horizontalScrollBar.mouseWheelMove (e, wheelIncrementX, 0);
+        {
+            MouseWheelDetails w (wheel);
+            w.deltaX = 0;
+            verticalScrollBar.mouseWheelMove (e, w);
+        }
+
+        {
+            MouseWheelDetails w (wheel);
+            w.deltaY = 0;
+            horizontalScrollBar.mouseWheelMove (e, w);
+        }
     }
     else
     {
-        Component::mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+        Component::mouseWheelMove (e, wheel);
     }
 }
 

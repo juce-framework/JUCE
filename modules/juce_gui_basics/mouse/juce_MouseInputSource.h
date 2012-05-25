@@ -166,9 +166,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void handleEvent (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, const ModifierKeys& mods);
+    void handleEvent (ComponentPeer*, const Point<int>& positionWithinPeer, int64 time, const ModifierKeys&);
     /** @internal */
-    void handleWheel (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, float x, float y);
+    void handleWheel (ComponentPeer*, const Point<int>& positionWithinPeer, int64 time, const MouseWheelDetails&);
 
 private:
     //==============================================================================

@@ -1464,19 +1464,20 @@ public:
 
 
     //==============================================================================
-    /** Called when the mouse moves inside this component.
+    /** Called when the mouse moves inside a component.
 
         If the mouse button isn't pressed and the mouse moves over a component,
         this will be called to let the component react to this.
 
         A component will always get a mouseEnter callback before a mouseMove.
 
-        @param e    details about the position and status of the mouse event
+        @param event details about the position and status of the mouse event, including
+                     the source component in which it occurred
         @see mouseEnter, mouseExit, mouseDrag, contains
     */
-    virtual void mouseMove         (const MouseEvent& e);
+    virtual void mouseMove (const MouseEvent& event);
 
-    /** Called when the mouse first enters this component.
+    /** Called when the mouse first enters a component.
 
         If the mouse button isn't pressed and the mouse moves into a component,
         this will be called to let the component react to this.
@@ -1486,16 +1487,13 @@ public:
         mouseDrag messages are sent to the component that the mouse was originally
         clicked on, until the button is released.
 
-        If you're writing a component that needs to repaint itself when the mouse
-        enters and exits, it might be quicker to use the setRepaintsOnMouseActivity()
-        method.
-
-        @param e    details about the position and status of the mouse event
+        @param event details about the position and status of the mouse event, including
+                     the source component in which it occurred
         @see mouseExit, mouseDrag, mouseMove, contains
     */
-    virtual void mouseEnter        (const MouseEvent& e);
+    virtual void mouseEnter (const MouseEvent& event);
 
-    /** Called when the mouse moves out of this component.
+    /** Called when the mouse moves out of a component.
 
         This will be called when the mouse moves off the edge of this
         component.
@@ -1504,16 +1502,13 @@ public:
         edge of the component and released, then this callback will happen
         when the button is released, after the mouseUp callback.
 
-        If you're writing a component that needs to repaint itself when the mouse
-        enters and exits, it might be quicker to use the setRepaintsOnMouseActivity()
-        method.
-
-        @param e    details about the position and status of the mouse event
+        @param event  details about the position and status of the mouse event, including
+                      the source component in which it occurred
         @see mouseEnter, mouseDrag, mouseMove, contains
     */
-    virtual void mouseExit         (const MouseEvent& e);
+    virtual void mouseExit (const MouseEvent& event);
 
-    /** Called when a mouse button is pressed while it's over this component.
+    /** Called when a mouse button is pressed.
 
         The MouseEvent object passed in contains lots of methods for finding out
         which button was pressed, as well as which modifier keys (e.g. shift, ctrl)
@@ -1522,10 +1517,11 @@ public:
         Once a button is held down, the mouseDrag method will be called when the
         mouse moves, until the button is released.
 
-        @param e    details about the position and status of the mouse event
+        @param event  details about the position and status of the mouse event, including
+                      the source component in which it occurred
         @see mouseUp, mouseDrag, mouseDoubleClick, contains
     */
-    virtual void mouseDown         (const MouseEvent& e);
+    virtual void mouseDown (const MouseEvent& event);
 
     /** Called when the mouse is moved while a button is held down.
 
@@ -1533,14 +1529,11 @@ public:
         receives mouseDrag callbacks each time the mouse moves, even if the
         mouse strays outside the component's bounds.
 
-        If you want to be able to drag things off the edge of a component
-        and have the component scroll when you get to the edges, the
-        beginDragAutoRepeat() method might be useful.
-
-        @param e    details about the position and status of the mouse event
-        @see mouseDown, mouseUp, mouseMove, contains, beginDragAutoRepeat
+        @param event  details about the position and status of the mouse event, including
+                      the source component in which it occurred
+        @see mouseDown, mouseUp, mouseMove, contains, setDragRepeatInterval
     */
-    virtual void mouseDrag         (const MouseEvent& e);
+    virtual void mouseDrag (const MouseEvent& event);
 
     /** Called when a mouse button is released.
 
@@ -1551,46 +1544,38 @@ public:
         The MouseEvent object passed in contains lots of methods for finding out
         which buttons were down just before they were released.
 
-        @param e    details about the position and status of the mouse event
+        @param event  details about the position and status of the mouse event, including
+                      the source component in which it occurred
         @see mouseDown, mouseDrag, mouseDoubleClick, contains
     */
-    virtual void mouseUp           (const MouseEvent& e);
+    virtual void mouseUp (const MouseEvent& event);
 
-    /** Called when a mouse button has been double-clicked in this component.
+    /** Called when a mouse button has been double-clicked on a component.
 
         The MouseEvent object passed in contains lots of methods for finding out
         which button was pressed, as well as which modifier keys (e.g. shift, ctrl)
         were held down at the time.
 
-        For altering the time limit used to detect double-clicks,
-        see MouseEvent::setDoubleClickTimeout.
-
-        @param e    details about the position and status of the mouse event
-        @see mouseDown, mouseUp, MouseEvent::setDoubleClickTimeout,
-             MouseEvent::getDoubleClickTimeout
+        @param event  details about the position and status of the mouse event, including
+                      the source component in which it occurred
+        @see mouseDown, mouseUp
     */
-    virtual void mouseDoubleClick  (const MouseEvent& e);
+    virtual void mouseDoubleClick (const MouseEvent& event);
 
     /** Called when the mouse-wheel is moved.
 
         This callback is sent to the component that the mouse is over when the
         wheel is moved.
 
-        If not overridden, the component will forward this message to its parent, so
+        If not overridden, a component will forward this message to its parent, so
         that parent components can collect mouse-wheel messages that happen to
         child components which aren't interested in them.
 
-        @param e                details about the position and status of the mouse event
-        @param wheelIncrementX   the speed and direction of the horizontal scroll-wheel - a positive
-                                 value means the wheel has been pushed to the right, negative means it
-                                 was pushed to the left
-        @param wheelIncrementY   the speed and direction of the vertical scroll-wheel - a positive
-                                 value means the wheel has been pushed upwards, negative means it
-                                 was pushed downwards
+        @param event   details about the mouse event
+        @param wheel   details about the mouse wheel movement
     */
-    virtual void mouseWheelMove    (const MouseEvent& e,
-                                    float wheelIncrementX,
-                                    float wheelIncrementY);
+    virtual void mouseWheelMove (const MouseEvent& event,
+                                 const MouseWheelDetails& wheel);
 
     //==============================================================================
     /** Ensures that a non-stop stream of mouse-drag events will be sent during the
@@ -2318,7 +2303,7 @@ private:
     void internalMouseUp    (MouseInputSource&, const Point<int>&, const Time&, const ModifierKeys& oldModifiers);
     void internalMouseDrag  (MouseInputSource&, const Point<int>&, const Time&);
     void internalMouseMove  (MouseInputSource&, const Point<int>&, const Time&);
-    void internalMouseWheel (MouseInputSource&, const Point<int>&, const Time&, float amountX, float amountY);
+    void internalMouseWheel (MouseInputSource&, const Point<int>&, const Time&, const MouseWheelDetails&);
     void internalBroughtToFront();
     void internalFocusGain (const FocusChangeType, const WeakReference<Component>&);
     void internalFocusGain (const FocusChangeType);

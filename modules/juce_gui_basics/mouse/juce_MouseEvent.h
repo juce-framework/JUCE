@@ -319,4 +319,41 @@ private:
 };
 
 
+//==============================================================================
+/**
+    Contains status information about a mouse wheel event.
+
+    @see MouseListener, MouseEvent
+*/
+struct MouseWheelDetails
+{
+    //==============================================================================
+    /** The amount that the wheel has been moved in the X axis.
+
+        If isReversed is true, then a negative deltaX means that the wheel has been
+        pushed physically to the left.
+        If isReversed is false, then a negative deltaX means that the wheel has been
+        pushed physically to the right.
+    */
+    float deltaX;
+
+    /** The amount that the wheel has been moved in the Y axis.
+
+        If isReversed is true, then a negative deltaY means that the wheel has been
+        pushed physically upwards.
+        If isReversed is false, then a negative deltaY means that the wheel has been
+        pushed physically downwards.
+    */
+    float deltaY;
+
+    /** Indicates whether the user has reversed the direction of the wheel.
+        See deltaX and deltaY for an explanation of the effects of this value.
+    */
+    bool isReversed;
+
+    /** If true, then the wheel has continuous, un-stepped motion. */
+    bool isSmooth;
+};
+
+
 #endif   // __JUCE_MOUSEEVENT_JUCEHEADER__

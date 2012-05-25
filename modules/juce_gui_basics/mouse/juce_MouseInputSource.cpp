@@ -120,10 +120,10 @@ public:
         comp->internalMouseUp (source, comp->getLocalPoint (nullptr, screenPos), time, oldMods);
     }
 
-    void sendMouseWheel (Component* const comp, const Point<int>& screenPos, const Time& time, float x, float y)
+    void sendMouseWheel (Component* const comp, const Point<int>& screenPos, const Time& time, const MouseWheelDetails& wheel)
     {
         //DBG ("Mouse " + String (source.getIndex()) + " wheel: " + comp->getLocalPoint (nullptr, screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
-        comp->internalMouseWheel (source, comp->getLocalPoint (nullptr, screenPos), time, x, y);
+        comp->internalMouseWheel (source, comp->getLocalPoint (nullptr, screenPos), time, wheel);
     }
 
     //==============================================================================
@@ -285,7 +285,8 @@ public:
         }
     }
 
-    void handleWheel (ComponentPeer* const peer, const Point<int>& positionWithinPeer, const Time& time, float x, float y)
+    void handleWheel (ComponentPeer* const peer, const Point<int>& positionWithinPeer,
+                      const Time& time, const MouseWheelDetails& wheel)
     {
         jassert (peer != nullptr);
         lastTime = time;
@@ -300,7 +301,7 @@ public:
         {
             Component* current = getComponentUnderMouse();
             if (current != nullptr)
-                sendMouseWheel (current, screenPos, time, x, y);
+                sendMouseWheel (current, screenPos, time, wheel);
         }
     }
 
@@ -522,12 +523,14 @@ void MouseInputSource::hideCursor()                                     { pimpl-
 void MouseInputSource::revealCursor()                                   { pimpl->revealCursor (false); }
 void MouseInputSource::forceMouseCursorUpdate()                         { pimpl->revealCursor (true); }
 
-void MouseInputSource::handleEvent (ComponentPeer* peer, const Point<int>& positionWithinPeer, const int64 time, const ModifierKeys& mods)
+void MouseInputSource::handleEvent (ComponentPeer* peer, const Point<int>& positionWithinPeer,
+                                    const int64 time, const ModifierKeys& mods)
 {
     pimpl->handleEvent (peer, positionWithinPeer, Time (time), mods.withOnlyMouseButtons());
 }
 
-void MouseInputSource::handleWheel (ComponentPeer* const peer, const Point<int>& positionWithinPeer, const int64 time, const float x, const float y)
+void MouseInputSource::handleWheel (ComponentPeer* const peer, const Point<int>& positionWithinPeer,
+                                    const int64 time, const MouseWheelDetails& wheel)
 {
-    pimpl->handleWheel (peer, positionWithinPeer, Time (time), x, y);
+    pimpl->handleWheel (peer, positionWithinPeer, Time (time), wheel);
 }

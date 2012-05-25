@@ -40,6 +40,7 @@ extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
  - (CGFloat) scrollingDeltaX;
  - (CGFloat) scrollingDeltaX;
  - (BOOL) hasPreciseScrollingDeltas;
+ - (BOOL) isDirectionInvertedFromDevice;
 #endif
 @end
 
@@ -1580,36 +1581,47 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 {
     updateModifiers (ev);
 
-    float x = 0, y = 0;
+    MouseWheelDetails wheel;
+    wheel.deltaX = 0;
+    wheel.deltaY = 0;
+    wheel.isReversed = false;
+    wheel.isSmooth = false;
 
     @try
     {
        #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+        if ([ev respondsToSelector: @selector (isDirectionInvertedFromDevice)])
+            wheel.isReversed = [ev isDirectionInvertedFromDevice];
+
+        const float scale = 0.5f / 256.0f;
+
         if ([ev respondsToSelector: @selector (hasPreciseScrollingDeltas)])
         {
             if ([ev hasPreciseScrollingDeltas])
             {
-                x = [ev scrollingDeltaX] * 0.5f;
-                y = [ev scrollingDeltaY] * 0.5f;
+                wheel.deltaX = [ev scrollingDeltaX] * scale;
+                wheel.deltaY = [ev scrollingDeltaY] * scale;
+                wheel.isSmooth = true;
             }
         }
         else
        #endif
         {
-            x = [ev deviceDeltaX] * 0.5f;
-            y = [ev deviceDeltaY] * 0.5f;
+            wheel.deltaX = [ev deviceDeltaX] * scale;
+            wheel.deltaY = [ev deviceDeltaY] * scale;
         }
     }
     @catch (...)
     {}
 
-    if (x == 0 && y == 0)
+    if (wheel.deltaX == 0 && wheel.deltaY == 0)
     {
-        x = [ev deltaX] * 10.0f;
-        y = [ev deltaY] * 10.0f;
+        const float scale = 10.0f / 256.0f;
+        wheel.deltaX = [ev deltaX] * scale;
+        wheel.deltaY = [ev deltaY] * scale;
     }
 
-    handleMouseWheel (0, getMousePos (ev, view), getMouseTime (ev), x, y);
+    handleMouseWheel (0, getMousePos (ev, view), getMouseTime (ev), wheel);
 }
 
 void NSViewComponentPeer::showArrowCursorIfNeeded()

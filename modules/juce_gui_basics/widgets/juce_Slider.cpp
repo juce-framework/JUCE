@@ -942,7 +942,7 @@ public:
         }
     }
 
-    bool mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
+    bool mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
     {
         if (scrollWheelEnabled
              && style != TwoValueHorizontal
@@ -954,7 +954,8 @@ public:
                     valueBox->hideEditor (false);
 
                 const double value = (double) currentValue.getValue();
-                const double proportionDelta = (wheelIncrementX != 0 ? -wheelIncrementX : wheelIncrementY) * 0.15f;
+                const double proportionDelta = (wheel.deltaX != 0 ? -wheel.deltaX : wheel.deltaY)
+                                                   * (wheel.isReversed ? -0.15f : 0.15f);
                 const double currentPos = owner.valueToProportionOfLength (value);
                 const double newValue = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta));
 
@@ -1557,10 +1558,10 @@ void Slider::mouseDoubleClick (const MouseEvent&)
         pimpl->mouseDoubleClick();
 }
 
-void Slider::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
+void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! (isEnabled() && pimpl->mouseWheelMove (e, wheelIncrementX, wheelIncrementY)))
-        Component::mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+    if (! (isEnabled() && pimpl->mouseWheelMove (e, wheel)))
+        Component::mouseWheelMove (e, wheel);
 }
 
 void SliderListener::sliderDragStarted (Slider*)  {} // (can't write Slider::Listener due to idiotic VC2005 bug)
