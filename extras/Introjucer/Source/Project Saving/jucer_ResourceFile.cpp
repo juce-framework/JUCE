@@ -216,9 +216,10 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
                << "        }" << newLine
                << newLine
                << "        juce::var getIdentifierForImage (const juce::Image&)  { return juce::var(); }" << newLine
-               << "    };" << newLine
-               << "}" << newLine;
+               << "    };" << newLine;
     }
+
+    header << "}" << newLine;
 
     return true;
 }
