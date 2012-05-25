@@ -62,15 +62,15 @@ public:
         {
             const String viewBoxAtt (xml.getStringAttribute ("viewBox"));
             String::CharPointerType viewParams (viewBoxAtt.getCharPointer());
-            float vx, vy, vw, vh;
+            Point<float> vxy, vwh;
 
-            if (parseCoords (viewParams, vx, vy, true)
-                 && parseCoords (viewParams, vw, vh, true)
-                 && vw > 0
-                 && vh > 0)
+            if (parseCoords (viewParams, vxy, true)
+                 && parseCoords (viewParams, vwh, true)
+                 && vwh.x > 0
+                 && vwh.y > 0)
             {
-                newState.viewBoxW = vw;
-                newState.viewBoxH = vh;
+                newState.viewBoxW = vwh.x;
+                newState.viewBoxH = vwh.y;
 
                 int placementFlags = 0;
 
@@ -103,8 +103,8 @@ public:
                 const RectanglePlacement placement (placementFlags);
 
                 newState.transform
-                    = placement.getTransformToFit (Rectangle<float> (vx, vy, vw, vh),
-                                                   Rectangle<float> (0.0f, 0.0f, newState.width, newState.height))
+                    = placement.getTransformToFit (Rectangle<float> (vxy.x, vxy.y, vwh.x, vwh.y),
+                                                   Rectangle<float> (newState.width, newState.height))
                                .followedBy (newState.transform);
             }
         }
@@ -196,8 +196,7 @@ private:
         if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase ("evenodd"))
             path.setUsingNonZeroWinding (false);
 
-        float lastX = 0, lastY = 0;
-        float lastX2 = 0, lastY2 = 0;
+        Point<float> subpathStart, last, last2, p1, p2, p3;
         juce_wchar lastCommandChar = 0;
         bool isRelative = true;
         bool carryOn = true;
@@ -206,8 +205,6 @@ private:
 
         while (! d.isEmpty())
         {
-            float x, y, x2, y2, x3, y3;
-
             if (validCommandChars.indexOf (*d) >= 0)
             {
                 lastCommandChar = d.getAndAdvance();
@@ -220,45 +217,36 @@ private:
             case 'm':
             case 'L':
             case 'l':
-                if (parseCoords (d, x, y, false))
+                if (parseCoordsOrSkip (d, p1, false))
                 {
                     if (isRelative)
-                    {
-                        x += lastX;
-                        y += lastY;
-                    }
+                        p1 += last;
 
                     if (lastCommandChar == 'M' || lastCommandChar == 'm')
                     {
-                        path.startNewSubPath (x, y);
+                        subpathStart = p1;
+                        path.startNewSubPath (p1);
                         lastCommandChar = 'l';
                     }
                     else
-                        path.lineTo (x, y);
+                        path.lineTo (p1);
 
-                    lastX2 = lastX;
-                    lastY2 = lastY;
-                    lastX = x;
-                    lastY = y;
+                    last2 = last;
+                    last = p1;
                 }
-                else
-                {
-                    ++d;
-                }
-
                 break;
 
             case 'H':
             case 'h':
-                if (parseCoord (d, x, false, true))
+                if (parseCoord (d, p1.x, false, true))
                 {
                     if (isRelative)
-                        x += lastX;
+                        p1.x += last.x;
 
-                    path.lineTo (x, lastY);
+                    path.lineTo (p1.x, last.y);
 
-                    lastX2 = lastX;
-                    lastX = x;
+                    last2.x = last.x;
+                    last.x = p1.x;
                 }
                 else
                 {
@@ -268,15 +256,15 @@ private:
 
             case 'V':
             case 'v':
-                if (parseCoord (d, y, false, false))
+                if (parseCoord (d, p1.y, false, false))
                 {
                     if (isRelative)
-                        y += lastY;
+                        p1.y += last.y;
 
-                    path.lineTo (lastX, y);
+                    path.lineTo (last.x, p1.y);
 
-                    lastY2 = lastY;
-                    lastY = y;
+                    last2.y = last.y;
+                    last.y = p1.y;
                 }
                 else
                 {
@@ -286,115 +274,79 @@ private:
 
             case 'C':
             case 'c':
-                if (parseCoords (d, x, y, false)
-                     && parseCoords (d, x2, y2, false)
-                     && parseCoords (d, x3, y3, false))
+                if (parseCoordsOrSkip (d, p1, false)
+                     && parseCoordsOrSkip (d, p2, false)
+                     && parseCoordsOrSkip (d, p3, false))
                 {
                     if (isRelative)
                     {
-                        x += lastX;
-                        y += lastY;
-                        x2 += lastX;
-                        y2 += lastY;
-                        x3 += lastX;
-                        y3 += lastY;
+                        p1 += last;
+                        p2 += last;
+                        p3 += last;
                     }
 
-                    path.cubicTo (x, y, x2, y2, x3, y3);
+                    path.cubicTo (p1, p2, p3);
 
-                    lastX2 = x2;
-                    lastY2 = y2;
-                    lastX = x3;
-                    lastY = y3;
-                }
-                else
-                {
-                    ++d;
+                    last2 = p2;
+                    last = p3;
                 }
                 break;
 
             case 'S':
             case 's':
-                if (parseCoords (d, x, y, false)
-                     && parseCoords (d, x3, y3, false))
+                if (parseCoordsOrSkip (d, p1, false)
+                     && parseCoordsOrSkip (d, p3, false))
                 {
                     if (isRelative)
                     {
-                        x += lastX;
-                        y += lastY;
-                        x3 += lastX;
-                        y3 += lastY;
+                        p1 += last;
+                        p3 += last;
                     }
 
-                    x2 = lastX + (lastX - lastX2);
-                    y2 = lastY + (lastY - lastY2);
-                    path.cubicTo (x2, y2, x, y, x3, y3);
+                    p2 = last + (last - last2);
+                    path.cubicTo (p2, p1, p3);
 
-                    lastX2 = x;
-                    lastY2 = y;
-                    lastX = x3;
-                    lastY = y3;
-                }
-                else
-                {
-                    ++d;
+                    last2 = p1;
+                    last = p3;
                 }
                 break;
 
             case 'Q':
             case 'q':
-                if (parseCoords (d, x, y, false)
-                     && parseCoords (d, x2, y2, false))
+                if (parseCoordsOrSkip (d, p1, false)
+                     && parseCoordsOrSkip (d, p2, false))
                 {
                     if (isRelative)
                     {
-                        x += lastX;
-                        y += lastY;
-                        x2 += lastX;
-                        y2 += lastY;
+                        p1 += last;
+                        p2 += last;
                     }
 
-                    path.quadraticTo (x, y, x2, y2);
+                    path.quadraticTo (p1, p2);
 
-                    lastX2 = x;
-                    lastY2 = y;
-                    lastX = x2;
-                    lastY = y2;
-                }
-                else
-                {
-                    ++d;
+                    last2 = p1;
+                    last = p2;
                 }
                 break;
 
             case 'T':
             case 't':
-                if (parseCoords (d, x, y, false))
+                if (parseCoordsOrSkip (d, p1, false))
                 {
                     if (isRelative)
-                    {
-                        x += lastX;
-                        y += lastY;
-                    }
+                        p1 += last;
 
-                    x2 = lastX + (lastX - lastX2);
-                    y2 = lastY + (lastY - lastY2);
-                    path.quadraticTo (x2, y2, x, y);
+                    p2 = last + (last - last2);
+                    path.quadraticTo (p2, p1);
 
-                    lastX2 = x2;
-                    lastY2 = y2;
-                    lastX = x;
-                    lastY = y;
-                }
-                else
-                {
-                    ++d;
+                    last2 = p2;
+                    last = p1;
                 }
                 break;
 
             case 'A':
             case 'a':
-                if (parseCoords (d, x, y, false))
+                if (parseCoordsOrSkip (d, p1, false))
                 {
                     String num;
 
@@ -410,20 +362,17 @@ private:
                             {
                                 const bool sweep = num.getIntValue() != 0;
 
-                                if (parseCoords (d, x2, y2, false))
+                                if (parseCoordsOrSkip (d, p2, false))
                                 {
                                     if (isRelative)
-                                    {
-                                        x2 += lastX;
-                                        y2 += lastY;
-                                    }
+                                        p2 += last;
 
-                                    if (lastX != x2 || lastY != y2)
+                                    if (last != p2)
                                     {
                                         double centreX, centreY, startAngle, deltaAngle;
-                                        double rx = x, ry = y;
+                                        double rx = p1.x, ry = p1.y;
 
-                                        endpointToCentreParameters (lastX, lastY, x2, y2,
+                                        endpointToCentreParameters (last.x, last.y, p2.x, p2.y,
                                                                     angle, largeArc, sweep,
                                                                     rx, ry, centreX, centreY,
                                                                     startAngle, deltaAngle);
@@ -433,21 +382,15 @@ private:
                                                             angle, (float) startAngle, (float) (startAngle + deltaAngle),
                                                             false);
 
-                                        path.lineTo (x2, y2);
+                                        path.lineTo (p2);
                                     }
 
-                                    lastX2 = lastX;
-                                    lastY2 = lastY;
-                                    lastX = x2;
-                                    lastY = y2;
+                                    last2 = last;
+                                    last = p2;
                                 }
                             }
                         }
                     }
-                }
-                else
-                {
-                    ++d;
                 }
 
                 break;
@@ -455,6 +398,7 @@ private:
             case 'Z':
             case 'z':
                 path.closeSubPath();
+                last = last2 = subpathStart;
                 d = d.findEndOfWhitespace();
                 break;
 
@@ -551,24 +495,21 @@ private:
         const String pointsAtt (xml.getStringAttribute ("points"));
         String::CharPointerType points (pointsAtt.getCharPointer());
         Path path;
-        float x, y;
+        Point<float> p;
 
-        if (parseCoords (points, x, y, true))
+        if (parseCoords (points, p, true))
         {
-            float firstX = x;
-            float firstY = y;
-            float lastX = 0, lastY = 0;
+            Point<float> first (p), last;
 
-            path.startNewSubPath (x, y);
+            path.startNewSubPath (first);
 
-            while (parseCoords (points, x, y, true))
+            while (parseCoords (points, p, true))
             {
-                lastX = x;
-                lastY = y;
-                path.lineTo (x, y);
+                last = p;
+                path.lineTo (p);
             }
 
-            if ((! isPolyline) || (firstX == lastX && firstY == lastY))
+            if ((! isPolyline) || first == last)
                 path.closeSubPath();
         }
 
@@ -865,10 +806,19 @@ private:
         return true;
     }
 
-    bool parseCoords (String::CharPointerType& s, float& x, float& y, const bool allowUnits) const
+    bool parseCoords (String::CharPointerType& s, Point<float>& p, const bool allowUnits) const
     {
-        return parseCoord (s, x, allowUnits, true)
-            && parseCoord (s, y, allowUnits, false);
+        return parseCoord (s, p.x, allowUnits, true)
+            && parseCoord (s, p.y, allowUnits, false);
+    }
+
+    bool parseCoordsOrSkip (String::CharPointerType& s, Point<float>& p, const bool allowUnits) const
+    {
+        const bool b = parseCoords (s, p, allowUnits);
+        if (! b)
+            ++s;
+
+        return b;
     }
 
     float getCoordLength (const String& s, const float sizeForProportions) const
