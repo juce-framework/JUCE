@@ -86,15 +86,15 @@ void BubbleMessageComponent::init (const int numMillisecondsBeforeRemoving,
 
 void BubbleMessageComponent::getContentSize (int& w, int& h)
 {
-    w = 16 + (int) textLayout.getWidth();
-    h = 16 + (int) textLayout.getHeight();
+    w = 20 + (int) textLayout.getWidth();
+    h = 20 + (int) textLayout.getHeight();
 }
 
 void BubbleMessageComponent::paintContent (Graphics& g, int w, int h)
 {
     g.setColour (findColour (TooltipWindow::textColourId));
 
-    textLayout.draw (g, Rectangle<float> ((float) w, (float) h));
+    textLayout.draw (g, Rectangle<float> (6.0f, 6.0f, w - 12.0f, h - 12.0f));
 }
 
 void BubbleMessageComponent::timerCallback()
