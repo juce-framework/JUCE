@@ -590,7 +590,7 @@ static bool exporterTargetMatches (const String& test, String target)
     validTargets.addTokens (target, ",;", "");
     validTargets.trim();
     validTargets.removeEmptyStrings();
-    
+
     if (validTargets.size() == 0)
         return true;
 
@@ -602,7 +602,7 @@ static bool exporterTargetMatches (const String& test, String target)
              || (target.startsWithChar ('!') && test != target.substring (1).trimStart()))
             return true;
     }
-    
+
     return false;
 }
 

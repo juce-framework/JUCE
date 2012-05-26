@@ -707,7 +707,13 @@ Project::Item Project::Item::getOrCreateSubGroup (const String& name)
 
 Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex)
 {
-    Item group (createGroup (project, name, createGUID (getID() + name + String (getNumChildren()))));
+    String newID (createGUID (getID() + name + String (getNumChildren())));
+
+    int n = 0;
+    while (findItemWithID (newID).isValid())
+        newID = createGUID (newID + String (++n));
+
+    Item group (createGroup (project, name, newID));
 
     jassert (canContain (group));
     addChild (group, insertIndex);
