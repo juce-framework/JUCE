@@ -1593,12 +1593,11 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
         if ([ev respondsToSelector: @selector (isDirectionInvertedFromDevice)])
             wheel.isReversed = [ev isDirectionInvertedFromDevice];
 
-        const float scale = 0.5f / 256.0f;
-
         if ([ev respondsToSelector: @selector (hasPreciseScrollingDeltas)])
         {
             if ([ev hasPreciseScrollingDeltas])
             {
+                const float scale = 0.5f / 256.0f;
                 wheel.deltaX = [ev scrollingDeltaX] * scale;
                 wheel.deltaY = [ev scrollingDeltaY] * scale;
                 wheel.isSmooth = true;
@@ -1607,6 +1606,7 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
         else
        #endif
         {
+            const float scale = 0.5f / 256.0f;
             wheel.deltaX = [ev deviceDeltaX] * scale;
             wheel.deltaY = [ev deviceDeltaY] * scale;
         }
