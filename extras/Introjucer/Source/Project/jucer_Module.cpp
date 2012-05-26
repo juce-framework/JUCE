@@ -586,12 +586,24 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
 //==============================================================================
 static bool exporterTargetMatches (const String& test, String target)
 {
-    target = target.trim();
+    StringArray validTargets;
+    validTargets.addTokens (target, ",;", "");
+    validTargets.trim();
+    validTargets.removeEmptyStrings();
+    
+    if (validTargets.size() == 0)
+        return true;
 
-    if (target.startsWithChar ('!'))
-        return ! exporterTargetMatches (test, target.substring (1).trimStart());
+    for (int i = validTargets.size(); --i >= 0;)
+    {
+        const String& target = validTargets[i];
 
-    return target == test || target.isEmpty();
+        if (target == test
+             || (target.startsWithChar ('!') && test != target.substring (1).trimStart()))
+            return true;
+    }
+    
+    return false;
 }
 
 bool LibraryModule::fileTargetMatches (ProjectExporter& exporter, const String& target)
