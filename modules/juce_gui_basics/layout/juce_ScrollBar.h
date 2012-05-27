@@ -44,7 +44,7 @@
     The scrollbar will adjust its own visibility according to whether its thumb size
     allows it to actually be scrolled.
 
-    For most purposes, it's probably easier to use a ViewportContainer or ListBox
+    For most purposes, it's probably easier to use a Viewport or ListBox
     instead of handling a scrollbar directly.
 
     @see ScrollBar::Listener
