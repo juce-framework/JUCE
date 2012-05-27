@@ -28,8 +28,6 @@ class UIViewComponentPeer;
 //==============================================================================
 } // (juce namespace)
 
-#define JuceUIView MakeObjCClassName(JuceUIView)
-
 @interface JuceUIView : UIView <UITextViewDelegate>
 {
 @public
@@ -54,9 +52,7 @@ class UIViewComponentPeer;
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text;
 @end
 
-
-#define JuceUIViewController MakeObjCClassName(JuceUIViewController)
-
+//==============================================================================
 @interface JuceUIViewController : UIViewController
 {
 }
@@ -66,8 +62,6 @@ class UIViewComponentPeer;
 @end
 
 //==============================================================================
-#define JuceUIWindow MakeObjCClassName(JuceUIWindow)
-
 @interface JuceUIWindow : UIWindow
 {
 @private

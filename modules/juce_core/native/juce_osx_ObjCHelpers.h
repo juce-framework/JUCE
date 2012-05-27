@@ -54,5 +54,50 @@ namespace
     }
 }
 
+//==============================================================================
+class ObjCClassBuilder
+{
+public:
+    ObjCClassBuilder (Class superClass, const String& name)
+        : cls (objc_allocateClassPair (superClass, name.toUTF8(), 0))
+    {
+    }
+
+    Class getClass()
+    {
+        objc_registerClassPair (cls);
+        return cls;
+    }
+
+    template <typename Type>
+    void addIvar (const char* name)
+    {
+        BOOL b = class_addIvar (cls, name, sizeof (Type), (uint8_t) rint (log2 (sizeof (Type))), @encode (Type));
+        jassert (b); (void) b;
+    }
+
+    template <typename FunctionType>
+    void addMethod (SEL selector, FunctionType callbackFn, const char* signature)
+    {
+        BOOL b = class_addMethod (cls, selector, (IMP) callbackFn, signature);
+        jassert (b); (void) b;
+    }
+
+    static id sendSuperclassMessage (id self, SEL selector)
+    {
+        objc_super s = { self, [NSObject class] };
+        return objc_msgSendSuper (&s, selector);
+    }
+
+    static String getRandomisedName (const char* root)
+    {
+        return root + String::toHexString (Random::getSystemRandom().nextInt64());
+    }
+
+private:
+    Class cls;
+
+    JUCE_DECLARE_NON_COPYABLE (ObjCClassBuilder);
+};
 
 #endif   // __JUCE_OSX_OBJCHELPERS_JUCEHEADER__

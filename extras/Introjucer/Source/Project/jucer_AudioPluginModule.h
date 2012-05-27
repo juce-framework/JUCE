@@ -474,12 +474,6 @@ namespace AAXHelpers
 
     static bool isExporterSupported (ProjectExporter& exporter)       { return exporter.isVisualStudio() || exporter.isXcode(); }
 
-    static RelativePath getAAXFolderRelativePath (ProjectExporter& exporter)
-    {
-        return exporter.rebaseFromProjectFolderToBuildTarget (RelativePath (getAAXFolder (exporter).toString(),
-                                                                            RelativePath::projectFolder));
-    }
-
     static void fixMissingAAXValues (ProjectExporter& exporter)
     {
         if (getAAXFolder (exporter).toString().isEmpty())
