@@ -106,7 +106,11 @@ public:
 
             setOwner (window, this);
             [window orderOut: nil];
+           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
             [window setDelegate: (id<NSWindowDelegate>) window];
+           #else
+            [window setDelegate: window];
+           #endif
             [window setOpaque: component->isOpaque()];
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 
