@@ -101,10 +101,10 @@ bool Process::openEmailWithAttachments (const String& targetEmailAddress,
 class URLConnectionState   : public Thread
 {
 public:
-    URLConnectionState (NSObject* owner_, NSURLRequest* req)
+    URLConnectionState (NSURLRequest* req)
         : Thread ("http connection"),
           contentLength (-1),
-          owner (owner_),
+          delegate (nil),
           request ([req retain]),
           connection (nil),
           data ([[NSMutableData data] retain]),
@@ -113,15 +113,19 @@ public:
           hasFailed (false),
           hasFinished (false)
     {
+        static DelegateClass cls;
+        delegate = [cls.createInstance() init];
+        DelegateClass::setState (delegate, this);
     }
 
     ~URLConnectionState()
     {
-        stopThread (10000);
+        stop();
         [connection release];
         [data release];
         [request release];
         [headers release];
+        [delegate release];
     }
 
     bool start (URL::OpenStreamProgressCallback* callback, void* context)
@@ -216,12 +220,12 @@ public:
 
     void run()
     {
-        NSUInteger oldRetainCount = [owner retainCount];
+        NSUInteger oldRetainCount = [delegate retainCount];
         connection = [[NSURLConnection alloc] initWithRequest: request
-                                                     delegate: owner];
+                                                     delegate: delegate];
 
-        if (oldRetainCount == [owner retainCount])
-            [owner retain]; // newer SDK should already retain this, but there were problems in older versions..
+        if (oldRetainCount == [delegate retainCount])
+            [delegate retain]; // newer SDK should already retain this, but there were problems in older versions..
 
         if (connection != nil)
         {
@@ -235,7 +239,7 @@ public:
 
     int64 contentLength;
     CriticalSection dataLock;
-    NSObject* owner;
+    NSObject* delegate;
     NSURLRequest* request;
     NSURLConnection* connection;
     NSMutableData* data;
@@ -243,63 +247,49 @@ public:
     bool initialised, hasFailed, hasFinished;
 
 private:
+    //==============================================================================
+    struct DelegateClass  : public ObjCClass<NSObject>
+    {
+        DelegateClass()  : ObjCClass ("JUCEAppDelegate_")
+        {
+            addIvar <URLConnectionState*> ("state");
+
+            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,         "v@:@@");
+            addMethod (@selector (connection:didFailWithError:),   didFailWithError,           "v@:@@");
+            addMethod (@selector (connection:didReceiveData:),     didReceiveData,             "v@:@@");
+            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading, "v@:@");
+
+            registerClass();
+        }
+
+        static void setState (id self, URLConnectionState* state)  { object_setInstanceVariable (self, "state", state); }
+        static URLConnectionState* getState (id self)              { return getIvar<URLConnectionState*> (self, "state"); }
+
+    private:
+        static void didReceiveResponse (id self, SEL, NSURLConnection*, NSURLResponse* response)
+        {
+            getState (self)->didReceiveResponse (response);
+        }
+
+        static void didFailWithError (id self, SEL, NSURLConnection*, NSError* error)
+        {
+            getState (self)->didFailWithError (error);
+        }
+
+        static void didReceiveData (id self, SEL, NSURLConnection*, NSData* newData)
+        {
+            getState (self)->didReceiveData (newData);
+        }
+
+        static void connectionDidFinishLoading (id self, SEL, NSURLConnection*)
+        {
+            getState (self)->finishedLoading();
+        }
+    };
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState);
 };
 
-//==============================================================================
-struct URLConnectionDelegateClass  : public ObjCClass<NSObject>
-{
-    URLConnectionDelegateClass()  : ObjCClass ("JUCEAppDelegate_")
-    {
-        addIvar <URLConnectionState*> ("state");
-
-        addMethod (@selector (dealloc),                        dealloc,                    "v@:");
-        addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,         "v@:@@");
-        addMethod (@selector (connection:didFailWithError:),   didFailWithError,           "v@:@@");
-        addMethod (@selector (connection:didReceiveData:),     didReceiveData,             "v@:@@");
-        addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading, "v@:@");
-
-        registerClass();
-    }
-
-    static void setState (id self, URLConnectionState* state)
-    {
-        object_setInstanceVariable (self, "state", state);
-    }
-
-    static URLConnectionState* getState (id self)
-    {
-        return getIvar<URLConnectionState*> (self, "state");
-    }
-
-private:
-    static void dealloc (id self, SEL sel)
-    {
-        getState (self)->stop();
-        delete getState (self);
-        sendSuperclassMessage (self, @selector (dealloc));
-    }
-
-    static void didReceiveResponse (id self, SEL, NSURLConnection*, NSURLResponse* response)
-    {
-        getState (self)->didReceiveResponse (response);
-    }
-
-    static void didFailWithError (id self, SEL, NSURLConnection*, NSError* error)
-    {
-        getState (self)->didFailWithError (error);
-    }
-
-    static void didReceiveData (id self, SEL, NSURLConnection*, NSData* newData)
-    {
-        getState (self)->didReceiveData (newData);
-    }
-
-    static void connectionDidFinishLoading (id self, SEL, NSURLConnection*)
-    {
-        getState (self)->finishedLoading();
-    }
-};
 
 //==============================================================================
 class WebInputStream  : public InputStream
@@ -308,37 +298,29 @@ public:
     WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
                     URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
                     const String& headers_, int timeOutMs_, StringPairArray* responseHeaders)
-      : connection (nil),
-        address (address_), headers (headers_), postData (postData_), position (0),
+      : address (address_), headers (headers_), postData (postData_), position (0),
         finished (false), isPost (isPost_), timeOutMs (timeOutMs_)
     {
         JUCE_AUTORELEASEPOOL
-        connection = createConnection (progressCallback, progressCallbackContext);
+        createConnection (progressCallback, progressCallbackContext);
 
-        if (responseHeaders != nullptr && connection != nil)
+        if (responseHeaders != nullptr && connection != nullptr)
         {
-            URLConnectionState* const state = URLConnectionDelegateClass::getState (connection);
-
-            if (state->headers != nil)
+            if (connection->headers != nil)
             {
-                NSEnumerator* enumerator = [state->headers keyEnumerator];
+                NSEnumerator* enumerator = [connection->headers keyEnumerator];
                 NSString* key;
 
                 while ((key = [enumerator nextObject]) != nil)
                     responseHeaders->set (nsStringToJuce (key),
-                                          nsStringToJuce ((NSString*) [state->headers objectForKey: key]));
+                                          nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
             }
         }
     }
 
-    ~WebInputStream()
-    {
-        close();
-    }
-
     //==============================================================================
-    bool isError() const        { return connection == nil; }
-    int64 getTotalLength()      { return connection == nil ? -1 : URLConnectionDelegateClass::getState (connection)->contentLength; }
+    bool isError() const        { return connection == nullptr; }
+    int64 getTotalLength()      { return connection == nullptr ? -1 : connection->contentLength; }
     bool isExhausted()          { return finished; }
     int64 getPosition()         { return position; }
 
@@ -347,23 +329,17 @@ public:
         jassert (buffer != nullptr && bytesToRead >= 0);
 
         if (finished || isError())
-        {
             return 0;
-        }
-        else
-        {
-            JUCE_AUTORELEASEPOOL
 
-            URLConnectionState* const state = URLConnectionDelegateClass::getState (connection);
+        JUCE_AUTORELEASEPOOL
 
-            const int bytesRead = state->read (static_cast <char*> (buffer), bytesToRead);
-            position += bytesRead;
+        const int bytesRead = connection->read (static_cast <char*> (buffer), bytesToRead);
+        position += bytesRead;
 
-            if (bytesRead == 0)
-                finished = true;
+        if (bytesRead == 0)
+            finished = true;
 
-            return bytesRead;
-        }
+        return bytesRead;
     }
 
     bool setPosition (int64 wantedPos)
@@ -374,9 +350,9 @@ public:
 
             if (wantedPos < position)
             {
-                close();
+                connection = nullptr;
                 position = 0;
-                connection = createConnection (0, 0);
+                createConnection (0, 0);
             }
 
             skipNextBytes (wantedPos - position);
@@ -385,9 +361,8 @@ public:
         return true;
     }
 
-    //==============================================================================
 private:
-    NSObject* connection;
+    ScopedPointer<URLConnectionState> connection;
     String address, headers;
     MemoryBlock postData;
     int64 position;
@@ -395,57 +370,42 @@ private:
     const bool isPost;
     const int timeOutMs;
 
-    void close()
+    void createConnection (URL::OpenStreamProgressCallback* progressCallback,
+                           void* progressCallbackContext)
     {
-        if (connection != nil)
-        {
-            URLConnectionDelegateClass::getState (connection)->stop();
-            [connection release];
-            connection = nil;
-        }
-    }
+        jassert (connection == nullptr);
 
-    NSObject* createConnection (URL::OpenStreamProgressCallback* progressCallback,
-                                void* progressCallbackContext)
-    {
         NSMutableURLRequest* req = [NSMutableURLRequest  requestWithURL: [NSURL URLWithString: juceStringToNS (address)]
                                                             cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
                                                         timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)];
 
-        if (req == nil)
-            return nil;
-
-        [req setHTTPMethod: nsStringLiteral (isPost ? "POST" : "GET")];
-        //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
-
-        StringArray headerLines;
-        headerLines.addLines (headers);
-        headerLines.removeEmptyStrings (true);
-
-        for (int i = 0; i < headerLines.size(); ++i)
+        if (req != nil)
         {
-            const String key (headerLines[i].upToFirstOccurrenceOf (":", false, false).trim());
-            const String value (headerLines[i].fromFirstOccurrenceOf (":", false, false).trim());
+            [req setHTTPMethod: nsStringLiteral (isPost ? "POST" : "GET")];
+            //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
 
-            if (key.isNotEmpty() && value.isNotEmpty())
-                [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+            StringArray headerLines;
+            headerLines.addLines (headers);
+            headerLines.removeEmptyStrings (true);
+
+            for (int i = 0; i < headerLines.size(); ++i)
+            {
+                const String key (headerLines[i].upToFirstOccurrenceOf (":", false, false).trim());
+                const String value (headerLines[i].fromFirstOccurrenceOf (":", false, false).trim());
+
+                if (key.isNotEmpty() && value.isNotEmpty())
+                    [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+            }
+
+            if (isPost && postData.getSize() > 0)
+                [req setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                                 length: postData.getSize()]];
+
+            connection = new URLConnectionState (req);
+
+            if (! connection->start (progressCallback, progressCallbackContext))
+                connection = nullptr;
         }
-
-        if (isPost && postData.getSize() > 0)
-            [req setHTTPBody: [NSData dataWithBytes: postData.getData()
-                                             length: postData.getSize()]];
-
-        static URLConnectionDelegateClass cls;
-        NSObject* const s = [cls.createInstance() init];
-
-        URLConnectionState* state = new URLConnectionState (s, req);
-        URLConnectionDelegateClass::setState (s, state);
-
-        if (state->start (progressCallback, progressCallbackContext))
-            return s;
-
-        [s release];
-        return nil;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream);
