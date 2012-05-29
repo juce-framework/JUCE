@@ -220,20 +220,12 @@ public:
 
     void run()
     {
-        NSUInteger oldRetainCount = [delegate retainCount];
         connection = [[NSURLConnection alloc] initWithRequest: request
                                                      delegate: delegate];
-
-        if (oldRetainCount == [delegate retainCount])
-            [delegate retain]; // newer SDK should already retain this, but there were problems in older versions..
-
-        if (connection != nil)
+        while (! threadShouldExit())
         {
-            while (! threadShouldExit())
-            {
-                JUCE_AUTORELEASEPOOL
-                [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
-            }
+            JUCE_AUTORELEASEPOOL
+            [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
     }
 
@@ -304,17 +296,14 @@ public:
         JUCE_AUTORELEASEPOOL
         createConnection (progressCallback, progressCallbackContext);
 
-        if (responseHeaders != nullptr && connection != nullptr)
+        if (responseHeaders != nullptr && connection != nullptr && connection->headers != nil)
         {
-            if (connection->headers != nil)
-            {
-                NSEnumerator* enumerator = [connection->headers keyEnumerator];
-                NSString* key;
+            NSEnumerator* enumerator = [connection->headers keyEnumerator];
+            NSString* key;
 
-                while ((key = [enumerator nextObject]) != nil)
-                    responseHeaders->set (nsStringToJuce (key),
-                                          nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
-            }
+            while ((key = [enumerator nextObject]) != nil)
+                responseHeaders->set (nsStringToJuce (key),
+                                      nsStringToJuce ((NSString*) [connection->headers objectForKey: key]));
         }
     }
 
