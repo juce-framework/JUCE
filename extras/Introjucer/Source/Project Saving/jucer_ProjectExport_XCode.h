@@ -61,8 +61,6 @@ public:
 
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX");
-
-        setValueIfVoid (getObjCSuffixValue(), createAlphaNumericUID());
     }
 
     static XCodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
@@ -76,9 +74,6 @@ public:
     }
 
     //==============================================================================
-    Value getObjCSuffixValue()              { return getSetting ("objCExtraSuffix"); }
-    String getObjCSuffixString() const      { return settings ["objCExtraSuffix"]; }
-
     Value getPListToMergeValue()            { return getSetting ("customPList"); }
     String getPListToMergeString() const    { return settings ["customPList"]; }
 
@@ -112,11 +107,6 @@ public:
     void createPropertyEditors (PropertyListBuilder& props)
     {
         ProjectExporter::createPropertyEditors (props);
-
-        props.add (new TextPropertyComponent (getObjCSuffixValue(), "Objective-C class name suffix", 64, false),
-                   "Because objective-C linkage is done by string-matching, you can get horrible linkage mix-ups when different modules containing the "
-                   "same class-names are loaded simultaneously. This setting lets you provide a unique string that will be used in naming "
-                   "the obj-C classes in your executable to avoid this.");
 
         if (projectType.isGUIApplication() && ! iOS)
         {
@@ -744,12 +734,6 @@ private:
             defines.set ("NDEBUG", "1");
             s.add ("GCC_GENERATE_DEBUGGING_SYMBOLS = NO");
             s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = YES");
-        }
-
-        {
-            const String objCSuffix (getObjCSuffixString().trim());
-            if (objCSuffix.isNotEmpty())
-                defines.set ("JUCE_ObjCExtraSuffix", replacePreprocessorTokens (config, objCSuffix));
         }
 
         {

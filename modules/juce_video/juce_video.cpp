@@ -108,7 +108,6 @@ namespace juce
 
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "../juce_core/native/juce_mac_ObjCSuffix.h"
 
  #if JUCE_USE_CAMERA
   #include "native/juce_mac_CameraDevice.mm"

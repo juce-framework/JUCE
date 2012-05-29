@@ -55,18 +55,27 @@ namespace
 }
 
 //==============================================================================
-class ObjCClassBuilder
+template <typename SuperclassType>
+struct ObjCClass
 {
-public:
-    ObjCClassBuilder (Class superClass, const String& name)
-        : cls (objc_allocateClassPair (superClass, name.toUTF8(), 0))
+    ObjCClass (const char* nameRoot)
+        : cls (objc_allocateClassPair ([SuperclassType class], getRandomisedName (nameRoot).toUTF8(), 0))
     {
     }
 
-    Class getClass()
+    ~ObjCClass()
+    {
+        objc_disposeClassPair (cls);
+    }
+
+    void registerClass()
     {
         objc_registerClassPair (cls);
-        return cls;
+    }
+
+    SuperclassType* createInstance() const
+    {
+        return class_createInstance (cls, 0);
     }
 
     template <typename Type>
@@ -83,21 +92,54 @@ public:
         jassert (b); (void) b;
     }
 
+    template <typename FunctionType>
+    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2)
+    {
+        addMethod (selector, callbackFn, (String (sig1) + sig2).toUTF8());
+    }
+
+    template <typename FunctionType>
+    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2, const char* sig3)
+    {
+        addMethod (selector, callbackFn, (String (sig1) + sig2 + sig3).toUTF8());
+    }
+
+    template <typename FunctionType>
+    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2, const char* sig3, const char* sig4)
+    {
+        addMethod (selector, callbackFn, (String (sig1) + sig2 + sig3 + sig4).toUTF8());
+    }
+
+    void addProtocol (Protocol* protocol)
+    {
+        BOOL b = class_addProtocol (cls, protocol);
+        jassert (b); (void) b;
+    }
+
+    Class cls;
+
     static id sendSuperclassMessage (id self, SEL selector)
     {
-        objc_super s = { self, [NSObject class] };
+        objc_super s = { self, [SuperclassType class] };
         return objc_msgSendSuper (&s, selector);
     }
 
+    template <typename Type>
+    static Type getIvar (id self, const char* name)
+    {
+        Type v = Type();
+        object_getInstanceVariable (self, name, (void**) &v);
+        return v;
+    }
+
+private:
     static String getRandomisedName (const char* root)
     {
         return root + String::toHexString (Random::getSystemRandom().nextInt64());
     }
 
-private:
-    Class cls;
-
-    JUCE_DECLARE_NON_COPYABLE (ObjCClassBuilder);
+    JUCE_DECLARE_NON_COPYABLE (ObjCClass);
 };
+
 
 #endif   // __JUCE_OSX_OBJCHELPERS_JUCEHEADER__

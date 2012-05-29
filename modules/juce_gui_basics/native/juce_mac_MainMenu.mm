@@ -23,43 +23,17 @@
   ==============================================================================
 */
 
-class JuceMainMenuHandler;
-
-} // (juce namespace)
-
-using namespace juce;
-
-#define JuceMenuCallback MakeObjCClassName(JuceMenuCallback)
-
-#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-@interface JuceMenuCallback  : NSObject <NSMenuDelegate>
-#else
-@interface JuceMenuCallback  : NSObject
-#endif
-{
-    JuceMainMenuHandler* owner;
-}
-
-- (JuceMenuCallback*) initWithOwner: (JuceMainMenuHandler*) owner_;
-- (void) dealloc;
-- (void) menuItemInvoked: (id) menu;
-- (void) menuNeedsUpdate: (NSMenu*) menu;
-@end
-
-namespace juce
-{
-
-//==============================================================================
 class JuceMainMenuHandler   : private MenuBarModel::Listener,
                               private DeletedAtShutdown
 {
 public:
-    //==============================================================================
     JuceMainMenuHandler()
         : currentModel (nullptr),
           lastUpdateTime (0)
     {
-        callback = [[JuceMenuCallback alloc] initWithOwner: this];
+        static JuceMenuCallbackClass cls;
+        callback = [cls.createInstance() performSelector: @selector (initWithOwner:)
+                                              withObject: (id) this];
     }
 
     ~JuceMainMenuHandler()
@@ -234,17 +208,38 @@ public:
         }
         else if (iter.subMenu != nullptr)
         {
-            NSMenuItem* item = [menuToAddTo addItemWithTitle: text
-                                                      action: nil
-                                               keyEquivalent: nsEmptyString()];
+            if (iter.itemName.containsIgnoreCase ("recent"))
+            {
+                NSMenuItem* item = [menuToAddTo addItemWithTitle: NSLocalizedString (@"Open Recent", nil)
+                                                          action: nil
+                                                   keyEquivalent: @""];
 
-            [item setTag: iter.itemId];
-            [item setEnabled: iter.isEnabled];
+                NSMenu* openRecentMenu = [[[NSMenu alloc] initWithTitle: @"Open Recent"] autorelease];
+                [openRecentMenu performSelector: @selector(_setMenuName:)
+                                     withObject: @"NSRecentDocumentsMenu"];
 
-            NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex);
-            [sub setDelegate: nil];
-            [menuToAddTo setSubmenu: sub forItem: item];
-            [sub release];
+                [menuToAddTo setSubmenu: openRecentMenu forItem: item];
+
+                item = [openRecentMenu addItemWithTitle: NSLocalizedString(@"Clear Menu", nil)
+                                                 action: @selector(clearRecentDocuments:)
+                                          keyEquivalent: @""];
+
+                [openRecentMenu update];
+            }
+            else
+            {
+                NSMenuItem* item = [menuToAddTo addItemWithTitle: text
+                                                          action: nil
+                                                   keyEquivalent: nsEmptyString()];
+
+                [item setTag: iter.itemId];
+                [item setEnabled: iter.isEnabled];
+
+                NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex);
+                [sub setDelegate: nil];
+                [menuToAddTo setSubmenu: sub forItem: item];
+                [sub release];
+            }
         }
         else
         {
@@ -289,7 +284,7 @@ public:
 
     MenuBarModel* currentModel;
     uint32 lastUpdateTime;
-    JuceMenuCallback* callback;
+    NSObject* callback;
 
 private:
     //==============================================================================
@@ -301,7 +296,7 @@ private:
         NSMenu* m = [[NSMenu alloc] initWithTitle: juceStringToNS (menuName)];
 
         [m setAutoenablesItems: false];
-        [m setDelegate: callback];
+        [m setDelegate: (id<NSMenuDelegate>) callback];
 
         for (PopupMenu::MenuItemIterator iter (menu); iter.next();)
             addMenuItem (iter, m, topLevelMenuId, topLevelIndex);
@@ -385,8 +380,8 @@ private:
 
         void messageCallback()
         {
-            if (JuceMainMenuHandler::instance != nullptr)
-                JuceMainMenuHandler::instance->menuBarItemsChanged (nullptr);
+            if (instance != nullptr)
+                instance->menuBarItemsChanged (nullptr);
         }
 
     private:
@@ -402,8 +397,8 @@ private:
 
         void messageCallback()
         {
-            if (JuceMainMenuHandler::instance != nullptr)
-                JuceMainMenuHandler::instance->invokeDirectly (commandId, topLevelIndex);
+            if (instance != nullptr)
+                instance->invokeDirectly (commandId, topLevelIndex);
         }
 
     private:
@@ -411,74 +406,82 @@ private:
 
         JUCE_DECLARE_NON_COPYABLE (AsyncCommandInvoker);
     };
-};
 
-JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;
-
-} // (juce namespace)
-
-//==============================================================================
-@implementation JuceMenuCallback
-
-- (JuceMenuCallback*) initWithOwner: (JuceMainMenuHandler*) owner_
-{
-    [super init];
-    owner = owner_;
-    return self;
-}
-
-- (void) dealloc
-{
-    [super dealloc];
-}
-
-- (void) menuItemInvoked: (id) menu
-{
-    NSMenuItem* item = (NSMenuItem*) menu;
-
-    if ([[item representedObject] isKindOfClass: [NSArray class]])
+    //==============================================================================
+    struct JuceMenuCallbackClass   : public ObjCClass <NSObject>
     {
-        // If the menu is being triggered by a keypress, the OS will have picked it up before we had a chance to offer it to
-        // our own components, which may have wanted to intercept it. So, rather than dispatching directly, we'll feed it back
-        // into the focused component and let it trigger the menu item indirectly.
-        NSEvent* e = [NSApp currentEvent];
-        if ([e type] == NSKeyDown || [e type] == NSKeyUp)
+        JuceMenuCallbackClass()
+            : ObjCClass ("JUCEMainMenu_")
         {
-            if (juce::Component::getCurrentlyFocusedComponent() != nullptr)
+            addIvar<JuceMainMenuHandler*> ("owner");
+
+            addMethod (@selector (initWithOwner:),    initWithOwner,   "@@:^v");
+            addMethod (@selector (menuItemInvoked:),  menuItemInvoked, "v@:@");
+            addMethod (@selector (menuNeedsUpdate:),  menuNeedsUpdate, "v@:@");
+
+           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+            addProtocol (@protocol (NSMenuDelegate));
+           #endif
+
+            registerClass();
+        }
+
+    private:
+        static id initWithOwner (id self, SEL, JuceMainMenuHandler* owner)
+        {
+            self = sendSuperclassMessage (self, @selector (init));
+            object_setInstanceVariable (self, "owner", owner);
+            return self;
+        }
+
+        static void menuItemInvoked (id self, SEL, id menu)
+        {
+            JuceMainMenuHandler* const owner = getIvar<JuceMainMenuHandler*> (self, "owner");
+
+            NSMenuItem* item = (NSMenuItem*) menu;
+
+            if ([[item representedObject] isKindOfClass: [NSArray class]])
             {
-                juce::NSViewComponentPeer* peer = dynamic_cast <juce::NSViewComponentPeer*> (juce::Component::getCurrentlyFocusedComponent()->getPeer());
-
-                if (peer != nullptr)
+                // If the menu is being triggered by a keypress, the OS will have picked it up before we had a chance to offer it to
+                // our own components, which may have wanted to intercept it. So, rather than dispatching directly, we'll feed it back
+                // into the focused component and let it trigger the menu item indirectly.
+                NSEvent* e = [NSApp currentEvent];
+                if ([e type] == NSKeyDown || [e type] == NSKeyUp)
                 {
-                    if ([e type] == NSKeyDown)
-                        peer->redirectKeyDown (e);
-                    else
-                        peer->redirectKeyUp (e);
+                    if (juce::Component::getCurrentlyFocusedComponent() != nullptr)
+                    {
+                        juce::NSViewComponentPeer* peer = dynamic_cast <juce::NSViewComponentPeer*> (juce::Component::getCurrentlyFocusedComponent()->getPeer());
 
-                    return;
+                        if (peer != nullptr)
+                        {
+                            if ([e type] == NSKeyDown)
+                                peer->redirectKeyDown (e);
+                            else
+                                peer->redirectKeyUp (e);
+
+                            return;
+                        }
+                    }
                 }
+
+                NSArray* info = (NSArray*) [item representedObject];
+
+                owner->invoke ((int) [item tag],
+                               (ApplicationCommandManager*) (pointer_sized_int)
+                                    [((NSNumber*) [info objectAtIndex: 0]) unsignedLongLongValue],
+                               (int) [((NSNumber*) [info objectAtIndex: 1]) intValue]);
             }
         }
 
-        NSArray* info = (NSArray*) [item representedObject];
+        static void menuNeedsUpdate (id self, SEL, NSMenu* menu)
+        {
+            if (instance != nullptr)
+                instance->updateMenus (menu);
+        }
+    };
+};
 
-        owner->invoke ((int) [item tag],
-                       (ApplicationCommandManager*) (pointer_sized_int)
-                            [((NSNumber*) [info objectAtIndex: 0]) unsignedLongLongValue],
-                       (int) [((NSNumber*) [info objectAtIndex: 1]) intValue]);
-    }
-}
-
-- (void) menuNeedsUpdate: (NSMenu*) menu;
-{
-    if (JuceMainMenuHandler::instance != nullptr)
-        JuceMainMenuHandler::instance->updateMenus (menu);
-}
-
-@end
-
-namespace juce
-{
+JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;
 
 //==============================================================================
 namespace MainMenuHelpers

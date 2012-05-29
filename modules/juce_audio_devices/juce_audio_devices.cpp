@@ -163,7 +163,6 @@ namespace juce
 //==============================================================================
 #if JUCE_MAC
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "../juce_core/native/juce_mac_ObjCSuffix.h"
  #include "native/juce_mac_CoreAudio.cpp"
  #include "native/juce_mac_CoreMidi.cpp"
 

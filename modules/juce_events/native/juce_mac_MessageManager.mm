@@ -30,33 +30,24 @@ typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
 CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
 //==============================================================================
-struct AppDelegateClass
+struct AppDelegateClass   : public ObjCClass <NSObject>
 {
-    static Class createClass()
+    AppDelegateClass()  : ObjCClass ("JUCEAppDelegate_")
     {
-        ObjCClassBuilder c ([NSObject class], ObjCClassBuilder::getRandomisedName ("JUCEAppDelegate_"));
+        addMethod (@selector (init),                          init,                       "@@:");
+        addMethod (@selector (dealloc),                       dealloc,                    "v@:");
+        addMethod (@selector (unregisterObservers),           unregisterObservers,        "v@:");
+        addMethod (@selector (applicationShouldTerminate:),   applicationShouldTerminate, "I@:@");
+        addMethod (@selector (applicationWillTerminate:),     applicationWillTerminate,   "v@:@");
+        addMethod (@selector (application:openFile:),         application_openFile,       "c@:@@");
+        addMethod (@selector (application:openFiles:),        application_openFiles,      "v@:@@");
+        addMethod (@selector (applicationDidBecomeActive:),   applicationDidBecomeActive, "v@:@");
+        addMethod (@selector (applicationDidResignActive:),   applicationDidResignActive, "v@:@");
+        addMethod (@selector (applicationWillUnhide:),        applicationWillUnhide,      "v@:@");
+        addMethod (@selector (broadcastMessageCallback:),     broadcastMessageCallback,   "v@:@");
+        addMethod (@selector (dummyMethod),                   dummyMethod,                "v@:");
 
-        c.addMethod (@selector (init),                          init,                       "@@:");
-        c.addMethod (@selector (dealloc),                       dealloc,                    "v@:");
-        c.addMethod (@selector (unregisterObservers),           unregisterObservers,        "v@:");
-        c.addMethod (@selector (applicationShouldTerminate:),   applicationShouldTerminate, "I@:@");
-        c.addMethod (@selector (applicationWillTerminate:),     applicationWillTerminate,   "v@:@");
-        c.addMethod (@selector (application:openFile:),         application_openFile,       "c@:@@");
-        c.addMethod (@selector (application:openFiles:),        application_openFiles,      "v@:@@");
-        c.addMethod (@selector (applicationDidBecomeActive:),   applicationDidBecomeActive, "v@:@");
-        c.addMethod (@selector (applicationDidResignActive:),   applicationDidResignActive, "v@:@");
-        c.addMethod (@selector (applicationWillUnhide:),        applicationWillUnhide,      "v@:@");
-        c.addMethod (@selector (broadcastMessageCallback:),     broadcastMessageCallback,   "v@:@");
-        c.addMethod (@selector (dummyMethod),                   dummyMethod,                "v@:");
-
-        return c.getClass();
-    }
-
-    static NSObject* createInstance()
-    {
-        static Class c = createClass();
-        jassert (c != nullptr);
-        return class_createInstance (c, 0);
+        registerClass();
     }
 
     static NSString* getBroacastEventName()
@@ -64,10 +55,10 @@ struct AppDelegateClass
         return juceStringToNS ("juce_" + String::toHexString (File::getSpecialLocation (File::currentExecutableFile).hashCode64()));
     }
 
-    //==============================================================================
+private:
     static id init (id self, SEL)
     {
-        self = ObjCClassBuilder::sendSuperclassMessage (self, @selector (init));
+        self = sendSuperclassMessage (self, @selector (init));
 
         if (JUCEApplicationBase::isStandaloneApp())
         {
@@ -97,7 +88,7 @@ struct AppDelegateClass
 
     static void dealloc (id self, SEL)
     {
-        ObjCClassBuilder::sendSuperclassMessage (self, @selector (dealloc));
+        sendSuperclassMessage (self, @selector (dealloc));
     }
 
     static void unregisterObservers (id self, SEL)
@@ -265,8 +256,10 @@ struct AppDelegateHolder
 {
 public:
     AppDelegateHolder()
-       : delegate ([AppDelegateClass::createInstance() init])
-    {}
+    {
+        static AppDelegateClass cls;
+        delegate = [cls.createInstance() init];
+    }
 
     ~AppDelegateHolder()
     {

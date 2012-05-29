@@ -25,81 +25,69 @@
 
 #if JUCE_MAC
 
-} // (juce namespace)
-
-using namespace juce;
-
-#define JuceFileChooserDelegate MakeObjCClassName(JuceFileChooserDelegate)
-
-#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-@interface JuceFileChooserDelegate   : NSObject <NSOpenSavePanelDelegate>
-#else
-@interface JuceFileChooserDelegate   : NSObject
-#endif
+struct FileChooserDelegateClass  : public ObjCClass <NSObject>
 {
-    StringArray* filters;
-}
-
-- (JuceFileChooserDelegate*) initWithFilters: (StringArray*) filters_;
-- (void) dealloc;
-- (BOOL) panel: (id) sender shouldShowFilename: (NSString*) filename;
-
-@end
-
-@implementation JuceFileChooserDelegate
-- (JuceFileChooserDelegate*) initWithFilters: (StringArray*) filters_
-{
-    [super init];
-    filters = filters_;
-    return self;
-}
-
-- (void) dealloc
-{
-    delete filters;
-    [super dealloc];
-}
-
-- (BOOL) panel: (id) sender shouldShowFilename: (NSString*) filename
-{
-    (void) sender;
-    const File f (nsStringToJuce (filename));
-
-    for (int i = filters->size(); --i >= 0;)
-        if (f.getFileName().matchesWildcard ((*filters)[i], true))
-            return true;
-
-   #if (! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7
-    NSError* error;
-    NSString* name = [[NSWorkspace sharedWorkspace] typeOfFile: filename error: &error];
-
-    if ([name isEqualToString: nsStringLiteral ("com.apple.alias-file")])
+    FileChooserDelegateClass()  : ObjCClass ("JUCEFileChooser_")
     {
-        FSRef ref;
-        FSPathMakeRef ((const UInt8*) [filename fileSystemRepresentation], &ref, nullptr);
+        addIvar<StringArray*> ("filters");
 
-        Boolean targetIsFolder = false, wasAliased = false;
-        FSResolveAliasFileWithMountFlags (&ref, true, &targetIsFolder, &wasAliased, 0);
+        addMethod (@selector (initWithFilters:),          initWithFilters,    "@@:^v");
+        addMethod (@selector (dealloc),                   dealloc,            "v@:");
+        addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename, "c@:@@");
 
-        return wasAliased && targetIsFolder;
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+        addProtocol (@protocol (NSOpenSavePanelDelegate));
+       #endif
+
+        registerClass();
     }
-   #endif
 
-    return f.isDirectory()
-            && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: filename];
-}
-@end
+private:
+    static id initWithFilters (id self, SEL, StringArray* filters)
+    {
+        self = sendSuperclassMessage (self, @selector (init));
+        object_setInstanceVariable (self, "filters", filters);
+        return self;
+    }
 
+    static void dealloc (id self, SEL)
+    {
+        delete getIvar<StringArray*> (self, "filters");
+        sendSuperclassMessage (self, @selector (dealloc));
+    }
 
-namespace juce
-{
+    static BOOL shouldShowFilename (id self, SEL, id /*sender*/, NSString* filename)
+    {
+        StringArray* const filters = getIvar<StringArray*> (self, "filters");
+
+        const File f (nsStringToJuce (filename));
+
+        for (int i = filters->size(); --i >= 0;)
+            if (f.getFileName().matchesWildcard ((*filters)[i], true))
+                return true;
+
+       #if (! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7
+        NSError* error;
+        NSString* name = [[NSWorkspace sharedWorkspace] typeOfFile: filename error: &error];
+
+        if ([name isEqualToString: nsStringLiteral ("com.apple.alias-file")])
+        {
+            FSRef ref;
+            FSPathMakeRef ((const UInt8*) [filename fileSystemRepresentation], &ref, nullptr);
+
+            Boolean targetIsFolder = false, wasAliased = false;
+            FSResolveAliasFileWithMountFlags (&ref, true, &targetIsFolder, &wasAliased, 0);
+
+            return wasAliased && targetIsFolder;
+        }
+       #endif
+
+        return f.isDirectory()
+                 && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: filename];
+    }
+};
 
 //==============================================================================
-bool FileChooser::isPlatformDialogAvailable()
-{
-    return true;
-}
-
 class TemporaryMainMenuWithStandardCommands
 {
 public:
@@ -127,7 +115,7 @@ public:
         [item release];
 
         item = [[NSApp mainMenu] addItemWithTitle: NSLocalizedString (nsStringLiteral ("Edit"), nil)
-                                           action: nil keyEquivalent: nsEmptyString()];
+                                          action: nil  keyEquivalent: nsEmptyString()];
         [[NSApp mainMenu] setSubmenu: menu forItem: item];
         [menu release];
     }
@@ -141,6 +129,7 @@ private:
     MenuBarModel* oldMenu;
 };
 
+//==============================================================================
 void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,
@@ -161,8 +150,15 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     filters->trim();
     filters->removeEmptyStrings();
 
-    JuceFileChooserDelegate* delegate = [[JuceFileChooserDelegate alloc] initWithFilters: filters];
-    [delegate autorelease];
+   #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+    typedef NSObject<NSOpenSavePanelDelegate> DelegateType;
+   #else
+    typedef NSObject DelegateType;
+   #endif
+
+    static FileChooserDelegateClass cls;
+    DelegateType* delegate = [[cls.createInstance()  performSelector: @selector (initWithFilters:)
+                                                          withObject: (id) filters] autorelease];
 
     NSSavePanel* panel = isSaveDialogue ? [NSSavePanel savePanel]
                                         : [NSOpenPanel openPanel];
@@ -220,6 +216,11 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     }
 
     [panel setDelegate: nil];
+}
+
+bool FileChooser::isPlatformDialogAvailable()
+{
+    return true;
 }
 
 #else

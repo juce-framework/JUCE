@@ -111,7 +111,6 @@ namespace juce
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "../juce_core/native/juce_mac_ObjCSuffix.h"
  #include "native/juce_mac_CoreGraphicsHelpers.h"
  #include "native/juce_mac_Fonts.mm"
  #include "native/juce_mac_CoreGraphicsContext.mm"

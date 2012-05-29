@@ -152,7 +152,6 @@ namespace juce
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
 #include "native/juce_osx_ObjCHelpers.h"
-#include "native/juce_mac_ObjCSuffix.h"
 #endif
 
 #if JUCE_ANDROID
