@@ -265,7 +265,6 @@
 		4D385CCEDF0EBF53DCD6853C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_Network.cpp"; path = "../../../../modules/juce_core/native/juce_win32_Network.cpp"; sourceTree = "SOURCE_ROOT"; };
 		4D5AE0F55C03F1A2EFFA74BA = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = "SOURCE_ROOT"; };
 		4D62E6D0F93176C6ECD1E11A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_BinaryResources.cpp"; path = "../../src/model/jucer_BinaryResources.cpp"; sourceTree = "SOURCE_ROOT"; };
-		4D6707579CED81BA04B60074 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_mac_ObjCSuffix.h"; path = "../../../../modules/juce_core/native/juce_mac_ObjCSuffix.h"; sourceTree = "SOURCE_ROOT"; };
 		4D9325C9A7FE0E1B4F7B489F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CriticalSection.h"; path = "../../../../modules/juce_core/threads/juce_CriticalSection.h"; sourceTree = "SOURCE_ROOT"; };
 		4DF3CEAA25F14103BA475AFD = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_Threads.mm"; path = "../../../../modules/juce_core/native/juce_mac_Threads.mm"; sourceTree = "SOURCE_ROOT"; };
 		4E07995C0E9951843B936AF1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_mac_Fonts.mm"; path = "../../../../modules/juce_graphics/native/juce_mac_Fonts.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -1077,7 +1076,6 @@
 				35F8BD1350F8BD6615D84F16,
 				571668630341CED2E68ED143,
 				BEE796EE7004ED908D949561,
-				4D6707579CED81BA04B60074,
 				66BCEB0EB713A756F7A61E05,
 				B8A76938F597EE7B5FFE7A75,
 				4DF3CEAA25F14103BA475AFD,
@@ -1665,7 +1663,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_DEBUG=1",
 				"DEBUG=1",
-				"JUCE_ObjCExtraSuffix=wQBvzo",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		EB7F74BF01346F8C6BCC31A7 = { isa = XCBuildConfiguration; buildSettings = {
 				SRCROOT = "../..";
@@ -1682,7 +1679,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 				"_NDEBUG=1",
 				"NDEBUG=1",
-				"JUCE_ObjCExtraSuffix=wQBvzo",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Release; };
 		4EC79CF8247C17DA12FB3EEC = { isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;

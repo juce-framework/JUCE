@@ -1090,7 +1090,6 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Files.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Network.mm"/>
-          <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_ObjCSuffix.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Strings.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_SystemStats.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Threads.mm"/>
