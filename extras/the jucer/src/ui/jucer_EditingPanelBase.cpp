@@ -72,15 +72,15 @@ public:
 
     void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
     {
-        if (e.mouseEvent.mods.isCtrlDown() || e.mouseEvent.mods.isAltDown())
+        if (e.mods.isCtrlDown() || e.mods.isAltDown())
         {
-            const double factor = (e.wheelDeltaY > 0) ? 2.0 : 0.5;
+            const double factor = (wheel.deltaY > 0) ? 2.0 : 0.5;
 
-            panel->setZoom (panel->getZoom() * factor, e.wheelDeltaX, e.wheelDeltaY);
+            panel->setZoom (panel->getZoom() * factor, wheel.deltaX, wheel.deltaY);
         }
         else
         {
-            Viewport::mouseWheelMove (e, ix, iy);
+            Viewport::mouseWheelMove (e, wheel);
         }
     }
 
