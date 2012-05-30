@@ -208,38 +208,17 @@ public:
         }
         else if (iter.subMenu != nullptr)
         {
-            if (iter.itemName.containsIgnoreCase ("recent"))
-            {
-                NSMenuItem* item = [menuToAddTo addItemWithTitle: NSLocalizedString (@"Open Recent", nil)
-                                                          action: nil
-                                                   keyEquivalent: @""];
+            NSMenuItem* item = [menuToAddTo addItemWithTitle: text
+                                                      action: nil
+                                               keyEquivalent: nsEmptyString()];
 
-                NSMenu* openRecentMenu = [[[NSMenu alloc] initWithTitle: @"Open Recent"] autorelease];
-                [openRecentMenu performSelector: @selector(_setMenuName:)
-                                     withObject: @"NSRecentDocumentsMenu"];
+            [item setTag: iter.itemId];
+            [item setEnabled: iter.isEnabled];
 
-                [menuToAddTo setSubmenu: openRecentMenu forItem: item];
-
-                item = [openRecentMenu addItemWithTitle: NSLocalizedString(@"Clear Menu", nil)
-                                                 action: @selector(clearRecentDocuments:)
-                                          keyEquivalent: @""];
-
-                [openRecentMenu update];
-            }
-            else
-            {
-                NSMenuItem* item = [menuToAddTo addItemWithTitle: text
-                                                          action: nil
-                                                   keyEquivalent: nsEmptyString()];
-
-                [item setTag: iter.itemId];
-                [item setEnabled: iter.isEnabled];
-
-                NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex);
-                [sub setDelegate: nil];
-                [menuToAddTo setSubmenu: sub forItem: item];
-                [sub release];
-            }
+            NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex);
+            [sub setDelegate: nil];
+            [menuToAddTo setSubmenu: sub forItem: item];
+            [sub release];
         }
         else
         {
