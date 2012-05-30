@@ -32,8 +32,8 @@ public:
           lastUpdateTime (0)
     {
         static JuceMenuCallbackClass cls;
-        callback = [cls.createInstance() performSelector: @selector (initWithOwner:)
-                                              withObject: (id) this];
+        callback = [cls.createInstance() init];
+        JuceMenuCallbackClass::setOwner (callback, this);
     }
 
     ~JuceMainMenuHandler()
@@ -399,7 +399,6 @@ private:
         {
             addIvar<JuceMainMenuHandler*> ("owner");
 
-            addMethod (@selector (initWithOwner:),    initWithOwner,   "@@:^v");
             addMethod (@selector (menuItemInvoked:),  menuItemInvoked, "v@:@");
             addMethod (@selector (menuNeedsUpdate:),  menuNeedsUpdate, "v@:@");
 
@@ -410,14 +409,12 @@ private:
             registerClass();
         }
 
-    private:
-        static id initWithOwner (id self, SEL, JuceMainMenuHandler* owner)
+        static void setOwner (id self, JuceMainMenuHandler* owner)
         {
-            self = sendSuperclassMessage (self, @selector (init));
             object_setInstanceVariable (self, "owner", owner);
-            return self;
         }
 
+    private:
         static void menuItemInvoked (id self, SEL, id menu)
         {
             JuceMainMenuHandler* const owner = getIvar<JuceMainMenuHandler*> (self, "owner");

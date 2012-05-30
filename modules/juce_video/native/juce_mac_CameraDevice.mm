@@ -224,17 +224,10 @@ private:
             registerClass();
         }
 
-        static void setOwner (id self, QTCameraDeviceInternal* owner)
-        {
-            object_setInstanceVariable (self, "owner", owner);
-        }
+        static void setOwner (id self, QTCameraDeviceInternal* owner)   { object_setInstanceVariable (self, "owner", owner); }
+        static QTCameraDeviceInternal* getOwner (id self)               { return getIvar<QTCameraDeviceInternal*> (self, "owner"); }
 
     private:
-        static QTCameraDeviceInternal* getOwner (id self)
-        {
-            return getIvar<QTCameraDeviceInternal*> (self, "owner");
-        }
-
         static void didOutputVideoFrame (id self, SEL, QTCaptureOutput* captureOutput,
                                          CVImageBufferRef videoFrame, QTSampleBuffer* sampleBuffer,
                                          QTCaptureConnection* connection)

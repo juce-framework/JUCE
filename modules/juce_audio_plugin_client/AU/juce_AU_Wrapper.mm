@@ -988,10 +988,11 @@ public:
             addIvar<JuceAU*> ("au");
             addIvar<EditorCompHolder*> ("editor");
 
-            addMethod (@selector (dealloc),  dealloc,  "v@:");
-            addMethod (@selector (applicationWillTerminate:), applicationWillTerminate, "v@:@");
-            addMethod (@selector (viewDidMoveToWindow), viewDidMoveToWindow, "v@:");
-            addMethod (@selector (mouseDownCanMoveWindow), mouseDownCanMoveWindow, "c@:");
+            addMethod (@selector (dealloc),                     dealloc,                    "v@:");
+            addMethod (@selector (applicationWillTerminate:),   applicationWillTerminate,   "v@:@");
+            addMethod (@selector (viewDidMoveToWindow),         viewDidMoveToWindow,        "v@:");
+            addMethod (@selector (mouseDownCanMoveWindow),      mouseDownCanMoveWindow,     "c@:");
+
             registerClass();
         }
 

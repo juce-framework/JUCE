@@ -30,41 +30,19 @@ typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
 CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
 //==============================================================================
-struct AppDelegateClass   : public ObjCClass <NSObject>
+struct AppDelegate
 {
-    AppDelegateClass()  : ObjCClass ("JUCEAppDelegate_")
+public:
+    AppDelegate()
     {
-        addMethod (@selector (init),                          init,                       "@@:");
-        addMethod (@selector (dealloc),                       dealloc,                    "v@:");
-        addMethod (@selector (unregisterObservers),           unregisterObservers,        "v@:");
-        addMethod (@selector (applicationShouldTerminate:),   applicationShouldTerminate, "I@:@");
-        addMethod (@selector (applicationWillTerminate:),     applicationWillTerminate,   "v@:@");
-        addMethod (@selector (application:openFile:),         application_openFile,       "c@:@@");
-        addMethod (@selector (application:openFiles:),        application_openFiles,      "v@:@@");
-        addMethod (@selector (applicationDidBecomeActive:),   applicationDidBecomeActive, "v@:@");
-        addMethod (@selector (applicationDidResignActive:),   applicationDidResignActive, "v@:@");
-        addMethod (@selector (applicationWillUnhide:),        applicationWillUnhide,      "v@:@");
-        addMethod (@selector (broadcastMessageCallback:),     broadcastMessageCallback,   "v@:@");
-        addMethod (@selector (dummyMethod),                   dummyMethod,                "v@:");
-
-        registerClass();
-    }
-
-    static NSString* getBroacastEventName()
-    {
-        return juceStringToNS ("juce_" + String::toHexString (File::getSpecialLocation (File::currentExecutableFile).hashCode64()));
-    }
-
-private:
-    static id init (id self, SEL)
-    {
-        self = sendSuperclassMessage (self, @selector (init));
+        static AppDelegateClass cls;
+        delegate = [cls.createInstance() init];
 
         if (JUCEApplicationBase::isStandaloneApp())
         {
-            [NSApp setDelegate: self];
+            [NSApp setDelegate: delegate];
 
-            [[NSDistributedNotificationCenter defaultCenter] addObserver: self
+            [[NSDistributedNotificationCenter defaultCenter] addObserver: delegate
                                                                 selector: @selector (broadcastMessageCallback:)
                                                                     name: getBroacastEventName()
                                                                   object: nil];
@@ -73,106 +51,142 @@ private:
         {
             NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
 
-            [center addObserver: self selector: @selector (applicationDidResignActive:)
+            [center addObserver: delegate selector: @selector (applicationDidResignActive:)
                            name: NSApplicationDidResignActiveNotification object: NSApp];
 
-            [center addObserver: self selector: @selector (applicationDidBecomeActive:)
+            [center addObserver: delegate selector: @selector (applicationDidBecomeActive:)
                            name: NSApplicationDidBecomeActiveNotification object: NSApp];
 
-            [center addObserver: self selector: @selector (applicationWillUnhide:)
+            [center addObserver: delegate selector: @selector (applicationWillUnhide:)
                            name: NSApplicationWillUnhideNotification object: NSApp];
         }
-
-        return self;
     }
 
-    static void dealloc (id self, SEL)
+    ~AppDelegate()
     {
-        sendSuperclassMessage (self, @selector (dealloc));
-    }
-
-    static void unregisterObservers (id self, SEL)
-    {
-        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: self];
-        [[NSNotificationCenter defaultCenter] removeObserver: self];
+        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: delegate];
+        [[NSNotificationCenter defaultCenter] removeObserver: delegate];
 
         if (JUCEApplicationBase::isStandaloneApp())
         {
             [NSApp setDelegate: nil];
 
-            [[NSDistributedNotificationCenter defaultCenter] removeObserver: self
+            [[NSDistributedNotificationCenter defaultCenter] removeObserver: delegate
                                                                        name: getBroacastEventName()
                                                                      object: nil];
         }
+
+        [delegate release];
     }
 
-    static NSApplicationTerminateReply applicationShouldTerminate (id /*self*/, SEL, NSApplication*)
+    static NSString* getBroacastEventName()
     {
-        if (JUCEApplicationBase::getInstance() != nullptr)
-        {
-            JUCEApplicationBase::getInstance()->systemRequestedQuit();
-
-            if (! MessageManager::getInstance()->hasStopMessageBeenSent())
-                return NSTerminateCancel;
-        }
-
-        return NSTerminateNow;
+        return juceStringToNS ("juce_" + String::toHexString (File::getSpecialLocation (File::currentExecutableFile).hashCode64()));
     }
 
-    static void applicationWillTerminate (id /*self*/, SEL, NSNotification*)
-    {
-        JUCEApplicationBase::appWillTerminateByForce();
-    }
-
-    static BOOL application_openFile (id /*self*/, SEL, NSApplication*, NSString* filename)
-    {
-        if (JUCEApplicationBase::getInstance() != nullptr)
-        {
-            JUCEApplicationBase::getInstance()->anotherInstanceStarted (quotedIfContainsSpaces (filename));
-            return YES;
-        }
-
-        return NO;
-    }
-
-    static void application_openFiles (id /*self*/, SEL, NSApplication*, NSArray* filenames)
-    {
-        StringArray files;
-        for (unsigned int i = 0; i < [filenames count]; ++i)
-            files.add (quotedIfContainsSpaces ((NSString*) [filenames objectAtIndex: i]));
-
-        if (files.size() > 0 && JUCEApplicationBase::getInstance() != nullptr)
-            JUCEApplicationBase::getInstance()->anotherInstanceStarted (files.joinIntoString (" "));
-    }
-
-    static void applicationDidBecomeActive (id /*self*/, SEL, NSNotification*)  { focusChanged(); }
-    static void applicationDidResignActive (id /*self*/, SEL, NSNotification*)  { focusChanged(); }
-    static void applicationWillUnhide (id /*self*/, SEL, NSNotification*)       { focusChanged(); }
-
-    static void broadcastMessageCallback (id /*self*/, SEL, NSNotification* n)
-    {
-        NSDictionary* dict = (NSDictionary*) [n userInfo];
-        const String messageString (nsStringToJuce ((NSString*) [dict valueForKey: nsStringLiteral ("message")]));
-        MessageManager::getInstance()->deliverBroadcastMessage (messageString);
-    }
-
-    static void dummyMethod (id /*self*/, SEL) {}   // (used as a way of running a dummy thread)
+    MessageQueue messageQueue;
 
 private:
-    static void focusChanged()
-    {
-        if (appFocusChangeCallback != nullptr)
-            (*appFocusChangeCallback)();
-    }
+    id delegate;
+    CFRunLoopRef runLoop;
+    CFRunLoopSourceRef runLoopSource;
 
-    static String quotedIfContainsSpaces (NSString* file)
+    //==============================================================================
+    struct AppDelegateClass   : public ObjCClass <NSObject>
     {
-        String s (nsStringToJuce (file));
-        if (s.containsChar (' '))
-            s = s.quoted ('"');
+        AppDelegateClass()  : ObjCClass ("JUCEAppDelegate_")
+        {
+            addMethod (@selector (applicationShouldTerminate:),   applicationShouldTerminate, "I@:@");
+            addMethod (@selector (applicationWillTerminate:),     applicationWillTerminate,   "v@:@");
+            addMethod (@selector (application:openFile:),         application_openFile,       "c@:@@");
+            addMethod (@selector (application:openFiles:),        application_openFiles,      "v@:@@");
+            addMethod (@selector (applicationDidBecomeActive:),   applicationDidBecomeActive, "v@:@");
+            addMethod (@selector (applicationDidResignActive:),   applicationDidResignActive, "v@:@");
+            addMethod (@selector (applicationWillUnhide:),        applicationWillUnhide,      "v@:@");
+            addMethod (@selector (broadcastMessageCallback:),     broadcastMessageCallback,   "v@:@");
+            addMethod (@selector (dummyMethod),                   dummyMethod,                "v@:");
 
-        return s;
-    }
+            registerClass();
+        }
+
+    private:
+        static NSApplicationTerminateReply applicationShouldTerminate (id /*self*/, SEL, NSApplication*)
+        {
+            JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
+
+            if (app != nullptr)
+            {
+                app->systemRequestedQuit();
+
+                if (! MessageManager::getInstance()->hasStopMessageBeenSent())
+                    return NSTerminateCancel;
+            }
+
+            return NSTerminateNow;
+        }
+
+        static void applicationWillTerminate (id /*self*/, SEL, NSNotification*)
+        {
+            JUCEApplicationBase::appWillTerminateByForce();
+        }
+
+        static BOOL application_openFile (id /*self*/, SEL, NSApplication*, NSString* filename)
+        {
+            JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
+
+            if (app != nullptr)
+            {
+                app->anotherInstanceStarted (quotedIfContainsSpaces (filename));
+                return YES;
+            }
+
+            return NO;
+        }
+
+        static void application_openFiles (id /*self*/, SEL, NSApplication*, NSArray* filenames)
+        {
+            JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
+
+            if (app != nullptr)
+            {
+                StringArray files;
+                for (unsigned int i = 0; i < [filenames count]; ++i)
+                    files.add (quotedIfContainsSpaces ((NSString*) [filenames objectAtIndex: i]));
+
+                if (files.size() > 0)
+                    app->anotherInstanceStarted (files.joinIntoString (" "));
+            }
+        }
+
+        static void applicationDidBecomeActive (id /*self*/, SEL, NSNotification*)  { focusChanged(); }
+        static void applicationDidResignActive (id /*self*/, SEL, NSNotification*)  { focusChanged(); }
+        static void applicationWillUnhide      (id /*self*/, SEL, NSNotification*)  { focusChanged(); }
+
+        static void broadcastMessageCallback (id /*self*/, SEL, NSNotification* n)
+        {
+            NSDictionary* dict = (NSDictionary*) [n userInfo];
+            const String messageString (nsStringToJuce ((NSString*) [dict valueForKey: nsStringLiteral ("message")]));
+            MessageManager::getInstance()->deliverBroadcastMessage (messageString);
+        }
+
+        static void dummyMethod (id /*self*/, SEL) {}   // (used as a way of running a dummy thread)
+
+    private:
+        static void focusChanged()
+        {
+            if (appFocusChangeCallback != nullptr)
+                (*appFocusChangeCallback)();
+        }
+
+        static String quotedIfContainsSpaces (NSString* file)
+        {
+            String s (nsStringToJuce (file));
+            if (s.containsChar (' '))
+                s = s.quoted ('"');
+
+            return s;
+        }
+    };
 };
 
 //==============================================================================
@@ -251,34 +265,12 @@ void initialiseNSApplication()
     [NSApplication sharedApplication];
 }
 
-//==============================================================================
-struct AppDelegateHolder
-{
-public:
-    AppDelegateHolder()
-    {
-        static AppDelegateClass cls;
-        delegate = [cls.createInstance() init];
-    }
-
-    ~AppDelegateHolder()
-    {
-        [delegate performSelector: @selector (unregisterObservers)];
-        [delegate release];
-    }
-
-    id delegate;
-    CFRunLoopRef runLoop;
-    CFRunLoopSourceRef runLoopSource;
-    MessageQueue messageQueue;
-};
-
-static AppDelegateHolder* appDelegate = nullptr;
+static AppDelegate* appDelegate = nullptr;
 
 void MessageManager::doPlatformSpecificInitialisation()
 {
     if (appDelegate == nil)
-        appDelegate = new AppDelegateHolder();
+        appDelegate = new AppDelegate();
 
    #if ! (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     // This launches a dummy thread, which forces Cocoa to initialise NSThreads correctly (needed prior to 10.5)
@@ -307,7 +299,7 @@ void MessageManager::broadcastMessage (const String& message)
     NSDictionary* info = [NSDictionary dictionaryWithObject: juceStringToNS (message)
                                                      forKey: nsStringLiteral ("message")];
 
-    [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegateClass::getBroacastEventName()
+    [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegate::getBroacastEventName()
                                                                    object: nil
                                                                  userInfo: info];
 }

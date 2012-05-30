@@ -116,8 +116,6 @@ struct ObjCClass
         jassert (b); (void) b;
     }
 
-    Class cls;
-
     static id sendSuperclassMessage (id self, SEL selector)
     {
         objc_super s = { self, [SuperclassType class] };
@@ -131,6 +129,8 @@ struct ObjCClass
         object_getInstanceVariable (self, name, (void**) &v);
         return v;
     }
+
+    Class cls;
 
 private:
     static String getRandomisedName (const char* root)

@@ -31,7 +31,6 @@ struct FileChooserDelegateClass  : public ObjCClass <NSObject>
     {
         addIvar<StringArray*> ("filters");
 
-        addMethod (@selector (initWithFilters:),          initWithFilters,    "@@:^v");
         addMethod (@selector (dealloc),                   dealloc,            "v@:");
         addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename, "c@:@@");
 
@@ -42,14 +41,12 @@ struct FileChooserDelegateClass  : public ObjCClass <NSObject>
         registerClass();
     }
 
-private:
-    static id initWithFilters (id self, SEL, StringArray* filters)
+    static void setFilters (id self, StringArray* filters)
     {
-        self = sendSuperclassMessage (self, @selector (init));
         object_setInstanceVariable (self, "filters", filters);
-        return self;
     }
 
+private:
     static void dealloc (id self, SEL)
     {
         delete getIvar<StringArray*> (self, "filters");
@@ -157,8 +154,8 @@ void FileChooser::showPlatformDialog (Array<File>& results,
    #endif
 
     static FileChooserDelegateClass cls;
-    DelegateType* delegate = [[cls.createInstance()  performSelector: @selector (initWithFilters:)
-                                                          withObject: (id) filters] autorelease];
+    DelegateType* delegate = (DelegateType*) [[cls.createInstance() init] autorelease];
+    FileChooserDelegateClass::setFilters (delegate, filters);
 
     NSSavePanel* panel = isSaveDialogue ? [NSSavePanel savePanel]
                                         : [NSOpenPanel openPanel];

@@ -38,17 +38,10 @@ struct DownloadClickDetectorClass  : public ObjCClass <NSObject>
         registerClass();
     }
 
-    static void setOwner (id self, WebBrowserComponent* owner)
-    {
-        object_setInstanceVariable (self, "owner", owner);
-    }
+    static void setOwner (id self, WebBrowserComponent* owner)   { object_setInstanceVariable (self, "owner", owner); }
+    static WebBrowserComponent* getOwner (id self)               { return getIvar<WebBrowserComponent*> (self, "owner"); }
 
 private:
-    static WebBrowserComponent* getOwner (id self)
-    {
-        return getIvar<WebBrowserComponent*> (self, "owner");
-    }
-
     static void decidePolicyForNavigationAction (id self, SEL, WebView*, NSDictionary* actionInformation,
                                                  NSURLRequest*, WebFrame*, id <WebPolicyDecisionListener> listener)
     {
