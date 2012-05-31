@@ -2049,14 +2049,19 @@ void Component::sendLookAndFeelChange()
 
     if (safePointer != nullptr)
     {
-        for (int i = childComponentList.size(); --i >= 0;)
+        colourChanged();
+
+        if (safePointer != nullptr)
         {
-            childComponentList.getUnchecked (i)->sendLookAndFeelChange();
+            for (int i = childComponentList.size(); --i >= 0;)
+            {
+                childComponentList.getUnchecked (i)->sendLookAndFeelChange();
 
-            if (safePointer == nullptr)
-                return;
+                if (safePointer == nullptr)
+                    return;
 
-            i = jmin (i, childComponentList.size());
+                i = jmin (i, childComponentList.size());
+            }
         }
     }
 }
