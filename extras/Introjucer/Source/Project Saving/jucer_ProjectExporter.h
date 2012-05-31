@@ -140,6 +140,7 @@ public:
     //==============================================================================
     String makefileTargetSuffix;
     bool makefileIsDLL;
+    StringArray linuxLibs;
 
     //==============================================================================
     String msvcTargetSuffix;

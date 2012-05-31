@@ -35,5 +35,6 @@
                       "native/*" ],
 
   "OSXFrameworks":  "Cocoa Carbon QuartzCore",
-  "iOSFrameworks":  "UIKit"
+  "iOSFrameworks":  "UIKit",
+  "LinuxLibs":      "X11 Xinerama Xext"
 }

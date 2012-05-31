@@ -522,6 +522,14 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
         const String frameworks (moduleInfo [exporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
         exporter.xcodeFrameworks.addTokens (frameworks, ", ", String::empty);
     }
+    else if (exporter.isLinux())
+    {
+        const String libs (moduleInfo ["LinuxLibs"].toString());
+        exporter.linuxLibs.addTokens (libs, ", ", String::empty);
+        exporter.linuxLibs.trim();
+        exporter.linuxLibs.sort (false);
+        exporter.linuxLibs.removeDuplicates (false);
+    }
 
     if (isPluginClient())
     {

@@ -17,5 +17,6 @@
                       "native/*" ],
 
   "OSXFrameworks":  "OpenGL",
-  "iOSFrameworks":  "OpenGLES"
+  "iOSFrameworks":  "OpenGLES",
+  "LinuxLibs":      "GL"
 }

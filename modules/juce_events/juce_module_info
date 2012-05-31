@@ -17,5 +17,7 @@
                       "timers/*",
                       "broadcasters/*",
                       "interprocess/*",
-                      "native/*" ]
+                      "native/*" ],
+
+  "LinuxLibs":      "X11"
 }
