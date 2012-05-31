@@ -1198,7 +1198,7 @@ private:
 //==============================================================================
 struct JuceNSViewClass   : public ObjCClass <NSView>
 {
-    JuceNSViewClass()  : ObjCClass ("JUCEView_")
+    JuceNSViewClass()  : ObjCClass <NSView> ("JUCEView_")
     {
         addIvar<NSViewComponentPeer*> ("owner");
 
@@ -1607,7 +1607,7 @@ private:
 //==============================================================================
 struct JuceNSWindowClass   : public ObjCClass <NSWindow>
 {
-    JuceNSWindowClass()  : ObjCClass ("JUCEWindow_")
+    JuceNSWindowClass()  : ObjCClass <NSWindow> ("JUCEWindow_")
     {
         addIvar<NSViewComponentPeer*> ("owner");
 

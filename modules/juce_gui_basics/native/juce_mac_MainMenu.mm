@@ -394,8 +394,7 @@ private:
     //==============================================================================
     struct JuceMenuCallbackClass   : public ObjCClass <NSObject>
     {
-        JuceMenuCallbackClass()
-            : ObjCClass ("JUCEMainMenu_")
+        JuceMenuCallbackClass()  : ObjCClass <NSObject> ("JUCEMainMenu_")
         {
             addIvar<JuceMainMenuHandler*> ("owner");
 

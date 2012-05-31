@@ -94,7 +94,7 @@ private:
     //==============================================================================
     struct AppDelegateClass   : public ObjCClass <NSObject>
     {
-        AppDelegateClass()  : ObjCClass ("JUCEAppDelegate_")
+        AppDelegateClass()  : ObjCClass <NSObject> ("JUCEAppDelegate_")
         {
             addMethod (@selector (applicationShouldTerminate:),   applicationShouldTerminate, "I@:@");
             addMethod (@selector (applicationWillTerminate:),     applicationWillTerminate,   "v@:@");

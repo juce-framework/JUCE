@@ -26,7 +26,7 @@
 
 struct ThreadSafeNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
 {
-    ThreadSafeNSOpenGLViewClass()  : ObjCClass ("JUCEGLView_")
+    ThreadSafeNSOpenGLViewClass()  : ObjCClass <NSOpenGLView> ("JUCEGLView_")
     {
         addIvar <CriticalSection*> ("lock");
         addIvar <BOOL> ("needsUpdate");

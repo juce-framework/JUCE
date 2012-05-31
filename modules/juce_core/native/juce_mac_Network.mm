@@ -240,9 +240,9 @@ public:
 
 private:
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass  : public ObjCClass <NSObject>
     {
-        DelegateClass()  : ObjCClass ("JUCEAppDelegate_")
+        DelegateClass()  : ObjCClass <NSObject> ("JUCEAppDelegate_")
         {
             addIvar <URLConnectionState*> ("state");
 

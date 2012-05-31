@@ -27,7 +27,7 @@
 
 struct FileChooserDelegateClass  : public ObjCClass <NSObject>
 {
-    FileChooserDelegateClass()  : ObjCClass ("JUCEFileChooser_")
+    FileChooserDelegateClass()  : ObjCClass <NSObject> ("JUCEFileChooser_")
     {
         addIvar<StringArray*> ("filters");
 

@@ -27,7 +27,7 @@
 
 struct DownloadClickDetectorClass  : public ObjCClass <NSObject>
 {
-    DownloadClickDetectorClass()  : ObjCClass ("JUCEWebClickDetector_")
+    DownloadClickDetectorClass()  : ObjCClass <NSObject> ("JUCEWebClickDetector_")
     {
         addIvar <WebBrowserComponent*> ("owner");
 

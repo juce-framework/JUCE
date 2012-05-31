@@ -27,7 +27,7 @@
 
 struct NonInterceptingQTMovieViewClass  : public ObjCClass <QTMovieView>
 {
-    NonInterceptingQTMovieViewClass()  : ObjCClass ("JUCEQTMovieView_")
+    NonInterceptingQTMovieViewClass()  : ObjCClass <QTMovieView> ("JUCEQTMovieView_")
     {
         addMethod (@selector (hitTest:),            hitTest,           "@@:", @encode (NSPoint));
         addMethod (@selector (acceptsFirstMouse:),  acceptsFirstMouse, "c@:@");

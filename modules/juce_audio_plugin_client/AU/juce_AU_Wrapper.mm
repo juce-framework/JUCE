@@ -982,7 +982,7 @@ public:
     //==============================================================================
     struct JuceUIViewClass  : public ObjCClass <NSView>
     {
-        JuceUIViewClass()  : ObjCClass ("JUCEAUView_")
+        JuceUIViewClass()  : ObjCClass <NSView> ("JUCEAUView_")
         {
             addIvar<AudioProcessor*> ("filter");
             addIvar<JuceAU*> ("au");
