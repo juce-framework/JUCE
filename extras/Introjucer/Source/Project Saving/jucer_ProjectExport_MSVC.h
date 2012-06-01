@@ -434,7 +434,11 @@ protected:
 
         MemoryOutputStream mo;
 
-        mo << "#undef  WIN32_LEAN_AND_MEAN" << newLine
+        mo << "#ifdef JUCE_USER_DEFINED_RC_FILE" << newLine
+           << " #include JUCE_USER_DEFINED_RC_FILE" << newLine
+           << "#else" << newLine
+           << newLine
+           << "#undef  WIN32_LEAN_AND_MEAN" << newLine
            << "#define WIN32_LEAN_AND_MEAN" << newLine
            << "#include <windows.h>" << newLine
            << newLine
@@ -459,7 +463,9 @@ protected:
            << "  BEGIN" << newLine
            << "    VALUE \"Translation\", 0x409, 65001" << newLine
            << "  END" << newLine
-           << "END" << newLine;
+           << "END" << newLine
+           << newLine
+           << "#endif" << newLine;
 
         if (iconFile != File::nonexistent)
            mo << newLine
