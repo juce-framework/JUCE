@@ -553,7 +553,7 @@ public:
                 {
                     AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
                     filter->m_hasSideChain = false;
-                    filter->m_playPositionSamples = getTimeInfo(0)->samplePos;
+                    filter->m_playPositionSamples = getTimeInfo(kVstSmpteValid)->samplePos;
                     filter->processBlock (chans, midiEvents);
                 }
 
