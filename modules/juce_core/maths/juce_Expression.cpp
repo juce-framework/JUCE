@@ -146,7 +146,7 @@ struct Expression::Helpers
 
         Type getType() const noexcept       { return operatorType; }
         int getNumInputs() const            { return 2; }
-        Term* getInput (int index) const    { return index == 0 ? left.getObject() : (index == 1 ? right.getObject() : 0); }
+        Term* getInput (int index) const    { return index == 0 ? left.get() : (index == 1 ? right.get() : 0); }
 
         virtual double performFunction (double left, double right) const = 0;
         virtual void writeOperator (String& dest) const = 0;
@@ -397,7 +397,7 @@ struct Expression::Helpers
             JUCE_DECLARE_NON_COPYABLE (SymbolRenamingVisitor);
         };
 
-        SymbolTerm* getSymbol() const  { return static_cast <SymbolTerm*> (left.getObject()); }
+        SymbolTerm* getSymbol() const  { return static_cast <SymbolTerm*> (left.get()); }
 
         JUCE_DECLARE_NON_COPYABLE (DotOperator);
     };
@@ -414,7 +414,7 @@ struct Expression::Helpers
         Type getType() const noexcept                           { return operatorType; }
         int getInputIndexFor (const Term* possibleInput) const  { return possibleInput == input ? 0 : -1; }
         int getNumInputs() const                                { return 1; }
-        Term* getInput (int index) const                        { return index == 0 ? input.getObject() : nullptr; }
+        Term* getInput (int index) const                        { return index == 0 ? input.get() : nullptr; }
         Term* clone() const                                     { return new Negate (input->clone()); }
 
         TermPtr resolve (const Scope& scope, int recursionDepth)

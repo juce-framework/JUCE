@@ -129,7 +129,7 @@ void NSViewComponent::setView (void* const view)
 
 void* NSViewComponent::getView() const
 {
-    return attachment != nullptr ? static_cast <NSViewAttachment*> (attachment.getObject())->view
+    return attachment != nullptr ? static_cast <NSViewAttachment*> (attachment.get())->view
                                  : nullptr;
 }
 
@@ -137,7 +137,7 @@ void NSViewComponent::resizeToFitView()
 {
     if (attachment != nullptr)
     {
-        NSRect r = [static_cast <NSViewAttachment*> (attachment.getObject())->view frame];
+        NSRect r = [static_cast <NSViewAttachment*> (attachment.get())->view frame];
         setBounds (Rectangle<int> ((int) r.size.width, (int) r.size.height));
     }
 }
