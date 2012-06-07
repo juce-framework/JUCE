@@ -201,6 +201,12 @@ void Project::addDefaultModules (bool shouldCopyFilesLocally)
     }
 }
 
+bool Project::isAudioPluginModuleMissing() const
+{
+    return getProjectType().isAudioPlugin()
+            && ! isModuleEnabled ("juce_audio_plugin_client");
+}
+
 //==============================================================================
 static void registerRecentFile (const File& file)
 {
@@ -254,17 +260,10 @@ Result Project::saveResourcesOnly (const File& file)
 }
 
 //==============================================================================
-File Project::lastDocumentOpened;
+static File lastDocumentOpened;
 
-File Project::getLastDocumentOpened()
-{
-    return lastDocumentOpened;
-}
-
-void Project::setLastDocumentOpened (const File& file)
-{
-    lastDocumentOpened = file;
-}
+File Project::getLastDocumentOpened()                   { return lastDocumentOpened; }
+void Project::setLastDocumentOpened (const File& file)  { lastDocumentOpened = file; }
 
 //==============================================================================
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
@@ -275,24 +274,10 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
     changed();
 }
 
-void Project::valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded)
-{
-    changed();
-}
-
-void Project::valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved)
-{
-    changed();
-}
-
-void Project::valueTreeChildOrderChanged (ValueTree& parentTree)
-{
-    changed();
-}
-
-void Project::valueTreeParentChanged (ValueTree& tree)
-{
-}
+void Project::valueTreeChildAdded (ValueTree&, ValueTree&)      { changed(); }
+void Project::valueTreeChildRemoved (ValueTree&, ValueTree&)    { changed(); }
+void Project::valueTreeChildOrderChanged (ValueTree&)           { changed(); }
+void Project::valueTreeParentChanged (ValueTree&)               {}
 
 //==============================================================================
 File Project::resolveFilename (String filename) const

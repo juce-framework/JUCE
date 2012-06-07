@@ -242,7 +242,9 @@ public:
     void removeModule (const String& moduleID);
     int getNumModules() const;
     String getModuleID (int index) const;
+
     void addDefaultModules (bool shouldCopyFilesLocally);
+    bool isAudioPluginModuleMissing() const;
 
     void createRequiredModules (const ModuleList& availableModules, OwnedArray<LibraryModule>& modules) const;
 
@@ -265,7 +267,6 @@ public:
 private:
     friend class Item;
     ValueTree projectRoot;
-    static File lastDocumentOpened;
     DrawableImage mainProjectIcon;
 
     void updateProjectSettings();

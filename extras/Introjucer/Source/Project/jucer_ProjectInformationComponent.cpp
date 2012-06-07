@@ -430,6 +430,9 @@ public:
                           "This may create problems if some modules expect to share the same parent folder, so you may "
                           "want to make sure that they are all either copied or not.";
 
+            if (project.isAudioPluginModuleMissing())
+                newName = "Warning! Your project is an audio plugin, but you haven't enabled the 'juce_audio_plugin_client' module!";
+
             if (newName != getName())
             {
                 setName (newName);
