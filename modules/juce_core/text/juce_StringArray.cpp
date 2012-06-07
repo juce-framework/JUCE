@@ -118,6 +118,11 @@ bool StringArray::operator!= (const StringArray& other) const noexcept
     return ! operator== (other);
 }
 
+void StringArray::swapWith (StringArray& other) noexcept
+{
+    strings.swapWithArray (other.strings);
+}
+
 void StringArray::clear()
 {
     strings.clear();

@@ -90,6 +90,9 @@ public:
     StringArray& operator= (StringArray&& other) noexcept;
    #endif
 
+    /** Swaps the contents of this and another StringArray. */
+    void swapWith (StringArray& other) noexcept;
+
     //==============================================================================
     /** Compares two arrays.
         Comparisons are case-sensitive.
