@@ -135,7 +135,7 @@ struct ObjCClass
 private:
     static String getRandomisedName (const char* root)
     {
-        return root + String::toHexString (Random::getSystemRandom().nextInt64());
+        return root + String::toHexString (juce::Random::getSystemRandom().nextInt64());
     }
 
     JUCE_DECLARE_NON_COPYABLE (ObjCClass);
