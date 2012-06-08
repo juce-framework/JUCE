@@ -198,13 +198,22 @@ namespace DirectWriteTypeLayout
             default:                          jassertfalse; break; // Illegal flags!
         }
 
-        format->SetTextAlignment (alignment);
-        format->SetWordWrapping (wrapType);
-
         // DirectWrite does not automatically set reading direction
         // This must be set correctly and manually when using RTL Scripts (Hebrew, Arabic)
         if (text.getReadingDirection() == AttributedString::rightToLeft)
+        {
             format->SetReadingDirection (DWRITE_READING_DIRECTION_RIGHT_TO_LEFT);
+
+            switch (text.getJustification().getOnlyHorizontalFlags())
+            {
+                case Justification::left:      alignment = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
+                case Justification::right:     alignment = DWRITE_TEXT_ALIGNMENT_LEADING;  break;
+                default: break;
+            }
+        }
+
+        format->SetTextAlignment (alignment);
+        format->SetWordWrapping (wrapType);
     }
 
     void addAttributedRange (const AttributedString::Attribute& attr, IDWriteTextLayout* textLayout,
