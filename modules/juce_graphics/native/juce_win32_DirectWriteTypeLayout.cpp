@@ -77,7 +77,7 @@ namespace DirectWriteTypeLayout
                     jassert (currentLine == layout->getNumLines());
                     TextLayout::Line* const newLine = new TextLayout::Line();
                     layout->addLine (newLine);
-                    newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY); // The x value is only correct when dealing with LTR text
+                    newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
                 }
             }
 
