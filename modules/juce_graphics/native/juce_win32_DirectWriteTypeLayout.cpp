@@ -344,8 +344,8 @@ namespace DirectWriteTypeLayout
 
         for (int i = 0; i < numLines; ++i)
         {
-            lastLocation = dwLineMetrics[i].length;
             layout.getLine(i).stringRange = Range<int> (lastLocation, (int) lastLocation + dwLineMetrics[i].length);
+            lastLocation += dwLineMetrics[i].length;
         }
     }
 
