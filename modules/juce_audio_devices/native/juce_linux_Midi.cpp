@@ -34,6 +34,14 @@
  #define JUCE_ALSA_MIDI_OUTPUT_NAME "Juce Midi Output"
 #endif
 
+#ifndef JUCE_ALSA_MIDI_INPUT_PORT_NAME
+ #define JUCE_ALSA_MIDI_INPUT_PORT_NAME  "Juce Midi In Port"
+#endif
+
+#ifndef JUCE_ALSA_MIDI_OUTPUT_PORT_NAME
+ #define JUCE_ALSA_MIDI_OUTPUT_PORT_NAME "Juce Midi Out Port"
+#endif
+
 //==============================================================================
 namespace
 {
@@ -74,7 +82,7 @@ namespace
                             {
                                 snd_seq_set_client_name (seqHandle, JUCE_ALSA_MIDI_INPUT_NAME);
 
-                                const int portId = snd_seq_create_simple_port (seqHandle, "Juce Midi In Port",
+                                const int portId = snd_seq_create_simple_port (seqHandle, JUCE_ALSA_MIDI_INPUT_PORT_NAME,
                                                                                SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,
                                                                                SND_SEQ_PORT_TYPE_MIDI_GENERIC);
 
@@ -84,7 +92,7 @@ namespace
                             {
                                 snd_seq_set_client_name (seqHandle, JUCE_ALSA_MIDI_OUTPUT_NAME);
 
-                                const int portId = snd_seq_create_simple_port (seqHandle, "Juce Midi Out Port",
+                                const int portId = snd_seq_create_simple_port (seqHandle, JUCE_ALSA_MIDI_OUTPUT_PORT_NAME,
                                                                                SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ,
                                                                                SND_SEQ_PORT_TYPE_MIDI_GENERIC);
 
