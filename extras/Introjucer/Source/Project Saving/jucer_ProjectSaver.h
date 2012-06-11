@@ -433,7 +433,7 @@ private:
 
     void writeBinaryDataFiles()
     {
-        binaryDataCpp = generatedCodeFolder.getChildFile ("BinaryData.cpp");
+        binaryDataCpp = project.getBinaryDataCppFile();
 
         ResourceFile resourceFile (project);
 
