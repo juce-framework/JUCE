@@ -159,6 +159,8 @@ public:
     }
 
     virtual void doExtraInitialisation() {}
+    virtual void projectOpened (Project*) {}
+    virtual void projectClosed (Project*) {}
 
     static JucerApplication* getApp()
     {

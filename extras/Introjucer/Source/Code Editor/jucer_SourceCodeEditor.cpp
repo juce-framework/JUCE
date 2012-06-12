@@ -57,16 +57,20 @@ void SourceCodeEditor::resized()
     editor.setBounds (getLocalBounds());
 }
 
+CodeTokeniser* SourceCodeEditor::getTokeniserFor (const File& file)
+{
+    if (file.hasFileExtension (sourceOrHeaderFileExtensions))
+    {
+        static CPlusPlusCodeTokeniser cppTokeniser;
+        return &cppTokeniser;
+    }
+
+    return nullptr;
+}
+
 SourceCodeEditor* SourceCodeEditor::createFor (OpenDocumentManager::Document* document,
                                                CodeDocument& codeDocument)
 {
-    CodeTokeniser* tokeniser = nullptr;
-
-    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-    {
-        static CPlusPlusCodeTokeniser cppTokeniser;
-        tokeniser = &cppTokeniser;
-    }
-
-    return new SourceCodeEditor (document, codeDocument, tokeniser);
+    return new SourceCodeEditor (document, codeDocument,
+                                 getTokeniserFor (document->getFile()));
 }

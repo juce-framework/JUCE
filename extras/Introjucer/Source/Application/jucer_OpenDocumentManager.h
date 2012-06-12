@@ -28,7 +28,6 @@
 
 #include "../Project/jucer_Project.h"
 
-
 //==============================================================================
 /**
 */
@@ -120,5 +119,78 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenDocumentManager);
 };
 
+//==============================================================================
+class SourceCodeDocument  : public OpenDocumentManager::Document
+{
+public:
+    //==============================================================================
+    SourceCodeDocument (Project* project_, const File& file_)
+        : modDetector (file_), project (project_)
+    {
+        codeDoc = new CodeDocument();
+        reloadFromFile();
+    }
+
+    //==============================================================================
+    struct Type  : public OpenDocumentManager::DocumentType
+    {
+        bool canOpenFile (const File& file)                     { return file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;xml;plist;rtf;html;htm;php;py;rb;cs"); }
+        Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }
+    };
+
+    //==============================================================================
+    bool loadedOk() const                               { return true; }
+    bool isForFile (const File& file) const             { return getFile() == file; }
+    bool isForNode (const ValueTree& node) const        { return false; }
+    bool refersToProject (Project& p) const             { return project == &p; }
+    Project* getProject() const                         { return project; }
+    bool canSaveAs() const                              { return true; }
+    String getName() const                              { return getFile().getFileName(); }
+    String getType() const                              { return getFile().getFileExtension() + " file"; }
+    File getFile() const                                { return modDetector.getFile(); }
+    bool needsSaving() const                            { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
+    bool hasFileBeenModifiedExternally()                { return modDetector.hasBeenModified(); }
+    void fileHasBeenRenamed (const File& newFile)       { modDetector.fileHasBeenRenamed (newFile); }
+
+    void reloadFromFile()
+    {
+        modDetector.updateHash();
+
+        ScopedPointer <InputStream> in (modDetector.getFile().createInputStream());
+
+        if (in != nullptr)
+            codeDoc->loadFromStream (*in);
+    }
+
+    bool save()
+    {
+        TemporaryFile temp (modDetector.getFile());
+        ScopedPointer <FileOutputStream> out (temp.getFile().createOutputStream());
+
+        if (out == nullptr || ! codeDoc->writeToStream (*out))
+            return false;
+
+        out = nullptr;
+        if (! temp.overwriteTargetFileWithTemporary())
+            return false;
+
+        modDetector.updateHash();
+        return true;
+    }
+
+    bool saveAs()
+    {
+        jassertfalse; //xxx todo
+        return false;
+    }
+
+    Component* createEditor();
+    Component* createViewer()       { return createEditor(); }
+
+protected:
+    FileModificationDetector modDetector;
+    ScopedPointer <CodeDocument> codeDoc;
+    Project* project;
+};
 
 #endif   // __JUCER_OPENDOCUMENTMANAGER_JUCEHEADER__

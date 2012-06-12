@@ -46,6 +46,8 @@ public:
     static SourceCodeEditor* createFor (OpenDocumentManager::Document* document,
                                         CodeDocument& codeDocument);
 
+    static CodeTokeniser* getTokeniserFor (const File& file);
+
     //==============================================================================
     void resized();
 

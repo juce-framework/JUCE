@@ -28,6 +28,7 @@
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Project Saving/jucer_ProjectSaver.h"
 #include "../Application/jucer_OpenDocumentManager.h"
+#include "../Application/jucer_Application.h"
 
 
 //==============================================================================
@@ -62,10 +63,14 @@ Project::Project (const File& file_)
     mainProjectIcon.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
 
     projectRoot.addListener (this);
+
+    JucerApplication::getApp()->projectOpened (this);
 }
 
 Project::~Project()
 {
+    JucerApplication::getApp()->projectClosed (this);
+
     projectRoot.removeListener (this);
     OpenDocumentManager::getInstance()->closeAllDocumentsUsingProject (*this, false);
 }
@@ -228,7 +233,9 @@ Result Project::loadDocument (const File& file)
         return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
+    JucerApplication::getApp()->projectClosed (this);
     projectRoot = newTree;
+    JucerApplication::getApp()->projectOpened (this);
 
     removeDefunctExporters();
     setMissingDefaultValues();
