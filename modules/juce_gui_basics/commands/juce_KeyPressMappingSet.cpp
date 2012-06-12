@@ -273,8 +273,7 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
 
     doc->setAttribute ("basedOnDefaults", saveDifferencesFromDefaultSet);
 
-    int i;
-    for (i = 0; i < mappings.size(); ++i)
+    for (int i = 0; i < mappings.size(); ++i)
     {
         const CommandMapping* const cm = mappings.getUnchecked(i);
 
@@ -294,7 +293,7 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
 
     if (defaultSet != nullptr)
     {
-        for (i = 0; i < defaultSet->mappings.size(); ++i)
+        for (int i = 0; i < defaultSet->mappings.size(); ++i)
         {
             const CommandMapping* const cm = defaultSet->mappings.getUnchecked(i);
 

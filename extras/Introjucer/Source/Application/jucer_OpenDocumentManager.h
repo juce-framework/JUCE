@@ -57,8 +57,6 @@ public:
         virtual File getFile() const = 0;
         virtual bool needsSaving() const = 0;
         virtual bool save() = 0;
-        virtual bool canSaveAs() const = 0;
-        virtual bool saveAs() = 0;
         virtual bool hasFileBeenModifiedExternally() = 0;
         virtual void reloadFromFile() = 0;
         virtual Component* createEditor() = 0;
@@ -144,7 +142,6 @@ public:
     bool isForNode (const ValueTree& node) const        { return false; }
     bool refersToProject (Project& p) const             { return project == &p; }
     Project* getProject() const                         { return project; }
-    bool canSaveAs() const                              { return true; }
     String getName() const                              { return getFile().getFileName(); }
     String getType() const                              { return getFile().getFileExtension() + " file"; }
     File getFile() const                                { return modDetector.getFile(); }
@@ -176,12 +173,6 @@ public:
 
         modDetector.updateHash();
         return true;
-    }
-
-    bool saveAs()
-    {
-        jassertfalse; //xxx todo
-        return false;
     }
 
     Component* createEditor();

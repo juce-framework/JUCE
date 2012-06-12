@@ -51,14 +51,8 @@ MainWindow::MainWindow()
     centreWithSize (800, 600);
 
     // Register all the app commands..
-    {
-        commandManager->registerAllCommandsForTarget (this);
-        commandManager->registerAllCommandsForTarget (getProjectContentComponent());
-
-        // use some temporary objects to harvest their commands..
-        DocumentEditorComponent dec (nullptr);
-        commandManager->registerAllCommandsForTarget (&dec);
-    }
+    commandManager->registerAllCommandsForTarget (this);
+    commandManager->registerAllCommandsForTarget (getProjectContentComponent());
 
     // update key mappings..
     {

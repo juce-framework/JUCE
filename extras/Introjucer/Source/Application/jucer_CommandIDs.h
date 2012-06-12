@@ -32,11 +32,9 @@ namespace CommandIDs
     static const int open                   = 0x200020;
     static const int closeDocument          = 0x200030;
     static const int saveDocument           = 0x200040;
-    static const int saveDocumentAs         = 0x200050;
 
     static const int closeProject           = 0x200051;
     static const int saveProject            = 0x200060;
-    static const int saveProjectAs          = 0x200070;
     static const int openInIDE              = 0x200072;
     static const int saveAndOpenInIDE       = 0x200073;
     static const int showProjectSettings    = 0x200074;

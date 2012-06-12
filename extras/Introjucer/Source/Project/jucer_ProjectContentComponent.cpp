@@ -215,19 +215,24 @@ ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 
 void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
 {
-    const CommandID ids[] = { CommandIDs::saveProject,
-                              CommandIDs::saveProjectAs,
+    const CommandID ids[] = { CommandIDs::saveDocument,
+                              CommandIDs::closeDocument,
+                              CommandIDs::saveProject,
                               CommandIDs::closeProject,
                               CommandIDs::openInIDE,
                               CommandIDs::saveAndOpenInIDE,
                               CommandIDs::showProjectSettings,
-                              StandardApplicationCommandIDs::del};
+                              StandardApplicationCommandIDs::del };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
 
 void ProjectContentComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
 {
+    String documentName;
+    if (currentDocument != nullptr)
+        documentName = " '" + currentDocument->getName().substring (0, 32) + "'";
+
     switch (commandID)
     {
     case CommandIDs::saveProject:
@@ -235,15 +240,6 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
-        break;
-
-    case CommandIDs::saveProjectAs:
-        result.setInfo ("Save Project As...",
-                        "Saves the current project to a different filename",
-                        CommandCategories::general, 0);
-        result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::closeProject:
@@ -251,6 +247,26 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Closes the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
+        break;
+
+    case CommandIDs::saveDocument:
+        result.setInfo ("Save" + documentName,
+                        "Saves the current document",
+                        CommandCategories::general, 0);
+        result.setActive (currentDocument != nullptr || project != nullptr);
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
+        break;
+
+    case CommandIDs::closeDocument:
+        result.setInfo ("Close" + documentName,
+                        "Closes the current document",
+                        CommandCategories::general, 0);
+        result.setActive (currentDocument != nullptr);
+       #if JUCE_MAC
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+       #else
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+       #endif
         break;
 
     case CommandIDs::openInIDE:
@@ -310,34 +326,35 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::saveProject:
-        if (project != nullptr)
-        {
-            if (! reinvokeCommandAfterClosingPropertyEditors (info))
-                project->save (true, true);
-        }
-
-        break;
-
-    case CommandIDs::saveProjectAs:
-        if (project != nullptr)
-        {
-            if (! reinvokeCommandAfterClosingPropertyEditors (info))
-                project->saveAsInteractive (true);
-        }
+        if (project != nullptr && ! reinvokeCommandAfterClosingPropertyEditors (info))
+            project->save (true, true);
 
         break;
 
     case CommandIDs::closeProject:
         {
-            MainWindow* mw = findParentComponentOfClass<MainWindow>();
+            MainWindow* const mw = findParentComponentOfClass<MainWindow>();
 
-            if (mw != nullptr)
-            {
-                if (! reinvokeCommandAfterClosingPropertyEditors (info))
-                    mw->closeCurrentProject();
-            }
+            if (mw != nullptr && ! reinvokeCommandAfterClosingPropertyEditors (info))
+                mw->closeCurrentProject();
         }
 
+        break;
+
+    case CommandIDs::saveDocument:
+        if (! reinvokeCommandAfterClosingPropertyEditors (info))
+        {
+            if (currentDocument != nullptr)
+                currentDocument->save();
+            else if (project != nullptr)
+                project->save (true, true);
+        }
+
+        break;
+
+    case CommandIDs::closeDocument:
+        if (currentDocument != nullptr)
+            OpenDocumentManager::getInstance()->closeDocument (currentDocument, true);
         break;
 
     case CommandIDs::openInIDE:

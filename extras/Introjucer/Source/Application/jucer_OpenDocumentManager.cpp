@@ -56,8 +56,6 @@ public:
     Project* getProject() const                     { return project; }
     bool needsSaving() const                        { return false; }
     bool save()                                     { return true; }
-    bool canSaveAs() const                          { return false; }
-    bool saveAs()                                   { return false; }
     bool hasFileBeenModifiedExternally()            { return fileModificationTime != file.getLastModificationTime(); }
     void reloadFromFile()                           { fileModificationTime = file.getLastModificationTime(); }
     String getName() const                          { return file.getFileName(); }

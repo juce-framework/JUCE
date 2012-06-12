@@ -199,11 +199,9 @@ public:
                 menu.addSeparator();
                 menu.addCommandItem (commandManager, CommandIDs::closeDocument);
                 menu.addCommandItem (commandManager, CommandIDs::saveDocument);
-                menu.addCommandItem (commandManager, CommandIDs::saveDocumentAs);
                 menu.addSeparator();
                 menu.addCommandItem (commandManager, CommandIDs::closeProject);
                 menu.addCommandItem (commandManager, CommandIDs::saveProject);
-                menu.addCommandItem (commandManager, CommandIDs::saveProjectAs);
                 menu.addSeparator();
                 menu.addCommandItem (commandManager, CommandIDs::openInIDE);
                 menu.addCommandItem (commandManager, CommandIDs::saveAndOpenInIDE);
