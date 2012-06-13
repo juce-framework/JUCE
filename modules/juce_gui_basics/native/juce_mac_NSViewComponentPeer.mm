@@ -228,13 +228,12 @@ public:
     Rectangle<int> getBounds (const bool global) const
     {
         NSRect r = [view frame];
+        NSWindow* window = [view window];
 
-        if (global && [view window] != nil)
+        if (global && window != nil)
         {
-            r = [view convertRect: r toView: nil];
-            NSRect wr = [[view window] frame];
-            r.origin.x += wr.origin.x;
-            r.origin.y += wr.origin.y;
+            r = [[view superview] convertRect: r toView: nil];
+            r = [window convertRectToScreen: r];
             r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
         }
         else
