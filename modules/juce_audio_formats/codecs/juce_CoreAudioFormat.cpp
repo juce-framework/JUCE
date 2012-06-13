@@ -58,6 +58,7 @@ public:
           ok (false), lastReadPosition (0)
     {
         usesFloatingPointData = true;
+        bitsPerSample = 32;
 
         OSStatus status = AudioFileOpenWithCallbacks (this,
                                                       &readCallback,
@@ -79,9 +80,8 @@ public:
                                          &audioStreamBasicDescriptionSize,
                                          &sourceAudioFormat);
 
-                numChannels   = sourceAudioFormat.mChannelsPerFrame;
-                sampleRate    = sourceAudioFormat.mSampleRate;
-                bitsPerSample = sourceAudioFormat.mBitsPerChannel;
+                numChannels = sourceAudioFormat.mChannelsPerFrame;
+                sampleRate  = sourceAudioFormat.mSampleRate;
 
                 UInt32 sizeOfLengthProperty = sizeof (int64);
                 ExtAudioFileGetProperty (audioFileRef,
