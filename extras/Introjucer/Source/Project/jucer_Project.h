@@ -101,6 +101,7 @@ public:
     File getGeneratedCodeFolder() const                 { return getFile().getSiblingFile ("JuceLibraryCode"); }
     File getAppIncludeFile() const                      { return getGeneratedCodeFolder().getChildFile (getJuceSourceHFilename()); }
     File getBinaryDataCppFile() const                   { return getGeneratedCodeFolder().getChildFile ("BinaryData.cpp"); }
+    File getBinaryDataHeaderFile() const                { return getBinaryDataCppFile().withFileExtension (".h"); }
 
     //==============================================================================
     String getAmalgamatedHeaderFileName() const         { return "juce_amalgamated.h"; }
