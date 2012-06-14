@@ -89,8 +89,12 @@ class TemporaryMainMenuWithStandardCommands
 {
 public:
     TemporaryMainMenuWithStandardCommands()
-        : oldMenu (MenuBarModel::getMacMainMenu())
+        : oldMenu (MenuBarModel::getMacMainMenu()), oldAppleMenu (nullptr)
     {
+        const PopupMenu* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu();
+        if (appleMenu != nullptr)
+            oldAppleMenu = new PopupMenu (*appleMenu);
+
         MenuBarModel::setMacMainMenu (nullptr);
 
         NSMenu* menu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Edit")];
@@ -119,11 +123,12 @@ public:
 
     ~TemporaryMainMenuWithStandardCommands()
     {
-        MenuBarModel::setMacMainMenu (oldMenu);
+        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu);
     }
 
 private:
     MenuBarModel* oldMenu;
+    ScopedPointer<PopupMenu> oldAppleMenu;
 };
 
 //==============================================================================

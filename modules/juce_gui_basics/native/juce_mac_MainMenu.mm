@@ -38,7 +38,7 @@ public:
 
     ~JuceMainMenuHandler()
     {
-        setMenu (nullptr);
+        setMenu (nullptr, nullptr);
 
         jassert (instance == this);
         instance = nullptr;
@@ -46,7 +46,7 @@ public:
         [callback release];
     }
 
-    void setMenu (MenuBarModel* const newMenuBarModel)
+    void setMenu (MenuBarModel* const newMenuBarModel, const PopupMenu* newExtraAppleMenuItems)
     {
         if (currentModel != newMenuBarModel)
         {
@@ -60,6 +60,9 @@ public:
 
             menuBarItemsChanged (nullptr);
         }
+
+        extraAppleMenuItems = newExtraAppleMenuItems != nullptr ? new PopupMenu (*newExtraAppleMenuItems)
+                                                                : nullptr;
     }
 
     void addSubMenu (NSMenu* parent, const PopupMenu& child,
@@ -262,6 +265,7 @@ public:
     static JuceMainMenuHandler* instance;
 
     MenuBarModel* currentModel;
+    ScopedPointer<PopupMenu> extraAppleMenuItems;
     uint32 lastUpdateTime;
     NSObject* callback;
 
@@ -569,7 +573,7 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
             if (JuceMainMenuHandler::instance == nullptr)
                 JuceMainMenuHandler::instance = new JuceMainMenuHandler();
 
-            JuceMainMenuHandler::instance->setMenu (newMenuBarModel);
+            JuceMainMenuHandler::instance->setMenu (newMenuBarModel, extraAppleMenuItems);
         }
     }
 
@@ -583,6 +587,12 @@ MenuBarModel* MenuBarModel::getMacMainMenu()
 {
     return JuceMainMenuHandler::instance != nullptr
              ? JuceMainMenuHandler::instance->currentModel : nullptr;
+}
+
+const PopupMenu* MenuBarModel::getMacExtraAppleItemsMenu()
+{
+    return JuceMainMenuHandler::instance != nullptr
+             ? JuceMainMenuHandler::instance->extraAppleMenuItems.get() : nullptr;
 }
 
 void juce_initialiseMacMainMenu()

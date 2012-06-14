@@ -154,6 +154,11 @@ public:
         the main menu bar.
     */
     static MenuBarModel* getMacMainMenu();
+
+    /** MAC ONLY - Returns the menu that was last passed as the extraAppleMenuItems
+        argument to setMacMainMenu(), or nullptr if none was specified.
+    */
+    static const PopupMenu* getMacExtraAppleItemsMenu();
    #endif
 
     //==============================================================================
