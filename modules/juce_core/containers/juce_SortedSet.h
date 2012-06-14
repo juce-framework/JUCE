@@ -424,7 +424,7 @@ public:
                 if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
                     numElementsToAdd = setToAddFrom.size() - startIndex;
 
-                addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
+                addArray (setToAddFrom.data.elements + startIndex, numElementsToAdd);
             }
         }
     }
@@ -582,7 +582,7 @@ private:
         if (numberToMove > 0)
             memmove (insertPos + 1, insertPos, sizeof (ElementType) * (size_t) numberToMove);
 
-        *insertPos = newElement;
+        new (insertPos) ElementType (newElement);
         ++numUsed;
     }
 };
