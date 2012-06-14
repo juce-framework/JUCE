@@ -233,7 +233,13 @@ public:
         if (global && window != nil)
         {
             r = [[view superview] convertRect: r toView: nil];
+
+           #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_7
             r = [window convertRectToScreen: r];
+           #else
+            r.origin = [window convertBaseToScreen: r.origin];
+           #endif
+
             r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
         }
         else
