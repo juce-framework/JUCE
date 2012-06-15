@@ -119,9 +119,9 @@ public:
     {
         if (activePlugins.size() + activeUIs.size() == 0)
         {
-          #if BUILD_AU_CARBON_UI
+           #if BUILD_AU_CARBON_UI
             NSApplicationLoad();
-          #endif
+           #endif
 
             initialiseJuce_GUI();
         }
@@ -140,6 +140,18 @@ public:
         auEvent.mArgument.mParameter.mAudioUnit = GetComponentInstance();
         auEvent.mArgument.mParameter.mScope = kAudioUnitScope_Global;
         auEvent.mArgument.mParameter.mElement = 0;
+
+        CreateElements();
+
+        CAStreamBasicDescription streamDescription;
+        streamDescription.mSampleRate = GetSampleRate();
+        streamDescription.SetCanonical (channelConfigs[0][1], false);
+        Outputs().GetIOElement(0)->SetStreamFormat (streamDescription);
+
+       #if ! JucePlugin_IsSynth
+        streamDescription.SetCanonical (channelConfigs[0][0], false);
+        Inputs().GetIOElement(0)->SetStreamFormat (streamDescription);
+       #endif
     }
 
     ~JuceAU()

@@ -1310,6 +1310,10 @@ public:
             const int cw = child->getWidth();
             const int ch = child->getHeight();
 
+           #if JUCE_MAC && JUCE_64BIT
+            setTopLeftPosition (0, getHeight() - ch);
+           #endif
+
             wrapper.resizeHostWindow (cw, ch);
 
            #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
