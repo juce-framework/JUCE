@@ -219,8 +219,8 @@ protected:
                 if (getMacCompatibilityVersion().isEmpty())
                     getMacCompatibilityVersionValue() = osxVersionDefault;
 
-                const char* osxVersions[]      = { "Use Default",     osxVersion10_4, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
-                const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
+                const char* osxVersions[]      = { "Use Default",     osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
+                const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
 
                 props.add (new ChoicePropertyComponent (getMacSDKVersionValue(), "OSX Base SDK Version",
                                                         StringArray (osxVersions), Array<var> (osxVersionValues)),
@@ -672,7 +672,7 @@ private:
             const String sdk (config.getMacSDKVersion());
             const String sdkCompat (config.getMacCompatibilityVersion());
 
-            if (sdk == osxVersion10_5)     s.add ("SDKROOT = macosx10.5");
+            if (sdk == osxVersion10_5)          s.add ("SDKROOT = macosx10.5");
             else if (sdk == osxVersion10_6)     s.add ("SDKROOT = macosx10.6");
             else if (sdk == osxVersion10_7)     s.add ("SDKROOT = macosx10.7");
 
