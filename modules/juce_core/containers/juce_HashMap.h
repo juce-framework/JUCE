@@ -156,7 +156,7 @@ public:
         If the map doesn't contain the key, a default instance of the value type is returned.
         @param keyToLookFor    the key of the item being requested
     */
-    inline const ValueType operator[] (KeyTypeParameter keyToLookFor) const
+    inline ValueType operator[] (KeyTypeParameter keyToLookFor) const
     {
         const ScopedLockType sl (getLock());
 
