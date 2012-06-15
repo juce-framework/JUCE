@@ -94,7 +94,7 @@ void MainWindow::createProjectContentCompIfNeeded()
     if (getProjectContentComponent() == nullptr)
     {
         clearContentComponent();
-        setContentOwned (new ProjectContentComponent(), false);
+        setContentOwned (JucerApplication::getApp()->createProjectContentComponent(), false);
     }
 }
 

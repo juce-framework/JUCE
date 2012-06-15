@@ -159,8 +159,6 @@ public:
     }
 
     virtual void doExtraInitialisation() {}
-    virtual void projectOpened (Project*) {}
-    virtual void projectClosed (Project*) {}
 
     static JucerApplication* getApp()
     {
@@ -487,13 +485,18 @@ public:
 
     ScopedPointer<MainMenuModel> menuModel;
 
-    virtual MainWindow* createNewMainWindow()
+    MainWindow* createNewMainWindow()
     {
         MainWindow* mw = new MainWindow();
         mainWindows.add (mw);
         mw->restoreWindowPosition();
         avoidSuperimposedWindows (mw);
         return mw;
+    }
+
+    virtual Component* createProjectContentComponent() const
+    {
+        return new ProjectContentComponent();
     }
 
 private:

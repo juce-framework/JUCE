@@ -44,7 +44,8 @@ public:
 
     void paint (Graphics& g);
 
-    void setProject (Project* project);
+    Project* getProject() const noexcept    { return project; }
+    virtual void setProject (Project* project);
     void saveTreeViewState();
 
     bool showEditorForFile (const File& f);
