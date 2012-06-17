@@ -85,9 +85,9 @@ public:
     }
 
     MessageQueue messageQueue;
+    id delegate;
 
 private:
-    id delegate;
     CFRunLoopRef runLoop;
     CFRunLoopSourceRef runLoopSource;
 

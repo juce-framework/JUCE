@@ -1532,7 +1532,7 @@ private:
             return true;
 
         objc_super s = { self, [NSView class] };
-        return objc_msgSendSuper (&s, @selector (performKeyEquivalent:), ev);
+        return objc_msgSendSuper (&s, @selector (performKeyEquivalent:), ev) != nil;
     }
     #endif
 
