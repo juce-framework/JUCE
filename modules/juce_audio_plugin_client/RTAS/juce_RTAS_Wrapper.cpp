@@ -982,7 +982,7 @@ private:
             case 7:   return ePlugIn_StemFormat_6dot1;
 
            #if PT_VERS_MAJOR >= 9
-            case 8:   return ePlugIn_StemFormat_7dot1DTS
+            case 8:   return ePlugIn_StemFormat_7dot1DTS;
            #else
             case 8:   return ePlugIn_StemFormat_7dot1;
            #endif
