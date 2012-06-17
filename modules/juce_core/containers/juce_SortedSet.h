@@ -531,6 +531,20 @@ public:
         }
     }
 
+    /** This swaps the contents of this array with those of another array.
+
+        If you need to exchange two arrays, this is vastly quicker than using copy-by-value
+        because it just swaps their internal pointers.
+    */
+    void swapWith (SortedSet& otherSet) noexcept
+    {
+        const ScopedLockType lock1 (getLock());
+        const ScopedLockType lock2 (otherSet.getLock());
+
+        data.swapWith (otherSet.data);
+        swapVariables (numUsed, otherSet.numUsed);
+    }
+
     //==============================================================================
     /** Reduces the amount of storage being used by the set.
 

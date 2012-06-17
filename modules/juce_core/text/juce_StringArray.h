@@ -125,6 +125,22 @@ public:
     */
     String& getReference (int index) noexcept;
 
+    /** Returns a pointer to the first String in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline String* begin() const noexcept
+    {
+        return strings.begin();
+    }
+
+    /** Returns a pointer to the String which follows the last element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline String* end() const noexcept
+    {
+        return strings.end();
+    }
+
     /** Searches for a string in the array.
 
         The comparison will be case-insensitive if the ignoreCase parameter is true.
