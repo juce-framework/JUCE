@@ -70,6 +70,12 @@ public:
     /** Destructor. */
     ~MemoryInputStream();
 
+    /** Returns a pointer to the source data block from which this stream is reading. */
+    const void* getData() const noexcept        { return data; }
+
+    /** Returns the number of bytes of source data in the block from which this stream is reading. */
+    size_t getDataSize() const noexcept         { return dataSize; }
+
     //==============================================================================
     int64 getPosition();
     bool setPosition (int64 pos);
@@ -79,7 +85,7 @@ public:
 
 private:
     //==============================================================================
-    const char* data;
+    const void* data;
     size_t dataSize, position;
     HeapBlock<char> internalCopy;
 

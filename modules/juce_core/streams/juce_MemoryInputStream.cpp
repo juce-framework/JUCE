@@ -26,7 +26,7 @@
 MemoryInputStream::MemoryInputStream (const void* const sourceData,
                                       const size_t sourceDataSize,
                                       const bool keepInternalCopy)
-    : data (static_cast <const char*> (sourceData)),
+    : data (sourceData),
       dataSize (sourceDataSize),
       position (0)
 {
@@ -36,7 +36,7 @@ MemoryInputStream::MemoryInputStream (const void* const sourceData,
 
 MemoryInputStream::MemoryInputStream (const MemoryBlock& sourceData,
                                       const bool keepInternalCopy)
-    : data (static_cast <const char*> (sourceData.getData())),
+    : data (sourceData.getData()),
       dataSize (sourceData.getSize()),
       position (0)
 {
@@ -68,9 +68,9 @@ int MemoryInputStream::read (void* const buffer, const int howMany)
     if (num <= 0)
         return 0;
 
-    memcpy (buffer, data + position, (size_t) num);
+    memcpy (buffer, addBytesToPointer (data, position), (size_t) num);
     position += num;
-    return (int) num;
+    return num;
 }
 
 bool MemoryInputStream::isExhausted()
