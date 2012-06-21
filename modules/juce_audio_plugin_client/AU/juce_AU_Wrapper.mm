@@ -94,6 +94,11 @@ static const int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelC
  #define JuceAUBaseClass AUMIDIEffectBase
 #endif
 
+// This macro can be set if you need to override this internal name for some reason..
+#ifndef JUCE_STATE_DICTIONARY_KEY
+ #define JUCE_STATE_DICTIONARY_KEY   CFSTR("jucePluginState")
+#endif
+
 //==============================================================================
 /** Somewhere in the codebase of your plugin, you need to implement this function
     and make it create an instance of the filter subclass that you're building.
@@ -297,7 +302,7 @@ public:
             if (state.getSize() > 0)
             {
                 CFDataRef ourState = CFDataCreate (kCFAllocatorDefault, (const UInt8*) state.getData(), state.getSize());
-                CFDictionarySetValue (dict, CFSTR("jucePluginState"), ourState);
+                CFDictionarySetValue (dict, JUCE_STATE_DICTIONARY_KEY, ourState);
                 CFRelease (ourState);
             }
         }
@@ -317,7 +322,7 @@ public:
             CFDictionaryRef dict = (CFDictionaryRef) inData;
             CFDataRef data = 0;
 
-            if (CFDictionaryGetValueIfPresent (dict, CFSTR("jucePluginState"), (const void**) &data))
+            if (CFDictionaryGetValueIfPresent (dict, JUCE_STATE_DICTIONARY_KEY, (const void**) &data))
             {
                 if (data != 0)
                 {
