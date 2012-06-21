@@ -35,7 +35,7 @@ public:
     {
         setEditable (true, true, false);
 
-        setColour (backgroundColourId, Colours::white);
+        setColour (backgroundColourId, findColour (ComboBox::backgroundColourId));
         setColour (outlineColourId, findColour (ComboBox::outlineColourId));
     }
 
