@@ -83,7 +83,7 @@ public:
             for (int i = 0; i < (int) numHeaders; ++i)
                 headers[i].write (deviceHandle);
 
-            startTime = Time::getMillisecondCounter();
+            startTime = Time::getMillisecondCounterHiRes();
             MMRESULT res = midiInStart (deviceHandle);
 
             if (res == MMSYSERR_NOERROR)
@@ -134,7 +134,7 @@ private:
     MidiInputCallback& callback;
     MidiDataConcatenator concatenator;
     bool volatile isStarted;
-    uint32 startTime;
+    double startTime;
 
     class MidiHeader
     {
@@ -201,11 +201,11 @@ private:
     {
         timeStamp += startTime;
 
-        const uint32 now = Time::getMillisecondCounter();
+        const double now = Time::getMillisecondCounterHiRes();
         if (timeStamp > now)
         {
-            if (timeStamp > now + 2)
-                --startTime;
+            if (timeStamp > now + 2.0)
+                startTime -= 1.0;
 
             timeStamp = now;
         }
