@@ -471,9 +471,8 @@ public:
         @returns                    the index of the element, or -1 if it's not found
         @see addSorted, sort
     */
-    template <class ElementComparator>
-    int indexOfSorted (ElementComparator& comparator,
-                       const ObjectClass* const objectToLookFor) const noexcept
+    template <typename ElementComparator, typename TargetValueType>
+    int indexOfSorted (ElementComparator& comparator, TargetValueType objectToLookFor) const noexcept
     {
         (void) comparator;
         const ScopedLockType lock (getLock());

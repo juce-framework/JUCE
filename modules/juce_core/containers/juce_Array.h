@@ -672,8 +672,8 @@ public:
         @returns                    the index of the element, or -1 if it's not found
         @see addSorted, sort
     */
-    template <class ElementComparator>
-    int indexOfSorted (ElementComparator& comparator, ParameterType elementToLookFor) const
+    template <typename ElementComparator, typename TargetValueType>
+    int indexOfSorted (ElementComparator& comparator, TargetValueType elementToLookFor) const
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
