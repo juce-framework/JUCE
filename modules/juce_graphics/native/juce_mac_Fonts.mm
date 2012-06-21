@@ -23,13 +23,19 @@
   ==============================================================================
 */
 
-#if JUCE_IOS || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) \
-                  && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 \
-                  && MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5)
+#if JUCE_IOS || (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4)
  #define JUCE_CORETEXT_AVAILABLE 1
 #endif
 
 #if JUCE_CORETEXT_AVAILABLE
+
+#if JUCE_MAC && MAC_OS_X_VERSION_MAX_ALLOWED == MAC_OS_X_VERSION_10_5
+extern "C"
+{
+    void CTRunGetAdvances (CTRunRef, CFRange, CGSize buffer[]);
+    const CGSize* CTRunGetAdvancesPtr (CTRunRef);
+}
+#endif
 
 namespace CoreTextTypeLayout
 {
