@@ -87,13 +87,6 @@ template <class ElementType, bool throwOnFailure = false>
 class HeapBlock
 {
 public:
-    /** Flags used to indicate whether a newly allocated block should be cleared or not. */
-    enum InitialisationState
-    {
-        leaveUnitialised = 0,
-        clearToZero
-    };
-
     //==============================================================================
     /** Creates a HeapBlock which is initially just a null pointer.
 
@@ -120,13 +113,13 @@ public:
 
     /** Creates a HeapBlock containing a number of elements.
 
-        The initState parameter determines whether the new memory should be cleared, or
-        left uninitialised.
+        The initialiseToZero parameter determines whether the new memory should be cleared,
+        or left uninitialised.
     */
-    HeapBlock (const size_t numElements, InitialisationState initState)
-        : data (static_cast <ElementType*> (initState == leaveUnitialised
-                                              ? std::malloc (numElements * sizeof (ElementType))
-                                              : std::calloc (numElements, sizeof (ElementType))))
+    HeapBlock (const size_t numElements, const bool initialiseToZero)
+        : data (static_cast <ElementType*> (initialiseToZero
+                                               ? std::calloc (numElements, sizeof (ElementType))
+                                               : std::malloc (numElements * sizeof (ElementType))))
     {
         throwOnAllocationFailure();
     }

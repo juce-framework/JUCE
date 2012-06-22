@@ -199,18 +199,18 @@ private:
 
     double convertTimeStamp (uint32 timeStamp)
     {
-        timeStamp += startTime;
+        double t = startTime + timeStamp;
 
         const double now = Time::getMillisecondCounterHiRes();
-        if (timeStamp > now)
+        if (t > now)
         {
-            if (timeStamp > now + 2.0)
+            if (t > now + 2.0)
                 startTime -= 1.0;
 
-            timeStamp = now;
+            t = now;
         }
 
-        return timeStamp * 0.001;
+        return t * 0.001;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInCollector);
