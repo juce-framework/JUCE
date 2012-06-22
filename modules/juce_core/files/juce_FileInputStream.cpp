@@ -30,7 +30,6 @@ FileInputStream::FileInputStream (const File& f)
     : file (f),
       fileHandle (nullptr),
       currentPosition (0),
-      totalSize (0),
       status (Result::ok()),
       needToSeek (true)
 {
@@ -45,7 +44,7 @@ FileInputStream::~FileInputStream()
 //==============================================================================
 int64 FileInputStream::getTotalLength()
 {
-    return totalSize;
+    return file.getSize();
 }
 
 int FileInputStream::read (void* buffer, int bytesToRead)
@@ -69,7 +68,7 @@ int FileInputStream::read (void* buffer, int bytesToRead)
 
 bool FileInputStream::isExhausted()
 {
-    return currentPosition >= totalSize;
+    return currentPosition >= getTotalLength();
 }
 
 int64 FileInputStream::getPosition()
@@ -80,10 +79,14 @@ int64 FileInputStream::getPosition()
 bool FileInputStream::setPosition (int64 pos)
 {
     jassert (openedOk());
-    pos = jlimit ((int64) 0, totalSize, pos);
 
-    needToSeek |= (currentPosition != pos);
-    currentPosition = pos;
+    if (pos != currentPosition)
+    {
+        pos = jlimit ((int64) 0, getTotalLength(), pos);
+
+        needToSeek |= (currentPosition != pos);
+        currentPosition = pos;
+    }
 
     return true;
 }

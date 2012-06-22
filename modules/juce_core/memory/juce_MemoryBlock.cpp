@@ -175,6 +175,16 @@ void MemoryBlock::append (const void* const srcData, const size_t numBytes)
     }
 }
 
+void MemoryBlock::replaceWith (const void* const srcData, const size_t numBytes)
+{
+    if (numBytes > 0)
+    {
+        jassert (srcData != nullptr); // this must not be null!
+        setSize (numBytes);
+        memcpy (data, srcData, numBytes);
+    }
+}
+
 void MemoryBlock::insert (const void* const srcData, const size_t numBytes, size_t insertPosition)
 {
     if (numBytes > 0)

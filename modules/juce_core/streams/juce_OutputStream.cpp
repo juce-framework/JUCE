@@ -241,7 +241,7 @@ int OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWri
 
     int numWritten = 0;
 
-    while (numBytesToWrite > 0 && ! source.isExhausted())
+    while (numBytesToWrite > 0)
     {
         char buffer [8192];
         const int num = source.read (buffer, (int) jmin (numBytesToWrite, (int64) sizeof (buffer)));
