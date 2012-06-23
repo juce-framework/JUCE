@@ -64,19 +64,15 @@ public:
     //==============================================================================
     /** Creates an empty set. */
     SortedSet() noexcept
-       : numUsed (0)
     {
     }
 
     /** Creates a copy of another set.
         @param other    the set to copy
     */
-    SortedSet (const SortedSet& other) noexcept
+    SortedSet (const SortedSet& other)
+        : data (other.data)
     {
-        const ScopedLockType lock (other.getLock());
-        numUsed = other.numUsed;
-        data.setAllocatedSize (other.numUsed);
-        memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
     }
 
     /** Destructor. */
@@ -89,47 +85,22 @@ public:
     */
     SortedSet& operator= (const SortedSet& other) noexcept
     {
-        if (this != &other)
-        {
-            const ScopedLockType lock1 (other.getLock());
-            const ScopedLockType lock2 (getLock());
-
-            data.ensureAllocatedSize (other.size());
-            numUsed = other.numUsed;
-            memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
-            minimiseStorageOverheads();
-        }
-
+        data = other.data;
         return *this;
     }
 
     //==============================================================================
     /** Compares this set to another one.
-
-        Two sets are considered equal if they both contain the same set of
-        elements.
-
+        Two sets are considered equal if they both contain the same set of elements.
         @param other    the other set to compare with
     */
     bool operator== (const SortedSet<ElementType>& other) const noexcept
     {
-        const ScopedLockType lock (getLock());
-
-        if (numUsed != other.numUsed)
-            return false;
-
-        for (int i = numUsed; --i >= 0;)
-            if (! (data.elements[i] == other.data.elements[i]))
-                return false;
-
-        return true;
+        return data == other.data;
     }
 
     /** Compares this set to another one.
-
-        Two sets are considered equal if they both contain the same set of
-        elements.
-
+        Two sets are considered equal if they both contain the same set of elements.
         @param other    the other set to compare with
     */
     bool operator!= (const SortedSet<ElementType>& other) const noexcept
@@ -148,9 +119,7 @@ public:
     */
     void clear() noexcept
     {
-        const ScopedLockType lock (getLock());
-        data.setAllocatedSize (0);
-        numUsed = 0;
+        data.clear();
     }
 
     /** Removes all elements from the set without freeing the array's allocated storage.
@@ -159,8 +128,7 @@ public:
     */
     void clearQuick() noexcept
     {
-        const ScopedLockType lock (getLock());
-        numUsed = 0;
+        data.clearQuick();
     }
 
     //==============================================================================
@@ -168,7 +136,7 @@ public:
     */
     inline int size() const noexcept
     {
-        return numUsed;
+        return data.size();
     }
 
     /** Returns one of the elements in the set.
@@ -184,9 +152,7 @@ public:
     */
     inline ElementType operator[] (const int index) const noexcept
     {
-        const ScopedLockType lock (getLock());
-        return isPositiveAndBelow (index, numUsed) ? data.elements [index]
-                                                   : ElementType();
+        return data [index];
     }
 
     /** Returns one of the elements in the set, without checking the index passed in.
@@ -199,9 +165,7 @@ public:
     */
     inline ElementType getUnchecked (const int index) const noexcept
     {
-        const ScopedLockType lock (getLock());
-        jassert (isPositiveAndBelow (index, numUsed));
-        return data.elements [index];
+        return data.getUnchecked (index);
     }
 
     /** Returns a direct reference to one of the elements in the set, without checking the index passed in.
@@ -214,9 +178,7 @@ public:
     */
     inline ElementType& getReference (const int index) const noexcept
     {
-        const ScopedLockType lock (getLock());
-        jassert (isPositiveAndBelow (index, numUsed));
-        return data.elements [index];
+        return data.getReference (index);
     }
 
     /** Returns the first element in the set, or 0 if the set is empty.
@@ -225,8 +187,7 @@ public:
     */
     inline ElementType getFirst() const noexcept
     {
-        const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [0] : ElementType();
+        return data.getFirst();
     }
 
     /** Returns the last element in the set, or 0 if the set is empty.
@@ -235,8 +196,7 @@ public:
     */
     inline ElementType getLast() const noexcept
     {
-        const ScopedLockType lock (getLock());
-        return numUsed > 0 ? data.elements [numUsed - 1] : ElementType();
+        return data.getLast();
     }
 
     //==============================================================================
@@ -245,7 +205,7 @@ public:
     */
     inline ElementType* begin() const noexcept
     {
-        return data.elements;
+        return data.begin();
     }
 
     /** Returns a pointer to the element which follows the last element in the set.
@@ -253,7 +213,7 @@ public:
     */
     inline ElementType* end() const noexcept
     {
-        return data.elements + numUsed;
+        return data.end();
     }
 
     //==============================================================================
@@ -267,32 +227,27 @@ public:
     */
     int indexOf (const ElementType elementToLookFor) const noexcept
     {
-        const ScopedLockType lock (getLock());
+        const ScopedLockType lock (data.getLock());
 
         int start = 0;
-        int end_ = numUsed;
+        int end_ = data.size();
 
         for (;;)
         {
             if (start >= end_)
-            {
                 return -1;
-            }
-            else if (elementToLookFor == data.elements [start])
-            {
-                return start;
-            }
-            else
-            {
-                const int halfway = (start + end_) >> 1;
 
-                if (halfway == start)
-                    return -1;
-                else if (elementToLookFor < data.elements [halfway])
-                    end_ = halfway;
-                else
-                    start = halfway;
-            }
+            if (elementToLookFor == data.getReference (start))
+                return start;
+
+            const int halfway = (start + end_) >> 1;
+
+            if (halfway == start)
+                return -1;
+            else if (elementToLookFor < data.getReference (halfway))
+                end_ = halfway;
+            else
+                start = halfway;
         }
     }
 
@@ -306,29 +261,24 @@ public:
         const ScopedLockType lock (getLock());
 
         int start = 0;
-        int end_ = numUsed;
+        int end_ = data.size();
 
         for (;;)
         {
             if (start >= end_)
-            {
                 return false;
-            }
-            else if (elementToLookFor == data.elements [start])
-            {
-                return true;
-            }
-            else
-            {
-                const int halfway = (start + end_) >> 1;
 
-                if (halfway == start)
-                    return false;
-                else if (elementToLookFor < data.elements [halfway])
-                    end_ = halfway;
-                else
-                    start = halfway;
-            }
+            if (elementToLookFor == data.getReference (start))
+                return true;
+
+            const int halfway = (start + end_) >> 1;
+
+            if (halfway == start)
+                return false;
+            else if (elementToLookFor < data.getReference (halfway))
+                end_ = halfway;
+            else
+                start = halfway;
         }
     }
 
@@ -343,38 +293,35 @@ public:
         const ScopedLockType lock (getLock());
 
         int start = 0;
-        int end_ = numUsed;
+        int end_ = data.size();
 
         for (;;)
         {
             if (start >= end_)
             {
                 jassert (start <= end_);
-                insertInternal (start, newElement);
+                data.insert (start, newElement);
                 break;
             }
-            else if (newElement == data.elements [start])
-            {
+
+            if (newElement == data.getReference (start))
                 break;
-            }
-            else
+
+            const int halfway = (start + end_) >> 1;
+
+            if (halfway == start)
             {
-                const int halfway = (start + end_) >> 1;
-
-                if (halfway == start)
-                {
-                    if (newElement < data.elements [halfway])
-                        insertInternal (start, newElement);
-                    else
-                        insertInternal (start + 1, newElement);
-
-                    break;
-                }
-                else if (newElement < data.elements [halfway])
-                    end_ = halfway;
+                if (newElement < data.getReference (halfway))
+                    data.insert (start, newElement);
                 else
-                    start = halfway;
+                    data.insert (start + 1, newElement);
+
+                break;
             }
+            else if (newElement < data.getReference (halfway))
+                end_ = halfway;
+            else
+                start = halfway;
         }
     }
 
@@ -424,11 +371,11 @@ public:
                 if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
                     numElementsToAdd = setToAddFrom.size() - startIndex;
 
-                addArray (setToAddFrom.data.elements + startIndex, numElementsToAdd);
+                if (numElementsToAdd > 0)
+                    addArray (&setToAddFrom.data.getReference (startIndex), numElementsToAdd);
             }
         }
     }
-
 
     //==============================================================================
     /** Removes an element from the set.
@@ -442,26 +389,7 @@ public:
     */
     ElementType remove (const int indexToRemove) noexcept
     {
-        const ScopedLockType lock (getLock());
-
-        if (isPositiveAndBelow (indexToRemove, numUsed))
-        {
-            --numUsed;
-
-            ElementType* const e = data.elements + indexToRemove;
-            ElementType const removed = *e;
-            const int numberToShift = numUsed - indexToRemove;
-
-            if (numberToShift > 0)
-                memmove (e, e + 1, sizeof (ElementType) * (size_t) numberToShift);
-
-            if ((numUsed << 1) < data.numAllocated)
-                minimiseStorageOverheads();
-
-            return removed;
-        }
-
-        return ElementType();
+        return data.remove (indexToRemove);
     }
 
     /** Removes an item from the set.
@@ -474,7 +402,7 @@ public:
     void removeValue (const ElementType valueToRemove) noexcept
     {
         const ScopedLockType lock (getLock());
-        remove (indexOf (valueToRemove));
+        data.remove (indexOf (valueToRemove));
     }
 
     /** Removes any elements which are also in another set.
@@ -492,14 +420,11 @@ public:
         {
             clear();
         }
-        else
+        else if (otherSet.size() > 0)
         {
-            if (otherSet.size() > 0)
-            {
-                for (int i = numUsed; --i >= 0;)
-                    if (otherSet.contains (data.elements [i]))
-                        remove (i);
-            }
+            for (int i = data.size(); --i >= 0;)
+                if (otherSet.contains (data.getReference (i)))
+                    remove (i);
         }
     }
 
@@ -524,8 +449,8 @@ public:
             }
             else
             {
-                for (int i = numUsed; --i >= 0;)
-                    if (! otherSet.contains (data.elements [i]))
+                for (int i = data.size(); --i >= 0;)
+                    if (! otherSet.contains (data.getReference (i)))
                         remove (i);
             }
         }
@@ -538,11 +463,7 @@ public:
     */
     void swapWith (SortedSet& otherSet) noexcept
     {
-        const ScopedLockType lock1 (getLock());
-        const ScopedLockType lock2 (otherSet.getLock());
-
-        data.swapWith (otherSet.data);
-        swapVariables (numUsed, otherSet.numUsed);
+        data.swapWithArray (otherSet.data);
     }
 
     //==============================================================================
@@ -554,8 +475,7 @@ public:
     */
     void minimiseStorageOverheads() noexcept
     {
-        const ScopedLockType lock (getLock());
-        data.shrinkToNoMoreThan (numUsed);
+        data.minimiseStorageOverheads();
     }
 
     /** Increases the set's internal storage to hold a minimum number of elements.
@@ -566,8 +486,7 @@ public:
     */
     void ensureStorageAllocated (const int minNumElements)
     {
-        const ScopedLockType lock (getLock());
-        data.ensureAllocatedSize (minNumElements);
+        data.ensureStorageAllocated (minNumElements);
     }
 
     //==============================================================================
@@ -575,7 +494,7 @@ public:
         To lock, you can call getLock().enter() and getLock().exit(), or preferably use
         an object of ScopedLockType as an RAII lock for it.
     */
-    inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return data; }
+    inline const TypeOfCriticalSectionToUse& getLock() const noexcept      { return data.getLock(); }
 
     /** Returns the type of scoped lock to use for locking this array */
     typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
@@ -583,22 +502,7 @@ public:
 
 private:
     //==============================================================================
-    ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse> data;
-    int numUsed;
-
-    void insertInternal (const int indexToInsertAt, const ElementType newElement) noexcept
-    {
-        data.ensureAllocatedSize (numUsed + 1);
-
-        ElementType* const insertPos = data.elements + indexToInsertAt;
-        const int numberToMove = numUsed - indexToInsertAt;
-
-        if (numberToMove > 0)
-            memmove (insertPos + 1, insertPos, sizeof (ElementType) * (size_t) numberToMove);
-
-        new (insertPos) ElementType (newElement);
-        ++numUsed;
-    }
+    Array <ElementType, TypeOfCriticalSectionToUse> data;
 };
 
 #if JUCE_MSVC
