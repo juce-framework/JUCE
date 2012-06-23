@@ -1614,7 +1614,7 @@ namespace ClipRegions
             }
 
             if (transform.isSingularity())
-                return nullptr;
+                return Ptr();
 
             {
                 Path p;

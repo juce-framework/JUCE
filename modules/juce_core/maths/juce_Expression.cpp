@@ -44,7 +44,7 @@ public:
                                                                        double /*overallTarget*/, Term* /*topLevelTerm*/) const
     {
         jassertfalse;
-        return nullptr;
+        return ReferenceCountedObjectPtr<Term>();
     }
 
     virtual String getName() const
@@ -184,7 +184,7 @@ struct Expression::Helpers
         {
             jassert (input == left || input == right);
             if (input != left && input != right)
-                return nullptr;
+                return TermPtr();
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);
 
@@ -464,7 +464,7 @@ struct Expression::Helpers
         {
             const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
             if (newDest == nullptr)
-                return nullptr;
+                return TermPtr();
 
             return new Subtract (newDest, (input == left ? right : left)->clone());
         }
@@ -489,7 +489,7 @@ struct Expression::Helpers
         {
             const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
             if (newDest == nullptr)
-                return nullptr;
+                return TermPtr();
 
             if (input == left)
                 return new Add (newDest, right->clone());
@@ -517,7 +517,7 @@ struct Expression::Helpers
         {
             const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
             if (newDest == nullptr)
-                return nullptr;
+                return TermPtr();
 
             return new Divide (newDest, (input == left ? right : left)->clone());
         }
@@ -542,7 +542,7 @@ struct Expression::Helpers
         {
             const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
             if (newDest == nullptr)
-                return nullptr;
+                return TermPtr();
 
             if (input == left)
                 return new Multiply (newDest, right->clone());
@@ -897,17 +897,17 @@ struct Expression::Helpers
                 }
             }
 
-            return nullptr;
+            return TermPtr();
         }
 
         TermPtr readParenthesisedExpression()
         {
             if (! readOperator ("("))
-                return nullptr;
+                return TermPtr();
 
             const TermPtr e (readExpression());
             if (e == nullptr || ! readOperator (")"))
-                return nullptr;
+                return TermPtr();
 
             return e;
         }

@@ -1432,7 +1432,7 @@ public:
     {
         clip = clip.getIntersection (r.getBounds());
         if (clip.isEmpty())
-            return nullptr;
+            return Ptr();
 
         RectangleList excluded (clip);
 
@@ -1455,7 +1455,7 @@ public:
     Ptr excludeClipRectangle (const Rectangle<int>& r)
     {
         if (r.contains (clip))
-            return nullptr;
+            return Ptr();
 
         TargetSaver ts (state.target.context);
         makeActive();
@@ -1482,7 +1482,7 @@ public:
             return clipToTexture (pt);
         }
 
-        return nullptr;
+        return Ptr();
     }
 
     Ptr clipToTexture (const PositionedTexture& pt)
@@ -1490,7 +1490,7 @@ public:
         clip = clip.getIntersection (pt.clip);
 
         if (clip.isEmpty())
-            return nullptr;
+            return Ptr();
 
         TargetSaver ts (state.target.context);
         makeActive();
