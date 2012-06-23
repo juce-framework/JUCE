@@ -37,6 +37,8 @@ StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const Stri
 String createGCCPreprocessorFlags (const StringPairArray& defs);
 String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString);
 
+StringArray getSearchPathsFromString (const String& searchPath);
+
 void setValueIfVoid (Value value, const var& defaultValue);
 
 //==============================================================================

@@ -162,6 +162,16 @@ String replacePreprocessorDefs (const StringPairArray& definitions, String sourc
     return sourceString;
 }
 
+StringArray getSearchPathsFromString (const String& searchPath)
+{
+    StringArray s;
+    s.addTokens (searchPath, ";", String::empty);
+    s.trim();
+    s.removeEmptyStrings();
+    s.removeDuplicates (false);
+    return s;
+}
+
 //==============================================================================
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 {

@@ -521,22 +521,12 @@ StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() co
 
 StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 {
-    StringArray s;
-    s.addTokens (getHeaderSearchPathString(), ";", String::empty);
-    s.trim();
-    s.removeEmptyStrings();
-    s.removeDuplicates (false);
-    return s;
+    return getSearchPathsFromString (getHeaderSearchPathString());
 }
 
 StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 {
-    StringArray s;
-    s.addTokens (getLibrarySearchPathString(), ";", String::empty);
-    s.trim();
-    s.removeEmptyStrings();
-    s.removeDuplicates (false);
-    return s;
+    return getSearchPathsFromString (getLibrarySearchPathString());
 }
 
 String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const

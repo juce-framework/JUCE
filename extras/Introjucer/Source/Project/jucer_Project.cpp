@@ -901,15 +901,7 @@ String Project::getModuleID (int index) const
 //==============================================================================
 ValueTree Project::getExporters()
 {
-    ValueTree exporters (projectRoot.getChildWithName (Tags::exporters));
-
-    if (! exporters.isValid())
-    {
-        projectRoot.addChild (ValueTree (Tags::exporters), 0, getUndoManagerFor (projectRoot));
-        exporters = getExporters();
-    }
-
-    return exporters;
+    return projectRoot.getOrCreateChildWithName (Tags::exporters, nullptr);
 }
 
 int Project::getNumExporters()
