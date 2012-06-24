@@ -24,6 +24,7 @@
 */
 
 #include "jucer_JucerTreeViewBase.h"
+#include "../Project/jucer_ProjectContentComponent.h"
 
 
 //==============================================================================
@@ -31,6 +32,13 @@ JucerTreeViewBase::JucerTreeViewBase()
     : textX (0)
 {
     setLinesDrawnForSubItems (false);
+}
+
+void JucerTreeViewBase::refreshSubItems()
+{
+    WholeTreeOpennessRestorer openness (*this);
+    clearSubItems();
+    addSubItems();
 }
 
 Font JucerTreeViewBase::getFont() const
@@ -175,10 +183,82 @@ void JucerTreeViewBase::itemClicked (const MouseEvent& e)
     }
 }
 
-void JucerTreeViewBase::showPopupMenu()
+void JucerTreeViewBase::deleteItem()    {}
+void JucerTreeViewBase::deleteAllSelectedItems() {}
+void JucerTreeViewBase::showDocument()  {}
+void JucerTreeViewBase::showPopupMenu() {}
+void JucerTreeViewBase::showMultiSelectionPopupMenu() {}
+
+static void treeViewMenuItemChosen (int resultCode, JucerTreeViewBase* item)
+{
+    item->handlePopupMenuResult (resultCode);
+}
+
+void JucerTreeViewBase::launchPopupMenu (PopupMenu& m)
+{
+    m.showMenuAsync (PopupMenu::Options(),
+                     ModalCallbackFunction::create (treeViewMenuItemChosen, this));
+}
+
+void JucerTreeViewBase::handlePopupMenuResult (int)
 {
 }
 
-void JucerTreeViewBase::showMultiSelectionPopupMenu()
+ProjectContentComponent* JucerTreeViewBase::getProjectContentComponent() const
 {
+    Component* c = getOwnerView();
+
+    while (c != nullptr)
+    {
+        ProjectContentComponent* pcc = dynamic_cast <ProjectContentComponent*> (c);
+
+        if (pcc != nullptr)
+            return pcc;
+
+        c = c->getParentComponent();
+    }
+
+    return 0;
+}
+
+//==============================================================================
+class JucerTreeViewBase::ItemSelectionTimer  : public Timer
+{
+public:
+    ItemSelectionTimer (JucerTreeViewBase& owner_)  : owner (owner_) {}
+
+    void timerCallback()    { owner.invokeShowDocument(); }
+
+private:
+    JucerTreeViewBase& owner;
+    JUCE_DECLARE_NON_COPYABLE (ItemSelectionTimer);
+};
+
+void JucerTreeViewBase::itemSelectionChanged (bool isNowSelected)
+{
+    if (isNowSelected)
+    {
+        delayedSelectionTimer = new ItemSelectionTimer (*this);
+        delayedSelectionTimer->startTimer (getMillisecsAllowedForDragGesture());
+    }
+    else
+    {
+        cancelDelayedSelectionTimer();
+    }
+}
+
+void JucerTreeViewBase::invokeShowDocument()
+{
+    cancelDelayedSelectionTimer();
+    showDocument();
+}
+
+void JucerTreeViewBase::itemDoubleClicked (const MouseEvent& e)
+{
+    invokeShowDocument();
+}
+
+void JucerTreeViewBase::cancelDelayedSelectionTimer()
+{
+    delayedSelectionTimer = nullptr;
 }

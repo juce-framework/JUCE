@@ -32,9 +32,117 @@
 
 
 //==============================================================================
+class TreePanelBase   : public Component
+{
+public:
+    TreePanelBase (const String& opennessStateKey_)
+        : opennessStateKey (opennessStateKey_)
+    {
+        addAndMakeVisible (&tree);
+        tree.setRootItemVisible (true);
+        tree.setDefaultOpenness (true);
+        tree.setColour (TreeView::backgroundColourId, Colours::transparentBlack);
+        tree.setIndentSize (14);
+    }
+
+    ~TreePanelBase()
+    {
+        tree.setRootItem (nullptr);
+    }
+
+    void setRoot (JucerTreeViewBase* root)
+    {
+        rootItem = root;
+        tree.setRootItem (root);
+        tree.getRootItem()->setOpen (true);
+
+        const ScopedPointer<XmlElement> treeOpenness (StoredSettings::getInstance()->getProps()
+                                                        .getXmlValue (opennessStateKey));
+        if (treeOpenness != nullptr)
+            tree.restoreOpennessState (*treeOpenness, true);
+    }
+
+    void saveOpenness()
+    {
+        const ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
+
+        if (opennessState != nullptr)
+            StoredSettings::getInstance()->getProps().setValue (opennessStateKey, opennessState);
+    }
+
+    void deleteSelectedItems()
+    {
+        if (rootItem != nullptr)
+            rootItem->deleteAllSelectedItems();
+    }
+
+    void resized()
+    {
+        tree.setBounds (getLocalBounds());
+    }
+
+    TreeView tree;
+    ScopedPointer<JucerTreeViewBase> rootItem;
+
+private:
+    String opennessStateKey;
+};
+
+//==============================================================================
+class FileTreeTab   : public TreePanelBase
+{
+public:
+    FileTreeTab (Project& project)
+        : TreePanelBase ("treeViewState_" + project.getProjectUID())
+    {
+        tree.setMultiSelectEnabled (true);
+        setRoot (new GroupTreeViewItem (project.getMainGroup()));
+    }
+};
+
+//==============================================================================
+class ConfigTreeTab   : public TreePanelBase
+{
+public:
+    ConfigTreeTab (Project& project)
+        : TreePanelBase ("settingsTreeViewState_" + project.getProjectUID())
+    {
+        tree.setMultiSelectEnabled (false);
+        setRoot (createProjectConfigTreeViewRoot (project));
+
+       #if JUCE_MAC || JUCE_WINDOWS
+        addAndMakeVisible (&openProjectButton);
+        openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
+        openProjectButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::openInIDE));
+
+        addAndMakeVisible (&saveAndOpenButton);
+        saveAndOpenButton.setCommandToTrigger (commandManager, CommandIDs::saveAndOpenInIDE, true);
+        saveAndOpenButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::saveAndOpenInIDE));
+       #endif
+    }
+
+    void resized()
+    {
+        Rectangle<int> r (getLocalBounds());
+        r.removeFromBottom (6);
+
+        if (saveAndOpenButton.isVisible())
+            saveAndOpenButton.setBounds (r.removeFromBottom (28).reduced (20, 3));
+
+        if (openProjectButton.isVisible())
+            openProjectButton.setBounds (r.removeFromBottom (28).reduced (20, 3));
+
+        tree.setBounds (r);
+    }
+
+    TextButton openProjectButton, saveAndOpenButton;
+};
+
+//==============================================================================
 ProjectContentComponent::ProjectContentComponent()
     : project (nullptr),
-      currentDocument (nullptr)
+      currentDocument (nullptr),
+      treeViewTabs (TabbedButtonBar::TabsAtTop)
 {
     setOpaque (true);
     setWantsKeyboardFocus (true);
@@ -47,7 +155,7 @@ ProjectContentComponent::~ProjectContentComponent()
 {
     setProject (nullptr);
     contentView = nullptr;
-    jassert (getNumChildComponents() == 0);
+    jassert (getNumChildComponents() <= 1);
 }
 
 void ProjectContentComponent::paint (Graphics& g)
@@ -67,34 +175,28 @@ void ProjectContentComponent::setProject (Project* newProject)
         contentView = nullptr;
         resizerBar = nullptr;
 
-        if (projectTree != nullptr)
-        {
-            settings.setValue ("projectTreeviewWidth", projectTree->getWidth());
-            projectTree->deleteRootItem();
-            projectTree = nullptr;
-        }
+        treeViewTabs.clearTabs();
+
+        if (treeViewTabs.isShowing() && treeViewTabs.getWidth() > 0)
+            settings.setValue ("projectTreeviewWidth", treeViewTabs.getWidth());
 
         project = newProject;
 
         if (project != nullptr)
         {
-            addChildAndSetID (projectTree = new TreeView(), "tree");
-            projectTree->setRootItemVisible (true);
-            projectTree->setMultiSelectEnabled (true);
-            projectTree->setDefaultOpenness (true);
-            projectTree->setColour (TreeView::backgroundColourId, Colour::greyLevel (0.93f));
-            projectTree->setIndentSize (14);
+            treeViewTabs.setVisible (true);
+            addChildAndSetID (&treeViewTabs, "tree");
 
-            projectTree->setRootItem (new GroupTreeViewItem (project->getMainGroup()));
-            projectTree->getRootItem()->setOpen (true);
+            createProjectTabs();
 
             String lastTreeWidth (settings.getValue ("projectTreeviewWidth"));
             if (lastTreeWidth.getIntValue() < 150)
                 lastTreeWidth = "250";
 
-            projectTree->setBounds ("0, 0, left + " + lastTreeWidth + ", parent.height");
+            treeViewTabs.setBounds ("0, 0, left + " + lastTreeWidth + ", parent.height");
 
-            addChildAndSetID (resizerBar = new ResizableEdgeComponent (projectTree, &treeSizeConstrainer, ResizableEdgeComponent::rightEdge),
+            addChildAndSetID (resizerBar = new ResizableEdgeComponent (&treeViewTabs, &treeSizeConstrainer,
+                                                                       ResizableEdgeComponent::rightEdge),
                               "resizer");
 
             resizerBar->setBounds ("tree.right, 0, tree.right + 4, parent.height");
@@ -105,24 +207,40 @@ void ProjectContentComponent::setProject (Project* newProject)
                 invokeDirectly (CommandIDs::showProjectSettings, true);
 
             updateMissingFileStatuses();
-
-            const ScopedPointer<XmlElement> treeOpenness (settings.getXmlValue ("treeViewState_" + project->getProjectUID()));
-
-            if (treeOpenness != nullptr)
-                projectTree->restoreOpennessState (*treeOpenness, true);
+        }
+        else
+        {
+            treeViewTabs.setVisible (false);
         }
     }
 }
 
+void ProjectContentComponent::createProjectTabs()
+{
+    treeViewTabs.addTab ("Files",  Colour::greyLevel (0.93f), new FileTreeTab (*project), true);
+    treeViewTabs.addTab ("Config", Colour::greyLevel (0.93f), new ConfigTreeTab (*project), true);
+}
+
+TreeView* ProjectContentComponent::getFilesTreeView() const
+{
+    FileTreeTab* ft = dynamic_cast<FileTreeTab*> (treeViewTabs.getTabContentComponent (0));
+    return ft != nullptr ? &(ft->tree) : nullptr;
+}
+
+ProjectTreeViewBase* ProjectContentComponent::getFilesTreeRoot() const
+{
+    TreeView* tv = getFilesTreeView();
+    return tv != nullptr ? dynamic_cast <ProjectTreeViewBase*> (tv->getRootItem()) : nullptr;
+}
+
 void ProjectContentComponent::saveTreeViewState()
 {
-    if (projectTree != nullptr)
+    for (int i = treeViewTabs.getNumTabs(); --i >= 0;)
     {
-        const ScopedPointer<XmlElement> opennessState (projectTree->getOpennessState (true));
+        TreePanelBase* t = dynamic_cast<TreePanelBase*> (treeViewTabs.getTabContentComponent (i));
 
-        if (opennessState != nullptr)
-            StoredSettings::getInstance()->getProps()
-                .setValue ("treeViewState_" + project->getProjectUID(), opennessState);
+        if (t != nullptr)
+            t->saveOpenness();
     }
 }
 
@@ -133,12 +251,10 @@ void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 
 void ProjectContentComponent::updateMissingFileStatuses()
 {
-    if (projectTree != nullptr)
-    {
-        ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (projectTree->getRootItem());
-        if (p != nullptr)
-            p->checkFileStatus();
-    }
+    ProjectTreeViewBase* p = getFilesTreeRoot();
+
+    if (p != nullptr)
+        p->checkFileStatus();
 }
 
 bool ProjectContentComponent::showEditorForFile (const File& f)
@@ -159,15 +275,18 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
     return setEditorComponent (doc->createEditor(), doc);
 }
 
+void ProjectContentComponent::hideEditor()
+{
+    currentDocument = nullptr;
+    contentView = nullptr;
+    updateMainWindowTitle();
+    commandManager->commandStatusChanged();
+}
+
 void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
 {
     if (doc == currentDocument)
-    {
-        currentDocument = nullptr;
-        contentView = nullptr;
-        updateMainWindowTitle();
-        commandManager->commandStatusChanged();
-    }
+        hideEditor();
 }
 
 bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumentManager::Document* doc)
@@ -308,7 +427,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Delete", String::empty, CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
         result.defaultKeypresses.add (KeyPress (KeyPress::backspaceKey, 0, 0));
-        result.setActive (projectTree != nullptr);
+        result.setActive (dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()) != nullptr);
         break;
 
     default:
@@ -384,17 +503,15 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         break;
 
     case CommandIDs::showProjectSettings:
-        if (projectTree != nullptr)
-            projectTree->getRootItem()->setSelected (true, true);
-
+        treeViewTabs.setCurrentTabIndex (1);
         break;
 
     case StandardApplicationCommandIDs::del:
-        if (projectTree != nullptr)
         {
-            ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (projectTree->getRootItem());
-            if (p != nullptr)
-                p->deleteAllSelectedItems();
+            TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent());
+
+            if (tree != nullptr)
+                tree->deleteSelectedItems();
         }
 
         break;

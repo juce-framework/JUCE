@@ -350,10 +350,10 @@ void ProjectExporter::addNewConfiguration (const BuildConfiguration* configToCop
     configs.addChild (newConfig, -1, project.getUndoManagerFor (configs));
 }
 
-void ProjectExporter::deleteConfiguration (int index)
+void ProjectExporter::BuildConfiguration::removeFromExporter()
 {
-    ValueTree configs (getConfigurations());
-    configs.removeChild (index, project.getUndoManagerFor (configs));
+    ValueTree configs (config.getParent());
+    configs.removeChild (config, project.getUndoManagerFor (configs));
 }
 
 void ProjectExporter::createDefaultConfigs()

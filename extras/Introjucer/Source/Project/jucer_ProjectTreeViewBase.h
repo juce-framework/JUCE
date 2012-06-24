@@ -30,7 +30,6 @@
 #include "../Utility/jucer_JucerTreeViewBase.h"
 #include "jucer_Project.h"
 #include "../Project Saving/jucer_ResourceFile.h"
-#include "jucer_ProjectContentComponent.h"
 
 
 //==============================================================================
@@ -45,7 +44,7 @@ protected:
 public:
     //==============================================================================
     virtual bool isRoot() const                         { return false; }
-    virtual bool acceptsFileDrop (const StringArray& files) const         = 0;
+    virtual bool acceptsFileDrop (const StringArray& files) const = 0;
     virtual bool acceptsDragItems (const OwnedArray <Project::Item>& selectedNodes) = 0;
 
     //==============================================================================
@@ -58,17 +57,12 @@ public:
     virtual void deleteItem();
     virtual void deleteAllSelectedItems();
     virtual void revealInFinder() const;
-    virtual void showDocument() = 0;
     virtual void browseToAddExistingFiles();
     virtual void checkFileStatus();  // (recursive)
 
     virtual void addFiles (const StringArray& files, int insertIndex);
     virtual void moveSelectedItemsTo (OwnedArray <Project::Item>& selectedNodes, int insertIndex);
     virtual void showMultiSelectionPopupMenu();
-
-    void launchPopupMenu (PopupMenu&); // runs asynchronously, and produces a callback to handlePopupMenuResult().
-    virtual void handlePopupMenuResult (int resultCode);
-    void invokeShowDocument();
 
     virtual ProjectTreeViewBase* findTreeViewItem (const Project::Item& itemToFind);
 
@@ -80,16 +74,13 @@ public:
     void valueTreeParentChanged (ValueTree& tree);
 
     //==============================================================================
-    // TreeViewItem stuff..
     bool mightContainSubItems();
     String getUniqueName() const;
     void itemOpennessChanged (bool isNowOpen);
-    void refreshSubItems();
     bool canBeSelected() const                  { return true; }
-    void itemDoubleClicked (const MouseEvent& e);
-    void itemSelectionChanged (bool isNowSelected);
     String getTooltip();
     var getDragSourceDescription();
+    void addSubItems();
 
     //==============================================================================
     // Drag-and-drop stuff..
@@ -97,6 +88,7 @@ public:
     void filesDropped (const StringArray& files, int insertIndex);
     bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails);
     void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex);
+    int getMillisecsAllowedForDragGesture();
 
     static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <Project::Item>& selectedNodes);
 
@@ -105,11 +97,9 @@ public:
 
 protected:
     bool isFileMissing;
-    ScopedPointer<Timer> delayedSelectionTimer;
 
     //==============================================================================
     void treeChildrenChanged (const ValueTree& parentTree);
-    virtual void addSubItems();
     virtual ProjectTreeViewBase* createSubItem (const Project::Item& node) = 0;
     const Drawable* getIcon() const         { return item.getIcon(); }
 
@@ -118,7 +108,6 @@ protected:
     static void moveItems (OwnedArray <Project::Item>& selectedNodes,
                            Project::Item destNode, int insertIndex);
 
-    ProjectContentComponent* getProjectContentComponent() const;
     ProjectTreeViewBase* getParentProjectItem() const;
 };
 

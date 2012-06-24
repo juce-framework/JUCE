@@ -123,14 +123,21 @@ public:
     void closeWindow (MainWindow* w)
     {
         jassert (mainWindows.contains (w));
-        mainWindows.removeObject (w);
 
        #if ! JUCE_MAC
-        if (mainWindows.size() == 0)
+        if (mainWindows.size() == 1)
+        {
             systemRequestedQuit();
+        }
+        else
        #endif
-
-        updateRecentProjectList();
+        {
+            if (w->closeCurrentProject())
+            {
+                mainWindows.removeObject (w);
+                updateRecentProjectList();
+            }
+        }
     }
 
     //==============================================================================

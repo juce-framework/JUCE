@@ -429,13 +429,6 @@ void ProjectTreeViewBase::addSubItems()
     }
 }
 
-void ProjectTreeViewBase::refreshSubItems()
-{
-    WholeTreeOpennessRestorer openness (*this);
-    clearSubItems();
-    addSubItems();
-}
-
 static void treeViewMultiSelectItemChosen (int resultCode, ProjectTreeViewBase* item)
 {
     switch (resultCode)
@@ -454,60 +447,6 @@ void ProjectTreeViewBase::showMultiSelectionPopupMenu()
                      ModalCallbackFunction::create (treeViewMultiSelectItemChosen, this));
 }
 
-static void treeViewMenuItemChosen (int resultCode, ProjectTreeViewBase* item)
-{
-    item->handlePopupMenuResult (resultCode);
-}
-
-void ProjectTreeViewBase::launchPopupMenu (PopupMenu& m)
-{
-    m.showMenuAsync (PopupMenu::Options(),
-                     ModalCallbackFunction::create (treeViewMenuItemChosen, this));
-}
-
-void ProjectTreeViewBase::handlePopupMenuResult (int)
-{
-}
-
-void ProjectTreeViewBase::itemDoubleClicked (const MouseEvent& e)
-{
-    invokeShowDocument();
-}
-
-class TreeviewItemSelectionTimer  : public Timer
-{
-public:
-    TreeviewItemSelectionTimer (ProjectTreeViewBase& owner_)
-        : owner (owner_)
-    {}
-
-    void timerCallback()
-    {
-        owner.invokeShowDocument();
-    }
-
-private:
-    ProjectTreeViewBase& owner;
-
-    JUCE_DECLARE_NON_COPYABLE (TreeviewItemSelectionTimer);
-};
-
-void ProjectTreeViewBase::itemSelectionChanged (bool isNowSelected)
-{
-    if (isNowSelected)
-    {
-        delayedSelectionTimer = new TreeviewItemSelectionTimer (*this);
-
-        // for images, give the user longer to start dragging before assuming they're
-        // clicking to select it for previewing..
-        delayedSelectionTimer->startTimer (item.isImageFile() ? 250 : 120);
-    }
-    else
-    {
-        delayedSelectionTimer = nullptr;
-    }
-}
-
 String ProjectTreeViewBase::getTooltip()
 {
     return String::empty;
@@ -515,35 +454,19 @@ String ProjectTreeViewBase::getTooltip()
 
 var ProjectTreeViewBase::getDragSourceDescription()
 {
-    delayedSelectionTimer = nullptr;
+    cancelDelayedSelectionTimer();
     return projectItemDragType;
 }
 
-void ProjectTreeViewBase::invokeShowDocument()
+int ProjectTreeViewBase::getMillisecsAllowedForDragGesture()
 {
-    delayedSelectionTimer = nullptr;
-    showDocument();
+    // for images, give the user longer to start dragging before assuming they're
+    // clicking to select it for previewing..
+    return item.isImageFile() ? 250 : JucerTreeViewBase::getMillisecsAllowedForDragGesture();
 }
 
 //==============================================================================
 ProjectTreeViewBase* ProjectTreeViewBase::getParentProjectItem() const
 {
     return dynamic_cast <ProjectTreeViewBase*> (getParentItem());
-}
-
-ProjectContentComponent* ProjectTreeViewBase::getProjectContentComponent() const
-{
-    Component* c = getOwnerView();
-
-    while (c != nullptr)
-    {
-        ProjectContentComponent* pcc = dynamic_cast <ProjectContentComponent*> (c);
-
-        if (pcc != nullptr)
-            return pcc;
-
-        c = c->getParentComponent();
-    }
-
-    return 0;
 }

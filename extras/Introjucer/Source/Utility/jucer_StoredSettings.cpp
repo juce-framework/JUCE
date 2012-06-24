@@ -206,3 +206,15 @@ const Drawable* StoredSettings::getImageFileIcon()
 
     return imageFileIcon;
 }
+
+const Drawable* StoredSettings::getCogIcon()
+{
+    if (cogIcon == nullptr)
+    {
+        ScopedPointer<XmlElement> svg (XmlDocument::parse (BinaryData::cog_icon_svg));
+        jassert (svg != nullptr);
+        cogIcon = Drawable::createFromSVG (*svg);
+    }
+
+    return cogIcon;
+}

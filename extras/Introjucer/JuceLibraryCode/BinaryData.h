@@ -13,6 +13,12 @@ namespace BinaryData
     extern const char*   brushed_aluminium_png;
     const int            brushed_aluminium_pngSize = 14724;
 
+    extern const char*   cog_icon_svg;
+    const int            cog_icon_svgSize = 915;
+
+    extern const char*   juce_icon_png;
+    const int            juce_icon_pngSize = 19826;
+
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1008;
 
@@ -42,9 +48,6 @@ namespace BinaryData
 
     extern const char*   jucer_WindowTemplate_h;
     const int            jucer_WindowTemplate_hSize = 1216;
-
-    extern const char*   juce_icon_png;
-    const int            juce_icon_pngSize = 19826;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

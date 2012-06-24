@@ -114,9 +114,6 @@ ProjectContentComponent* MainWindow::getProjectContentComponent() const
 
 void MainWindow::closeButtonPressed()
 {
-    if (! closeCurrentProject())
-        return;
-
     JucerApplication::getApp()->closeWindow (this);
 }
 

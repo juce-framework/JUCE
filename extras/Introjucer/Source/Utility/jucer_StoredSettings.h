@@ -69,13 +69,14 @@ public:
     //==============================================================================
     Image getFallbackImage();
     const Drawable* getImageFileIcon();
+    const Drawable* getCogIcon();
 
 
 private:
     ScopedPointer<PropertiesFile> props;
     StringArray fontNames;
 
-    ScopedPointer<Drawable> imageFileIcon;
+    ScopedPointer<Drawable> imageFileIcon, cogIcon;
     Image fallbackImage;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StoredSettings);

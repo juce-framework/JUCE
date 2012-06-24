@@ -2288,6 +2288,9 @@
     <None Include="..\..\Source\BinaryData\brushed_aluminium.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
+    <None Include="..\..\Source\BinaryData\cog_icon.svg">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
     <None Include="..\..\Source\BinaryData\juce_icon.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>

@@ -201,7 +201,6 @@ public:
     int getNumExporters();
     ProjectExporter* createExporter (int index);
     void addNewExporter (const String& exporterName);
-    void deleteExporter (int index);
     void createDefaultExporters();
 
     struct ExporterIterator

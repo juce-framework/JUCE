@@ -197,6 +197,8 @@ public:
         Value getValue (const Identifier& name)             { return config.getPropertyAsValue (name, getUndoManager()); }
         UndoManager* getUndoManager() const                 { return project.getUndoManagerFor (config); }
 
+        void removeFromExporter();
+
         //==============================================================================
         ValueTree config;
         Project& project;
@@ -209,7 +211,6 @@ public:
     };
 
     void addNewConfiguration (const BuildConfiguration* configToCopy);
-    void deleteConfiguration (int index);
     bool hasConfigurationNamed (const String& name) const;
     String getUniqueConfigName (String name) const;
 

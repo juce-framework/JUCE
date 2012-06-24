@@ -29,7 +29,7 @@
 #include "../Application/jucer_OpenDocumentManager.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "jucer_NewFileWizard.h"
-
+#include "jucer_ProjectContentComponent.h"
 
 //==============================================================================
 GroupTreeViewItem::GroupTreeViewItem (const Project::Item& item_)
@@ -99,13 +99,8 @@ void GroupTreeViewItem::showDocument()
 {
     ProjectContentComponent* pcc = getProjectContentComponent();
 
-    if (pcc != nullptr)
-    {
-        if (isRoot())
-            pcc->setEditorComponent (new ProjectInformationComponent (item.project), 0);
-        else
-            pcc->setEditorComponent (new GroupInformationComponent (item), 0);
-    }
+    if (pcc != nullptr && ! isRoot())
+        pcc->setEditorComponent (new GroupInformationComponent (item), nullptr);
 }
 
 void GroupTreeViewItem::showPopupMenu()

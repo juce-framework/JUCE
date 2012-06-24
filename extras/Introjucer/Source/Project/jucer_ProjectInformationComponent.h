@@ -1,17 +1,24 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file!
-
-  Be careful when adding custom code to these files, as only the code within
-  the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
-  and re-saved.
-
-  Created for JUCE version: JUCE v2.0.16
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
-  JUCE is copyright 2004-11 by Raw Material Software ltd.
+   JUCE can be redistributed and/or modified under the terms of the GNU General
+   Public License (Version 2), as published by the Free Software Foundation.
+   A copy of the license is included in the JUCE distribution, or can be found
+   online at www.gnu.org/licenses.
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.rawmaterialsoftware.com/juce for more information.
 
   ==============================================================================
 */
@@ -19,52 +26,10 @@
 #ifndef __JUCER_PROJECTINFORMATIONCOMPONENT_H_30FFCD07__
 #define __JUCER_PROJECTINFORMATIONCOMPONENT_H_30FFCD07__
 
-//[Headers]     -- You can add your own extra header files here --
 #include "jucer_Project.h"
-//[/Headers]
+#include "../Utility/jucer_JucerTreeViewBase.h"
 
+JucerTreeViewBase* createProjectConfigTreeViewRoot (Project& project);
 
-
-//==============================================================================
-/**
-                                                                    //[Comments]
-    Holds the tabs containing all the project info.
-                                                                    //[/Comments]
-*/
-class ProjectInformationComponent  : public Component,
-                                     public ChangeListener,
-                                     public ButtonListener
-{
-public:
-    //==============================================================================
-    ProjectInformationComponent (Project& project_);
-    ~ProjectInformationComponent();
-
-    //==============================================================================
-    //[UserMethods]
-    void changeListenerCallback (ChangeBroadcaster*);
-    //[/UserMethods]
-
-    void buttonClicked (Button* buttonThatWasClicked);
-    void paint (Graphics& g);
-
-private:
-    //==============================================================================
-    //[UserVariables]
-    Project& project;
-    //[/UserVariables]
-
-    //==============================================================================
-    Viewport viewport;
-    TextButton openProjectButton;
-    TextButton saveAndOpenButton;
-    RolloverHelpComp rollover;
-
-    void initialiseComponentState();
-    static ValueTree getComponentState();
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectInformationComponent)
-};
 
 #endif   // __JUCER_PROJECTINFORMATIONCOMPONENT_H_30FFCD07__

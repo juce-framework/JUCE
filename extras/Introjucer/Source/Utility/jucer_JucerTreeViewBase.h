@@ -27,6 +27,7 @@
 #define __JUCER_JUCERTREEVIEWBASE_JUCEHEADER__
 
 #include "../jucer_Headers.h"
+class ProjectContentComponent;
 
 
 //==============================================================================
@@ -42,6 +43,8 @@ public:
     void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
     Component* createItemComponent();
     void itemClicked (const MouseEvent& e);
+    void itemSelectionChanged (bool isNowSelected);
+    void itemDoubleClicked (const MouseEvent&);
 
     //==============================================================================
     virtual Font getFont() const;
@@ -51,12 +54,19 @@ public:
     virtual bool isMissing() = 0;
     virtual const Drawable* getIcon() const = 0;
     virtual void createLeftEdgeComponents (OwnedArray<Component>&) {}
-    virtual Component* createRightEdgeComponent()   { return nullptr; }
+    virtual Component* createRightEdgeComponent()      { return nullptr; }
+    virtual int getMillisecsAllowedForDragGesture()    { return 120; };
 
+    void refreshSubItems();
+    virtual void deleteItem();
+    virtual void deleteAllSelectedItems();
+    virtual void showDocument();
     virtual void showPopupMenu();
     virtual void showMultiSelectionPopupMenu();
-
     virtual void showRenameBox();
+
+    void launchPopupMenu (PopupMenu&); // runs asynchronously, and produces a callback to handlePopupMenuResult().
+    virtual void handlePopupMenuResult (int resultCode);
 
     //==============================================================================
     // To handle situations where an item gets deleted before openness is
@@ -76,6 +86,18 @@ public:
     };
 
     int textX;
+
+protected:
+    ProjectContentComponent* getProjectContentComponent() const;
+    void cancelDelayedSelectionTimer();
+    virtual void addSubItems() {}
+
+private:
+    class ItemSelectionTimer;
+    friend class ItemSelectionTimer;
+    ScopedPointer<Timer> delayedSelectionTimer;
+
+    void invokeShowDocument();
 };
 
 

@@ -923,12 +923,6 @@ void Project::addNewExporter (const String& exporterName)
     exporters.addChild (exp->settings, -1, getUndoManagerFor (exporters));
 }
 
-void Project::deleteExporter (int index)
-{
-    ValueTree exporters (getExporters());
-    exporters.removeChild (index, getUndoManagerFor (exporters));
-}
-
 void Project::createDefaultExporters()
 {
     ValueTree exporters (getExporters());

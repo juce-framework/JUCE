@@ -1,31 +1,33 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file!
-
-  Be careful when adding custom code to these files, as only the code within
-  the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
-  and re-saved.
-
-  Created for JUCE version: JUCE v2.0.16
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-11 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
-  JUCE is copyright 2004-11 by Raw Material Software ltd.
+   JUCE can be redistributed and/or modified under the terms of the GNU General
+   Public License (Version 2), as published by the Free Software Foundation.
+   A copy of the license is included in the JUCE distribution, or can be found
+   online at www.gnu.org/licenses.
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.rawmaterialsoftware.com/juce for more information.
 
   ==============================================================================
 */
 
-//[CppHeaders] You can add your own extra header files here...
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "jucer_Module.h"
 #include "../Application/jucer_JuceUpdater.h"
-//[/CppHeaders]
-
+#include "../Project/jucer_ProjectContentComponent.h"
 #include "jucer_ProjectInformationComponent.h"
-
-
-//[MiscUserDefs] You can add your own user definitions and misc code here...
 
 
 //==============================================================================
@@ -504,243 +506,13 @@ private:
     ScopedPointer<ModuleSettingsPanel> settings;
 };
 
-
 //==============================================================================
-class ProjectSettingsComponent  : public Component
+struct ProjectSettingsTreeClasses
 {
-public:
-    ProjectSettingsComponent (Project& project_)
-        : project (project_),
-          exporters ("Export Targets", "Add a New Exporter...", true, false)
-    {
-        addAndMakeVisible (&mainProjectInfoPanel);
-        addAndMakeVisible (&modulesPanelGroup);
-        addAndMakeVisible (&exporters);
-
-        mainProjectInfoPanel.fillBackground = true;
-        modulesPanelGroup.fillBackground = true;
-    }
-
-    void updateSize (int width)
-    {
-        width = jmax (550, width - 6);
-
-        int y = 0;
-        y += mainProjectInfoPanel.updateSize (y, width);
-        y += modulesPanelGroup.updateSize (y, width);
-        y += exporters.updateSize (y, width);
-
-        setSize (width, y);
-    }
-
-    void parentSizeChanged()
-    {
-        updateSize (getParentWidth());
-    }
-
-    void visibilityChanged()
-    {
-        if (isVisible())
-            createAllPanels();
-    }
-
-    void createModulesPanel()
-    {
-        PropertyListBuilder props;
-        props.add (new ModulesPanel (project));
-        modulesPanelGroup.setProperties (props);
-        modulesPanelGroup.setName ("Modules");
-    }
-
-    void createProjectPanel()
-    {
-        PropertyListBuilder props;
-        project.createPropertyEditors (props);
-        mainProjectInfoPanel.setProperties (props);
-        mainProjectInfoPanel.setName ("Project Settings");
-
-        lastProjectType = project.getProjectTypeValue().getValue();
-    }
-
-    void createExportersPanel()
-    {
-        exporters.clear();
-
-        for (Project::ExporterIterator exporter (project); exporter.next();)
-        {
-            PropertyGroup* exporterGroup = exporters.createGroup();
-            exporterGroup->fillBackground = true;
-            exporterGroup->addDeleteButton ("exporter " + String (exporter.index), "Deletes this export target.");
-
-            PropertyListBuilder props;
-            exporter->createPropertyEditors (props);
-
-            PropertyGroupList* configList = new PropertyGroupList ("Configurations", "Add a New Configuration", false, true);
-            props.add (configList);
-            exporterGroup->setProperties (props);
-
-            configList->createNewButton.setName ("newconfig " + String (exporter.index));
-
-            for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
-            {
-                PropertyGroup* configGroup = configList->createGroup();
-
-                if (exporter->getNumConfigurations() > 1)
-                    configGroup->addDeleteButton ("config " + String (exporter.index) + "/" + String (config.index), "Deletes this configuration.");
-
-                PropertyListBuilder configProps;
-                config->createPropertyEditors (configProps);
-                configGroup->setProperties (configProps);
-            }
-        }
-    }
-
-    void createAllPanels()
-    {
-        createProjectPanel();
-        createModulesPanel();
-        createExportersPanel();
-        updateNames();
-
-        updateSize (getWidth());
-    }
-
-    bool needsFullUpdate() const
-    {
-        if (exporters.groups.size() != project.getNumExporters()
-             || lastProjectType != project.getProjectTypeValue().getValue())
-            return true;
-
-        for (int i = exporters.groups.size(); --i >= 0;)
-        {
-            ScopedPointer <ProjectExporter> exp (project.createExporter (i));
-
-            jassert (exp != nullptr);
-            if (exp != nullptr)
-            {
-                PropertyGroupList* configList = dynamic_cast <PropertyGroupList*> (exporters.groups.getUnchecked(i)->properties.getLast());
-
-                if (configList != nullptr && configList->groups.size() != exp->getNumConfigurations())
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    void updateNames()
-    {
-        for (int i = exporters.groups.size(); --i >= 0;)
-        {
-            PropertyGroup& exporterGroup = *exporters.groups.getUnchecked(i);
-            ScopedPointer <ProjectExporter> exp (project.createExporter (i));
-            jassert (exp != nullptr);
-
-            if (exp != nullptr)
-            {
-                exporterGroup.setName (exp->getName());
-                exporterGroup.repaint();
-
-                PropertyGroupList* configList = dynamic_cast <PropertyGroupList*> (exporterGroup.properties.getLast());
-
-                if (configList != nullptr)
-                {
-                    for (int j = configList->groups.size(); --j >= 0;)
-                    {
-                        PropertyGroup& configGroup = *configList->groups.getUnchecked(j);
-                        configGroup.setName ("Configuration: " + exp->getConfiguration (j)->getName().quoted());
-                        configGroup.repaint();
-                    }
-                }
-            }
-        }
-    }
-
-    void update()
-    {
-        if (needsFullUpdate())
-            createAllPanels();
-        else
-            updateNames();
-    }
-
-    void deleteButtonClicked (const String& name)
-    {
-        if (name.startsWith ("config"))
-        {
-            int exporterIndex = name.upToLastOccurrenceOf ("/", false, false).getTrailingIntValue();
-            int configIndex = name.getTrailingIntValue();
-
-            ScopedPointer<ProjectExporter> exporter (project.createExporter (exporterIndex));
-            jassert (exporter != nullptr);
-
-            if (exporter != nullptr)
-                exporter->deleteConfiguration (configIndex);
-        }
-        else
-        {
-            project.deleteExporter (name.getTrailingIntValue());
-        }
-    }
-
-    static void newExporterMenuItemChosen (int resultCode, ProjectSettingsComponent* settingsComp)
-    {
-        if (resultCode > 0 && settingsComp != nullptr)
-            settingsComp->project.addNewExporter (ProjectExporter::getExporterNames() [resultCode - 1]);
-    }
-
-    void createNewExporter (TextButton& button)
-    {
-        PopupMenu menu;
-
-        const StringArray exporters (ProjectExporter::getExporterNames());
-
-        for (int i = 0; i < exporters.size(); ++i)
-            menu.addItem (i + 1, "Create a new " + exporters[i] + " target");
-
-        menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&button),
-                            ModalCallbackFunction::forComponent (newExporterMenuItemChosen, this));
-    }
-
-    void createNewConfig (int exporterIndex)
-    {
-        ScopedPointer<ProjectExporter> exp (project.createExporter (exporterIndex));
-        jassert (exp != nullptr);
-
-        if (exp != nullptr)
-            exp->addNewConfiguration (nullptr);
-    }
-
-    void newItemButtonClicked (TextButton& button)
-    {
-        if (button.getName().containsIgnoreCase ("export"))
-            createNewExporter (button);
-        else if (button.getName().containsIgnoreCase ("newconfig"))
-            createNewConfig (button.getName().getTrailingIntValue());
-    }
-
-private:
-    //==============================================================================
-    class PropertyGroup  : public Component,
-                           public ButtonListener
+    class PropertyGroup  : public Component
     {
     public:
-        PropertyGroup()
-            : deleteButton ("Delete"), fillBackground (false)
-        {
-            deleteButton.addListener (this);
-        }
-
-        void addDeleteButton (const String& name, const String& tooltip)
-        {
-            addAndMakeVisible (&deleteButton);
-            deleteButton.setBounds ("right - 55, 11, parent.width - 10, 26");
-            deleteButton.setColour (TextButton::buttonColourId, Colour (0xa0fcbdbd));
-            deleteButton.setColour (TextButton::textColourOffId, Colours::darkred);
-            deleteButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight);
-            deleteButton.setName (name);
-            deleteButton.setTooltip (tooltip);
-        }
+        PropertyGroup()  {}
 
         void setProperties (const PropertyListBuilder& newProps)
         {
@@ -751,273 +523,505 @@ private:
                 addAndMakeVisible (properties.getUnchecked(i));
         }
 
-        int updateSize (int y, int width)
+        int updateSize (int x, int y, int width)
         {
-            int height = fillBackground ? 36 : 32;
+            int height = 36;
 
             for (int i = 0; i < properties.size(); ++i)
             {
                 PropertyComponent* pp = properties.getUnchecked(i);
-                PropertyGroupList* pgl = dynamic_cast <PropertyGroupList*> (pp);
-
-                if (pgl != nullptr)
-                    pgl->updateSize (height, width - 20);
-
                 pp->setBounds (10, height, width - 20, pp->getPreferredHeight());
                 height += pp->getHeight();
             }
 
             height += 16;
-            setBounds (0, y, width, height);
+            setBounds (x, y, width, height);
             return height;
         }
 
         void paint (Graphics& g)
         {
-            if (fillBackground)
-            {
-                g.setColour (Colours::white.withAlpha (0.3f));
-                g.fillRect (0, 28, getWidth(), getHeight() - 38);
+            g.setColour (Colours::white.withAlpha (0.3f));
+            g.fillRect (0, 28, getWidth(), getHeight() - 38);
 
-                g.setColour (Colours::black.withAlpha (0.4f));
-                g.drawRect (0, 28, getWidth(), getHeight() - 38);
-            }
+            g.setColour (Colours::black.withAlpha (0.4f));
+            g.drawRect (0, 28, getWidth(), getHeight() - 38);
 
             g.setFont (14.0f, Font::bold);
             g.setColour (Colours::black);
             g.drawFittedText (getName(), 12, 0, getWidth() - 16, 26, Justification::bottomLeft, 1);
         }
 
-        void buttonClicked (Button*)
-        {
-            ProjectSettingsComponent* psc = findParentComponentOfClass<ProjectSettingsComponent>();
-            if (psc != nullptr)
-                psc->deleteButtonClicked (deleteButton.getName());
-        }
-
         OwnedArray<PropertyComponent> properties;
-        TextButton deleteButton;
-        bool fillBackground;
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyGroup);
     };
 
     //==============================================================================
-    class PropertyGroupList  : public PropertyComponent,
-                               public ButtonListener
+    class PropertyPanelViewport  : public Component
     {
     public:
-        PropertyGroupList (const String& title, const String& newButtonText,
-                           bool triggerOnMouseDown, bool hideNameAndPutButtonAtBottom)
-            : PropertyComponent (title), createNewButton (newButtonText),
-              dontDisplayName (hideNameAndPutButtonAtBottom)
+        PropertyPanelViewport (Component* content)
         {
-            addAndMakeVisible (&createNewButton);
-            createNewButton.setColour (TextButton::buttonColourId, Colours::lightgreen.withAlpha (0.5f));
-            createNewButton.setBounds (hideNameAndPutButtonAtBottom ? "right - 140, parent.height - 25, parent.width - 10, top + 20"
-                                                                    : "right - 140, 30, parent.width - 10, top + 20");
-            createNewButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight);
-            createNewButton.addListener (this);
-            createNewButton.setTriggeredOnMouseDown (triggerOnMouseDown);
-        }
-
-        int updateSize (int ourY, int width)
-        {
-            int y = dontDisplayName ? 10 : 55;
-
-            for (int i = 0; i < groups.size(); ++i)
-                y += groups.getUnchecked(i)->updateSize (y, width);
-
-            y = jmax (y, 100);
-            setBounds (0, ourY, width, y);
-
-            if (dontDisplayName)
-                y += 25;
-
-            setPreferredHeight (y);
-            return y;
+            addAndMakeVisible (&viewport);
+            viewport.setViewedComponent (content, true);
         }
 
         void paint (Graphics& g)
         {
-            if (! dontDisplayName)
+            g.setTiledImageFill (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png,
+                                                            BinaryData::brushed_aluminium_pngSize),
+                                 0, 0, 1.0f);
+            g.fillAll();
+            drawRecessedShadows (g, getWidth(), getHeight(), 14);
+        }
+
+        void resized()
+        {
+            viewport.setBounds (getLocalBounds());
+        }
+
+        Viewport viewport;
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyPanelViewport);
+    };
+
+    //==============================================================================
+    class SettingsItemBase  : public JucerTreeViewBase,
+                              public ValueTree::Listener
+    {
+    public:
+        SettingsItemBase() {}
+
+        void showSettingsPage (Component* content)
+        {
+            content->setComponentID (getUniqueName());
+
+            ScopedPointer<Component> comp (content);
+            ProjectContentComponent* pcc = getProjectContentComponent();
+
+            if (pcc != nullptr)
+                pcc->setEditorComponent (new PropertyPanelViewport (comp.release()), nullptr);
+        }
+
+        void closeSettingsPage()
+        {
+            ProjectContentComponent* pcc = getProjectContentComponent();
+
+            if (pcc != nullptr)
             {
-                g.setFont (17.0f, Font::bold);
-                g.setColour (Colours::black);
-                g.drawFittedText (getName(), 0, 30, getWidth(), 20, Justification::centred, 1);
+                PropertyPanelViewport* ppv = dynamic_cast<PropertyPanelViewport*> (pcc->getEditorComponent());
+
+                if (ppv != nullptr && ppv->viewport.getViewedComponent()->getComponentID() == getUniqueName())
+                    pcc->hideEditor();
             }
         }
 
-        void clear()
+        void deleteAllSelectedItems()
         {
-            groups.clear();
+            TreeView* const tree = getOwnerView();
+            jassert (tree->getNumSelectedItems() <= 1); // multi-select should be disabled
+
+            if (SettingsItemBase* s = dynamic_cast <SettingsItemBase*> (tree->getSelectedItem (0)))
+                s->deleteItem();
         }
 
-        void refresh() {}
-
-        PropertyGroup* createGroup()
+        void itemOpennessChanged (bool isNowOpen)
         {
-            PropertyGroup* p = new PropertyGroup();
-            groups.add (p);
-            addAndMakeVisible (p);
-            return p;
+            if (isNowOpen)
+               refreshSubItems();
         }
 
-        void buttonClicked (Button*)
-        {
-            ProjectSettingsComponent* psc = findParentComponentOfClass<ProjectSettingsComponent>();
-            if (psc != nullptr)
-                psc->newItemButtonClicked (createNewButton);
-        }
+        void valueTreePropertyChanged (ValueTree&, const Identifier&) {}
+        void valueTreeChildAdded (ValueTree&, ValueTree&) {}
+        void valueTreeChildRemoved (ValueTree&, ValueTree&) {}
+        void valueTreeChildOrderChanged (ValueTree&) {}
+        void valueTreeParentChanged (ValueTree&) {}
 
-        OwnedArray<PropertyGroup> groups;
-        TextButton createNewButton;
-        bool dontDisplayName;
+        static void updateSizes (Component& comp, PropertyGroup* groups, int numGroups)
+        {
+            const int width = jmax (550, comp.getParentWidth() - 20);
+
+            int y = 0;
+            for (int i = 0; i < numGroups; ++i)
+                y += groups[i].updateSize (12, y, width - 12);
+
+            comp.setSize (width, y);
+        }
     };
 
-    Project& project;
-    var lastProjectType;
-    PropertyGroup mainProjectInfoPanel, modulesPanelGroup;
-    PropertyGroupList exporters;
+    //==============================================================================
+    class ConfigItem   : public SettingsItemBase
+    {
+    public:
+        ConfigItem (const ProjectExporter::BuildConfiguration::Ptr& config_, const String& exporterName_)
+            : config (config_), exporterName (exporterName_), configTree (config->config)
+        {
+            jassert (config != nullptr);
+            configTree.addListener (this);
+        }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSettingsComponent);
+        bool isRoot() const                     { return false; }
+        bool isMissing()                        { return false; }
+        bool canBeSelected() const              { return true; }
+        bool mightContainSubItems()             { return false; }
+        String getUniqueName() const            { return config->project.getProjectUID() + "_config_" + config->getName(); }
+        String getRenamingName() const          { return getDisplayName(); }
+        String getDisplayName() const           { return config->getName(); }
+        void setName (const String&)            {}
+        const Drawable* getIcon() const         { return StoredSettings::getInstance()->getCogIcon(); }
+
+        void showDocument()                     { showSettingsPage (new SettingsComp (config, exporterName)); }
+        void itemOpennessChanged (bool)         {}
+
+        void deleteItem()
+        {
+            if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Delete Configuration",
+                                              "Are you sure you want to delete this configuration?"))
+            {
+                closeSettingsPage();
+                config->removeFromExporter();
+            }
+        }
+
+        void showPopupMenu()
+        {
+            PopupMenu menu;
+            menu.addItem (1, "Create a copy of this configuration");
+            menu.addSeparator();
+            menu.addItem (2, "Delete this configuration");
+
+            launchPopupMenu (menu);
+        }
+
+        void handlePopupMenuResult (int resultCode)
+        {
+            if (resultCode == 2)
+            {
+                deleteAllSelectedItems();
+            }
+            else if (resultCode == 1)
+            {
+                for (Project::ExporterIterator exporter (config->project); exporter.next();)
+                {
+                    if (config->config.isAChildOf (exporter.exporter->settings))
+                    {
+                        exporter.exporter->addNewConfiguration (config);
+                        break;
+                    }
+                }
+            }
+        }
+
+        var getDragSourceDescription()
+        {
+            return getParentItem()->getUniqueName() + "||" + config->getName();
+        }
+
+        void valueTreePropertyChanged (ValueTree&, const Identifier&)  { repaintItem(); }
+
+    private:
+        ProjectExporter::BuildConfiguration::Ptr config;
+        String exporterName;
+        ValueTree configTree;
+
+        //==============================================================================
+        class SettingsComp  : public Component
+        {
+        public:
+            SettingsComp (ProjectExporter::BuildConfiguration* config, const String& exporterName)
+            {
+                addAndMakeVisible (&group);
+
+                PropertyListBuilder props;
+                config->createPropertyEditors (props);
+                group.setProperties (props);
+                group.setName (exporterName + " / " + config->getName());
+                parentSizeChanged();
+            }
+
+            void parentSizeChanged()  { updateSizes (*this, &group, 1); }
+
+        private:
+            PropertyGroup group;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
+        };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigItem);
+    };
+
+    //==============================================================================
+    class ExporterItem   : public SettingsItemBase
+    {
+    public:
+        ExporterItem (Project& project_, ProjectExporter* exporter_, int exporterIndex_)
+            : project (project_), exporter (exporter_), configListTree (exporter->getConfigurations()),
+              exporterIndex (exporterIndex_)
+        {
+            configListTree.addListener (this);
+            jassert (exporter != nullptr);
+        }
+
+        bool isRoot() const                     { return false; }
+        bool canBeSelected() const              { return true; }
+        bool mightContainSubItems()             { return exporter->getNumConfigurations() > 0; }
+        String getUniqueName() const            { return project.getProjectUID() + "_exporter_" + String (exporterIndex); }
+        String getRenamingName() const          { return getDisplayName(); }
+        String getDisplayName() const           { return exporter->getName(); }
+        void setName (const String&)            {}
+        bool isMissing()                        { return false; }
+        const Drawable* getIcon() const         { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
+        void showDocument()                     { showSettingsPage (new SettingsComp (exporter)); }
+
+        void deleteItem()
+        {
+            if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Delete Exporter",
+                                              "Are you sure you want to delete this export target?"))
+            {
+                closeSettingsPage();
+                ValueTree parent (exporter->settings.getParent());
+                parent.removeChild (exporter->settings, project.getUndoManagerFor (parent));
+            }
+        }
+
+        void addSubItems()
+        {
+            for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
+                addSubItem (new ConfigItem (config.config, exporter->getName()));
+        }
+
+        void showPopupMenu()
+        {
+            PopupMenu menu;
+            menu.addItem (1, "Add a new configuration");
+            menu.addSeparator();
+            menu.addItem (2, "Delete this exporter");
+
+            launchPopupMenu (menu);
+        }
+
+        void handlePopupMenuResult (int resultCode)
+        {
+            if (resultCode == 2)
+                deleteAllSelectedItems();
+            else if (resultCode == 1)
+                exporter->addNewConfiguration (nullptr);
+        }
+
+        var getDragSourceDescription()
+        {
+            return getParentItem()->getUniqueName() + "/" + String (exporterIndex);
+        }
+
+        bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails)
+        {
+            return dragSourceDetails.description.toString().startsWith (getUniqueName());
+        }
+
+        void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
+        {
+            const int oldIndex = indexOfConfig (dragSourceDetails.description.toString().fromLastOccurrenceOf ("||", false, false));
+
+            if (oldIndex >= 0)
+                configListTree.moveChild (oldIndex, insertIndex, project.getUndoManagerFor (configListTree));
+        }
+
+        int indexOfConfig (const String& configName)
+        {
+            int i = 0;
+            for (ProjectExporter::ConfigIterator config (*exporter); config.next(); ++i)
+                if (config->getName() == configName)
+                    return i;
+
+            return -1;
+        }
+
+        //==============================================================================
+        void valueTreeChildAdded (ValueTree& parentTree, ValueTree&)    { refreshIfNeeded (parentTree); }
+        void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&)  { refreshIfNeeded (parentTree); }
+        void valueTreeChildOrderChanged (ValueTree& parentTree)         { refreshIfNeeded (parentTree); }
+
+        void refreshIfNeeded (ValueTree& changedTree)
+        {
+            if (changedTree == configListTree)
+                refreshSubItems();
+        }
+
+    private:
+        Project& project;
+        ScopedPointer<ProjectExporter> exporter;
+        ValueTree configListTree;
+        int exporterIndex;
+
+        //==============================================================================
+        class SettingsComp  : public Component
+        {
+        public:
+            SettingsComp (ProjectExporter* exporter)
+            {
+                addAndMakeVisible (&group);
+
+                PropertyListBuilder props;
+                exporter->createPropertyEditors (props);
+                group.setProperties (props);
+                group.setName ("Export target: " + exporter->getName());
+                parentSizeChanged();
+            }
+
+            void parentSizeChanged()  { updateSizes (*this, &group, 1); }
+
+        private:
+            PropertyGroup group;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
+        };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterItem);
+    };
+
+    //==============================================================================
+    class RootItem   : public SettingsItemBase
+    {
+    public:
+        RootItem (Project& project_)
+            : project (project_), exportersTree (project_.getExporters())
+        {
+            exportersTree.addListener (this);
+        }
+
+        bool isRoot() const                     { return true; }
+        String getRenamingName() const          { return getDisplayName(); }
+        String getDisplayName() const           { return project.getProjectName().toString(); }
+        void setName (const String&)            {}
+        bool isMissing()                        { return false; }
+        const Drawable* getIcon() const         { return project.getMainGroup().getIcon(); }
+        void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
+        bool canBeSelected() const              { return true; }
+        bool mightContainSubItems()             { return project.getNumExporters() > 0; }
+        String getUniqueName() const            { return project.getProjectUID() + "_config_root"; }
+
+        void addSubItems()
+        {
+            int i = 0;
+            for (Project::ExporterIterator exporter (project); exporter.next(); ++i)
+                addSubItem (new ExporterItem (project, exporter.exporter.release(), i));
+        }
+
+        void showPopupMenu()
+        {
+            PopupMenu menu;
+
+            const StringArray exporters (ProjectExporter::getExporterNames());
+
+            for (int i = 0; i < exporters.size(); ++i)
+                menu.addItem (i + 1, "Create a new " + exporters[i] + " target");
+
+            launchPopupMenu (menu);
+        }
+
+        void handlePopupMenuResult (int resultCode)
+        {
+            if (resultCode > 0)
+            {
+                String exporterName (ProjectExporter::getExporterNames() [resultCode - 1]);
+
+                if (exporterName.isNotEmpty())
+                    project.addNewExporter (exporterName);
+            }
+        }
+
+        bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails)
+        {
+            return dragSourceDetails.description.toString().startsWith (getUniqueName());
+        }
+
+        void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
+        {
+            int oldIndex = dragSourceDetails.description.toString().getTrailingIntValue();
+            exportersTree.moveChild (oldIndex, insertIndex, project.getUndoManagerFor (exportersTree));
+        }
+
+        //==============================================================================
+        void valueTreeChildAdded (ValueTree& parentTree, ValueTree&)    { refreshIfNeeded (parentTree); }
+        void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&)  { refreshIfNeeded (parentTree); }
+        void valueTreeChildOrderChanged (ValueTree& parentTree)         { refreshIfNeeded (parentTree); }
+
+        void refreshIfNeeded (ValueTree& changedTree)
+        {
+            if (changedTree == exportersTree)
+                refreshSubItems();
+        }
+
+    private:
+        Project& project;
+        ValueTree exportersTree;
+
+        //==============================================================================
+        class SettingsComp  : public Component,
+                              private ChangeListener
+        {
+        public:
+            SettingsComp (Project& project_)
+                : project (project_)
+            {
+                addAndMakeVisible (&groups[0]);
+                addAndMakeVisible (&groups[1]);
+
+                createAllPanels();
+                project.addChangeListener (this);
+            }
+
+            ~SettingsComp()
+            {
+                project.removeChangeListener (this);
+            }
+
+            void parentSizeChanged()
+            {
+                updateSizes (*this, groups, 2);
+            }
+
+            void createAllPanels()
+            {
+                {
+                    PropertyListBuilder props;
+                    project.createPropertyEditors (props);
+                    groups[0].setProperties (props);
+                    groups[0].setName ("Project Settings");
+
+                    lastProjectType = project.getProjectTypeValue().getValue();
+                }
+
+                PropertyListBuilder props;
+                props.add (new ModulesPanel (project));
+                groups[1].setProperties (props);
+                groups[1].setName ("Modules");
+
+                parentSizeChanged();
+            }
+
+            void changeListenerCallback (ChangeBroadcaster*)
+            {
+                if (lastProjectType != project.getProjectTypeValue().getValue())
+                    createAllPanels();
+            }
+
+        private:
+            Project& project;
+            var lastProjectType;
+            PropertyGroup groups[2];
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
+        };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RootItem);
+    };
 };
 
-//[/MiscUserDefs]
-
-//==============================================================================
-ProjectInformationComponent::ProjectInformationComponent (Project& project_)
-    : project (project_)
+JucerTreeViewBase* createProjectConfigTreeViewRoot (Project& project)
 {
-    //[Constructor_pre]
-    //[/Constructor_pre]
-
-    addChildAndSetID (&viewport, "ykdBpb");
-    addChildAndSetID (&openProjectButton, "a550a652e2666ee7");
-    addChildAndSetID (&saveAndOpenButton, "dRGMyYx");
-    addChildAndSetID (&rollover, "QqLJBF");
-
-    initialiseComponentState();
-    openProjectButton.addListener (this);
-    saveAndOpenButton.addListener (this);
-
-    //[UserPreSize]
-    viewport.setViewedComponent (new ProjectSettingsComponent (project), true);
-
-   #if JUCE_MAC || JUCE_WINDOWS
-    openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
-    openProjectButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::openInIDE));
-
-    saveAndOpenButton.setCommandToTrigger (commandManager, CommandIDs::saveAndOpenInIDE, true);
-    saveAndOpenButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::saveAndOpenInIDE));
-   #else
-    openProjectButton.setVisible (false);
-    saveAndOpenButton.setVisible (false);
-   #endif
-    //[/UserPreSize]
-
-    setSize (808, 638);
-
-    //[Constructor]
-    project.addChangeListener (this);
-    //[/Constructor]
-}
-
-ProjectInformationComponent::~ProjectInformationComponent()
-{
-    //[Destructor]
-    project.removeChangeListener (this);
-    //[/Destructor]
-}
-
-//==============================================================================
-void ProjectInformationComponent::buttonClicked (Button* buttonThatWasClicked)
-{
-    //[UserbuttonClicked_Pre]
-    //[/UserbuttonClicked_Pre]
-
-    if (buttonThatWasClicked == &openProjectButton)
-    {
-        //[UserButtonCode_openProjectButton] -- add your button handler code here..
-        //[/UserButtonCode_openProjectButton]
-    }
-    else if (buttonThatWasClicked == &saveAndOpenButton)
-    {
-        //[UserButtonCode_saveAndOpenButton] -- add your button handler code here..
-        //[/UserButtonCode_saveAndOpenButton]
-    }
-
-    //[UserbuttonClicked_Post]
-    //[/UserbuttonClicked_Post]
-}
-
-void ProjectInformationComponent::paint (Graphics& g)
-{
-    //[UserPaint]
-    g.setTiledImageFill (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize),
-                         0, 0, 1.0f);
-    g.fillAll();
-    drawRecessedShadows (g, getWidth(), getHeight(), 14);
-    //[/UserPaint]
-}
-
-//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
-void ProjectInformationComponent::changeListenerCallback (ChangeBroadcaster*)
-{
-    dynamic_cast<ProjectSettingsComponent*> (viewport.getViewedComponent())->update();
-}
-//[/MiscUserCode]
-
-//==============================================================================
-//=======================  Jucer Information Section  ==========================
-//==============================================================================
-#if 0
-/*  This section stores the metadata for this component - edit it at your own risk!
-
-JUCER_COMPONENT_METADATA_START
-
-<COMPONENT id="tO9EG1a" className="ProjectInformationComponent" width="808"
-           height="638" background="f6f9ff" parentClasses="public Component, public ChangeListener"
-           constructorParams="Project&amp; project_" memberInitialisers="project (project_)">
-  <COMPONENTS>
-    <VIEWPORT id="ykdBpb" memberName="viewport" position="8, 8, parent.width - 8, parent.height - 74"
-              scrollBarV="1" scrollBarH="1" scrollbarWidth="16"/>
-    <TEXTBUTTON id="a550a652e2666ee7" memberName="openProjectButton" focusOrder="0"
-                text="Open Project in " createCallback="1" radioGroup="0" connectedLeft="0"
-                connectedRight="0" connectedTop="0" connectedBottom="0" backgroundColour="FFDDDDFF"
-                textColour="" backgroundColourOn="" textColourOn="" position="8, parent.height - 34, left + 227, top + 24"/>
-    <TEXTBUTTON id="dRGMyYx" name="" memberName="saveAndOpenButton" position="8, parent.height - 65, left + 227, top + 24"
-                text="Save And Open in" createCallback="1" radioGroup="0" connectedLeft="0"
-                connectedRight="0" connectedTop="0" connectedBottom="0" backgroundColour="FFDDDDFF"/>
-    <GENERICCOMPONENT id="QqLJBF" memberName="rollover" position="246, parent.height - 68, parent.width - 8, parent.height - 4"
-                      class="RolloverHelpComp" canBeAggregated="1" constructorParams=""/>
-  </COMPONENTS>
-  <MARKERS_X/>
-  <MARKERS_Y/>
-  <METHODS paint="1"/>
-</COMPONENT>
-
-JUCER_COMPONENT_METADATA_END
-*/
-#endif
-
-void ProjectInformationComponent::initialiseComponentState()
-{
-
-    BinaryData::ImageProvider imageProvider;
-    ComponentBuilder::initialiseFromValueTree (*this, getComponentState(), &imageProvider);
-}
-
-ValueTree ProjectInformationComponent::getComponentState()
-{
-
-    const unsigned char data[] =
-        "COMPONENT\0\x01\x08id\0\x01\t\x05tO9EG1a\0""className\0\x01\x1d\x05ProjectInformationComponent\0width\0\x01\x05\x05""808\0height\0\x01\x05\x05""638\0""background\0\x01\x08\x05""f6f9ff\0parentClasses\0\x01)\x05public Component, public ChangeListener\0"
-        "constructorParams\0\x01\x13\x05Project& project_\0memberInitialisers\0\x01\x14\x05project (project_)\0\x01\x04""COMPONENTS\0\0\x01\x04VIEWPORT\0\x01\x06id\0\x01\x08\x05ykdBpb\0memberName\0\x01\n\x05viewport\0position\0\x01,\x05""8, 8, parent.width - "
-        "8, parent.height - 74\0scrollBarV\0\x01\x03\x05""1\0scrollBarH\0\x01\x03\x05""1\0scrollbarWidth\0\x01\x04\x05""16\0\0TEXTBUTTON\0\x01\x0fid\0\x01\x12\x05""a550a652e2666ee7\0memberName\0\x01\x13\x05openProjectButton\0""focusOrder\0\x01\x03\x05""0\0tex"
-        "t\0\x01\x12\x05Open Project in \0""createCallback\0\x01\x03\x05""1\0radioGroup\0\x01\x03\x05""0\0""connectedLeft\0\x01\x03\x05""0\0""connectedRight\0\x01\x03\x05""0\0""connectedTop\0\x01\x03\x05""0\0""connectedBottom\0\x01\x03\x05""0\0""backgroundCol"
-        "our\0\x01\n\x05""FFDDDDFF\0textColour\0\x01\x02\x05\0""backgroundColourOn\0\x01\x02\x05\0textColourOn\0\x01\x02\x05\0position\0\x01-\x05""8, parent.height - 34, left + 227, top + 24\0\0TEXTBUTTON\0\x01\x0cid\0\x01\t\x05""dRGMyYx\0name\0\x01\x02\x05\0"
-        "memberName\0\x01\x13\x05saveAndOpenButton\0position\0\x01-\x05""8, parent.height - 65, left + 227, top + 24\0text\0\x01\x12\x05Save And Open in\0""createCallback\0\x01\x03\x05""1\0radioGroup\0\x01\x03\x05""0\0""connectedLeft\0\x01\x03\x05""0\0""conne"
-        "ctedRight\0\x01\x03\x05""0\0""connectedTop\0\x01\x03\x05""0\0""connectedBottom\0\x01\x03\x05""0\0""backgroundColour\0\x01\n\x05""FFDDDDFF\0\0GENERICCOMPONENT\0\x01\x06id\0\x01\x08\x05QqLJBF\0memberName\0\x01\n\x05rollover\0position\0\x01>\x05""246, p"
-        "arent.height - 68, parent.width - 8, parent.height - 4\0""class\0\x01\x12\x05RolloverHelpComp\0""canBeAggregated\0\x01\x03\x05""1\0""constructorParams\0\x01\x02\x05\0\0MARKERS_X\0\0\0MARKERS_Y\0\0\0METHODS\0\x01\x01paint\0\x01\x03\x05""1\0\0";
-
-    return ValueTree::readFromData (data, sizeof (data));
+    return new ProjectSettingsTreeClasses::RootItem (project);
 }
