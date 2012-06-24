@@ -589,10 +589,7 @@ TreeViewItem* TreeView::getSelectedItem (const int index) const noexcept
 
 int TreeView::getNumRowsInTree() const
 {
-    if (rootItem != nullptr)
-        return rootItem->getNumRows() - (rootItemVisible ? 0 : 1);
-
-    return 0;
+    return rootItem != nullptr ? (rootItem->getNumRows() - (rootItemVisible ? 0 : 1)) : 0;
 }
 
 TreeViewItem* TreeView::getItemOnRow (int index) const
@@ -699,44 +696,45 @@ void TreeView::enablementChanged()
 
 void TreeView::moveSelectedRow (const int delta)
 {
-    int rowSelected = 0;
+    const int numRowsInTree = getNumRowsInTree();
 
-    TreeViewItem* const firstSelected = getSelectedItem (0);
-    if (firstSelected != nullptr)
-        rowSelected = firstSelected->getRowNumberInTree();
-
-    rowSelected = jlimit (0, getNumRowsInTree() - 1, rowSelected + delta);
-
-    for (;;)
+    if (numRowsInTree > 0)
     {
-        TreeViewItem* item = getItemOnRow (rowSelected);
+        int rowSelected = 0;
 
-        if (item != nullptr)
+        TreeViewItem* const firstSelected = getSelectedItem (0);
+        if (firstSelected != nullptr)
+            rowSelected = firstSelected->getRowNumberInTree();
+
+        rowSelected = jlimit (0, numRowsInTree - 1, rowSelected + delta);
+
+        for (;;)
         {
-            if (! item->canBeSelected())
-            {
-                // if the row we want to highlight doesn't allow it, try skipping
-                // to the next item..
-                const int nextRowToTry = jlimit (0, getNumRowsInTree() - 1,
-                                                 rowSelected + (delta < 0 ? -1 : 1));
+            TreeViewItem* const item = getItemOnRow (rowSelected);
 
-                if (rowSelected != nextRowToTry)
+            if (item != nullptr)
+            {
+                if (! item->canBeSelected())
                 {
-                    rowSelected = nextRowToTry;
-                    continue;
-                }
-                else
-                {
+                    // if the row we want to highlight doesn't allow it, try skipping
+                    // to the next item..
+                    const int nextRowToTry = jlimit (0, numRowsInTree - 1, rowSelected + (delta < 0 ? -1 : 1));
+
+                    if (rowSelected != nextRowToTry)
+                    {
+                        rowSelected = nextRowToTry;
+                        continue;
+                    }
+
                     break;
                 }
+
+                item->setSelected (true, true);
+                scrollToKeepItemVisible (item);
             }
 
-            item->setSelected (true, true);
-
-            scrollToKeepItemVisible (item);
+            break;
         }
-
-        break;
     }
 }
 
