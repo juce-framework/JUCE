@@ -89,14 +89,23 @@ public:
   #define START_JUCE_APPLICATION(AppClass) \
     juce::JUCEApplication* juce_CreateApplication() { return new AppClass(); }
 
+#elif JUCE_WINDOWS && defined (WINAPI)
+  #define START_JUCE_APPLICATION(AppClass) \
+    static juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); } \
+    int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
+    { \
+        juce::JUCEApplication::createInstance = &juce_CreateApplication; \
+        return juce::JUCEApplication::main(); \
+    }
+
 #elif JUCE_WINDOWS
   #define START_JUCE_APPLICATION(AppClass) \
-      static juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); } \
-      int __stdcall WinMain (void*, void*, const char*, int) \
-      { \
-          juce::JUCEApplication::createInstance = &juce_CreateApplication; \
-          return juce::JUCEApplication::main(); \
-      }
+    static juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); } \
+    int __stdcall WinMain (void*, void*, const char*, int) \
+    { \
+        juce::JUCEApplication::createInstance = &juce_CreateApplication; \
+        return juce::JUCEApplication::main(); \
+    }
 
 #else
   #define START_JUCE_APPLICATION(AppClass) \
