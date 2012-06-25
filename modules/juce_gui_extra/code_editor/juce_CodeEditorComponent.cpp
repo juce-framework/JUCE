@@ -269,7 +269,8 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
     f.setTypefaceName (Font::getDefaultMonospacedFontName());
     setFont (f);
 
-    resetToDefaultColours();
+    if (codeTokeniser != nullptr)
+        setColourScheme (codeTokeniser->getDefaultColourScheme());
 
     verticalScrollBar.addListener (this);
     horizontalScrollBar.addListener (this);
@@ -1093,34 +1094,18 @@ void CodeEditorComponent::setFont (const Font& newFont)
     resized();
 }
 
-void CodeEditorComponent::resetToDefaultColours()
+void CodeEditorComponent::setColourScheme (const ColourScheme& scheme)
 {
-    coloursForTokenCategories.clear();
-
-    if (codeTokeniser != nullptr)
-    {
-        for (int i = codeTokeniser->getTokenTypes().size(); --i >= 0;)
-            setColourForTokenType (i, codeTokeniser->getDefaultColour (i));
-    }
-}
-
-void CodeEditorComponent::setColourForTokenType (const int tokenType, const Colour& colour)
-{
-    jassert (tokenType < 256);
-
-    while (coloursForTokenCategories.size() < tokenType)
-        coloursForTokenCategories.add (Colours::black);
-
-    coloursForTokenCategories.set (tokenType, colour);
+    colourScheme = scheme;
     repaint();
 }
 
 Colour CodeEditorComponent::getColourForTokenType (const int tokenType) const
 {
-    if (! isPositiveAndBelow (tokenType, coloursForTokenCategories.size()))
+    if (! isPositiveAndBelow (tokenType, colourScheme.tokenColours.size()))
         return findColour (CodeEditorComponent::defaultTextColourId);
 
-    return coloursForTokenCategories.getReference (tokenType);
+    return colourScheme.tokenColours.getReference (tokenType);
 }
 
 void CodeEditorComponent::clearCachedIterators (const int firstLineToBeInvalid)

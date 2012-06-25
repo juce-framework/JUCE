@@ -27,8 +27,7 @@
 #define __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
 
 #include "juce_CodeDocument.h"
-#include "juce_CodeTokeniser.h"
-
+class CodeTokeniser;
 
 //==============================================================================
 /**
@@ -173,25 +172,28 @@ public:
     /** Returns the font that the editor is using. */
     const Font& getFont() const noexcept                { return font; }
 
-    /** Resets the syntax highlighting colours to the default ones provided by the
-        code tokeniser.
-        @see CodeTokeniser::getDefaultColour
-    */
-    void resetToDefaultColours();
+    //==============================================================================
+    struct ColourScheme
+    {
+        StringArray tokenTypeNames;
+        Array<Colour> tokenColours;
+    };
 
-    /** Changes one of the syntax highlighting colours.
+    /** Changes the syntax highlighting scheme.
         The token type values are dependent on the tokeniser being used - use
         CodeTokeniser::getTokenTypes() to get a list of the token types.
         @see getColourForTokenType
     */
-    void setColourForTokenType (int tokenType, const Colour& colour);
+    void setColourScheme (const ColourScheme& scheme);
 
-    /** Returns one of the syntax highlighting colours.
-        The token type values are dependent on the tokeniser being used - use
-        CodeTokeniser::getTokenTypes() to get a list of the token types.
-        @see setColourForTokenType
+    /** Returns the current syntax highlighting colour scheme. */
+    const ColourScheme& getColourScheme() const noexcept    { return colourScheme; }
+
+    /** Returns one the syntax highlighting colour for the given token.
+        The token type values are dependent on the tokeniser being used.
+        @see setColourScheme
     */
-    Colour getColourForTokenType (int tokenType) const;
+    Colour getColourForTokenType (const int tokenType) const;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
@@ -281,7 +283,7 @@ private:
 
     //==============================================================================
     CodeTokeniser* codeTokeniser;
-    Array <Colour> coloursForTokenCategories;
+    ColourScheme colourScheme;
 
     class CodeEditorLine;
     OwnedArray <CodeEditorLine> lines;

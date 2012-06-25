@@ -60,8 +60,7 @@ public:
 
     //==============================================================================
     int readNextToken (CodeDocument::Iterator& source);
-    StringArray getTokenTypes();
-    Colour getDefaultColour (int tokenType);
+    CodeEditorComponent::ColourScheme getDefaultColourScheme();
 
     /** This is a handy method for checking whether a string is a c++ reserved keyword. */
     static bool isReservedKeyword (const String& token) noexcept;

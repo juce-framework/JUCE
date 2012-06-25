@@ -27,6 +27,7 @@
 #define __JUCE_CODETOKENISER_JUCEHEADER__
 
 #include "juce_CodeDocument.h"
+#include "juce_CodeEditorComponent.h"
 
 
 //==============================================================================
@@ -50,21 +51,10 @@ public:
     */
     virtual int readNextToken (CodeDocument::Iterator& source) = 0;
 
-    /** Returns a list of the names of the token types this analyser uses.
-
-        The index in this list must match the token type numbers that are
-        returned by readNextToken().
-    */
-    virtual StringArray getTokenTypes() = 0;
-
-    /** Returns a suggested syntax highlighting colour for a specified
-        token type.
-    */
-    virtual Colour getDefaultColour (int tokenType) = 0;
-
+    /** Returns a suggested syntax highlighting colour scheme. */
+    virtual CodeEditorComponent::ColourScheme getDefaultColourScheme() = 0;
 
 private:
-    //==============================================================================
     JUCE_LEAK_DETECTOR (CodeTokeniser);
 };
 

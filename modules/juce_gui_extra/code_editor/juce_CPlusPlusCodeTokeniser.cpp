@@ -558,48 +558,38 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     return result;
 }
 
-StringArray CPlusPlusCodeTokeniser::getTokenTypes()
+CodeEditorComponent::ColourScheme CPlusPlusCodeTokeniser::getDefaultColourScheme()
 {
-    const char* const types[] =
+    struct Type
     {
-        "Error",
-        "Comment",
-        "C++ keyword",
-        "Identifier",
-        "Integer literal",
-        "Float literal",
-        "String literal",
-        "Operator",
-        "Bracket",
-        "Punctuation",
-        "Preprocessor line",
-        0
+        const char* name;
+        uint32 colour;
     };
 
-    return StringArray (types);
-}
-
-Colour CPlusPlusCodeTokeniser::getDefaultColour (const int tokenType)
-{
-    const uint32 colours[] =
+    const Type types[] =
     {
-        0xffcc0000,  // error
-        0xff00aa00,  // comment
-        0xff0000cc,  // keyword
-        0xff000000,  // identifier
-        0xff880000,  // int literal
-        0xff885500,  // float literal
-        0xff990099,  // string literal
-        0xff225500,  // operator
-        0xff000055,  // bracket
-        0xff004400,  // punctuation
-        0xff660000   // preprocessor
+        { "Error",              0xffcc0000 },
+        { "Comment",            0xff00aa00 },
+        { "C++ keyword",        0xff0000cc },
+        { "Identifier",         0xff000000 },
+        { "Integer literal",    0xff880000 },
+        { "Float literal",      0xff885500 },
+        { "String literal",     0xff990099 },
+        { "Operator",           0xff225500 },
+        { "Bracket",            0xff000055 },
+        { "Punctuation",        0xff004400 },
+        { "Preprocessor line",  0xff660000 }
     };
 
-    if (tokenType >= 0 && tokenType < numElementsInArray (colours))
-        return Colour (colours [tokenType]);
+    CodeEditorComponent::ColourScheme cs;
 
-    return Colours::black;
+    for (int i = 0; i < numElementsInArray (types); ++i)
+    {
+        cs.tokenTypeNames.add (types[i].name);
+        cs.tokenColours.add (Colour (types[i].colour));
+    }
+
+    return cs;
 }
 
 bool CPlusPlusCodeTokeniser::isReservedKeyword (const String& token) noexcept
