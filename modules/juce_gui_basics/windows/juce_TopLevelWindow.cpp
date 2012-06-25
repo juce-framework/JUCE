@@ -171,6 +171,11 @@ void TopLevelWindow::activeWindowStatusChanged()
 {
 }
 
+bool TopLevelWindow::isUsingNativeTitleBar() const noexcept
+{
+    return useNativeTitleBar && (isOnDesktop() || ! isShowing());
+}
+
 void TopLevelWindow::visibilityChanged()
 {
     if (isShowing()

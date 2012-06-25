@@ -387,10 +387,7 @@ public:
             const Rectangle<int> screen (getFrameSize().subtractedFrom (component->getParentMonitorArea()));
             const Rectangle<int> window (component->getScreenBounds());
 
-            fullScreen = std::abs (screen.getX() - window.getX()) <= 2
-                      && std::abs (screen.getY() - window.getY()) <= 2
-                      && std::abs (screen.getRight() - window.getRight()) <= 2
-                      && std::abs (screen.getBottom() - window.getBottom()) <= 2;
+            fullScreen = window.expanded (2, 2).contains (screen);
         }
     }
 

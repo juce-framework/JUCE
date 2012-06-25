@@ -491,7 +491,7 @@ public:
             MainWindow* mw = dynamic_cast<MainWindow*> (getTopLevelComponent());
             jassert (mw != nullptr);
 
-            JucerApplication::getApp()->closeWindow (mw);
+            JucerApplication::getApp()->mainWindowList.closeWindow (mw);
         }
     }
 

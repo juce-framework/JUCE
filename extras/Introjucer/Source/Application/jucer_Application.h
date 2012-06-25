@@ -65,21 +65,13 @@ public:
         ImageCache::setCacheTimeout (30 * 1000);
 
         if (commandLine.trim().isNotEmpty() && ! commandLine.trim().startsWithChar ('-'))
-        {
             anotherInstanceStarted (commandLine);
-        }
         else
-        {
-            Array<File> projects (StoredSettings::getInstance()->getLastProjects());
-
-            for (int i = 0; i < projects.size(); ++ i)
-                openFile (projects.getReference(i));
-        }
+            mainWindowList.reopenLastProjects();
 
         makeSureUserHasSelectedModuleFolder();
 
-        if (mainWindows.size() == 0)
-            createNewMainWindow()->makeVisible();
+        mainWindowList.createWindowIfNoneAreOpen();
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (menuModel);
@@ -94,7 +86,7 @@ public:
         menuModel = nullptr;
 
         StoredSettings::deleteInstance();
-        mainWindows.clear();
+        mainWindowList.forceCloseAllWindows();
 
         OpenDocumentManager::deleteInstance();
         commandManager = nullptr;
@@ -109,35 +101,8 @@ public:
             return;
         }
 
-        while (mainWindows.size() > 0)
-        {
-            if (! mainWindows[0]->closeCurrentProject())
-                return;
-
-            mainWindows.remove (0);
-        }
-
-        quit();
-    }
-
-    void closeWindow (MainWindow* w)
-    {
-        jassert (mainWindows.contains (w));
-
-       #if ! JUCE_MAC
-        if (mainWindows.size() == 1)
-        {
-            systemRequestedQuit();
-        }
-        else
-       #endif
-        {
-            if (w->closeCurrentProject())
-            {
-                mainWindows.removeObject (w);
-                updateRecentProjectList();
-            }
-        }
+        if (mainWindowList.askAllWindowsToClose())
+            quit();
     }
 
     //==============================================================================
@@ -293,11 +258,9 @@ public:
             else if (menuItemID >= 300 && menuItemID < 400)
             {
                 OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument (menuItemID - 300);
+                jassert (doc != nullptr);
 
-                MainWindow* w = getApp()->getOrCreateFrontmostWindow();
-                w->makeVisible();
-                w->getProjectContentComponent()->showDocument (doc);
-                getApp()->avoidSuperimposedWindows (w);
+                getApp()->mainWindowList.openDocument (doc);
             }
         }
     };
@@ -389,9 +352,9 @@ public:
     {
         if (makeSureUserHasSelectedModuleFolder())
         {
-            MainWindow* mw = getOrCreateEmptyWindow();
+            MainWindow* mw = mainWindowList.getOrCreateEmptyWindow();
             mw->showNewProjectWizard();
-            avoidSuperimposedWindows (mw);
+            mainWindowList.avoidSuperimposedWindows (mw);
         }
     }
 
@@ -405,60 +368,12 @@ public:
 
     bool openFile (const File& file)
     {
-        for (int j = mainWindows.size(); --j >= 0;)
-        {
-            if (mainWindows.getUnchecked(j)->getProject() != nullptr
-                 && mainWindows.getUnchecked(j)->getProject()->getFile() == file)
-            {
-                mainWindows.getUnchecked(j)->toFront (true);
-                return true;
-            }
-        }
-
-        if (file.hasFileExtension (Project::projectFileExtension))
-        {
-            ScopedPointer <Project> newDoc (new Project (file));
-
-            if (newDoc->loadFrom (file, true))
-            {
-                MainWindow* w = getOrCreateEmptyWindow();
-                w->setProject (newDoc.release());
-                w->makeVisible();
-                avoidSuperimposedWindows (w);
-                return true;
-            }
-        }
-        else if (file.exists())
-        {
-            MainWindow* w = getOrCreateFrontmostWindow();
-
-            const bool ok = w->openFile (file);
-            w->makeVisible();
-            avoidSuperimposedWindows (w);
-            return ok;
-        }
-
-        return false;
+        return mainWindowList.openFile (file);
     }
 
     bool closeAllDocuments (bool askUserToSave)
     {
         return OpenDocumentManager::getInstance()->closeAll (askUserToSave);
-    }
-
-    void updateRecentProjectList()
-    {
-        Array<File> projects;
-
-        for (int i = 0; i < mainWindows.size(); ++i)
-        {
-            MainWindow* mw = mainWindows[i];
-
-            if (mw != nullptr && mw->getProject() != nullptr)
-                projects.add (mw->getProject()->getFile());
-        }
-
-        StoredSettings::getInstance()->setLastProjects (projects);
     }
 
     bool makeSureUserHasSelectedModuleFolder()
@@ -484,7 +399,7 @@ public:
     {
         ModuleList list;
         list.rescan (ModuleList::getDefaultModulesFolder (nullptr));
-        JuceUpdater::show (list, mainWindows[0], message);
+        JuceUpdater::show (list, mainWindowList.windows[0], message);
 
         ModuleList::setLocalModulesFolder (list.getModulesFolder());
         return ModuleList::isJuceOrModulesFolder (list.getModulesFolder());
@@ -492,79 +407,14 @@ public:
 
     ScopedPointer<MainMenuModel> menuModel;
 
-    MainWindow* createNewMainWindow()
-    {
-        MainWindow* mw = new MainWindow();
-        mainWindows.add (mw);
-        mw->restoreWindowPosition();
-        avoidSuperimposedWindows (mw);
-        return mw;
-    }
-
     virtual Component* createProjectContentComponent() const
     {
         return new ProjectContentComponent();
     }
 
+    MainWindowList mainWindowList;
+
 private:
-    OwnedArray <MainWindow> mainWindows;
-
-    MainWindow* getOrCreateFrontmostWindow()
-    {
-        if (mainWindows.size() == 0)
-            return createNewMainWindow();
-
-        for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
-        {
-            MainWindow* mw = dynamic_cast <MainWindow*> (Desktop::getInstance().getComponent (i));
-            if (mainWindows.contains (mw))
-                return mw;
-        }
-
-        return mainWindows.getLast();
-    }
-
-    MainWindow* getOrCreateEmptyWindow()
-    {
-        if (mainWindows.size() == 0)
-            return createNewMainWindow();
-
-        for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
-        {
-            MainWindow* mw = dynamic_cast <MainWindow*> (Desktop::getInstance().getComponent (i));
-            if (mainWindows.contains (mw) && mw->getProject() == nullptr)
-                return mw;
-        }
-
-        return createNewMainWindow();
-    }
-
-    void avoidSuperimposedWindows (MainWindow* const mw)
-    {
-        for (int i = mainWindows.size(); --i >= 0;)
-        {
-            MainWindow* const other = mainWindows.getUnchecked(i);
-
-            const Rectangle<int> b1 (mw->getBounds());
-            const Rectangle<int> b2 (other->getBounds());
-
-            if (mw != other
-                 && std::abs (b1.getX() - b2.getX()) < 3
-                 && std::abs (b1.getY() - b2.getY()) < 3
-                 && std::abs (b1.getRight() - b2.getRight()) < 3
-                 && std::abs (b1.getBottom() - b2.getBottom()) < 3)
-            {
-                int dx = 40, dy = 30;
-
-                if (b1.getCentreX() >= mw->getScreenBounds().getCentreX())   dx = -dx;
-                if (b1.getCentreY() >= mw->getScreenBounds().getCentreY())   dy = -dy;
-
-                mw->setBounds (b1.translated (dx, dy));
-            }
-        }
-    }
-
-    //==============================================================================
     class AsyncQuitRetrier  : public Timer
     {
     public:

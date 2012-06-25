@@ -303,8 +303,7 @@ int DocumentWindow::getDesktopWindowStyleFlags() const
 
 void DocumentWindow::lookAndFeelChanged()
 {
-    int i;
-    for (i = numElementsInArray (titleBarButtons); --i >= 0;)
+    for (int i = numElementsInArray (titleBarButtons); --i >= 0;)
         titleBarButtons[i] = nullptr;
 
     if (! isUsingNativeTitleBar())
@@ -320,7 +319,7 @@ void DocumentWindow::lookAndFeelChanged()
         if ((requiredButtons & closeButton) != 0)
             titleBarButtons[2] = lf.createDocumentWindowButton (closeButton);
 
-        for (i = 0; i < 3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
             if (titleBarButtons[i] != nullptr)
             {
