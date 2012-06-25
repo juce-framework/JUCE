@@ -282,13 +282,6 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
     return juce_isRunningUnderDebugger();
 }
 
-String JUCE_CALLTYPE Process::getCurrentCommandLineParams()
-{
-    return CharacterFunctions::findEndOfToken (CharPointer_UTF16 (GetCommandLineW()),
-                                               CharPointer_UTF16 (L" "),
-                                               CharPointer_UTF16 (L"\"")).findEndOfWhitespace();
-}
-
 static void* currentModuleHandle = nullptr;
 
 void* Process::getCurrentModuleInstanceHandle() noexcept

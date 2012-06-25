@@ -3060,6 +3060,30 @@ String SystemClipboard::getTextFromClipboard()
 }
 
 //==============================================================================
+String JUCE_CALLTYPE JUCEApplication::getCommandLineParameters()
+{
+    return CharacterFunctions::findEndOfToken (CharPointer_UTF16 (GetCommandLineW()),
+                                               CharPointer_UTF16 (L" "),
+                                               CharPointer_UTF16 (L"\"")).findEndOfWhitespace();
+}
+
+StringArray JUCE_CALLTYPE JUCEApplication::getCommandLineParameterArray()
+{
+    StringArray s;
+
+    int argc = 0;
+    LPWSTR* const argv = CommandLineToArgvW (GetCommandLineW(), &argc);
+
+    if (argv != nullptr)
+    {
+        s = StringArray (argv + 1, argc - 1);
+        LocalFree (argv);
+    }
+
+    return s;
+}
+
+//==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
     if (enableOrDisable)
