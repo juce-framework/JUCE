@@ -28,7 +28,7 @@
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 
 //==============================================================================
-Component* SourceCodeDocument::createEditor()       { return SourceCodeEditor::createFor (this, *codeDoc); }
+Component* SourceCodeDocument::createEditor()       { return SourceCodeEditor::createFor (this, codeDoc); }
 
 
 //==============================================================================

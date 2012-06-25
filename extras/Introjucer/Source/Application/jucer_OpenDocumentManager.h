@@ -125,7 +125,6 @@ public:
     SourceCodeDocument (Project* project_, const File& file_)
         : modDetector (file_), project (project_)
     {
-        codeDoc = new CodeDocument();
         reloadFromFile();
     }
 
@@ -145,7 +144,7 @@ public:
     String getName() const                              { return getFile().getFileName(); }
     String getType() const                              { return getFile().getFileExtension() + " file"; }
     File getFile() const                                { return modDetector.getFile(); }
-    bool needsSaving() const                            { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
+    bool needsSaving() const                            { return codeDoc.hasChangedSinceSavePoint(); }
     bool hasFileBeenModifiedExternally()                { return modDetector.hasBeenModified(); }
     void fileHasBeenRenamed (const File& newFile)       { modDetector.fileHasBeenRenamed (newFile); }
 
@@ -156,21 +155,24 @@ public:
         ScopedPointer <InputStream> in (modDetector.getFile().createInputStream());
 
         if (in != nullptr)
-            codeDoc->loadFromStream (*in);
+            codeDoc.loadFromStream (*in);
     }
 
     bool save()
     {
         TemporaryFile temp (modDetector.getFile());
-        ScopedPointer <FileOutputStream> out (temp.getFile().createOutputStream());
 
-        if (out == nullptr || ! codeDoc->writeToStream (*out))
-            return false;
+        {
+            FileOutputStream fo (temp.getFile());
 
-        out = nullptr;
+            if (! (fo.openedOk() && codeDoc.writeToStream (fo)))
+                return false;
+        }
+
         if (! temp.overwriteTargetFileWithTemporary())
             return false;
 
+        codeDoc.setSavePoint();
         modDetector.updateHash();
         return true;
     }
@@ -180,7 +182,7 @@ public:
 
 protected:
     FileModificationDetector modDetector;
-    ScopedPointer <CodeDocument> codeDoc;
+    CodeDocument codeDoc;
     Project* project;
 };
 
