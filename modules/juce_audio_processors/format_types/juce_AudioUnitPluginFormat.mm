@@ -568,10 +568,34 @@ public:
         const ScopedLock sl (lock);
 
         if (audioUnit != 0 && isPositiveAndBelow (index, parameterIds.size()))
+        {
             AudioUnitSetParameter (audioUnit,
                                    (UInt32) parameterIds.getUnchecked (index),
                                    kAudioUnitScope_Global, 0,
                                    newValue, 0);
+
+            sendParameterChangeEvent (index);
+        }
+    }
+
+    void sendParameterChangeEvent (int index)
+    {
+        jassert (audioUnit != 0 && isPositiveAndBelow (index, parameterIds.size()));
+
+        AudioUnitEvent ev;
+        ev.mEventType                        = kAudioUnitEvent_ParameterValueChange;
+        ev.mArgument.mParameter.mAudioUnit   = audioUnit;
+        ev.mArgument.mParameter.mParameterID = (UInt32) parameterIds.getUnchecked (index);
+        ev.mArgument.mParameter.mScope       = kAudioUnitScope_Global;
+        ev.mArgument.mParameter.mElement     = 0;
+
+        AUEventListenerNotify (nullptr, nullptr, &ev);
+    }
+
+    void sendAllParametersChangedEvents()
+    {
+        for (int i = 0; i < parameterIds.size(); ++i)
+            sendParameterChangeEvent (i);
     }
 
     const String getParameterName (int index)
@@ -647,6 +671,8 @@ public:
 
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
                               kAudioUnitScope_Global, 0, &current, sizeof (AUPreset));
+
+        sendAllParametersChangedEvents();
     }
 
     const String getProgramName (int index)
@@ -736,10 +762,14 @@ public:
         CFRelease (stream);
 
         if (propertyList != 0)
+        {
             AudioUnitSetProperty (audioUnit,
                                   kAudioUnitProperty_ClassInfo,
                                   kAudioUnitScope_Global,
                                   0, &propertyList, sizeof (propertyList));
+
+            sendAllParametersChangedEvents();
+        }
     }
 
     void refreshParameterListFromPlugin()
