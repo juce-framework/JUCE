@@ -1129,7 +1129,7 @@ const char* jucer_WindowTemplate_h = (const char*) temp_613d4455;
 const char* getNamedResource (const char*, int&) throw();
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
 {
-    int hash = 0;
+    unsigned int hash = 0;
     if (resourceNameUTF8 != 0)
         while (*resourceNameUTF8 != 0)
             hash = 31 * hash + *resourceNameUTF8++;

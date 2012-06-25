@@ -306,20 +306,6 @@ String RolloverHelpComp::findTip (Component* c)
 }
 
 //==============================================================================
-PropertyPanelWithTooltips::PropertyPanelWithTooltips()
-{
-    addAndMakeVisible (&panel);
-    addAndMakeVisible (&rollover);
-}
-
-void PropertyPanelWithTooltips::resized()
-{
-    panel.setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
-    rollover.setBounds (3, panel.getBottom() - 50, getWidth() - 6,
-                        getHeight() - (panel.getBottom() - 50) - 4);
-}
-
-//==============================================================================
 FloatingLabelComponent::FloatingLabelComponent()
     : font (10.0f)
 {

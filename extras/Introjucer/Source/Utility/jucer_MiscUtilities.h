@@ -75,18 +75,6 @@ private:
 };
 
 //==============================================================================
-class PropertyPanelWithTooltips  : public Component
-{
-public:
-    PropertyPanelWithTooltips();
-
-    void resized();
-
-    PropertyPanel panel;
-    RolloverHelpComp rollover;
-};
-
-//==============================================================================
 class PropertyListBuilder
 {
 public:

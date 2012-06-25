@@ -191,19 +191,20 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
         << newLine
         << "}" << newLine;
 
+    header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
+           << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
+           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine;
+
     if (containsAnyImages)
     {
-        header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
-               << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
-               << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
-               << newLine
+        header << newLine
                << "    //==============================================================================" << newLine
                << "    // This class acts as an ImageProvider that will access the BinaryData images" << newLine
                << "    class ImageProvider  : public juce::ComponentBuilder::ImageProvider" << newLine
                << "    {" << newLine
                << "    public:" << newLine
                << "        ImageProvider() noexcept {}" << newLine
-              << newLine
+               << newLine
                << "        juce::Image getImageForIdentifier (const juce::var& imageIdentifier)" << newLine
                << "        {" << newLine
                << "            int dataSize = 0;" << newLine
