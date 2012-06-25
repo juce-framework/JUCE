@@ -36,10 +36,6 @@ public:
     {
     }
 
-    ~ToolbarSpacerComp()
-    {
-    }
-
     bool getToolbarItemSizes (int toolbarThickness, bool /*isToolbarVertical*/,
                               int& preferredSize, int& minSize, int& maxSize)
     {
