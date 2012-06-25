@@ -110,6 +110,9 @@ public:
         tree.setMultiSelectEnabled (false);
         setRoot (createProjectConfigTreeViewRoot (project));
 
+        if (tree.getNumSelectedItems() == 0)
+            tree.getRootItem()->setSelected (true, true);
+
        #if JUCE_MAC || JUCE_WINDOWS
         addAndMakeVisible (&openProjectButton);
         openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
