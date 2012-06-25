@@ -565,6 +565,7 @@ struct ProjectSettingsTreeClasses
         PropertyPanelViewport (Component* content)
         {
             addAndMakeVisible (&viewport);
+            addAndMakeVisible (&rolloverHelp);
             viewport.setViewedComponent (content, true);
         }
 
@@ -579,10 +580,13 @@ struct ProjectSettingsTreeClasses
 
         void resized()
         {
-            viewport.setBounds (getLocalBounds());
+            Rectangle<int> r (getLocalBounds());
+            rolloverHelp.setBounds (r.removeFromBottom (70).reduced (10, 0));
+            viewport.setBounds (r);
         }
 
         Viewport viewport;
+        RolloverHelpComp rolloverHelp;
 
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyPanelViewport);
