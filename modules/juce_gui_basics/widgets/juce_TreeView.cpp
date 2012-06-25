@@ -1741,14 +1741,14 @@ String TreeViewItem::getItemIdentifierString() const
 
 TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifierString)
 {
-    const String thisId (getUniqueName());
+    const String thisId ("/" + getUniqueName());
 
     if (thisId == identifierString)
         return this;
 
     if (identifierString.startsWith (thisId + "/"))
     {
-        const String remainingPath (identifierString.substring (thisId.length() + 1));
+        const String remainingPath (identifierString.substring (thisId.length()));
 
         const bool wasOpen = isOpen();
         setOpen (true);
