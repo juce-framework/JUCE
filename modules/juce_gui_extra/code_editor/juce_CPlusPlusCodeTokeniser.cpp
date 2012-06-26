@@ -583,7 +583,7 @@ CodeEditorComponent::ColourScheme CPlusPlusCodeTokeniser::getDefaultColourScheme
 
     CodeEditorComponent::ColourScheme cs;
 
-    for (int i = 0; i < numElementsInArray (types); ++i)
+    for (int i = 0; i < sizeof (types) / sizeof (types[0]); ++i)  // (NB: numElementsInArray doesn't work here in GCC4.2)
     {
         cs.tokenTypeNames.add (types[i].name);
         cs.tokenColours.add (Colour (types[i].colour));
