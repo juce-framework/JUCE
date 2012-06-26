@@ -26,7 +26,7 @@
             MkTypLibCompatible="true"
             SuppressStartupBanner="true"
             TargetEnvironment="1"
-            TypeLibraryName=".\Debug\JuceDemoPlugin.tlb"
+            TypeLibraryName="$(IntDir)\JuceDemoPlugin.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
             Optimization="0"
@@ -37,10 +37,10 @@
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Debug\JuceDemoPlugin.pch"
-            AssemblerListingLocation=".\Debug\"
-            ObjectFile=".\Debug\"
-            ProgramDataBaseFileName=".\Debug\"
+            PrecompiledHeaderFile="$(IntDir)\JuceDemoPlugin.pch"
+            AssemblerListingLocation="$(IntDir)\"
+            ObjectFile="$(IntDir)\"
+            ProgramDataBaseFileName="$(IntDir)\"
             WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
@@ -48,11 +48,11 @@
             PreprocessorDefinitions="_DEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLinkerTool"
-            OutputFile=".\Debug\JuceDemoPlugin.dll"
+            OutputFile="$(OutDir)\JuceDemoPlugin.dll"
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"
             GenerateDebugInformation="true"
-            ProgramDatabaseFile=".\Debug\JuceDemoPlugin.pdb"
+            ProgramDatabaseFile="$(IntDir)\JuceDemoPlugin.pdb"
             SubSystem="2"
             GenerateManifest="true"
             TargetMachine="1"/>
@@ -61,7 +61,7 @@
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Debug\JuceDemoPlugin.bsc"/>
+            OutputFile="$(IntDir)\JuceDemoPlugin.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
@@ -83,7 +83,7 @@
             MkTypLibCompatible="true"
             SuppressStartupBanner="true"
             TargetEnvironment="1"
-            TypeLibraryName=".\Release\JuceDemoPlugin.tlb"
+            TypeLibraryName="$(IntDir)\JuceDemoPlugin.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
             Optimization="1"
@@ -94,10 +94,10 @@
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Release\JuceDemoPlugin.pch"
-            AssemblerListingLocation=".\Release\"
-            ObjectFile=".\Release\"
-            ProgramDataBaseFileName=".\Release\"
+            PrecompiledHeaderFile="$(IntDir)\JuceDemoPlugin.pch"
+            AssemblerListingLocation="$(IntDir)\"
+            ObjectFile="$(IntDir)\"
+            ProgramDataBaseFileName="$(IntDir)\"
             WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
@@ -105,11 +105,11 @@
             PreprocessorDefinitions="NDEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLinkerTool"
-            OutputFile=".\Release\JuceDemoPlugin.dll"
+            OutputFile="$(OutDir)\JuceDemoPlugin.dll"
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames=""
             GenerateDebugInformation="false"
-            ProgramDatabaseFile=".\Release\JuceDemoPlugin.pdb"
+            ProgramDatabaseFile="$(IntDir)\JuceDemoPlugin.pdb"
             SubSystem="2"
             GenerateManifest="true"
             OptimizeReferences="2"
@@ -120,7 +120,7 @@
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Release\JuceDemoPlugin.bsc"/>
+            OutputFile="$(IntDir)\JuceDemoPlugin.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
@@ -808,6 +808,9 @@
         </Filter>
         <Filter Name="VST">
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.mm"/>
+        </Filter>
+        <Filter Name="AAX">
+          <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.mm"/>
         </Filter>
         <Filter Name="utility">
           <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_CarbonVisibility.h"/>
@@ -1806,7 +1809,6 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Files.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Network.mm"/>
-          <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_ObjCSuffix.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Strings.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_SystemStats.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Threads.mm"/>
@@ -2704,6 +2706,7 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_TextDragAndDropTarget.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h"/>
         </Filter>
         <Filter Name="keyboard">
@@ -4142,6 +4145,7 @@
     </Filter>
     <Filter Name="Juce Library Code">
       <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Wrapper.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_audio_devices\juce_audio_devices.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_audio_formats\juce_audio_formats.cpp"/>
