@@ -195,7 +195,7 @@ public:
         g.setColour (Colours::pink);
         g.fillEllipse ((float) blobX, (float) blobY, 30.0f, 40.0f);
 
-        g.setFont (14.0f, Font::italic);
+        g.setFont (Font (14.0f, Font::italic));
         g.setColour (Colours::black);
 
         g.drawFittedText ("this is a customised menu item (also demonstrating the Timer class)...",

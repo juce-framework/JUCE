@@ -70,7 +70,7 @@ void ItemPreviewComponent::paint (Graphics& g)
                        RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
                        false);
 
-    g.setFont (15.0f, Font::bold);
+    g.setFont (Font (15.0f, Font::bold));
     g.setColour (Colours::white);
     g.drawMultiLineText (facts.joinIntoString ("\n"),
                          10, 15, getWidth() - 16);

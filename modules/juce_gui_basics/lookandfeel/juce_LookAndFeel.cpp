@@ -2448,7 +2448,7 @@ void LookAndFeel::drawTableHeaderColumn (Graphics& g, const String& columnName, 
     }
 
     g.setColour (Colours::black);
-    g.setFont (height * 0.5f, Font::bold);
+    g.setFont (Font (height * 0.5f, Font::bold));
     const int textX = 4;
     g.drawFittedText (columnName, textX, 0, rightOfText - textX, height, Justification::centredLeft, 1);
 }
@@ -2509,7 +2509,7 @@ void LookAndFeel::drawPropertyPanelSectionHeader (Graphics& g, const String& nam
     const int textX = buttonIndent * 2 + buttonSize + 2;
 
     g.setColour (Colours::black);
-    g.setFont (height * 0.7f, Font::bold);
+    g.setFont (Font (height * 0.7f, Font::bold));
     g.drawText (name, textX, 0, width - textX - 4, height, Justification::centredLeft, true);
 }
 

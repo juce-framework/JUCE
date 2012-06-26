@@ -180,10 +180,10 @@ public:
                 else
                     g.setColour (Colours::black);
 
-                g.setFont (height * 0.7f, Font::bold);
+                g.setFont (Font (height * 0.7f, Font::bold));
                 g.drawFittedText (m->uid, height, 0, 200, height, Justification::centredLeft, 1);
 
-                g.setFont (height * 0.55f, Font::italic);
+                g.setFont (Font (height * 0.55f, Font::italic));
                 g.drawText (m->name, height + 200, 0, width - height - 200, height, Justification::centredLeft, true);
             }
         }
@@ -547,7 +547,7 @@ struct ProjectSettingsTreeClasses
             g.setColour (Colours::black.withAlpha (0.4f));
             g.drawRect (0, 28, getWidth(), getHeight() - 38);
 
-            g.setFont (14.0f, Font::bold);
+            g.setFont (Font (14.0f, Font::bold));
             g.setColour (Colours::black);
             g.drawFittedText (getName(), 12, 0, getWidth() - 16, 26, Justification::bottomLeft, 1);
         }
