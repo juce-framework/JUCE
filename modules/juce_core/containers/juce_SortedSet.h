@@ -225,29 +225,29 @@ public:
         @param elementToLookFor   the value or object to look for
         @returns                  the index of the object, or -1 if it's not found
     */
-    int indexOf (const ElementType elementToLookFor) const noexcept
+    int indexOf (const ElementType& elementToLookFor) const noexcept
     {
         const ScopedLockType lock (data.getLock());
 
-        int start = 0;
-        int end_ = data.size();
+        int s = 0;
+        int e = data.size();
 
         for (;;)
         {
-            if (start >= end_)
+            if (s >= e)
                 return -1;
 
-            if (elementToLookFor == data.getReference (start))
-                return start;
+            if (elementToLookFor == data.getReference (s))
+                return s;
 
-            const int halfway = (start + end_) >> 1;
+            const int halfway = (s + e) / 2;
 
-            if (halfway == start)
+            if (halfway == s)
                 return -1;
             else if (elementToLookFor < data.getReference (halfway))
-                end_ = halfway;
+                e = halfway;
             else
-                start = halfway;
+                s = halfway;
         }
     }
 
@@ -256,30 +256,9 @@ public:
         @param elementToLookFor     the value or object to look for
         @returns                    true if the item is found
     */
-    bool contains (const ElementType elementToLookFor) const noexcept
+    bool contains (const ElementType& elementToLookFor) const noexcept
     {
-        const ScopedLockType lock (getLock());
-
-        int start = 0;
-        int end_ = data.size();
-
-        for (;;)
-        {
-            if (start >= end_)
-                return false;
-
-            if (elementToLookFor == data.getReference (start))
-                return true;
-
-            const int halfway = (start + end_) >> 1;
-
-            if (halfway == start)
-                return false;
-            else if (elementToLookFor < data.getReference (halfway))
-                end_ = halfway;
-            else
-                start = halfway;
-        }
+        return indexOf (elementToLookFor) >= 0;
     }
 
     //==============================================================================
@@ -288,41 +267,35 @@ public:
         @param newElement       the new object to add to the set
         @see set, insert, addIfNotAlreadyThere, addSorted, addSet, addArray
     */
-    void add (const ElementType newElement) noexcept
+    void add (const ElementType& newElement) noexcept
     {
         const ScopedLockType lock (getLock());
 
-        int start = 0;
-        int end_ = data.size();
+        int s = 0;
+        int e = data.size();
 
-        for (;;)
+        while (s < e)
         {
-            if (start >= end_)
+            if (newElement == data.getReference (s))
+                return;
+
+            const int halfway = (s + e) / 2;
+            const bool isBeforeHalfway = (newElement < data.getReference (halfway));
+
+            if (halfway == s)
             {
-                jassert (start <= end_);
-                data.insert (start, newElement);
-                break;
-            }
-
-            if (newElement == data.getReference (start))
-                break;
-
-            const int halfway = (start + end_) >> 1;
-
-            if (halfway == start)
-            {
-                if (newElement < data.getReference (halfway))
-                    data.insert (start, newElement);
-                else
-                    data.insert (start + 1, newElement);
+                if (! isBeforeHalfway)
+                    ++s;
 
                 break;
             }
-            else if (newElement < data.getReference (halfway))
-                end_ = halfway;
+            else if (isBeforeHalfway)
+                e = halfway;
             else
-                start = halfway;
+                s = halfway;
         }
+
+        data.insert (s, newElement);
     }
 
     /** Adds elements from an array to this set.
