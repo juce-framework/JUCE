@@ -20,6 +20,7 @@ static const unsigned char temp_43731c40[] =
 "copyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\r\n"
 "copyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\r\n"
 "copyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\r\n"
+"copyAAX=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'GetEffectDescriptions' | wc -l`\r\n"
 "\r\n"
 "if [ $copyAU -gt 0 ]; then\r\n"
 "  echo \"Copying to AudioUnit folder...\"\r\n"
@@ -53,6 +54,30 @@ static const unsigned char temp_43731c40[] =
 "  fi\r\n"
 "\r\n"
 "  cp -r \"$original\" \"$RTAS\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyAAX -gt 0 ]; then\r\n"
+"  echo \"Copying to AAX folder...\"\r\n"
+"\r\n"
+"  if [ -d \"/Applications/ProTools_3PDev/Plug-Ins\" ]; then\r\n"
+"    AAX1=\"/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
+"\r\n"
+"    if [ -d \"$AAX1\" ]; then\r\n"
+"      rm -r \"$AAX1\"\r\n"
+"    fi\r\n"
+"\r\n"
+"    cp -r \"$original\" \"$AAX1\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  if [ -d \"/Library/Application Support/Avid/Audio/Plug-Ins\" ]; then\r\n"
+"    AAX2=\"/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\r\n"
+"\r\n"
+"    if [ -d \"$AAX2\" ]; then\r\n"
+"      rm -r \"$AAX2\"\r\n"
+"    fi\r\n"
+"\r\n"
+"    cp -r \"$original\" \"$AAX2\"\r\n"
+"  fi\r\n"
 "fi\r\n";
 
 const char* AudioPluginXCodeScript_txt = (const char*) temp_43731c40;
@@ -1137,7 +1162,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
     switch (hash)
     {
         case 0x44be9398:
-        case 0x2981a553:  numBytes = 1449; return AudioPluginXCodeScript_txt;
+        case 0x2981a553:  numBytes = 2112; return AudioPluginXCodeScript_txt;
         case 0x950fd7dd:
         case 0xa6cfe0e2:  numBytes = 14724; return brushed_aluminium_png;
         case 0xabd76fe2:

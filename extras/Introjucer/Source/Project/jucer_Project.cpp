@@ -78,9 +78,14 @@ void Project::setTitle (const String& newTitle)
     getMainGroup().getNameValue() = newTitle;
 }
 
+String Project::getTitle() const
+{
+    return projectRoot.getChildWithName (Tags::projectMainGroup) [Ids::name];
+}
+
 String Project::getDocumentTitle()
 {
-    return getProjectName().toString();
+    return getTitle();
 }
 
 void Project::updateProjectSettings()
@@ -337,7 +342,7 @@ const ProjectType& Project::getProjectType() const
 //==============================================================================
 void Project::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getProjectName(), "Project Name", 256, false),
+    props.add (new TextPropertyComponent (getProjectNameValue(), "Project Name", 256, false),
                "The name of the project.");
 
     props.add (new TextPropertyComponent (getVersionValue(), "Project Version", 16, false),

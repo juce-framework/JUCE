@@ -573,7 +573,7 @@ public:
         Graphics g (icon);
         g.fillAll (Colours::lightblue);
         g.setColour (Colours::black);
-        g.setFont ((float) icon.getHeight(), Font::bold);
+        g.setFont (Font ((float) icon.getHeight(), Font::bold));
         g.drawText ("j", 0, 0, icon.getWidth(), icon.getHeight(), Justification::centred, false);
 
         setIconImage (icon);

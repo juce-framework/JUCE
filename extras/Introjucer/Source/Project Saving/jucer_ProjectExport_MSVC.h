@@ -73,6 +73,7 @@ protected:
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
     Value getLibraryType()              { return getSetting (Ids::libraryType); }
+    String getLibraryString() const     { return getSettingString (Ids::libraryType); }
     bool isLibraryDLL() const           { return msvcIsDLL || (projectType.isLibrary() && (int) settings [Ids::libraryType] == 2); }
 
     static String prependIfNotAbsolute (const String& file, const char* prefix)
@@ -89,7 +90,7 @@ protected:
     void updateOldSettings()
     {
         {
-            const String oldStylePrebuildCommand (getSetting (Ids::prebuildCommand).toString());
+            const String oldStylePrebuildCommand (getSettingString (Ids::prebuildCommand));
             settings.removeProperty (Ids::prebuildCommand, nullptr);
 
             if (oldStylePrebuildCommand.isNotEmpty())
@@ -98,7 +99,7 @@ protected:
         }
 
         {
-            const String oldStyleLibName (getSetting ("libraryName_Debug").toString());
+            const String oldStyleLibName (getSettingString ("libraryName_Debug"));
             settings.removeProperty ("libraryName_Debug", nullptr);
 
             if (oldStyleLibName.isNotEmpty())
@@ -108,7 +109,7 @@ protected:
         }
 
         {
-            const String oldStyleLibName (getSetting ("libraryName_Release").toString());
+            const String oldStyleLibName (getSettingString ("libraryName_Release"));
             settings.removeProperty ("libraryName_Release", nullptr);
 
             if (oldStyleLibName.isNotEmpty())
@@ -451,9 +452,9 @@ protected:
            << "    BEGIN" << newLine;
 
         writeRCValue (mo, "CompanyName", project.getCompanyName().toString());
-        writeRCValue (mo, "FileDescription", project.getProjectName().toString());
+        writeRCValue (mo, "FileDescription", project.getTitle());
         writeRCValue (mo, "FileVersion", version);
-        writeRCValue (mo, "ProductName", project.getProjectName().toString());
+        writeRCValue (mo, "ProductName", project.getTitle());
         writeRCValue (mo, "ProductVersion", version);
 
         mo << "    END" << newLine

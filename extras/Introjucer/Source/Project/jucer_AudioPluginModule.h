@@ -51,6 +51,7 @@ namespace
     Value getPluginAUCocoaViewClassName (Project& project)        { return project.getProjectValue ("pluginAUViewClass"); }
     Value getPluginAUMainType (Project& project)                  { return project.getProjectValue ("pluginAUMainType"); }
     Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
+    Value getPluginAAXCategory (Project& project)                 { return project.getProjectValue ("pluginAAXCategory"); }
 
     String getPluginRTASCategoryCode (Project& project)
     {
@@ -135,7 +136,7 @@ namespace
         flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
         flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AAXPluginId",                 "JucePlugin_PluginCode");
-        flags.set ("JucePlugin_AAXCategory",                 "AAX_ePlugInCategory_None");
+        flags.set ("JucePlugin_AAXCategory",                 getPluginAAXCategory (project).toString());
 
         MemoryOutputStream mem;
 

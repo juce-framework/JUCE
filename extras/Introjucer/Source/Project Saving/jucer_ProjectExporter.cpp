@@ -136,7 +136,7 @@ ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
       settings (settings_),
       project (project_),
       projectType (project_.getProjectType()),
-      projectName (project_.getProjectName().toString()),
+      projectName (project_.getTitle()),
       projectFolder (project_.getFile().getParentDirectory()),
       modulesGroup (nullptr)
 {

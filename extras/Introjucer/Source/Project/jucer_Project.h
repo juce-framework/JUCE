@@ -55,7 +55,8 @@ public:
 
     //==============================================================================
     ValueTree getProjectRoot() const                    { return projectRoot; }
-    Value getProjectName()                              { return getMainGroup().getNameValue(); }
+    String getTitle() const;
+    Value getProjectNameValue()                         { return getMainGroup().getNameValue(); }
     String getProjectFilenameRoot()                     { return File::createLegalFileName (getDocumentTitle()); }
     String getProjectUID() const                        { return projectRoot [ComponentBuilder::idProperty]; }
 
@@ -84,7 +85,7 @@ public:
     String getVersionAsHex() const;
 
     Value getBundleIdentifier()                         { return getProjectValue (Ids::bundleIdentifier); }
-    String getDefaultBundleIdentifier()                 { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
+    String getDefaultBundleIdentifier()                 { return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getTitle(), false, true, false); }
 
     Value getAAXIdentifier()                            { return getProjectValue (Ids::aaxIdentifier); }
     String getDefaultAAXIdentifier()                    { return getDefaultBundleIdentifier(); }

@@ -898,7 +898,7 @@ struct ProjectSettingsTreeClasses
 
         bool isRoot() const                     { return true; }
         String getRenamingName() const          { return getDisplayName(); }
-        String getDisplayName() const           { return project.getProjectName().toString(); }
+        String getDisplayName() const           { return project.getTitle(); }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
         const Drawable* getIcon() const         { return project.getMainGroup().getIcon(); }

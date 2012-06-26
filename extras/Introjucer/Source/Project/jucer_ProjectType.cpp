@@ -173,13 +173,13 @@ public:
 
     void setMissingProjectProperties (Project& project) const
     {
-        const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (project.getProjectName().toString(), false, true, false));
+        const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (project.getTitle(), false, true, false));
 
         setValueIfVoid (shouldBuildVST (project), true);
         setValueIfVoid (shouldBuildAU (project),  true);
 
-        setValueIfVoid (getPluginName (project),                   project.getProjectName().toString());
-        setValueIfVoid (getPluginDesc (project),                   project.getProjectName().toString());
+        setValueIfVoid (getPluginName (project),                   project.getTitle());
+        setValueIfVoid (getPluginDesc (project),                   project.getTitle());
         setValueIfVoid (getPluginManufacturer (project),           "yourcompany");
         setValueIfVoid (getPluginManufacturerCode (project),       "Manu");
         setValueIfVoid (getPluginCode (project),                   "Plug");
@@ -195,6 +195,7 @@ public:
         setValueIfVoid (getPluginRTASCategory (project),           String::empty);
         setValueIfVoid (project.getBundleIdentifier(),             project.getDefaultBundleIdentifier());
         setValueIfVoid (project.getAAXIdentifier(),                project.getDefaultAAXIdentifier());
+        setValueIfVoid (getPluginAAXCategory (project),            "AAX_ePlugInCategory_Dynamics");
     }
 
     void createPropertyEditors (Project& project, PropertyListBuilder& props) const
@@ -205,8 +206,8 @@ public:
                    "Whether the project should produce an AudioUnit plugin.");
         props.add (new BooleanPropertyComponent (shouldBuildRTAS (project), "Build RTAS", "Enabled"),
                    "Whether the project should produce an RTAS plugin.");
-//        props.add (new BooleanPropertyComponent (shouldBuildAAX (project), "Build AAX", "Enabled"),
-//                   "Whether the project should produce an AAX plugin.");
+        props.add (new BooleanPropertyComponent (shouldBuildAAX (project), "Build AAX", "Enabled"),
+                   "Whether the project should produce an AAX plugin.");
 
         props.add (new TextPropertyComponent (getPluginName (project), "Plugin Name", 128, false),
                    "The name of your plugin (keep it short!)");
@@ -258,6 +259,9 @@ public:
                    "ePlugInCategory_PitchShift, ePlugInCategory_Reverb, ePlugInCategory_Delay, "
                    "ePlugInCategory_Modulation, ePlugInCategory_Harmonic, ePlugInCategory_NoiseReduction, "
                    "ePlugInCategory_Dither, ePlugInCategory_SoundField");
+
+        props.add (new TextPropertyComponent (getPluginAAXCategory (project), "Plugin AAX Category", 64, false),
+                   "This is one of the RTAS categories from the AAX_EPlugInCategory enum");
     }
 
     void prepareExporter (ProjectExporter& exporter) const
@@ -315,7 +319,7 @@ public:
             d->createNewChildElement ("array")
                ->createNewChildElement ("string")->setText (exeName);
             d->createNewChildElement ("key")->setText ("WebPluginTypeDescription");
-            d->createNewChildElement ("string")->setText (exporter.getProject().getProjectName().toString());
+            d->createNewChildElement ("string")->setText (exporter.getProject().getTitle());
 
             exporter.xcodeExtraPListEntries.add (mimeTypesKey);
             exporter.xcodeExtraPListEntries.add (mimeTypesEntry);

@@ -231,7 +231,7 @@ namespace
         }
 
         std::cout << "Project file: " << projectFile.getFullPathName() << std::endl
-                  << "Name: " << proj.getProjectName().toString() << std::endl
+                  << "Name: " << proj.getTitle() << std::endl
                   << "UID: " << proj.getProjectUID() << std::endl;
 
         const int numModules = proj.getNumModules();
