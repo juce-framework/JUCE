@@ -324,7 +324,7 @@ void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 {
     if (defaultSans != newName)
     {
-        Typeface::clearTypefaceCache()
+        Typeface::clearTypefaceCache();
         defaultSans = newName;
     }
 }
