@@ -322,7 +322,11 @@ const Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)
 
 void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 {
-    defaultSans = newName;
+    if (defaultSans != newName)
+    {
+        Typeface::clearTypefaceCache()
+        defaultSans = newName;
+    }
 }
 
 //==============================================================================

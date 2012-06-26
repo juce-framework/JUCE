@@ -61,6 +61,11 @@ public:
         faces.insertMultiple (-1, CachedFace(), numToCache);
     }
 
+    void clear()
+    {
+        setSize (faces.size());
+    }
+
     Typeface::Ptr findTypefaceFor (const Font& font)
     {
         const String faceName (font.getTypefaceName());
@@ -149,6 +154,11 @@ juce_ImplementSingleton_SingleThreaded (TypefaceCache)
 void Typeface::setTypefaceCacheSize (int numFontsToCache)
 {
     TypefaceCache::getInstance()->setSize (numFontsToCache);
+}
+
+void Typeface::clearTypefaceCache()
+{
+    TypefaceCache::getInstance()->clear();
 }
 
 //==============================================================================

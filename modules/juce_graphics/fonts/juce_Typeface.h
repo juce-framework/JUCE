@@ -126,6 +126,9 @@ public:
     /** Changes the number of fonts that are cached in memory. */
     static void setTypefaceCacheSize (int numFontsToCache);
 
+    /** Clears any fonts that are currently cached in memory. */
+    static void clearTypefaceCache();
+
 protected:
     //==============================================================================
     String name, style;
