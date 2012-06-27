@@ -281,7 +281,6 @@ public:
                 {
                     ChoicePropertyComponent* c = new ChoicePropertyComponent (flags[i]->value, flags[i]->symbol, possibleValues, mappings);
                     c->setTooltip (flags[i]->description);
-                    c->setPreferredHeight (22);
                     props.add (c);
                 }
             }
@@ -644,13 +643,12 @@ struct ProjectSettingsTreeClasses
         void valueTreeChildOrderChanged (ValueTree&) {}
         void valueTreeParentChanged (ValueTree&) {}
 
-        static void updateSizes (Component& comp, PropertyGroup* groups, int numGroups)
+        static void updateSize (Component& comp, PropertyGroup& group)
         {
             const int width = jmax (550, comp.getParentWidth() - 20);
 
             int y = 0;
-            for (int i = 0; i < numGroups; ++i)
-                y += groups[i].updateSize (12, y, width - 12);
+            y += group.updateSize (12, y, width - 12);
 
             comp.setSize (width, y);
         }
@@ -746,7 +744,7 @@ struct ProjectSettingsTreeClasses
                 parentSizeChanged();
             }
 
-            void parentSizeChanged()  { updateSizes (*this, &group, 1); }
+            void parentSizeChanged()  { updateSize (*this, group); }
 
         private:
             PropertyGroup group;
@@ -875,7 +873,7 @@ struct ProjectSettingsTreeClasses
                 parentSizeChanged();
             }
 
-            void parentSizeChanged()  { updateSizes (*this, &group, 1); }
+            void parentSizeChanged()  { updateSize (*this, group); }
 
         private:
             PropertyGroup group;
@@ -884,6 +882,58 @@ struct ProjectSettingsTreeClasses
         };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterItem);
+    };
+
+    //==============================================================================
+    class ModulesItem   : public SettingsItemBase
+    {
+    public:
+        ModulesItem (Project& project_)  : project (project_) {}
+
+        bool isRoot() const                     { return false; }
+        bool canBeSelected() const              { return true; }
+        bool mightContainSubItems()             { return false; }
+        String getUniqueName() const            { return project.getProjectUID() + "_modules"; }
+        String getRenamingName() const          { return getDisplayName(); }
+        String getDisplayName() const           { return "Modules"; }
+        void setName (const String&)            {}
+        bool isMissing()                        { return false; }
+        const Drawable* getIcon() const         { return project.getMainGroup().getIcon(); }
+        void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
+
+    private:
+        Project& project;
+
+        //==============================================================================
+        class SettingsComp  : public Component
+        {
+        public:
+            SettingsComp (Project& project_)   : project (project_)
+            {
+                addAndMakeVisible (&group);
+
+                PropertyListBuilder props;
+                props.add (new ModulesPanel (project));
+                group.setProperties (props);
+                group.setName ("Modules");
+
+                parentSizeChanged();
+            }
+
+            void parentSizeChanged()
+            {
+                updateSize (*this, group);
+            }
+
+        private:
+            Project& project;
+            var lastProjectType;
+            PropertyGroup group;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
+        };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModulesItem);
     };
 
     //==============================================================================
@@ -909,6 +959,8 @@ struct ProjectSettingsTreeClasses
 
         void addSubItems()
         {
+            addSubItem (new ModulesItem (project));
+
             int i = 0;
             for (Project::ExporterIterator exporter (project); exporter.next(); ++i)
                 addSubItem (new ExporterItem (project, exporter.exporter.release(), i));
@@ -971,10 +1023,9 @@ struct ProjectSettingsTreeClasses
             SettingsComp (Project& project_)
                 : project (project_)
             {
-                addAndMakeVisible (&groups[0]);
-                addAndMakeVisible (&groups[1]);
+                addAndMakeVisible (&group);
 
-                createAllPanels();
+                updatePropertyList();
                 project.addChangeListener (this);
             }
 
@@ -985,38 +1036,30 @@ struct ProjectSettingsTreeClasses
 
             void parentSizeChanged()
             {
-                updateSizes (*this, groups, 2);
+                updateSize (*this, group);
             }
 
-            void createAllPanels()
+            void updatePropertyList()
             {
-                {
-                    PropertyListBuilder props;
-                    project.createPropertyEditors (props);
-                    groups[0].setProperties (props);
-                    groups[0].setName ("Project Settings");
-
-                    lastProjectType = project.getProjectTypeValue().getValue();
-                }
-
                 PropertyListBuilder props;
-                props.add (new ModulesPanel (project));
-                groups[1].setProperties (props);
-                groups[1].setName ("Modules");
+                project.createPropertyEditors (props);
+                group.setProperties (props);
+                group.setName ("Project Settings");
 
+                lastProjectType = project.getProjectTypeValue().getValue();
                 parentSizeChanged();
             }
 
             void changeListenerCallback (ChangeBroadcaster*)
             {
                 if (lastProjectType != project.getProjectTypeValue().getValue())
-                    createAllPanels();
+                    updatePropertyList();
             }
 
         private:
             Project& project;
             var lastProjectType;
-            PropertyGroup groups[2];
+            PropertyGroup group;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp);
         };

@@ -209,12 +209,13 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
     for (int i = 0; i < modules.size(); ++i)
         modules.getUnchecked(i)->createPropertyEditors (*this, props);
 
-    props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+    props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, true),
+               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, "
+               "or new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, false),
+    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, true),
                "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
-    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, false),
+    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, true),
                "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
     {
@@ -500,17 +501,12 @@ void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyLi
                "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed "
                "in its default location in the build folder.");
 
-    props.add (new TextPropertyComponent (getHeaderSearchPathValue(), "Header search paths", 16384, false),
-               "Extra header search paths. Use semi-colons to separate multiple paths.");
+    props.addSearchPathProperty (getHeaderSearchPathValue(), "Header search paths", "Extra header search paths.");
+    props.addSearchPathProperty (getLibrarySearchPathValue(), "Extra library search paths", "Extra library search paths.");
 
-    props.add (new TextPropertyComponent (getLibrarySearchPathValue(), "Extra library search paths", 16384, false),
-               "Extra library search paths. Use semi-colons to separate multiple paths.");
-
-    props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate "
-               "the items - to include a space or comma in a definition, precede it with a backslash.");
-
-    props.setPreferredHeight (22);
+    props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, true),
+               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
+               "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 }
 
 StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() const

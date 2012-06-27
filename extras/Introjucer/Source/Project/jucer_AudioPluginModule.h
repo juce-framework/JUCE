@@ -240,6 +240,10 @@ namespace RTASHelpers
             else
                 getRTASFolder (exporter) = "~/SDKs/PT_80_SDK";
         }
+
+        if (exporter.settings [Ids::postbuildCommand].toString().isEmpty())
+            exporter.getSetting (Ids::postbuildCommand) = String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt,
+                                                                            BinaryData::AudioPluginXCodeScript_txtSize);
     }
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
@@ -345,7 +349,7 @@ namespace RTASHelpers
 
                 exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll";
 
-                if (! exporter.getExtraLinkerFlags().toString().contains ("/FORCE:multiple"))
+                if (! exporter.getExtraLinkerFlagsString().contains ("/FORCE:multiple"))
                     exporter.getExtraLinkerFlags() = exporter.getExtraLinkerFlags().toString() + " /FORCE:multiple";
 
                 for (ProjectExporter::ConfigIterator config (exporter); config.next();)

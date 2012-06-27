@@ -2539,8 +2539,8 @@ void LookAndFeel::drawPropertyComponentLabel (Graphics& g, int, int height,
 
 const Rectangle<int> LookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
 {
-    return Rectangle<int> (component.getWidth() / 3, 1,
-                           component.getWidth() - component.getWidth() / 3 - 1, component.getHeight() - 3);
+    const int textW = jmin (200, component.getWidth() / 3);
+    return Rectangle<int> (textW, 1, component.getWidth() - textW - 1, component.getHeight() - 3);
 }
 
 //==============================================================================

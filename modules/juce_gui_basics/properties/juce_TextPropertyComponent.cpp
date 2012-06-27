@@ -105,7 +105,7 @@ void TextPropertyComponent::createEditor (const int maxNumChars, const bool isMu
     if (isMultiLine)
     {
         textEditor->setJustificationType (Justification::topLeft);
-        preferredHeight = 120;
+        preferredHeight = 100;
     }
 }
 

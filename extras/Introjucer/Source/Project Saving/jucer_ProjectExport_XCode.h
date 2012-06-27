@@ -75,10 +75,13 @@ public:
 
     //==============================================================================
     Value getPListToMergeValue()            { return getSetting ("customPList"); }
-    String getPListToMergeString() const    { return settings ["customPList"]; }
+    String getPListToMergeString() const    { return settings   ["customPList"]; }
 
     Value getExtraFrameworksValue()         { return getSetting (Ids::extraFrameworks); }
-    String getExtraFrameworksString() const { return settings [Ids::extraFrameworks]; }
+    String getExtraFrameworksString() const { return settings   [Ids::extraFrameworks]; }
+
+    Value  getPostBuildScriptValue()        { return getSetting (Ids::postbuildCommand); }
+    String getPostBuildScript() const       { return settings   [Ids::postbuildCommand]; }
 
     int getLaunchPreferenceOrderForCurrentOS()
     {
@@ -138,6 +141,9 @@ public:
             props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type",
                                                     StringArray (libTypes), Array<var> (libTypeValues)));
         }
+
+        props.add (new TextPropertyComponent (getPostBuildScriptValue(), "Post-build shell script", 32768, true),
+                   "Some shell-script that will be run after a build completes.");
     }
 
     void launchProject()
@@ -614,14 +620,6 @@ private:
     StringArray getTargetSettings (const XcodeBuildConfiguration& config) const
     {
         StringArray s;
-
-        {
-            String srcRoot = rebaseFromProjectFolderToBuildTarget (RelativePath (".", RelativePath::projectFolder)).toUnixStyle();
-            if (srcRoot.endsWith ("/."))
-                srcRoot = srcRoot.dropLastCharacters (2);
-
-            s.add ("SRCROOT = " + srcRoot.quoted());
-        }
 
         const String arch (config.getMacArchitecture());
         if (arch == osxArch_Native)                s.add ("ARCHS = \"$(ARCHS_NATIVE)\"");
@@ -1131,15 +1129,15 @@ private:
 
     void addShellScriptPhase() const
     {
-        if (xcodeShellScript.isNotEmpty())
+        if (getPostBuildScript().isNotEmpty())
         {
             ValueTree* const v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
-            v->setProperty (Ids::name, xcodeShellScriptTitle, 0);
+            v->setProperty (Ids::name, "Post-build script", 0);
             v->setProperty ("shellPath", "/bin/sh", 0);
-            v->setProperty ("shellScript", xcodeShellScript.replace ("\\", "\\\\")
-                                                           .replace ("\"", "\\\"")
-                                                           .replace ("\r\n", "\\n")
-                                                           .replace ("\n", "\\n"), 0);
+            v->setProperty ("shellScript", getPostBuildScript().replace ("\\", "\\\\")
+                                                               .replace ("\"", "\\\"")
+                                                               .replace ("\r\n", "\\n")
+                                                               .replace ("\n", "\\n"), 0);
         }
     }
 
