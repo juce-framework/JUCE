@@ -99,7 +99,7 @@ void GroupTreeViewItem::showDocument()
 {
     ProjectContentComponent* pcc = getProjectContentComponent();
 
-    if (pcc != nullptr && ! isRoot())
+    if (pcc != nullptr)
         pcc->setEditorComponent (new GroupInformationComponent (item), nullptr);
 }
 
