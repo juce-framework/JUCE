@@ -815,12 +815,11 @@ private:
     void recalculateIfNeeded();
     void moveSelectedRow (int delta);
     void updateButtonUnderMouse (const MouseEvent&);
-    void showDragHighlight (TreeViewItem*, int insertIndex, int x, int y) noexcept;
+    struct InsertPoint;
+    void showDragHighlight (const InsertPoint&) noexcept;
     void hideDragHighlight() noexcept;
     void handleDrag (const StringArray& files, const SourceDetails&);
     void handleDrop (const StringArray& files, const SourceDetails&);
-    TreeViewItem* getInsertPosition (int& x, int& y, int& insertIndex,
-                                     const StringArray& files, const SourceDetails&) const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
 };

@@ -553,7 +553,10 @@ bool ComponentPeer::handleDragDrop (const ComponentPeer::DragInfo& info)
                     return true;
             }
 
-            (new DragHelpers::AsyncDropMessage (targetComp, info))->post();
+            ComponentPeer::DragInfo info2 (info);
+            info2.position = targetComp->getLocalPoint (component, info.position);
+
+            (new DragHelpers::AsyncDropMessage (targetComp, info2))->post();
             return true;
         }
     }
