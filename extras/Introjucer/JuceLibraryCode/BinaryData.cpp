@@ -294,20 +294,6 @@ static const unsigned char temp_9aa09877[] =
 
 const char* brushed_aluminium_png = (const char*) temp_9aa09877;
 
-//================== cog_icon.svg ==================
-static const unsigned char temp_8136acca[] =
-"<svg width=\"155\" height=\"155\">\n"
-"  <g>\n"
-"    <path\n"
-"       style=\"color:#000000;fill:#889977;fill-opacity:1;fill-rule:nonzero;stroke:#333333;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;\"\n"
-"       d=\"m 336,565 c -1,0 -3,0 -5,0 l -0,0 -4,20 c -6,1 -12,4 -17,7 L 294,581 c -4,4 -8,8 -12,12 l 12,17 c -3,5 -6,11 -8,18 0,0 0,0 0,0 l -20,3 c -0,3 -1,6 0,9 0,3 0,5 0,7 l 20,3 c 1,7 4,13 8,20 l -12,16 c 3,4 7,8 12,12 l 17,-12 c 6,4 13,7 20,8 l 3"
-",20 c 2,0 4,0 7,0 3,0 6,0 10,0 l 4,-20 c 7,-2 13,-5 19,-9 l 17,12 c 4,-4 8,-8 12,-12 l -12,-17 c 3,-6 6,-12 7,-18 l 20,-3 c 0,-2 0,-4 0,-6 0,-4 0,-7 -1,-11 l -21,-4 c -2,-6 -4,-12 -8,-17 l 12,-17 c -4,-5 -8,-8 -13,-12 l -17,12 c -5,-3 -10,-5 -16,-7 l"
-" -3,-20 c -3,0 -6,0 -9,0 -1,0 -2,0 -2,0 0,0 -1,0 -1,0 0,0 0,0 0,0 z m 3,52 c 0,0 1,0 1,0 13,0 23,10 23,23 0,13 -10,23 -23,23 -13,0 -23,-10 -23,-23 0,-12 9,-22 22,-23 z\"/>\n"
-"  </g>\n"
-"</svg>";
-
-const char* cog_icon_svg = (const char*) temp_8136acca;
-
 //================== juce_icon.png ==================
 static const unsigned char temp_ee6f0c0f[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,9,112,72,89,115,0,0,11,19,0,0,11,19,1,0,154,156,24,0,0,0,4,103,65,77,65,0,0,177,142,124,251,81,147,0,0,0,32,99,72,82,77,0,0,122,37,0,0,128,131,0,0,249,255,
@@ -1165,8 +1151,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x2981a553:  numBytes = 2112; return AudioPluginXCodeScript_txt;
         case 0x950fd7dd:
         case 0xa6cfe0e2:  numBytes = 14724; return brushed_aluminium_png;
-        case 0xabd76fe2:
-        case 0x0e0b94aa:  numBytes = 915; return cog_icon_svg;
         case 0x154a7275:
         case 0xcd05ca61:  numBytes = 19826; return juce_icon_png;
         case 0x27c5a93a:

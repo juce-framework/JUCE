@@ -113,7 +113,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
     {
-        PropertiesFile& settings = StoredSettings::getInstance()->getProps();
+        PropertiesFile& settings = getAppProperties();
 
         if (project != nullptr)
             project->removeChangeListener (this);

@@ -13,9 +13,6 @@ namespace BinaryData
     extern const char*   brushed_aluminium_png;
     const int            brushed_aluminium_pngSize = 14724;
 
-    extern const char*   cog_icon_svg;
-    const int            cog_icon_svgSize = 915;
-
     extern const char*   juce_icon_png;
     const int            juce_icon_pngSize = 19826;
 

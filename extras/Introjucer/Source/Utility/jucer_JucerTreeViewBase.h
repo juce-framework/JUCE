@@ -125,8 +125,7 @@ public:
         tree.setRootItem (root);
         tree.getRootItem()->setOpen (true);
 
-        const ScopedPointer<XmlElement> treeOpenness (StoredSettings::getInstance()->getProps()
-                                                        .getXmlValue (opennessStateKey));
+        const ScopedPointer<XmlElement> treeOpenness (getAppProperties().getXmlValue (opennessStateKey));
         if (treeOpenness != nullptr)
             tree.restoreOpennessState (*treeOpenness, true);
     }
@@ -136,7 +135,7 @@ public:
         const ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
 
         if (opennessState != nullptr)
-            StoredSettings::getInstance()->getProps().setValue (opennessStateKey, opennessState);
+            getAppProperties().setValue (opennessStateKey, opennessState);
     }
 
     void deleteSelectedItems()

@@ -1332,7 +1332,6 @@
   <ItemGroup>
     <None Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt"/>
     <None Include="..\..\Source\BinaryData\brushed_aluminium.png"/>
-    <None Include="..\..\Source\BinaryData\cog_icon.svg"/>
     <None Include="..\..\Source\BinaryData\juce_icon.png"/>
     <None Include="..\..\..\..\modules\juce_core\juce_module_info"/>
     <None Include="..\..\..\..\modules\juce_cryptography\juce_module_info"/>

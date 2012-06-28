@@ -146,7 +146,7 @@ File ModuleList::getLocalModulesFolder (Project* project)
 {
     File defaultJuceFolder (getDefaultModulesFolder (project));
 
-    File f (StoredSettings::getInstance()->getProps().getValue ("lastJuceFolder", defaultJuceFolder.getFullPathName()));
+    File f (getAppProperties().getValue ("lastJuceFolder", defaultJuceFolder.getFullPathName()));
     f = getModulesFolderForJuceOrModulesFolder (f);
 
     if ((! ModuleList::isModulesFolder (f)) && ModuleList::isModulesFolder (defaultJuceFolder))
@@ -163,7 +163,7 @@ File ModuleList::getModuleFolder (const String& uid) const
 void ModuleList::setLocalModulesFolder (const File& file)
 {
     //jassert (FileHelpers::isJuceFolder (file));
-    StoredSettings::getInstance()->getProps().setValue ("lastJuceFolder", file.getFullPathName());
+    getAppProperties().setValue ("lastJuceFolder", file.getFullPathName());
 }
 
 struct ModuleSorter

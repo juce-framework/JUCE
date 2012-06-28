@@ -39,10 +39,9 @@ public:
     StoredSettings();
     ~StoredSettings();
 
-    juce_DeclareSingleton (StoredSettings, false);
-
     PropertiesFile& getProps();
     void flush();
+    void reload();
 
     //==============================================================================
     RecentlyOpenedFilesList recentFiles;
@@ -60,27 +59,48 @@ public:
     public:
         ColourSelectorWithSwatches() {}
 
-        int getNumSwatches() const                                      { return StoredSettings::getInstance()->swatchColours.size(); }
-        Colour getSwatchColour (int index) const                        { return StoredSettings::getInstance()->swatchColours [index]; }
-        void setSwatchColour (int index, const Colour& newColour) const { StoredSettings::getInstance()->swatchColours.set (index, newColour); }
+        int getNumSwatches() const;
+        Colour getSwatchColour (int index) const;
+        void setSwatchColour (int index, const Colour& newColour) const;
     };
-
-
-    //==============================================================================
-    Image getFallbackImage();
-    const Drawable* getImageFileIcon();
-    const Drawable* getCogIcon();
-
 
 private:
     ScopedPointer<PropertiesFile> props;
     StringArray fontNames;
 
-    ScopedPointer<Drawable> imageFileIcon, cogIcon;
-    Image fallbackImage;
+    void loadSwatchColours();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StoredSettings);
 };
+
+StoredSettings& getAppSettings();
+PropertiesFile& getAppProperties();
+
+
+//==============================================================================
+class Icons
+{
+public:
+    Icons();
+
+    void reload (const Colour& backgroundColour);
+
+    const Drawable* folder;
+    const Drawable* document;
+    const Drawable* imageDoc;
+    const Drawable* config;
+    const Drawable* exporter;
+    const Drawable* juceLogo;
+    const Drawable* graph;
+    const Drawable* jigsaw;
+
+private:
+    OwnedArray<Drawable> drawables;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons);
+};
+
+const Icons& getIcons();
 
 
 #endif   // __JUCER_STOREDSETTINGS_JUCEHEADER__

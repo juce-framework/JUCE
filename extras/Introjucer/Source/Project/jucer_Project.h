@@ -269,7 +269,6 @@ public:
 private:
     friend class Item;
     ValueTree projectRoot;
-    DrawableImage mainProjectIcon;
 
     void updateProjectSettings();
     void sanitiseConfigFlags();

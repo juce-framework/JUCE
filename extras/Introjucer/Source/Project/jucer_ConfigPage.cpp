@@ -74,7 +74,7 @@ namespace ProjectSettingsTreeClasses
         String getRenamingName() const          { return getDisplayName(); }
         String getDisplayName() const           { return config->getName(); }
         void setName (const String&)            {}
-        const Drawable* getIcon() const         { return StoredSettings::getInstance()->getCogIcon(); }
+        const Drawable* getIcon() const         { return getIcons().config; }
 
         void showDocument()                     { showSettingsPage (new SettingsComp (config, exporterName)); }
         void itemOpennessChanged (bool)         {}
@@ -175,7 +175,7 @@ namespace ProjectSettingsTreeClasses
         String getDisplayName() const           { return exporter->getName(); }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
-        const Drawable* getIcon() const         { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
+        const Drawable* getIcon() const         { return getIcons().exporter; }
         void showDocument()                     { showSettingsPage (new SettingsComp (exporter)); }
 
         void deleteItem()
@@ -297,7 +297,7 @@ namespace ProjectSettingsTreeClasses
         String getDisplayName() const           { return "Modules"; }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
-        const Drawable* getIcon() const         { return project.getMainGroup().getIcon(); }
+        const Drawable* getIcon() const         { return getIcons().graph; }
         void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
 
     private:

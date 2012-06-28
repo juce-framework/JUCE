@@ -85,11 +85,11 @@ public:
        #endif
         menuModel = nullptr;
 
-        StoredSettings::deleteInstance();
         mainWindowList.forceCloseAllWindows();
 
         OpenDocumentManager::deleteInstance();
         commandManager = nullptr;
+        settings.flush();
     }
 
     //==============================================================================
@@ -161,7 +161,7 @@ public:
                 menu.addCommandItem (commandManager, CommandIDs::open);
 
                 PopupMenu recentFiles;
-                StoredSettings::getInstance()->recentFiles.createPopupMenuItems (recentFiles, 100, true, true);
+                getAppSettings().recentFiles.createPopupMenuItems (recentFiles, 100, true, true);
                 menu.addSubMenu ("Open recent file", recentFiles);
 
                 menu.addSeparator();
@@ -249,7 +249,7 @@ public:
             if (menuItemID >= 100 && menuItemID < 200)
             {
                 // open a file from the "recent files" menu
-                const File file (StoredSettings::getInstance()->recentFiles.getFile (menuItemID - 100));
+                const File file (getAppSettings().recentFiles.getFile (menuItemID - 100));
 
                 getApp()->openFile (file);
             }
@@ -413,6 +413,9 @@ public:
     }
 
     //==============================================================================
+    StoredSettings settings;
+    Icons icons;
+
     ScopedPointer<MainMenuModel> menuModel;
     MainWindowList mainWindowList;
 

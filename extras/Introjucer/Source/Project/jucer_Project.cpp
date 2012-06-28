@@ -60,8 +60,6 @@ Project::Project (const File& file_)
 
     setChangedFlag (false);
 
-    mainProjectIcon.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
-
     projectRoot.addListener (this);
 }
 
@@ -217,8 +215,8 @@ bool Project::isAudioPluginModuleMissing() const
 static void registerRecentFile (const File& file)
 {
     RecentlyOpenedFilesList::registerRecentFileNatively (file);
-    StoredSettings::getInstance()->recentFiles.addFile (file);
-    StoredSettings::getInstance()->flush();
+    getAppSettings().recentFiles.addFile (file);
+    getAppSettings().flush();
 }
 
 Result Project::loadDocument (const File& file)
@@ -775,19 +773,21 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
 
 const Drawable* Project::Item::getIcon() const
 {
+    const Icons& icons = getIcons();
+
     if (isFile())
     {
         if (isImageFile())
-            return StoredSettings::getInstance()->getImageFileIcon();
+            return icons.imageDoc;
 
-        return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage();
+        return icons.document;
     }
     else if (isMainGroup())
     {
-        return &(project.mainProjectIcon);
+        return icons.juceLogo;
     }
 
-    return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage();
+    return icons.folder;
 }
 
 //==============================================================================

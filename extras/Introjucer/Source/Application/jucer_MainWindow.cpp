@@ -58,7 +58,7 @@ MainWindow::MainWindow()
     {
         commandManager->getKeyMappings()->resetToDefaultMappings();
 
-        ScopedPointer <XmlElement> keys (StoredSettings::getInstance()->getProps().getXmlValue ("keyMappings"));
+        ScopedPointer <XmlElement> keys (getAppProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
             commandManager->getKeyMappings()->restoreFromXml (*keys);
@@ -82,8 +82,7 @@ MainWindow::~MainWindow()
     removeKeyListener (commandManager->getKeyMappings());
 
     // save the current size and position to our settings file..
-    StoredSettings::getInstance()->getProps()
-        .setValue ("lastMainWindowPos", getWindowStateAsString());
+    getAppProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
 
     clearContentComponent();
     currentProject = nullptr;
@@ -125,8 +124,7 @@ bool MainWindow::closeProject (Project* project)
     if (project == nullptr)
         return true;
 
-    StoredSettings::getInstance()->getProps()
-        .setValue (getProjectWindowPosName(), getWindowStateAsString());
+    getAppProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
 
     if (! OpenDocumentManager::getInstance()->closeAllDocumentsUsingProject (*project, true))
         return false;
@@ -165,10 +163,10 @@ void MainWindow::restoreWindowPosition()
     String windowState;
 
     if (currentProject != nullptr)
-        windowState = StoredSettings::getInstance()->getProps().getValue (getProjectWindowPosName());
+        windowState = getAppProperties().getValue (getProjectWindowPosName());
 
     if (windowState.isEmpty())
-        windowState = StoredSettings::getInstance()->getProps().getValue ("lastMainWindowPos");
+        windowState = getAppProperties().getValue ("lastMainWindowPos");
 
     restoreWindowStateFromString (windowState);
 }
@@ -470,12 +468,12 @@ void MainWindowList::saveCurrentlyOpenProjectList()
             projects.add (mw->getProject()->getFile());
     }
 
-    StoredSettings::getInstance()->setLastProjects (projects);
+    getAppSettings().setLastProjects (projects);
 }
 
 void MainWindowList::reopenLastProjects()
 {
-    Array<File> projects (StoredSettings::getInstance()->getLastProjects());
+    Array<File> projects (getAppSettings().getLastProjects());
 
     for (int i = 0; i < projects.size(); ++ i)
         openFile (projects.getReference(i));
