@@ -447,21 +447,37 @@ public:
         Returns -1 if the substring is not found.
     */
     template <typename CharPointerType1, typename CharPointerType2>
-    static int indexOf (CharPointerType1 haystack, const CharPointerType2& needle) noexcept
+    static int indexOf (CharPointerType1 textToSearch, const CharPointerType2& substringToLookFor) noexcept
     {
         int index = 0;
-        const int needleLength = (int) needle.length();
+        const int substringLength = (int) substringToLookFor.length();
 
         for (;;)
         {
-            if (haystack.compareUpTo (needle, needleLength) == 0)
+            if (textToSearch.compareUpTo (substringToLookFor, substringLength) == 0)
                 return index;
 
-            if (haystack.getAndAdvance() == 0)
+            if (textToSearch.getAndAdvance() == 0)
                 return -1;
 
             ++index;
         }
+    }
+
+    /** Returns a pointer to the first occurrence of a substring in a string.
+        If the substring is not found, this will return a pointer to the string's
+        null terminator.
+    */
+    template <typename CharPointerType1, typename CharPointerType2>
+    static CharPointerType1 find (CharPointerType1 textToSearch, const CharPointerType2& substringToLookFor) noexcept
+    {
+        const int substringLength = (int) substringToLookFor.length();
+
+        while (textToSearch.compareUpTo (substringToLookFor, substringLength) != 0
+                 && ! textToSearch.isEmpty())
+            ++textToSearch;
+
+        return textToSearch;
     }
 
     /** Finds the character index of a given substring in another string, using

@@ -32,63 +32,6 @@
 
 
 //==============================================================================
-class TreePanelBase   : public Component
-{
-public:
-    TreePanelBase (const String& opennessStateKey_)
-        : opennessStateKey (opennessStateKey_)
-    {
-        addAndMakeVisible (&tree);
-        tree.setRootItemVisible (true);
-        tree.setDefaultOpenness (true);
-        tree.setColour (TreeView::backgroundColourId, Colours::transparentBlack);
-        tree.setIndentSize (14);
-    }
-
-    ~TreePanelBase()
-    {
-        tree.setRootItem (nullptr);
-    }
-
-    void setRoot (JucerTreeViewBase* root)
-    {
-        rootItem = root;
-        tree.setRootItem (root);
-        tree.getRootItem()->setOpen (true);
-
-        const ScopedPointer<XmlElement> treeOpenness (StoredSettings::getInstance()->getProps()
-                                                        .getXmlValue (opennessStateKey));
-        if (treeOpenness != nullptr)
-            tree.restoreOpennessState (*treeOpenness, true);
-    }
-
-    void saveOpenness()
-    {
-        const ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
-
-        if (opennessState != nullptr)
-            StoredSettings::getInstance()->getProps().setValue (opennessStateKey, opennessState);
-    }
-
-    void deleteSelectedItems()
-    {
-        if (rootItem != nullptr)
-            rootItem->deleteAllSelectedItems();
-    }
-
-    void resized()
-    {
-        tree.setBounds (getLocalBounds());
-    }
-
-    TreeView tree;
-    ScopedPointer<JucerTreeViewBase> rootItem;
-
-private:
-    String opennessStateKey;
-};
-
-//==============================================================================
 class FileTreeTab   : public TreePanelBase
 {
 public:

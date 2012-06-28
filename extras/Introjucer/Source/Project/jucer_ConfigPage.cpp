@@ -67,7 +67,6 @@ namespace ProjectSettingsTreeClasses
             configTree.addListener (this);
         }
 
-        bool isRoot() const                     { return false; }
         bool isMissing()                        { return false; }
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return false; }
@@ -169,7 +168,6 @@ namespace ProjectSettingsTreeClasses
             jassert (exporter != nullptr);
         }
 
-        bool isRoot() const                     { return false; }
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return exporter->getNumConfigurations() > 0; }
         String getUniqueName() const            { return project.getProjectUID() + "_exporter_" + String (exporterIndex); }
@@ -292,7 +290,6 @@ namespace ProjectSettingsTreeClasses
     public:
         ModulesItem (Project& project_)  : project (project_) {}
 
-        bool isRoot() const                     { return false; }
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return false; }
         String getUniqueName() const            { return project.getProjectUID() + "_modules"; }
@@ -348,7 +345,6 @@ namespace ProjectSettingsTreeClasses
             exportersTree.addListener (this);
         }
 
-        bool isRoot() const                     { return true; }
         String getRenamingName() const          { return getDisplayName(); }
         String getDisplayName() const           { return project.getTitle(); }
         void setName (const String&)            {}
@@ -362,12 +358,11 @@ namespace ProjectSettingsTreeClasses
         void addSubItems()
         {
             addSubItem (new ModulesItem (project));
+            JucerApplication::getApp()->addExtraConfigItems (project, *this);
 
             int i = 0;
             for (Project::ExporterIterator exporter (project); exporter.next(); ++i)
                 addSubItem (new ExporterItem (project, exporter.exporter.release(), i));
-
-            JucerApplication::getApp()->addExtraConfigItems (project, *this);
         }
 
         void showPopupMenu()
