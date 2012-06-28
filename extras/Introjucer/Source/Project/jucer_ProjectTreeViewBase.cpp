@@ -92,31 +92,26 @@ void ProjectTreeViewBase::moveSelectedItemsTo (OwnedArray <Project::Item>& selec
 ProjectTreeViewBase* ProjectTreeViewBase::findTreeViewItem (const Project::Item& itemToFind)
 {
     if (item == itemToFind)
-    {
         return this;
-    }
-    else
-    {
-        const bool wasOpen = isOpen();
-        setOpen (true);
 
-        for (int i = getNumSubItems(); --i >= 0;)
+    const bool wasOpen = isOpen();
+    setOpen (true);
+
+    for (int i = getNumSubItems(); --i >= 0;)
+    {
+        ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i));
+
+        if (pg != nullptr)
         {
-            ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i));
+            pg = pg->findTreeViewItem (itemToFind);
 
             if (pg != nullptr)
-            {
-                pg = pg->findTreeViewItem (itemToFind);
-
-                if (pg != nullptr)
-                    return pg;
-            }
+                return pg;
         }
-
-        setOpen (wasOpen);
     }
 
-    return 0;
+    setOpen (wasOpen);
+    return nullptr;
 }
 
 //==============================================================================
@@ -182,8 +177,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
     OwnedArray <File> filesToTrash;
     OwnedArray <Project::Item> itemsToRemove;
 
-    int i;
-    for (i = 0; i < numSelected; ++i)
+    for (int i = 0; i < numSelected; ++i)
     {
         const ProjectTreeViewBase* const p = dynamic_cast <ProjectTreeViewBase*> (tree->getSelectedItem (i));
 
@@ -200,7 +194,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
     {
         String fileList;
         const int maxFilesToList = 10;
-        for (i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
+        for (int i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
             fileList << filesToTrash.getUnchecked(i)->getFullPathName() << "\n";
 
         if (filesToTrash.size() > maxFilesToList)
@@ -226,7 +220,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
 
     if (treeRootItem != nullptr)
     {
-        for (i = filesToTrash.size(); --i >= 0;)
+        for (int i = filesToTrash.size(); --i >= 0;)
         {
             const File f (*filesToTrash.getUnchecked(i));
 
@@ -238,7 +232,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
             }
         }
 
-        for (i = itemsToRemove.size(); --i >= 0;)
+        for (int i = itemsToRemove.size(); --i >= 0;)
         {
             ProjectTreeViewBase* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i));
 
@@ -263,8 +257,7 @@ static int indexOfNode (const ValueTree& parent, const ValueTree& child)
 void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
                                      Project::Item destNode, int insertIndex)
 {
-    int i;
-    for (i = selectedNodes.size(); --i >= 0;)
+    for (int i = selectedNodes.size(); --i >= 0;)
     {
         Project::Item* const n = selectedNodes.getUnchecked(i);
 
@@ -276,7 +269,7 @@ void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
     }
 
     // Don't include any nodes that are children of other selected nodes..
-    for (i = selectedNodes.size(); --i >= 0;)
+    for (int i = selectedNodes.size(); --i >= 0;)
     {
         Project::Item* const n = selectedNodes.getUnchecked(i);
 
@@ -291,7 +284,7 @@ void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
     }
 
     // Remove and re-insert them one at a time..
-    for (i = 0; i < selectedNodes.size(); ++i)
+    for (int i = 0; i < selectedNodes.size(); ++i)
     {
         Project::Item* selectedNode = selectedNodes.getUnchecked(i);
 

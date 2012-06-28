@@ -150,10 +150,13 @@
       </Filter>
       <Filter Name="Project">
         <File RelativePath="..\..\Source\Project\jucer_AudioPluginModule.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigPage.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigPage.h"/>
         <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ModulesPanel.h"/>
         <File RelativePath="..\..\Source\Project\jucer_NewFileWizard.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_NewFileWizard.h"/>
         <File RelativePath="..\..\Source\Project\jucer_NewProjectWizard.cpp"/>
@@ -162,8 +165,6 @@
         <File RelativePath="..\..\Source\Project\jucer_Project.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectInformationComponent.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectInformationComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.cpp"/>

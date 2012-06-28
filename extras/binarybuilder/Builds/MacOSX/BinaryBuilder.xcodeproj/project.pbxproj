@@ -428,7 +428,6 @@
 				E28F51A0038F01E08E22F853,
 				70A875922C34E55D4F48A196 ); name = Source; sourceTree = "<group>"; };
 		3C712C667F851F9061100DD7 = { isa = XCBuildConfiguration; buildSettings = {
-				SRCROOT = "../..";
 				HEADER_SEARCH_PATHS = "../../JuceLibraryCode $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
@@ -445,7 +444,6 @@
 				"DEBUG=1",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		145C0C90E41D8DECE4DD66AD = { isa = XCBuildConfiguration; buildSettings = {
-				SRCROOT = "../..";
 				HEADER_SEARCH_PATHS = "../../JuceLibraryCode $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = Info.plist;

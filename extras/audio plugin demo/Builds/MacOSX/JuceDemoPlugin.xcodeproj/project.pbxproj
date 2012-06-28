@@ -1971,7 +1971,6 @@
 				7EA0AEAFB626CDF5E0038ED5,
 				227AE5B2ACBB7881D9552404 ); name = Source; sourceTree = "<group>"; };
 		77D1D11FAA110A1B1F960A8F = { isa = XCBuildConfiguration; buildSettings = {
-				SRCROOT = "../..";
 				HEADER_SEARCH_PATHS = "~/SDKs/vstsdk2.4 ../../JuceLibraryCode $(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility $(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Info.plist;
@@ -1995,7 +1994,6 @@
 				"DEBUG=1",
 				"JUCER_XCODE_MAC_F6D2F4CF=1"); }; name = Debug; };
 		76082281008CF5F891C856DA = { isa = XCBuildConfiguration; buildSettings = {
-				SRCROOT = "../..";
 				HEADER_SEARCH_PATHS = "~/SDKs/vstsdk2.4 ../../JuceLibraryCode $(DEVELOPER_DIR)/Extras/CoreAudio/PublicUtility $(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/Utility $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = s;
 				INFOPLIST_FILE = Info.plist;
@@ -2114,13 +2112,11 @@
 				CC4D3A6F1EF2934059AA9FEB,
 				221F46E90C0A8651AB76A0E5,
 				B46C12D99498E9FA8F1D083A ); runOnlyForDeploymentPostprocessing = 0; };
-		E277BCF6E051A6008DD74155 = { isa = PBXShellScriptBuildPhase; buildActionMask = 2147483647; files = (  ); runOnlyForDeploymentPostprocessing = 0; name = "Copy to the different plugin folders"; shellPath = /bin/sh; shellScript = "\n# This script takes the build product and copies it to the AU, VST, and RTAS folders, depending on \n# which plugin types you've built\n\noriginal=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\n\n# this looks inside the binary to detect which platforms are needed.. \ncopyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\ncopyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\ncopyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\ncopyAAX=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'GetEffectDescriptions' | wc -l`\n\nif [ $copyAU -gt 0 ]; then\n  echo \"Copying to AudioUnit folder...\"\n  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\n  if [ -d \"$AU\" ]; then \n    rm -r \"$AU\"\n  fi\n\n  cp -r \"$original\" \"$AU\"\n  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\n  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\nfi\n\nif [ $copyVST -gt 0 ]; then\n  echo \"Copying to VST folder...\"\n  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\n  if [ -d \"$VST\" ]; then \n    rm -r \"$VST\"\n  fi\n\n  cp -r \"$original\" \"$VST\"\n  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\n  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\nfi\n\nif [ $copyRTAS -gt 0 ]; then\n  echo \"Copying to RTAS folder...\"\n  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\n  if [ -d \"$RTAS\" ]; then\n    rm -r \"$RTAS\"\n  fi\n\n  cp -r \"$original\" \"$RTAS\"\nfi\n\nif [ $copyAAX -gt 0 ]; then\n  echo \"Copying to AAX folder...\"\n\n  if [ -d \"/Applications/ProTools_3PDev/Plug-Ins\" ]; then\n    AAX1=\"/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\n\n    if [ -d \"$AAX1\" ]; then\n      rm -r \"$AAX1\"\n    fi\n\n    cp -r \"$original\" \"$AAX1\"\n  fi\n\n  if [ -d \"/Library/Application Support/Avid/Audio/Plug-Ins\" ]; then\n    AAX2=\"/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin\"\n\n    if [ -d \"$AAX2\" ]; then\n      rm -r \"$AAX2\"\n    fi\n\n    cp -r \"$original\" \"$AAX2\"\n  fi\nfi\n"; };
 		27A65CD0B053616E226D4547 = { isa = PBXNativeTarget; buildConfigurationList = 92D1022F6276146FC92B4442; buildPhases = (
 				0D832C784AB07BFDE57BCB92,
 				D95827C1509280C88845BCB4,
 				E032EB514708440DE9B7FF2A,
-				95E57A758351FE57067B605F,
-				E277BCF6E051A6008DD74155 ); buildRules = ( ); dependencies = ( ); name = JuceDemoPlugin; productName = JuceDemoPlugin; productReference = 63F8022F081E22DFFFCAC998; productInstallPath = "$(HOME)/Library/Audio/Plug-Ins/Components/"; productType = "com.apple.product-type.bundle"; };
+				95E57A758351FE57067B605F ); buildRules = ( ); dependencies = ( ); name = JuceDemoPlugin; productName = JuceDemoPlugin; productReference = 63F8022F081E22DFFFCAC998; productInstallPath = "$(HOME)/Library/Audio/Plug-Ins/Components/"; productType = "com.apple.product-type.bundle"; };
 		85250052F3E019894332668E = { isa = PBXProject; buildConfigurationList = 0720B453F376663EAB98BF9B; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4074359E1E7C4D54E87C3461; projectDirPath = ""; projectRoot = ""; targets = ( 27A65CD0B053616E226D4547 ); };
 	};
 	rootObject = 85250052F3E019894332668E;

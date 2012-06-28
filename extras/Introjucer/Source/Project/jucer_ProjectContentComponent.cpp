@@ -26,7 +26,7 @@
 #include "jucer_ProjectContentComponent.h"
 #include "../Application/jucer_MainWindow.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "jucer_ProjectInformationComponent.h"
+#include "jucer_ConfigPage.h"
 #include "jucer_TreeViewTypes.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
 

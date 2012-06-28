@@ -130,8 +130,6 @@ public:
         openFile (commandLine.unquoted());
     }
 
-    virtual void doExtraInitialisation() {}
-
     static JucerApplication* getApp()
     {
         return dynamic_cast<JucerApplication*> (JUCEApplication::getInstance());
@@ -405,13 +403,17 @@ public:
         return ModuleList::isJuceOrModulesFolder (list.getModulesFolder());
     }
 
-    ScopedPointer<MainMenuModel> menuModel;
+    //==============================================================================
+    virtual void doExtraInitialisation() {}
+    virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
 
     virtual Component* createProjectContentComponent() const
     {
         return new ProjectContentComponent();
     }
 
+    //==============================================================================
+    ScopedPointer<MainMenuModel> menuModel;
     MainWindowList mainWindowList;
 
 private:

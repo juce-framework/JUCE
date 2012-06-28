@@ -250,6 +250,9 @@
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Project\jucer_ConfigPage.cpp">
+      <Filter>The Introjucer\Project</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_GroupInformationComponent.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
@@ -266,9 +269,6 @@
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ProjectInformationComponent.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp">
@@ -1227,10 +1227,16 @@
     <ClInclude Include="..\..\Source\Project\jucer_AudioPluginModule.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ConfigPage.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_Module.h">
+      <Filter>The Introjucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ModulesPanel.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_NewFileWizard.h">
@@ -1243,9 +1249,6 @@
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
-      <Filter>The Introjucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectInformationComponent.h">
       <Filter>The Introjucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectTreeViewBase.h">

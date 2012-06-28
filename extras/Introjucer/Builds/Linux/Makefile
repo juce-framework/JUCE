@@ -50,13 +50,13 @@ OBJECTS := \
   $(OBJDIR)/jucer_Main_f8488f5b.o \
   $(OBJDIR)/jucer_MainWindow_1e163aeb.o \
   $(OBJDIR)/jucer_OpenDocumentManager_4c72d210.o \
+  $(OBJDIR)/jucer_ConfigPage_99b07caa.o \
   $(OBJDIR)/jucer_GroupInformationComponent_631ccf01.o \
   $(OBJDIR)/jucer_Module_3f7666a5.o \
   $(OBJDIR)/jucer_NewFileWizard_b8a19ef8.o \
   $(OBJDIR)/jucer_NewProjectWizard_7a15bf5d.o \
   $(OBJDIR)/jucer_Project_c131864a.o \
   $(OBJDIR)/jucer_ProjectContentComponent_60de0eee.o \
-  $(OBJDIR)/jucer_ProjectInformationComponent_4746e69b.o \
   $(OBJDIR)/jucer_ProjectTreeViewBase_63c2bdbe.o \
   $(OBJDIR)/jucer_ProjectType_1bc27a24.o \
   $(OBJDIR)/jucer_TreeViewTypes_4a765287.o \
@@ -127,6 +127,11 @@ $(OBJDIR)/jucer_OpenDocumentManager_4c72d210.o: ../../Source/Application/jucer_O
 	@echo "Compiling jucer_OpenDocumentManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/jucer_ConfigPage_99b07caa.o: ../../Source/Project/jucer_ConfigPage.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_ConfigPage.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/jucer_GroupInformationComponent_631ccf01.o: ../../Source/Project/jucer_GroupInformationComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_GroupInformationComponent.cpp"
@@ -155,11 +160,6 @@ $(OBJDIR)/jucer_Project_c131864a.o: ../../Source/Project/jucer_Project.cpp
 $(OBJDIR)/jucer_ProjectContentComponent_60de0eee.o: ../../Source/Project/jucer_ProjectContentComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_ProjectContentComponent.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_ProjectInformationComponent_4746e69b.o: ../../Source/Project/jucer_ProjectInformationComponent.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ProjectInformationComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ProjectTreeViewBase_63c2bdbe.o: ../../Source/Project/jucer_ProjectTreeViewBase.cpp

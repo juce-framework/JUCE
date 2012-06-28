@@ -24,7 +24,7 @@
 */
 
 #include "jucer_TreeViewTypes.h"
-#include "jucer_ProjectInformationComponent.h"
+#include "jucer_ConfigPage.h"
 #include "jucer_GroupInformationComponent.h"
 #include "../Application/jucer_OpenDocumentManager.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
