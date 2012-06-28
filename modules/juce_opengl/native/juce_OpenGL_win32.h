@@ -197,6 +197,8 @@ private:
             atts[n++] = WGL_SUPPORT_OPENGL_ARB;   atts[n++] = GL_TRUE;
             atts[n++] = WGL_DOUBLE_BUFFER_ARB;    atts[n++] = GL_TRUE;
             atts[n++] = WGL_PIXEL_TYPE_ARB;       atts[n++] = WGL_TYPE_RGBA_ARB;
+            atts[n++] = WGL_ACCELERATION_ARB;
+            atts[n++] = WGL_FULL_ACCELERATION_ARB;
 
             atts[n++] = WGL_COLOR_BITS_ARB;  atts[n++] = pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits;
             atts[n++] = WGL_RED_BITS_ARB;    atts[n++] = pixelFormat.redBits;
