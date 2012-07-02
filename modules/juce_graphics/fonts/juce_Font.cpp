@@ -64,6 +64,7 @@ public:
     void clear()
     {
         setSize (faces.size());
+        defaultFace = nullptr;
     }
 
     Typeface::Ptr findTypefaceFor (const Font& font)
@@ -127,10 +128,7 @@ public:
 private:
     struct CachedFace
     {
-        CachedFace() noexcept
-            : lastUsageCount (0)
-        {
-        }
+        CachedFace() noexcept  : lastUsageCount (0) {}
 
         // Although it seems a bit wacky to store the name here, it's because it may be a
         // placeholder rather than a real one, e.g. "<Sans-Serif>" vs the actual typeface name.
