@@ -700,7 +700,7 @@ Font Font::fromString (const String& fontDescription)
     if (name.isEmpty())
         name = getDefaultSansSerifFontName();
 
-    String sizeAndStyle (fontDescription.substring (separator + 1));
+    String sizeAndStyle (fontDescription.substring (separator + 1).trimStart());
 
     float height = sizeAndStyle.getFloatValue();
     if (height <= 0)
