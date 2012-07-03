@@ -129,7 +129,7 @@ public:
             return false;
 
         // (avoid sending a spurious mouse-drag when we receive a mouse-up)
-        if (! (isDragging && ! newButtonState.isAnyMouseButtonDown()))
+        if (! (buttonState.isAnyMouseButtonDown() && ! newButtonState.isAnyMouseButtonDown()))
             setScreenPos (screenPos, time, false);
 
         // (ignore secondary clicks when there's already a button down)
