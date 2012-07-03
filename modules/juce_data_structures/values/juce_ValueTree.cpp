@@ -663,6 +663,8 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
     }
 
     object = other.object;
+
+    listeners.call (&ValueTree::Listener::valueTreeRedirected, *this);
     return *this;
 }
 
@@ -670,12 +672,6 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
 ValueTree::ValueTree (ValueTree&& other) noexcept
     : object (static_cast <SharedObject::Ptr&&> (other.object))
 {
-}
-
-ValueTree& ValueTree::operator= (ValueTree&& other) noexcept
-{
-    object = static_cast <SharedObject::Ptr&&> (other.object);
-    return *this;
 }
 #endif
 

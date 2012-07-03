@@ -93,7 +93,6 @@ public:
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     ValueTree (ValueTree&& other) noexcept;
-    ValueTree& operator= (ValueTree&& other) noexcept;
    #endif
 
     /** Destructor. */
@@ -412,6 +411,12 @@ public:
             the listener is registered, and not to any of its children.
         */
         virtual void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) = 0;
+
+        /** This method is called when a tree is made to point to a different internal shared object.
+            When operator= is used to make a ValueTree refer to a different object, this callback
+            will be made.
+        */
+        virtual void valueTreeRedirected (ValueTree& treeWhichHasBeenChanged) {}
     };
 
     /** Adds a listener to receive callbacks when this node is changed.
