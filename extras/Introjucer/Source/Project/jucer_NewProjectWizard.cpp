@@ -159,7 +159,7 @@ public:
             sourceGroup.addFile (mainCppFile, -1, true);
         }
 
-        project.createDefaultExporters();
+        project.createExporterForCurrentPlatform();
 
         return true;
     }
@@ -227,6 +227,8 @@ public:
 
             sourceGroup.addFile (mainCppFile, -1, true);
         }
+
+        project.createExporterForCurrentPlatform();
 
         return true;
     }
@@ -316,6 +318,8 @@ public:
         sourceGroup.addFile (filterHFile, -1, false);
         sourceGroup.addFile (editorCppFile, -1, true);
         sourceGroup.addFile (editorHFile, -1, false);
+
+        project.createExporterForCurrentPlatform();
 
         return true;
     }

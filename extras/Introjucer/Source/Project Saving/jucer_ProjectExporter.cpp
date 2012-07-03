@@ -31,11 +31,6 @@
 
 
 //==============================================================================
-int ProjectExporter::getNumExporters()
-{
-    return 6;
-}
-
 StringArray ProjectExporter::getExporterNames()
 {
     StringArray s;
@@ -49,13 +44,17 @@ StringArray ProjectExporter::getExporterNames()
     return s;
 }
 
-StringArray ProjectExporter::getDefaultExporters()
+String ProjectExporter::getCurrentPlatformExporterName()
 {
-    StringArray s;
-    s.add (XCodeProjectExporter::getNameMac());
-    s.add (MSVCProjectExporterVC2010::getName());
-    s.add (MakefileProjectExporter::getNameLinux());
-    return s;
+   #if JUCE_MAC
+    return XCodeProjectExporter::getNameMac();
+   #elif JUCE_WINDOWS
+    return MSVCProjectExporterVC2010::getName();
+   #elif JUCE_LINUX
+    return MakefileProjectExporter::getNameLinux();
+   #else
+    #error // huh?
+   #endif
 }
 
 ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int index)

@@ -926,15 +926,9 @@ void Project::addNewExporter (const String& exporterName)
     exporters.addChild (exp->settings, -1, getUndoManagerFor (exporters));
 }
 
-void Project::createDefaultExporters()
+void Project::createExporterForCurrentPlatform()
 {
-    ValueTree exporters (getExporters());
-    exporters.removeAllChildren (getUndoManagerFor (exporters));
-
-    const StringArray exporterNames (ProjectExporter::getDefaultExporters());
-
-    for (int i = 0; i < exporterNames.size(); ++i)
-        addNewExporter (exporterNames[i]);
+    addNewExporter (ProjectExporter::getCurrentPlatformExporterName());
 }
 
 //==============================================================================

@@ -38,7 +38,6 @@ public:
     ProjectExporter (Project&, const ValueTree& settings);
     virtual ~ProjectExporter();
 
-    static int getNumExporters();
     static StringArray getExporterNames();
 
     static ProjectExporter* createNewExporter (Project&, const int index);
@@ -46,7 +45,7 @@ public:
     static ProjectExporter* createExporter (Project&, const ValueTree& settings);
     static ProjectExporter* createPlatformDefaultExporter (Project&);
 
-    static StringArray getDefaultExporters();
+    static String getCurrentPlatformExporterName();
 
     //=============================================================================
     // return 0 if this can't be opened in the current OS, or a higher value, where higher numbers are more preferable.

@@ -202,7 +202,7 @@ public:
     int getNumExporters();
     ProjectExporter* createExporter (int index);
     void addNewExporter (const String& exporterName);
-    void createDefaultExporters();
+    void createExporterForCurrentPlatform();
 
     struct ExporterIterator
     {
