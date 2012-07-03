@@ -28,18 +28,13 @@ class MouseInputSourceInternal   : public AsyncUpdater
 public:
     //==============================================================================
     MouseInputSourceInternal (MouseInputSource& source_, const int index_, const bool isMouseDevice_)
-        : index (index_), isMouseDevice (isMouseDevice_), source (source_), lastPeer (nullptr),
-          isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false), currentCursorHandle (nullptr),
-          mouseEventCounter (0)
+        : index (index_), isMouseDevice (isMouseDevice_), isDragging (false), source (source_),
+          lastPeer (nullptr), isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false),
+          currentCursorHandle (nullptr), mouseEventCounter (0)
     {
     }
 
     //==============================================================================
-    bool isDragging() const noexcept
-    {
-        return buttonState.isAnyMouseButtonDown();
-    }
-
     Component* getComponentUnderMouse() const
     {
         return static_cast <Component*> (componentUnderMouse);
@@ -134,7 +129,7 @@ public:
             return false;
 
         // (avoid sending a spurious mouse-drag when we receive a mouse-up)
-        if (! (isDragging() && ! newButtonState.isAnyMouseButtonDown()))
+        if (! (isDragging && ! newButtonState.isAnyMouseButtonDown()))
             setScreenPos (screenPos, time, false);
 
         // (ignore secondary clicks when there's already a button down)
@@ -154,6 +149,7 @@ public:
             {
                 const ModifierKeys oldMods (getCurrentModifiers());
                 buttonState = newButtonState; // must change this before calling sendMouseUp, in case it runs a modal loop
+                isDragging = false;
 
                 sendMouseUp (current, screenPos + unboundedMouseOffset, time, oldMods);
             }
@@ -171,6 +167,7 @@ public:
 
             if (current != nullptr)
             {
+                isDragging = true;
                 registerMouseDown (screenPos, time, current, buttonState);
                 sendMouseDown (current, screenPos, time);
             }
@@ -226,7 +223,7 @@ public:
 
     void setScreenPos (const Point<int>& newScreenPos, const Time& time, const bool forceUpdate)
     {
-        if (! isDragging())
+        if (! isDragging)
             setComponentUnderMouse (findComponentAt (newScreenPos), newScreenPos, time);
 
         if (newScreenPos != lastScreenPos || forceUpdate)
@@ -238,7 +235,7 @@ public:
 
             if (current != nullptr)
             {
-                if (isDragging())
+                if (isDragging)
                 {
                     registerMouseDrag (newScreenPos);
                     sendMouseDrag (current, newScreenPos + unboundedMouseOffset, time);
@@ -264,7 +261,7 @@ public:
         ++mouseEventCounter;
         const Point<int> screenPos (newPeer->localToGlobal (positionWithinPeer));
 
-        if (isDragging() && newMods.isAnyMouseButtonDown())
+        if (isDragging && newMods.isAnyMouseButtonDown())
         {
             setScreenPos (screenPos, time, false);
         }
@@ -297,7 +294,7 @@ public:
         setScreenPos (screenPos, time, false);
         triggerFakeMove();
 
-        if (! isDragging())
+        if (! isDragging)
         {
             Component* current = getComponentUnderMouse();
             if (current != nullptr)
@@ -306,15 +303,8 @@ public:
     }
 
     //==============================================================================
-    Time getLastMouseDownTime() const noexcept
-    {
-        return Time (mouseDowns[0].time);
-    }
-
-    Point<int> getLastMouseDownPosition() const noexcept
-    {
-        return mouseDowns[0].position;
-    }
+    const Time& getLastMouseDownTime() const noexcept              { return mouseDowns[0].time; }
+    const Point<int>& getLastMouseDownPosition() const noexcept    { return mouseDowns[0].position; }
 
     int getNumberOfMultipleClicks() const noexcept
     {
@@ -357,7 +347,7 @@ public:
     //==============================================================================
     void enableUnboundedMouseMovement (bool enable, bool keepCursorVisibleUntilOffscreen)
     {
-        enable = enable && isDragging();
+        enable = enable && isDragging;
         isCursorVisibleUntilOffscreen = keepCursorVisibleUntilOffscreen;
 
         if (enable != isUnboundedMouseModeOn)
@@ -432,6 +422,7 @@ public:
     //==============================================================================
     const int index;
     const bool isMouseDevice;
+    bool isDragging;
     Point<int> lastScreenPos;
     ModifierKeys buttonState;
 
@@ -447,9 +438,7 @@ private:
 
     struct RecentMouseDown
     {
-        RecentMouseDown()  : component (nullptr)
-        {
-        }
+        RecentMouseDown() noexcept  : component (nullptr) {}
 
         Point<int> position;
         Time time;
@@ -466,8 +455,8 @@ private:
     };
 
     RecentMouseDown mouseDowns[4];
-    bool mouseMovedSignificantlySincePressed;
     Time lastTime;
+    bool mouseMovedSignificantlySincePressed;
 
     void registerMouseDown (const Point<int>& screenPos, const Time& time,
                             Component* const component, const ModifierKeys& modifiers) noexcept
@@ -506,7 +495,7 @@ bool MouseInputSource::isTouch() const                                  { return
 bool MouseInputSource::canHover() const                                 { return isMouse(); }
 bool MouseInputSource::hasMouseWheel() const                            { return isMouse(); }
 int MouseInputSource::getIndex() const                                  { return pimpl->index; }
-bool MouseInputSource::isDragging() const                               { return pimpl->isDragging(); }
+bool MouseInputSource::isDragging() const                               { return pimpl->isDragging; }
 Point<int> MouseInputSource::getScreenPosition() const                  { return pimpl->getScreenPosition(); }
 ModifierKeys MouseInputSource::getCurrentModifiers() const              { return pimpl->getCurrentModifiers(); }
 Component* MouseInputSource::getComponentUnderMouse() const             { return pimpl->getComponentUnderMouse(); }
