@@ -394,7 +394,7 @@ public:
                 Component::SafePointer<Window> parentWindow (owner);
                 PopupMenu::ItemComponent* currentChildOfParent = parentWindow->currentChild;
 
-                hide (0, true);
+                hide (nullptr, true);
 
                 if (parentWindow != nullptr)
                     parentWindow->setCurrentlyHighlightedChild (currentChildOfParent);
@@ -520,7 +520,7 @@ public:
         }
 
         if (hideOnExit && hasBeenOver && ! isOverAny)
-            hide (0, true);
+            hide (nullptr, true);
         else
             checkButtonState (localMousePos, timeNow, wasDown, overScrollArea, isOverAny);
     }
@@ -999,7 +999,7 @@ private:
                       && (isOver || (activeSubMenu == nullptr) || ! activeSubMenu->isVisible()))
                 {
                     if (isOver && (c != nullptr) && (activeSubMenu != nullptr))
-                        activeSubMenu->hide (0, true);
+                        activeSubMenu->hide (nullptr, true);
 
                     if (! isOver)
                         itemUnderMouse = nullptr;
@@ -1413,7 +1413,7 @@ public:
     PopupMenuCompletionCallback()
         : managerOfChosenCommand (nullptr),
           prevFocused (Component::getCurrentlyFocusedComponent()),
-          prevTopLevel (prevFocused != nullptr ? prevFocused->getTopLevelComponent() : 0)
+          prevTopLevel (prevFocused != nullptr ? prevFocused->getTopLevelComponent() : nullptr)
     {
         PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
     }

@@ -129,8 +129,8 @@ File File::getLinkedTarget() const
 }
 
 //==============================================================================
-extern const char** juce_argv;  // declared in juce_Application.cpp
-extern int juce_argc;
+const char* const* juce_argv = nullptr;
+int juce_argc = 0;
 
 File File::getSpecialLocation (const SpecialLocationType type)
 {

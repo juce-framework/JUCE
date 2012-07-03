@@ -225,8 +225,8 @@ int JUCEApplication::main()
  extern void initialiseNSApplication();
 #endif
 
-const char* const* juce_argv = nullptr;
-int juce_argc = 0;
+extern const char** juce_argv;  // declared in juce_core
+extern int juce_argc;
 
 StringArray JUCEApplication::getCommandLineParameterArray()
 {
