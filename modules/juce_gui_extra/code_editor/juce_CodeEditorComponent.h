@@ -175,8 +175,15 @@ public:
     //==============================================================================
     struct ColourScheme
     {
-        StringArray tokenTypeNames;
-        Array<Colour> tokenColours;
+        struct TokenType
+        {
+            String name;
+            Colour colour;
+        };
+
+        Array<TokenType> types;
+
+        void add (const String& name, const Colour& colour);
     };
 
     /** Changes the syntax highlighting scheme.

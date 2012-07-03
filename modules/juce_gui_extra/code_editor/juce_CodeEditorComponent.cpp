@@ -1019,15 +1019,8 @@ void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, doub
 }
 
 //==============================================================================
-void CodeEditorComponent::focusGained (FocusChangeType)
-{
-    updateCaretPosition();
-}
-
-void CodeEditorComponent::focusLost (FocusChangeType)
-{
-    updateCaretPosition();
-}
+void CodeEditorComponent::focusGained (FocusChangeType)     { updateCaretPosition(); }
+void CodeEditorComponent::focusLost (FocusChangeType)       { updateCaretPosition(); }
 
 //==============================================================================
 void CodeEditorComponent::setTabSize (const int numSpaces, const bool insertSpaces)
@@ -1094,6 +1087,14 @@ void CodeEditorComponent::setFont (const Font& newFont)
     resized();
 }
 
+void CodeEditorComponent::ColourScheme::add (const String& name, const Colour& colour)
+{
+    TokenType tt;
+    tt.name = name;
+    tt.colour = colour;
+    types.add (tt);
+}
+
 void CodeEditorComponent::setColourScheme (const ColourScheme& scheme)
 {
     colourScheme = scheme;
@@ -1102,10 +1103,9 @@ void CodeEditorComponent::setColourScheme (const ColourScheme& scheme)
 
 Colour CodeEditorComponent::getColourForTokenType (const int tokenType) const
 {
-    if (! isPositiveAndBelow (tokenType, colourScheme.tokenColours.size()))
-        return findColour (CodeEditorComponent::defaultTextColourId);
-
-    return colourScheme.tokenColours.getReference (tokenType);
+    return isPositiveAndBelow (tokenType, colourScheme.types.size())
+                ? colourScheme.types.getReference (tokenType).colour
+                : findColour (CodeEditorComponent::defaultTextColourId);
 }
 
 void CodeEditorComponent::clearCachedIterators (const int firstLineToBeInvalid)
