@@ -384,6 +384,13 @@ void Font::setTypefaceStyle (const String& typefaceStyle)
     }
 }
 
+Font Font::withTypefaceStyle (const String& newStyle) const
+{
+    Font f (*this);
+    f.setTypefaceStyle (newStyle);
+    return f;
+}
+
 StringArray Font::getAvailableStyles() const
 {
     return findAllTypefaceStyles (getTypeface()->getName());
