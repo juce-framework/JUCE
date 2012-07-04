@@ -38,16 +38,16 @@ class CodeTokeniser;
 */
 class JUCE_API  CodeEditorComponent   : public Component,
                                         public TextInputTarget,
-                                        public Timer,
-                                        public ScrollBar::Listener,
-                                        public CodeDocument::Listener,
-                                        public AsyncUpdater
+                                        private Timer,
+                                        private ScrollBar::Listener,
+                                        private CodeDocument::Listener,
+                                        private AsyncUpdater
 {
 public:
     //==============================================================================
     /** Creates an editor for a document.
 
-        The tokeniser object is optional - pass 0 to disable syntax highlighting.
+        The tokeniser object is optional - pass nullptr to disable syntax highlighting.
         The object that you pass in is not owned or deleted by the editor - you must
         make sure that it doesn't get deleted while this component is still using it.
 
@@ -128,6 +128,7 @@ public:
     bool moveCaretToEndOfLine (bool selecting);
     bool deleteBackwards (bool moveInWholeWordSteps);
     bool deleteForwards (bool moveInWholeWordSteps);
+    bool deleteWhitespaceBackwardsToTabStop();
     bool copyToClipboard();
     bool cutToClipboard();
     bool pasteFromClipboard();
@@ -144,6 +145,9 @@ public:
 
     void insertTextAtCaret (const String& textToInsert);
     void insertTabAtCaret();
+
+    void indentSelection();
+    void unindentSelection();
 
     //==============================================================================
     Range<int> getHighlightedRegion() const;
@@ -230,10 +234,52 @@ public:
     int getScrollbarThickness() const noexcept          { return scrollbarThickness; }
 
     //==============================================================================
-    /** @internal */
-    void resized();
+    /** Called when the return key is pressed - this can be overridden for custom behaviour. */
+    virtual void handleReturnKey();
+    /** Called when the tab key is pressed - this can be overridden for custom behaviour. */
+    virtual void handleTabKey();
+    /** Called when the escape key is pressed - this can be overridden for custom behaviour. */
+    virtual void handleEscapeKey();
+
+    //==============================================================================
+    /** This adds the items to the popup menu.
+
+        By default it adds the cut/copy/paste items, but you can override this if
+        you need to replace these with your own items.
+
+        If you want to add your own items to the existing ones, you can override this,
+        call the base class's addPopupMenuItems() method, then append your own items.
+
+        When the menu has been shown, performPopupMenuAction() will be called to
+        perform the item that the user has chosen.
+
+        If this was triggered by a mouse-click, the mouseClickEvent parameter will be
+        a pointer to the info about it, or may be null if the menu is being triggered
+        by some other means.
+
+        @see performPopupMenuAction, setPopupMenuEnabled, isPopupMenuEnabled
+    */
+    virtual void addPopupMenuItems (PopupMenu& menuToAddTo,
+                                    const MouseEvent* mouseClickEvent);
+
+    /** This is called to perform one of the items that was shown on the popup menu.
+
+        If you've overridden addPopupMenuItems(), you should also override this
+        to perform the actions that you've added.
+
+        If you've overridden addPopupMenuItems() but have still left the default items
+        on the menu, remember to call the superclass's performPopupMenuAction()
+        so that it can perform the default actions if that's what the user clicked on.
+
+        @see addPopupMenuItems, setPopupMenuEnabled, isPopupMenuEnabled
+    */
+    virtual void performPopupMenuAction (int menuItemID);
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics&);
+    /** @internal */
+    void resized();
     /** @internal */
     bool keyPressed (const KeyPress&);
     /** @internal */
@@ -250,14 +296,6 @@ public:
     void focusGained (FocusChangeType);
     /** @internal */
     void focusLost (FocusChangeType);
-    /** @internal */
-    void timerCallback();
-    /** @internal */
-    void scrollBarMoved (ScrollBar*, double);
-    /** @internal */
-    void handleAsyncUpdate();
-    /** @internal */
-    void codeDocumentChanged (const CodeDocument::Position&, const CodeDocument::Position&);
     /** @internal */
     bool isTextInputActive() const;
     /** @internal */
@@ -307,16 +345,24 @@ private:
     void clearCachedIterators (int firstLineToBeInvalid);
     void updateCachedIterators (int maxLineNum);
     void getIteratorForPosition (int position, CodeDocument::Iterator& result);
+
+    void timerCallback();
+    void scrollBarMoved (ScrollBar*, double);
+    void handleAsyncUpdate();
+    void codeDocumentChanged (const CodeDocument::Position&, const CodeDocument::Position&);
+
     void moveLineDelta (int delta, bool selecting);
     int getGutterSize() const noexcept;
 
     //==============================================================================
+    void insertText (const String& textToInsert);
     void updateCaretPosition();
     void updateScrollBars();
     void scrollToLineInternal (int line);
     void scrollToColumnInternal (double column);
     void newTransaction();
     void cut();
+    void indentSelectedLines (int spacesToAdd);
 
     int indexToColumn (int line, int index) const noexcept;
     int columnToIndex (int line, int column) const noexcept;

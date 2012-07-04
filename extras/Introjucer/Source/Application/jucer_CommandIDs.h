@@ -43,8 +43,6 @@ namespace CommandIDs
     static const int showAppearanceSettings = 0x200077;
 
     static const int saveAll                = 0x200080;
-    static const int undo                   = 0x200090;
-    static const int redo                   = 0x2000a0;
 
     static const int closeWindow            = 0x201001;
     static const int closeAllDocuments      = 0x201000;

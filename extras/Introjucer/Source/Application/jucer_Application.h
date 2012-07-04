@@ -183,8 +183,8 @@ public:
             }
             else if (topLevelMenuIndex == 1)    // "Edit" menu
             {
-                menu.addCommandItem (commandManager, CommandIDs::undo);
-                menu.addCommandItem (commandManager, CommandIDs::redo);
+                menu.addCommandItem (commandManager, StandardApplicationCommandIDs::undo);
+                menu.addCommandItem (commandManager, StandardApplicationCommandIDs::redo);
                 menu.addSeparator();
                 menu.addCommandItem (commandManager, StandardApplicationCommandIDs::cut);
                 menu.addCommandItem (commandManager, StandardApplicationCommandIDs::copy);

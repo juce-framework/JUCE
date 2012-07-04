@@ -26,8 +26,7 @@
 class CodeEditorComponent::CodeEditorLine
 {
 public:
-    CodeEditorLine() noexcept
-       : highlightColumnStart (0), highlightColumnEnd (0)
+    CodeEditorLine() noexcept   : highlightColumnStart (0), highlightColumnEnd (0)
     {
     }
 
@@ -196,7 +195,7 @@ private:
 
             for (;;)
             {
-                int tabPos = t.text.indexOfChar ('\t');
+                const int tabPos = t.text.indexOfChar ('\t');
                 if (tabPos < 0)
                     break;
 
@@ -225,6 +224,26 @@ private:
         return col;
     }
 };
+
+namespace CodeEditorHelpers
+{
+    static int findFirstNonWhitespaceChar (const String& line) noexcept
+    {
+        String::CharPointerType t (line.getCharPointer());
+        int i = 0;
+
+        while (! t.isEmpty())
+        {
+            if (! t.isWhitespace())
+                return i;
+
+            ++t;
+            ++i;
+        }
+
+        return 0;
+    }
+}
 
 //==============================================================================
 class CodeEditorComponent::GutterComponent  : public Component
@@ -641,6 +660,11 @@ CodeDocument::Position CodeEditorComponent::getPositionAt (int x, int y)
 //==============================================================================
 void CodeEditorComponent::insertTextAtCaret (const String& newText)
 {
+    insertText (newText);
+}
+
+void CodeEditorComponent::insertText (const String& newText)
+{
     document.deleteSection (selectionStart, selectionEnd);
 
     if (newText.isNotEmpty())
@@ -661,17 +685,89 @@ void CodeEditorComponent::insertTabAtCaret()
     {
         const int caretCol = indexToColumn (caretPos.getLineNumber(), caretPos.getIndexInLine());
         const int spacesNeeded = spacesPerTab - (caretCol % spacesPerTab);
-        insertTextAtCaret (String::repeatedString (" ", spacesNeeded));
+        insertText (String::repeatedString (" ", spacesNeeded));
     }
     else
     {
-        insertTextAtCaret ("\t");
+        insertText ("\t");
     }
+}
+
+bool CodeEditorComponent::deleteWhitespaceBackwardsToTabStop()
+{
+    if (! getHighlightedRegion().isEmpty())
+        return false;
+
+    for (;;)
+    {
+        const int currentColumn = indexToColumn (caretPos.getLineNumber(), caretPos.getIndexInLine());
+
+        if (currentColumn <= 0 || (currentColumn % spacesPerTab) == 0)
+            break;
+
+        moveCaretLeft (false, true);
+    }
+
+    const String selected (getTextInRange (getHighlightedRegion()));
+
+    if (selected.isNotEmpty() && selected.trim().isEmpty())
+    {
+        cut();
+        return true;
+    }
+
+    return false;
+}
+
+void CodeEditorComponent::indentSelection()     { indentSelectedLines ( spacesPerTab); }
+void CodeEditorComponent::unindentSelection()   { indentSelectedLines (-spacesPerTab); }
+
+void CodeEditorComponent::indentSelectedLines (const int spacesToAdd)
+{
+    newTransaction();
+
+    CodeDocument::Position oldSelectionStart (selectionStart), oldSelectionEnd (selectionEnd), oldCaret (caretPos);
+    oldSelectionStart.setPositionMaintained (true);
+    oldSelectionEnd.setPositionMaintained (true);
+    oldCaret.setPositionMaintained (true);
+
+    const int lineStart = selectionStart.getLineNumber();
+    int lineEnd = selectionEnd.getLineNumber();
+
+    if (lineEnd > lineStart && selectionEnd.getIndexInLine() == 0)
+        --lineEnd;
+
+    for (int line = lineStart; line <= lineEnd; ++line)
+    {
+        const String lineText (document.getLine (line));
+        const int nonWhitespaceStart = CodeEditorHelpers::findFirstNonWhitespaceChar (lineText);
+
+        if (nonWhitespaceStart > 0 || lineText.trimStart().isNotEmpty())
+        {
+            const CodeDocument::Position wsStart (&document, line, 0);
+            const CodeDocument::Position wsEnd   (&document, line, nonWhitespaceStart);
+
+            const int numLeadingSpaces = indexToColumn (line, wsEnd.getIndexInLine());
+            const int newNumLeadingSpaces = jmax (0, numLeadingSpaces + spacesToAdd);
+
+            if (newNumLeadingSpaces != numLeadingSpaces)
+            {
+                document.deleteSection (wsStart, wsEnd);
+                document.insertText (wsStart, String::repeatedString (useSpacesForTabs ? " " : "\t",
+                                                                      useSpacesForTabs ? newNumLeadingSpaces
+                                                                                       : (newNumLeadingSpaces / spacesPerTab)));
+            }
+        }
+    }
+
+    selectionStart = oldSelectionStart;
+    selectionEnd = oldSelectionEnd;
+    caretPos = oldCaret;
 }
 
 void CodeEditorComponent::cut()
 {
-    insertTextAtCaret (String::empty);
+    insertText (String::empty);
 }
 
 bool CodeEditorComponent::copyToClipboard()
@@ -700,7 +796,7 @@ bool CodeEditorComponent::pasteFromClipboard()
     const String clip (SystemClipboard::getTextFromClipboard());
 
     if (clip.isNotEmpty())
-        insertTextAtCaret (clip);
+        insertText (clip);
 
     newTransaction();
     return true;
@@ -812,26 +908,6 @@ bool CodeEditorComponent::moveCaretToTop (const bool selecting)
     newTransaction();
     moveCaretTo (CodeDocument::Position (&document, 0, 0), selecting);
     return true;
-}
-
-namespace CodeEditorHelpers
-{
-    static int findFirstNonWhitespaceChar (const String& line) noexcept
-    {
-        String::CharPointerType t (line.getCharPointer());
-        int i = 0;
-
-        while (! t.isEmpty())
-        {
-            if (! t.isWhitespace())
-                return i;
-
-            ++t;
-            ++i;
-        }
-
-        return 0;
-    }
 }
 
 bool CodeEditorComponent::moveCaretToStartOfLine (const bool selecting)
@@ -956,20 +1032,27 @@ bool CodeEditorComponent::keyPressed (const KeyPress& key)
     {
         if (key == KeyPress::tabKey || key.getTextCharacter() == '\t')
         {
-            insertTabAtCaret();
+            handleTabKey();
         }
         else if (key == KeyPress::returnKey)
         {
-            newTransaction();
-            insertTextAtCaret (document.getNewLineCharacters());
+            handleReturnKey();
         }
         else if (key.isKeyCode (KeyPress::escapeKey))
         {
-            newTransaction();
+            handleEscapeKey();
         }
         else if (key.getTextCharacter() >= ' ')
         {
             insertTextAtCaret (String::charToString (key.getTextCharacter()));
+        }
+        else if (key == KeyPress ('[', ModifierKeys::commandModifier, 0))
+        {
+            unindentSelection();
+        }
+        else if (key == KeyPress (']', ModifierKeys::commandModifier, 0))
+        {
+            indentSelection();
         }
         else
         {
@@ -980,26 +1063,90 @@ bool CodeEditorComponent::keyPressed (const KeyPress& key)
     return true;
 }
 
+void CodeEditorComponent::handleReturnKey()
+{
+    insertText (document.getNewLineCharacters());
+}
+
+void CodeEditorComponent::handleTabKey()
+{
+    insertTabAtCaret();
+}
+
+void CodeEditorComponent::handleEscapeKey()
+{
+    newTransaction();
+}
+
+//==============================================================================
+void CodeEditorComponent::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
+{
+    m.addItem (StandardApplicationCommandIDs::cut,   TRANS("Cut"));
+    m.addItem (StandardApplicationCommandIDs::copy,  TRANS("Copy"), ! getHighlightedRegion().isEmpty());
+    m.addItem (StandardApplicationCommandIDs::paste, TRANS("Paste"));
+    m.addItem (StandardApplicationCommandIDs::del,   TRANS("Delete"));
+    m.addSeparator();
+    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS("Select All"));
+    m.addSeparator();
+    m.addItem (StandardApplicationCommandIDs::undo,  TRANS("Undo"), document.getUndoManager().canUndo());
+    m.addItem (StandardApplicationCommandIDs::redo,  TRANS("Redo"), document.getUndoManager().canRedo());
+}
+
+void CodeEditorComponent::performPopupMenuAction (const int menuItemID)
+{
+    switch (menuItemID)
+    {
+        case StandardApplicationCommandIDs::cut:        cutToClipboard(); break;
+        case StandardApplicationCommandIDs::copy:       copyToClipboard(); break;
+        case StandardApplicationCommandIDs::paste:      pasteFromClipboard(); break;
+        case StandardApplicationCommandIDs::del:        cut(); break;
+        case StandardApplicationCommandIDs::selectAll:  selectAll(); break;
+        case StandardApplicationCommandIDs::undo:       undo(); break;
+        case StandardApplicationCommandIDs::redo:       redo(); break;
+        default: break;
+    }
+}
+
+static void codeEditorMenuCallback (int menuResult, CodeEditorComponent* editor)
+{
+    if (editor != nullptr && menuResult != 0)
+        editor->performPopupMenuAction (menuResult);
+}
+
+//==============================================================================
 void CodeEditorComponent::mouseDown (const MouseEvent& e)
 {
     newTransaction();
     dragType = notDragging;
 
-    if (! e.mods.isPopupMenu())
+    if (e.mods.isPopupMenu())
     {
-        beginDragAutoRepeat (100);
-        moveCaretTo (getPositionAt (e.x, e.y), e.mods.isShiftDown());
+        if (getHighlightedRegion().isEmpty())
+        {
+            const CodeDocument::Position pos (getPositionAt (e.x, e.y));
+            const String line (pos.getLineText());
+            const int index = pos.getIndexInLine();
+            const int lineLen = line.length();
+
+            if (index > 0 && index < lineLen - 2)
+            {
+                moveCaretTo (pos, false);
+                moveCaretLeft (true, false);
+                moveCaretRight (true, true);
+            }
+        }
+
+        PopupMenu m;
+        m.setLookAndFeel (&getLookAndFeel());
+        addPopupMenuItems (m, &e);
+
+        m.showMenuAsync (PopupMenu::Options(),
+                         ModalCallbackFunction::forComponent (codeEditorMenuCallback, this));
     }
     else
     {
-        /*PopupMenu m;
-        addPopupMenuItems (m, &e);
-
-        const int result = m.show();
-
-        if (result != 0)
-            performPopupMenuAction (result);
-        */
+        beginDragAutoRepeat (100);
+        moveCaretTo (getPositionAt (e.x, e.y), e.mods.isShiftDown());
     }
 }
 
@@ -1147,6 +1294,7 @@ void CodeEditorComponent::ColourScheme::set (const String& name, const Colour& c
     for (int i = 0; i < types.size(); ++i)
     {
         TokenType& tt = types.getReference(i);
+
         if (tt.name == name)
         {
             tt.colour = colour;
@@ -1191,57 +1339,57 @@ void CodeEditorComponent::updateCachedIterators (int maxLineNum)
     if (cachedIterators.size() == 0)
         cachedIterators.add (new CodeDocument::Iterator (&document));
 
-    if (codeTokeniser == nullptr)
-        return;
-
-    for (;;)
+    if (codeTokeniser != nullptr)
     {
-        CodeDocument::Iterator* last = cachedIterators.getLast();
-
-        if (last->getLine() >= maxLineNum)
-            break;
-
-        CodeDocument::Iterator* t = new CodeDocument::Iterator (*last);
-        cachedIterators.add (t);
-        const int targetLine = last->getLine() + linesBetweenCachedSources;
-
         for (;;)
         {
-            codeTokeniser->readNextToken (*t);
+            CodeDocument::Iterator* const last = cachedIterators.getLast();
 
-            if (t->getLine() >= targetLine)
+            if (last->getLine() >= maxLineNum)
                 break;
 
-            if (t->isEOF())
-                return;
+            CodeDocument::Iterator* t = new CodeDocument::Iterator (*last);
+            cachedIterators.add (t);
+            const int targetLine = last->getLine() + linesBetweenCachedSources;
+
+            for (;;)
+            {
+                codeTokeniser->readNextToken (*t);
+
+                if (t->getLine() >= targetLine)
+                    break;
+
+                if (t->isEOF())
+                    return;
+            }
         }
     }
 }
 
 void CodeEditorComponent::getIteratorForPosition (int position, CodeDocument::Iterator& source)
 {
-    if (codeTokeniser == nullptr)
-        return;
-
-    for (int i = cachedIterators.size(); --i >= 0;)
+    if (codeTokeniser != nullptr)
     {
-        CodeDocument::Iterator* t = cachedIterators.getUnchecked (i);
-        if (t->getPosition() <= position)
+        for (int i = cachedIterators.size(); --i >= 0;)
         {
-            source = *t;
-            break;
+            CodeDocument::Iterator* t = cachedIterators.getUnchecked (i);
+            if (t->getPosition() <= position)
+            {
+                source = *t;
+                break;
+            }
         }
-    }
 
-    while (source.getPosition() < position)
-    {
-        const CodeDocument::Iterator original (source);
-        codeTokeniser->readNextToken (source);
-
-        if (source.getPosition() > position || source.isEOF())
+        while (source.getPosition() < position)
         {
-            source = original;
-            break;
+            const CodeDocument::Iterator original (source);
+            codeTokeniser->readNextToken (source);
+
+            if (source.getPosition() > position || source.isEOF())
+            {
+                source = original;
+                break;
+            }
         }
     }
 }
