@@ -130,7 +130,7 @@ void StoredSettings::reload()
 
     const ScopedPointer<XmlElement> xml (props->getXmlValue ("editorColours"));
     if (xml != nullptr)
-        appearance.settings = ValueTree::fromXml (*xml);
+        appearance.readFromXML (*xml);
 
     loadSwatchColours();
 }

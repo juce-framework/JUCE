@@ -227,11 +227,43 @@ private:
 };
 
 //==============================================================================
+class CodeEditorComponent::GutterComponent  : public Component
+{
+public:
+    GutterComponent() {}
+
+    void paint (Graphics& g)
+    {
+        jassert (dynamic_cast <CodeEditorComponent*> (getParentComponent()) != nullptr);
+        const CodeEditorComponent& editor = *static_cast <CodeEditorComponent*> (getParentComponent());
+
+        g.fillAll (editor.findColour (lineNumberBackgroundId));
+
+        const Rectangle<int> clip (g.getClipBounds());
+        const int lineHeight = editor.lineHeight;
+        const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
+        const int lastLineToDraw = jmin (editor.lines.size(), clip.getBottom() / lineHeight + 1);
+
+        const Font lineNumberFont (editor.getFont().withHeight (lineHeight * 0.8f));
+        const float y = (lineHeight - lineNumberFont.getHeight()) / 2.0f + lineNumberFont.getAscent();
+        const float w = getWidth() - 2.0f;
+
+        GlyphArrangement ga;
+        for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
+            ga.addJustifiedText (lineNumberFont, String (editor.firstLineOnScreen + i + 1),
+                                 0.0f, y + (lineHeight * i), w, Justification::centredRight);
+
+        g.setColour (editor.findColour (lineNumberTextId));
+        ga.draw (g);
+    }
+};
+
+
+//==============================================================================
 CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
                                           CodeTokeniser* const codeTokeniser_)
     : document (document_),
       firstLineOnScreen (0),
-      gutter (5),
       spacesPerTab (4),
       lineHeight (0),
       linesOnScreen (0),
@@ -239,6 +271,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
       scrollbarThickness (16),
       columnToTryToMaintain (-1),
       useSpacesForTabs (false),
+      showLineNumbers (false),
       xOffset (0),
       verticalScrollBar (true),
       horizontalScrollBar (false),
@@ -272,6 +305,8 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
     if (codeTokeniser != nullptr)
         setColourScheme (codeTokeniser->getDefaultColourScheme());
 
+    setLineNumbersShown (true);
+
     verticalScrollBar.addListener (this);
     horizontalScrollBar.addListener (this);
     document.addListener (this);
@@ -280,6 +315,11 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
 CodeEditorComponent::~CodeEditorComponent()
 {
     document.removeListener (this);
+}
+
+int CodeEditorComponent::getGutterSize() const noexcept
+{
+    return showLineNumbers ? 35 : 5;
 }
 
 void CodeEditorComponent::loadContent (const String& newContent)
@@ -307,6 +347,20 @@ void CodeEditorComponent::setTemporaryUnderlining (const Array <Range<int> >&)
 Rectangle<int> CodeEditorComponent::getCaretRectangle()
 {
     return getLocalArea (caret, caret->getLocalBounds());
+}
+
+void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
+{
+    if (showLineNumbers != shouldBeShown)
+    {
+        showLineNumbers = shouldBeShown;
+        gutter = nullptr;
+
+        if (shouldBeShown)
+            addAndMakeVisible (gutter = new GutterComponent(), 0);
+
+        resized();
+    }
 }
 
 //==============================================================================
@@ -339,8 +393,14 @@ void CodeEditorComponent::resized()
     rebuildLineTokens();
     updateCaretPosition();
 
-    verticalScrollBar.setBounds (getWidth() - scrollbarThickness, 0, scrollbarThickness, getHeight() - scrollbarThickness);
-    horizontalScrollBar.setBounds (gutter, getHeight() - scrollbarThickness, getWidth() - scrollbarThickness - gutter, scrollbarThickness);
+    if (gutter != nullptr)
+        gutter->setBounds (0, 0, getGutterSize() - 2, getHeight());
+
+    verticalScrollBar.setBounds (getWidth() - scrollbarThickness, 0,
+                                 scrollbarThickness, getHeight() - scrollbarThickness);
+
+    horizontalScrollBar.setBounds (getGutterSize(), getHeight() - scrollbarThickness,
+                                   getWidth() - scrollbarThickness - getGutterSize(), scrollbarThickness);
     updateScrollBars();
 }
 
@@ -350,24 +410,22 @@ void CodeEditorComponent::paint (Graphics& g)
 
     g.fillAll (findColour (CodeEditorComponent::backgroundColourId));
 
+    const int gutter = getGutterSize();
     g.reduceClipRegion (gutter, 0, verticalScrollBar.getX() - gutter, horizontalScrollBar.getY());
 
     g.setFont (font);
     const int baselineOffset = (int) font.getAscent();
-    const Colour defaultColour (findColour (CodeEditorComponent::defaultTextColourId));
     const Colour highlightColour (findColour (CodeEditorComponent::highlightColourId));
 
     const Rectangle<int> clip (g.getClipBounds());
     const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
     const int lastLineToDraw = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
 
-    for (int j = firstLineToDraw; j < lastLineToDraw; ++j)
-    {
-        lines.getUnchecked(j)->draw (*this, g, font,
+    for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
+        lines.getUnchecked(i)->draw (*this, g, font,
                                      (float) (gutter - xOffset * charWidth),
-                                     lineHeight * j, baselineOffset, lineHeight,
+                                     lineHeight * i, baselineOffset, lineHeight,
                                      highlightColour);
-    }
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)
@@ -422,11 +480,8 @@ void CodeEditorComponent::rebuildLineTokens()
     }
 
     if (minLineToRepaint <= maxLineToRepaint)
-    {
-        repaint (gutter, lineHeight * minLineToRepaint - 1,
-                 verticalScrollBar.getX() - gutter,
-                 lineHeight * (1 + maxLineToRepaint - minLineToRepaint) + 2);
-    }
+        repaint (0, lineHeight * minLineToRepaint - 1,
+                 verticalScrollBar.getX(), lineHeight * (1 + maxLineToRepaint - minLineToRepaint) + 2);
 }
 
 //==============================================================================
@@ -568,7 +623,7 @@ void CodeEditorComponent::scrollToKeepCaretOnScreen()
 
 Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const
 {
-    return Rectangle<int> (roundToInt ((gutter - xOffset * charWidth) + indexToColumn (pos.getLineNumber(), pos.getIndexInLine()) * charWidth),
+    return Rectangle<int> (roundToInt ((getGutterSize() - xOffset * charWidth) + indexToColumn (pos.getLineNumber(), pos.getIndexInLine()) * charWidth),
                            (pos.getLineNumber() - firstLineOnScreen) * lineHeight,
                            roundToInt (charWidth),
                            lineHeight);
@@ -577,7 +632,7 @@ Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument::Posi
 CodeDocument::Position CodeEditorComponent::getPositionAt (int x, int y)
 {
     const int line = y / lineHeight + firstLineOnScreen;
-    const int column = roundToInt ((x - (gutter - xOffset * charWidth)) / charWidth);
+    const int column = roundToInt ((x - (getGutterSize() - xOffset * charWidth)) / charWidth);
     const int index = columnToIndex (line, column);
 
     return CodeDocument::Position (&document, line, index);

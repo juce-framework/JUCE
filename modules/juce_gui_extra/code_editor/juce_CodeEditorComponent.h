@@ -110,6 +110,9 @@ public:
     */
     CodeDocument::Position getPositionAt (int x, int y);
 
+    /** Enables or disables the line-number display in the gutter. */
+    void setLineNumbersShown (bool shouldBeShown);
+
     //==============================================================================
     bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
     bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
@@ -213,10 +216,10 @@ public:
     enum ColourIds
     {
         backgroundColourId          = 0x1004500,  /**< A colour to use to fill the editor's background. */
-        highlightColourId           = 0x1004502,  /**< The colour to use for the highlighted background under
-                                                       selected text. */
-        defaultTextColourId         = 0x1004503   /**< The colour to use for text when no syntax colouring is
-                                                       enabled. */
+        highlightColourId           = 0x1004502,  /**< The colour to use for the highlighted background under selected text. */
+        defaultTextColourId         = 0x1004503,  /**< The colour to use for text when no syntax colouring is enabled. */
+        lineNumberBackgroundId      = 0x1004504,  /**< The colour to use for filling the background of the line-number gutter. */
+        lineNumberTextId            = 0x1004505,  /**< The colour to use for drawing the line numbers. */
     };
 
     //==============================================================================
@@ -250,12 +253,11 @@ public:
     /** @internal */
     void timerCallback();
     /** @internal */
-    void scrollBarMoved (ScrollBar*, double newRangeStart);
+    void scrollBarMoved (ScrollBar*, double);
     /** @internal */
     void handleAsyncUpdate();
     /** @internal */
-    void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
-                              const CodeDocument::Position& affectedTextEnd);
+    void codeDocumentChanged (const CodeDocument::Position&, const CodeDocument::Position&);
     /** @internal */
     bool isTextInputActive() const;
     /** @internal */
@@ -266,11 +268,11 @@ private:
     CodeDocument& document;
 
     Font font;
-    int firstLineOnScreen, gutter, spacesPerTab;
+    int firstLineOnScreen, spacesPerTab;
     float charWidth;
     int lineHeight, linesOnScreen, columnsOnScreen;
     int scrollbarThickness, columnToTryToMaintain;
-    bool useSpacesForTabs;
+    bool useSpacesForTabs, showLineNumbers;
     double xOffset;
 
     CodeDocument::Position caretPos;
@@ -278,6 +280,11 @@ private:
 
     ScopedPointer<CaretComponent> caret;
     ScrollBar verticalScrollBar, horizontalScrollBar;
+
+    class GutterComponent;
+    friend class GutterComponent;
+    friend class ScopedPointer<GutterComponent>;
+    ScopedPointer<GutterComponent> gutter;
 
     enum DragType
     {
@@ -301,6 +308,7 @@ private:
     void updateCachedIterators (int maxLineNum);
     void getIteratorForPosition (int position, CodeDocument::Iterator& result);
     void moveLineDelta (int delta, bool selecting);
+    int getGutterSize() const noexcept;
 
     //==============================================================================
     void updateCaretPosition();

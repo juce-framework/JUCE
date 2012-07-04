@@ -33,6 +33,7 @@ public:
     AppearanceSettings (const CodeEditorComponent& editorToCopyFrom);
 
     bool readFromFile (const File& file);
+    bool readFromXML (const XmlElement&);
     bool writeToFile (const File& file) const;
 
     void applyToCodeEditor (CodeEditorComponent& editor) const;

@@ -32,6 +32,8 @@ AppearanceSettings::AppearanceSettings (const CodeEditorComponent& editor)
     : settings ("COLOUR_SCHEME")
 {
     getColourValue ("Background")          = editor.findColour (CodeEditorComponent::backgroundColourId).toString();
+    getColourValue ("Line Number Bkgd")    = editor.findColour (CodeEditorComponent::lineNumberBackgroundId).toString();
+    getColourValue ("Line Numbers")        = editor.findColour (CodeEditorComponent::lineNumberTextId).toString();
     getColourValue ("Plain Text")          = editor.findColour (CodeEditorComponent::defaultTextColourId).toString();
     getColourValue ("Selected Background") = editor.findColour (CodeEditorComponent::highlightColourId).toString();
 
@@ -48,17 +50,30 @@ AppearanceSettings::AppearanceSettings (const CodeEditorComponent& editor)
     getCodeFontValue() = f.toString();
 }
 
-bool AppearanceSettings::readFromFile (const File& file)
+bool AppearanceSettings::readFromXML (const XmlElement& xml)
 {
-    const ScopedPointer<XmlElement> xml (XmlDocument::parse (file));
-
-    if (xml != nullptr && xml->hasTagName (settings.getType().toString()))
+    if (xml.hasTagName (settings.getType().toString()))
     {
-        settings = ValueTree::fromXml (*xml);
+        ValueTree newSettings (ValueTree::fromXml (xml));
+
+        for (int i = settings.getNumChildren(); --i >= 0;)
+        {
+            const ValueTree c (settings.getChild (i));
+            if (! newSettings.getChildWithProperty (Ids::name, c.getProperty (Ids::name)).isValid())
+                newSettings.addChild (c.createCopy(), 0, nullptr);
+        }
+
+        settings = newSettings;
         return true;
     }
 
     return false;
+}
+
+bool AppearanceSettings::readFromFile (const File& file)
+{
+    const ScopedPointer<XmlElement> xml (XmlDocument::parse (file));
+    return xml != nullptr && readFromXML (*xml);
 }
 
 bool AppearanceSettings::writeToFile (const File& file) const
@@ -97,6 +112,8 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
     Colour col;
     if (getColour ("Plain Text", col))          editor.setColour (CodeEditorComponent::defaultTextColourId, col);
     if (getColour ("Selected Background", col)) editor.setColour (CodeEditorComponent::highlightColourId, col);
+    if (getColour ("Line Number Bkgd", col))    editor.setColour (CodeEditorComponent::lineNumberBackgroundId, col);
+    if (getColour ("Line Numbers", col))        editor.setColour (CodeEditorComponent::lineNumberTextId, col);
 
     if (getColour ("Background", col))
     {

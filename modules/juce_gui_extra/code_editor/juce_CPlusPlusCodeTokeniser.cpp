@@ -333,6 +333,46 @@ namespace CppTokeniser
         }
     }
 
+    static void skipPreprocessorLine (CodeDocument::Iterator& source) noexcept
+    {
+        bool lastWasBackslash = false;
+
+        for (;;)
+        {
+            const juce_wchar c = source.peekNextChar();
+
+            if (c == '"')
+            {
+                skipQuotedString (source);
+                continue;
+            }
+
+            if (c == '/')
+            {
+                const juce_wchar c2 = source.peekNextChar();
+
+                if (c2 == '/' || c2 == '*')
+                    return;
+            }
+
+            if (c == 0)
+                break;
+
+            if (c == '\n' || c == '\r')
+            {
+                source.skipToEndOfLine();
+
+                if (lastWasBackslash)
+                    skipPreprocessorLine (source);
+
+                break;
+            }
+
+            lastWasBackslash = (c == '\\');
+            source.skip();
+        }
+    }
+
     static void skipIfNextCharMatches (CodeDocument::Iterator& source, const juce_wchar c) noexcept
     {
         if (source.peekNextChar() == c)
@@ -478,7 +518,7 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
 
     case '#':
         result = tokenType_preprocessor;
-        source.skipToEndOfLine();
+        skipPreprocessorLine (source);
         break;
 
     default:
