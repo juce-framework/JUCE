@@ -229,6 +229,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Application\jucer_AppearanceSettings.cpp">
+      <Filter>The Introjucer\Application</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
@@ -1194,6 +1197,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Application\jucer_AppearanceSettings.h">
+      <Filter>The Introjucer\Application</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_Application.h">
       <Filter>The Introjucer\Application</Filter>
     </ClInclude>

@@ -519,7 +519,7 @@ CodeEditorComponent::ColourScheme CPlusPlusCodeTokeniser::getDefaultColourScheme
     CodeEditorComponent::ColourScheme cs;
 
     for (int i = 0; i < sizeof (types) / sizeof (types[0]); ++i)  // (NB: numElementsInArray doesn't work here in GCC4.2)
-        cs.add (types[i].name, Colour (types[i].colour));
+        cs.set (types[i].name, Colour (types[i].colour));
 
     return cs;
 }

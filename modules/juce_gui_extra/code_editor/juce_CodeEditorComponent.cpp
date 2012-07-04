@@ -333,8 +333,8 @@ void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& aff
 
 void CodeEditorComponent::resized()
 {
-    linesOnScreen = (getHeight() - scrollbarThickness) / lineHeight;
-    columnsOnScreen = (int) ((getWidth() - scrollbarThickness) / charWidth);
+    linesOnScreen   = jmax (1, (getHeight() - scrollbarThickness) / lineHeight);
+    columnsOnScreen = jmax (1, (int) ((getWidth() - scrollbarThickness) / charWidth));
     lines.clear();
     rebuildLineTokens();
     updateCaretPosition();
@@ -1087,8 +1087,18 @@ void CodeEditorComponent::setFont (const Font& newFont)
     resized();
 }
 
-void CodeEditorComponent::ColourScheme::add (const String& name, const Colour& colour)
+void CodeEditorComponent::ColourScheme::set (const String& name, const Colour& colour)
 {
+    for (int i = 0; i < types.size(); ++i)
+    {
+        TokenType& tt = types.getReference(i);
+        if (tt.name == name)
+        {
+            tt.colour = colour;
+            return;
+        }
+    }
+
     TokenType tt;
     tt.name = name;
     tt.colour = colour;

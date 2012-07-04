@@ -26,16 +26,13 @@
 #ifndef __JUCER_STOREDSETTINGS_JUCEHEADER__
 #define __JUCER_STOREDSETTINGS_JUCEHEADER__
 
+#include "../Application/jucer_AppearanceSettings.h"
+
 
 //==============================================================================
-/**
-    A singleton to hold persistent settings, and to save them in a
-    suitable PropertiesFile.
-*/
 class StoredSettings
 {
 public:
-    //==============================================================================
     StoredSettings();
     ~StoredSettings();
 
@@ -63,6 +60,12 @@ public:
         Colour getSwatchColour (int index) const;
         void setSwatchColour (int index, const Colour& newColour) const;
     };
+
+    //==============================================================================
+    AppearanceSettings appearance;
+
+    const char* getSchemeFileSuffix() const     { return ".editorscheme"; }
+    File getSchemesFolder();
 
 private:
     ScopedPointer<PropertiesFile> props;

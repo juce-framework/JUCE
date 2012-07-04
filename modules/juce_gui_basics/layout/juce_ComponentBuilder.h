@@ -45,7 +45,7 @@
     object, or if you keep the ComponentBuilder around, it'll monitor any changes in the
     ValueTree and automatically update the component to reflect these changes.
 */
-class JUCE_API  ComponentBuilder  : public ValueTree::Listener
+class JUCE_API  ComponentBuilder  : private ValueTree::Listener
 {
 public:
     /** Creates a ComponentBuilder that will use the given state.
@@ -235,16 +235,6 @@ public:
 
     //=============================================================================
     /** @internal */
-    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
-    /** @internal */
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded);
-    /** @internal */
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved);
-    /** @internal */
-    void valueTreeChildOrderChanged (ValueTree& parentTree);
-    /** @internal */
-    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
-    /** @internal */
     static void refreshBasicComponentProperties (Component&, const ValueTree&);
     /** @internal */
     static RelativeRectangle getComponentBounds (const ValueTree&);
@@ -257,6 +247,12 @@ private:
    #if JUCE_DEBUG
     WeakReference<Component> componentRef;
    #endif
+
+    void valueTreePropertyChanged (ValueTree&, const Identifier&);
+    void valueTreeChildAdded (ValueTree&, ValueTree&);
+    void valueTreeChildRemoved (ValueTree&, ValueTree&);
+    void valueTreeChildOrderChanged (ValueTree&);
+    void valueTreeParentChanged (ValueTree&);
 
     static const Identifier positionID;
     void initialiseRecursively (Component&, const ValueTree&);

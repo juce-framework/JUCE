@@ -130,6 +130,8 @@
   <Files>
     <Filter Name="The Introjucer">
       <Filter Name="Application">
+        <File RelativePath="..\..\Source\Application\jucer_AppearanceSettings.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_AppearanceSettings.h"/>
         <File RelativePath="..\..\Source\Application\jucer_Application.h"/>
         <File RelativePath="..\..\Source\Application\jucer_CommandIDs.h"/>
         <File RelativePath="..\..\Source\Application\jucer_CommandLine.cpp"/>

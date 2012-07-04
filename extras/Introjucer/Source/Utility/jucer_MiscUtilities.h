@@ -146,3 +146,204 @@ protected:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter);
 };
+
+//==============================================================================
+class PopupColourSelector   : public Component,
+                              public ChangeListener,
+                              public Value::Listener,
+                              public ButtonListener
+{
+public:
+    PopupColourSelector (const Value& colourValue_,
+                         const Colour& defaultColour_,
+                         const bool canResetToDefault)
+        : defaultButton ("Reset to Default"),
+          colourValue (colourValue_),
+          defaultColour (defaultColour_)
+    {
+        addAndMakeVisible (&selector);
+        selector.setName ("Colour");
+        selector.setCurrentColour (getColour());
+        selector.addChangeListener (this);
+
+        if (canResetToDefault)
+        {
+            addAndMakeVisible (&defaultButton);
+            defaultButton.addListener (this);
+        }
+
+        colourValue.addListener (this);
+        setSize (300, 400);
+    }
+
+    void resized()
+    {
+        if (defaultButton.isVisible())
+        {
+            selector.setBounds (0, 0, getWidth(), getHeight() - 30);
+            defaultButton.changeWidthToFitText (22);
+            defaultButton.setTopLeftPosition (10, getHeight() - 26);
+        }
+        else
+        {
+            selector.setBounds (0, 0, getWidth(), getHeight());
+        }
+    }
+
+    Colour getColour() const
+    {
+        if (colourValue.toString().isEmpty())
+            return defaultColour;
+
+        return Colour::fromString (colourValue.toString());
+    }
+
+    void setColour (const Colour& newColour)
+    {
+        if (getColour() != newColour)
+        {
+            if (newColour == defaultColour && defaultButton.isVisible())
+                colourValue = var::null;
+            else
+                colourValue = newColour.toDisplayString (true);
+        }
+    }
+
+    void buttonClicked (Button*)
+    {
+        setColour (defaultColour);
+        selector.setCurrentColour (defaultColour);
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*)
+    {
+        if (selector.getCurrentColour() != getColour())
+            setColour (selector.getCurrentColour());
+    }
+
+    void valueChanged (Value&)
+    {
+        selector.setCurrentColour (getColour());
+    }
+
+private:
+    StoredSettings::ColourSelectorWithSwatches selector;
+    TextButton defaultButton;
+    Value colourValue;
+    Colour defaultColour;
+};
+
+//==============================================================================
+/**
+    A component that shows a colour swatch with hex ARGB value, and which pops up
+    a colour selector when you click it.
+*/
+class ColourEditorComponent    : public Component,
+                                 public Value::Listener
+{
+public:
+    ColourEditorComponent (UndoManager* undoManager_, const Value& colourValue_,
+                           const Colour& defaultColour_, const bool canResetToDefault_)
+        : undoManager (undoManager_), colourValue (colourValue_), defaultColour (defaultColour_),
+          canResetToDefault (canResetToDefault_)
+    {
+        colourValue.addListener (this);
+    }
+
+    void paint (Graphics& g)
+    {
+        const Colour colour (getColour());
+
+        g.fillAll (Colours::grey);
+        g.fillCheckerBoard (getLocalBounds().reduced (2, 2),
+                            10, 10,
+                            Colour (0xffdddddd).overlaidWith (colour),
+                            Colour (0xffffffff).overlaidWith (colour));
+
+        g.setColour (Colours::white.overlaidWith (colour).contrasting());
+        g.setFont (Font (getHeight() * 0.6f, Font::bold));
+        g.drawFittedText (colour.toDisplayString (true),
+                          2, 1, getWidth() - 4, getHeight() - 1,
+                          Justification::centred, 1);
+    }
+
+    Colour getColour() const
+    {
+        if (colourValue.toString().isEmpty())
+            return defaultColour;
+
+        return Colour::fromString (colourValue.toString());
+    }
+
+    void setColour (const Colour& newColour)
+    {
+        if (getColour() != newColour)
+        {
+            if (newColour == defaultColour && canResetToDefault)
+                colourValue = var::null;
+            else
+                colourValue = newColour.toDisplayString (true);
+        }
+    }
+
+    void resetToDefault()
+    {
+        setColour (defaultColour);
+    }
+
+    void refresh()
+    {
+        const Colour col (getColour());
+
+        if (col != lastColour)
+        {
+            lastColour = col;
+            repaint();
+        }
+    }
+
+    void mouseDown (const MouseEvent&)
+    {
+        if (undoManager != nullptr)
+            undoManager->beginNewTransaction();
+
+        launchAsyncCallOutBox (*this, new PopupColourSelector (colourValue, defaultColour, canResetToDefault));
+    }
+
+    void valueChanged (Value&)
+    {
+        refresh();
+    }
+
+private:
+    UndoManager* undoManager;
+    Value colourValue;
+    Colour lastColour;
+    const Colour defaultColour;
+    const bool canResetToDefault;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourEditorComponent);
+};
+
+//==============================================================================
+class ColourPropertyComponent  : public PropertyComponent
+{
+public:
+    ColourPropertyComponent (UndoManager* undoManager, const String& name, const Value& colour,
+                             const Colour& defaultColour, bool canResetToDefault)
+        : PropertyComponent (name),
+          colourEditor (undoManager, colour, defaultColour, canResetToDefault)
+    {
+        addAndMakeVisible (&colourEditor);
+    }
+
+    void resized()
+    {
+        colourEditor.setBounds (getLookAndFeel().getPropertyComponentContentPosition (*this));
+    }
+
+    void refresh() {}
+
+protected:
+    ColourEditorComponent colourEditor;
+};

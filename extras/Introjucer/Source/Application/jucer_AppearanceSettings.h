@@ -23,36 +23,31 @@
   ==============================================================================
 */
 
-#include "jucer_DocumentEditorComponent.h"
-#include "../Project/jucer_ProjectContentComponent.h"
-#include "../Application/jucer_Application.h"
+#ifndef __JUCER_APPEARANCESETTINGS_H_34D762C7__
+#define __JUCER_APPEARANCESETTINGS_H_34D762C7__
 
 
-//==============================================================================
-DocumentEditorComponent::DocumentEditorComponent (OpenDocumentManager::Document* document_)
-    : document (document_)
+class AppearanceSettings
 {
-    JucerApplication::getApp()->openDocumentManager.addListener (this);
-}
+public:
+    AppearanceSettings (const CodeEditorComponent& editorToCopyFrom);
 
-DocumentEditorComponent::~DocumentEditorComponent()
-{
-    JucerApplication::getApp()->openDocumentManager.removeListener (this);
-}
+    bool readFromFile (const File& file);
+    bool writeToFile (const File& file) const;
 
-void DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Document* closingDoc)
-{
-    if (document == closingDoc)
-    {
-        jassert (document != nullptr);
-        ProjectContentComponent* pcc = findParentComponentOfClass<ProjectContentComponent>();
+    void applyToCodeEditor (CodeEditorComponent& editor) const;
 
-        if (pcc != nullptr)
-        {
-            pcc->hideDocument (document);
-            return;
-        }
+    StringArray getColourNames() const;
+    Value getColourValue (const String& colourName);
+    bool getColour (const String& name, Colour& resultIfFound) const;
 
-        jassertfalse
-    }
-}
+    Font getCodeFont() const;
+    Value getCodeFontValue();
+
+    ValueTree settings;
+
+    static Component* createEditorWindow();
+};
+
+
+#endif

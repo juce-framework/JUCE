@@ -91,10 +91,13 @@ OpenDocumentManager::OpenDocumentManager()
 
 OpenDocumentManager::~OpenDocumentManager()
 {
-    clearSingletonInstance();
 }
 
-juce_ImplementSingleton_SingleThreaded (OpenDocumentManager);
+void OpenDocumentManager::clear()
+{
+    documents.clear();
+    types.clear();
+}
 
 //==============================================================================
 void OpenDocumentManager::registerType (DocumentType* type)

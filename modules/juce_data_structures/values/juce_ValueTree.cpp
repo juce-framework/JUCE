@@ -1011,6 +1011,8 @@ ValueTree ValueTree::readFromGZIPData (const void* const data, const size_t numB
     return readFromStream (gzipStream);
 }
 
+void ValueTree::Listener::valueTreeRedirected (ValueTree&) {}
+
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

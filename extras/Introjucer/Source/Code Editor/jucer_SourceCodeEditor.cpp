@@ -37,7 +37,7 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
     addAndMakeVisible (&editor);
 
    #if JUCE_MAC
-    Font font (10.6f);
+    Font font (13.0f);
     font.setTypefaceName ("Menlo");
    #else
     Font font (10.0f);
@@ -46,10 +46,14 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
     editor.setFont (font);
 
     editor.setTabSize (4, true);
+
+    updateColourScheme();
+    getAppSettings().appearance.settings.addListener (this);
 }
 
 SourceCodeEditor::~SourceCodeEditor()
 {
+    getAppSettings().appearance.settings.removeListener (this);
 }
 
 void SourceCodeEditor::resized()
@@ -71,6 +75,17 @@ CodeTokeniser* SourceCodeEditor::getTokeniserFor (const File& file)
 SourceCodeEditor* SourceCodeEditor::createFor (OpenDocumentManager::Document* document,
                                                CodeDocument& codeDocument)
 {
-    return new SourceCodeEditor (document, codeDocument,
-                                 getTokeniserFor (document->getFile()));
+    return new SourceCodeEditor (document, codeDocument, getTokeniserFor (document->getFile()));
+}
+
+void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
+void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
+void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
+
+void SourceCodeEditor::updateColourScheme()
+{
+    getAppSettings().appearance.applyToCodeEditor (editor);
 }

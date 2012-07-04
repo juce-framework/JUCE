@@ -126,6 +126,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Application\jucer_AppearanceSettings.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_FilePreviewComponent.cpp"/>
@@ -965,6 +966,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Application\jucer_AppearanceSettings.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_Application.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_CommandIDs.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_CommandLine.h"/>

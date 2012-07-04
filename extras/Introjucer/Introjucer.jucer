@@ -65,6 +65,10 @@
   </EXPORTFORMATS>
   <MAINGROUP name="The Introjucer" id="NhrJq66R">
     <GROUP id="mslFIKZ" name="Application">
+      <FILE id="pI5xt5" name="jucer_AppearanceSettings.cpp" compile="1" resource="0"
+            file="Source/Application/jucer_AppearanceSettings.cpp"/>
+      <FILE id="oCCddi" name="jucer_AppearanceSettings.h" compile="0" resource="0"
+            file="Source/Application/jucer_AppearanceSettings.h"/>
       <FILE id="PXX8Yi" name="jucer_Application.h" compile="0" resource="0"
             file="Source/Application/jucer_Application.h"/>
       <FILE id="lHd3UQJ" name="jucer_CommandIDs.h" compile="0" resource="0"

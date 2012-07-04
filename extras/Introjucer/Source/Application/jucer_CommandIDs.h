@@ -40,6 +40,7 @@ namespace CommandIDs
     static const int showProjectSettings    = 0x200074;
     static const int updateModules          = 0x200075;
     static const int showUTF8Tool           = 0x200076;
+    static const int showAppearanceSettings = 0x200077;
 
     static const int saveAll                = 0x200080;
     static const int undo                   = 0x200090;
@@ -48,7 +49,6 @@ namespace CommandIDs
     static const int closeWindow            = 0x201001;
     static const int closeAllDocuments      = 0x201000;
 
-    static const int test                   = 0x202090;
     static const int toFront                = 0x2020a0;
     static const int toBack                 = 0x2030a1;
     static const int showOrHideProperties   = 0x2030b0;
@@ -71,21 +71,11 @@ namespace CommandIDs
 
     static const int showGrid               = 0x2020e0;
     static const int enableSnapToGrid       = 0x2020f0;
-
-    static const int editCompLayout         = 0x202100;
-    static const int editCompGraphics       = 0x202110;
-
-    static const int bringBackLostItems     = 0x202120;
-
     static const int zoomIn                 = 0x202130;
     static const int zoomOut                = 0x202140;
     static const int zoomNormal             = 0x202150;
     static const int spaceBarDrag           = 0x202160;
-
-    static const int compOverlay0           = 0x202200;
-    static const int compOverlay33          = 0x202210;
-    static const int compOverlay66          = 0x202220;
-    static const int compOverlay100         = 0x202230;
+    static const int bringBackLostItems     = 0x202120;
 
     static const int newDocumentBase        = 0x322010;
     static const int newComponentBase       = 0x302010;

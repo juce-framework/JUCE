@@ -112,6 +112,7 @@ public:
         tree.setDefaultOpenness (true);
         tree.setColour (TreeView::backgroundColourId, Colours::transparentBlack);
         tree.setIndentSize (14);
+        tree.getViewport()->setScrollBarThickness (14);
     }
 
     ~TreePanelBase()

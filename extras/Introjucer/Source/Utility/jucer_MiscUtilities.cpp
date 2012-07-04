@@ -468,7 +468,7 @@ class CallOutBoxCallback  : public ModalComponentManager::Callback
 public:
     CallOutBoxCallback (Component& attachTo, Component* content_)
         : content (content_),
-          callout (*content_, attachTo, attachTo.getTopLevelComponent())
+          callout (*content_, attachTo, nullptr)
     {
         callout.setVisible (true);
         callout.enterModalState (true, this);

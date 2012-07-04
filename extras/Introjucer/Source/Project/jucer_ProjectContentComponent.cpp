@@ -25,6 +25,7 @@
 
 #include "jucer_ProjectContentComponent.h"
 #include "../Application/jucer_MainWindow.h"
+#include "../Application/jucer_Application.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "jucer_ConfigPage.h"
 #include "jucer_TreeViewTypes.h"
@@ -109,6 +110,25 @@ void ProjectContentComponent::paint (Graphics& g)
     g.fillAll (Colour::greyLevel (0.8f));
 }
 
+void ProjectContentComponent::resized()
+{
+    Rectangle<int> r (getLocalBounds());
+
+    treeViewTabs.setBounds (r.removeFromLeft (treeViewTabs.getWidth()));
+
+    if (resizerBar != nullptr)
+        resizerBar->setBounds (r.removeFromLeft (4));
+
+    if (contentView != nullptr)
+        contentView->setBounds (r);
+}
+
+void ProjectContentComponent::childBoundsChanged (Component* child)
+{
+    if (child == &treeViewTabs)
+        resized();
+}
+
 void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
@@ -121,38 +141,44 @@ void ProjectContentComponent::setProject (Project* newProject)
         contentView = nullptr;
         resizerBar = nullptr;
 
+        if (project != nullptr && treeViewTabs.isShowing())
+        {
+            if (treeViewTabs.getWidth() > 0)
+                settings.setValue ("projectTreeviewWidth_" + project->getProjectUID(), treeViewTabs.getWidth());
+
+            settings.setValue ("lastTab_" + project->getProjectUID(), treeViewTabs.getCurrentTabName());
+        }
+
         treeViewTabs.clearTabs();
-
-        if (treeViewTabs.isShowing() && treeViewTabs.getWidth() > 0)
-            settings.setValue ("projectTreeviewWidth", treeViewTabs.getWidth());
-
         project = newProject;
 
         if (project != nullptr)
         {
-            treeViewTabs.setVisible (true);
-            addChildAndSetID (&treeViewTabs, "tree");
+            addAndMakeVisible (&treeViewTabs);
 
             createProjectTabs();
 
-            String lastTreeWidth (settings.getValue ("projectTreeviewWidth"));
-            if (lastTreeWidth.getIntValue() < 150)
-                lastTreeWidth = "250";
+            const String lastTabName (settings.getValue ("lastTab_" + project->getProjectUID()));
+            int lastTabIndex = treeViewTabs.getTabNames().indexOf (lastTabName);
 
-            treeViewTabs.setBounds ("0, 0, left + " + lastTreeWidth + ", parent.height");
+            if (lastTabIndex < 0 || lastTabIndex > treeViewTabs.getNumTabs())
+                lastTabIndex = 1;
 
-            addChildAndSetID (resizerBar = new ResizableEdgeComponent (&treeViewTabs, &treeSizeConstrainer,
-                                                                       ResizableEdgeComponent::rightEdge),
-                              "resizer");
+            treeViewTabs.setCurrentTabIndex (lastTabIndex);
 
-            resizerBar->setBounds ("tree.right, 0, tree.right + 4, parent.height");
+            int lastTreeWidth = settings.getValue ("projectTreeviewWidth_" + project->getProjectUID()).getIntValue();
+            if (lastTreeWidth < 150)
+                lastTreeWidth = 250;
+
+            treeViewTabs.setBounds (0, 0, lastTreeWidth, getHeight());
+
+            addAndMakeVisible (resizerBar = new ResizableEdgeComponent (&treeViewTabs, &treeSizeConstrainer,
+                                                                        ResizableEdgeComponent::rightEdge));
 
             project->addChangeListener (this);
 
-            if (currentDocument == nullptr)
-                invokeDirectly (CommandIDs::showProjectSettings, true);
-
             updateMissingFileStatuses();
+            resized();
         }
         else
         {
@@ -163,6 +189,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
 void ProjectContentComponent::createProjectTabs()
 {
+    jassert (project != nullptr);
     treeViewTabs.addTab ("Files",  Colour::greyLevel (0.93f), new FileTreeTab (*project), true);
     treeViewTabs.addTab ("Config", Colour::greyLevel (0.93f), new ConfigTreeTab (*project), true);
 }
@@ -205,7 +232,7 @@ void ProjectContentComponent::updateMissingFileStatuses()
 
 bool ProjectContentComponent::showEditorForFile (const File& f)
 {
-    return showDocument (OpenDocumentManager::getInstance()->openFile (project, f));
+    return showDocument (JucerApplication::getApp()->openDocumentManager.openFile (project, f));
 }
 
 bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
@@ -213,7 +240,7 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
     if (doc == nullptr)
         return false;
 
-    OpenDocumentManager::getInstance()->moveDocumentToTopOfStack (doc);
+    JucerApplication::getApp()->openDocumentManager.moveDocumentToTopOfStack (doc);
 
     if (doc->hasFileBeenModifiedExternally())
         doc->reloadFromFile();
@@ -242,11 +269,10 @@ bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumen
         contentView = editor;
         currentDocument = doc;
         addAndMakeVisible (editor);
-        editor->setBounds ("resizer.right, 0, parent.right, parent.height");
+        resized();
 
         updateMainWindowTitle();
         commandManager->commandStatusChanged();
-
         return true;
     }
 
@@ -419,7 +445,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
     case CommandIDs::closeDocument:
         if (currentDocument != nullptr)
-            OpenDocumentManager::getInstance()->closeDocument (currentDocument, true);
+            JucerApplication::getApp()->openDocumentManager.closeDocument (currentDocument, true);
         break;
 
     case CommandIDs::openInIDE:

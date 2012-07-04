@@ -38,8 +38,6 @@ public:
     OpenDocumentManager();
     ~OpenDocumentManager();
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (OpenDocumentManager);
-
     //==============================================================================
     class Document
     {
@@ -68,6 +66,7 @@ public:
     int getNumOpenDocuments() const;
     Document* getOpenDocument (int index) const;
     void moveDocumentToTopOfStack (Document* doc);
+    void clear();
 
     bool canOpenFile (const File& file);
     Document* openFile (Project* project, const File& file);

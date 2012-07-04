@@ -183,7 +183,7 @@ public:
 
         Array<TokenType> types;
 
-        void add (const String& name, const Colour& colour);
+        void set (const String& name, const Colour& colour);
     };
 
     /** Changes the syntax highlighting scheme.

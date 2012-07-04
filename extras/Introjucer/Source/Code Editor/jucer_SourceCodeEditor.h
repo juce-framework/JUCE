@@ -29,11 +29,9 @@
 #include "../Project/jucer_Project.h"
 #include "../Application/jucer_DocumentEditorComponent.h"
 
-
 //==============================================================================
-/**
-*/
-class SourceCodeEditor  : public DocumentEditorComponent
+class SourceCodeEditor  : public DocumentEditorComponent,
+                          private ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -54,6 +52,15 @@ public:
     CodeEditorComponent editor;
 
 private:
+    void valueTreePropertyChanged (ValueTree&, const Identifier&);
+    void valueTreeChildAdded (ValueTree&, ValueTree&);
+    void valueTreeChildRemoved (ValueTree&, ValueTree&);
+    void valueTreeChildOrderChanged (ValueTree&);
+    void valueTreeParentChanged (ValueTree&);
+    void valueTreeRedirected (ValueTree&);
+
+    void updateColourScheme();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceCodeEditor);
 };
 

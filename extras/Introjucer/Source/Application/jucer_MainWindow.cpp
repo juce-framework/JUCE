@@ -126,7 +126,7 @@ bool MainWindow::closeProject (Project* project)
 
     getAppProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
 
-    if (! OpenDocumentManager::getInstance()->closeAllDocumentsUsingProject (*project, true))
+    if (! JucerApplication::getApp()->openDocumentManager.closeAllDocumentsUsingProject (*project, true))
         return false;
 
     ProjectContentComponent* const pcc = getProjectContentComponent();
@@ -174,7 +174,7 @@ void MainWindow::restoreWindowPosition()
 bool MainWindow::canOpenFile (const File& file) const
 {
     return file.hasFileExtension (Project::projectFileExtension)
-             || OpenDocumentManager::getInstance()->canOpenFile (file);
+             || JucerApplication::getApp()->openDocumentManager.canOpenFile (file);
 }
 
 bool MainWindow::openFile (const File& file)
@@ -227,7 +227,7 @@ void MainWindow::activeWindowStatusChanged()
     if (getProjectContentComponent() != nullptr)
         getProjectContentComponent()->updateMissingFileStatuses();
 
-    OpenDocumentManager::getInstance()->reloadModifiedFiles();
+    JucerApplication::getApp()->openDocumentManager.reloadModifiedFiles();
 }
 
 void MainWindow::updateTitle (const String& documentName)

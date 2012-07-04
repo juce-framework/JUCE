@@ -24,7 +24,7 @@
 */
 
 #include "jucer_ProjectTreeViewBase.h"
-#include "../Application/jucer_OpenDocumentManager.h"
+#include "../Application/jucer_Application.h"
 
 
 //==============================================================================
@@ -220,11 +220,13 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
 
     if (treeRootItem != nullptr)
     {
+        OpenDocumentManager& om = JucerApplication::getApp()->openDocumentManager;
+
         for (int i = filesToTrash.size(); --i >= 0;)
         {
             const File f (*filesToTrash.getUnchecked(i));
 
-            OpenDocumentManager::getInstance()->closeFile (f, false);
+            om.closeFile (f, false);
 
             if (! f.moveToTrash())
             {
@@ -238,7 +240,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
 
             if (itemToRemove != nullptr)
             {
-                OpenDocumentManager::getInstance()->closeFile (itemToRemove->getFile(), false);
+                om.closeFile (itemToRemove->getFile(), false);
                 itemToRemove->deleteItem();
             }
         }

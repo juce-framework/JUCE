@@ -43,6 +43,7 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
+  $(OBJDIR)/jucer_AppearanceSettings_788d9889.o \
   $(OBJDIR)/jucer_CommandLine_f35de107.o \
   $(OBJDIR)/jucer_DocumentEditorComponent_695dff1d.o \
   $(OBJDIR)/jucer_FilePreviewComponent_55512f53.o \
@@ -91,6 +92,11 @@ clean:
 	-@rm -f $(OUTDIR)/$(TARGET)
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
+
+$(OBJDIR)/jucer_AppearanceSettings_788d9889.o: ../../Source/Application/jucer_AppearanceSettings.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_AppearanceSettings.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_CommandLine_f35de107.o: ../../Source/Application/jucer_CommandLine.cpp
 	-@mkdir -p $(OBJDIR)

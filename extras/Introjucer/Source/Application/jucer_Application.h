@@ -30,6 +30,7 @@
 #include "jucer_MainWindow.h"
 #include "jucer_JuceUpdater.h"
 #include "jucer_CommandLine.h"
+#include "../Code Editor/jucer_SourceCodeEditor.h"
 
 
 //==============================================================================
@@ -80,14 +81,15 @@ public:
 
     void shutdown()
     {
+        appearanceEditorWindow = nullptr;
+
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
        #endif
         menuModel = nullptr;
 
         mainWindowList.forceCloseAllWindows();
-
-        OpenDocumentManager::deleteInstance();
+        openDocumentManager.clear();
         commandManager = nullptr;
         settings.flush();
     }
@@ -204,7 +206,7 @@ public:
                 menu.addCommandItem (commandManager, CommandIDs::showProjectSettings);
                 menu.addSeparator();
 
-                menu.addCommandItem (commandManager, CommandIDs::test);
+                menu.addCommandItem (commandManager, CommandIDs::showAppearanceSettings);
                 menu.addSeparator();
 
                 menu.addCommandItem (commandManager, CommandIDs::showGrid);
@@ -223,11 +225,11 @@ public:
                 menu.addCommandItem (commandManager, CommandIDs::closeWindow);
                 menu.addSeparator();
 
-                const int numDocs = jmin (50, OpenDocumentManager::getInstance()->getNumOpenDocuments());
+                const int numDocs = jmin (50, getApp()->openDocumentManager.getNumOpenDocuments());
 
                 for (int i = 0; i < numDocs; ++i)
                 {
-                    OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument(i);
+                    OpenDocumentManager::Document* doc = getApp()->openDocumentManager.getOpenDocument(i);
 
                     menu.addItem (300 + i, doc->getName());
                 }
@@ -255,7 +257,7 @@ public:
             }
             else if (menuItemID >= 300 && menuItemID < 400)
             {
-                OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument (menuItemID - 300);
+                OpenDocumentManager::Document* doc = getApp()->openDocumentManager.getOpenDocument (menuItemID - 300);
                 jassert (doc != nullptr);
 
                 getApp()->mainWindowList.openDocument (doc);
@@ -274,6 +276,7 @@ public:
                                   CommandIDs::closeAllDocuments,
                                   CommandIDs::saveAll,
                                   CommandIDs::updateModules,
+                                  CommandIDs::showAppearanceSettings,
                                   CommandIDs::showUTF8Tool };
 
         commands.addArray (ids, numElementsInArray (ids));
@@ -298,14 +301,18 @@ public:
             result.defaultKeypresses.add (KeyPress (',', ModifierKeys::commandModifier, 0));
             break;
 
+        case CommandIDs::showAppearanceSettings:
+            result.setInfo ("Fonts and Colours...", "Shows the appearance settings window.", CommandCategories::general, 0);
+            break;
+
         case CommandIDs::closeAllDocuments:
             result.setInfo ("Close All Documents", "Closes all open documents", CommandCategories::general, 0);
-            result.setActive (OpenDocumentManager::getInstance()->getNumOpenDocuments() > 0);
+            result.setActive (openDocumentManager.getNumOpenDocuments() > 0);
             break;
 
         case CommandIDs::saveAll:
             result.setInfo ("Save All", "Saves all open documents", CommandCategories::general, 0);
-            result.setActive (OpenDocumentManager::getInstance()->anyFilesNeedSaving());
+            result.setActive (openDocumentManager.anyFilesNeedSaving());
             break;
 
         case CommandIDs::updateModules:
@@ -326,15 +333,17 @@ public:
     {
         switch (info.commandID)
         {
-            case CommandIDs::newProject:        createNewProject(); break;
-            case CommandIDs::open:              askUserToOpenFile(); break;
-            case CommandIDs::showPrefs:         showPrefsPanel(); break;
-            case CommandIDs::saveAll:           OpenDocumentManager::getInstance()->saveAll(); break;
-            case CommandIDs::closeAllDocuments: closeAllDocuments (true); break;
-            case CommandIDs::showUTF8Tool:      showUTF8ToolWindow(); break;
-            case CommandIDs::updateModules:     runModuleUpdate (String::empty); break;
+            case CommandIDs::newProject:                createNewProject(); break;
+            case CommandIDs::open:                      askUserToOpenFile(); break;
+            case CommandIDs::showPrefs:                 showPrefsPanel(); break;
+            case CommandIDs::saveAll:                   openDocumentManager.saveAll(); break;
+            case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
+            case CommandIDs::showUTF8Tool:              showUTF8ToolWindow(); break;
+            case CommandIDs::showAppearanceSettings:    showAppearanceEditorWindow(); break;
+            case CommandIDs::updateModules:             runModuleUpdate (String::empty); break;
 
-            default:                            return JUCEApplication::perform (info);
+            default:
+                return JUCEApplication::perform (info);
         }
 
         return true;
@@ -371,7 +380,7 @@ public:
 
     bool closeAllDocuments (bool askUserToSave)
     {
-        return OpenDocumentManager::getInstance()->closeAll (askUserToSave);
+        return openDocumentManager.closeAll (askUserToSave);
     }
 
     bool makeSureUserHasSelectedModuleFolder()
@@ -403,6 +412,14 @@ public:
         return ModuleList::isJuceOrModulesFolder (list.getModulesFolder());
     }
 
+    void showAppearanceEditorWindow()
+    {
+        if (appearanceEditorWindow == nullptr)
+            appearanceEditorWindow = AppearanceSettings::createEditorWindow();
+
+        appearanceEditorWindow->toFront (true);
+    }
+
     //==============================================================================
     virtual void doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
@@ -417,7 +434,11 @@ public:
     Icons icons;
 
     ScopedPointer<MainMenuModel> menuModel;
+
     MainWindowList mainWindowList;
+    OpenDocumentManager openDocumentManager;
+
+    ScopedPointer<Component> appearanceEditorWindow;
 
 private:
     class AsyncQuitRetrier  : public Timer

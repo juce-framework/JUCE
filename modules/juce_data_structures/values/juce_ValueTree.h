@@ -416,7 +416,7 @@ public:
             When operator= is used to make a ValueTree refer to a different object, this callback
             will be made.
         */
-        virtual void valueTreeRedirected (ValueTree& treeWhichHasBeenChanged) {}
+        virtual void valueTreeRedirected (ValueTree& treeWhichHasBeenChanged);
     };
 
     /** Adds a listener to receive callbacks when this node is changed.

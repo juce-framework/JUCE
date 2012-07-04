@@ -38,10 +38,24 @@ PropertiesFile& getAppProperties()
     return getAppSettings().getProps();
 }
 
+static AppearanceSettings getDefaultScheme()
+{
+    CodeDocument doc;
+    CPlusPlusCodeTokeniser tokeniser;
+    CodeEditorComponent defaultComp (doc, &tokeniser);
+    return AppearanceSettings (defaultComp);
+}
+
 //==============================================================================
 StoredSettings::StoredSettings()
+    : appearance (getDefaultScheme())
 {
     reload();
+
+    const File defaultSchemeFile (getSchemesFolder().getChildFile ("Default").withFileExtension (getSchemeFileSuffix()));
+
+    if (! defaultSchemeFile.exists())
+        appearance.writeToFile (defaultSchemeFile);
 }
 
 StoredSettings::~StoredSettings()
@@ -59,6 +73,11 @@ void StoredSettings::flush()
 {
     if (props != nullptr)
     {
+        {
+            const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
+            props->setValue ("editorColours", xml);
+        }
+
         props->setValue ("recentFiles", recentFiles.toString());
 
         props->removeValue ("keyMappings");
@@ -108,6 +127,10 @@ void StoredSettings::reload()
     // recent files...
     recentFiles.restoreFromString (props->getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
+
+    const ScopedPointer<XmlElement> xml (props->getXmlValue ("editorColours"));
+    if (xml != nullptr)
+        appearance.settings = ValueTree::fromXml (*xml);
 
     loadSwatchColours();
 }
@@ -176,6 +199,13 @@ Colour StoredSettings::ColourSelectorWithSwatches::getSwatchColour (int index) c
 void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, const Colour& newColour) const
 {
     getAppSettings().swatchColours.set (index, newColour);
+}
+
+File StoredSettings::getSchemesFolder()
+{
+    File f (getProps().getFile().getSiblingFile ("Colour Schemes"));
+    f.createDirectory();
+    return f;
 }
 
 //==============================================================================

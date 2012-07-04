@@ -42,8 +42,6 @@ public:
     ProjectContentComponent();
     ~ProjectContentComponent();
 
-    void paint (Graphics& g);
-
     Project* getProject() const noexcept    { return project; }
     virtual void setProject (Project* project);
     void saveTreeViewState();
@@ -67,6 +65,10 @@ public:
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     bool isCommandActive (const CommandID commandID);
     bool perform (const InvocationInfo& info);
+
+    void paint (Graphics& g);
+    void resized();
+    void childBoundsChanged (Component* child);
 
 protected:
     Project* project;
