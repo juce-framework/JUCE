@@ -545,15 +545,23 @@ private:
         return searchPaths;
     }
 
-    static void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths)
+    void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths) const
     {
         jassert (library.getFileNameWithoutExtension().substring (0, 3) == "lib");
 
         flags.add ("-l" + library.getFileNameWithoutExtension().substring (3));
 
         String searchPath (library.toUnixStyle().upToLastOccurrenceOf ("/", false, false));
+
         if (! library.isAbsolute())
-            searchPath = "$(SRCROOT)/" + searchPath;
+        {
+            String srcRoot (rebaseFromProjectFolderToBuildTarget (RelativePath (".", RelativePath::projectFolder)).toUnixStyle());
+
+            if (srcRoot.endsWith ("/."))      srcRoot = srcRoot.dropLastCharacters (2);
+            if (! srcRoot.endsWithChar ('/')) srcRoot << '/';
+
+            searchPath = srcRoot + searchPath;
+        }
 
         librarySearchPaths.add (sanitisePath (searchPath));
     }
