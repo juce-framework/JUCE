@@ -52,6 +52,11 @@ void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
         g.fillAll (Colour (0x401111ee));
 }
 
+float JucerTreeViewBase::getIconSize() const
+{
+    return jmin (getItemHeight() - 4.0f, 18.0f);
+}
+
 void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver)
 {
     Path p;
@@ -65,60 +70,15 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height
     g.fillPath (p);
 }
 
-//==============================================================================
-class TreeItemComponent   : public Component
+void JucerTreeViewBase::paintContent (Graphics& g, const Rectangle<int>& area)
 {
-public:
-    TreeItemComponent (JucerTreeViewBase& item_)
-        : item (item_)
-    {
-        setInterceptsMouseClicks (false, true);
+    g.setFont (getFont());
+    g.setColour (isMissing() ? Colours::red : Colours::black);
 
-        item.createLeftEdgeComponents (leftComps);
-
-        for (int i = 0; i < leftComps.size(); ++i)
-            addAndMakeVisible (leftComps.getUnchecked(i));
-
-        addAndMakeVisible (rightHandComponent = item.createRightEdgeComponent());
-    }
-
-    void paint (Graphics& g)
-    {
-        g.setColour (Colours::black);
-
-        const int height = getHeight();
-
-        item.getIcon()->drawWithin (g, Rectangle<float> (0.0f, 2.0f, height + 6.0f, height - 4.0f),
-                                    RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
-
-        g.setFont (item.getFont());
-        g.setColour (item.isMissing() ? Colours::red : Colours::black);
-
-        const int right = rightHandComponent != nullptr ? rightHandComponent->getX() - 2
-                                                        : getWidth();
-
-        g.drawFittedText (item.getDisplayName(),
-                          item.textX, 0, right - item.textX, height, Justification::centredLeft, 1, 0.8f);
-    }
-
-    void resized()
-    {
-        const int edge = 1;
-        const int itemSize = getHeight() - edge * 2;
-        item.textX = (leftComps.size() + 1) * getHeight() + 8;
-
-        for (int i = 0; i < leftComps.size(); ++i)
-            leftComps.getUnchecked(i)->setBounds (5 + (i + 1) * getHeight(), edge, itemSize, itemSize);
-
-        if (rightHandComponent != nullptr)
-            rightHandComponent->setBounds (getWidth() - itemSize - edge, edge, itemSize, itemSize);
-    }
-
-private:
-    JucerTreeViewBase& item;
-    OwnedArray<Component> leftComps;
-    ScopedPointer<Component> rightHandComponent;
-};
+    g.drawFittedText (getDisplayName(),
+                      area.getX(), area.getY(), area.getWidth(), area.getHeight(),
+                      Justification::centredLeft, 1, 0.8f);
+}
 
 Component* JucerTreeViewBase::createItemComponent()
 {

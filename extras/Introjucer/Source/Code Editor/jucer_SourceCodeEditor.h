@@ -98,7 +98,9 @@ public:
         {
             const CodeDocument::Position pos (getCaretPos());
 
-            if ((newText == "{" || newText == "}") && pos.getLineNumber() > 0)
+            if ((newText == "{" || newText == "}")
+                 && pos.getLineNumber() > 0
+                 && pos.getLineText().trim().isEmpty())
             {
                 moveCaretToStartOfLine (true);
                 CodeEditorComponent::insertTextAtCaret (getIndentForCurrentBlock (pos));
