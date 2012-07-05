@@ -96,6 +96,8 @@ public:
     const Drawable* juceLogo;
     const Drawable* graph;
     const Drawable* jigsaw;
+    const Drawable* info;
+    const Drawable* warning;
 
 private:
     OwnedArray<Drawable> drawables;

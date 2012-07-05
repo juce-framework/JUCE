@@ -53,8 +53,8 @@ public:
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
     virtual const Drawable* getIcon() const = 0;
-    virtual void createLeftEdgeComponents (OwnedArray<Component>&) {}
-    virtual Component* createRightEdgeComponent()      { return nullptr; }
+    virtual float getIconSize() const;
+    virtual void paintContent (Graphics& g, const Rectangle<int>& area);
     virtual int getMillisecsAllowedForDragGesture()    { return 120; };
 
     void refreshSubItems();
@@ -155,6 +155,37 @@ public:
 
 private:
     String opennessStateKey;
+};
+
+//==============================================================================
+class TreeItemComponent   : public Component
+{
+public:
+    TreeItemComponent (JucerTreeViewBase& item_)  : item (item_)
+    {
+        setInterceptsMouseClicks (false, true);
+    }
+
+    void paint (Graphics& g)
+    {
+        g.setColour (Colours::black);
+        paintIcon (g);
+        item.paintContent (g, Rectangle<int> (item.textX, 0, getWidth() - item.textX, getHeight()));
+    }
+
+    void paintIcon (Graphics& g)
+    {
+        const float iconSize = item.getIconSize();
+        item.getIcon()->drawWithin (g, Rectangle<float> (4.0f, 2.0f, iconSize, getHeight() - 4.0f),
+                                    RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
+    }
+
+    void resized()
+    {
+        item.textX = item.getIconSize() + 8;
+    }
+
+    JucerTreeViewBase& item;
 };
 
 
