@@ -621,6 +621,14 @@ private:
     {
         StringArray s;
 
+        {
+            String srcRoot = rebaseFromProjectFolderToBuildTarget (RelativePath (".", RelativePath::projectFolder)).toUnixStyle();
+            if (srcRoot.endsWith ("/."))
+                srcRoot = srcRoot.dropLastCharacters (2);
+
+            s.add ("SRCROOT = " + srcRoot.quoted());
+        }
+
         const String arch (config.getMacArchitecture());
         if (arch == osxArch_Native)                s.add ("ARCHS = \"$(ARCHS_NATIVE)\"");
         else if (arch == osxArch_32BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
