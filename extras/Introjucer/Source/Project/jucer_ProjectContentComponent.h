@@ -28,7 +28,7 @@
 
 #include "jucer_Project.h"
 #include "../Application/jucer_OpenDocumentManager.h"
-
+class ProjectTreeViewBase;
 
 //==============================================================================
 /**
@@ -42,19 +42,20 @@ public:
     ProjectContentComponent();
     ~ProjectContentComponent();
 
-    void paint (Graphics& g);
-
-    void setProject (Project* project);
+    Project* getProject() const noexcept    { return project; }
+    virtual void setProject (Project* project);
     void saveTreeViewState();
 
     bool showEditorForFile (const File& f);
     bool showDocument (OpenDocumentManager::Document* doc);
     void hideDocument (OpenDocumentManager::Document* doc);
+    void hideEditor();
     bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);
     Component* getEditorComponent() const                       { return contentView; }
     OpenDocumentManager::Document* getCurrentDocument() const   { return currentDocument; }
 
     void updateMissingFileStatuses();
+    virtual void createProjectTabs();
 
     void changeListenerCallback (ChangeBroadcaster*);
 
@@ -65,11 +66,15 @@ public:
     bool isCommandActive (const CommandID commandID);
     bool perform (const InvocationInfo& info);
 
-private:
+    void paint (Graphics& g);
+    void resized();
+    void childBoundsChanged (Component* child);
+
+protected:
     Project* project;
     OpenDocumentManager::Document* currentDocument;
 
-    ScopedPointer<TreeView> projectTree;
+    TabbedComponent treeViewTabs;
     ScopedPointer<ResizableEdgeComponent> resizerBar;
     ScopedPointer<Component> contentView;
 
@@ -78,6 +83,8 @@ private:
     void updateMainWindowTitle();
     bool reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo&);
     bool canProjectBeLaunched() const;
+    TreeView* getFilesTreeView() const;
+    ProjectTreeViewBase* getFilesTreeRoot() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent);
 };

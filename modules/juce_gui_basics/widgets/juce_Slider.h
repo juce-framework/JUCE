@@ -804,7 +804,7 @@ protected:
     /** @internal */
     void mouseDoubleClick (const MouseEvent&);
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, float wheelIncrementX, float wheelIncrementY);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */
     void modifierKeysChanged (const ModifierKeys&);
     /** @internal */

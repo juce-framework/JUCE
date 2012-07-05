@@ -150,6 +150,11 @@ public:
     */
     void append (const void* data, size_t numBytes);
 
+    /** Resizes this block to the given size and fills its contents from the supplied buffer.
+        The data pointer must not be null.
+    */
+    void replaceWith (const void* data, size_t numBytes);
+
     /** Inserts some data into the block.
         The dataToInsert pointer must not be null. This block's size will be increased accordingly.
         If the insert position lies outside the valid range of the block, it will be clipped to

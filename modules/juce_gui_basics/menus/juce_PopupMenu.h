@@ -216,7 +216,7 @@ public:
         E.g. @code
         PopupMenu menu;
         ...
-        menu.showMenu (PopupMenu::Options().withMaximumWidth (100),
+        menu.showMenu (PopupMenu::Options().withMinimumWidth (100)
                                            .withMaximumNumColumns (3)
                                            .withTargetComponent (myComp));
         @endcode

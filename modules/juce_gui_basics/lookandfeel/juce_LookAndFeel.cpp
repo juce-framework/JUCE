@@ -239,6 +239,8 @@ LookAndFeel::LookAndFeel()
         0x1004500, /*CodeEditorComponent::backgroundColourId*/                0xffffffff,
         0x1004502, /*CodeEditorComponent::highlightColourId*/                 textHighlightColour,
         0x1004503, /*CodeEditorComponent::defaultTextColourId*/               0xff000000,
+        0x1004504, /*CodeEditorComponent::lineNumberBackgroundId*/            0x44999999,
+        0x1004505, /*CodeEditorComponent::lineNumberTextId*/                  0x44000000,
 
         0x1007000, /*ColourSelector::backgroundColourId*/                     0xffe5e5e5,
         0x1007001, /*ColourSelector::labelTextColourId*/                      0xff000000,
@@ -322,7 +324,11 @@ const Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)
 
 void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 {
-    defaultSans = newName;
+    if (defaultSans != newName)
+    {
+        Typeface::clearTypefaceCache();
+        defaultSans = newName;
+    }
 }
 
 //==============================================================================
@@ -1617,7 +1623,7 @@ class SliderLabelComp : public Label
 public:
     SliderLabelComp() : Label (String::empty, String::empty) {}
 
-    void mouseWheelMove (const MouseEvent&, float, float) {}
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) {}
 };
 
 Label* LookAndFeel::createSliderTextBox (Slider& slider)
@@ -2444,7 +2450,7 @@ void LookAndFeel::drawTableHeaderColumn (Graphics& g, const String& columnName, 
     }
 
     g.setColour (Colours::black);
-    g.setFont (height * 0.5f, Font::bold);
+    g.setFont (Font (height * 0.5f, Font::bold));
     const int textX = 4;
     g.drawFittedText (columnName, textX, 0, rightOfText - textX, height, Justification::centredLeft, 1);
 }
@@ -2505,7 +2511,7 @@ void LookAndFeel::drawPropertyPanelSectionHeader (Graphics& g, const String& nam
     const int textX = buttonIndent * 2 + buttonSize + 2;
 
     g.setColour (Colours::black);
-    g.setFont (height * 0.7f, Font::bold);
+    g.setFont (Font (height * 0.7f, Font::bold));
     g.drawText (name, textX, 0, width - textX - 4, height, Justification::centredLeft, true);
 }
 
@@ -2535,8 +2541,8 @@ void LookAndFeel::drawPropertyComponentLabel (Graphics& g, int, int height,
 
 const Rectangle<int> LookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
 {
-    return Rectangle<int> (component.getWidth() / 3, 1,
-                           component.getWidth() - component.getWidth() / 3 - 1, component.getHeight() - 3);
+    const int textW = jmin (200, component.getWidth() / 3);
+    return Rectangle<int> (textW, 1, component.getWidth() - textW - 1, component.getHeight() - 3);
 }
 
 //==============================================================================

@@ -293,6 +293,7 @@ private:
         XmlElement* act = app->createNewChildElement ("activity");
         act->setAttribute ("android:name", getActivityName());
         act->setAttribute ("android:label", "@string/app_name");
+        act->setAttribute ("android:configChanges", "keyboardHidden|orientation");
 
         XmlElement* intent = act->createNewChildElement ("intent-filter");
         intent->createNewChildElement ("action")->setAttribute ("android:name", "android.intent.action.MAIN");

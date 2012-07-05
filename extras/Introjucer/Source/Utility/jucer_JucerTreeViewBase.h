@@ -27,6 +27,7 @@
 #define __JUCER_JUCERTREEVIEWBASE_JUCEHEADER__
 
 #include "../jucer_Headers.h"
+class ProjectContentComponent;
 
 
 //==============================================================================
@@ -42,6 +43,8 @@ public:
     void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
     Component* createItemComponent();
     void itemClicked (const MouseEvent& e);
+    void itemSelectionChanged (bool isNowSelected);
+    void itemDoubleClicked (const MouseEvent&);
 
     //==============================================================================
     virtual Font getFont() const;
@@ -51,12 +54,19 @@ public:
     virtual bool isMissing() = 0;
     virtual const Drawable* getIcon() const = 0;
     virtual void createLeftEdgeComponents (OwnedArray<Component>&) {}
-    virtual Component* createRightEdgeComponent()   { return nullptr; }
+    virtual Component* createRightEdgeComponent()      { return nullptr; }
+    virtual int getMillisecsAllowedForDragGesture()    { return 120; };
 
+    void refreshSubItems();
+    virtual void deleteItem();
+    virtual void deleteAllSelectedItems();
+    virtual void showDocument();
     virtual void showPopupMenu();
     virtual void showMultiSelectionPopupMenu();
-
     virtual void showRenameBox();
+
+    void launchPopupMenu (PopupMenu&); // runs asynchronously, and produces a callback to handlePopupMenuResult().
+    virtual void handlePopupMenuResult (int resultCode);
 
     //==============================================================================
     // To handle situations where an item gets deleted before openness is
@@ -76,7 +86,76 @@ public:
     };
 
     int textX;
+
+protected:
+    ProjectContentComponent* getProjectContentComponent() const;
+    void cancelDelayedSelectionTimer();
+    virtual void addSubItems() {}
+
+private:
+    class ItemSelectionTimer;
+    friend class ItemSelectionTimer;
+    ScopedPointer<Timer> delayedSelectionTimer;
+
+    void invokeShowDocument();
+};
+
+//==============================================================================
+class TreePanelBase   : public Component
+{
+public:
+    TreePanelBase (const String& opennessStateKey_)
+        : opennessStateKey (opennessStateKey_)
+    {
+        addAndMakeVisible (&tree);
+        tree.setRootItemVisible (true);
+        tree.setDefaultOpenness (true);
+        tree.setColour (TreeView::backgroundColourId, Colours::transparentBlack);
+        tree.setIndentSize (14);
+        tree.getViewport()->setScrollBarThickness (14);
+    }
+
+    ~TreePanelBase()
+    {
+        tree.setRootItem (nullptr);
+    }
+
+    void setRoot (JucerTreeViewBase* root)
+    {
+        rootItem = root;
+        tree.setRootItem (root);
+        tree.getRootItem()->setOpen (true);
+
+        const ScopedPointer<XmlElement> treeOpenness (getAppProperties().getXmlValue (opennessStateKey));
+        if (treeOpenness != nullptr)
+            tree.restoreOpennessState (*treeOpenness, true);
+    }
+
+    void saveOpenness()
+    {
+        const ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
+
+        if (opennessState != nullptr)
+            getAppProperties().setValue (opennessStateKey, opennessState);
+    }
+
+    void deleteSelectedItems()
+    {
+        if (rootItem != nullptr)
+            rootItem->deleteAllSelectedItems();
+    }
+
+    void resized()
+    {
+        tree.setBounds (getLocalBounds());
+    }
+
+    TreeView tree;
+    ScopedPointer<JucerTreeViewBase> rootItem;
+
+private:
+    String opennessStateKey;
 };
 
 
-#endif   // __JUCER_JUCERTREEVIEWBASE_JUCEHEADER__
+#endif

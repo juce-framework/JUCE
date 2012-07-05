@@ -24,7 +24,7 @@
 */
 
 #include "jucer_ProjectTreeViewBase.h"
-#include "../Application/jucer_OpenDocumentManager.h"
+#include "../Application/jucer_Application.h"
 
 
 //==============================================================================
@@ -92,31 +92,26 @@ void ProjectTreeViewBase::moveSelectedItemsTo (OwnedArray <Project::Item>& selec
 ProjectTreeViewBase* ProjectTreeViewBase::findTreeViewItem (const Project::Item& itemToFind)
 {
     if (item == itemToFind)
-    {
         return this;
-    }
-    else
-    {
-        const bool wasOpen = isOpen();
-        setOpen (true);
 
-        for (int i = getNumSubItems(); --i >= 0;)
+    const bool wasOpen = isOpen();
+    setOpen (true);
+
+    for (int i = getNumSubItems(); --i >= 0;)
+    {
+        ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i));
+
+        if (pg != nullptr)
         {
-            ProjectTreeViewBase* pg = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i));
+            pg = pg->findTreeViewItem (itemToFind);
 
             if (pg != nullptr)
-            {
-                pg = pg->findTreeViewItem (itemToFind);
-
-                if (pg != nullptr)
-                    return pg;
-            }
+                return pg;
         }
-
-        setOpen (wasOpen);
     }
 
-    return 0;
+    setOpen (wasOpen);
+    return nullptr;
 }
 
 //==============================================================================
@@ -182,8 +177,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
     OwnedArray <File> filesToTrash;
     OwnedArray <Project::Item> itemsToRemove;
 
-    int i;
-    for (i = 0; i < numSelected; ++i)
+    for (int i = 0; i < numSelected; ++i)
     {
         const ProjectTreeViewBase* const p = dynamic_cast <ProjectTreeViewBase*> (tree->getSelectedItem (i));
 
@@ -200,7 +194,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
     {
         String fileList;
         const int maxFilesToList = 10;
-        for (i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
+        for (int i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
             fileList << filesToTrash.getUnchecked(i)->getFullPathName() << "\n";
 
         if (filesToTrash.size() > maxFilesToList)
@@ -226,11 +220,13 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
 
     if (treeRootItem != nullptr)
     {
-        for (i = filesToTrash.size(); --i >= 0;)
+        OpenDocumentManager& om = JucerApplication::getApp()->openDocumentManager;
+
+        for (int i = filesToTrash.size(); --i >= 0;)
         {
             const File f (*filesToTrash.getUnchecked(i));
 
-            OpenDocumentManager::getInstance()->closeFile (f, false);
+            om.closeFile (f, false);
 
             if (! f.moveToTrash())
             {
@@ -238,13 +234,13 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
             }
         }
 
-        for (i = itemsToRemove.size(); --i >= 0;)
+        for (int i = itemsToRemove.size(); --i >= 0;)
         {
             ProjectTreeViewBase* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i));
 
             if (itemToRemove != nullptr)
             {
-                OpenDocumentManager::getInstance()->closeFile (itemToRemove->getFile(), false);
+                om.closeFile (itemToRemove->getFile(), false);
                 itemToRemove->deleteItem();
             }
         }
@@ -263,8 +259,7 @@ static int indexOfNode (const ValueTree& parent, const ValueTree& child)
 void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
                                      Project::Item destNode, int insertIndex)
 {
-    int i;
-    for (i = selectedNodes.size(); --i >= 0;)
+    for (int i = selectedNodes.size(); --i >= 0;)
     {
         Project::Item* const n = selectedNodes.getUnchecked(i);
 
@@ -276,7 +271,7 @@ void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
     }
 
     // Don't include any nodes that are children of other selected nodes..
-    for (i = selectedNodes.size(); --i >= 0;)
+    for (int i = selectedNodes.size(); --i >= 0;)
     {
         Project::Item* const n = selectedNodes.getUnchecked(i);
 
@@ -291,7 +286,7 @@ void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
     }
 
     // Remove and re-insert them one at a time..
-    for (i = 0; i < selectedNodes.size(); ++i)
+    for (int i = 0; i < selectedNodes.size(); ++i)
     {
         Project::Item* selectedNode = selectedNodes.getUnchecked(i);
 
@@ -429,13 +424,6 @@ void ProjectTreeViewBase::addSubItems()
     }
 }
 
-void ProjectTreeViewBase::refreshSubItems()
-{
-    WholeTreeOpennessRestorer openness (*this);
-    clearSubItems();
-    addSubItems();
-}
-
 static void treeViewMultiSelectItemChosen (int resultCode, ProjectTreeViewBase* item)
 {
     switch (resultCode)
@@ -454,60 +442,6 @@ void ProjectTreeViewBase::showMultiSelectionPopupMenu()
                      ModalCallbackFunction::create (treeViewMultiSelectItemChosen, this));
 }
 
-static void treeViewMenuItemChosen (int resultCode, ProjectTreeViewBase* item)
-{
-    item->handlePopupMenuResult (resultCode);
-}
-
-void ProjectTreeViewBase::launchPopupMenu (PopupMenu& m)
-{
-    m.showMenuAsync (PopupMenu::Options(),
-                     ModalCallbackFunction::create (treeViewMenuItemChosen, this));
-}
-
-void ProjectTreeViewBase::handlePopupMenuResult (int)
-{
-}
-
-void ProjectTreeViewBase::itemDoubleClicked (const MouseEvent& e)
-{
-    invokeShowDocument();
-}
-
-class TreeviewItemSelectionTimer  : public Timer
-{
-public:
-    TreeviewItemSelectionTimer (ProjectTreeViewBase& owner_)
-        : owner (owner_)
-    {}
-
-    void timerCallback()
-    {
-        owner.invokeShowDocument();
-    }
-
-private:
-    ProjectTreeViewBase& owner;
-
-    JUCE_DECLARE_NON_COPYABLE (TreeviewItemSelectionTimer);
-};
-
-void ProjectTreeViewBase::itemSelectionChanged (bool isNowSelected)
-{
-    if (isNowSelected)
-    {
-        delayedSelectionTimer = new TreeviewItemSelectionTimer (*this);
-
-        // for images, give the user longer to start dragging before assuming they're
-        // clicking to select it for previewing..
-        delayedSelectionTimer->startTimer (item.isImageFile() ? 250 : 120);
-    }
-    else
-    {
-        delayedSelectionTimer = nullptr;
-    }
-}
-
 String ProjectTreeViewBase::getTooltip()
 {
     return String::empty;
@@ -515,35 +449,19 @@ String ProjectTreeViewBase::getTooltip()
 
 var ProjectTreeViewBase::getDragSourceDescription()
 {
-    delayedSelectionTimer = nullptr;
+    cancelDelayedSelectionTimer();
     return projectItemDragType;
 }
 
-void ProjectTreeViewBase::invokeShowDocument()
+int ProjectTreeViewBase::getMillisecsAllowedForDragGesture()
 {
-    delayedSelectionTimer = nullptr;
-    showDocument();
+    // for images, give the user longer to start dragging before assuming they're
+    // clicking to select it for previewing..
+    return item.isImageFile() ? 250 : JucerTreeViewBase::getMillisecsAllowedForDragGesture();
 }
 
 //==============================================================================
 ProjectTreeViewBase* ProjectTreeViewBase::getParentProjectItem() const
 {
     return dynamic_cast <ProjectTreeViewBase*> (getParentItem());
-}
-
-ProjectContentComponent* ProjectTreeViewBase::getProjectContentComponent() const
-{
-    Component* c = getOwnerView();
-
-    while (c != nullptr)
-    {
-        ProjectContentComponent* pcc = dynamic_cast <ProjectContentComponent*> (c);
-
-        if (pcc != nullptr)
-            return pcc;
-
-        c = c->getParentComponent();
-    }
-
-    return 0;
 }

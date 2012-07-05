@@ -214,12 +214,9 @@ void Graphics::setFont (const Font& newFont)
     context->setFont (newFont);
 }
 
-void Graphics::setFont (const float newFontHeight, const int newFontStyleFlags)
+void Graphics::setFont (const float newFontHeight)
 {
-    saveStateIfPending();
-    Font f (context->getFont());
-    f.setSizeAndStyle (newFontHeight, newFontStyleFlags, 1.0f, 0);
-    context->setFont (f);
+    setFont (context->getFont().withHeight (newFontHeight));
 }
 
 Font Graphics::getCurrentFont() const

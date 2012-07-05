@@ -23,13 +23,19 @@
   ==============================================================================
 */
 
-#if (JUCE_MAC && defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 \
-        && MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_5) \
-     || (JUCE_IOS && defined (__IPHONE_3_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_3_2)
+#if JUCE_IOS || (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4)
  #define JUCE_CORETEXT_AVAILABLE 1
 #endif
 
 #if JUCE_CORETEXT_AVAILABLE
+
+#if JUCE_MAC && MAC_OS_X_VERSION_MAX_ALLOWED == MAC_OS_X_VERSION_10_5
+extern "C"
+{
+    void CTRunGetAdvances (CTRunRef, CFRange, CGSize buffer[]);
+    const CGSize* CTRunGetAdvancesPtr (CTRunRef);
+}
+#endif
 
 namespace CoreTextTypeLayout
 {
@@ -43,8 +49,38 @@ namespace CoreTextTypeLayout
         return style;
     }
 
-    static CTFontRef createCTFont (const Font& font, const float fontSize,
-                                   const bool applyScaleFactor)
+    // Workaround for Apple bug in CTFontCreateWithFontDescriptor in Garageband/Logic on 10.6
+   #if JUCE_MAC && ((! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7)
+    static CTFontRef getFontWithTrait (CTFontRef ctFontRef, CTFontSymbolicTraits trait)
+    {
+        CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits (ctFontRef, 0.0f, nullptr, trait, trait);
+        if (newFont == nullptr)
+            return ctFontRef;
+
+        CFRelease (ctFontRef);
+        return newFont;
+    }
+
+    static CTFontRef useStyleFallbackIfNecessary (CTFontRef ctFontRef, CFStringRef cfFontFamily,
+                                                  const float fontSize, const Font& font)
+    {
+        CFStringRef cfActualFontFamily = (CFStringRef) CTFontCopyAttribute (ctFontRef, kCTFontFamilyNameAttribute);
+
+        if (CFStringCompare (cfFontFamily, cfActualFontFamily, 0) != kCFCompareEqualTo)
+        {
+            CFRelease (ctFontRef);
+            ctFontRef = CTFontCreateWithName (cfFontFamily, fontSize, nullptr);
+
+            if (font.isItalic())   ctFontRef = getFontWithTrait (ctFontRef, kCTFontItalicTrait);
+            if (font.isBold())     ctFontRef = getFontWithTrait (ctFontRef, kCTFontBoldTrait);
+        }
+
+        CFRelease (cfActualFontFamily);
+        return ctFontRef;
+    }
+   #endif
+
+    static CTFontRef createCTFont (const Font& font, const float fontSize, const bool applyScaleFactor)
     {
         CFStringRef cfFontFamily = FontStyleHelpers::getConcreteFamilyName (font).toCFString();
         CFStringRef cfFontStyle = findBestAvailableStyle (font.getTypefaceName(),
@@ -58,13 +94,18 @@ namespace CoreTextTypeLayout
                                                                  &kCFTypeDictionaryKeyCallBacks,
                                                                  &kCFTypeDictionaryValueCallBacks);
         CFRelease (cfFontStyle);
-        CFRelease (cfFontFamily);
 
         CTFontDescriptorRef ctFontDescRef = CTFontDescriptorCreateWithAttributes (fontDescAttributes);
         CFRelease (fontDescAttributes);
 
         CTFontRef ctFontRef = CTFontCreateWithFontDescriptor (ctFontDescRef, fontSize, nullptr);
         CFRelease (ctFontDescRef);
+
+       #if JUCE_MAC && ((! defined (MAC_OS_X_VERSION_10_7)) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7)
+        ctFontRef = useStyleFallbackIfNecessary (ctFontRef, cfFontFamily, fontSize, font);
+       #endif
+
+        CFRelease (cfFontFamily);
 
         if (applyScaleFactor)
         {
@@ -631,7 +672,7 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 #else
 
 //==============================================================================
-// The stuff that follows is a mash-up that supports pre-OSX 10.5 and pre-iOS 3.2 APIs.
+// The stuff that follows is a mash-up that supports pre-OSX 10.5 APIs.
 // (Hopefully all of this can be ditched at some point in the future).
 
 //==============================================================================
@@ -663,23 +704,6 @@ public:
         JUCE_AUTORELEASEPOOL
         renderingTransform = CGAffineTransformIdentity;
 
-#if JUCE_IOS
-        NSString* fontName = juceStringToNS (style);
-        fontRef = CGFontCreateWithFontName ((CFStringRef) fontName);
-
-        if (fontRef == 0)
-        {
-            // Sometimes, UIFont manages to handle names that CGFontCreateWithFontName fails on...
-            UIFont* uiFont = [UIFont fontWithName: fontName size: 12];
-            fontRef = CGFontCreateWithFontName ((CFStringRef) uiFont.fontName);
-        }
-
-        const int ascender = abs (CGFontGetAscent (fontRef));
-        const float totalHeight = ascender + abs (CGFontGetDescent (fontRef));
-        ascent = ascender / totalHeight;
-        unitsToHeightScaleFactor = 1.0f / totalHeight;
-        fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / totalHeight;
-#else
         NSDictionary* nsDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                    juceStringToNS (name), NSFontFamilyAttribute,
                                    juceStringToNS (style), NSFontFaceAttribute, nil];
@@ -731,8 +755,6 @@ public:
             fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
         }
       #endif
-
-#endif
     }
 
     ~OSXTypeface()
@@ -1067,21 +1089,12 @@ StringArray Font::findAllTypefaceStyles (const String& family)
     StringArray results;
     JUCE_AUTORELEASEPOOL
 
-   #if JUCE_IOS
-    NSArray* styles = [UIFont fontNamesForFamilyName: juceStringToNS (family)];
-   #else
     NSArray* styles = [[NSFontManager sharedFontManager] availableMembersOfFontFamily: juceStringToNS (family)];
-   #endif
 
     for (unsigned int i = 0; i < [styles count]; ++i)
     {
-       #if JUCE_IOS
-        // Fonts are returned in the form of "Arial-BoldMT"
-        results.add (nsStringToJuce ((NSString*) [styles objectAtIndex: i]));
-       #else
         NSArray* style = [styles objectAtIndex: i];
         results.add (nsStringToJuce ((NSString*) [style objectAtIndex: 1]));
-       #endif
     }
 
     return results;
@@ -1127,13 +1140,6 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 
     if (font.getTypefaceStyle() == getDefaultStyle())
         newFont.setTypefaceStyle ("Regular");
-
-   #if JUCE_IOS && ! JUCE_CORETEXT_AVAILABLE
-    // Fonts style names on Cocoa Touch are unusual like "Arial-BoldMT"
-    // No font will be found for the style of "Regular" so we must modify the style
-    if (newFont.getTypefaceStyle() == "Regular")
-        newFont.setTypefaceStyle (faceName);
-   #endif
 
     return Typeface::createSystemTypefaceFor (newFont);
 }

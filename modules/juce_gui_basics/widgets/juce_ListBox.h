@@ -547,7 +547,7 @@ public:
     /** @internal */
     void visibilityChanged();
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, float wheelIncrementX, float wheelIncrementY);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */
     void mouseMove (const MouseEvent&);
     /** @internal */

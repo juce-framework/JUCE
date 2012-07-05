@@ -25,5 +25,6 @@
                       "native/*" ],
 
   "OSXFrameworks":  "Cocoa",
-  "iOSFrameworks":  "CoreGraphics CoreText QuartzCore"
+  "iOSFrameworks":  "CoreGraphics CoreText QuartzCore",
+  "LinuxLibs":      "X11 Xinerama Xext freetype"
 }

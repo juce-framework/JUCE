@@ -166,18 +166,19 @@ public:
         DWRITE_FONT_METRICS dwFontMetrics;
         dwFontFace->GetMetrics (&dwFontMetrics);
 
-        // All Font Metrics are in design units so we need to get designUnitsPerEm value to get the metrics
-        // into Em/Design Independent Pixels
+        // All Font Metrics are in design units so we need to get designUnitsPerEm value
+        // to get the metrics into Em/Design Independent Pixels
         designUnitsPerEm = dwFontMetrics.designUnitsPerEm;
 
         ascent = std::abs ((float) dwFontMetrics.ascent);
         const float totalSize = ascent + std::abs ((float) dwFontMetrics.descent);
         ascent /= totalSize;
-        unitsToHeightScaleFactor = 1.0f / (totalSize / designUnitsPerEm);
-        const float pathAscent = (((float) dwFontMetrics.ascent) / ((float) designUnitsPerEm)) * 1024.0f;
-        const float pathDescent = (((float) dwFontMetrics.descent) / ((float) designUnitsPerEm)) * 1024.0f;
-        const float pathTotalSize = std::abs (pathAscent) + std::abs (pathDescent);
-        pathTransform = AffineTransform::identity.scale (1.0f / pathTotalSize, 1.0f / pathTotalSize);
+        unitsToHeightScaleFactor = designUnitsPerEm / totalSize;
+
+        const float pathAscent  = (1024.0f * dwFontMetrics.ascent)  / designUnitsPerEm;
+        const float pathDescent = (1024.0f * dwFontMetrics.descent) / designUnitsPerEm;
+        const float pathScale   = 1.0f / (std::abs (pathAscent) + std::abs (pathDescent));
+        pathTransform = AffineTransform::scale (pathScale, pathScale);
     }
 
     float getAscent() const     { return ascent; }
@@ -247,6 +248,9 @@ public:
 
         return true;
     }
+
+    IDWriteFontFace* getIDWriteFontFace() const noexcept    { return dwFontFace; }
+    float getFontHeightToEmSizeFactor() const noexcept      { return unitsToHeightScaleFactor; }
 
 private:
     ComSmartPtr<IDWriteFontFace> dwFontFace;

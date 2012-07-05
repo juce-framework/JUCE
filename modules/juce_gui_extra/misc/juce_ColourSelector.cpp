@@ -442,7 +442,7 @@ void ColourSelector::paint (Graphics& g)
                             Colour (0xffffffff).overlaidWith (currentColour));
 
         g.setColour (Colours::white.overlaidWith (currentColour).contrasting());
-        g.setFont (14.0f, Font::bold);
+        g.setFont (Font (14.0f, Font::bold));
         g.drawText (currentColour.toDisplayString ((flags & showAlphaChannel) != 0),
                     previewArea.getX(), previewArea.getY(), previewArea.getWidth(), previewArea.getHeight(),
                     Justification::centred, false);

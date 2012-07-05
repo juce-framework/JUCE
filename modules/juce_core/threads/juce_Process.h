@@ -128,11 +128,6 @@ public:
         @see getCurrentModuleInstanceHandle()
     */
     static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) noexcept;
-
-    /** WINDOWS ONLY - Gets the command-line params as a string.
-        This is needed to avoid unicode problems with the argc type params.
-    */
-    static String JUCE_CALLTYPE getCurrentCommandLineParams();
    #endif
 
 private:

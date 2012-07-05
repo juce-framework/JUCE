@@ -71,17 +71,17 @@ public:
         }
     }
 
-    void mouseWheelMove (const MouseEvent&, float wheelIncrementX, float wheelIncrementY)
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel)
     {
         if (thumbnail.getTotalLength() > 0)
         {
-            double newStart = startTime - wheelIncrementX * (endTime - startTime) / 10.0;
+            double newStart = startTime - wheel.deltaX * (endTime - startTime) / 10.0;
             newStart = jlimit (0.0, jmax (0.0, thumbnail.getTotalLength() - (endTime - startTime)), newStart);
             endTime = newStart + (endTime - startTime);
             startTime = newStart;
 
-            if (wheelIncrementY != 0)
-                zoomSlider.setValue (zoomSlider.getValue() - wheelIncrementY);
+            if (wheel.deltaY != 0)
+                zoomSlider.setValue (zoomSlider.getValue() - wheel.deltaY);
 
             repaint();
         }

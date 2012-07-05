@@ -85,8 +85,10 @@ public:
         If during the initialise() method, the application decides not to start-up
         after all, it can just call the quit() method and the event loop won't be run.
 
-        @param commandLineParameters    the line passed in does not include the
-                                        name of the executable, just the parameter list.
+        @param commandLineParameters    the line passed in does not include the name of
+                                        the executable, just the parameter list. To get the
+                                        parameters as an array, you can call
+                                        JUCEApplication::getCommandLineParameters()
         @see shutdown, quit
     */
     virtual void initialise (const String& commandLineParameters) = 0;

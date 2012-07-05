@@ -43,25 +43,9 @@ public:
     ~CPlusPlusCodeTokeniser();
 
     //==============================================================================
-    enum TokenType
-    {
-        tokenType_error = 0,
-        tokenType_comment,
-        tokenType_builtInKeyword,
-        tokenType_identifier,
-        tokenType_integerLiteral,
-        tokenType_floatLiteral,
-        tokenType_stringLiteral,
-        tokenType_operator,
-        tokenType_bracket,
-        tokenType_punctuation,
-        tokenType_preprocessor
-    };
-
-    //==============================================================================
     int readNextToken (CodeDocument::Iterator& source);
-    StringArray getTokenTypes();
-    Colour getDefaultColour (int tokenType);
+
+    CodeEditorComponent::ColourScheme getDefaultColourScheme();
 
     /** This is a handy method for checking whether a string is a c++ reserved keyword. */
     static bool isReservedKeyword (const String& token) noexcept;

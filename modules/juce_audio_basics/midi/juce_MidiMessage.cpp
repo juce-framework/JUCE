@@ -682,7 +682,9 @@ bool MidiMessage::isTextMetaEvent() const noexcept
 
 String MidiMessage::getTextFromTextMetaEvent() const
 {
-    return String (reinterpret_cast <const char*> (getMetaEventData()), (size_t) getMetaEventLength());
+    const char* const textData = reinterpret_cast <const char*> (getMetaEventData());
+    return String (CharPointer_UTF8 (textData),
+                   CharPointer_UTF8 (textData + getMetaEventLength()));
 }
 
 bool MidiMessage::isTrackNameEvent() const noexcept         { return (data[1] == 3)    && (*data == 0xff); }

@@ -663,6 +663,8 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
     }
 
     object = other.object;
+
+    listeners.call (&ValueTree::Listener::valueTreeRedirected, *this);
     return *this;
 }
 
@@ -670,12 +672,6 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
 ValueTree::ValueTree (ValueTree&& other) noexcept
     : object (static_cast <SharedObject::Ptr&&> (other.object))
 {
-}
-
-ValueTree& ValueTree::operator= (ValueTree&& other) noexcept
-{
-    object = static_cast <SharedObject::Ptr&&> (other.object);
-    return *this;
 }
 #endif
 
@@ -704,7 +700,7 @@ bool ValueTree::isEquivalentTo (const ValueTree& other) const
 
 ValueTree ValueTree::createCopy() const
 {
-    return ValueTree (createCopyIfNotNull (object.getObject()));
+    return ValueTree (createCopyIfNotNull (object.get()));
 }
 
 bool ValueTree::hasType (const Identifier& typeName) const
@@ -1014,6 +1010,8 @@ ValueTree ValueTree::readFromGZIPData (const void* const data, const size_t numB
     GZIPDecompressorInputStream gzipStream (in);
     return readFromStream (gzipStream);
 }
+
+void ValueTree::Listener::valueTreeRedirected (ValueTree&) {}
 
 //==============================================================================
 #if JUCE_UNIT_TESTS

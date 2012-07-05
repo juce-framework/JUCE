@@ -441,3 +441,7 @@ bool DragAndDropTarget::shouldDrawDragImageWhenOver()         { return true; }
 void FileDragAndDropTarget::fileDragEnter (const StringArray&, int, int)  {}
 void FileDragAndDropTarget::fileDragMove  (const StringArray&, int, int)  {}
 void FileDragAndDropTarget::fileDragExit  (const StringArray&)            {}
+
+void TextDragAndDropTarget::textDragEnter (const String&, int, int)  {}
+void TextDragAndDropTarget::textDragMove  (const String&, int, int)  {}
+void TextDragAndDropTarget::textDragExit  (const String&)            {}

@@ -413,8 +413,6 @@ int64 juce_fileSetPosition (void* handle, int64 pos)
 
 void FileInputStream::openHandle()
 {
-    totalSize = file.getSize();
-
     const int f = open (file.getFullPathName().toUTF8(), O_RDONLY, 00644);
 
     if (f != -1)

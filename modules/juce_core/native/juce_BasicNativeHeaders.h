@@ -62,6 +62,9 @@
  #include <net/if_dl.h>
  #include <mach/mach_time.h>
  #include <mach-o/dyld.h>
+ #include <objc/runtime.h>
+ #include <objc/objc.h>
+ #include <objc/message.h>
 
 //==============================================================================
 #elif JUCE_WINDOWS

@@ -162,6 +162,16 @@ String replacePreprocessorDefs (const StringPairArray& definitions, String sourc
     return sourceString;
 }
 
+StringArray getSearchPathsFromString (const String& searchPath)
+{
+    StringArray s;
+    s.addTokens (searchPath, ";\r\n", String::empty);
+    s.trim();
+    s.removeEmptyStrings();
+    s.removeDuplicates (false);
+    return s;
+}
+
 //==============================================================================
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 {
@@ -293,20 +303,6 @@ String RolloverHelpComp::findTip (Component* c)
     }
 
     return String::empty;
-}
-
-//==============================================================================
-PropertyPanelWithTooltips::PropertyPanelWithTooltips()
-{
-    addAndMakeVisible (&panel);
-    addAndMakeVisible (&rollover);
-}
-
-void PropertyPanelWithTooltips::resized()
-{
-    panel.setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
-    rollover.setBounds (3, panel.getBottom() - 50, getWidth() - 6,
-                        getHeight() - (panel.getBottom() - 50) - 4);
 }
 
 //==============================================================================
@@ -472,7 +468,7 @@ class CallOutBoxCallback  : public ModalComponentManager::Callback
 public:
     CallOutBoxCallback (Component& attachTo, Component* content_)
         : content (content_),
-          callout (*content_, attachTo, attachTo.getTopLevelComponent())
+          callout (*content_, attachTo, nullptr)
     {
         callout.setVisible (true);
         callout.enterModalState (true, this);

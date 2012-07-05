@@ -103,6 +103,9 @@ namespace juce
 #ifndef __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
  #include "mouse/juce_FileDragAndDropTarget.h"
 #endif
+#ifndef __JUCE_TEXTDRAGANDDROPTARGET_JUCEHEADER__
+ #include "mouse/juce_TextDragAndDropTarget.h"
+#endif
 #ifndef __JUCE_LASSOCOMPONENT_JUCEHEADER__
  #include "mouse/juce_LassoComponent.h"
 #endif

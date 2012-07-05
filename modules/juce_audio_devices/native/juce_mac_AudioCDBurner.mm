@@ -25,305 +25,256 @@
 
 const int kilobytesPerSecond1x = 176;
 
-} // (juce namespace)
-
-#define OpenDiskDevice MakeObjCClassName(OpenDiskDevice)
-
-@interface OpenDiskDevice   : NSObject
+struct AudioTrackProducerClass  : public ObjCClass <NSObject>
 {
-@public
+    AudioTrackProducerClass()  : ObjCClass <NSObject> ("JUCEAudioTrackProducer_")
+    {
+        addIvar<AudioSourceHolder*> ("source");
+
+        addMethod (@selector (initWithAudioSourceHolder:),     initWithAudioSourceHolder,     "@@:^v");
+        addMethod (@selector (cleanupTrackAfterBurn:),         cleanupTrackAfterBurn,         "v@:@");
+        addMethod (@selector (cleanupTrackAfterVerification:), cleanupTrackAfterVerification, "c@:@");
+        addMethod (@selector (estimateLengthOfTrack:),         estimateLengthOfTrack,         "Q@:@");
+        addMethod (@selector (prepareTrack:forBurn:toMedia:),  prepareTrack,                  "c@:@@@");
+        addMethod (@selector (prepareTrackForVerification:),   prepareTrackForVerification,   "c@:@");
+        addMethod (@selector (produceDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
+                                                               produceDataForTrack,           "I@:@^cIQI^I");
+        addMethod (@selector (producePreGapForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
+                                                               produceDataForTrack,           "I@:@^cIQI^I");
+        addMethod (@selector (verifyDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
+                                                               produceDataForTrack,           "I@:@^cIQI^I");
+
+        registerClass();
+    }
+
+    struct AudioSourceHolder
+    {
+        AudioSourceHolder (AudioSource* source_, int numFrames)
+            : source (source_), readPosition (0), lengthInFrames (numFrames)
+        {
+        }
+
+        ~AudioSourceHolder()
+        {
+            if (source != nullptr)
+                source->releaseResources();
+        }
+
+        ScopedPointer<AudioSource> source;
+        int readPosition, lengthInFrames;
+    };
+
+private:
+    static id initWithAudioSourceHolder (id self, SEL, AudioSourceHolder* source)
+    {
+        self = sendSuperclassMessage (self, @selector (init));
+        object_setInstanceVariable (self, "source", source);
+        return self;
+    }
+
+    static AudioSourceHolder* getSource (id self)
+    {
+        return getIvar<AudioSourceHolder*> (self, "source");
+    }
+
+    static void dealloc (id self, SEL)
+    {
+        delete getSource (self);
+        sendSuperclassMessage (self, @selector (dealloc));
+    }
+
+    static void cleanupTrackAfterBurn (id self, SEL, DRTrack*) {}
+    static BOOL cleanupTrackAfterVerification (id self, SEL, DRTrack*) { return true; }
+
+    static uint64_t estimateLengthOfTrack (id self, SEL, DRTrack*)
+    {
+        return getSource (self)->lengthInFrames;
+    }
+
+    static BOOL prepareTrack (id self, SEL, DRTrack*, DRBurn*, NSDictionary*)
+    {
+        AudioSourceHolder* const source = getSource (self);
+
+        if (source != nullptr)
+        {
+            source->source->prepareToPlay (44100 / 75, 44100);
+            source->readPosition = 0;
+        }
+
+        return true;
+    }
+
+    static BOOL prepareTrackForVerification (id self, SEL, DRTrack*)
+    {
+        AudioSourceHolder* const source = getSource (self);
+
+        if (source != nullptr)
+            source->source->prepareToPlay (44100 / 75, 44100);
+
+        return true;
+    }
+
+    static uint32_t produceDataForTrack (id self, SEL, DRTrack*, char* buffer,
+                                         uint32_t bufferLength, uint64_t /*address*/,
+                                         uint32_t /*blockSize*/, uint32_t* /*flags*/)
+    {
+        AudioSourceHolder* const source = getSource (self);
+
+        if (source != nullptr)
+        {
+            const int numSamples = jmin ((int) bufferLength / 4,
+                                         (source->lengthInFrames * (44100 / 75)) - source->readPosition);
+
+            if (numSamples > 0)
+            {
+                AudioSampleBuffer tempBuffer (2, numSamples);
+                AudioSourceChannelInfo info (tempBuffer);
+
+                source->source->getNextAudioBlock (info);
+
+                typedef AudioData::Pointer <AudioData::Int16,
+                                            AudioData::LittleEndian,
+                                            AudioData::Interleaved,
+                                            AudioData::NonConst> CDSampleFormat;
+
+                typedef AudioData::Pointer <AudioData::Float32,
+                                            AudioData::NativeEndian,
+                                            AudioData::NonInterleaved,
+                                            AudioData::Const> SourceSampleFormat;
+                CDSampleFormat left (buffer, 2);
+                left.convertSamples (SourceSampleFormat (tempBuffer.getSampleData (0)), numSamples);
+                CDSampleFormat right (buffer + 2, 2);
+                right.convertSamples (SourceSampleFormat (tempBuffer.getSampleData (1)), numSamples);
+
+                source->readPosition += numSamples;
+            }
+
+            return numSamples * 4;
+        }
+
+        return 0;
+    }
+
+    static uint32_t producePreGapForTrack (id self, SEL, DRTrack*, char* buffer,
+                                           uint32_t bufferLength, uint64_t /*address*/,
+                                           uint32_t /*blockSize*/, uint32_t* /*flags*/)
+    {
+        zeromem (buffer, bufferLength);
+        return bufferLength;
+    }
+
+    static BOOL verifyDataForTrack (id self, SEL, DRTrack*, const char*,
+                                    uint32_t /*bufferLength*/, uint64_t /*address*/,
+                                    uint32_t /*blockSize*/, uint32_t* /*flags*/)
+    {
+        return true;
+    }
+};
+
+struct OpenDiskDevice
+{
+    OpenDiskDevice (DRDevice* device_)
+        : device (device_),
+          tracks ([[NSMutableArray alloc] init]),
+          underrunProtection (true)
+    {
+    }
+
+    ~OpenDiskDevice()
+    {
+        [tracks release];
+    }
+
+    void addSourceTrack (AudioSource* source, int numSamples)
+    {
+        if (source != nullptr)
+        {
+            const int numFrames = (numSamples + 587) / 588;
+
+            static AudioTrackProducerClass cls;
+
+            NSObject* producer = [cls.createInstance()  performSelector: @selector (initWithAudioSourceHolder:)
+                                                             withObject: (id) new AudioTrackProducerClass::AudioSourceHolder (source, numFrames)];
+            DRTrack* track = [[DRTrack alloc] initWithProducer: producer];
+
+            {
+                NSMutableDictionary* p = [[track properties] mutableCopy];
+                [p setObject: [DRMSF msfWithFrames: numFrames] forKey: DRTrackLengthKey];
+                [p setObject: [NSNumber numberWithUnsignedShort: 2352] forKey: DRBlockSizeKey];
+                [p setObject: [NSNumber numberWithInt: 0] forKey: DRDataFormKey];
+                [p setObject: [NSNumber numberWithInt: 0] forKey: DRBlockTypeKey];
+                [p setObject: [NSNumber numberWithInt: 0] forKey: DRTrackModeKey];
+                [p setObject: [NSNumber numberWithInt: 0] forKey: DRSessionFormatKey];
+                [track setProperties: p];
+                [p release];
+            }
+
+            [tracks addObject: track];
+
+            [track release];
+            [producer release];
+        }
+    }
+
+    String burn (AudioCDBurner::BurnProgressListener* listener,
+                 bool shouldEject, bool peformFakeBurnForTesting, int burnSpeed)
+    {
+        DRBurn* burn = [DRBurn burnForDevice: device];
+
+        if (! [device acquireExclusiveAccess])
+            return "Couldn't open or write to the CD device";
+
+        [device acquireMediaReservation];
+
+        NSMutableDictionary* d = [[burn properties] mutableCopy];
+        [d autorelease];
+        [d setObject: [NSNumber numberWithBool: peformFakeBurnForTesting] forKey: DRBurnTestingKey];
+        [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnVerifyDiscKey];
+        [d setObject: (shouldEject ? DRBurnCompletionActionEject : DRBurnCompletionActionMount) forKey: DRBurnCompletionActionKey];
+
+        if (burnSpeed > 0)
+            [d setObject: [NSNumber numberWithFloat: burnSpeed * kilobytesPerSecond1x] forKey: DRBurnRequestedSpeedKey];
+
+        if (! underrunProtection)
+            [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnUnderrunProtectionKey];
+
+        [burn setProperties: d];
+
+        [burn writeLayout: tracks];
+
+        for (;;)
+        {
+            Thread::sleep (300);
+            float progress = [[[burn status] objectForKey: DRStatusPercentCompleteKey] floatValue];
+
+            if (listener != nullptr && listener->audioCDBurnProgress (progress))
+            {
+                [burn abort];
+                return "User cancelled the write operation";
+            }
+
+            if ([[[burn status] objectForKey: DRStatusStateKey] isEqualTo: DRStatusStateFailed])
+                return "Write operation failed";
+
+            if ([[[burn status] objectForKey: DRStatusStateKey] isEqualTo: DRStatusStateDone])
+                break;
+
+            NSString* err = (NSString*) [[[burn status] objectForKey: DRErrorStatusKey]
+                                                        objectForKey: DRErrorStatusErrorStringKey];
+
+            if ([err length] > 0)
+                return CharPointer_UTF8 ([err UTF8String]);
+        }
+
+        [device releaseMediaReservation];
+        [device releaseExclusiveAccess];
+        return String::empty;
+    }
+
     DRDevice* device;
     NSMutableArray* tracks;
     bool underrunProtection;
-}
-
-- (OpenDiskDevice*) initWithDRDevice: (DRDevice*) device;
-- (void) dealloc;
-- (void) addSourceTrack: (juce::AudioSource*) source numSamples: (int) numSamples_;
-- (void) burn: (juce::AudioCDBurner::BurnProgressListener*) listener  errorString: (juce::String*) error
-         ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting speed: (int) burnSpeed;
-@end
-
-//==============================================================================
-#define AudioTrackProducer MakeObjCClassName(AudioTrackProducer)
-
-@interface AudioTrackProducer   : NSObject
-{
-    juce::AudioSource* source;
-    int readPosition, lengthInFrames;
-}
-
-- (AudioTrackProducer*) init: (int) lengthInFrames;
-- (AudioTrackProducer*) initWithAudioSource: (juce::AudioSource*) source numSamples: (int) lengthInSamples;
-- (void) dealloc;
-- (void) setupTrackProperties: (DRTrack*) track;
-
-- (void) cleanupTrackAfterBurn: (DRTrack*) track;
-- (BOOL) cleanupTrackAfterVerification:(DRTrack*)track;
-- (uint64_t) estimateLengthOfTrack:(DRTrack*)track;
-- (BOOL) prepareTrack:(DRTrack*)track forBurn:(DRBurn*)burn
-         toMedia:(NSDictionary*)mediaInfo;
-- (BOOL) prepareTrackForVerification:(DRTrack*)track;
-- (uint32_t) produceDataForTrack:(DRTrack*)track intoBuffer:(char*)buffer
-        length:(uint32_t)bufferLength atAddress:(uint64_t)address
-        blockSize:(uint32_t)blockSize ioFlags:(uint32_t*)flags;
-- (uint32_t) producePreGapForTrack:(DRTrack*)track
-             intoBuffer:(char*)buffer length:(uint32_t)bufferLength
-             atAddress:(uint64_t)address blockSize:(uint32_t)blockSize
-             ioFlags:(uint32_t*)flags;
-- (BOOL) verifyDataForTrack:(DRTrack*)track inBuffer:(const char*)buffer
-         length:(uint32_t)bufferLength atAddress:(uint64_t)address
-         blockSize:(uint32_t)blockSize ioFlags:(uint32_t*)flags;
-- (uint32_t) producePreGapForTrack:(DRTrack*)track
-        intoBuffer:(char*)buffer length:(uint32_t)bufferLength
-        atAddress:(uint64_t)address blockSize:(uint32_t)blockSize
-        ioFlags:(uint32_t*)flags;
-@end
-
-//==============================================================================
-@implementation OpenDiskDevice
-
-- (OpenDiskDevice*) initWithDRDevice: (DRDevice*) device_
-{
-    [super init];
-
-    device = device_;
-    tracks = [[NSMutableArray alloc] init];
-    underrunProtection = true;
-    return self;
-}
-
-- (void) dealloc
-{
-    [tracks release];
-    [super dealloc];
-}
-
-- (void) addSourceTrack: (juce::AudioSource*) source_ numSamples: (int) numSamples_
-{
-    AudioTrackProducer* p = [[AudioTrackProducer alloc] initWithAudioSource: source_ numSamples: numSamples_];
-    DRTrack* t = [[DRTrack alloc] initWithProducer: p];
-    [p setupTrackProperties: t];
-
-    [tracks addObject: t];
-
-    [t release];
-    [p release];
-}
-
-- (void) burn: (juce::AudioCDBurner::BurnProgressListener*) listener errorString: (juce::String*) error
-         ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting speed: (int) burnSpeed
-{
-    DRBurn* burn = [DRBurn burnForDevice: device];
-
-    if (! [device acquireExclusiveAccess])
-    {
-        *error = "Couldn't open or write to the CD device";
-        return;
-    }
-
-    [device acquireMediaReservation];
-
-    NSMutableDictionary* d = [[burn properties] mutableCopy];
-    [d autorelease];
-    [d setObject: [NSNumber numberWithBool: peformFakeBurnForTesting] forKey: DRBurnTestingKey];
-    [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnVerifyDiscKey];
-    [d setObject: (shouldEject ? DRBurnCompletionActionEject : DRBurnCompletionActionMount) forKey: DRBurnCompletionActionKey];
-
-    if (burnSpeed > 0)
-        [d setObject: [NSNumber numberWithFloat: burnSpeed * juce::kilobytesPerSecond1x] forKey: DRBurnRequestedSpeedKey];
-
-    if (! underrunProtection)
-        [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnUnderrunProtectionKey];
-
-    [burn setProperties: d];
-
-    [burn writeLayout: tracks];
-
-    for (;;)
-    {
-        juce::Thread::sleep (300);
-        float progress = [[[burn status] objectForKey: DRStatusPercentCompleteKey] floatValue];
-
-        if (listener != nullptr && listener->audioCDBurnProgress (progress))
-        {
-            [burn abort];
-            *error = "User cancelled the write operation";
-            break;
-        }
-
-        if ([[[burn status] objectForKey: DRStatusStateKey] isEqualTo: DRStatusStateFailed])
-        {
-            *error = "Write operation failed";
-            break;
-        }
-        else if ([[[burn status] objectForKey: DRStatusStateKey] isEqualTo: DRStatusStateDone])
-        {
-            break;
-        }
-
-        NSString* err = (NSString*) [[[burn status] objectForKey: DRErrorStatusKey]
-                                                    objectForKey: DRErrorStatusErrorStringKey];
-
-        if ([err length] > 0)
-        {
-            *error = juce::CharPointer_UTF8 ([err UTF8String]);
-            break;
-        }
-    }
-
-    [device releaseMediaReservation];
-    [device releaseExclusiveAccess];
-}
-@end
-
-//==============================================================================
-@implementation AudioTrackProducer
-
-- (AudioTrackProducer*) init: (int) lengthInFrames_
-{
-    lengthInFrames = lengthInFrames_;
-    readPosition = 0;
-    return self;
-}
-
-- (void) setupTrackProperties: (DRTrack*) track
-{
-    NSMutableDictionary*  p = [[track properties] mutableCopy];
-    [p setObject:[DRMSF msfWithFrames: lengthInFrames] forKey: DRTrackLengthKey];
-    [p setObject:[NSNumber numberWithUnsignedShort:2352] forKey: DRBlockSizeKey];
-    [p setObject:[NSNumber numberWithInt:0] forKey: DRDataFormKey];
-    [p setObject:[NSNumber numberWithInt:0] forKey: DRBlockTypeKey];
-    [p setObject:[NSNumber numberWithInt:0] forKey: DRTrackModeKey];
-    [p setObject:[NSNumber numberWithInt:0] forKey: DRSessionFormatKey];
-
-
-    [track setProperties: p];
-    [p release];
-}
-
-- (AudioTrackProducer*) initWithAudioSource: (juce::AudioSource*) source_ numSamples: (int) lengthInSamples
-{
-    AudioTrackProducer* s = [self init: (lengthInSamples + 587) / 588];
-
-    if (s != nil)
-        s->source = source_;
-
-    return s;
-}
-
-- (void) dealloc
-{
-    if (source != nullptr)
-    {
-        source->releaseResources();
-        delete source;
-    }
-
-    [super dealloc];
-}
-
-- (void) cleanupTrackAfterBurn: (DRTrack*) track
-{
-    (void) track;
-}
-
-- (BOOL) cleanupTrackAfterVerification: (DRTrack*) track
-{
-    (void) track;
-    return true;
-}
-
-- (uint64_t) estimateLengthOfTrack: (DRTrack*) track
-{
-    (void) track;
-    return lengthInFrames;
-}
-
-- (BOOL) prepareTrack: (DRTrack*) track forBurn: (DRBurn*) burn
-         toMedia: (NSDictionary*) mediaInfo
-{
-    (void) track; (void) burn; (void) mediaInfo;
-
-    if (source != nullptr)
-        source->prepareToPlay (44100 / 75, 44100);
-
-    readPosition = 0;
-    return true;
-}
-
-- (BOOL) prepareTrackForVerification: (DRTrack*) track
-{
-    (void) track;
-    if (source != nullptr)
-        source->prepareToPlay (44100 / 75, 44100);
-
-    return true;
-}
-
-- (uint32_t) produceDataForTrack: (DRTrack*) track intoBuffer: (char*) buffer
-        length: (uint32_t) bufferLength atAddress: (uint64_t) address
-        blockSize: (uint32_t) blockSize ioFlags: (uint32_t*) flags
-{
-    (void) track; (void) address; (void) blockSize; (void) flags;
-
-    if (source != nullptr)
-    {
-        const int numSamples = juce::jmin ((int) bufferLength / 4, (lengthInFrames * (44100 / 75)) - readPosition);
-
-        if (numSamples > 0)
-        {
-            juce::AudioSampleBuffer tempBuffer (2, numSamples);
-            juce::AudioSourceChannelInfo info (tempBuffer);
-
-            source->getNextAudioBlock (info);
-
-            typedef juce::AudioData::Pointer <juce::AudioData::Int16,
-                                              juce::AudioData::LittleEndian,
-                                              juce::AudioData::Interleaved,
-                                              juce::AudioData::NonConst> CDSampleFormat;
-
-            typedef juce::AudioData::Pointer <juce::AudioData::Float32,
-                                              juce::AudioData::NativeEndian,
-                                              juce::AudioData::NonInterleaved,
-                                              juce::AudioData::Const> SourceSampleFormat;
-            CDSampleFormat left (buffer, 2);
-            left.convertSamples (SourceSampleFormat (tempBuffer.getSampleData (0)), numSamples);
-            CDSampleFormat right (buffer + 2, 2);
-            right.convertSamples (SourceSampleFormat (tempBuffer.getSampleData (1)), numSamples);
-
-            readPosition += numSamples;
-        }
-
-        return numSamples * 4;
-    }
-
-    return 0;
-}
-
-- (uint32_t) producePreGapForTrack: (DRTrack*) track
-        intoBuffer: (char*) buffer length: (uint32_t) bufferLength
-        atAddress: (uint64_t) address blockSize: (uint32_t) blockSize
-        ioFlags: (uint32_t*) flags
-{
-    (void) track; (void) address; (void) blockSize; (void) flags;
-    zeromem (buffer, bufferLength);
-    return bufferLength;
-}
-
-- (BOOL) verifyDataForTrack: (DRTrack*) track inBuffer: (const char*) buffer
-         length: (uint32_t) bufferLength atAddress: (uint64_t) address
-         blockSize: (uint32_t) blockSize ioFlags: (uint32_t*) flags
-{
-    (void) track; (void) buffer; (void) bufferLength; (void) address; (void) blockSize; (void) flags;
-    return true;
-}
-
-@end
-
-
-namespace juce
-{
+};
 
 //==============================================================================
 class AudioCDBurner::Pimpl  : public Timer
@@ -333,9 +284,10 @@ public:
         : device (0), owner (owner_)
     {
         DRDevice* dev = [[DRDevice devices] objectAtIndex: deviceIndex];
+
         if (dev != nil)
         {
-            device = [[OpenDiskDevice alloc] initWithDRDevice: dev];
+            device = new OpenDiskDevice (dev);
             lastState = getDiskState();
             startTimer (1000);
         }
@@ -344,7 +296,6 @@ public:
     ~Pimpl()
     {
         stopTimer();
-        [device release];
     }
 
     void timerCallback()
@@ -386,7 +337,7 @@ public:
         return unknown;
     }
 
-    bool openTray() { return [device->device isValid] && [device->device ejectMedia]; }
+    bool openTray()    { return [device->device isValid] && [device->device ejectMedia]; }
 
     Array<int> getAvailableWriteSpeeds() const
     {
@@ -422,7 +373,7 @@ public:
                                           objectForKey: DRDeviceMediaBlocksFreeKey] intValue];
     }
 
-    OpenDiskDevice* device;
+    ScopedPointer<OpenDiskDevice> device;
 
 private:
     DiskState lastState;
@@ -528,30 +479,20 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamps)
 {
     if ([pimpl->device->device isValid])
     {
-        [pimpl->device addSourceTrack: source numSamples: numSamps];
+        pimpl->device->addSourceTrack (source, numSamps);
         return true;
     }
 
     return false;
 }
 
-String AudioCDBurner::burn (juce::AudioCDBurner::BurnProgressListener* listener,
+String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
                             bool ejectDiscAfterwards,
                             bool performFakeBurnForTesting,
                             int writeSpeed)
 {
-    String error ("Couldn't open or write to the CD device");
-
     if ([pimpl->device->device isValid])
-    {
-        error = String::empty;
+        return pimpl->device->burn (listener, ejectDiscAfterwards, performFakeBurnForTesting, writeSpeed);
 
-        [pimpl->device  burn: listener
-                 errorString: &error
-             ejectAfterwards: ejectDiscAfterwards
-                      isFake: performFakeBurnForTesting
-                       speed: writeSpeed];
-    }
-
-    return error;
+    return "Couldn't open or write to the CD device";
 }

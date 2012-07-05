@@ -987,7 +987,7 @@ private:
                               "Change tab component file");
         }
 
-        const File getFile() const
+        File getFile() const
         {
             return document.getFile().getSiblingFile (getTabJucerFile (component, tabIndex));
         }

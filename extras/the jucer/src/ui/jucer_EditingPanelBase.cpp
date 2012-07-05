@@ -70,17 +70,17 @@ public:
 
     ~ZoomingViewport() {}
 
-    void mouseWheelMove (const MouseEvent& e, float ix, float iy)
+    void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
     {
         if (e.mods.isCtrlDown() || e.mods.isAltDown())
         {
-            const double factor = (iy > 0) ? 2.0 : 0.5;
+            const double factor = (wheel.deltaY > 0) ? 2.0 : 0.5;
 
-            panel->setZoom (panel->getZoom() * factor, e.x, e.y);
+            panel->setZoom (panel->getZoom() * factor, wheel.deltaX, wheel.deltaY);
         }
         else
         {
-            Viewport::mouseWheelMove (e, ix, iy);
+            Viewport::mouseWheelMove (e, wheel);
         }
     }
 

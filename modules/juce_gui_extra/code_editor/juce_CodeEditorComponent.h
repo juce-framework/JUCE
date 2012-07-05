@@ -27,8 +27,7 @@
 #define __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
 
 #include "juce_CodeDocument.h"
-#include "juce_CodeTokeniser.h"
-
+class CodeTokeniser;
 
 //==============================================================================
 /**
@@ -39,16 +38,16 @@
 */
 class JUCE_API  CodeEditorComponent   : public Component,
                                         public TextInputTarget,
-                                        public Timer,
-                                        public ScrollBar::Listener,
-                                        public CodeDocument::Listener,
-                                        public AsyncUpdater
+                                        private Timer,
+                                        private ScrollBar::Listener,
+                                        private CodeDocument::Listener,
+                                        private AsyncUpdater
 {
 public:
     //==============================================================================
     /** Creates an editor for a document.
 
-        The tokeniser object is optional - pass 0 to disable syntax highlighting.
+        The tokeniser object is optional - pass nullptr to disable syntax highlighting.
         The object that you pass in is not owned or deleted by the editor - you must
         make sure that it doesn't get deleted while this component is still using it.
 
@@ -111,6 +110,9 @@ public:
     */
     CodeDocument::Position getPositionAt (int x, int y);
 
+    /** Enables or disables the line-number display in the gutter. */
+    void setLineNumbersShown (bool shouldBeShown);
+
     //==============================================================================
     bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
     bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
@@ -126,6 +128,7 @@ public:
     bool moveCaretToEndOfLine (bool selecting);
     bool deleteBackwards (bool moveInWholeWordSteps);
     bool deleteForwards (bool moveInWholeWordSteps);
+    bool deleteWhitespaceBackwardsToTabStop();
     bool copyToClipboard();
     bool cutToClipboard();
     bool pasteFromClipboard();
@@ -142,6 +145,9 @@ public:
 
     void insertTextAtCaret (const String& textToInsert);
     void insertTabAtCaret();
+
+    void indentSelection();
+    void unindentSelection();
 
     //==============================================================================
     Range<int> getHighlightedRegion() const;
@@ -173,25 +179,35 @@ public:
     /** Returns the font that the editor is using. */
     const Font& getFont() const noexcept                { return font; }
 
-    /** Resets the syntax highlighting colours to the default ones provided by the
-        code tokeniser.
-        @see CodeTokeniser::getDefaultColour
-    */
-    void resetToDefaultColours();
+    //==============================================================================
+    struct ColourScheme
+    {
+        struct TokenType
+        {
+            String name;
+            Colour colour;
+        };
 
-    /** Changes one of the syntax highlighting colours.
+        Array<TokenType> types;
+
+        void set (const String& name, const Colour& colour);
+    };
+
+    /** Changes the syntax highlighting scheme.
         The token type values are dependent on the tokeniser being used - use
         CodeTokeniser::getTokenTypes() to get a list of the token types.
         @see getColourForTokenType
     */
-    void setColourForTokenType (int tokenType, const Colour& colour);
+    void setColourScheme (const ColourScheme& scheme);
 
-    /** Returns one of the syntax highlighting colours.
-        The token type values are dependent on the tokeniser being used - use
-        CodeTokeniser::getTokenTypes() to get a list of the token types.
-        @see setColourForTokenType
+    /** Returns the current syntax highlighting colour scheme. */
+    const ColourScheme& getColourScheme() const noexcept    { return colourScheme; }
+
+    /** Returns one the syntax highlighting colour for the given token.
+        The token type values are dependent on the tokeniser being used.
+        @see setColourScheme
     */
-    Colour getColourForTokenType (int tokenType) const;
+    Colour getColourForTokenType (const int tokenType) const;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
@@ -204,10 +220,10 @@ public:
     enum ColourIds
     {
         backgroundColourId          = 0x1004500,  /**< A colour to use to fill the editor's background. */
-        highlightColourId           = 0x1004502,  /**< The colour to use for the highlighted background under
-                                                       selected text. */
-        defaultTextColourId         = 0x1004503   /**< The colour to use for text when no syntax colouring is
-                                                       enabled. */
+        highlightColourId           = 0x1004502,  /**< The colour to use for the highlighted background under selected text. */
+        defaultTextColourId         = 0x1004503,  /**< The colour to use for text when no syntax colouring is enabled. */
+        lineNumberBackgroundId      = 0x1004504,  /**< The colour to use for filling the background of the line-number gutter. */
+        lineNumberTextId            = 0x1004505,  /**< The colour to use for drawing the line numbers. */
     };
 
     //==============================================================================
@@ -218,35 +234,68 @@ public:
     int getScrollbarThickness() const noexcept          { return scrollbarThickness; }
 
     //==============================================================================
+    /** Called when the return key is pressed - this can be overridden for custom behaviour. */
+    virtual void handleReturnKey();
+    /** Called when the tab key is pressed - this can be overridden for custom behaviour. */
+    virtual void handleTabKey();
+    /** Called when the escape key is pressed - this can be overridden for custom behaviour. */
+    virtual void handleEscapeKey();
+
+    //==============================================================================
+    /** This adds the items to the popup menu.
+
+        By default it adds the cut/copy/paste items, but you can override this if
+        you need to replace these with your own items.
+
+        If you want to add your own items to the existing ones, you can override this,
+        call the base class's addPopupMenuItems() method, then append your own items.
+
+        When the menu has been shown, performPopupMenuAction() will be called to
+        perform the item that the user has chosen.
+
+        If this was triggered by a mouse-click, the mouseClickEvent parameter will be
+        a pointer to the info about it, or may be null if the menu is being triggered
+        by some other means.
+
+        @see performPopupMenuAction, setPopupMenuEnabled, isPopupMenuEnabled
+    */
+    virtual void addPopupMenuItems (PopupMenu& menuToAddTo,
+                                    const MouseEvent* mouseClickEvent);
+
+    /** This is called to perform one of the items that was shown on the popup menu.
+
+        If you've overridden addPopupMenuItems(), you should also override this
+        to perform the actions that you've added.
+
+        If you've overridden addPopupMenuItems() but have still left the default items
+        on the menu, remember to call the superclass's performPopupMenuAction()
+        so that it can perform the default actions if that's what the user clicked on.
+
+        @see addPopupMenuItems, setPopupMenuEnabled, isPopupMenuEnabled
+    */
+    virtual void performPopupMenuAction (int menuItemID);
+
+    //==============================================================================
+    /** @internal */
+    void paint (Graphics&);
     /** @internal */
     void resized();
     /** @internal */
-    void paint (Graphics& g);
+    bool keyPressed (const KeyPress&);
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    void mouseDown (const MouseEvent&);
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&);
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseUp (const MouseEvent&);
     /** @internal */
-    void mouseUp (const MouseEvent& e);
+    void mouseDoubleClick (const MouseEvent&);
     /** @internal */
-    void mouseDoubleClick (const MouseEvent& e);
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    void focusGained (FocusChangeType);
     /** @internal */
-    void focusGained (FocusChangeType cause);
-    /** @internal */
-    void focusLost (FocusChangeType cause);
-    /** @internal */
-    void timerCallback();
-    /** @internal */
-    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
-    /** @internal */
-    void handleAsyncUpdate();
-    /** @internal */
-    void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
-                              const CodeDocument::Position& affectedTextEnd);
+    void focusLost (FocusChangeType);
     /** @internal */
     bool isTextInputActive() const;
     /** @internal */
@@ -257,11 +306,11 @@ private:
     CodeDocument& document;
 
     Font font;
-    int firstLineOnScreen, gutter, spacesPerTab;
+    int firstLineOnScreen, spacesPerTab;
     float charWidth;
     int lineHeight, linesOnScreen, columnsOnScreen;
     int scrollbarThickness, columnToTryToMaintain;
-    bool useSpacesForTabs;
+    bool useSpacesForTabs, showLineNumbers;
     double xOffset;
 
     CodeDocument::Position caretPos;
@@ -269,6 +318,11 @@ private:
 
     ScopedPointer<CaretComponent> caret;
     ScrollBar verticalScrollBar, horizontalScrollBar;
+
+    class GutterComponent;
+    friend class GutterComponent;
+    friend class ScopedPointer<GutterComponent>;
+    ScopedPointer<GutterComponent> gutter;
 
     enum DragType
     {
@@ -281,7 +335,7 @@ private:
 
     //==============================================================================
     CodeTokeniser* codeTokeniser;
-    Array <Colour> coloursForTokenCategories;
+    ColourScheme colourScheme;
 
     class CodeEditorLine;
     OwnedArray <CodeEditorLine> lines;
@@ -291,15 +345,24 @@ private:
     void clearCachedIterators (int firstLineToBeInvalid);
     void updateCachedIterators (int maxLineNum);
     void getIteratorForPosition (int position, CodeDocument::Iterator& result);
+
+    void timerCallback();
+    void scrollBarMoved (ScrollBar*, double);
+    void handleAsyncUpdate();
+    void codeDocumentChanged (const CodeDocument::Position&, const CodeDocument::Position&);
+
     void moveLineDelta (int delta, bool selecting);
+    int getGutterSize() const noexcept;
 
     //==============================================================================
+    void insertText (const String& textToInsert);
     void updateCaretPosition();
     void updateScrollBars();
     void scrollToLineInternal (int line);
     void scrollToColumnInternal (double column);
     void newTransaction();
     void cut();
+    void indentSelectedLines (int spacesToAdd);
 
     int indexToColumn (int line, int index) const noexcept;
     int columnToIndex (int line, int column) const noexcept;

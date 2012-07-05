@@ -32,5 +32,6 @@
                       "native/*" ],
 
   "OSXFrameworks":  "Cocoa IOKit",
-  "iOSFrameworks":  "Foundation"
+  "iOSFrameworks":  "Foundation",
+  "LinuxLibs":      "rt dl pthread"
 }

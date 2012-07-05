@@ -309,7 +309,7 @@ public:
 
     void paintItem (Graphics& g, int width, int height)
     {
-        g.setFont (height * 0.6f, Font::bold);
+        g.setFont (Font (height * 0.6f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawText (categoryName,

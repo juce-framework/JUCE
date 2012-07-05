@@ -985,7 +985,7 @@ public:
 
     void paint (Graphics& g)
     {
-        g.setFont (getHeight() * 0.7f, Font::bold);
+        g.setFont (Font (getHeight() * 0.7f, Font::bold));
         g.setColour (Colours::black);
         g.drawFittedText (tip, 10, 0, getWidth() - 12, getHeight(), Justification::centredLeft, 1);
     }

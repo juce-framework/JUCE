@@ -82,7 +82,7 @@ private:
     //==============================================================================
     File file;
     void* fileHandle;
-    int64 currentPosition, totalSize;
+    int64 currentPosition;
     Result status;
     bool needToSeek;
 

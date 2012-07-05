@@ -92,12 +92,12 @@ void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int>& po
     mouse->handleEvent (this, positionWithinPeer, time, newMods);
 }
 
-void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int>& positionWithinPeer, const int64 time, const float x, const float y)
+void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int>& positionWithinPeer, const int64 time, const MouseWheelDetails& wheel)
 {
     MouseInputSource* const mouse = Desktop::getInstance().getMouseSource (touchIndex);
     jassert (mouse != nullptr); // not enough sources!
 
-    mouse->handleWheel (this, positionWithinPeer, time, x, y);
+    mouse->handleWheel (this, positionWithinPeer, time, wheel);
 }
 
 //==============================================================================
@@ -409,54 +409,97 @@ Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPositio
 }
 
 //==============================================================================
-namespace ComponentPeerHelpers
+namespace DragHelpers
 {
-    static FileDragAndDropTarget* findDragAndDropTarget (Component* c,
-                                                         const StringArray& files,
-                                                         FileDragAndDropTarget* const lastOne)
+    static bool isFileDrag (const ComponentPeer::DragInfo& info)
     {
-        while (c != nullptr)
-        {
-            FileDragAndDropTarget* const t = dynamic_cast <FileDragAndDropTarget*> (c);
+        return info.files.size() > 0;
+    }
 
-            if (t != nullptr && (t == lastOne || t->isInterestedInFileDrag (files)))
-                return t;
+    static bool isSuitableTarget (const ComponentPeer::DragInfo& info, Component* target)
+    {
+        return isFileDrag (info) ? dynamic_cast <FileDragAndDropTarget*> (target) != nullptr
+                                 : dynamic_cast <TextDragAndDropTarget*> (target) != nullptr;
+    }
 
-            c = c->getParentComponent();
-        }
+    static bool isInterested (const ComponentPeer::DragInfo& info, Component* target)
+    {
+        return isFileDrag (info) ? dynamic_cast <FileDragAndDropTarget*> (target)->isInterestedInFileDrag (info.files)
+                                 : dynamic_cast <TextDragAndDropTarget*> (target)->isInterestedInTextDrag (info.text);
+    }
+
+    static Component* findDragAndDropTarget (Component* c, const ComponentPeer::DragInfo& info, Component* lastOne)
+    {
+        for (; c != nullptr; c = c->getParentComponent())
+            if (isSuitableTarget (info, c) && (c == lastOne || isInterested (info, c)))
+                return c;
 
         return nullptr;
     }
+
+    // We'll use an async message to deliver the drop, because if the target decides
+    // to run a modal loop, it can gum-up the operating system..
+    class AsyncDropMessage  : public CallbackMessage
+    {
+    public:
+        AsyncDropMessage (Component* target_, const ComponentPeer::DragInfo& info_)
+            : target (target_), info (info_)
+        {}
+
+        void messageCallback()
+        {
+            if (target.get() != nullptr)
+            {
+                if (isFileDrag (info))
+                    dynamic_cast <FileDragAndDropTarget*> (target.get())->filesDropped (info.files, info.position.x, info.position.y);
+                else
+                    dynamic_cast <TextDragAndDropTarget*> (target.get())->textDropped (info.text, info.position.x, info.position.y);
+            }
+        }
+
+    private:
+        WeakReference<Component> target;
+        const ComponentPeer::DragInfo info;
+
+        JUCE_DECLARE_NON_COPYABLE (AsyncDropMessage);
+    };
 }
 
-bool ComponentPeer::handleFileDragMove (const StringArray& files, const Point<int>& position)
+bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
 {
     updateCurrentModifiers();
 
-    FileDragAndDropTarget* lastTarget
-        = dynamic_cast<FileDragAndDropTarget*> (dragAndDropTargetComponent.get());
+    Component* const compUnderMouse = component->getComponentAt (info.position);
 
-    FileDragAndDropTarget* newTarget = nullptr;
-
-    Component* const compUnderMouse = component->getComponentAt (position);
+    Component* const lastTarget = dragAndDropTargetComponent.get();
+    Component* newTarget = nullptr;
 
     if (compUnderMouse != lastDragAndDropCompUnderMouse)
     {
         lastDragAndDropCompUnderMouse = compUnderMouse;
-        newTarget = ComponentPeerHelpers::findDragAndDropTarget (compUnderMouse, files, lastTarget);
+        newTarget = DragHelpers::findDragAndDropTarget (compUnderMouse, info, lastTarget);
 
         if (newTarget != lastTarget)
         {
             if (lastTarget != nullptr)
-                lastTarget->fileDragExit (files);
+            {
+                if (DragHelpers::isFileDrag (info))
+                    dynamic_cast <FileDragAndDropTarget*> (lastTarget)->fileDragExit (info.files);
+                else
+                    dynamic_cast <TextDragAndDropTarget*> (lastTarget)->textDragExit (info.text);
+            }
 
             dragAndDropTargetComponent = nullptr;
 
-            if (newTarget != nullptr)
+            if (DragHelpers::isSuitableTarget (info, newTarget))
             {
-                dragAndDropTargetComponent = dynamic_cast <Component*> (newTarget);
-                const Point<int> pos (dragAndDropTargetComponent->getLocalPoint (component, position));
-                newTarget->fileDragEnter (files, pos.getX(), pos.getY());
+                dragAndDropTargetComponent = newTarget;
+                const Point<int> pos (newTarget->getLocalPoint (component, info.position));
+
+                if (DragHelpers::isFileDrag (info))
+                    dynamic_cast <FileDragAndDropTarget*> (newTarget)->fileDragEnter (info.files, pos.x, pos.y);
+                else
+                    dynamic_cast <TextDragAndDropTarget*> (newTarget)->textDragEnter (info.text, pos.x, pos.y);
             }
         }
     }
@@ -465,62 +508,42 @@ bool ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
         newTarget = lastTarget;
     }
 
-    if (newTarget == nullptr)
+    if (! DragHelpers::isSuitableTarget (info, newTarget))
         return false;
 
-    const Point<int> pos (dragAndDropTargetComponent->getLocalPoint (component, position));
-    newTarget->fileDragMove (files, pos.getX(), pos.getY());
+    const Point<int> pos (newTarget->getLocalPoint (component, info.position));
+
+    if (DragHelpers::isFileDrag (info))
+        dynamic_cast <FileDragAndDropTarget*> (newTarget)->fileDragMove (info.files, pos.x, pos.y);
+    else
+        dynamic_cast <TextDragAndDropTarget*> (newTarget)->textDragMove (info.text, pos.x, pos.y);
+
     return true;
 }
 
-bool ComponentPeer::handleFileDragExit (const StringArray& files)
+bool ComponentPeer::handleDragExit (const ComponentPeer::DragInfo& info)
 {
-    const bool used = handleFileDragMove (files, Point<int> (-1, -1));
+    DragInfo info2 (info);
+    info2.position.setXY (-1, -1);
+    const bool used = handleDragMove (info2);
 
     jassert (dragAndDropTargetComponent == nullptr);
     lastDragAndDropCompUnderMouse = nullptr;
     return used;
 }
 
-// We'll use an async message to deliver the drop, because if the target decides
-// to run a modal loop, it can gum-up the operating system..
-class AsyncFileDropMessage  : public CallbackMessage
+bool ComponentPeer::handleDragDrop (const ComponentPeer::DragInfo& info)
 {
-public:
-    AsyncFileDropMessage (Component* target_, FileDragAndDropTarget* dropTarget_,
-                          const Point<int>& position_, const StringArray& files_)
-        : target (target_), dropTarget (dropTarget_), position (position_), files (files_)
+    handleDragMove (info);
+
+    Component* const targetComp = dragAndDropTargetComponent;
+
+    if (targetComp != nullptr)
     {
-    }
-
-    void messageCallback()
-    {
-        if (target.get() != nullptr)
-            dropTarget->filesDropped (files, position.getX(), position.getY());
-    }
-
-private:
-    WeakReference<Component> target;
-    FileDragAndDropTarget* const dropTarget;
-    const Point<int> position;
-    const StringArray files;
-
-    JUCE_DECLARE_NON_COPYABLE (AsyncFileDropMessage);
-};
-
-bool ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<int>& position)
-{
-    handleFileDragMove (files, position);
-
-    if (dragAndDropTargetComponent != nullptr)
-    {
-        Component* const targetComp = dragAndDropTargetComponent;
-        FileDragAndDropTarget* const target = dynamic_cast<FileDragAndDropTarget*> (targetComp);
-
         dragAndDropTargetComponent = nullptr;
         lastDragAndDropCompUnderMouse = nullptr;
 
-        if (target != nullptr)
+        if (DragHelpers::isSuitableTarget (info, targetComp))
         {
             if (targetComp->isCurrentlyBlockedByAnotherModalComponent())
             {
@@ -530,7 +553,10 @@ bool ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
                     return true;
             }
 
-            (new AsyncFileDropMessage (targetComp, target, targetComp->getLocalPoint (component, position), files))->post();
+            ComponentPeer::DragInfo info2 (info);
+            info2.position = targetComp->getLocalPoint (component, info.position);
+
+            (new DragHelpers::AsyncDropMessage (targetComp, info2))->post();
             return true;
         }
     }

@@ -60,9 +60,11 @@ namespace Ids
     DECLARE_ID (headerPath);
     DECLARE_ID (libraryPath);
     DECLARE_ID (customXcodeFlags);
+    DECLARE_ID (cppLibType);
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);
     DECLARE_ID (osxArchitecture);
+    DECLARE_ID (iosCompatibility);
     DECLARE_ID (extraFrameworks);
     DECLARE_ID (winArchitecture);
     DECLARE_ID (winWarningLevel);
@@ -77,6 +79,7 @@ namespace Ids
     DECLARE_ID (buildVST);
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (aaxIdentifier);
+    DECLARE_ID (aaxCategory);
     DECLARE_ID (aaxFolder);
     DECLARE_ID (compile);
     DECLARE_ID (noWarnings);
@@ -114,6 +117,8 @@ namespace Ids
     DECLARE_ID (androidKeyStorePass);
     DECLARE_ID (androidKeyAlias);
     DECLARE_ID (androidKeyAliasPass);
+    DECLARE_ID (font);
+    DECLARE_ID (colour);
     const Identifier class_ ("class");
 
     #undef DECLARE_ID

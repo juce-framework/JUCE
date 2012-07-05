@@ -33,7 +33,6 @@
 /**
 */
 class DocumentEditorComponent  : public Component,
-                                 public ApplicationCommandTarget,
                                  public OpenDocumentManager::DocumentCloseListener
 {
 public:
@@ -43,12 +42,6 @@ public:
 
     OpenDocumentManager::Document* getDocument() const              { return document; }
     void documentAboutToClose (OpenDocumentManager::Document* document);
-
-    //==============================================================================
-    ApplicationCommandTarget* getNextCommandTarget();
-    void getAllCommands (Array <CommandID>& commands);
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
-    bool perform (const InvocationInfo& info);
 
 protected:
     OpenDocumentManager::Document* document;

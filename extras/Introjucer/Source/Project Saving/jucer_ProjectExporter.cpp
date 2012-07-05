@@ -31,11 +31,6 @@
 
 
 //==============================================================================
-int ProjectExporter::getNumExporters()
-{
-    return 6;
-}
-
 StringArray ProjectExporter::getExporterNames()
 {
     StringArray s;
@@ -49,13 +44,17 @@ StringArray ProjectExporter::getExporterNames()
     return s;
 }
 
-StringArray ProjectExporter::getDefaultExporters()
+String ProjectExporter::getCurrentPlatformExporterName()
 {
-    StringArray s;
-    s.add (XCodeProjectExporter::getNameMac());
-    s.add (MSVCProjectExporterVC2010::getName());
-    s.add (MakefileProjectExporter::getNameLinux());
-    return s;
+   #if JUCE_MAC
+    return XCodeProjectExporter::getNameMac();
+   #elif JUCE_WINDOWS
+    return MSVCProjectExporterVC2010::getName();
+   #elif JUCE_LINUX
+    return MakefileProjectExporter::getNameLinux();
+   #else
+    #error // huh?
+   #endif
 }
 
 ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int index)
@@ -136,7 +135,7 @@ ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
       settings (settings_),
       project (project_),
       projectType (project_.getProjectType()),
-      projectName (project_.getProjectName().toString()),
+      projectName (project_.getTitle()),
       projectFolder (project_.getFile().getParentDirectory()),
       modulesGroup (nullptr)
 {
@@ -209,12 +208,13 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
     for (int i = 0; i < modules.size(); ++i)
         modules.getUnchecked(i)->createPropertyEditors (*this, props);
 
-    props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+    props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, true),
+               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, "
+               "or new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, false),
+    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, true),
                "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
-    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, false),
+    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, true),
                "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
     {
@@ -350,10 +350,10 @@ void ProjectExporter::addNewConfiguration (const BuildConfiguration* configToCop
     configs.addChild (newConfig, -1, project.getUndoManagerFor (configs));
 }
 
-void ProjectExporter::deleteConfiguration (int index)
+void ProjectExporter::BuildConfiguration::removeFromExporter()
 {
-    ValueTree configs (getConfigurations());
-    configs.removeChild (index, project.getUndoManagerFor (configs));
+    ValueTree configs (config.getParent());
+    configs.removeChild (config, project.getUndoManagerFor (configs));
 }
 
 void ProjectExporter::createDefaultConfigs()
@@ -500,17 +500,12 @@ void ProjectExporter::BuildConfiguration::createBasicPropertyEditors (PropertyLi
                "The folder in which the finished binary should be placed. Leave this blank to cause the binary to be placed "
                "in its default location in the build folder.");
 
-    props.add (new TextPropertyComponent (getHeaderSearchPathValue(), "Header search paths", 16384, false),
-               "Extra header search paths. Use semi-colons to separate multiple paths.");
+    props.addSearchPathProperty (getHeaderSearchPathValue(), "Header search paths", "Extra header search paths.");
+    props.addSearchPathProperty (getLibrarySearchPathValue(), "Extra library search paths", "Extra library search paths.");
 
-    props.add (new TextPropertyComponent (getLibrarySearchPathValue(), "Extra library search paths", 16384, false),
-               "Extra library search paths. Use semi-colons to separate multiple paths.");
-
-    props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, false),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate "
-               "the items - to include a space or comma in a definition, precede it with a backslash.");
-
-    props.setPreferredHeight (22);
+    props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, true),
+               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
+               "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 }
 
 StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() const
@@ -521,22 +516,12 @@ StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() co
 
 StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 {
-    StringArray s;
-    s.addTokens (getHeaderSearchPathString(), ";", String::empty);
-    s.trim();
-    s.removeEmptyStrings();
-    s.removeDuplicates (false);
-    return s;
+    return getSearchPathsFromString (getHeaderSearchPathString());
 }
 
 StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 {
-    StringArray s;
-    s.addTokens (getLibrarySearchPathString(), ";", String::empty);
-    s.trim();
-    s.removeEmptyStrings();
-    s.removeDuplicates (false);
-    return s;
+    return getSearchPathsFromString (getLibrarySearchPathString());
 }
 
 String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const

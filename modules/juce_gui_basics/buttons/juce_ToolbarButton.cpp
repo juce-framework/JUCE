@@ -73,6 +73,7 @@ void ToolbarButton::updateDrawable()
 {
     if (currentImage != nullptr)
     {
+        currentImage->setInterceptsMouseClicks (false, false);
         currentImage->setTransformToFit (getContentArea().toFloat(), RectanglePlacement::centred);
         currentImage->setAlpha (isEnabled() ? 1.0f : 0.5f);
     }

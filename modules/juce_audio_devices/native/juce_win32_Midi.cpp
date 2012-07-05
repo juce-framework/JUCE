@@ -83,7 +83,7 @@ public:
             for (int i = 0; i < (int) numHeaders; ++i)
                 headers[i].write (deviceHandle);
 
-            startTime = Time::getMillisecondCounter();
+            startTime = Time::getMillisecondCounterHiRes();
             MMRESULT res = midiInStart (deviceHandle);
 
             if (res == MMSYSERR_NOERROR)
@@ -134,7 +134,7 @@ private:
     MidiInputCallback& callback;
     MidiDataConcatenator concatenator;
     bool volatile isStarted;
-    uint32 startTime;
+    double startTime;
 
     class MidiHeader
     {
@@ -199,18 +199,18 @@ private:
 
     double convertTimeStamp (uint32 timeStamp)
     {
-        timeStamp += startTime;
+        double t = startTime + timeStamp;
 
-        const uint32 now = Time::getMillisecondCounter();
-        if (timeStamp > now)
+        const double now = Time::getMillisecondCounterHiRes();
+        if (t > now)
         {
-            if (timeStamp > now + 2)
-                --startTime;
+            if (t > now + 2.0)
+                startTime -= 1.0;
 
-            timeStamp = now;
+            t = now;
         }
 
-        return timeStamp * 0.001;
+        return t * 0.001;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInCollector);

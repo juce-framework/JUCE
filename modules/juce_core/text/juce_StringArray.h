@@ -90,6 +90,9 @@ public:
     StringArray& operator= (StringArray&& other) noexcept;
    #endif
 
+    /** Swaps the contents of this and another StringArray. */
+    void swapWith (StringArray& other) noexcept;
+
     //==============================================================================
     /** Compares two arrays.
         Comparisons are case-sensitive.
@@ -121,6 +124,22 @@ public:
         the index is in-range.
     */
     String& getReference (int index) noexcept;
+
+    /** Returns a pointer to the first String in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline String* begin() const noexcept
+    {
+        return strings.begin();
+    }
+
+    /** Returns a pointer to the String which follows the last element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline String* end() const noexcept
+    {
+        return strings.end();
+    }
 
     /** Searches for a string in the array.
 

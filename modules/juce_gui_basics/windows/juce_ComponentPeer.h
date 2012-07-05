@@ -307,13 +307,20 @@ public:
 
     //==============================================================================
     void handleMouseEvent (int touchIndex, const Point<int>& positionWithinPeer, const ModifierKeys& newMods, int64 time);
-    void handleMouseWheel (int touchIndex, const Point<int>& positionWithinPeer, int64 time, float x, float y);
+    void handleMouseWheel (int touchIndex, const Point<int>& positionWithinPeer, int64 time, const MouseWheelDetails&);
 
     void handleUserClosingWindow();
 
-    bool handleFileDragMove (const StringArray& files, const Point<int>& position);
-    bool handleFileDragExit (const StringArray& files);
-    bool handleFileDragDrop (const StringArray& files, const Point<int>& position);
+    struct DragInfo
+    {
+        StringArray files;
+        String text;
+        Point<int> position;
+    };
+
+    bool handleDragMove (const DragInfo&);
+    bool handleDragExit (const DragInfo&);
+    bool handleDragDrop (const DragInfo&);
 
     //==============================================================================
     /** Resets the masking region.
@@ -384,6 +391,7 @@ private:
     static ComponentPeer* getPeerFor (const Component* component) noexcept;
 
     void setLastDragDropTarget (Component* comp);
+    bool finishDrag (bool);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer);
 };

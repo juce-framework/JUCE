@@ -111,15 +111,15 @@ public:
 
     //==============================================================================
     /** This method must return a list of the names of the menus. */
-    virtual const StringArray getMenuBarNames() = 0;
+    virtual StringArray getMenuBarNames() = 0;
 
     /** This should return the popup menu to display for a given top-level menu.
 
         @param topLevelMenuIndex    the index of the top-level menu to show
         @param menuName             the name of the top-level menu item to show
     */
-    virtual const PopupMenu getMenuForIndex (int topLevelMenuIndex,
-                                             const String& menuName) = 0;
+    virtual PopupMenu getMenuForIndex (int topLevelMenuIndex,
+                                       const String& menuName) = 0;
 
     /** This is called when a menu item has been clicked on.
 
@@ -154,6 +154,11 @@ public:
         the main menu bar.
     */
     static MenuBarModel* getMacMainMenu();
+
+    /** MAC ONLY - Returns the menu that was last passed as the extraAppleMenuItems
+        argument to setMacMainMenu(), or nullptr if none was specified.
+    */
+    static const PopupMenu* getMacExtraAppleItemsMenu();
    #endif
 
     //==============================================================================

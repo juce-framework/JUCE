@@ -47,7 +47,7 @@ class AffineTransform;
 
     @see CustomTypeface, Font
 */
-class JUCE_API  Typeface  : public SingleThreadedReferenceCountedObject
+class JUCE_API  Typeface  : public ReferenceCountedObject
 {
 public:
     //==============================================================================
@@ -125,6 +125,9 @@ public:
     //==============================================================================
     /** Changes the number of fonts that are cached in memory. */
     static void setTypefaceCacheSize (int numFontsToCache);
+
+    /** Clears any fonts that are currently cached in memory. */
+    static void clearTypefaceCache();
 
 protected:
     //==============================================================================

@@ -28,8 +28,6 @@ class UIViewComponentPeer;
 //==============================================================================
 } // (juce namespace)
 
-#define JuceUIView MakeObjCClassName(JuceUIView)
-
 @interface JuceUIView : UIView <UITextViewDelegate>
 {
 @public
@@ -54,9 +52,7 @@ class UIViewComponentPeer;
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text;
 @end
 
-
-#define JuceUIViewController MakeObjCClassName(JuceUIViewController)
-
+//==============================================================================
 @interface JuceUIViewController : UIViewController
 {
 }
@@ -66,8 +62,6 @@ class UIViewComponentPeer;
 @end
 
 //==============================================================================
-#define JuceUIWindow MakeObjCClassName(JuceUIWindow)
-
 @interface JuceUIWindow : UIWindow
 {
 @private
@@ -236,6 +230,14 @@ private:
     JuceUIView* juceView = (JuceUIView*) [self view];
     jassert (juceView != nil && juceView->owner != nullptr);
     juceView->owner->displayRotated();
+
+    [UIView setAnimationsEnabled: YES];
+}
+
+- (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation
+                                 duration: (NSTimeInterval) duration
+{
+    [UIView setAnimationsEnabled: NO]; // disable this because it goes the wrong way and looks like crap.
 }
 
 @end
@@ -494,7 +496,7 @@ void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     {
         const Rectangle<int> bounds (rotatedScreenPosToReal (Rectangle<int> (x, y, w, h)));
         window.frame = convertToCGRect (bounds);
-        view.frame = CGRectMake (0, 0, (CGFloat) bounds.getWidth(), (CGFloat) bounds.getHeight());
+        view.frame = CGRectMake (0, 0, (CGFloat) w, (CGFloat) h);
 
         handleMovedOrResized();
     }
@@ -506,13 +508,10 @@ Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
 
     if (global && view.window != nil)
     {
-        r = [view convertRect: r toView: nil];
-        CGRect wr = view.window.frame;
+        r = [view convertRect: r toView: view.window];
+        r = [view.window convertRect: r toWindow: nil];
 
-        const Rectangle<int> windowBounds (realScreenPosToRotated (convertToRectInt (wr)));
-
-        r.origin.x += windowBounds.getX();
-        r.origin.y += windowBounds.getY();
+        return realScreenPosToRotated (convertToRectInt (r));
     }
 
     return convertToRectInt (r);
@@ -607,7 +606,7 @@ bool UIViewComponentPeer::isFullScreen() const
 
 namespace
 {
-    Desktop::DisplayOrientation convertToJuceOrientation (UIInterfaceOrientation interfaceOrientation)
+    static Desktop::DisplayOrientation convertToJuceOrientation (UIInterfaceOrientation interfaceOrientation)
     {
         switch (interfaceOrientation)
         {
@@ -619,6 +618,19 @@ namespace
         }
 
         return Desktop::upright;
+    }
+
+    static CGAffineTransform getCGTransformForDisplayOrientation (const Desktop::DisplayOrientation orientation) noexcept
+    {
+        switch (orientation)
+        {
+            case Desktop::upsideDown:             return CGAffineTransformMake (-1, 0,  0, -1, 0, 0);
+            case Desktop::rotatedClockwise:       return CGAffineTransformMake (0, -1,  1,  0, 0, 0);
+            case Desktop::rotatedAntiClockwise:   return CGAffineTransformMake (0,  1, -1,  0, 0, 0);
+            default: break;
+        }
+
+        return CGAffineTransformIdentity;
     }
 }
 
@@ -635,6 +647,9 @@ void UIViewComponentPeer::displayRotated()
 
     const_cast <Desktop::Displays&> (desktop.getDisplays()).refresh();
 
+    window.transform = getCGTransformForDisplayOrientation (desktop.getCurrentOrientation());
+    view.transform = CGAffineTransformIdentity;
+
     if (fullScreen)
     {
         fullScreen = false;
@@ -642,18 +657,16 @@ void UIViewComponentPeer::displayRotated()
     }
     else if (! isSharedWindow)
     {
-        const float l = oldArea.getX() / (float) oldDesktop.getWidth();
-        const float r = oldArea.getRight() / (float) oldDesktop.getWidth();
-        const float t = oldArea.getY() / (float) oldDesktop.getHeight();
-        const float b = oldArea.getBottom() / (float) oldDesktop.getHeight();
+        // this will re-centre the window, but leave its size unchanged
+        const float centreRelX = oldArea.getCentreX() / (float) oldDesktop.getWidth();
+        const float centreRelY = oldArea.getCentreY() / (float) oldDesktop.getHeight();
 
         const Rectangle<int> newDesktop (desktop.getDisplays().getMainDisplay().userArea);
 
-        setBounds ((int) (l * newDesktop.getWidth()),
-                   (int) (t * newDesktop.getHeight()),
-                   (int) ((r - l) * newDesktop.getWidth()),
-                   (int) ((b - t) * newDesktop.getHeight()),
-                   false);
+        const int x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
+        const int y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
+
+        setBounds (x, y, oldArea.getWidth(), oldArea.getHeight(), false);
     }
 }
 
@@ -766,7 +779,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
         if (isCancel)
         {
             currentTouches.clear();
-            currentModifiers = currentModifiers.withoutMouseButtons();
+            modsToSend = currentModifiers = currentModifiers.withoutMouseButtons();
         }
 
         handleMouseEvent (touchIndex, pos, modsToSend, time);
@@ -775,7 +788,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (touchIndex, Point<int> (-1, -1), currentModifiers, time);
+            handleMouseEvent (touchIndex, Point<int> (-1, -1), modsToSend, time);
             if (! isValidPeer (this))
                 return;
         }

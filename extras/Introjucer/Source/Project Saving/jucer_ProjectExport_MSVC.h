@@ -73,12 +73,24 @@ protected:
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
     Value getLibraryType()              { return getSetting (Ids::libraryType); }
+    String getLibraryString() const     { return getSettingString (Ids::libraryType); }
     bool isLibraryDLL() const           { return msvcIsDLL || (projectType.isLibrary() && (int) settings [Ids::libraryType] == 2); }
+
+    static String prependIfNotAbsolute (const String& file, const char* prefix)
+    {
+        if (File::isAbsolutePath (file) || file.startsWithChar ('$'))
+            prefix = "";
+
+        return prefix + FileHelpers::windowsStylePath (file);
+    }
+
+    static String getIntDirFile (const String& file)  { return prependIfNotAbsolute (file, "$(IntDir)\\"); }
+    static String getOutDirFile (const String& file)  { return prependIfNotAbsolute (file, "$(OutDir)\\"); }
 
     void updateOldSettings()
     {
         {
-            const String oldStylePrebuildCommand (getSetting (Ids::prebuildCommand).toString());
+            const String oldStylePrebuildCommand (getSettingString (Ids::prebuildCommand));
             settings.removeProperty (Ids::prebuildCommand, nullptr);
 
             if (oldStylePrebuildCommand.isNotEmpty())
@@ -87,7 +99,7 @@ protected:
         }
 
         {
-            const String oldStyleLibName (getSetting ("libraryName_Debug").toString());
+            const String oldStyleLibName (getSettingString ("libraryName_Debug"));
             settings.removeProperty ("libraryName_Debug", nullptr);
 
             if (oldStyleLibName.isNotEmpty())
@@ -97,7 +109,7 @@ protected:
         }
 
         {
-            const String oldStyleLibName (getSetting ("libraryName_Release").toString());
+            const String oldStyleLibName (getSettingString ("libraryName_Release"));
             settings.removeProperty ("libraryName_Release", nullptr);
 
             if (oldStyleLibName.isNotEmpty())
@@ -423,7 +435,11 @@ protected:
 
         MemoryOutputStream mo;
 
-        mo << "#undef  WIN32_LEAN_AND_MEAN" << newLine
+        mo << "#ifdef JUCE_USER_DEFINED_RC_FILE" << newLine
+           << " #include JUCE_USER_DEFINED_RC_FILE" << newLine
+           << "#else" << newLine
+           << newLine
+           << "#undef  WIN32_LEAN_AND_MEAN" << newLine
            << "#define WIN32_LEAN_AND_MEAN" << newLine
            << "#include <windows.h>" << newLine
            << newLine
@@ -436,9 +452,9 @@ protected:
            << "    BEGIN" << newLine;
 
         writeRCValue (mo, "CompanyName", project.getCompanyName().toString());
-        writeRCValue (mo, "FileDescription", project.getProjectName().toString());
+        writeRCValue (mo, "FileDescription", project.getTitle());
         writeRCValue (mo, "FileVersion", version);
-        writeRCValue (mo, "ProductName", project.getProjectName().toString());
+        writeRCValue (mo, "ProductName", project.getTitle());
         writeRCValue (mo, "ProductVersion", version);
 
         mo << "    END" << newLine
@@ -448,7 +464,9 @@ protected:
            << "  BEGIN" << newLine
            << "    VALUE \"Translation\", 0x409, 65001" << newLine
            << "  END" << newLine
-           << "END" << newLine;
+           << "END" << newLine
+           << newLine
+           << "#endif" << newLine;
 
         if (iconFile != File::nonexistent)
            mo << newLine
@@ -659,13 +677,11 @@ protected:
 
     void createConfig (XmlElement& xml, const MSVCBuildConfiguration& config) const
     {
-        String binariesPath (getConfigTargetPath (config));
-        String intermediatesPath (getIntermediatesPath (config));
         const bool isDebug = config.isDebug();
 
         xml.setAttribute ("Name", createConfigName (config));
-        xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (binariesPath));
-        xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (intermediatesPath));
+        xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (getConfigTargetPath (config)));
+        xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (getIntermediatesPath (config)));
         xml.setAttribute ("ConfigurationType", isLibraryDLL() ? "2" : (projectType.isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
@@ -693,8 +709,7 @@ protected:
             midl->setAttribute ("MkTypLibCompatible", "true");
             midl->setAttribute ("SuppressStartupBanner", "true");
             midl->setAttribute ("TargetEnvironment", "1");
-            midl->setAttribute ("TypeLibraryName", FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                    + config.getOutputFilename (".tlb", true)));
+            midl->setAttribute ("TypeLibraryName", getIntDirFile (config.getOutputFilename (".tlb", true)));
             midl->setAttribute ("HeaderFileName", "");
         }
 
@@ -721,11 +736,10 @@ protected:
                                                                              : (isDebug ? 1 : 0)); // MT static
             compiler->setAttribute ("RuntimeTypeInfo", "true");
             compiler->setAttribute ("UsePrecompiledHeader", "0");
-            compiler->setAttribute ("PrecompiledHeaderFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                                + config.getOutputFilename (".pch", true)));
-            compiler->setAttribute ("AssemblerListingLocation", FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("ObjectFile", FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("ProgramDataBaseFileName", FileHelpers::windowsStylePath (intermediatesPath + "/"));
+            compiler->setAttribute ("PrecompiledHeaderFile", getIntDirFile (config.getOutputFilename (".pch", true)));
+            compiler->setAttribute ("AssemblerListingLocation", "$(IntDir)\\");
+            compiler->setAttribute ("ObjectFile", "$(IntDir)\\");
+            compiler->setAttribute ("ProgramDataBaseFileName", "$(IntDir)\\");
             compiler->setAttribute ("WarningLevel", String (getWarningLevel (config)));
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
@@ -747,13 +761,12 @@ protected:
         {
             XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
-            linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (msvcTargetSuffix, false)));
+            linker->setAttribute ("OutputFile", getOutDirFile (config.getOutputFilename (msvcTargetSuffix, false)));
             linker->setAttribute ("SuppressStartupBanner", "true");
 
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
-            linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                            + config.getOutputFilename (".pdb", true)));
+            linker->setAttribute ("ProgramDatabaseFile", getIntDirFile (config.getOutputFilename (".pdb", true)));
             linker->setAttribute ("SubSystem", msvcIsWindowsSubsystem ? "2" : "1");
 
             const StringArray librarySearchPaths (config.getLibrarySearchPaths());
@@ -788,17 +801,17 @@ protected:
                 XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
                 String extraLinkerOptions (getExtraLinkerFlagsString());
-                extraLinkerOptions << " /IMPLIB:" << FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (".lib", true));
+                extraLinkerOptions << " /IMPLIB:" << getOutDirFile (config.getOutputFilename (".lib", true));
                 linker->setAttribute ("AdditionalOptions", replacePreprocessorTokens (config, extraLinkerOptions).trim());
 
-                linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (msvcTargetSuffix, false)));
+                linker->setAttribute ("OutputFile", getOutDirFile (config.getOutputFilename (msvcTargetSuffix, false)));
                 linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             }
             else
             {
                 XmlElement* librarian = createToolElement (xml, "VCLibrarianTool");
 
-                librarian->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (msvcTargetSuffix, false)));
+                librarian->setAttribute ("OutputFile", getOutDirFile (config.getOutputFilename (msvcTargetSuffix, false)));
                 librarian->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             }
         }
@@ -810,8 +823,7 @@ protected:
         {
             XmlElement* bscMake = createToolElement (xml, "VCBscMakeTool");
             bscMake->setAttribute ("SuppressStartupBanner", "true");
-            bscMake->setAttribute ("OutputFile", FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                    + config.getOutputFilename (".bsc", true)));
+            bscMake->setAttribute ("OutputFile", getIntDirFile (config.getOutputFilename (".bsc", true)));
         }
 
         createToolElement (xml, "VCFxCopTool");
@@ -1080,7 +1092,7 @@ protected:
                 {
                     XmlElement* intdir = props->createNewChildElement ("IntDir");
                     setConditionAttribute (*intdir, config);
-                    intdir->addTextElement (getConfigTargetPath (config) + "\\");
+                    intdir->addTextElement (getIntermediatesPath (config) + "\\");
                 }
 
                 {
@@ -1110,8 +1122,6 @@ protected:
         {
             const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
 
-            String binariesPath (getConfigTargetPath (config));
-            String intermediatesPath (getIntermediatesPath (config));
             const bool isDebug = config.isDebug();
 
             XmlElement* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
@@ -1143,9 +1153,9 @@ protected:
                                                                                                      : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
                 cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
                 cl->createNewChildElement ("PrecompiledHeader");
-                cl->createNewChildElement ("AssemblerListingLocation")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-                cl->createNewChildElement ("ObjectFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
-                cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
+                cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
+                cl->createNewChildElement ("ObjectFileName")->addTextElement ("$(IntDir)\\");
+                cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement ("$(IntDir)\\");
                 cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (getWarningLevel (config)));
                 cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement ("true");
@@ -1163,14 +1173,12 @@ protected:
 
             {
                 XmlElement* link = group->createNewChildElement ("Link");
-                link->createNewChildElement ("OutputFile")
-                    ->addTextElement (FileHelpers::windowsStylePath (binariesPath + "/" + config.getOutputFilename (msvcTargetSuffix, false)));
+                link->createNewChildElement ("OutputFile")->addTextElement (getOutDirFile (config.getOutputFilename (msvcTargetSuffix, false)));
                 link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                 link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                         : "%(IgnoreSpecificDefaultLibraries)");
                 link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
-                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"
-                                                                                                                        + config.getOutputFilename (".pdb", true)));
+                link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getIntDirFile (config.getOutputFilename (".pdb", true)));
                 link->createNewChildElement ("SubSystem")->addTextElement (msvcIsWindowsSubsystem ? "Windows" : "Console");
 
                 if (! is64Bit (config))
@@ -1198,8 +1206,7 @@ protected:
             {
                 XmlElement* bsc = group->createNewChildElement ("Bscmake");
                 bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath
-                                                                                                            + "/" + config.getOutputFilename (".bsc", true)));
+                bsc->createNewChildElement ("OutputFile")->addTextElement (getIntDirFile (config.getOutputFilename (".bsc", true)));
             }
 
             if (config.getPrebuildCommandString().isNotEmpty())

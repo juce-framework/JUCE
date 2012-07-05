@@ -8,6 +8,7 @@ original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME
 copyAU=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'AudioUnit' | wc -l`
 copyVST=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'VSTPlugin' | wc -l`
 copyRTAS=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'CProcess' | wc -l`
+copyAAX=`nm -g "$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH" | grep -i 'GetEffectDescriptions' | wc -l`
 
 if [ $copyAU -gt 0 ]; then
   echo "Copying to AudioUnit folder..."
@@ -41,4 +42,28 @@ if [ $copyRTAS -gt 0 ]; then
   fi
 
   cp -r "$original" "$RTAS"
+fi
+
+if [ $copyAAX -gt 0 ]; then
+  echo "Copying to AAX folder..."
+
+  if [ -d "/Applications/ProTools_3PDev/Plug-Ins" ]; then
+    AAX1="/Applications/ProTools_3PDev/Plug-Ins/$PRODUCT_NAME.aaxplugin"
+
+    if [ -d "$AAX1" ]; then
+      rm -r "$AAX1"
+    fi
+
+    cp -r "$original" "$AAX1"
+  fi
+
+  if [ -d "/Library/Application Support/Avid/Audio/Plug-Ins" ]; then
+    AAX2="/Library/Application Support/Avid/Audio/Plug-Ins/$PRODUCT_NAME.aaxplugin"
+
+    if [ -d "$AAX2" ]; then
+      rm -r "$AAX2"
+    fi
+
+    cp -r "$original" "$AAX2"
+  fi
 fi

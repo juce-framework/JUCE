@@ -77,6 +77,12 @@ namespace StandardApplicationCommandIDs
 
     /** The command ID that should be used to send a "Deselect all" command. */
     static const CommandID  deselectAll    = 0x1007;
+
+    /** The command ID that should be used to send a "undo" command. */
+    static const CommandID  undo           = 0x1008;
+
+    /** The command ID that should be used to send a "redo" command. */
+    static const CommandID  redo           = 0x1009;
 }
 
 

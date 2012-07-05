@@ -26,10 +26,6 @@
 #ifndef __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
 #define __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
 
-#include "../components/juce_Component.h"
-
-
-//==============================================================================
 /**
     Components derived from this class can have files dropped onto them by an external application.
 

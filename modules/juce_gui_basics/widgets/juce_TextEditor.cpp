@@ -865,6 +865,7 @@ public:
     {
         setWantsKeyboardFocus (false);
         setInterceptsMouseClicks (false, true);
+        setMouseCursor (MouseCursor::IBeamCursor);
 
         owner.getTextValue().addListener (this);
     }
@@ -887,11 +888,6 @@ public:
     void timerCallback()
     {
         owner.timerCallbackInt();
-    }
-
-    MouseCursor getMouseCursor()
-    {
-        return owner.getMouseCursor();
     }
 
     void valueChanged (Value&)
@@ -985,6 +981,7 @@ TextEditor::TextEditor (const String& name,
       dragType (notDragging)
 {
     setOpaque (true);
+    setMouseCursor (MouseCursor::IBeamCursor);
 
     addAndMakeVisible (viewport = new TextEditorViewport (*this));
     viewport->setViewedComponent (textHolder = new TextHolderComponent (*this));
@@ -1168,9 +1165,6 @@ void TextEditor::setCaretVisible (const bool shouldCaretBeVisible)
     {
         caret = nullptr;
     }
-
-    setMouseCursor (shouldCaretBeVisible ? MouseCursor::IBeamCursor
-                                         : MouseCursor::NormalCursor);
 }
 
 void TextEditor::updateCaretPosition()
@@ -1761,12 +1755,51 @@ void TextEditor::paintOverChildren (Graphics& g)
 }
 
 //==============================================================================
+void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
+{
+    const bool writable = ! isReadOnly();
+
+    if (passwordCharacter == 0)
+    {
+        m.addItem (StandardApplicationCommandIDs::cut,   TRANS("Cut"), writable);
+        m.addItem (StandardApplicationCommandIDs::copy,  TRANS("Copy"), ! selection.isEmpty());
+        m.addItem (StandardApplicationCommandIDs::paste, TRANS("Paste"), writable);
+    }
+
+    m.addItem (StandardApplicationCommandIDs::del,       TRANS("Delete"), writable);
+    m.addSeparator();
+    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS("Select All"));
+    m.addSeparator();
+
+    if (getUndoManager() != nullptr)
+    {
+        m.addItem (StandardApplicationCommandIDs::undo, TRANS("Undo"), undoManager.canUndo());
+        m.addItem (StandardApplicationCommandIDs::redo, TRANS("Redo"), undoManager.canRedo());
+    }
+}
+
+void TextEditor::performPopupMenuAction (const int menuItemID)
+{
+    switch (menuItemID)
+    {
+        case StandardApplicationCommandIDs::cut:        cutToClipboard(); break;
+        case StandardApplicationCommandIDs::copy:       copyToClipboard(); break;
+        case StandardApplicationCommandIDs::paste:      pasteFromClipboard(); break;
+        case StandardApplicationCommandIDs::del:        cut(); break;
+        case StandardApplicationCommandIDs::selectAll:  selectAll(); break;
+        case StandardApplicationCommandIDs::undo:       undo(); break;
+        case StandardApplicationCommandIDs::redo:       redo(); break;
+        default: break;
+    }
+}
+
 static void textEditorMenuCallback (int menuResult, TextEditor* editor)
 {
     if (editor != nullptr && menuResult != 0)
         editor->performPopupMenuAction (menuResult);
 }
 
+//==============================================================================
 void TextEditor::mouseDown (const MouseEvent& e)
 {
     beginDragAutoRepeat (100);
@@ -1794,12 +1827,8 @@ void TextEditor::mouseDown (const MouseEvent& e)
 void TextEditor::mouseDrag (const MouseEvent& e)
 {
     if (wasFocused || ! selectAllTextWhenFocused)
-    {
         if (! (popupMenuEnabled && e.mods.isPopupMenu()))
-        {
             moveCaretTo (getTextIndexAt (e.x, e.y), true);
-        }
-    }
 }
 
 void TextEditor::mouseUp (const MouseEvent& e)
@@ -1808,12 +1837,8 @@ void TextEditor::mouseUp (const MouseEvent& e)
     textHolder->restartTimer();
 
     if (wasFocused || ! selectAllTextWhenFocused)
-    {
         if (e.mouseWasClicked() && ! (popupMenuEnabled && e.mods.isPopupMenu()))
-        {
             moveCaret (getTextIndexAt (e.x, e.y));
-        }
-    }
 
     wasFocused = true;
 }
@@ -1881,10 +1906,10 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
     moveCaretTo (tokenStart, true);
 }
 
-void TextEditor::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
+void TextEditor::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! viewport->useMouseWheelMoveIfNeeded (e, wheelIncrementX, wheelIncrementY))
-        Component::mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+    if (! viewport->useMouseWheelMoveIfNeeded (e, wheel))
+        Component::mouseWheelMove (e, wheel);
 }
 
 //==============================================================================
@@ -2101,47 +2126,6 @@ bool TextEditor::keyStateChanged (const bool isKeyDown)
 }
 
 //==============================================================================
-const int baseMenuItemID = 0x7fff0000;
-
-void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
-{
-    const bool writable = ! isReadOnly();
-
-    if (passwordCharacter == 0)
-    {
-        m.addItem (baseMenuItemID + 1, TRANS("cut"), writable);
-        m.addItem (baseMenuItemID + 2, TRANS("copy"), ! selection.isEmpty());
-        m.addItem (baseMenuItemID + 3, TRANS("paste"), writable);
-    }
-
-    m.addItem (baseMenuItemID + 4, TRANS("delete"), writable);
-    m.addSeparator();
-    m.addItem (baseMenuItemID + 5, TRANS("select all"));
-    m.addSeparator();
-
-    if (getUndoManager() != nullptr)
-    {
-        m.addItem (baseMenuItemID + 6, TRANS("undo"), undoManager.canUndo());
-        m.addItem (baseMenuItemID + 7, TRANS("redo"), undoManager.canRedo());
-    }
-}
-
-void TextEditor::performPopupMenuAction (const int menuItemID)
-{
-    switch (menuItemID)
-    {
-        case baseMenuItemID + 1:    cutToClipboard(); break;
-        case baseMenuItemID + 2:    copyToClipboard(); break;
-        case baseMenuItemID + 3:    pasteFromClipboard(); break;
-        case baseMenuItemID + 4:    cut(); break;
-        case baseMenuItemID + 5:    selectAll(); break;
-        case baseMenuItemID + 6:    undo(); break;
-        case baseMenuItemID + 7:    redo(); break;
-        default: break;
-    }
-}
-
-//==============================================================================
 void TextEditor::focusGained (FocusChangeType)
 {
     newTransaction();
@@ -2228,8 +2212,6 @@ void TextEditor::handleCommandMessage (const int commandId)
 
 void TextEditor::enablementChanged()
 {
-    setMouseCursor (isReadOnly() ? MouseCursor::NormalCursor
-                                 : MouseCursor::IBeamCursor);
     repaint();
 }
 

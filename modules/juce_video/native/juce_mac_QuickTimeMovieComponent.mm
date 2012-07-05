@@ -25,49 +25,31 @@
 
 #if JUCE_QUICKTIME
 
-} // (juce namespace)
-
-//==============================================================================
-#define NonInterceptingQTMovieView MakeObjCClassName(NonInterceptingQTMovieView)
-
-@interface NonInterceptingQTMovieView   : QTMovieView
+struct NonInterceptingQTMovieViewClass  : public ObjCClass <QTMovieView>
 {
-}
+    NonInterceptingQTMovieViewClass()  : ObjCClass <QTMovieView> ("JUCEQTMovieView_")
+    {
+        addMethod (@selector (hitTest:),            hitTest,           "@@:", @encode (NSPoint));
+        addMethod (@selector (acceptsFirstMouse:),  acceptsFirstMouse, "c@:@");
 
-- (id) initWithFrame: (NSRect) frame;
-- (BOOL) acceptsFirstMouse: (NSEvent*) theEvent;
-- (NSView*) hitTest: (NSPoint) p;
+        registerClass();
+    }
 
-@end
+private:
+    static NSView* hitTest (id self, SEL, NSPoint point)
+    {
+        if (! [(QTMovieView*) self isControllerVisible])
+            return nil;
 
-@implementation NonInterceptingQTMovieView
+        objc_super s = { self, [QTMovieView class] };
+        return objc_msgSendSuper (&s, @selector (hitTest:), point);
+    }
 
-- (id) initWithFrame: (NSRect) frame
-{
-    self = [super initWithFrame: frame];
-    [self setNextResponder: [self superview]];
-    return self;
-}
-
-- (void) dealloc
-{
-    [super dealloc];
-}
-
-- (NSView*) hitTest: (NSPoint) point
-{
-    return [self isControllerVisible] ? [super hitTest: point] : nil;
-}
-
-- (BOOL) acceptsFirstMouse: (NSEvent*) theEvent
-{
-    return YES;
-}
-
-@end
-
-namespace juce
-{
+    static BOOL acceptsFirstMouse (id, SEL, NSEvent*)
+    {
+        return YES;
+    }
+};
 
 //==============================================================================
 #define theMovie (static_cast <QTMovie*> (movie))
@@ -79,8 +61,10 @@ QuickTimeMovieComponent::QuickTimeMovieComponent()
     setOpaque (true);
     setVisible (true);
 
-    QTMovieView* view = [[NonInterceptingQTMovieView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
+    static NonInterceptingQTMovieViewClass cls;
+    QTMovieView* view = [cls.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
     setView (view);
+    [view setNextResponder: [view superview]];
     [view setWantsLayer: YES]; // prevents the view failing to redraw correctly when paused.
     [view release];
 }

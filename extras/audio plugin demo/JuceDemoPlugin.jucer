@@ -9,10 +9,11 @@
               pluginTailLength="0" pluginEditorRequiresKeys="1" pluginAUExportPrefix="JuceDemoProjectAU"
               pluginAUViewClass="JuceDemoProjectAU_V1" pluginRTASCategory=""
               bundleIdentifier="com.rawmaterialsoftware.JuceDemoPlugin" jucerVersion="3.0.0"
-              companyName="Raw Material Software Ltd.">
+              companyName="Raw Material Software Ltd." aaxIdentifier="com.yourcompany.JuceDemoPlugin"
+              buildAAX="0" pluginAAXCategory="AAX_ePlugInCategory_Dynamics">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../.." objCExtraSuffix="JuceDemo">
+               juceFolder="../.." objCExtraSuffix="JuceDemo" aaxFolder="~/SDKs/AAX">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"/>
@@ -21,7 +22,8 @@
       </CONFIGURATIONS>
     </XCODE_MAC>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"
+            aaxFolder="c:\SDKs\AAX">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
                        winWarningLevel="4" generateManifest="1"/>
@@ -30,7 +32,8 @@
       </CONFIGURATIONS>
     </VS2005>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1">
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"
+            aaxFolder="c:\SDKs\AAX">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
                        winWarningLevel="4" generateManifest="1"/>

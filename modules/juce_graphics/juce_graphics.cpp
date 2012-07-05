@@ -57,6 +57,10 @@
  #import <QuartzCore/QuartzCore.h>
  #import <CoreText/CoreText.h>
 
+ #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2
+  #error "JUCE no longer supports targets earlier than iOS 3.2"
+ #endif
+
 #elif JUCE_LINUX
  #include <ft2build.h>
  #include FT_FREETYPE_H
@@ -107,19 +111,18 @@ namespace juce
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "../juce_core/native/juce_mac_ObjCSuffix.h"
  #include "native/juce_mac_CoreGraphicsHelpers.h"
  #include "native/juce_mac_Fonts.mm"
  #include "native/juce_mac_CoreGraphicsContext.mm"
 
 #elif JUCE_WINDOWS
  #include "../juce_core/native/juce_win32_ComSmartPtr.h"
- #if JUCE_DIRECT2D
-  #include "native/juce_win32_Direct2DGraphicsContext.cpp"
- #endif
  #include "native/juce_win32_DirectWriteTypeface.cpp"
  #include "native/juce_win32_DirectWriteTypeLayout.cpp"
  #include "native/juce_win32_Fonts.cpp"
+ #if JUCE_DIRECT2D
+  #include "native/juce_win32_Direct2DGraphicsContext.cpp"
+ #endif
 
 #elif JUCE_LINUX
  #include "native/juce_linux_Fonts.cpp"

@@ -696,7 +696,7 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
 {
     ScopedPointer <AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
 
-    if (w->sampleRate > 0)
+    if (w->sampleRate > 0 && w->numChannels > 0)
         return w.release();
 
     if (! deleteStreamIfOpeningFails)

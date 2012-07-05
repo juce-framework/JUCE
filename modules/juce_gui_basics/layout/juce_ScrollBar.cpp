@@ -380,11 +380,9 @@ void ScrollBar::mouseUp (const MouseEvent&)
     repaint();
 }
 
-void ScrollBar::mouseWheelMove (const MouseEvent&,
-                                float wheelIncrementX,
-                                float wheelIncrementY)
+void ScrollBar::mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel)
 {
-    float increment = 10.0f * (vertical ? wheelIncrementY : wheelIncrementX);
+    float increment = 10.0f * (vertical ? wheel.deltaY : wheel.deltaX);
 
     if (increment < 0)
         increment = jmin (increment, -1.0f);

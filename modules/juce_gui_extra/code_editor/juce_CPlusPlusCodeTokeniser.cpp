@@ -23,12 +23,24 @@
   ==============================================================================
 */
 
-CPlusPlusCodeTokeniser::CPlusPlusCodeTokeniser() {}
-CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser() {}
 
-//==============================================================================
 namespace CppTokeniser
 {
+    enum TokenType
+    {
+        tokenType_error = 0,
+        tokenType_comment,
+        tokenType_keyword,
+        tokenType_operator,
+        tokenType_identifier,
+        tokenType_integer,
+        tokenType_float,
+        tokenType_string,
+        tokenType_bracket,
+        tokenType_punctuation,
+        tokenType_preprocessor
+    };
+
     static bool isIdentifierStart (const juce_wchar c) noexcept
     {
         return CharacterFunctions::isLetter (c)
@@ -91,14 +103,9 @@ namespace CppTokeniser
                 break;
         }
 
-        int i = 0;
-        while (k[i] != 0)
-        {
+        for (int i = 0; k[i] != 0; ++i)
             if (token.compare (CharPointer_ASCII (k[i])) == 0)
                 return true;
-
-            ++i;
-        }
 
         return false;
     }
@@ -124,10 +131,10 @@ namespace CppTokeniser
             possible.writeNull();
 
             if (isReservedKeyword (String::CharPointerType (possibleIdentifier), tokenLength))
-                return CPlusPlusCodeTokeniser::tokenType_builtInKeyword;
+                return tokenType_keyword;
         }
 
-        return CPlusPlusCodeTokeniser::tokenType_identifier;
+        return tokenType_identifier;
     }
 
     static bool skipNumberSuffix (CodeDocument::Iterator& source)
@@ -272,27 +279,27 @@ namespace CppTokeniser
         const CodeDocument::Iterator original (source);
 
         if (parseFloatLiteral (source))
-            return CPlusPlusCodeTokeniser::tokenType_floatLiteral;
+            return tokenType_float;
 
         source = original;
 
         if (parseHexLiteral (source))
-            return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
+            return tokenType_integer;
 
         source = original;
 
         if (parseOctalLiteral (source))
-            return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
+            return tokenType_integer;
 
         source = original;
 
         if (parseDecimalLiteral (source))
-            return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
+            return tokenType_integer;
 
         source = original;
         source.skip();
 
-        return CPlusPlusCodeTokeniser::tokenType_error;
+        return tokenType_error;
     }
 
     static void skipQuotedString (CodeDocument::Iterator& source) noexcept
@@ -325,15 +332,74 @@ namespace CppTokeniser
             lastWasStar = (c == '*');
         }
     }
+
+    static void skipPreprocessorLine (CodeDocument::Iterator& source) noexcept
+    {
+        bool lastWasBackslash = false;
+
+        for (;;)
+        {
+            const juce_wchar c = source.peekNextChar();
+
+            if (c == '"')
+            {
+                skipQuotedString (source);
+                continue;
+            }
+
+            if (c == '/')
+            {
+                const juce_wchar c2 = source.peekNextChar();
+
+                if (c2 == '/' || c2 == '*')
+                    return;
+            }
+
+            if (c == 0)
+                break;
+
+            if (c == '\n' || c == '\r')
+            {
+                source.skipToEndOfLine();
+
+                if (lastWasBackslash)
+                    skipPreprocessorLine (source);
+
+                break;
+            }
+
+            lastWasBackslash = (c == '\\');
+            source.skip();
+        }
+    }
+
+    static void skipIfNextCharMatches (CodeDocument::Iterator& source, const juce_wchar c) noexcept
+    {
+        if (source.peekNextChar() == c)
+            source.skip();
+    }
+
+    static void skipIfNextCharMatches (CodeDocument::Iterator& source,
+                                       const juce_wchar c1, const juce_wchar c2) noexcept
+    {
+        const juce_wchar c = source.peekNextChar();
+
+        if (c == c1 || c == c2)
+            source.skip();
+    }
 }
 
 //==============================================================================
+CPlusPlusCodeTokeniser::CPlusPlusCodeTokeniser() {}
+CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser() {}
+
 int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
 {
+    using namespace CppTokeniser;
     int result = tokenType_error;
     source.skipWhitespace();
 
-    juce_wchar firstChar = source.peekNextChar();
+    const juce_wchar firstChar = source.peekNextChar();
 
     switch (firstChar)
     {
@@ -351,11 +417,11 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case '7':
     case '8':
     case '9':
-        result = CppTokeniser::parseNumber (source);
+        result = parseNumber (source);
         break;
 
     case '.':
-        result = CppTokeniser::parseNumber (source);
+        result = parseNumber (source);
 
         if (result == tokenType_error)
             result = tokenType_punctuation;
@@ -381,33 +447,24 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
 
     case '"':
     case '\'':
-        CppTokeniser::skipQuotedString (source);
-        result = tokenType_stringLiteral;
+        skipQuotedString (source);
+        result = tokenType_string;
         break;
 
     case '+':
         result = tokenType_operator;
         source.skip();
-
-        if (source.peekNextChar() == '+')
-            source.skip();
-        else if (source.peekNextChar() == '=')
-            source.skip();
-
+        skipIfNextCharMatches (source, '+', '=');
         break;
 
     case '-':
         source.skip();
-        result = CppTokeniser::parseNumber (source);
+        result = parseNumber (source);
 
         if (result == tokenType_error)
         {
             result = tokenType_operator;
-
-            if (source.peekNextChar() == '-')
-                source.skip();
-            else if (source.peekNextChar() == '=')
-                source.skip();
+            skipIfNextCharMatches (source, '-', '=');
         }
         break;
 
@@ -417,10 +474,7 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case '!':
         result = tokenType_operator;
         source.skip();
-
-        if (source.peekNextChar() == '=')
-            source.skip();
-
+        skipIfNextCharMatches (source, '=');
         break;
 
     case '/':
@@ -440,7 +494,7 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
         {
             source.skip();
             result = tokenType_comment;
-            CppTokeniser::skipComment (source);
+            skipComment (source);
         }
 
         break;
@@ -452,103 +506,24 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
         break;
 
     case '<':
-        source.skip();
-        result = tokenType_operator;
-
-        if (source.peekNextChar() == '=')
-        {
-            source.skip();
-        }
-        else if (source.peekNextChar() == '<')
-        {
-            source.skip();
-
-            if (source.peekNextChar() == '=')
-                source.skip();
-        }
-
-        break;
-
     case '>':
-        source.skip();
-        result = tokenType_operator;
-
-        if (source.peekNextChar() == '=')
-        {
-            source.skip();
-        }
-        else if (source.peekNextChar() == '<')
-        {
-            source.skip();
-
-            if (source.peekNextChar() == '=')
-                source.skip();
-        }
-
-        break;
-
     case '|':
-        source.skip();
-        result = tokenType_operator;
-
-        if (source.peekNextChar() == '=')
-        {
-            source.skip();
-        }
-        else if (source.peekNextChar() == '|')
-        {
-            source.skip();
-
-            if (source.peekNextChar() == '=')
-                source.skip();
-        }
-
-        break;
-
     case '&':
-        source.skip();
-        result = tokenType_operator;
-
-        if (source.peekNextChar() == '=')
-        {
-            source.skip();
-        }
-        else if (source.peekNextChar() == '&')
-        {
-            source.skip();
-
-            if (source.peekNextChar() == '=')
-                source.skip();
-        }
-
-        break;
-
     case '^':
         source.skip();
         result = tokenType_operator;
-
-        if (source.peekNextChar() == '=')
-        {
-            source.skip();
-        }
-        else if (source.peekNextChar() == '^')
-        {
-            source.skip();
-
-            if (source.peekNextChar() == '=')
-                source.skip();
-        }
-
+        skipIfNextCharMatches (source, firstChar);
+        skipIfNextCharMatches (source, '=');
         break;
 
     case '#':
         result = tokenType_preprocessor;
-        source.skipToEndOfLine();
+        skipPreprocessorLine (source);
         break;
 
     default:
-        if (CppTokeniser::isIdentifierStart (firstChar))
-            result = CppTokeniser::parseIdentifier (source);
+        if (isIdentifierStart (firstChar))
+            result = parseIdentifier (source);
         else
             source.skip();
 
@@ -558,48 +533,35 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     return result;
 }
 
-StringArray CPlusPlusCodeTokeniser::getTokenTypes()
+CodeEditorComponent::ColourScheme CPlusPlusCodeTokeniser::getDefaultColourScheme()
 {
-    const char* const types[] =
+    struct Type
     {
-        "Error",
-        "Comment",
-        "C++ keyword",
-        "Identifier",
-        "Integer literal",
-        "Float literal",
-        "String literal",
-        "Operator",
-        "Bracket",
-        "Punctuation",
-        "Preprocessor line",
-        0
+        const char* name;
+        uint32 colour;
     };
 
-    return StringArray (types);
-}
-
-Colour CPlusPlusCodeTokeniser::getDefaultColour (const int tokenType)
-{
-    const uint32 colours[] =
+    const Type types[] =
     {
-        0xffcc0000,  // error
-        0xff00aa00,  // comment
-        0xff0000cc,  // keyword
-        0xff000000,  // identifier
-        0xff880000,  // int literal
-        0xff885500,  // float literal
-        0xff990099,  // string literal
-        0xff225500,  // operator
-        0xff000055,  // bracket
-        0xff004400,  // punctuation
-        0xff660000   // preprocessor
+        { "Error",              0xffcc0000 },
+        { "Comment",            0xff00aa00 },
+        { "Keyword",            0xff0000cc },
+        { "Operator",           0xff225500 },
+        { "Identifier",         0xff000000 },
+        { "Integer",            0xff880000 },
+        { "Float",              0xff885500 },
+        { "String",             0xff990099 },
+        { "Bracket",            0xff000055 },
+        { "Punctuation",        0xff004400 },
+        { "Preprocessor Text",  0xff660000 }
     };
 
-    if (tokenType >= 0 && tokenType < numElementsInArray (colours))
-        return Colour (colours [tokenType]);
+    CodeEditorComponent::ColourScheme cs;
 
-    return Colours::black;
+    for (int i = 0; i < sizeof (types) / sizeof (types[0]); ++i)  // (NB: numElementsInArray doesn't work here in GCC4.2)
+        cs.set (types[i].name, Colour (types[i].colour));
+
+    return cs;
 }
 
 bool CPlusPlusCodeTokeniser::isReservedKeyword (const String& token) noexcept

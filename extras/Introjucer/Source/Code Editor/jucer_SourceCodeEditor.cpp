@@ -28,45 +28,60 @@
 
 
 //==============================================================================
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
-                                    CodeDocument& codeDocument,
-                                    CodeTokeniser* const codeTokeniser)
-    : DocumentEditorComponent (document_),
-      editor (codeDocument, codeTokeniser)
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_, CodeDocument& codeDocument)
+    : DocumentEditorComponent (document_)
 {
-    addAndMakeVisible (&editor);
+    createEditor (codeDocument);
+}
+
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_)
+    : DocumentEditorComponent (document_)
+{
+}
+
+void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
+{
+    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
+        setEditor (new CppCodeEditorComponent (codeDocument));
+    else
+        setEditor (new CodeEditorComponent (codeDocument, nullptr));
+}
+
+void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
+{
+    addAndMakeVisible (editor = newEditor);
 
    #if JUCE_MAC
-    Font font (10.6f);
+    Font font (13.0f);
     font.setTypefaceName ("Menlo");
    #else
-    Font font (10.0f);
+    Font font (12.0f);
     font.setTypefaceName (Font::getDefaultMonospacedFontName());
    #endif
-    editor.setFont (font);
+    editor->setFont (font);
 
-    editor.setTabSize (4, true);
+    editor->setTabSize (4, true);
+
+    updateColourScheme();
+    getAppSettings().appearance.settings.addListener (this);
 }
 
 SourceCodeEditor::~SourceCodeEditor()
 {
+    getAppSettings().appearance.settings.removeListener (this);
 }
 
+//==============================================================================
 void SourceCodeEditor::resized()
 {
-    editor.setBounds (getLocalBounds());
+    editor->setBounds (getLocalBounds());
 }
 
-SourceCodeEditor* SourceCodeEditor::createFor (OpenDocumentManager::Document* document,
-                                               CodeDocument& codeDocument)
-{
-    CodeTokeniser* tokeniser = nullptr;
+void SourceCodeEditor::updateColourScheme()     { getAppSettings().appearance.applyToCodeEditor (*editor); }
 
-    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-    {
-        static CPlusPlusCodeTokeniser cppTokeniser;
-        tokeniser = &cppTokeniser;
-    }
-
-    return new SourceCodeEditor (document, codeDocument, tokeniser);
-}
+void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
+void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
+void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }

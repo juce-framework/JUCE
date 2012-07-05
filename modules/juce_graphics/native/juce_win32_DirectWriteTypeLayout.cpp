@@ -77,7 +77,7 @@ namespace DirectWriteTypeLayout
                     jassert (currentLine == layout->getNumLines());
                     TextLayout::Line* const newLine = new TextLayout::Line();
                     layout->addLine (newLine);
-                    newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY); // The x value is only correct when dealing with LTR text
+                    newLine->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
                 }
             }
 
@@ -198,17 +198,26 @@ namespace DirectWriteTypeLayout
             default:                          jassertfalse; break; // Illegal flags!
         }
 
-        format->SetTextAlignment (alignment);
-        format->SetWordWrapping (wrapType);
-
         // DirectWrite does not automatically set reading direction
         // This must be set correctly and manually when using RTL Scripts (Hebrew, Arabic)
         if (text.getReadingDirection() == AttributedString::rightToLeft)
+        {
             format->SetReadingDirection (DWRITE_READING_DIRECTION_RIGHT_TO_LEFT);
+
+            switch (text.getJustification().getOnlyHorizontalFlags())
+            {
+                case Justification::left:      alignment = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
+                case Justification::right:     alignment = DWRITE_TEXT_ALIGNMENT_LEADING;  break;
+                default: break;
+            }
+        }
+
+        format->SetTextAlignment (alignment);
+        format->SetWordWrapping (wrapType);
     }
 
     void addAttributedRange (const AttributedString::Attribute& attr, IDWriteTextLayout* textLayout,
-                             const int textLen, ID2D1DCRenderTarget* const renderTarget, IDWriteFontCollection* const fontCollection)
+                             const int textLen, ID2D1RenderTarget* const renderTarget, IDWriteFontCollection* const fontCollection)
     {
         DWRITE_TEXT_RANGE range;
         range.startPosition = attr.range.getStart();
@@ -264,20 +273,12 @@ namespace DirectWriteTypeLayout
         }
     }
 
-    void createLayout (TextLayout& layout, const AttributedString& text, IDWriteFactory* const directWriteFactory,
-                       ID2D1Factory* const direct2dFactory, IDWriteFontCollection* const fontCollection)
+    void setupLayout (const AttributedString& text, const float& maxWidth, const float& maxHeight,
+                      ID2D1RenderTarget* const renderTarget, IDWriteFactory* const directWriteFactory,
+                      IDWriteFontCollection* const fontCollection, IDWriteTextLayout** dwTextLayout)
     {
         // To add color to text, we need to create a D2D render target
         // Since we are not actually rendering to a D2D context we create a temporary GDI render target
-
-        D2D1_RENDER_TARGET_PROPERTIES d2dRTProp = D2D1::RenderTargetProperties (D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                                                                                D2D1::PixelFormat (DXGI_FORMAT_B8G8R8A8_UNORM,
-                                                                                                   D2D1_ALPHA_MODE_IGNORE),
-                                                                                0, 0,
-                                                                                D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
-                                                                                D2D1_FEATURE_LEVEL_DEFAULT);
-        ComSmartPtr<ID2D1DCRenderTarget> renderTarget;
-        HRESULT hr = direct2dFactory->CreateDCRenderTarget (&d2dRTProp, renderTarget.resetAndGetPointerAddress());
 
         Font defaultFont;
         BOOL fontFound = false;
@@ -288,7 +289,7 @@ namespace DirectWriteTypeLayout
             fontIndex = 0;
 
         ComSmartPtr<IDWriteFontFamily> dwFontFamily;
-        hr = fontCollection->GetFontFamily (fontIndex, dwFontFamily.resetAndGetPointerAddress());
+        HRESULT hr = fontCollection->GetFontFamily (fontIndex, dwFontFamily.resetAndGetPointerAddress());
 
         ComSmartPtr<IDWriteFont> dwFont;
         hr = dwFontFamily->GetFirstMatchingFont (DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL,
@@ -308,15 +309,32 @@ namespace DirectWriteTypeLayout
 
         const int textLen = text.getText().length();
 
-        ComSmartPtr<IDWriteTextLayout> dwTextLayout;
         hr = directWriteFactory->CreateTextLayout (text.getText().toWideCharPointer(), textLen,
-                                                   dwTextFormat, layout.getWidth(),
-                                                   1.0e7f, dwTextLayout.resetAndGetPointerAddress());
+                                                   dwTextFormat, maxWidth, maxHeight, dwTextLayout);
 
         const int numAttributes = text.getNumAttributes();
 
         for (int i = 0; i < numAttributes; ++i)
-            addAttributedRange (*text.getAttribute (i), dwTextLayout, textLen, renderTarget, fontCollection);
+            addAttributedRange (*text.getAttribute (i), *dwTextLayout, textLen, renderTarget, fontCollection);
+    }
+
+    void createLayout (TextLayout& layout, const AttributedString& text, IDWriteFactory* const directWriteFactory,
+                       ID2D1Factory* const direct2dFactory, IDWriteFontCollection* const fontCollection)
+    {
+        // To add color to text, we need to create a D2D render target
+        // Since we are not actually rendering to a D2D context we create a temporary GDI render target
+
+        D2D1_RENDER_TARGET_PROPERTIES d2dRTProp = D2D1::RenderTargetProperties (D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+                                                                                D2D1::PixelFormat (DXGI_FORMAT_B8G8R8A8_UNORM,
+                                                                                                   D2D1_ALPHA_MODE_IGNORE),
+                                                                                0, 0,
+                                                                                D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
+                                                                                D2D1_FEATURE_LEVEL_DEFAULT);
+        ComSmartPtr<ID2D1DCRenderTarget> renderTarget;
+        HRESULT hr = direct2dFactory->CreateDCRenderTarget (&d2dRTProp, renderTarget.resetAndGetPointerAddress());
+
+        ComSmartPtr<IDWriteTextLayout> dwTextLayout;
+        setupLayout(text, layout.getWidth(), 1.0e7f, renderTarget, directWriteFactory, fontCollection, dwTextLayout.resetAndGetPointerAddress());
 
         UINT32 actualLineCount = 0;
         hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
@@ -335,9 +353,24 @@ namespace DirectWriteTypeLayout
 
         for (int i = 0; i < numLines; ++i)
         {
-            lastLocation = dwLineMetrics[i].length;
             layout.getLine(i).stringRange = Range<int> (lastLocation, (int) lastLocation + dwLineMetrics[i].length);
+            lastLocation += dwLineMetrics[i].length;
         }
+    }
+
+    void drawToD2DContext (const AttributedString& text, const Rectangle<float>& area, ID2D1RenderTarget* const renderTarget,
+                           IDWriteFactory* const directWriteFactory, IDWriteFontCollection* const fontCollection)
+    {
+        ComSmartPtr<IDWriteTextLayout> dwTextLayout;
+        setupLayout (text, area.getWidth(), area.getHeight(), renderTarget, directWriteFactory,
+                     fontCollection, dwTextLayout.resetAndGetPointerAddress());
+
+        ComSmartPtr<ID2D1SolidColorBrush> d2dBrush;
+        renderTarget->CreateSolidColorBrush (D2D1::ColorF (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f)),
+                                             d2dBrush.resetAndGetPointerAddress());
+
+        renderTarget->DrawTextLayout (D2D1::Point2F ((float) area.getX(), (float) area.getY()),
+                                      dwTextLayout, d2dBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
     }
 }
 #endif

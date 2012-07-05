@@ -121,14 +121,12 @@ public:
     */
     void setFont (const Font& newFont);
 
-    /** Changes the size and style of the currently-selected font.
-
+    /** Changes the size of the currently-selected font.
         This is a convenient shortcut that changes the context's current font to a
-        different size or style. The typeface won't be changed.
-
+        different size. The typeface won't be changed.
         @see Font
     */
-    void setFont (float newFontHeight, int fontStyleFlags = Font::plain);
+    void setFont (float newFontHeight);
 
     /** Returns the currently selected font. */
     Font getCurrentFont() const;

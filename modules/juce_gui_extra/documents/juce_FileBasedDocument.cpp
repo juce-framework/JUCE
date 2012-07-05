@@ -75,13 +75,13 @@ bool FileBasedDocument::loadFrom (const File& newFile,
     const File oldFile (documentFile);
     documentFile = newFile;
 
-    String error;
+    Result result (Result::fail ("The file doesn't exist"));
 
     if (newFile.existsAsFile())
     {
-        error = loadDocument (newFile);
+        result = loadDocument (newFile);
 
-        if (error.isEmpty())
+        if (result.wasOk())
         {
             setChangedFlag (false);
             MouseCursor::hideWaitCursor();
@@ -89,10 +89,6 @@ bool FileBasedDocument::loadFrom (const File& newFile,
             setLastDocumentOpened (newFile);
             return true;
         }
-    }
-    else
-    {
-        error = "The file doesn't exist";
     }
 
     documentFile = oldFile;
@@ -105,7 +101,7 @@ bool FileBasedDocument::loadFrom (const File& newFile,
                                      TRANS("There was an error while trying to load the file:\n\n")
                                        + newFile.getFullPathName()
                                        + "\n\n"
-                                       + error);
+                                       + result.getErrorMessage());
     }
 
     return false;
@@ -171,9 +167,9 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
     const File oldFile (documentFile);
     documentFile = newFile;
 
-    String error (saveDocument (newFile));
+    const Result result (saveDocument (newFile));
 
-    if (error.isEmpty())
+    if (result.wasOk())
     {
         setChangedFlag (false);
         MouseCursor::hideWaitCursor();
@@ -193,7 +189,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
                                         + TRANS("\" to the file:\n\n")
                                         + newFile.getFullPathName()
                                         + "\n\n"
-                                        + error);
+                                        + result.getErrorMessage());
     }
 
     return failedToWriteToFile;

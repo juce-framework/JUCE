@@ -91,5 +91,34 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow);
 };
 
+//==============================================================================
+class MainWindowList
+{
+public:
+    MainWindowList();
+
+    void forceCloseAllWindows();
+    bool askAllWindowsToClose();
+    void closeWindow (MainWindow*);
+
+    void createWindowIfNoneAreOpen();
+    void openDocument (OpenDocumentManager::Document*);
+    bool openFile (const File& file);
+
+    MainWindow* createNewMainWindow();
+    MainWindow* getOrCreateFrontmostWindow();
+    MainWindow* getOrCreateEmptyWindow();
+
+    void reopenLastProjects();
+    void saveCurrentlyOpenProjectList();
+
+    void avoidSuperimposedWindows (MainWindow*);
+
+    OwnedArray<MainWindow> windows;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindowList);
+};
+
 
 #endif   // __JUCER_MAINWINDOW_JUCEHEADER__

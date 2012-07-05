@@ -252,7 +252,7 @@ void JucerDocument::setComponentOverlayOpacity (const float alpha)
 }
 
 //==============================================================================
-const String JucerDocument::getDocumentTitle()
+String JucerDocument::getDocumentTitle()
 {
     return className;
 }
@@ -291,7 +291,7 @@ void JucerDocument::getOptionalMethods (StringArray& baseClasses,
     addMethod ("Component", "void", "mouseDrag (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "void", "mouseUp (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "void", "mouseDoubleClick (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("Component", "void", "mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)", "", baseClasses, returnValues, methods, initialContents);
 
     addMethod ("Component", "bool", "keyPressed (const KeyPress& key)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "bool", "keyStateChanged (const bool isKeyDown)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);
@@ -406,7 +406,7 @@ bool JucerDocument::loadFromXml (const XmlElement& xml)
 }
 
 //==============================================================================
-const String JucerDocument::loadDocument (const File& file)
+Result JucerDocument::loadDocument (const File& file)
 {
     const File cppFile (file.withFileExtension (".cpp"));
 
@@ -419,15 +419,15 @@ const String JucerDocument::loadDocument (const File& file)
     if (xml != nullptr)
     {
         if (loadFromXml (*xml))
-            return String::empty;
+            return Result::ok();
 
-        return TRANS("Couldn't parse the XML section of this file correctly");
+        return Result::fail (TRANS("Couldn't parse the XML section of this file correctly"));
     }
 
-    return TRANS("Not a valid Jucer cpp file");
+    return Result::fail (TRANS("Not a valid Jucer cpp file"));
 }
 
-const String JucerDocument::saveDocument (const File& file)
+Result JucerDocument::saveDocument (const File& file)
 {
     const File cppFile (file.withFileExtension (".cpp"));
     const File hFile (file.withFileExtension (".h"));
@@ -435,19 +435,19 @@ const String JucerDocument::saveDocument (const File& file)
     String templateH, templateCpp;
 
     if (! findTemplateFiles (templateH, templateCpp))
-        return TRANS("Couldn't find the required Jucer template files...\n\nMake sure the template files directory is set up correctly in the preferences box.");
+        return Result::fail (TRANS("Couldn't find the required Jucer template files...\n\nMake sure the template files directory is set up correctly in the preferences box."));
 
     const bool ok = writeCodeFiles (hFile, cppFile, templateH, templateCpp);
     TestComponent::reloadAll();
 
     if (ok)
-        return String::empty;
+        return Result::ok();
     else
-        return TRANS("Couldn't write to the file.");
+        return Result::fail (TRANS("Couldn't write to the file."));
 }
 
 //==============================================================================
-const File JucerDocument::getLastDocumentOpened()
+File JucerDocument::getLastDocumentOpened()
 {
     return StoredSettings::getInstance()->recentFiles.getFile (0);
 }

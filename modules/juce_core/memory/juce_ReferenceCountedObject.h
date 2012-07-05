@@ -242,7 +242,7 @@ public:
     */
     template <class DerivedClass>
     inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<DerivedClass>& other) noexcept
-        : referencedObject (static_cast <ReferenceCountedObjectClass*> (other.getObject()))
+        : referencedObject (static_cast <ReferenceCountedObjectClass*> (other.get()))
     {
         if (referencedObject != nullptr)
             referencedObject->incReferenceCount();
@@ -266,7 +266,7 @@ public:
     template <class DerivedClass>
     ReferenceCountedObjectPtr& operator= (const ReferenceCountedObjectPtr<DerivedClass>& other)
     {
-        return operator= (static_cast <ReferenceCountedObjectClass*> (other.getObject()));
+        return operator= (static_cast <ReferenceCountedObjectClass*> (other.get()));
     }
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
@@ -328,6 +328,14 @@ public:
     /** Returns the object that this pointer references.
         The pointer returned may be zero, of course.
     */
+    inline ReferenceCountedObjectClass* get() const noexcept
+    {
+        return referencedObject;
+    }
+
+    /** Returns the object that this pointer references.
+        The pointer returned may be zero, of course.
+    */
     inline ReferenceCountedObjectClass* getObject() const noexcept
     {
         return referencedObject;
@@ -343,42 +351,42 @@ private:
 template <class ReferenceCountedObjectClass>
 bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectClass* const object2) noexcept
 {
-    return object1.getObject() == object2;
+    return object1.get() == object2;
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
 bool operator== (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
-    return object1.getObject() == object2.getObject();
+    return object1.get() == object2.get();
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
 bool operator== (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
-    return object1 == object2.getObject();
+    return object1 == object2.get();
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
 bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, const ReferenceCountedObjectClass* object2) noexcept
 {
-    return object1.getObject() != object2;
+    return object1.get() != object2;
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
 bool operator!= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
-    return object1.getObject() != object2.getObject();
+    return object1.get() != object2.get();
 }
 
 /** Compares two ReferenceCountedObjectPointers. */
 template <class ReferenceCountedObjectClass>
 bool operator!= (ReferenceCountedObjectClass* object1, ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& object2) noexcept
 {
-    return object1 != object2.getObject();
+    return object1 != object2.get();
 }
 
 

@@ -55,6 +55,7 @@
 #if JUCE_PLUGINHOST_VST && JUCE_LINUX
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
+ #undef KeyPress
 #endif
 
 //==============================================================================

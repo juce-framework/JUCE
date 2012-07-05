@@ -339,10 +339,10 @@ namespace CodeHelpers
     }
 
     //==============================================================================
-    static int calculateHash (const String& s, const int hashMultiplier)
+    static unsigned int calculateHash (const String& s, const int hashMultiplier)
     {
         const char* t = s.toUTF8();
-        int hash = 0;
+        unsigned int hash = 0;
         while (*t != 0)
             hash = hashMultiplier * hash + *t++;
 
@@ -360,11 +360,11 @@ namespace CodeHelpers
 
         for (;;)
         {
-            SortedSet <int> hashes;
+            SortedSet <unsigned int> hashes;
             bool collision = false;
             for (int i = allStrings.size(); --i >= 0;)
             {
-                const int hash = calculateHash (allStrings[i], v);
+                const unsigned int hash = calculateHash (allStrings[i], v);
                 if (hashes.contains (hash))
                 {
                     collision = true;
@@ -390,7 +390,7 @@ namespace CodeHelpers
         const String indent (String::repeatedString (" ", indentLevel));
         const int hashMultiplier = findBestHashMultiplier (strings);
 
-        out << indent << "int hash = 0;" << newLine
+        out << indent << "unsigned int hash = 0;" << newLine
             << indent << "if (" << utf8PointerVariable << " != 0)" << newLine
             << indent << "    while (*" << utf8PointerVariable << " != 0)" << newLine
             << indent << "        hash = " << hashMultiplier << " * hash + *" << utf8PointerVariable << "++;" << newLine

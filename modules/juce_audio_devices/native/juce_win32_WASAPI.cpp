@@ -746,7 +746,7 @@ public:
 
         if (inputDevice != nullptr && inputDevice->client != nullptr)
         {
-            latencyIn = (int) (inputDevice->latencySamples + inputDevice->actualBufferSize + inputDevice->minBufferSize);
+            latencyIn = (int) (inputDevice->latencySamples + currentBufferSizeSamples);
 
             if (! check (inputDevice->client->Start()))
             {
@@ -758,7 +758,7 @@ public:
 
         if (outputDevice != nullptr && outputDevice->client != nullptr)
         {
-            latencyOut = (int) (outputDevice->latencySamples + outputDevice->actualBufferSize + outputDevice->minBufferSize);
+            latencyOut = (int) (outputDevice->latencySamples + currentBufferSizeSamples);
 
             if (! check (outputDevice->client->Start()))
             {

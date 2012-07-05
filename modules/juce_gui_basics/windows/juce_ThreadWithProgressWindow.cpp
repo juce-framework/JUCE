@@ -27,7 +27,8 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasProgressBar,
                                                     const bool hasCancelButton,
                                                     const int timeOutMsWhenCancelling_,
-                                                    const String& cancelButtonText)
+                                                    const String& cancelButtonText,
+                                                    Component* componentToCentreAround)
   : Thread ("Juce Progress Window"),
     progress (0.0),
     timeOutMsWhenCancelling (timeOutMsWhenCancelling_)
@@ -35,7 +36,8 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
     alertWindow = LookAndFeel::getDefaultLookAndFeel()
                     .createAlertWindow (title, String::empty, cancelButtonText,
                                         String::empty, String::empty,
-                                        AlertWindow::NoIcon, hasCancelButton ? 1 : 0, 0);
+                                        AlertWindow::NoIcon, hasCancelButton ? 1 : 0,
+                                        componentToCentreAround);
 
     // if there are no buttons, we won't allow the user to interrupt the thread.
     alertWindow->setEscapeKeyCancels (false);

@@ -226,21 +226,17 @@ protected:
         This is used in message boxes, filenames and file choosers, so it should be
         something sensible.
     */
-    virtual const String getDocumentTitle() = 0;
+    virtual String getDocumentTitle() = 0;
 
     /** This method should try to load your document from the given file.
-
-        If it fails, it should return an error message. If it succeeds, it should return
-        an empty string.
+        @returns a Result object to indicate the whether there was an error.
     */
-    virtual const String loadDocument (const File& file) = 0;
+    virtual Result loadDocument (const File& file) = 0;
 
     /** This method should try to write your document to the given file.
-
-        If it fails, it should return an error message. If it succeeds, it should return
-        an empty string.
+        @returns a Result object to indicate the whether there was an error.
     */
-    virtual const String saveDocument (const File& file) = 0;
+    virtual Result saveDocument (const File& file) = 0;
 
     /** This is used for dialog boxes to make them open at the last folder you
         were using.
@@ -258,7 +254,7 @@ protected:
 
         @see RecentlyOpenedFilesList
     */
-    virtual const File getLastDocumentOpened() = 0;
+    virtual File getLastDocumentOpened() = 0;
 
     /** This is used for dialog boxes to make them open at the last folder you
         were using.

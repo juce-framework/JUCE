@@ -28,6 +28,7 @@
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Project Saving/jucer_ProjectSaver.h"
 #include "../Application/jucer_OpenDocumentManager.h"
+#include "../Application/jucer_Application.h"
 
 
 //==============================================================================
@@ -59,15 +60,13 @@ Project::Project (const File& file_)
 
     setChangedFlag (false);
 
-    mainProjectIcon.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
-
     projectRoot.addListener (this);
 }
 
 Project::~Project()
 {
     projectRoot.removeListener (this);
-    OpenDocumentManager::getInstance()->closeAllDocumentsUsingProject (*this, false);
+    JucerApplication::getApp()->openDocumentManager.closeAllDocumentsUsingProject (*this, false);
 }
 
 //==============================================================================
@@ -77,9 +76,14 @@ void Project::setTitle (const String& newTitle)
     getMainGroup().getNameValue() = newTitle;
 }
 
-const String Project::getDocumentTitle()
+String Project::getTitle() const
 {
-    return getProjectName().toString();
+    return projectRoot.getChildWithName (Tags::projectMainGroup) [Ids::name];
+}
+
+String Project::getDocumentTitle()
+{
+    return getTitle();
 }
 
 void Project::updateProjectSettings()
@@ -201,63 +205,69 @@ void Project::addDefaultModules (bool shouldCopyFilesLocally)
     }
 }
 
+bool Project::isAudioPluginModuleMissing() const
+{
+    return getProjectType().isAudioPlugin()
+            && ! isModuleEnabled ("juce_audio_plugin_client");
+}
+
 //==============================================================================
-const String Project::loadDocument (const File& file)
+static void registerRecentFile (const File& file)
+{
+    RecentlyOpenedFilesList::registerRecentFileNatively (file);
+    getAppSettings().recentFiles.addFile (file);
+    getAppSettings().flush();
+}
+
+Result Project::loadDocument (const File& file)
 {
     ScopedPointer <XmlElement> xml (XmlDocument::parse (file));
 
     if (xml == nullptr || ! xml->hasTagName (Tags::projectRoot.toString()))
-        return "Not a valid Jucer project!";
+        return Result::fail ("Not a valid Jucer project!");
 
     ValueTree newTree (ValueTree::fromXml (*xml));
 
     if (! newTree.hasType (Tags::projectRoot))
-        return "The document contains errors and couldn't be parsed!";
+        return Result::fail ("The document contains errors and couldn't be parsed!");
 
-    StoredSettings::getInstance()->recentFiles.addFile (file);
-    StoredSettings::getInstance()->flush();
+    registerRecentFile (file);
     projectRoot = newTree;
 
     removeDefunctExporters();
     setMissingDefaultValues();
 
-    return String::empty;
+    return Result::ok();
 }
 
-const String Project::saveDocument (const File& file)
+Result Project::saveDocument (const File& file)
 {
-    return saveProject (file, true);
+    return saveProject (file, false);
 }
 
-String Project::saveProject (const File& file, bool showProgressBox)
+Result Project::saveProject (const File& file, bool isCommandLineApp)
 {
     updateProjectSettings();
     sanitiseConfigFlags();
 
-    StoredSettings::getInstance()->recentFiles.addFile (file);
+    if (! isCommandLineApp)
+        registerRecentFile (file);
 
     ProjectSaver saver (*this, file);
-    return saver.save (showProgressBox);
+    return saver.save (! isCommandLineApp);
 }
 
-String Project::saveResourcesOnly (const File& file)
+Result Project::saveResourcesOnly (const File& file)
 {
     ProjectSaver saver (*this, file);
     return saver.saveResourcesOnly();
 }
 
 //==============================================================================
-File Project::lastDocumentOpened;
+static File lastDocumentOpened;
 
-const File Project::getLastDocumentOpened()
-{
-    return lastDocumentOpened;
-}
-
-void Project::setLastDocumentOpened (const File& file)
-{
-    lastDocumentOpened = file;
-}
+File Project::getLastDocumentOpened()                   { return lastDocumentOpened; }
+void Project::setLastDocumentOpened (const File& file)  { lastDocumentOpened = file; }
 
 //==============================================================================
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
@@ -268,24 +278,10 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
     changed();
 }
 
-void Project::valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded)
-{
-    changed();
-}
-
-void Project::valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved)
-{
-    changed();
-}
-
-void Project::valueTreeChildOrderChanged (ValueTree& parentTree)
-{
-    changed();
-}
-
-void Project::valueTreeParentChanged (ValueTree& tree)
-{
-}
+void Project::valueTreeChildAdded (ValueTree&, ValueTree&)      { changed(); }
+void Project::valueTreeChildRemoved (ValueTree&, ValueTree&)    { changed(); }
+void Project::valueTreeChildOrderChanged (ValueTree&)           { changed(); }
+void Project::valueTreeParentChanged (ValueTree&)               {}
 
 //==============================================================================
 File Project::resolveFilename (String filename) const
@@ -344,7 +340,7 @@ const ProjectType& Project::getProjectType() const
 //==============================================================================
 void Project::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getProjectName(), "Project Name", 256, false),
+    props.add (new TextPropertyComponent (getProjectNameValue(), "Project Name", 256, false),
                "The name of the project.");
 
     props.add (new TextPropertyComponent (getVersionValue(), "Project Version", 16, false),
@@ -375,8 +371,6 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, false),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace or commas to separate the items - to include a space or comma in a definition, precede it with a backslash.");
-
-    props.setPreferredHeight (22);
 }
 
 String Project::getVersionAsHex() const
@@ -543,7 +537,7 @@ bool Project::Item::renameFile (const File& newFile)
          || (newFile.exists() && ! oldFile.exists()))
     {
         setFile (newFile);
-        OpenDocumentManager::getInstance()->fileHasBeenRenamed (oldFile, newFile);
+        JucerApplication::getApp()->openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
         return true;
     }
 
@@ -700,7 +694,13 @@ Project::Item Project::Item::getOrCreateSubGroup (const String& name)
 
 Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex)
 {
-    Item group (createGroup (project, name, createGUID (getID() + name + String (getNumChildren()))));
+    String newID (createGUID (getID() + name + String (getNumChildren())));
+
+    int n = 0;
+    while (findItemWithID (newID).isValid())
+        newID = createGUID (newID + String (++n));
+
+    Item group (createGroup (project, name, newID));
 
     jassert (canContain (group));
     addChild (group, insertIndex);
@@ -773,19 +773,21 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
 
 const Drawable* Project::Item::getIcon() const
 {
+    const Icons& icons = getIcons();
+
     if (isFile())
     {
         if (isImageFile())
-            return StoredSettings::getInstance()->getImageFileIcon();
+            return icons.imageDoc;
 
-        return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage();
+        return icons.document;
     }
     else if (isMainGroup())
     {
-        return &(project.mainProjectIcon);
+        return icons.juceLogo;
     }
 
-    return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage();
+    return icons.folder;
 }
 
 //==============================================================================
@@ -902,15 +904,7 @@ String Project::getModuleID (int index) const
 //==============================================================================
 ValueTree Project::getExporters()
 {
-    ValueTree exporters (projectRoot.getChildWithName (Tags::exporters));
-
-    if (! exporters.isValid())
-    {
-        projectRoot.addChild (ValueTree (Tags::exporters), 0, getUndoManagerFor (projectRoot));
-        exporters = getExporters();
-    }
-
-    return exporters;
+    return projectRoot.getOrCreateChildWithName (Tags::exporters, nullptr);
 }
 
 int Project::getNumExporters()
@@ -932,21 +926,9 @@ void Project::addNewExporter (const String& exporterName)
     exporters.addChild (exp->settings, -1, getUndoManagerFor (exporters));
 }
 
-void Project::deleteExporter (int index)
+void Project::createExporterForCurrentPlatform()
 {
-    ValueTree exporters (getExporters());
-    exporters.removeChild (index, getUndoManagerFor (exporters));
-}
-
-void Project::createDefaultExporters()
-{
-    ValueTree exporters (getExporters());
-    exporters.removeAllChildren (getUndoManagerFor (exporters));
-
-    const StringArray exporterNames (ProjectExporter::getDefaultExporters());
-
-    for (int i = 0; i < exporterNames.size(); ++i)
-        addNewExporter (exporterNames[i]);
+    addNewExporter (ProjectExporter::getCurrentPlatformExporterName());
 }
 
 //==============================================================================

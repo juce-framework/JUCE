@@ -256,7 +256,6 @@ namespace juce
 
 #if JUCE_MAC || JUCE_IOS
  #include "../juce_core/native/juce_osx_ObjCHelpers.h"
- #include "../juce_core/native/juce_mac_ObjCSuffix.h"
  #include "../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
  #include "../juce_graphics/native/juce_mac_CoreGraphicsContext.h"
 

@@ -164,14 +164,14 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster*)
     }
 }
 
-const StringArray MainHostWindow::getMenuBarNames()
+StringArray MainHostWindow::getMenuBarNames()
 {
     const char* const names[] = { "File", "Plugins", "Options", nullptr };
 
     return StringArray (names);
 }
 
-const PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& /*menuName*/)
+PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& /*menuName*/)
 {
     PopupMenu menu;
 

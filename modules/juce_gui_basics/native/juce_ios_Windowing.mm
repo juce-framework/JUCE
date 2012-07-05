@@ -41,7 +41,7 @@
     initialiseJuce_GUI();
 
     JUCEApplication* app = dynamic_cast <JUCEApplication*> (JUCEApplicationBase::createInstance());
-    if (! app->initialiseApp (String::empty))
+    if (! app->initialiseApp())
         exit (0);
 }
 

@@ -25,16 +25,71 @@
 
 #include "jucer_ProjectContentComponent.h"
 #include "../Application/jucer_MainWindow.h"
+#include "../Application/jucer_Application.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "jucer_ProjectInformationComponent.h"
+#include "jucer_ConfigPage.h"
 #include "jucer_TreeViewTypes.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
 
 
 //==============================================================================
+class FileTreeTab   : public TreePanelBase
+{
+public:
+    FileTreeTab (Project& project)
+        : TreePanelBase ("treeViewState_" + project.getProjectUID())
+    {
+        tree.setMultiSelectEnabled (true);
+        setRoot (new GroupTreeViewItem (project.getMainGroup()));
+    }
+};
+
+//==============================================================================
+class ConfigTreeTab   : public TreePanelBase
+{
+public:
+    ConfigTreeTab (Project& project)
+        : TreePanelBase ("settingsTreeViewState_" + project.getProjectUID())
+    {
+        tree.setMultiSelectEnabled (false);
+        setRoot (createProjectConfigTreeViewRoot (project));
+
+        if (tree.getNumSelectedItems() == 0)
+            tree.getRootItem()->setSelected (true, true);
+
+       #if JUCE_MAC || JUCE_WINDOWS
+        addAndMakeVisible (&openProjectButton);
+        openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
+        openProjectButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::openInIDE));
+
+        addAndMakeVisible (&saveAndOpenButton);
+        saveAndOpenButton.setCommandToTrigger (commandManager, CommandIDs::saveAndOpenInIDE, true);
+        saveAndOpenButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::saveAndOpenInIDE));
+       #endif
+    }
+
+    void resized()
+    {
+        Rectangle<int> r (getLocalBounds());
+        r.removeFromBottom (6);
+
+        if (saveAndOpenButton.isVisible())
+            saveAndOpenButton.setBounds (r.removeFromBottom (28).reduced (20, 3));
+
+        if (openProjectButton.isVisible())
+            openProjectButton.setBounds (r.removeFromBottom (28).reduced (20, 3));
+
+        tree.setBounds (r);
+    }
+
+    TextButton openProjectButton, saveAndOpenButton;
+};
+
+//==============================================================================
 ProjectContentComponent::ProjectContentComponent()
     : project (nullptr),
-      currentDocument (nullptr)
+      currentDocument (nullptr),
+      treeViewTabs (TabbedButtonBar::TabsAtTop)
 {
     setOpaque (true);
     setWantsKeyboardFocus (true);
@@ -47,7 +102,7 @@ ProjectContentComponent::~ProjectContentComponent()
 {
     setProject (nullptr);
     contentView = nullptr;
-    jassert (getNumChildComponents() == 0);
+    jassert (getNumChildComponents() <= 1);
 }
 
 void ProjectContentComponent::paint (Graphics& g)
@@ -55,11 +110,30 @@ void ProjectContentComponent::paint (Graphics& g)
     g.fillAll (Colour::greyLevel (0.8f));
 }
 
+void ProjectContentComponent::resized()
+{
+    Rectangle<int> r (getLocalBounds());
+
+    treeViewTabs.setBounds (r.removeFromLeft (treeViewTabs.getWidth()));
+
+    if (resizerBar != nullptr)
+        resizerBar->setBounds (r.removeFromLeft (4));
+
+    if (contentView != nullptr)
+        contentView->setBounds (r);
+}
+
+void ProjectContentComponent::childBoundsChanged (Component* child)
+{
+    if (child == &treeViewTabs)
+        resized();
+}
+
 void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
     {
-        PropertiesFile& settings = StoredSettings::getInstance()->getProps();
+        PropertiesFile& settings = getAppProperties();
 
         if (project != nullptr)
             project->removeChangeListener (this);
@@ -67,62 +141,79 @@ void ProjectContentComponent::setProject (Project* newProject)
         contentView = nullptr;
         resizerBar = nullptr;
 
-        if (projectTree != nullptr)
+        if (project != nullptr && treeViewTabs.isShowing())
         {
-            settings.setValue ("projectTreeviewWidth", projectTree->getWidth());
-            projectTree->deleteRootItem();
-            projectTree = nullptr;
+            if (treeViewTabs.getWidth() > 0)
+                settings.setValue ("projectTreeviewWidth_" + project->getProjectUID(), treeViewTabs.getWidth());
+
+            settings.setValue ("lastTab_" + project->getProjectUID(), treeViewTabs.getCurrentTabName());
         }
 
+        treeViewTabs.clearTabs();
         project = newProject;
 
         if (project != nullptr)
         {
-            addChildAndSetID (projectTree = new TreeView(), "tree");
-            projectTree->setRootItemVisible (true);
-            projectTree->setMultiSelectEnabled (true);
-            projectTree->setDefaultOpenness (true);
-            projectTree->setColour (TreeView::backgroundColourId, Colour::greyLevel (0.93f));
-            projectTree->setIndentSize (14);
+            addAndMakeVisible (&treeViewTabs);
 
-            projectTree->setRootItem (new GroupTreeViewItem (project->getMainGroup()));
-            projectTree->getRootItem()->setOpen (true);
+            createProjectTabs();
 
-            String lastTreeWidth (settings.getValue ("projectTreeviewWidth"));
-            if (lastTreeWidth.getIntValue() < 150)
-                lastTreeWidth = "250";
+            const String lastTabName (settings.getValue ("lastTab_" + project->getProjectUID()));
+            int lastTabIndex = treeViewTabs.getTabNames().indexOf (lastTabName);
 
-            projectTree->setBounds ("0, 0, left + " + lastTreeWidth + ", parent.height");
+            if (lastTabIndex < 0 || lastTabIndex > treeViewTabs.getNumTabs())
+                lastTabIndex = 1;
 
-            addChildAndSetID (resizerBar = new ResizableEdgeComponent (projectTree, &treeSizeConstrainer, ResizableEdgeComponent::rightEdge),
-                              "resizer");
+            treeViewTabs.setCurrentTabIndex (lastTabIndex);
 
-            resizerBar->setBounds ("tree.right, 0, tree.right + 4, parent.height");
+            int lastTreeWidth = settings.getValue ("projectTreeviewWidth_" + project->getProjectUID()).getIntValue();
+            if (lastTreeWidth < 150)
+                lastTreeWidth = 250;
+
+            treeViewTabs.setBounds (0, 0, lastTreeWidth, getHeight());
+
+            addAndMakeVisible (resizerBar = new ResizableEdgeComponent (&treeViewTabs, &treeSizeConstrainer,
+                                                                        ResizableEdgeComponent::rightEdge));
 
             project->addChangeListener (this);
 
-            if (currentDocument == nullptr)
-                invokeDirectly (CommandIDs::showProjectSettings, true);
-
             updateMissingFileStatuses();
-
-            const ScopedPointer<XmlElement> treeOpenness (settings.getXmlValue ("treeViewState_" + project->getProjectUID()));
-
-            if (treeOpenness != nullptr)
-                projectTree->restoreOpennessState (*treeOpenness, true);
+            resized();
+        }
+        else
+        {
+            treeViewTabs.setVisible (false);
         }
     }
 }
 
+void ProjectContentComponent::createProjectTabs()
+{
+    jassert (project != nullptr);
+    treeViewTabs.addTab ("Files",  Colour::greyLevel (0.93f), new FileTreeTab (*project), true);
+    treeViewTabs.addTab ("Config", Colour::greyLevel (0.93f), new ConfigTreeTab (*project), true);
+}
+
+TreeView* ProjectContentComponent::getFilesTreeView() const
+{
+    FileTreeTab* ft = dynamic_cast<FileTreeTab*> (treeViewTabs.getTabContentComponent (0));
+    return ft != nullptr ? &(ft->tree) : nullptr;
+}
+
+ProjectTreeViewBase* ProjectContentComponent::getFilesTreeRoot() const
+{
+    TreeView* tv = getFilesTreeView();
+    return tv != nullptr ? dynamic_cast <ProjectTreeViewBase*> (tv->getRootItem()) : nullptr;
+}
+
 void ProjectContentComponent::saveTreeViewState()
 {
-    if (projectTree != nullptr)
+    for (int i = treeViewTabs.getNumTabs(); --i >= 0;)
     {
-        const ScopedPointer<XmlElement> opennessState (projectTree->getOpennessState (true));
+        TreePanelBase* t = dynamic_cast<TreePanelBase*> (treeViewTabs.getTabContentComponent (i));
 
-        if (opennessState != nullptr)
-            StoredSettings::getInstance()->getProps()
-                .setValue ("treeViewState_" + project->getProjectUID(), opennessState);
+        if (t != nullptr)
+            t->saveOpenness();
     }
 }
 
@@ -133,17 +224,15 @@ void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 
 void ProjectContentComponent::updateMissingFileStatuses()
 {
-    if (projectTree != nullptr)
-    {
-        ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (projectTree->getRootItem());
-        if (p != nullptr)
-            p->checkFileStatus();
-    }
+    ProjectTreeViewBase* p = getFilesTreeRoot();
+
+    if (p != nullptr)
+        p->checkFileStatus();
 }
 
 bool ProjectContentComponent::showEditorForFile (const File& f)
 {
-    return showDocument (OpenDocumentManager::getInstance()->openFile (project, f));
+    return showDocument (JucerApplication::getApp()->openDocumentManager.openFile (project, f));
 }
 
 bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
@@ -151,7 +240,7 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
     if (doc == nullptr)
         return false;
 
-    OpenDocumentManager::getInstance()->moveDocumentToTopOfStack (doc);
+    JucerApplication::getApp()->openDocumentManager.moveDocumentToTopOfStack (doc);
 
     if (doc->hasFileBeenModifiedExternally())
         doc->reloadFromFile();
@@ -159,15 +248,18 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
     return setEditorComponent (doc->createEditor(), doc);
 }
 
+void ProjectContentComponent::hideEditor()
+{
+    currentDocument = nullptr;
+    contentView = nullptr;
+    updateMainWindowTitle();
+    commandManager->commandStatusChanged();
+}
+
 void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
 {
     if (doc == currentDocument)
-    {
-        currentDocument = nullptr;
-        contentView = nullptr;
-        updateMainWindowTitle();
-        commandManager->commandStatusChanged();
-    }
+        hideEditor();
 }
 
 bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumentManager::Document* doc)
@@ -177,11 +269,10 @@ bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumen
         contentView = editor;
         currentDocument = doc;
         addAndMakeVisible (editor);
-        editor->setBounds ("resizer.right, 0, parent.right, parent.height");
+        resized();
 
         updateMainWindowTitle();
         commandManager->commandStatusChanged();
-
         return true;
     }
 
@@ -215,19 +306,24 @@ ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 
 void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
 {
-    const CommandID ids[] = { CommandIDs::saveProject,
-                              CommandIDs::saveProjectAs,
+    const CommandID ids[] = { CommandIDs::saveDocument,
+                              CommandIDs::closeDocument,
+                              CommandIDs::saveProject,
                               CommandIDs::closeProject,
                               CommandIDs::openInIDE,
                               CommandIDs::saveAndOpenInIDE,
                               CommandIDs::showProjectSettings,
-                              StandardApplicationCommandIDs::del};
+                              StandardApplicationCommandIDs::del };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
 
 void ProjectContentComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
 {
+    String documentName;
+    if (currentDocument != nullptr)
+        documentName = " '" + currentDocument->getName().substring (0, 32) + "'";
+
     switch (commandID)
     {
     case CommandIDs::saveProject:
@@ -235,15 +331,6 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
-        break;
-
-    case CommandIDs::saveProjectAs:
-        result.setInfo ("Save Project As...",
-                        "Saves the current project to a different filename",
-                        CommandCategories::general, 0);
-        result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::closeProject:
@@ -251,6 +338,26 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Closes the current project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
+        break;
+
+    case CommandIDs::saveDocument:
+        result.setInfo ("Save" + documentName,
+                        "Saves the current document",
+                        CommandCategories::general, 0);
+        result.setActive (currentDocument != nullptr || project != nullptr);
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
+        break;
+
+    case CommandIDs::closeDocument:
+        result.setInfo ("Close" + documentName,
+                        "Closes the current document",
+                        CommandCategories::general, 0);
+        result.setActive (currentDocument != nullptr);
+       #if JUCE_MAC
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+       #else
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+       #endif
         break;
 
     case CommandIDs::openInIDE:
@@ -292,7 +399,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Delete", String::empty, CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
         result.defaultKeypresses.add (KeyPress (KeyPress::backspaceKey, 0, 0));
-        result.setActive (projectTree != nullptr);
+        result.setActive (dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()) != nullptr);
         break;
 
     default:
@@ -310,34 +417,35 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::saveProject:
-        if (project != nullptr)
-        {
-            if (! reinvokeCommandAfterClosingPropertyEditors (info))
-                project->save (true, true);
-        }
-
-        break;
-
-    case CommandIDs::saveProjectAs:
-        if (project != nullptr)
-        {
-            if (! reinvokeCommandAfterClosingPropertyEditors (info))
-                project->saveAsInteractive (true);
-        }
+        if (project != nullptr && ! reinvokeCommandAfterClosingPropertyEditors (info))
+            project->save (true, true);
 
         break;
 
     case CommandIDs::closeProject:
         {
-            MainWindow* mw = findParentComponentOfClass<MainWindow>();
+            MainWindow* const mw = findParentComponentOfClass<MainWindow>();
 
-            if (mw != nullptr)
-            {
-                if (! reinvokeCommandAfterClosingPropertyEditors (info))
-                    mw->closeCurrentProject();
-            }
+            if (mw != nullptr && ! reinvokeCommandAfterClosingPropertyEditors (info))
+                mw->closeCurrentProject();
         }
 
+        break;
+
+    case CommandIDs::saveDocument:
+        if (! reinvokeCommandAfterClosingPropertyEditors (info))
+        {
+            if (currentDocument != nullptr)
+                currentDocument->save();
+            else if (project != nullptr)
+                project->save (true, true);
+        }
+
+        break;
+
+    case CommandIDs::closeDocument:
+        if (currentDocument != nullptr)
+            JucerApplication::getApp()->openDocumentManager.closeDocument (currentDocument, true);
         break;
 
     case CommandIDs::openInIDE:
@@ -367,17 +475,15 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         break;
 
     case CommandIDs::showProjectSettings:
-        if (projectTree != nullptr)
-            projectTree->getRootItem()->setSelected (true, true);
-
+        treeViewTabs.setCurrentTabIndex (1);
         break;
 
     case StandardApplicationCommandIDs::del:
-        if (projectTree != nullptr)
         {
-            ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (projectTree->getRootItem());
-            if (p != nullptr)
-                p->deleteAllSelectedItems();
+            TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent());
+
+            if (tree != nullptr)
+                tree->deleteSelectedItems();
         }
 
         break;

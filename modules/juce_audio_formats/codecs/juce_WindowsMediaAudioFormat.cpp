@@ -193,21 +193,24 @@ public:
                 HRESULT hr = wmSyncReader->GetNextSample (0, &sampleBuffer, &sampleTime,
                                                           &duration, &flags, &outputNum, &streamNum);
 
-                if (SUCCEEDED (hr))
+                if (sampleBuffer != nullptr)
                 {
                     BYTE* rawData = nullptr;
                     DWORD dataLength = 0;
                     hr = sampleBuffer->GetBufferAndLength (&rawData, &dataLength);
-                    jassert (SUCCEEDED (hr));
 
                     bufferStart = 0;
                     bufferEnd = (int) dataLength;
 
                     if (bufferEnd <= 0)
+                    {
+                        sampleBuffer->Release();
                         return false;
+                    }
 
                     buffer.ensureSize (bufferEnd);
                     memcpy (buffer.getData(), rawData, bufferEnd);
+                    sampleBuffer->Release();
                 }
                 else
                 {

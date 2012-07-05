@@ -26,7 +26,7 @@
             MkTypLibCompatible="true"
             SuppressStartupBanner="true"
             TargetEnvironment="1"
-            TypeLibraryName=".\Debug\Introjucer.tlb"
+            TypeLibraryName="$(IntDir)\Introjucer.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
             Optimization="0"
@@ -37,10 +37,10 @@
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Debug\Introjucer.pch"
-            AssemblerListingLocation=".\Debug\"
-            ObjectFile=".\Debug\"
-            ProgramDataBaseFileName=".\Debug\"
+            PrecompiledHeaderFile="$(IntDir)\Introjucer.pch"
+            AssemblerListingLocation="$(IntDir)\"
+            ObjectFile="$(IntDir)\"
+            ProgramDataBaseFileName="$(IntDir)\"
             WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
@@ -48,11 +48,11 @@
             PreprocessorDefinitions="_DEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLinkerTool"
-            OutputFile=".\Debug\Introjucer.exe"
+            OutputFile="$(OutDir)\Introjucer.exe"
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"
             GenerateDebugInformation="true"
-            ProgramDatabaseFile=".\Debug\Introjucer.pdb"
+            ProgramDatabaseFile="$(IntDir)\Introjucer.pdb"
             SubSystem="2"
             GenerateManifest="true"
             TargetMachine="1"/>
@@ -61,7 +61,7 @@
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Debug\Introjucer.bsc"/>
+            OutputFile="$(IntDir)\Introjucer.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
@@ -83,7 +83,7 @@
             MkTypLibCompatible="true"
             SuppressStartupBanner="true"
             TargetEnvironment="1"
-            TypeLibraryName=".\Release\Introjucer.tlb"
+            TypeLibraryName="$(IntDir)\Introjucer.tlb"
             HeaderFileName=""/>
       <Tool Name="VCCLCompilerTool"
             Optimization="2"
@@ -94,10 +94,10 @@
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Release\Introjucer.pch"
-            AssemblerListingLocation=".\Release\"
-            ObjectFile=".\Release\"
-            ProgramDataBaseFileName=".\Release\"
+            PrecompiledHeaderFile="$(IntDir)\Introjucer.pch"
+            AssemblerListingLocation="$(IntDir)\"
+            ObjectFile="$(IntDir)\"
+            ProgramDataBaseFileName="$(IntDir)\"
             WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
@@ -105,11 +105,11 @@
             PreprocessorDefinitions="NDEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLinkerTool"
-            OutputFile=".\Release\Introjucer.exe"
+            OutputFile="$(OutDir)\Introjucer.exe"
             SuppressStartupBanner="true"
             IgnoreDefaultLibraryNames=""
             GenerateDebugInformation="false"
-            ProgramDatabaseFile=".\Release\Introjucer.pdb"
+            ProgramDatabaseFile="$(IntDir)\Introjucer.pdb"
             SubSystem="2"
             GenerateManifest="true"
             OptimizeReferences="2"
@@ -120,7 +120,7 @@
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Release\Introjucer.bsc"/>
+            OutputFile="$(IntDir)\Introjucer.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
@@ -130,6 +130,8 @@
   <Files>
     <Filter Name="The Introjucer">
       <Filter Name="Application">
+        <File RelativePath="..\..\Source\Application\jucer_AppearanceSettings.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_AppearanceSettings.h"/>
         <File RelativePath="..\..\Source\Application\jucer_Application.h"/>
         <File RelativePath="..\..\Source\Application\jucer_CommandIDs.h"/>
         <File RelativePath="..\..\Source\Application\jucer_CommandLine.cpp"/>
@@ -150,10 +152,13 @@
       </Filter>
       <Filter Name="Project">
         <File RelativePath="..\..\Source\Project\jucer_AudioPluginModule.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigPage.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_ConfigPage.h"/>
         <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_Module.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ModulesPanel.h"/>
         <File RelativePath="..\..\Source\Project\jucer_NewFileWizard.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_NewFileWizard.h"/>
         <File RelativePath="..\..\Source\Project\jucer_NewProjectWizard.cpp"/>
@@ -162,8 +167,6 @@
         <File RelativePath="..\..\Source\Project\jucer_Project.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectInformationComponent.cpp"/>
-        <File RelativePath="..\..\Source\Project\jucer_ProjectInformationComponent.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.h"/>
         <File RelativePath="..\..\Source\Project\jucer_ProjectType.cpp"/>
@@ -214,6 +217,16 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\BinaryData\brushed_aluminium.png">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\juce_icon.png">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -314,16 +327,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\BinaryData\jucer_WindowTemplate.h">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
-        <File RelativePath="..\..\Source\BinaryData\juce_icon.png">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -1090,7 +1093,6 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Files.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Network.mm"/>
-          <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_ObjCSuffix.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Strings.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_SystemStats.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Threads.mm"/>
@@ -2060,6 +2062,7 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_TextDragAndDropTarget.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h"/>
         </Filter>
         <Filter Name="keyboard">

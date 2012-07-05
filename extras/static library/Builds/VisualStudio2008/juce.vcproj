@@ -30,10 +30,10 @@
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Debug\jucedebug.pch"
-            AssemblerListingLocation=".\Debug\"
-            ObjectFile=".\Debug\"
-            ProgramDataBaseFileName=".\Debug\"
+            PrecompiledHeaderFile="$(IntDir)\jucedebug.pch"
+            AssemblerListingLocation="$(IntDir)\"
+            ObjectFile="$(IntDir)\"
+            ProgramDataBaseFileName="$(IntDir)\"
             WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
@@ -41,14 +41,14 @@
             PreprocessorDefinitions="_DEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLibrarianTool"
-            OutputFile=".\Debug\jucedebug.lib"
+            OutputFile="$(OutDir)\jucedebug.lib"
             IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Debug\jucedebug.bsc"/>
+            OutputFile="$(IntDir)\jucedebug.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCPostBuildEventTool"/>
     </Configuration>
@@ -73,10 +73,10 @@
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
-            PrecompiledHeaderFile=".\Release\juce.pch"
-            AssemblerListingLocation=".\Release\"
-            ObjectFile=".\Release\"
-            ProgramDataBaseFileName=".\Release\"
+            PrecompiledHeaderFile="$(IntDir)\juce.pch"
+            AssemblerListingLocation="$(IntDir)\"
+            ObjectFile="$(IntDir)\"
+            ProgramDataBaseFileName="$(IntDir)\"
             WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
@@ -84,14 +84,14 @@
             PreprocessorDefinitions="NDEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLibrarianTool"
-            OutputFile=".\Release\juce.lib"
+            OutputFile="$(OutDir)\juce.lib"
             IgnoreDefaultLibraryNames=""/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
       <Tool Name="VCXDCMakeTool"/>
       <Tool Name="VCBscMakeTool"
             SuppressStartupBanner="true"
-            OutputFile=".\Release\juce.bsc"/>
+            OutputFile="$(IntDir)\juce.bsc"/>
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCPostBuildEventTool"/>
     </Configuration>
@@ -1742,7 +1742,6 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Files.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Network.mm"/>
-          <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_ObjCSuffix.h"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Strings.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_SystemStats.mm"/>
           <File RelativePath="..\..\..\..\modules\juce_core\native\juce_mac_Threads.mm"/>
@@ -2712,6 +2711,7 @@
           </File>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h"/>
+          <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_TextDragAndDropTarget.h"/>
           <File RelativePath="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h"/>
         </Filter>
         <Filter Name="keyboard">

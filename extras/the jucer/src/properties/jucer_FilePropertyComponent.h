@@ -36,16 +36,16 @@ class FilePropertyComponent  : public PropertyComponent,
 public:
     //==============================================================================
     FilePropertyComponent (const String& name,
-                          const bool isDirectory,
-                          const bool allowEditingOfFilename,
-                          const String& fileBrowserWildcard = "*");
+                           const bool isDirectory,
+                           const bool allowEditingOfFilename,
+                           const String& fileBrowserWildcard = "*");
 
     ~FilePropertyComponent();
 
 
     //==============================================================================
     virtual void setFile (const File& newFile) = 0;
-    virtual const File getFile() const = 0;
+    virtual File getFile() const = 0;
 
     //==============================================================================
     void refresh();

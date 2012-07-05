@@ -35,7 +35,7 @@ public:
     {
         setEditable (true, true, false);
 
-        setColour (backgroundColourId, Colours::white);
+        setColour (backgroundColourId, findColour (ComboBox::backgroundColourId));
         setColour (outlineColourId, findColour (ComboBox::outlineColourId));
     }
 
@@ -105,7 +105,7 @@ void TextPropertyComponent::createEditor (const int maxNumChars, const bool isMu
     if (isMultiLine)
     {
         textEditor->setJustificationType (Justification::topLeft);
-        preferredHeight = 120;
+        preferredHeight = 100;
     }
 }
 

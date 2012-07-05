@@ -129,7 +129,8 @@ File File::getLinkedTarget() const
 }
 
 //==============================================================================
-const char* juce_Argv0 = nullptr;  // referenced from juce_Application.cpp
+const char* const* juce_argv = nullptr;
+int juce_argc = 0;
 
 File File::getSpecialLocation (const SpecialLocationType type)
 {
@@ -180,8 +181,8 @@ File File::getSpecialLocation (const SpecialLocationType type)
     }
 
     case invokedExecutableFile:
-        if (juce_Argv0 != nullptr)
-            return File (CharPointer_UTF8 (juce_Argv0));
+        if (juce_argv != nullptr && juce_argc > 0)
+            return File (CharPointer_UTF8 (juce_argv[0]));
         // deliberate fall-through...
 
     case currentExecutableFile:

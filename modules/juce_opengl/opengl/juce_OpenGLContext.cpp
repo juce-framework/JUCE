@@ -43,20 +43,25 @@ public:
         nativeContext = new NativeContext (component, pixelFormat, contextToShareWith);
 
         if (nativeContext->createdOk())
-        {
             context.nativeContext = nativeContext;
-
-           #if ! JUCE_ANDROID
-            startThread (6);
-           #endif
-        }
         else
-        {
             nativeContext = nullptr;
-        }
     }
 
     ~CachedImage()
+    {
+        stop();
+    }
+
+    void start()
+    {
+       #if ! JUCE_ANDROID
+        if (nativeContext != nullptr)
+            startThread (6);
+       #endif
+    }
+
+    void stop()
     {
        #if ! JUCE_ANDROID
         stopThread (10000);
@@ -369,19 +374,19 @@ public:
 
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
-        Component* const comp = getComponent();
+        Component& comp = *getComponent();
 
-        if (isAttached (*comp) != canBeAttached (*comp))
+        if (isAttached (comp) != canBeAttached (comp))
             componentVisibilityChanged();
 
-        context.width  = comp->getWidth();
-        context.height = comp->getHeight();
+        context.width  = comp.getWidth();
+        context.height = comp.getHeight();
 
-        if (comp->getWidth() > 0 && comp->getHeight() > 0
+        if (comp.getWidth() > 0 && comp.getHeight() > 0
              && context.nativeContext != nullptr)
         {
-            context.nativeContext->updateWindowPosition (comp->getTopLevelComponent()
-                                                            ->getLocalArea (comp, comp->getLocalBounds()));
+            context.nativeContext->updateWindowPosition (comp.getTopLevelComponent()
+                                                            ->getLocalArea (&comp, comp.getLocalBounds()));
         }
     }
 
@@ -393,11 +398,11 @@ public:
 
     void componentVisibilityChanged()
     {
-        Component* const comp = getComponent();
+        Component& comp = *getComponent();
 
-        if (canBeAttached (*comp))
+        if (canBeAttached (comp))
         {
-            if (! isAttached (*comp))
+            if (! isAttached (comp))
                 attach();
         }
         else
@@ -433,15 +438,22 @@ private:
 
     void attach()
     {
-        Component* const comp = getComponent();
-        comp->setCachedComponentImage (new CachedImage (context, *comp,
-                                                        context.pixelFormat,
-                                                        context.contextToShareWith));
+        Component& comp = *getComponent();
+        CachedImage* const newCachedImage = new CachedImage (context, comp,
+                                                             context.pixelFormat,
+                                                             context.contextToShareWith);
+        comp.setCachedComponentImage (newCachedImage);
+        newCachedImage->start(); // (must wait until this is attached before starting its thread)
     }
 
     void detach()
     {
-        getComponent()->setCachedComponentImage (nullptr);
+        Component& comp = *getComponent();
+        CachedImage* oldCachedImage = CachedImage::get (comp);
+        if (oldCachedImage != nullptr)
+            oldCachedImage->stop(); // (must stop this before detaching it from the component)
+
+        comp.setCachedComponentImage (nullptr);
         context.nativeContext = nullptr;
     }
 };

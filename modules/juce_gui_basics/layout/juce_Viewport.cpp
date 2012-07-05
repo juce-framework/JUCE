@@ -348,13 +348,13 @@ void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRange
     }
 }
 
-void Viewport::mouseWheelMove (const MouseEvent& e, const float wheelIncrementX, const float wheelIncrementY)
+void Viewport::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! useMouseWheelMoveIfNeeded (e, wheelIncrementX, wheelIncrementY))
-        Component::mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+    if (! useMouseWheelMoveIfNeeded (e, wheel))
+        Component::mouseWheelMove (e, wheel);
 }
 
-bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
+bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
     if (! (e.mods.isAltDown() || e.mods.isCtrlDown()))
     {
@@ -363,6 +363,9 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrem
 
         if (hasHorzBar || hasVertBar)
         {
+            float wheelIncrementX = wheel.deltaX;
+            float wheelIncrementY = wheel.deltaY;
+
             if (wheelIncrementX != 0)
             {
                 wheelIncrementX *= 14.0f * singleStepX;

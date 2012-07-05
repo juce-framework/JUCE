@@ -149,19 +149,20 @@ public:
     const String& getTypefaceName() const noexcept;
 
     //==============================================================================
-    /** Changes the font style of the typeface
-
-        e.g. "Regular", "Italic", etc.
-
-    */
-    void setTypefaceStyle (const String& typefaceStyle);
-
     /** Returns the font style of the typeface that this font uses.
-
-        e.g. "Regular", "Italic", etc.
-
+        @see withTypefaceStyle, getAvailableStyles()
     */
     const String& getTypefaceStyle() const noexcept;
+
+    /** Changes the font style of the typeface.
+        @see getAvailableStyles()
+    */
+    void setTypefaceStyle (const String& newStyle);
+
+    /** Returns a copy of this font with a new typeface style.
+        @see getAvailableStyles()
+    */
+    Font withTypefaceStyle (const String& newStyle) const;
 
     /** Returns a list of the styles that this font can use. */
     StringArray getAvailableStyles() const;

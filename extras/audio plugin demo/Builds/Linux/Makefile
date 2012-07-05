@@ -20,7 +20,7 @@ ifeq ($(CONFIG),Debug)
   CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I /usr/include -I /usr/include/freetype2 -I ~/SDKs/vstsdk2.4 -I ../../JuceLibraryCode
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -ggdb -fPIC -O0
   CXXFLAGS += $(CFLAGS) 
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -L/usr/X11R6/lib/ -ldl -lfreetype -lpthread -lrt -lX11 -lGL -lXinerama -lasound -lXext 
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -lasound -ldl -lfreetype -lpthread -lrt 
   LDDEPS :=
   RESFLAGS :=  -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I /usr/include -I /usr/include/freetype2 -I ~/SDKs/vstsdk2.4 -I ../../JuceLibraryCode
   TARGET := JuceDemoPlugin.so
@@ -35,7 +35,7 @@ ifeq ($(CONFIG),Release)
   CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I /usr/include -I /usr/include/freetype2 -I ~/SDKs/vstsdk2.4 -I ../../JuceLibraryCode
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -fPIC -Os
   CXXFLAGS += $(CFLAGS) 
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -L/usr/X11R6/lib/ -ldl -lfreetype -lpthread -lrt -lX11 -lGL -lXinerama -lasound -lXext 
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -shared -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -lasound -ldl -lfreetype -lpthread -lrt 
   LDDEPS :=
   RESFLAGS :=  -D "LINUX=1" -D "NDEBUG=1" -D "JUCER_LINUX_MAKE_7346DA2A=1" -I /usr/include -I /usr/include/freetype2 -I ~/SDKs/vstsdk2.4 -I ../../JuceLibraryCode
   TARGET := JuceDemoPlugin.so
@@ -56,10 +56,6 @@ OBJECTS := \
   $(OBJDIR)/juce_graphics_f9afc18.o \
   $(OBJDIR)/juce_gui_basics_90929794.o \
   $(OBJDIR)/juce_gui_extra_b81d9e1c.o \
-  $(OBJDIR)/juce_RTAS_DigiCode1_6dea9489.o \
-  $(OBJDIR)/juce_RTAS_DigiCode2_6df8ac0a.o \
-  $(OBJDIR)/juce_RTAS_DigiCode3_6e06c38b.o \
-  $(OBJDIR)/juce_RTAS_Wrapper_67ed73df.o \
   $(OBJDIR)/juce_VST_Wrapper_8aa348b1.o \
 
 .PHONY: clean
@@ -140,26 +136,6 @@ $(OBJDIR)/juce_gui_basics_90929794.o: ../../../../modules/juce_gui_basics/juce_g
 $(OBJDIR)/juce_gui_extra_b81d9e1c.o: ../../../../modules/juce_gui_extra/juce_gui_extra.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_gui_extra.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_RTAS_DigiCode1_6dea9489.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode1.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RTAS_DigiCode1.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_RTAS_DigiCode2_6df8ac0a.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode2.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RTAS_DigiCode2.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_RTAS_DigiCode3_6e06c38b.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_DigiCode3.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RTAS_DigiCode3.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_RTAS_Wrapper_67ed73df.o: ../../../../modules/juce_audio_plugin_client/RTAS/juce_RTAS_Wrapper.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling juce_RTAS_Wrapper.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_VST_Wrapper_8aa348b1.o: ../../../../modules/juce_audio_plugin_client/VST/juce_VST_Wrapper.cpp
