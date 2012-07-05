@@ -34,14 +34,16 @@ class SourceCodeEditor  : public DocumentEditorComponent,
                           private ValueTree::Listener
 {
 public:
-    SourceCodeEditor (OpenDocumentManager::Document* document,
-                      CodeDocument& codeDocument);
+    SourceCodeEditor (OpenDocumentManager::Document* document, CodeDocument& codeDocument);
+    SourceCodeEditor (OpenDocumentManager::Document* document);
     ~SourceCodeEditor();
+
+    void createEditor (CodeDocument& codeDocument);
+    void setEditor (CodeEditorComponent*);
 
 private:
     ScopedPointer<CodeEditorComponent> editor;
 
-    CodeEditorComponent* createEditor (CodeDocument&);
     void resized();
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&);
@@ -125,6 +127,8 @@ private:
 
     static String getIndentForCurrentBlock (CodeDocument::Position pos)
     {
+        int braceCount = 0;
+
         while (pos.getLineNumber() > 0)
         {
             pos = pos.movedByLines (-1);
@@ -132,8 +136,18 @@ private:
             const String line (pos.getLineText());
             const String trimmedLine (line.trimStart());
 
-            if (trimmedLine.startsWithChar ('{'))
-                return getLeadingWhitespace (line);
+            StringArray tokens;
+            tokens.addTokens (trimmedLine, true);
+
+            for (int i = tokens.size(); --i >= 0;)
+            {
+                if (tokens[i] == "}")
+                    ++braceCount;
+
+                if (tokens[i] == "{")
+                    if (--braceCount < 0)
+                        return getLeadingWhitespace (line);
+            }
         }
 
         return String::empty;

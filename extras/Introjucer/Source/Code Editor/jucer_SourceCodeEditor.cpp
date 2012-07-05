@@ -28,11 +28,28 @@
 
 
 //==============================================================================
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
-                                    CodeDocument& codeDocument)
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_, CodeDocument& codeDocument)
     : DocumentEditorComponent (document_)
 {
-    addAndMakeVisible (editor = createEditor (codeDocument));
+    createEditor (codeDocument);
+}
+
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_)
+    : DocumentEditorComponent (document_)
+{
+}
+
+void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
+{
+    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
+        setEditor (new CppCodeEditorComponent (codeDocument));
+    else
+        setEditor (new CodeEditorComponent (codeDocument, nullptr));
+}
+
+void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
+{
+    addAndMakeVisible (editor = newEditor);
 
    #if JUCE_MAC
     Font font (13.0f);
@@ -52,14 +69,6 @@ SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
 SourceCodeEditor::~SourceCodeEditor()
 {
     getAppSettings().appearance.settings.removeListener (this);
-}
-
-CodeEditorComponent* SourceCodeEditor::createEditor (CodeDocument& codeDocument)
-{
-    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-        return new CppCodeEditorComponent (codeDocument);
-
-    return new CodeEditorComponent (codeDocument, nullptr);
 }
 
 //==============================================================================
