@@ -146,15 +146,17 @@ public:
         if (! context.makeActive())
             return false;
 
-        NativeContext::Locker locker (*nativeContext);
-
-        JUCE_CHECK_OPENGL_ERROR
-        glViewport (0, 0, component.getWidth(), component.getHeight());
-
-        if (context.renderer != nullptr)
         {
-            context.renderer->renderOpenGL();
-            clearGLError();
+            NativeContext::Locker locker (*nativeContext);
+
+            JUCE_CHECK_OPENGL_ERROR
+            glViewport (0, 0, component.getWidth(), component.getHeight());
+
+            if (context.renderer != nullptr)
+            {
+                context.renderer->renderOpenGL();
+                clearGLError();
+            }
         }
 
         if (context.renderComponents)
@@ -176,6 +178,8 @@ public:
 
             // you mustn't set your own cached image object when attaching a GL context!
             jassert (get (component) == this);
+
+            NativeContext::Locker locker (*nativeContext);
 
             const Rectangle<int> bounds (component.getLocalBounds());
             if (! ensureFrameBufferSize (bounds.getWidth(), bounds.getHeight()))
@@ -201,6 +205,8 @@ public:
 
             JUCE_CHECK_OPENGL_ERROR
         }
+
+        NativeContext::Locker locker (*nativeContext);
 
        #if ! JUCE_ANDROID
         glEnable (GL_TEXTURE_2D);
