@@ -130,7 +130,7 @@ public:
     //==============================================================================
     struct Type  : public OpenDocumentManager::DocumentType
     {
-        bool canOpenFile (const File& file)                     { return file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;xml;plist;rtf;html;htm;php;py;rb;cs"); }
+        bool canOpenFile (const File& file)                     { return file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;inc;tcc;xml;plist;rtf;html;htm;php;py;rb;cs"); }
         Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }
     };
 

@@ -98,6 +98,7 @@ public:
     const Drawable* jigsaw;
     const Drawable* info;
     const Drawable* warning;
+    const Drawable* bug;
 
 private:
     OwnedArray<Drawable> drawables;

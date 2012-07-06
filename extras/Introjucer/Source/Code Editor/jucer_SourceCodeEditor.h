@@ -41,6 +41,8 @@ public:
     void createEditor (CodeDocument& codeDocument);
     void setEditor (CodeEditorComponent*);
 
+    void highlightLine (int lineNum, int characterIndex);
+
 private:
     ScopedPointer<CodeEditorComponent> editor;
 

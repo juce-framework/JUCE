@@ -232,7 +232,8 @@ void ProjectContentComponent::updateMissingFileStatuses()
 
 bool ProjectContentComponent::showEditorForFile (const File& f)
 {
-    return showDocument (JucerApplication::getApp()->openDocumentManager.openFile (project, f));
+    return getCurrentFile() == f
+            || showDocument (JucerApplication::getApp()->openDocumentManager.openFile (project, f));
 }
 
 bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)

@@ -71,7 +71,15 @@ SourceCodeEditor::~SourceCodeEditor()
     getAppSettings().appearance.settings.removeListener (this);
 }
 
-//==============================================================================
+void SourceCodeEditor::highlightLine (int lineNum, int characterIndex)
+{
+    if (lineNum <= editor->getFirstLineOnScreen()
+         || lineNum >= editor->getFirstLineOnScreen() + editor->getNumLinesOnScreen() - 1)
+        editor->scrollToLine (jmax (lineNum - editor->getNumLinesOnScreen() / 3, 0));
+
+    editor->moveCaretTo (CodeDocument::Position (&editor->getDocument(), lineNum - 1, characterIndex), false);
+}
+
 void SourceCodeEditor::resized()
 {
     editor->setBounds (getLocalBounds());

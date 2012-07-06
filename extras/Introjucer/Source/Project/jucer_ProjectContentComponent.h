@@ -53,6 +53,7 @@ public:
     bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);
     Component* getEditorComponent() const                       { return contentView; }
     OpenDocumentManager::Document* getCurrentDocument() const   { return currentDocument; }
+    File getCurrentFile() const                                 { return currentDocument != nullptr ? currentDocument->getFile() : File::nonexistent; }
 
     void updateMissingFileStatuses();
     virtual void createProjectTabs();

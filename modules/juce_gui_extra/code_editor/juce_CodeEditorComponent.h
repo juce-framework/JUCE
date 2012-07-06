@@ -82,6 +82,9 @@ public:
     */
     int getNumLinesOnScreen() const noexcept                    { return linesOnScreen; }
 
+    /** Returns the index of the first line that's visible at the top of the editor. */
+    int getFirstLineOnScreen() const noexcept                   { return firstLineOnScreen; }
+
     /** Returns the number of whole columns visible on the screen.
         This doesn't include any cut-off columns at the right-hand edge.
     */
