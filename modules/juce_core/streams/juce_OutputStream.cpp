@@ -270,6 +270,11 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number)
     return stream << String (number);
 }
 
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int64 number)
+{
+    return stream << String (number);
+}
+
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const double number)
 {
     return stream << String (number);
