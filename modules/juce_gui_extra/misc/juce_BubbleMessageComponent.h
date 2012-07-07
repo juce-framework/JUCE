@@ -65,8 +65,7 @@ public:
         For details about exactly how it decides where to position itself, see
         BubbleComponent::updatePosition().
 
-        @param x                                the x co-ordinate of end of the bubble's tail
-        @param y                                the y co-ordinate of end of the bubble's tail
+        @param position                         the coords of the object to point to
         @param message                          the text to display
         @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
                                                 from its parent compnent. If this is 0 or less, it
@@ -76,7 +75,7 @@ public:
         @param deleteSelfAfterUse               if true, then the component will delete itself after
                                                 it becomes invisible
     */
-    void showAt (int x, int y,
+    void showAt (const Rectangle<int>& position,
                  const AttributedString& message,
                  int numMillisecondsBeforeRemoving,
                  bool removeWhenMouseClicked = true,
@@ -125,6 +124,7 @@ private:
     void init (int numMillisecondsBeforeRemoving,
                bool removeWhenMouseClicked,
                bool deleteSelfAfterUse);
+    void hide (bool fadeOut);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleMessageComponent);
 };

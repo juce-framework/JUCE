@@ -46,11 +46,11 @@ public:
         isMoving = (finalBounds != component->getBounds());
         isChangingAlpha = (finalAlpha != component->getAlpha());
 
-        left = component->getX();
-        top = component->getY();
-        right = component->getRight();
-        bottom = component->getBottom();
-        alpha = component->getAlpha();
+        left    = component->getX();
+        top     = component->getY();
+        right   = component->getRight();
+        bottom  = component->getBottom();
+        alpha   = component->getAlpha();
 
         const double invTotalDistance = 4.0 / (startSpeed_ + endSpeed_ + 2.0);
         startSpeed = jmax (0.0, startSpeed_ * invTotalDistance);

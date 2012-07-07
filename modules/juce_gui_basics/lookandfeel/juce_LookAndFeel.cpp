@@ -949,26 +949,13 @@ void LookAndFeel::drawBubble (Graphics& g,
                               float boxX, float boxY,
                               float boxW, float boxH)
 {
-    int side = 0;
+    const Rectangle<float> body (boxX, boxY, boxW, boxH);
 
-    if (tipX < boxX)
-        side = 1;
-    else if (tipX > boxX + boxW)
-        side = 3;
-    else if (tipY > boxY + boxH)
-        side = 2;
-
-    const float indent = 2.0f;
     Path p;
-    p.addBubble (boxX + indent,
-                 boxY + indent,
-                 boxW - indent * 2.0f,
-                 boxH - indent * 2.0f,
-                 5.0f,
-                 tipX, tipY,
-                 side,
-                 0.5f,
-                 jmin (15.0f, boxW * 0.3f, boxH * 0.3f));
+    p.addBubble (body,
+                 body.getUnion (Rectangle<float> (tipX, tipY, 1.0f, 1.0f)),
+                 Point<float> (tipX, tipY),
+                 5.0f, jmin (15.0f, boxW * 0.2f, boxH * 0.2f));
 
     //xxx need to take comp as param for colour
     g.setColour (findColour (TooltipWindow::backgroundColourId).withAlpha (0.9f));

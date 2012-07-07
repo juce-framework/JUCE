@@ -108,8 +108,7 @@ public:
         on where there's the most space, honouring any restrictions that were set
         with setAllowedPlacement().
     */
-    void setPosition (int arrowTipX,
-                      int arrowTipY);
+    void setPosition (const Point<int>& arrowTipPosition);
 
     /** Moves and resizes the bubble to point at a given rectangle.
 
@@ -145,8 +144,8 @@ public:
 
 private:
     Rectangle<int> content;
-    int side, allowablePlacements;
-    float arrowTipX, arrowTipY;
+    Point<float> arrowTip;
+    int allowablePlacements;
     DropShadowEffect shadow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleComponent);

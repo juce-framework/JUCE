@@ -199,63 +199,9 @@ void CallOutBox::refreshPath()
     outline.clear();
 
     const float gap = 4.5f;
-    const float cornerSize = 9.0f;
-    const float cornerSize2 = 2.0f * cornerSize;
-    const float arrowBaseWidth = arrowSize * 0.7f;
 
-    const Rectangle<float> area (content.getBounds().toFloat().expanded (gap, gap));
-    const Point<float> target (targetPoint - getPosition().toFloat());
-
-    outline.startNewSubPath (area.getX() + cornerSize, area.getY());
-
-    const float targetLimitX = area.getX() + cornerSize + arrowBaseWidth;
-    const float targetLimitW = area.getWidth() - cornerSize2 - arrowBaseWidth * 2.0f;
-
-    const float targetLimitY = area.getY() + cornerSize + arrowBaseWidth;
-    const float targetLimitH = area.getHeight() - cornerSize2 - arrowBaseWidth * 2.0f;
-
-    if (Rectangle<float> (targetLimitX, 1.0f,
-                          targetLimitW, area.getY() - 2.0f).contains (target))
-    {
-        outline.lineTo (target.x - arrowBaseWidth, area.getY());
-        outline.lineTo (target.x, target.y);
-        outline.lineTo (target.x + arrowBaseWidth, area.getY());
-    }
-
-    outline.lineTo (area.getRight() - cornerSize, area.getY());
-    outline.addArc (area.getRight() - cornerSize2, area.getY(), cornerSize2, cornerSize2, 0, float_Pi * 0.5f);
-
-    if (Rectangle<float> (area.getRight() + 1.0f, targetLimitY,
-                          getWidth() - area.getRight() - 2.0f, targetLimitH).contains (target))
-    {
-        outline.lineTo (area.getRight(), target.y - arrowBaseWidth);
-        outline.lineTo (target.x, target.y);
-        outline.lineTo (area.getRight(), target.y + arrowBaseWidth);
-    }
-
-    outline.lineTo (area.getRight(), area.getBottom() - cornerSize);
-    outline.addArc (area.getRight() - cornerSize2, area.getBottom() - cornerSize2, cornerSize2, cornerSize2, float_Pi * 0.5f, float_Pi);
-
-    if (Rectangle<float> (targetLimitX, area.getBottom() + 1.0f,
-                          targetLimitW, getHeight() - area.getBottom() - 2.0f).contains (target))
-    {
-        outline.lineTo (target.x + arrowBaseWidth, area.getBottom());
-        outline.lineTo (target.x, target.y);
-        outline.lineTo (target.x - arrowBaseWidth, area.getBottom());
-    }
-
-    outline.lineTo (area.getX() + cornerSize, area.getBottom());
-    outline.addArc (area.getX(), area.getBottom() - cornerSize2, cornerSize2, cornerSize2, float_Pi, float_Pi * 1.5f);
-
-    if (Rectangle<float> (1.0f, targetLimitY, area.getX() - 2.0f, targetLimitH).contains (target))
-    {
-        outline.lineTo (area.getX(), target.y + arrowBaseWidth);
-        outline.lineTo (target.x, target.y);
-        outline.lineTo (area.getX(), target.y - arrowBaseWidth);
-    }
-
-    outline.lineTo (area.getX(), area.getY() + cornerSize);
-    outline.addArc (area.getX(), area.getY(), cornerSize2, cornerSize2, float_Pi * 1.5f, float_Pi * 2.0f - 0.05f);
-
-    outline.closeSubPath();
+    outline.addBubble (content.getBounds().toFloat().expanded (gap, gap),
+                       getLocalBounds().toFloat(),
+                       targetPoint - getPosition().toFloat(),
+                       9.0f, arrowSize * 0.7f);
 }

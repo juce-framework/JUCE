@@ -58,7 +58,7 @@ public:
     void updateMissingFileStatuses();
     virtual void createProjectTabs();
 
-    void showBubbleMessage (const Point<int>& pos, const String& text);
+    void showBubbleMessage (const Rectangle<int>& pos, const String& text);
 
     void changeListenerCallback (ChangeBroadcaster*);
 
