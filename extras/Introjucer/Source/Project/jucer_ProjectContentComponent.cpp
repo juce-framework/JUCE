@@ -506,3 +506,11 @@ bool ProjectContentComponent::reinvokeCommandAfterClosingPropertyEditors (const 
 
     return false;
 }
+
+void ProjectContentComponent::showBubbleMessage (const Point<int>& pos, const String& text)
+{
+    addChildComponent (&bubbleMessage);
+    bubbleMessage.setAlwaysOnTop (true);
+
+    bubbleMessage.showAt (pos, AttributedString (text), 3000, true, false);
+}

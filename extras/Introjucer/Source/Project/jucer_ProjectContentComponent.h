@@ -58,6 +58,8 @@ public:
     void updateMissingFileStatuses();
     virtual void createProjectTabs();
 
+    void showBubbleMessage (const Point<int>& pos, const String& text);
+
     void changeListenerCallback (ChangeBroadcaster*);
 
     //==============================================================================
@@ -80,6 +82,8 @@ protected:
     ScopedPointer<Component> contentView;
 
     ComponentBoundsConstrainer treeSizeConstrainer;
+
+    BubbleMessageComponent bubbleMessage;
 
     void updateMainWindowTitle();
     bool reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo&);

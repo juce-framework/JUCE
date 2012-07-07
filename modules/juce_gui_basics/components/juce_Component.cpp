@@ -1379,9 +1379,6 @@ void Component::addChildComponent (Component* const child, int zOrder)
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
-    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || ! isShowing());
-
-
     if (child != nullptr && child->parentComponent != this)
     {
         if (child->parentComponent != nullptr)
