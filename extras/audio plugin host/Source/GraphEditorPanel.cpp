@@ -108,7 +108,7 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node,
 
 PluginWindow::~PluginWindow()
 {
-    activePluginWindows.removeValue (this);
+    activePluginWindows.removeFirstMatchingValue (this);
     clearContentComponent();
 }
 

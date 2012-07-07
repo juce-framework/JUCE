@@ -400,7 +400,7 @@ public:
     void removeListener (CameraDevice::Listener* listenerToRemove)
     {
         const ScopedLock sl (listenerLock);
-        listeners.removeValue (listenerToRemove);
+        listeners.removeFirstMatchingValue (listenerToRemove);
 
         if (listeners.size() == 0)
             removeUser();
@@ -438,7 +438,7 @@ public:
         {
             if (owner != nullptr)
             {
-                owner->viewerComps.removeValue (this);
+                owner->viewerComps.removeFirstMatchingValue (this);
                 owner->removeUser();
                 owner->removeChangeListener (this);
             }

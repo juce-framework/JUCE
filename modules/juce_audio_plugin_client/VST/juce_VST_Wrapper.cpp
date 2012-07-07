@@ -311,7 +311,7 @@ public:
             deleteTempChannels();
 
             jassert (activePlugins.contains (this));
-            activePlugins.removeValue (this);
+            activePlugins.removeFirstMatchingValue (this);
         }
 
         if (activePlugins.size() == 0)
