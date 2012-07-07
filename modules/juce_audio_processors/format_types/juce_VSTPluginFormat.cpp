@@ -394,7 +394,7 @@ public:
 
     ~ModuleHandle()
     {
-        getActiveModules().removeValue (this);
+        getActiveModules().removeFirstMatchingValue (this);
         close();
     }
 
@@ -1153,7 +1153,7 @@ public:
         closePluginWindow();
        #endif
 
-        activeVSTWindows.removeValue (this);
+        activeVSTWindows.removeFirstMatchingValue (this);
         plugin.editorBeingDeleted (this);
     }
 
@@ -1319,7 +1319,7 @@ public:
 
     void broughtToFront()
     {
-        activeVSTWindows.removeValue (this);
+        activeVSTWindows.removeFirstMatchingValue (this);
         activeVSTWindows.add (this);
 
        #if JUCE_MAC

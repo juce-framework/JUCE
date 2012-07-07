@@ -287,7 +287,7 @@ public:
 
     ~Window()
     {
-        getActiveWindows().removeValue (this);
+        getActiveWindows().removeFirstMatchingValue (this);
         Desktop::getInstance().removeGlobalMouseListener (this);
         activeSubMenu = nullptr;
         items.clear();

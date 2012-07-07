@@ -743,7 +743,7 @@ public:
         @param valueToRemove   the object to try to remove
         @see remove, removeRange
     */
-    void removeValue (ParameterType valueToRemove)
+    void removeFirstMatchingValue (ParameterType valueToRemove)
     {
         const ScopedLockType lock (getLock());
         ElementType* const e = data.elements;
@@ -756,6 +756,24 @@ public:
                 break;
             }
         }
+    }
+
+    /** Removes an item from the array.
+
+        This will remove the first occurrence of the given element from the array.
+        If the item isn't found, no action is taken.
+
+        @param valueToRemove   the object to try to remove
+        @see remove, removeRange
+    */
+    void removeAllInstancesOf (ParameterType valueToRemove)
+    {
+        const ScopedLockType lock (getLock());
+        ElementType* const e = data.elements;
+
+        for (int i = numUsed; --i >= 0;)
+            if (valueToRemove == e[i])
+                remove (i);
     }
 
     /** Removes a range of elements from the array.

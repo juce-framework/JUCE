@@ -601,7 +601,7 @@ void AudioDeviceManager::removeAudioCallback (AudioIODeviceCallback* callbackToR
             const ScopedLock sl (audioCallbackLock);
 
             needsDeinitialising = needsDeinitialising && callbacks.contains (callbackToRemove);
-            callbacks.removeValue (callbackToRemove);
+            callbacks.removeFirstMatchingValue (callbackToRemove);
         }
 
         if (needsDeinitialising)

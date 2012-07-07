@@ -92,7 +92,7 @@ public:
         if (currentActive == w)
             currentActive = nullptr;
 
-        windows.removeValue (w);
+        windows.removeFirstMatchingValue (w);
 
         if (windows.size() == 0)
             deleteInstance();

@@ -105,7 +105,7 @@ public:
             isStarted = false;
             midiInReset (deviceHandle);
             midiInStop (deviceHandle);
-            activeMidiCollectors.removeValue (this);
+            activeMidiCollectors.removeFirstMatchingValue (this);
             unprepareAllHeaders();
             concatenator.reset();
         }
@@ -436,7 +436,7 @@ MidiOutput::~MidiOutput()
     if (MidiOutHandle::activeHandles.contains (h) && --(h->refCount) == 0)
     {
         midiOutClose (h->handle);
-        MidiOutHandle::activeHandles.removeValue (h);
+        MidiOutHandle::activeHandles.removeFirstMatchingValue (h);
         delete h;
     }
 }

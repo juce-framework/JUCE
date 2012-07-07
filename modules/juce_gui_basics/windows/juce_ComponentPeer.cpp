@@ -45,7 +45,7 @@ ComponentPeer::ComponentPeer (Component* const component_, const int styleFlags_
 
 ComponentPeer::~ComponentPeer()
 {
-    heavyweightPeers.removeValue (this);
+    heavyweightPeers.removeFirstMatchingValue (this);
     Desktop::getInstance().triggerFocusCallback();
 }
 

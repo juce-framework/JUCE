@@ -480,7 +480,7 @@ void TableHeaderComponent::addListener (Listener* const newListener)
 
 void TableHeaderComponent::removeListener (Listener* const listenerToRemove)
 {
-    listeners.removeValue (listenerToRemove);
+    listeners.removeFirstMatchingValue (listenerToRemove);
 }
 
 //==============================================================================

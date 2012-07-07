@@ -96,7 +96,7 @@ void ComponentMovementWatcher::componentMovedOrResized (Component&, bool wasMove
 
 void ComponentMovementWatcher::componentBeingDeleted (Component& comp)
 {
-    registeredParentComps.removeValue (&comp);
+    registeredParentComps.removeFirstMatchingValue (&comp);
 
     if (component == &comp)
         unregister();

@@ -265,7 +265,7 @@ void RelativeCoordinatePositionerBase::componentChildrenChanged (Component& chan
 void RelativeCoordinatePositionerBase::componentBeingDeleted (Component& comp)
 {
     jassert (sourceComponents.contains (&comp));
-    sourceComponents.removeValue (&comp);
+    sourceComponents.removeFirstMatchingValue (&comp);
     registeredOk = false;
 }
 
@@ -277,7 +277,7 @@ void RelativeCoordinatePositionerBase::markersChanged (MarkerList*)
 void RelativeCoordinatePositionerBase::markerListBeingDeleted (MarkerList* markerList)
 {
     jassert (sourceMarkerLists.contains (markerList));
-    sourceMarkerLists.removeValue (markerList);
+    sourceMarkerLists.removeFirstMatchingValue (markerList);
 }
 
 void RelativeCoordinatePositionerBase::apply()

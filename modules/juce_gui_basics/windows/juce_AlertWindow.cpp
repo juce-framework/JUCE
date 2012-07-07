@@ -325,8 +325,8 @@ Component* AlertWindow::removeCustomComponent (const int index)
 
     if (c != nullptr)
     {
-        customComps.removeValue (c);
-        allComps.removeValue (c);
+        customComps.removeFirstMatchingValue (c);
+        allComps.removeFirstMatchingValue (c);
         removeChildComponent (c);
 
         updateLayout (false);

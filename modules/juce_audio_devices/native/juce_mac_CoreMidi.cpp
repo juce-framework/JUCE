@@ -257,7 +257,7 @@ namespace CoreMidiHelpers
 
             {
                 const ScopedLock sl (callbackLock);
-                activeCallbacks.removeValue (this);
+                activeCallbacks.removeFirstMatchingValue (this);
             }
 
             if (portAndEndpoint != nullptr && portAndEndpoint->port != 0)

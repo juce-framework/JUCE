@@ -38,7 +38,7 @@ ProjectType::ProjectType (const String& type_, const String& desc_)
 
 ProjectType::~ProjectType()
 {
-    getAllTypes().removeValue (this);
+    getAllTypes().removeFirstMatchingValue (this);
 }
 
 Array<ProjectType*>& ProjectType::getAllTypes()

@@ -56,7 +56,7 @@ public:
     {
         {
             const ScopedLock sl (contextListLock);
-            contextList.removeValue (this);
+            contextList.removeFirstMatchingValue (this);
         }
 
         android.activity.callVoidMethod (JuceAppActivity.deleteView, glView.get());

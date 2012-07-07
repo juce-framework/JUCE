@@ -119,7 +119,7 @@ void Desktop::addDesktopComponent (Component* const c)
 
 void Desktop::removeDesktopComponent (Component* const c)
 {
-    desktopComponents.removeValue (c);
+    desktopComponents.removeFirstMatchingValue (c);
 }
 
 void Desktop::componentBroughtToFront (Component* const c)

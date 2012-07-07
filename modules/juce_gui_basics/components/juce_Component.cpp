@@ -2907,7 +2907,7 @@ void Component::addKeyListener (KeyListener* const newListener)
 void Component::removeKeyListener (KeyListener* const listenerToRemove)
 {
     if (keyListeners != nullptr)
-        keyListeners->removeValue (listenerToRemove);
+        keyListeners->removeFirstMatchingValue (listenerToRemove);
 }
 
 bool Component::keyPressed (const KeyPress&)                { return false; }

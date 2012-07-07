@@ -58,7 +58,7 @@ OutputStream::OutputStream()
 OutputStream::~OutputStream()
 {
    #if JUCE_DEBUG
-    danglingStreamChecker.activeStreams.removeValue (this);
+    danglingStreamChecker.activeStreams.removeFirstMatchingValue (this);
    #endif
 }
 

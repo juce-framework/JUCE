@@ -31,7 +31,7 @@ UnitTest::UnitTest (const String& name_)
 
 UnitTest::~UnitTest()
 {
-    getAllTests().removeValue (this);
+    getAllTests().removeFirstMatchingValue (this);
 }
 
 Array<UnitTest*>& UnitTest::getAllTests()

@@ -77,7 +77,7 @@ public:
             if (isStandard)
             {
                 const SpinLock::ScopedLockType sl (lock);
-                getCursors().removeValue (this);
+                getCursors().removeFirstMatchingValue (this);
             }
 
             delete this;

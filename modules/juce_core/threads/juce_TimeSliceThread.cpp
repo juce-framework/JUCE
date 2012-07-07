@@ -59,11 +59,11 @@ void TimeSliceThread::removeTimeSliceClient (TimeSliceClient* const client)
         const ScopedLock sl2 (callbackLock);
         const ScopedLock sl3 (listLock);
 
-        clients.removeValue (client);
+        clients.removeFirstMatchingValue (client);
     }
     else
     {
-        clients.removeValue (client);
+        clients.removeFirstMatchingValue (client);
     }
 }
 
@@ -156,7 +156,7 @@ void TimeSliceThread::run()
                     if (msUntilNextCall >= 0)
                         clientBeingCalled->nextCallTime += RelativeTime::milliseconds (msUntilNextCall);
                     else
-                        clients.removeValue (clientBeingCalled);
+                        clients.removeFirstMatchingValue (clientBeingCalled);
 
                     clientBeingCalled = nullptr;
                 }

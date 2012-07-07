@@ -202,7 +202,7 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
             }
             else
             {
-                jobs.removeValue (job);
+                jobs.removeFirstMatchingValue (job);
                 addToDeleteList (deletionList, job);
             }
         }
@@ -351,7 +351,7 @@ bool ThreadPool::runNextJob()
 
             if (result != ThreadPoolJob::jobNeedsRunningAgain || job->shouldStop)
             {
-                jobs.removeValue (job);
+                jobs.removeFirstMatchingValue (job);
                 addToDeleteList (deletionList, job);
 
                 jobFinishedSignal.signal();

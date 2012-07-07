@@ -836,7 +836,7 @@ public:
             if (isKeyDown)
                 keysCurrentlyDown.addIfNotAlreadyThere (keyCode);
             else
-                keysCurrentlyDown.removeValue (keyCode);
+                keysCurrentlyDown.removeFirstMatchingValue (keyCode);
         }
     }
 

@@ -258,7 +258,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
             if (shouldDelete)
                 delete component;
 
-            components.removeValue (component);
+            components.removeFirstMatchingValue (component);
 
             if (isFullscreenWhenOneDocument() && components.size() == 1)
             {
@@ -294,7 +294,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
             if (tabComponent != nullptr && tabComponent->getNumTabs() <= numDocsBeforeTabsUsed)
                 tabComponent = nullptr;
 
-            components.removeValue (component);
+            components.removeFirstMatchingValue (component);
 
             if (components.size() > 0 && tabComponent == nullptr)
                 addAndMakeVisible (components.getFirst());
@@ -515,7 +515,7 @@ void MultiDocumentPanel::updateOrder()
 
             if (current != nullptr)
             {
-                components.removeValue (current);
+                components.removeFirstMatchingValue (current);
                 components.add (current);
             }
         }
