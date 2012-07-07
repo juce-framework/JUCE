@@ -28,15 +28,19 @@
 
 
 //==============================================================================
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_, CodeDocument& codeDocument)
-    : DocumentEditorComponent (document_)
-{
-    createEditor (codeDocument);
-}
-
 SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_)
     : DocumentEditorComponent (document_)
 {
+}
+
+SourceCodeEditor::~SourceCodeEditor()
+{
+    getAppSettings().appearance.settings.removeListener (this);
+
+    SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument());
+
+    if (doc != nullptr)
+        doc->updateLastPosition (*editor);
 }
 
 void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
@@ -66,11 +70,6 @@ void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
     getAppSettings().appearance.settings.addListener (this);
 }
 
-SourceCodeEditor::~SourceCodeEditor()
-{
-    getAppSettings().appearance.settings.removeListener (this);
-}
-
 void SourceCodeEditor::highlightLine (int lineNum, int characterIndex)
 {
     if (lineNum <= editor->getFirstLineOnScreen()
@@ -96,3 +95,52 @@ void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&)           
 void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
 void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
 void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
+
+//==============================================================================
+Component* SourceCodeDocument::createEditor()
+{
+    SourceCodeEditor* e = new SourceCodeEditor (this);
+    e->createEditor (codeDoc);
+    applyLastPosition (*(e->editor));
+    return e;
+}
+
+void SourceCodeDocument::reloadFromFile()
+{
+    modDetector.updateHash();
+
+    ScopedPointer <InputStream> in (modDetector.getFile().createInputStream());
+
+    if (in != nullptr)
+        codeDoc.loadFromStream (*in);
+}
+
+bool SourceCodeDocument::save()
+{
+    TemporaryFile temp (modDetector.getFile());
+
+    {
+        FileOutputStream fo (temp.getFile());
+
+        if (! (fo.openedOk() && codeDoc.writeToStream (fo)))
+            return false;
+    }
+
+    if (! temp.overwriteTargetFileWithTemporary())
+        return false;
+
+    codeDoc.setSavePoint();
+    modDetector.updateHash();
+    return true;
+}
+
+void SourceCodeDocument::updateLastPosition (CodeEditorComponent& editor)
+{
+    lastState = new CodeEditorComponent::State (editor);
+}
+
+void SourceCodeDocument::applyLastPosition (CodeEditorComponent& editor) const
+{
+    if (lastState != nullptr)
+        lastState->restoreState (editor);
+}

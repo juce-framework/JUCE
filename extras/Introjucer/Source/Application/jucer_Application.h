@@ -225,6 +225,10 @@ public:
                 menu.addCommandItem (commandManager, CommandIDs::closeWindow);
                 menu.addSeparator();
 
+                menu.addCommandItem (commandManager, CommandIDs::goToPreviousDoc);
+                menu.addCommandItem (commandManager, CommandIDs::goToNextDoc);
+                menu.addSeparator();
+
                 const int numDocs = jmin (50, getApp()->openDocumentManager.getNumOpenDocuments());
 
                 for (int i = 0; i < numDocs; ++i)

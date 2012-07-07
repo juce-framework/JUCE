@@ -346,10 +346,8 @@ void MainWindowList::closeWindow (MainWindow* w)
 
 void MainWindowList::openDocument (OpenDocumentManager::Document* doc)
 {
-    MainWindow* const w = getOrCreateFrontmostWindow();
-    w->makeVisible();
+    MainWindow* w = getOrCreateFrontmostWindow();
     w->getProjectContentComponent()->showDocument (doc);
-    avoidSuperimposedWindows (w);
 }
 
 bool MainWindowList::openFile (const File& file)
@@ -381,11 +379,7 @@ bool MainWindowList::openFile (const File& file)
     else if (file.exists())
     {
         MainWindow* const w = getOrCreateFrontmostWindow();
-
-        const bool ok = w->openFile (file);
-        w->makeVisible();
-        avoidSuperimposedWindows (w);
-        return ok;
+        return w->openFile (file);
     }
 
     return false;
@@ -403,7 +397,12 @@ MainWindow* MainWindowList::createNewMainWindow()
 MainWindow* MainWindowList::getOrCreateFrontmostWindow()
 {
     if (windows.size() == 0)
-        return createNewMainWindow();
+    {
+        MainWindow* w = createNewMainWindow();
+        avoidSuperimposedWindows (w);
+        w->makeVisible();
+        return w;
+    }
 
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
     {

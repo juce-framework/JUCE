@@ -35,7 +35,7 @@ class ProjectTreeViewBase;
 */
 class ProjectContentComponent  : public Component,
                                  public ApplicationCommandTarget,
-                                 public ChangeListener
+                                 private ChangeListener
 {
 public:
     //==============================================================================
@@ -47,20 +47,23 @@ public:
     void saveTreeViewState();
 
     bool showEditorForFile (const File& f);
+    File getCurrentFile() const;
+
     bool showDocument (OpenDocumentManager::Document* doc);
     void hideDocument (OpenDocumentManager::Document* doc);
+    OpenDocumentManager::Document* getCurrentDocument() const   { return currentDocument; }
+
     void hideEditor();
     bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);
     Component* getEditorComponent() const                       { return contentView; }
-    OpenDocumentManager::Document* getCurrentDocument() const   { return currentDocument; }
-    File getCurrentFile() const                                 { return currentDocument != nullptr ? currentDocument->getFile() : File::nonexistent; }
+
+    bool goToPreviousFile();
+    bool goToNextFile();
 
     void updateMissingFileStatuses();
     virtual void createProjectTabs();
 
     void showBubbleMessage (const Rectangle<int>& pos, const String& text);
-
-    void changeListenerCallback (ChangeBroadcaster*);
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget();
@@ -76,15 +79,16 @@ public:
 protected:
     Project* project;
     OpenDocumentManager::Document* currentDocument;
+    RecentDocumentList recentDocumentList;
 
     TabbedComponent treeViewTabs;
     ScopedPointer<ResizableEdgeComponent> resizerBar;
     ScopedPointer<Component> contentView;
 
     ComponentBoundsConstrainer treeSizeConstrainer;
-
     BubbleMessageComponent bubbleMessage;
 
+    void changeListenerCallback (ChangeBroadcaster*);
     void updateMainWindowTitle();
     bool reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo&);
     bool canProjectBeLaunched() const;

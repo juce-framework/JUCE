@@ -102,6 +102,7 @@ ProjectContentComponent::~ProjectContentComponent()
 {
     setProject (nullptr);
     contentView = nullptr;
+    removeChildComponent (&bubbleMessage);
     jassert (getNumChildComponents() <= 1);
 }
 
@@ -236,15 +237,24 @@ bool ProjectContentComponent::showEditorForFile (const File& f)
             || showDocument (JucerApplication::getApp()->openDocumentManager.openFile (project, f));
 }
 
+File ProjectContentComponent::getCurrentFile() const
+{
+    return currentDocument != nullptr ? currentDocument->getFile()
+                                      : File::nonexistent;
+}
+
 bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
 {
     if (doc == nullptr)
         return false;
 
-    JucerApplication::getApp()->openDocumentManager.moveDocumentToTopOfStack (doc);
-
     if (doc->hasFileBeenModifiedExternally())
         doc->reloadFromFile();
+
+    if (doc == getCurrentDocument())
+        return true;
+
+    recentDocumentList.newDocumentOpened (doc);
 
     return setEditorComponent (doc->createEditor(), doc);
 }
@@ -255,18 +265,27 @@ void ProjectContentComponent::hideEditor()
     contentView = nullptr;
     updateMainWindowTitle();
     commandManager->commandStatusChanged();
+    recentDocumentList.clear();
 }
 
 void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
 {
     if (doc == currentDocument)
-        hideEditor();
+    {
+        OpenDocumentManager::Document* replacement = recentDocumentList.getClosestPreviousDocOtherThan (doc);
+
+        if (replacement != nullptr)
+            showDocument (replacement);
+        else
+            hideEditor();
+    }
 }
 
 bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumentManager::Document* doc)
 {
     if (editor != nullptr)
     {
+        contentView = nullptr;
         contentView = editor;
         currentDocument = doc;
         addAndMakeVisible (editor);
@@ -274,11 +293,22 @@ bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumen
 
         updateMainWindowTitle();
         commandManager->commandStatusChanged();
+        editor->grabKeyboardFocus();
         return true;
     }
 
     updateMainWindowTitle();
     return false;
+}
+
+bool ProjectContentComponent::goToPreviousFile()
+{
+    return showDocument (recentDocumentList.getPrevious());
+}
+
+bool ProjectContentComponent::goToNextFile()
+{
+    return showDocument (recentDocumentList.getNext());
 }
 
 void ProjectContentComponent::updateMainWindowTitle()
@@ -314,6 +344,8 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::openInIDE,
                               CommandIDs::saveAndOpenInIDE,
                               CommandIDs::showProjectSettings,
+                              CommandIDs::goToPreviousDoc,
+                              CommandIDs::goToNextDoc,
                               StandardApplicationCommandIDs::del };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -358,6 +390,26 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
        #else
         result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+       #endif
+        break;
+
+    case CommandIDs::goToPreviousDoc:
+        result.setInfo ("Previous Document", "Go to previous document", CommandCategories::general, 0);
+        result.setActive (recentDocumentList.canGoToPrevious());
+       #if JUCE_MAC
+        result.defaultKeypresses.add (KeyPress (KeyPress::leftKey, ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+       #else
+        result.defaultKeypresses.add (KeyPress (KeyPress::leftKey, ModifierKeys::ctrlModifier | ModifierKeys::shiftModifier, 0));
+       #endif
+        break;
+
+    case CommandIDs::goToNextDoc:
+        result.setInfo ("Next Document", "Go to next document", CommandCategories::general, 0);
+        result.setActive (recentDocumentList.canGoToNext());
+       #if JUCE_MAC
+        result.defaultKeypresses.add (KeyPress (KeyPress::rightKey, ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+       #else
+        result.defaultKeypresses.add (KeyPress (KeyPress::rightKey, ModifierKeys::ctrlModifier | ModifierKeys::shiftModifier, 0));
        #endif
         break;
 
@@ -447,6 +499,14 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     case CommandIDs::closeDocument:
         if (currentDocument != nullptr)
             JucerApplication::getApp()->openDocumentManager.closeDocument (currentDocument, true);
+        break;
+
+    case CommandIDs::goToPreviousDoc:
+        goToPreviousFile();
+        break;
+
+    case CommandIDs::goToNextDoc:
+        goToNextFile();
         break;
 
     case CommandIDs::openInIDE:

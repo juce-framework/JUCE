@@ -46,6 +46,8 @@ namespace CommandIDs
 
     static const int closeWindow            = 0x201001;
     static const int closeAllDocuments      = 0x201000;
+    static const int goToPreviousDoc        = 0x201002;
+    static const int goToNextDoc            = 0x201003;
 
     static const int toFront                = 0x2020a0;
     static const int toBack                 = 0x2030a1;

@@ -26,9 +26,7 @@
 #include "jucer_OpenDocumentManager.h"
 #include "jucer_FilePreviewComponent.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-
-//==============================================================================
-Component* SourceCodeDocument::createEditor()       { return new SourceCodeEditor (this, codeDoc); }
+#include "jucer_Application.h"
 
 
 //==============================================================================
@@ -113,7 +111,7 @@ void OpenDocumentManager::addListener (DocumentCloseListener* listener)
 
 void OpenDocumentManager::removeListener (DocumentCloseListener* listener)
 {
-    listeners.removeValue (listener);
+    listeners.removeFirstMatchingValue (listener);
 }
 
 //==============================================================================
@@ -158,19 +156,6 @@ int OpenDocumentManager::getNumOpenDocuments() const
 OpenDocumentManager::Document* OpenDocumentManager::getOpenDocument (int index) const
 {
     return documents.getUnchecked (index);
-}
-
-void OpenDocumentManager::moveDocumentToTopOfStack (Document* doc)
-{
-    for (int i = documents.size(); --i >= 0;)
-    {
-        if (doc == documents.getUnchecked(i))
-        {
-            documents.move (i, 0);
-            commandManager->commandStatusChanged();
-            break;
-        }
-    }
 }
 
 FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Document* doc)
@@ -311,4 +296,78 @@ void OpenDocumentManager::fileHasBeenRenamed (const File& oldFile, const File& n
         if (d->isForFile (oldFile))
             d->fileHasBeenRenamed (newFile);
     }
+}
+
+
+//==============================================================================
+RecentDocumentList::RecentDocumentList()
+{
+    JucerApplication::getApp()->openDocumentManager.addListener (this);
+}
+
+RecentDocumentList::~RecentDocumentList()
+{
+    JucerApplication::getApp()->openDocumentManager.removeListener (this);
+}
+
+void RecentDocumentList::clear()
+{
+    previousDocs.clear();
+    nextDocs.clear();
+}
+
+void RecentDocumentList::newDocumentOpened (OpenDocumentManager::Document* document)
+{
+    if (document != getCurrentDocument())
+    {
+        nextDocs.clear();
+        previousDocs.add (document);
+    }
+}
+
+bool RecentDocumentList::canGoToPrevious() const
+{
+    return previousDocs.size() > 1;
+}
+
+bool RecentDocumentList::canGoToNext() const
+{
+    return nextDocs.size() > 0;
+}
+
+OpenDocumentManager::Document* RecentDocumentList::getPrevious()
+{
+    if (! canGoToPrevious())
+        return nullptr;
+
+    nextDocs.insert (0, previousDocs.remove (previousDocs.size() - 1));
+    return previousDocs.getLast();
+}
+
+OpenDocumentManager::Document* RecentDocumentList::getNext()
+{
+    if (! canGoToNext())
+        return nullptr;
+
+    OpenDocumentManager::Document* d = nextDocs.remove (0);
+    previousDocs.add (d);
+    return d;
+}
+
+OpenDocumentManager::Document* RecentDocumentList::getClosestPreviousDocOtherThan (OpenDocumentManager::Document* oneToAvoid) const
+{
+    for (int i = previousDocs.size(); --i >= 0;)
+        if (previousDocs.getUnchecked(i) != oneToAvoid)
+            return previousDocs.getUnchecked(i);
+
+    return nullptr;
+}
+
+void RecentDocumentList::documentAboutToClose (OpenDocumentManager::Document* document)
+{
+    previousDocs.removeAllInstancesOf (document);
+    nextDocs.removeAllInstancesOf (document);
+
+    jassert (! previousDocs.contains (document));
+    jassert (! nextDocs.contains (document));
 }
