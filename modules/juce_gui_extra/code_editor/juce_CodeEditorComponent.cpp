@@ -628,16 +628,19 @@ void CodeEditorComponent::scrollBy (int deltaLines)
 
 void CodeEditorComponent::scrollToKeepCaretOnScreen()
 {
-    if (caretPos.getLineNumber() < firstLineOnScreen)
-        scrollBy (caretPos.getLineNumber() - firstLineOnScreen);
-    else if (caretPos.getLineNumber() >= firstLineOnScreen + linesOnScreen)
-        scrollBy (caretPos.getLineNumber() - (firstLineOnScreen + linesOnScreen - 1));
+    if (getWidth() > 0 && getHeight() > 0)
+    {
+        if (caretPos.getLineNumber() < firstLineOnScreen)
+            scrollBy (caretPos.getLineNumber() - firstLineOnScreen);
+        else if (caretPos.getLineNumber() >= firstLineOnScreen + linesOnScreen)
+            scrollBy (caretPos.getLineNumber() - (firstLineOnScreen + linesOnScreen - 1));
 
-    const int column = indexToColumn (caretPos.getLineNumber(), caretPos.getIndexInLine());
-    if (column >= xOffset + columnsOnScreen - 1)
-        scrollToColumn (column + 1 - columnsOnScreen);
-    else if (column < xOffset)
-        scrollToColumn (column);
+        const int column = indexToColumn (caretPos.getLineNumber(), caretPos.getIndexInLine());
+        if (column >= xOffset + columnsOnScreen - 1)
+            scrollToColumn (column + 1 - columnsOnScreen);
+        else if (column < xOffset)
+            scrollToColumn (column);
+    }
 }
 
 Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const
@@ -1392,4 +1395,33 @@ void CodeEditorComponent::getIteratorForPosition (int position, CodeDocument::It
             }
         }
     }
+}
+
+CodeEditorComponent::State::State (const CodeEditorComponent& editor)
+    : lastTopLine (editor.getFirstLineOnScreen()),
+      lastCaretPos (editor.getCaretPos().getPosition()),
+      lastSelectionEnd (lastCaretPos)
+{
+    const Range<int> selection (editor.getHighlightedRegion());
+
+    if (lastCaretPos == selection.getStart())
+        lastSelectionEnd = selection.getEnd();
+    else
+        lastSelectionEnd = selection.getStart();
+}
+
+CodeEditorComponent::State::State (const State& other) noexcept
+    : lastTopLine (other.lastTopLine),
+      lastCaretPos (other.lastCaretPos),
+      lastSelectionEnd (other.lastSelectionEnd)
+{
+}
+
+void CodeEditorComponent::State::restoreState (CodeEditorComponent& editor) const
+{
+    editor.moveCaretTo (CodeDocument::Position (&editor.getDocument(), lastSelectionEnd), false);
+    editor.moveCaretTo (CodeDocument::Position (&editor.getDocument(), lastCaretPos), true);
+
+    if (lastTopLine > 0 && lastTopLine < editor.getDocument().getNumLines())
+        editor.scrollToLine (lastTopLine);
 }

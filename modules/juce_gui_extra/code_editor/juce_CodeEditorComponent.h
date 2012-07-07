@@ -158,6 +158,21 @@ public:
     String getTextInRange (const Range<int>& range) const;
 
     //==============================================================================
+    /** Can be used to save and restore the editor's caret position, selection state, etc. */
+    struct State
+    {
+        /** Creates an object containing the state of the given editor. */
+        State (const CodeEditorComponent& editor);
+        State (const State& other) noexcept;
+
+        /** Updates the given editor with this saved state. */
+        void restoreState (CodeEditorComponent& editor) const;
+
+    private:
+        int lastTopLine, lastCaretPos, lastSelectionEnd;
+    };
+
+    //==============================================================================
     /** Changes the current tab settings.
         This lets you change the tab size and whether pressing the tab key inserts a
         tab character, or its equivalent number of spaces.
