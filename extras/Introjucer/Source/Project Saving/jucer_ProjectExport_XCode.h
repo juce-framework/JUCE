@@ -496,6 +496,7 @@ private:
         addPlistDictionaryKey (dict, "CFBundleShortVersionString",  project.getVersionString());
         addPlistDictionaryKey (dict, "CFBundleVersion",             project.getVersionString());
         addPlistDictionaryKey (dict, "NSHumanReadableCopyright",    project.getCompanyName().toString());
+        addPlistDictionaryKeyBool (dict, "NSHighResolutionCapable", true);
 
         StringArray documentExtensions;
         documentExtensions.addTokens (replacePreprocessorDefs (getAllPreprocessorDefs(), settings ["documentExtensions"]),

@@ -21,5 +21,7 @@
     <string>2.0.0</string>
     <key>NSHumanReadableCopyright</key>
     <string>Raw Material Software Ltd.</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
   </dict>
 </plist>

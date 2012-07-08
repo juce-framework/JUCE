@@ -21,5 +21,7 @@
     <string>1.0.0</string>
     <key>NSHumanReadableCopyright</key>
     <string></string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
   </dict>
 </plist>
