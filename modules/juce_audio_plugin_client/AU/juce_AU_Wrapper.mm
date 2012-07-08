@@ -165,7 +165,7 @@ public:
         juceFilter = nullptr;
 
         jassert (activePlugins.contains (this));
-        activePlugins.removeValue (this);
+        activePlugins.removeFirstMatchingValue (this);
 
         if (activePlugins.size() + activeUIs.size() == 0)
             shutdownJuce_GUI();
@@ -1066,7 +1066,7 @@ public:
             deleteEditor (self);
 
             jassert (activeUIs.contains (self));
-            activeUIs.removeValue (self);
+            activeUIs.removeFirstMatchingValue (self);
             if (activePlugins.size() + activeUIs.size() == 0)
                 shutdownJuce_GUI();
         }
