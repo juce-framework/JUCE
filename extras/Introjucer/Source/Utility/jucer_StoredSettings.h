@@ -88,21 +88,10 @@ public:
 
     void reload (const Colour& backgroundColour);
 
-    const Drawable* folder;
-    const Drawable* document;
-    const Drawable* imageDoc;
-    const Drawable* config;
-    const Drawable* exporter;
-    const Drawable* juceLogo;
-    const Drawable* graph;
-    const Drawable* jigsaw;
-    const Drawable* info;
-    const Drawable* warning;
-    const Drawable* bug;
+    Path folder, document, imageDoc, config, exporter,
+         juceLogo, graph, jigsaw, info, warning, bug;
 
 private:
-    OwnedArray<Drawable> drawables;
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons);
 };
 

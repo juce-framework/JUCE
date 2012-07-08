@@ -105,8 +105,7 @@ public:
     {
         int x = getHeight() + 6;
 
-        item.getIcon()->drawWithin (g, Rectangle<float> (2.0f, 2.0f, x - 4.0f, getHeight() - 4.0f),
-                                    RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
+        item.getIcon().draw (g, Rectangle<float> (2.0f, 2.0f, x - 4.0f, getHeight() - 4.0f));
 
         g.setColour (Colours::black);
         g.setFont (getHeight() * 0.6f);

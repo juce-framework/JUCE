@@ -74,7 +74,7 @@ namespace ProjectSettingsTreeClasses
         String getRenamingName() const          { return getDisplayName(); }
         String getDisplayName() const           { return config->getName(); }
         void setName (const String&)            {}
-        const Drawable* getIcon() const         { return getIcons().config; }
+        Icon getIcon() const                    { return Icon (getIcons().config, Colours::darkgreen); }
 
         void showDocument()                     { showSettingsPage (new SettingsComp (config, exporterName)); }
         void itemOpennessChanged (bool)         {}
@@ -175,7 +175,7 @@ namespace ProjectSettingsTreeClasses
         String getDisplayName() const           { return exporter->getName(); }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
-        const Drawable* getIcon() const         { return getIcons().exporter; }
+        Icon getIcon() const                    { return Icon (getIcons().exporter, Colours::darkgrey); }
         void showDocument()                     { showSettingsPage (new SettingsComp (exporter)); }
 
         void deleteItem()
@@ -297,7 +297,7 @@ namespace ProjectSettingsTreeClasses
         String getDisplayName() const           { return "Modules"; }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
-        const Drawable* getIcon() const         { return getIcons().graph; }
+        Icon getIcon() const                    { return Icon (getIcons().graph, Colours::darkred); }
         void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
 
     private:
@@ -349,7 +349,7 @@ namespace ProjectSettingsTreeClasses
         String getDisplayName() const           { return project.getTitle(); }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
-        const Drawable* getIcon() const         { return project.getMainGroup().getIcon(); }
+        Icon getIcon() const                    { return project.getMainGroup().getIcon(); }
         void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return project.getNumExporters() > 0; }

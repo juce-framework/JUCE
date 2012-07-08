@@ -184,7 +184,7 @@ public:
 
         UndoManager* getUndoManager() const              { return project.getUndoManagerFor (state); }
 
-        const Drawable* getIcon() const;
+        Icon getIcon() const;
 
         Project& project;
         ValueTree state;

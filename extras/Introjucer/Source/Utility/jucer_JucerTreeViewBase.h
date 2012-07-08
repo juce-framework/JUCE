@@ -54,7 +54,7 @@ public:
     virtual String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
-    virtual const Drawable* getIcon() const = 0;
+    virtual Icon getIcon() const = 0;
     virtual float getIconSize() const;
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
     virtual int getMillisecsAllowedForDragGesture()    { return 120; };
@@ -186,9 +186,7 @@ public:
 
     void paintIcon (Graphics& g)
     {
-        const float iconSize = item.getIconSize();
-        item.getIcon()->drawWithin (g, Rectangle<float> (4.0f, 2.0f, iconSize, getHeight() - 4.0f),
-                                    RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
+        item.getIcon().draw (g, Rectangle<float> (4.0f, 2.0f, item.getIconSize(), getHeight() - 4.0f));
     }
 
     void resized()

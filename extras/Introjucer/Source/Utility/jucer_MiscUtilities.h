@@ -58,6 +58,28 @@ bool cancelAnyModalComponents();
 bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo&);
 
 //==============================================================================
+struct Icon
+{
+    Icon() : path (nullptr) {}
+    Icon (const Path& p, const Colour& c)  : path (&p), colour (c) {}
+
+    void draw (Graphics& g, const Rectangle<float>& area) const
+    {
+        if (path != nullptr)
+        {
+            g.setColour (colour);
+
+            const RectanglePlacement placement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
+            g.fillPath (*path, placement.getTransformToFit (path->getBounds(), area));
+        }
+    }
+
+    const Path* path;
+    Colour colour;
+};
+
+
+//==============================================================================
 class RolloverHelpComp   : public Component,
                            private Timer
 {

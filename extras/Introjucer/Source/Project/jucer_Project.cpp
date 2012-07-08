@@ -771,23 +771,23 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
     return false;
 }
 
-const Drawable* Project::Item::getIcon() const
+Icon Project::Item::getIcon() const
 {
     const Icons& icons = getIcons();
 
     if (isFile())
     {
         if (isImageFile())
-            return icons.imageDoc;
+            return Icon (icons.imageDoc, Colours::blue);
 
-        return icons.document;
+        return Icon (icons.document, Colours::yellow.darker (1.0f));
     }
     else if (isMainGroup())
     {
-        return icons.juceLogo;
+        return Icon (icons.juceLogo, Colours::orange);
     }
 
-    return icons.folder;
+    return Icon (icons.folder, Colours::darkgrey);
 }
 
 //==============================================================================
