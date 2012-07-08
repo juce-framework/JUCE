@@ -255,6 +255,7 @@ public:
     //==============================================================================
     JuceVSTWrapper (audioMasterCallback audioMaster, AudioProcessor* const filter_)
        : AudioEffectX (audioMaster, filter_->getNumPrograms(), filter_->getNumParameters()),
+         nextExpectedPlayPosition (-1),
          filter (filter_),
          chunkMemoryTime (0),
          speakerIn (kSpeakerArrEmpty),
@@ -553,7 +554,15 @@ public:
                 {
                     AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
                     filter->m_hasSideChain = false;
-                    filter->m_playPositionSamples = getTimeInfo(kVstSmpteValid)->samplePos;
+                    const VstTimeInfo* const ti = getTimeInfo (kVstCyclePosValid | kVstSmpteValid);
+                    const bool isCycle = (ti->flags & kVstTransportCycleActive) != 0;
+                    if (isCycle && nextExpectedPlayPosition != -1 && 1 == abs(nextExpectedPlayPosition - ti->samplePos)) {
+                        // Cubase/Nuendo cycle bug causing sample position reported to be randomly (?) off by one.
+                        filter->m_playPositionSamples = nextExpectedPlayPosition;
+                    } else {
+                        filter->m_playPositionSamples = ti->samplePos;
+                    }
+                    nextExpectedPlayPosition = filter->m_playPositionSamples + numSamples;
                     filter->processBlock (chans, midiEvents);
                 }
 
@@ -1365,6 +1374,7 @@ public:
 
     //==============================================================================
 private:
+    int nextExpectedPlayPosition;
     AudioProcessor* filter;
     juce::MemoryBlock chunkMemory;
     juce::uint32 chunkMemoryTime;
