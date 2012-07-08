@@ -901,7 +901,7 @@ void UIViewComponentPeer::drawRect (CGRect r)
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
     CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, view.bounds.size.height));
-    CoreGraphicsContext g (cg, view.bounds.size.height);
+    CoreGraphicsContext g (cg, view.bounds.size.height, [UIScreen mainScreen].scale);
 
     insideDrawRect = true;
     handlePaint (g);

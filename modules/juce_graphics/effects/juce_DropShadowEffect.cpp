@@ -51,52 +51,57 @@ void DropShadowEffect::setShadowProperties (const float newRadius,
     opacity = newOpacity;
 }
 
-void DropShadowEffect::applyEffect (Image& image, Graphics& g, float alpha)
+void DropShadowEffect::drawShadow (Graphics& g, const Image& srcImage,
+                                   float radius, float alpha, int offsetX, int offsetY)
 {
-    const int w = image.getWidth();
-    const int h = image.getHeight();
+    const int w = srcImage.getWidth();
+    const int h = srcImage.getHeight();
 
     Image shadowImage (Image::SingleChannel, w, h, false);
 
+    const Image::BitmapData srcData (srcImage, Image::BitmapData::readOnly);
+    const Image::BitmapData destData (shadowImage, Image::BitmapData::readWrite);
+
+    const int filter = roundToInt (63.0f / radius);
+    const int radiusMinus1 = roundToInt ((radius - 1.0f) * 63.0f);
+
+    for (int x = w; --x >= 0;)
     {
-        const Image::BitmapData srcData (image, Image::BitmapData::readOnly);
-        const Image::BitmapData destData (shadowImage, Image::BitmapData::readWrite);
+        int shadowAlpha = 0;
 
-        const int filter = roundToInt (63.0f / radius);
-        const int radiusMinus1 = roundToInt ((radius - 1.0f) * 63.0f);
-
-        for (int x = w; --x >= 0;)
-        {
-            int shadowAlpha = 0;
-
-            const PixelARGB* src = ((const PixelARGB*) srcData.data) + x;
-            uint8* shadowPix = destData.data + x;
-
-            for (int y = h; --y >= 0;)
-            {
-                shadowAlpha = ((shadowAlpha * radiusMinus1 + (src->getAlpha() << 6)) * filter) >> 12;
-
-                *shadowPix = (uint8) shadowAlpha;
-                src = addBytesToPointer (src, srcData.lineStride);
-                shadowPix += destData.lineStride;
-            }
-        }
+        const PixelARGB* src = ((const PixelARGB*) srcData.data) + x;
+        uint8* shadowPix = destData.data + x;
 
         for (int y = h; --y >= 0;)
         {
-            int shadowAlpha = 0;
-            uint8* shadowPix = destData.getLinePointer (y);
+            shadowAlpha = ((shadowAlpha * radiusMinus1 + (src->getAlpha() << 6)) * filter) >> 12;
 
-            for (int x = w; --x >= 0;)
-            {
-                shadowAlpha = ((shadowAlpha * radiusMinus1 + (*shadowPix << 6)) * filter) >> 12;
-                *shadowPix++ = (uint8) shadowAlpha;
-            }
+            *shadowPix = (uint8) shadowAlpha;
+            src = addBytesToPointer (src, srcData.lineStride);
+            shadowPix += destData.lineStride;
         }
     }
 
-    g.setColour (Colours::black.withAlpha (opacity * alpha));
+    for (int y = h; --y >= 0;)
+    {
+        int shadowAlpha = 0;
+        uint8* shadowPix = destData.getLinePointer (y);
+
+        for (int x = w; --x >= 0;)
+        {
+            shadowAlpha = ((shadowAlpha * radiusMinus1 + (*shadowPix << 6)) * filter) >> 12;
+            *shadowPix++ = (uint8) shadowAlpha;
+        }
+    }
+
+    g.setColour (Colours::black.withAlpha (alpha));
     g.drawImageAt (shadowImage, offsetX, offsetY, true);
+}
+
+void DropShadowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor, float alpha)
+{
+    drawShadow (g, image, radius * scaleFactor, opacity * alpha,
+                (int) (offsetX * scaleFactor), (int) (offsetY * scaleFactor));
 
     g.setOpacity (alpha);
     g.drawImageAt (image, 0, 0);

@@ -53,11 +53,15 @@ public:
                                 its paint() method. The image may or may not have an alpha
                                 channel, depending on whether the component is opaque.
         @param destContext      the graphics context to use to draw the resultant image.
+        @param scaleFactor      a scale factor that has been applied to the image - e.g. if
+                                this is 2, then the image is actually scaled-up to twice the
+                                original resolution
         @param alpha            the alpha with which to draw the resultant image to the
                                 target context
     */
     virtual void applyEffect (Image& sourceImage,
                               Graphics& destContext,
+                              float scaleFactor,
                               float alpha) = 0;
 
     /** Destructor. */

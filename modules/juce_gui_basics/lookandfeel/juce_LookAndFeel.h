@@ -611,7 +611,7 @@ public:
     virtual const Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
 
     //==============================================================================
-    virtual void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path);
+    virtual void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path, Image& cachedImage);
 
     //==============================================================================
     virtual void drawLevelMeter (Graphics& g, int width, int height, float level);

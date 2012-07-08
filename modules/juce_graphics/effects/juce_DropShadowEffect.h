@@ -75,9 +75,12 @@ public:
                               int newShadowOffsetY);
 
 
+    static void drawShadow (Graphics& g, const Image& srcImage,
+                            float radius, float alpha, int offsetX, int offsetY);
+
     //==============================================================================
     /** @internal */
-    void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
+    void applyEffect (Image& sourceImage, Graphics& destContext, float scaleFactor, float alpha);
 
 
 private:

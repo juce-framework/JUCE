@@ -53,7 +53,7 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new CoreGraphicsContext (context, height);
+        return new CoreGraphicsContext (context, height, 1.0f);
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
@@ -124,9 +124,10 @@ ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, i
 }
 
 //==============================================================================
-CoreGraphicsContext::CoreGraphicsContext (CGContextRef context_, const float flipHeight_)
+CoreGraphicsContext::CoreGraphicsContext (CGContextRef context_, const float flipHeight_, const float targetScale_)
     : context (context_),
       flipHeight (flipHeight_),
+      targetScale (targetScale_),
       lastClipRectIsValid (false),
       state (new SavedState())
 {

@@ -1946,14 +1946,20 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
 
     if (effect != nullptr)
     {
+        const float scale = g.getInternalContext()->getTargetDeviceScaleFactor();
+
         Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                           getWidth(), getHeight(), ! flags.opaqueFlag);
+                           (int) (scale * getWidth()), (int) (scale * getHeight()), ! flags.opaqueFlag);
         {
             Graphics g2 (effectImage);
+            g2.addTransform (AffineTransform::scale (scale, scale));
             paintComponentAndChildren (g2);
         }
 
-        effect->applyEffect (effectImage, g, ignoreAlphaLevel ? 1.0f : getAlpha());
+        g.saveState();
+        g.addTransform (AffineTransform::scale (1.0f / scale, 1.0f / scale));
+        effect->applyEffect (effectImage, g, scale, ignoreAlphaLevel ? 1.0f : getAlpha());
+        g.restoreState();
     }
     else if (componentTransparency > 0 && ! ignoreAlphaLevel)
     {

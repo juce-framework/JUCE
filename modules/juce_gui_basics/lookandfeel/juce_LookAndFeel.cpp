@@ -2533,23 +2533,36 @@ const Rectangle<int> LookAndFeel::getPropertyComponentContentPosition (PropertyC
 }
 
 //==============================================================================
-void LookAndFeel::drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path)
+void LookAndFeel::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
+                                            const Path& path, Image& cachedImage)
 {
-    Image content (Image::ARGB, box.getWidth(), box.getHeight(), true);
-
+    if (cachedImage.isNull())
     {
-        Graphics g2 (content);
+        const int w = box.getWidth();
+        const int h = box.getHeight();
 
-        g2.setColour (Colour::greyLevel (0.23f).withAlpha (0.9f));
-        g2.fillPath (path);
+        Image renderedPath (Image::ARGB, w, h, true);
 
-        g2.setColour (Colours::white.withAlpha (0.8f));
-        g2.strokePath (path, PathStrokeType (2.0f));
+        {
+            Graphics g2 (renderedPath);
+
+            g2.setColour (Colour::greyLevel (0.23f).withAlpha (0.9f));
+            g2.fillPath (path);
+        }
+
+        cachedImage = Image (Image::ARGB, w, h, true);
+        Graphics g2 (cachedImage);
+        DropShadowEffect::drawShadow (g2, renderedPath, 5.0f, 0.4f, 0, 2);
     }
 
-    DropShadowEffect shadow;
-    shadow.setShadowProperties (5.0f, 0.4f, 0, 2);
-    shadow.applyEffect (content, g, 1.0f);
+    g.setColour (Colours::black);
+    g.drawImageAt (cachedImage, 0, 0);
+
+    g.setColour (Colour::greyLevel (0.23f).withAlpha (0.9f));
+    g.fillPath (path);
+
+    g.setColour (Colours::white.withAlpha (0.8f));
+    g.strokePath (path, PathStrokeType (2.0f));
 }
 
 

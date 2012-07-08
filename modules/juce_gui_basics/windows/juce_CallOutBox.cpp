@@ -65,15 +65,7 @@ void CallOutBox::setArrowSize (const float newSize)
 
 void CallOutBox::paint (Graphics& g)
 {
-    if (background.isNull())
-    {
-        background = Image (Image::ARGB, getWidth(), getHeight(), true);
-        Graphics g2 (background);
-        getLookAndFeel().drawCallOutBoxBackground (*this, g2, outline);
-    }
-
-    g.setColour (Colours::black);
-    g.drawImageAt (background, 0, 0);
+    getLookAndFeel().drawCallOutBoxBackground (*this, g, outline, background);
 }
 
 void CallOutBox::resized()
