@@ -1252,19 +1252,19 @@ public:
             editor->setTopLeftPosition (0, 0);
             addAndMakeVisible (editor);
 
-          #if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             if (! getHostType().isReceptor())
                 addMouseListener (this, true);
 
             registerMouseWheelHook();
-          #endif
+           #endif
         }
 
         ~EditorCompWrapper()
         {
-          #if JUCE_WINDOWS
+           #if JUCE_WINDOWS
             unregisterMouseWheelHook();
-          #endif
+           #endif
 
             deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
                                  // have been transferred to another parent which takes over ownership.

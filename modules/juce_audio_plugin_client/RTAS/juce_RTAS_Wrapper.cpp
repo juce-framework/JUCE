@@ -353,6 +353,8 @@ public:
 
             ~EditorCompWrapper()
             {
+                removeChildComponent (editorComp);
+
                #if JUCE_WINDOWS && ! JucePlugin_EditorRequiresKeyboardFocus
                 Desktop::getInstance().removeFocusChangeListener (this);
                #endif
