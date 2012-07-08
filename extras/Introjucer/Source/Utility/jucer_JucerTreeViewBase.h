@@ -46,6 +46,8 @@ public:
     void itemSelectionChanged (bool isNowSelected);
     void itemDoubleClicked (const MouseEvent&);
 
+    void cancelDelayedSelectionTimer();
+
     //==============================================================================
     virtual Font getFont() const;
     virtual String getRenamingName() const = 0;
@@ -89,7 +91,6 @@ public:
 
 protected:
     ProjectContentComponent* getProjectContentComponent() const;
-    void cancelDelayedSelectionTimer();
     virtual void addSubItems() {}
 
 private:
@@ -128,7 +129,17 @@ public:
 
         const ScopedPointer<XmlElement> treeOpenness (getAppProperties().getXmlValue (opennessStateKey));
         if (treeOpenness != nullptr)
+        {
             tree.restoreOpennessState (*treeOpenness, true);
+
+            for (int i = tree.getNumSelectedItems(); --i >= 0;)
+            {
+                JucerTreeViewBase* item = dynamic_cast<JucerTreeViewBase*> (tree.getSelectedItem (i));
+
+                if (item != nullptr)
+                    item->cancelDelayedSelectionTimer();
+            }
+        }
     }
 
     void saveOpenness()

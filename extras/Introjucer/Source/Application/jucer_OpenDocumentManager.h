@@ -60,6 +60,8 @@ public:
         virtual Component* createEditor() = 0;
         virtual Component* createViewer() = 0;
         virtual void fileHasBeenRenamed (const File& newFile) = 0;
+        virtual String getState() const = 0;
+        virtual void restoreState (const String& state) = 0;
     };
 
     //==============================================================================
@@ -122,6 +124,8 @@ public:
     RecentDocumentList();
     ~RecentDocumentList();
 
+    void clear();
+
     void newDocumentOpened (OpenDocumentManager::Document* document);
 
     OpenDocumentManager::Document* getCurrentDocument() const       { return previousDocs.getLast(); }
@@ -134,7 +138,8 @@ public:
 
     OpenDocumentManager::Document* getClosestPreviousDocOtherThan (OpenDocumentManager::Document* oneToAvoid) const;
 
-    void clear();
+    void restoreFromXML (Project& project, const XmlElement& xml);
+    XmlElement* createXML() const;
 
 private:
     void documentAboutToClose (OpenDocumentManager::Document*);

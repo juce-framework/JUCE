@@ -761,86 +761,100 @@ void TreeView::scrollToKeepItemVisible (TreeViewItem* item)
     }
 }
 
+void TreeView::toggleOpenSelectedItem()
+{
+    TreeViewItem* const firstSelected = getSelectedItem (0);
+    if (firstSelected != nullptr)
+        firstSelected->setOpen (! firstSelected->isOpen());
+}
+
+void TreeView::moveOutOfSelectedItem()
+{
+    TreeViewItem* const firstSelected = getSelectedItem (0);
+
+    if (firstSelected != nullptr)
+    {
+        if (firstSelected->isOpen())
+        {
+            firstSelected->setOpen (false);
+        }
+        else
+        {
+            TreeViewItem* parent = firstSelected->parentItem;
+
+            if ((! rootItemVisible) && parent == rootItem)
+                parent = nullptr;
+
+            if (parent != nullptr)
+            {
+                parent->setSelected (true, true);
+                scrollToKeepItemVisible (parent);
+            }
+        }
+    }
+}
+
+void TreeView::moveIntoSelectedItem()
+{
+    TreeViewItem* const firstSelected = getSelectedItem (0);
+
+    if (firstSelected != nullptr)
+    {
+        if (firstSelected->isOpen() || ! firstSelected->mightContainSubItems())
+            moveSelectedRow (1);
+        else
+            firstSelected->setOpen (true);
+    }
+}
+
+void TreeView::moveByPages (int numPages)
+{
+    TreeViewItem* currentItem = getSelectedItem (0);
+
+    if (currentItem != nullptr)
+    {
+        const Rectangle<int> pos (currentItem->getItemPosition (false));
+        const int targetY = pos.getY() + numPages * (getHeight() - pos.getHeight());
+        int currentRow = currentItem->getRowNumberInTree();
+
+        for (;;)
+        {
+            moveSelectedRow (numPages);
+            currentItem = getSelectedItem (0);
+
+            if (currentItem == nullptr)
+                break;
+
+            const int y = currentItem->getItemPosition (false).getY();
+            if ((numPages < 0 && y <= targetY) || (numPages > 0 && y >= targetY))
+                break;
+
+            const int newRow = currentItem->getRowNumberInTree();
+            if (newRow == currentRow)
+                break;
+
+            currentRow = newRow;
+        }
+    }
+}
+
 bool TreeView::keyPressed (const KeyPress& key)
 {
-    if (key.isKeyCode (KeyPress::upKey))
+    if (rootItem != nullptr
+         && ! key.getModifiers().testFlags (ModifierKeys::ctrlAltCommandModifiers))
     {
-        moveSelectedRow (-1);
-    }
-    else if (key.isKeyCode (KeyPress::downKey))
-    {
-        moveSelectedRow (1);
-    }
-    else if (key.isKeyCode (KeyPress::pageDownKey) || key.isKeyCode (KeyPress::pageUpKey))
-    {
-        if (rootItem != nullptr)
-        {
-            int rowsOnScreen = getHeight() / jmax (1, rootItem->itemHeight);
-
-            if (key.isKeyCode (KeyPress::pageUpKey))
-                rowsOnScreen = -rowsOnScreen;
-
-            if (rowsOnScreen != 0)
-                moveSelectedRow (rowsOnScreen);
-        }
-    }
-    else if (key.isKeyCode (KeyPress::homeKey))
-    {
-        moveSelectedRow (-0x3fffffff);
-    }
-    else if (key.isKeyCode (KeyPress::endKey))
-    {
-        moveSelectedRow (0x3fffffff);
-    }
-    else if (key.isKeyCode (KeyPress::returnKey))
-    {
-        TreeViewItem* const firstSelected = getSelectedItem (0);
-        if (firstSelected != nullptr)
-            firstSelected->setOpen (! firstSelected->isOpen());
-    }
-    else if (key.isKeyCode (KeyPress::leftKey))
-    {
-        TreeViewItem* const firstSelected = getSelectedItem (0);
-
-        if (firstSelected != nullptr)
-        {
-            if (firstSelected->isOpen())
-            {
-                firstSelected->setOpen (false);
-            }
-            else
-            {
-                TreeViewItem* parent = firstSelected->parentItem;
-
-                if ((! rootItemVisible) && parent == rootItem)
-                    parent = nullptr;
-
-                if (parent != nullptr)
-                {
-                    parent->setSelected (true, true);
-                    scrollToKeepItemVisible (parent);
-                }
-            }
-        }
-    }
-    else if (key.isKeyCode (KeyPress::rightKey))
-    {
-        TreeViewItem* const firstSelected = getSelectedItem (0);
-
-        if (firstSelected != nullptr)
-        {
-            if (firstSelected->isOpen() || ! firstSelected->mightContainSubItems())
-                moveSelectedRow (1);
-            else
-                firstSelected->setOpen (true);
-        }
-    }
-    else
-    {
-        return false;
+        if (key.getKeyCode() == KeyPress::upKey)       { moveSelectedRow (-1); return true; }
+        if (key.getKeyCode() == KeyPress::downKey)     { moveSelectedRow (1);  return true; }
+        if (key.getKeyCode() == KeyPress::homeKey)     { moveSelectedRow (-0x3fffffff); return true; }
+        if (key.getKeyCode() == KeyPress::endKey)      { moveSelectedRow (0x3fffffff);  return true; }
+        if (key.getKeyCode() == KeyPress::pageUpKey)   { moveByPages (-1); return true; }
+        if (key.getKeyCode() == KeyPress::pageDownKey) { moveByPages (1);  return true; }
+        if (key.getKeyCode() == KeyPress::returnKey)   { toggleOpenSelectedItem(); return true; }
+        if (key.getKeyCode() == KeyPress::leftKey)     { moveOutOfSelectedItem();  return true; }
+        if (key.getKeyCode() == KeyPress::rightKey)    { moveIntoSelectedItem();   return true; }
     }
 
-    return true;
+    return false;
 }
 
 void TreeView::itemsChanged() noexcept

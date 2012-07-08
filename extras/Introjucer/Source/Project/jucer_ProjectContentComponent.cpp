@@ -218,6 +218,31 @@ void ProjectContentComponent::saveTreeViewState()
     }
 }
 
+void ProjectContentComponent::saveOpenDocumentList()
+{
+    if (project != nullptr)
+    {
+        ScopedPointer<XmlElement> xml (recentDocumentList.createXML());
+
+        if (xml != nullptr)
+            getAppProperties().setValue ("lastDocs_" + project->getProjectUID(), xml);
+    }
+}
+
+void ProjectContentComponent::reloadLastOpenDocuments()
+{
+    if (project != nullptr)
+    {
+        ScopedPointer<XmlElement> xml (getAppProperties().getXmlValue ("lastDocs_" + project->getProjectUID()));
+
+        if (xml != nullptr)
+        {
+            recentDocumentList.restoreFromXML (*project, *xml);
+            showDocument (recentDocumentList.getCurrentDocument());
+        }
+    }
+}
+
 void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     updateMissingFileStatuses();
@@ -251,8 +276,11 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
     if (doc->hasFileBeenModifiedExternally())
         doc->reloadFromFile();
 
-    if (doc == getCurrentDocument())
+    if (doc == getCurrentDocument() && contentView != nullptr)
+    {
+        contentView->grabKeyboardFocus();
         return true;
+    }
 
     recentDocumentList.newDocumentOpened (doc);
 
@@ -265,7 +293,6 @@ void ProjectContentComponent::hideEditor()
     contentView = nullptr;
     updateMainWindowTitle();
     commandManager->commandStatusChanged();
-    recentDocumentList.clear();
 }
 
 void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
@@ -303,7 +330,12 @@ bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumen
 
 bool ProjectContentComponent::goToPreviousFile()
 {
-    return showDocument (recentDocumentList.getPrevious());
+    OpenDocumentManager::Document* currentSourceDoc = recentDocumentList.getCurrentDocument();
+
+    if (currentSourceDoc != nullptr && currentSourceDoc != getCurrentDocument())
+        return showDocument (currentSourceDoc);
+    else
+        return showDocument (recentDocumentList.getPrevious());
 }
 
 bool ProjectContentComponent::goToNextFile()

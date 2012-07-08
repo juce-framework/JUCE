@@ -61,6 +61,8 @@ public:
     Component* createEditor()                       { return new ItemPreviewComponent (file); }
     Component* createViewer()                       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile)   { file = newFile; }
+    String getState() const                         { return String::empty; }
+    void restoreState (const String& state)         {}
 
     String getType() const
     {
@@ -318,7 +320,7 @@ void RecentDocumentList::clear()
 
 void RecentDocumentList::newDocumentOpened (OpenDocumentManager::Document* document)
 {
-    if (document != getCurrentDocument())
+    if (document != nullptr && document != getCurrentDocument())
     {
         nextDocs.clear();
         previousDocs.add (document);
@@ -370,4 +372,63 @@ void RecentDocumentList::documentAboutToClose (OpenDocumentManager::Document* do
 
     jassert (! previousDocs.contains (document));
     jassert (! nextDocs.contains (document));
+}
+
+static void restoreDocList (Project& project, Array <OpenDocumentManager::Document*>& list, const XmlElement* xml)
+{
+    if (xml != nullptr)
+    {
+        OpenDocumentManager& odm = JucerApplication::getApp()->openDocumentManager;
+
+        forEachXmlChildElementWithTagName (*xml, e, "DOC")
+        {
+            const File file (e->getStringAttribute ("file"));
+
+            if (file.exists())
+            {
+                OpenDocumentManager::Document* doc = odm.openFile (&project, file);
+
+                if (doc != nullptr)
+                {
+                    doc->restoreState (e->getStringAttribute ("state"));
+
+                    list.add (doc);
+                }
+            }
+        }
+    }
+}
+
+void RecentDocumentList::restoreFromXML (Project& project, const XmlElement& xml)
+{
+    clear();
+
+    if (xml.hasTagName ("RECENT_DOCUMENTS"))
+    {
+        restoreDocList (project, previousDocs, xml.getChildByName ("PREVIOUS"));
+        restoreDocList (project, nextDocs,     xml.getChildByName ("NEXT"));
+    }
+}
+
+static void saveDocList (const Array <OpenDocumentManager::Document*>& list, XmlElement& xml)
+{
+    for (int i = 0; i < list.size(); ++i)
+    {
+        const OpenDocumentManager::Document& doc = *list.getUnchecked(i);
+
+        XmlElement* e = xml.createNewChildElement ("DOC");
+
+        e->setAttribute ("file", doc.getFile().getFullPathName());
+        e->setAttribute ("state", doc.getState());
+    }
+}
+
+XmlElement* RecentDocumentList::createXML() const
+{
+    XmlElement* xml = new XmlElement ("RECENT_DOCUMENTS");
+
+    saveDocList (previousDocs, *xml->createNewChildElement ("PREVIOUS"));
+    saveDocList (nextDocs,     *xml->createNewChildElement ("NEXT"));
+
+    return xml;
 }

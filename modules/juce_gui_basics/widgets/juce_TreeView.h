@@ -820,6 +820,10 @@ private:
     void hideDragHighlight() noexcept;
     void handleDrag (const StringArray& files, const SourceDetails&);
     void handleDrop (const StringArray& files, const SourceDetails&);
+    void toggleOpenSelectedItem();
+    void moveOutOfSelectedItem();
+    void moveIntoSelectedItem();
+    void moveByPages (int numPages);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
 };

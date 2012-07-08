@@ -35,11 +35,32 @@ class SourceCodeDocument  : public OpenDocumentManager::Document
 {
 public:
     //==============================================================================
-    SourceCodeDocument (Project* project_, const File& file_)
-        : modDetector (file_), project (project_)
-    {
-        reloadFromFile();
-    }
+    SourceCodeDocument (Project*, const File&);
+
+    bool loadedOk() const                           { return true; }
+    bool isForFile (const File& file) const         { return getFile() == file; }
+    bool isForNode (const ValueTree& node) const    { return false; }
+    bool refersToProject (Project& p) const         { return project == &p; }
+    Project* getProject() const                     { return project; }
+    String getName() const                          { return getFile().getFileName(); }
+    String getType() const                          { return getFile().getFileExtension() + " file"; }
+    File getFile() const                            { return modDetector.getFile(); }
+    bool needsSaving() const                        { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
+    bool hasFileBeenModifiedExternally()            { return modDetector.hasBeenModified(); }
+    void fileHasBeenRenamed (const File& newFile)   { modDetector.fileHasBeenRenamed (newFile); }
+    String getState() const                         { return lastState != nullptr ? lastState->toString() : String::empty; }
+    void restoreState (const String& state)         { lastState = new CodeEditorComponent::State (state); }
+
+    void reloadFromFile();
+    bool save();
+
+    Component* createEditor();
+    Component* createViewer()       { return createEditor(); }
+
+    void updateLastState (CodeEditorComponent& editor);
+    void applyLastState (CodeEditorComponent& editor) const;
+
+    CodeDocument& getCodeDocument();
 
     //==============================================================================
     struct Type  : public OpenDocumentManager::DocumentType
@@ -48,34 +69,14 @@ public:
         Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }
     };
 
-    //==============================================================================
-    bool loadedOk() const                               { return true; }
-    bool isForFile (const File& file) const             { return getFile() == file; }
-    bool isForNode (const ValueTree& node) const        { return false; }
-    bool refersToProject (Project& p) const             { return project == &p; }
-    Project* getProject() const                         { return project; }
-    String getName() const                              { return getFile().getFileName(); }
-    String getType() const                              { return getFile().getFileExtension() + " file"; }
-    File getFile() const                                { return modDetector.getFile(); }
-    bool needsSaving() const                            { return codeDoc.hasChangedSinceSavePoint(); }
-    bool hasFileBeenModifiedExternally()                { return modDetector.hasBeenModified(); }
-    void fileHasBeenRenamed (const File& newFile)       { modDetector.fileHasBeenRenamed (newFile); }
-
-    void reloadFromFile();
-    bool save();
-
-    Component* createEditor();
-    Component* createViewer()       { return createEditor(); }
-
-    void updateLastPosition (CodeEditorComponent& editor);
-    void applyLastPosition (CodeEditorComponent& editor) const;
-
 protected:
     FileModificationDetector modDetector;
-    CodeDocument codeDoc;
+    ScopedPointer<CodeDocument> codeDoc;
     Project* project;
 
     ScopedPointer<CodeEditorComponent::State> lastState;
+
+    void reloadInternal();
 };
 
 //==============================================================================

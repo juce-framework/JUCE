@@ -40,7 +40,7 @@ SourceCodeEditor::~SourceCodeEditor()
     SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument());
 
     if (doc != nullptr)
-        doc->updateLastPosition (*editor);
+        doc->updateLastState (*editor);
 }
 
 void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
@@ -97,22 +97,45 @@ void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                      
 void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
 
 //==============================================================================
+SourceCodeDocument::SourceCodeDocument (Project* project_, const File& file_)
+    : modDetector (file_), project (project_)
+{
+}
+
+CodeDocument& SourceCodeDocument::getCodeDocument()
+{
+    if (codeDoc == nullptr)
+    {
+        codeDoc = new CodeDocument();
+        reloadInternal();
+    }
+
+    return *codeDoc;
+}
+
 Component* SourceCodeDocument::createEditor()
 {
     SourceCodeEditor* e = new SourceCodeEditor (this);
-    e->createEditor (codeDoc);
-    applyLastPosition (*(e->editor));
+    e->createEditor (getCodeDocument());
+    applyLastState (*(e->editor));
     return e;
 }
 
 void SourceCodeDocument::reloadFromFile()
 {
+    getCodeDocument();
+    reloadInternal();
+}
+
+void SourceCodeDocument::reloadInternal()
+{
+    jassert (codeDoc != nullptr);
     modDetector.updateHash();
 
     ScopedPointer <InputStream> in (modDetector.getFile().createInputStream());
 
     if (in != nullptr)
-        codeDoc.loadFromStream (*in);
+        codeDoc->loadFromStream (*in);
 }
 
 bool SourceCodeDocument::save()
@@ -122,24 +145,24 @@ bool SourceCodeDocument::save()
     {
         FileOutputStream fo (temp.getFile());
 
-        if (! (fo.openedOk() && codeDoc.writeToStream (fo)))
+        if (! (fo.openedOk() && getCodeDocument().writeToStream (fo)))
             return false;
     }
 
     if (! temp.overwriteTargetFileWithTemporary())
         return false;
 
-    codeDoc.setSavePoint();
+    getCodeDocument().setSavePoint();
     modDetector.updateHash();
     return true;
 }
 
-void SourceCodeDocument::updateLastPosition (CodeEditorComponent& editor)
+void SourceCodeDocument::updateLastState (CodeEditorComponent& editor)
 {
     lastState = new CodeEditorComponent::State (editor);
 }
 
-void SourceCodeDocument::applyLastPosition (CodeEditorComponent& editor) const
+void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
 {
     if (lastState != nullptr)
         lastState->restoreState (editor);

@@ -94,6 +94,7 @@ void MainWindow::createProjectContentCompIfNeeded()
     {
         clearContentComponent();
         setContentOwned (JucerApplication::getApp()->createProjectContentComponent(), false);
+        jassert (getProjectContentComponent() != nullptr);
     }
 }
 
@@ -126,13 +127,17 @@ bool MainWindow::closeProject (Project* project)
 
     getAppProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
 
-    if (! JucerApplication::getApp()->openDocumentManager.closeAllDocumentsUsingProject (*project, true))
-        return false;
-
     ProjectContentComponent* const pcc = getProjectContentComponent();
 
     if (pcc != nullptr)
+    {
         pcc->saveTreeViewState();
+        pcc->saveOpenDocumentList();
+        pcc->hideEditor();
+    }
+
+    if (! JucerApplication::getApp()->openDocumentManager.closeAllDocumentsUsingProject (*project, true))
+        return false;
 
     FileBasedDocument::SaveResult r = project->saveIfNeededAndUserAgrees();
 
@@ -373,6 +378,10 @@ bool MainWindowList::openFile (const File& file)
             w->setProject (newDoc.release());
             w->makeVisible();
             avoidSuperimposedWindows (w);
+
+            jassert (w->getProjectContentComponent() != nullptr);
+            w->getProjectContentComponent()->reloadLastOpenDocuments();
+
             return true;
         }
     }

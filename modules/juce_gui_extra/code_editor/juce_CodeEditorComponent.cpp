@@ -1425,3 +1425,18 @@ void CodeEditorComponent::State::restoreState (CodeEditorComponent& editor) cons
     if (lastTopLine > 0 && lastTopLine < editor.getDocument().getNumLines())
         editor.scrollToLine (lastTopLine);
 }
+
+CodeEditorComponent::State::State (const String& s)
+{
+    StringArray tokens;
+    tokens.addTokens (s, ":", String::empty);
+
+    lastTopLine = tokens[0].getIntValue();
+    lastCaretPos = tokens[1].getIntValue();
+    lastSelectionEnd = tokens[2].getIntValue();
+}
+
+String CodeEditorComponent::State::toString() const
+{
+    return String (lastTopLine) + ":" + String (lastCaretPos) + ":" + String (lastSelectionEnd);
+}

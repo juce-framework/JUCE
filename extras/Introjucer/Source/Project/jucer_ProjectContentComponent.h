@@ -44,7 +44,10 @@ public:
 
     Project* getProject() const noexcept    { return project; }
     virtual void setProject (Project* project);
+
     void saveTreeViewState();
+    void saveOpenDocumentList();
+    void reloadLastOpenDocuments();
 
     bool showEditorForFile (const File& f);
     File getCurrentFile() const;

@@ -163,10 +163,15 @@ public:
     {
         /** Creates an object containing the state of the given editor. */
         State (const CodeEditorComponent& editor);
+        /** Creates a state object from a string that was previously created with toString(). */
+        State (const String& stringifiedVersion);
         State (const State& other) noexcept;
 
         /** Updates the given editor with this saved state. */
         void restoreState (CodeEditorComponent& editor) const;
+
+        /** Returns a stringified version of this state that can be used to recreate it later. */
+        String toString() const;
 
     private:
         int lastTopLine, lastCaretPos, lastSelectionEnd;
