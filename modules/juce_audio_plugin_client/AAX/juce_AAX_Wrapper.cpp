@@ -182,7 +182,7 @@ struct AAXClasses
                 numChans = numOuts;
             }
 
-            AudioSampleBuffer buffer (renderingChannels, numChans, bufferSize);
+            AudioSampleBuffer buffer (renderingChannels, jmax (1, numChans), bufferSize);
 
             // XXX need to do midi..
             midiBuffer.clear();
@@ -215,6 +215,8 @@ struct AAXClasses
 
         AudioProcessor* pluginInstance;
         MidiBuffer midiBuffer;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginInstanceInfo);
     };
 
     //==============================================================================
@@ -375,6 +377,7 @@ struct AAXClasses
 
             // add other params..
 
+            preparePlugin();
 
             return AAX_SUCCESS;
         }
@@ -398,23 +401,7 @@ struct AAXClasses
 
                 case JUCEAlgorithmIDs::preparedFlag:
                 {
-                    AAX_CSampleRate sampleRate;
-                    check (Controller()->GetSampleRate (&sampleRate));
-
-                    AAX_EStemFormat inputStemFormat = AAX_eStemFormat_None;
-                    check (Controller()->GetInputStemFormat (&inputStemFormat));
-                    const int numberOfInputChannels = getNumChannelsForStemFormat (inputStemFormat);
-
-                    AAX_EStemFormat outputStemFormat = AAX_eStemFormat_None;
-                    check (Controller()->GetOutputStemFormat (&outputStemFormat));
-                    const int numberOfOutputChannels = getNumChannelsForStemFormat (outputStemFormat);
-
-                    int32_t bufferSize = 0;
-                    check (Controller()->GetSignalLatency (&bufferSize));
-
-                    AudioProcessor* audioProcessor = getPluginInstance();
-                    audioProcessor->setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, bufferSize);
-                    audioProcessor->prepareToPlay (sampleRate, bufferSize);
+                    preparePlugin();
 
                     const size_t numObjects = dataSize / sizeof (uint32_t);
                     uint32_t* const objects = static_cast <uint32_t*> (data);
@@ -448,6 +435,27 @@ struct AAXClasses
             masterBypass->SetType (AAX_eParameterType_Discrete);
             mParameterManager.AddParameter (masterBypass);
             mPacketDispatcher.RegisterPacket (bypassID.CString(), JUCEAlgorithmIDs::bypass);
+        }
+
+        void preparePlugin() const
+        {
+            AAX_CSampleRate sampleRate;
+            check (Controller()->GetSampleRate (&sampleRate));
+
+            AAX_EStemFormat inputStemFormat = AAX_eStemFormat_None;
+            check (Controller()->GetInputStemFormat (&inputStemFormat));
+            const int numberOfInputChannels = getNumChannelsForStemFormat (inputStemFormat);
+
+            AAX_EStemFormat outputStemFormat = AAX_eStemFormat_None;
+            check (Controller()->GetOutputStemFormat (&outputStemFormat));
+            const int numberOfOutputChannels = getNumChannelsForStemFormat (outputStemFormat);
+
+            int32_t bufferSize = 0;
+            check (Controller()->GetSignalLatency (&bufferSize));
+
+            AudioProcessor* audioProcessor = getPluginInstance();
+            audioProcessor->setPlayConfigDetails (numberOfInputChannels, numberOfOutputChannels, sampleRate, bufferSize);
+            audioProcessor->prepareToPlay (sampleRate, bufferSize);
         }
 
         JUCELibraryRefCount juceCount;
@@ -493,7 +501,7 @@ struct AAXClasses
         properties->AddProperty (AAX_eProperty_InputStemFormat,     getFormatForChans (numInputs));
         properties->AddProperty (AAX_eProperty_OutputStemFormat,    getFormatForChans (numOutputs));
 
-        properties->AddProperty (AAX_eProperty_PlugInID_Native,     JucePlugin_AAXPluginId);
+        properties->AddProperty (AAX_eProperty_PlugInID_Native,     JucePlugin_AAXPluginId + (numInputs + 256 * numOutputs));
 
         check (desc.AddProcessProc_Native (algorithmProcessCallback, properties));
     }
