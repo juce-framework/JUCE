@@ -209,7 +209,7 @@ struct AppearanceEditor
 
         void closeButtonPressed()
         {
-            JucerApplication::getApp()->appearanceEditorWindow = nullptr;
+            JucerApplication::getApp().appearanceEditorWindow = nullptr;
         }
 
     private:

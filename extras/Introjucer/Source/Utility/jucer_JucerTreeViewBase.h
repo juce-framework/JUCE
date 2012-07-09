@@ -191,7 +191,7 @@ public:
 
     void resized()
     {
-        item.textX = item.getIconSize() + 8;
+        item.textX = (int) item.getIconSize() + 8;
     }
 
     JucerTreeViewBase& item;

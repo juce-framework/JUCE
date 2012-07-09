@@ -32,12 +32,12 @@
 DocumentEditorComponent::DocumentEditorComponent (OpenDocumentManager::Document* document_)
     : document (document_)
 {
-    JucerApplication::getApp()->openDocumentManager.addListener (this);
+    JucerApplication::getApp().openDocumentManager.addListener (this);
 }
 
 DocumentEditorComponent::~DocumentEditorComponent()
 {
-    JucerApplication::getApp()->openDocumentManager.removeListener (this);
+    JucerApplication::getApp().openDocumentManager.removeListener (this);
 }
 
 void DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Document* closingDoc)

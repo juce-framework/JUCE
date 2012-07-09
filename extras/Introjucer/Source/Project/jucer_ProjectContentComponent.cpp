@@ -259,7 +259,7 @@ void ProjectContentComponent::updateMissingFileStatuses()
 bool ProjectContentComponent::showEditorForFile (const File& f)
 {
     return getCurrentFile() == f
-            || showDocument (JucerApplication::getApp()->openDocumentManager.openFile (project, f));
+            || showDocument (JucerApplication::getApp().openDocumentManager.openFile (project, f));
 }
 
 File ProjectContentComponent::getCurrentFile() const
@@ -375,7 +375,8 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::closeProject,
                               CommandIDs::openInIDE,
                               CommandIDs::saveAndOpenInIDE,
-                              CommandIDs::showProjectSettings,
+                              CommandIDs::showFilePanel,
+                              CommandIDs::showConfigPanel,
                               CommandIDs::goToPreviousDoc,
                               CommandIDs::goToNextDoc,
                               StandardApplicationCommandIDs::del };
@@ -472,16 +473,24 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier, 0));
         break;
 
-    case CommandIDs::showProjectSettings:
-        result.setInfo ("Show Project Build Settings",
+    case CommandIDs::showFilePanel:
+        result.setInfo ("Show File Panel",
+                        "Shows the tree of files for this project",
+                        CommandCategories::general, 0);
+        result.setActive (project != nullptr);
+        result.defaultKeypresses.add (KeyPress ('p', ModifierKeys::commandModifier, 0));
+        break;
+
+    case CommandIDs::showConfigPanel:
+        result.setInfo ("Show Config Panel",
                         "Shows the build options for the project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('i', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('i', ModifierKeys::commandModifier, 0));
         break;
 
     case StandardApplicationCommandIDs::del:
-        result.setInfo ("Delete", String::empty, CommandCategories::general, 0);
+        result.setInfo ("Delete Selected File", String::empty, CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
         result.defaultKeypresses.add (KeyPress (KeyPress::backspaceKey, 0, 0));
         result.setActive (dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent()) != nullptr);
@@ -530,7 +539,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
     case CommandIDs::closeDocument:
         if (currentDocument != nullptr)
-            JucerApplication::getApp()->openDocumentManager.closeDocument (currentDocument, true);
+            JucerApplication::getApp().openDocumentManager.closeDocument (currentDocument, true);
         break;
 
     case CommandIDs::goToPreviousDoc:
@@ -567,7 +576,11 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         }
         break;
 
-    case CommandIDs::showProjectSettings:
+    case CommandIDs::showFilePanel:
+        treeViewTabs.setCurrentTabIndex (0);
+        break;
+
+    case CommandIDs::showConfigPanel:
         treeViewTabs.setCurrentTabIndex (1);
         break;
 

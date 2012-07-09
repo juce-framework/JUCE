@@ -66,7 +66,7 @@ Project::Project (const File& file_)
 Project::~Project()
 {
     projectRoot.removeListener (this);
-    JucerApplication::getApp()->openDocumentManager.closeAllDocumentsUsingProject (*this, false);
+    JucerApplication::getApp().openDocumentManager.closeAllDocumentsUsingProject (*this, false);
 }
 
 //==============================================================================
@@ -537,7 +537,7 @@ bool Project::Item::renameFile (const File& newFile)
          || (newFile.exists() && ! oldFile.exists()))
     {
         setFile (newFile);
-        JucerApplication::getApp()->openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
+        JucerApplication::getApp().openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
         return true;
     }
 
