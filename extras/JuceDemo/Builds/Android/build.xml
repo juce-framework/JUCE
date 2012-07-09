@@ -3,12 +3,6 @@
 <project name="Juce Demo" default="debug">
   <loadproperties srcFile="local.properties"/>
   <loadproperties srcFile="project.properties"/>
-  <path id="android.antlibs">
-    <pathelement path="${sdk.dir}/tools/lib/anttasks.jar"/>
-    <pathelement path="${sdk.dir}/tools/lib/sdklib.jar"/>
-    <pathelement path="${sdk.dir}/tools/lib/androidprefs.jar"/>
-  </path>
-  <taskdef name="setup" classname="com.android.ant.SetupTask" classpathref="android.antlibs"/>
   <target name="clean">
     <exec executable="${ndk.dir}/ndk-build" dir="${basedir}" failonerror="true">
       <arg value="clean"/>
