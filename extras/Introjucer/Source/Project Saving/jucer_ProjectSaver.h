@@ -502,6 +502,8 @@ private:
         {
             if (exporter->getTargetFolder().createDirectory())
             {
+                exporter->settings = exporter->settings.createCopy();
+
                 exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
 
                 generatedFilesGroup.state = originalGeneratedGroup.createCopy();
