@@ -304,7 +304,7 @@ public:
                 }
                 else
                 {
-                    if (index < 0)
+                    if (! isPositiveAndBelow (index, children.size()))
                         index = children.size();
 
                     undoManager->perform (new AddOrRemoveChildAction (this, index, child));
