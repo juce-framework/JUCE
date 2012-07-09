@@ -144,7 +144,7 @@ public:
 
 private:
     Rectangle<int> content;
-    Point<float> arrowTip;
+    Point<int> arrowTip;
     int allowablePlacements;
     DropShadowEffect shadow;
 

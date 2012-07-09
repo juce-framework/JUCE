@@ -39,7 +39,7 @@ BubbleComponent::~BubbleComponent()
 //==============================================================================
 void BubbleComponent::paint (Graphics& g)
 {
-    getLookAndFeel().drawBubble (g, arrowTip.x, arrowTip.y,
+    getLookAndFeel().drawBubble (g, (float) arrowTip.x, (float) arrowTip.y,
                                  (float) content.getX(), (float) content.getY(),
                                  (float) content.getWidth(), (float) content.getHeight());
 
@@ -109,7 +109,7 @@ void BubbleComponent::setPosition (const Rectangle<int>& rectangleToPointTo)
     if (jmax (spaceAbove, spaceBelow) >= jmax (spaceLeft, spaceRight))
     {
         targetX = rectangleToPointTo.getCentre().x;
-        arrowTip.x = totalW * 0.5f;
+        arrowTip.x = totalW / 2;
 
         if (spaceAbove >= spaceBelow)
         {
@@ -127,7 +127,7 @@ void BubbleComponent::setPosition (const Rectangle<int>& rectangleToPointTo)
     else
     {
         targetY = rectangleToPointTo.getCentre().y;
-        arrowTip.y = totalH * 0.5f;
+        arrowTip.y = totalH / 2;
 
         if (spaceLeft > spaceRight)
         {
