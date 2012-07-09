@@ -32,8 +32,12 @@ namespace ColourHelpers
 
     // This is an adjusted brightness value, based on the way the human
     // eye responds to different colour channels..
-    static float getPerceivedBrightness (float r, float g, float b) noexcept
+    static float getPerceivedBrightness (const Colour& c) noexcept
     {
+        const float r = c.getFloatRed();
+        const float g = c.getFloatGreen();
+        const float b = c.getFloatBlue();
+
         return std::sqrt (r * r * 0.241f
                            + g * g * 0.691f
                            + b * b * 0.068f);
@@ -117,6 +121,33 @@ struct HSB
 
     float hue, saturation, brightness;
 };
+
+//==============================================================================
+struct YIQ
+{
+    YIQ (const Colour& c) noexcept
+    {
+        const float r = c.getFloatRed();
+        const float g = c.getFloatGreen();
+        const float b = c.getFloatBlue();
+
+        y = 0.299900f * r + 0.587000f * g + 0.114000f * b;
+        i = 0.595716f * r - 0.274453f * g - 0.321264f * b;
+        q = 0.211456f * r - 0.522591f * g - 0.311350f * b;
+        alpha = c.getFloatAlpha();
+    }
+
+    Colour toColour() const noexcept
+    {
+        return Colour::fromFloatRGBA (y + 0.9563f * i + 0.6210f * q,
+                                      y - 0.2721f * i - 0.6474f * q,
+                                      y - 1.1070f * i + 1.7046f * q,
+                                      alpha);
+    }
+
+    float y, i, q, alpha;
+};
+
 
 //==============================================================================
 Colour::Colour() noexcept
@@ -356,16 +387,31 @@ Colour Colour::greyLevel (const float brightness) noexcept
 //==============================================================================
 Colour Colour::contrasting (const float amount) const noexcept
 {
-   return overlaidWith ((ColourHelpers::getPerceivedBrightness (getFloatRed(), getFloatGreen(), getFloatBlue()) >= 0.5f
+   return overlaidWith ((ColourHelpers::getPerceivedBrightness (*this) >= 0.5f
                             ? Colours::black
                             : Colours::white).withAlpha (amount));
+}
+
+Colour Colour::contrasting (const Colour& target, float minContrast) const noexcept
+{
+    const YIQ bg (*this);
+    YIQ fg (target);
+
+    if (fabs (bg.y - fg.y) >= minContrast)
+        return target;
+
+    const float y1 = jmax (0.0f, bg.y - minContrast);
+    const float y2 = jmin (1.0f, bg.y + minContrast);
+    fg.y = (fabs (y1 - bg.y) > fabs (y2 - bg.y)) ? y1 : y2;
+
+    return fg.toColour();
 }
 
 Colour Colour::contrasting (const Colour& colour1,
                             const Colour& colour2) noexcept
 {
-    const float b1 = colour1.getBrightness();
-    const float b2 = colour2.getBrightness();
+    const float b1 = ColourHelpers::getPerceivedBrightness (colour1);
+    const float b2 = ColourHelpers::getPerceivedBrightness (colour2);
     float best = 0.0f;
     float bestDist = 0.0f;
 
