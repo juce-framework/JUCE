@@ -154,6 +154,13 @@ namespace
 
         projectSaver.setExtraAppConfigFileContent (mem.toString());
     }
+
+    static void fixMissingXcodePostBuildScript (ProjectExporter& exporter)
+    {
+        if (exporter.isXcode() && exporter.settings [Ids::postbuildCommand].toString().isEmpty())
+            exporter.getSetting (Ids::postbuildCommand) = String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt,
+                                                                            BinaryData::AudioPluginXCodeScript_txtSize);
+    }
 }
 
 //==============================================================================
@@ -187,6 +194,8 @@ namespace VSTHelpers
         if (getVSTFolder(exporter).toString().isEmpty())
             getVSTFolder(exporter) = (exporter.isVisualStudio() ? "c:\\SDKs\\vstsdk2.4"
                                                                 : "~/SDKs/vstsdk2.4");
+
+        fixMissingXcodePostBuildScript (exporter);
     }
 
     static inline void prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver)
@@ -241,9 +250,7 @@ namespace RTASHelpers
                 getRTASFolder (exporter) = "~/SDKs/PT_80_SDK";
         }
 
-        if (exporter.settings [Ids::postbuildCommand].toString().isEmpty())
-            exporter.getSetting (Ids::postbuildCommand) = String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt,
-                                                                            BinaryData::AudioPluginXCodeScript_txtSize);
+        fixMissingXcodePostBuildScript (exporter);
     }
 
     static void addExtraSearchPaths (ProjectExporter& exporter)
@@ -488,6 +495,8 @@ namespace AAXHelpers
             else
                 getAAXFolder (exporter) = "~/SDKs/AAX";
         }
+
+        fixMissingXcodePostBuildScript (exporter);
     }
 
     static void addExtraSearchPaths (ProjectExporter& exporter)

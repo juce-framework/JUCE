@@ -532,7 +532,7 @@ struct AAXClasses
 };
 
 //==============================================================================
-AAX_Result GetEffectDescriptions (AAX_ICollection* const collection)
+AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* const collection)
 {
     AAXClasses::JUCELibraryRefCount libraryRefCount;
 
