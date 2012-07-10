@@ -33,17 +33,58 @@
 class ItemPreviewComponent  : public Component
 {
 public:
-    //==============================================================================
-    ItemPreviewComponent (const File& file);
+    ItemPreviewComponent (const File& file_)
+        : file (file_)
+    {
+        tryToLoadImage();
+    }
 
-    void paint (Graphics& g);
+    void paint (Graphics& g)
+    {
+        g.drawImageWithin (image, 2, 22, getWidth() - 4, getHeight() - 24,
+                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
+                           false);
+
+        g.setFont (Font (14.0f, Font::bold));
+        g.setColour (findColour (mainBackgroundColourId).contrasting());
+        g.drawMultiLineText (facts.joinIntoString ("\n"),
+                             10, 15, getWidth() - 16);
+    }
 
 private:
     StringArray facts;
     File file;
     Image image;
 
-    void tryToLoadImage();
+    void tryToLoadImage()
+    {
+        facts.clear();
+        facts.add (file.getFullPathName());
+        image = Image();
+
+        ScopedPointer <InputStream> input (file.createInputStream());
+
+        if (input != nullptr)
+        {
+            const int64 totalSize = input->getTotalLength();
+            ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input);
+            input = nullptr;
+
+            String formatName;
+            if (format != nullptr)
+                formatName = " " + format->getFormatName();
+
+            image = ImageCache::getFromFile (file);
+
+            if (image.isValid())
+                facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
+
+            if (totalSize > 0)
+                facts.add (File::descriptionOfSizeInBytes (totalSize));
+        }
+
+        facts.removeEmptyStrings (true);
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemPreviewComponent);
 };

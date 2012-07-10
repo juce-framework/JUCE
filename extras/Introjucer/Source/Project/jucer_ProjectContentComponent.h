@@ -35,7 +35,8 @@ class ProjectTreeViewBase;
 */
 class ProjectContentComponent  : public Component,
                                  public ApplicationCommandTarget,
-                                 private ChangeListener
+                                 private ChangeListener,
+                                 private OpenDocumentManager::DocumentCloseListener
 {
 public:
     //==============================================================================
@@ -78,6 +79,7 @@ public:
     void paint (Graphics& g);
     void resized();
     void childBoundsChanged (Component* child);
+    void lookAndFeelChanged();
 
 protected:
     Project* project;
@@ -91,6 +93,7 @@ protected:
     ComponentBoundsConstrainer treeSizeConstrainer;
     BubbleMessageComponent bubbleMessage;
 
+    void documentAboutToClose (OpenDocumentManager::Document*);
     void changeListenerCallback (ChangeBroadcaster*);
     void updateMainWindowTitle();
     bool reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo&);

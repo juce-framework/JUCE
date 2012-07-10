@@ -36,6 +36,8 @@ public:
     StoredSettings();
     ~StoredSettings();
 
+    void initialise();
+
     PropertiesFile& getProps();
     void flush();
     void reload();

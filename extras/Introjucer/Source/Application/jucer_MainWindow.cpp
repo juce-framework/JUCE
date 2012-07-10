@@ -486,3 +486,9 @@ void MainWindowList::reopenLastProjects()
     for (int i = 0; i < projects.size(); ++ i)
         openFile (projects.getReference(i));
 }
+
+void MainWindowList::sendLookAndFeelChange()
+{
+    for (int i = windows.size(); --i >= 0;)
+        windows.getUnchecked(i)->sendLookAndFeelChange();
+}

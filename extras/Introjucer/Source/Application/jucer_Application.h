@@ -44,6 +44,10 @@ public:
     //==============================================================================
     void initialise (const String& commandLine)
     {
+        LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
+
+        settings.initialise();
+
         if (commandLine.isNotEmpty())
         {
             const int appReturnCode = performCommandLine (commandLine);
@@ -92,6 +96,8 @@ public:
         openDocumentManager.clear();
         commandManager = nullptr;
         settings.flush();
+
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
     }
 
     //==============================================================================
@@ -439,6 +445,8 @@ public:
     }
 
     //==============================================================================
+    IntrojucerLookAndFeel lookAndFeel;
+
     StoredSettings settings;
     Icons icons;
 

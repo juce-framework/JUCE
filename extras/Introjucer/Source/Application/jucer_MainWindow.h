@@ -114,6 +114,8 @@ public:
 
     void avoidSuperimposedWindows (MainWindow*);
 
+    void sendLookAndFeelChange();
+
     OwnedArray<MainWindow> windows;
 
 private:

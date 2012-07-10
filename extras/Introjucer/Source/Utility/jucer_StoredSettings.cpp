@@ -50,17 +50,21 @@ static AppearanceSettings getDefaultScheme()
 StoredSettings::StoredSettings()
     : appearance (getDefaultScheme())
 {
+}
+
+StoredSettings::~StoredSettings()
+{
+    flush();
+}
+
+void StoredSettings::initialise()
+{
     reload();
 
     const File defaultSchemeFile (getSchemesFolder().getChildFile ("Default").withFileExtension (getSchemeFileSuffix()));
 
     if (! defaultSchemeFile.exists())
         appearance.writeToFile (defaultSchemeFile);
-}
-
-StoredSettings::~StoredSettings()
-{
-    flush();
 }
 
 PropertiesFile& StoredSettings::getProps()

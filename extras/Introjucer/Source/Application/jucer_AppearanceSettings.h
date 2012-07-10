@@ -27,7 +27,7 @@
 #define __JUCER_APPEARANCESETTINGS_H_34D762C7__
 
 
-class AppearanceSettings
+class AppearanceSettings    : private ValueTree::Listener
 {
 public:
     AppearanceSettings (const CodeEditorComponent& editorToCopyFrom);
@@ -36,6 +36,7 @@ public:
     bool readFromXML (const XmlElement&);
     bool writeToFile (const File& file) const;
 
+    void applyToLookAndFeel (LookAndFeel&) const;
     void applyToCodeEditor (CodeEditorComponent& editor) const;
 
     StringArray getColourNames() const;
@@ -48,6 +49,32 @@ public:
     ValueTree settings;
 
     static Component* createEditorWindow();
+
+    static void intialiseLookAndFeel (LookAndFeel&);
+
+private:
+    void updateColourScheme();
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
+    void valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
+    void valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
+    void valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
+};
+
+//==============================================================================
+class IntrojucerLookAndFeel   : public LookAndFeel
+{
+public:
+    IntrojucerLookAndFeel();
+
+    void drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging)
+    {
+        if (isMouseOver || isMouseDragging)
+            g.fillAll (Colours::grey.withAlpha (0.4f));
+    }
+
+    Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
 };
 
 

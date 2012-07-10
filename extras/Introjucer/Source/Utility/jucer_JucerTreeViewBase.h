@@ -93,6 +93,10 @@ protected:
     ProjectContentComponent* getProjectContentComponent() const;
     virtual void addSubItems() {}
 
+    Colour getBackgroundColour() const;
+    Colour getContrastingColour (float contrast) const;
+    Colour getContrastingColour (const Colour& targetColour, float minContrast) const;
+
 private:
     class ItemSelectionTimer;
     friend class ItemSelectionTimer;

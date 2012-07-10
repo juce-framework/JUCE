@@ -83,8 +83,6 @@
             resource="0" file="Source/Application/jucer_DocumentEditorComponent.cpp"/>
       <FILE id="tyrTEq" name="jucer_DocumentEditorComponent.h" compile="0"
             resource="0" file="Source/Application/jucer_DocumentEditorComponent.h"/>
-      <FILE id="jGu5u7N" name="jucer_FilePreviewComponent.cpp" compile="1"
-            resource="0" file="Source/Application/jucer_FilePreviewComponent.cpp"/>
       <FILE id="C4MqR1U" name="jucer_FilePreviewComponent.h" compile="0"
             resource="0" file="Source/Application/jucer_FilePreviewComponent.h"/>
       <FILE id="qXOJtpg" name="jucer_Headers.h" compile="0" resource="0"
@@ -110,8 +108,6 @@
             file="Source/Project/jucer_ConfigPage.cpp"/>
       <FILE id="tlj7HT" name="jucer_ConfigPage.h" compile="0" resource="0"
             file="Source/Project/jucer_ConfigPage.h"/>
-      <FILE id="Wx7kXq7" name="jucer_GroupInformationComponent.cpp" compile="1"
-            resource="0" file="Source/Project/jucer_GroupInformationComponent.cpp"/>
       <FILE id="sQjHbVN" name="jucer_GroupInformationComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_GroupInformationComponent.h"/>
       <FILE id="MJkOAX" name="jucer_Module.cpp" compile="1" resource="0"

@@ -26,16 +26,38 @@
 #include "jucer_Application.h"
 #include "jucer_AppearanceSettings.h"
 
+namespace AppearanceColours
+{
+    struct ColourInfo
+    {
+        const char* name;
+        uint32 colourID;
+        bool mustBeOpaque;
+    };
+
+    static const ColourInfo colours[] =
+    {
+        { "Code Background",    CodeEditorComponent::backgroundColourId, true },
+        { "Line Number Bkgd",   CodeEditorComponent::lineNumberBackgroundId, false },
+        { "Line Numbers",       CodeEditorComponent::lineNumberTextId, false },
+        { "Plain Text",         CodeEditorComponent::defaultTextColourId, false },
+        { "Selected Text Bkgd", CodeEditorComponent::highlightColourId, false },
+        { "Caret",              CaretComponent::caretColourId, false },
+
+        { "Main Window Bkgd",   mainBackgroundColourId, true },
+        { "Project Panel Bkgd", projectPanelBackgroundColourId, true },
+        { "Treeview Highlight", treeviewHighlightColourId, false }
+    };
+}
 
 //==============================================================================
 AppearanceSettings::AppearanceSettings (const CodeEditorComponent& editor)
     : settings ("COLOUR_SCHEME")
 {
-    getColourValue ("Background")          = editor.findColour (CodeEditorComponent::backgroundColourId).toString();
-    getColourValue ("Line Number Bkgd")    = editor.findColour (CodeEditorComponent::lineNumberBackgroundId).toString();
-    getColourValue ("Line Numbers")        = editor.findColour (CodeEditorComponent::lineNumberTextId).toString();
-    getColourValue ("Plain Text")          = editor.findColour (CodeEditorComponent::defaultTextColourId).toString();
-    getColourValue ("Selected Background") = editor.findColour (CodeEditorComponent::highlightColourId).toString();
+    IntrojucerLookAndFeel lf;
+
+    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
+        getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
 
     const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
 
@@ -48,6 +70,8 @@ AppearanceSettings::AppearanceSettings (const CodeEditorComponent& editor)
     Font f (editor.getFont());
     f.setTypefaceName (f.getTypeface()->getName());
     getCodeFontValue() = f.toString();
+
+    settings.addListener (this);
 }
 
 bool AppearanceSettings::readFromXML (const XmlElement& xml)
@@ -97,6 +121,27 @@ StringArray AppearanceSettings::getColourNames() const
     return s;
 }
 
+void AppearanceSettings::updateColourScheme()
+{
+    applyToLookAndFeel (LookAndFeel::getDefaultLookAndFeel());
+    JucerApplication::getApp().mainWindowList.sendLookAndFeelChange();
+}
+
+void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const
+{
+    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
+    {
+        Colour col;
+        if (getColour (AppearanceColours::colours[i].name, col))
+        {
+            if (AppearanceColours::colours[i].mustBeOpaque)
+                col = Colours::white.overlaidWith (col);
+
+            lf.setColour (AppearanceColours::colours[i].colourID, col);
+        }
+    }
+}
+
 void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 {
     CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
@@ -108,20 +153,6 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
     }
 
     editor.setColourScheme (cs);
-
-    Colour col;
-    if (getColour ("Plain Text", col))          editor.setColour (CodeEditorComponent::defaultTextColourId, col);
-    if (getColour ("Selected Background", col)) editor.setColour (CodeEditorComponent::highlightColourId, col);
-    if (getColour ("Line Number Bkgd", col))    editor.setColour (CodeEditorComponent::lineNumberBackgroundId, col);
-    if (getColour ("Line Numbers", col))        editor.setColour (CodeEditorComponent::lineNumberTextId, col);
-
-    if (getColour ("Background", col))
-    {
-        col = Colours::white.overlaidWith (col);
-        editor.setColour (CodeEditorComponent::backgroundColourId, col);
-        editor.setColour (CaretComponent::caretColourId, col.contrasting());
-    }
-
     editor.setFont (getCodeFont());
 }
 
@@ -374,4 +405,20 @@ struct AppearanceEditor
 Component* AppearanceSettings::createEditorWindow()
 {
     return new AppearanceEditor::Window();
+}
+
+//==============================================================================
+IntrojucerLookAndFeel::IntrojucerLookAndFeel()
+{
+    setColour (mainBackgroundColourId, Colour::greyLevel (0.8f));
+    setColour (projectPanelBackgroundColourId, Colour::greyLevel (0.93f));
+    setColour (treeviewHighlightColourId, Colour (0x401111ee));
+}
+
+Rectangle<int> IntrojucerLookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
+{
+    if (component.findParentComponentOfClass<AppearanceEditor::EditorPanel>() != nullptr)
+        return component.getLocalBounds().reduced (1, 1).removeFromRight (component.getWidth() / 2);
+
+    return LookAndFeel::getPropertyComponentContentPosition (component);
 }

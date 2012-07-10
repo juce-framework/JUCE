@@ -96,10 +96,16 @@ ProjectContentComponent::ProjectContentComponent()
 
     treeSizeConstrainer.setMinimumWidth (100);
     treeSizeConstrainer.setMaximumWidth (500);
+
+    treeViewTabs.setOutline (0);
+
+    JucerApplication::getApp().openDocumentManager.addListener (this);
 }
 
 ProjectContentComponent::~ProjectContentComponent()
 {
+    JucerApplication::getApp().openDocumentManager.removeListener (this);
+
     setProject (nullptr);
     contentView = nullptr;
     removeChildComponent (&bubbleMessage);
@@ -108,7 +114,7 @@ ProjectContentComponent::~ProjectContentComponent()
 
 void ProjectContentComponent::paint (Graphics& g)
 {
-    g.fillAll (Colour::greyLevel (0.8f));
+    g.fillAll (findColour (mainBackgroundColourId));
 }
 
 void ProjectContentComponent::resized()
@@ -122,6 +128,16 @@ void ProjectContentComponent::resized()
 
     if (contentView != nullptr)
         contentView->setBounds (r);
+}
+
+void ProjectContentComponent::lookAndFeelChanged()
+{
+    const Colour tabColour (findColour (projectPanelBackgroundColourId));
+
+    for (int i = treeViewTabs.getNumTabs(); --i >= 0;)
+        treeViewTabs.setTabBackgroundColour (i, tabColour);
+
+    repaint();
 }
 
 void ProjectContentComponent::childBoundsChanged (Component* child)
@@ -191,8 +207,10 @@ void ProjectContentComponent::setProject (Project* newProject)
 void ProjectContentComponent::createProjectTabs()
 {
     jassert (project != nullptr);
-    treeViewTabs.addTab ("Files",  Colour::greyLevel (0.93f), new FileTreeTab (*project), true);
-    treeViewTabs.addTab ("Config", Colour::greyLevel (0.93f), new ConfigTreeTab (*project), true);
+    const Colour tabColour (findColour (projectPanelBackgroundColourId));
+
+    treeViewTabs.addTab ("Files",  tabColour, new FileTreeTab (*project), true);
+    treeViewTabs.addTab ("Config", tabColour, new ConfigTreeTab (*project), true);
 }
 
 TreeView* ProjectContentComponent::getFilesTreeView() const
@@ -241,6 +259,11 @@ void ProjectContentComponent::reloadLastOpenDocuments()
             showDocument (recentDocumentList.getCurrentDocument());
         }
     }
+}
+
+void ProjectContentComponent::documentAboutToClose (OpenDocumentManager::Document* document)
+{
+    hideDocument (document);
 }
 
 void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)

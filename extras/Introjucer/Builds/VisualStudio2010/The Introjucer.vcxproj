@@ -129,13 +129,11 @@
     <ClCompile Include="..\..\Source\Application\jucer_AppearanceSettings.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
-    <ClCompile Include="..\..\Source\Application\jucer_FilePreviewComponent.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_JuceUpdater.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_ConfigPage.cpp"/>
-    <ClCompile Include="..\..\Source\Project\jucer_GroupInformationComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_NewFileWizard.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_NewProjectWizard.cpp"/>
