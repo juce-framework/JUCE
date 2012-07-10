@@ -30,13 +30,12 @@
 class AppearanceSettings    : private ValueTree::Listener
 {
 public:
-    AppearanceSettings (const CodeEditorComponent& editorToCopyFrom);
+    AppearanceSettings();
 
     bool readFromFile (const File& file);
     bool readFromXML (const XmlElement&);
     bool writeToFile (const File& file) const;
 
-    void applyToLookAndFeel (LookAndFeel&) const;
     void applyToCodeEditor (CodeEditorComponent& editor) const;
 
     StringArray getColourNames() const;
@@ -48,18 +47,29 @@ public:
 
     ValueTree settings;
 
+    File getSchemesFolder();
+    StringArray getPresetSchemes();
+    void refreshPresetSchemeList();
+    void selectPresetScheme (int index);
+
     static Component* createEditorWindow();
 
-    static void intialiseLookAndFeel (LookAndFeel&);
-
 private:
+    static const char* getSchemeFileSuffix()      { return ".editorscheme"; }
+
+    Array<File> presetSchemeFiles;
+
+    void applyToLookAndFeel (LookAndFeel&) const;
     void updateColourScheme();
+
     void valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
     void valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
     void valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
     void valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
     void valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettings);
 };
 
 //==============================================================================

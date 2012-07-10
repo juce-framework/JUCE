@@ -51,13 +51,17 @@ namespace AppearanceColours
 }
 
 //==============================================================================
-AppearanceSettings::AppearanceSettings (const CodeEditorComponent& editor)
+AppearanceSettings::AppearanceSettings()
     : settings ("COLOUR_SCHEME")
 {
     IntrojucerLookAndFeel lf;
 
     for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
         getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
+
+    CodeDocument doc;
+    CPlusPlusCodeTokeniser tokeniser;
+    CodeEditorComponent editor (doc, &tokeniser);
 
     const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
 
@@ -72,6 +76,44 @@ AppearanceSettings::AppearanceSettings (const CodeEditorComponent& editor)
     getCodeFontValue() = f.toString();
 
     settings.addListener (this);
+}
+
+File AppearanceSettings::getSchemesFolder()
+{
+    File f (getAppProperties().getFile().getSiblingFile ("Colour Schemes"));
+    f.createDirectory();
+    return f;
+}
+
+void AppearanceSettings::refreshPresetSchemeList()
+{
+    const File defaultSchemeFile (getSchemesFolder().getChildFile ("Default").withFileExtension (getSchemeFileSuffix()));
+
+    if (! defaultSchemeFile.exists())
+        AppearanceSettings().writeToFile (defaultSchemeFile);
+
+    Array<File> newSchemes;
+    getSchemesFolder().findChildFiles (newSchemes, File::findFiles, false, String ("*") + getSchemeFileSuffix());
+
+    if (newSchemes != presetSchemeFiles)
+    {
+        presetSchemeFiles.swapWithArray (newSchemes);
+        commandManager->commandStatusChanged();
+    }
+}
+
+StringArray AppearanceSettings::getPresetSchemes()
+{
+    StringArray s;
+    for (int i = 0; i < presetSchemeFiles.size(); ++i)
+        s.add (presetSchemeFiles.getReference(i).getFileNameWithoutExtension());
+
+    return s;
+}
+
+void AppearanceSettings::selectPresetScheme (int index)
+{
+    readFromFile (presetSchemeFiles [index]);
 }
 
 bool AppearanceSettings::readFromXML (const XmlElement& xml)
@@ -321,20 +363,21 @@ struct AppearanceEditor
         void saveScheme()
         {
             FileChooser fc ("Select a file in which to save this colour-scheme...",
-                            getAppSettings().getSchemesFolder().getNonexistentChildFile ("Scheme", ".editorscheme"),
+                            getAppSettings().appearance.getSchemesFolder().getNonexistentChildFile ("Scheme", ".editorscheme"),
                             "*.editorscheme");
 
             if (fc.browseForFileToSave (true))
             {
                 File file (fc.getResult().withFileExtension (".editorscheme"));
                 getAppSettings().appearance.writeToFile (file);
+                getAppSettings().appearance.refreshPresetSchemeList();
             }
         }
 
         void loadScheme()
         {
             FileChooser fc ("Please select a colour-scheme file to load...",
-                            getAppSettings().getSchemesFolder(),
+                            getAppSettings().appearance.getSchemesFolder(),
                             "*.editorscheme");
 
             if (fc.browseForFileToOpen())

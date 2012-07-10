@@ -67,6 +67,8 @@ public:
 
         doExtraInitialisation();
 
+        settings.appearance.refreshPresetSchemeList();
+
         ImageCache::setCacheTimeout (30 * 1000);
 
         if (commandLine.trim().isNotEmpty() && ! commandLine.trim().startsWithChar ('-'))
@@ -168,19 +170,30 @@ public:
 
         void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
         {
-            if (menuItemID >= 100 && menuItemID < 200)
+            if (menuItemID >= recentProjectsBaseID && menuItemID < recentProjectsBaseID + 100)
             {
                 // open a file from the "recent files" menu
-                getApp().openFile (getAppSettings().recentFiles.getFile (menuItemID - 100));
+                getApp().openFile (getAppSettings().recentFiles.getFile (menuItemID - recentProjectsBaseID));
             }
-            else if (menuItemID >= 300 && menuItemID < 400)
+            else if (menuItemID >= activeDocumentsBaseID && menuItemID < activeDocumentsBaseID + 200)
             {
-                OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument (menuItemID - 300);
+                OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID);
                 jassert (doc != nullptr);
 
                 getApp().mainWindowList.openDocument (doc);
             }
+            else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
+            {
+                getApp().settings.appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
+            }
         }
+    };
+
+    enum
+    {
+        recentProjectsBaseID = 100,
+        activeDocumentsBaseID = 300,
+        colourSchemeBaseID = 1000
     };
 
     virtual StringArray getMenuNames()
@@ -206,7 +219,7 @@ public:
         menu.addCommandItem (commandManager, CommandIDs::open);
 
         PopupMenu recentFiles;
-        getAppSettings().recentFiles.createPopupMenuItems (recentFiles, 100, true, true);
+        getAppSettings().recentFiles.createPopupMenuItems (recentFiles, recentProjectsBaseID, true, true);
         menu.addSubMenu ("Open recent file", recentFiles);
 
         menu.addSeparator();
@@ -251,7 +264,24 @@ public:
         menu.addCommandItem (commandManager, CommandIDs::showFilePanel);
         menu.addCommandItem (commandManager, CommandIDs::showConfigPanel);
         menu.addSeparator();
+        createColourSchemeItems (menu);
+    }
+
+    void createColourSchemeItems (PopupMenu& menu)
+    {
         menu.addCommandItem (commandManager, CommandIDs::showAppearanceSettings);
+
+        const StringArray presetSchemes (settings.appearance.getPresetSchemes());
+
+        if (presetSchemes.size() > 0)
+        {
+            PopupMenu schemes;
+
+            for (int i = 0; i < presetSchemes.size(); ++i)
+                schemes.addItem (colourSchemeBaseID + i, presetSchemes[i]);
+
+            menu.addSubMenu ("Colour Scheme", schemes);
+        }
     }
 
     virtual void createWindowMenu (PopupMenu& menu)
@@ -269,7 +299,7 @@ public:
         {
             OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument(i);
 
-            menu.addItem (300 + i, doc->getName());
+            menu.addItem (activeDocumentsBaseID + i, doc->getName());
         }
 
         menu.addSeparator();

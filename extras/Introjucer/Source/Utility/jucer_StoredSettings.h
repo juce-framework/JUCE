@@ -66,9 +66,6 @@ public:
     //==============================================================================
     AppearanceSettings appearance;
 
-    const char* getSchemeFileSuffix() const     { return ".editorscheme"; }
-    File getSchemesFolder();
-
 private:
     ScopedPointer<PropertiesFile> props;
     StringArray fontNames;

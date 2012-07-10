@@ -38,17 +38,8 @@ PropertiesFile& getAppProperties()
     return getAppSettings().getProps();
 }
 
-static AppearanceSettings getDefaultScheme()
-{
-    CodeDocument doc;
-    CPlusPlusCodeTokeniser tokeniser;
-    CodeEditorComponent defaultComp (doc, &tokeniser);
-    return AppearanceSettings (defaultComp);
-}
-
 //==============================================================================
 StoredSettings::StoredSettings()
-    : appearance (getDefaultScheme())
 {
 }
 
@@ -60,11 +51,6 @@ StoredSettings::~StoredSettings()
 void StoredSettings::initialise()
 {
     reload();
-
-    const File defaultSchemeFile (getSchemesFolder().getChildFile ("Default").withFileExtension (getSchemeFileSuffix()));
-
-    if (! defaultSchemeFile.exists())
-        appearance.writeToFile (defaultSchemeFile);
 }
 
 PropertiesFile& StoredSettings::getProps()
@@ -203,13 +189,6 @@ Colour StoredSettings::ColourSelectorWithSwatches::getSwatchColour (int index) c
 void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, const Colour& newColour) const
 {
     getAppSettings().swatchColours.set (index, newColour);
-}
-
-File StoredSettings::getSchemesFolder()
-{
-    File f (getProps().getFile().getSiblingFile ("Colour Schemes"));
-    f.createDirectory();
-    return f;
 }
 
 //==============================================================================
