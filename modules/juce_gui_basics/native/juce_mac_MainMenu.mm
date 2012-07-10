@@ -595,8 +595,18 @@ const PopupMenu* MenuBarModel::getMacExtraAppleItemsMenu()
              ? JuceMainMenuHandler::instance->extraAppleMenuItems.get() : nullptr;
 }
 
+typedef void (*MenuTrackingBeganCallback)();
+extern MenuTrackingBeganCallback menuTrackingBeganCallback;
+
+static void mainMenuTrackingBegan()
+{
+    PopupMenu::dismissAllActiveMenus();
+}
+
 void juce_initialiseMacMainMenu()
 {
+    menuTrackingBeganCallback = mainMenuTrackingBegan;
+
     if (JuceMainMenuHandler::instance == nullptr)
         MainMenuHelpers::rebuildMainMenu (nullptr);
 }
