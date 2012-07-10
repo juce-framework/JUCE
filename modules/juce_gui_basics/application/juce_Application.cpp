@@ -60,14 +60,11 @@ JUCEApplication::~JUCEApplication()
 }
 
 //==============================================================================
-bool JUCEApplication::moreThanOneInstanceAllowed()
-{
-    return true;
-}
+bool JUCEApplication::moreThanOneInstanceAllowed()  { return true; }
+void JUCEApplication::anotherInstanceStarted (const String&) {}
 
-void JUCEApplication::anotherInstanceStarted (const String&)
-{
-}
+void JUCEApplication::suspended() {}
+void JUCEApplication::resumed() {}
 
 void JUCEApplication::systemRequestedQuit()
 {

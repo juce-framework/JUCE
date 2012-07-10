@@ -49,6 +49,20 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* en
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 }
 
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* env, jobject activity))
+{
+    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
+    if (app != nullptr)
+        app->suspended();
+}
+
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* env, jobject activity))
+{
+    JUCEApplicationBase* const app = JUCEApplicationBase::getInstance();
+    if (app != nullptr)
+        app->resumed();
+}
+
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env, jobject activity))
 {
     JUCEApplicationBase::appWillTerminateByForce();
