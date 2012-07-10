@@ -349,7 +349,9 @@ namespace CppTokeniser
 
             if (c == '/')
             {
-                const juce_wchar c2 = source.peekNextChar();
+                CodeDocument::Iterator next (source);
+                next.skip();
+                const juce_wchar c2 = next.peekNextChar();
 
                 if (c2 == '/' || c2 == '*')
                     return;
