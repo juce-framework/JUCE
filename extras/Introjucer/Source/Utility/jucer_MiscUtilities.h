@@ -62,6 +62,7 @@ struct Icon
 {
     Icon() : path (nullptr) {}
     Icon (const Path& p, const Colour& c)  : path (&p), colour (c) {}
+    Icon (const Path* p, const Colour& c)  : path (p),  colour (c) {}
 
     void draw (Graphics& g, const Rectangle<float>& area) const
     {
@@ -72,6 +73,11 @@ struct Icon
             const RectanglePlacement placement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
             g.fillPath (*path, placement.getTransformToFit (path->getBounds(), area));
         }
+    }
+
+    Icon withContrastingColourTo (const Colour& background) const
+    {
+        return Icon (path, background.contrasting (colour, 0.6f));
     }
 
     const Path* path;

@@ -136,8 +136,7 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
     targetArea = newAreaToPointTo;
     availableArea = newAreaToFitIn;
 
-    Rectangle<int> newBounds (0, 0,
-                              content.getWidth() + borderSpace * 2,
+    Rectangle<int> newBounds (content.getWidth()  + borderSpace * 2,
                               content.getHeight() + borderSpace * 2);
 
     const int hw = newBounds.getWidth() / 2;

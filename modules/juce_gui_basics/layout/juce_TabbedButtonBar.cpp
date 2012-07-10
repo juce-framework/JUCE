@@ -49,13 +49,12 @@ void TabBarButton::paintButton (Graphics& g,
     const Rectangle<int> area (getActiveArea());
     g.setOrigin (area.getX(), area.getY());
 
-    getLookAndFeel()
-        .drawTabButton (g, area.getWidth(), area.getHeight(),
-                        owner.getTabBackgroundColour (getIndex()),
-                        getIndex(), getButtonText(), *this,
-                        owner.getOrientation(),
-                        isMouseOverButton, isButtonDown,
-                        getToggleState());
+    getLookAndFeel().drawTabButton (g, area.getWidth(), area.getHeight(),
+                                    owner.getTabBackgroundColour (getIndex()),
+                                    getIndex(), getButtonText(), *this,
+                                    owner.getOrientation(),
+                                    isMouseOverButton, isButtonDown,
+                                    getToggleState());
 }
 
 void TabBarButton::clicked (const ModifierKeys& mods)
@@ -86,9 +85,9 @@ bool TabBarButton::hitTest (int mx, int my)
     }
 
     Path p;
-    getLookAndFeel()
-        .createTabButtonShape (p, area.getWidth(), area.getHeight(), getIndex(), getButtonText(), *this,
-                               owner.getOrientation(), false, false, getToggleState());
+    getLookAndFeel().createTabButtonShape (p, area.getWidth(), area.getHeight(),
+                                           getIndex(), getButtonText(), *this,
+                                           owner.getOrientation(), false, false, getToggleState());
 
     return p.contains ((float) (mx - area.getX()),
                        (float) (my - area.getY()));
@@ -325,14 +324,15 @@ void TabbedButtonBar::lookAndFeelChanged()
 
 void TabbedButtonBar::resized()
 {
+    LookAndFeel& lf = getLookAndFeel();
+
     int depth = getWidth();
     int length = getHeight();
 
     if (orientation == TabsAtTop || orientation == TabsAtBottom)
         std::swap (depth, length);
 
-    const int overlap = getLookAndFeel().getTabButtonOverlap (depth)
-                            + getLookAndFeel().getTabButtonSpaceAroundImage() * 2;
+    const int overlap = lf.getTabButtonOverlap (depth) + lf.getTabButtonSpaceAroundImage() * 2;
 
     int i, totalLength = overlap;
     int numVisibleButtons = tabs.size();
@@ -357,7 +357,7 @@ void TabbedButtonBar::resized()
     {
         if (extraTabsButton == nullptr)
         {
-            addAndMakeVisible (extraTabsButton = getLookAndFeel().createTabBarExtrasButton());
+            addAndMakeVisible (extraTabsButton = lf.createTabBarExtrasButton());
             extraTabsButton->addListener (behindFrontTab);
             extraTabsButton->setAlwaysOnTop (true);
             extraTabsButton->setTriggeredOnMouseDown (true);

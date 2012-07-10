@@ -780,7 +780,7 @@ Icon Project::Item::getIcon() const
         if (isImageFile())
             return Icon (icons.imageDoc, Colours::blue);
 
-        return Icon (icons.document, Colours::yellow.darker (1.0f));
+        return Icon (icons.document, Colours::yellow);
     }
     else if (isMainGroup())
     {

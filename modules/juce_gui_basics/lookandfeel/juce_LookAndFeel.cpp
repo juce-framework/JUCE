@@ -2079,15 +2079,9 @@ int LookAndFeel::getTabButtonSpaceAroundImage()
     return 4;
 }
 
-void LookAndFeel::createTabButtonShape (Path& p,
-                                        int width, int height,
-                                        int /*tabIndex*/,
-                                        const String& /*text*/,
-                                        Button& /*button*/,
-                                        TabbedButtonBar::Orientation orientation,
-                                        const bool /*isMouseOver*/,
-                                        const bool /*isMouseDown*/,
-                                        const bool /*isFrontTab*/)
+void LookAndFeel::createTabButtonShape (Path& p, int width, int height, int /*tabIndex*/,
+                                        const String& /*text*/, Button& /*button*/, TabbedButtonBar::Orientation orientation,
+                                        const bool /*isMouseOver*/, const bool /*isMouseDown*/, const bool /*isFrontTab*/)
 {
     const float w = (float) width;
     const float h = (float) height;
@@ -2146,16 +2140,10 @@ void LookAndFeel::createTabButtonShape (Path& p,
     p = p.createPathWithRoundedCorners (3.0f);
 }
 
-void LookAndFeel::fillTabButtonShape (Graphics& g,
-                                      const Path& path,
-                                      const Colour& preferredColour,
-                                      int /*tabIndex*/,
-                                      const String& /*text*/,
-                                      Button& button,
-                                      TabbedButtonBar::Orientation /*orientation*/,
-                                      const bool /*isMouseOver*/,
-                                      const bool /*isMouseDown*/,
-                                      const bool isFrontTab)
+void LookAndFeel::fillTabButtonShape (Graphics& g, const Path& path, const Colour& preferredColour,
+                                      int /*tabIndex*/, const String& /*text*/, Button& button,
+                                      TabbedButtonBar::Orientation /*orientation*/, const bool /*isMouseOver*/,
+                                      const bool /*isMouseDown*/, const bool isFrontTab)
 {
     g.setColour (isFrontTab ? preferredColour
                             : preferredColour.withMultipliedAlpha (0.9f));
@@ -2169,16 +2157,10 @@ void LookAndFeel::fillTabButtonShape (Graphics& g,
     g.strokePath (path, PathStrokeType (isFrontTab ? 1.0f : 0.5f));
 }
 
-void LookAndFeel::drawTabButtonText (Graphics& g,
-                                     int x, int y, int w, int h,
-                                     const Colour& preferredBackgroundColour,
-                                     int /*tabIndex*/,
-                                     const String& text,
-                                     Button& button,
-                                     TabbedButtonBar::Orientation orientation,
-                                     const bool isMouseOver,
-                                     const bool isMouseDown,
-                                     const bool isFrontTab)
+void LookAndFeel::drawTabButtonText (Graphics& g, int x, int y, int w, int h,
+                                     const Colour& preferredBackgroundColour, int /*tabIndex*/,
+                                     const String& text, Button& button, TabbedButtonBar::Orientation orientation,
+                                     const bool isMouseOver, const bool isMouseDown, const bool isFrontTab)
 {
     int length = w;
     int depth = h;
@@ -2198,21 +2180,13 @@ void LookAndFeel::drawTabButtonText (Graphics& g,
                               Justification::centred,
                               jmax (1, depth / 12));
 
-    AffineTransform transform;
+    AffineTransform t;
 
-    if (orientation == TabbedButtonBar::TabsAtLeft)
+    switch (orientation)
     {
-        transform = transform.rotated (float_Pi * -0.5f)
-                             .translated ((float) x, (float) (y + h));
-    }
-    else if (orientation  == TabbedButtonBar::TabsAtRight)
-    {
-        transform = transform.rotated (float_Pi * 0.5f)
-                             .translated ((float) (x + w), (float) y);
-    }
-    else
-    {
-        transform = transform.translated ((float) x, (float) y);
+        case TabbedButtonBar::TabsAtLeft:   t = t.rotated (float_Pi * -0.5f).translated ((float) x, (float) (y + h)); break;
+        case TabbedButtonBar::TabsAtRight:  t = t.rotated (float_Pi *  0.5f).translated ((float) (x + w), (float) y); break;
+        default:                            t = t.translated ((float) x, (float) y);
     }
 
     if (isFrontTab && (button.isColourSpecified (TabbedButtonBar::frontTextColourId) || isColourSpecified (TabbedButtonBar::frontTextColourId)))
@@ -2228,53 +2202,32 @@ void LookAndFeel::drawTabButtonText (Graphics& g,
     if (! button.isEnabled())
         g.setOpacity (0.3f);
 
-    textLayout.draw (g, transform);
+    textLayout.draw (g, t);
 }
 
-int LookAndFeel::getTabButtonBestWidth (int /*tabIndex*/,
-                                        const String& text,
-                                        int tabDepth,
-                                        Button&)
+int LookAndFeel::getTabButtonBestWidth (int /*tabIndex*/, const String& text, int tabDepth, Button&)
 {
     Font f (tabDepth * 0.6f);
     return f.getStringWidth (text.trim()) + getTabButtonOverlap (tabDepth) * 2;
 }
 
-void LookAndFeel::drawTabButton (Graphics& g,
-                                 int w, int h,
-                                 const Colour& preferredColour,
-                                 int tabIndex,
-                                 const String& text,
-                                 Button& button,
-                                 TabbedButtonBar::Orientation orientation,
-                                 const bool isMouseOver,
-                                 const bool isMouseDown,
-                                 const bool isFrontTab)
+void LookAndFeel::drawTabButton (Graphics& g, int w, int h, const Colour& preferredColour,
+                                 int tabIndex, const String& text, Button& button, TabbedButtonBar::Orientation orientation,
+                                 const bool isMouseOver, const bool isMouseDown, const bool isFrontTab)
 {
-    int length = w;
-    int depth = h;
-
-    if (orientation == TabbedButtonBar::TabsAtLeft
-            || orientation == TabbedButtonBar::TabsAtRight)
-    {
-        std::swap (length, depth);
-    }
-
     Path tabShape;
-
-    createTabButtonShape (tabShape, w, h,
-                          tabIndex, text, button, orientation,
+    createTabButtonShape (tabShape, w, h, tabIndex, text, button, orientation,
                           isMouseOver, isMouseDown, isFrontTab);
 
     fillTabButtonShape (g, tabShape, preferredColour,
                         tabIndex, text, button, orientation,
                         isMouseOver, isMouseDown, isFrontTab);
 
+    const int depth = (orientation == TabbedButtonBar::TabsAtLeft || orientation == TabbedButtonBar::TabsAtRight) ? w : h;
     const int indent = getTabButtonOverlap (depth);
     int x = 0, y = 0;
 
-    if (orientation == TabbedButtonBar::TabsAtLeft
-         || orientation == TabbedButtonBar::TabsAtRight)
+    if (orientation == TabbedButtonBar::TabsAtLeft || orientation == TabbedButtonBar::TabsAtRight)
     {
         y += indent;
         h -= indent * 2;
@@ -2290,63 +2243,51 @@ void LookAndFeel::drawTabButton (Graphics& g,
                        isMouseOver, isMouseDown, isFrontTab);
 }
 
-void LookAndFeel::drawTabAreaBehindFrontButton (Graphics& g,
-                                                int w, int h,
-                                                TabbedButtonBar& tabBar,
+void LookAndFeel::drawTabAreaBehindFrontButton (Graphics& g, int w, int h, TabbedButtonBar& tabBar,
                                                 TabbedButtonBar::Orientation orientation)
 {
     const float shadowSize = 0.2f;
 
-    float x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
-    Rectangle<int> shadowRect;
+    float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    Rectangle<int> shadowRect, line;
 
-    if (orientation == TabbedButtonBar::TabsAtLeft)
+    switch (orientation)
     {
-        x1 = (float) w;
-        x2 = w * (1.0f - shadowSize);
-        shadowRect.setBounds ((int) x2, 0, w - (int) x2, h);
-    }
-    else if (orientation == TabbedButtonBar::TabsAtRight)
-    {
-        x2 = w * shadowSize;
-        shadowRect.setBounds (0, 0, (int) x2, h);
-    }
-    else if (orientation == TabbedButtonBar::TabsAtBottom)
-    {
-        y2 = h * shadowSize;
-        shadowRect.setBounds (0, 0, w, (int) y2);
-    }
-    else
-    {
-        y1 = (float) h;
-        y2 = h * (1.0f - shadowSize);
-        shadowRect.setBounds (0, (int) y2, w, h - (int) y2);
+        case TabbedButtonBar::TabsAtLeft:
+            x1 = (float) w;
+            x2 = w * (1.0f - shadowSize);
+            shadowRect.setBounds ((int) x2, 0, w - (int) x2, h);
+            line.setBounds (w - 1, 0, 1, h);
+            break;
+
+        case TabbedButtonBar::TabsAtRight:
+            x2 = w * shadowSize;
+            shadowRect.setBounds (0, 0, (int) x2, h);
+            line.setBounds (0, 0, 1, h);
+            break;
+
+        case TabbedButtonBar::TabsAtTop:
+            y1 = (float) h;
+            y2 = h * (1.0f - shadowSize);
+            shadowRect.setBounds (0, (int) y2, w, h - (int) y2);
+            line.setBounds (0, h - 1, w, 1);
+            break;
+
+        case TabbedButtonBar::TabsAtBottom:
+            y2 = h * shadowSize;
+            shadowRect.setBounds (0, 0, w, (int) y2);
+            line.setBounds (0, 0, w, 1);
+            break;
+
+        default: break;
     }
 
     g.setGradientFill (ColourGradient (Colours::black.withAlpha (tabBar.isEnabled() ? 0.3f : 0.15f), x1, y1,
                                        Colours::transparentBlack, x2, y2, false));
-
-    shadowRect.expand (2, 2);
-    g.fillRect (shadowRect);
+    g.fillRect (shadowRect.expanded (2, 2));
 
     g.setColour (Colour (0x80000000));
-
-    if (orientation == TabbedButtonBar::TabsAtLeft)
-    {
-        g.fillRect (w - 1, 0, 1, h);
-    }
-    else if (orientation == TabbedButtonBar::TabsAtRight)
-    {
-        g.fillRect (0, 0, 1, h);
-    }
-    else if (orientation == TabbedButtonBar::TabsAtBottom)
-    {
-        g.fillRect (0, 0, w, 1);
-    }
-    else
-    {
-        g.fillRect (0, h - 1, w, 1);
-    }
+    g.fillRect (line);
 }
 
 Button* LookAndFeel::createTabBarExtrasButton()
@@ -2526,7 +2467,7 @@ void LookAndFeel::drawPropertyComponentLabel (Graphics& g, int, int height,
                       Justification::centredLeft, 2);
 }
 
-const Rectangle<int> LookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
+Rectangle<int> LookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
 {
     const int textW = jmin (200, component.getWidth() / 3);
     return Rectangle<int> (textW, 1, component.getWidth() - textW - 1, component.getHeight() - 3);

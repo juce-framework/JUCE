@@ -608,7 +608,7 @@ public:
     virtual void drawPropertyComponentLabel (Graphics& g, int width, int height,
                                              PropertyComponent& component);
 
-    virtual const Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
+    virtual Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
 
     //==============================================================================
     virtual void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path, Image& cachedImage);
