@@ -51,9 +51,6 @@ void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize);
 
 void showUTF8ToolWindow();
 
-// Start a callout modally, which will delete the content comp when it's dismissed.
-void launchAsyncCallOutBox (Component& attachTo, Component* content);
-
 bool cancelAnyModalComponents();
 bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo&);
 
@@ -335,7 +332,9 @@ public:
         if (undoManager != nullptr)
             undoManager->beginNewTransaction();
 
-        launchAsyncCallOutBox (*this, new PopupColourSelector (colourValue, defaultColour, canResetToDefault));
+        CallOutBox::launchAsynchronously (*this, new PopupColourSelector (colourValue,
+                                                                          defaultColour,
+                                                                          canResetToDefault), nullptr);
     }
 
     void valueChanged (Value&)

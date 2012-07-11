@@ -56,6 +56,35 @@ CallOutBox::~CallOutBox()
 }
 
 //==============================================================================
+class CallOutBoxCallback  : public ModalComponentManager::Callback
+{
+public:
+    CallOutBoxCallback (Component& attachTo, Component* content_, Component* parentComponent)
+        : content (content_), callout (*content_, attachTo, parentComponent)
+    {
+        callout.setVisible (true);
+        callout.enterModalState (true, this);
+    }
+
+    void modalStateFinished (int) {}
+
+private:
+    ScopedPointer<Component> content;
+    CallOutBox callout;
+
+    JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback);
+};
+
+void CallOutBox::launchAsynchronously (Component& componentToPointTo,
+                                       Component* contentComponent,
+                                       Component* parentComponent)
+{
+    jassert (contentComponent != nullptr); // must be a valid content component!
+
+    new CallOutBoxCallback (componentToPointTo, contentComponent, parentComponent);
+}
+
+//==============================================================================
 void CallOutBox::setArrowSize (const float newSize)
 {
     arrowSize = newSize;

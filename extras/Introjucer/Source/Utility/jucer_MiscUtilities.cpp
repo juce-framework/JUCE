@@ -461,29 +461,3 @@ bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::I
 
     return false;
 }
-
-//==============================================================================
-class CallOutBoxCallback  : public ModalComponentManager::Callback
-{
-public:
-    CallOutBoxCallback (Component& attachTo, Component* content_)
-        : content (content_),
-          callout (*content_, attachTo, nullptr)
-    {
-        callout.setVisible (true);
-        callout.enterModalState (true, this);
-    }
-
-    void modalStateFinished (int) {}
-
-private:
-    ScopedPointer<Component> content;
-    CallOutBox callout;
-
-    JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback);
-};
-
-void launchAsyncCallOutBox (Component& attachTo, Component* content)
-{
-    new CallOutBoxCallback (attachTo, content);
-}

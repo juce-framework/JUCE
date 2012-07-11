@@ -332,12 +332,16 @@ public:
 
     //==============================================================================
     /** Fills an ellipse with the current colour or brush.
-
         The ellipse is drawn to fit inside the given rectangle.
-
         @see drawEllipse, Path::addEllipse
     */
     void fillEllipse (float x, float y, float width, float height) const;
+
+    /** Fills an ellipse with the current colour or brush.
+        The ellipse is drawn to fit inside the given rectangle.
+        @see drawEllipse, Path::addEllipse
+    */
+    void fillEllipse (const Rectangle<float>& area) const;
 
     /** Draws an elliptical stroke using the current colour or brush.
 

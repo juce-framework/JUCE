@@ -90,6 +90,24 @@ public:
     void updatePosition (const Rectangle<int>& newAreaToPointTo,
                          const Rectangle<int>& newAreaToFitIn);
 
+
+    /** This will launch a callout box containing the given content, pointing to the
+        specified target component.
+
+        This method will create and display a callout, returning immediately, after which
+        the box will continue to run modally until the user clicks on some other component, at
+        which point it will be dismissed automatically.
+
+        The content component that is passed-in will be owned by the callout, which will
+        delete it when it is dismissed.
+
+        The parentComponent parameter can be a nullptr if you want the window to appear on
+        the desktop.
+    */
+    static void launchAsynchronously (Component& componentToPointTo,
+                                      Component* contentComponent,
+                                      Component* parentComponent);
+
     //==============================================================================
     /** @internal */
     void paint (Graphics& g);

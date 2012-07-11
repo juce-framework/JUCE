@@ -446,6 +446,11 @@ void Graphics::drawBevel (const int x, const int y, const int width, const int h
 }
 
 //==============================================================================
+void Graphics::fillEllipse (const Rectangle<float>& area) const
+{
+    fillEllipse (area.getX(), area.getY(), area.getWidth(), area.getHeight());
+}
+
 void Graphics::fillEllipse (const float x, const float y, const float width, const float height) const
 {
     // passing in a silly number can cause maths problems in rendering!
