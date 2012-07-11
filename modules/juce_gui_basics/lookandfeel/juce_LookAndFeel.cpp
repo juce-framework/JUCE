@@ -2079,60 +2079,64 @@ int LookAndFeel::getTabButtonSpaceAroundImage()
     return 4;
 }
 
-void LookAndFeel::createTabButtonShape (Path& p, int width, int height, int /*tabIndex*/,
-                                        const String& /*text*/, Button& /*button*/, TabbedButtonBar::Orientation orientation,
-                                        const bool /*isMouseOver*/, const bool /*isMouseDown*/, const bool /*isFrontTab*/)
+int LookAndFeel::getTabButtonBestWidth (TabBarButton& button, int tabDepth)
 {
-    const float w = (float) width;
-    const float h = (float) height;
+    return Font (tabDepth * 0.6f).getStringWidth (button.getButtonText().trim())
+              + getTabButtonOverlap (tabDepth) * 2;
+}
+
+void LookAndFeel::createTabButtonShape (TabBarButton& button, Path& p, bool isMouseOver, bool isMouseDown)
+{
+    const Rectangle<int> activeArea (button.getActiveArea());
+    const float w = (float) activeArea.getWidth();
+    const float h = (float) activeArea.getHeight();
 
     float length = w;
     float depth = h;
 
-    if (orientation == TabbedButtonBar::TabsAtLeft
-         || orientation == TabbedButtonBar::TabsAtRight)
-    {
+    if (button.getTabbedButtonBar().isVertical())
         std::swap (length, depth);
-    }
 
     const float indent = (float) getTabButtonOverlap ((int) depth);
     const float overhang = 4.0f;
 
-    if (orientation == TabbedButtonBar::TabsAtLeft)
+    switch (button.getTabbedButtonBar().getOrientation())
     {
-        p.startNewSubPath (w, 0.0f);
-        p.lineTo (0.0f, indent);
-        p.lineTo (0.0f, h - indent);
-        p.lineTo (w, h);
-        p.lineTo (w + overhang, h + overhang);
-        p.lineTo (w + overhang, -overhang);
-    }
-    else if (orientation == TabbedButtonBar::TabsAtRight)
-    {
-        p.startNewSubPath (0.0f, 0.0f);
-        p.lineTo (w, indent);
-        p.lineTo (w, h - indent);
-        p.lineTo (0.0f, h);
-        p.lineTo (-overhang, h + overhang);
-        p.lineTo (-overhang, -overhang);
-    }
-    else if (orientation == TabbedButtonBar::TabsAtBottom)
-    {
-        p.startNewSubPath (0.0f, 0.0f);
-        p.lineTo (indent, h);
-        p.lineTo (w - indent, h);
-        p.lineTo (w, 0.0f);
-        p.lineTo (w + overhang, -overhang);
-        p.lineTo (-overhang, -overhang);
-    }
-    else
-    {
-        p.startNewSubPath (0.0f, h);
-        p.lineTo (indent, 0.0f);
-        p.lineTo (w - indent, 0.0f);
-        p.lineTo (w, h);
-        p.lineTo (w + overhang, h + overhang);
-        p.lineTo (-overhang, h + overhang);
+        case TabbedButtonBar::TabsAtLeft:
+            p.startNewSubPath (w, 0.0f);
+            p.lineTo (0.0f, indent);
+            p.lineTo (0.0f, h - indent);
+            p.lineTo (w, h);
+            p.lineTo (w + overhang, h + overhang);
+            p.lineTo (w + overhang, -overhang);
+            break;
+
+        case TabbedButtonBar::TabsAtRight:
+            p.startNewSubPath (0.0f, 0.0f);
+            p.lineTo (w, indent);
+            p.lineTo (w, h - indent);
+            p.lineTo (0.0f, h);
+            p.lineTo (-overhang, h + overhang);
+            p.lineTo (-overhang, -overhang);
+            break;
+
+        case TabbedButtonBar::TabsAtBottom:
+            p.startNewSubPath (0.0f, 0.0f);
+            p.lineTo (indent, h);
+            p.lineTo (w - indent, h);
+            p.lineTo (w, 0.0f);
+            p.lineTo (w + overhang, -overhang);
+            p.lineTo (-overhang, -overhang);
+            break;
+
+        default:
+            p.startNewSubPath (0.0f, h);
+            p.lineTo (indent, 0.0f);
+            p.lineTo (w - indent, 0.0f);
+            p.lineTo (w, h);
+            p.lineTo (w + overhang, h + overhang);
+            p.lineTo (-overhang, h + overhang);
+            break;
     }
 
     p.closeSubPath();
@@ -2140,13 +2144,13 @@ void LookAndFeel::createTabButtonShape (Path& p, int width, int height, int /*ta
     p = p.createPathWithRoundedCorners (3.0f);
 }
 
-void LookAndFeel::fillTabButtonShape (Graphics& g, const Path& path, const Colour& preferredColour,
-                                      int /*tabIndex*/, const String& /*text*/, Button& button,
-                                      TabbedButtonBar::Orientation /*orientation*/, const bool /*isMouseOver*/,
-                                      const bool /*isMouseDown*/, const bool isFrontTab)
+void LookAndFeel::fillTabButtonShape (TabBarButton& button, Graphics& g, const Path& path,  bool isMouseOver, bool isMouseDown)
 {
-    g.setColour (isFrontTab ? preferredColour
-                            : preferredColour.withMultipliedAlpha (0.9f));
+    const Colour tabBackground (button.getTabBackgroundColour());
+    const bool isFrontTab = button.isFrontTab();
+
+    g.setColour (isFrontTab ? tabBackground
+                            : tabBackground.withMultipliedAlpha (0.9f));
 
     g.fillPath (path);
 
@@ -2157,44 +2161,44 @@ void LookAndFeel::fillTabButtonShape (Graphics& g, const Path& path, const Colou
     g.strokePath (path, PathStrokeType (isFrontTab ? 1.0f : 0.5f));
 }
 
-void LookAndFeel::drawTabButtonText (Graphics& g, int x, int y, int w, int h,
-                                     const Colour& preferredBackgroundColour, int /*tabIndex*/,
-                                     const String& text, Button& button, TabbedButtonBar::Orientation orientation,
-                                     const bool isMouseOver, const bool isMouseDown, const bool isFrontTab)
+void LookAndFeel::drawTabButtonText (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-    int length = w;
-    int depth = h;
+    const Rectangle<float> area (button.getTextArea().toFloat());
 
-    if (orientation == TabbedButtonBar::TabsAtLeft
-         || orientation == TabbedButtonBar::TabsAtRight)
-    {
+    int length = area.getWidth();
+    int depth  = area.getHeight();
+
+    if (button.getTabbedButtonBar().isVertical())
         std::swap (length, depth);
-    }
 
     Font font (depth * 0.6f);
     font.setUnderline (button.hasKeyboardFocus (false));
 
     GlyphArrangement textLayout;
-    textLayout.addFittedText (font, text.trim(),
+    textLayout.addFittedText (font, button.getButtonText().trim(),
                               0.0f, 0.0f, (float) length, (float) depth,
                               Justification::centred,
                               jmax (1, depth / 12));
 
     AffineTransform t;
 
-    switch (orientation)
+    switch (button.getTabbedButtonBar().getOrientation())
     {
-        case TabbedButtonBar::TabsAtLeft:   t = t.rotated (float_Pi * -0.5f).translated ((float) x, (float) (y + h)); break;
-        case TabbedButtonBar::TabsAtRight:  t = t.rotated (float_Pi *  0.5f).translated ((float) (x + w), (float) y); break;
-        default:                            t = t.translated ((float) x, (float) y);
+        case TabbedButtonBar::TabsAtLeft:   t = t.rotated (float_Pi * -0.5f).translated (area.getX(), area.getBottom()); break;
+        case TabbedButtonBar::TabsAtRight:  t = t.rotated (float_Pi *  0.5f).translated (area.getRight(), area.getY()); break;
+        case TabbedButtonBar::TabsAtTop:
+        case TabbedButtonBar::TabsAtBottom: t = t.translated (area.getX(), area.getY()); break;
+        default:                            jassertfalse; break;
     }
 
-    if (isFrontTab && (button.isColourSpecified (TabbedButtonBar::frontTextColourId) || isColourSpecified (TabbedButtonBar::frontTextColourId)))
+    if (button.isFrontTab() && (button.isColourSpecified (TabbedButtonBar::frontTextColourId)
+                                    || isColourSpecified (TabbedButtonBar::frontTextColourId)))
         g.setColour (findColour (TabbedButtonBar::frontTextColourId));
-    else if (button.isColourSpecified (TabbedButtonBar::tabTextColourId) || isColourSpecified (TabbedButtonBar::tabTextColourId))
+    else if (button.isColourSpecified (TabbedButtonBar::tabTextColourId)
+                 || isColourSpecified (TabbedButtonBar::tabTextColourId))
         g.setColour (findColour (TabbedButtonBar::tabTextColourId));
     else
-        g.setColour (preferredBackgroundColour.contrasting());
+        g.setColour (button.getTabBackgroundColour().contrasting());
 
     if (! (isMouseOver || isMouseDown))
         g.setOpacity (0.8f);
@@ -2205,85 +2209,60 @@ void LookAndFeel::drawTabButtonText (Graphics& g, int x, int y, int w, int h,
     textLayout.draw (g, t);
 }
 
-int LookAndFeel::getTabButtonBestWidth (int /*tabIndex*/, const String& text, int tabDepth, Button&)
-{
-    Font f (tabDepth * 0.6f);
-    return f.getStringWidth (text.trim()) + getTabButtonOverlap (tabDepth) * 2;
-}
-
-void LookAndFeel::drawTabButton (Graphics& g, int w, int h, const Colour& preferredColour,
-                                 int tabIndex, const String& text, Button& button, TabbedButtonBar::Orientation orientation,
-                                 const bool isMouseOver, const bool isMouseDown, const bool isFrontTab)
+void LookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
     Path tabShape;
-    createTabButtonShape (tabShape, w, h, tabIndex, text, button, orientation,
-                          isMouseOver, isMouseDown, isFrontTab);
+    createTabButtonShape (button, tabShape, isMouseOver, isMouseDown);
 
-    fillTabButtonShape (g, tabShape, preferredColour,
-                        tabIndex, text, button, orientation,
-                        isMouseOver, isMouseDown, isFrontTab);
+    const Rectangle<int> activeArea (button.getActiveArea());
+    tabShape.applyTransform (AffineTransform::translation ((float) activeArea.getX(),
+                                                           (float) activeArea.getY()));
 
-    const int depth = (orientation == TabbedButtonBar::TabsAtLeft || orientation == TabbedButtonBar::TabsAtRight) ? w : h;
-    const int indent = getTabButtonOverlap (depth);
-    int x = 0, y = 0;
+    fillTabButtonShape (button, g, tabShape, isMouseOver, isMouseDown);
 
-    if (orientation == TabbedButtonBar::TabsAtLeft || orientation == TabbedButtonBar::TabsAtRight)
-    {
-        y += indent;
-        h -= indent * 2;
-    }
-    else
-    {
-        x += indent;
-        w -= indent * 2;
-    }
-
-    drawTabButtonText (g, x, y, w, h, preferredColour,
-                       tabIndex, text, button, orientation,
-                       isMouseOver, isMouseDown, isFrontTab);
+    drawTabButtonText (button, g, isMouseOver, isMouseDown);
 }
 
-void LookAndFeel::drawTabAreaBehindFrontButton (Graphics& g, int w, int h, TabbedButtonBar& tabBar,
-                                                TabbedButtonBar::Orientation orientation)
+void LookAndFeel::drawTabAreaBehindFrontButton (TabbedButtonBar& bar, Graphics& g, const int w, const int h)
 {
     const float shadowSize = 0.2f;
 
-    float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     Rectangle<int> shadowRect, line;
+    ColourGradient gradient (Colours::black.withAlpha (bar.isEnabled() ? 0.3f : 0.15f), 0, 0,
+                             Colours::transparentBlack, 0, 0, false);
 
-    switch (orientation)
+    switch (bar.getOrientation())
     {
         case TabbedButtonBar::TabsAtLeft:
-            x1 = (float) w;
-            x2 = w * (1.0f - shadowSize);
-            shadowRect.setBounds ((int) x2, 0, w - (int) x2, h);
+            gradient.point1.x = (float) w;
+            gradient.point2.x = w * (1.0f - shadowSize);
+            shadowRect.setBounds ((int) gradient.point2.x, 0, w - (int) gradient.point2.x, h);
             line.setBounds (w - 1, 0, 1, h);
             break;
 
         case TabbedButtonBar::TabsAtRight:
-            x2 = w * shadowSize;
-            shadowRect.setBounds (0, 0, (int) x2, h);
+            gradient.point2.x = w * shadowSize;
+            shadowRect.setBounds (0, 0, (int) gradient.point2.x, h);
             line.setBounds (0, 0, 1, h);
             break;
 
         case TabbedButtonBar::TabsAtTop:
-            y1 = (float) h;
-            y2 = h * (1.0f - shadowSize);
-            shadowRect.setBounds (0, (int) y2, w, h - (int) y2);
+            gradient.point1.y = (float) h;
+            gradient.point2.y = h * (1.0f - shadowSize);
+            shadowRect.setBounds (0, (int) gradient.point2.y, w, h - (int) gradient.point2.y);
             line.setBounds (0, h - 1, w, 1);
             break;
 
         case TabbedButtonBar::TabsAtBottom:
-            y2 = h * shadowSize;
-            shadowRect.setBounds (0, 0, w, (int) y2);
+            gradient.point2.y = h * shadowSize;
+            shadowRect.setBounds (0, 0, w, (int) gradient.point2.y);
             line.setBounds (0, 0, w, 1);
             break;
 
         default: break;
     }
 
-    g.setGradientFill (ColourGradient (Colours::black.withAlpha (tabBar.isEnabled() ? 0.3f : 0.15f), x1, y1,
-                                       Colours::transparentBlack, x2, y2, false));
+    g.setGradientFill (gradient);
     g.fillRect (shadowRect.expanded (2, 2));
 
     g.setColour (Colour (0x80000000));

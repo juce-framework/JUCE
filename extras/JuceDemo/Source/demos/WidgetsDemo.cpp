@@ -33,60 +33,51 @@ class BouncingBallComponent : public Component,
 public:
     BouncingBallComponent()
     {
-        x = Random::getSystemRandom().nextFloat() * 100.0f;
-        y = Random::getSystemRandom().nextFloat() * 100.0f;
+        Random random;
 
-        dx = Random::getSystemRandom().nextFloat() * 8.0f - 4.0f;
-        dy = Random::getSystemRandom().nextFloat() * 8.0f - 4.0f;
+        const int size = 10 + random.nextInt (30);
 
-        colour = Colour (Random::getSystemRandom().nextInt())
+        ballBounds.setBounds (random.nextFloat() * 100.0f,
+                              random.nextFloat() * 100.0f,
+                              size, size);
+
+        direction.x = random.nextFloat() * 8.0f - 4.0f;
+        direction.y = random.nextFloat() * 8.0f - 4.0f;
+
+        colour = Colour (random.nextInt())
                     .withAlpha (0.5f)
                     .withBrightness (0.7f);
 
-        int size = 10 + Random::getSystemRandom().nextInt (30);
-        setSize (size, size);
-
         startTimer (60);
-    }
-
-    ~BouncingBallComponent()
-    {
     }
 
     void paint (Graphics& g)
     {
         g.setColour (colour);
-        g.fillEllipse (x - getX(), y - getY(), getWidth() - 2.0f, getHeight() - 2.0f);
+        g.fillEllipse (ballBounds - getPosition().toFloat());
     }
 
     void timerCallback()
     {
-        x += dx;
-        y += dy;
+        ballBounds += direction;
 
-        if (x < 0)
-            dx = fabsf (dx);
+        if (ballBounds.getX() < 0)                      direction.x =  fabsf (direction.x);
+        if (ballBounds.getY() < 0)                      direction.y =  fabsf (direction.y);
+        if (ballBounds.getRight() > getParentWidth())   direction.x = -fabsf (direction.x);
+        if (ballBounds.getBottom() > getParentHeight()) direction.y = -fabsf (direction.y);
 
-        if (x > getParentWidth())
-            dx = -fabsf (dx);
-
-        if (y < 0)
-            dy = fabsf (dy);
-
-        if (y > getParentHeight())
-            dy = -fabsf (dy);
-
-        setTopLeftPosition ((int) x, (int) y);
+        setBounds (ballBounds.getSmallestIntegerContainer());
     }
 
-    bool hitTest (int /*x*/, int /*y*/)
+    bool hitTest (int /* x */, int /* y */)
     {
         return false;
     }
 
 private:
     Colour colour;
-    float x, y, dx, dy;
+    Rectangle<float> ballBounds;
+    Point<float> direction;
 };
 
 //==============================================================================
@@ -103,10 +94,6 @@ public:
             addAndMakeVisible (&(balls[i]));
     }
 
-    ~DragOntoDesktopDemoComp()
-    {
-    }
-
     void mouseDown (const MouseEvent& e)
     {
         dragger.startDraggingComponent (this, e);
@@ -114,7 +101,7 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if (parent == 0)
+        if (parent == nullptr)
         {
             delete this;  // If our parent has been deleted, we'll just get rid of this component
         }
@@ -146,17 +133,16 @@ public:
         else
             g.fillAll (Colours::blue.withAlpha (0.2f));
 
-        String desc ("drag this box onto the desktop to show how the same component can move from being lightweight to being a separate window");
-
         g.setFont (15.0f);
         g.setColour (Colours::black);
-        g.drawFittedText (desc, 4, 0, getWidth() - 8, getHeight(), Justification::horizontallyJustified, 5);
+        g.drawFittedText ("drag this box onto the desktop to show how the same component can move from being lightweight to being a separate window",
+                          4, 0, getWidth() - 8, getHeight(), Justification::horizontallyJustified, 5);
 
-        g.drawRect (0, 0, getWidth(), getHeight());
+        g.drawRect (getLocalBounds());
     }
 
 private:
-    Component::SafePointer<Component> parent; // A safe-pointer will become zero if the component that it refers to is deleted..
+    Component::SafePointer<Component> parent; // A safe-pointer will become null if the component that it refers to is deleted..
     ComponentDragger dragger;
 
     BouncingBallComponent balls[3];
@@ -168,16 +154,10 @@ class CustomMenuComponent  : public PopupMenu::CustomComponent,
 {
 public:
     CustomMenuComponent()
-        : blobX (0),
-          blobY (0)
     {
         // set off a timer to move a blob around on this component every
         // 300 milliseconds - see the timerCallback() method.
         startTimer (300);
-    }
-
-    ~CustomMenuComponent()
-    {
     }
 
     void getIdealSize (int& idealWidth,
@@ -193,7 +173,7 @@ public:
         g.fillAll (Colours::yellow.withAlpha (0.3f));
 
         g.setColour (Colours::pink);
-        g.fillEllipse ((float) blobX, (float) blobY, 30.0f, 40.0f);
+        g.fillEllipse (blobPosition);
 
         g.setFont (Font (14.0f, Font::italic));
         g.setColour (Colours::black);
@@ -205,13 +185,15 @@ public:
 
     void timerCallback()
     {
-        blobX = Random::getSystemRandom().nextInt (getWidth());
-        blobY = Random::getSystemRandom().nextInt (getHeight());
+        Random random;
+        blobPosition.setBounds (random.nextInt (getWidth()),
+                                random.nextInt (getHeight()),
+                                40, 30);
         repaint();
     }
 
 private:
-    int blobX, blobY;
+    Rectangle<float> blobPosition;
 };
 
 //==============================================================================
@@ -250,23 +232,16 @@ public:
         changeWidthToFitText();
     }
 
-    ~ColourChangeButton()
-    {
-    }
-
     void clicked()
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        ColourSelector colourSelector;
-        colourSelector.setName ("background");
-        colourSelector.setCurrentColour (findColour (TextButton::buttonColourId));
-        colourSelector.addChangeListener (this);
-        colourSelector.setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-        colourSelector.setSize (300, 400);
+        ColourSelector* colourSelector = new ColourSelector();
+        colourSelector->setName ("background");
+        colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
+        colourSelector->addChangeListener (this);
+        colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+        colourSelector->setSize (300, 400);
 
-        CallOutBox callOut (colourSelector, *this, 0);
-        callOut.runModalLoop();
-       #endif
+        CallOutBox::launchAsynchronously (*this, colourSelector, nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source)
@@ -417,8 +392,7 @@ static Component* createRadioButtonPage()
     group->setBounds (20, 20, 220, 140);
     page->addAndMakeVisible (group);
 
-    int i;
-    for (i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         ToggleButton* tb = new ToggleButton ("radio button #" + String (i + 1));
         page->addAndMakeVisible (tb);
@@ -430,7 +404,7 @@ static Component* createRadioButtonPage()
             tb->setToggleState (true, false);
     }
 
-    for (i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         DrawablePath normal, over;
 
@@ -460,7 +434,7 @@ static Component* createRadioButtonPage()
             db->setToggleState (true, false);
     }
 
-    for (i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         TextButton* tb = new TextButton ("button " + String (i + 1));
 
@@ -512,41 +486,37 @@ public:
         // create an image-above-text button from these drawables..
         DrawableButton* db = new DrawableButton ("Button 1", DrawableButton::ImageAboveTextLabel);
         db->setImages (&normal, &over, &down);
-
-        addAndMakeVisible (db);
         db->setBounds (10, 30, 80, 80);
         db->setTooltip ("this is a DrawableButton with a label");
+        addAndMakeVisible (db);
 
         //==============================================================================
         // create an image-only button from these drawables..
         db = new DrawableButton ("Button 2", DrawableButton::ImageFitted);
         db->setImages (&normal, &over, &down);
         db->setClickingTogglesState (true);
-
-        addAndMakeVisible (db);
         db->setBounds (90, 30, 80, 80);
         db->setTooltip ("this is an image-only DrawableButton");
         db->addListener (buttonListener);
+        addAndMakeVisible (db);
 
         //==============================================================================
         // create an image-on-button-shape button from the same drawables..
         db = new DrawableButton ("Button 3", DrawableButton::ImageOnButtonBackground);
         db->setImages (&normal, 0, 0);
-
-        addAndMakeVisible (db);
         db->setBounds (200, 30, 110, 25);
         db->setTooltip ("this is a DrawableButton on a standard button background");
+        addAndMakeVisible (db);
 
         //==============================================================================
         db = new DrawableButton ("Button 4", DrawableButton::ImageOnButtonBackground);
         db->setImages (&normal, &over, &down);
         db->setClickingTogglesState (true);
         db->setBackgroundColours (Colours::white, Colours::yellow);
-
-        addAndMakeVisible (db);
         db->setBounds (200, 70, 50, 50);
         db->setTooltip ("this is a DrawableButton on a standard button background");
         db->addListener (buttonListener);
+        addAndMakeVisible (db);
 
         //==============================================================================
         HyperlinkButton* hyperlink
@@ -577,10 +547,10 @@ public:
 
         //==============================================================================
         animateButton = new TextButton ("click to animate...");
-        addAndMakeVisible (animateButton);
         animateButton->changeWidthToFitText (24);
         animateButton->setTopLeftPosition (350, 70);
         animateButton->addListener (this);
+        addAndMakeVisible (animateButton);
     }
 
     ~ButtonsPage()
@@ -642,8 +612,7 @@ static Component* createMiscPage()
     comboBox->setEditableText (true);
     comboBox->setJustificationType (Justification::centred);
 
-    int i;
-    for (i = 1; i < 100; ++i)
+    for (int i = 1; i < 100; ++i)
         comboBox->addItem ("combo box item " + String (i), i);
 
     comboBox->setSelectedId (1);
@@ -705,10 +674,12 @@ public:
 
     void resized()
     {
+        int toolbarThickness = (int) depthSlider.getValue();
+
         if (toolbar.isVertical())
-            toolbar.setBounds (0, 0, (int) depthSlider.getValue(), getHeight());
+            toolbar.setBounds (getLocalBounds().removeFromLeft (toolbarThickness));
         else
-            toolbar.setBounds (0, 0, getWidth(), (int) depthSlider.getValue());
+            toolbar.setBounds (getLocalBounds().removeFromTop  (toolbarThickness));
     }
 
     void sliderValueChanged (Slider*)
@@ -740,7 +711,6 @@ private:
     {
     public:
         DemoToolbarItemFactory() {}
-        ~DemoToolbarItemFactory() {}
 
         //==============================================================================
         // Each type of item a toolbar can contain must be given a unique ID. These
@@ -870,10 +840,6 @@ private:
                 comboBox.setEditableText (true);
             }
 
-            ~CustomToolbarComboBox()
-            {
-            }
-
             bool getToolbarItemSizes (int /*toolbarDepth*/, bool isToolbarVertical,
                                       int& preferredSize, int& minSize, int& maxSize)
             {
@@ -919,9 +885,19 @@ public:
         addTab ("buttons",       getRandomBrightColour(), new ButtonsPage (this),   true);
         addTab ("radio buttons", getRandomBrightColour(), createRadioButtonPage(),  true);
         addTab ("misc widgets",  getRandomBrightColour(), createMiscPage(),         true);
+
+        getTabbedButtonBar().getTabButton (2)->setExtraComponent (new CustomTabButton(), TabBarButton::afterText);
     }
 
     void buttonClicked (Button* button)
+    {
+        showBubbleMessage (button,
+                           "This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing "
+                           "at a component or somewhere on the screen.\n\n"
+                           "The message bubbles will disappear after a timeout period, or when the mouse is clicked.");
+    }
+
+    void showBubbleMessage (Component* targetComponent, const String& textToShow)
     {
         BubbleMessageComponent* bmc = new BubbleMessageComponent();
 
@@ -935,18 +911,44 @@ public:
             addChildComponent (bmc);
         }
 
-        AttributedString text ("This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing "
-                               "at a component or somewhere on the screen.\n\n"
-                               "The message bubbles will disappear after a timeout period, or when the mouse is clicked.");
+        AttributedString text (textToShow);
         text.setJustification (Justification::centred);
 
-        bmc->showAt (button, text, 2000, true, true);
+        bmc->showAt (targetComponent, text, 2000, true, true);
     }
 
     static const Colour getRandomBrightColour()
     {
         return Colour (Random::getSystemRandom().nextFloat(), 0.1f, 0.97f, 1.0f);
     }
+
+    // This is a small star button that is put inside one of the tabs. You can
+    // use this technique to create things like "close tab" buttons, etc.
+    class CustomTabButton  : public Component
+    {
+    public:
+        CustomTabButton()
+        {
+            setSize (20, 20);
+        }
+
+        void paint (Graphics& g)
+        {
+            Path p;
+            p.addStar (Point<float>(), 7, 1.0f, 2.0f);
+
+            g.setColour (Colours::green);
+            g.fillPath (p, RectanglePlacement (RectanglePlacement::centred)
+                                .getTransformToFit (p.getBounds(), getLocalBounds().reduced (2, 2).toFloat()));
+        }
+
+        void mouseDown (const MouseEvent&)
+        {
+            DemoTabbedComponent* dtc = findParentComponentOfClass<DemoTabbedComponent>();
+
+            dtc->showBubbleMessage (this, "This is a custom tab component");
+        }
+    };
 };
 
 
@@ -997,9 +999,7 @@ class ColourSelectorDialogWindow  : public DialogWindow
 {
 public:
     ColourSelectorDialogWindow()
-        : DialogWindow ("Colour selector demo",
-                        Colours::lightgrey,
-                        true)
+        : DialogWindow ("Colour selector demo", Colours::lightgrey, true)
     {
         setContentOwned (new ColourSelector(), false);
         centreWithSize (400, 400);
@@ -1044,29 +1044,27 @@ public:
 
     void buttonPressed (const ButtonType buttonId, const bool isDown)
     {
-        String desc;
+        setMessage (getDescriptionOfButtonType (buttonId) + (isDown ? " -- [down]"
+                                                                    : " -- [up]"));
+    }
 
-        switch (buttonId)
+    static String getDescriptionOfButtonType (const ButtonType type)
+    {
+        switch (type)
         {
-            case menuButton:            desc = "menu button (short)";   break;
-            case playButton:            desc = "play button";           break;
-            case plusButton:            desc = "plus button";           break;
-            case minusButton:           desc = "minus button";          break;
-            case rightButton:           desc = "right button (short)";  break;
-            case leftButton:            desc = "left button (short)";   break;
-            case rightButton_Long:      desc = "right button (long)";   break;
-            case leftButton_Long:       desc = "left button (long)";    break;
-            case menuButton_Long:       desc = "menu button (long)";    break;
-            case playButtonSleepMode:   desc = "play (sleep mode)";     break;
-            case switched:              desc = "remote switched";       break;
+            case menuButton:            return "menu button (short)";
+            case playButton:            return "play button";
+            case plusButton:            return "plus button";
+            case minusButton:           return "minus button";
+            case rightButton:           return "right button (short)";
+            case leftButton:            return "left button (short)";
+            case rightButton_Long:      return "right button (long)";
+            case leftButton_Long:       return "left button (long)";
+            case menuButton_Long:       return "menu button (long)";
+            case playButtonSleepMode:   return "play (sleep mode)";
+            case switched:              return "remote switched";
+            default:                    return "unknown";
         }
-
-        if (isDown)
-            desc << " -- [down]";
-        else
-            desc << " -- [up]";
-
-        setMessage (desc);
     }
 };
 
@@ -1093,7 +1091,7 @@ public:
         menuButton.setBounds (10, 10, 200, 24);
         menuButton.addListener (this);
         menuButton.setTriggeredOnMouseDown (true); // because this button pops up a menu, this lets us
-                                                    // hold down the button and drag straight onto the menu
+                                                   // hold down the button and drag straight onto the menu
 
         //==============================================================================
         addAndMakeVisible (&enableButton);
@@ -1135,7 +1133,6 @@ public:
             m.addColouredItem (4, "Coloured item", Colours::green);
             m.addSeparator();
             m.addCustomItem (5, new CustomMenuComponent());
-
             m.addSeparator();
 
             PopupMenu tabsMenu;
@@ -1143,8 +1140,8 @@ public:
             tabsMenu.addItem (1002, "Show tabs at the bottom", true, tabs.getOrientation() == TabbedButtonBar::TabsAtBottom);
             tabsMenu.addItem (1003, "Show tabs at the left", true, tabs.getOrientation() == TabbedButtonBar::TabsAtLeft);
             tabsMenu.addItem (1004, "Show tabs at the right", true, tabs.getOrientation() == TabbedButtonBar::TabsAtRight);
-            m.addSubMenu ("Tab position", tabsMenu);
 
+            m.addSubMenu ("Tab position", tabsMenu);
             m.addSeparator();
 
             PopupMenu dialogMenu;
@@ -1154,28 +1151,22 @@ public:
             dialogMenu.addItem (103, "Show an alert-window with a 'question' icon...");
 
             dialogMenu.addSeparator();
-
             dialogMenu.addItem (110, "Show an ok/cancel alert-window...");
-
             dialogMenu.addSeparator();
-
             dialogMenu.addItem (111, "Show an alert-window with some extra components...");
-
             dialogMenu.addSeparator();
-
             dialogMenu.addItem (112, "Show a ThreadWithProgressWindow demo...");
 
             m.addSubMenu ("AlertWindow demonstrations", dialogMenu);
-
             m.addSeparator();
 
             m.addItem (120, "Show a colour selector demo...");
             m.addSeparator();
 
-#if JUCE_MAC
+           #if JUCE_MAC
             m.addItem (140, "Run the Apple Remote Control test...");
             m.addSeparator();
-#endif
+           #endif
 
             PopupMenu nativeFileChoosers;
             nativeFileChoosers.addItem (121, "'Load' file browser...");
@@ -1221,12 +1212,12 @@ public:
         {
             AlertWindow::AlertIconType icon = AlertWindow::NoIcon;
 
-            if (result == 101)
-                icon = AlertWindow::WarningIcon;
-            else if (result == 102)
-                icon = AlertWindow::InfoIcon;
-            else if (result == 103)
-                icon = AlertWindow::QuestionIcon;
+            switch (result)
+            {
+                case 101:  icon = AlertWindow::WarningIcon;  break;
+                case 102:  icon = AlertWindow::InfoIcon;     break;
+                case 103:  icon = AlertWindow::QuestionIcon; break;
+            }
 
             AlertWindow::showMessageBoxAsync (icon,
                                               "This is an AlertWindow",
@@ -1252,14 +1243,10 @@ public:
 
             w.addTextEditor ("text", "enter some text here", "text field:");
 
-            StringArray options;
-            options.add ("option 1");
-            options.add ("option 2");
-            options.add ("option 3");
-            options.add ("option 4");
-            w.addComboBox ("option", options, "some options");
+            const char* options[] = { "option 1", "option 2", "option 3", "option 4", nullptr };
+            w.addComboBox ("option", StringArray (options), "some options");
 
-            w.addButton ("ok", 1, KeyPress (KeyPress::returnKey, 0, 0));
+            w.addButton ("ok",     1, KeyPress (KeyPress::returnKey, 0, 0));
             w.addButton ("cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
 
             if (w.runModalLoop() != 0) // is they picked 'ok'

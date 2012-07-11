@@ -49,6 +49,47 @@ public:
     /** Destructor. */
     ~TabBarButton();
 
+    /** Returns the bar that contains this button. */
+    TabbedButtonBar& getTabbedButtonBar() const   { return owner; }
+
+    //==============================================================================
+    /** When adding an extra component to the tab, this indicates which side of
+        the text it should be placed on. */
+    enum ExtraComponentPlacement
+    {
+        beforeText,
+        afterText
+    };
+
+    /** Sets an extra component that will be shown in the tab.
+
+        This optional component will be positioned inside the tab, either to the left or right
+        of the text. You could use this to implement things like a close button or a graphical
+        status indicator. If a non-null component is passed-in, the TabbedButtonBar will take
+        ownership of it and delete it when required.
+     */
+    void setExtraComponent (Component* extraTabComponent,
+                            ExtraComponentPlacement extraComponentPlacement);
+
+    /** Returns an area of the component that's safe to draw in.
+
+        This deals with the orientation of the tabs, which affects which side is
+        touching the tabbed box's content component.
+    */
+    Rectangle<int> getActiveArea() const;
+
+    /** Returns the area of the component that should contain its text. */
+    Rectangle<int> getTextArea() const;
+
+    /** Returns this tab's index in its tab bar. */
+    int getIndex() const;
+
+    /** Returns the colour of the tab. */
+    Colour getTabBackgroundColour() const;
+
+    /** Returns true if this is the frontmost (selected) tab. */
+    bool isFrontTab() const;
+
     //==============================================================================
     /** Chooses the best length for the tab, given the specified depth.
 
@@ -59,28 +100,24 @@ public:
     virtual int getBestTabLength (int depth);
 
     //==============================================================================
-    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown);
-    void clicked (const ModifierKeys& mods);
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
+    void clicked (const ModifierKeys&);
     bool hitTest (int x, int y);
+    void resized();
+    void childBoundsChanged (Component*);
 
 protected:
-    //==============================================================================
     friend class TabbedButtonBar;
     TabbedButtonBar& owner;
-    int overlapPixels;
     DropShadowEffect shadow;
+    int overlapPixels;
 
-    /** Returns an area of the component that's safe to draw in.
-
-        This deals with the orientation of the tabs, which affects which side is
-        touching the tabbed box's content component.
-    */
-    Rectangle<int> getActiveArea();
-
-    /** Returns this tab's index in its tab bar. */
-    int getIndex() const;
+    ScopedPointer<Component> extraComponent;
+    ExtraComponentPlacement extraCompPlacement;
 
 private:
+    void calcAreas (Rectangle<int>&, Rectangle<int>&) const;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabBarButton);
 };
 
@@ -135,11 +172,16 @@ public:
     */
     void setOrientation (Orientation orientation);
 
-    /** Returns the current orientation.
-
+    /** Returns the bar's current orientation.
         @see setOrientation
     */
-    Orientation getOrientation() const noexcept                     { return orientation; }
+    Orientation getOrientation() const noexcept         { return orientation; }
+
+    /** Returns true if the orientation is TabsAtLeft or TabsAtRight. */
+    bool isVertical() const noexcept                    { return orientation == TabsAtLeft || orientation == TabsAtRight; }
+
+    /** Returns the thickness of the bar, which may be its width or height, depending on the orientation. */
+    int getThickness() const noexcept                   { return isVertical() ? getWidth() : getHeight(); }
 
     /** Changes the minimum scale factor to which the tabs can be compressed when trying to
         fit a lot of tabs on-screen.
@@ -154,14 +196,12 @@ public:
     void clearTabs();
 
     /** Adds a tab to the bar.
-
         Tabs are added in left-to-right reading order.
-
         If this is the first tab added, it'll also be automatically selected.
     */
     void addTab (const String& tabName,
                  const Colour& tabBackgroundColour,
-                 int insertIndex = -1);
+                 int insertIndex);
 
     /** Changes the name of one of the tabs. */
     void setTabName (int tabIndex,
@@ -280,7 +320,7 @@ private:
 
     struct TabInfo
     {
-        ScopedPointer<TabBarButton> component;
+        ScopedPointer<TabBarButton> button;
         String name;
         Colour colour;
     };

@@ -513,61 +513,16 @@ public:
                                             GroupComponent& group);
 
     //==============================================================================
-    virtual void createTabButtonShape (Path& p,
-                                       int width, int height,
-                                       int tabIndex,
-                                       const String& text,
-                                       Button& button,
-                                       TabbedButtonBar::Orientation orientation,
-                                       bool isMouseOver,
-                                       bool isMouseDown,
-                                       bool isFrontTab);
-
-    virtual void fillTabButtonShape (Graphics& g,
-                                     const Path& path,
-                                     const Colour& preferredBackgroundColour,
-                                     int tabIndex,
-                                     const String& text,
-                                     Button& button,
-                                     TabbedButtonBar::Orientation orientation,
-                                     bool isMouseOver,
-                                     bool isMouseDown,
-                                     bool isFrontTab);
-
-    virtual void drawTabButtonText (Graphics& g,
-                                    int x, int y, int w, int h,
-                                    const Colour& preferredBackgroundColour,
-                                    int tabIndex,
-                                    const String& text,
-                                    Button& button,
-                                    TabbedButtonBar::Orientation orientation,
-                                    bool isMouseOver,
-                                    bool isMouseDown,
-                                    bool isFrontTab);
-
-    virtual int getTabButtonOverlap (int tabDepth);
     virtual int getTabButtonSpaceAroundImage();
+    virtual int getTabButtonOverlap (int tabDepth);
+    virtual int getTabButtonBestWidth (TabBarButton&, int tabDepth);
 
-    virtual int getTabButtonBestWidth (int tabIndex,
-                                       const String& text,
-                                       int tabDepth,
-                                       Button& button);
+    virtual void drawTabButton (TabBarButton&, Graphics& g, bool isMouseOver, bool isMouseDown);
+    virtual void drawTabButtonText (TabBarButton&, Graphics& g, bool isMouseOver, bool isMouseDown);
+    virtual void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics& g, int w, int h);
 
-    virtual void drawTabButton (Graphics& g,
-                                int w, int h,
-                                const Colour& preferredColour,
-                                int tabIndex,
-                                const String& text,
-                                Button& button,
-                                TabbedButtonBar::Orientation orientation,
-                                bool isMouseOver,
-                                bool isMouseDown,
-                                bool isFrontTab);
-
-    virtual void drawTabAreaBehindFrontButton (Graphics& g,
-                                               int w, int h,
-                                               TabbedButtonBar& tabBar,
-                                               TabbedButtonBar::Orientation orientation);
+    virtual void createTabButtonShape (TabBarButton&, Path& path,  bool isMouseOver, bool isMouseDown);
+    virtual void fillTabButtonShape (TabBarButton&, Graphics& g, const Path& path, bool isMouseOver, bool isMouseDown);
 
     virtual Button* createTabBarExtrasButton();
 
@@ -673,8 +628,16 @@ private:
                                bool flatOnTop,
                                bool flatOnBottom) noexcept;
 
-    // This has been deprecated - see the new parameter list..
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // These methods have been deprecated - see their new parameter lists..
     virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }
+    virtual int drawTabButton (Graphics&, int, int, const Colour&, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
+    virtual int createTabButtonShape (Path&, int, int, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
+    virtual int fillTabButtonShape (Graphics&, const Path&, const Colour&, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
+    virtual int drawTabAreaBehindFrontButton (Graphics&, int, int, TabbedButtonBar&, TabbedButtonBar::Orientation) { return 0; }
+    virtual int drawTabButtonText (Graphics&, int, int, int, int, const Colour&, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
+    virtual int getTabButtonBestWidth (int, const String&, int, Button&) { return 0; }
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel);
 };
