@@ -109,7 +109,6 @@ public:
 protected:
     friend class TabbedButtonBar;
     TabbedButtonBar& owner;
-    DropShadowEffect shadow;
     int overlapPixels;
 
     ScopedPointer<Component> extraComponent;

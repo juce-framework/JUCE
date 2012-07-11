@@ -27,86 +27,145 @@
  #pragma optimize ("t", on)
 #endif
 
+static void blurSingleChannelImage (uint8* const data, const int width, const int height,
+                                    const int lineStride, const int repetitions) noexcept
+{
+    uint8* line = data;
+
+    for (int y = height; --y >= 0;)
+    {
+        for (int i = repetitions; --i >= 0;)
+        {
+            uint8* p = line;
+            *p++ = (((int) p[0]) + p[1]) / 2;
+
+            for (int x = width - 2; --x >= 0;)
+                *p++ = (((int) p[-1]) + p[0] + p[1] + 1) / 3;
+
+            *p = (((int) p[0]) + p[-1]) / 2;
+        }
+
+        line += lineStride;
+    }
+
+    for (int i = repetitions; --i >= 0;)
+    {
+        line = data;
+
+        {
+            uint8* p1 = line;
+            uint8* p2 = line + lineStride;
+
+            for (int x = width; --x >= 0;)
+                *p1++ = (((int) *p1) + *p2++) / 2;
+        }
+
+        line += lineStride;
+
+        for (int y = height - 2; --y >= 0;)
+        {
+            uint8* p1 = line;
+            uint8* p2 = line - lineStride;
+            uint8* p3 = line + lineStride;
+
+            for (int x = width; --x >= 0;)
+                *p1++ = (((int) *p1) + *p2++ + *p3++ + 1) / 3;
+
+            line += lineStride;
+        }
+
+        uint8* p1 = line;
+        uint8* p2 = line - lineStride;
+
+        for (int x = width; --x >= 0;)
+            *p1++ = (((int) *p1) + *p2++) / 2;
+    }
+}
+
+static void blurSingleChannelImage (Image& image, int radius)
+{
+    const Image::BitmapData bm (image, Image::BitmapData::readWrite);
+    blurSingleChannelImage (bm.data, bm.width, bm.height, bm.lineStride, 2 * radius);
+}
+
+#if JUCE_MSVC && JUCE_DEBUG
+ #pragma optimize ("", on)  // resets optimisations to the project defaults
+#endif
+
 //==============================================================================
-DropShadowEffect::DropShadowEffect()
-  : offsetX (0),
-    offsetY (0),
-    radius (4),
-    opacity (0.6f)
+DropShadow::DropShadow() noexcept
+    : colour (0x90000000), radius (4)
 {
 }
 
-DropShadowEffect::~DropShadowEffect()
+DropShadow::DropShadow (const Colour& shadowColour, const int r, const Point<int>& o) noexcept
+    : colour (shadowColour), radius (r), offset (o)
 {
+    jassert (radius > 0);
 }
 
-void DropShadowEffect::setShadowProperties (const float newRadius,
-                                            const float newOpacity,
-                                            const int newShadowOffsetX,
-                                            const int newShadowOffsetY)
+void DropShadow::drawForImage (Graphics& g, const Image& srcImage) const
 {
-    radius = jmax (1.1f, newRadius);
-    offsetX = newShadowOffsetX;
-    offsetY = newShadowOffsetY;
-    opacity = newOpacity;
-}
+    jassert (radius > 0);
 
-void DropShadowEffect::drawShadow (Graphics& g, const Image& srcImage,
-                                   float radius, float alpha, int offsetX, int offsetY)
-{
-    const int w = srcImage.getWidth();
-    const int h = srcImage.getHeight();
-
-    Image shadowImage (Image::SingleChannel, w, h, false);
-
-    const Image::BitmapData srcData (srcImage, Image::BitmapData::readOnly);
-    const Image::BitmapData destData (shadowImage, Image::BitmapData::readWrite);
-
-    const int filter = roundToInt (63.0f / radius);
-    const int radiusMinus1 = roundToInt ((radius - 1.0f) * 63.0f);
-
-    for (int x = w; --x >= 0;)
+    if (srcImage.isValid())
     {
-        int shadowAlpha = 0;
+        Image shadowImage (srcImage.convertedToFormat (Image::SingleChannel));
+        shadowImage.duplicateIfShared();
 
-        const PixelARGB* src = ((const PixelARGB*) srcData.data) + x;
-        uint8* shadowPix = destData.data + x;
+        blurSingleChannelImage (shadowImage, radius);
 
-        for (int y = h; --y >= 0;)
-        {
-            shadowAlpha = ((shadowAlpha * radiusMinus1 + (src->getAlpha() << 6)) * filter) >> 12;
-
-            *shadowPix = (uint8) shadowAlpha;
-            src = addBytesToPointer (src, srcData.lineStride);
-            shadowPix += destData.lineStride;
-        }
+        g.setColour (colour);
+        g.drawImageAt (shadowImage, offset.x, offset.y, true);
     }
+}
 
-    for (int y = h; --y >= 0;)
+void DropShadow::drawForPath (Graphics& g, const Path& path) const
+{
+    jassert (radius > 0);
+
+    const Rectangle<int> area (path.getBounds().translated ((float) offset.x, (float) offset.y)
+                                               .getSmallestIntegerContainer()
+                                               .getIntersection (g.getClipBounds())
+                                               .expanded (radius + 1, radius + 1));
+
+    if (area.getWidth() > 2 && area.getHeight() > 2)
     {
-        int shadowAlpha = 0;
-        uint8* shadowPix = destData.getLinePointer (y);
+        Image renderedPath (Image::SingleChannel, area.getWidth(), area.getHeight(), true);
 
-        for (int x = w; --x >= 0;)
         {
-            shadowAlpha = ((shadowAlpha * radiusMinus1 + (*shadowPix << 6)) * filter) >> 12;
-            *shadowPix++ = (uint8) shadowAlpha;
+            Graphics g2 (renderedPath);
+            g2.setColour (Colours::white);
+            g2.fillPath (path, AffineTransform::translation ((float) (offset.x - area.getX()),
+                                                             (float) (offset.y - area.getY())));
         }
-    }
 
-    g.setColour (Colours::black.withAlpha (alpha));
-    g.drawImageAt (shadowImage, offsetX, offsetY, true);
+        blurSingleChannelImage (renderedPath, radius);
+
+        g.setColour (colour);
+        g.drawImageAt (renderedPath, area.getX(), area.getY(), true);
+    }
+}
+
+//==============================================================================
+DropShadowEffect::DropShadowEffect() {}
+DropShadowEffect::~DropShadowEffect() {}
+
+void DropShadowEffect::setShadowProperties (const DropShadow& newShadow)
+{
+    shadow = newShadow;
 }
 
 void DropShadowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor, float alpha)
 {
-    drawShadow (g, image, radius * scaleFactor, opacity * alpha,
-                (int) (offsetX * scaleFactor), (int) (offsetY * scaleFactor));
+    DropShadow s (shadow);
+    s.radius = roundToInt (s.radius * scaleFactor);
+    s.colour = s.colour.withMultipliedAlpha (alpha);
+    s.offset.x = roundToInt (s.offset.x * scaleFactor);
+    s.offset.y = roundToInt (s.offset.y * scaleFactor);
+
+    s.drawForImage (g, image);
 
     g.setOpacity (alpha);
     g.drawImageAt (image, 0, 0);
 }
-
-#if JUCE_MSVC && JUCE_DEBUG
-  #pragma optimize ("", on)  // resets optimisations to the project defaults
-#endif

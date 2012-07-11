@@ -24,13 +24,8 @@
 */
 
 TabBarButton::TabBarButton (const String& name, TabbedButtonBar& owner_)
-    : Button (name),
-      owner (owner_),
-      overlapPixels (0),
-      extraCompPlacement (afterText)
+    : Button (name), owner (owner_), overlapPixels (0), extraCompPlacement (afterText)
 {
-    shadow.setShadowProperties (2.2f, 0.7f, 0, 0);
-    setComponentEffect (&shadow);
     setWantsKeyboardFocus (false);
 }
 

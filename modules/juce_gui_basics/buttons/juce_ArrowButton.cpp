@@ -23,49 +23,24 @@
   ==============================================================================
 */
 
-ArrowButton::ArrowButton (const String& name,
-                          float arrowDirectionInRadians,
-                          const Colour& arrowColour)
-   : Button (name),
-     colour (arrowColour)
+ArrowButton::ArrowButton (const String& name, float arrowDirectionInRadians, const Colour& arrowColour)
+   : Button (name), colour (arrowColour)
 {
-    path.lineTo (0.0f, 1.0f);
-    path.lineTo (1.0f, 0.5f);
-    path.closeSubPath();
-
-    path.applyTransform (AffineTransform::rotation (float_Pi * 2.0f * arrowDirectionInRadians,
-                                                    0.5f, 0.5f));
-
-    setComponentEffect (&shadow);
-    updateShadowAndOffset();
+    path.addTriangle (0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
+    path.applyTransform (AffineTransform::rotation (float_Pi * 2.0f * arrowDirectionInRadians, 0.5f, 0.5f));
 }
 
-ArrowButton::~ArrowButton()
-{
-}
+ArrowButton::~ArrowButton() {}
 
-void ArrowButton::paintButton (Graphics& g,
-                               bool /*isMouseOverButton*/,
-                               bool /*isButtonDown*/)
+void ArrowButton::paintButton (Graphics& g, bool /*isMouseOverButton*/, bool isButtonDown)
 {
+    Path p (path);
+
+    const float offset = isButtonDown ? 1.0f : 0.0f;
+    p.applyTransform (path.getTransformToScaleToFit (offset, offset, getWidth() - 3.0f, getHeight() - 3.0f, false));
+
+    DropShadow (Colours::black.withAlpha (0.3f), isButtonDown ? 2 : 4, Point<int>()).drawForPath (g, p);
+
     g.setColour (colour);
-
-    g.fillPath (path, path.getTransformToScaleToFit ((float) offset,
-                                                     (float) offset,
-                                                     (float) (getWidth() - 3),
-                                                     (float) (getHeight() - 3),
-                                                     false));
-}
-
-void ArrowButton::buttonStateChanged()
-{
-    updateShadowAndOffset();
-}
-
-void ArrowButton::updateShadowAndOffset()
-{
-    offset = (isDown()) ? 1 : 0;
-
-    shadow.setShadowProperties ((isDown()) ? 1.2f : 3.0f,
-                                0.3f, -1, 0);
+    g.fillPath (p);
 }

@@ -64,8 +64,8 @@ void ShapeButton::setShape (const Path& newShape,
     shape = newShape;
     maintainShapeProportions = maintainShapeProportions_;
 
-    shadow.setShadowProperties (3.0f, 0.5f, 0, 0);
-    setComponentEffect ((hasShadow) ? &shadow : 0);
+    shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, Point<int>()));
+    setComponentEffect (hasShadow ? &shadow : nullptr);
 
     if (resizeNowToFitThisShape)
     {

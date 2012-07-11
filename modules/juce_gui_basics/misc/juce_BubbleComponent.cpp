@@ -28,7 +28,7 @@ BubbleComponent::BubbleComponent()
 {
     setInterceptsMouseClicks (false, false);
 
-    shadow.setShadowProperties (5.0f, 0.35f, 0, 0);
+    shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.35f), 5, Point<int>()));
     setComponentEffect (&shadow);
 }
 

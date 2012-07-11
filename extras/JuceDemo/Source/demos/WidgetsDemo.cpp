@@ -35,7 +35,7 @@ public:
     {
         Random random;
 
-        const int size = 10 + random.nextInt (30);
+        const float size = 10.0f + random.nextInt (30);
 
         ballBounds.setBounds (random.nextFloat() * 100.0f,
                               random.nextFloat() * 100.0f,
@@ -186,9 +186,9 @@ public:
     void timerCallback()
     {
         Random random;
-        blobPosition.setBounds (random.nextInt (getWidth()),
-                                random.nextInt (getHeight()),
-                                40, 30);
+        blobPosition.setBounds ((float) random.nextInt (getWidth()),
+                                (float) random.nextInt (getHeight()),
+                                40.0f, 30.0f);
         repaint();
     }
 

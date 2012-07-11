@@ -1977,9 +1977,8 @@ int LookAndFeel::getDefaultMenuBarHeight()
 //==============================================================================
 DropShadower* LookAndFeel::createDropShadowerForComponent (Component*)
 {
-    return new DropShadower (0.4f, 1, 5, 10);
+    return new DropShadower (DropShadow (Colours::black.withAlpha (0.4f), 10, Point<int> (0, 2)));
 }
-
 
 //==============================================================================
 void LookAndFeel::drawStretchableLayoutResizerBar (Graphics& g,
@@ -2085,7 +2084,7 @@ int LookAndFeel::getTabButtonBestWidth (TabBarButton& button, int tabDepth)
               + getTabButtonOverlap (tabDepth) * 2;
 }
 
-void LookAndFeel::createTabButtonShape (TabBarButton& button, Path& p, bool isMouseOver, bool isMouseDown)
+void LookAndFeel::createTabButtonShape (TabBarButton& button, Path& p, bool /*isMouseOver*/, bool /*isMouseDown*/)
 {
     const Rectangle<int> activeArea (button.getActiveArea());
     const float w = (float) activeArea.getWidth();
@@ -2144,7 +2143,7 @@ void LookAndFeel::createTabButtonShape (TabBarButton& button, Path& p, bool isMo
     p = p.createPathWithRoundedCorners (3.0f);
 }
 
-void LookAndFeel::fillTabButtonShape (TabBarButton& button, Graphics& g, const Path& path,  bool isMouseOver, bool isMouseDown)
+void LookAndFeel::fillTabButtonShape (TabBarButton& button, Graphics& g, const Path& path,  bool /*isMouseOver*/, bool /*isMouseDown*/)
 {
     const Colour tabBackground (button.getTabBackgroundColour());
     const bool isFrontTab = button.isFrontTab();
@@ -2165,8 +2164,8 @@ void LookAndFeel::drawTabButtonText (TabBarButton& button, Graphics& g, bool isM
 {
     const Rectangle<float> area (button.getTextArea().toFloat());
 
-    int length = area.getWidth();
-    int depth  = area.getHeight();
+    float length = area.getWidth();
+    float depth  = area.getHeight();
 
     if (button.getTabbedButtonBar().isVertical())
         std::swap (length, depth);
@@ -2178,7 +2177,7 @@ void LookAndFeel::drawTabButtonText (TabBarButton& button, Graphics& g, bool isM
     textLayout.addFittedText (font, button.getButtonText().trim(),
                               0.0f, 0.0f, (float) length, (float) depth,
                               Justification::centred,
-                              jmax (1, depth / 12));
+                              jmax (1, ((int) depth) / 12));
 
     AffineTransform t;
 
@@ -2191,21 +2190,20 @@ void LookAndFeel::drawTabButtonText (TabBarButton& button, Graphics& g, bool isM
         default:                            jassertfalse; break;
     }
 
+    Colour col;
+
     if (button.isFrontTab() && (button.isColourSpecified (TabbedButtonBar::frontTextColourId)
                                     || isColourSpecified (TabbedButtonBar::frontTextColourId)))
-        g.setColour (findColour (TabbedButtonBar::frontTextColourId));
+        col = findColour (TabbedButtonBar::frontTextColourId);
     else if (button.isColourSpecified (TabbedButtonBar::tabTextColourId)
                  || isColourSpecified (TabbedButtonBar::tabTextColourId))
-        g.setColour (findColour (TabbedButtonBar::tabTextColourId));
+        col = findColour (TabbedButtonBar::tabTextColourId);
     else
-        g.setColour (button.getTabBackgroundColour().contrasting());
+        col = button.getTabBackgroundColour().contrasting();
 
-    if (! (isMouseOver || isMouseDown))
-        g.setOpacity (0.8f);
+    const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
 
-    if (! button.isEnabled())
-        g.setOpacity (0.3f);
-
+    g.setColour (col.withMultipliedAlpha (alpha));
     textLayout.draw (g, t);
 }
 
@@ -2218,8 +2216,9 @@ void LookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouse
     tabShape.applyTransform (AffineTransform::translation ((float) activeArea.getX(),
                                                            (float) activeArea.getY()));
 
-    fillTabButtonShape (button, g, tabShape, isMouseOver, isMouseDown);
+    DropShadow (Colours::black.withAlpha (0.5f), 2, Point<int> (0, 1)).drawForPath (g, tabShape);
 
+    fillTabButtonShape (button, g, tabShape, isMouseOver, isMouseDown);
     drawTabButtonText (button, g, isMouseOver, isMouseDown);
 }
 
@@ -2458,21 +2457,10 @@ void LookAndFeel::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
 {
     if (cachedImage.isNull())
     {
-        const int w = box.getWidth();
-        const int h = box.getHeight();
-
-        Image renderedPath (Image::ARGB, w, h, true);
-
-        {
-            Graphics g2 (renderedPath);
-
-            g2.setColour (Colour::greyLevel (0.23f).withAlpha (0.9f));
-            g2.fillPath (path);
-        }
-
-        cachedImage = Image (Image::ARGB, w, h, true);
+        cachedImage = Image (Image::ARGB, box.getWidth(), box.getHeight(), true);
         Graphics g2 (cachedImage);
-        DropShadowEffect::drawShadow (g2, renderedPath, 5.0f, 0.4f, 0, 2);
+
+        DropShadow (Colours::black.withAlpha (0.7f), 8, Point<int> (0, 2)).drawForPath (g2, path);
     }
 
     g.setColour (Colours::black);
@@ -2779,16 +2767,16 @@ void LookAndFeel::drawShinyButtonShape (Graphics& g,
 
     Path outline;
     LookAndFeelHelpers::createRoundedPath (outline, x, y, w, h, cs,
-                                            ! (flatOnLeft || flatOnTop),
+                                            ! (flatOnLeft  || flatOnTop),
                                             ! (flatOnRight || flatOnTop),
-                                            ! (flatOnLeft || flatOnBottom),
+                                            ! (flatOnLeft  || flatOnBottom),
                                             ! (flatOnRight || flatOnBottom));
 
     ColourGradient cg (baseColour, 0.0f, y,
                        baseColour.overlaidWith (Colour (0x070000ff)), 0.0f, y + h,
                        false);
 
-    cg.addColour (0.5, baseColour.overlaidWith (Colour (0x33ffffff)));
+    cg.addColour (0.5,  baseColour.overlaidWith (Colour (0x33ffffff)));
     cg.addColour (0.51, baseColour.overlaidWith (Colour (0x110000ff)));
 
     g.setGradientFill (cg);

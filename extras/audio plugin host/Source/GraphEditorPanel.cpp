@@ -223,7 +223,7 @@ public:
           numIns (0),
           numOuts (0)
     {
-        shadow.setShadowProperties (2.5f, 0.5f, -1, 0);
+        shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, Point<int> (0, 1));
         setComponentEffect (&shadow);
 
         setSize (150, 60);

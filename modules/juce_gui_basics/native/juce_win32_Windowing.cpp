@@ -759,7 +759,7 @@ public:
         shouldDeactivateTitleBar = oldDeactivate;
 
         if (shadower != nullptr)
-            shadower->componentBroughtToFront (*component);
+            handleBroughtToFront();
 
         return true;
     }
