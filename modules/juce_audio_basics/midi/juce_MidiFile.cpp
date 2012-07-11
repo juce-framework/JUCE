@@ -325,9 +325,8 @@ void MidiFile::readNextTrack (const uint8* data, int size)
     MidiFileHelpers::Sorter sorter;
     result.list.sort (sorter, true);
 
-    result.updateMatchedPairs();
-
     addTrack (result);
+    tracks.getLast()->updateMatchedPairs();
 }
 
 //==============================================================================
