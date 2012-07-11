@@ -43,7 +43,7 @@ public:
 
         NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
 
-        [center addObserver: delegate selector: @selector (trackingBegan:)
+        [center addObserver: delegate selector: @selector (mainMenuTrackingBegan:)
                        name: NSMenuDidBeginTrackingNotification object: nil];
 
         if (JUCEApplicationBase::isStandaloneApp())
@@ -110,7 +110,7 @@ private:
             addMethod (@selector (applicationDidResignActive:),   applicationDidResignActive, "v@:@");
             addMethod (@selector (applicationWillUnhide:),        applicationWillUnhide,      "v@:@");
             addMethod (@selector (broadcastMessageCallback:),     broadcastMessageCallback,   "v@:@");
-            addMethod (@selector (trackingBegan:),                trackingBegan,              "v@:@");
+            addMethod (@selector (mainMenuTrackingBegan:),        mainMenuTrackingBegan,      "v@:@");
             addMethod (@selector (dummyMethod),                   dummyMethod,                "v@:");
 
             registerClass();
@@ -176,7 +176,7 @@ private:
             MessageManager::getInstance()->deliverBroadcastMessage (messageString);
         }
 
-        static void trackingBegan (id /*self*/, SEL, NSNotification*)
+        static void mainMenuTrackingBegan (id /*self*/, SEL, NSNotification*)
         {
             if (menuTrackingBeganCallback != nullptr)
                 (*menuTrackingBeganCallback)();

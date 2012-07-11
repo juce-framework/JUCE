@@ -596,6 +596,7 @@ void Font::setItalic (const bool shouldBeItalic)
 
 void Font::setUnderline (const bool shouldBeUnderlined)
 {
+    dupeInternalIfShared();
     font->underline = shouldBeUnderlined;
 }
 
