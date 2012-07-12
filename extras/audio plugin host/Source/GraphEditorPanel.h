@@ -83,7 +83,8 @@ class GraphDocumentComponent  : public Component
 {
 public:
     //==============================================================================
-    GraphDocumentComponent (AudioDeviceManager* deviceManager);
+    GraphDocumentComponent (AudioPluginFormatManager& formatManager,
+                            AudioDeviceManager* deviceManager);
     ~GraphDocumentComponent();
 
     //==============================================================================

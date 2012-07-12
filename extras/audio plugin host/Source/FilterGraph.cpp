@@ -49,16 +49,15 @@ FilterConnection::~FilterConnection()
 {
 }
 
-
 //==============================================================================
 const int FilterGraph::midiChannelNumber = 0x1000;
 
-FilterGraph::FilterGraph()
+FilterGraph::FilterGraph (AudioPluginFormatManager& formatManager_)
     : FileBasedDocument (filenameSuffix,
                          filenameWildcard,
                          "Load a filter graph",
                          "Save a filter graph"),
-      lastUID (0)
+      formatManager (formatManager_), lastUID (0)
 {
     InternalPluginFormat internalFormat;
 
@@ -106,8 +105,7 @@ void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
     {
         String errorMessage;
 
-        AudioPluginInstance* instance
-            = AudioPluginFormatManager::getInstance()->createPluginInstance (*desc, errorMessage);
+        AudioPluginInstance* instance = formatManager.createPluginInstance (*desc, errorMessage);
 
         AudioProcessorGraph::Node* node = nullptr;
 
@@ -329,8 +327,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
 
     String errorMessage;
 
-    AudioPluginInstance* instance
-        = AudioPluginFormatManager::getInstance()->createPluginInstance (pd, errorMessage);
+    AudioPluginInstance* instance = formatManager.createPluginInstance (pd, errorMessage);
 
     if (instance == nullptr)
     {

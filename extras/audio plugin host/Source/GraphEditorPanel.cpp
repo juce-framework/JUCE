@@ -1014,8 +1014,9 @@ private:
 };
 
 //==============================================================================
-GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManager_)
-    : deviceManager (deviceManager_)
+GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& formatManager,
+                                                AudioDeviceManager* deviceManager_)
+    : graph (formatManager), deviceManager (deviceManager_)
 {
     addAndMakeVisible (graphPanel = new GraphEditorPanel (graph));
 

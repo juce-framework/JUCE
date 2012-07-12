@@ -67,7 +67,7 @@ class FilterGraph   : public FileBasedDocument
 {
 public:
     //==============================================================================
-    FilterGraph();
+    FilterGraph (AudioPluginFormatManager& formatManager);
     ~FilterGraph();
 
     //==============================================================================
@@ -126,6 +126,7 @@ public:
 
 private:
     //==============================================================================
+    AudioPluginFormatManager& formatManager;
     AudioProcessorGraph graph;
     AudioProcessorPlayer player;
 
