@@ -79,10 +79,10 @@ MultiDocumentPanel* MultiDocumentPanelWindow::getOwner() const noexcept
 
 
 //==============================================================================
-class MDITabbedComponentInternal   : public TabbedComponent
+class MultiDocumentPanel::TabbedComponentInternal   : public TabbedComponent
 {
 public:
-    MDITabbedComponentInternal()
+    TabbedComponentInternal()
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
     }
@@ -203,7 +203,7 @@ bool MultiDocumentPanel::addDocument (Component* const component,
     {
         if (tabComponent == nullptr && components.size() > numDocsBeforeTabsUsed)
         {
-            addAndMakeVisible (tabComponent = new MDITabbedComponentInternal());
+            addAndMakeVisible (tabComponent = new TabbedComponentInternal());
 
             Array <Component*> temp (components);
 

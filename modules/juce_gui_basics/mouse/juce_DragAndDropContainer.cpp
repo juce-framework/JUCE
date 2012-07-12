@@ -28,8 +28,8 @@ bool juce_performDragDropText (const String&, bool& shouldStop);
 
 
 //==============================================================================
-class DragImageComponent  : public Component,
-                            public Timer
+class DragAndDropContainer::DragImageComponent  : public Component,
+                                                  private Timer
 {
 public:
     DragImageComponent (const Image& im,

@@ -57,11 +57,11 @@ private:
 
 //==============================================================================
 AudioThumbnailCache::AudioThumbnailCache (const int maxNumThumbsToStore_)
-    : TimeSliceThread ("thumb cache"),
+    : thread ("thumb cache"),
       maxNumThumbsToStore (maxNumThumbsToStore_)
 {
     jassert (maxNumThumbsToStore > 0);
-    startThread (2);
+    thread.startThread (2);
 }
 
 AudioThumbnailCache::~AudioThumbnailCache()

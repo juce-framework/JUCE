@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-class DragOverlayComp   : public Component
+class TableHeaderComponent::DragOverlayComp   : public Component
 {
 public:
     DragOverlayComp (const Image& image_)

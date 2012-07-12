@@ -75,20 +75,21 @@ public:
     */
     virtual void setText (const String& newText);
 
-    /** Returns the text that should be shown in the text editor.
-    */
+    /** Returns the text that should be shown in the text editor. */
     virtual String getText() const;
 
 
     //==============================================================================
     /** @internal */
     void refresh();
-    /** @internal */
-    void textWasEdited();
 
 private:
     ScopedPointer<Label> textEditor;
 
+    class LabelComp;
+    friend class LabelComp;
+
+    void textWasEdited();
     void createEditor (int maxNumChars, bool isMultiLine);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent);

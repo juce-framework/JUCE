@@ -27,7 +27,7 @@
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 class RenderingTestCanvas   : public Component,
-                              public Timer
+                              private Timer
 {
 public:
     RenderingTestCanvas (RenderingTestComponent& owner_)

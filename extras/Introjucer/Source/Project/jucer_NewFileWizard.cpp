@@ -155,10 +155,7 @@ NewFileWizard::NewFileWizard()
 
 NewFileWizard::~NewFileWizard()
 {
-    clearSingletonInstance();
 }
-
-juce_ImplementSingleton_SingleThreaded (NewFileWizard)
 
 void NewFileWizard::addWizardsToMenu (PopupMenu& m) const
 {

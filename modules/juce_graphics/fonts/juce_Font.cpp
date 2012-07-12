@@ -39,7 +39,7 @@ typedef Typeface::Ptr (*GetTypefaceForFont) (const Font&);
 GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
 //==============================================================================
-class TypefaceCache  : public DeletedAtShutdown
+class TypefaceCache  : private DeletedAtShutdown
 {
 public:
     TypefaceCache()

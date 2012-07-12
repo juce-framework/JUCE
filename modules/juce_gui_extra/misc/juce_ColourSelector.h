@@ -134,6 +134,9 @@ private:
     class ColourSpaceView;
     class HueSelectorComp;
     class SwatchComponent;
+    class ColourComponentSlider;
+    class ColourSpaceMarker;
+    class HueSelectorMarker;
     friend class ColourSpaceView;
     friend class ScopedPointer<ColourSpaceView>;
     friend class HueSelectorComp;

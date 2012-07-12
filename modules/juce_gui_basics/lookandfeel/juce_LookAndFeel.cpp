@@ -1605,7 +1605,7 @@ Button* LookAndFeel::createSliderButton (const bool isIncrement)
     return new TextButton (isIncrement ? "+" : "-", String::empty);
 }
 
-class SliderLabelComp : public Label
+class LookAndFeel::SliderLabelComp : public Label
 {
 public:
     SliderLabelComp() : Label (String::empty, String::empty) {}
@@ -1827,7 +1827,7 @@ void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,
 }
 
 //==============================================================================
-class GlassWindowButton   : public Button
+class LookAndFeel::GlassWindowButton   : public Button
 {
 public:
     //==============================================================================
@@ -1838,10 +1838,6 @@ public:
           colour (col),
           normalShape (normalShape_),
           toggledShape (toggledShape_)
-    {
-    }
-
-    ~GlassWindowButton()
     {
     }
 

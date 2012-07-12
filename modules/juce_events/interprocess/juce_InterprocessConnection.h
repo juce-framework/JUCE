@@ -48,7 +48,7 @@ class MemoryBlock;
 
     @see InterprocessConnectionServer, Socket, NamedPipe
 */
-class JUCE_API  InterprocessConnection    : public Thread
+class JUCE_API  InterprocessConnection    : private Thread
 {
 public:
     //==============================================================================

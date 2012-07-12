@@ -562,6 +562,7 @@ public:
 private:
     //==============================================================================
     class ListViewport;
+    class RowComponent;
     friend class ListViewport;
     friend class TableListBox;
     ListBoxModel* model;

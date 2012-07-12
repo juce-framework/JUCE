@@ -90,7 +90,7 @@ public:
 
     ~LevelDataSource()
     {
-        owner.cache.removeTimeSliceClient (this);
+        owner.cache.getTimeSliceThread().removeTimeSliceClient (this);
     }
 
     enum { timeBeforeDeletingReader = 3000 };
@@ -112,7 +112,7 @@ public:
             if (lengthInSamples <= 0 || isFullyLoaded())
                 reader = nullptr;
             else
-                owner.cache.addTimeSliceClient (this);
+                owner.cache.getTimeSliceThread().addTimeSliceClient (this);
         }
     }
 
@@ -127,7 +127,7 @@ public:
             if (reader != nullptr)
             {
                 lastReaderUseTime = Time::getMillisecondCounter();
-                owner.cache.addTimeSliceClient (this);
+                owner.cache.getTimeSliceThread().addTimeSliceClient (this);
             }
         }
 

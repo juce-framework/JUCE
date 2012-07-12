@@ -347,8 +347,8 @@ private:
 
 //==============================================================================
 class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
-                                                  public ChangeListener,
-                                                  public ButtonListener
+                                                  public ButtonListener,
+                                                  private ChangeListener
 {
 public:
     TopLevelItem (KeyMappingEditorComponent& owner_)

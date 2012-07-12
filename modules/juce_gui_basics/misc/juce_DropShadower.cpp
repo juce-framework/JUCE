@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-class ShadowWindow  : public Component
+class DropShadower::ShadowWindow  : public Component
 {
 public:
     ShadowWindow (Component& owner, const int type_, const Image shadowImageSections [12])

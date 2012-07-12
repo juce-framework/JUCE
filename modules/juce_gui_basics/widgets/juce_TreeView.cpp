@@ -23,12 +23,12 @@
   ==============================================================================
 */
 
-class TreeViewContentComponent  : public Component,
-                                  public TooltipClient,
-                                  public AsyncUpdater
+class TreeView::ContentComponent  : public Component,
+                                    public TooltipClient,
+                                    public AsyncUpdater
 {
 public:
-    TreeViewContentComponent (TreeView& owner_)
+    ContentComponent (TreeView& owner_)
         : owner (owner_),
           buttonUnderMouse (nullptr),
           isDragging (false)
@@ -403,7 +403,7 @@ private:
         owner.recalculateIfNeeded();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewContentComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentComponent);
 };
 
 //==============================================================================
@@ -414,7 +414,7 @@ public:
 
     void updateComponents (const bool triggerResize)
     {
-        TreeViewContentComponent* const tvc = getContentComp();
+        ContentComponent* const tvc = getContentComp();
 
         if (tvc != nullptr)
         {
@@ -434,9 +434,9 @@ public:
         updateComponents (hasScrolledSideways);
     }
 
-    TreeViewContentComponent* getContentComp() const noexcept
+    ContentComponent* getContentComp() const noexcept
     {
-        return static_cast <TreeViewContentComponent*> (getViewedComponent());
+        return static_cast <ContentComponent*> (getViewedComponent());
     }
 
     bool keyPressed (const KeyPress& key)
@@ -467,7 +467,7 @@ TreeView::TreeView (const String& name)
       openCloseButtonsVisible (true)
 {
     addAndMakeVisible (viewport);
-    viewport->setViewedComponent (new TreeViewContentComponent (*this));
+    viewport->setViewedComponent (new ContentComponent (*this));
     setWantsKeyboardFocus (true);
 }
 
@@ -605,7 +605,7 @@ TreeViewItem* TreeView::getItemOnRow (int index) const
 
 TreeViewItem* TreeView::getItemAt (int y) const noexcept
 {
-    TreeViewContentComponent* const tc = viewport->getContentComp();
+    ContentComponent* const tc = viewport->getContentComp();
     Rectangle<int> pos;
     return tc->findItemAt (tc->getLocalPoint (this, Point<int> (0, y)).y, pos);
 }

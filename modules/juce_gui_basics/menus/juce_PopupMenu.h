@@ -478,6 +478,8 @@ private:
     //==============================================================================
     class Item;
     class ItemComponent;
+    class HeaderItemComponent;
+    class NormalComponentWrapper;
 
     friend class MenuItemIterator;
     friend class ItemComponent;

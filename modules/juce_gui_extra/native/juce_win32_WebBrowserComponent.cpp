@@ -24,17 +24,17 @@
 */
 
 //==============================================================================
-class WebBrowserComponentInternal   : public ActiveXControlComponent
+class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
 {
 public:
-    WebBrowserComponentInternal()
-        : browser (nullptr),
-          connectionPoint (nullptr),
-          adviseCookie (0)
+    Pimpl()
+      : browser (nullptr),
+        connectionPoint (nullptr),
+        adviseCookie (0)
     {
     }
 
-    ~WebBrowserComponentInternal()
+    ~Pimpl()
     {
         if (connectionPoint != nullptr)
             connectionPoint->Unadvise (adviseCookie);
@@ -183,7 +183,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler);
     };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserComponentInternal);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
 };
 
 
@@ -194,7 +194,7 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidd
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
     setOpaque (true);
-    addAndMakeVisible (browser = new WebBrowserComponentInternal());
+    addAndMakeVisible (browser = new Pimpl());
 }
 
 WebBrowserComponent::~WebBrowserComponent()

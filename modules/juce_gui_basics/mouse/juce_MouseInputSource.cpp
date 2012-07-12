@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-class MouseInputSourceInternal   : public AsyncUpdater
+class MouseInputSourceInternal   : private AsyncUpdater
 {
 public:
     //==============================================================================

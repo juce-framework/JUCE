@@ -208,10 +208,11 @@ public:
 
         for (int i = desktop.getNumMouseSources(); --i >= 0;)
         {
-            MouseInputSource* const source = desktop.getMouseSource(i);
-            if (source->isDragging())
+            MouseInputSource& source = *desktop.getMouseSource(i);
+
+            if (source.isDragging())
             {
-                source->triggerFakeMove();
+                source.triggerFakeMove();
                 ++numMiceDown;
             }
         }

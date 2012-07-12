@@ -785,7 +785,7 @@ Identifier ValueTree::getPropertyName (const int index) const
 
 //==============================================================================
 class ValueTreePropertyValueSource  : public Value::ValueSource,
-                                      public ValueTree::Listener
+                                      private ValueTree::Listener
 {
 public:
     ValueTreePropertyValueSource (const ValueTree& tree_, const Identifier& property_,
@@ -803,6 +803,11 @@ public:
     var getValue() const                 { return tree [property]; }
     void setValue (const var& newValue)  { tree.setProperty (property, newValue, undoManager); }
 
+private:
+    ValueTree tree;
+    const Identifier property;
+    UndoManager* const undoManager;
+
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
                                    const Identifier& changedProperty)
     {
@@ -814,11 +819,6 @@ public:
     void valueTreeChildRemoved (ValueTree&, ValueTree&) {}
     void valueTreeChildOrderChanged (ValueTree&) {}
     void valueTreeParentChanged (ValueTree&) {}
-
-private:
-    ValueTree tree;
-    const Identifier property;
-    UndoManager* const undoManager;
 
     JUCE_DECLARE_NON_COPYABLE (ValueTreePropertyValueSource);
 };

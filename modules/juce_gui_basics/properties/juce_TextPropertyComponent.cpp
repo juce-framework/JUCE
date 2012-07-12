@@ -23,11 +23,11 @@
   ==============================================================================
 */
 
-class TextPropLabel  : public Label
+class TextPropertyComponent::LabelComp  : public Label
 {
 public:
-    TextPropLabel (TextPropertyComponent& owner_,
-                   const int maxChars_, const bool isMultiline_)
+    LabelComp (TextPropertyComponent& owner_,
+               const int maxChars_, const bool isMultiline_)
         : Label (String::empty, String::empty),
           owner (owner_),
           maxChars (maxChars_),
@@ -100,7 +100,7 @@ String TextPropertyComponent::getText() const
 
 void TextPropertyComponent::createEditor (const int maxNumChars, const bool isMultiLine)
 {
-    addAndMakeVisible (textEditor = new TextPropLabel (*this, maxNumChars, isMultiLine));
+    addAndMakeVisible (textEditor = new LabelComp (*this, maxNumChars, isMultiLine));
 
     if (isMultiLine)
     {

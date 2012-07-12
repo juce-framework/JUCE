@@ -269,7 +269,7 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-class DisplaySettingsChangeCallback  : public DeletedAtShutdown
+class DisplaySettingsChangeCallback  : private DeletedAtShutdown
 {
 public:
     DisplaySettingsChangeCallback()

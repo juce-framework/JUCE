@@ -80,25 +80,20 @@ public:
         (and if the file isn't in the list, all other items will be deselected). */
     void setSelectedFile (const File&);
 
-    //==============================================================================
-    /** @internal */
-    void changeListenerCallback (ChangeBroadcaster*);
-    /** @internal */
-    int getNumRows();
-    /** @internal */
-    void paintListBoxItem (int, Graphics&, int, int, bool);
-    /** @internal */
-    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
-    /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
-    /** @internal */
-    void deleteKeyPressed (int currentSelectedRow);
-    /** @internal */
-    void returnKeyPressed (int currentSelectedRow);
-
 private:
     //==============================================================================
     File lastDirectory;
+
+    class ItemComponent;
+
+    void changeListenerCallback (ChangeBroadcaster*);
+
+    int getNumRows();
+    void paintListBoxItem (int, Graphics&, int, int, bool);
+    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
+    void selectedRowsChanged (int lastRowSelected);
+    void deleteKeyPressed (int currentSelectedRow);
+    void returnKeyPressed (int currentSelectedRow);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListComponent);
 };

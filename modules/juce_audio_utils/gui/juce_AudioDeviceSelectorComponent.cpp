@@ -67,7 +67,7 @@ private:
 
 //==============================================================================
 class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox  : public ListBox,
-                                                                         public ListBoxModel
+                                                                         private ListBoxModel
 {
 public:
     //==============================================================================
@@ -196,9 +196,9 @@ struct AudioDeviceSetupDetails
 
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
-                                 public ChangeListener,
-                                 public ComboBoxListener,  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
-                                 public ButtonListener
+                                 private ChangeListener,
+                                 private ComboBoxListener,  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+                                 private ButtonListener
 {
 public:
     AudioDeviceSettingsPanel (AudioIODeviceType* type_,
@@ -661,7 +661,7 @@ private:
 public:
     //==============================================================================
     class ChannelSelectorListBox  : public ListBox,
-                                    public ListBoxModel
+                                    private ListBoxModel
     {
     public:
         enum BoxType

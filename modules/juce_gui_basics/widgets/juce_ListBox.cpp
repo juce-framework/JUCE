@@ -23,11 +23,11 @@
   ==============================================================================
 */
 
-class ListBoxRowComponent  : public Component,
-                             public TooltipClient
+class ListBox::RowComponent  : public Component,
+                               public TooltipClient
 {
 public:
-    ListBoxRowComponent (ListBox& owner_)
+    RowComponent (ListBox& owner_)
         : owner (owner_), row (-1),
           selected (false), isDragging (false), selectRowOnMouseUp (false)
     {
@@ -138,7 +138,7 @@ private:
     int row;
     bool selected, isDragging, selectRowOnMouseUp;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBoxRowComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComponent);
 };
 
 
@@ -157,12 +157,12 @@ public:
         content->setWantsKeyboardFocus (false);
     }
 
-    ListBoxRowComponent* getComponentForRow (const int row) const noexcept
+    RowComponent* getComponentForRow (const int row) const noexcept
     {
         return rows [row % jmax (1, rows.size())];
     }
 
-    ListBoxRowComponent* getComponentForRowIfOnscreen (const int row) const noexcept
+    RowComponent* getComponentForRowIfOnscreen (const int row) const noexcept
     {
         return (row >= firstIndex && row < firstIndex + rows.size())
                  ? getComponentForRow (row) : nullptr;
@@ -221,7 +221,7 @@ public:
 
             while (numNeeded > rows.size())
             {
-                ListBoxRowComponent* newRow = new ListBoxRowComponent (owner);
+                RowComponent* newRow = new RowComponent (owner);
                 rows.add (newRow);
                 getViewedComponent()->addAndMakeVisible (newRow);
             }
@@ -233,7 +233,7 @@ public:
             for (int i = 0; i < numNeeded; ++i)
             {
                 const int row = i + firstIndex;
-                ListBoxRowComponent* const rowComp = getComponentForRow (row);
+                RowComponent* const rowComp = getComponentForRow (row);
 
                 if (rowComp != nullptr)
                 {
@@ -320,7 +320,7 @@ public:
 
 private:
     ListBox& owner;
-    OwnedArray<ListBoxRowComponent> rows;
+    OwnedArray<RowComponent> rows;
     int firstIndex, firstWholeIndex, lastWholeIndex;
     bool hasUpdated;
 
@@ -619,7 +619,7 @@ int ListBox::getInsertionIndexForPosition (const int x, const int y) const noexc
 
 Component* ListBox::getComponentForRowNumber (const int row) const noexcept
 {
-    ListBoxRowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row);
+    RowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row);
     return listRowComp != nullptr ? static_cast <Component*> (listRowComp->customComponent) : nullptr;
 }
 

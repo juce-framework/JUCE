@@ -639,6 +639,9 @@ private:
     virtual int getTabButtonBestWidth (int, const String&, int, Button&) { return 0; }
    #endif
 
+    class GlassWindowButton;
+    class SliderLabelComp;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel);
 };
 

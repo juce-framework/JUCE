@@ -127,7 +127,7 @@ private:
 };
 
 //==============================================================================
-class FTTypefaceList  : public DeletedAtShutdown
+class FTTypefaceList  : private DeletedAtShutdown
 {
 public:
     FTTypefaceList()

@@ -488,7 +488,7 @@ public:
     ScopedPointer<Component> appearanceEditorWindow;
 
 private:
-    class AsyncQuitRetrier  : public Timer
+    class AsyncQuitRetrier  : private Timer
     {
     public:
         AsyncQuitRetrier()   { startTimer (500); }

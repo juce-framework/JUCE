@@ -1110,7 +1110,7 @@ private:
     TemporaryImage offscreenImageGenerator;
 
     //==============================================================================
-    class WindowClassHolder    : public DeletedAtShutdown
+    class WindowClassHolder    : private DeletedAtShutdown
     {
     public:
         WindowClassHolder()

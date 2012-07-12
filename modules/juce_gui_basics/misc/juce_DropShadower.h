@@ -59,6 +59,8 @@ public:
 
 private:
     //==============================================================================
+    class ShadowWindow;
+
     Component* owner;
     OwnedArray<Component> shadowWindows;
     Image shadowImageSections[12];

@@ -24,7 +24,7 @@
 */
 
 class ChoicePropertyComponent::RemapperValueSource    : public Value::ValueSource,
-                                                        public ValueListener
+                                                        private ValueListener
 {
 public:
     RemapperValueSource (const Value& sourceValue_, const Array<var>& mappings_)
@@ -33,8 +33,6 @@ public:
     {
         sourceValue.addListener (this);
     }
-
-    ~RemapperValueSource() {}
 
     var getValue() const
     {
@@ -49,15 +47,14 @@ public:
             sourceValue = remappedVal;
     }
 
+protected:
+    Value sourceValue;
+    Array<var> mappings;
+
     void valueChanged (Value&)
     {
         sendChangeMessage (true);
     }
-
-protected:
-    //==============================================================================
-    Value sourceValue;
-    Array<var> mappings;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemapperValueSource);
 };

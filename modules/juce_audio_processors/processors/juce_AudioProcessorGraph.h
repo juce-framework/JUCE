@@ -46,7 +46,7 @@
     AudioProcessorPlayer object.
 */
 class JUCE_API  AudioProcessorGraph   : public AudioProcessor,
-                                        public AsyncUpdater
+                                        private AsyncUpdater
 {
 public:
     //==============================================================================
@@ -395,9 +395,6 @@ public:
     void getStateInformation (juce::MemoryBlock& destData);
     void setStateInformation (const void* data, int sizeInBytes);
 
-    /** @internal */
-    void handleAsyncUpdate();
-
 private:
     //==============================================================================
     ReferenceCountedArray <Node> nodes;
@@ -415,9 +412,9 @@ private:
     MidiBuffer* currentMidiInputBuffer;
     MidiBuffer currentMidiOutputBuffer;
 
+    void handleAsyncUpdate();
     void clearRenderingSequence();
     void buildRenderingSequence();
-
     bool isAnInputTo (uint32 possibleInputId, uint32 possibleDestinationId, int recursionCheck) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorGraph);

@@ -39,7 +39,7 @@
 
     @see AudioThumbnail
 */
-class JUCE_API  AudioThumbnailCache   : public TimeSliceThread
+class JUCE_API  AudioThumbnailCache
 {
 public:
     //==============================================================================
@@ -85,8 +85,13 @@ public:
     */
     void writeToStream (OutputStream& stream);
 
+    /** Returns the thread that client thumbnails can use. */
+    TimeSliceThread& getTimeSliceThread() noexcept      { return thread; }
+
 private:
     //==============================================================================
+    TimeSliceThread thread;
+
     class ThumbnailCacheEntry;
     friend class OwnedArray<ThumbnailCacheEntry>;
     OwnedArray<ThumbnailCacheEntry> thumbs;

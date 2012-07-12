@@ -857,7 +857,7 @@ private:
 //==============================================================================
 class TextEditor::TextHolderComponent  : public Component,
                                          public Timer,
-                                         public ValueListener
+                                         private ValueListener
 {
 public:
     TextHolderComponent (TextEditor& owner_)

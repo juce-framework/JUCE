@@ -26,10 +26,10 @@
 const char* const Toolbar::toolbarDragDescriptor = "_toolbarItem_";
 
 //==============================================================================
-class ToolbarSpacerComp  : public ToolbarItemComponent
+class Toolbar::Spacer  : public ToolbarItemComponent
 {
 public:
-    ToolbarSpacerComp (const int itemId_, const float fixedSize_, const bool drawBar_)
+    Spacer (const int itemId_, const float fixedSize_, const bool drawBar_)
         : ToolbarItemComponent (itemId_, String::empty, false),
           fixedSize (fixedSize_),
           drawBar (drawBar_)
@@ -143,7 +143,7 @@ private:
     const float fixedSize;
     const bool drawBar;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarSpacerComp);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Spacer);
 };
 
 //==============================================================================
@@ -159,7 +159,7 @@ public:
         {
             ToolbarItemComponent* const tc = owner_.items.getUnchecked(i);
 
-            if (dynamic_cast <ToolbarSpacerComp*> (tc) == nullptr && ! tc->isVisible())
+            if (dynamic_cast <Spacer*> (tc) == nullptr && ! tc->isVisible())
             {
                 oldIndexes.insert (0, i);
                 addAndMakeVisible (tc, 0);
@@ -274,11 +274,11 @@ void Toolbar::clear()
 ToolbarItemComponent* Toolbar::createItem (ToolbarItemFactory& factory, const int itemId)
 {
     if (itemId == ToolbarItemFactory::separatorBarId)
-        return new ToolbarSpacerComp (itemId, 0.1f, true);
+        return new Spacer (itemId, 0.1f, true);
     else if (itemId == ToolbarItemFactory::spacerId)
-        return new ToolbarSpacerComp (itemId, 0.5f, false);
+        return new Spacer (itemId, 0.5f, false);
     else if (itemId == ToolbarItemFactory::flexibleSpacerId)
-        return new ToolbarSpacerComp (itemId, 0, false);
+        return new Spacer (itemId, 0, false);
 
     return factory.createItem (itemId);
 }
@@ -451,7 +451,7 @@ void Toolbar::updateAllItemPositions (const bool animate)
 
             tc->setStyle (toolbarStyle);
 
-            ToolbarSpacerComp* const spacer = dynamic_cast <ToolbarSpacerComp*> (tc);
+            Spacer* const spacer = dynamic_cast <Spacer*> (tc);
 
             int preferredSize = 1, minSize = 1, maxSize = 1;
 
@@ -647,12 +647,12 @@ void Toolbar::mouseDown (const MouseEvent&)
 }
 
 //==============================================================================
-class ToolbarCustomisationDialog   : public DialogWindow
+class Toolbar::CustomisationDialog   : public DialogWindow
 {
 public:
-    ToolbarCustomisationDialog (ToolbarItemFactory& factory,
-                                Toolbar* const toolbar_,
-                                const int optionFlags)
+    CustomisationDialog (ToolbarItemFactory& factory,
+                         Toolbar* const toolbar_,
+                         const int optionFlags)
         : DialogWindow (TRANS("Add/remove items from toolbar"), Colours::white, true, true),
           toolbar (toolbar_)
     {
@@ -662,7 +662,7 @@ public:
         positionNearBar();
     }
 
-    ~ToolbarCustomisationDialog()
+    ~CustomisationDialog()
     {
         toolbar->setEditingActive (false);
     }
@@ -820,6 +820,6 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
 {
     setEditingActive (true);
 
-    (new ToolbarCustomisationDialog (factory, this, optionFlags))
+    (new CustomisationDialog (factory, this, optionFlags))
         ->enterModalState (true, 0, true);
 }
