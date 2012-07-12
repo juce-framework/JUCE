@@ -516,6 +516,7 @@ public:
     virtual int getTabButtonSpaceAroundImage();
     virtual int getTabButtonOverlap (int tabDepth);
     virtual int getTabButtonBestWidth (TabBarButton&, int tabDepth);
+    virtual Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton&, Rectangle<int>& textArea, Component& extraComp);
 
     virtual void drawTabButton (TabBarButton&, Graphics& g, bool isMouseOver, bool isMouseDown);
     virtual void drawTabButtonText (TabBarButton&, Graphics& g, bool isMouseOver, bool isMouseDown);

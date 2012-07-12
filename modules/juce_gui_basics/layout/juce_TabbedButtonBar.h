@@ -71,6 +71,12 @@ public:
     void setExtraComponent (Component* extraTabComponent,
                             ExtraComponentPlacement extraComponentPlacement);
 
+    /** Returns the custom component, if there is one. */
+    Component* getExtraComponent() const noexcept                           { return extraComponent; }
+
+    /** Returns the placement of the custom component, if there is one. */
+    ExtraComponentPlacement getExtraComponentPlacement() const noexcept     { return extraCompPlacement; }
+
     /** Returns an area of the component that's safe to draw in.
 
         This deals with the orientation of the tabs, which affects which side is

@@ -2076,8 +2076,48 @@ int LookAndFeel::getTabButtonSpaceAroundImage()
 
 int LookAndFeel::getTabButtonBestWidth (TabBarButton& button, int tabDepth)
 {
-    return Font (tabDepth * 0.6f).getStringWidth (button.getButtonText().trim())
-              + getTabButtonOverlap (tabDepth) * 2;
+    int width = Font (tabDepth * 0.6f).getStringWidth (button.getButtonText().trim())
+                  + getTabButtonOverlap (tabDepth) * 2;
+
+    Component* const extraComponent = button.getExtraComponent();
+
+    if (extraComponent != nullptr)
+        width += button.getTabbedButtonBar().isVertical() ? extraComponent->getHeight()
+                                                          : extraComponent->getWidth();
+
+    return jlimit (tabDepth * 2, tabDepth * 8, width);
+}
+
+Rectangle<int> LookAndFeel::getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp)
+{
+    Rectangle<int> extraComp;
+
+    const TabbedButtonBar::Orientation orientation = button.getTabbedButtonBar().getOrientation();
+
+    if (button.getExtraComponentPlacement() == TabBarButton::beforeText)
+    {
+        switch (orientation)
+        {
+            case TabbedButtonBar::TabsAtBottom:
+            case TabbedButtonBar::TabsAtTop:     extraComp = textArea.removeFromLeft   (comp.getWidth()); break;
+            case TabbedButtonBar::TabsAtLeft:    extraComp = textArea.removeFromBottom (comp.getHeight()); break;
+            case TabbedButtonBar::TabsAtRight:   extraComp = textArea.removeFromTop    (comp.getHeight()); break;
+            default:                             jassertfalse; break;
+        }
+    }
+    else
+    {
+        switch (orientation)
+        {
+            case TabbedButtonBar::TabsAtBottom:
+            case TabbedButtonBar::TabsAtTop:     extraComp = textArea.removeFromRight  (comp.getWidth()); break;
+            case TabbedButtonBar::TabsAtLeft:    extraComp = textArea.removeFromTop    (comp.getHeight()); break;
+            case TabbedButtonBar::TabsAtRight:   extraComp = textArea.removeFromBottom (comp.getHeight()); break;
+            default:                             jassertfalse; break;
+        }
+    }
+
+    return extraComp;
 }
 
 void LookAndFeel::createTabButtonShape (TabBarButton& button, Path& p, bool /*isMouseOver*/, bool /*isMouseDown*/)

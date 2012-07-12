@@ -74,50 +74,27 @@ bool TabBarButton::hitTest (int mx, int my)
 
 int TabBarButton::getBestTabLength (const int depth)
 {
-    int textWidth = getLookAndFeel().getTabButtonBestWidth (*this, depth);
-    int extraCompSize = extraComponent != nullptr ? (owner.isVertical() ? extraComponent->getHeight()
-                                                                        : extraComponent->getWidth()) : 0;
-
-    return jlimit (depth * 2, depth * 8, textWidth + extraCompSize);
+    return getLookAndFeel().getTabButtonBestWidth (*this, depth);
 }
 
 void TabBarButton::calcAreas (Rectangle<int>& extraComp, Rectangle<int>& text) const
 {
+    LookAndFeel& lf = getLookAndFeel();
     text = getActiveArea();
 
     const int depth = owner.isVertical() ? text.getWidth() : text.getHeight();
-    const int indent = getLookAndFeel().getTabButtonOverlap (depth);
+    const int overlap = lf.getTabButtonOverlap (depth);
 
-    if (owner.isVertical())
-        text.reduce (0, indent);
-    else
-        text.reduce (indent, 0);
+    if (overlap > 0)
+    {
+        if (owner.isVertical())
+            text.reduce (0, overlap);
+        else
+            text.reduce (overlap, 0);
+    }
 
     if (extraComponent != nullptr)
-    {
-        if (extraCompPlacement == beforeText)
-        {
-            switch (owner.getOrientation())
-            {
-                case TabbedButtonBar::TabsAtLeft:    extraComp = text.removeFromBottom (extraComponent->getHeight()); break;
-                case TabbedButtonBar::TabsAtRight:   extraComp = text.removeFromTop    (extraComponent->getHeight()); break;
-                case TabbedButtonBar::TabsAtBottom:
-                case TabbedButtonBar::TabsAtTop:     extraComp = text.removeFromLeft (extraComponent->getWidth()); break;
-                default:                             jassertfalse; break;
-            }
-        }
-        else
-        {
-            switch (owner.getOrientation())
-            {
-                case TabbedButtonBar::TabsAtLeft:    extraComp = text.removeFromTop    (extraComponent->getHeight()); break;
-                case TabbedButtonBar::TabsAtRight:   extraComp = text.removeFromBottom (extraComponent->getHeight()); break;
-                case TabbedButtonBar::TabsAtBottom:
-                case TabbedButtonBar::TabsAtTop:     extraComp = text.removeFromRight (extraComponent->getWidth()); break;
-                default:                             jassertfalse; break;
-            }
-        }
-    }
+        extraComp = lf.getTabButtonExtraComponentBounds (*this, text, *extraComponent);
 }
 
 Rectangle<int> TabBarButton::getTextArea() const
@@ -389,7 +366,7 @@ void TabbedButtonBar::resized()
 
     const int overlap = lf.getTabButtonOverlap (depth) + lf.getTabButtonSpaceAroundImage() * 2;
 
-    int totalLength = overlap;
+    int totalLength = jmax (0, overlap);
     int numVisibleButtons = tabs.size();
 
     for (int i = 0; i < tabs.size(); ++i)
@@ -397,7 +374,7 @@ void TabbedButtonBar::resized()
         TabBarButton* const tb = tabs.getUnchecked(i)->button;
 
         totalLength += tb->getBestTabLength (depth) - overlap;
-        tb->overlapPixels = overlap / 2;
+        tb->overlapPixels = jmax (0, overlap / 2);
     }
 
     double scale = 1.0;
@@ -405,7 +382,7 @@ void TabbedButtonBar::resized()
     if (totalLength > length)
         scale = jmax (minimumScale, length / (double) totalLength);
 
-    const bool isTooBig = totalLength * scale > length;
+    const bool isTooBig = (int) (totalLength * scale) > length;
     int tabsButtonPos = 0;
 
     if (isTooBig)
