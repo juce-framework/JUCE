@@ -57,15 +57,6 @@ Image ImageType::convert (const Image& source) const
 }
 
 //==============================================================================
-NativeImageType::NativeImageType() {}
-NativeImageType::~NativeImageType() {}
-
-int NativeImageType::getTypeID() const
-{
-    return 1;
-}
-
-//==============================================================================
 class SoftwarePixelData  : public ImagePixelData
 {
 public:
@@ -118,6 +109,22 @@ int SoftwareImageType::getTypeID() const
 {
     return 2;
 }
+
+//==============================================================================
+NativeImageType::NativeImageType() {}
+NativeImageType::~NativeImageType() {}
+
+int NativeImageType::getTypeID() const
+{
+    return 1;
+}
+
+#if JUCE_WINDOWS || JUCE_LINUX
+ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
+{
+    return new SoftwarePixelData (format, width, height, clearImage);
+}
+#endif
 
 //==============================================================================
 class SubsectionPixelData  : public ImagePixelData

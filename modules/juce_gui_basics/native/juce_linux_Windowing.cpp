@@ -3031,11 +3031,6 @@ Image juce_createIconForFile (const File& file)
     return Image::null;
 }
 
-ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
-{
-    return SoftwareImageType().create (format, width, height, clearImage);
-}
-
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
 {

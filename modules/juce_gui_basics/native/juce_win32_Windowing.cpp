@@ -2927,12 +2927,6 @@ void Desktop::setMousePosition (const Point<int>& newPosition)
 }
 
 //==============================================================================
-ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
-{
-    return SoftwareImageType().create (format, width, height, clearImage);
-}
-
-//==============================================================================
 class ScreenSaverDefeater   : public Timer
 {
 public:
