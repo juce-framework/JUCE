@@ -219,6 +219,16 @@ public:
         }
     }
 
+    void copyPropertiesFrom (const SharedObject& source, UndoManager* const undoManager)
+    {
+        for (int i = properties.size(); --i >= 0;)
+            if (! source.properties.contains (properties.getName (i)))
+                removeProperty (properties.getName (i), undoManager);
+
+        for (int i = 0; i < source.properties.size(); ++i)
+            setProperty (source.properties.getName(i), source.properties.getValueAt(i), undoManager);
+    }
+
     ValueTree getChildWithName (const Identifier& typeToMatch) const
     {
         for (int i = 0; i < children.size(); ++i)
@@ -781,6 +791,14 @@ Identifier ValueTree::getPropertyName (const int index) const
 {
     return object == nullptr ? Identifier()
                              : object->properties.getName (index);
+}
+
+void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* const undoManager)
+{
+    if (source.object == nullptr)
+        removeAllProperties (undoManager);
+    else if (object != nullptr)
+        object->copyPropertiesFrom (*(source.object), undoManager);
 }
 
 //==============================================================================
