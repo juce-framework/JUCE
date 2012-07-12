@@ -89,9 +89,9 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
         isButtonDown = false;
     }
 
-    g.setColour ((isButtonDown) ? downColour
-                                : (isMouseOverButton) ? overColour
-                                                      : normalColour);
+    g.setColour (isButtonDown ? downColour
+                              : isMouseOverButton ? overColour
+                                                  : normalColour);
 
     int w = getWidth();
     int h = getHeight();

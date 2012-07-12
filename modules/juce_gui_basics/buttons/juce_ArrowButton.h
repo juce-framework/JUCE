@@ -53,8 +53,6 @@ public:
     /** Destructor. */
     ~ArrowButton();
 
-
-protected:
     /** @internal */
     void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
 

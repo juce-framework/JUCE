@@ -32,9 +32,7 @@ BubbleComponent::BubbleComponent()
     setComponentEffect (&shadow);
 }
 
-BubbleComponent::~BubbleComponent()
-{
-}
+BubbleComponent::~BubbleComponent() {}
 
 //==============================================================================
 void BubbleComponent::paint (Graphics& g)
@@ -43,13 +41,12 @@ void BubbleComponent::paint (Graphics& g)
                                  (float) content.getX(), (float) content.getY(),
                                  (float) content.getWidth(), (float) content.getHeight());
 
+    g.reduceClipRegion (content);
     g.setOrigin (content.getX(), content.getY());
-    g.reduceClipRegion (0, 0, content.getWidth(), content.getHeight());
 
     paintContent (g, content.getWidth(), content.getHeight());
 }
 
-//==============================================================================
 void BubbleComponent::setAllowedPlacement (const int newPlacement)
 {
     allowablePlacements = newPlacement;
@@ -82,9 +79,8 @@ void BubbleComponent::setPosition (const Rectangle<int>& rectangleToPointTo)
         content.setBounds (edgeSpace, edgeSpace, contentW, contentH);
     }
 
-    int totalW = content.getWidth()  + edgeSpace * 2;
-    int totalH = content.getHeight() + edgeSpace * 2;
-    int targetX, targetY;
+    const int totalW = content.getWidth()  + edgeSpace * 2;
+    const int totalH = content.getHeight() + edgeSpace * 2;
 
     const Rectangle<int> availableSpace (getParentComponent() != nullptr ? getParentComponent()->getLocalBounds()
                                                                          : getParentMonitorArea());
@@ -105,6 +101,8 @@ void BubbleComponent::setPosition (const Rectangle<int>& rectangleToPointTo)
     {
         spaceAbove = spaceBelow = 0;
     }
+
+    int targetX, targetY;
 
     if (jmax (spaceAbove, spaceBelow) >= jmax (spaceLeft, spaceRight))
     {

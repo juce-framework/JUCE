@@ -152,7 +152,10 @@ void TabBarButton::setExtraComponent (Component* comp, ExtraComponentPlacement p
 void TabBarButton::childBoundsChanged (Component* c)
 {
     if (c == extraComponent)
+    {
+        owner.resized();
         resized();
+    }
 }
 
 void TabBarButton::resized()
@@ -434,7 +437,6 @@ void TabbedButtonBar::resized()
         for (int i = 0; i < tabs.size(); ++i)
         {
             TabBarButton* const tb = tabs.getUnchecked(i)->button;
-
             const int newLength = totalLength + tb->getBestTabLength (depth);
 
             if (i > 0 && newLength * minimumScale > tabsButtonPos)
