@@ -37,16 +37,16 @@ namespace AppearanceColours
 
     static const ColourInfo colours[] =
     {
+        { "Main Window Bkgd",   mainBackgroundColourId, true },
+        { "Project Panel Bkgd", projectPanelBackgroundColourId, true },
+        { "Treeview Highlight", treeviewHighlightColourId, false },
+
         { "Code Background",    CodeEditorComponent::backgroundColourId, true },
         { "Line Number Bkgd",   CodeEditorComponent::lineNumberBackgroundId, false },
         { "Line Numbers",       CodeEditorComponent::lineNumberTextId, false },
         { "Plain Text",         CodeEditorComponent::defaultTextColourId, false },
         { "Selected Text Bkgd", CodeEditorComponent::highlightColourId, false },
-        { "Caret",              CaretComponent::caretColourId, false },
-
-        { "Main Window Bkgd",   mainBackgroundColourId, true },
-        { "Project Panel Bkgd", projectPanelBackgroundColourId, true },
-        { "Treeview Highlight", treeviewHighlightColourId, false }
+        { "Caret",              CaretComponent::caretColourId, false }
     };
 }
 
@@ -120,16 +120,22 @@ bool AppearanceSettings::readFromXML (const XmlElement& xml)
 {
     if (xml.hasTagName (settings.getType().toString()))
     {
-        ValueTree newSettings (ValueTree::fromXml (xml));
+        const ValueTree newSettings (ValueTree::fromXml (xml));
+
+        // we'll manually copy across the new properties to the existing tree so that
+        // any open editors will be kept up to date..
+        settings.copyPropertiesFrom (newSettings, nullptr);
 
         for (int i = settings.getNumChildren(); --i >= 0;)
         {
-            const ValueTree c (settings.getChild (i));
-            if (! newSettings.getChildWithProperty (Ids::name, c.getProperty (Ids::name)).isValid())
-                newSettings.addChild (c.createCopy(), 0, nullptr);
+            ValueTree c (settings.getChild (i));
+
+            const ValueTree newValue (newSettings.getChildWithProperty (Ids::name, c.getProperty (Ids::name)));
+
+            if (newValue.isValid())
+                c.copyPropertiesFrom (newValue, nullptr);
         }
 
-        settings = newSettings;
         return true;
     }
 
