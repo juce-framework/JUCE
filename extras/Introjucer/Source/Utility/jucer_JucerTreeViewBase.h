@@ -162,7 +162,12 @@ public:
 
     void resized()
     {
-        tree.setBounds (getLocalBounds());
+        tree.setBounds (getAvailableBounds());
+    }
+
+    Rectangle<int> getAvailableBounds() const
+    {
+        return Rectangle<int> (0, 2, getWidth() - 2, getHeight() - 2);
     }
 
     TreeView tree;

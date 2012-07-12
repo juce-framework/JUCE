@@ -66,13 +66,13 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height
     else
         p.addTriangle (width * 0.25f, height * 0.25f, width * 0.8f, height * 0.5f,  width * 0.25f, height * 0.75f);
 
-    g.setColour (getOwnerView()->findColour (projectPanelBackgroundColourId).contrasting (0.3f));
+    g.setColour (getOwnerView()->findColour (mainBackgroundColourId).contrasting (0.3f));
     g.fillPath (p);
 }
 
 Colour JucerTreeViewBase::getBackgroundColour() const
 {
-    Colour background (getOwnerView()->findColour (projectPanelBackgroundColourId));
+    Colour background (getOwnerView()->findColour (mainBackgroundColourId));
 
     if (isSelected())
         background = background.overlaidWith (getOwnerView()->findColour (treeviewHighlightColourId));

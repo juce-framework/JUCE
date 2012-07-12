@@ -26,76 +26,6 @@
 #include "jucer_SourceCodeEditor.h"
 #include "../Application/jucer_OpenDocumentManager.h"
 
-
-//==============================================================================
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_)
-    : DocumentEditorComponent (document_)
-{
-}
-
-SourceCodeEditor::~SourceCodeEditor()
-{
-    getAppSettings().appearance.settings.removeListener (this);
-
-    SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument());
-
-    if (doc != nullptr)
-        doc->updateLastState (*editor);
-}
-
-void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
-{
-    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-        setEditor (new CppCodeEditorComponent (codeDocument));
-    else
-        setEditor (new CodeEditorComponent (codeDocument, nullptr));
-}
-
-void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
-{
-    addAndMakeVisible (editor = newEditor);
-
-   #if JUCE_MAC
-    Font font (13.0f);
-    font.setTypefaceName ("Menlo");
-   #else
-    Font font (12.0f);
-    font.setTypefaceName (Font::getDefaultMonospacedFontName());
-   #endif
-    editor->setFont (font);
-
-    editor->setTabSize (4, true);
-
-    updateColourScheme();
-    getAppSettings().appearance.settings.addListener (this);
-}
-
-void SourceCodeEditor::highlightLine (int lineNum, int characterIndex)
-{
-    if (lineNum <= editor->getFirstLineOnScreen()
-         || lineNum >= editor->getFirstLineOnScreen() + editor->getNumLinesOnScreen() - 1)
-    {
-        editor->scrollToLine (jmax (0, jmin (lineNum - editor->getNumLinesOnScreen() / 3,
-                                             editor->getDocument().getNumLines() - editor->getNumLinesOnScreen())));
-    }
-
-    editor->moveCaretTo (CodeDocument::Position (&editor->getDocument(), lineNum - 1, characterIndex), false);
-}
-
-void SourceCodeEditor::resized()
-{
-    editor->setBounds (getLocalBounds());
-}
-
-void SourceCodeEditor::updateColourScheme()     { getAppSettings().appearance.applyToCodeEditor (*editor); }
-
-void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
-void SourceCodeEditor::valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
-void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
-void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
-void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
-void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
-
 //==============================================================================
 SourceCodeDocument::SourceCodeDocument (Project* project_, const File& file_)
     : modDetector (file_), project (project_)
@@ -167,3 +97,72 @@ void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
     if (lastState != nullptr)
         lastState->restoreState (editor);
 }
+
+//==============================================================================
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_)
+    : DocumentEditorComponent (document_)
+{
+}
+
+SourceCodeEditor::~SourceCodeEditor()
+{
+    getAppSettings().appearance.settings.removeListener (this);
+
+    SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument());
+
+    if (doc != nullptr)
+        doc->updateLastState (*editor);
+}
+
+void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
+{
+    if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
+        setEditor (new CppCodeEditorComponent (codeDocument));
+    else
+        setEditor (new CodeEditorComponent (codeDocument, nullptr));
+}
+
+void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
+{
+    addAndMakeVisible (editor = newEditor);
+
+   #if JUCE_MAC
+    Font font (13.0f);
+    font.setTypefaceName ("Menlo");
+   #else
+    Font font (12.0f);
+    font.setTypefaceName (Font::getDefaultMonospacedFontName());
+   #endif
+    editor->setFont (font);
+
+    editor->setTabSize (4, true);
+
+    updateColourScheme();
+    getAppSettings().appearance.settings.addListener (this);
+}
+
+void SourceCodeEditor::highlightLine (int lineNum, int characterIndex)
+{
+    if (lineNum <= editor->getFirstLineOnScreen()
+         || lineNum >= editor->getFirstLineOnScreen() + editor->getNumLinesOnScreen() - 1)
+    {
+        editor->scrollToLine (jmax (0, jmin (lineNum - editor->getNumLinesOnScreen() / 3,
+                                             editor->getDocument().getNumLines() - editor->getNumLinesOnScreen())));
+    }
+
+    editor->moveCaretTo (CodeDocument::Position (&editor->getDocument(), lineNum - 1, characterIndex), false);
+}
+
+void SourceCodeEditor::resized()
+{
+    editor->setBounds (getLocalBounds());
+}
+
+void SourceCodeEditor::updateColourScheme()     { getAppSettings().appearance.applyToCodeEditor (*editor); }
+
+void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
+void SourceCodeEditor::valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
+void SourceCodeEditor::valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
+void SourceCodeEditor::valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }

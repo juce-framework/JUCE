@@ -76,7 +76,8 @@ public:
     bool isCommandActive (const CommandID commandID);
     bool perform (const InvocationInfo& info);
 
-    void paint (Graphics& g);
+    void paint (Graphics&);
+    void paintOverChildren (Graphics&);
     void resized();
     void childBoundsChanged (Component* child);
     void lookAndFeelChanged();

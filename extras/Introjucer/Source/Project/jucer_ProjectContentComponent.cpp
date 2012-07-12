@@ -70,7 +70,7 @@ public:
 
     void resized()
     {
-        Rectangle<int> r (getLocalBounds());
+        Rectangle<int> r (getAvailableBounds());
         r.removeFromBottom (6);
 
         if (saveAndOpenButton.isVisible())
@@ -98,6 +98,7 @@ ProjectContentComponent::ProjectContentComponent()
     treeSizeConstrainer.setMaximumWidth (500);
 
     treeViewTabs.setOutline (0);
+    treeViewTabs.getTabbedButtonBar().setMinimumTabScaleFactor (0.3);
 
     JucerApplication::getApp().openDocumentManager.addListener (this);
 }
@@ -117,6 +118,23 @@ void ProjectContentComponent::paint (Graphics& g)
     g.fillAll (findColour (mainBackgroundColourId));
 }
 
+void ProjectContentComponent::paintOverChildren (Graphics& g)
+{
+    if (contentView != nullptr)
+    {
+        const int shadowSize = 15;
+        const int x = contentView->getX();
+
+        ColourGradient cg (Colours::black.withAlpha (0.25f), (float) x, 0,
+                           Colours::transparentBlack,        (float) (x - shadowSize), 0, false);
+        cg.addColour (0.4, Colours::black.withAlpha (0.07f));
+        cg.addColour (0.6, Colours::black.withAlpha (0.02f));
+
+        g.setGradientFill (cg);
+        g.fillRect (x - shadowSize, 0, shadowSize, getHeight());
+    }
+}
+
 void ProjectContentComponent::resized()
 {
     Rectangle<int> r (getLocalBounds());
@@ -132,7 +150,7 @@ void ProjectContentComponent::resized()
 
 void ProjectContentComponent::lookAndFeelChanged()
 {
-    const Colour tabColour (findColour (projectPanelBackgroundColourId));
+    const Colour tabColour (findColour (mainBackgroundColourId));
 
     for (int i = treeViewTabs.getNumTabs(); --i >= 0;)
         treeViewTabs.setTabBackgroundColour (i, tabColour);
@@ -207,7 +225,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 void ProjectContentComponent::createProjectTabs()
 {
     jassert (project != nullptr);
-    const Colour tabColour (findColour (projectPanelBackgroundColourId));
+    const Colour tabColour (findColour (mainBackgroundColourId));
 
     treeViewTabs.addTab ("Files",  tabColour, new FileTreeTab (*project), true);
     treeViewTabs.addTab ("Config", tabColour, new ConfigTreeTab (*project), true);

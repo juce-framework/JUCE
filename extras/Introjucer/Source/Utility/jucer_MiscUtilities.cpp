@@ -198,30 +198,39 @@ void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text)
     g.drawFittedText (text, 2, 2, w - 4, h - 4, Justification::centredTop, 2);
 }
 
-void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize)
+static Image createTexturisedBackgroundTile()
 {
-    ColourGradient cg (Colours::black.withAlpha (0.15f), 0, 0,
-                       Colours::transparentBlack, 0, (float) shadowSize, false);
-    cg.addColour (0.4, Colours::black.withAlpha (0.07f));
-    cg.addColour (0.6, Colours::black.withAlpha (0.02f));
+    const Colour bkg (LookAndFeel::getDefaultLookAndFeel().findColour (mainBackgroundColourId));
+    const int64 hash = bkg.getARGB() + 0x3474572a;
 
-    g.setGradientFill (cg);
-    g.fillRect (0, 0, w, shadowSize);
+    Image tile (ImageCache::getFromHashCode (hash));
 
-    cg.point1.setXY (0.0f, (float) h);
-    cg.point2.setXY (0.0f, (float) h - shadowSize);
-    g.setGradientFill (cg);
-    g.fillRect (0, h - shadowSize, w, shadowSize);
+    if (tile.isNull())
+    {
+        const Image original (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png,
+                                                         BinaryData::brushed_aluminium_pngSize));
 
-    cg.point1.setXY (0.0f, 0.0f);
-    cg.point2.setXY ((float) shadowSize, 0.0f);
-    g.setGradientFill (cg);
-    g.fillRect (0, 0, shadowSize, h);
+        tile = Image (Image::RGB, original.getWidth(), original.getHeight(), false);
 
-    cg.point1.setXY ((float) w, 0.0f);
-    cg.point2.setXY ((float) w - shadowSize, 0.0f);
-    g.setGradientFill (cg);
-    g.fillRect (w - shadowSize, 0, shadowSize, h);
+        for (int y = 0; y < tile.getHeight(); ++y)
+        {
+            for (int x = 0; x < tile.getWidth(); ++x)
+            {
+                const float b = original.getPixelAt (x, y).getBrightness();
+                tile.setPixelAt (x, y, bkg.withMultipliedBrightness (b + 0.4f));
+            }
+        }
+
+        ImageCache::addImageToCache (tile, hash);
+    }
+
+    return tile;
+}
+
+void drawTexturedBackground (Graphics& g)
+{
+    g.setTiledImageFill (createTexturisedBackgroundTile(), 0, 0, 1.0f);
+    g.fillAll();
 }
 
 //==============================================================================

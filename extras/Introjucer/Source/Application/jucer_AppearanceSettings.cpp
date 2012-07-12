@@ -38,7 +38,6 @@ namespace AppearanceColours
     static const ColourInfo colours[] =
     {
         { "Main Window Bkgd",   mainBackgroundColourId, true },
-        { "Project Panel Bkgd", projectPanelBackgroundColourId, true },
         { "Treeview Highlight", treeviewHighlightColourId, false },
 
         { "Code Background",    CodeEditorComponent::backgroundColourId, true },
@@ -460,7 +459,6 @@ Component* AppearanceSettings::createEditorWindow()
 IntrojucerLookAndFeel::IntrojucerLookAndFeel()
 {
     setColour (mainBackgroundColourId, Colour::greyLevel (0.8f));
-    setColour (projectPanelBackgroundColourId, Colour::greyLevel (0.93f));
     setColour (treeviewHighlightColourId, Colour (0x401111ee));
 }
 

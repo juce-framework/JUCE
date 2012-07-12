@@ -50,7 +50,7 @@ public:
 
     int updateSize (int x, int y, int width)
     {
-        int height = 36;
+        int height = 38;
 
         for (int i = 0; i < properties.size(); ++i)
         {
@@ -66,15 +66,14 @@ public:
 
     void paint (Graphics& g)
     {
-        g.setColour (Colours::white.withAlpha (0.3f));
-        g.fillRect (0, 28, getWidth(), getHeight() - 38);
+        const Colour bkg (findColour (mainBackgroundColourId));
 
-        g.setColour (Colours::black.withAlpha (0.4f));
-        g.drawRect (0, 28, getWidth(), getHeight() - 38);
+        g.setColour (Colours::white.withAlpha (0.35f));
+        g.fillRect (0, 30, getWidth(), getHeight() - 38);
 
-        g.setFont (Font (14.0f, Font::bold));
-        g.setColour (Colours::black);
-        g.drawFittedText (getName(), 12, 0, getWidth() - 16, 26, Justification::bottomLeft, 1);
+        g.setFont (Font (15.0f, Font::bold));
+        g.setColour (bkg.contrasting (0.7f));
+        g.drawFittedText (getName(), 12, 0, getWidth() - 16, 25, Justification::bottomLeft, 1);
     }
 
     OwnedArray<PropertyComponent> properties;
@@ -96,11 +95,7 @@ public:
 
     void paint (Graphics& g)
     {
-        g.setTiledImageFill (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png,
-                                                        BinaryData::brushed_aluminium_pngSize),
-                             0, 0, 1.0f);
-        g.fillAll();
-        drawRecessedShadows (g, getWidth(), getHeight(), 14);
+        drawTexturedBackground (g);
     }
 
     void resized()

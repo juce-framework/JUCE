@@ -57,12 +57,12 @@ public:
     //==============================================================================
     void paint (Graphics& g)
     {
-        g.fillAll (findColour (projectPanelBackgroundColourId));
+        drawTexturedBackground (g);
     }
 
     void resized()
     {
-        list.setBounds (getLocalBounds().reduced (4, 2));
+        list.setBounds (getLocalBounds().reduced (5, 4));
     }
 
     int getNumRows()
