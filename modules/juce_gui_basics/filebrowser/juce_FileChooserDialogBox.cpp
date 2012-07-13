@@ -38,10 +38,10 @@ public:
         addAndMakeVisible (&chooserComponent);
 
         addAndMakeVisible (&okButton);
-        okButton.addShortcut (KeyPress::returnKey);
+        okButton.addShortcut (KeyPress (KeyPress::returnKey));
 
         addAndMakeVisible (&cancelButton);
-        cancelButton.addShortcut (KeyPress::escapeKey);
+        cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
 
         addChildComponent (&newFolderButton);
 
@@ -245,8 +245,8 @@ void FileChooserDialogBox::createNewFolder()
                                            AlertWindow::NoIcon, this);
 
         aw->addTextEditor ("name", String::empty, String::empty, false);
-        aw->addButton (TRANS("ok"), 1, KeyPress::returnKey);
-        aw->addButton (TRANS("cancel"), KeyPress::escapeKey);
+        aw->addButton (TRANS("ok"),     1, KeyPress (KeyPress::returnKey));
+        aw->addButton (TRANS("cancel"), 0, KeyPress (KeyPress::escapeKey));
 
         aw->enterModalState (true,
                              ModalCallbackFunction::forComponent (createNewFolderCallback, this,

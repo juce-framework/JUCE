@@ -406,18 +406,18 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, const MouseWheelD
 
 bool Viewport::keyPressed (const KeyPress& key)
 {
-    const bool isUpDownKey = key.isKeyCode (KeyPress::upKey)
-                                || key.isKeyCode (KeyPress::downKey)
-                                || key.isKeyCode (KeyPress::pageUpKey)
-                                || key.isKeyCode (KeyPress::pageDownKey)
-                                || key.isKeyCode (KeyPress::homeKey)
-                                || key.isKeyCode (KeyPress::endKey);
+    const bool isUpDownKey = key == KeyPress::upKey
+                          || key == KeyPress::downKey
+                          || key == KeyPress::pageUpKey
+                          || key == KeyPress::pageDownKey
+                          || key == KeyPress::homeKey
+                          || key == KeyPress::endKey;
 
     if (verticalScrollBar.isVisible() && isUpDownKey)
         return verticalScrollBar.keyPressed (key);
 
-    const bool isLeftRightKey = key.isKeyCode (KeyPress::leftKey)
-                                 || key.isKeyCode (KeyPress::rightKey);
+    const bool isLeftRightKey = key == KeyPress::leftKey
+                             || key == KeyPress::rightKey;
 
     if (horizontalScrollBar.isVisible() && (isUpDownKey || isLeftRightKey))
         return horizontalScrollBar.keyPressed (key);

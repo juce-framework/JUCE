@@ -70,9 +70,8 @@ public:
               const ModifierKeys& modifiers,
               juce_wchar textCharacter) noexcept;
 
-    /** Creates a keypress with a keyCode but no modifiers or text character.
-    */
-    KeyPress (int keyCode) noexcept;
+    /** Creates a keypress with a keyCode but no modifiers or text character. */
+    explicit KeyPress (int keyCode) noexcept;
 
     /** Creates a copy of another KeyPress. */
     KeyPress (const KeyPress& other) noexcept;
@@ -85,6 +84,12 @@ public:
 
     /** Compares two KeyPress objects. */
     bool operator!= (const KeyPress& other) const noexcept;
+
+    /** Returns true if this keypress is for the given keycode without any modifiers. */
+    bool operator== (int keyCode) const noexcept;
+
+    /** Returns true if this keypress is not for the given keycode without any modifiers. */
+    bool operator!= (int keyCode) const noexcept;
 
     //==============================================================================
     /** Returns true if this is a valid KeyPress.

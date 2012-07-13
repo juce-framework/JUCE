@@ -451,7 +451,7 @@ void ComboBox::colourChanged()
 //==============================================================================
 bool ComboBox::keyPressed (const KeyPress& key)
 {
-    if (key.isKeyCode (KeyPress::upKey) || key.isKeyCode (KeyPress::leftKey))
+    if (key == KeyPress::upKey || key == KeyPress::leftKey)
     {
         int index = getSelectedItemIndex() - 1;
 
@@ -460,7 +460,7 @@ bool ComboBox::keyPressed (const KeyPress& key)
 
         return true;
     }
-    else if (key.isKeyCode (KeyPress::downKey) || key.isKeyCode (KeyPress::rightKey))
+    else if (key == KeyPress::downKey || key == KeyPress::rightKey)
     {
         int index = getSelectedItemIndex() + 1;
 
@@ -469,7 +469,7 @@ bool ComboBox::keyPressed (const KeyPress& key)
 
         return true;
     }
-    else if (key.isKeyCode (KeyPress::returnKey))
+    else if (key == KeyPress::returnKey)
     {
         showPopup();
         return true;

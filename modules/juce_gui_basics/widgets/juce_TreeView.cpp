@@ -840,18 +840,17 @@ void TreeView::moveByPages (int numPages)
 
 bool TreeView::keyPressed (const KeyPress& key)
 {
-    if (rootItem != nullptr
-         && ! key.getModifiers().testFlags (ModifierKeys::ctrlAltCommandModifiers))
+    if (rootItem != nullptr)
     {
-        if (key.getKeyCode() == KeyPress::upKey)       { moveSelectedRow (-1); return true; }
-        if (key.getKeyCode() == KeyPress::downKey)     { moveSelectedRow (1);  return true; }
-        if (key.getKeyCode() == KeyPress::homeKey)     { moveSelectedRow (-0x3fffffff); return true; }
-        if (key.getKeyCode() == KeyPress::endKey)      { moveSelectedRow (0x3fffffff);  return true; }
-        if (key.getKeyCode() == KeyPress::pageUpKey)   { moveByPages (-1); return true; }
-        if (key.getKeyCode() == KeyPress::pageDownKey) { moveByPages (1);  return true; }
-        if (key.getKeyCode() == KeyPress::returnKey)   { toggleOpenSelectedItem(); return true; }
-        if (key.getKeyCode() == KeyPress::leftKey)     { moveOutOfSelectedItem();  return true; }
-        if (key.getKeyCode() == KeyPress::rightKey)    { moveIntoSelectedItem();   return true; }
+        if (key == KeyPress::upKey)       { moveSelectedRow (-1); return true; }
+        if (key == KeyPress::downKey)     { moveSelectedRow (1);  return true; }
+        if (key == KeyPress::homeKey)     { moveSelectedRow (-0x3fffffff); return true; }
+        if (key == KeyPress::endKey)      { moveSelectedRow (0x3fffffff);  return true; }
+        if (key == KeyPress::pageUpKey)   { moveByPages (-1); return true; }
+        if (key == KeyPress::pageDownKey) { moveByPages (1);  return true; }
+        if (key == KeyPress::returnKey)   { toggleOpenSelectedItem(); return true; }
+        if (key == KeyPress::leftKey)     { moveOutOfSelectedItem();  return true; }
+        if (key == KeyPress::rightKey)    { moveIntoSelectedItem();   return true; }
     }
 
     return false;
