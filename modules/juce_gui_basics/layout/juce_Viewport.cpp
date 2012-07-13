@@ -328,12 +328,6 @@ int Viewport::getScrollBarThickness() const
                                   : getLookAndFeel().getDefaultScrollbarWidth();
 }
 
-void Viewport::setScrollBarButtonVisibility (const bool buttonsVisible)
-{
-    verticalScrollBar.setButtonVisibility (buttonsVisible);
-    horizontalScrollBar.setButtonVisibility (buttonsVisible);
-}
-
 void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
     const int newRangeStartInt = roundToInt (newRangeStart);

@@ -287,12 +287,6 @@ public:
     */
     void setScrollBarThickness (int newThicknessPixels);
 
-    /** Shows or hides the buttons on any scrollbars that are used.
-
-        @see ScrollBar::setButtonVisibility
-    */
-    void setScrollBarButtonVisibility (bool buttonsVisible);
-
     //==============================================================================
     /**
         Receives callbacks from a TextEditor component when it changes.

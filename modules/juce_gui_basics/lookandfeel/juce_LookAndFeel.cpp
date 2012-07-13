@@ -713,6 +713,11 @@ void LookAndFeel::drawSpinningWaitAnimation (Graphics& g, const Colour& colour, 
     }
 }
 
+bool LookAndFeel::areScrollbarButtonsVisible()
+{
+    return true;
+}
+
 void LookAndFeel::drawScrollbarButton (Graphics& g,
                                        ScrollBar& scrollbar,
                                        int width, int height,

@@ -1200,11 +1200,6 @@ void TextEditor::setScrollBarThickness (const int newThicknessPixels)
     viewport->setScrollBarThickness (newThicknessPixels);
 }
 
-void TextEditor::setScrollBarButtonVisibility (const bool buttonsVisible)
-{
-    viewport->setScrollBarButtonVisibility (buttonsVisible);
-}
-
 //==============================================================================
 void TextEditor::clear()
 {

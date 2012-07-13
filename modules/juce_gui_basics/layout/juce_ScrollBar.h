@@ -27,7 +27,7 @@
 #define __JUCE_SCROLLBAR_JUCEHEADER__
 
 #include "../buttons/juce_Button.h"
-
+class Viewport;
 
 //==============================================================================
 /**
@@ -50,7 +50,7 @@
     @see ScrollBar::Listener
 */
 class JUCE_API  ScrollBar  : public Component,
-                             public AsyncUpdater,
+                             private AsyncUpdater,
                              private Timer
 {
 public:
@@ -60,8 +60,7 @@ public:
         @param isVertical           whether it should be a vertical or horizontal bar
         @param buttonsAreVisible    whether to show the up/down or left/right buttons
     */
-    ScrollBar (bool isVertical,
-               bool buttonsAreVisible = true);
+    ScrollBar (bool isVertical);
 
     /** Destructor. */
     ~ScrollBar();
@@ -78,9 +77,6 @@ public:
         @param shouldBeVertical     true makes it vertical; false makes it horizontal.
     */
     void setOrientation (bool shouldBeVertical);
-
-    /** Shows or hides the scrollbar's buttons. */
-    void setButtonVisibility (bool buttonsAreVisible);
 
     /** Tells the scrollbar whether to make itself invisible when not needed.
 
@@ -295,8 +291,6 @@ public:
     /** @internal */
     void lookAndFeelChanged();
     /** @internal */
-    void handleAsyncUpdate();
-    /** @internal */
     void mouseDown (const MouseEvent&);
     /** @internal */
     void mouseDrag (const MouseEvent&);
@@ -320,8 +314,11 @@ private:
     ScopedPointer<ScrollbarButton> upButton, downButton;
     ListenerList <Listener> listeners;
 
+    void handleAsyncUpdate();
     void updateThumbPosition();
     void timerCallback();
+
+    friend class Viewport;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar);
 };

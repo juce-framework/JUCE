@@ -229,6 +229,8 @@ public:
                                             int x, int y, int w, int h);
 
     //==============================================================================
+    virtual bool areScrollbarButtonsVisible();
+
     /** Draws one of the buttons on a scrollbar.
 
         @param g                    the context to draw into

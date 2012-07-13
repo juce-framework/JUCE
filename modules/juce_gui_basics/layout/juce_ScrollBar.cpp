@@ -59,8 +59,7 @@ private:
 
 
 //==============================================================================
-ScrollBar::ScrollBar (const bool vertical_,
-                      const bool buttonsAreVisible)
+ScrollBar::ScrollBar (const bool vertical_)
     : totalRange (0.0, 1.0),
       visibleRange (0.0, 0.1),
       singleStepSize (0.1),
@@ -75,8 +74,6 @@ ScrollBar::ScrollBar (const bool vertical_,
       isDraggingThumb (false),
       autohides (true)
 {
-    setButtonVisibility (buttonsAreVisible);
-
     setRepaintsOnMouseActivity (true);
     setFocusContainer (true);
 }
@@ -235,22 +232,6 @@ void ScrollBar::setOrientation (const bool shouldBeVertical)
     }
 }
 
-void ScrollBar::setButtonVisibility (const bool buttonsAreVisible)
-{
-    upButton = nullptr;
-    downButton = nullptr;
-
-    if (buttonsAreVisible)
-    {
-        addAndMakeVisible (upButton   = new ScrollbarButton (vertical ? 0 : 3, *this));
-        addAndMakeVisible (downButton = new ScrollbarButton (vertical ? 2 : 1, *this));
-
-        setButtonRepeatSpeed (initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs);
-    }
-
-    updateThumbPosition();
-}
-
 void ScrollBar::setAutoHide (const bool shouldHideWhenFullRange)
 {
     autohides = shouldHideWhenFullRange;
@@ -296,11 +277,30 @@ void ScrollBar::paint (Graphics& g)
 void ScrollBar::lookAndFeelChanged()
 {
     setComponentEffect (getLookAndFeel().getScrollbarEffect());
+    resized();
 }
 
 void ScrollBar::resized()
 {
     const int length = vertical ? getHeight() : getWidth();
+
+    const bool buttonsVisible = getLookAndFeel().areScrollbarButtonsVisible();
+
+    if (buttonsVisible)
+    {
+        if (upButton == nullptr)
+        {
+            addAndMakeVisible (upButton   = new ScrollbarButton (vertical ? 0 : 3, *this));
+            addAndMakeVisible (downButton = new ScrollbarButton (vertical ? 2 : 1, *this));
+
+            setButtonRepeatSpeed (initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs);
+        }
+    }
+    else
+    {
+        upButton = nullptr;
+        downButton = nullptr;
+    }
 
     const int buttonSize = upButton != nullptr ? jmin (getLookAndFeel().getScrollbarButtonSize (*this), length / 2)
                                                : 0;

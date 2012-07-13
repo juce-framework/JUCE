@@ -225,12 +225,6 @@ public:
     */
     void setSingleStepSizes (int stepX, int stepY);
 
-    /** Shows or hides the buttons on any scrollbars that are used.
-
-        @see ScrollBar::setButtonVisibility
-    */
-    void setScrollBarButtonVisibility (bool buttonsVisible);
-
     /** Returns a pointer to the scrollbar component being used.
         Handy if you need to customise the bar somehow.
     */
