@@ -135,8 +135,7 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
     jassert (roundToInt (10.1f) == 10);
 }
 
-bool ComponentPeer::handleKeyPress (const int keyCode,
-                                    const juce_wchar textCharacter)
+bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textCharacter)
 {
     updateCurrentModifiers();
 
@@ -186,7 +185,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
 
         if (currentlyFocused != nullptr)
         {
-            const bool isTab      = (keyInfo == KeyPress (KeyPress::tabKey, ModifierKeys::noModifiers, 0));
+            const bool isTab      = (keyInfo == KeyPress::tabKey);
             const bool isShiftTab = (keyInfo == KeyPress (KeyPress::tabKey, ModifierKeys::shiftModifier, 0));
 
             if (isTab || isShiftTab)

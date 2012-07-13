@@ -578,26 +578,42 @@ public:
 
     bool handleKeyEvent (NSEvent* ev, bool isKeyDown)
     {
-        String unicode (nsStringToJuce ([ev characters]));
-        String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
-        int keyCode = getKeyCodeFromEvent (ev);
+        const String unicode (nsStringToJuce ([ev characters]));
+        const int keyCode = getKeyCodeFromEvent (ev);
 
         //DBG ("unicode: " + unicode + " " + String::toHexString ((int) unicode[0]));
+        //String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
         //DBG ("unmodified: " + unmodified + " " + String::toHexString ((int) unmodified[0]));
 
-        if (unicode.isNotEmpty() || keyCode != 0)
+        if (keyCode != 0 || unicode.isNotEmpty())
         {
             if (isKeyDown)
             {
                 bool used = false;
 
-                while (unicode.length() > 0)
+                for (String::CharPointerType u (unicode.getCharPointer()); ! u.isEmpty();)
                 {
-                    juce_wchar textCharacter = unicode[0];
-                    unicode = unicode.substring (1);
+                    juce_wchar textCharacter = u.getAndAdvance();
 
-                    if (([ev modifierFlags] & NSCommandKeyMask) != 0)
-                        textCharacter = 0;
+                    switch (keyCode)
+                    {
+                        case NSLeftArrowFunctionKey:
+                        case NSRightArrowFunctionKey:
+                        case NSUpArrowFunctionKey:
+                        case NSDownArrowFunctionKey:
+                        case NSPageUpFunctionKey:
+                        case NSPageDownFunctionKey:
+                        case NSEndFunctionKey:
+                        case NSHomeFunctionKey:
+                        case NSDeleteFunctionKey:
+                            textCharacter = 0;
+                            break; // (these all seem to generate unwanted garbage unicode strings)
+
+                        default:
+                            if (([ev modifierFlags] & NSCommandKeyMask) != 0)
+                                textCharacter = 0;
+                            break;
+                    }
 
                     used = handleKeyUpOrDown (true) || used;
                     used = handleKeyPress (keyCode, textCharacter) || used;
