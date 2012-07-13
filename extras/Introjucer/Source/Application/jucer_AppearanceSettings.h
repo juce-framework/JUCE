@@ -36,6 +36,7 @@ public:
     bool readFromXML (const XmlElement&);
     bool writeToFile (const File& file) const;
 
+    void updateColourScheme();
     void applyToCodeEditor (CodeEditorComponent& editor) const;
 
     StringArray getColourNames() const;
@@ -52,6 +53,8 @@ public:
     void refreshPresetSchemeList();
     void selectPresetScheme (int index);
 
+    static Colour getScrollbarColourForBackground (const Colour& background);
+
     static Component* createEditorWindow();
 
 private:
@@ -60,7 +63,6 @@ private:
     Array<File> presetSchemeFiles;
 
     void applyToLookAndFeel (LookAndFeel&) const;
-    void updateColourScheme();
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
@@ -78,74 +80,24 @@ class IntrojucerLookAndFeel   : public LookAndFeel
 public:
     IntrojucerLookAndFeel();
 
-    int getTabButtonOverlap (int tabDepth)                          { return -1; }
-    int getTabButtonSpaceAroundImage()                              { return 1; }
-    int getTabButtonBestWidth (TabBarButton& button, int tabDepth)  { return 120; }
+    int getTabButtonOverlap (int tabDepth);
+    int getTabButtonSpaceAroundImage();
+    int getTabButtonBestWidth (TabBarButton& button, int tabDepth);
 
-    void createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout)
-    {
-        Font font (textArea.getHeight() * 0.5f);
-        font.setUnderline (button.hasKeyboardFocus (false));
+    static Colour getTabBackgroundColour (TabBarButton& button);
+    void createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout);
+    void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown);
 
-        textLayout.addFittedText (font, button.getButtonText().trim(),
-                                  (float) textArea.getX(), (float) textArea.getY(), (float) textArea.getWidth(), (float) textArea.getHeight(),
-                                  Justification::centred, 1);
-    }
-
-    static Colour getTabBackgroundColour (TabBarButton& button)
-    {
-        Colour normalBkg (button.getTabBackgroundColour());
-        Colour bkg (normalBkg.contrasting (0.15f));
-        if (button.isFrontTab())
-            bkg = bkg.overlaidWith (Colours::yellow.withAlpha (0.5f));
-
-        return bkg;
-    }
-
-    void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
-    {
-        const Rectangle<int> activeArea (button.getActiveArea());
-
-        Colour bkg (getTabBackgroundColour (button));
-
-        g.setGradientFill (ColourGradient (bkg.brighter (0.1f), 0, (float) activeArea.getY(),
-                                           bkg.darker (0.1f), 0, (float) activeArea.getBottom(), false));
-        g.fillRect (activeArea);
-
-        g.setColour (button.getTabBackgroundColour().darker (0.3f));
-        g.drawRect (activeArea);
-
-        GlyphArrangement textLayout;
-        createTabTextLayout (button, button.getTextArea(), textLayout);
-
-        const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
-        g.setColour (bkg.contrasting().withMultipliedAlpha (alpha));
-        textLayout.draw (g);
-    }
-
-    Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp)
-    {
-        GlyphArrangement textLayout;
-        createTabTextLayout (button, textArea, textLayout);
-        const int textWidth = (int) textLayout.getBoundingBox (0, -1, false).getWidth();
-        const int extraSpace = jmax (0, textArea.getWidth() - (textWidth + comp.getWidth())) / 2;
-
-        textArea.removeFromRight (extraSpace);
-        textArea.removeFromLeft (extraSpace);
-        return textArea.removeFromRight (comp.getWidth());
-    }
-
+    Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp);
     void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) {}
 
-    void drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging)
-    {
-        if (isMouseOver || isMouseDragging)
-            g.fillAll (Colours::yellow.withAlpha (0.4f));
-    }
-
+    void drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging);
     Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&);
 
     bool areScrollbarButtonsVisible()   { return false; }
+
+    void drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical,
+                        int thumbStartPosition, int thumbSize, bool /*isMouseOver*/, bool /*isMouseDown*/);
 };
 
 

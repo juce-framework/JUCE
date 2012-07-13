@@ -187,6 +187,9 @@ void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const
             lf.setColour (AppearanceColours::colours[i].colourID, col);
         }
     }
+
+    lf.setColour (ScrollBar::thumbColourId,
+                  getScrollbarColourForBackground (lf.findColour (mainBackgroundColourId)));
 }
 
 void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
@@ -201,6 +204,9 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 
     editor.setColourScheme (cs);
     editor.setFont (getCodeFont());
+
+    editor.setColour (ScrollBar::thumbColourId,
+                      getScrollbarColourForBackground (editor.findColour (CodeEditorComponent::backgroundColourId)));
 }
 
 Font AppearanceSettings::getCodeFont() const
@@ -253,6 +259,11 @@ bool AppearanceSettings::getColour (const String& name, Colour& result) const
     }
 
     return false;
+}
+
+Colour AppearanceSettings::getScrollbarColourForBackground (const Colour& background)
+{
+    return background.contrasting().withAlpha (0.13f);
 }
 
 //==============================================================================
@@ -468,4 +479,98 @@ Rectangle<int> IntrojucerLookAndFeel::getPropertyComponentContentPosition (Prope
         return component.getLocalBounds().reduced (1, 1).removeFromRight (component.getWidth() / 2);
 
     return LookAndFeel::getPropertyComponentContentPosition (component);
+}
+
+int IntrojucerLookAndFeel::getTabButtonOverlap (int tabDepth)                          { return -1; }
+int IntrojucerLookAndFeel::getTabButtonSpaceAroundImage()                              { return 1; }
+int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton& button, int tabDepth)  { return 120; }
+
+void IntrojucerLookAndFeel::createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout)
+{
+    Font font (textArea.getHeight() * 0.5f);
+    font.setUnderline (button.hasKeyboardFocus (false));
+
+    textLayout.addFittedText (font, button.getButtonText().trim(),
+                              (float) textArea.getX(), (float) textArea.getY(), (float) textArea.getWidth(), (float) textArea.getHeight(),
+                              Justification::centred, 1);
+}
+
+Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
+{
+    Colour normalBkg (button.getTabBackgroundColour());
+    Colour bkg (normalBkg.contrasting (0.15f));
+    if (button.isFrontTab())
+        bkg = bkg.overlaidWith (Colours::yellow.withAlpha (0.5f));
+
+    return bkg;
+}
+
+void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
+{
+    const Rectangle<int> activeArea (button.getActiveArea());
+
+    Colour bkg (getTabBackgroundColour (button));
+
+    g.setGradientFill (ColourGradient (bkg.brighter (0.1f), 0, (float) activeArea.getY(),
+                                       bkg.darker (0.1f), 0, (float) activeArea.getBottom(), false));
+    g.fillRect (activeArea);
+
+    g.setColour (button.getTabBackgroundColour().darker (0.3f));
+    g.drawRect (activeArea);
+
+    GlyphArrangement textLayout;
+    createTabTextLayout (button, button.getTextArea(), textLayout);
+
+    const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
+    g.setColour (bkg.contrasting().withMultipliedAlpha (alpha));
+    textLayout.draw (g);
+}
+
+Rectangle<int> IntrojucerLookAndFeel::getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp)
+{
+    GlyphArrangement textLayout;
+    createTabTextLayout (button, textArea, textLayout);
+    const int textWidth = (int) textLayout.getBoundingBox (0, -1, false).getWidth();
+    const int extraSpace = jmax (0, textArea.getWidth() - (textWidth + comp.getWidth())) / 2;
+
+    textArea.removeFromRight (extraSpace);
+    textArea.removeFromLeft (extraSpace);
+    return textArea.removeFromRight (comp.getWidth());
+}
+
+void IntrojucerLookAndFeel::drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging)
+{
+    if (isMouseOver || isMouseDragging)
+        g.fillAll (Colours::yellow.withAlpha (0.4f));
+}
+
+void IntrojucerLookAndFeel::drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height,
+                                           bool isScrollbarVertical, int thumbStartPosition, int thumbSize,
+                                           bool isMouseOver, bool isMouseDown)
+{
+    Path thumbPath;
+
+    if (thumbSize > 0)
+    {
+        const float thumbIndent = jmin (width, height) * 0.25f;
+        const float thumbIndentx2 = thumbIndent * 2.0f;
+
+        if (isScrollbarVertical)
+            thumbPath.addRoundedRectangle (x + thumbIndent, thumbStartPosition + thumbIndent,
+                                           width - thumbIndentx2, thumbSize - thumbIndentx2, (width - thumbIndentx2) * 0.5f);
+        else
+            thumbPath.addRoundedRectangle (thumbStartPosition + thumbIndent, y + thumbIndent,
+                                           thumbSize - thumbIndentx2, height - thumbIndentx2, (height - thumbIndentx2) * 0.5f);
+    }
+
+    Colour thumbCol (scrollbar.findColour (ScrollBar::thumbColourId, true));
+
+    if (isMouseOver || isMouseDown)
+        thumbCol = thumbCol.withMultipliedAlpha (2.0f);
+
+    g.setColour (thumbCol);
+    g.fillPath (thumbPath);
+
+    g.setColour (thumbCol.contrasting ((isMouseOver  || isMouseDown) ? 0.2f : 0.1f));
+    g.strokePath (thumbPath, PathStrokeType (1.0f));
 }

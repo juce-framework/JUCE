@@ -122,6 +122,7 @@ void StoredSettings::reload()
     if (xml != nullptr)
         appearance.readFromXML (*xml);
 
+    appearance.updateColourScheme();
     loadSwatchColours();
 }
 
