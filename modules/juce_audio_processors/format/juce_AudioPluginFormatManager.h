@@ -35,7 +35,7 @@
 
     @see AudioPluginFormat
 */
-class JUCE_API  AudioPluginFormatManager  : private DeletedAtShutdown
+class JUCE_API  AudioPluginFormatManager
 {
 public:
     //==============================================================================
