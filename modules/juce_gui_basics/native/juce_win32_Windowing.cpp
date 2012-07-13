@@ -726,20 +726,23 @@ public:
         return wp.showCmd == SW_SHOWMAXIMIZED;
     }
 
-    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
+    bool isWindowAtPoint (const Point<int>& localPos, bool trueIfInAChildWindow) const
     {
-        if (! (isPositiveAndBelow (position.x, component->getWidth())
-                && isPositiveAndBelow (position.y, component->getHeight())))
-            return false;
-
         RECT r;
         GetWindowRect (hwnd, &r);
 
-        POINT p = { position.x + r.left + windowBorder.getLeft(),
-                    position.y + r.top  + windowBorder.getTop() };
+        POINT p = { localPos.x + r.left + windowBorder.getLeft(),
+                    localPos.y + r.top  + windowBorder.getTop() };
 
         HWND w = WindowFromPoint (p);
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
+    }
+
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
+    {
+        return isPositiveAndBelow (position.x, component->getWidth())
+            && isPositiveAndBelow (position.y, component->getHeight())
+            && isWindowAtPoint (position, trueIfInAChildWindow);
     }
 
     BorderSize<int> getFrameSize() const
@@ -2027,9 +2030,9 @@ private:
                 constrainer->checkBounds (pos, current,
                                           Desktop::getInstance().getDisplays().getTotalBounds (true),
                                           pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
-                                          pos.getX() != current.getX() && pos.getRight() == current.getRight(),
+                                          pos.getX() != current.getX() && pos.getRight()  == current.getRight(),
                                           pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
-                                          pos.getX() == current.getX() && pos.getRight() != current.getRight());
+                                          pos.getX() == current.getX() && pos.getRight()  != current.getRight());
                 wp->x = pos.getX();
                 wp->y = pos.getY();
                 wp->cx = pos.getWidth();
@@ -2243,7 +2246,7 @@ private:
             case WM_WINDOWPOSCHANGED:
                 {
                     const Point<int> pos (getCurrentMousePos());
-                    if (contains (pos, false))
+                    if (isWindowAtPoint (pos, false))
                         doMouseEvent (pos);
                 }
 
