@@ -94,7 +94,7 @@ ProjectContentComponent::ProjectContentComponent()
     setOpaque (true);
     setWantsKeyboardFocus (true);
 
-    treeSizeConstrainer.setMinimumWidth (100);
+    treeSizeConstrainer.setMinimumWidth (200);
     treeSizeConstrainer.setMaximumWidth (500);
 
     treeViewTabs.setOutline (0);
@@ -203,7 +203,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
             int lastTreeWidth = settings.getValue ("projectTreeviewWidth_" + project->getProjectUID()).getIntValue();
             if (lastTreeWidth < 150)
-                lastTreeWidth = 250;
+                lastTreeWidth = 240;
 
             treeViewTabs.setBounds (0, 0, lastTreeWidth, getHeight());
 

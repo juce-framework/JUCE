@@ -74,7 +74,7 @@ public:
         ComponentPeer* const peer = component.getPeer();
 
         if (peer != nullptr)
-            peer->addMaskedRegion (peer->getComponent()->getLocalArea (&component, component.getLocalBounds()));
+            peer->addMaskedRegion (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
     }
 
     void invalidateAll()

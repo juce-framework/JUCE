@@ -55,7 +55,7 @@ public:
         ComponentPeer* const peer = component.getPeer();
         jassert (peer != nullptr);
 
-        const Rectangle<int> bounds (peer->getComponent()->getLocalArea (&component, component.getLocalBounds()));
+        const Rectangle<int> bounds (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
         lastWidth  = bounds.getWidth();
         lastHeight = bounds.getHeight();
 

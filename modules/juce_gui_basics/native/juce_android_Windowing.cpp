@@ -104,8 +104,8 @@ DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$Componen
 class AndroidComponentPeer  : public ComponentPeer
 {
 public:
-    AndroidComponentPeer (Component* const component, const int windowStyleFlags)
-        : ComponentPeer (component, windowStyleFlags),
+    AndroidComponentPeer (Component& comp, const int windowStyleFlags)
+        : ComponentPeer (comp, windowStyleFlags),
           usingAndroidGraphics (false),
           fullScreen (false),
           sizeAllocated (0)
@@ -113,7 +113,7 @@ public:
         // NB: must not put this in the initialiser list, as it invokes a callback,
         // which will fail if the peer is only half-constructed.
         view = GlobalRef (android.activity.callObjectMethod (JuceAppActivity.createNewView,
-                                                             component->isOpaque()));
+                                                             component.isOpaque()));
 
         if (isFocused())
             handleFocusGain();
@@ -285,7 +285,7 @@ public:
         if (! r.isEmpty())
             setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
 
-        component->repaint();
+        component.repaint();
     }
 
     bool isFullScreen() const
@@ -300,8 +300,8 @@ public:
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        return isPositiveAndBelow (position.x, component->getWidth())
-            && isPositiveAndBelow (position.y, component->getHeight())
+        return isPositiveAndBelow (position.x, component.getWidth())
+            && isPositiveAndBelow (position.y, component.getHeight())
             && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
                                                                     position.x, position.y));
     }
@@ -406,7 +406,7 @@ public:
         {
             {
                 Image temp (new PreallocatedImage (clip.getWidth(), clip.getHeight(),
-                                                   dest, ! component->isOpaque()));
+                                                   dest, ! component.isOpaque()));
 
                 {
                     LowLevelGraphicsSoftwareRenderer g (temp);
@@ -563,7 +563,7 @@ JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject view, jboolean
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
 {
-    return new AndroidComponentPeer (this, styleFlags);
+    return new AndroidComponentPeer (*this, styleFlags);
 }
 
 jobject createOpenGLView (ComponentPeer* peer)

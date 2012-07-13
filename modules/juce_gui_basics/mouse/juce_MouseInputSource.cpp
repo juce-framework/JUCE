@@ -64,12 +64,12 @@ public:
 
         if (peer != nullptr)
         {
-            Component* const comp = peer->getComponent();
-            const Point<int> relativePos (comp->getLocalPoint (nullptr, screenPos));
+            Component& comp = peer->getComponent();
+            const Point<int> relativePos (comp.getLocalPoint (nullptr, screenPos));
 
             // (the contains() call is needed to test for overlapping desktop windows)
-            if (comp->contains (relativePos))
-                return comp->getComponentAt (relativePos);
+            if (comp.contains (relativePos))
+                return comp.getComponentAt (relativePos);
         }
 
         return nullptr;

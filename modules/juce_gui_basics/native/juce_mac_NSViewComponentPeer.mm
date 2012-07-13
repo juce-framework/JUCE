@@ -46,7 +46,7 @@ namespace juce {
 class NSViewComponentPeer  : public ComponentPeer
 {
 public:
-    NSViewComponentPeer (Component* const comp, const int windowStyleFlags, NSView* viewToAttachTo)
+    NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
         : ComponentPeer (comp, windowStyleFlags),
           window (nil),
           view (nil),
@@ -66,7 +66,7 @@ public:
         appFocusChangeCallback = appFocusChanged;
         isEventBlockedByModalComps = checkEventBlockedByModalComps;
 
-        NSRect r = NSMakeRect (0, 0, (CGFloat) component->getWidth(), (CGFloat) component->getHeight());
+        NSRect r = NSMakeRect (0, 0, (CGFloat) component.getWidth(), (CGFloat) component.getHeight());
 
         view = [createViewInstance() initWithFrame: r];
         setOwner (view, this);
@@ -95,8 +95,8 @@ public:
         }
         else
         {
-            r.origin.x = (CGFloat) component->getX();
-            r.origin.y = (CGFloat) component->getY();
+            r.origin.x = (CGFloat) component.getX();
+            r.origin.y = (CGFloat) component.getY();
             r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - (r.origin.y + r.size.height);
 
             window = [createWindowInstance() initWithContentRect: r
@@ -111,10 +111,10 @@ public:
            #else
             [window setDelegate: window];
            #endif
-            [window setOpaque: component->isOpaque()];
+            [window setOpaque: component.isOpaque()];
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 
-            if (component->isAlwaysOnTop())
+            if (component.isAlwaysOnTop())
                 [window setLevel: NSFloatingWindowLevel];
 
             [window setContentView: view];
@@ -135,11 +135,11 @@ public:
            #endif
         }
 
-        const float alpha = component->getAlpha();
+        const float alpha = component.getAlpha();
         if (alpha < 1.0f)
             setAlpha (alpha);
 
-        setTitle (component->getName());
+        setTitle (component.getName());
     }
 
     ~NSViewComponentPeer()
@@ -190,12 +190,12 @@ public:
 
     void setPosition (int x, int y)
     {
-        setBounds (x, y, component->getWidth(), component->getHeight(), false);
+        setBounds (x, y, component.getWidth(), component.getHeight(), false);
     }
 
     void setSize (int w, int h)
     {
-        setBounds (component->getX(), component->getY(), w, h, false);
+        setBounds (component.getX(), component.getY(), w, h, false);
     }
 
     void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
@@ -330,10 +330,10 @@ public:
                 else
                 {
                     if (shouldBeFullScreen)
-                        r = component->getParentMonitorArea();
+                        r = component.getParentMonitorArea();
 
                     // (can't call the component's setBounds method because that'll reset our fullscreen flag)
-                    if (r != getComponent()->getBounds() && ! r.isEmpty())
+                    if (r != component.getBounds() && ! r.isEmpty())
                         setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
                 }
             }
@@ -347,8 +347,8 @@ public:
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        if (! (isPositiveAndBelow (position.getX(), component->getWidth())
-                && isPositiveAndBelow (position.getY(), component->getHeight())))
+        if (! (isPositiveAndBelow (position.getX(), component.getWidth())
+                && isPositiveAndBelow (position.getY(), component.getHeight())))
             return false;
 
         NSRect frameRect = [view frame];
@@ -384,8 +384,8 @@ public:
     {
         if (hasNativeTitleBar())
         {
-            const Rectangle<int> screen (getFrameSize().subtractedFrom (component->getParentMonitorArea()));
-            const Rectangle<int> window (component->getScreenBounds());
+            const Rectangle<int> screen (getFrameSize().subtractedFrom (component.getParentMonitorArea()));
+            const Rectangle<int> window (component.getScreenBounds());
 
             fullScreen = window.expanded (2, 2).contains (screen);
         }
@@ -411,7 +411,7 @@ public:
                               positioned: NSWindowAbove
                               relativeTo: nil];
 
-        if (window != nil && component->isVisible())
+        if (window != nil && component.isVisible())
         {
             if (makeActiveWindow)
                 [window makeKeyAndOrderFront: nil];
@@ -681,7 +681,7 @@ public:
 
     bool isOpaque()
     {
-        return component == nullptr || component->isOpaque();
+        return component.isOpaque();
     }
 
     void drawRect (NSRect r)
@@ -691,7 +691,7 @@ public:
 
         CGContextRef cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
 
-        if (! component->isOpaque())
+        if (! component.isOpaque())
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
        #if USE_COREGRAPHICS_RENDERING
@@ -724,11 +724,11 @@ public:
 
             if (! clip.isEmpty())
             {
-                Image temp (getComponent()->isOpaque() ? Image::RGB : Image::ARGB,
-                            clipW, clipH, ! getComponent()->isOpaque());
+                Image temp (component.isOpaque() ? Image::RGB : Image::ARGB,
+                            clipW, clipH, ! component.isOpaque());
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (component->getLookAndFeel()
+                    ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
                                                                         .createGraphicsContext (temp, Point<int> (xOffset, yOffset), clip));
 
                     insideDrawRect = true;
@@ -1708,7 +1708,7 @@ private:
             frameRect = owner->constrainRect (frameRect);
 
         if (juce::Component::getCurrentlyModalComponent() != nullptr
-              && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
+              && owner->getComponent().isCurrentlyBlockedByAnotherModalComponent()
               && owner->hasNativeTitleBar())
             juce::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
 
@@ -1732,7 +1732,7 @@ private:
         NSViewComponentPeer* const owner = getOwner (self);
 
         if (juce::Component::getCurrentlyModalComponent() != nullptr
-              && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
+              && owner->getComponent().isCurrentlyBlockedByAnotherModalComponent()
               && owner->hasNativeTitleBar())
             juce::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
     }
@@ -1827,7 +1827,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
             if (peer->hasNativeTitleBar())
             {
                 [peer->window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (peer->getStyleFlags()))];
-                peer->setTitle (peer->component->getName()); // required to force the OS to update the title
+                peer->setTitle (peer->component.getName()); // required to force the OS to update the title
             }
 
             [NSApp setPresentationOptions: NSApplicationPresentationDefault];
@@ -1853,7 +1853,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 {
-    return new NSViewComponentPeer (this, styleFlags, (NSView*) windowToAttachTo);
+    return new NSViewComponentPeer (*this, styleFlags, (NSView*) windowToAttachTo);
 }
 
 //==============================================================================

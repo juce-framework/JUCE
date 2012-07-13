@@ -463,10 +463,8 @@ public:
     };
 
     //==============================================================================
-    HWNDComponentPeer (Component* const component,
-                       const int windowStyleFlags,
-                       HWND parentToAddTo_)
-        : ComponentPeer (component, windowStyleFlags),
+    HWNDComponentPeer (Component& comp, const int windowStyleFlags, HWND parentToAddTo_)
+        : ComponentPeer (comp, windowStyleFlags),
           dontRepaint (false),
           currentRenderingEngine (softwareRenderingEngine),
           fullScreen (false),
@@ -481,15 +479,15 @@ public:
     {
         callFunctionIfNotLocked (&createWindowCallback, this);
 
-        setTitle (component->getName());
+        setTitle (component.getName());
 
         if ((windowStyleFlags & windowHasDropShadow) != 0
              && Desktop::canUseSemiTransparentWindows())
         {
-            shadower = component->getLookAndFeel().createDropShadowerForComponent (component);
+            shadower = component.getLookAndFeel().createDropShadowerForComponent (&component);
 
             if (shadower != nullptr)
-                shadower->setOwner (component);
+                shadower->setOwner (&component);
         }
     }
 
@@ -641,7 +639,7 @@ public:
     {
         const uint8 intAlpha = (uint8) jlimit (0, 255, (int) (newAlpha * 255.0f));
 
-        if (component->isOpaque())
+        if (component.isOpaque())
         {
             if (newAlpha < 1.0f)
             {
@@ -657,7 +655,7 @@ public:
         else
         {
             updateLayeredWindowAlpha = intAlpha;
-            component->repaint();
+            component.repaint();
         }
     }
 
@@ -683,7 +681,7 @@ public:
         if (isFullScreen() != shouldBeFullScreen)
         {
             fullScreen = shouldBeFullScreen;
-            const WeakReference<Component> deletionChecker (component);
+            const WeakReference<Component> deletionChecker (&component);
 
             if (! fullScreen)
             {
@@ -740,8 +738,8 @@ public:
 
     bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        return isPositiveAndBelow (position.x, component->getWidth())
-            && isPositiveAndBelow (position.y, component->getHeight())
+        return isPositiveAndBelow (position.x, component.getWidth())
+            && isPositiveAndBelow (position.y, component.getHeight())
             && isWindowAtPoint (position, trueIfInAChildWindow);
     }
 
@@ -797,12 +795,10 @@ public:
 
             // Must be careful not to try to put a topmost window behind a normal one, or Windows
             // promotes the normal one to be topmost!
-            if (getComponent()->isAlwaysOnTop() == otherPeer->getComponent()->isAlwaysOnTop())
-                SetWindowPos (hwnd, otherPeer->hwnd, 0, 0, 0, 0,
-                              SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
-            else if (otherPeer->getComponent()->isAlwaysOnTop())
-                SetWindowPos (hwnd, HWND_TOP, 0, 0, 0, 0,
-                              SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+            if (component.isAlwaysOnTop() == otherPeer->component.isAlwaysOnTop())
+                SetWindowPos (hwnd, otherPeer->hwnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+            else if (otherPeer->component.isAlwaysOnTop())
+                SetWindowPos (hwnd, HWND_TOP,        0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
         }
     }
 
@@ -847,7 +843,7 @@ public:
     void performAnyPendingRepaintsNow()
     {
         MSG m;
-        if (component->isVisible()
+        if (component.isVisible()
              && (PeekMessage (&m, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE) || isUsingUpdateLayeredWindow()))
             handlePaintMessage();
     }
@@ -1308,7 +1304,7 @@ private:
             // correctly enable the menu items that we specify in the wm_initmenu message.
             GetSystemMenu (hwnd, false);
 
-            const float alpha = component->getAlpha();
+            const float alpha = component.getAlpha();
             if (alpha < 1.0f)
                 setAlpha (alpha);
         }
@@ -1366,7 +1362,7 @@ private:
 
     bool isUsingUpdateLayeredWindow() const
     {
-        return ! component->isOpaque();
+        return ! component.isOpaque();
     }
 
     inline bool hasTitleBar() const noexcept        { return (styleFlags & windowHasTitleBar) != 0; }
@@ -1514,12 +1510,12 @@ private:
                 }
 
                 // if the component's not opaque, this won't draw properly unless the platform can support this
-                jassert (Desktop::canUseSemiTransparentWindows() || component->isOpaque());
+                jassert (Desktop::canUseSemiTransparentWindows() || component.isOpaque());
 
                 updateCurrentModifiers();
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (component->getLookAndFeel()
+                    ScopedPointer<LowLevelGraphicsContext> context (component.getLookAndFeel()
                                                                         .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
                     handlePaint (*context);
                 }
@@ -1579,7 +1575,7 @@ private:
         {
             currentRenderingEngine = index == 1 ? direct2DRenderingEngine : softwareRenderingEngine;
             updateDirect2DContext();
-            repaint (component->getLocalBounds());
+            repaint (component.getLocalBounds());
         }
        #endif
     }
@@ -2002,7 +1998,7 @@ private:
         {
             Rectangle<int> pos (rectangleFromRECT (*r));
 
-            constrainer->checkBounds (pos, windowBorder.addedTo (component->getBounds()),
+            constrainer->checkBounds (pos, windowBorder.addedTo (component.getBounds()),
                                       Desktop::getInstance().getDisplays().getTotalBounds (true),
                                       wParam == WMSZ_TOP    || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_TOPRIGHT,
                                       wParam == WMSZ_LEFT   || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_BOTTOMLEFT,
@@ -2025,7 +2021,7 @@ private:
                  && ! Component::isMouseButtonDownAnywhere())
             {
                 Rectangle<int> pos (wp->x, wp->y, wp->cx, wp->cy);
-                const Rectangle<int> current (windowBorder.addedTo (component->getBounds()));
+                const Rectangle<int> current (windowBorder.addedTo (component.getBounds()));
 
                 constrainer->checkBounds (pos, current,
                                           Desktop::getInstance().getDisplays().getTotalBounds (true),
@@ -2050,17 +2046,17 @@ private:
 
         if (isMinimised())
         {
-            component->repaint();
+            component.repaint();
             handleMovedOrResized();
 
             if (! ComponentPeer::isValidPeer (this))
                 return;
         }
 
-        Component* underMouse = component->getComponentAt (component->getMouseXYRelative());
+        Component* underMouse = component.getComponentAt (component.getMouseXYRelative());
 
         if (underMouse == nullptr)
-            underMouse = component;
+            underMouse = &component;
 
         if (underMouse->isCurrentlyBlockedByAnotherModalComponent())
         {
@@ -2125,7 +2121,7 @@ private:
 
         if (fullScreen && ! isMinimised())
         {
-            const Rectangle<int> r (component->getParentMonitorArea());
+            const Rectangle<int> r (component.getParentMonitorArea());
 
             SetWindowPos (hwnd, 0, r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
@@ -2333,7 +2329,7 @@ private:
                 break;
 
             case WM_MOUSEACTIVATE:
-                if (! component->getMouseClickGrabsKeyboardFocus())
+                if (! component.getMouseClickGrabsKeyboardFocus())
                     return MA_NOACTIVATE;
 
                 break;
@@ -2345,7 +2341,7 @@ private:
                 break;
 
             case WM_CLOSE:
-                if (! component->isCurrentlyBlockedByAnotherModalComponent())
+                if (! component.isCurrentlyBlockedByAnotherModalComponent())
                     handleUserClosingWindow();
 
                 return 0;
@@ -2467,7 +2463,7 @@ private:
 
     bool sendInputAttemptWhenModalMessage()
     {
-        if (component->isCurrentlyBlockedByAnotherModalComponent())
+        if (component.isCurrentlyBlockedByAnotherModalComponent())
         {
             Component* const current = Component::getCurrentlyModalComponent();
 
@@ -2695,8 +2691,7 @@ private:
 
             if (targetComp != nullptr)
             {
-                const Rectangle<int> area (peer.getComponent()
-                                              ->getLocalArea (targetComp, target->getCaretRectangle()));
+                const Rectangle<int> area (peer.getComponent().getLocalArea (targetComp, target->getCaretRectangle()));
 
                 CANDIDATEFORM pos = { 0, CFS_CANDIDATEPOS, { area.getX(), area.getBottom() }, { 0, 0, 0, 0 } };
                 ImmSetCandidateWindow (hImc, &pos);
@@ -2717,12 +2712,14 @@ ModifierKeys HWNDComponentPeer::modifiersAtLastCallback;
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
 {
-    return new HWNDComponentPeer (this, styleFlags, (HWND) nativeWindowToAttachTo);
+    return new HWNDComponentPeer (*this, styleFlags, (HWND) nativeWindowToAttachTo);
 }
 
 ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component* component, void* parent)
 {
-    HWNDComponentPeer* const p = new HWNDComponentPeer (component, ComponentPeer::windowIgnoresMouseClicks, (HWND) parent);
+    jassert (component != nullptr);
+
+    HWNDComponentPeer* const p = new HWNDComponentPeer (*component, ComponentPeer::windowIgnoresMouseClicks, (HWND) parent);
     p->dontRepaint = true;
     return p;
 }
