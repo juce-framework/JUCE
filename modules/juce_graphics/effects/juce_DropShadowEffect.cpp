@@ -23,63 +23,38 @@
   ==============================================================================
 */
 
-#if JUCE_MSVC && JUCE_DEBUG
- #pragma optimize ("t", on)
-#endif
+static inline void blurDataTriplets (uint8* d, int num, const int delta) noexcept
+{
+    uint32 last = d[0];
+    d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);
+    d += delta;
+
+    num -= 2;
+
+    do
+    {
+        const uint32 newLast = d[0];
+        d[0] = (uint8) ((last + d[0] + d[delta] + 1) / 3);
+        d += delta;
+        last = newLast;
+    }
+    while (--num > 0);
+
+    d[0] = (uint8) ((last + d[0] + 1) / 3);
+}
 
 static void blurSingleChannelImage (uint8* const data, const int width, const int height,
                                     const int lineStride, const int repetitions) noexcept
 {
-    uint8* line = data;
+    jassert (width > 2 && height > 2);
 
-    for (int y = height; --y >= 0;)
-    {
+    for (int y = 0; y < height; ++y)
         for (int i = repetitions; --i >= 0;)
-        {
-            uint8* p = line;
-            *p++ = (((int) p[0]) + p[1]) / 2;
+            blurDataTriplets (data + lineStride * y, width, 1);
 
-            for (int x = width - 2; --x >= 0;)
-                *p++ = (((int) p[-1]) + p[0] + p[1] + 1) / 3;
-
-            *p = (((int) p[0]) + p[-1]) / 2;
-        }
-
-        line += lineStride;
-    }
-
-    for (int i = repetitions; --i >= 0;)
-    {
-        line = data;
-
-        {
-            uint8* p1 = line;
-            uint8* p2 = line + lineStride;
-
-            for (int x = width; --x >= 0;)
-                *p1++ = (((int) *p1) + *p2++) / 2;
-        }
-
-        line += lineStride;
-
-        for (int y = height - 2; --y >= 0;)
-        {
-            uint8* p1 = line;
-            uint8* p2 = line - lineStride;
-            uint8* p3 = line + lineStride;
-
-            for (int x = width; --x >= 0;)
-                *p1++ = (((int) *p1) + *p2++ + *p3++ + 1) / 3;
-
-            line += lineStride;
-        }
-
-        uint8* p1 = line;
-        uint8* p2 = line - lineStride;
-
-        for (int x = width; --x >= 0;)
-            *p1++ = (((int) *p1) + *p2++) / 2;
-    }
+    for (int x = 0; x < width; ++x)
+        for (int i = repetitions; --i >= 0;)
+            blurDataTriplets (data + x, height, lineStride);
 }
 
 static void blurSingleChannelImage (Image& image, int radius)
@@ -87,10 +62,6 @@ static void blurSingleChannelImage (Image& image, int radius)
     const Image::BitmapData bm (image, Image::BitmapData::readWrite);
     blurSingleChannelImage (bm.data, bm.width, bm.height, bm.lineStride, 2 * radius);
 }
-
-#if JUCE_MSVC && JUCE_DEBUG
- #pragma optimize ("", on)  // resets optimisations to the project defaults
-#endif
 
 //==============================================================================
 DropShadow::DropShadow() noexcept

@@ -36,19 +36,30 @@ public:
     ItemPreviewComponent (const File& file_)
         : file (file_)
     {
+        setOpaque (true);
         tryToLoadImage();
     }
 
     void paint (Graphics& g)
     {
-        g.drawImageWithin (image, 2, 22, getWidth() - 4, getHeight() - 24,
-                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
-                           false);
+        drawTexturedBackground (g);
+
+        Rectangle<int> area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
+                                .appliedTo (image.getBounds(), Rectangle<int> (4, 22, getWidth() - 8, getHeight() - 26));
+
+        Path p;
+        p.addRectangle (area);
+        DropShadow (Colours::black.withAlpha (0.5f), 6, Point<int> (0, 1)).drawForPath (g, p);
+
+        g.fillCheckerBoard (area, 24, 24, Colour (0xffffffff), Colour (0xffeeeeee));
+
+        g.setOpacity (1.0f);
+        g.drawImageWithin (image, area.getX(), area.getY(), area.getWidth(), area.getHeight(),
+                           RectanglePlacement::stretchToFit, false);
 
         g.setFont (Font (14.0f, Font::bold));
         g.setColour (findColour (mainBackgroundColourId).contrasting());
-        g.drawMultiLineText (facts.joinIntoString ("\n"),
-                             10, 15, getWidth() - 16);
+        g.drawMultiLineText (facts.joinIntoString ("\n"), 10, 15, getWidth() - 16);
     }
 
 private:
