@@ -75,7 +75,7 @@ void MixerAudioSource::removeInputSource (AudioSource* const input)
             if (inputsToDelete [index])
                 toDelete = input;
 
-            inputsToDelete.shiftBits (index, 1);
+            inputsToDelete.shiftBits (-1, index);
             inputs.remove (index);
         }
 
