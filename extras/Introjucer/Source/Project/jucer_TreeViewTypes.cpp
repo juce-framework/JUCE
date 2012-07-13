@@ -236,7 +236,7 @@ void SourceFileTreeViewItem::showDocument()
     const File f (getFile());
 
     if (pcc != nullptr && f.exists())
-        pcc->showEditorForFile (f);
+        pcc->showEditorForFile (f, false);
 }
 
 void SourceFileTreeViewItem::showPopupMenu()

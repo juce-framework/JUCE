@@ -199,7 +199,7 @@ bool MainWindow::openFile (const File& file)
     }
     else if (file.exists())
     {
-        return getProjectContentComponent()->showEditorForFile (file);
+        return getProjectContentComponent()->showEditorForFile (file, true);
     }
 
     return false;
@@ -349,10 +349,10 @@ void MainWindowList::closeWindow (MainWindow* w)
     }
 }
 
-void MainWindowList::openDocument (OpenDocumentManager::Document* doc)
+void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grabFocus)
 {
     MainWindow* w = getOrCreateFrontmostWindow();
-    w->getProjectContentComponent()->showDocument (doc);
+    w->getProjectContentComponent()->showDocument (doc, grabFocus);
 }
 
 bool MainWindowList::openFile (const File& file)

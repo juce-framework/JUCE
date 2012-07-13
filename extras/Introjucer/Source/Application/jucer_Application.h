@@ -180,7 +180,7 @@ public:
                 OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID);
                 jassert (doc != nullptr);
 
-                getApp().mainWindowList.openDocument (doc);
+                getApp().mainWindowList.openDocument (doc, true);
             }
             else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
             {

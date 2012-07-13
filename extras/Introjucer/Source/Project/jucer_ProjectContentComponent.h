@@ -50,10 +50,10 @@ public:
     void saveOpenDocumentList();
     void reloadLastOpenDocuments();
 
-    bool showEditorForFile (const File& f);
+    bool showEditorForFile (const File& f, bool grabFocus);
     File getCurrentFile() const;
 
-    bool showDocument (OpenDocumentManager::Document* doc);
+    bool showDocument (OpenDocumentManager::Document* doc, bool grabFocus);
     void hideDocument (OpenDocumentManager::Document* doc);
     OpenDocumentManager::Document* getCurrentDocument() const   { return currentDocument; }
 

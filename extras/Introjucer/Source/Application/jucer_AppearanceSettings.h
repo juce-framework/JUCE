@@ -144,6 +144,8 @@ public:
     }
 
     Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&);
+
+    bool areScrollbarButtonsVisible()   { return false; }
 };
 
 

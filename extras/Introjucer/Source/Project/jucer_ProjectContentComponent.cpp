@@ -274,7 +274,7 @@ void ProjectContentComponent::reloadLastOpenDocuments()
         if (xml != nullptr)
         {
             recentDocumentList.restoreFromXML (*project, *xml);
-            showDocument (recentDocumentList.getCurrentDocument());
+            showDocument (recentDocumentList.getCurrentDocument(), true);
         }
     }
 }
@@ -297,10 +297,10 @@ void ProjectContentComponent::updateMissingFileStatuses()
         p->checkFileStatus();
 }
 
-bool ProjectContentComponent::showEditorForFile (const File& f)
+bool ProjectContentComponent::showEditorForFile (const File& f, bool grabFocus)
 {
     return getCurrentFile() == f
-            || showDocument (JucerApplication::getApp().openDocumentManager.openFile (project, f));
+            || showDocument (JucerApplication::getApp().openDocumentManager.openFile (project, f), grabFocus);
 }
 
 File ProjectContentComponent::getCurrentFile() const
@@ -309,7 +309,7 @@ File ProjectContentComponent::getCurrentFile() const
                                       : File::nonexistent;
 }
 
-bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
+bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc, bool grabFocus)
 {
     if (doc == nullptr)
         return false;
@@ -319,13 +319,21 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc)
 
     if (doc == getCurrentDocument() && contentView != nullptr)
     {
-        contentView->grabKeyboardFocus();
+        if (grabFocus)
+            contentView->grabKeyboardFocus();
+
         return true;
     }
 
     recentDocumentList.newDocumentOpened (doc);
 
-    return setEditorComponent (doc->createEditor(), doc);
+    bool opened = setEditorComponent (doc->createEditor(), doc);
+
+    if (opened && grabFocus)
+        contentView->grabKeyboardFocus();
+
+    return opened;
+
 }
 
 void ProjectContentComponent::hideEditor()
@@ -343,13 +351,14 @@ void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
         OpenDocumentManager::Document* replacement = recentDocumentList.getClosestPreviousDocOtherThan (doc);
 
         if (replacement != nullptr)
-            showDocument (replacement);
+            showDocument (replacement, true);
         else
             hideEditor();
     }
 }
 
-bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumentManager::Document* doc)
+bool ProjectContentComponent::setEditorComponent (Component* editor,
+                                                  OpenDocumentManager::Document* doc)
 {
     if (editor != nullptr)
     {
@@ -361,7 +370,6 @@ bool ProjectContentComponent::setEditorComponent (Component* editor, OpenDocumen
 
         updateMainWindowTitle();
         commandManager->commandStatusChanged();
-        editor->grabKeyboardFocus();
         return true;
     }
 
@@ -374,14 +382,14 @@ bool ProjectContentComponent::goToPreviousFile()
     OpenDocumentManager::Document* currentSourceDoc = recentDocumentList.getCurrentDocument();
 
     if (currentSourceDoc != nullptr && currentSourceDoc != getCurrentDocument())
-        return showDocument (currentSourceDoc);
+        return showDocument (currentSourceDoc, true);
     else
-        return showDocument (recentDocumentList.getPrevious());
+        return showDocument (recentDocumentList.getPrevious(), true);
 }
 
 bool ProjectContentComponent::goToNextFile()
 {
-    return showDocument (recentDocumentList.getNext());
+    return showDocument (recentDocumentList.getNext(), true);
 }
 
 void ProjectContentComponent::updateMainWindowTitle()

@@ -102,7 +102,7 @@ public:
     void closeWindow (MainWindow*);
 
     void createWindowIfNoneAreOpen();
-    void openDocument (OpenDocumentManager::Document*);
+    void openDocument (OpenDocumentManager::Document*, bool grabFocus);
     bool openFile (const File& file);
 
     MainWindow* createNewMainWindow();
