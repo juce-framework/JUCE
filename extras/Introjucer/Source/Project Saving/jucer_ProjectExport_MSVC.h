@@ -1153,11 +1153,11 @@ protected:
                 XmlElement* cl = group->createNewChildElement ("ClCompile");
 
                 const int optimiseLevel = config.getOptimisationLevelInt();
-                cl->createNewChildElement ("Optimization")->addTextElement (optimiseLevel == 0 ? "Disabled"
-                                                                                               : optimiseLevel == 1 ? "MinSpace"
+                cl->createNewChildElement ("Optimization")->addTextElement (optimiseLevel <= 1 ? "Disabled"
+                                                                                               : optimiseLevel == 2 ? "MinSpace"
                                                                                                                     : "MaxSpeed");
 
-                if (isDebug && optimiseLevel == 0)
+                if (isDebug && optimiseLevel <= 1)
                     cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (config) ? "ProgramDatabase"
                                                                                                            : "EditAndContinue");
 
