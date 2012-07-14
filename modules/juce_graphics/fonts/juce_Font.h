@@ -212,7 +212,6 @@ public:
 
     //==============================================================================
     /** Returns the total height of this font.
-
         This is the maximum height, from the top of the ascent to the bottom of the
         descenders.
 
@@ -288,7 +287,6 @@ public:
 
     //==============================================================================
     /** Returns the font's horizontal scale.
-
         A value of 1.0 is the normal scale, less than this will be narrower, greater
         than 1.0 will be stretched out.
 
@@ -350,13 +348,11 @@ public:
 
     //==============================================================================
     /** Returns the total width of a string as it would be drawn using this font.
-
         For a more accurate floating-point result, use getStringWidthFloat().
     */
     int getStringWidth (const String& text) const;
 
     /** Returns the total width of a string as it would be drawn using this font.
-
         @see getStringWidth
     */
     float getStringWidthFloat (const String& text) const;

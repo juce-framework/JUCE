@@ -197,9 +197,9 @@ void TextLayout::addLine (Line* line)
 
 void TextLayout::draw (Graphics& g, const Rectangle<float>& area) const
 {
-    const Point<float> origin (justification.appliedToRectangle (Rectangle<float> (0, 0, width, getHeight()), area).getPosition());
+    const Point<float> origin (justification.appliedToRectangle (Rectangle<float> (width, getHeight()), area).getPosition());
 
-    LowLevelGraphicsContext& context = *g.getInternalContext();
+    LowLevelGraphicsContext& context = g.getInternalContext();
 
     for (int i = 0; i < getNumLines(); ++i)
     {

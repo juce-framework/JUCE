@@ -1118,7 +1118,7 @@ struct DefaultFontNames
        #else
         : defaultSans  ("Lucida Grande"),
           defaultSerif ("Times New Roman"),
-          defaultFixed ("Monaco"),
+          defaultFixed ("Menlo"),
        #endif
           defaultFallback ("Arial Unicode MS")
     {

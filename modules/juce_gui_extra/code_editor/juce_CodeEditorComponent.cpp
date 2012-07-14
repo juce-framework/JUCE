@@ -32,14 +32,14 @@ public:
 
     bool update (CodeDocument& document, int lineNum,
                  CodeDocument::Iterator& source,
-                 CodeTokeniser* analyser, const int spacesPerTab,
+                 CodeTokeniser* tokeniser, const int spacesPerTab,
                  const CodeDocument::Position& selectionStart,
                  const CodeDocument::Position& selectionEnd)
     {
         Array <SyntaxToken> newTokens;
         newTokens.ensureStorageAllocated (8);
 
-        if (analyser == nullptr)
+        if (tokeniser == nullptr)
         {
             newTokens.add (SyntaxToken (document.getLine (lineNum), -1));
         }
@@ -47,7 +47,7 @@ public:
         {
             const CodeDocument::Position pos (&document, lineNum, 0);
             createTokens (pos.getPosition(), pos.getLineText(),
-                          source, analyser, newTokens);
+                          source, *tokeniser, newTokens);
         }
 
         replaceTabsWithSpaces (newTokens, spacesPerTab);
@@ -96,7 +96,7 @@ public:
     }
 
     void draw (CodeEditorComponent& owner, Graphics& g, const Font& font,
-               float x, const int y, const int baselineOffset, const int lineHeight,
+               float x, const float rightEdge, const int y, const int baselineOffset, const int lineHeight,
                const Colour& highlightColour) const
     {
         if (highlightColumnStart < highlightColumnEnd)
@@ -106,19 +106,25 @@ public:
                         roundToInt ((highlightColumnEnd - highlightColumnStart) * owner.getCharWidth()), lineHeight);
         }
 
-        int lastType = std::numeric_limits<int>::min();
+        const float baselineY = (float) (y + baselineOffset);
+        Colour lastColour (0x00000001);
+        GlyphArrangement ga;
 
         for (int i = 0; i < tokens.size(); ++i)
         {
             SyntaxToken& token = tokens.getReference(i);
 
-            if (lastType != token.tokenType)
+            const Colour newColour (owner.getColourForTokenType (token.tokenType));
+            if (lastColour != newColour)
             {
-                lastType = token.tokenType;
-                g.setColour (owner.getColourForTokenType (lastType));
+                ga.draw (g);
+                ga.clear();
+
+                lastColour = newColour;
+                g.setColour (newColour);
             }
 
-            g.drawSingleLineText (token.text, roundToInt (x), y + baselineOffset);
+            ga.addCurtailedLineOfText (font, token.text, x, baselineY, rightEdge - x, false);
 
             if (i < tokens.size() - 1)
             {
@@ -126,8 +132,13 @@ public:
                     token.width = font.getStringWidthFloat (token.text);
 
                 x += token.width;
+
+                if (x > rightEdge)
+                    break;
             }
         }
+
+        ga.draw (g);
     }
 
 private:
@@ -153,7 +164,7 @@ private:
 
     static void createTokens (int startPosition, const String& lineText,
                               CodeDocument::Iterator& source,
-                              CodeTokeniser* analyser,
+                              CodeTokeniser& tokeniser,
                               Array <SyntaxToken>& newTokens)
     {
         CodeDocument::Iterator lastIterator (source);
@@ -161,7 +172,7 @@ private:
 
         for (;;)
         {
-            int tokenType = analyser->readNextToken (source);
+            int tokenType = tokeniser.readNextToken (source);
             int tokenStart = lastIterator.getPosition();
             int tokenEnd = source.getPosition();
 
@@ -263,8 +274,8 @@ public:
         const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
         const int lastLineToDraw = jmin (editor.lines.size(), clip.getBottom() / lineHeight + 1);
 
-        const Font lineNumberFont (editor.getFont().withHeight (lineHeight * 0.8f));
-        const float y = (lineHeight - lineNumberFont.getHeight()) / 2.0f + lineNumberFont.getAscent();
+        const Font lineNumberFont (editor.getFont().withHeight (jmin (13.0f, lineHeight * 0.8f)));
+        const float y = lineHeight - editor.getFont().getDescent();
         const float w = getWidth() - 2.0f;
 
         GlyphArrangement ga;
@@ -439,12 +450,12 @@ void CodeEditorComponent::paint (Graphics& g)
     const Rectangle<int> clip (g.getClipBounds());
     const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
     const int lastLineToDraw = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
+    const float x = (float) (gutter - xOffset * charWidth);
+    const float rightEdge = (float) getWidth();
 
     for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-        lines.getUnchecked(i)->draw (*this, g, font,
-                                     (float) (gutter - xOffset * charWidth),
-                                     lineHeight * i, baselineOffset, lineHeight,
-                                     highlightColour);
+        lines.getUnchecked(i)->draw (*this, g, font, x, rightEdge, lineHeight * i,
+                                     baselineOffset, lineHeight, highlightColour);
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)
@@ -488,10 +499,8 @@ void CodeEditorComponent::rebuildLineTokens()
 
     for (int i = 0; i < numNeeded; ++i)
     {
-        CodeEditorLine* const line = lines.getUnchecked(i);
-
-        if (line->update (document, firstLineOnScreen + i, source, codeTokeniser, spacesPerTab,
-                          selectionStart, selectionEnd))
+        if (lines.getUnchecked(i)->update (document, firstLineOnScreen + i, source, codeTokeniser,
+                                           spacesPerTab, selectionStart, selectionEnd))
         {
             minLineToRepaint = jmin (minLineToRepaint, i);
             maxLineToRepaint = jmax (maxLineToRepaint, i);
@@ -1346,14 +1355,14 @@ void CodeEditorComponent::updateCachedIterators (int maxLineNum)
     {
         for (;;)
         {
-            CodeDocument::Iterator* const last = cachedIterators.getLast();
+            CodeDocument::Iterator& last = *cachedIterators.getLast();
 
-            if (last->getLine() >= maxLineNum)
+            if (last.getLine() >= maxLineNum)
                 break;
 
-            CodeDocument::Iterator* t = new CodeDocument::Iterator (*last);
+            CodeDocument::Iterator* t = new CodeDocument::Iterator (last);
             cachedIterators.add (t);
-            const int targetLine = last->getLine() + linesBetweenCachedSources;
+            const int targetLine = last.getLine() + linesBetweenCachedSources;
 
             for (;;)
             {
@@ -1375,10 +1384,10 @@ void CodeEditorComponent::getIteratorForPosition (int position, CodeDocument::It
     {
         for (int i = cachedIterators.size(); --i >= 0;)
         {
-            CodeDocument::Iterator* t = cachedIterators.getUnchecked (i);
-            if (t->getPosition() <= position)
+            const CodeDocument::Iterator& t = *cachedIterators.getUnchecked (i);
+            if (t.getPosition() <= position)
             {
-                source = *t;
+                source = t;
                 break;
             }
         }

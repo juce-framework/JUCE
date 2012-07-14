@@ -688,14 +688,14 @@ public:
         For internal use only.
         NB. The context will NOT be deleted by this object when it is deleted.
     */
-    Graphics (LowLevelGraphicsContext* internalContext) noexcept;
+    Graphics (LowLevelGraphicsContext*) noexcept;
 
     /** @internal */
-    LowLevelGraphicsContext* getInternalContext() const noexcept    { return context; }
+    LowLevelGraphicsContext& getInternalContext() const noexcept    { return context; }
 
 private:
     //==============================================================================
-    LowLevelGraphicsContext* const context;
+    LowLevelGraphicsContext& context;
     ScopedPointer <LowLevelGraphicsContext> contextToDelete;
 
     bool saveStatePending;

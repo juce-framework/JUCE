@@ -207,7 +207,7 @@ void AttributedString::draw (Graphics& g, const Rectangle<float>& area) const
 {
     if (text.isNotEmpty() && g.clipRegionIntersects (area.getSmallestIntegerContainer()))
     {
-        if (! g.getInternalContext()->drawTextLayout (*this, area))
+        if (! g.getInternalContext().drawTextLayout (*this, area))
         {
             TextLayout layout;
             layout.createLayout (*this, area.getWidth());

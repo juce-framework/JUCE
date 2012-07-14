@@ -42,7 +42,8 @@ public:
 
         // Create the editor..
         addAndMakeVisible (editor = new CodeEditorComponent (codeDocument, &cppTokeniser));
-        editor->loadContent ("\n\n/* Code editor demo! Please be gentle, this component is still an alpha version! */\n\n");
+        editor->loadContent ("\n\n/* Code editor demo! To see a real-world example of the "
+                             "code editor in action, try the Introjucer! */\n\n");
 
         // Create a file chooser control to load files into it..
         addAndMakeVisible (&fileChooser);

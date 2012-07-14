@@ -720,18 +720,18 @@ public:
 
         {
             Graphics imG (image);
-            LowLevelGraphicsContext* const lg = imG.getInternalContext();
+            LowLevelGraphicsContext& lg = imG.getInternalContext();
 
             for (RectangleList::Iterator i (validArea); i.next();)
-                lg->excludeClipRectangle (*i.getRectangle());
+                lg.excludeClipRectangle (*i.getRectangle());
 
-            if (! lg->isClipEmpty())
+            if (! lg.isClipEmpty())
             {
                 if (! owner.isOpaque())
                 {
-                    lg->setFill (Colours::transparentBlack);
-                    lg->fillRect (bounds, true);
-                    lg->setFill (Colours::black);
+                    lg.setFill (Colours::transparentBlack);
+                    lg.fillRect (bounds, true);
+                    lg.setFill (Colours::black);
                 }
 
                 owner.paintEntireComponent (imG, true);
@@ -1946,7 +1946,7 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
 
     if (effect != nullptr)
     {
-        const float scale = g.getInternalContext()->getTargetDeviceScaleFactor();
+        const float scale = g.getInternalContext().getTargetDeviceScaleFactor();
 
         Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
                            (int) (scale * getWidth()), (int) (scale * getHeight()), ! flags.opaqueFlag);
