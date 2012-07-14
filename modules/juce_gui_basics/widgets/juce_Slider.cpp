@@ -1229,7 +1229,7 @@ public:
         {
             g.setFont (font);
             g.setColour (findColour (TooltipWindow::textColourId, true));
-            g.drawFittedText (text, 0, 0, w, h, Justification::centred, 1);
+            g.drawFittedText (text, Rectangle<int> (w, h), Justification::centred, 1);
         }
 
         void getContentSize (int& w, int& h)

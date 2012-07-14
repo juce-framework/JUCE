@@ -388,9 +388,7 @@ void ComboBox::paint (Graphics& g)
     {
         g.setColour (findColour (textColourId).withMultipliedAlpha (0.5f));
         g.setFont (label->getFont());
-        g.drawFittedText (textWhenNothingSelected,
-                          label->getX() + 2, label->getY() + 1,
-                          label->getWidth() - 4, label->getHeight() - 2,
+        g.drawFittedText (textWhenNothingSelected, label->getBounds().reduced (2, 1),
                           label->getJustificationType(),
                           jmax (1, (int) (label->getHeight() / label->getFont().getHeight())));
     }

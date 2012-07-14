@@ -287,8 +287,7 @@ public:
 
         g.setColour (Colours::white.overlaidWith (colour).contrasting());
         g.setFont (Font (getHeight() * 0.6f, Font::bold));
-        g.drawFittedText (colour.toDisplayString (true),
-                          2, 1, getWidth() - 4, getHeight() - 1,
+        g.drawFittedText (colour.toDisplayString (true), getLocalBounds().reduced (2, 1),
                           Justification::centred, 1);
     }
 

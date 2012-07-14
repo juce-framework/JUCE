@@ -203,7 +203,7 @@ void PropertyPanel::paint (Graphics& g)
     {
         g.setColour (Colours::black.withAlpha (0.5f));
         g.setFont (14.0f);
-        g.drawText (messageWhenEmpty, 0, 0, getWidth(), 30,
+        g.drawText (messageWhenEmpty, getLocalBounds().withHeight (30),
                     Justification::centred, true);
     }
 }

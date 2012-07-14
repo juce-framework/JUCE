@@ -136,7 +136,8 @@ public:
         g.setFont (15.0f);
         g.setColour (Colours::black);
         g.drawFittedText ("drag this box onto the desktop to show how the same component can move from being lightweight to being a separate window",
-                          4, 0, getWidth() - 8, getHeight(), Justification::horizontallyJustified, 5);
+                          getLocalBounds().reduced (4, 0),
+                          getHeight(), Justification::horizontallyJustified, 5);
 
         g.drawRect (getLocalBounds());
     }
@@ -179,7 +180,7 @@ public:
         g.setColour (Colours::black);
 
         g.drawFittedText ("this is a customised menu item (also demonstrating the Timer class)...",
-                          4, 0, getWidth() - 8, getHeight(),
+                          getLocalBounds().reduced (4, 0),
                           Justification::centred, 3);
     }
 

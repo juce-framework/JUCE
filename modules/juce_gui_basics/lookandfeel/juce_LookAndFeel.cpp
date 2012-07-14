@@ -1117,8 +1117,7 @@ void LookAndFeel::drawPopupMenuItem (Graphics& g,
         }
 
         g.drawFittedText (text,
-                          leftBorder, 0,
-                          width - (leftBorder + rightBorder), height,
+                          leftBorder, 0, width - (leftBorder + rightBorder), height,
                           Justification::centredLeft, 1);
 
         if (shortcutKeyText.isNotEmpty())
@@ -1129,10 +1128,7 @@ void LookAndFeel::drawPopupMenuItem (Graphics& g,
             g.setFont (f2);
 
             g.drawText (shortcutKeyText,
-                        leftBorder,
-                        0,
-                        width - (leftBorder + rightBorder + 4),
-                        height,
+                        leftBorder, 0, width - (leftBorder + rightBorder + 4), height,
                         Justification::centredRight,
                         true);
         }

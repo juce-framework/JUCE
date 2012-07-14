@@ -96,9 +96,7 @@ void JucerTreeViewBase::paintContent (Graphics& g, const Rectangle<int>& area)
     g.setColour (isMissing() ? getContrastingColour (Colours::red, 0.8f)
                              : getContrastingColour (0.8f));
 
-    g.drawFittedText (getDisplayName(),
-                      area.getX(), area.getY(), area.getWidth(), area.getHeight(),
-                      Justification::centredLeft, 1, 0.8f);
+    g.drawFittedText (getDisplayName(), area, Justification::centredLeft, 1, 0.8f);
 }
 
 Component* JucerTreeViewBase::createItemComponent()

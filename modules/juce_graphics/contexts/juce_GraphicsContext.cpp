@@ -38,13 +38,8 @@ namespace
 }
 
 //==============================================================================
-LowLevelGraphicsContext::LowLevelGraphicsContext()
-{
-}
-
-LowLevelGraphicsContext::~LowLevelGraphicsContext()
-{
-}
+LowLevelGraphicsContext::LowLevelGraphicsContext() {}
+LowLevelGraphicsContext::~LowLevelGraphicsContext() {}
 
 //==============================================================================
 Graphics::Graphics (const Image& imageToDrawOnto)
@@ -266,7 +261,8 @@ void Graphics::drawTextAsPath (const String& text, const AffineTransform& transf
     }
 }
 
-void Graphics::drawMultiLineText (const String& text, const int startX, const int baselineY, const int maximumLineWidth) const
+void Graphics::drawMultiLineText (const String& text, const int startX,
+                                  const int baselineY, const int maximumLineWidth) const
 {
     if (text.isNotEmpty()
          && startX < context.getClipBounds().getRight())
@@ -279,46 +275,58 @@ void Graphics::drawMultiLineText (const String& text, const int startX, const in
     }
 }
 
-void Graphics::drawText (const String& text,
-                         const int x, const int y, const int width, const int height,
+void Graphics::drawText (const String& text, const Rectangle<int>& area,
                          const Justification& justificationType,
                          const bool useEllipsesIfTooBig) const
 {
-    if (text.isNotEmpty() && context.clipRegionIntersects (Rectangle<int> (x, y, width, height)))
+    if (text.isNotEmpty() && context.clipRegionIntersects (area))
     {
         GlyphArrangement arr;
-
         arr.addCurtailedLineOfText (context.getFont(), text,
-                                    0.0f, 0.0f, (float) width,
+                                    0.0f, 0.0f, (float) area.getWidth(),
                                     useEllipsesIfTooBig);
 
         arr.justifyGlyphs (0, arr.getNumGlyphs(),
-                           (float) x, (float) y, (float) width, (float) height,
+                           (float) area.getX(), (float) area.getY(),
+                           (float) area.getWidth(), (float) area.getHeight(),
                            justificationType);
         arr.draw (*this);
     }
 }
 
-void Graphics::drawFittedText (const String& text,
-                               const int x, const int y, const int width, const int height,
+void Graphics::drawText (const String& text, const int x, const int y, const int width, const int height,
+                         const Justification& justificationType,
+                         const bool useEllipsesIfTooBig) const
+{
+    drawText (text, Rectangle<int> (x, y, width, height), justificationType, useEllipsesIfTooBig);
+}
+
+void Graphics::drawFittedText (const String& text, const Rectangle<int>& area,
                                const Justification& justification,
                                const int maximumNumberOfLines,
                                const float minimumHorizontalScale) const
 {
-    if (text.isNotEmpty()
-         && width > 0 && height > 0
-         && context.clipRegionIntersects (Rectangle<int> (x, y, width, height)))
+    if (text.isNotEmpty() && (! area.isEmpty()) && context.clipRegionIntersects (area))
     {
         GlyphArrangement arr;
-
         arr.addFittedText (context.getFont(), text,
-                           (float) x, (float) y, (float) width, (float) height,
+                           (float) area.getX(), (float) area.getY(),
+                           (float) area.getWidth(), (float) area.getHeight(),
                            justification,
                            maximumNumberOfLines,
                            minimumHorizontalScale);
 
         arr.draw (*this);
     }
+}
+
+void Graphics::drawFittedText (const String& text, const int x, const int y, const int width, const int height,
+                               const Justification& justification,
+                               const int maximumNumberOfLines,
+                               const float minimumHorizontalScale) const
+{
+    drawFittedText (text,Rectangle<int> (x, y, width, height),
+                    justification, maximumNumberOfLines, minimumHorizontalScale);
 }
 
 //==============================================================================

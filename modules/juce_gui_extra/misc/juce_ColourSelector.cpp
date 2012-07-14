@@ -215,8 +215,7 @@ public:
 
     void resized()
     {
-        marker.setBounds (0, roundToInt ((getHeight() - edge * 2) * h),
-                          getWidth(), edge * 2);
+        marker.setBounds (0, roundToInt ((getHeight() - edge * 2) * h), getWidth(), edge * 2);
     }
 
     void mouseDown (const MouseEvent& e)
@@ -350,8 +349,7 @@ ColourSelector::~ColourSelector()
 //==============================================================================
 Colour ColourSelector::getCurrentColour() const
 {
-    return ((flags & showAlphaChannel) != 0) ? colour
-                                             : colour.withAlpha ((uint8) 0xff);
+    return ((flags & showAlphaChannel) != 0) ? colour : colour.withAlpha ((uint8) 0xff);
 }
 
 void ColourSelector::setCurrentColour (const Colour& c)
@@ -435,8 +433,7 @@ void ColourSelector::paint (Graphics& g)
         g.setColour (Colours::white.overlaidWith (currentColour).contrasting());
         g.setFont (Font (14.0f, Font::bold));
         g.drawText (currentColour.toDisplayString ((flags & showAlphaChannel) != 0),
-                    previewArea.getX(), previewArea.getY(), previewArea.getWidth(), previewArea.getHeight(),
-                    Justification::centred, false);
+                    previewArea, Justification::centred, false);
     }
 
     if ((flags & showSliders) != 0)

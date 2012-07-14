@@ -334,9 +334,7 @@ public:
 
         g.setColour (Colours::black);
         g.setFont (font);
-        g.drawFittedText (getName(),
-                          x + 4, y + 2, w - 8, h - 4,
-                          Justification::centred, 2);
+        g.drawFittedText (getName(), getLocalBounds().reduced (4, 2), Justification::centred, 2);
 
         g.setColour (Colours::grey);
         g.drawRect (x, y, w, h);

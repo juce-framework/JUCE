@@ -1734,8 +1734,7 @@ void TextEditor::paintOverChildren (Graphics& g)
 
         if (isMultiLine())
         {
-            g.drawText (textToShowWhenEmpty,
-                        0, 0, getWidth(), getHeight(),
+            g.drawText (textToShowWhenEmpty, getLocalBounds(),
                         Justification::centred, true);
         }
         else

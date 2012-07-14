@@ -184,6 +184,20 @@ public:
                    const Justification& justificationType,
                    bool useEllipsesIfTooBig) const;
 
+    /** Draws a line of text within a specified rectangle.
+
+        The text will be positioned within the rectangle based on the justification
+        flags passed-in. If the string is too long to fit inside the rectangle, it will
+        either be truncated or will have ellipsis added to its end (if the useEllipsesIfTooBig
+        flag is true).
+
+        @see drawSingleLineText, drawFittedText, drawMultiLineText, GlyphArrangement::addJustifiedText
+    */
+    void drawText (const String& text,
+                   const Rectangle<int>& area,
+                   const Justification& justificationType,
+                   bool useEllipsesIfTooBig) const;
+
     /** Tries to draw a text string inside a given space.
 
         This does its best to make the given text readable within the specified rectangle,
@@ -205,6 +219,31 @@ public:
     */
     void drawFittedText (const String& text,
                          int x, int y, int width, int height,
+                         const Justification& justificationFlags,
+                         int maximumNumberOfLines,
+                         float minimumHorizontalScale = 0.7f) const;
+
+    /** Tries to draw a text string inside a given space.
+
+        This does its best to make the given text readable within the specified rectangle,
+        so it useful for labelling things.
+
+        If the text is too big, it'll be squashed horizontally or broken over multiple lines
+        if the maximumLinesToUse value allows this. If the text just won't fit into the space,
+        it'll cram as much as possible in there, and put some ellipsis at the end to show that
+        it's been truncated.
+
+        A Justification parameter lets you specify how the text is laid out within the rectangle,
+        both horizontally and vertically.
+
+        The minimumHorizontalScale parameter specifies how much the text can be squashed horizontally
+        to try to squeeze it into the space. If you don't want any horizontal scaling to occur, you
+        can set this value to 1.0f.
+
+        @see GlyphArrangement::addFittedText
+    */
+    void drawFittedText (const String& text,
+                         const Rectangle<int>& area,
                          const Justification& justificationFlags,
                          int maximumNumberOfLines,
                          float minimumHorizontalScale = 0.7f) const;

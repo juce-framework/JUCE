@@ -104,8 +104,7 @@ void HyperlinkButton::paintButton (Graphics& g,
 
     g.setFont (getFontToUse());
 
-    g.drawText (getButtonText(),
-                2, 0, getWidth() - 2, getHeight(),
+    g.drawText (getButtonText(), getLocalBounds().reduced (1, 0),
                 justification.getOnlyHorizontalFlags() | Justification::verticallyCentred,
                 true);
 }

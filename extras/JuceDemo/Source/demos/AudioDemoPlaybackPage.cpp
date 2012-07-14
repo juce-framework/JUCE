@@ -100,8 +100,7 @@ public:
         else
         {
             g.setFont (14.0f);
-            g.drawFittedText ("(No audio file selected)", 0, 0, getWidth(), getHeight(),
-                              Justification::centred, 2);
+            g.drawFittedText ("(No audio file selected)", getLocalBounds(), Justification::centred, 2);
         }
     }
 
