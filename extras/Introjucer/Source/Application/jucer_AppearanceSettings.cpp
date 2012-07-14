@@ -70,26 +70,38 @@ AppearanceSettings::AppearanceSettings()
         getColourValue (t.name) = t.colour.toString();
     }
 
-    Font f (editor.getFont());
-    f.setTypefaceName (f.getTypeface()->getName());
-    getCodeFontValue() = f.toString();
+    getCodeFontValue() = getDefaultCodeFont().toString();
 
     settings.addListener (this);
 }
 
 File AppearanceSettings::getSchemesFolder()
 {
-    File f (getAppProperties().getFile().getSiblingFile ("Colour Schemes"));
+    File f (getAppProperties().getFile().getSiblingFile ("Schemes"));
     f.createDirectory();
     return f;
 }
 
+void AppearanceSettings::writeDefaultSchemeFile (const String& xmlString, const String& name)
+{
+    const File file (getSchemesFolder().getChildFile (name).withFileExtension (getSchemeFileSuffix()));
+
+    if (! file.exists())
+    {
+        AppearanceSettings settings;
+
+        ScopedPointer<XmlElement> xml (XmlDocument::parse (xmlString));
+        if (xml != nullptr)
+            settings.readFromXML (*xml);
+
+        settings.writeToFile (file);
+    }
+}
+
 void AppearanceSettings::refreshPresetSchemeList()
 {
-    const File defaultSchemeFile (getSchemesFolder().getChildFile ("Default").withFileExtension (getSchemeFileSuffix()));
-
-    if (! defaultSchemeFile.exists())
-        AppearanceSettings().writeToFile (defaultSchemeFile);
+    writeDefaultSchemeFile (String::empty,               "Default (Light)");
+    writeDefaultSchemeFile (BinaryData::dark_scheme_xml, "Default (Dark)");
 
     Array<File> newSchemes;
     getSchemesFolder().findChildFiles (newSchemes, File::findFiles, false, String ("*") + getSchemeFileSuffix());
@@ -153,6 +165,11 @@ bool AppearanceSettings::writeToFile (const File& file) const
     return xml != nullptr && xml->writeToFile (file, String::empty);
 }
 
+Font AppearanceSettings::getDefaultCodeFont()
+{
+    return Font (Font::getDefaultMonospacedFontName(), Font::getDefaultStyle(), 13.0f);
+}
+
 StringArray AppearanceSettings::getColourNames() const
 {
     StringArray s;
@@ -214,17 +231,7 @@ Font AppearanceSettings::getCodeFont() const
     const String fontString (settings [Ids::font].toString());
 
     if (fontString.isEmpty())
-    {
-       #if JUCE_MAC
-        Font font (13.0f);
-        font.setTypefaceName ("Menlo");
-       #else
-        Font font (10.0f);
-        font.setTypefaceName (Font::getDefaultMonospacedFontName());
-       #endif
-
-        return font;
-    }
+        return Font (Font::getDefaultMonospacedFontName(), 13.0f);
 
     return Font::fromString (fontString);
 }
@@ -272,7 +279,7 @@ struct AppearanceEditor
     class Window   : public DialogWindow
     {
     public:
-        Window()   : DialogWindow ("Appearance Settings", Colours::black, true, true)
+        Window()   : DialogWindow ("Appearance Settings", Colours::darkgrey, true, true)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (new EditorPanel(), false);
@@ -316,13 +323,13 @@ struct AppearanceEditor
             : loadButton ("Load Scheme..."),
               saveButton ("Save Scheme...")
         {
-            setOpaque (true);
-
             rebuildProperties();
             addAndMakeVisible (&panel);
 
-            loadButton.setColour (TextButton::buttonColourId, Colours::grey);
-            saveButton.setColour (TextButton::buttonColourId, Colours::grey);
+            loadButton.setColour (TextButton::buttonColourId, Colours::darkgrey.withAlpha (0.5f));
+            saveButton.setColour (TextButton::buttonColourId, Colours::darkgrey.withAlpha (0.5f));
+            loadButton.setColour (TextButton::textColourOffId, Colours::white);
+            saveButton.setColour (TextButton::textColourOffId, Colours::white);
 
             addAndMakeVisible (&loadButton);
             addAndMakeVisible (&saveButton);
@@ -351,16 +358,11 @@ struct AppearanceEditor
             panel.addProperties (props);
         }
 
-        void paint (Graphics& g)
-        {
-            g.fillAll (Colours::black);
-        }
-
         void resized()
         {
             Rectangle<int> r (getLocalBounds());
-            panel.setBounds (r.removeFromTop (getHeight() - 26).reduced (4, 3));
-            loadButton.setBounds (r.removeFromLeft (getWidth() / 2).reduced (10, 3));
+            panel.setBounds (r.removeFromTop (getHeight() - 28).reduced (4, 2));
+            loadButton.setBounds (r.removeFromLeft (getWidth() / 2).reduced (10, 4));
             saveButton.setBounds (r.reduced (10, 3));
         }
 
@@ -379,12 +381,13 @@ struct AppearanceEditor
         void saveScheme()
         {
             FileChooser fc ("Select a file in which to save this colour-scheme...",
-                            getAppSettings().appearance.getSchemesFolder().getNonexistentChildFile ("Scheme", ".editorscheme"),
-                            "*.editorscheme");
+                            getAppSettings().appearance.getSchemesFolder()
+                                .getNonexistentChildFile ("Scheme", AppearanceSettings::getSchemeFileSuffix()),
+                            AppearanceSettings::getSchemeFileWildCard());
 
             if (fc.browseForFileToSave (true))
             {
-                File file (fc.getResult().withFileExtension (".editorscheme"));
+                File file (fc.getResult().withFileExtension (AppearanceSettings::getSchemeFileSuffix()));
                 getAppSettings().appearance.writeToFile (file);
                 getAppSettings().appearance.refreshPresetSchemeList();
             }
@@ -394,7 +397,7 @@ struct AppearanceEditor
         {
             FileChooser fc ("Please select a colour-scheme file to load...",
                             getAppSettings().appearance.getSchemesFolder(),
-                            "*.editorscheme");
+                            AppearanceSettings::getSchemeFileWildCard());
 
             if (fc.browseForFileToOpen())
             {
@@ -426,14 +429,22 @@ struct AppearanceEditor
 
         static ChoicePropertyComponent* createProperty (const String& title, const Value& value)
         {
-            const StringArray& fontNames = getAppSettings().getFontNames();
+            StringArray fontNames = getAppSettings().getFontNames();
 
             Array<var> values;
+            values.add (Font::getDefaultMonospacedFontName());
+            values.add (var());
+
             for (int i = 0; i < fontNames.size(); ++i)
                 values.add (fontNames[i]);
 
+            StringArray names;
+            names.add ("<Default Monospaced>");
+            names.add (String::empty);
+            names.addArray (getAppSettings().getFontNames());
+
             return new ChoicePropertyComponent (Value (new FontNameValueSource (value)),
-                                                title, fontNames, values);
+                                                title, names, values);
         }
     };
 
@@ -497,7 +508,7 @@ void IntrojucerLookAndFeel::createTabTextLayout (const TabBarButton& button, con
 
 Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
 {
-    Colour normalBkg (button.getTabBackgroundColour());
+    const Colour normalBkg (button.getTabBackgroundColour());
     Colour bkg (normalBkg.contrasting (0.15f));
     if (button.isFrontTab())
         bkg = bkg.overlaidWith (Colours::yellow.withAlpha (0.5f));
@@ -509,7 +520,7 @@ void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bo
 {
     const Rectangle<int> activeArea (button.getActiveArea());
 
-    Colour bkg (getTabBackgroundColour (button));
+    const Colour bkg (getTabBackgroundColour (button));
 
     g.setGradientFill (ColourGradient (bkg.brighter (0.1f), 0, (float) activeArea.getY(),
                                        bkg.darker (0.1f), 0, (float) activeArea.getBottom(), false));
@@ -552,7 +563,7 @@ void IntrojucerLookAndFeel::drawScrollbar (Graphics& g, ScrollBar& scrollbar, in
 
     if (thumbSize > 0)
     {
-        const float thumbIndent = jmin (width, height) * 0.25f;
+        const float thumbIndent = (isScrollbarVertical ? width : height) * 0.25f;
         const float thumbIndentx2 = thumbIndent * 2.0f;
 
         if (isScrollbarVertical)

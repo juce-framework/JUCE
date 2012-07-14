@@ -224,7 +224,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\BinaryData\juce_icon.png">
+        <File RelativePath="..\..\Source\BinaryData\dark_scheme.xml">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -234,6 +234,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
+        <File RelativePath="..\..\Source\BinaryData\juce_icon.png"/>
         <File RelativePath="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">

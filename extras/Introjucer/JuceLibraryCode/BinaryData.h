@@ -13,8 +13,8 @@ namespace BinaryData
     extern const char*   brushed_aluminium_png;
     const int            brushed_aluminium_pngSize = 14724;
 
-    extern const char*   juce_icon_png;
-    const int            juce_icon_pngSize = 19826;
+    extern const char*   dark_scheme_xml;
+    const int            dark_scheme_xmlSize = 1045;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1008;

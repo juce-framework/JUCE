@@ -48,19 +48,24 @@ public:
 
     ValueTree settings;
 
-    File getSchemesFolder();
+    static File getSchemesFolder();
     StringArray getPresetSchemes();
     void refreshPresetSchemeList();
     void selectPresetScheme (int index);
 
+    static Font getDefaultCodeFont();
     static Colour getScrollbarColourForBackground (const Colour& background);
 
     static Component* createEditorWindow();
 
+    static const char* getSchemeFileSuffix()      { return ".scheme"; }
+    static const char* getSchemeFileWildCard()    { return "*.scheme"; }
+
 private:
-    static const char* getSchemeFileSuffix()      { return ".editorscheme"; }
 
     Array<File> presetSchemeFiles;
+
+    static void writeDefaultSchemeFile (const String& xml, const String& name);
 
     void applyToLookAndFeel (LookAndFeel&) const;
 

@@ -126,15 +126,7 @@ void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
 {
     addAndMakeVisible (editor = newEditor);
 
-   #if JUCE_MAC
-    Font font (13.0f);
-    font.setTypefaceName ("Menlo");
-   #else
-    Font font (12.0f);
-    font.setTypefaceName (Font::getDefaultMonospacedFontName());
-   #endif
-    editor->setFont (font);
-
+    editor->setFont (AppearanceSettings::getDefaultCodeFont());
     editor->setTabSize (4, true);
 
     updateColourScheme();

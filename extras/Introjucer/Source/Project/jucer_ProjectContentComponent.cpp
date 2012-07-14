@@ -61,10 +61,12 @@ public:
         addAndMakeVisible (&openProjectButton);
         openProjectButton.setCommandToTrigger (commandManager, CommandIDs::openInIDE, true);
         openProjectButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::openInIDE));
+        openProjectButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
 
         addAndMakeVisible (&saveAndOpenButton);
         saveAndOpenButton.setCommandToTrigger (commandManager, CommandIDs::saveAndOpenInIDE, true);
         saveAndOpenButton.setButtonText (commandManager->getNameOfCommand (CommandIDs::saveAndOpenInIDE));
+        saveAndOpenButton.setColour (TextButton::buttonColourId, Colours::white.withAlpha (0.5f));
        #endif
     }
 
