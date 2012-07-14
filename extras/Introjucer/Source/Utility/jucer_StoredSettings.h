@@ -48,8 +48,6 @@ public:
     Array<File> getLastProjects() const;
     void setLastProjects (const Array<File>& files);
 
-    const StringArray& getFontNames();
-
     //==============================================================================
     Array <Colour> swatchColours;
 
@@ -66,9 +64,10 @@ public:
     //==============================================================================
     AppearanceSettings appearance;
 
+    StringArray monospacedFontNames;
+
 private:
     ScopedPointer<PropertiesFile> props;
-    StringArray fontNames;
 
     void loadSwatchColours();
 

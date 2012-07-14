@@ -147,14 +147,6 @@ void StoredSettings::setLastProjects (const Array<File>& files)
     props->setValue ("lastProjects", s.joinIntoString ("|"));
 }
 
-const StringArray& StoredSettings::getFontNames()
-{
-    if (fontNames.size() == 0)
-        fontNames = Font::findAllTypefaceNames();
-
-    return fontNames;
-}
-
 //==============================================================================
 void StoredSettings::loadSwatchColours()
 {

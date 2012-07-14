@@ -294,7 +294,12 @@ struct AppearanceEditor
         Window()   : DialogWindow ("Appearance Settings", Colours::darkgrey, true, true)
         {
             setUsingNativeTitleBar (true);
-            setContentOwned (new EditorPanel(), false);
+
+            if (getAppSettings().monospacedFontNames.size() == 0)
+                setContentOwned (new FontScanPanel(), false);
+            else
+                setContentOwned (new EditorPanel(), false);
+
             setResizable (true, true);
 
             const int width = 350;
@@ -324,6 +329,67 @@ struct AppearanceEditor
         static const char* getWindowPosName()   { return "colourSchemeEditorPos"; }
 
         JUCE_DECLARE_NON_COPYABLE (Window);
+    };
+
+    //==============================================================================
+    class FontScanPanel   : public Component,
+                            private Timer
+    {
+    public:
+        FontScanPanel()
+        {
+            fontsToScan = Font::findAllTypefaceNames();
+            startTimer (1);
+        }
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colours::darkgrey);
+
+            g.setFont (14.0f);
+            g.setColour (Colours::white);
+            g.drawFittedText ("Scanning for fonts..", getLocalBounds(), Justification::centred, 2);
+
+            const int size = 30;
+            getLookAndFeel().drawSpinningWaitAnimation (g, Colours::white, (getWidth() - size) / 2, getHeight() / 2 - 50, size, size);
+        }
+
+        void timerCallback()
+        {
+            repaint();
+
+            if (fontsToScan.size() == 0)
+            {
+                getAppSettings().monospacedFontNames = fontsFound;
+                Window* w = findParentComponentOfClass<Window>();
+
+                if (w != nullptr)
+                    w->setContentOwned (new EditorPanel(), false);
+            }
+            else
+            {
+                if (isMonospacedTypeface (fontsToScan[0]))
+                    fontsFound.add (fontsToScan[0]);
+
+                fontsToScan.remove (0);
+            }
+        }
+
+        // A rather hacky trick to select only the fixed-pitch fonts..
+        // This is unfortunately a bit slow, but will work on all platforms.
+        static bool isMonospacedTypeface (const String& name)
+        {
+            const Font font (name, 20.0f, Font::plain);
+
+            const int width = font.getStringWidth ("....");
+
+            return width == font.getStringWidth ("WWWW")
+                && width == font.getStringWidth ("0000")
+                && width == font.getStringWidth ("1111")
+                && width == font.getStringWidth ("iiii");
+        }
+
+        StringArray fontsToScan, fontsFound;
     };
 
     //==============================================================================
@@ -435,13 +501,14 @@ struct AppearanceEditor
         void setValue (const var& newValue)
         {
             Font font (Font::fromString (sourceValue.toString()));
-            font.setTypefaceName (newValue.toString());
+            font.setTypefaceName (newValue.toString().isEmpty() ? Font::getDefaultMonospacedFontName()
+                                                                : newValue.toString());
             sourceValue = font.toString();
         }
 
         static ChoicePropertyComponent* createProperty (const String& title, const Value& value)
         {
-            StringArray fontNames = getAppSettings().getFontNames();
+            StringArray fontNames = getAppSettings().monospacedFontNames;
 
             Array<var> values;
             values.add (Font::getDefaultMonospacedFontName());
@@ -453,7 +520,7 @@ struct AppearanceEditor
             StringArray names;
             names.add ("<Default Monospaced>");
             names.add (String::empty);
-            names.addArray (getAppSettings().getFontNames());
+            names.addArray (getAppSettings().monospacedFontNames);
 
             return new ChoicePropertyComponent (Value (new FontNameValueSource (value)),
                                                 title, names, values);
