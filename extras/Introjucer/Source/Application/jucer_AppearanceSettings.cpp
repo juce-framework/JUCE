@@ -33,19 +33,20 @@ namespace AppearanceColours
         const char* name;
         uint32 colourID;
         bool mustBeOpaque;
+        bool applyToEditorOnly;
     };
 
     static const ColourInfo colours[] =
     {
-        { "Main Window Bkgd",   mainBackgroundColourId, true },
-        { "Treeview Highlight", treeviewHighlightColourId, false },
+        { "Main Window Bkgd",   mainBackgroundColourId, true, false },
+        { "Treeview Highlight", treeviewHighlightColourId, false, false },
 
-        { "Code Background",    CodeEditorComponent::backgroundColourId, true },
-        { "Line Number Bkgd",   CodeEditorComponent::lineNumberBackgroundId, false },
-        { "Line Numbers",       CodeEditorComponent::lineNumberTextId, false },
-        { "Plain Text",         CodeEditorComponent::defaultTextColourId, false },
-        { "Selected Text Bkgd", CodeEditorComponent::highlightColourId, false },
-        { "Caret",              CaretComponent::caretColourId, false }
+        { "Code Background",    CodeEditorComponent::backgroundColourId, true, false },
+        { "Line Number Bkgd",   CodeEditorComponent::lineNumberBackgroundId, false, false },
+        { "Line Numbers",       CodeEditorComponent::lineNumberTextId, false, false },
+        { "Plain Text",         CodeEditorComponent::defaultTextColourId, false, false },
+        { "Selected Text Bkgd", CodeEditorComponent::highlightColourId, false, false },
+        { "Caret",              CaretComponent::caretColourId, false, true }
     };
 }
 
@@ -201,7 +202,8 @@ void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const
             if (AppearanceColours::colours[i].mustBeOpaque)
                 col = Colours::white.overlaidWith (col);
 
-            lf.setColour (AppearanceColours::colours[i].colourID, col);
+            if (! AppearanceColours::colours[i].applyToEditorOnly)
+                lf.setColour (AppearanceColours::colours[i].colourID, col);
         }
     }
 
@@ -221,6 +223,16 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 
     editor.setColourScheme (cs);
     editor.setFont (getCodeFont());
+
+    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
+    {
+        if (AppearanceColours::colours[i].applyToEditorOnly)
+        {
+            Colour col;
+            if (getColour (AppearanceColours::colours[i].name, col))
+                editor.setColour (AppearanceColours::colours[i].colourID, col);
+        }
+    }
 
     editor.setColour (ScrollBar::thumbColourId,
                       getScrollbarColourForBackground (editor.findColour (CodeEditorComponent::backgroundColourId)));

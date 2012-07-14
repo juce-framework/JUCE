@@ -305,29 +305,7 @@ public:
     void drawRoundedRectangle (const Rectangle<float>& rectangle,
                                float cornerSize, float lineThickness) const;
 
-    /** Draws a 3D raised (or indented) bevel using two colours.
-
-        The bevel is drawn inside the given rectangle, and greater bevel thicknesses
-        extend inwards.
-
-        The top-left colour is used for the top- and left-hand edges of the
-        bevel; the bottom-right colour is used for the bottom- and right-hand
-        edges.
-
-        If useGradient is true, then the bevel fades out to make it look more curved
-        and less angular. If sharpEdgeOnOutside is true, the outside of the bevel is
-        sharp, and it fades towards the centre; if sharpEdgeOnOutside is false, then
-        the centre edges are sharp and it fades towards the outside.
-    */
-    void drawBevel (int x, int y, int width, int height,
-                    int bevelThickness,
-                    const Colour& topLeftColour = Colours::white,
-                    const Colour& bottomRightColour = Colours::black,
-                    bool useGradient = true,
-                    bool sharpEdgeOnOutside = true) const;
-
-    /** Draws a pixel using the current colour or brush.
-    */
+    /** Draws a 1x1 pixel using the current colour or brush. */
     void setPixel (int x, int y) const;
 
     //==============================================================================

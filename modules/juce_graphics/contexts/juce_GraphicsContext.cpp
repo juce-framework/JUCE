@@ -416,36 +416,6 @@ void Graphics::drawRect (const Rectangle<int>& r, const int lineThickness) const
     drawRect (r.getX(), r.getY(), r.getWidth(), r.getHeight(), lineThickness);
 }
 
-void Graphics::drawBevel (const int x, const int y, const int width, const int height,
-                          const int bevelThickness, const Colour& topLeftColour, const Colour& bottomRightColour,
-                          const bool useGradient, const bool sharpEdgeOnOutside) const
-{
-    // passing in a silly number can cause maths problems in rendering!
-    jassert (areCoordsSensibleNumbers (x, y, width, height));
-
-    if (clipRegionIntersects (Rectangle<int> (x, y, width, height)))
-    {
-        context.saveState();
-
-        for (int i = bevelThickness; --i >= 0;)
-        {
-            const float op = useGradient ? (sharpEdgeOnOutside ? bevelThickness - i : i) / (float) bevelThickness
-                                         : 1.0f;
-
-            context.setFill (topLeftColour.withMultipliedAlpha (op));
-            context.fillRect (Rectangle<int> (x + i, y + i, width - i * 2, 1), false);
-            context.setFill (topLeftColour.withMultipliedAlpha (op * 0.75f));
-            context.fillRect (Rectangle<int> (x + i, y + i + 1, 1, height - i * 2 - 2), false);
-            context.setFill (bottomRightColour.withMultipliedAlpha (op));
-            context.fillRect (Rectangle<int> (x + i, y + height - i - 1, width - i * 2, 1), false);
-            context.setFill (bottomRightColour.withMultipliedAlpha (op  * 0.75f));
-            context.fillRect (Rectangle<int> (x + width - i - 1, y + i + 1, 1, height - i * 2 - 2), false);
-        }
-
-        context.restoreState();
-    }
-}
-
 //==============================================================================
 void Graphics::fillEllipse (const Rectangle<float>& area) const
 {

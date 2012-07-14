@@ -1238,7 +1238,7 @@ void LookAndFeel::drawTextEditorOutline (Graphics& g, int width, int height, Tex
 
             g.setOpacity (1.0f);
             const Colour shadowColour (textEditor.findColour (TextEditor::shadowColourId).withMultipliedAlpha (0.75f));
-            g.drawBevel (0, 0, width, height + 2, border + 2, shadowColour, shadowColour);
+            drawBevel (g, 0, 0, width, height + 2, border + 2, shadowColour, shadowColour);
         }
         else
         {
@@ -1247,7 +1247,7 @@ void LookAndFeel::drawTextEditorOutline (Graphics& g, int width, int height, Tex
 
             g.setOpacity (1.0f);
             const Colour shadowColour (textEditor.findColour (TextEditor::shadowColourId));
-            g.drawBevel (0, 0, width, height + 2, 3, shadowColour, shadowColour);
+            drawBevel (g, 0, 0, width, height + 2, 3, shadowColour, shadowColour);
         }
     }
 }
@@ -2758,7 +2758,7 @@ void LookAndFeel::drawKeymapChangeButton (Graphics& g, int width, int height, Bu
             g.fillAll (textColour.withAlpha (alpha));
 
             g.setOpacity (0.3f);
-            g.drawBevel (0, 0, width, height, 2);
+            drawBevel (g, 0, 0, width, height, 2);
         }
 
         g.setColour (textColour);
@@ -2787,6 +2787,35 @@ void LookAndFeel::drawKeymapChangeButton (Graphics& g, int width, int height, Bu
     {
         g.setColour (textColour.withAlpha (0.4f));
         g.drawRect (0, 0, width, height);
+    }
+}
+
+//==============================================================================
+void LookAndFeel::drawBevel (Graphics& g, const int x, const int y, const int width, const int height,
+                             const int bevelThickness, const Colour& topLeftColour, const Colour& bottomRightColour,
+                             const bool useGradient, const bool sharpEdgeOnOutside)
+{
+    if (g.clipRegionIntersects (Rectangle<int> (x, y, width, height)))
+    {
+        LowLevelGraphicsContext& context = g.getInternalContext();
+        context.saveState();
+
+        for (int i = bevelThickness; --i >= 0;)
+        {
+            const float op = useGradient ? (sharpEdgeOnOutside ? bevelThickness - i : i) / (float) bevelThickness
+                                         : 1.0f;
+
+            context.setFill (topLeftColour.withMultipliedAlpha (op));
+            context.fillRect (Rectangle<int> (x + i, y + i, width - i * 2, 1), false);
+            context.setFill (topLeftColour.withMultipliedAlpha (op * 0.75f));
+            context.fillRect (Rectangle<int> (x + i, y + i + 1, 1, height - i * 2 - 2), false);
+            context.setFill (bottomRightColour.withMultipliedAlpha (op));
+            context.fillRect (Rectangle<int> (x + i, y + height - i - 1, width - i * 2, 1), false);
+            context.setFill (bottomRightColour.withMultipliedAlpha (op  * 0.75f));
+            context.fillRect (Rectangle<int> (x + width - i - 1, y + i + 1, 1, height - i * 2 - 2), false);
+        }
+
+        context.restoreState();
     }
 }
 
