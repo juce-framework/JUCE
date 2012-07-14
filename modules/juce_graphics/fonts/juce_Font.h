@@ -77,13 +77,6 @@ public:
     */
     Font (const String& typefaceName, float fontHeight, int styleFlags);
 
-    /** Creates a sans-serif font in a given style and size.
-
-        @param typefaceStyle the font style of the typeface to use
-        @param fontHeight   the height in pixels (can be fractional)
-    */
-    Font (const String& typefaceStyle, float fontHeight);
-
     /** Creates a font with a given typeface and parameters.
 
         @param typefaceName  the font family of the typeface to use

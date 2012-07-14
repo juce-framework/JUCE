@@ -265,11 +265,6 @@ Font::Font (const String& typefaceName, const float fontHeight, const int styleF
 {
 }
 
-Font::Font (const String& typefaceStyle, float fontHeight)
-    : font (new SharedFontInternal (typefaceStyle, FontValues::limitFontHeight (fontHeight), false))
-{
-}
-
 Font::Font (const String& typefaceName, const String& typefaceStyle, float fontHeight)
     : font (new SharedFontInternal (typefaceName, typefaceStyle, FontValues::limitFontHeight (fontHeight), false))
 {

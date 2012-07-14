@@ -243,7 +243,7 @@ Font AppearanceSettings::getCodeFont() const
     const String fontString (settings [Ids::font].toString());
 
     if (fontString.isEmpty())
-        return Font (Font::getDefaultMonospacedFontName(), 13.0f);
+        return getDefaultCodeFont();
 
     return Font::fromString (fontString);
 }
