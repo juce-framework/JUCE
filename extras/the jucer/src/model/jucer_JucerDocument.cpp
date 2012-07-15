@@ -71,11 +71,11 @@ void JucerDocument::changed()
 void JucerDocument::timerCallback()
 {
     if ((lastFocusedComp != Component::getCurrentlyFocusedComponent()
-          || lastClickCounter != Desktop::getMouseButtonClickCounter())
+          || lastClickCounter != Desktop::getInstance().getMouseButtonClickCounter())
         && ! Component::isMouseButtonDownAnywhere())
     {
         lastFocusedComp = Component::getCurrentlyFocusedComponent();
-        lastClickCounter = Desktop::getMouseButtonClickCounter();
+        lastClickCounter = Desktop::getInstance().getMouseButtonClickCounter();
 
         getUndoManager().beginNewTransaction();
     }

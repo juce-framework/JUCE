@@ -291,8 +291,9 @@ public:
         jassert (peer != nullptr);
         lastTime = time;
         ++mouseEventCounter;
-        const Point<int> screenPos (peer->localToGlobal (positionWithinPeer));
+        Desktop::getInstance().incrementMouseWheelCounter();
 
+        const Point<int> screenPos (peer->localToGlobal (positionWithinPeer));
         setPeer (peer, screenPos, time);
         setScreenPos (screenPos, time, false);
         triggerFakeMove();

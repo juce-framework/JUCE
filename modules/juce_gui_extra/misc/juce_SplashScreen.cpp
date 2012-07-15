@@ -78,7 +78,7 @@ void SplashScreen::show (const String& title,
     repaint();
 
     originalClickCounter = removeOnMouseClick
-                                ? Desktop::getMouseButtonClickCounter()
+                                ? Desktop::getInstance().getMouseButtonClickCounter()
                                 : std::numeric_limits<int>::max();
 
     earliestTimeToDelete = Time::getCurrentTime() + RelativeTime::milliseconds (minimumTimeToDisplayFor);
@@ -99,7 +99,7 @@ void SplashScreen::paint (Graphics& g)
 void SplashScreen::timerCallback()
 {
     if (Time::getCurrentTime() > earliestTimeToDelete
-         || Desktop::getMouseButtonClickCounter() > originalClickCounter)
+         || Desktop::getInstance().getMouseButtonClickCounter() != originalClickCounter)
     {
         delete this;
     }

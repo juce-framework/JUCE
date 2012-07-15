@@ -78,7 +78,6 @@ public:
     static Point<int> getMousePosition();
 
     /** Makes the mouse pointer jump to a given location.
-
         The co-ordinates are relative to the top-left of the main monitor.
     */
     static void setMousePosition (const Point<int>& newPosition);
@@ -92,12 +91,17 @@ public:
     */
     static Point<int> getLastMouseDownPosition();
 
-    /** Returns the number of times the mouse button has been clicked since the
-        app started.
-
+    /** Returns the number of times the mouse button has been clicked since the app started.
         Each mouse-down event increments this number by 1.
+        @see getMouseWheelMoveCounter
     */
-    static int getMouseButtonClickCounter();
+    int getMouseButtonClickCounter() const noexcept;
+
+    /** Returns the number of times the mouse wheel has been moved since the app started.
+        Each mouse-wheel event increments this number by 1.
+        @see getMouseButtonClickCounter
+    */
+    int getMouseWheelMoveCounter() const noexcept;
 
     //==============================================================================
     /** This lets you prevent the screensaver from becoming active.
@@ -391,8 +395,9 @@ private:
     Point<int> lastFakeMouseMove;
     void sendMouseMove();
 
-    int mouseClickCounter;
+    int mouseClickCounter, mouseWheelCounter;
     void incrementMouseClickCounter() noexcept;
+    void incrementMouseWheelCounter() noexcept;
 
     ScopedPointer<Timer> dragRepeater;
 

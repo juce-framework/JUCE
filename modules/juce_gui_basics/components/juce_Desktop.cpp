@@ -24,7 +24,7 @@
 */
 
 Desktop::Desktop()
-    : mouseClickCounter (0),
+    : mouseClickCounter (0), mouseWheelCounter (0),
       kioskModeComponent (nullptr),
       allowedOrientations (allOrientations)
 {
@@ -156,15 +156,11 @@ Point<int> Desktop::getLastMouseDownPosition()
     return getInstance().getMainMouseSource().getLastMouseDownPosition();
 }
 
-int Desktop::getMouseButtonClickCounter()
-{
-    return getInstance().mouseClickCounter;
-}
+int Desktop::getMouseButtonClickCounter() const noexcept    { return mouseClickCounter; }
+int Desktop::getMouseWheelMoveCounter() const noexcept      { return mouseWheelCounter; }
 
-void Desktop::incrementMouseClickCounter() noexcept
-{
-    ++mouseClickCounter;
-}
+void Desktop::incrementMouseClickCounter() noexcept         { ++mouseClickCounter; }
+void Desktop::incrementMouseWheelCounter() noexcept         { ++mouseWheelCounter; }
 
 int Desktop::getNumDraggingMouseSources() const noexcept
 {
