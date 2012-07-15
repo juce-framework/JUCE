@@ -127,7 +127,9 @@ public:
 
         if (pos.getLineNumber() > 0 && pos.getLineText().trim().isEmpty())
         {
-            String indent (getIndentForCurrentBlock (pos));
+            String indent;
+            getIndentForCurrentBlock (pos, indent);
+
             const String previousLine (pos.movedByLines (-1).getLineText());
             const String trimmedPreviousLine (previousLine.trim());
             const String leadingWhitespace (getLeadingWhitespace (previousLine));
@@ -154,10 +156,34 @@ public:
                  && pos.getLineText().trim().isEmpty())
             {
                 moveCaretToStartOfLine (true);
-                CodeEditorComponent::insertTextAtCaret (getIndentForCurrentBlock (pos));
 
-                if (newText == "{")
-                    insertTabAtCaret();
+                String whitespace;
+                if (getIndentForCurrentBlock (pos, whitespace))
+                {
+                    CodeEditorComponent::insertTextAtCaret (whitespace);
+
+                    if (newText == "{")
+                        insertTabAtCaret();
+                }
+            }
+            else if (newText == getDocument().getNewLineCharacters()
+                      && pos.getLineNumber() > 0)
+            {
+                const String remainderOfLine (pos.getLineText().substring (pos.getIndexInLine()));
+
+                if (remainderOfLine.startsWithChar ('{') || remainderOfLine.startsWithChar ('}'))
+                {
+                    String whitespace;
+                    if (getIndentForCurrentBlock (pos, whitespace))
+                    {
+                        CodeEditorComponent::insertTextAtCaret (newText + whitespace);
+
+                        if (remainderOfLine.startsWithChar ('{'))
+                            insertTabAtCaret();
+
+                        return;
+                    }
+                }
             }
         }
 
@@ -178,7 +204,7 @@ private:
         return String (line.getCharPointer(), endOfLeadingWS);
     }
 
-    static String getIndentForCurrentBlock (CodeDocument::Position pos)
+    static bool getIndentForCurrentBlock (CodeDocument::Position pos, String& whitespace)
     {
         int braceCount = 0;
 
@@ -198,12 +224,17 @@ private:
                     ++braceCount;
 
                 if (tokens[i] == "{")
+                {
                     if (--braceCount < 0)
-                        return getLeadingWhitespace (line);
+                    {
+                        whitespace = getLeadingWhitespace (line);
+                        return true;
+                    }
+                }
             }
         }
 
-        return String::empty;
+        return false;
     }
 };
 

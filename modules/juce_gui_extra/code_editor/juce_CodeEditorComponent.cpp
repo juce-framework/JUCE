@@ -697,11 +697,11 @@ void CodeEditorComponent::insertTabAtCaret()
     {
         const int caretCol = indexToColumn (caretPos.getLineNumber(), caretPos.getIndexInLine());
         const int spacesNeeded = spacesPerTab - (caretCol % spacesPerTab);
-        insertText (String::repeatedString (" ", spacesNeeded));
+        insertTextAtCaret (String::repeatedString (" ", spacesNeeded));
     }
     else
     {
-        insertText ("\t");
+        insertTextAtCaret ("\t");
     }
 }
 
@@ -765,9 +765,7 @@ void CodeEditorComponent::indentSelectedLines (const int spacesToAdd)
             if (newNumLeadingSpaces != numLeadingSpaces)
             {
                 document.deleteSection (wsStart, wsEnd);
-                document.insertText (wsStart, String::repeatedString (useSpacesForTabs ? " " : "\t",
-                                                                      useSpacesForTabs ? newNumLeadingSpaces
-                                                                                       : (newNumLeadingSpaces / spacesPerTab)));
+                document.insertText (wsStart, getTabString (newNumLeadingSpaces));
             }
         }
     }
@@ -1077,7 +1075,7 @@ bool CodeEditorComponent::keyPressed (const KeyPress& key)
 
 void CodeEditorComponent::handleReturnKey()
 {
-    insertText (document.getNewLineCharacters());
+    insertTextAtCaret (document.getNewLineCharacters());
 }
 
 void CodeEditorComponent::handleTabKey()
@@ -1246,6 +1244,13 @@ void CodeEditorComponent::setTabSize (const int numSpaces, const bool insertSpac
         spacesPerTab = numSpaces;
         triggerAsyncUpdate();
     }
+}
+
+String CodeEditorComponent::getTabString (const int numSpaces) const
+{
+    return String::repeatedString (useSpacesForTabs ? " " : "\t",
+                                   useSpacesForTabs ? numSpaces
+                                                    : (numSpaces / spacesPerTab));
 }
 
 int CodeEditorComponent::indexToColumn (int lineNum, int index) const noexcept
