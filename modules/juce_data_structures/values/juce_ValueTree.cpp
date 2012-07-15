@@ -972,7 +972,7 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
 }
 
 //==============================================================================
-void ValueTree::writeToStream (OutputStream& output)
+void ValueTree::writeToStream (OutputStream& output) const
 {
     SharedObject::writeObjectToStream (output, object);
 }
@@ -994,8 +994,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
         return v;
     }
 
-    int i;
-    for (i = 0; i < numProps; ++i)
+    for (int i = 0; i < numProps; ++i)
     {
         const String name (input.readString());
         jassert (name.isNotEmpty());
@@ -1005,7 +1004,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
 
     const int numChildren = input.readCompressedInt();
 
-    for (i = 0; i < numChildren; ++i)
+    for (int i = 0; i < numChildren; ++i)
     {
         ValueTree child (readFromStream (input));
 

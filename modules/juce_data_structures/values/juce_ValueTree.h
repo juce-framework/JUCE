@@ -342,7 +342,7 @@ public:
         It's much faster to load/save your tree in binary form than as XML, but
         obviously isn't human-readable.
     */
-    void writeToStream (OutputStream& output);
+    void writeToStream (OutputStream& output) const;
 
     /** Reloads a tree from a stream that was written with writeToStream(). */
     static ValueTree readFromStream (InputStream& input);
