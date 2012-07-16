@@ -1721,7 +1721,7 @@ private:
 
         owner->isZooming = true;
         objc_super s = { self, [NSWindow class] };
-        objc_msgSendSuper (&s, @selector(zoom), sender);
+        objc_msgSendSuper (&s, @selector(zoom:), sender);
         owner->isZooming = false;
 
         owner->redirectMovedOrResized();
