@@ -386,74 +386,71 @@ private:
         return rescaleImageForIcon (image, bestSize);
     }
 
+    static void writeOldIconFormat (MemoryOutputStream& out, const Image& image, const char* type, const char* maskType)
+    {
+        const int w = image.getWidth();
+        const int h = image.getHeight();
+
+        out.write (type, 4);
+        out.writeIntBigEndian (8 + 4 * w * h);
+
+        const Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
+
+        for (int y = 0; y < h; ++y)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                const Colour pixel (bitmap.getPixelColour (x, y));
+                out.writeByte ((char) pixel.getAlpha());
+                out.writeByte ((char) pixel.getRed());
+                out.writeByte ((char) pixel.getGreen());
+                out.writeByte ((char) pixel.getBlue());
+            }
+        }
+
+        out.write (maskType, 4);
+        out.writeIntBigEndian (8 + w * h);
+
+        for (int y = 0; y < h; ++y)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                const Colour pixel (bitmap.getPixelColour (x, y));
+                out.writeByte ((char) pixel.getAlpha());
+            }
+        }
+    }
+
+    static void writeNewIconFormat (MemoryOutputStream& out, const Image& image, const char* type)
+    {
+        MemoryOutputStream pngData;
+        PNGImageFormat pngFormat;
+        pngFormat.writeImageToStream (image, pngData);
+
+        out.write (type, 4);
+        out.writeIntBigEndian (8 + pngData.getDataSize());
+        out << pngData;
+    }
+
     void writeIcnsFile (const Array<Image>& images, OutputStream& out) const
     {
         MemoryOutputStream data;
 
         for (int i = 0; i < images.size(); ++i)
         {
-            Image image (fixMacIconImageSize (images.getReference (i)));
+            const Image image (fixMacIconImageSize (images.getReference (i)));
+            jassert (image.getWidth() == image.getHeight());
 
-            const int w = image.getWidth();
-            const int h = image.getHeight();
-            jassert (w == h);
-
-            const char* type = nullptr;
-            const char* maskType = nullptr;
-
-            if (w == 16)  { type = "is32"; maskType = "s8mk"; }
-            if (w == 32)  { type = "il32"; maskType = "l8mk"; }
-            if (w == 48)  { type = "ih32"; maskType = "h8mk"; }
-            if (w == 128) { type = "it32"; maskType = "t8mk"; }
-
-            if (type != nullptr)
+            switch (image.getWidth())
             {
-                data.write (type, 4);
-                data.writeIntBigEndian (8 + 4 * w * h);
-
-                const Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
-
-                int y;
-                for (y = 0; y < h; ++y)
-                {
-                    for (int x = 0; x < w; ++x)
-                    {
-                        const Colour pixel (bitmap.getPixelColour (x, y));
-                        data.writeByte ((char) pixel.getAlpha());
-                        data.writeByte ((char) pixel.getRed());
-                        data.writeByte ((char) pixel.getGreen());
-                        data.writeByte ((char) pixel.getBlue());
-                    }
-                }
-
-                data.write (maskType, 4);
-                data.writeIntBigEndian (8 + w * h);
-
-                for (y = 0; y < h; ++y)
-                {
-                    for (int x = 0; x < w; ++x)
-                    {
-                        const Colour pixel (bitmap.getPixelColour (x, y));
-                        data.writeByte ((char) pixel.getAlpha());
-                    }
-                }
-            }
-            else
-            {
-                if (w == 256)  type = "ic08";
-                if (w == 512)  type = "ic09";
-                if (w == 1024) type = "ic10";
-
-                if (type != nullptr)
-                {
-                    MemoryOutputStream pngData;
-                    PNGImageFormat pngFormat;
-                    pngFormat.writeImageToStream (image, pngData);
-
-                    data.write (type, 4);
-                    data.writeIntBigEndian (pngData.getDataSize());
-                    data.write (pngData.getData(), pngData.getDataSize());
-                }
+                case 16:   writeOldIconFormat (data, image, "is32", "s8mk"); break;
+                case 32:   writeOldIconFormat (data, image, "il32", "l8mk"); break;
+                case 48:   writeOldIconFormat (data, image, "ih32", "h8mk"); break;
+                case 128:  writeOldIconFormat (data, image, "it32", "t8mk"); break;
+                case 256:  writeNewIconFormat (data, image, "ic08"); break;
+                case 512:  writeNewIconFormat (data, image, "ic09"); break;
+                case 1024: writeNewIconFormat (data, image, "ic10"); break;
+                default:   break;
             }
         }
 
