@@ -367,7 +367,7 @@ private:
 
     static Image fixMacIconImageSize (Image& image)
     {
-        const int validSizes[] = { 16, 32, 48, 128 };
+        const int validSizes[] = { 16, 32, 48, 128, 256, 512, 1024 };
 
         const int w = image.getWidth();
         const int h = image.getHeight();
@@ -436,6 +436,23 @@ private:
                         const Colour pixel (bitmap.getPixelColour (x, y));
                         data.writeByte ((char) pixel.getAlpha());
                     }
+                }
+            }
+            else
+            {
+                if (w == 256)  type = "ic08";
+                if (w == 512)  type = "ic09";
+                if (w == 1024) type = "ic10";
+
+                if (type != nullptr)
+                {
+                    MemoryOutputStream pngData;
+                    PNGImageFormat pngFormat;
+                    pngFormat.writeImageToStream (image, pngData);
+
+                    data.write (type, 4);
+                    data.writeIntBigEndian (pngData.getDataSize());
+                    data.write (pngData.getData(), pngData.getDataSize());
                 }
             }
         }

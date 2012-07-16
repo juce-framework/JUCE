@@ -34,6 +34,7 @@ namespace Ids
 
     DECLARE_ID (name);
     DECLARE_ID (file);
+    DECLARE_ID (text);
     DECLARE_ID (version);
     DECLARE_ID (companyName);
     DECLARE_ID (position);
@@ -47,6 +48,10 @@ namespace Ids
     DECLARE_ID (vstFolder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
+    DECLARE_ID (flags);
+    DECLARE_ID (line);
+    DECLARE_ID (index);
+    DECLARE_ID (type);
     DECLARE_ID (extraCompilerFlags);
     DECLARE_ID (extraLinkerFlags);
     DECLARE_ID (extraDefs);
