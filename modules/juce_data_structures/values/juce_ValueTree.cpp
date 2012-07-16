@@ -757,7 +757,8 @@ var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValu
 ValueTree& ValueTree::setProperty (const Identifier& name, const var& newValue,
                                    UndoManager* const undoManager)
 {
-    jassert (name.toString().isNotEmpty());
+    jassert (name.toString().isNotEmpty()); // Must have a valid property name!
+    jassert (object != nullptr); // Trying to add a property to a null ValueTree will fail!
 
     if (object != nullptr)
         object->setProperty (name, newValue, undoManager);
@@ -795,6 +796,8 @@ Identifier ValueTree::getPropertyName (const int index) const
 
 void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* const undoManager)
 {
+    jassert (object != nullptr || source.object == nullptr); // Trying to add properties to a null ValueTree will fail!
+
     if (source.object == nullptr)
         removeAllProperties (undoManager);
     else if (object != nullptr)
@@ -885,6 +888,8 @@ int ValueTree::indexOf (const ValueTree& child) const
 
 void ValueTree::addChild (const ValueTree& child, int index, UndoManager* const undoManager)
 {
+    jassert (object != nullptr); // Trying to add a child to a null ValueTree!
+
     if (object != nullptr)
         object->addChild (child.object, index, undoManager);
 }
