@@ -46,7 +46,10 @@ public:
     {
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
 
-        settings.initialise();
+        settings = new StoredSettings();
+        icons = new Icons();
+
+        settings->initialise();
 
         if (commandLine.isNotEmpty())
         {
@@ -67,7 +70,7 @@ public:
 
         doExtraInitialisation();
 
-        settings.appearance.refreshPresetSchemeList();
+        settings->appearance.refreshPresetSchemeList();
 
         ImageCache::setCacheTimeout (30 * 1000);
 
@@ -97,7 +100,7 @@ public:
         mainWindowList.forceCloseAllWindows();
         openDocumentManager.clear();
         commandManager = nullptr;
-        settings.flush();
+        settings = nullptr;
 
         LookAndFeel::setDefaultLookAndFeel (nullptr);
     }
@@ -184,7 +187,7 @@ public:
             }
             else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
             {
-                getApp().settings.appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
+                getAppSettings().appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
             }
         }
     };
@@ -271,7 +274,7 @@ public:
     {
         menu.addCommandItem (commandManager, CommandIDs::showAppearanceSettings);
 
-        const StringArray presetSchemes (settings.appearance.getPresetSchemes());
+        const StringArray presetSchemes (settings->appearance.getPresetSchemes());
 
         if (presetSchemes.size() > 0)
         {
@@ -477,8 +480,8 @@ public:
     //==============================================================================
     IntrojucerLookAndFeel lookAndFeel;
 
-    StoredSettings settings;
-    Icons icons;
+    ScopedPointer<StoredSettings> settings;
+    ScopedPointer<Icons> icons;
 
     ScopedPointer<MainMenuModel> menuModel;
 

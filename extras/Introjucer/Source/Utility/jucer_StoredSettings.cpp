@@ -30,7 +30,7 @@
 //==============================================================================
 StoredSettings& getAppSettings()
 {
-    return JucerApplication::getApp().settings;
+    return *JucerApplication::getApp().settings;
 }
 
 PropertiesFile& getAppProperties()
@@ -187,7 +187,7 @@ void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, con
 //==============================================================================
 const Icons& getIcons()
 {
-    return JucerApplication::getApp().icons;
+    return *JucerApplication::getApp().icons;
 }
 
 Icons::Icons()
