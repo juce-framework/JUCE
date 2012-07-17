@@ -88,8 +88,7 @@ public:
     static void lowerPrivilege();
 
     //==============================================================================
-    /** Returns true if this process is being hosted by a debugger.
-    */
+    /** Returns true if this process is being hosted by a debugger. */
     static bool JUCE_CALLTYPE isRunningUnderDebugger();
 
 
@@ -128,6 +127,12 @@ public:
         @see getCurrentModuleInstanceHandle()
     */
     static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) noexcept;
+   #endif
+
+   #if JUCE_MAC || DOXYGEN
+    //==============================================================================
+    /** OSX ONLY - Shows or hides the OSX dock icon for this app. */
+    static void setDockIconVisible (bool isVisible);
    #endif
 
 private:

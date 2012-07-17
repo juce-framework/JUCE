@@ -372,3 +372,9 @@ String SystemClipboard::getTextFromClipboard()
     return text == nil ? String::empty
                        : nsStringToJuce (text);
 }
+
+void Process::setDockIconVisible (bool isVisible)
+{
+    [NSApp setActivationPolicy: isVisible ? NSApplicationActivationPolicyRegular
+                                          : NSApplicationActivationPolicyProhibited];
+}

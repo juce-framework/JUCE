@@ -138,7 +138,7 @@ struct AAXClasses
         static void initialise()
         {
            #if JUCE_WINDOWS
-            PlatformUtilities::setCurrentModuleInstanceHandle (moduleInstance);
+            Process::setCurrentModuleInstanceHandle (moduleInstance);
            #endif
 
             initialiseJuce_GUI();
