@@ -64,8 +64,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     }
 }
 
-bool InterprocessConnection::connectToPipe (const String& pipeName,
-                                            const int pipeReceiveMessageTimeoutMs)
+bool InterprocessConnection::connectToPipe (const String& pipeName, const int timeoutMs)
 {
     disconnect();
 
@@ -74,7 +73,7 @@ bool InterprocessConnection::connectToPipe (const String& pipeName,
     if (newPipe->openExisting (pipeName))
     {
         const ScopedLock sl (pipeAndSocketLock);
-        pipeReceiveMessageTimeout = pipeReceiveMessageTimeoutMs;
+        pipeReceiveMessageTimeout = timeoutMs;
         initialiseWithPipe (newPipe.release());
         return true;
     }
@@ -82,8 +81,7 @@ bool InterprocessConnection::connectToPipe (const String& pipeName,
     return false;
 }
 
-bool InterprocessConnection::createPipe (const String& pipeName,
-                                         const int pipeReceiveMessageTimeoutMs)
+bool InterprocessConnection::createPipe (const String& pipeName, const int timeoutMs)
 {
     disconnect();
 
@@ -92,7 +90,7 @@ bool InterprocessConnection::createPipe (const String& pipeName,
     if (newPipe->createNewPipe (pipeName))
     {
         const ScopedLock sl (pipeAndSocketLock);
-        pipeReceiveMessageTimeout = pipeReceiveMessageTimeoutMs;
+        pipeReceiveMessageTimeout = timeoutMs;
         initialiseWithPipe (newPipe.release());
         return true;
     }
@@ -163,7 +161,7 @@ bool InterprocessConnection::sendMessage (const MemoryBlock& message)
     if (socket != nullptr)
         bytesWritten = socket->write (messageData.getData(), (int) messageData.getSize());
     else if (pipe != nullptr)
-        bytesWritten = pipe->write (messageData.getData(), (int) messageData.getSize());
+        bytesWritten = pipe->write (messageData.getData(), (int) messageData.getSize(), pipeReceiveMessageTimeout);
 
     return bytesWritten == (int) messageData.getSize();
 }
@@ -171,7 +169,7 @@ bool InterprocessConnection::sendMessage (const MemoryBlock& message)
 //==============================================================================
 void InterprocessConnection::initialiseWithSocket (StreamingSocket* const socket_)
 {
-    jassert (socket == 0);
+    jassert (socket == nullptr);
     socket = socket_;
     connectionMadeInt();
     startThread();
@@ -179,7 +177,7 @@ void InterprocessConnection::initialiseWithSocket (StreamingSocket* const socket
 
 void InterprocessConnection::initialiseWithPipe (NamedPipe* const pipe_)
 {
-    jassert (pipe == 0);
+    jassert (pipe == nullptr);
     pipe = pipe_;
     connectionMadeInt();
     startThread();
@@ -206,6 +204,8 @@ struct ConnectionStateMessage  : public MessageManager::MessageBase
 
     WeakReference<InterprocessConnection> owner;
     bool connectionMade;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectionStateMessage);
 };
 
 void InterprocessConnection::connectionMadeInt()
@@ -264,18 +264,16 @@ void InterprocessConnection::deliverDataInt (const MemoryBlock& data)
 //==============================================================================
 bool InterprocessConnection::readNextMessageInt()
 {
-    const int maximumMessageSize = 1024 * 1024 * 10; // sanity check
-
     uint32 messageHeader[2];
     const int bytes = socket != nullptr ? socket->read (messageHeader, sizeof (messageHeader), true)
-                                        : pipe  ->read (messageHeader, sizeof (messageHeader), pipeReceiveMessageTimeout);
+                                        : pipe  ->read (messageHeader, sizeof (messageHeader), -1);
 
     if (bytes == sizeof (messageHeader)
          && ByteOrder::swapIfBigEndian (messageHeader[0]) == magicMessageHeader)
     {
         int bytesInMessage = (int) ByteOrder::swapIfBigEndian (messageHeader[1]);
 
-        if (bytesInMessage > 0 && bytesInMessage < maximumMessageSize)
+        if (bytesInMessage > 0)
         {
             MemoryBlock messageData ((size_t) bytesInMessage, true);
             int bytesRead = 0;
@@ -286,8 +284,10 @@ bool InterprocessConnection::readNextMessageInt()
                     return false;
 
                 const int numThisTime = jmin (bytesInMessage, 65536);
-                const int bytesIn = socket != nullptr ? socket->read (static_cast <char*> (messageData.getData()) + bytesRead, numThisTime, true)
-                                                      : pipe  ->read (static_cast <char*> (messageData.getData()) + bytesRead, numThisTime, pipeReceiveMessageTimeout);
+                void* const data = addBytesToPointer (messageData.getData(), bytesRead);
+
+                const int bytesIn = socket != nullptr ? socket->read (data, numThisTime, true)
+                                                      : pipe  ->read (data, numThisTime, -1);
 
                 if (bytesIn <= 0)
                     break;
@@ -339,7 +339,7 @@ void InterprocessConnection::run()
             }
             else
             {
-                Thread::sleep (2);
+                Thread::sleep (1);
             }
         }
         else if (pipe != nullptr)

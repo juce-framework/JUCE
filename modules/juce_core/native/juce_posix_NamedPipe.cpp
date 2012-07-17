@@ -49,15 +49,28 @@ public:
         }
     }
 
-    int read (char* destBuffer, int maxBytesToRead)
+    static int openPipe (const String& name, int flags, const uint32 timeoutEnd)
+    {
+        for (;;)
+        {
+            const int p = ::open (name.toUTF8(), flags);
+
+            if (p != -1 || hasExpired (timeoutEnd))
+                return p;
+
+            Thread::sleep (2);
+        }
+    }
+
+    int read (char* destBuffer, int maxBytesToRead, int timeOutMilliseconds)
     {
         int bytesRead = -1;
         blocked = true;
+        const uint32 timeoutEnd = getTimeoutEnd (timeOutMilliseconds);
 
         if (pipeIn == -1)
         {
-            pipeIn = ::open ((createdPipe ? pipeInName
-                                          : pipeOutName).toUTF8(), O_RDWR);
+            pipeIn = openPipe (createdPipe ? pipeInName : pipeOutName, O_RDWR | O_NONBLOCK, timeoutEnd);
 
             if (pipeIn == -1)
             {
@@ -73,10 +86,16 @@ public:
             const int bytesThisTime = maxBytesToRead - bytesRead;
             const int numRead = (int) ::read (pipeIn, destBuffer, bytesThisTime);
 
-            if (numRead <= 0 || stopReadOperation)
+            if (numRead <= 0)
             {
-                bytesRead = -1;
-                break;
+                if (errno != EWOULDBLOCK || stopReadOperation || hasExpired (timeoutEnd))
+                {
+                    bytesRead = -1;
+                    break;
+                }
+
+                Thread::yield();
+                continue;
             }
 
             bytesRead += numRead;
@@ -90,21 +109,19 @@ public:
     int write (const char* sourceBuffer, int numBytesToWrite, int timeOutMilliseconds)
     {
         int bytesWritten = -1;
+        const uint32 timeoutEnd = getTimeoutEnd (timeOutMilliseconds);
 
         if (pipeOut == -1)
         {
-            pipeOut = ::open ((createdPipe ? pipeOutName
-                                           : pipeInName).toUTF8(), O_WRONLY);
+            pipeOut = openPipe (createdPipe ? pipeOutName : pipeInName, O_WRONLY, timeoutEnd);
 
             if (pipeOut == -1)
                 return -1;
         }
 
         bytesWritten = 0;
-        const uint32 timeOutTime = Time::getMillisecondCounter() + timeOutMilliseconds;
 
-        while (bytesWritten < numBytesToWrite
-                && (timeOutMilliseconds < 0 || Time::getMillisecondCounter() < timeOutTime))
+        while (bytesWritten < numBytesToWrite && ! hasExpired (timeoutEnd))
         {
             const int bytesThisTime = numBytesToWrite - bytesWritten;
             const int numWritten = (int) ::write (pipeOut, sourceBuffer, bytesThisTime);
@@ -136,6 +153,16 @@ public:
 
 private:
     static void signalHandler (int) {}
+
+    static uint32 getTimeoutEnd (const int timeOutMilliseconds)
+    {
+        return timeOutMilliseconds >= 0 ? Time::getMillisecondCounter() + timeOutMilliseconds : 0;
+    }
+
+    static bool hasExpired (const uint32 timeoutEnd)
+    {
+        return timeoutEnd != 0 && Time::getMillisecondCounter() >= timeoutEnd;
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
 };
@@ -193,9 +220,9 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
     return true;
 }
 
-int NamedPipe::read (void* destBuffer, int maxBytesToRead, int /*timeOutMilliseconds*/)
+int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMilliseconds)
 {
-    return pimpl != nullptr ? pimpl->read (static_cast <char*> (destBuffer), maxBytesToRead) : -1;
+    return pimpl != nullptr ? pimpl->read (static_cast <char*> (destBuffer), maxBytesToRead, timeOutMilliseconds) : -1;
 }
 
 int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOutMilliseconds)

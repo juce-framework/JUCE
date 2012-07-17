@@ -211,7 +211,7 @@ public:
             {
                 ScopedPointer<DemoInterprocessConnection> newConnection (new DemoInterprocessConnection (*this));
 
-                openedOk = newConnection->createPipe (pipeName.getText());
+                openedOk = newConnection->createPipe (pipeName.getText(), 2000);
 
                 if (openedOk)
                 {
