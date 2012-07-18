@@ -190,7 +190,7 @@ public:
             }
             else
             {
-                openedOk = newConnection->connectToPipe (pipeName.getText());
+                openedOk = newConnection->connectToPipe (pipeName.getText(), 5000);
             }
 
             if (openedOk)

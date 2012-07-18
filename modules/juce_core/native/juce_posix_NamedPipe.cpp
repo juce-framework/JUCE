@@ -62,6 +62,19 @@ public:
         }
     }
 
+    static void waitForInput (const int handle, const int timeoutMsecs) noexcept
+    {
+        struct timeval timeout;
+        timeout.tv_sec = timeoutMsecs / 1000;
+        timeout.tv_usec = (timeoutMsecs % 1000) * 1000;
+
+        fd_set rset;
+        FD_ZERO (&rset);
+        FD_SET (handle, &rset);
+
+        select (handle + 1, &rset, nullptr, 0, &timeout);
+    }
+
     int read (char* destBuffer, int maxBytesToRead, int timeOutMilliseconds)
     {
         int bytesRead = -1;
@@ -94,7 +107,10 @@ public:
                     break;
                 }
 
-                Thread::yield();
+                const int maxWaitingTime = 30;
+                waitForInput (pipeIn, timeoutEnd == 0 ? maxWaitingTime
+                                                      : jmin (maxWaitingTime,
+                                                              (int) (timeoutEnd - Time::getMillisecondCounter())));
                 continue;
             }
 
@@ -189,9 +205,10 @@ void NamedPipe::cancelPendingReads()
         int timeout = 2000;
         while (pimpl->blocked && --timeout >= 0)
             Thread::sleep (2);
-
-        pimpl->stopReadOperation = false;
     }
+
+    if (pimpl != nullptr)
+        pimpl->stopReadOperation = false;
 }
 
 void NamedPipe::close()
