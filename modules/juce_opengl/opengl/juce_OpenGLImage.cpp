@@ -178,7 +178,7 @@ int OpenGLImageType::getTypeID() const
     return 3;
 }
 
-ImagePixelData* OpenGLImageType::create (Image::PixelFormat, int width, int height, bool /*shouldClearImage*/) const
+ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int height, bool /*shouldClearImage*/) const
 {
     OpenGLContext* currentContext = OpenGLContext::getCurrentContext();
     jassert (currentContext != nullptr); // an OpenGL image can only be created when a valid context is active!

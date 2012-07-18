@@ -100,7 +100,7 @@ private:
 SoftwareImageType::SoftwareImageType() {}
 SoftwareImageType::~SoftwareImageType() {}
 
-ImagePixelData* SoftwareImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
+ImagePixelData::Ptr SoftwareImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
     return new SoftwarePixelData (format, width, height, clearImage);
 }
@@ -120,7 +120,7 @@ int NativeImageType::getTypeID() const
 }
 
 #if JUCE_WINDOWS || JUCE_LINUX
-ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
+ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
     return new SoftwarePixelData (format, width, height, clearImage);
 }
@@ -168,7 +168,7 @@ public:
     ImageType* createType() const    { return image->createType(); }
 
 private:
-    const ReferenceCountedObjectPtr<ImagePixelData> image;
+    const ImagePixelData::Ptr image;
     const Rectangle<int> area;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubsectionPixelData);
@@ -217,13 +217,13 @@ Image& Image::operator= (const Image& other)
 
 #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Image::Image (Image&& other) noexcept
-    : image (static_cast <ReferenceCountedObjectPtr<ImagePixelData>&&> (other.image))
+    : image (static_cast <ImagePixelData::Ptr&&> (other.image))
 {
 }
 
 Image& Image::operator= (Image&& other) noexcept
 {
-    image = static_cast <ReferenceCountedObjectPtr<ImagePixelData>&&> (other.image);
+    image = static_cast <ImagePixelData::Ptr&&> (other.image);
     return *this;
 }
 #endif
@@ -339,8 +339,7 @@ NamedValueSet* Image::getProperties() const
 
 //==============================================================================
 Image::BitmapData::BitmapData (Image& image, const int x, const int y, const int w, const int h, BitmapData::ReadWriteMode mode)
-    : width (w),
-      height (h)
+    : width (w), height (h)
 {
     // The BitmapData class must be given a valid image, and a valid rectangle within it!
     jassert (image.image != nullptr);
@@ -351,8 +350,7 @@ Image::BitmapData::BitmapData (Image& image, const int x, const int y, const int
 }
 
 Image::BitmapData::BitmapData (const Image& image, const int x, const int y, const int w, const int h)
-    : width (w),
-      height (h)
+    : width (w), height (h)
 {
     // The BitmapData class must be given a valid image, and a valid rectangle within it!
     jassert (image.image != nullptr);

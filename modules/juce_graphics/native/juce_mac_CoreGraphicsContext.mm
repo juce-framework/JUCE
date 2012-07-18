@@ -118,7 +118,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsImage);
 };
 
-ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
+ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
     return new CoreGraphicsImage (format == Image::RGB ? Image::ARGB : format, width, height, clearImage);
 }
