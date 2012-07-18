@@ -30,7 +30,7 @@
 class AppearanceSettings    : private ValueTree::Listener
 {
 public:
-    AppearanceSettings();
+    AppearanceSettings (bool updateAppWhenChanged);
 
     bool readFromFile (const File& file);
     bool readFromXML (const XmlElement&);

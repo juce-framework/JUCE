@@ -122,10 +122,10 @@ void ProjectContentComponent::paint (Graphics& g)
 
 void ProjectContentComponent::paintOverChildren (Graphics& g)
 {
-    if (contentView != nullptr)
+    if (resizerBar != nullptr)
     {
         const int shadowSize = 15;
-        const int x = contentView->getX();
+        const int x = resizerBar->getRight();
 
         ColourGradient cg (Colours::black.withAlpha (0.25f), (float) x, 0,
                            Colours::transparentBlack,        (float) (x - shadowSize), 0, false);

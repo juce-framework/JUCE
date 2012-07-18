@@ -51,7 +51,7 @@ namespace AppearanceColours
 }
 
 //==============================================================================
-AppearanceSettings::AppearanceSettings()
+AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
     : settings ("COLOUR_SCHEME")
 {
     IntrojucerLookAndFeel lf;
@@ -73,7 +73,8 @@ AppearanceSettings::AppearanceSettings()
 
     getCodeFontValue() = getDefaultCodeFont().toString();
 
-    settings.addListener (this);
+    if (updateAppWhenChanged)
+        settings.addListener (this);
 }
 
 File AppearanceSettings::getSchemesFolder()
@@ -89,7 +90,7 @@ void AppearanceSettings::writeDefaultSchemeFile (const String& xmlString, const 
 
     if (! file.exists())
     {
-        AppearanceSettings settings;
+        AppearanceSettings settings (false);
 
         ScopedPointer<XmlElement> xml (XmlDocument::parse (xmlString));
         if (xml != nullptr)

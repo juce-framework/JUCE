@@ -40,6 +40,7 @@ PropertiesFile& getAppProperties()
 
 //==============================================================================
 StoredSettings::StoredSettings()
+    : appearance (true)
 {
 }
 
@@ -91,7 +92,7 @@ void StoredSettings::reload()
     {
         // These settings are used in defining the properties file's location.
         PropertiesFile::Options options;
-        options.applicationName     = "Introjucer";
+        options.applicationName     = "IntrojucerXXX";
         options.folderName          = "Introjucer";
         options.filenameSuffix      = "settings";
         options.osxLibrarySubFolder = "Application Support";
