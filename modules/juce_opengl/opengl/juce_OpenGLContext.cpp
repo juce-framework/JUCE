@@ -559,13 +559,12 @@ void OpenGLContext::deactivateCurrentContext()      { NativeContext::deactivateC
 
 void OpenGLContext::triggerRepaint()
 {
-    CachedImage* const currentContext
-            = dynamic_cast <CachedImage*> (Thread::getCurrentThread());
+    CachedImage* const cachedImage = getCachedImage();
 
-    if (currentContext != nullptr)
+    if (cachedImage != nullptr)
     {
-        currentContext->triggerRepaint();
-        currentContext->component.repaint();
+        cachedImage->triggerRepaint();
+        cachedImage->component.repaint();
     }
 }
 
