@@ -137,7 +137,7 @@ public:
         g.setColour (Colours::black);
         g.drawFittedText ("drag this box onto the desktop to show how the same component can move from being lightweight to being a separate window",
                           getLocalBounds().reduced (4, 0),
-                          getHeight(), Justification::horizontallyJustified, 5);
+                          Justification::horizontallyJustified, 5);
 
         g.drawRect (getLocalBounds());
     }
