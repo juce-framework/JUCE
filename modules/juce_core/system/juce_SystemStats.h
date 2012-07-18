@@ -94,6 +94,11 @@ public:
     static int getOSXMinorVersionNumber();
    #endif
 
+    /** Returns an environment variable.
+        If the named value isn't set, this will return the defaultValue string instead.
+    */
+    static String getEnvironmentVariable (const String& name, const String& defaultValue);
+
     //==============================================================================
     /** Returns the current user's name, if available.
         @see getFullUserName()
