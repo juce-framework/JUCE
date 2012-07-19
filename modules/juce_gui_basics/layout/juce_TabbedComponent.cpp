@@ -275,16 +275,17 @@ void TabbedComponent::lookAndFeelChanged()
 
 void TabbedComponent::changeCallback (const int newCurrentTabIndex, const String& newTabName)
 {
-    if (panelComponent != nullptr)
-    {
-        panelComponent->setVisible (false);
-        removeChildComponent (panelComponent);
-        panelComponent = nullptr;
-    }
+    Component* const newPanelComp = getTabContentComponent (getCurrentTabIndex());
 
-    if (getCurrentTabIndex() >= 0)
+    if (newPanelComp != panelComponent)
     {
-        panelComponent = getTabContentComponent (getCurrentTabIndex());
+        if (panelComponent != nullptr)
+        {
+            panelComponent->setVisible (false);
+            removeChildComponent (panelComponent);
+        }
+
+        panelComponent = newPanelComp;
 
         if (panelComponent != nullptr)
         {
