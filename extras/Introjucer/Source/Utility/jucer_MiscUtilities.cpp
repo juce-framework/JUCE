@@ -262,7 +262,7 @@ void RolloverHelpComp::paint (Graphics& g)
 {
     AttributedString s;
     s.setJustification (Justification::centredLeft);
-    s.append (lastTip, Font (14.0f), Colour::greyLevel (0.15f));
+    s.append (lastTip, Font (14.0f), findColour (mainBackgroundColourId).contrasting (0.7f));
 
     TextLayout tl;
     tl.createLayoutWithBalancedLineLengths (s, getWidth() - 10.0f);
