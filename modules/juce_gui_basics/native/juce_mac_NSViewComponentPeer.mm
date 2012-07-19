@@ -502,9 +502,17 @@ public:
 
     void redirectMouseMove (NSEvent* ev)
     {
-        currentModifiers = currentModifiers.withoutMouseButtons();
-        sendMouseEvent (ev);
-        showArrowCursorIfNeeded();
+        if ([NSWindow windowNumberAtPoint: [[ev window] convertBaseToScreen: [ev locationInWindow]]
+              belowWindowWithWindowNumber: 0] == [window windowNumber])
+        {
+            currentModifiers = currentModifiers.withoutMouseButtons();
+            sendMouseEvent (ev);
+            showArrowCursorIfNeeded();
+        }
+        else
+        {
+            [[NSCursor arrowCursor] set];
+        }
     }
 
     void redirectMouseEnter (NSEvent* ev)
