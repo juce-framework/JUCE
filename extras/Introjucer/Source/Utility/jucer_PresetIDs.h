@@ -52,6 +52,7 @@ namespace Ids
     DECLARE_ID (line);
     DECLARE_ID (index);
     DECLARE_ID (type);
+    DECLARE_ID (time);
     DECLARE_ID (extraCompilerFlags);
     DECLARE_ID (extraLinkerFlags);
     DECLARE_ID (extraDefs);

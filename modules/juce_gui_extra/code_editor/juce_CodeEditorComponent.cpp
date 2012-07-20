@@ -260,7 +260,7 @@ namespace CodeEditorHelpers
 class CodeEditorComponent::GutterComponent  : public Component
 {
 public:
-    GutterComponent() {}
+    GutterComponent() : lastNumLines (0) {}
 
     void paint (Graphics& g)
     {
@@ -272,7 +272,8 @@ public:
         const Rectangle<int> clip (g.getClipBounds());
         const int lineHeight = editor.lineHeight;
         const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
-        const int lastLineToDraw = jmin (editor.lines.size(), clip.getBottom() / lineHeight + 1);
+        const int lastLineToDraw = jmin (editor.lines.size(), clip.getBottom() / lineHeight + 1,
+                                         lastNumLines - editor.firstLineOnScreen);
 
         const Font lineNumberFont (editor.getFont().withHeight (jmin (13.0f, lineHeight * 0.8f)));
         const float y = lineHeight - editor.getFont().getDescent();
@@ -286,6 +287,19 @@ public:
         g.setColour (editor.findColour (lineNumberTextId));
         ga.draw (g);
     }
+
+    void documentChanged (CodeDocument& doc)
+    {
+        const int newNumLines = doc.getNumLines();
+        if (newNumLines != lastNumLines)
+        {
+            lastNumLines = newNumLines;
+            repaint();
+        }
+    }
+
+private:
+    int lastNumLines;
 };
 
 
@@ -417,8 +431,9 @@ void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& aff
 
 void CodeEditorComponent::resized()
 {
+    const int visibleWidth = getWidth() - scrollbarThickness - getGutterSize();
     linesOnScreen   = jmax (1, (getHeight() - scrollbarThickness) / lineHeight);
-    columnsOnScreen = jmax (1, (int) ((getWidth() - scrollbarThickness) / charWidth));
+    columnsOnScreen = jmax (1, (int) (visibleWidth / charWidth));
     lines.clear();
     rebuildLineTokens();
     updateCaretPosition();
@@ -430,7 +445,7 @@ void CodeEditorComponent::resized()
                                  scrollbarThickness, getHeight() - scrollbarThickness);
 
     horizontalScrollBar.setBounds (getGutterSize(), getHeight() - scrollbarThickness,
-                                   getWidth() - scrollbarThickness - getGutterSize(), scrollbarThickness);
+                                   visibleWidth, scrollbarThickness);
     updateScrollBars();
 }
 
@@ -510,6 +525,9 @@ void CodeEditorComponent::rebuildLineTokens()
     if (minLineToRepaint <= maxLineToRepaint)
         repaint (0, lineHeight * minLineToRepaint - 1,
                  verticalScrollBar.getX(), lineHeight * (1 + maxLineToRepaint - minLineToRepaint) + 2);
+
+    if (gutter != nullptr)
+        gutter->documentChanged (document);
 }
 
 //==============================================================================
@@ -639,10 +657,12 @@ void CodeEditorComponent::scrollToKeepCaretOnScreen()
 {
     if (getWidth() > 0 && getHeight() > 0)
     {
-        if (caretPos.getLineNumber() < firstLineOnScreen)
-            scrollBy (caretPos.getLineNumber() - firstLineOnScreen);
-        else if (caretPos.getLineNumber() >= firstLineOnScreen + linesOnScreen)
-            scrollBy (caretPos.getLineNumber() - (firstLineOnScreen + linesOnScreen - 1));
+        const int caretLine = caretPos.getLineNumber();
+
+        if (caretLine < firstLineOnScreen)
+            scrollBy (caretLine - firstLineOnScreen);
+        else if (caretLine >= firstLineOnScreen + linesOnScreen)
+            scrollBy (caretLine - (firstLineOnScreen + linesOnScreen - 1));
 
         const int column = indexToColumn (caretPos.getLineNumber(), caretPos.getIndexInLine());
         if (column >= xOffset + columnsOnScreen - 1)
@@ -957,11 +977,36 @@ bool CodeEditorComponent::deleteBackwards (const bool moveInWholeWordSteps)
     else
     {
         if (selectionStart == selectionEnd)
-            selectionStart.moveBy (-1);
+        {
+            if (! skipBackwardsToPreviousTab())
+                selectionStart.moveBy (-1);
+        }
     }
 
     cut();
     return true;
+}
+
+bool CodeEditorComponent::skipBackwardsToPreviousTab()
+{
+    const String currentLineText (caretPos.getLineText().removeCharacters ("\r\n"));
+    const int currentIndex = caretPos.getIndexInLine();
+
+    if (currentLineText.isNotEmpty() && currentLineText.length() == currentIndex)
+    {
+        const int currentLine = caretPos.getLineNumber();
+        const int currentColumn = indexToColumn (currentLine, currentIndex);
+        const int previousTabColumn = (currentColumn - 1) - ((currentColumn - 1) % spacesPerTab);
+        const int previousTabIndex = columnToIndex (currentLine, previousTabColumn);
+
+        if (currentLineText.substring (previousTabIndex, currentIndex).trim().isEmpty())
+        {
+            selectionStart.moveBy (previousTabIndex - currentIndex);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool CodeEditorComponent::deleteForwards (const bool moveInWholeWordSteps)
@@ -1445,8 +1490,8 @@ CodeEditorComponent::State::State (const String& s)
     StringArray tokens;
     tokens.addTokens (s, ":", String::empty);
 
-    lastTopLine = tokens[0].getIntValue();
-    lastCaretPos = tokens[1].getIntValue();
+    lastTopLine      = tokens[0].getIntValue();
+    lastCaretPos     = tokens[1].getIntValue();
     lastSelectionEnd = tokens[2].getIntValue();
 }
 
