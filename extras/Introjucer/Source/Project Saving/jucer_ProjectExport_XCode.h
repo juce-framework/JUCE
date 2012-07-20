@@ -745,7 +745,11 @@ private:
         {
             defines.set ("_DEBUG", "1");
             defines.set ("DEBUG", "1");
-            s.add ("ONLY_ACTIVE_ARCH = YES");
+
+            if (config.getMacArchitecture() == osxArch_Default
+                 || config.getMacArchitecture().isEmpty())
+                s.add ("ONLY_ACTIVE_ARCH = YES");
+
             s.add ("COPY_PHASE_STRIP = NO");
             s.add ("GCC_DYNAMIC_NO_PIC = NO");
         }
