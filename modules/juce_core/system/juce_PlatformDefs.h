@@ -279,6 +279,13 @@ namespace juce
 #endif
 
 //==============================================================================
+#if JUCE_GCC
+ #define JUCE_PACKED __attribute__((packed))
+#elif ! DOXYGEN
+ #define JUCE_PACKED
+#endif
+
+//==============================================================================
 // Here, we'll check for C++11 compiler support, and if it's not available, define
 // a few workarounds, so that we can still use some of the newer language features.
 #if defined (__GXX_EXPERIMENTAL_CXX0X__) && defined (__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))

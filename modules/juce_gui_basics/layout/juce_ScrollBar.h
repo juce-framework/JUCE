@@ -56,9 +56,7 @@ class JUCE_API  ScrollBar  : public Component,
 public:
     //==============================================================================
     /** Creates a Scrollbar.
-
-        @param isVertical           whether it should be a vertical or horizontal bar
-        @param buttonsAreVisible    whether to show the up/down or left/right buttons
+        @param isVertical      specifies whether the bar should be a vertical or horizontal
     */
     ScrollBar (bool isVertical);
 

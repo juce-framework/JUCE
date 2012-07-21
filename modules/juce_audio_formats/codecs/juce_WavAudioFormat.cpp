@@ -64,11 +64,6 @@ namespace WavFileHelpers
 
     #if JUCE_MSVC
      #pragma pack (push, 1)
-     #define PACKED
-    #elif JUCE_GCC
-     #define PACKED __attribute__((packed))
-    #else
-     #define PACKED
     #endif
 
     struct BWAVChunk
@@ -137,7 +132,7 @@ namespace WavFileHelpers
             return MemoryBlock();
         }
 
-    } PACKED;
+    } JUCE_PACKED;
 
 
     //==============================================================================
@@ -151,7 +146,7 @@ namespace WavFileHelpers
             uint32 end;
             uint32 fraction;
             uint32 playCount;
-        } PACKED;
+        } JUCE_PACKED;
 
         uint32 manufacturer;
         uint32 product;
@@ -227,7 +222,7 @@ namespace WavFileHelpers
 
             return data;
         }
-    } PACKED;
+    } JUCE_PACKED;
 
     //==============================================================================
     struct InstChunk
@@ -272,7 +267,7 @@ namespace WavFileHelpers
 
             return data;
         }
-    } PACKED;
+    } JUCE_PACKED;
 
     //==============================================================================
     struct CueChunk
@@ -285,7 +280,7 @@ namespace WavFileHelpers
             uint32 chunkStart;
             uint32 blockStart;
             uint32 offset;
-        } PACKED;
+        } JUCE_PACKED;
 
         uint32 numCues;
         Cue cues[1];
@@ -354,7 +349,7 @@ namespace WavFileHelpers
             }
         }
 
-    } PACKED;
+    } JUCE_PACKED;
 
     //==============================================================================
     namespace ListChunk
@@ -427,7 +422,7 @@ namespace WavFileHelpers
         uint16 data2;
         uint16 data3;
         uint8  data4[8];
-    } PACKED;
+    } JUCE_PACKED;
 
     struct DataSize64Chunk   // chunk ID = 'ds64' if data size > 0xffffffff, 'JUNK' otherwise
     {
@@ -438,14 +433,12 @@ namespace WavFileHelpers
         uint32 sampleCountLow;  // low 4 byte sample count of fact chunk
         uint32 sampleCountHigh; // high 4 byte sample count of fact chunk
         uint32 tableLength;     // number of valid entries in array 'table'
-    } PACKED;
+    } JUCE_PACKED;
 
 
     #if JUCE_MSVC
      #pragma pack (pop)
     #endif
-
-    #undef PACKED
 }
 
 //==============================================================================

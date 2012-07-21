@@ -28,15 +28,8 @@
 
 
 //==============================================================================
-#ifndef DOXYGEN
- #if JUCE_MSVC
-  #pragma pack (push, 1)
-  #define PACKED
- #elif JUCE_GCC
-  #define PACKED __attribute__((packed))
- #else
-  #define PACKED
- #endif
+#if JUCE_MSVC
+ #pragma pack (push, 1)
 #endif
 
 class PixelRGB;
@@ -83,6 +76,11 @@ public:
     forcedinline uint8 getRed() const noexcept      { return components.r; }
     forcedinline uint8 getGreen() const noexcept    { return components.g; }
     forcedinline uint8 getBlue() const noexcept     { return components.b; }
+
+    forcedinline uint8& getAlpha() noexcept         { return components.a; }
+    forcedinline uint8& getRed() noexcept           { return components.r; }
+    forcedinline uint8& getGreen() noexcept         { return components.g; }
+    forcedinline uint8& getBlue() noexcept          { return components.b; }
 
     /** Blends another pixel onto this one.
 
@@ -275,7 +273,7 @@ private:
        #else
         uint8 b, g, r, a;
        #endif
-    } PACKED;
+    } JUCE_PACKED;
 
     union
     {
@@ -284,7 +282,7 @@ private:
     };
 }
 #ifndef DOXYGEN
- PACKED
+ JUCE_PACKED
 #endif
 ;
 
@@ -325,6 +323,10 @@ public:
     forcedinline uint8 getRed() const noexcept      { return r; }
     forcedinline uint8 getGreen() const noexcept    { return g; }
     forcedinline uint8 getBlue() const noexcept     { return b; }
+
+    forcedinline uint8& getRed() noexcept           { return r; }
+    forcedinline uint8& getGreen() noexcept         { return g; }
+    forcedinline uint8& getBlue() noexcept          { return b; }
 
     /** Blends another pixel onto this one.
 
@@ -450,7 +452,7 @@ private:
 
 }
 #ifndef DOXYGEN
- PACKED
+ JUCE_PACKED
 #endif
 ;
 
@@ -490,6 +492,8 @@ public:
     forcedinline uint32 getAG() const noexcept      { return (((uint32) a) << 16) | a; }
 
     forcedinline uint8 getAlpha() const noexcept    { return a; }
+    forcedinline uint8& getAlpha() noexcept         { return a; }
+
     forcedinline uint8 getRed() const noexcept      { return 0; }
     forcedinline uint8 getGreen() const noexcept    { return 0; }
     forcedinline uint8 getBlue() const noexcept     { return 0; }
@@ -576,17 +580,15 @@ public:
 
 private:
     //==============================================================================
-    uint8 a : 8;
+    uint8 a;
 }
 #ifndef DOXYGEN
- PACKED
+ JUCE_PACKED
 #endif
 ;
 
 #if JUCE_MSVC
  #pragma pack (pop)
 #endif
-
-#undef PACKED
 
 #endif   // __JUCE_PIXELFORMATS_JUCEHEADER__
