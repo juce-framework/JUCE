@@ -101,11 +101,7 @@ class LassoComponent  : public Component
 {
 public:
     //==============================================================================
-    /** Creates a Lasso component.
-
-        The fill colour is used to fill the lasso'ed rectangle, and the outline
-        colour is used to draw a line around its edge.
-    */
+    /** Creates a Lasso component. */
     explicit LassoComponent (const int outlineThickness_ = 1)
         : source (nullptr),
           outlineThickness (outlineThickness_)

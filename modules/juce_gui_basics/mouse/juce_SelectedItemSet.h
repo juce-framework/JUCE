@@ -308,7 +308,4 @@ private:
 };
 
 
-
-
-
 #endif   // __JUCE_SELECTEDITEMSET_JUCEHEADER__
