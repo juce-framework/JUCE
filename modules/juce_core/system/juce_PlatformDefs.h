@@ -317,7 +317,9 @@ namespace juce
 // Declare some fake versions of nullptr and noexcept, for older compilers:
 #if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_NOEXCEPT)
  #define noexcept  throw()
- #define _ALLOW_KEYWORD_MACROS 1 // (to stop VC2012 complaining)
+ #if defined (_MSC_VER) && _MSC_VER > 1600
+  #define _ALLOW_KEYWORD_MACROS 1 // (to stop VC2012 complaining)
+ #endif
 #endif
 
 #if ! (DOXYGEN || JUCE_COMPILER_SUPPORTS_NULLPTR)
