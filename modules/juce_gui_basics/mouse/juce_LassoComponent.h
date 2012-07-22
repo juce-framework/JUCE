@@ -102,9 +102,7 @@ class LassoComponent  : public Component
 public:
     //==============================================================================
     /** Creates a Lasso component. */
-    explicit LassoComponent (const int outlineThickness_ = 1)
-        : source (nullptr),
-          outlineThickness (outlineThickness_)
+    LassoComponent()  : source (nullptr)
     {
     }
 
@@ -212,10 +210,7 @@ public:
     /** @internal */
     void paint (Graphics& g)
     {
-        g.fillAll (findColour (lassoFillColourId));
-
-        g.setColour (findColour (lassoOutlineColourId));
-        g.drawRect (0, 0, getWidth(), getHeight(), outlineThickness);
+        getLookAndFeel().drawLasso (g, *this);
 
         // this suggests that you've left a lasso comp lying around after the
         // mouse drag has finished.. Be careful to call endLasso() when you get a
@@ -230,7 +225,6 @@ private:
     //==============================================================================
     Array <SelectableItemType> originalSelection;
     LassoSource <SelectableItemType>* source;
-    int outlineThickness;
     Point<int> dragStartPos;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LassoComponent);

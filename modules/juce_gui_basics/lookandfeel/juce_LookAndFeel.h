@@ -340,6 +340,9 @@ public:
                              float boxX, float boxY, float boxW, float boxH);
 
     //==============================================================================
+    virtual void drawLasso (Graphics& g, Component& lassoComp);
+
+    //==============================================================================
     /** Fills the background of a popup menu component. */
     virtual void drawPopupMenuBackground (Graphics& g, int width, int height);
 

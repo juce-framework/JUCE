@@ -2398,6 +2398,16 @@ void LookAndFeel::drawTableHeaderColumn (Graphics& g, const String& columnName, 
     g.drawFittedText (columnName, textX, 0, rightOfText - textX, height, Justification::centredLeft, 1);
 }
 
+//==============================================================================
+void LookAndFeel::drawLasso (Graphics& g, Component& lassoComp)
+{
+    const int outlineThickness = 1;
+
+    g.fillAll (lassoComp.findColour (0x1000440 /*lassoFillColourId*/));
+
+    g.setColour (lassoComp.findColour (0x1000441 /*lassoOutlineColourId*/));
+    g.drawRect (lassoComp.getLocalBounds(), outlineThickness);
+}
 
 //==============================================================================
 void LookAndFeel::paintToolbarBackground (Graphics& g, int w, int h, Toolbar& toolbar)
