@@ -125,12 +125,12 @@ public:
     {
         modulesLocation.setBounds (150, 3, getWidth() - 180 - 150, 25);
         updateModulesButton.setBounds (modulesLocation.getRight() + 6, 3, getWidth() - modulesLocation.getRight() - 12, 25);
-        moduleListBox.setBounds (4, 31, getWidth() / 3 - 4, getHeight() - 63);
-        copyingMessage.setBounds (4, getHeight() - 30, getWidth() - 8, getHeight() - 31);
+        moduleListBox.setBounds (5, 34, getWidth() / 3, getHeight() - 72);
+        copyingMessage.setBounds (5, moduleListBox.getBottom() + 2, getWidth() - 10, getHeight() - moduleListBox.getBottom() - 4);
 
         if (settings != nullptr)
             settings->setBounds (moduleListBox.getRight() + 5, moduleListBox.getY(),
-                                 getWidth() - (moduleListBox.getRight() + 5), moduleListBox.getHeight());
+                                 getWidth() - moduleListBox.getRight() - 9, moduleListBox.getHeight());
     }
 
     //==============================================================================
@@ -403,7 +403,6 @@ public:
               copyModeButton ("Set Copying Mode...")
         {
             addAndMakeVisible (&copyModeButton);
-            copyModeButton.setBounds ("4, parent.height / 2 - 10, 160, parent.height / 2 + 10");
             copyModeButton.addListener (this);
 
             startTimer (1500);
@@ -416,6 +415,11 @@ public:
             g.drawFittedText (getName(), copyModeButton.getRight() + 10, 0,
                               getWidth() - copyModeButton.getRight() - 16, getHeight(),
                               Justification::centredRight, 4);
+        }
+
+        void resized()
+        {
+            copyModeButton.setBounds (0, getHeight() / 2 - 10, 160, 20);
         }
 
         void refresh()
@@ -477,7 +481,12 @@ public:
         void setCopyModeForAllModules (bool copyEnabled)
         {
             for (int i = list.modules.size(); --i >= 0;)
-                project.shouldCopyModuleFilesLocally (list.modules.getUnchecked(i)->uid) = copyEnabled;
+            {
+                const String moduleID (list.modules.getUnchecked(i)->uid);
+
+                if (project.isModuleEnabled (moduleID))
+                    project.shouldCopyModuleFilesLocally (moduleID) = copyEnabled;
+            }
 
             refresh();
         }
