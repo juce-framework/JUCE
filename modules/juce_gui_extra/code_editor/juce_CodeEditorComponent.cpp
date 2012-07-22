@@ -1085,36 +1085,16 @@ bool CodeEditorComponent::keyPressed (const KeyPress& key)
 {
     if (! TextEditorKeyMapper<CodeEditorComponent>::invokeKeyFunction (*this, key))
     {
-        if (key == KeyPress::tabKey || key.getTextCharacter() == '\t')
-        {
-            handleTabKey();
-        }
-        else if (key == KeyPress::returnKey)
-        {
-            handleReturnKey();
-        }
-        else if (key.isKeyCode (KeyPress::escapeKey))
-        {
-            handleEscapeKey();
-        }
-        else if (key.getTextCharacter() >= ' ')
-        {
-            insertTextAtCaret (String::charToString (key.getTextCharacter()));
-        }
-        else if (key == KeyPress ('[', ModifierKeys::commandModifier, 0))
-        {
-            unindentSelection();
-        }
-        else if (key == KeyPress (']', ModifierKeys::commandModifier, 0))
-        {
-            indentSelection();
-        }
-        else
-        {
-            return false;
-        }
+        if (key == KeyPress::tabKey || key.getTextCharacter() == '\t')      handleTabKey();
+        else if (key == KeyPress::returnKey)                                handleReturnKey();
+        else if (key == KeyPress::escapeKey)                                handleEscapeKey();
+        else if (key == KeyPress ('[', ModifierKeys::commandModifier, 0))   unindentSelection();
+        else if (key == KeyPress (']', ModifierKeys::commandModifier, 0))   indentSelection();
+        else if (key.getTextCharacter() >= ' ')                             insertTextAtCaret (String::charToString (key.getTextCharacter()));
+        else                                                                return false;
     }
 
+    handleUpdateNowIfNeeded();
     return true;
 }
 
