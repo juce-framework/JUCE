@@ -502,6 +502,7 @@ private:
         {
             if (exporter->getTargetFolder().createDirectory())
             {
+                exporter->copyMainGroupFromProject();
                 exporter->settings = exporter->settings.createCopy();
 
                 exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
@@ -513,7 +514,7 @@ private:
                     modules.getUnchecked(j)->prepareExporter (*exporter, *this);
 
                 sortGroupRecursively (generatedFilesGroup);
-                exporter->groups.add (generatedFilesGroup);
+                exporter->getAllGroups().add (generatedFilesGroup);
 
                 threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
             }

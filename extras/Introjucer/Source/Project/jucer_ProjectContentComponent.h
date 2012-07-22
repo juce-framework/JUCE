@@ -98,7 +98,6 @@ protected:
     void changeListenerCallback (ChangeBroadcaster*);
     void updateMainWindowTitle();
     bool reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo&);
-    bool canProjectBeLaunched() const;
     TreeView* getFilesTreeView() const;
     ProjectTreeViewBase* getFilesTreeRoot() const;
 

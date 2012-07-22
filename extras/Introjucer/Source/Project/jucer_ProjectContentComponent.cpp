@@ -402,17 +402,6 @@ void ProjectContentComponent::updateMainWindowTitle()
         mw->updateTitle (currentDocument != nullptr ? currentDocument->getName() : String::empty);
 }
 
-bool ProjectContentComponent::canProjectBeLaunched() const
-{
-    if (project != nullptr)
-    {
-        ScopedPointer <ProjectExporter> launcher (ProjectExporter::createPlatformDefaultExporter (*project));
-        return launcher != nullptr;
-    }
-
-    return false;
-}
-
 ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 {
     return findFirstTargetParentComponent();
@@ -507,7 +496,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
        #endif
                         "Launches the project in an external IDE",
                         CommandCategories::general, 0);
-        result.setActive (canProjectBeLaunched());
+        result.setActive (ProjectExporter::canProjectBeLaunched (project));
         break;
 
     case CommandIDs::saveAndOpenInIDE:
@@ -520,7 +509,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
        #endif
                         "Saves the project and launches it in an external IDE",
                         CommandCategories::general, 0);
-        result.setActive (canProjectBeLaunched());
+        result.setActive (ProjectExporter::canProjectBeLaunched (project));
         result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier, 0));
         break;
 

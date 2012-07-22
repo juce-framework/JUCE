@@ -44,6 +44,7 @@ public:
     static ProjectExporter* createNewExporter (Project&, const String& name);
     static ProjectExporter* createExporter (Project&, const ValueTree& settings);
     static ProjectExporter* createPlatformDefaultExporter (Project&);
+    static bool canProjectBeLaunched (Project*);
 
     static String getCurrentPlatformExporterName();
 
@@ -123,7 +124,9 @@ public:
     RelativePath getJucePathFromProjectFolder() const;
 
     //==============================================================================
-    Array<Project::Item> groups;
+    void copyMainGroupFromProject();
+    Array<Project::Item>& getAllGroups() noexcept               { jassert (itemGroups.size() > 0); return itemGroups; }
+    const Array<Project::Item>& getAllGroups() const noexcept   { jassert (itemGroups.size() > 0); return itemGroups; }
     Project::Item& getModulesGroup();
 
     //==============================================================================
@@ -275,6 +278,9 @@ protected:
     const ProjectType& projectType;
     const String projectName;
     const File projectFolder;
+
+    mutable Array<Project::Item> itemGroups;
+    void initItemGroups() const;
     Project::Item* modulesGroup;
 
     virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;

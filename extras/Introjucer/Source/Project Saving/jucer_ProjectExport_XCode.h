@@ -311,9 +311,13 @@ private:
         {
             StringArray topLevelGroupIDs;
 
-            for (int i = 0; i < groups.size(); ++i)
-                if (groups.getReference(i).getNumChildren() > 0)
-                    topLevelGroupIDs.add (addProjectItem (groups.getReference(i)));
+            for (int i = 0; i < getAllGroups().size(); ++i)
+            {
+                const Project::Item& group = getAllGroups().getReference(i);
+
+                if (group.getNumChildren() > 0)
+                    topLevelGroupIDs.add (addProjectItem (group));
+            }
 
             { // Add 'resources' group
                 String resourcesGroupID (createID ("__resources"));

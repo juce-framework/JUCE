@@ -555,9 +555,9 @@ public:
 
         if (hasResourceFile())
         {
-            for (int i = 0; i < groups.size(); ++i)
+            for (int i = 0; i < getAllGroups().size(); ++i)
             {
-                Project::Item& group = groups.getReference(i);
+                Project::Item& group = getAllGroups().getReference(i);
 
                 if (group.getID() == ProjectSaver::getGeneratedGroupID())
                 {
@@ -672,9 +672,13 @@ protected:
 
     void createFiles (XmlElement& files) const
     {
-        for (int i = 0; i < groups.size(); ++i)
-            if (groups.getReference(i).getNumChildren() > 0)
-                addFiles (groups.getReference(i), files);
+        for (int i = 0; i < getAllGroups().size(); ++i)
+        {
+            const Project::Item& group = getAllGroups().getReference(i);
+
+            if (group.getNumChildren() > 0)
+                addFiles (group, files);
+        }
     }
 
     //==============================================================================
@@ -1242,9 +1246,13 @@ protected:
             XmlElement* cppFiles    = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* headerFiles = projectXml.createNewChildElement ("ItemGroup");
 
-            for (int i = 0; i < groups.size(); ++i)
-                if (groups.getReference(i).getNumChildren() > 0)
-                    addFilesToCompile (groups.getReference(i), *cppFiles, *headerFiles, *otherFilesGroup);
+            for (int i = 0; i < getAllGroups().size(); ++i)
+            {
+                const Project::Item& group = getAllGroups().getReference(i);
+
+                if (group.getNumChildren() > 0)
+                    addFilesToCompile (group, *cppFiles, *headerFiles, *otherFilesGroup);
+            }
         }
 
         if (iconFile != File::nonexistent)
@@ -1386,10 +1394,13 @@ protected:
         XmlElement* headers    = filterXml.createNewChildElement ("ItemGroup");
         ScopedPointer<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
 
-        for (int i = 0; i < groups.size(); ++i)
-            if (groups.getReference(i).getNumChildren() > 0)
-                addFilesToFilter (groups.getReference(i), groups.getReference(i).getName(),
-                                  *cpps, *headers, *otherFilesGroup, *groupsXml);
+        for (int i = 0; i < getAllGroups().size(); ++i)
+        {
+            const Project::Item& group = getAllGroups().getReference(i);
+
+            if (group.getNumChildren() > 0)
+                addFilesToFilter (group, group.getName(), *cpps, *headers, *otherFilesGroup, *groupsXml);
+        }
 
         if (iconFile.exists())
         {
