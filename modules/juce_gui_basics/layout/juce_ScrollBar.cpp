@@ -265,7 +265,9 @@ void ScrollBar::paint (Graphics& g)
 void ScrollBar::lookAndFeelChanged()
 {
     setComponentEffect (getLookAndFeel().getScrollbarEffect());
-    resized();
+
+    if (isVisible())
+        resized();
 }
 
 void ScrollBar::resized()
