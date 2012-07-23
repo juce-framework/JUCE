@@ -460,17 +460,17 @@ public:
         {
             const ScopedLockType lock (getLock());
             data.ensureAllocatedSize (numUsed + numberOfElements);
-            ElementType* insertPos;
+            ElementType* insertPos = data.elements;
 
             if (isPositiveAndBelow (indexToInsertAt, numUsed))
             {
-                insertPos = data.elements + indexToInsertAt;
+                insertPos += indexToInsertAt;
                 const int numberToMove = numUsed - indexToInsertAt;
                 memmove (insertPos + numberOfElements, insertPos, numberToMove * sizeof (ElementType));
             }
             else
             {
-                insertPos = data.elements + numUsed;
+                insertPos += numUsed;
             }
 
             numUsed += numberOfElements;

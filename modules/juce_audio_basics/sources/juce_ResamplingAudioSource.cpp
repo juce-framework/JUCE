@@ -135,10 +135,10 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
     for (int m = info.numSamples; --m >= 0;)
     {
         const float alpha = (float) subSampleOffset;
-        const float invAlpha = 1.0f - alpha;
 
         for (int channel = 0; channel < channelsToProcess; ++channel)
-            *destBuffers[channel]++ = srcBuffers[channel][bufferPos] * invAlpha + srcBuffers[channel][nextPos] * alpha;
+            *destBuffers[channel]++ = srcBuffers[channel][bufferPos]
+                                        + alpha * (srcBuffers[channel][nextPos] - srcBuffers[channel][bufferPos]);
 
         subSampleOffset += localRatio;
 

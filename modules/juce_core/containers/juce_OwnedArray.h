@@ -292,6 +292,46 @@ public:
         }
     }
 
+    /** Inserts an array of values into this array at a given position.
+
+        If the index is less than 0 or greater than the size of the array, the
+        new elements will be added to the end of the array.
+        Otherwise, they will be inserted into the array, moving all the later elements
+        along to make room.
+
+        @param indexToInsertAt      the index at which the first new element should be inserted
+        @param newObjects           the new values to add to the array
+        @param numberOfElements     how many items are in the array
+        @see insert, add, addSorted, set
+    */
+    void insertArray (int indexToInsertAt,
+                      ObjectClass* const* newObjects,
+                      int numberOfElements)
+    {
+        if (numberOfElements > 0)
+        {
+            const ScopedLockType lock (getLock());
+            data.ensureAllocatedSize (numUsed + numberOfElements);
+            ObjectClass** insertPos = data.elements;
+
+            if (isPositiveAndBelow (indexToInsertAt, numUsed))
+            {
+                insertPos += indexToInsertAt;
+                const int numberToMove = numUsed - indexToInsertAt;
+                memmove (insertPos + numberOfElements, insertPos, numberToMove * sizeof (ObjectClass*));
+            }
+            else
+            {
+                insertPos += numUsed;
+            }
+
+            numUsed += numberOfElements;
+
+            while (--numberOfElements >= 0)
+                *insertPos++ = *newObjects++;
+        }
+    }
+
     /** Appends a new object at the end of the array as long as the array doesn't
         already contain it.
 

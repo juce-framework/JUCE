@@ -142,7 +142,7 @@ void SourceCodeEditor::highlightLine (int lineNum, int characterIndex)
                                              editor->getDocument().getNumLines() - editor->getNumLinesOnScreen())));
     }
 
-    editor->moveCaretTo (CodeDocument::Position (&editor->getDocument(), lineNum - 1, characterIndex), false);
+    editor->moveCaretTo (CodeDocument::Position (editor->getDocument(), lineNum - 1, characterIndex), false);
 }
 
 void SourceCodeEditor::resized()

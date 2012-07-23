@@ -15,6 +15,7 @@
 *.manifest.res
 *.o
 *.d
+*.sdf
 xcuserdata
 contents.xcworkspacedata
 .DS_Store
