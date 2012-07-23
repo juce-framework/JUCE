@@ -70,7 +70,7 @@ public:
     */
     ~OwnedArray()
     {
-        clear (true);
+        deleteAllObjects();
     }
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
@@ -83,6 +83,9 @@ public:
 
     OwnedArray& operator= (OwnedArray&& other) noexcept
     {
+        const ScopedLockType lock (getLock());
+        deleteAllObjects();
+
         data = static_cast <ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data);
         numUsed = other.numUsed;
         other.numUsed = 0;
@@ -97,10 +100,7 @@ public:
         const ScopedLockType lock (getLock());
 
         if (deleteObjects)
-        {
-            while (numUsed > 0)
-                delete data.elements [--numUsed];
-        }
+            deleteAllObjects();
 
         data.setAllocatedSize (0);
         numUsed = 0;
@@ -853,6 +853,12 @@ private:
     //==============================================================================
     ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse> data;
     int numUsed;
+
+    void deleteAllObjects()
+    {
+        while (numUsed > 0)
+            delete data.elements [--numUsed];
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray);
 };
