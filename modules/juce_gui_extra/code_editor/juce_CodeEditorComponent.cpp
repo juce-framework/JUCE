@@ -275,18 +275,19 @@ public:
 
         const Rectangle<int> clip (g.getClipBounds());
         const int lineHeight = editor.lineHeight;
+        const float lineHeightFloat = (float) lineHeight;
         const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
         const int lastLineToDraw = jmin (editor.lines.size(), clip.getBottom() / lineHeight + 1,
                                          lastNumLines - editor.firstLineOnScreen);
 
-        const Font lineNumberFont (editor.getFont().withHeight (jmin (13.0f, lineHeight * 0.8f)));
-        const float y = lineHeight - editor.getFont().getDescent();
+        const Font lineNumberFont (editor.getFont().withHeight (jmin (13.0f, lineHeightFloat * 0.8f)));
         const float w = getWidth() - 2.0f;
 
         GlyphArrangement ga;
         for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-            ga.addJustifiedText (lineNumberFont, String (editor.firstLineOnScreen + i + 1),
-                                 0.0f, y + (lineHeight * i), w, Justification::centredRight);
+            ga.addFittedText (lineNumberFont, String (editor.firstLineOnScreen + i + 1),
+                              0, (float) (lineHeight * i), w, lineHeightFloat,
+                              Justification::centredRight, 1, 0.2f);
 
         g.setColour (editor.findColour (lineNumberTextId));
         ga.draw (g);
@@ -308,9 +309,8 @@ private:
 
 
 //==============================================================================
-CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
-                                          CodeTokeniser* const codeTokeniser_)
-    : document (document_),
+CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* const tokeniser)
+    : document (doc),
       firstLineOnScreen (0),
       spacesPerTab (4),
       lineHeight (0),
@@ -321,17 +321,15 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
       useSpacesForTabs (false),
       showLineNumbers (false),
       xOffset (0),
+      caretPos (doc, 0, 0),
+      selectionStart (doc, 0, 0),
+      selectionEnd (doc, 0, 0),
       verticalScrollBar (true),
       horizontalScrollBar (false),
-      codeTokeniser (codeTokeniser_)
+      codeTokeniser (tokeniser)
 {
-    caretPos = CodeDocument::Position (document_, 0, 0);
     caretPos.setPositionMaintained (true);
-
-    selectionStart = CodeDocument::Position (document_, 0, 0);
     selectionStart.setPositionMaintained (true);
-
-    selectionEnd = CodeDocument::Position (document_, 0, 0);
     selectionEnd.setPositionMaintained (true);
 
     setOpaque (true);
