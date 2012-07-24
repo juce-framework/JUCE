@@ -232,25 +232,37 @@ void CppCodeEditorComponent::handleReturnKey()
 {
     CodeEditorComponent::handleReturnKey();
 
-    const CodeDocument::Position pos (getCaretPos());
+    CodeDocument::Position pos (getCaretPos());
 
     if (pos.getLineNumber() > 0 && pos.getLineText().trim().isEmpty())
     {
-        String indent;
-        CppUtils::getIndentForCurrentBlock (pos, indent);
-
         const String previousLine (pos.movedByLines (-1).getLineText());
         const String trimmedPreviousLine (previousLine.trim());
-        const String leadingWhitespace (CppUtils::getLeadingWhitespace (previousLine));
-
-        insertTextAtCaret (leadingWhitespace);
 
         if (trimmedPreviousLine.endsWithChar ('{')
              || ((trimmedPreviousLine.startsWith ("if ")
                   || trimmedPreviousLine.startsWith ("for ")
                   || trimmedPreviousLine.startsWith ("while "))
                   && trimmedPreviousLine.endsWithChar (')')))
+        {
+            const String leadingWhitespace (CppUtils::getLeadingWhitespace (previousLine));
+            insertTextAtCaret (leadingWhitespace);
             insertTabAtCaret();
+        }
+        else
+        {
+            while (pos.getLineNumber() > 0)
+            {
+                pos = pos.movedByLines (-1);
+                const String leadingWhitespace (CppUtils::getLeadingWhitespace (pos.getLineText()));
+
+                if (leadingWhitespace.isNotEmpty())
+                {
+                    insertTextAtCaret (leadingWhitespace);
+                    break;
+                }
+            }
+        }
     }
 }
 

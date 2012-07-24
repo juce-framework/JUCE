@@ -189,6 +189,8 @@
         <File RelativePath="..\..\Source\Utility\jucer_Colours.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_FileHelpers.cpp"/>
         <File RelativePath="..\..\Source\Utility\jucer_FileHelpers.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_Icons.cpp"/>
+        <File RelativePath="..\..\Source\Utility\jucer_Icons.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp"/>
         <File RelativePath="..\..\Source\Utility\jucer_JucerTreeViewBase.h"/>
         <File RelativePath="..\..\Source\Utility\jucer_MiscUtilities.cpp"/>

@@ -289,6 +289,9 @@
     <ClCompile Include="..\..\Source\Utility\jucer_FileHelpers.cpp">
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_Icons.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp">
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
@@ -1288,6 +1291,9 @@
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_Icons.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h">

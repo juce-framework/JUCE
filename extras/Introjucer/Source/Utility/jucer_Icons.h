@@ -23,36 +23,26 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_COMMONHEADERS_JUCEHEADER__
-#define __JUCER_COMMONHEADERS_JUCEHEADER__
+#ifndef __JUCER_ICONS_H_D702578A__
+#define __JUCER_ICONS_H_D702578A__
 
-
-#include "../Utility/jucer_StoredSettings.h"
-#include "../Utility/jucer_Icons.h"
-#include "../Utility/jucer_MiscUtilities.h"
-#include "../Utility/jucer_CodeHelpers.h"
-#include "../Utility/jucer_FileHelpers.h"
-#include "../Utility/jucer_RelativePath.h"
-#include "../Utility/jucer_ValueSourceHelpers.h"
-#include "../Utility/jucer_PresetIDs.h"
-#include "jucer_CommandIDs.h"
 
 //==============================================================================
-extern ScopedPointer<ApplicationCommandManager> commandManager;
-
-//==============================================================================
-const char* const projectItemDragType   = "Project Items";
-const char* const drawableItemDragType  = "Drawable Items";
-const char* const componentItemDragType = "Components";
-
-const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx";
-const char* const headerFileExtensions          = "h;hpp;hxx";
-const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;h;hpp;hxx";
-
-enum ColourIds
+class Icons
 {
-    mainBackgroundColourId          = 0x2340000,
-    treeviewHighlightColourId       = 0x2340002,
+public:
+    Icons();
+
+    Path folder, document, imageDoc,
+         config, exporter, juceLogo,
+         graph, jigsaw, info, warning,
+         bug, mainJuceLogo;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons);
 };
 
-#endif   // __JUCER_COMMONHEADERS_JUCEHEADER__
+const Icons& getIcons();
+
+
+#endif  // __JUCER_ICONS_H_D702578A__

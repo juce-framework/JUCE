@@ -86,6 +86,7 @@ protected:
     Project* project;
     OpenDocumentManager::Document* currentDocument;
     RecentDocumentList recentDocumentList;
+    ScopedPointer<Component> logo;
 
     TabbedComponent treeViewTabs;
     ScopedPointer<ResizableEdgeComponent> resizerBar;

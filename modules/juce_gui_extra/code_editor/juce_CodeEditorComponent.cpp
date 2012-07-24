@@ -132,8 +132,7 @@ private:
     {
         SyntaxToken (const String& t, const int len, const int type) noexcept
             : text (t), length (len), tokenType (type)
-        {
-        }
+        {}
 
         bool operator== (const SyntaxToken& other) const noexcept
         {
@@ -201,9 +200,10 @@ private:
 
                 const int spacesNeeded = spacesPerTab - ((tabPos + x) % spacesPerTab);
                 t.text = t.text.replaceSection (tabPos, 1, String::repeatedString (" ", spacesNeeded));
+                t.length = t.text.length();
             }
 
-            x += t.text.length();
+            x += t.length;
         }
     }
 

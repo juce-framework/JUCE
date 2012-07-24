@@ -78,22 +78,4 @@ StoredSettings& getAppSettings();
 PropertiesFile& getAppProperties();
 
 
-//==============================================================================
-class Icons
-{
-public:
-    Icons();
-
-    void reload (const Colour& backgroundColour);
-
-    Path folder, document, imageDoc, config, exporter,
-         juceLogo, graph, jigsaw, info, warning, bug;
-
-private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons);
-};
-
-const Icons& getIcons();
-
-
 #endif   // __JUCER_STOREDSETTINGS_JUCEHEADER__

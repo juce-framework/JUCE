@@ -88,6 +88,27 @@ public:
 };
 
 //==============================================================================
+class LogoComponent  : public Component
+{
+public:
+    LogoComponent()
+    {
+        Rectangle<float> iconSize (getIcons().mainJuceLogo.getBounds());
+        setSize (400, (int) (400 * iconSize.getWidth() / iconSize.getHeight()));
+    }
+
+    void paint (Graphics& g)
+    {
+        g.setColour (findColour (mainBackgroundColourId).contrasting (0.3f));
+
+        g.fillPath (getIcons().mainJuceLogo,
+                    RectanglePlacement (RectanglePlacement::centred)
+                     .getTransformToFit (getIcons().mainJuceLogo.getBounds(),
+                                         getLocalBounds().toFloat()));
+    }
+};
+
+//==============================================================================
 ProjectContentComponent::ProjectContentComponent()
     : project (nullptr),
       currentDocument (nullptr),
@@ -95,6 +116,8 @@ ProjectContentComponent::ProjectContentComponent()
 {
     setOpaque (true);
     setWantsKeyboardFocus (true);
+
+    addAndMakeVisible (logo = new LogoComponent());
 
     treeSizeConstrainer.setMinimumWidth (200);
     treeSizeConstrainer.setMaximumWidth (500);
@@ -109,6 +132,7 @@ ProjectContentComponent::~ProjectContentComponent()
 {
     JucerApplication::getApp().openDocumentManager.removeListener (this);
 
+    logo = nullptr;
     setProject (nullptr);
     contentView = nullptr;
     removeChildComponent (&bubbleMessage);
@@ -141,13 +165,22 @@ void ProjectContentComponent::resized()
 {
     Rectangle<int> r (getLocalBounds());
 
-    treeViewTabs.setBounds (r.removeFromLeft (treeViewTabs.getWidth()));
+    if (treeViewTabs.isVisible())
+        treeViewTabs.setBounds (r.removeFromLeft (treeViewTabs.getWidth()));
 
     if (resizerBar != nullptr)
         resizerBar->setBounds (r.removeFromLeft (4));
 
     if (contentView != nullptr)
+    {
         contentView->setBounds (r);
+        logo->setVisible (false);
+    }
+    else
+    {
+        logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
+        logo->setVisible (true);
+    }
 }
 
 void ProjectContentComponent::lookAndFeelChanged()
@@ -215,12 +248,13 @@ void ProjectContentComponent::setProject (Project* newProject)
             project->addChangeListener (this);
 
             updateMissingFileStatuses();
-            resized();
         }
         else
         {
             treeViewTabs.setVisible (false);
         }
+
+        resized();
     }
 }
 
@@ -344,6 +378,7 @@ void ProjectContentComponent::hideEditor()
     contentView = nullptr;
     updateMainWindowTitle();
     commandManager->commandStatusChanged();
+    resized();
 }
 
 void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
