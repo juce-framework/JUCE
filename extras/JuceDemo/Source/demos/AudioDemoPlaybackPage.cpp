@@ -94,7 +94,7 @@ public:
 
         if (thumbnail.getTotalLength() > 0)
         {
-            thumbnail.drawChannels (g, getLocalBounds().reduced (2, 2),
+            thumbnail.drawChannels (g, getLocalBounds().reduced (2),
                                     startTime, endTime, 1.0f);
         }
         else

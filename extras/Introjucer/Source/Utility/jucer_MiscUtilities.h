@@ -280,7 +280,7 @@ public:
         const Colour colour (getColour());
 
         g.fillAll (Colours::grey);
-        g.fillCheckerBoard (getLocalBounds().reduced (2, 2),
+        g.fillCheckerBoard (getLocalBounds().reduced (2),
                             10, 10,
                             Colour (0xffdddddd).overlaidWith (colour),
                             Colour (0xffffffff).overlaidWith (colour));

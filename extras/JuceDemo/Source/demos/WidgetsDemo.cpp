@@ -940,7 +940,7 @@ public:
 
             g.setColour (Colours::green);
             g.fillPath (p, RectanglePlacement (RectanglePlacement::centred)
-                                .getTransformToFit (p.getBounds(), getLocalBounds().reduced (2, 2).toFloat()));
+                                .getTransformToFit (p.getBounds(), getLocalBounds().reduced (2).toFloat()));
         }
 
         void mouseDown (const MouseEvent&)

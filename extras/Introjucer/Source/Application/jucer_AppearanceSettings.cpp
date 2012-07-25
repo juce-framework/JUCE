@@ -567,7 +567,7 @@ IntrojucerLookAndFeel::IntrojucerLookAndFeel()
 Rectangle<int> IntrojucerLookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
 {
     if (component.findParentComponentOfClass<AppearanceEditor::EditorPanel>() != nullptr)
-        return component.getLocalBounds().reduced (1, 1).removeFromRight (component.getWidth() / 2);
+        return component.getLocalBounds().reduced (1).removeFromRight (component.getWidth() / 2);
 
     return LookAndFeel::getPropertyComponentContentPosition (component);
 }
