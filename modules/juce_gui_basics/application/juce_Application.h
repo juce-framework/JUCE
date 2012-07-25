@@ -246,12 +246,18 @@ public:
     static void sendUnhandledException (const std::exception*, const char* sourceFile, int lineNumber);
     bool initialiseApp();
     int shutdownApp();
+
+protected:
+    bool sendCommandLineToPreexistingInstance();
    #endif
 
 private:
     //==============================================================================
-    ScopedPointer<InterProcessLock> appLock;
-    ScopedPointer<ActionListener> broadcastCallback;
+    struct MultipleInstanceHandler;
+    friend struct MultipleInstanceHandler;
+    friend class ScopedPointer<MultipleInstanceHandler>;
+    ScopedPointer<MultipleInstanceHandler> multipleInstanceHandler;
+
     int appReturnValue;
     bool stillInitialising;
 

@@ -45,10 +45,7 @@ public:
     void initialise (const String& commandLine)
     {
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
-
         settings = new StoredSettings();
-        icons = new Icons();
-
         settings->initialise();
 
         if (commandLine.isNotEmpty())
@@ -62,6 +59,15 @@ public:
                 return;
             }
         }
+
+        if (sendCommandLineToPreexistingInstance())
+        {
+            DBG ("Another instance is running - quitting...");
+            quit();
+            return;
+        }
+
+        icons = new Icons();
 
         commandManager = new ApplicationCommandManager();
         commandManager->registerAllCommandsForTarget (this);
@@ -131,11 +137,7 @@ public:
 
     bool moreThanOneInstanceAllowed()
     {
-       #ifndef JUCE_LINUX
-        return false;
-       #else
-        return true; //xxx should be false but doesn't work on linux..
-       #endif
+        return true; // this is handled manually in initialise()
     }
 
     void anotherInstanceStarted (const String& commandLine)

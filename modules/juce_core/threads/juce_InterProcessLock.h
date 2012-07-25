@@ -41,13 +41,11 @@ class JUCE_API  InterProcessLock
 public:
     //==============================================================================
     /** Creates a lock object.
-
-        @param name     a name that processes will use to identify this lock object
+        @param name   a name that processes will use to identify this lock object
     */
     explicit InterProcessLock (const String& name);
 
     /** Destructor.
-
         This will also release the lock if it's currently held by this process.
     */
     ~InterProcessLock();
@@ -55,17 +53,15 @@ public:
     //==============================================================================
     /** Attempts to lock the critical section.
 
-        @param timeOutMillisecs     how many milliseconds to wait if the lock
-                                    is already held by another process - a value of
-                                    0 will return immediately, negative values will wait
-                                    forever
+        @param timeOutMillisecs  how many milliseconds to wait if the lock is already
+                                 held by another process - a value of 0 will return
+                                 immediately, negative values will wait forever
         @returns    true if the lock could be gained within the timeout period, or
                     false if the timeout expired.
     */
     bool enter (int timeOutMillisecs = -1);
 
-    /** Releases the lock if it's currently held by this process.
-    */
+    /** Releases the lock if it's currently held by this process. */
     void exit();
 
     //==============================================================================
@@ -94,7 +90,7 @@ public:
             otherwise there are no guarantees what will happen! Best just to use it
             as a local stack object, rather than creating one with the new() operator.
         */
-        explicit ScopedLockType (InterProcessLock& lock)                    : lock_ (lock) { lockWasSuccessful = lock.enter(); }
+        explicit ScopedLockType (InterProcessLock& lock)        : ipLock (lock) { lockWasSuccessful = lock.enter(); }
 
         /** Destructor.
 
@@ -103,14 +99,14 @@ public:
             Make sure this object is created and deleted by the same thread,
             otherwise there are no guarantees what will happen!
         */
-        inline ~ScopedLockType()                                            { lock_.exit(); }
+        inline ~ScopedLockType()                                { ipLock.exit(); }
 
         /** Returns true if the InterProcessLock was successfully locked. */
-        bool isLocked() const noexcept                                      { return lockWasSuccessful; }
+        bool isLocked() const noexcept                          { return lockWasSuccessful; }
 
     private:
         //==============================================================================
-        InterProcessLock& lock_;
+        InterProcessLock& ipLock;
         bool lockWasSuccessful;
 
         JUCE_DECLARE_NON_COPYABLE (ScopedLockType);

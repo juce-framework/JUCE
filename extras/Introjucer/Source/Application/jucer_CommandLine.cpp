@@ -31,6 +31,13 @@
 //==============================================================================
 namespace
 {
+    void hideDockIcon()
+    {
+       #if JUCE_MAC
+        Process::setDockIconVisible (false);
+       #endif
+    }
+
     File getFile (const String& filename)
     {
         return File::getCurrentWorkingDirectory().getChildFile (filename.unquoted());
@@ -53,6 +60,8 @@ namespace
     */
     int resaveProject (const StringArray& args, bool justSaveResources)
     {
+        hideDockIcon();
+
         if (! checkArgumentCount (args, 2))
             return 1;
 
@@ -145,6 +154,8 @@ namespace
 
     int buildModules (const StringArray& args, const bool buildAllWithIndex)
     {
+        hideDockIcon();
+
         if (! checkArgumentCount (args, 3))
             return 1;
 
@@ -200,6 +211,8 @@ namespace
 
     int listModules()
     {
+        hideDockIcon();
+
         std::cout << "Downloading list of available modules..." << std::endl;
         ModuleList list;
         list.loadFromWebsite();
@@ -216,6 +229,8 @@ namespace
 
     int showStatus (const StringArray& args)
     {
+        hideDockIcon();
+
         if (! checkArgumentCount (args, 2))
             return 1;
 
@@ -256,6 +271,8 @@ namespace
     //==============================================================================
     int showHelp()
     {
+        hideDockIcon();
+
         std::cout << "The Introjucer!" << std::endl
                   << std::endl
                   << "Usage: " << std::endl
