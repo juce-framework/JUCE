@@ -236,6 +236,7 @@ Result Project::loadDocument (const File& file)
 
     removeDefunctExporters();
     setMissingDefaultValues();
+    setChangedFlag (false);
 
     return Result::ok();
 }

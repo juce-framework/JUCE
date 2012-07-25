@@ -501,8 +501,8 @@ AlertWindow* LookAndFeel::createAlertWindow (const String& title,
     if (numButtons == 1)
     {
         aw->addButton (button1, 0,
-                       KeyPress (KeyPress::escapeKey, 0, 0),
-                       KeyPress (KeyPress::returnKey, 0, 0));
+                       KeyPress (KeyPress::escapeKey),
+                       KeyPress (KeyPress::returnKey));
     }
     else
     {
@@ -513,14 +513,14 @@ AlertWindow* LookAndFeel::createAlertWindow (const String& title,
 
         if (numButtons == 2)
         {
-            aw->addButton (button1, 1, KeyPress (KeyPress::returnKey, 0, 0), button1ShortCut);
-            aw->addButton (button2, 0, KeyPress (KeyPress::escapeKey, 0, 0), button2ShortCut);
+            aw->addButton (button1, 1, KeyPress (KeyPress::returnKey), button1ShortCut);
+            aw->addButton (button2, 0, KeyPress (KeyPress::escapeKey), button2ShortCut);
         }
         else if (numButtons == 3)
         {
             aw->addButton (button1, 1, button1ShortCut);
             aw->addButton (button2, 2, button2ShortCut);
-            aw->addButton (button3, 0, KeyPress (KeyPress::escapeKey, 0, 0));
+            aw->addButton (button3, 0, KeyPress (KeyPress::escapeKey));
         }
     }
 
@@ -608,12 +608,12 @@ int LookAndFeel::getAlertWindowButtonHeight()
     return 28;
 }
 
-const Font LookAndFeel::getAlertWindowMessageFont()
+Font LookAndFeel::getAlertWindowMessageFont()
 {
     return Font (15.0f);
 }
 
-const Font LookAndFeel::getAlertWindowFont()
+Font LookAndFeel::getAlertWindowFont()
 {
     return Font (12.0f);
 }
@@ -890,7 +890,7 @@ int LookAndFeel::getScrollbarButtonSize (ScrollBar& scrollbar)
 }
 
 //==============================================================================
-const Path LookAndFeel::getTickShape (const float height)
+Path LookAndFeel::getTickShape (const float height)
 {
     static const unsigned char tickShapeData[] =
     {
@@ -907,7 +907,7 @@ const Path LookAndFeel::getTickShape (const float height)
     return p;
 }
 
-const Path LookAndFeel::getCrossShape (const float height)
+Path LookAndFeel::getCrossShape (const float height)
 {
     static const unsigned char crossShapeData[] =
     {

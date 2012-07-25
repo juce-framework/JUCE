@@ -184,8 +184,8 @@ public:
                               bool isButtonDown);
 
     //==============================================================================
-    /* AlertWindow handling..
-    */
+    // AlertWindow handling..
+
     virtual AlertWindow* createAlertWindow (const String& title,
                                             const String& message,
                                             const String& button1,
@@ -204,8 +204,8 @@ public:
 
     virtual int getAlertWindowButtonHeight();
 
-    virtual const Font getAlertWindowMessageFont();
-    virtual const Font getAlertWindowFont();
+    virtual Font getAlertWindowMessageFont();
+    virtual Font getAlertWindowFont();
 
     void setUsingNativeAlertWindows (bool shouldUseNativeAlerts);
     bool isUsingNativeAlertWindows();
@@ -292,9 +292,9 @@ public:
 
     //==============================================================================
     /** Returns a tick shape for use in yes/no boxes, etc. */
-    virtual const Path getTickShape (float height);
+    virtual Path getTickShape (float height);
     /** Returns a cross shape for use in yes/no boxes, etc. */
-    virtual const Path getCrossShape (float height);
+    virtual Path getCrossShape (float height);
 
     //==============================================================================
     /** Draws the + or - box in a treeview. */
