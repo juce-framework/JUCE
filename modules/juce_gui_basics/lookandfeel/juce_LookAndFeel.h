@@ -57,6 +57,7 @@ class ImageButton;
 class CallOutBox;
 class Drawable;
 class CaretComponent;
+class BubbleComponent;
 
 //==============================================================================
 /**
@@ -335,9 +336,8 @@ public:
                                              Button* goUpButton);
 
     //==============================================================================
-    virtual void drawBubble (Graphics& g,
-                             float tipX, float tipY,
-                             float boxX, float boxY, float boxW, float boxH);
+    virtual void drawBubble (Graphics& g, BubbleComponent&,
+                             const Point<float>& tip, const Rectangle<float>& body);
 
     //==============================================================================
     virtual void drawLasso (Graphics& g, Component& lassoComp);
@@ -665,6 +665,7 @@ private:
     virtual int drawTabAreaBehindFrontButton (Graphics&, int, int, TabbedButtonBar&, TabbedButtonBar::Orientation) { return 0; }
     virtual int drawTabButtonText (Graphics&, int, int, int, int, const Colour&, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
     virtual int getTabButtonBestWidth (int, const String&, int, Button&) { return 0; }
+    virtual int drawBubble (Graphics&, float, float, float, float, float, float) { return 0; }
    #endif
 
     class GlassWindowButton;

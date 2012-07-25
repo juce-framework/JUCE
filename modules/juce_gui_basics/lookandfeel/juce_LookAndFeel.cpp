@@ -221,6 +221,9 @@ LookAndFeel::LookAndFeel()
         GroupComponent::outlineColourId,            0x66000000,
         GroupComponent::textColourId,               0xff000000,
 
+        BubbleComponent::backgroundColourId,        0xeeeeeebb,
+        BubbleComponent::outlineColourId,           0x77000000,
+
         DirectoryContentsDisplayComponent::highlightColourId,   textHighlightColour,
         DirectoryContentsDisplayComponent::textColourId,        0xff000000,
 
@@ -949,25 +952,17 @@ void LookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, in
 }
 
 //==============================================================================
-void LookAndFeel::drawBubble (Graphics& g,
-                              float tipX, float tipY,
-                              float boxX, float boxY,
-                              float boxW, float boxH)
+void LookAndFeel::drawBubble (Graphics& g, BubbleComponent& comp,
+                              const Point<float>& tip, const Rectangle<float>& body)
 {
-    const Rectangle<float> body (boxX, boxY, boxW, boxH);
-
     Path p;
-    p.addBubble (body,
-                 body.getUnion (Rectangle<float> (tipX, tipY, 1.0f, 1.0f)),
-                 Point<float> (tipX, tipY),
-                 5.0f, jmin (15.0f, boxW * 0.2f, boxH * 0.2f));
+    p.addBubble (body, body.getUnion (Rectangle<float> (tip.x, tip.y, 1.0f, 1.0f)),
+                 tip, 5.0f, jmin (15.0f, body.getWidth() * 0.2f, body.getHeight() * 0.2f));
 
-    //xxx need to take comp as param for colour
-    g.setColour (findColour (TooltipWindow::backgroundColourId).withAlpha (0.9f));
+    g.setColour (comp.findColour (BubbleComponent::backgroundColourId));
     g.fillPath (p);
 
-    //xxx as above
-    g.setColour (findColour (TooltipWindow::textColourId).withAlpha (0.4f));
+    g.setColour (comp.findColour (BubbleComponent::outlineColourId));
     g.strokePath (p, PathStrokeType (1.33f));
 }
 

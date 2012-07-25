@@ -690,6 +690,8 @@ bool ProjectContentComponent::reinvokeCommandAfterClosingPropertyEditors (const 
 void ProjectContentComponent::showBubbleMessage (const Rectangle<int>& pos, const String& text)
 {
     addChildComponent (&bubbleMessage);
+    bubbleMessage.setColour (BubbleComponent::backgroundColourId, Colours::white.withAlpha (0.7f));
+    bubbleMessage.setColour (BubbleComponent::outlineColourId, Colours::black.withAlpha (0.8f));
     bubbleMessage.setAlwaysOnTop (true);
 
     bubbleMessage.showAt (pos, AttributedString (text), 3000, true, false);
