@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<COLOUR_SCHEME font="Menlo; 13.0 Regular">
+<COLOUR_SCHEME font="<Monospaced>; 13.0 Regular">
   <COLOUR name="Main Window Bkgd" colour="FF292929"/>
   <COLOUR name="Treeview Highlight" colour="2BFFFEC3"/>
   <COLOUR name="Code Background" colour="FF353535"/>

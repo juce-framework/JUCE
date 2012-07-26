@@ -298,7 +298,7 @@ const char* brushed_aluminium_png = (const char*) temp_9aa09877;
 static const unsigned char temp_b8a2e640[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
-"<COLOUR_SCHEME font=\"Menlo; 13.0 Regular\">\r\n"
+"<COLOUR_SCHEME font=\"<Monospaced>; 13.0 Regular\">\r\n"
 "  <COLOUR name=\"Main Window Bkgd\" colour=\"FF292929\"/>\r\n"
 "  <COLOUR name=\"Treeview Highlight\" colour=\"2BFFFEC3\"/>\r\n"
 "  <COLOUR name=\"Code Background\" colour=\"FF353535\"/>\r\n"
@@ -899,7 +899,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x950fd7dd:
         case 0xa6cfe0e2:  numBytes = 14724; return brushed_aluminium_png;
         case 0x42b71ae6:
-        case 0xfbf631c1:  numBytes = 1045; return dark_scheme_xml;
+        case 0xfbf631c1:  numBytes = 1052; return dark_scheme_xml;
         case 0x27c5a93a:
         case 0xb6575890:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:

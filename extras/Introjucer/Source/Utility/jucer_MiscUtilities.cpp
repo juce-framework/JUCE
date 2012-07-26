@@ -373,20 +373,22 @@ public:
         : desc (String::empty,
                 "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, ready to cut-and-paste into your source-code...")
     {
-        setSize (400, 300);
-
-        desc.setBounds ("8, 8, parent.width - 8, 55");
         desc.setJustificationType (Justification::centred);
+        desc.setColour (Label::textColourId, Colours::white);
         addAndMakeVisible (&desc);
 
+        const Colour bkgd (Colours::white.withAlpha (0.6f));
+
         userText.setMultiLine (true, true);
-        userText.setBounds ("8, 60, parent.width - 8, parent.height / 2 - 4");
+        userText.setReturnKeyStartsNewLine (true);
+        userText.setColour (TextEditor::backgroundColourId, bkgd);
         addAndMakeVisible (&userText);
         userText.addListener (this);
 
         resultText.setMultiLine (true, true);
+        resultText.setColour (TextEditor::backgroundColourId, bkgd);
         resultText.setReadOnly (true);
-        resultText.setBounds ("8, parent.height / 2 + 4, parent.width - 8, parent.height - 8");
+        resultText.setSelectAllWhenFocused (true);
         addAndMakeVisible (&resultText);
 
         userText.setText (getLastText());
@@ -407,6 +409,13 @@ public:
         getLastText() = userText.getText();
         resultText.setText (CodeHelpers::stringLiteral (getLastText()), false);
     }
+    
+    void resized()
+    {
+        desc.setBounds (8, 8, getWidth() - 16, 44);
+        userText.setBounds (desc.getX(), desc.getBottom() + 8, getWidth() - 16, getHeight() / 2 - desc.getBottom() - 8);
+        resultText.setBounds (desc.getX(), userText.getBottom() + 4, getWidth() - 16, getHeight() - userText.getBottom() - 12);
+    }
 
 private:
     Label desc;
@@ -419,11 +428,20 @@ private:
     }
 };
 
-void showUTF8ToolWindow()
+void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer)
 {
-    UTF8Component comp;
-    DialogWindow::showModalDialog ("UTF-8 String Literal Converter", &comp,
-                                   nullptr, Colours::white, true, true);
+    if (ownerPointer != nullptr)
+    {
+        ownerPointer->toFront (true);
+    }
+    else
+    {
+        new FloatingToolWindow ("UTF-8 String Literal Converter",
+                                "utf8WindowPos",
+                                new UTF8Component(), ownerPointer,
+                                400, 300,
+                                300, 300, 1000, 1000);
+    }
 }
 
 bool cancelAnyModalComponents()

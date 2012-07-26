@@ -289,50 +289,6 @@ Colour AppearanceSettings::getScrollbarColourForBackground (const Colour& backgr
 //==============================================================================
 struct AppearanceEditor
 {
-    class Window   : public DialogWindow
-    {
-    public:
-        Window()   : DialogWindow ("Appearance Settings", Colours::darkgrey, true, true)
-        {
-            setUsingNativeTitleBar (true);
-
-            if (getAppSettings().monospacedFontNames.size() == 0)
-                setContentOwned (new FontScanPanel(), false);
-            else
-                setContentOwned (new EditorPanel(), false);
-
-            setResizable (true, true);
-
-            const int width = 350;
-            setResizeLimits (width, 200, width, 1000);
-
-            String windowState (getAppProperties().getValue (getWindowPosName()));
-
-            if (windowState.isNotEmpty())
-                restoreWindowStateFromString (windowState);
-            else
-                centreAroundComponent (Component::getCurrentlyFocusedComponent(), width, 500);
-
-            setVisible (true);
-        }
-
-        ~Window()
-        {
-            getAppProperties().setValue (getWindowPosName(), getWindowStateAsString());
-        }
-
-        void closeButtonPressed()
-        {
-            JucerApplication::getApp().appearanceEditorWindow = nullptr;
-        }
-
-    private:
-        static const char* getWindowPosName()   { return "colourSchemeEditorPos"; }
-
-        JUCE_DECLARE_NON_COPYABLE (Window);
-    };
-
-    //==============================================================================
     class FontScanPanel   : public Component,
                             private Timer
     {
@@ -362,7 +318,7 @@ struct AppearanceEditor
             if (fontsToScan.size() == 0)
             {
                 getAppSettings().monospacedFontNames = fontsFound;
-                Window* w = findParentComponentOfClass<Window>();
+                DialogWindow* w = findParentComponentOfClass<DialogWindow>();
 
                 if (w != nullptr)
                     w->setContentOwned (new EditorPanel(), false);
@@ -552,9 +508,27 @@ struct AppearanceEditor
     };
 };
 
-Component* AppearanceSettings::createEditorWindow()
+void AppearanceSettings::showEditorWindow (ScopedPointer<Component>& ownerPointer)
 {
-    return new AppearanceEditor::Window();
+    if (ownerPointer != nullptr)
+    {
+        ownerPointer->toFront (true);
+    }
+    else
+    {
+        Component* content;
+        if (getAppSettings().monospacedFontNames.size() == 0)
+            content = new AppearanceEditor::FontScanPanel();
+        else
+            content = new AppearanceEditor::EditorPanel();
+
+        const int width = 350;
+        new FloatingToolWindow ("Appearance Settings",
+                                "colourSchemeEditorPos",
+                                content, ownerPointer,
+                                width, 500,
+                                width, 200, width, 1000);
+    }
 }
 
 //==============================================================================

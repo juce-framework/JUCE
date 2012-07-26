@@ -14,7 +14,7 @@ namespace BinaryData
     const int            brushed_aluminium_pngSize = 14724;
 
     extern const char*   dark_scheme_xml;
-    const int            dark_scheme_xmlSize = 1045;
+    const int            dark_scheme_xmlSize = 1052;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1008;

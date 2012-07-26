@@ -56,7 +56,7 @@ public:
     static Font getDefaultCodeFont();
     static Colour getScrollbarColourForBackground (const Colour& background);
 
-    static Component* createEditorWindow();
+    static void showEditorWindow (ScopedPointer<Component>& ownerPointer);
 
     static const char* getSchemeFileSuffix()      { return ".scheme"; }
     static const char* getSchemeFileWildCard()    { return "*.scheme"; }

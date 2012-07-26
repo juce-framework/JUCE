@@ -35,7 +35,7 @@
 
 //==============================================================================
 /**
-    A component containing text that can be edited.
+    An editable text box.
 
     A TextEditor can either be in single- or multi-line mode, and supports mixed
     fonts and colours.
@@ -62,8 +62,7 @@ public:
                          juce_wchar passwordCharacter = 0);
 
     /** Destructor. */
-    virtual ~TextEditor();
-
+    ~TextEditor();
 
     //==============================================================================
     /** Puts the editor into either multi- or single-line mode.
@@ -79,8 +78,7 @@ public:
     void setMultiLine (bool shouldBeMultiLine,
                        bool shouldWordWrap = true);
 
-    /** Returns true if the editor is in multi-line mode.
-    */
+    /** Returns true if the editor is in multi-line mode. */
     bool isMultiLine() const;
 
     //==============================================================================
@@ -94,7 +92,6 @@ public:
     void setReturnKeyStartsNewLine (bool shouldStartNewLine);
 
     /** Returns the value set by setReturnKeyStartsNewLine().
-
         See setReturnKeyStartsNewLine() for more info.
     */
     bool getReturnKeyStartsNewLine() const                      { return returnKeyStartsNewLine; }
@@ -124,8 +121,7 @@ public:
     */
     void setReadOnly (bool shouldBeReadOnly);
 
-    /** Returns true if the editor is in read-only mode.
-    */
+    /** Returns true if the editor is in read-only mode. */
     bool isReadOnly() const;
 
     //==============================================================================
@@ -138,7 +134,7 @@ public:
     /** Returns true if the caret is enabled.
         @see setCaretVisible
     */
-    bool isCaretVisible() const                                 { return caret != nullptr; }
+    bool isCaretVisible() const noexcept                            { return caret != nullptr; }
 
     //==============================================================================
     /** Enables/disables a vertical scrollbar.
@@ -154,7 +150,7 @@ public:
     /** Returns true if scrollbars are enabled.
         @see setScrollbarsShown
     */
-    bool areScrollbarsShown() const                                 { return scrollbarVisible; }
+    bool areScrollbarsShown() const noexcept                        { return scrollbarVisible; }
 
 
     /** Changes the password character used to disguise the text.
@@ -171,7 +167,7 @@ public:
     /** Returns the current password character.
         @see setPasswordCharacter
     */
-    juce_wchar getPasswordCharacter() const                         { return passwordCharacter; }
+    juce_wchar getPasswordCharacter() const noexcept                { return passwordCharacter; }
 
 
     //==============================================================================
@@ -187,11 +183,10 @@ public:
     /** Returns true if the right-click menu is enabled.
         @see setPopupMenuEnabled
     */
-    bool isPopupMenuEnabled() const                                 { return popupMenuEnabled; }
+    bool isPopupMenuEnabled() const noexcept                        { return popupMenuEnabled; }
 
-    /** Returns true if a popup-menu is currently being displayed.
-    */
-    bool isPopupMenuCurrentlyActive() const                         { return menuActive; }
+    /** Returns true if a popup-menu is currently being displayed. */
+    bool isPopupMenuCurrentlyActive() const noexcept                { return menuActive; }
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
@@ -239,18 +234,15 @@ public:
     void setFont (const Font& newFont);
 
     /** Applies a font to all the text in the editor.
-
         This will also set the current font to use for any new text that's added.
-
         @see setFont
     */
     void applyFontToAllText (const Font& newFont);
 
     /** Returns the font that's currently being used for new text.
-
         @see setFont
     */
-    const Font& getFont() const;
+    const Font& getFont() const noexcept            { return currentFont; }
 
     //==============================================================================
     /** If set to true, focusing on the editor will highlight all its text.
@@ -260,7 +252,7 @@ public:
         This is useful for boxes where you expect the user to re-enter all the
         text when they focus on the component, rather than editing what's already there.
     */
-    void setSelectAllWhenFocused (bool b);
+    void setSelectAllWhenFocused (bool shouldSelectAll);
 
     /** Sets limits on the characters that can be entered.
 
@@ -282,7 +274,6 @@ public:
 
     //==============================================================================
     /** Changes the size of the scrollbars that are used.
-
         Handy if you need smaller scrollbars for a small text box.
     */
     void setScrollBarThickness (int newThicknessPixels);
@@ -313,13 +304,11 @@ public:
     };
 
     /** Registers a listener to be told when things happen to the text.
-
         @see removeListener
     */
     void addListener (Listener* newListener);
 
     /** Deregisters a listener.
-
         @see addListener
     */
     void removeListener (Listener* listenerToRemove);
@@ -332,8 +321,7 @@ public:
     String getTextInRange (const Range<int>& textRange) const;
 
     /** Returns true if there are no characters in the editor.
-
-        This is more efficient than calling getText().isEmpty().
+        This is far more efficient than calling getText().isEmpty().
     */
     bool isEmpty() const;
 
@@ -355,8 +343,8 @@ public:
     /** Returns a Value object that can be used to get or set the text.
 
         Bear in mind that this operate quite slowly if your text box contains large
-        amounts of text, as it needs to dynamically build the string that's involved. It's
-        best used for small text boxes.
+        amounts of text, as it needs to dynamically build the string that's involved. 
+        It's best used for small text boxes.
     */
     Value& getTextValue();
 
@@ -440,7 +428,6 @@ public:
     String getHighlightedText() const;
 
     /** Finds the index of the character at a given position.
-
         The co-ordinates are relative to the component's top-left.
     */
     int getTextIndexAt (int x, int y);
@@ -467,19 +454,16 @@ public:
     int getTextHeight() const;
 
     /** Changes the size of the gap at the top and left-edge of the editor.
-
         By default there's a gap of 4 pixels.
     */
     void setIndents (int newLeftIndent, int newTopIndent);
 
     /** Changes the size of border left around the edge of the component.
-
         @see getBorder
     */
     void setBorder (const BorderSize<int>& border);
 
     /** Returns the size of border around the edge of the component.
-
         @see setBorder
     */
     BorderSize<int> getBorder() const;
@@ -492,41 +476,6 @@ public:
     void setScrollToShowCursor (bool shouldScrollToShowCaret);
 
     //==============================================================================
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void paintOverChildren (Graphics& g);
-    /** @internal */
-    void mouseDown (const MouseEvent& e);
-    /** @internal */
-    void mouseUp (const MouseEvent& e);
-    /** @internal */
-    void mouseDrag (const MouseEvent& e);
-    /** @internal */
-    void mouseDoubleClick (const MouseEvent& e);
-    /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
-    /** @internal */
-    bool keyPressed (const KeyPress& key);
-    /** @internal */
-    bool keyStateChanged (bool isKeyDown);
-    /** @internal */
-    void focusGained (FocusChangeType cause);
-    /** @internal */
-    void focusLost (FocusChangeType cause);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void enablementChanged();
-    /** @internal */
-    void colourChanged();
-    /** @internal */
-    void lookAndFeelChanged();
-    /** @internal */
-    bool isTextInputActive() const;
-    /** @internal */
-    void setTemporaryUnderlining (const Array <Range<int> >&);
-
     bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
     bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
     bool moveCaretUp (bool selecting);
@@ -594,6 +543,41 @@ public:
 
     void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
 
+    //==============================================================================
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void paintOverChildren (Graphics& g);
+    /** @internal */
+    void mouseDown (const MouseEvent& e);
+    /** @internal */
+    void mouseUp (const MouseEvent& e);
+    /** @internal */
+    void mouseDrag (const MouseEvent& e);
+    /** @internal */
+    void mouseDoubleClick (const MouseEvent& e);
+    /** @internal */
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
+    /** @internal */
+    bool keyPressed (const KeyPress& key);
+    /** @internal */
+    bool keyStateChanged (bool isKeyDown);
+    /** @internal */
+    void focusGained (FocusChangeType);
+    /** @internal */
+    void focusLost (FocusChangeType);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void enablementChanged();
+    /** @internal */
+    void colourChanged();
+    /** @internal */
+    void lookAndFeelChanged();
+    /** @internal */
+    bool isTextInputActive() const;
+    /** @internal */
+    void setTemporaryUnderlining (const Array <Range<int> >&);
 
 protected:
     //==============================================================================

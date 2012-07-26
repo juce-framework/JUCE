@@ -1109,11 +1109,6 @@ void TextEditor::setSelectAllWhenFocused (const bool b)
 }
 
 //==============================================================================
-const Font& TextEditor::getFont() const
-{
-    return currentFont;
-}
-
 void TextEditor::setFont (const Font& newFont)
 {
     currentFont = newFont;

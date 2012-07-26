@@ -533,8 +533,8 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getMonospacedNames (allFonts);
 
-        const char* targets[] = { "Bitstream Vera Sans Mono", "Courier", "Sans Mono",
-                                  "Liberation Mono", "DejaVu Mono", "Mono", 0 };
+        const char* targets[] = { "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Sans Mono",
+                                  "Liberation Mono", "Courier", "DejaVu Mono", "Mono", 0 };
         return pickBestFont (allFonts, targets);
     }
 

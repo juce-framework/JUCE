@@ -97,6 +97,7 @@ public:
     void shutdown()
     {
         appearanceEditorWindow = nullptr;
+        utf8Window = nullptr;
 
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
@@ -390,8 +391,8 @@ public:
             case CommandIDs::showPrefs:                 showPrefsPanel(); break;
             case CommandIDs::saveAll:                   openDocumentManager.saveAll(); break;
             case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
-            case CommandIDs::showUTF8Tool:              showUTF8ToolWindow(); break;
-            case CommandIDs::showAppearanceSettings:    showAppearanceEditorWindow(); break;
+            case CommandIDs::showUTF8Tool:              showUTF8ToolWindow (utf8Window); break;
+            case CommandIDs::showAppearanceSettings:    AppearanceSettings::showEditorWindow (appearanceEditorWindow); break;
             case CommandIDs::updateModules:             runModuleUpdate (String::empty); break;
             default:                                    return JUCEApplication::perform (info);
         }
@@ -462,14 +463,6 @@ public:
         return ModuleList::isJuceOrModulesFolder (list.getModulesFolder());
     }
 
-    void showAppearanceEditorWindow()
-    {
-        if (appearanceEditorWindow == nullptr)
-            appearanceEditorWindow = AppearanceSettings::createEditorWindow();
-
-        appearanceEditorWindow->toFront (true);
-    }
-
     //==============================================================================
     virtual void doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
@@ -490,7 +483,7 @@ public:
     MainWindowList mainWindowList;
     OpenDocumentManager openDocumentManager;
 
-    ScopedPointer<Component> appearanceEditorWindow;
+    ScopedPointer<Component> appearanceEditorWindow, utf8Window;
 
 private:
     class AsyncQuitRetrier  : private Timer
