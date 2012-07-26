@@ -93,26 +93,15 @@ void StoredSettings::reload()
         // These settings are used in defining the properties file's location.
         PropertiesFile::Options options;
         options.applicationName     = "Introjucer";
-        options.folderName          = "Introjucer";
         options.filenameSuffix      = "settings";
         options.osxLibrarySubFolder = "Application Support";
+       #if JUCE_LINUX
+        options.folderName          = ".introjucer";
+       #else
+        options.folderName          = "Introjucer";
+       #endif
 
         props = new PropertiesFile (options);
-
-        // Because older versions of the introjucer saved their settings under a different
-        // name, this code is an example of how to migrate your old settings files...
-        if (! props->getFile().exists())
-        {
-            PropertiesFile::Options oldOptions;
-            oldOptions.applicationName      = "Jucer2";
-            oldOptions.filenameSuffix       = "settings";
-            oldOptions.osxLibrarySubFolder  = "Preferences";
-
-            PropertiesFile oldProps (oldOptions);
-
-            if (oldProps.getFile().exists())
-                props->addAllPropertiesFrom (oldProps);
-        }
     }
 
     // recent files...

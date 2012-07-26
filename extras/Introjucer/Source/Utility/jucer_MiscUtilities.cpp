@@ -409,7 +409,7 @@ public:
         getLastText() = userText.getText();
         resultText.setText (CodeHelpers::stringLiteral (getLastText()), false);
     }
-    
+
     void resized()
     {
         desc.setBounds (8, 8, getWidth() - 16, 44);
