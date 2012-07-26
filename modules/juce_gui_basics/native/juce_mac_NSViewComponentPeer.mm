@@ -236,7 +236,7 @@ public:
         {
             r = [[view superview] convertRect: r toView: nil];
 
-           #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_7
+           #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
             r = [window convertRectToScreen: r];
            #else
             r.origin = [window convertBaseToScreen: r.origin];
@@ -280,7 +280,7 @@ public:
         }
         else
         {
-           #if defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_5
+           #if defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
             [view setAlphaValue: (CGFloat) newAlpha];
            #else
             if ([view respondsToSelector: @selector (setAlphaValue:)])
@@ -504,16 +504,18 @@ public:
 
     void redirectMouseMove (NSEvent* ev)
     {
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
         if ([NSWindow windowNumberAtPoint: [[ev window] convertBaseToScreen: [ev locationInWindow]]
-              belowWindowWithWindowNumber: 0] == [window windowNumber])
+              belowWindowWithWindowNumber: 0] != [window windowNumber])
+        {
+            [[NSCursor arrowCursor] set];
+        }
+        else
+       #endif
         {
             currentModifiers = currentModifiers.withoutMouseButtons();
             sendMouseEvent (ev);
             showArrowCursorIfNeeded();
-        }
-        else
-        {
-            [[NSCursor arrowCursor] set];
         }
     }
 
@@ -804,7 +806,7 @@ public:
             Rectangle<int> original (convertToRectInt (current));
             const Rectangle<int> screenBounds (Desktop::getInstance().getDisplays().getTotalBounds (true));
 
-           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_ALLOWED >= MAC_OS_X_VERSION_10_6
+           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
             if ([window inLiveResize])
            #else
             if ([window respondsToSelector: @selector (inLiveResize)]
