@@ -227,18 +227,6 @@ public:
     */
     static const Identifier idProperty;
 
-    /**
-    */
-    static void initialiseFromValueTree (Component& component,
-                                         const ValueTree& state,
-                                         ImageProvider* imageProvider);
-
-    //=============================================================================
-    /** @internal */
-    static void refreshBasicComponentProperties (Component&, const ValueTree&);
-    /** @internal */
-    static RelativeRectangle getComponentBounds (const ValueTree&);
-
 private:
     //=============================================================================
     OwnedArray <TypeHandler> types;
@@ -253,9 +241,6 @@ private:
     void valueTreeChildRemoved (ValueTree&, ValueTree&);
     void valueTreeChildOrderChanged (ValueTree&);
     void valueTreeParentChanged (ValueTree&);
-
-    static const Identifier positionID;
-    void initialiseRecursively (Component&, const ValueTree&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBuilder);
 };

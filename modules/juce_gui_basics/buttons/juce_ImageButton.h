@@ -127,16 +127,6 @@ public:
     */
     Image getDownImage() const;
 
-    //==============================================================================
-    struct Ids
-    {
-        static const Identifier tagType, upImage, overImage, downImage,
-                                upOverlay, overOverlay, downOverlay,
-                                upOpacity, overOpacity, downOpacity;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
-
 protected:
     //==============================================================================
     /** @internal */

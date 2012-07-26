@@ -93,14 +93,6 @@ public:
     */
     void changeWidthToFitText();
 
-    //==============================================================================
-    struct Ids
-    {
-        static const Identifier tagType, text, url;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
-
 protected:
     //==============================================================================
     /** @internal */

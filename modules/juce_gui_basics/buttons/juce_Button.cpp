@@ -663,29 +663,3 @@ Button::RepeatTimer& Button::getRepeatTimer()
 
     return *repeatTimer;
 }
-
-const Identifier Button::Ids::text ("text");
-const Identifier Button::Ids::radioGroup ("radioGroup");
-const Identifier Button::Ids::connectedLeft ("connectedLeft");
-const Identifier Button::Ids::connectedRight ("connectedRight");
-const Identifier Button::Ids::connectedTop ("connectedTop");
-const Identifier Button::Ids::connectedBottom ("connectedBottom");
-
-void Button::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setButtonText (state [Ids::text].toString());
-    setRadioGroupId (state [Ids::radioGroup]);
-    setConnectedEdges (getConnectedFlags (state));
-}
-
-int Button::getConnectedFlags (const ValueTree& state)
-{
-    int connected = 0;
-    if (state [Button::Ids::connectedLeft])    connected |= Button::ConnectedOnLeft;
-    if (state [Button::Ids::connectedRight])   connected |= Button::ConnectedOnRight;
-    if (state [Button::Ids::connectedTop])     connected |= Button::ConnectedOnTop;
-    if (state [Button::Ids::connectedBottom])  connected |= Button::ConnectedOnBottom;
-    return connected;
-}

@@ -929,19 +929,6 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription,
 }
 
 //==============================================================================
-const Identifier ListBox::Ids::rowHeight ("rowHeight");
-const Identifier ListBox::Ids::borderThickness ("borderThickness");
-
-void ListBox::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setRowHeight (state.getProperty (Ids::rowHeight, defaultListRowHeight));
-    setOutlineThickness (state.getProperty (Ids::borderThickness, 0));
-}
-
-
-//==============================================================================
 Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingComponentToUpdate)
 {
     (void) existingComponentToUpdate;

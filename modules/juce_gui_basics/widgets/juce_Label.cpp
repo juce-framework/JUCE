@@ -448,22 +448,3 @@ void Label::textEditorFocusLost (TextEditor& ed)
 {
     textEditorTextChanged (ed);
 }
-
-
-const Identifier Label::Ids::tagType ("LABEL");
-const Identifier Label::Ids::text ("text");
-const Identifier Label::Ids::font ("font");
-const Identifier Label::Ids::editMode ("editMode");
-const Identifier Label::Ids::justification ("justification");
-const Identifier Label::Ids::focusLossDiscardsChanges ("focusLossDiscardsChanges");
-
-void Label::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setText (state [Ids::text].toString(), false);
-    setFont (Font::fromString (state [Ids::font]));
-    const int editMode = static_cast <int> (state [Ids::editMode]);
-    setEditable (editMode == 2, editMode == 3, static_cast <bool> (state [Ids::focusLossDiscardsChanges]));
-    setJustificationType (static_cast <int> (state [Ids::justification]));
-}

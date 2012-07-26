@@ -526,14 +526,6 @@ public:
     Viewport* getViewport() const noexcept;
 
     //==============================================================================
-    struct Ids
-    {
-        static const Identifier rowHeight, borderThickness;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
-
-    //==============================================================================
     /** @internal */
     bool keyPressed (const KeyPress&);
     /** @internal */

@@ -89,12 +89,6 @@ public:
     */
     virtual Font getFont();
 
-    //==============================================================================
-    struct Ids
-    {
-        static const Identifier tagType;
-    };
-
 protected:
     /** @internal */
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown);
@@ -102,7 +96,6 @@ protected:
     void colourChanged();
 
 private:
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextButton);
 };
 

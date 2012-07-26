@@ -253,14 +253,6 @@ public:
     /** Returns true if the editor is currently focused and active. */
     bool isBeingEdited() const noexcept;
 
-    //==============================================================================
-    struct Ids
-    {
-        static const Identifier tagType, text, font, editMode, justification, focusLossDiscardsChanges;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
-
 protected:
     //==============================================================================
     /** Creates the TextEditor component that will be used when the user has clicked on the label.

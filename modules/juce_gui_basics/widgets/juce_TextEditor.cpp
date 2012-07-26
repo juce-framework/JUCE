@@ -2611,32 +2611,3 @@ void TextEditor::Listener::textEditorTextChanged (TextEditor&) {}
 void TextEditor::Listener::textEditorReturnKeyPressed (TextEditor&) {}
 void TextEditor::Listener::textEditorEscapeKeyPressed (TextEditor&) {}
 void TextEditor::Listener::textEditorFocusLost (TextEditor&) {}
-
-//==============================================================================
-const Identifier TextEditor::Ids::tagType ("TEXTEDITOR");
-const Identifier TextEditor::Ids::text ("text");
-const Identifier TextEditor::Ids::font ("font");
-const Identifier TextEditor::Ids::mode ("mode");
-const Identifier TextEditor::Ids::readOnly ("readOnly");
-const Identifier TextEditor::Ids::scrollbarsShown ("scrollbarsShown");
-const Identifier TextEditor::Ids::caretVisible ("caretVisible");
-const Identifier TextEditor::Ids::popupMenuEnabled ("popupMenuEnabled");
-
-void TextEditor::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setReadOnly (state [Ids::readOnly]);
-    setScrollbarsShown (state [Ids::scrollbarsShown]);
-    setCaretVisible (state [Ids::caretVisible]);
-    setPopupMenuEnabled (state [Ids::popupMenuEnabled]);
-    const int mode = state [Ids::mode];
-    setMultiLine (mode > 1, true);
-    setReturnKeyStartsNewLine (mode != 3);
-
-    const Font font (Font::fromString (state [Ids::font]));
-    if (getFont() != font)
-        applyFontToAllText (font);
-
-    setText (state [Ids::text].toString());
-}

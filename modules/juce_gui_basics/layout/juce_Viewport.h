@@ -237,14 +237,6 @@ public:
 
 
     //==============================================================================
-    struct Ids
-    {
-        static const Identifier showScrollBarV, showScrollBarH, scrollBarWidth;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
-
-    //==============================================================================
     /** @internal */
     void resized();
     /** @internal */

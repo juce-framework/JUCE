@@ -58,7 +58,7 @@ public:
     String getTitle() const;
     Value getProjectNameValue()                         { return getMainGroup().getNameValue(); }
     String getProjectFilenameRoot()                     { return File::createLegalFileName (getDocumentTitle()); }
-    String getProjectUID() const                        { return projectRoot [ComponentBuilder::idProperty]; }
+    String getProjectUID() const                        { return projectRoot [Ids::ID]; }
 
     //==============================================================================
     template <class FileType>

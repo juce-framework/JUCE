@@ -94,8 +94,8 @@ void Project::updateProjectSettings()
 
 void Project::setMissingDefaultValues()
 {
-    if (! projectRoot.hasProperty (ComponentBuilder::idProperty))
-        projectRoot.setProperty (ComponentBuilder::idProperty, createAlphaNumericUID(), nullptr);
+    if (! projectRoot.hasProperty (Ids::ID))
+        projectRoot.setProperty (Ids::ID, createAlphaNumericUID(), nullptr);
 
     // Create main file group if missing
     if (! projectRoot.getChildWithName (Tags::projectMainGroup).isValid())
@@ -431,8 +431,8 @@ Project::Item::Item (const Item& other)
 
 Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.state.createCopy(); return i; }
 
-String Project::Item::getID() const               { return state [ComponentBuilder::idProperty]; }
-void Project::Item::setID (const String& newID)   { state.setProperty (ComponentBuilder::idProperty, newID, nullptr); }
+String Project::Item::getID() const               { return state [Ids::ID]; }
+void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
 String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
@@ -458,7 +458,7 @@ bool Project::Item::isImageFile() const     { return isFile() && getFile().hasFi
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {
-    if (state [ComponentBuilder::idProperty] == targetId)
+    if (state [Ids::ID] == targetId)
         return *this;
 
     if (isGroup())
@@ -603,7 +603,7 @@ File Project::Item::determineGroupFolder() const
 
 void Project::Item::initialiseMissingProperties()
 {
-    if (! state.hasProperty (ComponentBuilder::idProperty))
+    if (! state.hasProperty (Ids::ID))
         setID (createAlphaNumericUID());
 
     if (isFile())
@@ -841,7 +841,7 @@ bool Project::isModuleEnabled (const String& moduleID) const
     ValueTree modules (projectRoot.getChildWithName (Tags::modulesGroup));
 
     for (int i = 0; i < modules.getNumChildren(); ++i)
-        if (modules.getChild(i) [ComponentBuilder::idProperty] == moduleID)
+        if (modules.getChild(i) [Ids::ID] == moduleID)
             return true;
 
     return false;
@@ -849,13 +849,13 @@ bool Project::isModuleEnabled (const String& moduleID) const
 
 Value Project::shouldShowAllModuleFilesInProject (const String& moduleID)
 {
-    return getModulesNode().getChildWithProperty (ComponentBuilder::idProperty, moduleID)
+    return getModulesNode().getChildWithProperty (Ids::ID, moduleID)
                            .getPropertyAsValue (Ids::showAllCode, getUndoManagerFor (getModulesNode()));
 }
 
 Value Project::shouldCopyModuleFilesLocally (const String& moduleID)
 {
-    return getModulesNode().getChildWithProperty (ComponentBuilder::idProperty, moduleID)
+    return getModulesNode().getChildWithProperty (Ids::ID, moduleID)
                            .getPropertyAsValue (Ids::useLocalCopy, getUndoManagerFor (getModulesNode()));
 }
 
@@ -864,7 +864,7 @@ void Project::addModule (const String& moduleID, bool shouldCopyFilesLocally)
     if (! isModuleEnabled (moduleID))
     {
         ValueTree module (Tags::module);
-        module.setProperty (ComponentBuilder::idProperty, moduleID, nullptr);
+        module.setProperty (Ids::ID, moduleID, nullptr);
 
         ValueTree modules (getModulesNode());
         modules.addChild (module, -1, getUndoManagerFor (modules));
@@ -881,7 +881,7 @@ void Project::removeModule (const String& moduleID)
     ValueTree modules (getModulesNode());
 
     for (int i = 0; i < modules.getNumChildren(); ++i)
-        if (modules.getChild(i) [ComponentBuilder::idProperty] == moduleID)
+        if (modules.getChild(i) [Ids::ID] == moduleID)
             modules.removeChild (i, getUndoManagerFor (modules));
 }
 
@@ -899,7 +899,7 @@ int Project::getNumModules() const
 
 String Project::getModuleID (int index) const
 {
-    return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [ComponentBuilder::idProperty].toString();
+    return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [Ids::ID].toString();
 }
 
 //==============================================================================

@@ -23,6 +23,12 @@
   ==============================================================================
 */
 
+ToggleButton::ToggleButton()
+    : Button (String::empty)
+{
+    setClickingTogglesState (true);
+}
+
 ToggleButton::ToggleButton (const String& buttonText)
     : Button (buttonText)
 {
@@ -33,13 +39,9 @@ ToggleButton::~ToggleButton()
 {
 }
 
-void ToggleButton::paintButton (Graphics& g,
-                                bool isMouseOverButton,
-                                bool isButtonDown)
+void ToggleButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)
 {
-    getLookAndFeel().drawToggleButton (g, *this,
-                                       isMouseOverButton,
-                                       isButtonDown);
+    getLookAndFeel().drawToggleButton (g, *this, isMouseOverButton, isButtonDown);
 }
 
 void ToggleButton::changeWidthToFitText()
@@ -51,5 +53,3 @@ void ToggleButton::colourChanged()
 {
     repaint();
 }
-
-const Identifier ToggleButton::Ids::tagType ("TOGGLEBUTTON");

@@ -126,6 +126,7 @@ namespace Ids
     DECLARE_ID (androidKeyAliasPass);
     DECLARE_ID (font);
     DECLARE_ID (colour);
+    const Identifier ID ("id");
     const Identifier class_ ("class");
 
     #undef DECLARE_ID
