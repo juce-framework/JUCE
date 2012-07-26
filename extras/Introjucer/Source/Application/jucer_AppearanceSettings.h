@@ -85,10 +85,11 @@ class IntrojucerLookAndFeel   : public LookAndFeel
 public:
     IntrojucerLookAndFeel();
 
+    void fillWithBackgroundTexture (Graphics&);
+
     int getTabButtonOverlap (int tabDepth);
     int getTabButtonSpaceAroundImage();
     int getTabButtonBestWidth (TabBarButton& button, int tabDepth);
-
     static Colour getTabBackgroundColour (TabBarButton& button);
     void createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout);
     void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown);
@@ -103,6 +104,10 @@ public:
 
     void drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical,
                         int thumbStartPosition, int thumbSize, bool /*isMouseOver*/, bool /*isMouseDown*/);
+
+private:
+    Image backgroundTexture;
+    Colour backgroundTextureBaseColour;
 };
 
 

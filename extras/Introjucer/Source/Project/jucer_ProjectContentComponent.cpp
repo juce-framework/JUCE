@@ -138,7 +138,7 @@ ProjectContentComponent::~ProjectContentComponent()
 
 void ProjectContentComponent::paint (Graphics& g)
 {
-    g.fillAll (findColour (mainBackgroundColourId));
+    dynamic_cast<IntrojucerLookAndFeel&> (getLookAndFeel()).fillWithBackgroundTexture (g);
 }
 
 void ProjectContentComponent::paintOverChildren (Graphics& g)
@@ -176,11 +176,6 @@ void ProjectContentComponent::resized()
 
 void ProjectContentComponent::lookAndFeelChanged()
 {
-    const Colour tabColour (findColour (mainBackgroundColourId));
-
-    for (int i = treeViewTabs.getNumTabs(); --i >= 0;)
-        treeViewTabs.setTabBackgroundColour (i, tabColour);
-
     repaint();
 }
 
@@ -252,7 +247,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 void ProjectContentComponent::createProjectTabs()
 {
     jassert (project != nullptr);
-    const Colour tabColour (findColour (mainBackgroundColourId));
+    const Colour tabColour (Colours::transparentBlack);
 
     treeViewTabs.addTab ("Files",  tabColour, new FileTreeTab (*project), true);
     treeViewTabs.addTab ("Config", tabColour, new ConfigTreeTab (*project), true);

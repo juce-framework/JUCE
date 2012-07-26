@@ -88,16 +88,13 @@ void AppearanceSettings::writeDefaultSchemeFile (const String& xmlString, const 
 {
     const File file (getSchemesFolder().getChildFile (name).withFileExtension (getSchemeFileSuffix()));
 
-    if (! file.exists())
-    {
-        AppearanceSettings settings (false);
+    AppearanceSettings settings (false);
 
-        ScopedPointer<XmlElement> xml (XmlDocument::parse (xmlString));
-        if (xml != nullptr)
-            settings.readFromXML (*xml);
+    ScopedPointer<XmlElement> xml (XmlDocument::parse (xmlString));
+    if (xml != nullptr)
+        settings.readFromXML (*xml);
 
-        settings.writeToFile (file);
-    }
+    settings.writeToFile (file);
 }
 
 void AppearanceSettings::refreshPresetSchemeList()
@@ -562,7 +559,7 @@ void IntrojucerLookAndFeel::createTabTextLayout (const TabBarButton& button, con
 
 Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
 {
-    const Colour normalBkg (button.getTabBackgroundColour());
+    const Colour normalBkg (button.findColour (mainBackgroundColourId));
     Colour bkg (normalBkg.contrasting (0.15f));
     if (button.isFrontTab())
         bkg = bkg.overlaidWith (Colours::yellow.withAlpha (0.5f));
@@ -580,7 +577,7 @@ void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bo
                                        bkg.darker (0.1f), 0, (float) activeArea.getBottom(), false));
     g.fillRect (activeArea);
 
-    g.setColour (button.getTabBackgroundColour().darker (0.3f));
+    g.setColour (button.findColour (mainBackgroundColourId).darker (0.3f));
     g.drawRect (activeArea);
 
     GlyphArrangement textLayout;
@@ -638,4 +635,33 @@ void IntrojucerLookAndFeel::drawScrollbar (Graphics& g, ScrollBar& scrollbar, in
 
     g.setColour (thumbCol.contrasting ((isMouseOver  || isMouseDown) ? 0.2f : 0.1f));
     g.strokePath (thumbPath, PathStrokeType (1.0f));
+}
+
+void IntrojucerLookAndFeel::fillWithBackgroundTexture (Graphics& g)
+{
+    const Colour bkg (findColour (mainBackgroundColourId));
+
+    if (backgroundTextureBaseColour != bkg)
+    {
+        backgroundTextureBaseColour = bkg;
+
+        const Image original (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png,
+                                                         BinaryData::brushed_aluminium_pngSize));
+        const int w = original.getWidth();
+        const int h = original.getHeight();
+
+        backgroundTexture = Image (Image::RGB, w, h, false);
+
+        for (int y = 0; y < h; ++y)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                const float b = original.getPixelAt (x, y).getBrightness();
+                backgroundTexture.setPixelAt (x, y, bkg.withMultipliedBrightness (b + 0.4f));
+            }
+        }
+    }
+
+    g.setTiledImageFill (backgroundTexture, 0, 0, 1.0f);
+    g.fillAll();
 }

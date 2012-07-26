@@ -184,55 +184,6 @@ void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
     }
 }
 
-void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text)
-{
-    g.fillAll (Colours::white.withAlpha (0.4f));
-    g.setColour (Colours::grey);
-    g.drawRect (0, 0, w, h);
-
-    g.drawLine (0.5f, 0.5f, w - 0.5f, h - 0.5f);
-    g.drawLine (0.5f, h - 0.5f, w - 0.5f, 0.5f);
-
-    g.setColour (Colours::black);
-    g.setFont (11.0f);
-    g.drawFittedText (text, 2, 2, w - 4, h - 4, Justification::centredTop, 2);
-}
-
-static Image createTexturisedBackgroundTile()
-{
-    const Colour bkg (LookAndFeel::getDefaultLookAndFeel().findColour (mainBackgroundColourId));
-    const int64 hash = bkg.getARGB() + 0x3474572a;
-
-    Image tile (ImageCache::getFromHashCode (hash));
-
-    if (tile.isNull())
-    {
-        const Image original (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png,
-                                                         BinaryData::brushed_aluminium_pngSize));
-
-        tile = Image (Image::RGB, original.getWidth(), original.getHeight(), false);
-
-        for (int y = 0; y < tile.getHeight(); ++y)
-        {
-            for (int x = 0; x < tile.getWidth(); ++x)
-            {
-                const float b = original.getPixelAt (x, y).getBrightness();
-                tile.setPixelAt (x, y, bkg.withMultipliedBrightness (b + 0.4f));
-            }
-        }
-
-        ImageCache::addImageToCache (tile, hash);
-    }
-
-    return tile;
-}
-
-void drawTexturedBackground (Graphics& g)
-{
-    g.setTiledImageFill (createTexturisedBackgroundTile(), 0, 0, 1.0f);
-    g.fillAll();
-}
-
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex)
 {

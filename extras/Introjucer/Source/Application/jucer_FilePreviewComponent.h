@@ -42,7 +42,7 @@ public:
 
     void paint (Graphics& g)
     {
-        drawTexturedBackground (g);
+        dynamic_cast<IntrojucerLookAndFeel&> (getLookAndFeel()).fillWithBackgroundTexture (g);
 
         Rectangle<int> area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
                                 .appliedTo (image.getBounds(), Rectangle<int> (4, 22, getWidth() - 8, getHeight() - 26));

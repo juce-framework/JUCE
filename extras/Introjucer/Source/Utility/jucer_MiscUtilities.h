@@ -46,9 +46,6 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX = true, bool scrollY = true);
 
-void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text);
-void drawTexturedBackground (Graphics& g);
-
 void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer);
 
 bool cancelAnyModalComponents();

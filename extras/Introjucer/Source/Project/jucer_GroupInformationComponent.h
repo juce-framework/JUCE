@@ -57,7 +57,7 @@ public:
     //==============================================================================
     void paint (Graphics& g)
     {
-        drawTexturedBackground (g);
+        dynamic_cast<IntrojucerLookAndFeel&> (getLookAndFeel()).fillWithBackgroundTexture (g);
     }
 
     void resized()

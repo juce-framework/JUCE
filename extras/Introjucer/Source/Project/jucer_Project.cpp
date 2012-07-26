@@ -88,8 +88,8 @@ String Project::getDocumentTitle()
 
 void Project::updateProjectSettings()
 {
-    projectRoot.setProperty (Ids::jucerVersion, ProjectInfo::versionString, 0);
-    projectRoot.setProperty (Ids::name, getDocumentTitle(), 0);
+    projectRoot.setProperty (Ids::jucerVersion, ProjectInfo::versionString, nullptr);
+    projectRoot.setProperty (Ids::name, getDocumentTitle(), nullptr);
 }
 
 void Project::setMissingDefaultValues()
@@ -608,7 +608,7 @@ void Project::Item::initialiseMissingProperties()
 
     if (isFile())
     {
-        state.setProperty (Ids::name, getFile().getFileName(), 0);
+        state.setProperty (Ids::name, getFile().getFileName(), nullptr);
     }
     else if (isGroup())
     {
