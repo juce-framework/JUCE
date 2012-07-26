@@ -1788,8 +1788,10 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 
 ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
+   #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
     if ([NSEvent respondsToSelector: @selector (modifierFlags)])
         NSViewComponentPeer::updateModifiers ((NSUInteger) [NSEvent modifierFlags]);
+   #endif
 
     return NSViewComponentPeer::currentModifiers;
 }

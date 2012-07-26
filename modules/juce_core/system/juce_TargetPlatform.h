@@ -185,5 +185,8 @@
   #error unknown compiler
 #endif
 
+#ifdef __clang__
+ #define JUCE_CLANG 1
+#endif
 
 #endif   // __JUCE_TARGETPLATFORM_JUCEHEADER__

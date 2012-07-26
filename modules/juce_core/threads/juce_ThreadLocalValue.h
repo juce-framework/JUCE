@@ -28,7 +28,7 @@
 
 // (NB: on win32, native thread-locals aren't possible in a dynamically loaded DLL in XP).
 #if ! ((JUCE_MSVC && (defined (_WIN64) || ! defined (JucePlugin_PluginCode))) \
-       || (JUCE_MAC && defined (__clang__) && defined (MAC_OS_X_VERSION_10_7) \
+       || (JUCE_MAC && JUCE_CLANG && defined (MAC_OS_X_VERSION_10_7) \
              && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7))
  #define JUCE_NO_COMPILER_THREAD_LOCAL 1
 #endif

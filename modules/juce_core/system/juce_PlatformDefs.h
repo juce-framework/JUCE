@@ -294,7 +294,7 @@ namespace juce
  #define JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS 1
 #endif
 
-#if defined (__clang__) && defined (__has_feature)
+#if JUCE_CLANG && defined (__has_feature)
  #if __has_feature (cxx_nullptr)
   #define JUCE_COMPILER_SUPPORTS_NULLPTR 1
  #endif
