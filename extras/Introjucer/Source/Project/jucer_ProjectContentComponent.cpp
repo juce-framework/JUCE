@@ -91,20 +91,17 @@ public:
 class LogoComponent  : public Component
 {
 public:
-    LogoComponent()
-    {
-        Rectangle<float> iconSize (getIcons().mainJuceLogo.getBounds());
-        setSize (400, (int) (400 * iconSize.getWidth() / iconSize.getHeight()));
-    }
+    LogoComponent() {}
 
     void paint (Graphics& g)
     {
-        g.setColour (findColour (mainBackgroundColourId).contrasting (0.3f));
+        const Path& logo = getIcons().mainJuceLogo;
+        const AffineTransform trans (RectanglePlacement (RectanglePlacement::centred)
+                                        .getTransformToFit (logo.getBounds(),
+                                                            getLocalBounds().toFloat()));
 
-        g.fillPath (getIcons().mainJuceLogo,
-                    RectanglePlacement (RectanglePlacement::centred)
-                     .getTransformToFit (getIcons().mainJuceLogo.getBounds(),
-                                         getLocalBounds().toFloat()));
+        g.setColour (findColour (mainBackgroundColourId).contrasting (0.3f));
+        g.fillPath (logo, trans);
     }
 };
 
@@ -172,15 +169,9 @@ void ProjectContentComponent::resized()
         resizerBar->setBounds (r.removeFromLeft (4));
 
     if (contentView != nullptr)
-    {
         contentView->setBounds (r);
-        logo->setVisible (false);
-    }
-    else
-    {
-        logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
-        logo->setVisible (true);
-    }
+
+    logo->setBounds (r.reduced (r.getWidth() / 4, r.getHeight() / 4));
 }
 
 void ProjectContentComponent::lookAndFeelChanged()
@@ -414,19 +405,69 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
     return false;
 }
 
+void ProjectContentComponent::closeDocument()
+{
+    if (currentDocument != nullptr)
+        JucerApplication::getApp().openDocumentManager.closeDocument (currentDocument, true);
+    else if (contentView != nullptr)
+        if (! goToPreviousFile())
+            hideEditor();
+}
+
+void ProjectContentComponent::saveDocument()
+{
+    if (currentDocument != nullptr)
+        currentDocument->save();
+    else
+        saveProject();
+}
+
 bool ProjectContentComponent::goToPreviousFile()
 {
-    OpenDocumentManager::Document* currentSourceDoc = recentDocumentList.getCurrentDocument();
+    OpenDocumentManager::Document* doc = recentDocumentList.getCurrentDocument();
 
-    if (currentSourceDoc != nullptr && currentSourceDoc != getCurrentDocument())
-        return showDocument (currentSourceDoc, true);
-    else
-        return showDocument (recentDocumentList.getPrevious(), true);
+    if (doc == nullptr || doc == getCurrentDocument())
+        doc = recentDocumentList.getPrevious();
+
+    return showDocument (doc, true);
 }
 
 bool ProjectContentComponent::goToNextFile()
 {
     return showDocument (recentDocumentList.getNext(), true);
+}
+
+bool ProjectContentComponent::saveProject()
+{
+    return project != nullptr
+            && project->save (true, true) == FileBasedDocument::savedOk;
+}
+
+void ProjectContentComponent::closeProject()
+{
+    MainWindow* const mw = findParentComponentOfClass<MainWindow>();
+
+    if (mw != nullptr)
+        mw->closeCurrentProject();
+}
+
+void ProjectContentComponent::openInIDE()
+{
+    if (project != nullptr)
+    {
+        ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
+
+        if (exporter != nullptr)
+            exporter->launchProject();
+    }
+}
+
+void ProjectContentComponent::deleteSelectedTreeItems()
+{
+    TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent());
+
+    if (tree != nullptr)
+        tree->deleteSelectedItems();
 }
 
 void ProjectContentComponent::updateMainWindowTitle()
@@ -437,6 +478,17 @@ void ProjectContentComponent::updateMainWindowTitle()
         mw->updateTitle (currentDocument != nullptr ? currentDocument->getName() : String::empty);
 }
 
+void ProjectContentComponent::showBubbleMessage (const Rectangle<int>& pos, const String& text)
+{
+    addChildComponent (&bubbleMessage);
+    bubbleMessage.setColour (BubbleComponent::backgroundColourId, Colours::white.withAlpha (0.7f));
+    bubbleMessage.setColour (BubbleComponent::outlineColourId, Colours::black.withAlpha (0.8f));
+    bubbleMessage.setAlwaysOnTop (true);
+
+    bubbleMessage.showAt (pos, AttributedString (text), 3000, true, false);
+}
+
+//==============================================================================
 ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 {
     return findFirstTargetParentComponent();
@@ -493,7 +545,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Close" + documentName,
                         "Closes the current document",
                         CommandCategories::general, 0);
-        result.setActive (currentDocument != nullptr);
+        result.setActive (contentView != nullptr);
        #if JUCE_MAC
         result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
        #else
@@ -585,114 +637,51 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 {
     switch (info.commandID)
     {
-    case CommandIDs::saveProject:
-        if (project != nullptr && ! reinvokeCommandAfterClosingPropertyEditors (info))
-            project->save (true, true);
-
-        break;
-
-    case CommandIDs::closeProject:
-        {
-            MainWindow* const mw = findParentComponentOfClass<MainWindow>();
-
-            if (mw != nullptr && ! reinvokeCommandAfterClosingPropertyEditors (info))
-                mw->closeCurrentProject();
-        }
-
-        break;
-
-    case CommandIDs::saveDocument:
-        if (! reinvokeCommandAfterClosingPropertyEditors (info))
-        {
-            if (currentDocument != nullptr)
-                currentDocument->save();
-            else if (project != nullptr)
-                project->save (true, true);
-        }
-
-        break;
-
-    case CommandIDs::closeDocument:
-        if (currentDocument != nullptr)
-            JucerApplication::getApp().openDocumentManager.closeDocument (currentDocument, true);
-        break;
-
-    case CommandIDs::goToPreviousDoc:
-        goToPreviousFile();
-        break;
-
-    case CommandIDs::goToNextDoc:
-        goToNextFile();
-        break;
-
-    case CommandIDs::openInIDE:
-        if (project != nullptr)
-        {
-            ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
-
-            if (exporter != nullptr)
-                exporter->launchProject();
-        }
-        break;
-
-    case CommandIDs::saveAndOpenInIDE:
-        if (project != nullptr)
-        {
-            if (! reinvokeCommandAfterClosingPropertyEditors (info))
+        case CommandIDs::saveProject:
+        case CommandIDs::closeProject:
+        case CommandIDs::saveDocument:
+        case CommandIDs::closeDocument:
+        case CommandIDs::goToPreviousDoc:
+        case CommandIDs::goToNextDoc:
+        case CommandIDs::saveAndOpenInIDE:
+            if (reinvokeCommandAfterCancellingModalComps (info))
             {
-                if (project->save (true, true) == FileBasedDocument::savedOk)
-                {
-                    ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
-
-                    if (exporter != nullptr)
-                        exporter->launchProject();
-                }
+                grabKeyboardFocus(); // to force any open labels to close their text editors
+                return true;
             }
-        }
-        break;
 
-    case CommandIDs::showFilePanel:
-        treeViewTabs.setCurrentTabIndex (0);
-        break;
+            break;
 
-    case CommandIDs::showConfigPanel:
-        treeViewTabs.setCurrentTabIndex (1);
-        break;
+        default:
+            break;
+    }
 
-    case StandardApplicationCommandIDs::del:
-        {
-            TreePanelBase* const tree = dynamic_cast<TreePanelBase*> (treeViewTabs.getCurrentContentComponent());
+    switch (info.commandID)
+    {
+        case CommandIDs::saveProject:               saveProject(); break;
+        case CommandIDs::closeProject:              closeProject(); break;
+        case CommandIDs::saveDocument:              saveDocument(); break;
 
-            if (tree != nullptr)
-                tree->deleteSelectedItems();
-        }
+        case CommandIDs::closeDocument:             closeDocument(); break;
+        case CommandIDs::goToPreviousDoc:           goToPreviousFile(); break;
+        case CommandIDs::goToNextDoc:               goToNextFile(); break;
 
-        break;
+        case CommandIDs::showFilePanel:             treeViewTabs.setCurrentTabIndex (0); break;
+        case CommandIDs::showConfigPanel:           treeViewTabs.setCurrentTabIndex (1); break;
 
-    default:
-        return false;
+        case CommandIDs::openInIDE:                 openInIDE(); break;
+
+        case StandardApplicationCommandIDs::del:    deleteSelectedTreeItems(); break;
+
+        case CommandIDs::saveAndOpenInIDE:
+            if (saveProject())
+                openInIDE();
+
+            break;
+
+        default:
+            return false;
     }
 
     return true;
-}
-
-bool ProjectContentComponent::reinvokeCommandAfterClosingPropertyEditors (const InvocationInfo& info)
-{
-    if (reinvokeCommandAfterCancellingModalComps (info))
-    {
-        grabKeyboardFocus(); // to force any open labels to close their text editors
-        return true;
-    }
-
-    return false;
-}
-
-void ProjectContentComponent::showBubbleMessage (const Rectangle<int>& pos, const String& text)
-{
-    addChildComponent (&bubbleMessage);
-    bubbleMessage.setColour (BubbleComponent::backgroundColourId, Colours::white.withAlpha (0.7f));
-    bubbleMessage.setColour (BubbleComponent::outlineColourId, Colours::black.withAlpha (0.8f));
-    bubbleMessage.setAlwaysOnTop (true);
-
-    bubbleMessage.showAt (pos, AttributedString (text), 3000, true, false);
 }

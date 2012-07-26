@@ -123,9 +123,10 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 {
     String comment;
     comment << newLine << newLine
-            << "   This is an auto-generated file, created by " << JUCEApplication::getInstance()->getApplicationName() << newLine
-            << "   Do not edit anything in this file!" << newLine << newLine
-            << "*/" << newLine << newLine;
+            << "   This is an auto-generated file: Any edits you make may be overwritten!" << newLine
+            << newLine
+            << "*/" << newLine
+            << newLine;
 
     header << "/* ========================================================================================="
            << comment;

@@ -160,6 +160,7 @@ void MainWindow::setProject (Project* newProject)
     createProjectContentCompIfNeeded();
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
+    getProjectContentComponent()->updateMainWindowTitle();
     commandManager->commandStatusChanged();
 }
 
@@ -240,10 +241,10 @@ void MainWindow::updateTitle (const String& documentName)
     String name (JucerApplication::getApp().getApplicationName());
 
     if (currentProject != nullptr)
-        name = currentProject->getDocumentTitle() + " - " + name;
+        name << " - " << currentProject->getDocumentTitle();
 
     if (documentName.isNotEmpty())
-        name = documentName + " - " + name;
+        name << " - " << documentName;
 
     setName (name);
 }
@@ -375,7 +376,10 @@ bool MainWindowList::openFile (const File& file)
         if (newDoc->loadFrom (file, true))
         {
             MainWindow* const w = getOrCreateEmptyWindow();
-            w->setProject (newDoc.release());
+            w->setProject (newDoc);
+
+            newDoc.release()->setChangedFlag (false);
+
             w->makeVisible();
             avoidSuperimposedWindows (w);
 

@@ -128,7 +128,7 @@ public:
     //==============================================================================
     const String getApplicationName()
     {
-        return String (ProjectInfo::projectName) + " " + getApplicationVersion();
+        return "Introjucer";
     }
 
     const String getApplicationVersion()
