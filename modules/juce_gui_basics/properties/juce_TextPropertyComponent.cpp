@@ -35,8 +35,8 @@ public:
     {
         setEditable (true, true, false);
 
-        setColour (backgroundColourId, findColour (ComboBox::backgroundColourId));
-        setColour (outlineColourId, findColour (ComboBox::outlineColourId));
+        setColour (backgroundColourId, findColour (Label::backgroundColourId));
+        setColour (outlineColourId, findColour (Label::outlineColourId));
     }
 
     TextEditor* createEditorComponent()
