@@ -118,7 +118,7 @@ String TooltipWindow::getTipFor (Component* const c)
 {
     if (c != nullptr
          && Process::isForegroundProcess()
-         && ! Component::isMouseButtonDownAnywhere())
+         && ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
     {
         TooltipClient* const ttc = dynamic_cast <TooltipClient*> (c);
 

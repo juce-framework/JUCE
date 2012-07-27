@@ -396,7 +396,7 @@ namespace ProjectSettingsTreeClasses
         void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
         {
             int oldIndex = dragSourceDetails.description.toString().getTrailingIntValue();
-            exportersTree.moveChild (oldIndex, insertIndex, project.getUndoManagerFor (exportersTree));
+            exportersTree.moveChild (oldIndex, jmax (0, insertIndex - 1), project.getUndoManagerFor (exportersTree));
         }
 
         //==============================================================================

@@ -257,7 +257,7 @@ void JuceDemoPluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, Midi
             const float in = channelData[i];
             channelData[i] += delayData[dp];
             delayData[dp] = (delayData[dp] + in) * delay;
-            if (++dp > delayBuffer.getNumSamples())
+            if (++dp >= delayBuffer.getNumSamples())
                 dp = 0;
         }
     }
