@@ -95,61 +95,6 @@ namespace ComponentBuilderHelpers
             }
         }
     }
-
-    static void updateComponentColours (Component& component, const ValueTree& colourState)
-    {
-        NamedValueSet& properties = component.getProperties();
-
-        for (int i = properties.size(); --i >= 0;)
-        {
-            const Identifier name (properties.getName (i));
-
-            if (name.toString().startsWith ("jcclr_"))
-            {
-                const String colourName (name.toString().substring (6));
-
-                if (colourState [colourName].isVoid())
-                    component.removeColour (colourName.getHexValue32());
-            }
-        }
-
-        for (int i = 0; i < colourState.getNumProperties(); ++i)
-        {
-            const Identifier colourName (colourState.getPropertyName (i));
-            const String colour (colourState [colourName].toString());
-
-            if (colour.isNotEmpty())
-                component.setColour (colourName.toString().getHexValue32(), Colour::fromString (colour));
-        }
-    }
-
-    template <class ComponentClass>
-    class StandardTypeHandler  : public ComponentBuilder::TypeHandler
-    {
-    public:
-        StandardTypeHandler()  : ComponentBuilder::TypeHandler (ComponentClass::Ids::tagType)
-        {}
-
-        Component* addNewComponentFromState (const ValueTree& state, Component* parent)
-        {
-            ComponentClass* const c = new ComponentClass();
-
-            if (parent != nullptr)
-                parent->addAndMakeVisible (c);
-
-            updateComponentFromState (c, state);
-            return c;
-        }
-
-        void updateComponentFromState (Component* component, const ValueTree& state)
-        {
-            ComponentClass* const c = dynamic_cast <ComponentClass*> (component);
-            jassert (c != nullptr);
-
-            c->setComponentID (state [ComponentBuilder::idProperty]);
-            c->refreshFromValueTree (state, *this->getBuilder());
-        }
-    };
 }
 
 //=============================================================================
@@ -341,10 +286,4 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
         for (int i = componentsInOrder.size() - 1; --i >= 0;)
             componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
     }
-}
-
-static void updateMarkers (MarkerList* const list, const ValueTree& state)
-{
-    if (list != nullptr)
-        MarkerList::ValueTreeWrapper (state).applyTo (*list);
 }

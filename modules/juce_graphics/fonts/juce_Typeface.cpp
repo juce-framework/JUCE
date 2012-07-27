@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-namespace FontStyleHelpers
+struct FontStyleHelpers
 {
     static const char* getStyleName (const bool bold,
                                      const bool italic) noexcept
@@ -71,7 +71,7 @@ namespace FontStyleHelpers
         return isPlaceholderFamilyName (family) ? getConcreteFamilyNameFromPlaceholder (family)
                                                 : family;
     }
-}
+};
 
 //==============================================================================
 Typeface::Typeface (const String& name_, const String& style_) noexcept
