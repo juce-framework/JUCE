@@ -895,7 +895,7 @@ public:
                                               '4', KeyPress::numberPad4, '5', KeyPress::numberPad5,
                                               '6', KeyPress::numberPad6, '7', KeyPress::numberPad7,
                                               '8', KeyPress::numberPad8, '9', KeyPress::numberPad9,
-                                              '+', KeyPress::numberPadAdd,  '-', KeyPress::numberPadSubtract,
+                                              '+', KeyPress::numberPadAdd, '-', KeyPress::numberPadSubtract,
                                               '*', KeyPress::numberPadMultiply, '/', KeyPress::numberPadDivide,
                                               '.', KeyPress::numberPadDecimalPoint, '=', KeyPress::numberPadEquals };
 
@@ -916,14 +916,14 @@ public:
     static Point<int> getMousePos (NSEvent* e, NSView* view)
     {
         NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
-        return Point<int> (roundToInt (p.x), roundToInt ([view frame].size.height - p.y));
+        return Point<int> ((int) p.x, (int) ([view frame].size.height - p.y));
     }
 
     static int getModifierForButtonNumber (const NSInteger num)
     {
         return num == 0 ? ModifierKeys::leftButtonModifier
-                    : (num == 1 ? ModifierKeys::rightButtonModifier
-                                : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
+                        : (num == 1 ? ModifierKeys::rightButtonModifier
+                                    : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
     }
 
     static unsigned int getNSWindowStyleMask (const int flags) noexcept
