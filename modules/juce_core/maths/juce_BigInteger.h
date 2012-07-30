@@ -49,20 +49,17 @@ public:
     BigInteger();
 
     /** Creates a BigInteger containing an integer value in its low bits.
-
         The low 32 bits of the number are initialised with this value.
     */
     BigInteger (uint32 value);
 
     /** Creates a BigInteger containing an integer value in its low bits.
-
         The low 32 bits of the number are initialised with the absolute value
         passed in, and its sign is set to reflect the sign of the number.
     */
     BigInteger (int32 value);
 
     /** Creates a BigInteger containing an integer value in its low bits.
-
         The low 64 bits of the number are initialised with the absolute value
         passed in, and its sign is set to reflect the sign of the number.
     */
@@ -165,14 +162,14 @@ public:
         This searches from startIndex (inclusive) upwards for the first set bit,
         and returns its index. If no set bits are found, it returns -1.
     */
-    int findNextSetBit (int startIndex = 0) const noexcept;
+    int findNextSetBit (int startIndex) const noexcept;
 
     /** Looks for the index of the next clear bit after a given starting point.
 
         This searches from startIndex (inclusive) upwards for the first clear bit,
         and returns its index.
     */
-    int findNextClearBit (int startIndex = 0) const noexcept;
+    int findNextClearBit (int startIndex) const noexcept;
 
     /** Returns the index of the highest set bit in the number.
         If the value is zero, this will return -1.
@@ -247,13 +244,11 @@ public:
     BigInteger findGreatestCommonDivisor (BigInteger other) const;
 
     /** Performs a combined exponent and modulo operation.
-
         This BigInteger's value becomes (this ^ exponent) % modulus.
     */
     void exponentModulo (const BigInteger& exponent, const BigInteger& modulus);
 
     /** Performs an inverse modulo on the value.
-
         i.e. the result is (this ^ -1) mod (modulus).
     */
     void inverseModulo (const BigInteger& modulus);

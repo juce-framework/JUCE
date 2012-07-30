@@ -896,7 +896,7 @@ public:
             {
                 if (numActive >= maxNumber)
                 {
-                    const int firstActiveChan = chans.findNextSetBit();
+                    const int firstActiveChan = chans.findNextSetBit (0);
 
                     chans.setBit (index > firstActiveChan
                                      ? firstActiveChan : chans.getHighestBit(),
