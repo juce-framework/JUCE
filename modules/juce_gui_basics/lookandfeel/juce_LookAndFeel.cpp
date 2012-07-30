@@ -140,9 +140,6 @@ LookAndFeel::LookAndFeel()
         TextButton::textColourOnId,                 0xff000000,
         TextButton::textColourOffId,                0xff000000,
 
-        ComboBox::buttonColourId,                   0xffbbbbff,
-        ComboBox::outlineColourId,                  standardOutlineColour,
-
         ToggleButton::textColourId,                 0xff000000,
 
         TextEditor::backgroundColourId,             0xffffffff,
@@ -172,9 +169,15 @@ LookAndFeel::LookAndFeel()
         PopupMenu::highlightedTextColourId,         0xffffffff,
         PopupMenu::highlightedBackgroundColourId,   0x991111aa,
 
+        ComboBox::buttonColourId,                   0xffbbbbff,
+        ComboBox::outlineColourId,                  standardOutlineColour,
         ComboBox::textColourId,                     0xff000000,
         ComboBox::backgroundColourId,               0xffffffff,
         ComboBox::arrowColourId,                    0x99000000,
+
+        TextPropertyComponent::backgroundColourId,  0xffffffff,
+        TextPropertyComponent::textColourId,        0xff000000,
+        TextPropertyComponent::outlineColourId,     standardOutlineColour,
 
         ListBox::backgroundColourId,                0xffffffff,
         ListBox::outlineColourId,                   standardOutlineColour,

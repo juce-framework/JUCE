@@ -349,7 +349,6 @@ public:
                 addAndMakeVisible (&fixButton);
                 fixButton.setColour (TextButton::buttonColourId, Colours::red);
                 fixButton.setColour (TextButton::textColourOffId, Colours::white);
-                fixButton.setBounds ("right - 160, parent.height - 26, parent.width - 8, top + 22");
                 fixButton.addListener (this);
             }
 
@@ -379,6 +378,11 @@ public:
                 ModulesPanel* mp = findParentComponentOfClass<ModulesPanel>();
                 if (mp != nullptr)
                     mp->refresh();
+            }
+
+            void resized()
+            {
+                fixButton.setBounds (getWidth() - 168, getHeight() - 26, 160, 22);
             }
 
         private:

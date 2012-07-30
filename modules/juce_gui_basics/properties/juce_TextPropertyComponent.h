@@ -78,6 +78,20 @@ public:
     /** Returns the text that should be shown in the text editor. */
     virtual String getText() const;
 
+    //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId          = 0x100e401,    /**< The colour to fill the background of the text area. */
+        textColourId                = 0x100e402,    /**< The colour to use for the editable text. */
+        outlineColourId             = 0x100e403,    /**< The colour to use to draw an outline around the text area. */
+    };
 
     //==============================================================================
     /** @internal */
