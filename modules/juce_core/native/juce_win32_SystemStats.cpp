@@ -139,19 +139,25 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 
     if (info.dwPlatformId == VER_PLATFORM_WIN32_NT)
     {
-        switch (info.dwMajorVersion)
+        if (info.dwMajorVersion == 5)
+            return (info.dwMinorVersion == 0) ? Win2000 : WinXP;
+
+        if (info.dwMajorVersion == 6)
         {
-            case 5:     return (info.dwMinorVersion == 0) ? Win2000 : WinXP;
-            case 6:     return (info.dwMinorVersion == 0) ? WinVista : Windows7;
-            default:    jassertfalse; break; // !! not a supported OS!
+            switch (info.dwMinorVersion)
+            {
+                case 0:  return WinVista;
+                case 1:  return Windows7;
+                case 2:  return Windows8;
+
+                default:
+                    jassertfalse;  // new version needs to be added here!
+                    return Windows8;
+            }
         }
     }
-    else if (info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-    {
-        jassert (info.dwMinorVersion != 0); // !! still running on Windows 95??
-        return Win98;
-    }
 
+    jassertfalse;  // need to support whatever new version is running!
     return UnknownOS;
 }
 
@@ -162,10 +168,10 @@ String SystemStats::getOperatingSystemName()
     switch (getOperatingSystemType())
     {
         case Windows7:          name = "Windows 7";         break;
+        case Windows8:          name = "Windows 8";         break;
         case WinVista:          name = "Windows Vista";     break;
         case WinXP:             name = "Windows XP";        break;
         case Win2000:           name = "Windows 2000";      break;
-        case Win98:             name = "Windows 98";        break;
         default:                jassertfalse; break; // !! new type of OS?
     }
 

@@ -204,7 +204,7 @@ public:
             {
               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (SystemStats::getOSXMinorVersionNumber() > 4)
+                if (SystemStats::getOperatingSystemType() >= MacOSX_10_5)
               #endif
                 {
                     outDataSize = sizeof (AudioUnitCocoaViewInfo);
@@ -244,7 +244,7 @@ public:
             {
                #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (SystemStats::getOSXMinorVersionNumber() > 4)
+                if (SystemStats::getOperatingSystemType() >= MacOSX_10_5)
                #endif
                 {
                     JUCE_AUTORELEASEPOOL

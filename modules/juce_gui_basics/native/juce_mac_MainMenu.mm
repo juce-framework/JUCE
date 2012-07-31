@@ -84,7 +84,7 @@ public:
                         const String& name, const int menuId, const int tag)
     {
        #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-        static bool is10_4 = (SystemStats::getOSXMinorVersionNumber() <= 4);
+        static bool is10_4 = (SystemStats::getOperatingSystemType() == MacOSX_10_4);
 
         if (is10_4)
         {
