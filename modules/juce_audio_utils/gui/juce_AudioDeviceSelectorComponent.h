@@ -73,6 +73,8 @@ public:
     /** Destructor */
     ~AudioDeviceSelectorComponent();
 
+    /** The device manager that this component is controlling */
+    AudioDeviceManager& deviceManager;
 
     //==============================================================================
     /** @internal */
@@ -82,7 +84,6 @@ public:
 
 private:
     //==============================================================================
-    AudioDeviceManager& deviceManager;
     ScopedPointer<ComboBox> deviceTypeDropDown;
     ScopedPointer<Label> deviceTypeDropDownLabel;
     ScopedPointer<Component> audioDeviceSettingsComp;
