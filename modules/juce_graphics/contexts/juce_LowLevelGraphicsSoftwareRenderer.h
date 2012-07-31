@@ -82,6 +82,9 @@ public:
     const Font& getFont();
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform&);
+    
+    Image const& getImage () const { return savedState->image; }
+    RenderingHelpers::TranslationOrTransform const& getTransform () const { return savedState->transform; }
 
 protected:
     RenderingHelpers::SavedStateStack <RenderingHelpers::SoftwareRendererSavedState> savedState;
