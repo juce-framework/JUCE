@@ -2800,6 +2800,11 @@ bool Process::isForegroundProcess()
     return false;
 }
 
+void Process::makeForegroundProcess()
+{
+    // is this possible in Windows?
+}
+
 //==============================================================================
 class WindowsMessageBox  : public AsyncUpdater
 {

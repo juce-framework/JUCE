@@ -72,6 +72,11 @@ public:
     */
     static bool isForegroundProcess();
 
+    /** Attempts to make the current process the active one.
+        (This is not possible on some platforms).
+    */
+    static void makeForegroundProcess();
+
     //==============================================================================
     /** Raises the current process's privilege level.
 

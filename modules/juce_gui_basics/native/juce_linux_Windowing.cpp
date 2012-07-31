@@ -2556,6 +2556,10 @@ bool Process::isForegroundProcess()
     return LinuxComponentPeer::isActiveApplication;
 }
 
+void Process::makeForegroundProcess()
+{
+}
+
 //==============================================================================
 void ModifierKeys::updateCurrentModifiers() noexcept
 {

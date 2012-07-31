@@ -625,6 +625,10 @@ bool Process::isForegroundProcess()
     return true;      // TODO
 }
 
+void Process::makeForegroundProcess()
+{
+}
+
 //==============================================================================
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                           const String& title, const String& message,
