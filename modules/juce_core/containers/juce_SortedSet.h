@@ -264,6 +264,11 @@ public:
     //==============================================================================
     /** Adds a new element to the set, (as long as it's not already in there).
 
+        Note that if a matching element already exists, the new value will be assigned
+        to the existing one using operator=, so that if there are any differences between
+        the objects which were not recognised by the object's operator==, then the
+        set will always contain a copy of the most recently added one.
+
         @param newElement       the new object to add to the set
         @see set, insert, addIfNotAlreadyThere, addSorted, addSet, addArray
     */
@@ -276,8 +281,12 @@ public:
 
         while (s < e)
         {
-            if (newElement == data.getReference (s))
+            ElementType& elem = data.getReference (s);
+            if (newElement == elem)
+            {
+                elem = newElement; // force an update in case operator== permits differences.
                 return;
+            }
 
             const int halfway = (s + e) / 2;
             const bool isBeforeHalfway = (newElement < data.getReference (halfway));
