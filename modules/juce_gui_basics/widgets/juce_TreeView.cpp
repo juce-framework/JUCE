@@ -178,10 +178,8 @@ public:
         const int visibleTop = -getY();
         const int visibleBottom = visibleTop + getParentHeight();
 
-        {
-            for (int i = items.size(); --i >= 0;)
-                items.getUnchecked(i)->shouldKeep = false;
-        }
+        for (int i = items.size(); --i >= 0;)
+            items.getUnchecked(i)->shouldKeep = false;
 
         {
             TreeViewItem* item = owner.rootItem;
@@ -1314,6 +1312,18 @@ void TreeViewItem::paintOpenCloseButton (Graphics& g, int width, int height, boo
        .drawTreeviewPlusMinusBox (g, 0, 0, width, height, ! isOpen(), isMouseOver);
 }
 
+void TreeViewItem::paintHorizontalConnectingLine (Graphics& g, const Line<float>& line)
+{
+   g.setColour (ownerView->findColour (TreeView::linesColourId));
+   g.drawLine (line);
+}
+
+void TreeViewItem::paintVerticalConnectingLine (Graphics& g, const Line<float>& line)
+{
+   g.setColour (ownerView->findColour (TreeView::linesColourId));
+   g.drawLine (line);
+}
+
 void TreeViewItem::itemClicked (const MouseEvent&)
 {
 }
@@ -1498,8 +1508,6 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
             paintItem (g, itemW, itemHeight);
     }
 
-    g.setColour (ownerView->findColour (TreeView::linesColourId));
-
     const float halfH = itemHeight * 0.5f;
     const int indentWidth = ownerView->getIndentSize();
     const int depth = TreeViewHelpers::calculateDepth (this, ownerView->rootItemVisible);
@@ -1509,11 +1517,11 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         float x = (depth + 0.5f) * indentWidth;
 
         if (parentItem != nullptr && parentItem->drawLinesInside)
-            g.drawLine (x, 0, x, isLastOfSiblings() ? halfH : (float) itemHeight);
+            paintVerticalConnectingLine (g, Line<float> (x, 0, x, isLastOfSiblings() ? halfH : (float) itemHeight));
 
         if ((parentItem != nullptr && parentItem->drawLinesInside)
              || (parentItem == nullptr && drawLinesInside))
-            g.drawLine (x, halfH, x + indentWidth / 2, halfH);
+            paintHorizontalConnectingLine (g, Line<float> (x, halfH, x + indentWidth / 2, halfH));
 
         {
             TreeViewItem* p = parentItem;
@@ -1525,9 +1533,7 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
 
                 if ((p->parentItem == nullptr || p->parentItem->drawLinesInside)
                      && ! p->isLastOfSiblings())
-                {
-                    g.drawLine (x, 0, x, (float) itemHeight);
-                }
+                    p->paintVerticalConnectingLine (g, Line<float> (x, 0, x, (float) itemHeight));
 
                 p = p->parentItem;
             }

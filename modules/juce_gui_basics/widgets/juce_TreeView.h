@@ -292,7 +292,13 @@ public:
         call LookAndFeel::drawTreeviewPlusMinusBox(), but you can override
         it for custom effects.
     */
-    virtual void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
+    virtual void paintOpenCloseButton (Graphics&, int width, int height, bool isMouseOver);
+
+    /** Draws the line that connects this item to the vertical line extending below its parent. */
+    virtual void paintHorizontalConnectingLine (Graphics&, const Line<float>& line);
+
+    /** Draws the line that extends vertically up towards one of its parents, or down to one of its children. */
+    virtual void paintVerticalConnectingLine (Graphics&, const Line<float>& line);
 
     /** Called when the user clicks on this item.
 
