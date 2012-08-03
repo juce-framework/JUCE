@@ -559,7 +559,7 @@ namespace EdgeTableFillers
             : data (data_),
               sourceColour (colour)
         {
-            if (sizeof (PixelType) == 3)
+            if (sizeof (PixelType) == 3 && data.pixelStride == sizeof (PixelType))
             {
                 areRGBComponentsEqual = sourceColour.getRed() == sourceColour.getGreen()
                                             && sourceColour.getGreen() == sourceColour.getBlue();
@@ -578,17 +578,17 @@ namespace EdgeTableFillers
         forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const noexcept
         {
             if (replaceExisting)
-                linePixels[x].set (sourceColour);
+                getPixel (x)->set (sourceColour);
             else
-                linePixels[x].blend (sourceColour, (uint32) alphaLevel);
+                getPixel (x)->blend (sourceColour, (uint32) alphaLevel);
         }
 
         forcedinline void handleEdgeTablePixelFull (const int x) const noexcept
         {
             if (replaceExisting)
-                linePixels[x].set (sourceColour);
+                getPixel (x)->set (sourceColour);
             else
-                linePixels[x].blend (sourceColour);
+                getPixel (x)->blend (sourceColour);
         }
 
         forcedinline void handleEdgeTableLine (const int x, const int width, const int alphaLevel) const noexcept
@@ -596,7 +596,7 @@ namespace EdgeTableFillers
             PixelARGB p (sourceColour);
             p.multiplyAlpha (alphaLevel);
 
-            PixelType* dest = linePixels + x;
+            PixelType* dest = getPixel (x);
 
             if (replaceExisting || p.getAlpha() >= 0xff)
                 replaceLine (dest, p, width);
@@ -606,7 +606,7 @@ namespace EdgeTableFillers
 
         forcedinline void handleEdgeTableLineFull (const int x, const int width) const noexcept
         {
-            PixelType* dest = linePixels + x;
+            PixelType* dest = getPixel (x);
 
             if (replaceExisting || sourceColour.getAlpha() >= 0xff)
                 replaceLine (dest, sourceColour, width);
@@ -621,52 +621,91 @@ namespace EdgeTableFillers
         PixelRGB filler [4];
         bool areRGBComponentsEqual;
 
+        forcedinline PixelType* getPixel (const int x) const noexcept
+        {
+            return addBytesToPointer (linePixels, x * data.pixelStride);
+        }
+
+        forcedinline void incDestPixelPointer (PixelType*& p) const noexcept
+        {
+            p = addBytesToPointer (p, data.pixelStride);
+        }
+
         inline void blendLine (PixelType* dest, const PixelARGB& colour, int width) const noexcept
         {
-            do { dest++ ->blend (colour); }  while (--width > 0);
+            do
+            {
+                dest->blend (colour);
+                incDestPixelPointer (dest);
+            }
+            while (--width > 0);
         }
 
         forcedinline void replaceLine (PixelRGB* dest, const PixelARGB& colour, int width) const noexcept
         {
-            if (areRGBComponentsEqual)  // if all the component values are the same, we can cheat..
+            if (data.pixelStride == sizeof (*dest))
             {
-                memset (dest, colour.getRed(), (size_t) width * 3);
-            }
-            else
-            {
-                if (width >> 5)
+                if (areRGBComponentsEqual)  // if all the component values are the same, we can cheat..
                 {
-                    const int* const intFiller = reinterpret_cast<const int*> (filler);
+                    memset (dest, colour.getRed(), (size_t) width * 3);
+                }
+                else
+                {
+                    if (width >> 5)
+                    {
+                        const int* const intFiller = reinterpret_cast<const int*> (filler);
 
-                    while (width > 8 && (((pointer_sized_int) dest) & 7) != 0)
+                        while (width > 8 && (((pointer_sized_int) dest) & 7) != 0)
+                        {
+                            dest->set (colour);
+                            ++dest;
+                            --width;
+                        }
+
+                        while (width > 4)
+                        {
+                            int* d = reinterpret_cast<int*> (dest);
+                            *d++ = intFiller[0];
+                            *d++ = intFiller[1];
+                            *d++ = intFiller[2];
+                            dest = reinterpret_cast<PixelRGB*> (d);
+                            width -= 4;
+                        }
+                    }
+
+                    while (--width >= 0)
                     {
                         dest->set (colour);
                         ++dest;
-                        --width;
-                    }
-
-                    while (width > 4)
-                    {
-                        int* d = reinterpret_cast<int*> (dest);
-                        *d++ = intFiller[0];
-                        *d++ = intFiller[1];
-                        *d++ = intFiller[2];
-                        dest = reinterpret_cast<PixelRGB*> (d);
-                        width -= 4;
                     }
                 }
-
-                while (--width >= 0)
+            }
+            else
+            {
+                do
                 {
                     dest->set (colour);
-                    ++dest;
+                    incDestPixelPointer (dest);
                 }
+                while (--width > 0);
             }
         }
 
-        forcedinline void replaceLine (PixelAlpha* const dest, const PixelARGB& colour, int const width) const noexcept
+        forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB& colour, int width) const noexcept
         {
-            memset (dest, colour.getAlpha(), (size_t) width);
+            if (data.pixelStride == sizeof (*dest))
+            {
+                memset (dest, colour.getAlpha(), (size_t) width);
+            }
+            else
+            {
+                do
+                {
+                    dest->setAlpha (colour.getAlpha());
+                    incDestPixelPointer (dest);
+                }
+                while (--width > 0);
+            }
         }
 
         forcedinline void replaceLine (PixelARGB* dest, const PixelARGB& colour, int width) const noexcept
@@ -674,7 +713,7 @@ namespace EdgeTableFillers
             do
             {
                 dest->set (colour);
-                ++dest;
+                incDestPixelPointer (dest);
 
             } while (--width > 0);
         }
@@ -703,47 +742,62 @@ namespace EdgeTableFillers
 
         forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const noexcept
         {
-            linePixels[x].blend (GradientType::getPixel (x), (uint32) alphaLevel);
+            getPixel (x)->blend (GradientType::getPixel (x), (uint32) alphaLevel);
         }
 
         forcedinline void handleEdgeTablePixelFull (const int x) const noexcept
         {
-            linePixels[x].blend (GradientType::getPixel (x));
+            getPixel (x)->blend (GradientType::getPixel (x));
         }
 
         void handleEdgeTableLine (int x, int width, const int alphaLevel) const noexcept
         {
-            PixelType* dest = linePixels + x;
+            PixelType* dest = getPixel (x);
 
             if (alphaLevel < 0xff)
             {
                 do
                 {
-                    (dest++)->blend (GradientType::getPixel (x++), (uint32) alphaLevel);
+                    dest->blend (GradientType::getPixel (x++), (uint32) alphaLevel);
+                    incDestPixelPointer (dest);
                 } while (--width > 0);
             }
             else
             {
                 do
                 {
-                    (dest++)->blend (GradientType::getPixel (x++));
-                } while (--width > 0);
+                    dest->blend (GradientType::getPixel (x++));
+                    incDestPixelPointer (dest);
+                }
+                while (--width > 0);
             }
         }
 
         void handleEdgeTableLineFull (int x, int width) const noexcept
         {
-            PixelType* dest = linePixels + x;
+            PixelType* dest = getPixel (x);
 
             do
             {
-                (dest++)->blend (GradientType::getPixel (x++));
-            } while (--width > 0);
+                dest->blend (GradientType::getPixel (x++));
+                incDestPixelPointer (dest);
+            }
+            while (--width > 0);
         }
 
     private:
         const Image::BitmapData& destData;
         PixelType* linePixels;
+
+        forcedinline PixelType* getPixel (const int x) const noexcept
+        {
+            return addBytesToPointer (linePixels, x * destData.pixelStride);
+        }
+
+        forcedinline void incDestPixelPointer (PixelType*& p) const noexcept
+        {
+            p = addBytesToPointer (p, destData.pixelStride);
+        }
 
         JUCE_DECLARE_NON_COPYABLE (Gradient);
     };
@@ -782,17 +836,17 @@ namespace EdgeTableFillers
         {
             alphaLevel = (alphaLevel * extraAlpha) >> 8;
 
-            linePixels[x].blend (sourceLineStart [repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)], (uint32) alphaLevel);
+            getDestPixel (x)->blend (*getSrcPixel (repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)), (uint32) alphaLevel);
         }
 
         forcedinline void handleEdgeTablePixelFull (const int x) const noexcept
         {
-            linePixels[x].blend (sourceLineStart [repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)], (uint32) extraAlpha);
+            getDestPixel (x)->blend (*getSrcPixel (repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)), (uint32) extraAlpha);
         }
 
         void handleEdgeTableLine (int x, int width, int alphaLevel) const noexcept
         {
-            DestPixelType* dest = linePixels + x;
+            DestPixelType* dest = getDestPixel (x);
             alphaLevel = (alphaLevel * extraAlpha) >> 8;
             x -= xOffset;
 
@@ -802,7 +856,8 @@ namespace EdgeTableFillers
             {
                 do
                 {
-                    dest++ ->blend (sourceLineStart [repeatPattern ? (x++ % srcData.width) : x++], (uint32) alphaLevel);
+                    dest->blend (*getSrcPixel (repeatPattern ? (x++ % srcData.width) : x++), (uint32) alphaLevel);
+                    incDestPixelPointer (dest);
                 } while (--width > 0);
             }
             else
@@ -811,19 +866,20 @@ namespace EdgeTableFillers
                 {
                     do
                     {
-                        dest++ ->blend (sourceLineStart [x++ % srcData.width]);
+                        dest->blend (*getSrcPixel (x++ % srcData.width));
+                        incDestPixelPointer (dest);
                     } while (--width > 0);
                 }
                 else
                 {
-                    copyRow (dest, sourceLineStart + x, width);
+                    copyRow (dest, getSrcPixel (x), width);
                 }
             }
         }
 
         void handleEdgeTableLineFull (int x, int width) const noexcept
         {
-            DestPixelType* dest = linePixels + x;
+            DestPixelType* dest = getDestPixel (x);
             x -= xOffset;
 
             jassert (repeatPattern || (x >= 0 && x + width <= srcData.width));
@@ -832,7 +888,8 @@ namespace EdgeTableFillers
             {
                 do
                 {
-                    dest++ ->blend (sourceLineStart [repeatPattern ? (x++ % srcData.width) : x++], (uint32) extraAlpha);
+                    dest->blend (*getSrcPixel (repeatPattern ? (x++ % srcData.width) : x++), (uint32) extraAlpha);
+                    incDestPixelPointer (dest);
                 } while (--width > 0);
             }
             else
@@ -841,12 +898,13 @@ namespace EdgeTableFillers
                 {
                     do
                     {
-                        dest++ ->blend (sourceLineStart [x++ % srcData.width]);
+                        dest->blend (*getSrcPixel (x++ % srcData.width));
+                        incDestPixelPointer (dest);
                     } while (--width > 0);
                 }
                 else
                 {
-                    copyRow (dest, sourceLineStart + x, width);
+                    copyRow (dest, getSrcPixel (x), width);
                 }
             }
         }
@@ -870,18 +928,36 @@ namespace EdgeTableFillers
         DestPixelType* linePixels;
         SrcPixelType* sourceLineStart;
 
-        template <class PixelType1, class PixelType2>
-        static forcedinline void copyRow (PixelType1* dest, PixelType2* src, int width) noexcept
+        forcedinline DestPixelType* getDestPixel (int const x) const noexcept
         {
-            do
-            {
-                dest++ ->blend (*src++);
-            } while (--width > 0);
+            return addBytesToPointer (linePixels, x * destData.pixelStride);
         }
 
-        static forcedinline void copyRow (PixelRGB* dest, PixelRGB* src, int width) noexcept
+        forcedinline SrcPixelType const* getSrcPixel (int const x) const noexcept
         {
-            memcpy (dest, src, sizeof (PixelRGB) * (size_t) width);
+            return addBytesToPointer (sourceLineStart, x * srcData.pixelStride);
+        }
+
+        forcedinline void incDestPixelPointer (DestPixelType*& p) const noexcept
+        {
+            p = addBytesToPointer (p, destData.pixelStride);
+        }
+
+        forcedinline void copyRow (DestPixelType* dest, SrcPixelType const* src, int width) const noexcept
+        {
+            if (srcData.pixelStride == 3 && destData.pixelStride == 3)
+            {
+                memcpy (dest, src, sizeof (PixelRGB) * (size_t) width);
+            }
+            else
+            {
+                do
+                {
+                    dest->blend (*src);
+                    incDestPixelPointer (dest);
+                    src = addBytesToPointer (src, srcData.pixelStride);
+                } while (--width > 0);
+            }
         }
 
         JUCE_DECLARE_NON_COPYABLE (ImageFill);
@@ -1466,7 +1542,6 @@ namespace EdgeTableFillers
     template <class Iterator, class DestPixelType>
     void renderSolidFill (Iterator& iter, const Image::BitmapData& destData, const PixelARGB& fillColour, const bool replaceContents, DestPixelType*)
     {
-        jassert (destData.pixelStride == sizeof (DestPixelType));
         if (replaceContents)
         {
             EdgeTableFillers::SolidColour <DestPixelType, true> r (destData, fillColour);
@@ -1483,8 +1558,6 @@ namespace EdgeTableFillers
     void renderGradient (Iterator& iter, const Image::BitmapData& destData, const ColourGradient& g, const AffineTransform& transform,
                          const PixelARGB* const lookupTable, const int numLookupEntries, const bool isIdentity, DestPixelType*)
     {
-        jassert (destData.pixelStride == sizeof (DestPixelType));
-
         if (g.isRadial)
         {
             if (isIdentity)

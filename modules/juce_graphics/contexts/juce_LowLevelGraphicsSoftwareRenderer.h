@@ -83,6 +83,9 @@ public:
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform&);
 
+    const Image& getImage() const noexcept                                          { return savedState->image; }
+    const RenderingHelpers::TranslationOrTransform& getTransform() const noexcept   { return savedState->transform; }
+
 protected:
     RenderingHelpers::SavedStateStack <RenderingHelpers::SoftwareRendererSavedState> savedState;
 

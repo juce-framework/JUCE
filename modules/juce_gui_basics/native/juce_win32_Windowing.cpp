@@ -211,7 +211,9 @@ public:
     {
         jassert (format == Image::RGB || format == Image::ARGB);
 
-        pixelStride = (format == Image::RGB) ? 3 : 4;
+        static bool alwaysUse32Bits = isGraphicsCard32Bit(); // NB: for 32-bit cards, it's faster to use a 32-bit image.
+
+        pixelStride = (alwaysUse32Bits || format == Image::ARGB) ? 4 : 3;
         lineStride = -((w * pixelStride + 3) & ~3);
 
         zerostruct (bitmapInfo);
@@ -353,6 +355,14 @@ public:
     uint8* imageData;
 
 private:
+    static bool isGraphicsCard32Bit()
+    {
+        HDC dc = GetDC (0);
+        const int bitsPerPixel = GetDeviceCaps (dc, BITSPIXEL);
+        ReleaseDC (0, dc);
+        return bitsPerPixel > 24;
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsBitmapImage);
 };
 
@@ -1076,8 +1086,7 @@ private:
 
         Image& getImage (const bool transparent, const int w, const int h)
         {
-            static bool alwaysUseARGB = isGraphicsCard32Bit(); // NB: for 32-bit cards, it's faster to use a 32-bit image.
-            const Image::PixelFormat format = (transparent || alwaysUseARGB) ? Image::ARGB : Image::RGB;
+            const Image::PixelFormat format = transparent ? Image::ARGB : Image::RGB;
 
             if ((! image.isValid()) || image.getWidth() < w || image.getHeight() < h || image.getFormat() != format)
                 image = Image (new WindowsBitmapImage (format, (w + 31) & ~31, (h + 31) & ~31, false));
@@ -1094,14 +1103,6 @@ private:
 
     private:
         Image image;
-
-        static bool isGraphicsCard32Bit()
-        {
-            HDC dc = GetDC (0);
-            const int bitsPerPixel = GetDeviceCaps (dc, BITSPIXEL);
-            ReleaseDC (0, dc);
-            return bitsPerPixel > 24;
-        }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryImage);
     };
