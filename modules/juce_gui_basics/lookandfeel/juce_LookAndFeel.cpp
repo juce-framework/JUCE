@@ -1262,7 +1262,7 @@ void LookAndFeel::drawComboBox (Graphics& g, int width, int height,
 
     if (box.isEnabled() && box.hasKeyboardFocus (false))
     {
-        g.setColour (box.findColour (TextButton::buttonColourId));
+        g.setColour (box.findColour (ComboBox::buttonColourId));
         g.drawRect (0, 0, width, height, 2);
     }
     else
