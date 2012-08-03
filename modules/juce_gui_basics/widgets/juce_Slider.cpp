@@ -956,7 +956,8 @@ public:
 
     void mouseDoubleClick()
     {
-        if (style != IncDecButtons
+        if (doubleClickToValue
+             && style != IncDecButtons
              && minimum <= doubleClickReturnValue
              && maximum >= doubleClickReturnValue)
         {
