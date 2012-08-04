@@ -269,10 +269,11 @@ public:
         the objects which were not recognised by the object's operator==, then the
         set will always contain a copy of the most recently added one.
 
-        @param newElement       the new object to add to the set
+        @param newElement   the new object to add to the set
+        @returns            true if the value was added, or false if it already existed
         @see set, insert, addIfNotAlreadyThere, addSorted, addSet, addArray
     */
-    void add (const ElementType& newElement) noexcept
+    bool add (const ElementType& newElement) noexcept
     {
         const ScopedLockType lock (getLock());
 
@@ -285,7 +286,7 @@ public:
             if (newElement == elem)
             {
                 elem = newElement; // force an update in case operator== permits differences.
-                return;
+                return false;
             }
 
             const int halfway = (s + e) / 2;
@@ -305,6 +306,7 @@ public:
         }
 
         data.insert (s, newElement);
+        return true;
     }
 
     /** Adds elements from an array to this set.

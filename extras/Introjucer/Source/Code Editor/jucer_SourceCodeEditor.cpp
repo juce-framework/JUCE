@@ -176,6 +176,24 @@ namespace CppUtils
         return String (line.getCharPointer(), endOfLeadingWS);
     }
 
+    static int getBraceCount (String::CharPointerType line)
+    {
+        int braces = 0;
+
+        for (;;)
+        {
+            const juce_wchar c = line.getAndAdvance();
+
+            if (c == 0)                         break;
+            else if (c == '{')                  ++braces;
+            else if (c == '}')                  --braces;
+            else if (c == '/')                  { if (*line == '/') break; }
+            else if (c == '"' || c == '\'')     { while (! (line.isEmpty() || line.getAndAdvance() == c)) {} }
+        }
+
+        return braces;
+    }
+
     static bool getIndentForCurrentBlock (CodeDocument::Position pos, String& whitespace)
     {
         int braceCount = 0;
@@ -187,35 +205,12 @@ namespace CppUtils
             const String line (pos.getLineText());
             const String trimmedLine (line.trimStart());
 
-            String::CharPointerType l (trimmedLine.getCharPointer());
+            braceCount += getBraceCount (trimmedLine.getCharPointer());
 
-            for (;;)
+            if (braceCount > 0)
             {
-                const juce_wchar c = l.getAndAdvance();
-
-                if (c == 0)
-                    break;
-
-                if (c == '}')
-                    ++braceCount;
-
-                if (c == '{')
-                {
-                    if (--braceCount < 0)
-                    {
-                        whitespace = getLeadingWhitespace (line);
-                        return true;
-                    }
-                }
-
-                if (c == '"' || c == '\'')
-                {
-                    while (! (l.isEmpty() || l.getAndAdvance() == c))
-                    {}
-                }
-
-                if (c == '/' && *l == '/')
-                    break;
+                whitespace = getLeadingWhitespace (line);
+                return true;
             }
         }
 
@@ -254,11 +249,10 @@ void CppCodeEditorComponent::handleReturnKey()
             while (pos.getLineNumber() > 0)
             {
                 pos = pos.movedByLines (-1);
-                const String leadingWhitespace (CppUtils::getLeadingWhitespace (pos.getLineText()));
 
-                if (leadingWhitespace.isNotEmpty())
+                if (pos.getLineText().trimStart().isNotEmpty())
                 {
-                    insertTextAtCaret (leadingWhitespace);
+                    insertTextAtCaret (CppUtils::getLeadingWhitespace (pos.getLineText()));
                     break;
                 }
             }
