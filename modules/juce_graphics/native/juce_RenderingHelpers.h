@@ -996,7 +996,7 @@ namespace EdgeTableFillers
             SrcPixelType p;
             generate (&p, x, 1);
 
-            linePixels[x].blend (p, (uint32) (alphaLevel * extraAlpha) >> 8);
+            getDestPixel (x)->blend (p, (uint32) (alphaLevel * extraAlpha) >> 8);
         }
 
         forcedinline void handleEdgeTablePixelFull (const int x) noexcept
@@ -1004,7 +1004,7 @@ namespace EdgeTableFillers
             SrcPixelType p;
             generate (&p, x, 1);
 
-            linePixels[x].blend (p, (uint32) extraAlpha);
+            getDestPixel (x)->blend (p, (uint32) extraAlpha);
         }
 
         void handleEdgeTableLine (const int x, int width, int alphaLevel) noexcept
@@ -1018,7 +1018,7 @@ namespace EdgeTableFillers
             SrcPixelType* span = scratchBuffer;
             generate (span, x, width);
 
-            DestPixelType* dest = linePixels + x;
+            DestPixelType* dest = getDestPixel (x);
             alphaLevel *= extraAlpha;
             alphaLevel >>= 8;
 
@@ -1026,14 +1026,16 @@ namespace EdgeTableFillers
             {
                 do
                 {
-                    dest++ ->blend (*span++, (uint32) alphaLevel);
+                    dest->blend (*span++, (uint32) alphaLevel);
+                    incDestPixelPointer (dest);
                 } while (--width > 0);
             }
             else
             {
                 do
                 {
-                    dest++ ->blend (*span++);
+                    dest->blend (*span++);
+                    incDestPixelPointer (dest);
                 } while (--width > 0);
             }
         }
@@ -1060,6 +1062,16 @@ namespace EdgeTableFillers
         }
 
     private:
+        forcedinline DestPixelType* getDestPixel (const int x) const noexcept
+        {
+            return addBytesToPointer (linePixels, x * destData.pixelStride);
+        }
+
+        forcedinline void incDestPixelPointer (DestPixelType*& p) const noexcept
+        {
+            p = addBytesToPointer (p, destData.pixelStride);
+        }
+
         //==============================================================================
         template <class PixelType>
         void generate (PixelType* dest, const int x, int numPixels) noexcept
@@ -1145,25 +1157,29 @@ namespace EdgeTableFillers
             c[2] += weight * src[2];
             c[3] += weight * src[3];
 
+            src += this->srcData.pixelStride;
+
             weight = (uint32) (subPixelX * (256 - subPixelY));
-            c[0] += weight * src[4];
-            c[1] += weight * src[5];
-            c[2] += weight * src[6];
-            c[3] += weight * src[7];
+            c[0] += weight * src[0];
+            c[1] += weight * src[1];
+            c[2] += weight * src[2];
+            c[3] += weight * src[3];
 
             src += this->srcData.lineStride;
+
+            weight = (uint32) (subPixelX * subPixelY);
+            c[0] += weight * src[0];
+            c[1] += weight * src[1];
+            c[2] += weight * src[2];
+            c[3] += weight * src[3];
+
+            src -= this->srcData.pixelStride;
 
             weight = (uint32) ((256 - subPixelX) * subPixelY);
             c[0] += weight * src[0];
             c[1] += weight * src[1];
             c[2] += weight * src[2];
             c[3] += weight * src[3];
-
-            weight = (uint32) (subPixelX * subPixelY);
-            c[0] += weight * src[4];
-            c[1] += weight * src[5];
-            c[2] += weight * src[6];
-            c[3] += weight * src[7];
 
             dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
                            (uint8) (c[PixelARGB::indexR] >> 16),
@@ -1181,11 +1197,13 @@ namespace EdgeTableFillers
             c[2] += weight * src[2];
             c[3] += weight * src[3];
 
+            src += this->srcData.pixelStride;
+
             weight = subPixelX;
-            c[0] += weight * src[4];
-            c[1] += weight * src[5];
-            c[2] += weight * src[6];
-            c[3] += weight * src[7];
+            c[0] += weight * src[0];
+            c[1] += weight * src[1];
+            c[2] += weight * src[2];
+            c[3] += weight * src[3];
 
             dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 8),
                            (uint8) (c[PixelARGB::indexR] >> 8),
@@ -1227,22 +1245,26 @@ namespace EdgeTableFillers
             c[1] += weight * src[1];
             c[2] += weight * src[2];
 
+            src += this->srcData.pixelStride;
+
             weight = subPixelX * (256 - subPixelY);
-            c[0] += weight * src[3];
-            c[1] += weight * src[4];
-            c[2] += weight * src[5];
+            c[0] += weight * src[0];
+            c[1] += weight * src[1];
+            c[2] += weight * src[2];
 
             src += this->srcData.lineStride;
+
+            weight = subPixelX * subPixelY;
+            c[0] += weight * src[0];
+            c[1] += weight * src[1];
+            c[2] += weight * src[2];
+
+            src -= this->srcData.pixelStride;
 
             weight = (256 - subPixelX) * subPixelY;
             c[0] += weight * src[0];
             c[1] += weight * src[1];
             c[2] += weight * src[2];
-
-            weight = subPixelX * subPixelY;
-            c[0] += weight * src[3];
-            c[1] += weight * src[4];
-            c[2] += weight * src[5];
 
             dest->setARGB ((uint8) 255,
                            (uint8) (c[PixelRGB::indexR] >> 16),
@@ -1259,9 +1281,11 @@ namespace EdgeTableFillers
             c[1] += weight * src[1];
             c[2] += weight * src[2];
 
-            c[0] += subPixelX * src[3];
-            c[1] += subPixelX * src[4];
-            c[2] += subPixelX * src[5];
+            src += this->srcData.pixelStride;
+
+            c[0] += subPixelX * src[0];
+            c[1] += subPixelX * src[1];
+            c[2] += subPixelX * src[2];
 
             dest->setARGB ((uint8) 255,
                            (uint8) (c[PixelRGB::indexR] >> 8),
@@ -1295,10 +1319,13 @@ namespace EdgeTableFillers
         {
             uint32 c = 256 * 128;
             c += src[0] * ((256 - subPixelX) * (256 - subPixelY));
+            src += this->srcData.pixelStride;
             c += src[1] * (subPixelX * (256 - subPixelY));
             src += this->srcData.lineStride;
-            c += src[0] * ((256 - subPixelX) * subPixelY);
             c += src[1] * (subPixelX * subPixelY);
+            src -= this->srcData.pixelStride;
+
+            c += src[0] * ((256 - subPixelX) * subPixelY);
 
             *((uint8*) dest) = (uint8) (c >> 16);
         }
@@ -1307,7 +1334,8 @@ namespace EdgeTableFillers
         {
             uint32 c = 128;
             c += src[0] * (256 - subPixelX);
-            c += src[1] * subPixelX;
+            src += this->srcData.pixelStride;
+            c += src[0] * subPixelX;
             *((uint8*) dest) = (uint8) (c >> 8);
         }
 
