@@ -192,6 +192,7 @@ private:
             choices.add ("Rotary");
             choices.add ("Rotary HorizontalDrag");
             choices.add ("Rotary VerticalDrag");
+            choices.add ("Rotary HorizontalVerticalDrag");
             choices.add ("Inc/Dec Buttons");
             choices.add ("Two Value Horizontal");
             choices.add ("Two Value Vertical");
@@ -207,6 +208,7 @@ private:
                                                   Slider::Rotary,
                                                   Slider::RotaryHorizontalDrag,
                                                   Slider::RotaryVerticalDrag,
+                                                  Slider::RotaryHorizontalVerticalDrag,
                                                   Slider::IncDecButtons,
                                                   Slider::TwoValueHorizontal,
                                                   Slider::TwoValueVertical,
@@ -228,6 +230,7 @@ private:
                                                   Slider::Rotary,
                                                   Slider::RotaryHorizontalDrag,
                                                   Slider::RotaryVerticalDrag,
+                                                  Slider::RotaryHorizontalVerticalDrag,
                                                   Slider::IncDecButtons,
                                                   Slider::TwoValueHorizontal,
                                                   Slider::TwoValueVertical,
@@ -642,6 +645,8 @@ private:
             return "RotaryHorizontalDrag";
         case Slider::RotaryVerticalDrag:
             return "RotaryVerticalDrag";
+        case Slider::RotaryHorizontalVerticalDrag:
+            return "RotaryHorizontalVerticalDrag";
         case Slider::IncDecButtons:
             return "IncDecButtons";
         case Slider::TwoValueHorizontal:
@@ -675,6 +680,8 @@ private:
             return Slider::RotaryHorizontalDrag;
         else if (s == "RotaryVerticalDrag")
             return Slider::RotaryVerticalDrag;
+        else if (s == "RotaryHorizontalVerticalDrag")
+            return Slider::RotaryHorizontalVerticalDrag;
         else if (s == "IncDecButtons")
             return Slider::IncDecButtons;
         else if (s.startsWithIgnoreCase ("TwoValueHoriz"))
