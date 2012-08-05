@@ -297,8 +297,6 @@ namespace CppTokeniser
             return tokenType_integer;
 
         source = original;
-        source.skip();
-
         return tokenType_error;
     }
 
@@ -419,14 +417,16 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case '7':
     case '8':
     case '9':
-        result = parseNumber (source);
-        break;
-
     case '.':
         result = parseNumber (source);
 
         if (result == tokenType_error)
-            result = tokenType_punctuation;
+        {
+            source.skip();
+
+            if (firstChar == '.')
+                result = tokenType_punctuation;
+        }
 
         break;
 
