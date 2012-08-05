@@ -135,7 +135,7 @@ void GroupTreeViewItem::addCreateFileMenuItems (PopupMenu& m)
     m.addItem (1002, "Add Existing Files...");
 
     m.addSeparator();
-    NewFileWizard::getInstance()->addWizardsToMenu (m);
+    NewFileWizard().addWizardsToMenu (m);
 }
 
 void GroupTreeViewItem::processCreateFileMenuItem (int menuID)
@@ -146,7 +146,7 @@ void GroupTreeViewItem::processCreateFileMenuItem (int menuID)
         case 1002:  browseToAddExistingFiles(); break;
 
         default:
-            NewFileWizard::getInstance()->runWizardFromMenu (menuID, item);
+            NewFileWizard().runWizardFromMenu (menuID, item);
             break;
     }
 }
@@ -236,7 +236,7 @@ void SourceFileTreeViewItem::showDocument()
     const File f (getFile());
 
     if (pcc != nullptr && f.exists())
-        pcc->showEditorForFile (f);
+        pcc->showEditorForFile (f, false);
 }
 
 void SourceFileTreeViewItem::showPopupMenu()

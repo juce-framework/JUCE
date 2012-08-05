@@ -29,6 +29,9 @@ AppFocusChangeCallback appFocusChangeCallback = nullptr;
 typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
 CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
+typedef void (*MenuTrackingBeganCallback)();
+MenuTrackingBeganCallback menuTrackingBeganCallback = nullptr;
+
 //==============================================================================
 struct AppDelegate
 {
@@ -37,6 +40,11 @@ public:
     {
         static AppDelegateClass cls;
         delegate = [cls.createInstance() init];
+
+        NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+
+        [center addObserver: delegate selector: @selector (mainMenuTrackingBegan:)
+                       name: NSMenuDidBeginTrackingNotification object: nil];
 
         if (JUCEApplicationBase::isStandaloneApp())
         {
@@ -49,8 +57,6 @@ public:
         }
         else
         {
-            NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-
             [center addObserver: delegate selector: @selector (applicationDidResignActive:)
                            name: NSApplicationDidResignActiveNotification object: NSApp];
 
@@ -104,6 +110,7 @@ private:
             addMethod (@selector (applicationDidResignActive:),   applicationDidResignActive, "v@:@");
             addMethod (@selector (applicationWillUnhide:),        applicationWillUnhide,      "v@:@");
             addMethod (@selector (broadcastMessageCallback:),     broadcastMessageCallback,   "v@:@");
+            addMethod (@selector (mainMenuTrackingBegan:),        mainMenuTrackingBegan,      "v@:@");
             addMethod (@selector (dummyMethod),                   dummyMethod,                "v@:");
 
             registerClass();
@@ -167,6 +174,12 @@ private:
             NSDictionary* dict = (NSDictionary*) [n userInfo];
             const String messageString (nsStringToJuce ((NSString*) [dict valueForKey: nsStringLiteral ("message")]));
             MessageManager::getInstance()->deliverBroadcastMessage (messageString);
+        }
+
+        static void mainMenuTrackingBegan (id /*self*/, SEL, NSNotification*)
+        {
+            if (menuTrackingBeganCallback != nullptr)
+                (*menuTrackingBeganCallback)();
         }
 
         static void dummyMethod (id /*self*/, SEL) {}   // (used as a way of running a dummy thread)

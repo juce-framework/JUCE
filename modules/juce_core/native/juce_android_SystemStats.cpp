@@ -31,7 +31,7 @@ JNIClassBase::JNIClassBase (const char* classPath_)
 
 JNIClassBase::~JNIClassBase()
 {
-    getClasses().removeValue (this);
+    getClasses().removeFirstMatchingValue (this);
 }
 
 Array<JNIClassBase*>& JNIClassBase::getClasses()

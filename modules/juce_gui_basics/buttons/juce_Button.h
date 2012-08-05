@@ -30,7 +30,6 @@
 #include "../keyboard/juce_KeyListener.h"
 #include "../commands/juce_ApplicationCommandManager.h"
 #include "../windows/juce_TooltipWindow.h"
-#include "../layout/juce_ComponentBuilder.h"
 
 
 //==============================================================================
@@ -367,16 +366,6 @@ public:
     */
     void setState (const ButtonState newState);
 
-
-    //==============================================================================
-    struct Ids
-    {
-        static const Identifier text, radioGroup,
-                                connectedLeft, connectedRight, connectedTop, connectedBottom;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
-    static int getConnectedFlags (const ValueTree& state);
 
     //==============================================================================
     // These are deprecated - please use addListener() and removeListener() instead!

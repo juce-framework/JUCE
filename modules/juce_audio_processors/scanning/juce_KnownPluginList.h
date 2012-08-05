@@ -107,7 +107,8 @@ public:
 
         If any types are found in the files, their descriptions are returned in the array.
     */
-    void scanAndAddDragAndDroppedFiles (const StringArray& filenames,
+    void scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& formatManager,
+                                        const StringArray& filenames,
                                         OwnedArray <PluginDescription>& typesFound);
 
     //==============================================================================

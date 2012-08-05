@@ -66,7 +66,7 @@ Project::Project (const File& file_)
 Project::~Project()
 {
     projectRoot.removeListener (this);
-    JucerApplication::getApp()->openDocumentManager.closeAllDocumentsUsingProject (*this, false);
+    JucerApplication::getApp().openDocumentManager.closeAllDocumentsUsingProject (*this, false);
 }
 
 //==============================================================================
@@ -88,14 +88,14 @@ String Project::getDocumentTitle()
 
 void Project::updateProjectSettings()
 {
-    projectRoot.setProperty (Ids::jucerVersion, ProjectInfo::versionString, 0);
-    projectRoot.setProperty (Ids::name, getDocumentTitle(), 0);
+    projectRoot.setProperty (Ids::jucerVersion, ProjectInfo::versionString, nullptr);
+    projectRoot.setProperty (Ids::name, getDocumentTitle(), nullptr);
 }
 
 void Project::setMissingDefaultValues()
 {
-    if (! projectRoot.hasProperty (ComponentBuilder::idProperty))
-        projectRoot.setProperty (ComponentBuilder::idProperty, createAlphaNumericUID(), nullptr);
+    if (! projectRoot.hasProperty (Ids::ID))
+        projectRoot.setProperty (Ids::ID, createAlphaNumericUID(), nullptr);
 
     // Create main file group if missing
     if (! projectRoot.getChildWithName (Tags::projectMainGroup).isValid())
@@ -236,6 +236,7 @@ Result Project::loadDocument (const File& file)
 
     removeDefunctExporters();
     setMissingDefaultValues();
+    setChangedFlag (false);
 
     return Result::ok();
 }
@@ -430,8 +431,8 @@ Project::Item::Item (const Item& other)
 
 Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.state.createCopy(); return i; }
 
-String Project::Item::getID() const               { return state [ComponentBuilder::idProperty]; }
-void Project::Item::setID (const String& newID)   { state.setProperty (ComponentBuilder::idProperty, newID, nullptr); }
+String Project::Item::getID() const               { return state [Ids::ID]; }
+void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
 String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
@@ -457,7 +458,7 @@ bool Project::Item::isImageFile() const     { return isFile() && getFile().hasFi
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {
-    if (state [ComponentBuilder::idProperty] == targetId)
+    if (state [Ids::ID] == targetId)
         return *this;
 
     if (isGroup())
@@ -537,7 +538,7 @@ bool Project::Item::renameFile (const File& newFile)
          || (newFile.exists() && ! oldFile.exists()))
     {
         setFile (newFile);
-        JucerApplication::getApp()->openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
+        JucerApplication::getApp().openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
         return true;
     }
 
@@ -602,12 +603,12 @@ File Project::Item::determineGroupFolder() const
 
 void Project::Item::initialiseMissingProperties()
 {
-    if (! state.hasProperty (ComponentBuilder::idProperty))
+    if (! state.hasProperty (Ids::ID))
         setID (createAlphaNumericUID());
 
     if (isFile())
     {
-        state.setProperty (Ids::name, getFile().getFileName(), 0);
+        state.setProperty (Ids::name, getFile().getFileName(), nullptr);
     }
     else if (isGroup())
     {
@@ -771,23 +772,23 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
     return false;
 }
 
-const Drawable* Project::Item::getIcon() const
+Icon Project::Item::getIcon() const
 {
     const Icons& icons = getIcons();
 
     if (isFile())
     {
         if (isImageFile())
-            return icons.imageDoc;
+            return Icon (icons.imageDoc, Colours::blue);
 
-        return icons.document;
+        return Icon (icons.document, Colours::yellow);
     }
     else if (isMainGroup())
     {
-        return icons.juceLogo;
+        return Icon (icons.juceLogo, Colours::orange);
     }
 
-    return icons.folder;
+    return Icon (icons.folder, Colours::darkgrey);
 }
 
 //==============================================================================
@@ -840,7 +841,7 @@ bool Project::isModuleEnabled (const String& moduleID) const
     ValueTree modules (projectRoot.getChildWithName (Tags::modulesGroup));
 
     for (int i = 0; i < modules.getNumChildren(); ++i)
-        if (modules.getChild(i) [ComponentBuilder::idProperty] == moduleID)
+        if (modules.getChild(i) [Ids::ID] == moduleID)
             return true;
 
     return false;
@@ -848,13 +849,13 @@ bool Project::isModuleEnabled (const String& moduleID) const
 
 Value Project::shouldShowAllModuleFilesInProject (const String& moduleID)
 {
-    return getModulesNode().getChildWithProperty (ComponentBuilder::idProperty, moduleID)
+    return getModulesNode().getChildWithProperty (Ids::ID, moduleID)
                            .getPropertyAsValue (Ids::showAllCode, getUndoManagerFor (getModulesNode()));
 }
 
 Value Project::shouldCopyModuleFilesLocally (const String& moduleID)
 {
-    return getModulesNode().getChildWithProperty (ComponentBuilder::idProperty, moduleID)
+    return getModulesNode().getChildWithProperty (Ids::ID, moduleID)
                            .getPropertyAsValue (Ids::useLocalCopy, getUndoManagerFor (getModulesNode()));
 }
 
@@ -863,7 +864,7 @@ void Project::addModule (const String& moduleID, bool shouldCopyFilesLocally)
     if (! isModuleEnabled (moduleID))
     {
         ValueTree module (Tags::module);
-        module.setProperty (ComponentBuilder::idProperty, moduleID, nullptr);
+        module.setProperty (Ids::ID, moduleID, nullptr);
 
         ValueTree modules (getModulesNode());
         modules.addChild (module, -1, getUndoManagerFor (modules));
@@ -880,7 +881,7 @@ void Project::removeModule (const String& moduleID)
     ValueTree modules (getModulesNode());
 
     for (int i = 0; i < modules.getNumChildren(); ++i)
-        if (modules.getChild(i) [ComponentBuilder::idProperty] == moduleID)
+        if (modules.getChild(i) [Ids::ID] == moduleID)
             modules.removeChild (i, getUndoManagerFor (modules));
 }
 
@@ -898,7 +899,7 @@ int Project::getNumModules() const
 
 String Project::getModuleID (int index) const
 {
-    return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [ComponentBuilder::idProperty].toString();
+    return projectRoot.getChildWithName (Tags::modulesGroup).getChild (index) [Ids::ID].toString();
 }
 
 //==============================================================================

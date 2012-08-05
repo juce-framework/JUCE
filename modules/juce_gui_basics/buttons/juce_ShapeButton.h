@@ -87,11 +87,8 @@ public:
                      float outlineStrokeWidth);
 
 
-protected:
     /** @internal */
-    void paintButton (Graphics& g,
-                      bool isMouseOverButton,
-                      bool isButtonDown);
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
 
 private:
     //==============================================================================

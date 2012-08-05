@@ -194,6 +194,7 @@ public:
 
 private:
     friend class Toolbar;
+    class ItemDragAndDropOverlayComponent;
     friend class ItemDragAndDropOverlayComponent;
     const int itemId;
     ToolbarEditingMode mode;

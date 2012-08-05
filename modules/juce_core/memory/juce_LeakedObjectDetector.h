@@ -128,7 +128,8 @@ private:
 
       private:
           JUCE_LEAK_DETECTOR (MyClass);
-      };@endcode
+      };
+      @endcode
 
       @see JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
   */

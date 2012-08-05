@@ -24,8 +24,8 @@
 */
 
 /** Keeps track of the active top level window. */
-class TopLevelWindowManager  : public Timer,
-                               public DeletedAtShutdown
+class TopLevelWindowManager  : private Timer,
+                               private DeletedAtShutdown
 {
 public:
     //==============================================================================
@@ -41,7 +41,12 @@ public:
 
     juce_DeclareSingleton_SingleThreaded_Minimal (TopLevelWindowManager);
 
-    void timerCallback()
+    void checkFocusAsync()
+    {
+        startTimer (10);
+    }
+
+    void checkFocus()
     {
         startTimer (jmin (1731, getTimerInterval() * 2));
 
@@ -80,19 +85,19 @@ public:
     bool addWindow (TopLevelWindow* const w)
     {
         windows.add (w);
-        startTimer (10);
+        checkFocusAsync();
 
         return isWindowActive (w);
     }
 
     void removeWindow (TopLevelWindow* const w)
     {
-        startTimer (10);
+        checkFocusAsync();
 
         if (currentActive == w)
             currentActive = nullptr;
 
-        windows.removeValue (w);
+        windows.removeFirstMatchingValue (w);
 
         if (windows.size() == 0)
             deleteInstance();
@@ -102,6 +107,11 @@ public:
 
 private:
     TopLevelWindow* currentActive;
+
+    void timerCallback()
+    {
+        checkFocus();
+    }
 
     bool isWindowActive (TopLevelWindow* const tlw) const
     {
@@ -119,8 +129,10 @@ juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
 void juce_CheckCurrentlyFocusedTopLevelWindow();
 void juce_CheckCurrentlyFocusedTopLevelWindow()
 {
-    if (TopLevelWindowManager::getInstanceWithoutCreating() != nullptr)
-        TopLevelWindowManager::getInstanceWithoutCreating()->startTimer (20);
+    TopLevelWindowManager* const wm = TopLevelWindowManager::getInstanceWithoutCreating();
+
+    if (wm != nullptr)
+        wm->checkFocusAsync();
 }
 
 //==============================================================================
@@ -152,10 +164,12 @@ TopLevelWindow::~TopLevelWindow()
 //==============================================================================
 void TopLevelWindow::focusOfChildComponentChanged (FocusChangeType)
 {
+    TopLevelWindowManager* const wm = TopLevelWindowManager::getInstance();
+
     if (hasKeyboardFocus (true))
-        TopLevelWindowManager::getInstance()->timerCallback();
+        wm->checkFocus();
     else
-        TopLevelWindowManager::getInstance()->startTimer (10);
+        wm->checkFocusAsync();
 }
 
 void TopLevelWindow::setWindowActive (const bool isNowActive)

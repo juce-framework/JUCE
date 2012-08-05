@@ -23,11 +23,11 @@
   ==============================================================================
 */
 
-class ListBoxRowComponent  : public Component,
-                             public TooltipClient
+class ListBox::RowComponent  : public Component,
+                               public TooltipClient
 {
 public:
-    ListBoxRowComponent (ListBox& owner_)
+    RowComponent (ListBox& owner_)
         : owner (owner_), row (-1),
           selected (false), isDragging (false), selectRowOnMouseUp (false)
     {
@@ -138,7 +138,7 @@ private:
     int row;
     bool selected, isDragging, selectRowOnMouseUp;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBoxRowComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComponent);
 };
 
 
@@ -157,12 +157,12 @@ public:
         content->setWantsKeyboardFocus (false);
     }
 
-    ListBoxRowComponent* getComponentForRow (const int row) const noexcept
+    RowComponent* getComponentForRow (const int row) const noexcept
     {
         return rows [row % jmax (1, rows.size())];
     }
 
-    ListBoxRowComponent* getComponentForRowIfOnscreen (const int row) const noexcept
+    RowComponent* getComponentForRowIfOnscreen (const int row) const noexcept
     {
         return (row >= firstIndex && row < firstIndex + rows.size())
                  ? getComponentForRow (row) : nullptr;
@@ -221,7 +221,7 @@ public:
 
             while (numNeeded > rows.size())
             {
-                ListBoxRowComponent* newRow = new ListBoxRowComponent (owner);
+                RowComponent* newRow = new RowComponent (owner);
                 rows.add (newRow);
                 getViewedComponent()->addAndMakeVisible (newRow);
             }
@@ -233,7 +233,7 @@ public:
             for (int i = 0; i < numNeeded; ++i)
             {
                 const int row = i + firstIndex;
-                ListBoxRowComponent* const rowComp = getComponentForRow (row);
+                RowComponent* const rowComp = getComponentForRow (row);
 
                 if (rowComp != nullptr)
                 {
@@ -310,9 +310,14 @@ public:
             || key.isKeyCode (KeyPress::homeKey)
             || key.isKeyCode (KeyPress::endKey))
         {
-            // we want to avoid these keypresses going to the viewport, and instead allow
-            // them to pass up to our listbox..
-            return false;
+            const int allowableMods = owner.multipleSelection ? ModifierKeys::shiftModifier : 0;
+
+            if ((key.getModifiers().getRawFlags() & ~allowableMods) == 0)
+            {
+                // we want to avoid these keypresses going to the viewport, and instead allow
+                // them to pass up to our listbox..
+                return false;
+            }
         }
 
         return Viewport::keyPressed (key);
@@ -320,7 +325,7 @@ public:
 
 private:
     ListBox& owner;
-    OwnedArray<ListBoxRowComponent> rows;
+    OwnedArray<RowComponent> rows;
     int firstIndex, firstWholeIndex, lastWholeIndex;
     bool hasUpdated;
 
@@ -619,7 +624,7 @@ int ListBox::getInsertionIndexForPosition (const int x, const int y) const noexc
 
 Component* ListBox::getComponentForRowNumber (const int row) const noexcept
 {
-    ListBoxRowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row);
+    RowComponent* const listRowComp = viewport->getComponentForRowIfOnscreen (row);
     return listRowComp != nullptr ? static_cast <Component*> (listRowComp->customComponent) : nullptr;
 }
 
@@ -672,10 +677,8 @@ bool ListBox::keyPressed (const KeyPress& key)
     const int numVisibleRows = viewport->getHeight() / getRowHeight();
 
     const bool multiple = multipleSelection
-                            && (lastRowSelected >= 0)
-                            && (key.getModifiers().isShiftDown()
-                                 || key.getModifiers().isCtrlDown()
-                                 || key.getModifiers().isCommandDown());
+                            && lastRowSelected >= 0
+                            && key.getModifiers().isShiftDown();
 
     if (key.isKeyCode (KeyPress::upKey))
     {
@@ -684,11 +687,12 @@ bool ListBox::keyPressed (const KeyPress& key)
         else
             selectRow (jmax (0, lastRowSelected - 1));
     }
-    else if (key.isKeyCode (KeyPress::returnKey)
-              && isRowSelected (lastRowSelected))
+    else if (key.isKeyCode (KeyPress::downKey))
     {
-        if (model != nullptr)
-            model->returnKeyPressed (lastRowSelected);
+        if (multiple)
+            selectRangeOfRows (lastRowSelected, lastRowSelected + 1);
+        else
+            selectRow (jmin (totalItems - 1, jmax (0, lastRowSelected) + 1));
     }
     else if (key.isKeyCode (KeyPress::pageUpKey))
     {
@@ -706,24 +710,22 @@ bool ListBox::keyPressed (const KeyPress& key)
     }
     else if (key.isKeyCode (KeyPress::homeKey))
     {
-        if (multiple && key.getModifiers().isShiftDown())
+        if (multiple)
             selectRangeOfRows (lastRowSelected, 0);
         else
             selectRow (0);
     }
     else if (key.isKeyCode (KeyPress::endKey))
     {
-        if (multiple && key.getModifiers().isShiftDown())
+        if (multiple)
             selectRangeOfRows (lastRowSelected, totalItems - 1);
         else
             selectRow (totalItems - 1);
     }
-    else if (key.isKeyCode (KeyPress::downKey))
+    else if (key.isKeyCode (KeyPress::returnKey) && isRowSelected (lastRowSelected))
     {
-        if (multiple)
-            selectRangeOfRows (lastRowSelected, lastRowSelected + 1);
-        else
-            selectRow (jmin (totalItems - 1, jmax (0, lastRowSelected) + 1));
+        if (model != nullptr)
+            model->returnKeyPressed (lastRowSelected);
     }
     else if ((key.isKeyCode (KeyPress::deleteKey) || key.isKeyCode (KeyPress::backspaceKey))
                && isRowSelected (lastRowSelected))
@@ -731,7 +733,7 @@ bool ListBox::keyPressed (const KeyPress& key)
         if (model != nullptr)
             model->deleteKeyPressed (lastRowSelected);
     }
-    else if (multiple && key == KeyPress ('a', ModifierKeys::commandModifier, 0))
+    else if (multipleSelection && key == KeyPress ('a', ModifierKeys::commandModifier, 0))
     {
         selectRangeOfRows (0, std::numeric_limits<int>::max());
     }
@@ -925,19 +927,6 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const var& dragDescription,
         jassertfalse;
     }
 }
-
-//==============================================================================
-const Identifier ListBox::Ids::rowHeight ("rowHeight");
-const Identifier ListBox::Ids::borderThickness ("borderThickness");
-
-void ListBox::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setRowHeight (state.getProperty (Ids::rowHeight, defaultListRowHeight));
-    setOutlineThickness (state.getProperty (Ids::borderThickness, 0));
-}
-
 
 //==============================================================================
 Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingComponentToUpdate)

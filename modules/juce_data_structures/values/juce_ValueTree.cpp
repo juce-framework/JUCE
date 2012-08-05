@@ -219,6 +219,16 @@ public:
         }
     }
 
+    void copyPropertiesFrom (const SharedObject& source, UndoManager* const undoManager)
+    {
+        for (int i = properties.size(); --i >= 0;)
+            if (! source.properties.contains (properties.getName (i)))
+                removeProperty (properties.getName (i), undoManager);
+
+        for (int i = 0; i < source.properties.size(); ++i)
+            setProperty (source.properties.getName(i), source.properties.getValueAt(i), undoManager);
+    }
+
     ValueTree getChildWithName (const Identifier& typeToMatch) const
     {
         for (int i = 0; i < children.size(); ++i)
@@ -304,7 +314,7 @@ public:
                 }
                 else
                 {
-                    if (index < 0)
+                    if (! isPositiveAndBelow (index, children.size()))
                         index = children.size();
 
                     undoManager->perform (new AddOrRemoveChildAction (this, index, child));
@@ -747,7 +757,8 @@ var ValueTree::getProperty (const Identifier& name, const var& defaultReturnValu
 ValueTree& ValueTree::setProperty (const Identifier& name, const var& newValue,
                                    UndoManager* const undoManager)
 {
-    jassert (name.toString().isNotEmpty());
+    jassert (name.toString().isNotEmpty()); // Must have a valid property name!
+    jassert (object != nullptr); // Trying to add a property to a null ValueTree will fail!
 
     if (object != nullptr)
         object->setProperty (name, newValue, undoManager);
@@ -783,9 +794,19 @@ Identifier ValueTree::getPropertyName (const int index) const
                              : object->properties.getName (index);
 }
 
+void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* const undoManager)
+{
+    jassert (object != nullptr || source.object == nullptr); // Trying to add properties to a null ValueTree will fail!
+
+    if (source.object == nullptr)
+        removeAllProperties (undoManager);
+    else if (object != nullptr)
+        object->copyPropertiesFrom (*(source.object), undoManager);
+}
+
 //==============================================================================
 class ValueTreePropertyValueSource  : public Value::ValueSource,
-                                      public ValueTree::Listener
+                                      private ValueTree::Listener
 {
 public:
     ValueTreePropertyValueSource (const ValueTree& tree_, const Identifier& property_,
@@ -803,6 +824,11 @@ public:
     var getValue() const                 { return tree [property]; }
     void setValue (const var& newValue)  { tree.setProperty (property, newValue, undoManager); }
 
+private:
+    ValueTree tree;
+    const Identifier property;
+    UndoManager* const undoManager;
+
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
                                    const Identifier& changedProperty)
     {
@@ -814,11 +840,6 @@ public:
     void valueTreeChildRemoved (ValueTree&, ValueTree&) {}
     void valueTreeChildOrderChanged (ValueTree&) {}
     void valueTreeParentChanged (ValueTree&) {}
-
-private:
-    ValueTree tree;
-    const Identifier property;
-    UndoManager* const undoManager;
 
     JUCE_DECLARE_NON_COPYABLE (ValueTreePropertyValueSource);
 };
@@ -867,6 +888,8 @@ int ValueTree::indexOf (const ValueTree& child) const
 
 void ValueTree::addChild (const ValueTree& child, int index, UndoManager* const undoManager)
 {
+    jassert (object != nullptr); // Trying to add a child to a null ValueTree!
+
     if (object != nullptr)
         object->addChild (child.object, index, undoManager);
 }
@@ -954,7 +977,7 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
 }
 
 //==============================================================================
-void ValueTree::writeToStream (OutputStream& output)
+void ValueTree::writeToStream (OutputStream& output) const
 {
     SharedObject::writeObjectToStream (output, object);
 }
@@ -976,8 +999,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
         return v;
     }
 
-    int i;
-    for (i = 0; i < numProps; ++i)
+    for (int i = 0; i < numProps; ++i)
     {
         const String name (input.readString());
         jassert (name.isNotEmpty());
@@ -987,7 +1009,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
 
     const int numChildren = input.readCompressedInt();
 
-    for (i = 0; i < numChildren; ++i)
+    for (int i = 0; i < numChildren; ++i)
     {
         ValueTree child (readFromStream (input));
 

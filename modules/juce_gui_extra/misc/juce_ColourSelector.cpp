@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-class ColourComponentSlider  : public Slider
+class ColourSelector::ColourComponentSlider  : public Slider
 {
 public:
     ColourComponentSlider (const String& name)
@@ -47,7 +47,7 @@ private:
 };
 
 //==============================================================================
-class ColourSpaceMarker  : public Component
+class ColourSelector::ColourSpaceMarker  : public Component
 {
 public:
     ColourSpaceMarker()
@@ -71,13 +71,8 @@ private:
 class ColourSelector::ColourSpaceView  : public Component
 {
 public:
-    ColourSpaceView (ColourSelector& owner_,
-                     float& h_, float& s_, float& v_,
-                     const int edgeSize)
-        : owner (owner_),
-          h (h_), s (s_), v (v_),
-          lastHue (0.0f),
-          edge (edgeSize)
+    ColourSpaceView (ColourSelector& owner_, float& h_, float& s_, float& v_, const int edgeSize)
+        : owner (owner_), h (h_), s (s_), v (v_), lastHue (0.0f), edge (edgeSize)
     {
         addAndMakeVisible (&marker);
         setMouseCursor (MouseCursor::CrosshairCursor);
@@ -100,7 +95,6 @@ public:
                 for (int x = 0; x < width; ++x)
                 {
                     const float sat = x / (float) width;
-
                     pixels.setPixelColour (x, y, Colour (h, sat, val, 1.0f));
                 }
             }
@@ -163,7 +157,7 @@ private:
 };
 
 //==============================================================================
-class HueSelectorMarker  : public Component
+class ColourSelector::HueSelectorMarker  : public Component
 {
 public:
     HueSelectorMarker()
@@ -173,14 +167,17 @@ public:
 
     void paint (Graphics& g)
     {
+        const float w = (float) getWidth();
+        const float h = (float) getHeight();
+
         Path p;
         p.addTriangle (1.0f, 1.0f,
-                       getWidth() * 0.3f, getHeight() * 0.5f,
-                       1.0f, getHeight() - 1.0f);
+                       w * 0.3f, h * 0.5f,
+                       1.0f, h - 1.0f);
 
-        p.addTriangle (getWidth() - 1.0f, 1.0f,
-                       getWidth() * 0.7f, getHeight() * 0.5f,
-                       getWidth() - 1.0f, getHeight() - 1.0f);
+        p.addTriangle (w - 1.0f, 1.0f,
+                       w * 0.7f, h * 0.5f,
+                       w - 1.0f, h - 1.0f);
 
         g.setColour (Colours::white.withAlpha (0.75f));
         g.fillPath (p);
@@ -197,13 +194,8 @@ private:
 class ColourSelector::HueSelectorComp  : public Component
 {
 public:
-    HueSelectorComp (ColourSelector& owner_,
-                     float& h_, float& s_, float& v_,
-                     const int edgeSize)
-        : owner (owner_),
-          h (h_), s (s_), v (v_),
-          lastHue (0.0f),
-          edge (edgeSize)
+    HueSelectorComp (ColourSelector& owner_, float& h_, float& s_, float& v_, const int edgeSize)
+        : owner (owner_), h (h_), s (s_), v (v_), edge (edgeSize)
     {
         addAndMakeVisible (&marker);
     }
@@ -223,8 +215,7 @@ public:
 
     void resized()
     {
-        marker.setBounds (0, roundToInt ((getHeight() - edge * 2) * h),
-                          getWidth(), edge * 2);
+        marker.setBounds (0, roundToInt ((getHeight() - edge * 2) * h), getWidth(), edge * 2);
     }
 
     void mouseDown (const MouseEvent& e)
@@ -247,7 +238,6 @@ private:
     float& h;
     float& s;
     float& v;
-    float lastHue;
     HueSelectorMarker marker;
     const int edge;
 
@@ -359,8 +349,7 @@ ColourSelector::~ColourSelector()
 //==============================================================================
 Colour ColourSelector::getCurrentColour() const
 {
-    return ((flags & showAlphaChannel) != 0) ? colour
-                                             : colour.withAlpha ((uint8) 0xff);
+    return ((flags & showAlphaChannel) != 0) ? colour : colour.withAlpha ((uint8) 0xff);
 }
 
 void ColourSelector::setCurrentColour (const Colour& c)
@@ -444,8 +433,7 @@ void ColourSelector::paint (Graphics& g)
         g.setColour (Colours::white.overlaidWith (currentColour).contrasting());
         g.setFont (Font (14.0f, Font::bold));
         g.drawText (currentColour.toDisplayString ((flags & showAlphaChannel) != 0),
-                    previewArea.getX(), previewArea.getY(), previewArea.getWidth(), previewArea.getHeight(),
-                    Justification::centred, false);
+                    previewArea, Justification::centred, false);
     }
 
     if ((flags & showSliders) != 0)

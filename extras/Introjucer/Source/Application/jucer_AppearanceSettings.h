@@ -27,15 +27,16 @@
 #define __JUCER_APPEARANCESETTINGS_H_34D762C7__
 
 
-class AppearanceSettings
+class AppearanceSettings    : private ValueTree::Listener
 {
 public:
-    AppearanceSettings (const CodeEditorComponent& editorToCopyFrom);
+    AppearanceSettings (bool updateAppWhenChanged);
 
     bool readFromFile (const File& file);
     bool readFromXML (const XmlElement&);
     bool writeToFile (const File& file) const;
 
+    void updateColourScheme();
     void applyToCodeEditor (CodeEditorComponent& editor) const;
 
     StringArray getColourNames() const;
@@ -47,7 +48,66 @@ public:
 
     ValueTree settings;
 
-    static Component* createEditorWindow();
+    static File getSchemesFolder();
+    StringArray getPresetSchemes();
+    void refreshPresetSchemeList();
+    void selectPresetScheme (int index);
+
+    static Font getDefaultCodeFont();
+    static Colour getScrollbarColourForBackground (const Colour& background);
+
+    static void showEditorWindow (ScopedPointer<Component>& ownerPointer);
+
+    static const char* getSchemeFileSuffix()      { return ".scheme"; }
+    static const char* getSchemeFileWildCard()    { return "*.scheme"; }
+
+private:
+
+    Array<File> presetSchemeFiles;
+
+    static void writeDefaultSchemeFile (const String& xml, const String& name);
+
+    void applyToLookAndFeel (LookAndFeel&) const;
+
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
+    void valueTreeChildAdded (ValueTree&, ValueTree&)               { updateColourScheme(); }
+    void valueTreeChildRemoved (ValueTree&, ValueTree&)             { updateColourScheme(); }
+    void valueTreeChildOrderChanged (ValueTree&)                    { updateColourScheme(); }
+    void valueTreeParentChanged (ValueTree&)                        { updateColourScheme(); }
+    void valueTreeRedirected (ValueTree&)                           { updateColourScheme(); }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppearanceSettings);
+};
+
+//==============================================================================
+class IntrojucerLookAndFeel   : public LookAndFeel
+{
+public:
+    IntrojucerLookAndFeel();
+
+    void fillWithBackgroundTexture (Graphics&);
+
+    int getTabButtonOverlap (int tabDepth);
+    int getTabButtonSpaceAroundImage();
+    int getTabButtonBestWidth (TabBarButton& button, int tabDepth);
+    static Colour getTabBackgroundColour (TabBarButton& button);
+    void createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout);
+    void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown);
+
+    Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp);
+    void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int, int) {}
+
+    void drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging);
+    Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&);
+
+    bool areScrollbarButtonsVisible()   { return false; }
+
+    void drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical,
+                        int thumbStartPosition, int thumbSize, bool /*isMouseOver*/, bool /*isMouseDown*/);
+
+private:
+    Image backgroundTexture;
+    Colour backgroundTextureBaseColour;
 };
 
 

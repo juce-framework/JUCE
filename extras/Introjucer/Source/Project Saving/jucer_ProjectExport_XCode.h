@@ -186,6 +186,22 @@ protected:
         XcodeBuildConfiguration (Project& project, const ValueTree& settings, const bool iOS_)
             : BuildConfiguration (project, settings), iOS (iOS_)
         {
+            if (iOS)
+            {
+                if (getiOSCompatibilityVersion().isEmpty())
+                    getiOSCompatibilityVersionValue() = osxVersionDefault;
+            }
+            else
+            {
+                if (getMacSDKVersion().isEmpty())
+                    getMacSDKVersionValue() = osxVersionDefault;
+
+                if (getMacCompatibilityVersion().isEmpty())
+                    getMacCompatibilityVersionValue() = osxVersionDefault;
+
+                if (getMacArchitecture().isEmpty())
+                    getMacArchitectureValue() = osxArch_Default;
+            }
         }
 
         Value  getMacSDKVersionValue()                 { return getValue (Ids::osxSDK); }
@@ -207,9 +223,6 @@ protected:
 
             if (iOS)
             {
-                if (getiOSCompatibilityVersion().isEmpty())
-                    getiOSCompatibilityVersionValue() = osxVersionDefault;
-
                 const char* iosVersions[]      = { "Use Default",     "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", 0 };
                 const char* iosVersionValues[] = { osxVersionDefault, "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", 0 };
 
@@ -219,12 +232,6 @@ protected:
             }
             else
             {
-                if (getMacSDKVersion().isEmpty())
-                    getMacSDKVersionValue() = osxVersionDefault;
-
-                if (getMacCompatibilityVersion().isEmpty())
-                    getMacCompatibilityVersionValue() = osxVersionDefault;
-
                 const char* osxVersions[]      = { "Use Default",     osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
                 const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_5, osxVersion10_6, osxVersion10_7, 0 };
 
@@ -235,9 +242,6 @@ protected:
                 props.add (new ChoicePropertyComponent (getMacCompatibilityVersionValue(), "OSX Compatibility Version",
                                                         StringArray (osxVersions), Array<var> (osxVersionValues)),
                            "The minimum version of OSX that the target binary will be compatible with.");
-
-                if (getMacArchitecture().isEmpty())
-                    getMacArchitectureValue() = osxArch_Default;
 
                 const char* osxArch[] = { "Use Default", "Native architecture of build machine",
                                           "Universal Binary (32-bit)", "Universal Binary (64-bit)", "64-bit Intel", 0 };
@@ -311,9 +315,13 @@ private:
         {
             StringArray topLevelGroupIDs;
 
-            for (int i = 0; i < groups.size(); ++i)
-                if (groups.getReference(i).getNumChildren() > 0)
-                    topLevelGroupIDs.add (addProjectItem (groups.getReference(i)));
+            for (int i = 0; i < getAllGroups().size(); ++i)
+            {
+                const Project::Item& group = getAllGroups().getReference(i);
+
+                if (group.getNumChildren() > 0)
+                    topLevelGroupIDs.add (addProjectItem (group));
+            }
 
             { // Add 'resources' group
                 String resourcesGroupID (createID ("__resources"));
@@ -367,7 +375,7 @@ private:
 
     static Image fixMacIconImageSize (Image& image)
     {
-        const int validSizes[] = { 16, 32, 48, 128 };
+        const int validSizes[] = { 16, 32, 48, 128, 256, 512, 1024 };
 
         const int w = image.getWidth();
         const int h = image.getHeight();
@@ -386,57 +394,71 @@ private:
         return rescaleImageForIcon (image, bestSize);
     }
 
+    static void writeOldIconFormat (MemoryOutputStream& out, const Image& image, const char* type, const char* maskType)
+    {
+        const int w = image.getWidth();
+        const int h = image.getHeight();
+
+        out.write (type, 4);
+        out.writeIntBigEndian (8 + 4 * w * h);
+
+        const Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
+
+        for (int y = 0; y < h; ++y)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                const Colour pixel (bitmap.getPixelColour (x, y));
+                out.writeByte ((char) pixel.getAlpha());
+                out.writeByte ((char) pixel.getRed());
+                out.writeByte ((char) pixel.getGreen());
+                out.writeByte ((char) pixel.getBlue());
+            }
+        }
+
+        out.write (maskType, 4);
+        out.writeIntBigEndian (8 + w * h);
+
+        for (int y = 0; y < h; ++y)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                const Colour pixel (bitmap.getPixelColour (x, y));
+                out.writeByte ((char) pixel.getAlpha());
+            }
+        }
+    }
+
+    static void writeNewIconFormat (MemoryOutputStream& out, const Image& image, const char* type)
+    {
+        MemoryOutputStream pngData;
+        PNGImageFormat pngFormat;
+        pngFormat.writeImageToStream (image, pngData);
+
+        out.write (type, 4);
+        out.writeIntBigEndian (8 + pngData.getDataSize());
+        out << pngData;
+    }
+
     void writeIcnsFile (const Array<Image>& images, OutputStream& out) const
     {
         MemoryOutputStream data;
 
         for (int i = 0; i < images.size(); ++i)
         {
-            Image image (fixMacIconImageSize (images.getReference (i)));
+            const Image image (fixMacIconImageSize (images.getReference (i)));
+            jassert (image.getWidth() == image.getHeight());
 
-            const int w = image.getWidth();
-            const int h = image.getHeight();
-            jassert (w == h);
-
-            const char* type = nullptr;
-            const char* maskType = nullptr;
-
-            if (w == 16)  { type = "is32"; maskType = "s8mk"; }
-            if (w == 32)  { type = "il32"; maskType = "l8mk"; }
-            if (w == 48)  { type = "ih32"; maskType = "h8mk"; }
-            if (w == 128) { type = "it32"; maskType = "t8mk"; }
-
-            if (type != nullptr)
+            switch (image.getWidth())
             {
-                data.write (type, 4);
-                data.writeIntBigEndian (8 + 4 * w * h);
-
-                const Image::BitmapData bitmap (image, Image::BitmapData::readOnly);
-
-                int y;
-                for (y = 0; y < h; ++y)
-                {
-                    for (int x = 0; x < w; ++x)
-                    {
-                        const Colour pixel (bitmap.getPixelColour (x, y));
-                        data.writeByte ((char) pixel.getAlpha());
-                        data.writeByte ((char) pixel.getRed());
-                        data.writeByte ((char) pixel.getGreen());
-                        data.writeByte ((char) pixel.getBlue());
-                    }
-                }
-
-                data.write (maskType, 4);
-                data.writeIntBigEndian (8 + w * h);
-
-                for (y = 0; y < h; ++y)
-                {
-                    for (int x = 0; x < w; ++x)
-                    {
-                        const Colour pixel (bitmap.getPixelColour (x, y));
-                        data.writeByte ((char) pixel.getAlpha());
-                    }
-                }
+                case 16:   writeOldIconFormat (data, image, "is32", "s8mk"); break;
+                case 32:   writeOldIconFormat (data, image, "il32", "l8mk"); break;
+                case 48:   writeOldIconFormat (data, image, "ih32", "h8mk"); break;
+                case 128:  writeOldIconFormat (data, image, "it32", "t8mk"); break;
+                case 256:  writeNewIconFormat (data, image, "ic08"); break;
+                case 512:  writeNewIconFormat (data, image, "ic09"); break;
+                case 1024: writeNewIconFormat (data, image, "ic10"); break;
+                default:   break;
             }
         }
 
@@ -496,6 +518,7 @@ private:
         addPlistDictionaryKey (dict, "CFBundleShortVersionString",  project.getVersionString());
         addPlistDictionaryKey (dict, "CFBundleVersion",             project.getVersionString());
         addPlistDictionaryKey (dict, "NSHumanReadableCopyright",    project.getCompanyName().toString());
+        addPlistDictionaryKeyBool (dict, "NSHighResolutionCapable", true);
 
         StringArray documentExtensions;
         documentExtensions.addTokens (replacePreprocessorDefs (getAllPreprocessorDefs(), settings ["documentExtensions"]),
@@ -730,7 +753,11 @@ private:
         {
             defines.set ("_DEBUG", "1");
             defines.set ("DEBUG", "1");
-            s.add ("ONLY_ACTIVE_ARCH = YES");
+
+            if (config.getMacArchitecture() == osxArch_Default
+                 || config.getMacArchitecture().isEmpty())
+                s.add ("ONLY_ACTIVE_ARCH = YES");
+
             s.add ("COPY_PHASE_STRIP = NO");
             s.add ("GCC_DYNAMIC_NO_PIC = NO");
         }

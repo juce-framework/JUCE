@@ -30,7 +30,7 @@
 class CoreGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
-    CoreGraphicsContext (CGContextRef context_, const float flipHeight_);
+    CoreGraphicsContext (CGContextRef context_, const float flipHeight_, const float targetScale_);
     ~CoreGraphicsContext();
 
     //==============================================================================
@@ -39,6 +39,7 @@ public:
     void setOrigin (int x, int y);
     void addTransform (const AffineTransform& transform);
     float getScaleFactor();
+    float getTargetDeviceScaleFactor()  { return targetScale; }
     bool clipToRectangle (const Rectangle<int>& r);
     bool clipToRectangleList (const RectangleList& clipRegion);
     void excludeClipRectangle (const Rectangle<int>& r);
@@ -77,6 +78,7 @@ public:
 private:
     CGContextRef context;
     const CGFloat flipHeight;
+    float targetScale;
     CGColorSpaceRef rgbColourSpace, greyColourSpace;
     CGFunctionCallbacks gradientCallbacks;
     mutable Rectangle<int> lastClipRect;

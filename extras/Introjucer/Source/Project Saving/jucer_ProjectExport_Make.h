@@ -85,8 +85,8 @@ public:
     void create (const OwnedArray<LibraryModule>&) const
     {
         Array<RelativePath> files;
-        for (int i = 0; i < groups.size(); ++i)
-            findAllFilesToCompile (groups.getReference(i), files);
+        for (int i = 0; i < getAllGroups().size(); ++i)
+            findAllFilesToCompile (getAllGroups().getReference(i), files);
 
         MemoryOutputStream mo;
         writeMakefile (mo, files);

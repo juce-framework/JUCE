@@ -457,7 +457,7 @@ public:
     void resized()
     {
         if (child != nullptr)
-            child->setBounds (0, 0, getWidth(), getHeight());
+            child->setBounds (getLocalBounds());
     }
 
     var getObject()   { return child->getJavascriptObject(); }

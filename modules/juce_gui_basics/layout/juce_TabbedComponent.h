@@ -44,7 +44,6 @@ class JUCE_API  TabbedComponent  : public Component
 public:
     //==============================================================================
     /** Creates a TabbedComponent, specifying where the tabs should be placed.
-
         Once created, add some tabs with the addTab() method.
     */
     explicit TabbedComponent (TabbedButtonBar::Orientation orientation);
@@ -63,7 +62,6 @@ public:
     void setOrientation (TabbedButtonBar::Orientation orientation);
 
     /** Returns the current tab placement.
-
         @see setOrientation, TabbedButtonBar::getOrientation
     */
     TabbedButtonBar::Orientation getOrientation() const noexcept;
@@ -77,7 +75,6 @@ public:
     void setTabBarDepth (int newDepth);
 
     /** Returns the current thickness of the tab bar.
-
         @see setTabBarDepth
     */
     int getTabBarDepth() const noexcept                         { return tabDepth; }
@@ -92,23 +89,21 @@ public:
     void setOutline (int newThickness);
 
     /** Specifies a gap to leave around the edge of the content component.
-
         Each edge of the content component will be indented by the given number of pixels.
     */
     void setIndent (int indentThickness);
 
     //==============================================================================
     /** Removes all the tabs from the bar.
-
         @see TabbedButtonBar::clearTabs
     */
     void clearTabs();
 
     /** Adds a tab to the tab-bar.
 
-        The component passed in will be shown for the tab, and if deleteComponentWhenNotNeeded
-        is true, it will be deleted when the tab is removed or when this object is
-        deleted.
+        The component passed in will be shown for the tab. If deleteComponentWhenNotNeeded
+        is true, then the TabbedComponent will take ownership of the component and will delete
+        it when the tab is removed or when this object is deleted.
 
         @see TabbedButtonBar::addTab
     */
@@ -131,9 +126,8 @@ public:
     StringArray getTabNames() const;
 
     /** Returns the content component that was added for the given index.
-
-        Be sure not to use or delete the components that are returned, as this may interfere
-        with the TabbedComponent's use of them.
+        Be careful not to reposition or delete the components that are returned, as
+        this will interfere with the TabbedComponent's behaviour.
     */
     Component* getTabContentComponent (int tabIndex) const noexcept;
 
@@ -145,48 +139,36 @@ public:
 
     //==============================================================================
     /** Changes the currently-selected tab.
-
         To deselect all the tabs, pass -1 as the index.
-
         @see TabbedButtonBar::setCurrentTabIndex
     */
     void setCurrentTabIndex (int newTabIndex, bool sendChangeMessage = true);
 
     /** Returns the index of the currently selected tab.
-
         @see addTab, TabbedButtonBar::getCurrentTabIndex()
     */
     int getCurrentTabIndex() const;
 
     /** Returns the name of the currently selected tab.
-
         @see addTab, TabbedButtonBar::getCurrentTabName()
     */
     String getCurrentTabName() const;
 
     /** Returns the current component that's filling the panel.
-
-        This will return 0 if there isn't one.
+        This will return nullptr if there isn't one.
     */
     Component* getCurrentContentComponent() const noexcept          { return panelComponent; }
 
     //==============================================================================
     /** Callback method to indicate the selected tab has been changed.
-
         @see setCurrentTabIndex
     */
-    virtual void currentTabChanged (int newCurrentTabIndex,
-                                    const String& newCurrentTabName);
+    virtual void currentTabChanged (int newCurrentTabIndex, const String& newCurrentTabName);
 
-    /** Callback method to indicate that the user has right-clicked on a tab.
+    /** Callback method to indicate that the user has right-clicked on a tab. */
+    virtual void popupMenuClickOnTab (int tabIndex, const String& tabName);
 
-        (Or ctrl-clicked on the Mac)
-    */
-    virtual void popupMenuClickOnTab (int tabIndex,
-                                      const String& tabName);
-
-    /** Returns the tab button bar component that is being used.
-    */
+    /** Returns the tab button bar component that is being used. */
     TabbedButtonBar& getTabbedButtonBar() const noexcept            { return *tabs; }
 
     //==============================================================================
@@ -206,7 +188,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
     /** @internal */
     void resized();
     /** @internal */
@@ -228,8 +210,7 @@ private:
     //==============================================================================
     Array <WeakReference<Component> > contentComponents;
     WeakReference<Component> panelComponent;
-    int tabDepth;
-    int outlineThickness, edgeIndent;
+    int tabDepth, outlineThickness, edgeIndent;
 
     class ButtonBar;
     friend class ButtonBar;

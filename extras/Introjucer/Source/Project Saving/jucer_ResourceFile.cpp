@@ -123,9 +123,10 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 {
     String comment;
     comment << newLine << newLine
-            << "   This is an auto-generated file, created by " << JUCEApplication::getInstance()->getApplicationName() << newLine
-            << "   Do not edit anything in this file!" << newLine << newLine
-            << "*/" << newLine << newLine;
+            << "   This is an auto-generated file: Any edits you make may be overwritten!" << newLine
+            << newLine
+            << "*/" << newLine
+            << newLine;
 
     header << "/* ========================================================================================="
            << comment;
@@ -193,34 +194,8 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
     header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
            << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
-           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine;
-
-    if (containsAnyImages)
-    {
-        header << newLine
-               << "    //==============================================================================" << newLine
-               << "    // This class acts as an ImageProvider that will access the BinaryData images" << newLine
-               << "    class ImageProvider  : public juce::ComponentBuilder::ImageProvider" << newLine
-               << "    {" << newLine
-               << "    public:" << newLine
-               << "        ImageProvider() noexcept {}" << newLine
-               << newLine
-               << "        juce::Image getImageForIdentifier (const juce::var& imageIdentifier)" << newLine
-               << "        {" << newLine
-               << "            int dataSize = 0;" << newLine
-               << "            const char* const data = getNamedResource (imageIdentifier.toString().toUTF8(), dataSize);" << newLine
-               << newLine
-               << "            if (data != nullptr)" << newLine
-               << "                return juce::ImageCache::getFromMemory (data, dataSize);" << newLine
-               << newLine
-               << "            return juce::Image();" << newLine
-               << "        }" << newLine
-               << newLine
-               << "        juce::var getIdentifierForImage (const juce::Image&)  { return juce::var(); }" << newLine
-               << "    };" << newLine;
-    }
-
-    header << "}" << newLine;
+           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
+           << "}" << newLine;
 
     return true;
 }

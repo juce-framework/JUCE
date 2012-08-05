@@ -38,35 +38,34 @@ class JUCE_API  SystemStats
 public:
     //==============================================================================
     /** Returns the current version of JUCE,
-
         See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
     */
     static String getJUCEVersion();
 
     //==============================================================================
-    /** The set of possible results of the getOperatingSystemType() method.
-    */
+    /** The set of possible results of the getOperatingSystemType() method. */
     enum OperatingSystemType
     {
         UnknownOS   = 0,
 
-        MacOSX      = 0x1000,
         Linux       = 0x2000,
         Android     = 0x3000,
+        iOS         = 0x5000,
 
-        Win95       = 0x4001,
-        Win98       = 0x4002,
-        WinNT351    = 0x4103,
-        WinNT40     = 0x4104,
+        MacOSX_10_4 = 0x1004,
+        MacOSX_10_5 = 0x1005,
+        MacOSX_10_6 = 0x1006,
+        MacOSX_10_7 = 0x1007,
+        MacOSX_10_8 = 0x1008,
+
         Win2000     = 0x4105,
         WinXP       = 0x4106,
         WinVista    = 0x4107,
         Windows7    = 0x4108,
+        Windows8    = 0x4109,
 
         Windows     = 0x4000,   /**< To test whether any version of Windows is running,
                                      you can use the expression ((getOperatingSystemType() & Windows) != 0). */
-        WindowsNT   = 0x0100,   /**< To test whether the platform is Windows NT or later (i.e. not Win95 or 98),
-                                     you can use the expression ((getOperatingSystemType() & WindowsNT) != 0). */
     };
 
     /** Returns the type of operating system we're running on.
@@ -87,12 +86,10 @@ public:
     */
     static bool isOperatingSystem64Bit();
 
-   #if JUCE_MAC || DOXYGEN
-    /** OSX ONLY - Returns the current OS version number.
-        E.g. if it's running on 10.4, this will be 4, 10.5 will return 5, etc.
+    /** Returns an environment variable.
+        If the named value isn't set, this will return the defaultValue string instead.
     */
-    static int getOSXMinorVersionNumber();
-   #endif
+    static String getEnvironmentVariable (const String& name, const String& defaultValue);
 
     //==============================================================================
     /** Returns the current user's name, if available.
@@ -126,14 +123,12 @@ public:
     static int getNumCpus() noexcept            { return getCPUFlags().numCpus; }
 
     /** Returns the approximate CPU speed.
-
         @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
                     what year you're reading this...)
     */
     static int getCpuSpeedInMegaherz();
 
     /** Returns a string to indicate the CPU vendor.
-
         Might not be known on some systems.
     */
     static String getCpuVendor();
@@ -152,14 +147,12 @@ public:
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.
-
         @returns    the approximate number of megabytes of memory, or zero if
                     something goes wrong when finding out.
     */
     static int getMemorySizeInMegabytes();
 
     /** Returns the system page-size.
-
         This is only used by programmers with beards.
     */
     static int getPageSize();

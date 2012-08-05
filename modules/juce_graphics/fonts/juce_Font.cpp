@@ -39,7 +39,7 @@ typedef Typeface::Ptr (*GetTypefaceForFont) (const Font&);
 GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
 //==============================================================================
-class TypefaceCache  : public DeletedAtShutdown
+class TypefaceCache  : private DeletedAtShutdown
 {
 public:
     TypefaceCache()
@@ -262,11 +262,6 @@ Font::Font (const String& typefaceName, const float fontHeight, const int styleF
                                     FontStyleHelpers::getStyleName (styleFlags),
                                     FontValues::limitFontHeight (fontHeight),
                                     (styleFlags & underlined) != 0))
-{
-}
-
-Font::Font (const String& typefaceStyle, float fontHeight)
-    : font (new SharedFontInternal (typefaceStyle, FontValues::limitFontHeight (fontHeight), false))
 {
 }
 
@@ -596,6 +591,7 @@ void Font::setItalic (const bool shouldBeItalic)
 
 void Font::setUnderline (const bool shouldBeUnderlined)
 {
+    dupeInternalIfShared();
     font->underline = shouldBeUnderlined;
 }
 

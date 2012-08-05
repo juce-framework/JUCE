@@ -30,9 +30,9 @@
 #include <AudioUnit/AudioUnit.h>
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
+#include <AudioToolbox/AudioUnitUtilities.h>
 
 #if JUCE_SUPPORT_CARBON
- #include <AudioToolbox/AudioUnitUtilities.h>
  #include <AudioUnit/AudioUnitCarbonView.h>
 #endif
 

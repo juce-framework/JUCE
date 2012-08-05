@@ -31,14 +31,12 @@
 
 
 //==============================================================================
-class NewFileWizard  : public DeletedAtShutdown
+class NewFileWizard    : private DeletedAtShutdown
 {
 public:
     //==============================================================================
     NewFileWizard();
     ~NewFileWizard();
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (NewFileWizard);
 
     //==============================================================================
     class Type

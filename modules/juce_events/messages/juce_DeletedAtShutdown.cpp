@@ -34,7 +34,7 @@ DeletedAtShutdown::DeletedAtShutdown()
 DeletedAtShutdown::~DeletedAtShutdown()
 {
     const SpinLock::ScopedLockType sl (deletedAtShutdownLock);
-    getObjects().removeValue (this);
+    getObjects().removeFirstMatchingValue (this);
 }
 
 void DeletedAtShutdown::deleteAll()

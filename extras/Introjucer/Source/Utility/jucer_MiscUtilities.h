@@ -46,16 +46,38 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX = true, bool scrollY = true);
 
-void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text);
-void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize);
-
-void showUTF8ToolWindow();
-
-// Start a callout modally, which will delete the content comp when it's dismissed.
-void launchAsyncCallOutBox (Component& attachTo, Component* content);
+void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer);
 
 bool cancelAnyModalComponents();
 bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo&);
+
+//==============================================================================
+struct Icon
+{
+    Icon() : path (nullptr) {}
+    Icon (const Path& p, const Colour& c)  : path (&p), colour (c) {}
+    Icon (const Path* p, const Colour& c)  : path (p),  colour (c) {}
+
+    void draw (Graphics& g, const Rectangle<float>& area) const
+    {
+        if (path != nullptr)
+        {
+            g.setColour (colour);
+
+            const RectanglePlacement placement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
+            g.fillPath (*path, placement.getTransformToFit (path->getBounds(), area));
+        }
+    }
+
+    Icon withContrastingColourTo (const Colour& background) const
+    {
+        return Icon (path, background.contrasting (colour, 0.6f));
+    }
+
+    const Path* path;
+    Colour colour;
+};
+
 
 //==============================================================================
 class RolloverHelpComp   : public Component,
@@ -145,6 +167,54 @@ protected:
     Value sourceValue;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter);
+};
+
+//==============================================================================
+class FloatingToolWindow  : public DialogWindow
+{
+public:
+    FloatingToolWindow (const String& title,
+                        const String& windowPosPropertyName,
+                        Component* content,
+                        ScopedPointer<Component>& ownerPointer,
+                        int defaultW, int defaultH,
+                        int minW, int minH,
+                        int maxW, int maxH)
+        : DialogWindow (title, Colours::darkgrey, true, true),
+          windowPosProperty (windowPosPropertyName),
+          owner (ownerPointer)
+    {
+        setUsingNativeTitleBar (true);
+        setResizable (true, true);
+        setResizeLimits (minW, minH, maxW, maxH);
+        setContentOwned (content, false);
+
+        const String windowState (getAppProperties().getValue (windowPosProperty));
+
+        if (windowState.isNotEmpty())
+            restoreWindowStateFromString (windowState);
+        else
+            centreAroundComponent (Component::getCurrentlyFocusedComponent(), defaultW, defaultH);
+
+        setVisible (true);
+        owner = this;
+    }
+
+    ~FloatingToolWindow()
+    {
+        getAppProperties().setValue (windowPosProperty, getWindowStateAsString());
+    }
+
+    void closeButtonPressed()
+    {
+        owner = nullptr;
+    }
+
+private:
+    String windowPosProperty;
+    ScopedPointer<Component>& owner;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatingToolWindow);
 };
 
 //==============================================================================
@@ -255,15 +325,14 @@ public:
         const Colour colour (getColour());
 
         g.fillAll (Colours::grey);
-        g.fillCheckerBoard (getLocalBounds().reduced (2, 2),
+        g.fillCheckerBoard (getLocalBounds().reduced (2),
                             10, 10,
                             Colour (0xffdddddd).overlaidWith (colour),
                             Colour (0xffffffff).overlaidWith (colour));
 
         g.setColour (Colours::white.overlaidWith (colour).contrasting());
         g.setFont (Font (getHeight() * 0.6f, Font::bold));
-        g.drawFittedText (colour.toDisplayString (true),
-                          2, 1, getWidth() - 4, getHeight() - 1,
+        g.drawFittedText (colour.toDisplayString (true), getLocalBounds().reduced (2, 1),
                           Justification::centred, 1);
     }
 
@@ -307,7 +376,9 @@ public:
         if (undoManager != nullptr)
             undoManager->beginNewTransaction();
 
-        launchAsyncCallOutBox (*this, new PopupColourSelector (colourValue, defaultColour, canResetToDefault));
+        CallOutBox::launchAsynchronously (*this, new PopupColourSelector (colourValue,
+                                                                          defaultColour,
+                                                                          canResetToDefault), nullptr);
     }
 
     void valueChanged (Value&)

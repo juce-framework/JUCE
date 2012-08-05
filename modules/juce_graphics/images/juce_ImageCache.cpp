@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-class ImageCache::Pimpl     : public Timer,
-                              public DeletedAtShutdown
+class ImageCache::Pimpl     : private Timer,
+                              private DeletedAtShutdown
 {
 public:
     Pimpl()

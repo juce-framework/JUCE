@@ -27,7 +27,7 @@
 #define __JUCE_SCROLLBAR_JUCEHEADER__
 
 #include "../buttons/juce_Button.h"
-
+class Viewport;
 
 //==============================================================================
 /**
@@ -50,18 +50,15 @@
     @see ScrollBar::Listener
 */
 class JUCE_API  ScrollBar  : public Component,
-                             public AsyncUpdater,
+                             private AsyncUpdater,
                              private Timer
 {
 public:
     //==============================================================================
     /** Creates a Scrollbar.
-
-        @param isVertical           whether it should be a vertical or horizontal bar
-        @param buttonsAreVisible    whether to show the up/down or left/right buttons
+        @param isVertical      specifies whether the bar should be a vertical or horizontal
     */
-    ScrollBar (bool isVertical,
-               bool buttonsAreVisible = true);
+    ScrollBar (bool isVertical);
 
     /** Destructor. */
     ~ScrollBar();
@@ -78,9 +75,6 @@ public:
         @param shouldBeVertical     true makes it vertical; false makes it horizontal.
     */
     void setOrientation (bool shouldBeVertical);
-
-    /** Shows or hides the scrollbar's buttons. */
-    void setButtonVisibility (bool buttonsAreVisible);
 
     /** Tells the scrollbar whether to make itself invisible when not needed.
 
@@ -119,7 +113,7 @@ public:
     /** Returns the current limits on the thumb position.
         @see setRangeLimits
     */
-    const Range<double> getRangeLimit() const noexcept              { return totalRange; }
+    Range<double> getRangeLimit() const noexcept                    { return totalRange; }
 
     /** Returns the lower value that the thumb can be set to.
 
@@ -136,13 +130,17 @@ public:
     //==============================================================================
     /** Changes the position of the scrollbar's 'thumb'.
 
+        This sets both the position and size of the thumb - to just set the position without
+        changing the size, you can use setCurrentRangeStart().
+
         If this method call actually changes the scrollbar's position, it will trigger an
         asynchronous call to ScrollBar::Listener::scrollBarMoved() for all the listeners that
         are registered.
 
+        @returns true if the range was changed, or false if nothing was changed.
         @see getCurrentRange. setCurrentRangeStart
     */
-    void setCurrentRange (const Range<double>& newRange);
+    bool setCurrentRange (const Range<double>& newRange);
 
     /** Changes the position of the scrollbar's 'thumb'.
 
@@ -179,7 +177,7 @@ public:
     /** Returns the current thumb range.
         @see getCurrentRange, setCurrentRange
     */
-    const Range<double> getCurrentRange() const noexcept            { return visibleRange; }
+    Range<double> getCurrentRange() const noexcept                  { return visibleRange; }
 
     /** Returns the position of the top of the thumb.
         @see getCurrentRange, setCurrentRangeStart
@@ -197,7 +195,7 @@ public:
         The value here is in terms of the total range, and is added or subtracted
         from the thumb position when the user clicks an up/down (or left/right) button.
     */
-    void setSingleStepSize (double newSingleStepSize);
+    void setSingleStepSize (double newSingleStepSize) noexcept;
 
     /** Moves the scrollbar by a number of single-steps.
 
@@ -206,8 +204,9 @@ public:
 
         A positive value here will move the bar down or to the right, a negative
         value moves it up or to the left.
+        @returns true if the scrollbar's position actually changed.
     */
-    void moveScrollbarInSteps (int howManySteps);
+    bool moveScrollbarInSteps (int howManySteps);
 
     /** Moves the scroll bar up or down in pages.
 
@@ -216,20 +215,21 @@ public:
 
         A positive value here will move the bar down or to the right, a negative
         value moves it up or to the left.
+        @returns true if the scrollbar's position actually changed.
     */
-    void moveScrollbarInPages (int howManyPages);
+    bool moveScrollbarInPages (int howManyPages);
 
     /** Scrolls to the top (or left).
-
         This is the same as calling setCurrentRangeStart (getMinimumRangeLimit());
+        @returns true if the scrollbar's position actually changed.
     */
-    void scrollToTop();
+    bool scrollToTop();
 
     /** Scrolls to the bottom (or right).
-
         This is the same as calling setCurrentRangeStart (getMaximumRangeLimit() - getCurrentRangeSize());
+        @returns true if the scrollbar's position actually changed.
     */
-    void scrollToBottom();
+    bool scrollToBottom();
 
     /** Changes the delay before the up and down buttons autorepeat when they are held
         down.
@@ -295,8 +295,6 @@ public:
     /** @internal */
     void lookAndFeelChanged();
     /** @internal */
-    void handleAsyncUpdate();
-    /** @internal */
     void mouseDown (const MouseEvent&);
     /** @internal */
     void mouseDrag (const MouseEvent&);
@@ -320,8 +318,11 @@ private:
     ScopedPointer<ScrollbarButton> upButton, downButton;
     ListenerList <Listener> listeners;
 
+    void handleAsyncUpdate();
     void updateThumbPosition();
     void timerCallback();
+
+    friend class Viewport;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar);
 };

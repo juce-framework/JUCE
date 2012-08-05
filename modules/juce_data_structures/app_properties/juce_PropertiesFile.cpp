@@ -49,7 +49,7 @@ File PropertiesFile::Options::getDefaultFile() const
     // mustn't have illegal characters in this name..
     jassert (applicationName == File::createLegalFileName (applicationName));
 
-  #if JUCE_MAC || JUCE_IOS
+   #if JUCE_MAC || JUCE_IOS
     File dir (commonToAllUsers ?  "/Library/"
                                : "~/Library/");
 
@@ -81,12 +81,12 @@ File PropertiesFile::Options::getDefaultFile() const
     if (folderName.isNotEmpty())
         dir = dir.getChildFile (folderName);
 
-  #elif JUCE_LINUX || JUCE_ANDROID
+   #elif JUCE_LINUX || JUCE_ANDROID
     const File dir ((commonToAllUsers ? "/var/" : "~/")
                         + (folderName.isNotEmpty() ? folderName
                                                    : ("." + applicationName)));
 
-  #elif JUCE_WINDOWS
+   #elif JUCE_WINDOWS
     File dir (File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory
                                                          : File::userApplicationDataDirectory));
 
@@ -95,7 +95,7 @@ File PropertiesFile::Options::getDefaultFile() const
 
     dir = dir.getChildFile (folderName.isNotEmpty() ? folderName
                                                     : applicationName);
-  #endif
+   #endif
 
     return dir.getChildFile (applicationName)
               .withFileExtension (filenameSuffix);
@@ -121,90 +121,17 @@ PropertiesFile::PropertiesFile (const Options& options_)
 
 void PropertiesFile::initialise()
 {
-    // You need to correctly specify just one storage format for the file
     ProcessScopedLock pl (createProcessLock());
 
     if (pl != nullptr && ! pl->isLocked())
         return; // locking failure..
 
-    ScopedPointer<InputStream> fileStream (file.createInputStream());
-
-    if (fileStream != nullptr)
-    {
-        int magicNumber = fileStream->readInt();
-
-        if (magicNumber == PropertyFileConstants::magicNumberCompressed)
-        {
-            fileStream = new GZIPDecompressorInputStream (new SubregionStream (fileStream.release(), 4, -1, true), true);
-            magicNumber = PropertyFileConstants::magicNumber;
-        }
-
-        if (magicNumber == PropertyFileConstants::magicNumber)
-        {
-            loadedOk = true;
-            BufferedInputStream in (fileStream.release(), 2048, true);
-
-            int numValues = in.readInt();
-
-            while (--numValues >= 0 && ! in.isExhausted())
-            {
-                const String key (in.readString());
-                const String value (in.readString());
-
-                jassert (key.isNotEmpty());
-                if (key.isNotEmpty())
-                    getAllProperties().set (key, value);
-            }
-        }
-        else
-        {
-            // Not a binary props file - let's see if it's XML..
-            fileStream = nullptr;
-
-            XmlDocument parser (file);
-            ScopedPointer<XmlElement> doc (parser.getDocumentElement (true));
-
-            if (doc != nullptr && doc->hasTagName (PropertyFileConstants::fileTag))
-            {
-                doc = parser.getDocumentElement();
-
-                if (doc != nullptr)
-                {
-                    loadedOk = true;
-
-                    forEachXmlChildElementWithTagName (*doc, e, PropertyFileConstants::valueTag)
-                    {
-                        const String name (e->getStringAttribute (PropertyFileConstants::nameAttribute));
-
-                        if (name.isNotEmpty())
-                        {
-                            getAllProperties().set (name,
-                                                    e->getFirstChildElement() != nullptr
-                                                        ? e->getFirstChildElement()->createDocument (String::empty, true)
-                                                        : e->getStringAttribute (PropertyFileConstants::valueAttribute));
-                        }
-                    }
-                }
-                else
-                {
-                    // must be a pretty broken XML file we're trying to parse here,
-                    // or a sign that this object needs an InterProcessLock,
-                    // or just a failure reading the file.  This last reason is why
-                    // we don't jassertfalse here.
-                }
-            }
-        }
-    }
-    else
-    {
-        loadedOk = ! file.exists();
-    }
+    loadedOk = (! file.exists()) || loadAsBinary() || loadAsXml();
 }
 
 PropertiesFile::~PropertiesFile()
 {
-    if (! saveIfNeeded())
-        jassertfalse;
+    saveIfNeeded();
 }
 
 InterProcessLock::ScopedLockType* PropertiesFile::createProcessLock() const
@@ -242,79 +169,167 @@ bool PropertiesFile::save()
         return false;
 
     if (options.storageFormat == storeAsXML)
+        return saveAsXml();
+    else
+        return saveAsBinary();
+}
+
+bool PropertiesFile::loadAsXml()
+{
+    XmlDocument parser (file);
+    ScopedPointer<XmlElement> doc (parser.getDocumentElement (true));
+
+    if (doc != nullptr && doc->hasTagName (PropertyFileConstants::fileTag))
     {
-        XmlElement doc (PropertyFileConstants::fileTag);
+        doc = parser.getDocumentElement();
 
-        for (int i = 0; i < getAllProperties().size(); ++i)
+        if (doc != nullptr)
         {
-            XmlElement* const e = doc.createNewChildElement (PropertyFileConstants::valueTag);
-            e->setAttribute (PropertyFileConstants::nameAttribute, getAllProperties().getAllKeys() [i]);
+            forEachXmlChildElementWithTagName (*doc, e, PropertyFileConstants::valueTag)
+            {
+                const String name (e->getStringAttribute (PropertyFileConstants::nameAttribute));
 
-            // if the value seems to contain xml, store it as such..
-            XmlElement* const childElement = XmlDocument::parse (getAllProperties().getAllValues() [i]);
+                if (name.isNotEmpty())
+                {
+                    getAllProperties().set (name,
+                                            e->getFirstChildElement() != nullptr
+                                                ? e->getFirstChildElement()->createDocument (String::empty, true)
+                                                : e->getStringAttribute (PropertyFileConstants::valueAttribute));
+                }
+            }
 
-            if (childElement != nullptr)
-                e->addChildElement (childElement);
-            else
-                e->setAttribute (PropertyFileConstants::valueAttribute,
-                                 getAllProperties().getAllValues() [i]);
+            return true;
+        }
+        else
+        {
+            // must be a pretty broken XML file we're trying to parse here,
+            // or a sign that this object needs an InterProcessLock,
+            // or just a failure reading the file.  This last reason is why
+            // we don't jassertfalse here.
+        }
+    }
+
+    return false;
+}
+
+bool PropertiesFile::saveAsXml()
+{
+    XmlElement doc (PropertyFileConstants::fileTag);
+
+    for (int i = 0; i < getAllProperties().size(); ++i)
+    {
+        XmlElement* const e = doc.createNewChildElement (PropertyFileConstants::valueTag);
+        e->setAttribute (PropertyFileConstants::nameAttribute, getAllProperties().getAllKeys() [i]);
+
+        // if the value seems to contain xml, store it as such..
+        XmlElement* const childElement = XmlDocument::parse (getAllProperties().getAllValues() [i]);
+
+        if (childElement != nullptr)
+            e->addChildElement (childElement);
+        else
+            e->setAttribute (PropertyFileConstants::valueAttribute,
+                             getAllProperties().getAllValues() [i]);
+    }
+
+    ProcessScopedLock pl (createProcessLock());
+
+    if (pl != nullptr && ! pl->isLocked())
+        return false; // locking failure..
+
+    if (doc.writeToFile (file, String::empty))
+    {
+        needsWriting = false;
+        return true;
+    }
+
+    return false;
+}
+
+bool PropertiesFile::loadAsBinary()
+{
+    FileInputStream fileStream (file);
+
+    if (fileStream.openedOk())
+    {
+        const int magicNumber = fileStream.readInt();
+
+        if (magicNumber == PropertyFileConstants::magicNumberCompressed)
+        {
+            SubregionStream subStream (&fileStream, 4, -1, false);
+            GZIPDecompressorInputStream gzip (subStream);
+            return loadAsBinary (gzip);
+        }
+        else if (magicNumber == PropertyFileConstants::magicNumber)
+        {
+            return loadAsBinary (fileStream);
+        }
+    }
+
+    return false;
+}
+
+bool PropertiesFile::loadAsBinary (InputStream& input)
+{
+    BufferedInputStream in (input, 2048);
+
+    int numValues = in.readInt();
+
+    while (--numValues >= 0 && ! in.isExhausted())
+    {
+        const String key (in.readString());
+        const String value (in.readString());
+
+        jassert (key.isNotEmpty());
+        if (key.isNotEmpty())
+            getAllProperties().set (key, value);
+    }
+
+    return true;
+}
+
+bool PropertiesFile::saveAsBinary()
+{
+    ProcessScopedLock pl (createProcessLock());
+
+    if (pl != nullptr && ! pl->isLocked())
+        return false; // locking failure..
+
+    TemporaryFile tempFile (file);
+    ScopedPointer <OutputStream> out (tempFile.getFile().createOutputStream());
+
+    if (out != nullptr)
+    {
+        if (options.storageFormat == storeAsCompressedBinary)
+        {
+            out->writeInt (PropertyFileConstants::magicNumberCompressed);
+            out->flush();
+
+            out = new GZIPCompressorOutputStream (out.release(), 9, true);
+        }
+        else
+        {
+            // have you set up the storage option flags correctly?
+            jassert (options.storageFormat == storeAsBinary);
+
+            out->writeInt (PropertyFileConstants::magicNumber);
         }
 
-        ProcessScopedLock pl (createProcessLock());
+        const int numProperties = getAllProperties().size();
 
-        if (pl != nullptr && ! pl->isLocked())
-            return false; // locking failure..
+        out->writeInt (numProperties);
 
-        if (doc.writeToFile (file, String::empty))
+        for (int i = 0; i < numProperties; ++i)
+        {
+            out->writeString (getAllProperties().getAllKeys() [i]);
+            out->writeString (getAllProperties().getAllValues() [i]);
+        }
+
+        out = nullptr;
+
+        if (tempFile.overwriteTargetFileWithTemporary())
         {
             needsWriting = false;
             return true;
-        }
-    }
-    else
-    {
-        ProcessScopedLock pl (createProcessLock());
-
-        if (pl != nullptr && ! pl->isLocked())
-            return false; // locking failure..
-
-        TemporaryFile tempFile (file);
-        ScopedPointer <OutputStream> out (tempFile.getFile().createOutputStream());
-
-        if (out != nullptr)
-        {
-            if (options.storageFormat == storeAsCompressedBinary)
-            {
-                out->writeInt (PropertyFileConstants::magicNumberCompressed);
-                out->flush();
-
-                out = new GZIPCompressorOutputStream (out.release(), 9, true);
-            }
-            else
-            {
-                // have you set up the storage option flags correctly?
-                jassert (options.storageFormat == storeAsBinary);
-
-                out->writeInt (PropertyFileConstants::magicNumber);
-            }
-
-            const int numProperties = getAllProperties().size();
-
-            out->writeInt (numProperties);
-
-            for (int i = 0; i < numProperties; ++i)
-            {
-                out->writeString (getAllProperties().getAllKeys() [i]);
-                out->writeString (getAllProperties().getAllValues() [i]);
-            }
-
-            out = nullptr;
-
-            if (tempFile.overwriteTargetFileWithTemporary())
-            {
-                needsWriting = false;
-                return true;
-            }
         }
     }
 

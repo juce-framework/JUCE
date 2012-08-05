@@ -123,15 +123,15 @@ public:
 };
 
 //==============================================================================
-CodeDocument::Iterator::Iterator (CodeDocument* const document_)
-    : document (document_),
+CodeDocument::Iterator::Iterator (const CodeDocument& document_) noexcept
+    : document (&document_),
       charPointer (nullptr),
       line (0),
       position (0)
 {
 }
 
-CodeDocument::Iterator::Iterator (const CodeDocument::Iterator& other)
+CodeDocument::Iterator::Iterator (const CodeDocument::Iterator& other) noexcept
     : document (other.document),
       charPointer (other.charPointer),
       line (other.line),
@@ -153,13 +153,13 @@ CodeDocument::Iterator::~Iterator() noexcept
 {
 }
 
-juce_wchar CodeDocument::Iterator::nextChar()
+juce_wchar CodeDocument::Iterator::nextChar() noexcept
 {
     for (;;)
     {
         if (charPointer.getAddress() == nullptr)
         {
-            CodeDocumentLine* const l = document->lines[line];
+            const CodeDocumentLine* const l = document->lines[line];
 
             if (l == nullptr)
                 return 0;
@@ -182,16 +182,16 @@ juce_wchar CodeDocument::Iterator::nextChar()
     }
 }
 
-void CodeDocument::Iterator::skip()
+void CodeDocument::Iterator::skip() noexcept
 {
     nextChar();
 }
 
-void CodeDocument::Iterator::skipToEndOfLine()
+void CodeDocument::Iterator::skipToEndOfLine() noexcept
 {
     if (charPointer.getAddress() == nullptr)
     {
-        CodeDocumentLine* const l = document->lines[line];
+        const CodeDocumentLine* const l = document->lines[line];
 
         if (l == nullptr)
             return;
@@ -204,11 +204,11 @@ void CodeDocument::Iterator::skipToEndOfLine()
     charPointer = nullptr;
 }
 
-juce_wchar CodeDocument::Iterator::peekNextChar() const
+juce_wchar CodeDocument::Iterator::peekNextChar() const noexcept
 {
     if (charPointer.getAddress() == nullptr)
     {
-        CodeDocumentLine* const l = document->lines[line];
+        const CodeDocumentLine* const l = document->lines[line];
 
         if (l == nullptr)
             return 0;
@@ -221,11 +221,11 @@ juce_wchar CodeDocument::Iterator::peekNextChar() const
     if (c != 0)
         return c;
 
-    CodeDocumentLine* const l = document->lines [line + 1];
+    const CodeDocumentLine* const l = document->lines [line + 1];
     return l == nullptr ? 0 : l->line[0];
 }
 
-void CodeDocument::Iterator::skipWhitespace()
+void CodeDocument::Iterator::skipWhitespace() noexcept
 {
     while (CharacterFunctions::isWhitespace (peekNextChar()))
         skip();
@@ -238,23 +238,22 @@ bool CodeDocument::Iterator::isEOF() const noexcept
 
 //==============================================================================
 CodeDocument::Position::Position() noexcept
-    : owner (0), characterPos (0), line (0),
+    : owner (nullptr), characterPos (0), line (0),
       indexInLine (0), positionMaintained (false)
 {
 }
 
-CodeDocument::Position::Position (const CodeDocument* const ownerDocument,
+CodeDocument::Position::Position (const CodeDocument& ownerDocument,
                                   const int line_, const int indexInLine_) noexcept
-    : owner (const_cast <CodeDocument*> (ownerDocument)),
+    : owner (const_cast <CodeDocument*> (&ownerDocument)),
       characterPos (0), line (line_),
       indexInLine (indexInLine_), positionMaintained (false)
 {
     setLineAndIndex (line_, indexInLine_);
 }
 
-CodeDocument::Position::Position (const CodeDocument* const ownerDocument,
-                                  const int characterPos_) noexcept
-    : owner (const_cast <CodeDocument*> (ownerDocument)),
+CodeDocument::Position::Position (const CodeDocument& ownerDocument, const int characterPos_) noexcept
+    : owner (const_cast <CodeDocument*> (&ownerDocument)),
       positionMaintained (false)
 {
     setPosition (characterPos_);
@@ -324,25 +323,22 @@ void CodeDocument::Position::setLineAndIndex (const int newLineNum, const int ne
         {
             line = owner->lines.size() - 1;
 
-            CodeDocumentLine* const l = owner->lines.getUnchecked (line);
-            jassert (l != nullptr);
-
-            indexInLine = l->lineLengthWithoutNewLines;
-            characterPos = l->lineStartInFile + indexInLine;
+            const CodeDocumentLine& l = *owner->lines.getUnchecked (line);
+            indexInLine = l.lineLengthWithoutNewLines;
+            characterPos = l.lineStartInFile + indexInLine;
         }
         else
         {
             line = jmax (0, newLineNum);
 
-            CodeDocumentLine* const l = owner->lines.getUnchecked (line);
-            jassert (l != nullptr);
+            const CodeDocumentLine& l = *owner->lines.getUnchecked (line);
 
-            if (l->lineLengthWithoutNewLines > 0)
-                indexInLine = jlimit (0, l->lineLengthWithoutNewLines, newIndexInLine);
+            if (l.lineLengthWithoutNewLines > 0)
+                indexInLine = jlimit (0, l.lineLengthWithoutNewLines, newIndexInLine);
             else
                 indexInLine = 0;
 
-            characterPos = l->lineStartInFile + indexInLine;
+            characterPos = l.lineStartInFile + indexInLine;
         }
     }
 }
@@ -366,15 +362,14 @@ void CodeDocument::Position::setPosition (const int newPosition)
             {
                 for (int i = lineStart; i < lineEnd; ++i)
                 {
-                    CodeDocumentLine* const l = owner->lines.getUnchecked (i);
+                    const CodeDocumentLine& l = *owner->lines.getUnchecked (i);
+                    const int index = newPosition - l.lineStartInFile;
 
-                    int index = newPosition - l->lineStartInFile;
-
-                    if (index >= 0 && (index < l->lineLength || i == lineEnd - 1))
+                    if (index >= 0 && (index < l.lineLength || i == lineEnd - 1))
                     {
                         line = i;
-                        indexInLine = jmin (l->lineLengthWithoutNewLines, index);
-                        characterPos = l->lineStartInFile + indexInLine;
+                        indexInLine = jmin (l.lineLengthWithoutNewLines, index);
+                        characterPos = l.lineStartInFile + indexInLine;
                     }
                 }
 
@@ -383,9 +378,8 @@ void CodeDocument::Position::setPosition (const int newPosition)
             else
             {
                 const int midIndex = (lineStart + lineEnd + 1) / 2;
-                CodeDocumentLine* const mid = owner->lines.getUnchecked (midIndex);
 
-                if (newPosition >= mid->lineStartInFile)
+                if (newPosition >= owner->lines.getUnchecked (midIndex)->lineStartInFile)
                     lineStart = midIndex;
                 else
                     lineEnd = midIndex;
@@ -405,9 +399,10 @@ void CodeDocument::Position::moveBy (int characterDelta)
         // If moving right, make sure we don't get stuck between the \r and \n characters..
         if (line < owner->lines.size())
         {
-            CodeDocumentLine* const l = owner->lines.getUnchecked (line);
-            if (indexInLine + characterDelta < l->lineLength
-                 && indexInLine + characterDelta >= l->lineLengthWithoutNewLines + 1)
+            const CodeDocumentLine& l = *owner->lines.getUnchecked (line);
+
+            if (indexInLine + characterDelta < l.lineLength
+                 && indexInLine + characterDelta >= l.lineLengthWithoutNewLines + 1)
                 ++characterDelta;
         }
     }
@@ -415,21 +410,21 @@ void CodeDocument::Position::moveBy (int characterDelta)
     setPosition (characterPos + characterDelta);
 }
 
-const CodeDocument::Position CodeDocument::Position::movedBy (const int characterDelta) const
+CodeDocument::Position CodeDocument::Position::movedBy (const int characterDelta) const
 {
     CodeDocument::Position p (*this);
     p.moveBy (characterDelta);
     return p;
 }
 
-const CodeDocument::Position CodeDocument::Position::movedByLines (const int deltaLines) const
+CodeDocument::Position CodeDocument::Position::movedByLines (const int deltaLines) const
 {
     CodeDocument::Position p (*this);
     p.setLineAndIndex (getLineNumber() + deltaLines, getIndexInLine());
     return p;
 }
 
-const juce_wchar CodeDocument::Position::getCharacter() const
+juce_wchar CodeDocument::Position::getCharacter() const
 {
     const CodeDocumentLine* const l = owner->lines [line];
     return l == nullptr ? 0 : l->line [getIndexInLine()];
@@ -458,7 +453,7 @@ void CodeDocument::Position::setPositionMaintained (const bool isMaintained)
             {
                 // If this happens, you may have deleted the document while there are Position objects that are still using it...
                 jassert (owner->positionsToMaintain.contains (this));
-                owner->positionsToMaintain.removeValue (this);
+                owner->positionsToMaintain.removeFirstMatchingValue (this);
             }
         }
     }
@@ -480,8 +475,8 @@ CodeDocument::~CodeDocument()
 
 String CodeDocument::getAllContent() const
 {
-    return getTextBetween (Position (this, 0),
-                           Position (this, lines.size(), 0));
+    return getTextBetween (Position (*this, 0),
+                           Position (*this, lines.size(), 0));
 }
 
 String CodeDocument::getTextBetween (const Position& start, const Position& end) const
@@ -505,22 +500,22 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
 
     for (int i = jmax (0, startLine); i <= maxLine; ++i)
     {
-        const CodeDocumentLine* line = lines.getUnchecked(i);
-        int len = line->lineLength;
+        const CodeDocumentLine& line = *lines.getUnchecked(i);
+        int len = line.lineLength;
 
         if (i == startLine)
         {
             const int index = start.getIndexInLine();
-            mo << line->line.substring (index, len);
+            mo << line.line.substring (index, len);
         }
         else if (i == endLine)
         {
             len = end.getIndexInLine();
-            mo << line->line.substring (0, len);
+            mo << line.line.substring (0, len);
         }
         else
         {
-            mo << line->line;
+            mo << line.line;
         }
     }
 
@@ -736,20 +731,13 @@ void CodeDocument::checkLastLineStatus()
 }
 
 //==============================================================================
-void CodeDocument::addListener (CodeDocument::Listener* const listener) noexcept
-{
-    listeners.add (listener);
-}
-
-void CodeDocument::removeListener (CodeDocument::Listener* const listener) noexcept
-{
-    listeners.remove (listener);
-}
+void CodeDocument::addListener    (CodeDocument::Listener* const l) noexcept   { listeners.add (l); }
+void CodeDocument::removeListener (CodeDocument::Listener* const l) noexcept   { listeners.remove (l); }
 
 void CodeDocument::sendListenerChangeMessage (const int startLine, const int endLine)
 {
-    Position startPos (this, startLine, 0);
-    Position endPos (this, endLine, 0);
+    Position startPos (*this, startLine, 0);
+    Position endPos (*this, endLine, 0);
 
     listeners.call (&CodeDocument::Listener::codeDocumentChanged, startPos, endPos);
 }
@@ -758,10 +746,8 @@ void CodeDocument::sendListenerChangeMessage (const int startLine, const int end
 class CodeDocumentInsertAction   : public UndoableAction
 {
 public:
-    CodeDocumentInsertAction (CodeDocument& owner_, const String& text_, const int insertPos_) noexcept
-        : owner (owner_),
-          text (text_),
-          insertPos (insertPos_)
+    CodeDocumentInsertAction (CodeDocument& doc, const String& t, const int pos) noexcept
+        : owner (doc), text (t), insertPos (pos)
     {
     }
 
@@ -784,77 +770,72 @@ public:
 private:
     CodeDocument& owner;
     const String text;
-    int insertPos;
+    const int insertPos;
 
     JUCE_DECLARE_NON_COPYABLE (CodeDocumentInsertAction);
 };
 
 void CodeDocument::insert (const String& text, const int insertPos, const bool undoable)
 {
-    if (text.isEmpty())
-        return;
-
-    if (undoable)
+    if (text.isNotEmpty())
     {
-        undoManager.perform (new CodeDocumentInsertAction (*this, text, insertPos));
-    }
-    else
-    {
-        Position pos (this, insertPos);
-        const int firstAffectedLine = pos.getLineNumber();
-        int lastAffectedLine = firstAffectedLine + 1;
-
-        CodeDocumentLine* const firstLine = lines [firstAffectedLine];
-        String textInsideOriginalLine (text);
-
-        if (firstLine != nullptr)
+        if (undoable)
         {
-            const int index = pos.getIndexInLine();
-            textInsideOriginalLine = firstLine->line.substring (0, index)
-                                     + textInsideOriginalLine
-                                     + firstLine->line.substring (index);
+            undoManager.perform (new CodeDocumentInsertAction (*this, text, insertPos));
         }
-
-        maximumLineLength = -1;
-        Array <CodeDocumentLine*> newLines;
-        CodeDocumentLine::createLines (newLines, textInsideOriginalLine);
-        jassert (newLines.size() > 0);
-
-        CodeDocumentLine* const newFirstLine = newLines.getUnchecked (0);
-        newFirstLine->lineStartInFile = firstLine != nullptr ? firstLine->lineStartInFile : 0;
-        lines.set (firstAffectedLine, newFirstLine);
-
-        if (newLines.size() > 1)
+        else
         {
-            for (int i = 1; i < newLines.size(); ++i)
+            Position pos (*this, insertPos);
+            const int firstAffectedLine = pos.getLineNumber();
+            int lastAffectedLine = firstAffectedLine + 1;
+
+            CodeDocumentLine* const firstLine = lines [firstAffectedLine];
+            String textInsideOriginalLine (text);
+
+            if (firstLine != nullptr)
             {
-                CodeDocumentLine* const l = newLines.getUnchecked (i);
-                lines.insert (firstAffectedLine + i, l);
+                const int index = pos.getIndexInLine();
+                textInsideOriginalLine = firstLine->line.substring (0, index)
+                                         + textInsideOriginalLine
+                                         + firstLine->line.substring (index);
             }
 
-            lastAffectedLine = lines.size();
+            maximumLineLength = -1;
+            Array <CodeDocumentLine*> newLines;
+            CodeDocumentLine::createLines (newLines, textInsideOriginalLine);
+            jassert (newLines.size() > 0);
+
+            CodeDocumentLine* const newFirstLine = newLines.getUnchecked (0);
+            newFirstLine->lineStartInFile = firstLine != nullptr ? firstLine->lineStartInFile : 0;
+            lines.set (firstAffectedLine, newFirstLine);
+
+            if (newLines.size() > 1)
+            {
+                lines.insertArray (firstAffectedLine + 1, newLines.getRawDataPointer() + 1, newLines.size() - 1);
+                lastAffectedLine = lines.size();
+            }
+
+            int lineStart = newFirstLine->lineStartInFile;
+            for (int i = firstAffectedLine; i < lines.size(); ++i)
+            {
+                CodeDocumentLine& l = *lines.getUnchecked (i);
+                l.lineStartInFile = lineStart;
+                lineStart += l.lineLength;
+            }
+
+            checkLastLineStatus();
+
+            const int newTextLength = text.length();
+            for (int i = 0; i < positionsToMaintain.size(); ++i)
+            {
+                CodeDocument::Position& p = *positionsToMaintain.getUnchecked(i);
+
+                if (p.getPosition() >= insertPos)
+                    p.setPosition (p.getPosition() + newTextLength);
+            }
+
+            sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);
         }
-
-        int i, lineStart = newFirstLine->lineStartInFile;
-        for (i = firstAffectedLine; i < lines.size(); ++i)
-        {
-            CodeDocumentLine* const l = lines.getUnchecked (i);
-            l->lineStartInFile = lineStart;
-            lineStart += l->lineLength;
-        }
-
-        checkLastLineStatus();
-
-        const int newTextLength = text.length();
-        for (i = 0; i < positionsToMaintain.size(); ++i)
-        {
-            CodeDocument::Position* const p = positionsToMaintain.getUnchecked(i);
-
-            if (p->getPosition() >= insertPos)
-                p->setPosition (p->getPosition() + newTextLength);
-        }
-
-        sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);
     }
 }
 
@@ -862,13 +843,11 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
 class CodeDocumentDeleteAction  : public UndoableAction
 {
 public:
-    CodeDocumentDeleteAction (CodeDocument& owner_, const int startPos_, const int endPos_) noexcept
-        : owner (owner_),
-          startPos (startPos_),
-          endPos (endPos_)
+    CodeDocumentDeleteAction (CodeDocument& doc, const int start, const int end) noexcept
+        : owner (doc), startPos (start), endPos (end),
+          removedText (doc.getTextBetween (CodeDocument::Position (doc, start),
+                                           CodeDocument::Position (doc, end)))
     {
-        removedText = owner.getTextBetween (CodeDocument::Position (&owner, startPos),
-                                            CodeDocument::Position (&owner, endPos));
     }
 
     bool perform()
@@ -885,12 +864,12 @@ public:
         return true;
     }
 
-    int getSizeInUnits()    { return removedText.length() + 32; }
+    int getSizeInUnits()    { return (endPos - startPos) + 32; }
 
 private:
     CodeDocument& owner;
-    int startPos, endPos;
-    String removedText;
+    const int startPos, endPos;
+    const String removedText;
 
     JUCE_DECLARE_NON_COPYABLE (CodeDocumentDeleteAction);
 };
@@ -906,57 +885,55 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
     }
     else
     {
-        Position startPosition (this, startPos);
-        Position endPosition (this, endPos);
+        Position startPosition (*this, startPos);
+        Position endPosition (*this, endPos);
 
         maximumLineLength = -1;
         const int firstAffectedLine = startPosition.getLineNumber();
         const int endLine = endPosition.getLineNumber();
         int lastAffectedLine = firstAffectedLine + 1;
-        CodeDocumentLine* const firstLine = lines.getUnchecked (firstAffectedLine);
+        CodeDocumentLine& firstLine = *lines.getUnchecked (firstAffectedLine);
 
         if (firstAffectedLine == endLine)
         {
-            firstLine->line = firstLine->line.substring (0, startPosition.getIndexInLine())
-                            + firstLine->line.substring (endPosition.getIndexInLine());
-            firstLine->updateLength();
+            firstLine.line = firstLine.line.substring (0, startPosition.getIndexInLine())
+                           + firstLine.line.substring (endPosition.getIndexInLine());
+            firstLine.updateLength();
         }
         else
         {
             lastAffectedLine = lines.size();
 
-            CodeDocumentLine* const lastLine = lines.getUnchecked (endLine);
-            jassert (lastLine != nullptr);
+            CodeDocumentLine& lastLine = *lines.getUnchecked (endLine);
 
-            firstLine->line = firstLine->line.substring (0, startPosition.getIndexInLine())
-                                + lastLine->line.substring (endPosition.getIndexInLine());
-            firstLine->updateLength();
+            firstLine.line = firstLine.line.substring (0, startPosition.getIndexInLine())
+                            + lastLine.line.substring (endPosition.getIndexInLine());
+            firstLine.updateLength();
 
             int numLinesToRemove = endLine - firstAffectedLine;
             lines.removeRange (firstAffectedLine + 1, numLinesToRemove);
         }
 
-        int i;
-        for (i = firstAffectedLine + 1; i < lines.size(); ++i)
+        for (int i = firstAffectedLine + 1; i < lines.size(); ++i)
         {
-            CodeDocumentLine* const l = lines.getUnchecked (i);
-            const CodeDocumentLine* const previousLine = lines.getUnchecked (i - 1);
-            l->lineStartInFile = previousLine->lineStartInFile + previousLine->lineLength;
+            CodeDocumentLine& l = *lines.getUnchecked (i);
+            const CodeDocumentLine& previousLine = *lines.getUnchecked (i - 1);
+            l.lineStartInFile = previousLine.lineStartInFile + previousLine.lineLength;
         }
 
         checkLastLineStatus();
 
         const int totalChars = getNumCharacters();
 
-        for (i = 0; i < positionsToMaintain.size(); ++i)
+        for (int i = 0; i < positionsToMaintain.size(); ++i)
         {
-            CodeDocument::Position* p = positionsToMaintain.getUnchecked(i);
+            CodeDocument::Position& p = *positionsToMaintain.getUnchecked(i);
 
-            if (p->getPosition() > startPosition.getPosition())
-                p->setPosition (jmax (startPos, p->getPosition() + startPos - endPos));
+            if (p.getPosition() > startPosition.getPosition())
+                p.setPosition (jmax (startPos, p.getPosition() + startPos - endPos));
 
-            if (p->getPosition() > totalChars)
-                p->setPosition (totalChars);
+            if (p.getPosition() > totalChars)
+                p.setPosition (totalChars);
         }
 
         sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);

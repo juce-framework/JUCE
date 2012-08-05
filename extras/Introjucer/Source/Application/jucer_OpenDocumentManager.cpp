@@ -26,9 +26,7 @@
 #include "jucer_OpenDocumentManager.h"
 #include "jucer_FilePreviewComponent.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-
-//==============================================================================
-Component* SourceCodeDocument::createEditor()       { return new SourceCodeEditor (this, codeDoc); }
+#include "jucer_Application.h"
 
 
 //==============================================================================
@@ -63,6 +61,8 @@ public:
     Component* createEditor()                       { return new ItemPreviewComponent (file); }
     Component* createViewer()                       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile)   { file = newFile; }
+    String getState() const                         { return String::empty; }
+    void restoreState (const String& state)         {}
 
     String getType() const
     {
@@ -113,7 +113,7 @@ void OpenDocumentManager::addListener (DocumentCloseListener* listener)
 
 void OpenDocumentManager::removeListener (DocumentCloseListener* listener)
 {
-    listeners.removeValue (listener);
+    listeners.removeFirstMatchingValue (listener);
 }
 
 //==============================================================================
@@ -158,19 +158,6 @@ int OpenDocumentManager::getNumOpenDocuments() const
 OpenDocumentManager::Document* OpenDocumentManager::getOpenDocument (int index) const
 {
     return documents.getUnchecked (index);
-}
-
-void OpenDocumentManager::moveDocumentToTopOfStack (Document* doc)
-{
-    for (int i = documents.size(); --i >= 0;)
-    {
-        if (doc == documents.getUnchecked(i))
-        {
-            documents.move (i, 0);
-            commandManager->commandStatusChanged();
-            break;
-        }
-    }
 }
 
 FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Document* doc)
@@ -311,4 +298,137 @@ void OpenDocumentManager::fileHasBeenRenamed (const File& oldFile, const File& n
         if (d->isForFile (oldFile))
             d->fileHasBeenRenamed (newFile);
     }
+}
+
+
+//==============================================================================
+RecentDocumentList::RecentDocumentList()
+{
+    JucerApplication::getApp().openDocumentManager.addListener (this);
+}
+
+RecentDocumentList::~RecentDocumentList()
+{
+    JucerApplication::getApp().openDocumentManager.removeListener (this);
+}
+
+void RecentDocumentList::clear()
+{
+    previousDocs.clear();
+    nextDocs.clear();
+}
+
+void RecentDocumentList::newDocumentOpened (OpenDocumentManager::Document* document)
+{
+    if (document != nullptr && document != getCurrentDocument())
+    {
+        nextDocs.clear();
+        previousDocs.add (document);
+    }
+}
+
+bool RecentDocumentList::canGoToPrevious() const
+{
+    return previousDocs.size() > 1;
+}
+
+bool RecentDocumentList::canGoToNext() const
+{
+    return nextDocs.size() > 0;
+}
+
+OpenDocumentManager::Document* RecentDocumentList::getPrevious()
+{
+    if (! canGoToPrevious())
+        return nullptr;
+
+    nextDocs.insert (0, previousDocs.remove (previousDocs.size() - 1));
+    return previousDocs.getLast();
+}
+
+OpenDocumentManager::Document* RecentDocumentList::getNext()
+{
+    if (! canGoToNext())
+        return nullptr;
+
+    OpenDocumentManager::Document* d = nextDocs.remove (0);
+    previousDocs.add (d);
+    return d;
+}
+
+OpenDocumentManager::Document* RecentDocumentList::getClosestPreviousDocOtherThan (OpenDocumentManager::Document* oneToAvoid) const
+{
+    for (int i = previousDocs.size(); --i >= 0;)
+        if (previousDocs.getUnchecked(i) != oneToAvoid)
+            return previousDocs.getUnchecked(i);
+
+    return nullptr;
+}
+
+void RecentDocumentList::documentAboutToClose (OpenDocumentManager::Document* document)
+{
+    previousDocs.removeAllInstancesOf (document);
+    nextDocs.removeAllInstancesOf (document);
+
+    jassert (! previousDocs.contains (document));
+    jassert (! nextDocs.contains (document));
+}
+
+static void restoreDocList (Project& project, Array <OpenDocumentManager::Document*>& list, const XmlElement* xml)
+{
+    if (xml != nullptr)
+    {
+        OpenDocumentManager& odm = JucerApplication::getApp().openDocumentManager;
+
+        forEachXmlChildElementWithTagName (*xml, e, "DOC")
+        {
+            const File file (e->getStringAttribute ("file"));
+
+            if (file.exists())
+            {
+                OpenDocumentManager::Document* doc = odm.openFile (&project, file);
+
+                if (doc != nullptr)
+                {
+                    doc->restoreState (e->getStringAttribute ("state"));
+
+                    list.add (doc);
+                }
+            }
+        }
+    }
+}
+
+void RecentDocumentList::restoreFromXML (Project& project, const XmlElement& xml)
+{
+    clear();
+
+    if (xml.hasTagName ("RECENT_DOCUMENTS"))
+    {
+        restoreDocList (project, previousDocs, xml.getChildByName ("PREVIOUS"));
+        restoreDocList (project, nextDocs,     xml.getChildByName ("NEXT"));
+    }
+}
+
+static void saveDocList (const Array <OpenDocumentManager::Document*>& list, XmlElement& xml)
+{
+    for (int i = 0; i < list.size(); ++i)
+    {
+        const OpenDocumentManager::Document& doc = *list.getUnchecked(i);
+
+        XmlElement* e = xml.createNewChildElement ("DOC");
+
+        e->setAttribute ("file", doc.getFile().getFullPathName());
+        e->setAttribute ("state", doc.getState());
+    }
+}
+
+XmlElement* RecentDocumentList::createXML() const
+{
+    XmlElement* xml = new XmlElement ("RECENT_DOCUMENTS");
+
+    saveDocList (previousDocs, *xml->createNewChildElement ("PREVIOUS"));
+    saveDocList (nextDocs,     *xml->createNewChildElement ("NEXT"));
+
+    return xml;
 }

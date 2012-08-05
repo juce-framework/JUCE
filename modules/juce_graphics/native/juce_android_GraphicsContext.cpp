@@ -55,7 +55,7 @@ namespace GraphicsHelpers
     }
 }
 
-ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
+ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
     return SoftwareImageType().create (format, width, height, clearImage);
 }

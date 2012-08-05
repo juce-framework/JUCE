@@ -519,26 +519,19 @@ public:
 
     /** Adds a speech-bubble shape to the path.
 
-        @param bodyX            the left of the main body area of the bubble
-        @param bodyY            the top of the main body area of the bubble
-        @param bodyW            the width of the main body area of the bubble
-        @param bodyH            the height of the main body area of the bubble
-        @param cornerSize       the amount by which to round off the corners of the main body rectangle
-        @param arrowTipX        the x position that the tip of the arrow should connect to
-        @param arrowTipY        the y position that the tip of the arrow should connect to
-        @param whichSide        the side to connect the arrow to: 0 = top, 1 = left, 2 = bottom, 3 = right
-        @param arrowPositionAlongEdgeProportional   how far along the edge of the main rectangle the
-                                arrow's base should be - this is a proportional distance between 0 and 1.0
-        @param arrowWidth       how wide the base of the arrow should be where it joins the main rectangle
+        @param bodyArea         the area of the body of the bubble shape
+        @param maximumArea      an area which encloses the body area and defines the limits within which
+                                the arrow tip can be drawn - if the tip lies outside this area, the bubble
+                                will be drawn without an arrow
+        @param arrowTipPosition the location of the tip of the arrow
+        @param cornerSize       the size of the rounded corners
+        @param arrowBaseWidth   the width of the base of the arrow where it joins the main rectangle
     */
-    void addBubble (float bodyX, float bodyY,
-                    float bodyW, float bodyH,
-                    float cornerSize,
-                    float arrowTipX,
-                    float arrowTipY,
-                    int whichSide,
-                    float arrowPositionAlongEdgeProportional,
-                    float arrowWidth);
+    void addBubble (const Rectangle<float>& bodyArea,
+                    const Rectangle<float>& maximumArea,
+                    const Point<float>& arrowTipPosition,
+                    const float cornerSize,
+                    const float arrowBaseWidth);
 
     /** Adds another path to this one.
 

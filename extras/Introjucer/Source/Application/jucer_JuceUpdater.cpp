@@ -273,7 +273,6 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
             : updater (updater_)
         {
             addChildComponent (&toggle);
-            toggle.setBounds ("2, 2, parent.height - 2, parent.height - 2");
             toggle.setWantsKeyboardFocus (false);
             setInterceptsMouseClicks (false, true);
         }
@@ -326,6 +325,11 @@ Component* JuceUpdater::refreshComponentForRow (int rowNumber, bool isRowSelecte
 
             g.drawText (status, getWidth() / 2, 0, getWidth() / 2, getHeight(),
                         Justification::centredLeft, true);
+        }
+
+        void resized()
+        {
+            toggle.setBounds (getLocalBounds().reduced (2));
         }
 
     private:

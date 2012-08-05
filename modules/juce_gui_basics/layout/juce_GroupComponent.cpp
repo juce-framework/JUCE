@@ -78,15 +78,3 @@ void GroupComponent::colourChanged()
 {
     repaint();
 }
-
-const Identifier GroupComponent::Ids::tagType ("GROUPCOMPONENT");
-const Identifier GroupComponent::Ids::text ("text");
-const Identifier GroupComponent::Ids::justification ("justification");
-
-void GroupComponent::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setText (state [Ids::text].toString());
-    setTextLabelPosition (static_cast <int> (state [Ids::justification]));
-}

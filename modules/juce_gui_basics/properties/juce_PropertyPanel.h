@@ -149,6 +149,8 @@ public:
     void resized();
 
 private:
+    class SectionComponent;
+
     Viewport viewport;
     class PropertyHolderComponent;
     PropertyHolderComponent* propertyHolderComponent;

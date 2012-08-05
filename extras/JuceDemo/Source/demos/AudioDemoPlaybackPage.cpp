@@ -94,14 +94,13 @@ public:
 
         if (thumbnail.getTotalLength() > 0)
         {
-            thumbnail.drawChannels (g, getLocalBounds().reduced (2, 2),
+            thumbnail.drawChannels (g, getLocalBounds().reduced (2),
                                     startTime, endTime, 1.0f);
         }
         else
         {
             g.setFont (14.0f);
-            g.drawFittedText ("(No audio file selected)", 0, 0, getWidth(), getHeight(),
-                              Justification::centred, 2);
+            g.drawFittedText ("(No audio file selected)", getLocalBounds(), Justification::centred, 2);
         }
     }
 

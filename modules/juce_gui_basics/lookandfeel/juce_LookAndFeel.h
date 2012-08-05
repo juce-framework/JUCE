@@ -57,6 +57,7 @@ class ImageButton;
 class CallOutBox;
 class Drawable;
 class CaretComponent;
+class BubbleComponent;
 
 //==============================================================================
 /**
@@ -183,8 +184,8 @@ public:
                               bool isButtonDown);
 
     //==============================================================================
-    /* AlertWindow handling..
-    */
+    // AlertWindow handling..
+
     virtual AlertWindow* createAlertWindow (const String& title,
                                             const String& message,
                                             const String& button1,
@@ -203,8 +204,8 @@ public:
 
     virtual int getAlertWindowButtonHeight();
 
-    virtual const Font getAlertWindowMessageFont();
-    virtual const Font getAlertWindowFont();
+    virtual Font getAlertWindowMessageFont();
+    virtual Font getAlertWindowFont();
 
     void setUsingNativeAlertWindows (bool shouldUseNativeAlerts);
     bool isUsingNativeAlertWindows();
@@ -229,6 +230,8 @@ public:
                                             int x, int y, int w, int h);
 
     //==============================================================================
+    virtual bool areScrollbarButtonsVisible();
+
     /** Draws one of the buttons on a scrollbar.
 
         @param g                    the context to draw into
@@ -289,9 +292,9 @@ public:
 
     //==============================================================================
     /** Returns a tick shape for use in yes/no boxes, etc. */
-    virtual const Path getTickShape (float height);
+    virtual Path getTickShape (float height);
     /** Returns a cross shape for use in yes/no boxes, etc. */
-    virtual const Path getCrossShape (float height);
+    virtual Path getCrossShape (float height);
 
     //==============================================================================
     /** Draws the + or - box in a treeview. */
@@ -333,9 +336,11 @@ public:
                                              Button* goUpButton);
 
     //==============================================================================
-    virtual void drawBubble (Graphics& g,
-                             float tipX, float tipY,
-                             float boxX, float boxY, float boxW, float boxH);
+    virtual void drawBubble (Graphics& g, BubbleComponent&,
+                             const Point<float>& tip, const Rectangle<float>& body);
+
+    //==============================================================================
+    virtual void drawLasso (Graphics& g, Component& lassoComp);
 
     //==============================================================================
     /** Fills the background of a popup menu component. */
@@ -513,61 +518,17 @@ public:
                                             GroupComponent& group);
 
     //==============================================================================
-    virtual void createTabButtonShape (Path& p,
-                                       int width, int height,
-                                       int tabIndex,
-                                       const String& text,
-                                       Button& button,
-                                       TabbedButtonBar::Orientation orientation,
-                                       bool isMouseOver,
-                                       bool isMouseDown,
-                                       bool isFrontTab);
-
-    virtual void fillTabButtonShape (Graphics& g,
-                                     const Path& path,
-                                     const Colour& preferredBackgroundColour,
-                                     int tabIndex,
-                                     const String& text,
-                                     Button& button,
-                                     TabbedButtonBar::Orientation orientation,
-                                     bool isMouseOver,
-                                     bool isMouseDown,
-                                     bool isFrontTab);
-
-    virtual void drawTabButtonText (Graphics& g,
-                                    int x, int y, int w, int h,
-                                    const Colour& preferredBackgroundColour,
-                                    int tabIndex,
-                                    const String& text,
-                                    Button& button,
-                                    TabbedButtonBar::Orientation orientation,
-                                    bool isMouseOver,
-                                    bool isMouseDown,
-                                    bool isFrontTab);
-
-    virtual int getTabButtonOverlap (int tabDepth);
     virtual int getTabButtonSpaceAroundImage();
+    virtual int getTabButtonOverlap (int tabDepth);
+    virtual int getTabButtonBestWidth (TabBarButton&, int tabDepth);
+    virtual Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton&, Rectangle<int>& textArea, Component& extraComp);
 
-    virtual int getTabButtonBestWidth (int tabIndex,
-                                       const String& text,
-                                       int tabDepth,
-                                       Button& button);
+    virtual void drawTabButton (TabBarButton&, Graphics& g, bool isMouseOver, bool isMouseDown);
+    virtual void drawTabButtonText (TabBarButton&, Graphics& g, bool isMouseOver, bool isMouseDown);
+    virtual void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics& g, int w, int h);
 
-    virtual void drawTabButton (Graphics& g,
-                                int w, int h,
-                                const Colour& preferredColour,
-                                int tabIndex,
-                                const String& text,
-                                Button& button,
-                                TabbedButtonBar::Orientation orientation,
-                                bool isMouseOver,
-                                bool isMouseDown,
-                                bool isFrontTab);
-
-    virtual void drawTabAreaBehindFrontButton (Graphics& g,
-                                               int w, int h,
-                                               TabbedButtonBar& tabBar,
-                                               TabbedButtonBar::Orientation orientation);
+    virtual void createTabButtonShape (TabBarButton&, Path& path,  bool isMouseOver, bool isMouseDown);
+    virtual void fillTabButtonShape (TabBarButton&, Graphics& g, const Path& path, bool isMouseOver, bool isMouseDown);
 
     virtual Button* createTabBarExtrasButton();
 
@@ -608,10 +569,10 @@ public:
     virtual void drawPropertyComponentLabel (Graphics& g, int width, int height,
                                              PropertyComponent& component);
 
-    virtual const Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
+    virtual Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
 
     //==============================================================================
-    virtual void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path);
+    virtual void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path, Image& cachedImage);
 
     //==============================================================================
     virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
@@ -624,6 +585,28 @@ public:
     virtual void playAlertSound();
 
     //==============================================================================
+    /** Draws a 3D raised (or indented) bevel using two colours.
+
+        The bevel is drawn inside the given rectangle, and greater bevel thicknesses
+        extend inwards.
+
+        The top-left colour is used for the top- and left-hand edges of the
+        bevel; the bottom-right colour is used for the bottom- and right-hand
+        edges.
+
+        If useGradient is true, then the bevel fades out to make it look more curved
+        and less angular. If sharpEdgeOnOutside is true, the outside of the bevel is
+        sharp, and it fades towards the centre; if sharpEdgeOnOutside is false, then
+        the centre edges are sharp and it fades towards the outside.
+    */
+    static void drawBevel (Graphics& g,
+                            int x, int y, int width, int height,
+                            int bevelThickness,
+                            const Colour& topLeftColour = Colours::white,
+                            const Colour& bottomRightColour = Colours::black,
+                            bool useGradient = true,
+                            bool sharpEdgeOnOutside = true);
+
     /** Utility function to draw a shiny, glassy circle (for round LED-type buttons). */
     static void drawGlassSphere (Graphics& g,
                                  float x, float y,
@@ -673,8 +656,20 @@ private:
                                bool flatOnTop,
                                bool flatOnBottom) noexcept;
 
-    // This has been deprecated - see the new parameter list..
+   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
+    // These methods have been deprecated - see their new parameter lists..
     virtual int drawFileBrowserRow (Graphics&, int, int, const String&, Image*, const String&, const String&, bool, bool, int) { return 0; }
+    virtual int drawTabButton (Graphics&, int, int, const Colour&, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
+    virtual int createTabButtonShape (Path&, int, int, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
+    virtual int fillTabButtonShape (Graphics&, const Path&, const Colour&, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
+    virtual int drawTabAreaBehindFrontButton (Graphics&, int, int, TabbedButtonBar&, TabbedButtonBar::Orientation) { return 0; }
+    virtual int drawTabButtonText (Graphics&, int, int, int, int, const Colour&, int, const String&, Button&, TabbedButtonBar::Orientation, bool, bool, bool) { return 0; }
+    virtual int getTabButtonBestWidth (int, const String&, int, Button&) { return 0; }
+    virtual int drawBubble (Graphics&, float, float, float, float, float, float) { return 0; }
+   #endif
+
+    class GlassWindowButton;
+    class SliderLabelComp;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel);
 };

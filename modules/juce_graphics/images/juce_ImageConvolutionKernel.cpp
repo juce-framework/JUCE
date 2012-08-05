@@ -241,4 +241,51 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
             }
         }
     }
+    else if (destData.pixelStride == 1)
+    {
+        for (int y = area.getY(); y < bottom; ++y)
+        {
+            uint8* dest = line;
+            line += destData.lineStride;
+
+            for (int x = area.getX(); x < right; ++x)
+            {
+                float c1 = 0;
+
+                for (int yy = 0; yy < size; ++yy)
+                {
+                    const int sy = y + yy - (size >> 1);
+
+                    if (sy >= srcData.height)
+                        break;
+
+                    if (sy >= 0)
+                    {
+                        int sx = x - (size >> 1);
+                        const uint8* src = srcData.getPixelPointer (sx, sy);
+
+                        for (int xx = 0; xx < size; ++xx)
+                        {
+                            if (sx >= srcData.width)
+                                break;
+
+                            if (sx >= 0)
+                            {
+                                const float kernelMult = values [xx + yy * size];
+                                c1 += kernelMult * *src++;
+                            }
+                            else
+                            {
+                                src += 3;
+                            }
+
+                            ++sx;
+                        }
+                    }
+                }
+
+                *dest++ = (uint8) roundToInt (c1);
+            }
+        }
+    }
 }

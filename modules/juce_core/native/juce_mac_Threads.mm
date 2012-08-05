@@ -38,6 +38,13 @@ bool Process::isForegroundProcess()
    #endif
 }
 
+void Process::makeForegroundProcess()
+{
+   #if JUCE_MAC
+    [NSApp activateIgnoringOtherApps: YES];
+   #endif
+}
+
 void Process::raisePrivilege()
 {
     jassertfalse;

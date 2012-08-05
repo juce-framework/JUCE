@@ -23,16 +23,8 @@
   ==============================================================================
 */
 
-AudioPluginFormatManager::AudioPluginFormatManager()
-{
-}
-
-AudioPluginFormatManager::~AudioPluginFormatManager()
-{
-    clearSingletonInstance();
-}
-
-juce_ImplementSingleton_SingleThreaded (AudioPluginFormatManager);
+AudioPluginFormatManager::AudioPluginFormatManager() {}
+AudioPluginFormatManager::~AudioPluginFormatManager() {}
 
 //==============================================================================
 void AudioPluginFormatManager::addDefaultFormats()

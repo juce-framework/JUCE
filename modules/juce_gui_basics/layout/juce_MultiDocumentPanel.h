@@ -29,7 +29,6 @@
 #include "juce_TabbedComponent.h"
 #include "../windows/juce_DocumentWindow.h"
 class MultiDocumentPanel;
-class MDITabbedComponentInternal;
 
 
 //==============================================================================
@@ -293,8 +292,9 @@ private:
     Colour backgroundColour;
     int maximumNumDocuments, numDocsBeforeTabsUsed;
 
+    class TabbedComponentInternal;
     friend class MultiDocumentPanelWindow;
-    friend class MDITabbedComponentInternal;
+    friend class TabbedComponentInternal;
 
     Component* getContainerComp (Component* c) const;
     void updateOrder();

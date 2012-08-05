@@ -146,7 +146,7 @@ public:
 
             if (peer != nullptr)
             {
-                SystemTrayIconComponent* const iconComp = dynamic_cast<SystemTrayIconComponent*> (peer->getComponent());
+                SystemTrayIconComponent* const iconComp = dynamic_cast<SystemTrayIconComponent*> (&(peer->getComponent()));
 
                 if (iconComp != nullptr)
                     return iconComp->pimpl;

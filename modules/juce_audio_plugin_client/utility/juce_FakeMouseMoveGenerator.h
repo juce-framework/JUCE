@@ -30,7 +30,7 @@
 
 //==============================================================================
 // Helper class to workaround carbon windows not getting mouse-moves..
-class FakeMouseMoveGenerator  : public Timer
+class FakeMouseMoveGenerator  : private Timer
 {
 public:
     FakeMouseMoveGenerator()

@@ -155,6 +155,9 @@ public:
 
         /** Represents a combination of all the mouse buttons at once. */
         allMouseButtonModifiers                 = leftButtonModifier | rightButtonModifier | middleButtonModifier,
+
+        /** Represents a combination of all the alt, ctrl and command key modifiers. */
+        ctrlAltCommandModifiers                 = ctrlModifier | altModifier | commandModifier
     };
 
     //==============================================================================
@@ -171,11 +174,11 @@ public:
     /** Returns the raw flags for direct testing. */
     inline int getRawFlags() const noexcept                             { return flags; }
 
-    inline const ModifierKeys withoutFlags (int rawFlagsToClear) const noexcept { return ModifierKeys (flags & ~rawFlagsToClear); }
-    inline const ModifierKeys withFlags (int rawFlagsToSet) const noexcept      { return ModifierKeys (flags | rawFlagsToSet); }
+    ModifierKeys withoutFlags (int rawFlagsToClear) const noexcept      { return ModifierKeys (flags & ~rawFlagsToClear); }
+    ModifierKeys withFlags (int rawFlagsToSet) const noexcept           { return ModifierKeys (flags | rawFlagsToSet); }
 
     /** Tests a combination of flags and returns true if any of them are set. */
-    inline bool testFlags (const int flagsToTest) const noexcept        { return (flags & flagsToTest) != 0; }
+    bool testFlags (const int flagsToTest) const noexcept               { return (flags & flagsToTest) != 0; }
 
     /** Returns the total number of mouse buttons that are down. */
     int getNumMouseButtonsDown() const noexcept;

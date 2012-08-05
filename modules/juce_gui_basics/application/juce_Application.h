@@ -161,6 +161,16 @@ public:
     */
     virtual void systemRequestedQuit();
 
+    /** This method is called when the application is being put into background mode
+        by the operating system.
+    */
+    virtual void suspended();
+
+    /** This method is called when the application is being woken from background mode
+        by the operating system.
+    */
+    virtual void resumed();
+
     /** If any unhandled exceptions make it through to the message dispatch loop, this
         callback will be triggered, in case you want to log them or do some other
         type of error-handling.
@@ -236,12 +246,18 @@ public:
     static void sendUnhandledException (const std::exception*, const char* sourceFile, int lineNumber);
     bool initialiseApp();
     int shutdownApp();
+
+protected:
+    bool sendCommandLineToPreexistingInstance();
    #endif
 
 private:
     //==============================================================================
-    ScopedPointer<InterProcessLock> appLock;
-    ScopedPointer<ActionListener> broadcastCallback;
+    struct MultipleInstanceHandler;
+    friend struct MultipleInstanceHandler;
+    friend class ScopedPointer<MultipleInstanceHandler>;
+    ScopedPointer<MultipleInstanceHandler> multipleInstanceHandler;
+
     int appReturnValue;
     bool stillInitialising;
 

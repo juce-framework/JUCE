@@ -27,9 +27,9 @@ Image juce_createIconForFile (const File& file);
 
 //==============================================================================
 class FileListTreeItem   : public TreeViewItem,
-                           public TimeSliceClient,
-                           public AsyncUpdater,
-                           public ChangeListener
+                           private TimeSliceClient,
+                           private AsyncUpdater,
+                           private ChangeListener
 {
 public:
     FileListTreeItem (FileTreeComponent& owner_,

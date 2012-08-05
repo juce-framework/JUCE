@@ -32,7 +32,7 @@ ToolbarItemFactory::~ToolbarItemFactory()
 }
 
 //==============================================================================
-class ItemDragAndDropOverlayComponent    : public Component
+class ToolbarItemComponent::ItemDragAndDropOverlayComponent    : public Component
 {
 public:
     ItemDragAndDropOverlayComponent()

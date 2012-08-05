@@ -77,7 +77,7 @@ public:
             Lines are numbered from zero, and if the line or index are beyond the bounds of the document,
             they will be adjusted to keep them within its limits.
         */
-        Position (const CodeDocument* ownerDocument,
+        Position (const CodeDocument& ownerDocument,
                   int line, int indexInLine) noexcept;
 
         /** Creates a position based on a character index in a document.
@@ -87,7 +87,7 @@ public:
             If the position is beyond the range of the document, it'll be adjusted to keep it
             inside.
         */
-        Position (const CodeDocument* ownerDocument,
+        Position (const CodeDocument& ownerDocument,
                   int charactersFromStartOfDocument) noexcept;
 
         /** Creates a copy of another position.
@@ -101,6 +101,7 @@ public:
         ~Position();
 
         Position& operator= (const Position& other);
+
         bool operator== (const Position& other) const noexcept;
         bool operator!= (const Position& other) const noexcept;
 
@@ -159,18 +160,18 @@ public:
             characters.
             @see moveBy
         */
-        const Position movedBy (int characterDelta) const;
+        Position movedBy (int characterDelta) const;
 
         /** Returns a position which is the same as this one, moved up or down by the specified
             number of lines.
             @see movedBy
         */
-        const Position movedByLines (int deltaLines) const;
+        Position movedByLines (int deltaLines) const;
 
         /** Returns the character in the document at this position.
             @see getLineText
         */
-        const juce_wchar getCharacter() const;
+        juce_wchar getCharacter() const;
 
         /** Returns the line from the document that this position is within.
             @see getCharacter, getLineNumber
@@ -334,32 +335,30 @@ public:
     class JUCE_API  Iterator
     {
     public:
-        Iterator (CodeDocument* document);
-        Iterator (const Iterator& other);
+        Iterator (const CodeDocument& document) noexcept;
+        Iterator (const Iterator& other) noexcept;
         Iterator& operator= (const Iterator& other) noexcept;
         ~Iterator() noexcept;
 
         /** Reads the next character and returns it.
             @see peekNextChar
         */
-        juce_wchar nextChar();
+        juce_wchar nextChar() noexcept;
 
         /** Reads the next character without advancing the current position. */
-        juce_wchar peekNextChar() const;
+        juce_wchar peekNextChar() const noexcept;
 
         /** Advances the position by one character. */
-        void skip();
+        void skip() noexcept;
 
-        /** Returns the position of the next character as its position within the
-            whole document.
-        */
+        /** Returns the position as the number of characters from the start of the document. */
         int getPosition() const noexcept        { return position; }
 
         /** Skips over any whitespace characters until the next character is non-whitespace. */
-        void skipWhitespace();
+        void skipWhitespace() noexcept;
 
         /** Skips forward until the next character will be the first character on the next line */
-        void skipToEndOfLine();
+        void skipToEndOfLine() noexcept;
 
         /** Returns the line number of the next character. */
         int getLine() const noexcept            { return line; }
@@ -368,7 +367,7 @@ public:
         bool isEOF() const noexcept;
 
     private:
-        CodeDocument* document;
+        const CodeDocument* document;
         mutable String::CharPointerType charPointer;
         int line, position;
     };

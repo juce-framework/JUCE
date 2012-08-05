@@ -74,7 +74,7 @@ namespace ProjectSettingsTreeClasses
         String getRenamingName() const          { return getDisplayName(); }
         String getDisplayName() const           { return config->getName(); }
         void setName (const String&)            {}
-        const Drawable* getIcon() const         { return getIcons().config; }
+        Icon getIcon() const                    { return Icon (getIcons().config, getContrastingColour (Colours::green, 0.5f)); }
 
         void showDocument()                     { showSettingsPage (new SettingsComp (config, exporterName)); }
         void itemOpennessChanged (bool)         {}
@@ -175,7 +175,7 @@ namespace ProjectSettingsTreeClasses
         String getDisplayName() const           { return exporter->getName(); }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
-        const Drawable* getIcon() const         { return getIcons().exporter; }
+        Icon getIcon() const                    { return Icon (getIcons().exporter, getContrastingColour (0.5f)); }
         void showDocument()                     { showSettingsPage (new SettingsComp (exporter)); }
 
         void deleteItem()
@@ -297,7 +297,7 @@ namespace ProjectSettingsTreeClasses
         String getDisplayName() const           { return "Modules"; }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
-        const Drawable* getIcon() const         { return getIcons().graph; }
+        Icon getIcon() const                    { return Icon (getIcons().graph, getContrastingColour (Colours::red, 0.5f)); }
         void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
 
     private:
@@ -349,7 +349,7 @@ namespace ProjectSettingsTreeClasses
         String getDisplayName() const           { return project.getTitle(); }
         void setName (const String&)            {}
         bool isMissing()                        { return false; }
-        const Drawable* getIcon() const         { return project.getMainGroup().getIcon(); }
+        Icon getIcon() const                    { return project.getMainGroup().getIcon().withContrastingColourTo (getBackgroundColour()); }
         void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return project.getNumExporters() > 0; }
@@ -358,7 +358,7 @@ namespace ProjectSettingsTreeClasses
         void addSubItems()
         {
             addSubItem (new ModulesItem (project));
-            JucerApplication::getApp()->addExtraConfigItems (project, *this);
+            JucerApplication::getApp().addExtraConfigItems (project, *this);
 
             int i = 0;
             for (Project::ExporterIterator exporter (project); exporter.next(); ++i)
@@ -396,7 +396,7 @@ namespace ProjectSettingsTreeClasses
         void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
         {
             int oldIndex = dragSourceDetails.description.toString().getTrailingIntValue();
-            exportersTree.moveChild (oldIndex, insertIndex, project.getUndoManagerFor (exportersTree));
+            exportersTree.moveChild (oldIndex, jmax (0, insertIndex - 1), project.getUndoManagerFor (exportersTree));
         }
 
         //==============================================================================

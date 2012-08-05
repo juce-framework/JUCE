@@ -31,6 +31,37 @@
 
 //==============================================================================
 /**
+    Defines a drop-shadow effect.
+*/
+struct JUCE_API  DropShadow
+{
+    /** Creates a default drop-shadow effect. */
+    DropShadow() noexcept;
+
+    /** Creates a drop-shadow object with the given parameters. */
+    DropShadow (const Colour& shadowColour, int radius, const Point<int>& offset) noexcept;
+
+    /** Renders a drop-shadow based on the alpha-channel of the given image. */
+    void drawForImage (Graphics& g, const Image& srcImage) const;
+
+    /** Renders a drop-shadow based on the shape of a path. */
+    void drawForPath (Graphics& g, const Path& path) const;
+
+    /** The colour with which to render the shadow.
+        In most cases you'll probably want to leave this as black with an alpha
+        value of around 0.5
+    */
+    Colour colour;
+
+    /** The approximate spread of the shadow. */
+    int radius;
+
+    /** The offset of the shadow. */
+    Point<int> offset;
+};
+
+//==============================================================================
+/**
     An effect filter that adds a drop-shadow behind the image's content.
 
     (This will only work on images/components that aren't opaque, of course).
@@ -50,9 +81,7 @@ class JUCE_API  DropShadowEffect  : public ImageEffectFilter
 public:
     //==============================================================================
     /** Creates a default drop-shadow effect.
-
-        To customise the shadow's appearance, use the setShadowProperties()
-        method.
+        To customise the shadow's appearance, use the setShadowProperties() method.
     */
     DropShadowEffect();
 
@@ -60,30 +89,17 @@ public:
     ~DropShadowEffect();
 
     //==============================================================================
-    /** Sets up parameters affecting the shadow's appearance.
-
-        @param newRadius        the (approximate) radius of the blur used
-        @param newOpacity       the opacity with which the shadow is rendered
-        @param newShadowOffsetX allows the shadow to be shifted in relation to the
-                                component's contents
-        @param newShadowOffsetY allows the shadow to be shifted in relation to the
-                                component's contents
-    */
-    void setShadowProperties (float newRadius,
-                              float newOpacity,
-                              int newShadowOffsetX,
-                              int newShadowOffsetY);
-
+    /** Sets up parameters affecting the shadow's appearance. */
+    void setShadowProperties (const DropShadow& newShadow);
 
     //==============================================================================
     /** @internal */
-    void applyEffect (Image& sourceImage, Graphics& destContext, float alpha);
+    void applyEffect (Image& sourceImage, Graphics& destContext, float scaleFactor, float alpha);
 
 
 private:
     //==============================================================================
-    int offsetX, offsetY;
-    float radius, opacity;
+    DropShadow shadow;
 
     JUCE_LEAK_DETECTOR (DropShadowEffect);
 };

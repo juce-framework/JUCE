@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-class ShadowWindow  : public Component
+class DropShadower::ShadowWindow  : public Component
 {
 public:
     ShadowWindow (Component& owner, const int type_, const Image shadowImageSections [12])
@@ -97,16 +97,8 @@ private:
 
 
 //==============================================================================
-DropShadower::DropShadower (const float alpha_,
-                            const int xOffset_,
-                            const int yOffset_,
-                            const float blurRadius_)
-   : owner (nullptr),
-     xOffset (xOffset_),
-     yOffset (yOffset_),
-     alpha (alpha_),
-     blurRadius (blurRadius_),
-     reentrant (false)
+DropShadower::DropShadower (const DropShadow& shadow_)
+   : owner (nullptr), shadow (shadow_), reentrant (false)
 {
 }
 
@@ -179,55 +171,51 @@ void DropShadower::updateShadows()
     {
         const ScopedValueSetter<bool> setter (reentrant, true, false);
 
-        const int shadowEdge = jmax (xOffset, yOffset) + (int) blurRadius;
+        const int shadowEdge = jmax (shadow.offset.x, shadow.offset.y) + shadow.radius;
 
         if (createShadowWindows)
         {
-            // keep a cached version of the image to save doing the gaussian too often
-            String imageId;
-            imageId << shadowEdge << ',' << xOffset << ',' << yOffset << ',' << alpha;
+            const int shadowEdge2 = shadowEdge * 2;
+            const int imageSize = shadowEdge * 5;
 
-            const int hash = imageId.hashCode();
+            // keep a cached version of the image to save doing the gaussian too often
+            int64 hash = shadow.radius ^ 0x2342dfa7;
+            hash = hash * 101 + shadow.offset.x;
+            hash = hash * 101 + shadow.offset.y;
+            hash = hash * 65537 + shadow.colour.getARGB();
 
             Image bigIm (ImageCache::getFromHashCode (hash));
 
             if (bigIm.isNull())
             {
-                bigIm = Image (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true);
+                bigIm = Image (Image::ARGB, imageSize, imageSize, true);
+                Graphics g (bigIm);
 
-                Graphics bigG (bigIm);
-                bigG.setColour (Colours::black.withAlpha (alpha));
-                bigG.fillRect (shadowEdge + xOffset,
-                               shadowEdge + yOffset,
-                               bigIm.getWidth() - (shadowEdge * 2),
-                               bigIm.getHeight() - (shadowEdge * 2));
+                Path p;
+                p.addRectangle ((float) (shadowEdge + shadow.offset.x),
+                                (float) (shadowEdge + shadow.offset.y),
+                                (float) (imageSize - shadowEdge2),
+                                (float) (imageSize - shadowEdge2));
 
-                ImageConvolutionKernel blurKernel (roundToInt (blurRadius * 2.0f));
-                blurKernel.createGaussianBlur (blurRadius);
-
-                blurKernel.applyToImage (bigIm, bigIm,
-                                         Rectangle<int> (xOffset, yOffset,
-                                                         bigIm.getWidth(), bigIm.getHeight()));
+                shadow.drawForPath (g, p);
 
                 ImageCache::addImageToCache (bigIm, hash);
             }
 
-            const int iw = bigIm.getWidth();
-            const int ih = bigIm.getHeight();
-            const int shadowEdge2 = shadowEdge * 2;
+            jassert (imageSize == bigIm.getWidth() && imageSize == bigIm.getHeight());
 
-            setShadowImage (bigIm, 0, shadowEdge, shadowEdge2, 0, 0);
-            setShadowImage (bigIm, 1, shadowEdge, shadowEdge2, 0, ih - shadowEdge2);
-            setShadowImage (bigIm, 2, shadowEdge, shadowEdge, 0, shadowEdge2);
-            setShadowImage (bigIm, 3, shadowEdge, shadowEdge2, iw - shadowEdge, 0);
-            setShadowImage (bigIm, 4, shadowEdge, shadowEdge2, iw - shadowEdge, ih - shadowEdge2);
-            setShadowImage (bigIm, 5, shadowEdge, shadowEdge, iw - shadowEdge, shadowEdge2);
-            setShadowImage (bigIm, 6, shadowEdge, shadowEdge, shadowEdge, 0);
-            setShadowImage (bigIm, 7, shadowEdge, shadowEdge, iw - shadowEdge2, 0);
-            setShadowImage (bigIm, 8, shadowEdge, shadowEdge, shadowEdge2, 0);
-            setShadowImage (bigIm, 9, shadowEdge, shadowEdge, shadowEdge, ih - shadowEdge);
-            setShadowImage (bigIm, 10, shadowEdge, shadowEdge, iw - shadowEdge2, ih - shadowEdge);
-            setShadowImage (bigIm, 11, shadowEdge, shadowEdge, shadowEdge2, ih - shadowEdge);
+            setShadowImage (bigIm, 0,  shadowEdge, shadowEdge2, 0, 0);
+            setShadowImage (bigIm, 1,  shadowEdge, shadowEdge2, 0, imageSize - shadowEdge2);
+            setShadowImage (bigIm, 2,  shadowEdge, shadowEdge,  0, shadowEdge2);
+            setShadowImage (bigIm, 3,  shadowEdge, shadowEdge2, imageSize - shadowEdge, 0);
+            setShadowImage (bigIm, 4,  shadowEdge, shadowEdge2, imageSize - shadowEdge, imageSize - shadowEdge2);
+            setShadowImage (bigIm, 5,  shadowEdge, shadowEdge,  imageSize - shadowEdge, shadowEdge2);
+            setShadowImage (bigIm, 6,  shadowEdge, shadowEdge,  shadowEdge, 0);
+            setShadowImage (bigIm, 7,  shadowEdge, shadowEdge,  imageSize - shadowEdge2, 0);
+            setShadowImage (bigIm, 8,  shadowEdge, shadowEdge,  shadowEdge2, 0);
+            setShadowImage (bigIm, 9,  shadowEdge, shadowEdge,  shadowEdge, imageSize - shadowEdge);
+            setShadowImage (bigIm, 10, shadowEdge, shadowEdge,  imageSize - shadowEdge2, imageSize - shadowEdge);
+            setShadowImage (bigIm, 11, shadowEdge, shadowEdge,  shadowEdge2, imageSize - shadowEdge);
 
             for (int i = 0; i < 4; ++i)
                 shadowWindows.add (new ShadowWindow (*owner, i, shadowImageSections));

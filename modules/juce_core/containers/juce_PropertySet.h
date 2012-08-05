@@ -46,18 +46,15 @@ class JUCE_API  PropertySet
 public:
     //==============================================================================
     /** Creates an empty PropertySet.
-
-        @param ignoreCaseOfKeyNames         if true, the names of properties are compared in a
-                                            case-insensitive way
+        @param ignoreCaseOfKeyNames   if true, the names of properties are compared in a
+                                      case-insensitive way
     */
     PropertySet (bool ignoreCaseOfKeyNames = false);
 
-    /** Creates a copy of another PropertySet.
-    */
+    /** Creates a copy of another PropertySet. */
     PropertySet (const PropertySet& other);
 
-    /** Copies another PropertySet over this one.
-    */
+    /** Copies another PropertySet over this one. */
     PropertySet& operator= (const PropertySet& other);
 
     /** Destructor. */
@@ -152,7 +149,6 @@ public:
 
     //==============================================================================
     /** Deletes a property.
-
         @param keyName      the name of the property to delete. (This mustn't be an empty string)
     */
     void removeValue (const String& keyName);
@@ -172,17 +168,13 @@ public:
 
     //==============================================================================
     /** Returns an XML element which encapsulates all the items in this property set.
-
         The string parameter is the tag name that should be used for the node.
-
         @see restoreFromXml
     */
     XmlElement* createXml (const String& nodeName) const;
 
     /** Reloads a set of properties that were previously stored as XML.
-
         The node passed in must have been created by the createXml() method.
-
         @see createXml
     */
     void restoreFromXml (const XmlElement& xml);
@@ -208,12 +200,10 @@ public:
     PropertySet* getFallbackPropertySet() const noexcept                { return fallbackProperties; }
 
 protected:
-    //==============================================================================
     /** Subclasses can override this to be told when one of the properies has been changed. */
     virtual void propertyChanged();
 
 private:
-    //==============================================================================
     StringPairArray properties;
     PropertySet* fallbackProperties;
     CriticalSection lock;

@@ -37,8 +37,8 @@
     @see AudioDeviceManager
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
-                                                public ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
-                                                public ChangeListener
+                                                private ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+                                                private ChangeListener
 {
 public:
     //==============================================================================
@@ -73,20 +73,17 @@ public:
     /** Destructor */
     ~AudioDeviceSelectorComponent();
 
+    /** The device manager that this component is controlling */
+    AudioDeviceManager& deviceManager;
 
     //==============================================================================
     /** @internal */
     void resized();
     /** @internal */
-    void comboBoxChanged (ComboBox*);
-    /** @internal */
-    void changeListenerCallback (ChangeBroadcaster*);
-    /** @internal */
     void childBoundsChanged (Component*);
 
 private:
     //==============================================================================
-    AudioDeviceManager& deviceManager;
     ScopedPointer<ComboBox> deviceTypeDropDown;
     ScopedPointer<Label> deviceTypeDropDownLabel;
     ScopedPointer<Component> audioDeviceSettingsComp;
@@ -101,6 +98,8 @@ private:
     ScopedPointer<ComboBox> midiOutputSelector;
     ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
 
+    void comboBoxChanged (ComboBox*);
+    void changeListenerCallback (ChangeBroadcaster*);
     void updateAllControls();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent);

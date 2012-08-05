@@ -70,7 +70,7 @@ public:
     */
     ~OwnedArray()
     {
-        clear (true);
+        deleteAllObjects();
     }
 
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
@@ -83,6 +83,9 @@ public:
 
     OwnedArray& operator= (OwnedArray&& other) noexcept
     {
+        const ScopedLockType lock (getLock());
+        deleteAllObjects();
+
         data = static_cast <ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse>&&> (other.data);
         numUsed = other.numUsed;
         other.numUsed = 0;
@@ -97,10 +100,7 @@ public:
         const ScopedLockType lock (getLock());
 
         if (deleteObjects)
-        {
-            while (numUsed > 0)
-                delete data.elements [--numUsed];
-        }
+            deleteAllObjects();
 
         data.setAllocatedSize (0);
         numUsed = 0;
@@ -289,6 +289,46 @@ public:
         else
         {
             add (newObject);
+        }
+    }
+
+    /** Inserts an array of values into this array at a given position.
+
+        If the index is less than 0 or greater than the size of the array, the
+        new elements will be added to the end of the array.
+        Otherwise, they will be inserted into the array, moving all the later elements
+        along to make room.
+
+        @param indexToInsertAt      the index at which the first new element should be inserted
+        @param newObjects           the new values to add to the array
+        @param numberOfElements     how many items are in the array
+        @see insert, add, addSorted, set
+    */
+    void insertArray (int indexToInsertAt,
+                      ObjectClass* const* newObjects,
+                      int numberOfElements)
+    {
+        if (numberOfElements > 0)
+        {
+            const ScopedLockType lock (getLock());
+            data.ensureAllocatedSize (numUsed + numberOfElements);
+            ObjectClass** insertPos = data.elements;
+
+            if (isPositiveAndBelow (indexToInsertAt, numUsed))
+            {
+                insertPos += indexToInsertAt;
+                const int numberToMove = numUsed - indexToInsertAt;
+                memmove (insertPos + numberOfElements, insertPos, numberToMove * sizeof (ObjectClass*));
+            }
+            else
+            {
+                insertPos += numUsed;
+            }
+
+            numUsed += numberOfElements;
+
+            while (--numberOfElements >= 0)
+                *insertPos++ = *newObjects++;
         }
     }
 
@@ -813,6 +853,12 @@ private:
     //==============================================================================
     ArrayAllocationBase <ObjectClass*, TypeOfCriticalSectionToUse> data;
     int numUsed;
+
+    void deleteAllObjects()
+    {
+        while (numUsed > 0)
+            delete data.elements [--numUsed];
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray);
 };

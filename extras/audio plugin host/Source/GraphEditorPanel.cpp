@@ -108,7 +108,7 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node,
 
 PluginWindow::~PluginWindow()
 {
-    activePluginWindows.removeValue (this);
+    activePluginWindows.removeFirstMatchingValue (this);
     clearContentComponent();
 }
 
@@ -223,7 +223,7 @@ public:
           numIns (0),
           numOuts (0)
     {
-        shadow.setShadowProperties (2.5f, 0.5f, -1, 0);
+        shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, Point<int> (0, 1)));
         setComponentEffect (&shadow);
 
         setSize (150, 60);
@@ -334,9 +334,7 @@ public:
 
         g.setColour (Colours::black);
         g.setFont (font);
-        g.drawFittedText (getName(),
-                          x + 4, y + 2, w - 8, h - 4,
-                          Justification::centred, 2);
+        g.drawFittedText (getName(), getLocalBounds().reduced (4, 2), Justification::centred, 2);
 
         g.setColour (Colours::grey);
         g.drawRect (x, y, w, h);
@@ -1014,8 +1012,9 @@ private:
 };
 
 //==============================================================================
-GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManager_)
-    : deviceManager (deviceManager_)
+GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& formatManager,
+                                                AudioDeviceManager* deviceManager_)
+    : graph (formatManager), deviceManager (deviceManager_)
 {
     addAndMakeVisible (graphPanel = new GraphEditorPanel (graph));
 

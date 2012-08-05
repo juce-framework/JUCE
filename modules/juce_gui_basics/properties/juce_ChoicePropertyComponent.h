@@ -89,9 +89,7 @@ public:
     virtual void setIndex (int newIndex);
 
     /** Returns the index of the item that should currently be shown.
-
-        This is the index of the item in the choices StringArray that will be
-        shown.
+        This is the index of the item in the choices StringArray that will be shown.
     */
     virtual int getIndex() const;
 
@@ -102,8 +100,6 @@ public:
     //==============================================================================
     /** @internal */
     void refresh();
-    /** @internal */
-    void comboBoxChanged (ComboBox*);
 
 protected:
     /** The list of options that will be shown in the combo box.
@@ -120,6 +116,7 @@ private:
 
     class RemapperValueSource;
     void createComboBox();
+    void comboBoxChanged (ComboBox*);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent);
 };

@@ -180,5 +180,5 @@ void MidiKeyboardState::addListener (MidiKeyboardStateListener* const listener)
 void MidiKeyboardState::removeListener (MidiKeyboardStateListener* const listener)
 {
     const ScopedLock sl (lock);
-    listeners.removeValue (listener);
+    listeners.removeFirstMatchingValue (listener);
 }

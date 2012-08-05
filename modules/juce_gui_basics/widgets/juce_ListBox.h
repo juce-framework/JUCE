@@ -526,14 +526,6 @@ public:
     Viewport* getViewport() const noexcept;
 
     //==============================================================================
-    struct Ids
-    {
-        static const Identifier rowHeight, borderThickness;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
-
-    //==============================================================================
     /** @internal */
     bool keyPressed (const KeyPress&);
     /** @internal */
@@ -562,6 +554,7 @@ public:
 private:
     //==============================================================================
     class ListViewport;
+    class RowComponent;
     friend class ListViewport;
     friend class TableListBox;
     ListBoxModel* model;

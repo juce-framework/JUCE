@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-class MouseInputSourceInternal   : public AsyncUpdater
+class MouseInputSourceInternal   : private AsyncUpdater
 {
 public:
     //==============================================================================
@@ -64,12 +64,12 @@ public:
 
         if (peer != nullptr)
         {
-            Component* const comp = peer->getComponent();
-            const Point<int> relativePos (comp->getLocalPoint (nullptr, screenPos));
+            Component& comp = peer->getComponent();
+            const Point<int> relativePos (comp.getLocalPoint (nullptr, screenPos));
 
             // (the contains() call is needed to test for overlapping desktop windows)
-            if (comp->contains (relativePos))
-                return comp->getComponentAt (relativePos);
+            if (comp.contains (relativePos))
+                return comp.getComponentAt (relativePos);
         }
 
         return nullptr;
@@ -291,8 +291,9 @@ public:
         jassert (peer != nullptr);
         lastTime = time;
         ++mouseEventCounter;
-        const Point<int> screenPos (peer->localToGlobal (positionWithinPeer));
+        Desktop::getInstance().incrementMouseWheelCounter();
 
+        const Point<int> screenPos (peer->localToGlobal (positionWithinPeer));
         setPeer (peer, screenPos, time);
         setScreenPos (screenPos, time, false);
         triggerFakeMove();

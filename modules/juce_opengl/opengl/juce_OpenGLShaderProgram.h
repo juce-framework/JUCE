@@ -105,6 +105,12 @@ public:
         void set (GLint n1, GLint n2, GLint n3, GLint n4) const noexcept;
         /** Sets a vector float uniform. */
         void set (const GLfloat* values, int numValues) const noexcept;
+        /** Sets a 2x2 matrix float uniform. */
+        void setMatrix2 (const GLfloat* values, GLint count, GLboolean transpose) const noexcept;
+        /** Sets a 3x3 matrix float uniform. */
+        void setMatrix3 (const GLfloat* values, GLint count, GLboolean transpose) const noexcept;
+        /** Sets a 4x4 matrix float uniform. */
+        void setMatrix4 (const GLfloat* values, GLint count, GLboolean transpose) const noexcept;
 
         /** The uniform's ID number.
             If the uniform couldn't be found, this value will be < 0.

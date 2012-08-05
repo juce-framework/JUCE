@@ -58,7 +58,7 @@ OutputStream::OutputStream()
 OutputStream::~OutputStream()
 {
    #if JUCE_DEBUG
-    danglingStreamChecker.activeStreams.removeValue (this);
+    danglingStreamChecker.activeStreams.removeFirstMatchingValue (this);
    #endif
 }
 
@@ -266,6 +266,11 @@ void OutputStream::setNewLineString (const String& newLineString_)
 
 //==============================================================================
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number)
+{
+    return stream << String (number);
+}
+
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int64 number)
 {
     return stream << String (number);
 }

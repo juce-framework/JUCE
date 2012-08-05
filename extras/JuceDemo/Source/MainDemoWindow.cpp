@@ -54,13 +54,18 @@ public:
         g.fillAll (Colours::white);
     }
 
+    void resized()
+    {
+        if (currentDemo != nullptr)
+            currentDemo->setBounds (getLocalBounds());
+    }
+
     //==============================================================================
     void showDemo (Component* demoComp)
     {
         currentDemo = demoComp;
         addAndMakeVisible (currentDemo);
-
-        currentDemo->setBounds ("0, 0, parent.width, parent.height");
+        resized();
     }
 
     //==============================================================================

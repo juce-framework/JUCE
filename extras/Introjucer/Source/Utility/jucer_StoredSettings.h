@@ -36,6 +36,8 @@ public:
     StoredSettings();
     ~StoredSettings();
 
+    void initialise();
+
     PropertiesFile& getProps();
     void flush();
     void reload();
@@ -45,8 +47,6 @@ public:
 
     Array<File> getLastProjects() const;
     void setLastProjects (const Array<File>& files);
-
-    const StringArray& getFontNames();
 
     //==============================================================================
     Array <Colour> swatchColours;
@@ -64,12 +64,10 @@ public:
     //==============================================================================
     AppearanceSettings appearance;
 
-    const char* getSchemeFileSuffix() const     { return ".editorscheme"; }
-    File getSchemesFolder();
+    StringArray monospacedFontNames;
 
 private:
     ScopedPointer<PropertiesFile> props;
-    StringArray fontNames;
 
     void loadSwatchColours();
 
@@ -78,34 +76,6 @@ private:
 
 StoredSettings& getAppSettings();
 PropertiesFile& getAppProperties();
-
-
-//==============================================================================
-class Icons
-{
-public:
-    Icons();
-
-    void reload (const Colour& backgroundColour);
-
-    const Drawable* folder;
-    const Drawable* document;
-    const Drawable* imageDoc;
-    const Drawable* config;
-    const Drawable* exporter;
-    const Drawable* juceLogo;
-    const Drawable* graph;
-    const Drawable* jigsaw;
-    const Drawable* info;
-    const Drawable* warning;
-
-private:
-    OwnedArray<Drawable> drawables;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons);
-};
-
-const Icons& getIcons();
 
 
 #endif   // __JUCER_STOREDSETTINGS_JUCEHEADER__

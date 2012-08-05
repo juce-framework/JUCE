@@ -287,7 +287,7 @@ public:
 
     ~Window()
     {
-        getActiveWindows().removeValue (this);
+        getActiveWindows().removeFirstMatchingValue (this);
         Desktop::getInstance().removeGlobalMouseListener (this);
         activeSubMenu = nullptr;
         items.clear();
@@ -1244,7 +1244,7 @@ void PopupMenu::addCustomItem (const int itemResultId, CustomComponent* const cu
                          Colours::black, false, customComponent, nullptr, nullptr));
 }
 
-class NormalComponentWrapper : public PopupMenu::CustomComponent
+class PopupMenu::NormalComponentWrapper : public PopupMenu::CustomComponent
 {
 public:
     NormalComponentWrapper (Component* const comp, const int w, const int h,
@@ -1301,7 +1301,7 @@ void PopupMenu::addSeparator()
 }
 
 //==============================================================================
-class HeaderItemComponent  : public PopupMenu::CustomComponent
+class PopupMenu::HeaderItemComponent  : public PopupMenu::CustomComponent
 {
 public:
     HeaderItemComponent (const String& name)

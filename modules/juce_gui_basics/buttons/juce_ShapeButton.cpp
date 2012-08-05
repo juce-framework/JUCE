@@ -64,8 +64,8 @@ void ShapeButton::setShape (const Path& newShape,
     shape = newShape;
     maintainShapeProportions = maintainShapeProportions_;
 
-    shadow.setShadowProperties (3.0f, 0.5f, 0, 0);
-    setComponentEffect ((hasShadow) ? &shadow : 0);
+    shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, Point<int>()));
+    setComponentEffect (hasShadow ? &shadow : nullptr);
 
     if (resizeNowToFitThisShape)
     {
@@ -89,9 +89,9 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
         isButtonDown = false;
     }
 
-    g.setColour ((isButtonDown) ? downColour
-                                : (isMouseOverButton) ? overColour
-                                                      : normalColour);
+    g.setColour (isButtonDown ? downColour
+                              : isMouseOverButton ? overColour
+                                                  : normalColour);
 
     int w = getWidth();
     int h = getHeight();

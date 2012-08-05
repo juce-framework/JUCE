@@ -82,6 +82,9 @@ public:
     */
     int getNumLinesOnScreen() const noexcept                    { return linesOnScreen; }
 
+    /** Returns the index of the first line that's visible at the top of the editor. */
+    int getFirstLineOnScreen() const noexcept                   { return firstLineOnScreen; }
+
     /** Returns the number of whole columns visible on the screen.
         This doesn't include any cut-off columns at the right-hand edge.
     */
@@ -155,6 +158,26 @@ public:
     String getTextInRange (const Range<int>& range) const;
 
     //==============================================================================
+    /** Can be used to save and restore the editor's caret position, selection state, etc. */
+    struct State
+    {
+        /** Creates an object containing the state of the given editor. */
+        State (const CodeEditorComponent& editor);
+        /** Creates a state object from a string that was previously created with toString(). */
+        State (const String& stringifiedVersion);
+        State (const State& other) noexcept;
+
+        /** Updates the given editor with this saved state. */
+        void restoreState (CodeEditorComponent& editor) const;
+
+        /** Returns a stringified version of this state that can be used to recreate it later. */
+        String toString() const;
+
+    private:
+        int lastTopLine, lastCaretPos, lastSelectionEnd;
+    };
+
+    //==============================================================================
     /** Changes the current tab settings.
         This lets you change the tab size and whether pressing the tab key inserts a
         tab character, or its equivalent number of spaces.
@@ -170,6 +193,9 @@ public:
         @see setTabSize
     */
     bool areSpacesInsertedForTabs() const               { return useSpacesForTabs; }
+
+    /** Returns a string containing spaces or tab characters to generate the given number of spaces. */
+    String getTabString (int numSpaces) const;
 
     /** Changes the font.
         Make sure you only use a fixed-width font, or this component will look pretty nasty!
@@ -363,6 +389,7 @@ private:
     void newTransaction();
     void cut();
     void indentSelectedLines (int spacesToAdd);
+    bool skipBackwardsToPreviousTab();
 
     int indexToColumn (int line, int index) const noexcept;
     int columnToIndex (int line, int column) const noexcept;

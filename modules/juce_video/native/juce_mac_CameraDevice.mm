@@ -145,7 +145,7 @@ public:
     void removeListener (CameraDevice::Listener* listenerToRemove)
     {
         const ScopedLock sl (listenerLock);
-        listeners.removeValue (listenerToRemove);
+        listeners.removeFirstMatchingValue (listenerToRemove);
 
         if (listeners.size() == 0)
             [session removeOutput: imageOutput];

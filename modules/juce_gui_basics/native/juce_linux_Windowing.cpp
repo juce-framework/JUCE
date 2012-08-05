@@ -741,8 +741,8 @@ namespace PixmapHelpers
 class LinuxComponentPeer  : public ComponentPeer
 {
 public:
-    LinuxComponentPeer (Component* const component, const int windowStyleFlags, Window parentToAddTo)
-        : ComponentPeer (component, windowStyleFlags),
+    LinuxComponentPeer (Component& comp, const int windowStyleFlags, Window parentToAddTo)
+        : ComponentPeer (comp, windowStyleFlags),
           windowH (0), parentWindow (0),
           fullScreen (false), mapped (false),
           visual (0), depth (0)
@@ -754,7 +754,7 @@ public:
 
         createWindow (parentToAddTo);
 
-        setTitle (component->getName());
+        setTitle (component.getName());
     }
 
     ~LinuxComponentPeer()
@@ -847,7 +847,7 @@ public:
         {
             bounds.setBounds (x, y, jmax (1, w), jmax (1, h));
 
-            WeakReference<Component> deletionChecker (component);
+            WeakReference<Component> deletionChecker (&component);
             ScopedXLock xlock;
 
             XSizeHints* const hints = XAllocSizeHints();
@@ -964,7 +964,7 @@ public:
             if (! r.isEmpty())
                 setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
 
-            getComponent()->repaint();
+            component.repaint();
         }
     }
 
@@ -1029,7 +1029,7 @@ public:
         {
             Component* const c = Desktop::getInstance().getComponent (i);
 
-            if (c == getComponent())
+            if (c == &component)
                 break;
 
             if (c->contains (position + bounds.getPosition() - c->getScreenPosition()))
@@ -1089,7 +1089,7 @@ public:
             XWindowAttributes attr;
             XGetWindowAttributes (display, windowH, &attr);
 
-            if (component->isAlwaysOnTop())
+            if (component.isAlwaysOnTop())
                 XRaiseWindow (display, windowH);
 
             XSync (display, False);
@@ -1145,7 +1145,7 @@ public:
 
     void repaint (const Rectangle<int>& area)
     {
-        repainter->repaint (area.getIntersection (getComponent()->getLocalBounds()));
+        repainter->repaint (area.getIntersection (component.getLocalBounds()));
     }
 
     void performAnyPendingRepaintsNow()
@@ -1569,7 +1569,7 @@ public:
 
         // if the native title bar is dragged, need to tell any active menus, etc.
         if ((styleFlags & windowHasTitleBar) != 0
-              && component->isCurrentlyBlockedByAnotherModalComponent())
+              && component.isCurrentlyBlockedByAnotherModalComponent())
         {
             Component* const currentModalComp = Component::getCurrentlyModalComponent();
 
@@ -1796,7 +1796,7 @@ private:
                 }
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (peer->getComponent()->getLookAndFeel()
+                    ScopedPointer<LowLevelGraphicsContext> context (peer->component.getLookAndFeel()
                                                                       .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
                     peer->handlePaint (*context);
                 }
@@ -2081,7 +2081,7 @@ private:
         if ((styleFlags & windowAppearsOnTaskbar) == 0)
             netHints [numHints++] = Atoms::getIfExists ("_NET_WM_STATE_SKIP_TASKBAR");
 
-        if (component->isAlwaysOnTop())
+        if (component.isAlwaysOnTop())
             netHints [numHints++] = Atoms::getIfExists ("_NET_WM_STATE_ABOVE");
 
         if (numHints > 0)
@@ -2116,7 +2116,7 @@ private:
         swa.border_pixel = 0;
         swa.background_pixmap = None;
         swa.colormap = colormap;
-        swa.override_redirect = (getComponent()->isAlwaysOnTop() && (styleFlags & windowIsTemporary) != 0) ? True : False;
+        swa.override_redirect = (component.isAlwaysOnTop() && (styleFlags & windowIsTemporary) != 0) ? True : False;
         swa.event_mask = getAllEventsMask();
 
         windowH = XCreateWindow (display, parentToAddTo != 0 ? parentToAddTo : root,
@@ -2157,7 +2157,7 @@ private:
         else
             addWindowButtons (windowH);
 
-        setTitle (getComponent()->getName());
+        setTitle (component.getName());
 
         // Associate the PID, allowing to be shut down when something goes wrong
         unsigned long pid = getpid();
@@ -2556,6 +2556,10 @@ bool Process::isForegroundProcess()
     return LinuxComponentPeer::isActiveApplication;
 }
 
+void Process::makeForegroundProcess()
+{
+}
+
 //==============================================================================
 void ModifierKeys::updateCurrentModifiers() noexcept
 {
@@ -2594,7 +2598,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
 {
-    return new LinuxComponentPeer (this, styleFlags, (Window) nativeWindowToAttachTo);
+    return new LinuxComponentPeer (*this, styleFlags, (Window) nativeWindowToAttachTo);
 }
 
 
@@ -3029,11 +3033,6 @@ void MouseCursor::showInAllWindows() const
 Image juce_createIconForFile (const File& file)
 {
     return Image::null;
-}
-
-ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
-{
-    return SoftwareImageType().create (format, width, height, clearImage);
 }
 
 //==============================================================================

@@ -115,7 +115,7 @@ public:
         // Listeners can't be null pointers!
         jassert (listenerToRemove != nullptr);
 
-        listeners.removeValue (listenerToRemove);
+        listeners.removeFirstMatchingValue (listenerToRemove);
     }
 
     /** Returns the number of registered listeners. */

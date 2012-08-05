@@ -353,6 +353,8 @@ public:
 
             ~EditorCompWrapper()
             {
+                removeChildComponent (getEditor());
+
                #if JUCE_WINDOWS && ! JucePlugin_EditorRequiresKeyboardFocus
                 Desktop::getInstance().removeFocusChangeListener (this);
                #endif
@@ -362,16 +364,14 @@ public:
                #endif
             }
 
-            void paint (Graphics&)
-            {
-            }
+            void paint (Graphics&) {}
 
             void resized()
             {
-                juce::Component* const c = getChildComponent (0);
+                juce::Component* const ed = getEditor();
 
-                if (c != nullptr)
-                    c->setBounds (0, 0, getWidth(), getHeight());
+                if (ed != nullptr)
+                    ed->setBounds (getLocalBounds());
 
                 repaint();
             }
@@ -397,9 +397,7 @@ public:
                 owner->updateSize();
             }
 
-            void userTriedToCloseWindow()
-            {
-            }
+            void userTriedToCloseWindow() {}
 
            #if JUCE_MAC && JucePlugin_EditorRequiresKeyboardFocus
             bool keyPressed (const KeyPress& kp)
@@ -416,6 +414,8 @@ public:
             void* nsWindow;
             JuceCustomUIView* const owner;
             int titleW, titleH;
+
+            Component* getEditor() const        { return getChildComponent (0); }
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper);
         };

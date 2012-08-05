@@ -292,7 +292,13 @@ public:
         call LookAndFeel::drawTreeviewPlusMinusBox(), but you can override
         it for custom effects.
     */
-    virtual void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
+    virtual void paintOpenCloseButton (Graphics&, int width, int height, bool isMouseOver);
+
+    /** Draws the line that connects this item to the vertical line extending below its parent. */
+    virtual void paintHorizontalConnectingLine (Graphics&, const Line<float>& line);
+
+    /** Draws the line that extends vertically up towards one of its parents, or down to one of its children. */
+    virtual void paintVerticalConnectingLine (Graphics&, const Line<float>& line);
 
     /** Called when the user clicks on this item.
 
@@ -508,7 +514,6 @@ private:
     unsigned int openness   : 2;
 
     friend class TreeView;
-    friend class TreeViewContentComponent;
 
     void updatePositions (int newY);
     int getIndentX() const noexcept;
@@ -791,14 +796,16 @@ public:
     void itemDropped (const SourceDetails&);
 
 private:
-    friend class TreeViewItem;
-    friend class TreeViewContentComponent;
+    class ContentComponent;
     class TreeViewport;
     class InsertPointHighlight;
     class TargetGroupHighlight;
+    friend class TreeViewItem;
+    friend class ContentComponent;
     friend class ScopedPointer<TreeViewport>;
     friend class ScopedPointer<InsertPointHighlight>;
     friend class ScopedPointer<TargetGroupHighlight>;
+
     ScopedPointer<TreeViewport> viewport;
     CriticalSection nodeAlterationLock;
     TreeViewItem* rootItem;
@@ -818,8 +825,12 @@ private:
     struct InsertPoint;
     void showDragHighlight (const InsertPoint&) noexcept;
     void hideDragHighlight() noexcept;
-    void handleDrag (const StringArray& files, const SourceDetails&);
-    void handleDrop (const StringArray& files, const SourceDetails&);
+    void handleDrag (const StringArray&, const SourceDetails&);
+    void handleDrop (const StringArray&, const SourceDetails&);
+    void toggleOpenSelectedItem();
+    void moveOutOfSelectedItem();
+    void moveIntoSelectedItem();
+    void moveByPages (int numPages);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView);
 };

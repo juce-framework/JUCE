@@ -328,7 +328,7 @@ ActiveXControlComponent::ActiveXControlComponent()
 ActiveXControlComponent::~ActiveXControlComponent()
 {
     deleteControl();
-    ActiveXHelpers::activeXComps.removeValue (this);
+    ActiveXHelpers::activeXComps.removeFirstMatchingValue (this);
 }
 
 void ActiveXControlComponent::paint (Graphics& g)

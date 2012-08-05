@@ -95,66 +95,10 @@ namespace ComponentBuilderHelpers
             }
         }
     }
-
-    static void updateComponentColours (Component& component, const ValueTree& colourState)
-    {
-        NamedValueSet& properties = component.getProperties();
-
-        for (int i = properties.size(); --i >= 0;)
-        {
-            const Identifier name (properties.getName (i));
-
-            if (name.toString().startsWith ("jcclr_"))
-            {
-                const String colourName (name.toString().substring (6));
-
-                if (colourState [colourName].isVoid())
-                    component.removeColour (colourName.getHexValue32());
-            }
-        }
-
-        for (int i = 0; i < colourState.getNumProperties(); ++i)
-        {
-            const Identifier colourName (colourState.getPropertyName (i));
-            const String colour (colourState [colourName].toString());
-
-            if (colour.isNotEmpty())
-                component.setColour (colourName.toString().getHexValue32(), Colour::fromString (colour));
-        }
-    }
-
-    template <class ComponentClass>
-    class StandardTypeHandler  : public ComponentBuilder::TypeHandler
-    {
-    public:
-        StandardTypeHandler()  : ComponentBuilder::TypeHandler (ComponentClass::Ids::tagType)
-        {}
-
-        Component* addNewComponentFromState (const ValueTree& state, Component* parent)
-        {
-            ComponentClass* const c = new ComponentClass();
-
-            if (parent != nullptr)
-                parent->addAndMakeVisible (c);
-
-            updateComponentFromState (c, state);
-            return c;
-        }
-
-        void updateComponentFromState (Component* component, const ValueTree& state)
-        {
-            ComponentClass* const c = dynamic_cast <ComponentClass*> (component);
-            jassert (c != nullptr);
-
-            c->setComponentID (state [ComponentBuilder::idProperty]);
-            c->refreshFromValueTree (state, *this->getBuilder());
-        }
-    };
 }
 
 //=============================================================================
 const Identifier ComponentBuilder::idProperty ("id");
-const Identifier ComponentBuilder::positionID ("position");
 
 ComponentBuilder::ComponentBuilder()
     : imageProvider (nullptr)
@@ -242,18 +186,6 @@ ComponentBuilder::TypeHandler* ComponentBuilder::getHandler (const int index) co
 void ComponentBuilder::registerStandardComponentTypes()
 {
     Drawable::registerDrawableTypeHandlers (*this);
-
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <ComboBox>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <Slider>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <Label>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <Slider>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <TextEditor>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <GroupComponent>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <TextButton>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <ToggleButton>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <ImageButton>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <ImageComponent>());
-    registerTypeHandler (new ComponentBuilderHelpers::StandardTypeHandler <HyperlinkButton>());
 }
 
 void ComponentBuilder::setImageProvider (ImageProvider* newImageProvider) noexcept
@@ -321,12 +253,11 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
         OwnedArray<Component> existingComponents;
         existingComponents.ensureStorageAllocated (numExistingChildComps);
 
-        int i;
-        for (i = 0; i < numExistingChildComps; ++i)
+        for (int i = 0; i < numExistingChildComps; ++i)
             existingComponents.add (parent.getChildComponent (i));
 
         const int newNumChildren = children.getNumChildren();
-        for (i = 0; i < newNumChildren; ++i)
+        for (int i = 0; i < newNumChildren; ++i)
         {
             const ValueTree childState (children.getChild (i));
             Component* c = removeComponentWithID (existingComponents, getStateId (childState));
@@ -355,87 +286,4 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
         for (int i = componentsInOrder.size() - 1; --i >= 0;)
             componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
     }
-}
-
-static void updateMarkers (MarkerList* const list, const ValueTree& state)
-{
-    if (list != nullptr)
-        MarkerList::ValueTreeWrapper (state).applyTo (*list);
-}
-
-void ComponentBuilder::initialiseRecursively (Component& comp, const ValueTree& state)
-{
-    refreshBasicComponentProperties (comp, state);
-
-    updateMarkers (comp.getMarkers (true),  state.getChildWithName ("MARKERS_X"));
-    updateMarkers (comp.getMarkers (false), state.getChildWithName ("MARKERS_Y"));
-
-    const ValueTree childList (state.getChildWithName ("COMPONENTS"));
-
-    if (childList.isValid())
-    {
-        updateChildComponents (comp, childList);
-
-        for (int i = 0; i < childList.getNumChildren(); ++i)
-        {
-            const ValueTree childState (childList.getChild(i));
-            Component* const c = ComponentBuilderHelpers::findComponentWithID (comp, ComponentBuilderHelpers::getStateId (childState));
-
-            if (c != nullptr)
-            {
-                ComponentBuilder::TypeHandler* const type = getHandlerForState (childState);
-
-                if (type != nullptr)
-                    type->updateComponentFromState (c, childState);
-                else
-                    initialiseRecursively (*c, childState);
-            }
-        }
-    }
-}
-
-void ComponentBuilder::initialiseFromValueTree (Component& comp,
-                                                const ValueTree& state,
-                                                ImageProvider* const imageProvider)
-{
-    ComponentBuilder builder;
-    builder.setImageProvider (imageProvider);
-    builder.registerStandardComponentTypes();
-    builder.initialiseRecursively (comp, state);
-}
-
-RelativeRectangle ComponentBuilder::getComponentBounds (const ValueTree& state)
-{
-    try
-    {
-        return RelativeRectangle (state [positionID].toString());
-    }
-    catch (Expression::ParseError&)
-    {}
-
-    return RelativeRectangle();
-}
-
-void ComponentBuilder::refreshBasicComponentProperties (Component& comp, const ValueTree& state)
-{
-    static const Identifier focusOrderID ("focusOrder");
-    static const Identifier tooltipID ("tooltip");
-    static const Identifier nameID ("name");
-
-    comp.setName (state [nameID].toString());
-
-    if (state.hasProperty (positionID))
-        getComponentBounds (state).applyToComponent (comp);
-
-    comp.setExplicitFocusOrder (state [focusOrderID]);
-    const var tip (state [tooltipID]);
-
-    if (! tip.isVoid())
-    {
-        SettableTooltipClient* tooltipClient = dynamic_cast <SettableTooltipClient*> (&comp);
-        if (tooltipClient != nullptr)
-            tooltipClient->setTooltip (tip.toString());
-    }
-
-    ComponentBuilderHelpers::updateComponentColours (comp, state.getChildWithName ("COLOURS"));
 }

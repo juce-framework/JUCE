@@ -51,7 +51,8 @@ public:
 
         The properties file, if supplied, is used to store the user's last search paths.
     */
-    PluginListComponent (KnownPluginList& listToRepresent,
+    PluginListComponent (AudioPluginFormatManager& formatManager,
+                         KnownPluginList& listToRepresent,
                          const File& deadMansPedalFile,
                          PropertiesFile* propertiesToUse);
 
@@ -74,6 +75,7 @@ public:
 
 private:
     //==============================================================================
+    AudioPluginFormatManager& formatManager;
     KnownPluginList& list;
     File deadMansPedalFile;
     ListBox listBox;

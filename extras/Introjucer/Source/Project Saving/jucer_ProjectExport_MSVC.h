@@ -143,6 +143,9 @@ protected:
         Value shouldGenerateManifestValue()         { return getValue (Ids::generateManifest); }
         bool shouldGenerateManifest() const         { return config [Ids::generateManifest]; }
 
+        Value getWholeProgramOptValue()             { return getValue (Ids::wholeProgramOptimisation); }
+        bool shouldDisableWholeProgramOpt() const   { return static_cast<int> (config [Ids::wholeProgramOptimisation]) > 0; }
+
         String getOutputFilename (const String& suffix, bool forceSuffix) const
         {
             const String target (File::createLegalFileName (getTargetBinaryNameString().trim()));
@@ -162,6 +165,13 @@ protected:
 
             props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
                                                     StringArray (warningLevelNames), Array<var> (warningLevels)));
+
+            const char* const wpoNames[] = { "Enable link-time code generation when possible",
+                                             "Always disable link-time code generation", nullptr };
+            const var wpoValues[] = { var(), var (1) };
+
+            props.add (new ChoicePropertyComponent (getWholeProgramOptValue(), "Whole Program Optimisation",
+                                                    StringArray (wpoNames), Array<var> (wpoValues, numElementsInArray (wpoValues))));
 
             props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, false));
             props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, false));
@@ -545,9 +555,9 @@ public:
 
         if (hasResourceFile())
         {
-            for (int i = 0; i < groups.size(); ++i)
+            for (int i = 0; i < getAllGroups().size(); ++i)
             {
-                Project::Item& group = groups.getReference(i);
+                Project::Item& group = getAllGroups().getReference(i);
 
                 if (group.getID() == ProjectSaver::getGeneratedGroupID())
                 {
@@ -662,9 +672,13 @@ protected:
 
     void createFiles (XmlElement& files) const
     {
-        for (int i = 0; i < groups.size(); ++i)
-            if (groups.getReference(i).getNumChildren() > 0)
-                addFiles (groups.getReference(i), files);
+        for (int i = 0; i < getAllGroups().size(); ++i)
+        {
+            const Project::Item& group = getAllGroups().getReference(i);
+
+            if (group.getNumChildren() > 0)
+                addFiles (group, files);
+        }
     }
 
     //==============================================================================
@@ -687,7 +701,7 @@ protected:
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
         xml.setAttribute ("CharacterSet", "2");
 
-        if (! isDebug)
+        if (! (isDebug || config.shouldDisableWholeProgramOpt()))
             xml.setAttribute ("WholeProgramOptimization", "1");
 
         XmlElement* preBuildEvent = createToolElement (xml, "VCPreBuildEventTool");
@@ -1035,19 +1049,21 @@ protected:
             imports->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
         }
 
-        for (ConstConfigIterator config (*this); config.next();)
+        for (ConstConfigIterator i (*this); i.next();)
         {
+            const MSVCBuildConfiguration& config = dynamic_cast <const MSVCBuildConfiguration&> (*i);
+
             XmlElement* e = projectXml.createNewChildElement ("PropertyGroup");
-            setConditionAttribute (*e, *config);
+            setConditionAttribute (*e, config);
             e->setAttribute ("Label", "Configuration");
             e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
             e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
             e->createNewChildElement ("CharacterSet")->addTextElement ("MultiByte");
 
-            if (! config->isDebug())
+            if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
 
-            if (is64Bit (*config))
+            if (is64Bit (config))
                 e->createNewChildElement ("PlatformToolset")->addTextElement ("Windows7.1SDK");
         }
 
@@ -1139,9 +1155,13 @@ protected:
 
             {
                 XmlElement* cl = group->createNewChildElement ("ClCompile");
-                cl->createNewChildElement ("Optimization")->addTextElement (isDebug ? "Disabled" : "MaxSpeed");
 
-                if (isDebug)
+                const int optimiseLevel = config.getOptimisationLevelInt();
+                cl->createNewChildElement ("Optimization")->addTextElement (optimiseLevel <= 1 ? "Disabled"
+                                                                                               : optimiseLevel == 2 ? "MinSpace"
+                                                                                                                    : "MaxSpeed");
+
+                if (isDebug && optimiseLevel <= 1)
                     cl->createNewChildElement ("DebugInformationFormat")->addTextElement (is64Bit (config) ? "ProgramDatabase"
                                                                                                            : "EditAndContinue");
 
@@ -1226,9 +1246,13 @@ protected:
             XmlElement* cppFiles    = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* headerFiles = projectXml.createNewChildElement ("ItemGroup");
 
-            for (int i = 0; i < groups.size(); ++i)
-                if (groups.getReference(i).getNumChildren() > 0)
-                    addFilesToCompile (groups.getReference(i), *cppFiles, *headerFiles, *otherFilesGroup);
+            for (int i = 0; i < getAllGroups().size(); ++i)
+            {
+                const Project::Item& group = getAllGroups().getReference(i);
+
+                if (group.getNumChildren() > 0)
+                    addFilesToCompile (group, *cppFiles, *headerFiles, *otherFilesGroup);
+            }
         }
 
         if (iconFile != File::nonexistent)
@@ -1370,10 +1394,13 @@ protected:
         XmlElement* headers    = filterXml.createNewChildElement ("ItemGroup");
         ScopedPointer<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
 
-        for (int i = 0; i < groups.size(); ++i)
-            if (groups.getReference(i).getNumChildren() > 0)
-                addFilesToFilter (groups.getReference(i), groups.getReference(i).getName(),
-                                  *cpps, *headers, *otherFilesGroup, *groupsXml);
+        for (int i = 0; i < getAllGroups().size(); ++i)
+        {
+            const Project::Item& group = getAllGroups().getReference(i);
+
+            if (group.getNumChildren() > 0)
+                addFilesToFilter (group, group.getName(), *cpps, *headers, *otherFilesGroup, *groupsXml);
+        }
 
         if (iconFile.exists())
         {

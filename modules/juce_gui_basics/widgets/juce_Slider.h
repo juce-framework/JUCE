@@ -61,28 +61,30 @@ public:
     */
     enum SliderStyle
     {
-        LinearHorizontal,       /**< A traditional horizontal slider. */
-        LinearVertical,         /**< A traditional vertical slider. */
-        LinearBar,              /**< A horizontal bar slider with the text label drawn on top of it. */
-        Rotary,                 /**< A rotary control that you move by dragging the mouse in a circular motion, like a knob.
-                                     @see setRotaryParameters */
-        RotaryHorizontalDrag,   /**< A rotary control that you move by dragging the mouse left-to-right.
-                                     @see setRotaryParameters */
-        RotaryVerticalDrag,     /**< A rotary control that you move by dragging the mouse up-and-down.
-                                     @see setRotaryParameters */
-        IncDecButtons,          /**< A pair of buttons that increment or decrement the slider's value by the increment set in setRange(). */
+        LinearHorizontal,               /**< A traditional horizontal slider. */
+        LinearVertical,                 /**< A traditional vertical slider. */
+        LinearBar,                      /**< A horizontal bar slider with the text label drawn on top of it. */
+        Rotary,                         /**< A rotary control that you move by dragging the mouse in a circular motion, like a knob.
+                                             @see setRotaryParameters */
+        RotaryHorizontalDrag,           /**< A rotary control that you move by dragging the mouse left-to-right.
+                                             @see setRotaryParameters */
+        RotaryVerticalDrag,             /**< A rotary control that you move by dragging the mouse up-and-down.
+                                             @see setRotaryParameters */
+        RotaryHorizontalVerticalDrag,   /**< A rotary control that you move by dragging the mouse up-and-down or left-to-right.
+                                             @see setRotaryParameters */
+        IncDecButtons,                  /**< A pair of buttons that increment or decrement the slider's value by the increment set in setRange(). */
 
-        TwoValueHorizontal,     /**< A horizontal slider that has two thumbs instead of one, so it can show a minimum and maximum value.
-                                     @see setMinValue, setMaxValue */
-        TwoValueVertical,       /**< A vertical slider that has two thumbs instead of one, so it can show a minimum and maximum value.
-                                     @see setMinValue, setMaxValue */
+        TwoValueHorizontal,             /**< A horizontal slider that has two thumbs instead of one, so it can show a minimum and maximum value.
+                                             @see setMinValue, setMaxValue */
+        TwoValueVertical,               /**< A vertical slider that has two thumbs instead of one, so it can show a minimum and maximum value.
+                                             @see setMinValue, setMaxValue */
 
-        ThreeValueHorizontal,   /**< A horizontal slider that has three thumbs instead of one, so it can show a minimum and maximum
-                                     value, with the current value being somewhere between them.
-                                     @see setMinValue, setMaxValue */
-        ThreeValueVertical,     /**< A vertical slider that has three thumbs instead of one, so it can show a minimum and maximum
-                                     value, with the current value being somewhere between them.
-                                     @see setMinValue, setMaxValue */
+        ThreeValueHorizontal,           /**< A horizontal slider that has three thumbs instead of one, so it can show a minimum and maximum
+                                             value, with the current value being somewhere between them.
+                                             @see setMinValue, setMaxValue */
+        ThreeValueVertical,             /**< A vertical slider that has three thumbs instead of one, so it can show a minimum and maximum
+                                             value, with the current value being somewhere between them.
+                                             @see setMinValue, setMaxValue */
     };
 
     /** The position of the slider's text-entry box.
@@ -779,15 +781,6 @@ public:
         textBoxHighlightColourId    = 0x1001600,  /**< The text highlight colour for the text-editor box. */
         textBoxOutlineColourId      = 0x1001700   /**< The colour to use for a border around the text-editor box. */
     };
-
-    //==============================================================================
-    struct Ids
-    {
-        static const Identifier tagType, min, max, interval, type, editable,
-                                textBoxPos, textBoxWidth, textBoxHeight, skew;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
 
 protected:
     //==============================================================================

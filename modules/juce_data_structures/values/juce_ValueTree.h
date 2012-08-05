@@ -204,6 +204,12 @@ public:
     */
     Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager);
 
+    /** Overwrites all the properties in this tree with the properties of the source tree.
+        Any properties that already exist will be updated; and new ones will be added, and
+        any that are not present in the source tree will be removed.
+    */
+    void copyPropertiesFrom (const ValueTree& source, UndoManager* undoManager);
+
     //==============================================================================
     /** Returns the number of child nodes belonging to this one.
         @see getChild
@@ -336,7 +342,7 @@ public:
         It's much faster to load/save your tree in binary form than as XML, but
         obviously isn't human-readable.
     */
-    void writeToStream (OutputStream& output);
+    void writeToStream (OutputStream& output) const;
 
     /** Reloads a tree from a stream that was written with writeToStream(). */
     static ValueTree readFromStream (InputStream& input);

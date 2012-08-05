@@ -324,10 +324,17 @@ public:
     */
     Colour contrasting (float amount = 1.0f) const noexcept;
 
+    /** Returns a colour that is as close as possible to a target colour whilst
+        still being in contrast to this one.
+
+        The colour that is returned will be the targetColour, but with its luminosity
+        nudged up or down so that it differs from the luminosity of this colour
+        by at least the amount specified by minLuminosityDiff.
+    */
+    Colour contrasting (const Colour& targetColour, float minLuminosityDiff) const noexcept;
+
     /** Returns a colour that contrasts against two colours.
-
         Looks for a colour that contrasts with both of the colours passed-in.
-
         Handy for things like choosing a highlight colour in text editors, etc.
     */
     static Colour contrasting (const Colour& colour1,

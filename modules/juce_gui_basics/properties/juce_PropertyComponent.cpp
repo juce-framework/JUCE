@@ -23,29 +23,28 @@
   ==============================================================================
 */
 
-PropertyComponent::PropertyComponent (const String& name,
-                                      const int preferredHeight_)
-    : Component (name),
-      preferredHeight (preferredHeight_)
+PropertyComponent::PropertyComponent (const String& name, const int preferredHeight_)
+    : Component (name), preferredHeight (preferredHeight_)
 {
     jassert (name.isNotEmpty());
 }
 
-PropertyComponent::~PropertyComponent()
-{
-}
+PropertyComponent::~PropertyComponent() {}
 
 //==============================================================================
 void PropertyComponent::paint (Graphics& g)
 {
-    getLookAndFeel().drawPropertyComponentBackground (g, getWidth(), getHeight(), *this);
-    getLookAndFeel().drawPropertyComponentLabel (g, getWidth(), getHeight(), *this);
+    LookAndFeel& lf = getLookAndFeel();
+
+    lf.drawPropertyComponentBackground (g, getWidth(), getHeight(), *this);
+    lf.drawPropertyComponentLabel      (g, getWidth(), getHeight(), *this);
 }
 
 void PropertyComponent::resized()
 {
-    if (getNumChildComponents() > 0)
-        getChildComponent (0)->setBounds (getLookAndFeel().getPropertyComponentContentPosition (*this));
+    Component* const c = getChildComponent(0);
+    if (c != nullptr)
+        c->setBounds (getLookAndFeel().getPropertyComponentContentPosition (*this));
 }
 
 void PropertyComponent::enablementChanged()

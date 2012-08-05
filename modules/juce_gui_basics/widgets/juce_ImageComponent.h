@@ -68,15 +68,6 @@ public:
     const RectanglePlacement getImagePlacement() const;
 
     //==============================================================================
-    struct Ids
-    {
-        static const Identifier tagType, image, placement;
-    };
-
-    void refreshFromValueTree (const ValueTree&, ComponentBuilder&);
-    static RectanglePlacement getPlacement (const ValueTree& state);
-
-    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
 

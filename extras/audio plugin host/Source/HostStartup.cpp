@@ -59,9 +59,6 @@ public:
 
         commandManager = new ApplicationCommandManager();
 
-        AudioPluginFormatManager::getInstance()->addDefaultFormats();
-        AudioPluginFormatManager::getInstance()->addFormat (new InternalPluginFormat());
-
         mainWindow = new MainHostWindow();
         //mainWindow->setUsingNativeTitleBar (true);
 

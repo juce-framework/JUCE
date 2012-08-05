@@ -26,16 +26,42 @@
 #include "jucer_Application.h"
 #include "jucer_AppearanceSettings.h"
 
+namespace AppearanceColours
+{
+    struct ColourInfo
+    {
+        const char* name;
+        uint32 colourID;
+        bool mustBeOpaque;
+        bool applyToEditorOnly;
+    };
+
+    static const ColourInfo colours[] =
+    {
+        { "Main Window Bkgd",   mainBackgroundColourId, true, false },
+        { "Treeview Highlight", treeviewHighlightColourId, false, false },
+
+        { "Code Background",    CodeEditorComponent::backgroundColourId, true, false },
+        { "Line Number Bkgd",   CodeEditorComponent::lineNumberBackgroundId, false, false },
+        { "Line Numbers",       CodeEditorComponent::lineNumberTextId, false, false },
+        { "Plain Text",         CodeEditorComponent::defaultTextColourId, false, false },
+        { "Selected Text Bkgd", CodeEditorComponent::highlightColourId, false, false },
+        { "Caret",              CaretComponent::caretColourId, false, true }
+    };
+}
 
 //==============================================================================
-AppearanceSettings::AppearanceSettings (const CodeEditorComponent& editor)
+AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
     : settings ("COLOUR_SCHEME")
 {
-    getColourValue ("Background")          = editor.findColour (CodeEditorComponent::backgroundColourId).toString();
-    getColourValue ("Line Number Bkgd")    = editor.findColour (CodeEditorComponent::lineNumberBackgroundId).toString();
-    getColourValue ("Line Numbers")        = editor.findColour (CodeEditorComponent::lineNumberTextId).toString();
-    getColourValue ("Plain Text")          = editor.findColour (CodeEditorComponent::defaultTextColourId).toString();
-    getColourValue ("Selected Background") = editor.findColour (CodeEditorComponent::highlightColourId).toString();
+    IntrojucerLookAndFeel lf;
+
+    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
+        getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
+
+    CodeDocument doc;
+    CPlusPlusCodeTokeniser tokeniser;
+    CodeEditorComponent editor (doc, &tokeniser);
 
     const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
 
@@ -45,25 +71,81 @@ AppearanceSettings::AppearanceSettings (const CodeEditorComponent& editor)
         getColourValue (t.name) = t.colour.toString();
     }
 
-    Font f (editor.getFont());
-    f.setTypefaceName (f.getTypeface()->getName());
-    getCodeFontValue() = f.toString();
+    getCodeFontValue() = getDefaultCodeFont().toString();
+
+    if (updateAppWhenChanged)
+        settings.addListener (this);
+}
+
+File AppearanceSettings::getSchemesFolder()
+{
+    File f (getAppProperties().getFile().getSiblingFile ("Schemes"));
+    f.createDirectory();
+    return f;
+}
+
+void AppearanceSettings::writeDefaultSchemeFile (const String& xmlString, const String& name)
+{
+    const File file (getSchemesFolder().getChildFile (name).withFileExtension (getSchemeFileSuffix()));
+
+    AppearanceSettings settings (false);
+
+    ScopedPointer<XmlElement> xml (XmlDocument::parse (xmlString));
+    if (xml != nullptr)
+        settings.readFromXML (*xml);
+
+    settings.writeToFile (file);
+}
+
+void AppearanceSettings::refreshPresetSchemeList()
+{
+    writeDefaultSchemeFile (String::empty,               "Default (Light)");
+    writeDefaultSchemeFile (BinaryData::dark_scheme_xml, "Default (Dark)");
+
+    Array<File> newSchemes;
+    getSchemesFolder().findChildFiles (newSchemes, File::findFiles, false, String ("*") + getSchemeFileSuffix());
+
+    if (newSchemes != presetSchemeFiles)
+    {
+        presetSchemeFiles.swapWithArray (newSchemes);
+        commandManager->commandStatusChanged();
+    }
+}
+
+StringArray AppearanceSettings::getPresetSchemes()
+{
+    StringArray s;
+    for (int i = 0; i < presetSchemeFiles.size(); ++i)
+        s.add (presetSchemeFiles.getReference(i).getFileNameWithoutExtension());
+
+    return s;
+}
+
+void AppearanceSettings::selectPresetScheme (int index)
+{
+    readFromFile (presetSchemeFiles [index]);
 }
 
 bool AppearanceSettings::readFromXML (const XmlElement& xml)
 {
     if (xml.hasTagName (settings.getType().toString()))
     {
-        ValueTree newSettings (ValueTree::fromXml (xml));
+        const ValueTree newSettings (ValueTree::fromXml (xml));
+
+        // we'll manually copy across the new properties to the existing tree so that
+        // any open editors will be kept up to date..
+        settings.copyPropertiesFrom (newSettings, nullptr);
 
         for (int i = settings.getNumChildren(); --i >= 0;)
         {
-            const ValueTree c (settings.getChild (i));
-            if (! newSettings.getChildWithProperty (Ids::name, c.getProperty (Ids::name)).isValid())
-                newSettings.addChild (c.createCopy(), 0, nullptr);
+            ValueTree c (settings.getChild (i));
+
+            const ValueTree newValue (newSettings.getChildWithProperty (Ids::name, c.getProperty (Ids::name)));
+
+            if (newValue.isValid())
+                c.copyPropertiesFrom (newValue, nullptr);
         }
 
-        settings = newSettings;
         return true;
     }
 
@@ -82,6 +164,11 @@ bool AppearanceSettings::writeToFile (const File& file) const
     return xml != nullptr && xml->writeToFile (file, String::empty);
 }
 
+Font AppearanceSettings::getDefaultCodeFont()
+{
+    return Font (Font::getDefaultMonospacedFontName(), Font::getDefaultStyle(), 13.0f);
+}
+
 StringArray AppearanceSettings::getColourNames() const
 {
     StringArray s;
@@ -97,6 +184,31 @@ StringArray AppearanceSettings::getColourNames() const
     return s;
 }
 
+void AppearanceSettings::updateColourScheme()
+{
+    applyToLookAndFeel (LookAndFeel::getDefaultLookAndFeel());
+    JucerApplication::getApp().mainWindowList.sendLookAndFeelChange();
+}
+
+void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const
+{
+    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
+    {
+        Colour col;
+        if (getColour (AppearanceColours::colours[i].name, col))
+        {
+            if (AppearanceColours::colours[i].mustBeOpaque)
+                col = Colours::white.overlaidWith (col);
+
+            if (! AppearanceColours::colours[i].applyToEditorOnly)
+                lf.setColour (AppearanceColours::colours[i].colourID, col);
+        }
+    }
+
+    lf.setColour (ScrollBar::thumbColourId,
+                  getScrollbarColourForBackground (lf.findColour (mainBackgroundColourId)));
+}
+
 void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 {
     CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
@@ -108,21 +220,20 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
     }
 
     editor.setColourScheme (cs);
+    editor.setFont (getCodeFont());
 
-    Colour col;
-    if (getColour ("Plain Text", col))          editor.setColour (CodeEditorComponent::defaultTextColourId, col);
-    if (getColour ("Selected Background", col)) editor.setColour (CodeEditorComponent::highlightColourId, col);
-    if (getColour ("Line Number Bkgd", col))    editor.setColour (CodeEditorComponent::lineNumberBackgroundId, col);
-    if (getColour ("Line Numbers", col))        editor.setColour (CodeEditorComponent::lineNumberTextId, col);
-
-    if (getColour ("Background", col))
+    for (int i = 0; i < sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0]); ++i)
     {
-        col = Colours::white.overlaidWith (col);
-        editor.setColour (CodeEditorComponent::backgroundColourId, col);
-        editor.setColour (CaretComponent::caretColourId, col.contrasting());
+        if (AppearanceColours::colours[i].applyToEditorOnly)
+        {
+            Colour col;
+            if (getColour (AppearanceColours::colours[i].name, col))
+                editor.setColour (AppearanceColours::colours[i].colourID, col);
+        }
     }
 
-    editor.setFont (getCodeFont());
+    editor.setColour (ScrollBar::thumbColourId,
+                      getScrollbarColourForBackground (editor.findColour (CodeEditorComponent::backgroundColourId)));
 }
 
 Font AppearanceSettings::getCodeFont() const
@@ -130,17 +241,7 @@ Font AppearanceSettings::getCodeFont() const
     const String fontString (settings [Ids::font].toString());
 
     if (fontString.isEmpty())
-    {
-       #if JUCE_MAC
-        Font font (13.0f);
-        font.setTypefaceName ("Menlo");
-       #else
-        Font font (10.0f);
-        font.setTypefaceName (Font::getDefaultMonospacedFontName());
-       #endif
-
-        return font;
-    }
+        return getDefaultCodeFont();
 
     return Font::fromString (fontString);
 }
@@ -177,45 +278,72 @@ bool AppearanceSettings::getColour (const String& name, Colour& result) const
     return false;
 }
 
+Colour AppearanceSettings::getScrollbarColourForBackground (const Colour& background)
+{
+    return background.contrasting().withAlpha (0.13f);
+}
+
 //==============================================================================
 struct AppearanceEditor
 {
-    class Window   : public DialogWindow
+    class FontScanPanel   : public Component,
+                            private Timer
     {
     public:
-        Window()   : DialogWindow ("Appearance Settings", Colours::black, true, true)
+        FontScanPanel()
         {
-            setUsingNativeTitleBar (true);
-            setContentOwned (new EditorPanel(), false);
-            setResizable (true, true);
+            fontsToScan = Font::findAllTypefaceNames();
+            startTimer (1);
+        }
 
-            const int width = 350;
-            setResizeLimits (width, 200, width, 1000);
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colours::darkgrey);
 
-            String windowState (getAppProperties().getValue (getWindowPosName()));
+            g.setFont (14.0f);
+            g.setColour (Colours::white);
+            g.drawFittedText ("Scanning for fonts..", getLocalBounds(), Justification::centred, 2);
 
-            if (windowState.isNotEmpty())
-                restoreWindowStateFromString (windowState);
+            const int size = 30;
+            getLookAndFeel().drawSpinningWaitAnimation (g, Colours::white, (getWidth() - size) / 2, getHeight() / 2 - 50, size, size);
+        }
+
+        void timerCallback()
+        {
+            repaint();
+
+            if (fontsToScan.size() == 0)
+            {
+                getAppSettings().monospacedFontNames = fontsFound;
+                DialogWindow* w = findParentComponentOfClass<DialogWindow>();
+
+                if (w != nullptr)
+                    w->setContentOwned (new EditorPanel(), false);
+            }
             else
-                centreAroundComponent (Component::getCurrentlyFocusedComponent(), width, 500);
+            {
+                if (isMonospacedTypeface (fontsToScan[0]))
+                    fontsFound.add (fontsToScan[0]);
 
-            setVisible (true);
+                fontsToScan.remove (0);
+            }
         }
 
-        ~Window()
+        // A rather hacky trick to select only the fixed-pitch fonts..
+        // This is unfortunately a bit slow, but will work on all platforms.
+        static bool isMonospacedTypeface (const String& name)
         {
-            getAppProperties().setValue (getWindowPosName(), getWindowStateAsString());
+            const Font font (name, 20.0f, Font::plain);
+
+            const int width = font.getStringWidth ("....");
+
+            return width == font.getStringWidth ("WWWW")
+                && width == font.getStringWidth ("0000")
+                && width == font.getStringWidth ("1111")
+                && width == font.getStringWidth ("iiii");
         }
 
-        void closeButtonPressed()
-        {
-            JucerApplication::getApp()->appearanceEditorWindow = nullptr;
-        }
-
-    private:
-        static const char* getWindowPosName()   { return "colourSchemeEditorPos"; }
-
-        JUCE_DECLARE_NON_COPYABLE (Window);
+        StringArray fontsToScan, fontsFound;
     };
 
     //==============================================================================
@@ -227,13 +355,13 @@ struct AppearanceEditor
             : loadButton ("Load Scheme..."),
               saveButton ("Save Scheme...")
         {
-            setOpaque (true);
-
             rebuildProperties();
             addAndMakeVisible (&panel);
 
-            loadButton.setColour (TextButton::buttonColourId, Colours::grey);
-            saveButton.setColour (TextButton::buttonColourId, Colours::grey);
+            loadButton.setColour (TextButton::buttonColourId, Colours::darkgrey.withAlpha (0.5f));
+            saveButton.setColour (TextButton::buttonColourId, Colours::darkgrey.withAlpha (0.5f));
+            loadButton.setColour (TextButton::textColourOffId, Colours::white);
+            saveButton.setColour (TextButton::textColourOffId, Colours::white);
 
             addAndMakeVisible (&loadButton);
             addAndMakeVisible (&saveButton);
@@ -262,16 +390,11 @@ struct AppearanceEditor
             panel.addProperties (props);
         }
 
-        void paint (Graphics& g)
-        {
-            g.fillAll (Colours::black);
-        }
-
         void resized()
         {
             Rectangle<int> r (getLocalBounds());
-            panel.setBounds (r.removeFromTop (getHeight() - 26).reduced (4, 3));
-            loadButton.setBounds (r.removeFromLeft (getWidth() / 2).reduced (10, 3));
+            panel.setBounds (r.removeFromTop (getHeight() - 28).reduced (4, 2));
+            loadButton.setBounds (r.removeFromLeft (getWidth() / 2).reduced (10, 4));
             saveButton.setBounds (r.reduced (10, 3));
         }
 
@@ -290,21 +413,23 @@ struct AppearanceEditor
         void saveScheme()
         {
             FileChooser fc ("Select a file in which to save this colour-scheme...",
-                            getAppSettings().getSchemesFolder().getNonexistentChildFile ("Scheme", ".editorscheme"),
-                            "*.editorscheme");
+                            getAppSettings().appearance.getSchemesFolder()
+                                .getNonexistentChildFile ("Scheme", AppearanceSettings::getSchemeFileSuffix()),
+                            AppearanceSettings::getSchemeFileWildCard());
 
             if (fc.browseForFileToSave (true))
             {
-                File file (fc.getResult().withFileExtension (".editorscheme"));
+                File file (fc.getResult().withFileExtension (AppearanceSettings::getSchemeFileSuffix()));
                 getAppSettings().appearance.writeToFile (file);
+                getAppSettings().appearance.refreshPresetSchemeList();
             }
         }
 
         void loadScheme()
         {
             FileChooser fc ("Please select a colour-scheme file to load...",
-                            getAppSettings().getSchemesFolder(),
-                            "*.editorscheme");
+                            getAppSettings().appearance.getSchemesFolder(),
+                            AppearanceSettings::getSchemeFileWildCard());
 
             if (fc.browseForFileToOpen())
             {
@@ -330,20 +455,29 @@ struct AppearanceEditor
         void setValue (const var& newValue)
         {
             Font font (Font::fromString (sourceValue.toString()));
-            font.setTypefaceName (newValue.toString());
+            font.setTypefaceName (newValue.toString().isEmpty() ? Font::getDefaultMonospacedFontName()
+                                                                : newValue.toString());
             sourceValue = font.toString();
         }
 
         static ChoicePropertyComponent* createProperty (const String& title, const Value& value)
         {
-            const StringArray& fontNames = getAppSettings().getFontNames();
+            StringArray fontNames = getAppSettings().monospacedFontNames;
 
             Array<var> values;
+            values.add (Font::getDefaultMonospacedFontName());
+            values.add (var());
+
             for (int i = 0; i < fontNames.size(); ++i)
                 values.add (fontNames[i]);
 
+            StringArray names;
+            names.add ("<Default Monospaced>");
+            names.add (String::empty);
+            names.addArray (getAppSettings().monospacedFontNames);
+
             return new ChoicePropertyComponent (Value (new FontNameValueSource (value)),
-                                                title, fontNames, values);
+                                                title, names, values);
         }
     };
 
@@ -371,7 +505,163 @@ struct AppearanceEditor
     };
 };
 
-Component* AppearanceSettings::createEditorWindow()
+void AppearanceSettings::showEditorWindow (ScopedPointer<Component>& ownerPointer)
 {
-    return new AppearanceEditor::Window();
+    if (ownerPointer != nullptr)
+    {
+        ownerPointer->toFront (true);
+    }
+    else
+    {
+        Component* content;
+        if (getAppSettings().monospacedFontNames.size() == 0)
+            content = new AppearanceEditor::FontScanPanel();
+        else
+            content = new AppearanceEditor::EditorPanel();
+
+        const int width = 350;
+        new FloatingToolWindow ("Appearance Settings",
+                                "colourSchemeEditorPos",
+                                content, ownerPointer,
+                                width, 500,
+                                width, 200, width, 1000);
+    }
+}
+
+//==============================================================================
+IntrojucerLookAndFeel::IntrojucerLookAndFeel()
+{
+    setColour (mainBackgroundColourId, Colour::greyLevel (0.8f));
+    setColour (treeviewHighlightColourId, Colour (0x401111ee));
+}
+
+Rectangle<int> IntrojucerLookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
+{
+    if (component.findParentComponentOfClass<AppearanceEditor::EditorPanel>() != nullptr)
+        return component.getLocalBounds().reduced (1).removeFromRight (component.getWidth() / 2);
+
+    return LookAndFeel::getPropertyComponentContentPosition (component);
+}
+
+int IntrojucerLookAndFeel::getTabButtonOverlap (int tabDepth)                          { return -1; }
+int IntrojucerLookAndFeel::getTabButtonSpaceAroundImage()                              { return 1; }
+int IntrojucerLookAndFeel::getTabButtonBestWidth (TabBarButton& button, int tabDepth)  { return 120; }
+
+void IntrojucerLookAndFeel::createTabTextLayout (const TabBarButton& button, const Rectangle<int>& textArea, GlyphArrangement& textLayout)
+{
+    Font font (textArea.getHeight() * 0.5f);
+    font.setUnderline (button.hasKeyboardFocus (false));
+
+    textLayout.addFittedText (font, button.getButtonText().trim(),
+                              (float) textArea.getX(), (float) textArea.getY(), (float) textArea.getWidth(), (float) textArea.getHeight(),
+                              Justification::centred, 1);
+}
+
+Colour IntrojucerLookAndFeel::getTabBackgroundColour (TabBarButton& button)
+{
+    const Colour normalBkg (button.findColour (mainBackgroundColourId));
+    Colour bkg (normalBkg.contrasting (0.15f));
+    if (button.isFrontTab())
+        bkg = bkg.overlaidWith (Colours::yellow.withAlpha (0.5f));
+
+    return bkg;
+}
+
+void IntrojucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
+{
+    const Rectangle<int> activeArea (button.getActiveArea());
+
+    const Colour bkg (getTabBackgroundColour (button));
+
+    g.setGradientFill (ColourGradient (bkg.brighter (0.1f), 0, (float) activeArea.getY(),
+                                       bkg.darker (0.1f), 0, (float) activeArea.getBottom(), false));
+    g.fillRect (activeArea);
+
+    g.setColour (button.findColour (mainBackgroundColourId).darker (0.3f));
+    g.drawRect (activeArea);
+
+    GlyphArrangement textLayout;
+    createTabTextLayout (button, button.getTextArea(), textLayout);
+
+    const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
+    g.setColour (bkg.contrasting().withMultipliedAlpha (alpha));
+    textLayout.draw (g);
+}
+
+Rectangle<int> IntrojucerLookAndFeel::getTabButtonExtraComponentBounds (const TabBarButton& button, Rectangle<int>& textArea, Component& comp)
+{
+    GlyphArrangement textLayout;
+    createTabTextLayout (button, textArea, textLayout);
+    const int textWidth = (int) textLayout.getBoundingBox (0, -1, false).getWidth();
+    const int extraSpace = jmax (0, textArea.getWidth() - (textWidth + comp.getWidth())) / 2;
+
+    textArea.removeFromRight (extraSpace);
+    textArea.removeFromLeft (extraSpace);
+    return textArea.removeFromRight (comp.getWidth());
+}
+
+void IntrojucerLookAndFeel::drawStretchableLayoutResizerBar (Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/, bool isMouseOver, bool isMouseDragging)
+{
+    if (isMouseOver || isMouseDragging)
+        g.fillAll (Colours::yellow.withAlpha (0.4f));
+}
+
+void IntrojucerLookAndFeel::drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height,
+                                           bool isScrollbarVertical, int thumbStartPosition, int thumbSize,
+                                           bool isMouseOver, bool isMouseDown)
+{
+    Path thumbPath;
+
+    if (thumbSize > 0)
+    {
+        const float thumbIndent = (isScrollbarVertical ? width : height) * 0.25f;
+        const float thumbIndentx2 = thumbIndent * 2.0f;
+
+        if (isScrollbarVertical)
+            thumbPath.addRoundedRectangle (x + thumbIndent, thumbStartPosition + thumbIndent,
+                                           width - thumbIndentx2, thumbSize - thumbIndentx2, (width - thumbIndentx2) * 0.5f);
+        else
+            thumbPath.addRoundedRectangle (thumbStartPosition + thumbIndent, y + thumbIndent,
+                                           thumbSize - thumbIndentx2, height - thumbIndentx2, (height - thumbIndentx2) * 0.5f);
+    }
+
+    Colour thumbCol (scrollbar.findColour (ScrollBar::thumbColourId, true));
+
+    if (isMouseOver || isMouseDown)
+        thumbCol = thumbCol.withMultipliedAlpha (2.0f);
+
+    g.setColour (thumbCol);
+    g.fillPath (thumbPath);
+
+    g.setColour (thumbCol.contrasting ((isMouseOver  || isMouseDown) ? 0.2f : 0.1f));
+    g.strokePath (thumbPath, PathStrokeType (1.0f));
+}
+
+void IntrojucerLookAndFeel::fillWithBackgroundTexture (Graphics& g)
+{
+    const Colour bkg (findColour (mainBackgroundColourId));
+
+    if (backgroundTextureBaseColour != bkg)
+    {
+        backgroundTextureBaseColour = bkg;
+
+        const Image original (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png,
+                                                         BinaryData::brushed_aluminium_pngSize));
+        const int w = original.getWidth();
+        const int h = original.getHeight();
+
+        backgroundTexture = Image (Image::RGB, w, h, false);
+
+        for (int y = 0; y < h; ++y)
+        {
+            for (int x = 0; x < w; ++x)
+            {
+                const float b = original.getPixelAt (x, y).getBrightness();
+                backgroundTexture.setPixelAt (x, y, bkg.withMultipliedBrightness (b + 0.4f));
+            }
+        }
+    }
+
+    g.setTiledImageFill (backgroundTexture, 0, 0, 1.0f);
+    g.fillAll();
 }

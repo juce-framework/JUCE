@@ -23,12 +23,12 @@
   ==============================================================================
 */
 
-class PropertySectionComponent  : public Component
+class PropertyPanel::SectionComponent  : public Component
 {
 public:
-    PropertySectionComponent (const String& sectionTitle,
-                              const Array <PropertyComponent*>& newProperties,
-                              const bool sectionIsOpen_)
+    SectionComponent (const String& sectionTitle,
+                      const Array <PropertyComponent*>& newProperties,
+                      const bool sectionIsOpen_)
         : Component (sectionTitle),
           titleHeight (sectionTitle.isNotEmpty() ? 22 : 0),
           sectionIsOpen (sectionIsOpen_)
@@ -42,7 +42,7 @@ public:
         }
     }
 
-    ~PropertySectionComponent()
+    ~SectionComponent()
     {
         propertyComps.clear();
     }
@@ -127,7 +127,7 @@ private:
     int titleHeight;
     bool sectionIsOpen;
 
-    JUCE_DECLARE_NON_COPYABLE (PropertySectionComponent);
+    JUCE_DECLARE_NON_COPYABLE (SectionComponent);
 };
 
 //==============================================================================
@@ -144,7 +144,7 @@ public:
 
         for (int i = 0; i < sections.size(); ++i)
         {
-            PropertySectionComponent* const section = sections.getUnchecked(i);
+            SectionComponent* const section = sections.getUnchecked(i);
 
             section->setBounds (0, y, width, section->getPreferredHeight());
             y = section->getBottom();
@@ -165,17 +165,17 @@ public:
         sections.clear();
     }
 
-    void addSection (PropertySectionComponent* newSection)
+    void addSection (SectionComponent* newSection)
     {
         sections.add (newSection);
         addAndMakeVisible (newSection, 0);
     }
 
-    int getNumSections() const noexcept                             { return sections.size(); }
-    PropertySectionComponent* getSection (const int index) const    { return sections [index]; }
+    int getNumSections() const noexcept                     { return sections.size(); }
+    SectionComponent* getSection (const int index) const    { return sections [index]; }
 
 private:
-    OwnedArray<PropertySectionComponent> sections;
+    OwnedArray<SectionComponent> sections;
 
     JUCE_DECLARE_NON_COPYABLE (PropertyHolderComponent);
 };
@@ -203,7 +203,7 @@ void PropertyPanel::paint (Graphics& g)
     {
         g.setColour (Colours::black.withAlpha (0.5f));
         g.setFont (14.0f);
-        g.drawText (messageWhenEmpty, 0, 0, getWidth(), 30,
+        g.drawText (messageWhenEmpty, getLocalBounds().withHeight (30),
                     Justification::centred, true);
     }
 }
@@ -229,7 +229,7 @@ void PropertyPanel::addProperties (const Array <PropertyComponent*>& newProperti
     if (propertyHolderComponent->getNumSections() == 0)
         repaint();
 
-    propertyHolderComponent->addSection (new PropertySectionComponent (String::empty, newProperties, true));
+    propertyHolderComponent->addSection (new SectionComponent (String::empty, newProperties, true));
     updatePropHolderLayout();
 }
 
@@ -242,7 +242,7 @@ void PropertyPanel::addSection (const String& sectionTitle,
     if (propertyHolderComponent->getNumSections() == 0)
         repaint();
 
-    propertyHolderComponent->addSection (new PropertySectionComponent (sectionTitle, newProperties, shouldBeOpen));
+    propertyHolderComponent->addSection (new SectionComponent (sectionTitle, newProperties, shouldBeOpen));
     updatePropHolderLayout();
 }
 
@@ -271,7 +271,7 @@ StringArray PropertyPanel::getSectionNames() const
 
     for (int i = 0; i < propertyHolderComponent->getNumSections(); ++i)
     {
-        PropertySectionComponent* const section = propertyHolderComponent->getSection (i);
+        SectionComponent* const section = propertyHolderComponent->getSection (i);
 
         if (section->getName().isNotEmpty())
             s.add (section->getName());
@@ -286,7 +286,7 @@ bool PropertyPanel::isSectionOpen (const int sectionIndex) const
 
     for (int i = 0; i < propertyHolderComponent->getNumSections(); ++i)
     {
-        PropertySectionComponent* const section = propertyHolderComponent->getSection (i);
+        SectionComponent* const section = propertyHolderComponent->getSection (i);
 
         if (section->getName().isNotEmpty())
         {
@@ -306,7 +306,7 @@ void PropertyPanel::setSectionOpen (const int sectionIndex, const bool shouldBeO
 
     for (int i = 0; i < propertyHolderComponent->getNumSections(); ++i)
     {
-        PropertySectionComponent* const section = propertyHolderComponent->getSection (i);
+        SectionComponent* const section = propertyHolderComponent->getSection (i);
 
         if (section->getName().isNotEmpty())
         {
@@ -327,7 +327,7 @@ void PropertyPanel::setSectionEnabled (const int sectionIndex, const bool should
 
     for (int i = 0; i < propertyHolderComponent->getNumSections(); ++i)
     {
-        PropertySectionComponent* const section = propertyHolderComponent->getSection (i);
+        SectionComponent* const section = propertyHolderComponent->getSection (i);
 
         if (section->getName().isNotEmpty())
         {

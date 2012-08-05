@@ -492,7 +492,7 @@ private:
     ScopedPointer <DirectShowHelpers::VideoRenderer> videoRenderer;
 
     //======================================================================
-    class NativeWindowClass   : public DeletedAtShutdown
+    class NativeWindowClass   : private DeletedAtShutdown
     {
     private:
         NativeWindowClass()

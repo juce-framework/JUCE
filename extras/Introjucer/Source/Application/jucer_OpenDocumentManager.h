@@ -60,12 +60,13 @@ public:
         virtual Component* createEditor() = 0;
         virtual Component* createViewer() = 0;
         virtual void fileHasBeenRenamed (const File& newFile) = 0;
+        virtual String getState() const = 0;
+        virtual void restoreState (const String& state) = 0;
     };
 
     //==============================================================================
     int getNumOpenDocuments() const;
     Document* getOpenDocument (int index) const;
-    void moveDocumentToTopOfStack (Document* doc);
     void clear();
 
     bool canOpenFile (const File& file);
@@ -117,72 +118,34 @@ private:
 };
 
 //==============================================================================
-class SourceCodeDocument  : public OpenDocumentManager::Document
+class RecentDocumentList    : private OpenDocumentManager::DocumentCloseListener
 {
 public:
-    //==============================================================================
-    SourceCodeDocument (Project* project_, const File& file_)
-        : modDetector (file_), project (project_)
-    {
-        reloadFromFile();
-    }
+    RecentDocumentList();
+    ~RecentDocumentList();
 
-    //==============================================================================
-    struct Type  : public OpenDocumentManager::DocumentType
-    {
-        bool canOpenFile (const File& file)                     { return file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;xml;plist;rtf;html;htm;php;py;rb;cs"); }
-        Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }
-    };
+    void clear();
 
-    //==============================================================================
-    bool loadedOk() const                               { return true; }
-    bool isForFile (const File& file) const             { return getFile() == file; }
-    bool isForNode (const ValueTree& node) const        { return false; }
-    bool refersToProject (Project& p) const             { return project == &p; }
-    Project* getProject() const                         { return project; }
-    String getName() const                              { return getFile().getFileName(); }
-    String getType() const                              { return getFile().getFileExtension() + " file"; }
-    File getFile() const                                { return modDetector.getFile(); }
-    bool needsSaving() const                            { return codeDoc.hasChangedSinceSavePoint(); }
-    bool hasFileBeenModifiedExternally()                { return modDetector.hasBeenModified(); }
-    void fileHasBeenRenamed (const File& newFile)       { modDetector.fileHasBeenRenamed (newFile); }
+    void newDocumentOpened (OpenDocumentManager::Document* document);
 
-    void reloadFromFile()
-    {
-        modDetector.updateHash();
+    OpenDocumentManager::Document* getCurrentDocument() const       { return previousDocs.getLast(); }
 
-        ScopedPointer <InputStream> in (modDetector.getFile().createInputStream());
+    bool canGoToPrevious() const;
+    bool canGoToNext() const;
 
-        if (in != nullptr)
-            codeDoc.loadFromStream (*in);
-    }
+    OpenDocumentManager::Document* getPrevious();
+    OpenDocumentManager::Document* getNext();
 
-    bool save()
-    {
-        TemporaryFile temp (modDetector.getFile());
+    OpenDocumentManager::Document* getClosestPreviousDocOtherThan (OpenDocumentManager::Document* oneToAvoid) const;
 
-        {
-            FileOutputStream fo (temp.getFile());
+    void restoreFromXML (Project& project, const XmlElement& xml);
+    XmlElement* createXML() const;
 
-            if (! (fo.openedOk() && codeDoc.writeToStream (fo)))
-                return false;
-        }
+private:
+    void documentAboutToClose (OpenDocumentManager::Document*);
 
-        if (! temp.overwriteTargetFileWithTemporary())
-            return false;
-
-        codeDoc.setSavePoint();
-        modDetector.updateHash();
-        return true;
-    }
-
-    Component* createEditor();
-    Component* createViewer()       { return createEditor(); }
-
-protected:
-    FileModificationDetector modDetector;
-    CodeDocument codeDoc;
-    Project* project;
+    Array <OpenDocumentManager::Document*> previousDocs, nextDocs;
 };
+
 
 #endif   // __JUCER_OPENDOCUMENTMANAGER_JUCEHEADER__

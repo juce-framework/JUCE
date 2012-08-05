@@ -127,7 +127,7 @@ public:
 
         g.setColour (Colours::black);
         g.setFont (14.0f);
-        g.drawFittedText (message, 10, 0, getWidth() - 20, getHeight(), Justification::centred, 4);
+        g.drawFittedText (message, getLocalBounds().reduced (10, 0), Justification::centred, 4);
     }
 
     //==============================================================================

@@ -23,13 +23,8 @@
   ==============================================================================
 */
 
-StretchableObjectResizer::StretchableObjectResizer()
-{
-}
-
-StretchableObjectResizer::~StretchableObjectResizer()
-{
-}
+StretchableObjectResizer::StretchableObjectResizer() {}
+StretchableObjectResizer::~StretchableObjectResizer() {}
 
 void StretchableObjectResizer::addItem (const double size,
                                         const double minSize, const double maxSize,
@@ -37,19 +32,20 @@ void StretchableObjectResizer::addItem (const double size,
 {
     // the order must be >= 0 but less than the maximum integer value.
     jassert (order >= 0 && order < std::numeric_limits<int>::max());
+    jassert (maxSize >= minSize);
 
-    Item* const item = new Item();
-    item->size = size;
-    item->minSize = minSize;
-    item->maxSize = maxSize;
-    item->order = order;
+    Item item;
+    item.size = size;
+    item.minSize = minSize;
+    item.maxSize = maxSize;
+    item.order = order;
     items.add (item);
 }
 
 double StretchableObjectResizer::getItemSize (const int index) const noexcept
 {
-    const Item* const it = items [index];
-    return it != nullptr ? it->size : 0;
+    return isPositiveAndBelow (index, items.size()) ? items.getReference (index).size
+                                                    : 0.0;
 }
 
 void StretchableObjectResizer::resizeToFit (const double targetSize)
@@ -66,19 +62,19 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
 
         for (int i = 0; i < items.size(); ++i)
         {
-            const Item* const it = items.getUnchecked(i);
-            currentSize += it->size;
+            const Item& it = items.getReference(i);
+            currentSize += it.size;
 
-            if (it->order <= order)
+            if (it.order <= order)
             {
-                minSize += it->minSize;
-                maxSize += it->maxSize;
+                minSize += it.minSize;
+                maxSize += it.maxSize;
             }
             else
             {
-                minSize += it->size;
-                maxSize += it->size;
-                nextHighestOrder = jmin (nextHighestOrder, it->order);
+                minSize += it.size;
+                maxSize += it.size;
+                nextHighestOrder = jmin (nextHighestOrder, it.order);
             }
         }
 
@@ -92,10 +88,10 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
 
             for (int i = 0; i < items.size(); ++i)
             {
-                Item* const it = items.getUnchecked(i);
+                Item& it = items.getReference(i);
 
-                if (it->order <= order)
-                    it->size = jmin (it->maxSize, it->size + (it->maxSize - it->size) * scale);
+                if (it.order <= order)
+                    it.size = jlimit (it.minSize, it.maxSize, it.size + (it.maxSize - it.size) * scale);
             }
         }
         else
@@ -106,10 +102,10 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
 
             for (int i = 0; i < items.size(); ++i)
             {
-                Item* const it = items.getUnchecked(i);
+                Item& it = items.getReference(i);
 
-                if (it->order <= order)
-                    it->size = jmax (it->minSize, it->minSize + (it->size - it->minSize) * scale);
+                if (it.order <= order)
+                    it.size = jmax (it.minSize, it.minSize + (it.size - it.minSize) * scale);
             }
         }
 

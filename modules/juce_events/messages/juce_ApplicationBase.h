@@ -127,6 +127,16 @@ public:
     */
     virtual void systemRequestedQuit() = 0;
 
+    /** This method is called when the application is being put into background mode
+        by the operating system.
+    */
+    virtual void suspended() = 0;
+
+    /** This method is called when the application is being woken from background mode
+        by the operating system.
+    */
+    virtual void resumed() = 0;
+
     /** If any unhandled exceptions make it through to the message dispatch loop, this
         callback will be triggered, in case you want to log them or do some other
         type of error-handling.

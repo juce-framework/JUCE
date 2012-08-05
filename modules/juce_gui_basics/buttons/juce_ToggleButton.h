@@ -42,20 +42,22 @@ class JUCE_API  ToggleButton  : public Button
 {
 public:
     //==============================================================================
+    /** Creates a ToggleButton. */
+    ToggleButton();
+
     /** Creates a ToggleButton.
 
         @param buttonText   the text to put in the button (the component's name is also
                             initially set to this string, but these can be changed later
                             using the setName() and setButtonText() methods)
     */
-    explicit ToggleButton (const String& buttonText = String::empty);
+    explicit ToggleButton (const String& buttonText);
 
     /** Destructor. */
     ~ToggleButton();
 
     //==============================================================================
     /** Resizes the button to fit neatly around its current text.
-
         The button's height won't be affected, only its width.
     */
     void changeWidthToFitText();
@@ -73,23 +75,14 @@ public:
         textColourId                    = 0x1006501   /**< The colour to use for the button's text. */
     };
 
-    //==============================================================================
-    struct Ids
-    {
-        static const Identifier tagType;
-    };
-
 protected:
+    //==============================================================================
     /** @internal */
-    void paintButton (Graphics& g,
-                      bool isMouseOverButton,
-                      bool isButtonDown);
-
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
     /** @internal */
     void colourChanged();
 
 private:
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToggleButton);
 };
 

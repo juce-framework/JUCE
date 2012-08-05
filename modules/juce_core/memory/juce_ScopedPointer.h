@@ -195,7 +195,7 @@ private:
           ScopedPointer<MyClass> m = new MyClass();  // Compile error: copy constructor is private.
 
        Even though the compiler would normally ignore the assignment here, it can't do so when the
-       copy constructor is private. It's very easy to fis though - just write it like this:
+       copy constructor is private. It's very easy to fix though - just write it like this:
 
           ScopedPointer<MyClass> m (new MyClass());  // Compiles OK
 

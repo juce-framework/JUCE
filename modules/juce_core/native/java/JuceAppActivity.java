@@ -72,6 +72,20 @@ public final class JuceAppActivity   extends Activity
     }
 
     @Override
+    protected final void onPause()
+    {
+        suspendApp();
+        super.onPause();
+    }
+
+    @Override
+    protected final void onResume()
+    {
+        super.onResume();
+        resumeApp();
+    }
+
+    @Override
     public void onConfigurationChanged (Configuration cfg)
     {
         super.onConfigurationChanged (cfg);
@@ -87,6 +101,8 @@ public final class JuceAppActivity   extends Activity
     //==============================================================================
     private native void launchApp (String appFile, String appDataDir);
     private native void quitApp();
+    private native void suspendApp();
+    private native void resumeApp();
     private native void setScreenSize (int screenWidth, int screenHeight);
 
     //==============================================================================

@@ -123,6 +123,34 @@ ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& projec
     return best.release();
 }
 
+bool ProjectExporter::canProjectBeLaunched (Project* project)
+{
+    if (project != nullptr)
+    {
+        const char* types[] =
+        {
+           #if JUCE_MAC
+            XCodeProjectExporter::getValueTreeTypeName (false),
+            XCodeProjectExporter::getValueTreeTypeName (true),
+           #elif JUCE_WINDOWS
+            MSVCProjectExporterVC2005::getValueTreeTypeName(),
+            MSVCProjectExporterVC2008::getValueTreeTypeName(),
+            MSVCProjectExporterVC2010::getValueTreeTypeName(),
+           #elif JUCE_LINUX
+            MakefileProjectExporter::getValueTreeTypeName(),
+           #endif
+
+            nullptr
+        };
+
+        for (const char** type = types; *type != nullptr; ++type)
+            if (project->getExporters().getChildWithName (*type).isValid())
+                return true;
+    }
+
+    return false;
+}
+
 //==============================================================================
 ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
     : xcodeIsBundle (false),
@@ -139,7 +167,6 @@ ProjectExporter::ProjectExporter (Project& project_, const ValueTree& settings_)
       projectFolder (project_.getFile().getParentDirectory()),
       modulesGroup (nullptr)
 {
-    groups.add (project.getMainGroup().createCopy());
 }
 
 ProjectExporter::~ProjectExporter()
@@ -264,12 +291,19 @@ String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildC
     return replacePreprocessorDefs (getAllPreprocessorDefs (config), sourceString);
 }
 
+void ProjectExporter::copyMainGroupFromProject()
+{
+    jassert (itemGroups.size() == 0);
+    itemGroups.add (project.getMainGroup().createCopy());
+}
+
 Project::Item& ProjectExporter::getModulesGroup()
 {
     if (modulesGroup == nullptr)
     {
-        groups.add (Project::Item::createGroup (project, "Juce Modules", "__modulesgroup__"));
-        modulesGroup = &(groups.getReference (groups.size() - 1));
+        jassert (itemGroups.size() > 0); // must call copyMainGroupFromProject before this.
+        itemGroups.add (Project::Item::createGroup (project, "Juce Modules", "__modulesgroup__"));
+        modulesGroup = &(itemGroups.getReference (itemGroups.size() - 1));
     }
 
     return *modulesGroup;

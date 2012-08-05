@@ -28,6 +28,7 @@ TooltipWindow::TooltipWindow (Component* const parent_,
     : Component ("tooltip"),
       millisecondsBeforeTipAppears (millisecondsBeforeTipAppears_),
       mouseClicks (0),
+      mouseWheelMoves (0),
       lastHideTime (0),
       lastComponentUnderMouse (nullptr),
       changedCompsSinceShown (true)
@@ -117,7 +118,7 @@ String TooltipWindow::getTipFor (Component* const c)
 {
     if (c != nullptr
          && Process::isForegroundProcess()
-         && ! Component::isMouseButtonDownAnywhere())
+         && ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
     {
         TooltipClient* const ttc = dynamic_cast <TooltipClient*> (c);
 
@@ -145,9 +146,12 @@ void TooltipWindow::timerCallback()
     lastComponentUnderMouse = newComp;
     lastTipUnderMouse = newTip;
 
-    const int clickCount = Desktop::getInstance().getMouseButtonClickCounter();
-    const bool mouseWasClicked = clickCount > mouseClicks;
+    Desktop& desktop = Desktop::getInstance();
+    const int clickCount = desktop.getMouseButtonClickCounter();
+    const int wheelCount = desktop.getMouseButtonClickCounter();
+    const bool mouseWasClicked = (clickCount > mouseClicks || wheelCount > mouseWheelMoves);
     mouseClicks = clickCount;
+    mouseWheelMoves = wheelCount;
 
     const Point<int> mousePos (Desktop::getMousePosition());
     const bool mouseMovedQuickly = mousePos.getDistanceFrom (lastMousePos) > 12;

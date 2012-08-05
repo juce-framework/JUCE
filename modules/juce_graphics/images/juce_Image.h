@@ -453,6 +453,8 @@ public:
     */
     NamedValueSet userData;
 
+    typedef ReferenceCountedObjectPtr<ImagePixelData> Ptr;
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImagePixelData);
 };
@@ -471,7 +473,7 @@ public:
     virtual ~ImageType();
 
     /** Creates a new image of this type, and the specified parameters. */
-    virtual ImagePixelData* create (Image::PixelFormat format, int width, int height, bool shouldClearImage) const = 0;
+    virtual ImagePixelData::Ptr create (Image::PixelFormat format, int width, int height, bool shouldClearImage) const = 0;
 
     /** Must return a unique number to identify this type. */
     virtual int getTypeID() const = 0;
@@ -494,7 +496,7 @@ public:
     SoftwareImageType();
     ~SoftwareImageType();
 
-    ImagePixelData* create (Image::PixelFormat, int width, int height, bool clearImage) const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
     int getTypeID() const;
 };
 
@@ -510,7 +512,7 @@ public:
     NativeImageType();
     ~NativeImageType();
 
-    ImagePixelData* create (Image::PixelFormat, int width, int height, bool clearImage) const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const;
     int getTypeID() const;
 };
 

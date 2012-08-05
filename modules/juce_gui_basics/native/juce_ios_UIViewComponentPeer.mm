@@ -81,10 +81,7 @@ class UIViewComponentPeer  : public ComponentPeer,
                              public FocusChangeListener
 {
 public:
-    UIViewComponentPeer (Component* const component,
-                         const int windowStyleFlags,
-                         UIView* viewToAttachTo);
-
+    UIViewComponentPeer (Component& comp, int windowStyleFlags, UIView* viewToAttachTo);
     ~UIViewComponentPeer();
 
     //==============================================================================
@@ -377,10 +374,8 @@ namespace juce
 {
 
 //==============================================================================
-UIViewComponentPeer::UIViewComponentPeer (Component* const component,
-                                          const int windowStyleFlags,
-                                          UIView* viewToAttachTo)
-    : ComponentPeer (component, windowStyleFlags),
+UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyleFlags, UIView* viewToAttachTo)
+    : ComponentPeer (comp, windowStyleFlags),
       window (nil),
       view (nil),
       controller (nil),
@@ -388,13 +383,13 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
       fullScreen (false),
       insideDrawRect (false)
 {
-    CGRect r = convertToCGRect (component->getLocalBounds());
+    CGRect r = convertToCGRect (component.getLocalBounds());
 
     view = [[JuceUIView alloc] initWithOwner: this withFrame: r];
 
     view.multipleTouchEnabled = YES;
-    view.hidden = ! component->isVisible();
-    view.opaque = component->isOpaque();
+    view.hidden = ! component.isVisible();
+    view.opaque = component.isOpaque();
     view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
 
     if (isSharedWindow)
@@ -407,17 +402,17 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
         controller = [[JuceUIViewController alloc] init];
         controller.view = view;
 
-        r = convertToCGRect (rotatedScreenPosToReal (component->getBounds()));
+        r = convertToCGRect (rotatedScreenPosToReal (component.getBounds()));
         r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
 
         window = [[JuceUIWindow alloc] init];
         window.frame = r;
-        window.opaque = component->isOpaque();
+        window.opaque = component.isOpaque();
         window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
 
         [((JuceUIWindow*) window) setOwner: this];
 
-        if (component->isAlwaysOnTop())
+        if (component.isAlwaysOnTop())
             window.windowLevel = UIWindowLevelAlert;
 
         [window addSubview: view];
@@ -426,7 +421,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
         window.hidden = view.hidden;
     }
 
-    setTitle (component->getName());
+    setTitle (component.getName());
 
     Desktop::getInstance().addFocusChangeListener (this);
 }
@@ -468,12 +463,12 @@ void UIViewComponentPeer::setTitle (const String& title)
 
 void UIViewComponentPeer::setPosition (int x, int y)
 {
-    setBounds (x, y, component->getWidth(), component->getHeight(), false);
+    setBounds (x, y, component.getWidth(), component.getHeight(), false);
 }
 
 void UIViewComponentPeer::setSize (int w, int h)
 {
-    setBounds (component->getX(), component->getY(), w, h, false);
+    setBounds (component.getX(), component.getY(), w, h, false);
 }
 
 void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNowFullScreen)
@@ -595,7 +590,7 @@ void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
         if (! r.isEmpty())
             setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
 
-        component->repaint();
+        component.repaint();
     }
 }
 
@@ -642,7 +637,7 @@ BOOL UIViewComponentPeer::shouldRotate (UIInterfaceOrientation interfaceOrientat
 void UIViewComponentPeer::displayRotated()
 {
     Desktop& desktop = Desktop::getInstance();
-    const Rectangle<int> oldArea (component->getBounds());
+    const Rectangle<int> oldArea (component.getBounds());
     const Rectangle<int> oldDesktop (desktop.getDisplays().getMainDisplay().userArea);
 
     const_cast <Desktop::Displays&> (desktop.getDisplays()).refresh();
@@ -672,8 +667,8 @@ void UIViewComponentPeer::displayRotated()
 
 bool UIViewComponentPeer::contains (const Point<int>& position, bool trueIfInAChildWindow) const
 {
-    if (! (isPositiveAndBelow (position.getX(), component->getWidth())
-            && isPositiveAndBelow (position.getY(), component->getHeight())))
+    if (! (isPositiveAndBelow (position.getX(), component.getWidth())
+            && isPositiveAndBelow (position.getY(), component.getHeight())))
         return false;
 
     UIView* v = [view hitTest: CGPointMake ((CGFloat) position.getX(), (CGFloat) position.getY())
@@ -703,7 +698,7 @@ void UIViewComponentPeer::toFront (bool makeActiveWindow)
     if (isSharedWindow)
         [[view superview] bringSubviewToFront: view];
 
-    if (window != nil && component->isVisible())
+    if (window != nil && component.isVisible())
         [window makeKeyAndVisible];
 }
 
@@ -876,7 +871,7 @@ void UIViewComponentPeer::globalFocusChanged (Component*)
     {
         Component* comp = dynamic_cast<Component*> (target);
 
-        Point<int> pos (component->getLocalPoint (comp, Point<int>()));
+        Point<int> pos (component.getLocalPoint (comp, Point<int>()));
         view->hiddenTextView.frame = CGRectMake (pos.getX(), pos.getY(), 0, 0);
 
         updateHiddenTextContent (target);
@@ -897,11 +892,11 @@ void UIViewComponentPeer::drawRect (CGRect r)
 
     CGContextRef cg = UIGraphicsGetCurrentContext();
 
-    if (! component->isOpaque())
+    if (! component.isOpaque())
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
     CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, view.bounds.size.height));
-    CoreGraphicsContext g (cg, view.bounds.size.height);
+    CoreGraphicsContext g (cg, view.bounds.size.height, [UIScreen mainScreen].scale);
 
     insideDrawRect = true;
     handlePaint (g);
@@ -978,7 +973,7 @@ void UIViewComponentPeer::performAnyPendingRepaintsNow()
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 {
-    return new UIViewComponentPeer (this, styleFlags, (UIView*) windowToAttachTo);
+    return new UIViewComponentPeer (*this, styleFlags, (UIView*) windowToAttachTo);
 }
 
 //==============================================================================

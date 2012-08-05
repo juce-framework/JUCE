@@ -83,8 +83,6 @@
             resource="0" file="Source/Application/jucer_DocumentEditorComponent.cpp"/>
       <FILE id="tyrTEq" name="jucer_DocumentEditorComponent.h" compile="0"
             resource="0" file="Source/Application/jucer_DocumentEditorComponent.h"/>
-      <FILE id="jGu5u7N" name="jucer_FilePreviewComponent.cpp" compile="1"
-            resource="0" file="Source/Application/jucer_FilePreviewComponent.cpp"/>
       <FILE id="C4MqR1U" name="jucer_FilePreviewComponent.h" compile="0"
             resource="0" file="Source/Application/jucer_FilePreviewComponent.h"/>
       <FILE id="qXOJtpg" name="jucer_Headers.h" compile="0" resource="0"
@@ -110,8 +108,6 @@
             file="Source/Project/jucer_ConfigPage.cpp"/>
       <FILE id="tlj7HT" name="jucer_ConfigPage.h" compile="0" resource="0"
             file="Source/Project/jucer_ConfigPage.h"/>
-      <FILE id="Wx7kXq7" name="jucer_GroupInformationComponent.cpp" compile="1"
-            resource="0" file="Source/Project/jucer_GroupInformationComponent.cpp"/>
       <FILE id="sQjHbVN" name="jucer_GroupInformationComponent.h" compile="0"
             resource="0" file="Source/Project/jucer_GroupInformationComponent.h"/>
       <FILE id="MJkOAX" name="jucer_Module.cpp" compile="1" resource="0"
@@ -179,6 +175,8 @@
             file="Source/Utility/jucer_FileHelpers.cpp"/>
       <FILE id="NeLXzRp" name="jucer_FileHelpers.h" compile="0" resource="0"
             file="Source/Utility/jucer_FileHelpers.h"/>
+      <FILE id="f6iMAs" name="jucer_Icons.cpp" compile="1" resource="0" file="Source/Utility/jucer_Icons.cpp"/>
+      <FILE id="EtL6vF" name="jucer_Icons.h" compile="0" resource="0" file="Source/Utility/jucer_Icons.h"/>
       <FILE id="4fxv0YC" name="jucer_JucerTreeViewBase.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_JucerTreeViewBase.cpp"/>
       <FILE id="F0vVVSX" name="jucer_JucerTreeViewBase.h" compile="0" resource="0"
@@ -209,7 +207,8 @@
             file="Source/BinaryData/AudioPluginXCodeScript.txt"/>
       <FILE id="mDywA9N" name="brushed_aluminium.png" compile="0" resource="1"
             file="Source/BinaryData/brushed_aluminium.png"/>
-      <FILE id="rVgowdy" name="juce_icon.png" compile="0" resource="1" file="Source/BinaryData/juce_icon.png"/>
+      <FILE id="YDUf3Y" name="dark_scheme.xml" compile="0" resource="1" file="Source/BinaryData/dark_scheme.xml"/>
+      <FILE id="rVgowdy" name="juce_icon.png" compile="0" resource="0" file="Source/BinaryData/juce_icon.png"/>
       <FILE id="8H7vztx" name="jucer_AudioPluginEditorTemplate.cpp" compile="0"
             resource="1" file="Source/BinaryData/jucer_AudioPluginEditorTemplate.cpp"/>
       <FILE id="908LsXi" name="jucer_AudioPluginEditorTemplate.h" compile="0"

@@ -405,8 +405,8 @@ private:
     {
         Array<RelativePath> files;
 
-        for (int i = 0; i < groups.size(); ++i)
-            findAllFilesToCompile (groups.getReference(i), files);
+        for (int i = 0; i < getAllGroups().size(); ++i)
+            findAllFilesToCompile (getAllGroups().getReference(i), files);
 
         MemoryOutputStream mo;
         writeAndroidMk (mo, files);
@@ -530,17 +530,6 @@ private:
 
         proj->createNewChildElement ("loadproperties")->setAttribute ("srcFile", "local.properties");
         proj->createNewChildElement ("loadproperties")->setAttribute ("srcFile", "project.properties");
-
-        XmlElement* path = proj->createNewChildElement ("path");
-        path->setAttribute ("id", "android.antlibs");
-        path->createNewChildElement ("pathelement")->setAttribute ("path", "${sdk.dir}/tools/lib/anttasks.jar");
-        path->createNewChildElement ("pathelement")->setAttribute ("path", "${sdk.dir}/tools/lib/sdklib.jar");
-        path->createNewChildElement ("pathelement")->setAttribute ("path", "${sdk.dir}/tools/lib/androidprefs.jar");
-
-        XmlElement* taskdef = proj->createNewChildElement ("taskdef");
-        taskdef->setAttribute ("name", "setup");
-        taskdef->setAttribute ("classname", "com.android.ant.SetupTask");
-        taskdef->setAttribute ("classpathref", "android.antlibs");
 
         {
             XmlElement* target = proj->createNewChildElement ("target");

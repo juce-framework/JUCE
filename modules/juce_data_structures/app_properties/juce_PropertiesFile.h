@@ -212,7 +212,7 @@ public:
 
     //==============================================================================
     /** Returns the file that's being used. */
-    File getFile() const                              { return file; }
+    const File& getFile() const noexcept            { return file; }
 
 
 protected:
@@ -230,6 +230,11 @@ private:
 
     void timerCallback();
     void initialise();
+    bool saveAsXml();
+    bool saveAsBinary();
+    bool loadAsXml();
+    bool loadAsBinary();
+    bool loadAsBinary (InputStream&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesFile);
 };

@@ -142,6 +142,7 @@ public:
    #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
     Array& operator= (Array&& other) noexcept
     {
+        const ScopedLockType lock (getLock());
         data = static_cast <ArrayAllocationBase<ElementType, TypeOfCriticalSectionToUse>&&> (other.data);
         numUsed = other.numUsed;
         other.numUsed = 0;
@@ -460,17 +461,17 @@ public:
         {
             const ScopedLockType lock (getLock());
             data.ensureAllocatedSize (numUsed + numberOfElements);
-            ElementType* insertPos;
+            ElementType* insertPos = data.elements;
 
             if (isPositiveAndBelow (indexToInsertAt, numUsed))
             {
-                insertPos = data.elements + indexToInsertAt;
+                insertPos += indexToInsertAt;
                 const int numberToMove = numUsed - indexToInsertAt;
                 memmove (insertPos + numberOfElements, insertPos, numberToMove * sizeof (ElementType));
             }
             else
             {
-                insertPos = data.elements + numUsed;
+                insertPos += numUsed;
             }
 
             numUsed += numberOfElements;
@@ -743,7 +744,7 @@ public:
         @param valueToRemove   the object to try to remove
         @see remove, removeRange
     */
-    void removeValue (ParameterType valueToRemove)
+    void removeFirstMatchingValue (ParameterType valueToRemove)
     {
         const ScopedLockType lock (getLock());
         ElementType* const e = data.elements;
@@ -756,6 +757,24 @@ public:
                 break;
             }
         }
+    }
+
+    /** Removes an item from the array.
+
+        This will remove the first occurrence of the given element from the array.
+        If the item isn't found, no action is taken.
+
+        @param valueToRemove   the object to try to remove
+        @see remove, removeRange
+    */
+    void removeAllInstancesOf (ParameterType valueToRemove)
+    {
+        const ScopedLockType lock (getLock());
+        ElementType* const e = data.elements;
+
+        for (int i = numUsed; --i >= 0;)
+            if (valueToRemove == e[i])
+                remove (i);
     }
 
     /** Removes a range of elements from the array.

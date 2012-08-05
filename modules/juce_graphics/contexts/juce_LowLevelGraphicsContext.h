@@ -69,6 +69,8 @@ public:
     virtual void addTransform (const AffineTransform& transform) = 0;
     virtual float getScaleFactor() = 0;
 
+    virtual float getTargetDeviceScaleFactor()    { return 1.0f; }
+
     virtual bool clipToRectangle (const Rectangle<int>& r) = 0;
     virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
     virtual void excludeClipRectangle (const Rectangle<int>& r) = 0;

@@ -104,20 +104,7 @@ void HyperlinkButton::paintButton (Graphics& g,
 
     g.setFont (getFontToUse());
 
-    g.drawText (getButtonText(),
-                2, 0, getWidth() - 2, getHeight(),
+    g.drawText (getButtonText(), getLocalBounds().reduced (1, 0),
                 justification.getOnlyHorizontalFlags() | Justification::verticallyCentred,
                 true);
-}
-
-const Identifier HyperlinkButton::Ids::tagType ("HYPERLINKBUTTON");
-const Identifier HyperlinkButton::Ids::text ("text");
-const Identifier HyperlinkButton::Ids::url ("url");
-
-void HyperlinkButton::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setButtonText (state [Ids::text].toString());
-    setURL (URL (state [Ids::url].toString()));
 }

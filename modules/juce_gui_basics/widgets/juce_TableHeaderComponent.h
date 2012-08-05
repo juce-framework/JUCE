@@ -407,6 +407,7 @@ private:
     OwnedArray <ColumnInfo> columns;
     Array <Listener*> listeners;
     ScopedPointer <Component> dragOverlayComp;
+    class DragOverlayComp;
 
     bool columnsChanged, columnsResized, sortChanged, menuActive, stretchToFit;
     int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;

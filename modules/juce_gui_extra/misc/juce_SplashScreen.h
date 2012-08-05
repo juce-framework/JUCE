@@ -53,7 +53,7 @@
     @endcode
 */
 class JUCE_API  SplashScreen  : public Component,
-                                public Timer,
+                                private Timer,
                                 private DeletedAtShutdown
 {
 public:
@@ -129,15 +129,15 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void timerCallback();
+    void paint (Graphics&);
 
 private:
     //==============================================================================
     Image backgroundImage;
     Time earliestTimeToDelete;
     int originalClickCounter;
+
+    void timerCallback();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SplashScreen);
 };

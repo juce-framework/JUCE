@@ -101,7 +101,8 @@ protected:
     //==============================================================================
     void treeChildrenChanged (const ValueTree& parentTree);
     virtual ProjectTreeViewBase* createSubItem (const Project::Item& node) = 0;
-    const Drawable* getIcon() const         { return item.getIcon(); }
+
+    Icon getIcon() const { return item.getIcon().withContrastingColourTo (getBackgroundColour()); }
 
     //==============================================================================
     void triggerAsyncRename (const Project::Item& itemToRename);

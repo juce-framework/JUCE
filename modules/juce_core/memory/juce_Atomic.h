@@ -181,7 +181,7 @@ private:
 /*
     The following code is in the header so that the atomics can be inlined where possible...
 */
-#if JUCE_IOS || (JUCE_MAC && (JUCE_PPC || defined (__clang__) || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
+#if JUCE_IOS || (JUCE_MAC && (JUCE_PPC || JUCE_CLANG || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
   #define JUCE_ATOMICS_MAC 1        // Older OSX builds using gcc4.1 or earlier
 
   #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5

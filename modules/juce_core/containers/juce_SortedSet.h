@@ -264,10 +264,16 @@ public:
     //==============================================================================
     /** Adds a new element to the set, (as long as it's not already in there).
 
-        @param newElement       the new object to add to the set
+        Note that if a matching element already exists, the new value will be assigned
+        to the existing one using operator=, so that if there are any differences between
+        the objects which were not recognised by the object's operator==, then the
+        set will always contain a copy of the most recently added one.
+
+        @param newElement   the new object to add to the set
+        @returns            true if the value was added, or false if it already existed
         @see set, insert, addIfNotAlreadyThere, addSorted, addSet, addArray
     */
-    void add (const ElementType& newElement) noexcept
+    bool add (const ElementType& newElement) noexcept
     {
         const ScopedLockType lock (getLock());
 
@@ -276,8 +282,12 @@ public:
 
         while (s < e)
         {
-            if (newElement == data.getReference (s))
-                return;
+            ElementType& elem = data.getReference (s);
+            if (newElement == elem)
+            {
+                elem = newElement; // force an update in case operator== permits differences.
+                return false;
+            }
 
             const int halfway = (s + e) / 2;
             const bool isBeforeHalfway = (newElement < data.getReference (halfway));
@@ -296,6 +306,7 @@ public:
         }
 
         data.insert (s, newElement);
+        return true;
     }
 
     /** Adds elements from an array to this set.

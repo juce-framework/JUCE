@@ -23,11 +23,11 @@
   ==============================================================================
 */
 
-class TextPropLabel  : public Label
+class TextPropertyComponent::LabelComp  : public Label
 {
 public:
-    TextPropLabel (TextPropertyComponent& owner_,
-                   const int maxChars_, const bool isMultiline_)
+    LabelComp (TextPropertyComponent& owner_,
+               const int maxChars_, const bool isMultiline_)
         : Label (String::empty, String::empty),
           owner (owner_),
           maxChars (maxChars_),
@@ -35,8 +35,9 @@ public:
     {
         setEditable (true, true, false);
 
-        setColour (backgroundColourId, findColour (ComboBox::backgroundColourId));
-        setColour (outlineColourId, findColour (ComboBox::outlineColourId));
+        setColour (backgroundColourId, owner.findColour (TextPropertyComponent::backgroundColourId));
+        setColour (outlineColourId,    owner.findColour (TextPropertyComponent::outlineColourId));
+        setColour (textColourId,       owner.findColour (TextPropertyComponent::textColourId));
     }
 
     TextEditor* createEditorComponent()
@@ -100,7 +101,7 @@ String TextPropertyComponent::getText() const
 
 void TextPropertyComponent::createEditor (const int maxNumChars, const bool isMultiLine)
 {
-    addAndMakeVisible (textEditor = new TextPropLabel (*this, maxNumChars, isMultiLine));
+    addAndMakeVisible (textEditor = new LabelComp (*this, maxNumChars, isMultiLine));
 
     if (isMultiLine)
     {

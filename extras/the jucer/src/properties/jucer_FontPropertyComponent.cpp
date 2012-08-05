@@ -28,7 +28,7 @@
 
 
 //==============================================================================
-class FontList  : public DeletedAtShutdown
+class FontList  : private DeletedAtShutdown
 {
 public:
     FontList()

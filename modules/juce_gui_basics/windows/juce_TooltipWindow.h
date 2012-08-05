@@ -98,7 +98,7 @@ private:
     //==============================================================================
     int millisecondsBeforeTipAppears;
     Point<int> lastMousePos;
-    int mouseClicks;
+    int mouseClicks, mouseWheelMoves;
     unsigned int lastCompChangeTime, lastHideTime;
     Component* lastComponentUnderMouse;
     bool changedCompsSinceShown;

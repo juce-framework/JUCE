@@ -29,21 +29,71 @@
 #include "../Project/jucer_Project.h"
 #include "../Application/jucer_DocumentEditorComponent.h"
 
+
+//==============================================================================
+class SourceCodeDocument  : public OpenDocumentManager::Document
+{
+public:
+    SourceCodeDocument (Project*, const File&);
+
+    bool loadedOk() const                           { return true; }
+    bool isForFile (const File& file) const         { return getFile() == file; }
+    bool isForNode (const ValueTree& node) const    { return false; }
+    bool refersToProject (Project& p) const         { return project == &p; }
+    Project* getProject() const                     { return project; }
+    String getName() const                          { return getFile().getFileName(); }
+    String getType() const                          { return getFile().getFileExtension() + " file"; }
+    File getFile() const                            { return modDetector.getFile(); }
+    bool needsSaving() const                        { return codeDoc != nullptr && codeDoc->hasChangedSinceSavePoint(); }
+    bool hasFileBeenModifiedExternally()            { return modDetector.hasBeenModified(); }
+    void fileHasBeenRenamed (const File& newFile)   { modDetector.fileHasBeenRenamed (newFile); }
+    String getState() const                         { return lastState != nullptr ? lastState->toString() : String::empty; }
+    void restoreState (const String& state)         { lastState = new CodeEditorComponent::State (state); }
+
+    void reloadFromFile();
+    bool save();
+
+    Component* createEditor();
+    Component* createViewer()       { return createEditor(); }
+
+    void updateLastState (CodeEditorComponent& editor);
+    void applyLastState (CodeEditorComponent& editor) const;
+
+    CodeDocument& getCodeDocument();
+
+    //==============================================================================
+    struct Type  : public OpenDocumentManager::DocumentType
+    {
+        bool canOpenFile (const File& file)                     { return file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;inc;tcc;xml;plist;rtf;html;htm;php;py;rb;cs"); }
+        Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }
+    };
+
+protected:
+    FileModificationDetector modDetector;
+    ScopedPointer<CodeDocument> codeDoc;
+    Project* project;
+
+    ScopedPointer<CodeEditorComponent::State> lastState;
+
+    void reloadInternal();
+};
+
 //==============================================================================
 class SourceCodeEditor  : public DocumentEditorComponent,
                           private ValueTree::Listener
 {
 public:
-    SourceCodeEditor (OpenDocumentManager::Document* document, CodeDocument& codeDocument);
     SourceCodeEditor (OpenDocumentManager::Document* document);
     ~SourceCodeEditor();
 
     void createEditor (CodeDocument& codeDocument);
     void setEditor (CodeEditorComponent*);
 
-private:
+    void highlightLine (int lineNum, int characterIndex);
+
     ScopedPointer<CodeEditorComponent> editor;
 
+private:
     void resized();
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&);
@@ -63,97 +113,13 @@ private:
 class CppCodeEditorComponent  : public CodeEditorComponent
 {
 public:
-    CppCodeEditorComponent (CodeDocument& codeDocument)
-        : CodeEditorComponent (codeDocument, getCppTokeniser())
-    {
-    }
+    CppCodeEditorComponent (CodeDocument& codeDocument);
 
-    void handleReturnKey()
-    {
-        CodeEditorComponent::handleReturnKey();
-
-        const CodeDocument::Position pos (getCaretPos());
-
-        if (pos.getLineNumber() > 0 && pos.getLineText().trim().isEmpty())
-        {
-            String indent (getIndentForCurrentBlock (pos));
-            const String previousLine (pos.movedByLines (-1).getLineText());
-            const String trimmedPreviousLine (previousLine.trim());
-            const String leadingWhitespace (getLeadingWhitespace (previousLine));
-
-            insertTextAtCaret (leadingWhitespace);
-
-            if (trimmedPreviousLine.endsWithChar ('{')
-                 || ((trimmedPreviousLine.startsWith ("if ")
-                      || trimmedPreviousLine.startsWith ("for ")
-                      || trimmedPreviousLine.startsWith ("while "))
-                      && trimmedPreviousLine.endsWithChar (')')))
-                insertTabAtCaret();
-        }
-    }
-
-    void insertTextAtCaret (const String& newText)
-    {
-        if (getHighlightedRegion().isEmpty())
-        {
-            const CodeDocument::Position pos (getCaretPos());
-
-            if ((newText == "{" || newText == "}")
-                 && pos.getLineNumber() > 0
-                 && pos.getLineText().trim().isEmpty())
-            {
-                moveCaretToStartOfLine (true);
-                CodeEditorComponent::insertTextAtCaret (getIndentForCurrentBlock (pos));
-
-                if (newText == "{")
-                    insertTabAtCaret();
-            }
-        }
-
-        CodeEditorComponent::insertTextAtCaret (newText);
-    }
+    void handleReturnKey();
+    void insertTextAtCaret (const String& newText);
 
 private:
-    static CPlusPlusCodeTokeniser* getCppTokeniser()
-    {
-        static CPlusPlusCodeTokeniser cppTokeniser;
-        return &cppTokeniser;
-    }
-
-    static String getLeadingWhitespace (String line)
-    {
-        line = line.removeCharacters ("\r\n");
-        const String::CharPointerType endOfLeadingWS (line.getCharPointer().findEndOfWhitespace());
-        return String (line.getCharPointer(), endOfLeadingWS);
-    }
-
-    static String getIndentForCurrentBlock (CodeDocument::Position pos)
-    {
-        int braceCount = 0;
-
-        while (pos.getLineNumber() > 0)
-        {
-            pos = pos.movedByLines (-1);
-
-            const String line (pos.getLineText());
-            const String trimmedLine (line.trimStart());
-
-            StringArray tokens;
-            tokens.addTokens (trimmedLine, true);
-
-            for (int i = tokens.size(); --i >= 0;)
-            {
-                if (tokens[i] == "}")
-                    ++braceCount;
-
-                if (tokens[i] == "{")
-                    if (--braceCount < 0)
-                        return getLeadingWhitespace (line);
-            }
-        }
-
-        return String::empty;
-    }
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppCodeEditorComponent);
 };
 
 

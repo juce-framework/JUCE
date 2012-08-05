@@ -87,17 +87,17 @@ void FileListComponent::changeListenerCallback (ChangeBroadcaster*)
 }
 
 //==============================================================================
-class FileListItemComponent  : public Component,
-                               public TimeSliceClient,
-                               public AsyncUpdater
+class FileListComponent::ItemComponent  : public Component,
+                                          private TimeSliceClient,
+                                          private AsyncUpdater
 {
 public:
-    FileListItemComponent (FileListComponent& owner_, TimeSliceThread& thread_)
+    ItemComponent (FileListComponent& owner_, TimeSliceThread& thread_)
         : owner (owner_), thread (thread_), index (0), highlighted (false)
     {
     }
 
-    ~FileListItemComponent()
+    ~ItemComponent()
     {
         thread.removeTimeSliceClient (this);
     }
@@ -213,7 +213,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListItemComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemComponent);
 };
 
 //==============================================================================
@@ -228,12 +228,12 @@ void FileListComponent::paintListBoxItem (int, Graphics&, int, int, bool)
 
 Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, Component* existingComponentToUpdate)
 {
-    jassert (existingComponentToUpdate == nullptr || dynamic_cast <FileListItemComponent*> (existingComponentToUpdate) != nullptr);
+    jassert (existingComponentToUpdate == nullptr || dynamic_cast <ItemComponent*> (existingComponentToUpdate) != nullptr);
 
-    FileListItemComponent* comp = static_cast <FileListItemComponent*> (existingComponentToUpdate);
+    ItemComponent* comp = static_cast <ItemComponent*> (existingComponentToUpdate);
 
     if (comp == nullptr)
-        comp = new FileListItemComponent (*this, fileList.getTimeSliceThread());
+        comp = new ItemComponent (*this, fileList.getTimeSliceThread());
 
     DirectoryContentsList::FileInfo fileInfo;
     comp->update (fileList.getDirectory(),

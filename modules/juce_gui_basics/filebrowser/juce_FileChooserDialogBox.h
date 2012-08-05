@@ -68,8 +68,8 @@
     @see FileChooser
 */
 class JUCE_API  FileChooserDialogBox : public ResizableWindow,
-                                       public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
-                                       public FileBrowserListener
+                                       private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
+                                       private FileBrowserListener
 {
 public:
     //==============================================================================
@@ -121,7 +121,7 @@ public:
     /** Sets the size of this dialog box to its default and positions it either in the
         centre of the screen, or centred around a component that is provided.
     */
-    void centreWithDefaultSize (Component* componentToCentreAround = 0);
+    void centreWithDefaultSize (Component* componentToCentreAround = nullptr);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the box.
@@ -136,24 +136,17 @@ public:
         titleTextColourId      = 0x1000850, /**< The colour to use to draw the box's title. */
     };
 
-    //==============================================================================
-    /** @internal */
-    void buttonClicked (Button*);
-    /** @internal */
-    void closeButtonPressed();
-    /** @internal */
-    void selectionChanged();
-    /** @internal */
-    void fileClicked (const File&, const MouseEvent&);
-    /** @internal */
-    void fileDoubleClicked (const File&);
-    /** @internal */
-    void browserRootChanged (const File&);
-
 private:
     class ContentComponent;
     ContentComponent* content;
     const bool warnAboutOverwritingExistingFiles;
+
+    void buttonClicked (Button*);
+    void closeButtonPressed();
+    void selectionChanged();
+    void fileClicked (const File&, const MouseEvent&);
+    void fileDoubleClicked (const File&);
+    void browserRootChanged (const File&);
 
     void okButtonPressed();
     void createNewFolder();

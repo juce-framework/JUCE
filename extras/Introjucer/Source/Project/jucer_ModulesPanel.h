@@ -46,21 +46,17 @@ public:
         moduleList.rescan (ModuleList::getLocalModulesFolder (&project));
 
         addAndMakeVisible (&modulesLocation);
-        modulesLocation.setBounds ("150, 3, parent.width - 180, 28");
         modulesLocation.addListener (this);
 
         modulesLabel.attachToComponent (&modulesLocation, true);
 
         addAndMakeVisible (&updateModulesButton);
-        updateModulesButton.setBounds ("parent.width - 175, 3, parent.width - 4, 28");
         updateModulesButton.addListener (this);
 
         moduleListBox.setOwner (this);
         addAndMakeVisible (&moduleListBox);
-        moduleListBox.setBounds ("4, 31, parent.width / 2 - 4, parent.height - 32");
 
         addAndMakeVisible (&copyingMessage);
-        copyingMessage.setBounds ("4, parent.height - 30, parent.width - 4, parent.height - 1");
         copyingMessage.refresh();
     }
 
@@ -104,12 +100,10 @@ public:
         settings = nullptr;
 
         if (selectedModule != nullptr)
-        {
             addAndMakeVisible (settings = new ModuleSettingsPanel (project, moduleList, selectedModule->uid));
-            settings->setBounds ("parent.width / 2 + 1, 31, parent.width - 3, parent.height - 32");
-        }
 
         copyingMessage.refresh();
+        resized();
     }
 
     void refresh()
@@ -125,6 +119,18 @@ public:
     void paint (Graphics& g) // (overridden to avoid drawing the name)
     {
         getLookAndFeel().drawPropertyComponentBackground (g, getWidth(), getHeight(), *this);
+    }
+
+    void resized()
+    {
+        modulesLocation.setBounds (150, 3, getWidth() - 180 - 150, 25);
+        updateModulesButton.setBounds (modulesLocation.getRight() + 6, 3, getWidth() - modulesLocation.getRight() - 12, 25);
+        moduleListBox.setBounds (5, 34, getWidth() / 3, getHeight() - 72);
+        copyingMessage.setBounds (5, moduleListBox.getBottom() + 2, getWidth() - 10, getHeight() - moduleListBox.getBottom() - 4);
+
+        if (settings != nullptr)
+            settings->setBounds (moduleListBox.getRight() + 5, moduleListBox.getY(),
+                                 getWidth() - moduleListBox.getRight() - 9, moduleListBox.getHeight());
     }
 
     //==============================================================================
@@ -177,10 +183,7 @@ public:
                     g.setColour (Colours::black);
 
                 g.setFont (Font (height * 0.7f, Font::bold));
-                g.drawFittedText (m->uid, height, 0, 200, height, Justification::centredLeft, 1);
-
-                g.setFont (Font (height * 0.55f, Font::italic));
-                g.drawText (m->name, height + 200, 0, width - height - 200, height, Justification::centredLeft, true);
+                g.drawFittedText (m->uid, height, 0, width - height, height, Justification::centredLeft, 1);
             }
         }
 
@@ -346,7 +349,6 @@ public:
                 addAndMakeVisible (&fixButton);
                 fixButton.setColour (TextButton::buttonColourId, Colours::red);
                 fixButton.setColour (TextButton::textColourOffId, Colours::white);
-                fixButton.setBounds ("right - 160, parent.height - 26, parent.width - 8, top + 22");
                 fixButton.addListener (this);
             }
 
@@ -378,6 +380,11 @@ public:
                     mp->refresh();
             }
 
+            void resized()
+            {
+                fixButton.setBounds (getWidth() - 168, getHeight() - 26, 160, 22);
+            }
+
         private:
             Project& project;
             ModuleList& moduleList;
@@ -400,7 +407,6 @@ public:
               copyModeButton ("Set Copying Mode...")
         {
             addAndMakeVisible (&copyModeButton);
-            copyModeButton.setBounds ("4, parent.height / 2 - 10, 160, parent.height / 2 + 10");
             copyModeButton.addListener (this);
 
             startTimer (1500);
@@ -413,6 +419,11 @@ public:
             g.drawFittedText (getName(), copyModeButton.getRight() + 10, 0,
                               getWidth() - copyModeButton.getRight() - 16, getHeight(),
                               Justification::centredRight, 4);
+        }
+
+        void resized()
+        {
+            copyModeButton.setBounds (0, getHeight() / 2 - 10, 160, 20);
         }
 
         void refresh()
@@ -474,7 +485,12 @@ public:
         void setCopyModeForAllModules (bool copyEnabled)
         {
             for (int i = list.modules.size(); --i >= 0;)
-                project.shouldCopyModuleFilesLocally (list.modules.getUnchecked(i)->uid) = copyEnabled;
+            {
+                const String moduleID (list.modules.getUnchecked(i)->uid);
+
+                if (project.isModuleEnabled (moduleID))
+                    project.shouldCopyModuleFilesLocally (moduleID) = copyEnabled;
+            }
 
             refresh();
         }

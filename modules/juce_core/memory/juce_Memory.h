@@ -68,6 +68,31 @@ template <class Type>
 inline Type* createCopyIfNotNull (Type* pointer)     { return pointer != nullptr ? new Type (*pointer) : nullptr; }
 
 //==============================================================================
+#if JUCE_MAC || JUCE_IOS || DOXYGEN
+
+ /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object using RAII.
+     You should use the JUCE_AUTORELEASEPOOL macro to create a local auto-release pool on the stack.
+ */
+ class JUCE_API  ScopedAutoReleasePool
+ {
+ public:
+     ScopedAutoReleasePool();
+     ~ScopedAutoReleasePool();
+
+ private:
+     void* pool;
+
+     JUCE_DECLARE_NON_COPYABLE (ScopedAutoReleasePool);
+ };
+
+ /** A macro that can be used to easily declare a local ScopedAutoReleasePool object for RAII-based obj-C autoreleasing. */
+ #define JUCE_AUTORELEASEPOOL  const juce::ScopedAutoReleasePool JUCE_JOIN_MACRO (autoReleasePool_, __LINE__);
+
+#else
+ #define JUCE_AUTORELEASEPOOL
+#endif
+
+//==============================================================================
 /* In a Windows DLL build, we'll expose some malloc/free functions that live inside the DLL, and use these for
    allocating all the objects - that way all juce objects in the DLL and in the host will live in the same heap,
    avoiding problems when an object is created in one module and passed across to another where it is deleted.

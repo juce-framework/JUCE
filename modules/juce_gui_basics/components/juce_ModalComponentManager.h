@@ -38,8 +38,8 @@
     @see Component::enterModalState, Component::exitModalState, Component::isCurrentlyModal,
          Component::getCurrentlyModalComponent, Component::isCurrentlyBlockedByAnotherModalComponent
 */
-class JUCE_API  ModalComponentManager   : public AsyncUpdater,
-                                          public DeletedAtShutdown
+class JUCE_API  ModalComponentManager   : private AsyncUpdater,
+                                          private DeletedAtShutdown
 {
 public:
     //==============================================================================

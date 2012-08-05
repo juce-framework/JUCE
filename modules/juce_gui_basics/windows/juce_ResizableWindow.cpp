@@ -501,7 +501,7 @@ void ResizableWindow::updateLastPos()
 void ResizableWindow::parentSizeChanged()
 {
     if (isFullScreen() && getParentComponent() != nullptr)
-        setBounds (0, 0, getParentWidth(), getParentHeight());
+        setBounds (getParentComponent()->getLocalBounds());
 }
 
 //==============================================================================

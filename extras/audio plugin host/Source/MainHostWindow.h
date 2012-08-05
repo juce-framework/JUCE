@@ -88,6 +88,7 @@ public:
 private:
     //==============================================================================
     AudioDeviceManager deviceManager;
+    AudioPluginFormatManager formatManager;
 
     OwnedArray <PluginDescription> internalTypes;
     KnownPluginList knownPluginList;

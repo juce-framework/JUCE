@@ -45,7 +45,7 @@ public:
 
     ~IPhoneAudioIODevice()
     {
-        getSessionHolder().activeDevices.removeValue (this);
+        getSessionHolder().activeDevices.removeFirstMatchingValue (this);
         close();
     }
 

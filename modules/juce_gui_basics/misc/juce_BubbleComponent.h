@@ -108,8 +108,7 @@ public:
         on where there's the most space, honouring any restrictions that were set
         with setAllowedPlacement().
     */
-    void setPosition (int arrowTipX,
-                      int arrowTipY);
+    void setPosition (const Point<int>& arrowTipPosition);
 
     /** Moves and resizes the bubble to point at a given rectangle.
 
@@ -124,6 +123,19 @@ public:
     */
     void setPosition (const Rectangle<int>& rectangleToPointTo);
 
+    //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the bubble component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId            = 0x1000af0, /**< A background colour to fill the bubble with. */
+        outlineColourId               = 0x1000af1  /**< The colour to use for an outline around the bubble. */
+    };
 
 protected:
     //==============================================================================
@@ -145,8 +157,8 @@ public:
 
 private:
     Rectangle<int> content;
-    int side, allowablePlacements;
-    float arrowTipX, arrowTipY;
+    Point<int> arrowTip;
+    int allowablePlacements;
     DropShadowEffect shadow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleComponent);

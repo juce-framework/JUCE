@@ -275,8 +275,6 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    void buttonClicked (Button*);
-    /** @internal */
     void mouseDown (const MouseEvent&);
     /** @internal */
     bool isInterestedInDragSource (const SourceDetails&);
@@ -290,6 +288,8 @@ public:
     void updateAllItemPositions (bool animate);
     /** @internal */
     static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);
+    /** @internal */
+    static const char* const toolbarDragDescriptor;
 
 private:
     //==============================================================================
@@ -299,10 +299,10 @@ private:
     class MissingItemsComponent;
     friend class MissingItemsComponent;
     OwnedArray <ToolbarItemComponent> items;
+    class Spacer;
+    class CustomisationDialog;
 
-    friend class ItemDragAndDropOverlayComponent;
-    static const char* const toolbarDragDescriptor;
-
+    void buttonClicked (Button*);
     void addItemInternal (ToolbarItemFactory& factory, int itemId, int insertIndex);
 
     ToolbarItemComponent* getNextActiveComponent (int index, int delta) const;

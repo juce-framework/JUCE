@@ -526,6 +526,17 @@ Result FileOutputStream::truncate()
 }
 
 //==============================================================================
+String SystemStats::getEnvironmentVariable (const String& name, const String& defaultValue)
+{
+    const char* s = ::getenv (name.toUTF8());
+
+    if (s != nullptr)
+        return String::fromUTF8 (s);
+
+    return defaultValue;
+}
+
+//==============================================================================
 MemoryMappedFile::MemoryMappedFile (const File& file, MemoryMappedFile::AccessMode mode)
     : address (nullptr),
       length (0),

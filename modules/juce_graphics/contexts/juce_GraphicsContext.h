@@ -184,6 +184,20 @@ public:
                    const Justification& justificationType,
                    bool useEllipsesIfTooBig) const;
 
+    /** Draws a line of text within a specified rectangle.
+
+        The text will be positioned within the rectangle based on the justification
+        flags passed-in. If the string is too long to fit inside the rectangle, it will
+        either be truncated or will have ellipsis added to its end (if the useEllipsesIfTooBig
+        flag is true).
+
+        @see drawSingleLineText, drawFittedText, drawMultiLineText, GlyphArrangement::addJustifiedText
+    */
+    void drawText (const String& text,
+                   const Rectangle<int>& area,
+                   const Justification& justificationType,
+                   bool useEllipsesIfTooBig) const;
+
     /** Tries to draw a text string inside a given space.
 
         This does its best to make the given text readable within the specified rectangle,
@@ -205,6 +219,31 @@ public:
     */
     void drawFittedText (const String& text,
                          int x, int y, int width, int height,
+                         const Justification& justificationFlags,
+                         int maximumNumberOfLines,
+                         float minimumHorizontalScale = 0.7f) const;
+
+    /** Tries to draw a text string inside a given space.
+
+        This does its best to make the given text readable within the specified rectangle,
+        so it useful for labelling things.
+
+        If the text is too big, it'll be squashed horizontally or broken over multiple lines
+        if the maximumLinesToUse value allows this. If the text just won't fit into the space,
+        it'll cram as much as possible in there, and put some ellipsis at the end to show that
+        it's been truncated.
+
+        A Justification parameter lets you specify how the text is laid out within the rectangle,
+        both horizontally and vertically.
+
+        The minimumHorizontalScale parameter specifies how much the text can be squashed horizontally
+        to try to squeeze it into the space. If you don't want any horizontal scaling to occur, you
+        can set this value to 1.0f.
+
+        @see GlyphArrangement::addFittedText
+    */
+    void drawFittedText (const String& text,
+                         const Rectangle<int>& area,
                          const Justification& justificationFlags,
                          int maximumNumberOfLines,
                          float minimumHorizontalScale = 0.7f) const;
@@ -305,39 +344,21 @@ public:
     void drawRoundedRectangle (const Rectangle<float>& rectangle,
                                float cornerSize, float lineThickness) const;
 
-    /** Draws a 3D raised (or indented) bevel using two colours.
-
-        The bevel is drawn inside the given rectangle, and greater bevel thicknesses
-        extend inwards.
-
-        The top-left colour is used for the top- and left-hand edges of the
-        bevel; the bottom-right colour is used for the bottom- and right-hand
-        edges.
-
-        If useGradient is true, then the bevel fades out to make it look more curved
-        and less angular. If sharpEdgeOnOutside is true, the outside of the bevel is
-        sharp, and it fades towards the centre; if sharpEdgeOnOutside is false, then
-        the centre edges are sharp and it fades towards the outside.
-    */
-    void drawBevel (int x, int y, int width, int height,
-                    int bevelThickness,
-                    const Colour& topLeftColour = Colours::white,
-                    const Colour& bottomRightColour = Colours::black,
-                    bool useGradient = true,
-                    bool sharpEdgeOnOutside = true) const;
-
-    /** Draws a pixel using the current colour or brush.
-    */
+    /** Draws a 1x1 pixel using the current colour or brush. */
     void setPixel (int x, int y) const;
 
     //==============================================================================
     /** Fills an ellipse with the current colour or brush.
-
         The ellipse is drawn to fit inside the given rectangle.
-
         @see drawEllipse, Path::addEllipse
     */
     void fillEllipse (float x, float y, float width, float height) const;
+
+    /** Fills an ellipse with the current colour or brush.
+        The ellipse is drawn to fit inside the given rectangle.
+        @see drawEllipse, Path::addEllipse
+    */
+    void fillEllipse (const Rectangle<float>& area) const;
 
     /** Draws an elliptical stroke using the current colour or brush.
 
@@ -684,14 +705,14 @@ public:
         For internal use only.
         NB. The context will NOT be deleted by this object when it is deleted.
     */
-    Graphics (LowLevelGraphicsContext* internalContext) noexcept;
+    Graphics (LowLevelGraphicsContext*) noexcept;
 
     /** @internal */
-    LowLevelGraphicsContext* getInternalContext() const noexcept    { return context; }
+    LowLevelGraphicsContext& getInternalContext() const noexcept    { return context; }
 
 private:
     //==============================================================================
-    LowLevelGraphicsContext* const context;
+    LowLevelGraphicsContext& context;
     ScopedPointer <LowLevelGraphicsContext> contextToDelete;
 
     bool saveStatePending;

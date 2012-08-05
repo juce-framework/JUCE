@@ -319,6 +319,16 @@ public:
         return Rectangle (pos.x - deltaX, pos.y - deltaY, nw, nh);
     }
 
+    /** Returns a rectangle that is larger than this one by a given amount.
+
+        Effectively, the rectangle returned is (x - delta, y - delta, w + delta * 2, h + delta * 2).
+        @see expand, reduce, reduced
+    */
+    Rectangle expanded (const ValueType delta) const noexcept
+    {
+        return expanded (delta, delta);
+    }
+
     /** Shrinks the rectangle by a given amount.
 
         Effectively, its new size is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
@@ -339,6 +349,16 @@ public:
                        const ValueType deltaY) const noexcept
     {
         return expanded (-deltaX, -deltaY);
+    }
+
+    /** Returns a rectangle that is smaller than this one by a given amount.
+
+        Effectively, the rectangle returned is (x + delta, y + delta, w - delta * 2, h - delta * 2).
+        @see reduce, expand, expanded
+    */
+    Rectangle reduced (const ValueType delta) const noexcept
+    {
+        return reduced (delta, delta);
     }
 
     /** Removes a strip from the top of this rectangle, reducing this rectangle

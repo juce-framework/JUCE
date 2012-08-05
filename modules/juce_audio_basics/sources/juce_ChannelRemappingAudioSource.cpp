@@ -109,8 +109,7 @@ void ChannelRemappingAudioSource::getNextAudioBlock (const AudioSourceChannelInf
 
     const int numChans = bufferToFill.buffer->getNumChannels();
 
-    int i;
-    for (i = 0; i < buffer.getNumChannels(); ++i)
+    for (int i = 0; i < buffer.getNumChannels(); ++i)
     {
         const int remappedChan = getRemappedInputChannel (i);
 
@@ -133,7 +132,7 @@ void ChannelRemappingAudioSource::getNextAudioBlock (const AudioSourceChannelInf
 
     bufferToFill.clearActiveBufferRegion();
 
-    for (i = 0; i < requiredNumberOfChannels; ++i)
+    for (int i = 0; i < requiredNumberOfChannels; ++i)
     {
         const int remappedChan = getRemappedOutputChannel (i);
 
@@ -150,16 +149,14 @@ void ChannelRemappingAudioSource::getNextAudioBlock (const AudioSourceChannelInf
 XmlElement* ChannelRemappingAudioSource::createXml() const
 {
     XmlElement* e = new XmlElement ("MAPPINGS");
-
     String ins, outs;
-    int i;
 
     const ScopedLock sl (lock);
 
-    for (i = 0; i < remappedInputs.size(); ++i)
+    for (int i = 0; i < remappedInputs.size(); ++i)
         ins << remappedInputs.getUnchecked(i) << ' ';
 
-    for (i = 0; i < remappedOutputs.size(); ++i)
+    for (int i = 0; i < remappedOutputs.size(); ++i)
         outs << remappedOutputs.getUnchecked(i) << ' ';
 
     e->setAttribute ("inputs", ins.trimEnd());
@@ -180,11 +177,10 @@ void ChannelRemappingAudioSource::restoreFromXml (const XmlElement& e)
         ins.addTokens (e.getStringAttribute ("inputs"), false);
         outs.addTokens (e.getStringAttribute ("outputs"), false);
 
-        int i;
-        for (i = 0; i < ins.size(); ++i)
+        for (int i = 0; i < ins.size(); ++i)
             remappedInputs.add (ins[i].getIntValue());
 
-        for (i = 0; i < outs.size(); ++i)
+        for (int i = 0; i < outs.size(); ++i)
             remappedOutputs.add (outs[i].getIntValue());
     }
 }

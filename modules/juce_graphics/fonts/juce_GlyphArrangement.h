@@ -44,6 +44,7 @@ class JUCE_API  PositionedGlyph
 {
 public:
     //==============================================================================
+    PositionedGlyph() noexcept;
     PositionedGlyph (const Font& font, juce_wchar character, int glyphNumber,
                      float anchorX, float baselineY, float width, bool isWhitespace);
 
@@ -140,7 +141,7 @@ public:
                         careful not to pass an out-of-range index here, as it
                         doesn't do any bounds-checking.
     */
-    PositionedGlyph& getGlyph (int index) const;
+    PositionedGlyph& getGlyph (int index) const noexcept;
 
     //==============================================================================
     /** Clears all text from the arrangement and resets it.
@@ -301,7 +302,7 @@ public:
 
 private:
     //==============================================================================
-    OwnedArray <PositionedGlyph> glyphs;
+    Array <PositionedGlyph> glyphs;
 
     int insertEllipsis (const Font&, float maxXPos, int startIndex, int endIndex);
     int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font&,

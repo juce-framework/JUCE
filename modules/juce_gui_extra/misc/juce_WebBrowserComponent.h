@@ -28,10 +28,6 @@
 
 #if JUCE_WEB_BROWSER || DOXYGEN
 
-#if ! DOXYGEN
- class WebBrowserComponentInternal;
-#endif
-
 //==============================================================================
 /**
     A component that displays an embedded web browser.
@@ -114,7 +110,8 @@ public:
 
 private:
     //==============================================================================
-    WebBrowserComponentInternal* browser;
+    class Pimpl;
+    Pimpl* browser;
     bool blankPageShown, unloadPageWhenBrowserIsHidden;
     String lastURL;
     StringArray lastHeaders;

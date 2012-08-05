@@ -1,7 +1,6 @@
 /* =========================================================================================
 
-   This is an auto-generated file, created by The Introjucer 3.0.0
-   Do not edit anything in this file!
+   This is an auto-generated file: Any edits you make may be overwritten!
 
 */
 
@@ -13,8 +12,8 @@ namespace BinaryData
     extern const char*   brushed_aluminium_png;
     const int            brushed_aluminium_pngSize = 14724;
 
-    extern const char*   juce_icon_png;
-    const int            juce_icon_pngSize = 19826;
+    extern const char*   dark_scheme_xml;
+    const int            dark_scheme_xmlSize = 1052;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1008;
@@ -49,25 +48,4 @@ namespace BinaryData
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).
     const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();
-
-    //==============================================================================
-    // This class acts as an ImageProvider that will access the BinaryData images
-    class ImageProvider  : public juce::ComponentBuilder::ImageProvider
-    {
-    public:
-        ImageProvider() noexcept {}
-
-        juce::Image getImageForIdentifier (const juce::var& imageIdentifier)
-        {
-            int dataSize = 0;
-            const char* const data = getNamedResource (imageIdentifier.toString().toUTF8(), dataSize);
-
-            if (data != nullptr)
-                return juce::ImageCache::getFromMemory (data, dataSize);
-
-            return juce::Image();
-        }
-
-        juce::var getIdentifierForImage (const juce::Image&)  { return juce::var(); }
-    };
 }

@@ -63,7 +63,7 @@ void AudioProcessor::addListener (AudioProcessorListener* const newListener)
 void AudioProcessor::removeListener (AudioProcessorListener* const listenerToRemove)
 {
     const ScopedLock sl (listenerLock);
-    listeners.removeValue (listenerToRemove);
+    listeners.removeFirstMatchingValue (listenerToRemove);
 }
 
 void AudioProcessor::setPlayConfigDetails (const int numIns,

@@ -33,7 +33,7 @@ public:
       : owner (owner_),
         style (style_),
         lastCurrentValue (0), lastValueMin (0), lastValueMax (0),
-        minimum (0), maximum (10), interval (0),
+        minimum (0), maximum (10), interval (0), doubleClickReturnValue (0),
         skewFactor (1.0), velocityModeSensitivity (1.0),
         velocityModeOffset (0.0), velocityModeThreshold (1),
         rotaryStart (float_Pi * 1.2f),
@@ -69,7 +69,7 @@ public:
     }
 
     //==============================================================================
-    void init()
+    void registerListeners()
     {
         currentValue.addListener (this);
         valueMin.addListener (this);
@@ -91,7 +91,21 @@ public:
             || style == ThreeValueVertical;
     }
 
-    float getPositionOfValue (const double value)
+    bool isRotary() const noexcept
+    {
+        return style == Rotary
+            || style == RotaryHorizontalDrag
+            || style == RotaryVerticalDrag
+            || style == RotaryHorizontalVerticalDrag;
+    }
+
+    bool incDecDragDirectionIsHorizontal() const noexcept
+    {
+        return incDecButtonMode == incDecButtonsDraggable_Horizontal
+                || (incDecButtonMode == incDecButtonsDraggable_AutoDirection && incDecButtonsSideBySide);
+    }
+
+    float getPositionOfValue (const double value) const
     {
         if (isHorizontal() || isVertical())
         {
@@ -104,13 +118,9 @@ public:
         }
     }
 
-    void setRange (const double newMin,
-                   const double newMax,
-                   const double newInt)
+    void setRange (const double newMin, const double newMax, const double newInt)
     {
-        if (minimum != newMin
-            || maximum != newMax
-            || interval != newInt)
+        if (minimum != newMin || maximum != newMax || interval != newInt)
         {
             minimum = newMin;
             maximum = newMax;
@@ -155,9 +165,7 @@ public:
         return currentValue.getValue();
     }
 
-    void setValue (double newValue,
-                   const bool sendUpdateMessage,
-                   const bool sendMessageSynchronously)
+    void setValue (double newValue, const bool sendUpdateMessage, const bool sendMessageSynchronously)
     {
         // for a two-value style slider, you should use the setMinValue() and setMaxValue()
         // methods to set the two values.
@@ -235,7 +243,8 @@ public:
         }
     }
 
-    void setMaxValue (double newValue, const bool sendUpdateMessage, const bool sendMessageSynchronously, const bool allowNudgingOfOtherValues)
+    void setMaxValue (double newValue, const bool sendUpdateMessage,
+                      const bool sendMessageSynchronously, const bool allowNudgingOfOtherValues)
     {
         // The maximum value only applies to sliders that are in two- or three-value mode.
         jassert (style == TwoValueHorizontal || style == TwoValueVertical
@@ -358,13 +367,10 @@ public:
     {
         if (style == IncDecButtons)
         {
+            const double delta = (button == incButton) ? interval : -interval;
+
             sendDragStart();
-
-            if (button == incButton)
-                setValue (owner.snapValue (getValue() + interval, false), true, true);
-            else if (button == decButton)
-                setValue (owner.snapValue (getValue() - interval, false), true, true);
-
+            setValue (owner.snapValue (getValue() + delta, false), true, true);
             sendDragEnd();
         }
     }
@@ -415,35 +421,35 @@ public:
         return value;
     }
 
-    float getLinearSliderPos (const double value)
+    float getLinearSliderPos (const double value) const
     {
-        double sliderPosProportional;
+        double pos;
 
         if (maximum > minimum)
         {
             if (value < minimum)
             {
-                sliderPosProportional = 0.0;
+                pos = 0.0;
             }
             else if (value > maximum)
             {
-                sliderPosProportional = 1.0;
+                pos = 1.0;
             }
             else
             {
-                sliderPosProportional = owner.valueToProportionOfLength (value);
-                jassert (sliderPosProportional >= 0 && sliderPosProportional <= 1.0);
+                pos = owner.valueToProportionOfLength (value);
+                jassert (pos >= 0 && pos <= 1.0);
             }
         }
         else
         {
-            sliderPosProportional = 0.5;
+            pos = 0.5;
         }
 
         if (isVertical() || style == IncDecButtons)
-            sliderPosProportional = 1.0 - sliderPosProportional;
+            pos = 1.0 - pos;
 
-        return (float) (sliderRegionStart + sliderPosProportional * sliderRegionSize);
+        return (float) (sliderRegionStart + pos * sliderRegionSize);
     }
 
     void setSliderStyle (const SliderStyle newStyle)
@@ -617,33 +623,44 @@ public:
         owner.repaint();
     }
 
-    bool incDecDragDirectionIsHorizontal() const
-    {
-        return incDecButtonMode == incDecButtonsDraggable_Horizontal
-                || (incDecButtonMode == incDecButtonsDraggable_AutoDirection && incDecButtonsSideBySide);
-    }
-
     void showPopupMenu()
     {
         menuShown = true;
 
         PopupMenu m;
         m.setLookAndFeel (&owner.getLookAndFeel());
-        m.addItem (1, TRANS ("velocity-sensitive mode"), true, isVelocityBased);
+        m.addItem (1, TRANS ("Velocity-sensitive mode"), true, isVelocityBased);
         m.addSeparator();
 
-        if (style == Rotary || style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
+        if (isRotary())
         {
             PopupMenu rotaryMenu;
-            rotaryMenu.addItem (2, TRANS ("use circular dragging"), true, style == Rotary);
-            rotaryMenu.addItem (3, TRANS ("use left-right dragging"), true, style == RotaryHorizontalDrag);
-            rotaryMenu.addItem (4, TRANS ("use up-down dragging"), true, style == RotaryVerticalDrag);
+            rotaryMenu.addItem (2, TRANS ("Use circular dragging"),           true, style == Rotary);
+            rotaryMenu.addItem (3, TRANS ("Use left-right dragging"),         true, style == RotaryHorizontalDrag);
+            rotaryMenu.addItem (4, TRANS ("Use up-down dragging"),            true, style == RotaryVerticalDrag);
+            rotaryMenu.addItem (5, TRANS ("Use left-right/up-down dragging"), true, style == RotaryHorizontalVerticalDrag);
 
-            m.addSubMenu (TRANS ("rotary mode"), rotaryMenu);
+            m.addSubMenu (TRANS ("Rotary mode"), rotaryMenu);
         }
 
         m.showMenuAsync (PopupMenu::Options(),
                          ModalCallbackFunction::forComponent (sliderMenuCallback, &owner));
+    }
+
+    static void sliderMenuCallback (const int result, Slider* slider)
+    {
+        if (slider != nullptr)
+        {
+            switch (result)
+            {
+                case 1:   slider->setVelocityBasedMode (! slider->getVelocityBasedMode()); break;
+                case 2:   slider->setSliderStyle (Rotary); break;
+                case 3:   slider->setSliderStyle (RotaryHorizontalDrag); break;
+                case 4:   slider->setSliderStyle (RotaryVerticalDrag); break;
+                case 5:   slider->setSliderStyle (RotaryHorizontalVerticalDrag); break;
+                default:  break;
+            }
+        }
     }
 
     int getThumbIndexAt (const MouseEvent& e)
@@ -722,8 +739,7 @@ public:
     void handleAbsoluteDrag (const MouseEvent& e)
     {
         const int mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.x : e.y;
-
-        double scaledMousePos = (mousePos - sliderRegionStart) / (double) sliderRegionSize;
+        double newPos = (mousePos - sliderRegionStart) / (double) sliderRegionSize;
 
         if (style == RotaryHorizontalDrag
             || style == RotaryVerticalDrag
@@ -738,10 +754,8 @@ public:
                                     ? e.x - mouseDragStartPos.x
                                     : mouseDragStartPos.y - e.y;
 
-            double newPos = owner.valueToProportionOfLength (valueOnMouseDown)
-                               + mouseDiff * (1.0 / pixelsForFullDragExtent);
-
-            valueWhenLastDragged = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, newPos));
+            newPos = owner.valueToProportionOfLength (valueOnMouseDown)
+                       + mouseDiff * (1.0 / pixelsForFullDragExtent);
 
             if (style == IncDecButtons)
             {
@@ -749,21 +763,31 @@ public:
                 decButton->setState (mouseDiff > 0 ? Button::buttonNormal : Button::buttonDown);
             }
         }
+        else if (style == RotaryHorizontalVerticalDrag)
+        {
+            const int mouseDiff = (e.x - mouseDragStartPos.x) + (mouseDragStartPos.y - e.y);
+
+            newPos = owner.valueToProportionOfLength (valueOnMouseDown)
+                       + mouseDiff * (1.0 / pixelsForFullDragExtent);
+        }
         else
         {
             if (isVertical())
-                scaledMousePos = 1.0 - scaledMousePos;
-
-            valueWhenLastDragged = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, scaledMousePos));
+                newPos = 1.0 - newPos;
         }
+
+        valueWhenLastDragged = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, newPos));
     }
 
     void handleVelocityDrag (const MouseEvent& e)
     {
-        const int mouseDiff = (isHorizontal() || style == RotaryHorizontalDrag
-                                 || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                ? e.x - mousePosWhenLastDragged.x
-                                : e.y - mousePosWhenLastDragged.y;
+        const int mouseDiff = style == RotaryHorizontalVerticalDrag
+                                ? (e.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.y)
+                                : (isHorizontal()
+                                    || style == RotaryHorizontalDrag
+                                    || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
+                                      ? e.x - mousePosWhenLastDragged.x
+                                      : e.y - mousePosWhenLastDragged.y;
 
         const double maxSpeed = jmax (200, sliderRegionSize);
         double speed = jlimit (0.0, maxSpeed, (double) abs (mouseDiff));
@@ -932,7 +956,8 @@ public:
 
     void mouseDoubleClick()
     {
-        if (style != IncDecButtons
+        if (doubleClickToValue
+             && style != IncDecButtons
              && minimum <= doubleClickReturnValue
              && maximum >= doubleClickReturnValue)
         {
@@ -998,22 +1023,16 @@ public:
                                                                                   : (double) currentValue.getValue());
             Point<int> mousePos;
 
-            if (style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
+            if (isRotary())
             {
                 mousePos = Desktop::getLastMouseDownPosition();
 
-                if (style == RotaryHorizontalDrag)
-                {
-                    const double posDiff = owner.valueToProportionOfLength (pos)
-                                            - owner.valueToProportionOfLength (valueOnMouseDown);
-                    mousePos += Point<int> (roundToInt (pixelsForFullDragExtent * posDiff), 0);
-                }
-                else
-                {
-                    const double posDiff = owner.valueToProportionOfLength (valueOnMouseDown)
-                                            - owner.valueToProportionOfLength (pos);
-                    mousePos += Point<int> (0, roundToInt (pixelsForFullDragExtent * posDiff));
-                }
+                const int delta = roundToInt (pixelsForFullDragExtent * (owner.valueToProportionOfLength (valueOnMouseDown)
+                                                                           - owner.valueToProportionOfLength (pos)));
+
+                if (style == RotaryHorizontalDrag)      mousePos += Point<int> (-delta, 0);
+                else if (style == RotaryVerticalDrag)   mousePos += Point<int> (0, delta);
+                else                                    mousePos += Point<int> (delta / -2, delta / 2);
             }
             else
             {
@@ -1032,7 +1051,7 @@ public:
     {
         if (style != IncDecButtons)
         {
-            if (style == Rotary || style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
+            if (isRotary())
             {
                 const float sliderPos = (float) owner.valueToProportionOfLength (lastCurrentValue);
                 jassert (sliderPos >= 0 && sliderPos <= 1.0f);
@@ -1229,7 +1248,7 @@ public:
         {
             g.setFont (font);
             g.setColour (findColour (TooltipWindow::textColourId, true));
-            g.drawFittedText (text, 0, 0, w, h, Justification::centred, 1);
+            g.drawFittedText (text, Rectangle<int> (w, h), Justification::centred, 1);
         }
 
         void getContentSize (int& w, int& h)
@@ -1268,21 +1287,6 @@ public:
                      std::abs (a1 + double_Pi * 2.0 - a2),
                      std::abs (a2 + double_Pi * 2.0 - a1));
     }
-
-    static void sliderMenuCallback (const int result, Slider* slider)
-    {
-        if (slider != nullptr)
-        {
-            switch (result)
-            {
-                case 1:   slider->setVelocityBasedMode (! slider->getVelocityBasedMode()); break;
-                case 2:   slider->setSliderStyle (Rotary); break;
-                case 3:   slider->setSliderStyle (RotaryHorizontalDrag); break;
-                case 4:   slider->setSliderStyle (RotaryVerticalDrag); break;
-                default:  break;
-            }
-        }
-    }
 };
 
 
@@ -1312,7 +1316,7 @@ void Slider::init (SliderStyle style, TextEntryBoxPosition textBoxPos)
     Slider::lookAndFeelChanged();
     updateText();
 
-    pimpl->init();
+    pimpl->registerListeners();
 }
 
 Slider::~Slider() {}
@@ -1566,33 +1570,3 @@ void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel
 
 void SliderListener::sliderDragStarted (Slider*)  {} // (can't write Slider::Listener due to idiotic VC2005 bug)
 void SliderListener::sliderDragEnded (Slider*)    {}
-
-//==============================================================================
-const Identifier Slider::Ids::tagType ("SLIDER");
-const Identifier Slider::Ids::min ("min");
-const Identifier Slider::Ids::max ("max");
-const Identifier Slider::Ids::interval ("interval");
-const Identifier Slider::Ids::type ("type");
-const Identifier Slider::Ids::editable ("editable");
-const Identifier Slider::Ids::textBoxPos ("textBoxPos");
-const Identifier Slider::Ids::textBoxWidth ("textBoxWidth");
-const Identifier Slider::Ids::textBoxHeight ("textBoxHeight");
-const Identifier Slider::Ids::skew ("skew");
-
-void Slider::refreshFromValueTree (const ValueTree& state, ComponentBuilder&)
-{
-    ComponentBuilder::refreshBasicComponentProperties (*this, state);
-
-    setRange (static_cast <double> (state [Ids::min]),
-              static_cast <double> (state [Ids::max]),
-              static_cast <double> (state [Ids::interval]));
-
-    setSliderStyle ((SliderStyle) static_cast <int> (state [Ids::type]));
-
-    setTextBoxStyle ((TextEntryBoxPosition) static_cast <int> (state [Ids::textBoxPos]),
-                     ! static_cast <bool> (state [Ids::editable]),
-                     static_cast <int> (state [Ids::textBoxWidth]),
-                     static_cast <int> (state [Ids::textBoxHeight]));
-
-    setSkewFactor (static_cast <double> (state [Ids::skew]));
-}

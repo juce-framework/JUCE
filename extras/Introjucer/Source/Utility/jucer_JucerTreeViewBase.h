@@ -46,13 +46,15 @@ public:
     void itemSelectionChanged (bool isNowSelected);
     void itemDoubleClicked (const MouseEvent&);
 
+    void cancelDelayedSelectionTimer();
+
     //==============================================================================
     virtual Font getFont() const;
     virtual String getRenamingName() const = 0;
     virtual String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
-    virtual const Drawable* getIcon() const = 0;
+    virtual Icon getIcon() const = 0;
     virtual float getIconSize() const;
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
     virtual int getMillisecsAllowedForDragGesture()    { return 120; };
@@ -89,8 +91,11 @@ public:
 
 protected:
     ProjectContentComponent* getProjectContentComponent() const;
-    void cancelDelayedSelectionTimer();
     virtual void addSubItems() {}
+
+    Colour getBackgroundColour() const;
+    Colour getContrastingColour (float contrast) const;
+    Colour getContrastingColour (const Colour& targetColour, float minContrast) const;
 
 private:
     class ItemSelectionTimer;
@@ -128,7 +133,17 @@ public:
 
         const ScopedPointer<XmlElement> treeOpenness (getAppProperties().getXmlValue (opennessStateKey));
         if (treeOpenness != nullptr)
+        {
             tree.restoreOpennessState (*treeOpenness, true);
+
+            for (int i = tree.getNumSelectedItems(); --i >= 0;)
+            {
+                JucerTreeViewBase* item = dynamic_cast<JucerTreeViewBase*> (tree.getSelectedItem (i));
+
+                if (item != nullptr)
+                    item->cancelDelayedSelectionTimer();
+            }
+        }
     }
 
     void saveOpenness()
@@ -147,7 +162,12 @@ public:
 
     void resized()
     {
-        tree.setBounds (getLocalBounds());
+        tree.setBounds (getAvailableBounds());
+    }
+
+    Rectangle<int> getAvailableBounds() const
+    {
+        return Rectangle<int> (0, 2, getWidth() - 2, getHeight() - 2);
     }
 
     TreeView tree;
@@ -175,14 +195,12 @@ public:
 
     void paintIcon (Graphics& g)
     {
-        const float iconSize = item.getIconSize();
-        item.getIcon()->drawWithin (g, Rectangle<float> (4.0f, 2.0f, iconSize, getHeight() - 4.0f),
-                                    RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
+        item.getIcon().draw (g, Rectangle<float> (4.0f, 2.0f, item.getIconSize(), getHeight() - 4.0f));
     }
 
     void resized()
     {
-        item.textX = item.getIconSize() + 8;
+        item.textX = (int) item.getIconSize() + 8;
     }
 
     JucerTreeViewBase& item;

@@ -400,6 +400,7 @@ private:
                 path.closeSubPath();
                 last = last2 = subpathStart;
                 d = d.findEndOfWhitespace();
+                lastCommandChar = 'M';
                 break;
 
             default:

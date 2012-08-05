@@ -238,9 +238,6 @@
     <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Application\jucer_FilePreviewComponent.cpp">
-      <Filter>The Introjucer\Application</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_JuceUpdater.cpp">
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
@@ -254,9 +251,6 @@
       <Filter>The Introjucer\Application</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_ConfigPage.cpp">
-      <Filter>The Introjucer\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_GroupInformationComponent.cpp">
       <Filter>The Introjucer\Project</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
@@ -293,6 +287,9 @@
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_FileHelpers.cpp">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\jucer_Icons.cpp">
       <Filter>The Introjucer\Utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp">
@@ -1296,6 +1293,9 @@
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_Icons.h">
+      <Filter>The Introjucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h">
       <Filter>The Introjucer\Utility</Filter>
     </ClInclude>
@@ -2295,6 +2295,9 @@
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\brushed_aluminium.png">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\dark_scheme.xml">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\juce_icon.png">

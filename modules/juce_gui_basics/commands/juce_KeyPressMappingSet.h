@@ -87,7 +87,7 @@
 */
 class JUCE_API  KeyPressMappingSet  : public KeyListener,
                                       public ChangeBroadcaster,
-                                      public FocusChangeListener
+                                      private FocusChangeListener
 {
 public:
     //==============================================================================

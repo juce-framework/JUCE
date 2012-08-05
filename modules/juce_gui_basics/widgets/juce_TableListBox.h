@@ -324,6 +324,9 @@ public:
 
 private:
     //==============================================================================
+    class Header;
+    class RowComp;
+
     TableHeaderComponent* header;
     TableListBoxModel* model;
     int columnIdNowBeingDragged;

@@ -43,50 +43,37 @@
     Component::addToDesktop(), and the system will create one of these if it's
     needed (which it obviously isn't on the Mac, for example).
 */
-class JUCE_API  DropShadower  : public ComponentListener
+class JUCE_API  DropShadower  : private ComponentListener
 {
 public:
     //==============================================================================
-    /** Creates a DropShadower.
-
-        @param alpha        the opacity of the shadows, from 0 to 1.0
-        @param xOffset      the horizontal displacement of the shadow, in pixels
-        @param yOffset      the vertical displacement of the shadow, in pixels
-        @param blurRadius   the radius of the blur to use for creating the shadow
-    */
-    DropShadower (float alpha = 0.5f,
-                  int xOffset = 1,
-                  int yOffset = 5,
-                  float blurRadius = 10.0f);
+    /** Creates a DropShadower. */
+    DropShadower (const DropShadow& shadowType);
 
     /** Destructor. */
-    virtual ~DropShadower();
+    ~DropShadower();
 
     /** Attaches the DropShadower to the component you want to shadow. */
     void setOwner (Component* componentToFollow);
 
-    //==============================================================================
-    /** @internal */
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
-    /** @internal */
-    void componentBroughtToFront (Component& component);
-    /** @internal */
-    void componentParentHierarchyChanged (Component& component);
-    /** @internal */
-    void componentVisibilityChanged (Component& component);
-
 
 private:
     //==============================================================================
+    class ShadowWindow;
+
     Component* owner;
     OwnedArray<Component> shadowWindows;
     Image shadowImageSections[12];
-    const int xOffset, yOffset;
-    const float alpha, blurRadius;
+    DropShadow shadow;
     bool reentrant;
 
+    void componentMovedOrResized (Component&, bool, bool);
+    void componentBroughtToFront (Component&);
+    void componentParentHierarchyChanged (Component&);
+    void componentVisibilityChanged (Component&);
+
     void updateShadows();
-    void setShadowImage (const Image& src, int num, int w, int h, int sx, int sy);
+    void setShadowImage (const Image&, int num, int w, int h, int sx, int sy);
     void bringShadowWindowsToFront();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower);

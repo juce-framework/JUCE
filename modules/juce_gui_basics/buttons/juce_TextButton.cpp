@@ -67,5 +67,3 @@ void TextButton::changeWidthToFitText (const int newHeight)
     setSize (getFont().getStringWidth (getButtonText()) + getHeight(),
              getHeight());
 }
-
-const Identifier TextButton::Ids::tagType ("TEXTBUTTON");

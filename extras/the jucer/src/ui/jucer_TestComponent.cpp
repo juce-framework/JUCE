@@ -45,7 +45,7 @@ TestComponent::TestComponent (JucerDocument* const ownerDocument_,
 
 TestComponent::~TestComponent()
 {
-    testComponents.removeValue (this);
+    testComponents.removeFirstMatchingValue (this);
     deleteAllChildren();
     delete loadedDocument;
 }

@@ -46,7 +46,6 @@ class CachedComponentImage;
 //==============================================================================
 /**
     The base class for all JUCE user-interface objects.
-
 */
 class JUCE_API  Component  : public MouseListener
 {
@@ -82,13 +81,11 @@ public:
 
     //==============================================================================
     /** Creates a component, setting its name at the same time.
-
         @see getName, setName
     */
     explicit Component (const String& componentName);
 
     /** Returns the name of this component.
-
         @see setName
     */
     const String& getName() const noexcept                  { return componentName; }
@@ -140,7 +137,6 @@ public:
     bool isVisible() const noexcept                         { return flags.visibleFlag; }
 
     /** Called when this component's visiblility changes.
-
         @see setVisible, isVisible
     */
     virtual void visibilityChanged();
@@ -189,7 +185,6 @@ public:
     void removeFromDesktop();
 
     /** Returns true if this component is currently showing on the desktop.
-
         @see addToDesktop, removeFromDesktop
     */
     bool isOnDesktop() const noexcept;
@@ -216,9 +211,7 @@ public:
     virtual void userTriedToCloseWindow();
 
     /** Called for a desktop component which has just been minimised or un-minimised.
-
         This will only be called for components on the desktop.
-
         @see getPeer, ComponentPeer::setMinimised, ComponentPeer::isMinimised
     */
     virtual void minimisationStateChanged (bool isNowMinimised);
@@ -246,19 +239,16 @@ public:
     void toBack();
 
     /** Changes this component's z-order so that it's just behind another component.
-
         @see toFront, toBack
     */
     void toBehind (Component* other);
 
     /** Sets whether the component should always be kept at the front of its siblings.
-
         @see isAlwaysOnTop
     */
     void setAlwaysOnTop (bool shouldStayOnTop);
 
     /** Returns true if this component is set to always stay in front of its siblings.
-
         @see setAlwaysOnTop
     */
     bool isAlwaysOnTop() const noexcept;
@@ -271,7 +261,7 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    inline int getX() const noexcept                        { return bounds.getX(); }
+    int getX() const noexcept                               { return bounds.getX(); }
 
     /** Returns the y coordinate of the top of this component.
         This is a distance in pixels from the top edge of the component's parent.
@@ -280,13 +270,13 @@ public:
         bounds will no longer be a direct reflection of the position at which it appears within
         its parent, as the transform will be applied to its bounding box.
     */
-    inline int getY() const noexcept                        { return bounds.getY(); }
+    int getY() const noexcept                               { return bounds.getY(); }
 
     /** Returns the component's width in pixels. */
-    inline int getWidth() const noexcept                    { return bounds.getWidth(); }
+    int getWidth() const noexcept                           { return bounds.getWidth(); }
 
     /** Returns the component's height in pixels. */
-    inline int getHeight() const noexcept                   { return bounds.getHeight(); }
+    int getHeight() const noexcept                          { return bounds.getHeight(); }
 
     /** Returns the x coordinate of the component's right-hand edge.
         This is a distance in pixels from the left edge of the component's parent.
@@ -638,13 +628,11 @@ public:
 
     //==============================================================================
     /** Returns a proportion of the component's width.
-
         This is a handy equivalent of (getWidth() * proportion).
     */
     int proportionOfWidth (float proportion) const noexcept;
 
     /** Returns a proportion of the component's height.
-
         This is a handy equivalent of (getHeight() * proportion).
     */
     int proportionOfHeight (float proportion) const noexcept;
@@ -762,13 +750,11 @@ public:
     Component* removeChildComponent (int childIndexToRemove);
 
     /** Removes all this component's children.
-
         Note that this won't delete them! To do that, use deleteAllChildren() instead.
     */
     void removeAllChildren();
 
     /** Removes all this component's children, and deletes them.
-
         @see removeAllChildren
     */
     void deleteAllChildren();
@@ -828,7 +814,6 @@ public:
     virtual void parentHierarchyChanged();
 
     /** Subclasses can use this callback to be told when children are added or removed.
-
         @see parentHierarchyChanged
     */
     virtual void childrenChanged();
@@ -1087,7 +1072,6 @@ public:
     void setComponentEffect (ImageEffectFilter* newEffect);
 
     /** Returns the current component effect.
-
         @see setComponentEffect
     */
     ImageEffectFilter* getComponentEffect() const noexcept              { return effect; }
@@ -1179,7 +1163,6 @@ public:
     void setBroughtToFrontOnMouseClick (bool shouldBeBroughtToFront) noexcept;
 
     /** Indicates whether the component should be brought to the front when clicked-on.
-
         @see setBroughtToFrontOnMouseClick
     */
     bool isBroughtToFrontOnMouseClick() const noexcept;
@@ -1218,7 +1201,6 @@ public:
     void setMouseClickGrabsKeyboardFocus (bool shouldGrabFocus);
 
     /** Returns the last value set with setMouseClickGrabsKeyboardFocus().
-
         See setMouseClickGrabsKeyboardFocus() for more info.
     */
     bool getMouseClickGrabsKeyboardFocus() const noexcept;
@@ -1258,7 +1240,6 @@ public:
     bool hasKeyboardFocus (bool trueIfChildIsFocused) const;
 
     /** Returns the component that currently has the keyboard focus.
-
         @returns the focused component, or null if nothing is focused.
     */
     static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() noexcept;
@@ -1647,7 +1628,6 @@ public:
     void addKeyListener (KeyListener* newListener);
 
     /** Removes a previously-registered key listener.
-
         @see addKeyListener
     */
     void removeKeyListener (KeyListener* listenerToRemove);
@@ -1719,13 +1699,11 @@ public:
     };
 
     /** Called to indicate that this component has just acquired the keyboard focus.
-
         @see focusLost, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
     */
     virtual void focusGained (FocusChangeType cause);
 
     /** Called to indicate that this component has just lost the keyboard focus.
-
         @see focusGained, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
     */
     virtual void focusLost (FocusChangeType cause);
@@ -1865,7 +1843,6 @@ public:
     void addComponentListener (ComponentListener* newListener);
 
     /** Removes a component listener.
-
         @see addComponentListener
     */
     void removeComponentListener (ComponentListener* listenerToRemove);
@@ -2055,7 +2032,6 @@ public:
     void setColour (int colourId, const Colour& colour);
 
     /** If a colour has been set with setColour(), this will remove it.
-
         This allows you to make a colour revert to its default state.
     */
     void removeColour (int colourId);
@@ -2071,7 +2047,6 @@ public:
     void copyAllExplicitColoursTo (Component& target) const;
 
     /** This method is called when a colour is changed by the setColour() method.
-
         @see setColour, findColour
     */
     virtual void colourChanged();

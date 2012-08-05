@@ -269,7 +269,7 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-class DisplaySettingsChangeCallback  : public DeletedAtShutdown
+class DisplaySettingsChangeCallback  : private DeletedAtShutdown
 {
 public:
     DisplaySettingsChangeCallback()
@@ -371,4 +371,14 @@ String SystemClipboard::getTextFromClipboard()
 
     return text == nil ? String::empty
                        : nsStringToJuce (text);
+}
+
+void Process::setDockIconVisible (bool isVisible)
+{
+   #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
+    [NSApp setActivationPolicy: isVisible ? NSApplicationActivationPolicyRegular
+                                          : NSApplicationActivationPolicyProhibited];
+   #else
+    jassertfalse; // sorry, not available in 10.5!
+   #endif
 }

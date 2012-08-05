@@ -184,46 +184,6 @@ void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
     }
 }
 
-void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text)
-{
-    g.fillAll (Colours::white.withAlpha (0.4f));
-    g.setColour (Colours::grey);
-    g.drawRect (0, 0, w, h);
-
-    g.drawLine (0.5f, 0.5f, w - 0.5f, h - 0.5f);
-    g.drawLine (0.5f, h - 0.5f, w - 0.5f, 0.5f);
-
-    g.setColour (Colours::black);
-    g.setFont (11.0f);
-    g.drawFittedText (text, 2, 2, w - 4, h - 4, Justification::centredTop, 2);
-}
-
-void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize)
-{
-    ColourGradient cg (Colours::black.withAlpha (0.15f), 0, 0,
-                       Colours::transparentBlack, 0, (float) shadowSize, false);
-    cg.addColour (0.4, Colours::black.withAlpha (0.07f));
-    cg.addColour (0.6, Colours::black.withAlpha (0.02f));
-
-    g.setGradientFill (cg);
-    g.fillRect (0, 0, w, shadowSize);
-
-    cg.point1.setXY (0.0f, (float) h);
-    cg.point2.setXY (0.0f, (float) h - shadowSize);
-    g.setGradientFill (cg);
-    g.fillRect (0, h - shadowSize, w, shadowSize);
-
-    cg.point1.setXY (0.0f, 0.0f);
-    cg.point2.setXY ((float) shadowSize, 0.0f);
-    g.setGradientFill (cg);
-    g.fillRect (0, 0, shadowSize, h);
-
-    cg.point1.setXY ((float) w, 0.0f);
-    cg.point2.setXY ((float) w - shadowSize, 0.0f);
-    g.setGradientFill (cg);
-    g.fillRect (w - shadowSize, 0, shadowSize, h);
-}
-
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex)
 {
@@ -253,7 +213,7 @@ void RolloverHelpComp::paint (Graphics& g)
 {
     AttributedString s;
     s.setJustification (Justification::centredLeft);
-    s.append (lastTip, Font (14.0f), Colour::greyLevel (0.15f));
+    s.append (lastTip, Font (14.0f), findColour (mainBackgroundColourId).contrasting (0.7f));
 
     TextLayout tl;
     tl.createLayoutWithBalancedLineLengths (s, getWidth() - 10.0f);
@@ -364,20 +324,22 @@ public:
         : desc (String::empty,
                 "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, ready to cut-and-paste into your source-code...")
     {
-        setSize (400, 300);
-
-        desc.setBounds ("8, 8, parent.width - 8, 55");
         desc.setJustificationType (Justification::centred);
+        desc.setColour (Label::textColourId, Colours::white);
         addAndMakeVisible (&desc);
 
+        const Colour bkgd (Colours::white.withAlpha (0.6f));
+
         userText.setMultiLine (true, true);
-        userText.setBounds ("8, 60, parent.width - 8, parent.height / 2 - 4");
+        userText.setReturnKeyStartsNewLine (true);
+        userText.setColour (TextEditor::backgroundColourId, bkgd);
         addAndMakeVisible (&userText);
         userText.addListener (this);
 
         resultText.setMultiLine (true, true);
+        resultText.setColour (TextEditor::backgroundColourId, bkgd);
         resultText.setReadOnly (true);
-        resultText.setBounds ("8, parent.height / 2 + 4, parent.width - 8, parent.height - 8");
+        resultText.setSelectAllWhenFocused (true);
         addAndMakeVisible (&resultText);
 
         userText.setText (getLastText());
@@ -399,6 +361,13 @@ public:
         resultText.setText (CodeHelpers::stringLiteral (getLastText()), false);
     }
 
+    void resized()
+    {
+        desc.setBounds (8, 8, getWidth() - 16, 44);
+        userText.setBounds (desc.getX(), desc.getBottom() + 8, getWidth() - 16, getHeight() / 2 - desc.getBottom() - 8);
+        resultText.setBounds (desc.getX(), userText.getBottom() + 4, getWidth() - 16, getHeight() - userText.getBottom() - 12);
+    }
+
 private:
     Label desc;
     TextEditor userText, resultText;
@@ -410,11 +379,20 @@ private:
     }
 };
 
-void showUTF8ToolWindow()
+void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer)
 {
-    UTF8Component comp;
-    DialogWindow::showModalDialog ("UTF-8 String Literal Converter", &comp,
-                                   nullptr, Colours::white, true, true);
+    if (ownerPointer != nullptr)
+    {
+        ownerPointer->toFront (true);
+    }
+    else
+    {
+        new FloatingToolWindow ("UTF-8 String Literal Converter",
+                                "utf8WindowPos",
+                                new UTF8Component(), ownerPointer,
+                                400, 300,
+                                300, 300, 1000, 1000);
+    }
 }
 
 bool cancelAnyModalComponents()
@@ -460,30 +438,4 @@ bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::I
     }
 
     return false;
-}
-
-//==============================================================================
-class CallOutBoxCallback  : public ModalComponentManager::Callback
-{
-public:
-    CallOutBoxCallback (Component& attachTo, Component* content_)
-        : content (content_),
-          callout (*content_, attachTo, nullptr)
-    {
-        callout.setVisible (true);
-        callout.enterModalState (true, this);
-    }
-
-    void modalStateFinished (int) {}
-
-private:
-    ScopedPointer<Component> content;
-    CallOutBox callout;
-
-    JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback);
-};
-
-void launchAsyncCallOutBox (Component& attachTo, Component* content)
-{
-    new CallOutBoxCallback (attachTo, content);
 }

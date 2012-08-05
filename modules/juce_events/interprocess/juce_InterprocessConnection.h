@@ -48,7 +48,7 @@ class MemoryBlock;
 
     @see InterprocessConnectionServer, Socket, NamedPipe
 */
-class JUCE_API  InterprocessConnection    : public Thread
+class JUCE_API  InterprocessConnection    : private Thread
 {
 public:
     //==============================================================================
@@ -96,25 +96,26 @@ public:
         an InterprocessConnection object and used createPipe() to create a pipe for this
         to connect to.
 
-        You can optionally specify a timeout length to be passed to the NamedPipe::read() method.
-
+        @param pipeName     the name to use for the pipe - this should be unique to your app
+        @param pipeReceiveMessageTimeoutMs  a timeout length to be used when reading or writing
+                                            to the pipe, or -1 for an infinite timeout.
         @returns true if it connects successfully.
         @see createPipe, NamedPipe
     */
-    bool connectToPipe (const String& pipeName,
-                        int pipeReceiveMessageTimeoutMs = -1);
+    bool connectToPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs);
 
     /** Tries to create a new pipe for other processes to connect to.
 
         This creates a pipe with the given name, so that other processes can use
         connectToPipe() to connect to the other end.
 
-        You can optionally specify a timeout length to be passed to the NamedPipe::read() method.
-
-        If another process is already using this pipe, this will fail and return false.
+        @param pipeName     the name to use for the pipe - this should be unique to your app
+        @param pipeReceiveMessageTimeoutMs  a timeout length to be used when reading or writing
+                                            to the pipe, or -1 for an infinite timeout.
+        @returns true if the pipe was created, or false if it fails (e.g. if another process is
+                 already using using the pipe).
     */
-    bool createPipe (const String& pipeName,
-                     int pipeReceiveMessageTimeoutMs = -1);
+    bool createPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs);
 
     /** Disconnects and closes any currently-open sockets or pipes. */
     void disconnect();
@@ -122,16 +123,14 @@ public:
     /** True if a socket or pipe is currently active. */
     bool isConnected() const;
 
-    /** Returns the socket that this connection is using (or null if it uses a pipe). */
+    /** Returns the socket that this connection is using (or nullptr if it uses a pipe). */
     StreamingSocket* getSocket() const noexcept                 { return socket; }
 
-    /** Returns the pipe that this connection is using (or null if it uses a socket). */
+    /** Returns the pipe that this connection is using (or nullptr if it uses a socket). */
     NamedPipe* getPipe() const noexcept                         { return pipe; }
 
     /** Returns the name of the machine at the other end of this connection.
-
-        This will return an empty string if the other machine isn't known for
-        some reason.
+        This may return an empty string if the name is unknown.
     */
     String getConnectedHostName() const;
 

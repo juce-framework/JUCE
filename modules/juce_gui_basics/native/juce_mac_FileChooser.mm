@@ -119,6 +119,9 @@ public:
                                           action: nil  keyEquivalent: nsEmptyString()];
         [[NSApp mainMenu] setSubmenu: menu forItem: item];
         [menu release];
+
+        // use a dummy modal component so that apps can tell that something is currently modal.
+        dummyModalComponent.enterModalState();
     }
 
     ~TemporaryMainMenuWithStandardCommands()
@@ -129,6 +132,7 @@ public:
 private:
     MenuBarModel* oldMenu;
     ScopedPointer<PopupMenu> oldAppleMenu;
+    Component dummyModalComponent;
 };
 
 //==============================================================================

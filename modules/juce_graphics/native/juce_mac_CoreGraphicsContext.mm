@@ -53,7 +53,7 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext()
     {
-        return new CoreGraphicsContext (context, height);
+        return new CoreGraphicsContext (context, height, 1.0f);
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode)
@@ -118,15 +118,16 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsImage);
 };
 
-ImagePixelData* NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
+ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
     return new CoreGraphicsImage (format == Image::RGB ? Image::ARGB : format, width, height, clearImage);
 }
 
 //==============================================================================
-CoreGraphicsContext::CoreGraphicsContext (CGContextRef context_, const float flipHeight_)
+CoreGraphicsContext::CoreGraphicsContext (CGContextRef context_, const float flipHeight_, const float targetScale_)
     : context (context_),
       flipHeight (flipHeight_),
+      targetScale (targetScale_),
       lastClipRectIsValid (false),
       state (new SavedState())
 {

@@ -23,10 +23,12 @@
   ==============================================================================
 */
 
-PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
+PluginListComponent::PluginListComponent (AudioPluginFormatManager& formatManager_,
+                                          KnownPluginList& listToEdit,
                                           const File& deadMansPedalFile_,
                                           PropertiesFile* const propertiesToUse_)
-    : list (listToEdit),
+    : formatManager (formatManager_),
+      list (listToEdit),
       deadMansPedalFile (deadMansPedalFile_),
       optionsButton ("Options..."),
       propertiesToUse (propertiesToUse_)
@@ -151,7 +153,7 @@ void PluginListComponent::optionsMenuCallback (int result)
 
         case 7:
             for (int i = list.getNumTypes(); --i >= 0;)
-                if (! AudioPluginFormatManager::getInstance()->doesPluginStillExist (*list.getType (i)))
+                if (! formatManager.doesPluginStillExist (*list.getType (i)))
                     list.removeType (i);
 
             break;
@@ -188,9 +190,9 @@ void PluginListComponent::buttonClicked (Button* button)
         menu.addItem (4, TRANS("Sort by manufacturer"));
         menu.addSeparator();
 
-        for (int i = 0; i < AudioPluginFormatManager::getInstance()->getNumFormats(); ++i)
+        for (int i = 0; i < formatManager.getNumFormats(); ++i)
         {
-            AudioPluginFormat* const format = AudioPluginFormatManager::getInstance()->getFormat (i);
+            AudioPluginFormat* const format = formatManager.getFormat (i);
 
             if (format->getDefaultLocationsToSearch().getNumPaths() > 0)
                 menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plugins...");
@@ -204,7 +206,7 @@ void PluginListComponent::buttonClicked (Button* button)
 void PluginListComponent::timerCallback()
 {
     stopTimer();
-    scanFor (AudioPluginFormatManager::getInstance()->getFormat (typeToScan));
+    scanFor (formatManager.getFormat (typeToScan));
 }
 
 bool PluginListComponent::isInterestedInFileDrag (const StringArray& /*files*/)
@@ -215,7 +217,7 @@ bool PluginListComponent::isInterestedInFileDrag (const StringArray& /*files*/)
 void PluginListComponent::filesDropped (const StringArray& files, int, int)
 {
     OwnedArray <PluginDescription> typesFound;
-    list.scanAndAddDragAndDroppedFiles (files, typesFound);
+    list.scanAndAddDragAndDroppedFiles (formatManager, files, typesFound);
 }
 
 void PluginListComponent::scanFor (AudioPluginFormat* format)
@@ -236,8 +238,8 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
         pathList.setPath (path);
 
         aw.addCustomComponent (&pathList);
-        aw.addButton (TRANS("Scan"), 1, KeyPress::returnKey);
-        aw.addButton (TRANS("Cancel"), 0, KeyPress::escapeKey);
+        aw.addButton (TRANS("Scan"), 1, KeyPress (KeyPress::returnKey));
+        aw.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
 
         if (aw.runModalLoop() == 0)
             return;
@@ -256,7 +258,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
     AlertWindow aw (TRANS("Scanning for plugins..."),
                     TRANS("Searching for all possible plugin files..."), AlertWindow::NoIcon);
 
-    aw.addButton (TRANS("Cancel"), 0, KeyPress::escapeKey);
+    aw.addButton (TRANS("Cancel"), 0, KeyPress (KeyPress::escapeKey));
     aw.addProgressBarComponent (progress);
     aw.enterModalState();
 

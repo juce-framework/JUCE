@@ -60,6 +60,11 @@ KeyPress& KeyPress::operator= (const KeyPress& other) noexcept
     return *this;
 }
 
+bool KeyPress::operator== (int otherKeyCode) const noexcept
+{
+    return keyCode == otherKeyCode && ! mods.isAnyModifierKeyDown();
+}
+
 bool KeyPress::operator== (const KeyPress& other) const noexcept
 {
     return mods.getRawFlags() == other.mods.getRawFlags()
@@ -76,6 +81,11 @@ bool KeyPress::operator== (const KeyPress& other) const noexcept
 bool KeyPress::operator!= (const KeyPress& other) const noexcept
 {
     return ! operator== (other);
+}
+
+bool KeyPress::operator!= (int otherKeyCode) const noexcept
+{
+    return ! operator== (otherKeyCode);
 }
 
 bool KeyPress::isCurrentlyDown() const

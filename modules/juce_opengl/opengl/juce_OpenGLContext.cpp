@@ -74,7 +74,7 @@ public:
         ComponentPeer* const peer = component.getPeer();
 
         if (peer != nullptr)
-            peer->addMaskedRegion (peer->getComponent()->getLocalArea (&component, component.getLocalBounds()));
+            peer->addMaskedRegion (peer->getComponent().getLocalArea (&component, component.getLocalBounds()));
     }
 
     void invalidateAll()
@@ -565,13 +565,12 @@ void OpenGLContext::deactivateCurrentContext()      { NativeContext::deactivateC
 
 void OpenGLContext::triggerRepaint()
 {
-    CachedImage* const currentContext
-            = dynamic_cast <CachedImage*> (Thread::getCurrentThread());
+    CachedImage* const cachedImage = getCachedImage();
 
-    if (currentContext != nullptr)
+    if (cachedImage != nullptr)
     {
-        currentContext->triggerRepaint();
-        currentContext->component.repaint();
+        cachedImage->triggerRepaint();
+        cachedImage->component.repaint();
     }
 }
 

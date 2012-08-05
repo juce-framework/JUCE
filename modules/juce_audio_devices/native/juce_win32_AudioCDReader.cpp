@@ -1297,7 +1297,7 @@ Array<int> AudioCDReader::findIndexesInTrack (const int trackNumber)
             pos += samplesPerFrame * framesPerIndexRead;
         }
 
-        indexes.removeValue (trackStart);
+        indexes.removeFirstMatchingValue (trackStart);
     }
 
     return indexes;

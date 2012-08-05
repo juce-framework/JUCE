@@ -44,7 +44,7 @@ public:
     OpenGLImageType();
     ~OpenGLImageType();
 
-    ImagePixelData* create (Image::PixelFormat, int width, int height, bool shouldClearImage) const;
+    ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool shouldClearImage) const;
     int getTypeID() const;
 
     static OpenGLFrameBuffer* getFrameBufferFrom (const Image&);

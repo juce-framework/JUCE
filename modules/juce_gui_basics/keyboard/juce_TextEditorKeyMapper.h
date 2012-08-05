@@ -43,33 +43,56 @@ struct TextEditorKeyMapper
     */
     static bool invokeKeyFunction (CallbackClass& target, const KeyPress& key)
     {
-        const bool isShiftDown   = key.getModifiers().isShiftDown();
-        const bool ctrlOrAltDown = key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown();
+        const ModifierKeys& mods = key.getModifiers();
+
+        const bool isShiftDown   = mods.isShiftDown();
+        const bool ctrlOrAltDown = mods.isCtrlDown() || mods.isAltDown();
+
+        int numCtrlAltCommandKeys = 0;
+        if (mods.isCtrlDown())    ++numCtrlAltCommandKeys;
+        if (mods.isAltDown())     ++numCtrlAltCommandKeys;
 
         if (key == KeyPress (KeyPress::downKey, ModifierKeys::ctrlModifier, 0) && target.scrollUp())   return true;
         if (key == KeyPress (KeyPress::upKey,   ModifierKeys::ctrlModifier, 0) && target.scrollDown()) return true;
 
        #if JUCE_MAC
-        if (key.getModifiers().isCommandDown())
+        if (mods.isCommandDown() && ! ctrlOrAltDown)
         {
             if (key.isKeyCode (KeyPress::upKey))        return target.moveCaretToTop (isShiftDown);
             if (key.isKeyCode (KeyPress::downKey))      return target.moveCaretToEnd (isShiftDown);
             if (key.isKeyCode (KeyPress::leftKey))      return target.moveCaretToStartOfLine (isShiftDown);
-            if (key.isKeyCode (KeyPress::rightKey))     return target.moveCaretToEndOfLine (isShiftDown);
+            if (key.isKeyCode (KeyPress::rightKey))     return target.moveCaretToEndOfLine   (isShiftDown);
         }
+
+        if (mods.isCommandDown())
+            ++numCtrlAltCommandKeys;
        #endif
 
-        if (key.isKeyCode (KeyPress::upKey))        return target.moveCaretUp (isShiftDown);
-        if (key.isKeyCode (KeyPress::downKey))      return target.moveCaretDown (isShiftDown);
-        if (key.isKeyCode (KeyPress::leftKey))      return target.moveCaretLeft (ctrlOrAltDown, isShiftDown);
-        if (key.isKeyCode (KeyPress::rightKey))     return target.moveCaretRight (ctrlOrAltDown, isShiftDown);
-        if (key.isKeyCode (KeyPress::pageUpKey))    return target.pageUp (isShiftDown);
-        if (key.isKeyCode (KeyPress::pageDownKey))  return target.pageDown (isShiftDown);
+        if (numCtrlAltCommandKeys < 2)
+        {
+            if (key.isKeyCode (KeyPress::leftKey))  return target.moveCaretLeft  (ctrlOrAltDown, isShiftDown);
+            if (key.isKeyCode (KeyPress::rightKey)) return target.moveCaretRight (ctrlOrAltDown, isShiftDown);
 
-        if (key.isKeyCode (KeyPress::homeKey))  return ctrlOrAltDown ? target.moveCaretToTop (isShiftDown)
-                                                                     : target.moveCaretToStartOfLine (isShiftDown);
-        if (key.isKeyCode (KeyPress::endKey))   return ctrlOrAltDown ? target.moveCaretToEnd (isShiftDown)
-                                                                     : target.moveCaretToEndOfLine (isShiftDown);
+            if (key.isKeyCode (KeyPress::homeKey))  return ctrlOrAltDown ? target.moveCaretToTop         (isShiftDown)
+                                                                         : target.moveCaretToStartOfLine (isShiftDown);
+            if (key.isKeyCode (KeyPress::endKey))   return ctrlOrAltDown ? target.moveCaretToEnd         (isShiftDown)
+                                                                         : target.moveCaretToEndOfLine   (isShiftDown);
+        }
+
+        if (numCtrlAltCommandKeys == 0)
+        {
+            if (key.isKeyCode (KeyPress::upKey))        return target.moveCaretUp   (isShiftDown);
+            if (key.isKeyCode (KeyPress::downKey))      return target.moveCaretDown (isShiftDown);
+
+            if (key.isKeyCode (KeyPress::pageUpKey))    return target.pageUp   (isShiftDown);
+            if (key.isKeyCode (KeyPress::pageDownKey))  return target.pageDown (isShiftDown);
+        }
+
+        if (numCtrlAltCommandKeys < 2)
+        {
+            if (key.isKeyCode (KeyPress::backspaceKey)) return target.deleteBackwards (ctrlOrAltDown);
+            if (key.isKeyCode (KeyPress::deleteKey))    return target.deleteForwards  (ctrlOrAltDown);
+        }
 
         if (key == KeyPress ('c', ModifierKeys::commandModifier, 0)
               || key == KeyPress (KeyPress::insertKey, ModifierKeys::ctrlModifier, 0))
@@ -82,9 +105,6 @@ struct TextEditorKeyMapper
         if (key == KeyPress ('v', ModifierKeys::commandModifier, 0)
               || key == KeyPress (KeyPress::insertKey, ModifierKeys::shiftModifier, 0))
             return target.pasteFromClipboard();
-
-        if (key.isKeyCode (KeyPress::backspaceKey))     return target.deleteBackwards (ctrlOrAltDown);
-        if (key.isKeyCode (KeyPress::deleteKey))        return target.deleteForwards (ctrlOrAltDown);
 
         if (key == KeyPress ('a', ModifierKeys::commandModifier, 0))
             return target.selectAll();

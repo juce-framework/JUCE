@@ -49,7 +49,7 @@ Font JucerTreeViewBase::getFont() const
 void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
 {
     if (isSelected())
-        g.fillAll (Colour (0x401111ee));
+        g.fillAll (getOwnerView()->findColour (treeviewHighlightColourId));
 }
 
 float JucerTreeViewBase::getIconSize() const
@@ -66,18 +66,37 @@ void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, int width, int height
     else
         p.addTriangle (width * 0.25f, height * 0.25f, width * 0.8f, height * 0.5f,  width * 0.25f, height * 0.75f);
 
-    g.setColour (Colours::lightgrey);
+    g.setColour (getOwnerView()->findColour (mainBackgroundColourId).contrasting (0.3f));
     g.fillPath (p);
+}
+
+Colour JucerTreeViewBase::getBackgroundColour() const
+{
+    Colour background (getOwnerView()->findColour (mainBackgroundColourId));
+
+    if (isSelected())
+        background = background.overlaidWith (getOwnerView()->findColour (treeviewHighlightColourId));
+
+    return background;
+}
+
+Colour JucerTreeViewBase::getContrastingColour (float contrast) const
+{
+    return getBackgroundColour().contrasting (contrast);
+}
+
+Colour JucerTreeViewBase::getContrastingColour (const Colour& target, float minContrast) const
+{
+    return getBackgroundColour().contrasting (target, minContrast);
 }
 
 void JucerTreeViewBase::paintContent (Graphics& g, const Rectangle<int>& area)
 {
     g.setFont (getFont());
-    g.setColour (isMissing() ? Colours::red : Colours::black);
+    g.setColour (isMissing() ? getContrastingColour (Colours::red, 0.8f)
+                             : getContrastingColour (0.8f));
 
-    g.drawFittedText (getDisplayName(),
-                      area.getX(), area.getY(), area.getWidth(), area.getHeight(),
-                      Justification::centredLeft, 1, 0.8f);
+    g.drawFittedText (getDisplayName(), area, Justification::centredLeft, 1, 0.8f);
 }
 
 Component* JucerTreeViewBase::createItemComponent()

@@ -163,8 +163,29 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
     }
 }
 
-void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
-                                       int64 numSamples,
+template <typename SampleType>
+static void getStereoMinAndMax (SampleType* const* channels, const int numChannels, const int numSamples,
+                                SampleType& lmin, SampleType& lmax, SampleType& rmin, SampleType& rmax)
+{
+    SampleType bufMin, bufMax;
+    findMinAndMax (channels[0], numSamples, bufMin, bufMax);
+    lmax = jmax (lmax, bufMax);
+    lmin = jmin (lmin, bufMin);
+
+    if (numChannels > 1)
+    {
+        findMinAndMax (channels[1], numSamples, bufMin, bufMax);
+        rmax = jmax (rmax, bufMax);
+        rmin = jmin (rmin, bufMin);
+    }
+    else
+    {
+        rmax = lmax;
+        rmin = lmin;
+    }
+}
+
+void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples,
                                        float& lowestLeft, float& highestLeft,
                                        float& lowestRight, float& highestRight)
 {
@@ -178,12 +199,10 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
     }
 
     const int bufferSize = (int) jmin (numSamples, (int64) 4096);
-    HeapBlock<int> tempSpace ((size_t) bufferSize * 2 + 64);
+    AudioSampleBuffer tempSampleBuffer (numChannels, bufferSize);
 
-    int* tempBuffer[3];
-    tempBuffer[0] = tempSpace.getData();
-    tempBuffer[1] = tempSpace.getData() + bufferSize;
-    tempBuffer[2] = 0;
+    float** const floatBuffer = tempSampleBuffer.getArrayOfChannels();
+    int* const* intBuffer = reinterpret_cast<int* const*> (floatBuffer);
 
     if (usesFloatingPointData)
     {
@@ -195,28 +214,12 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
         while (numSamples > 0)
         {
             const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            read (tempBuffer, 2, startSampleInFile, numToDo, false);
+            if (! read (intBuffer, 2, startSampleInFile, numToDo, false))
+                break;
 
             numSamples -= numToDo;
             startSampleInFile += numToDo;
-
-            float bufMin, bufMax;
-            findMinAndMax (reinterpret_cast<float*> (tempBuffer[0]), numToDo, bufMin, bufMax);
-            lmin = jmin (lmin, bufMin);
-            lmax = jmax (lmax, bufMax);
-
-            if (numChannels > 1)
-            {
-                findMinAndMax (reinterpret_cast<float*> (tempBuffer[1]), numToDo, bufMin, bufMax);
-                rmin = jmin (rmin, bufMin);
-                rmax = jmax (rmax, bufMax);
-            }
-        }
-
-        if (numChannels <= 1)
-        {
-            rmax = lmax;
-            rmin = lmin;
+            getStereoMinAndMax (floatBuffer, numChannels, numToDo, lmin, lmax, rmin, rmax);
         }
 
         lowestLeft   = lmin;
@@ -234,34 +237,12 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
         while (numSamples > 0)
         {
             const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            if (! read (tempBuffer, 2, startSampleInFile, numToDo, false))
+            if (! read (intBuffer, 2, startSampleInFile, numToDo, false))
                 break;
 
             numSamples -= numToDo;
             startSampleInFile += numToDo;
-
-            for (int j = (int) numChannels; --j >= 0;)
-            {
-                int bufMin, bufMax;
-                findMinAndMax (tempBuffer[j], numToDo, bufMin, bufMax);
-
-                if (j == 0)
-                {
-                    lmax = jmax (lmax, bufMax);
-                    lmin = jmin (lmin, bufMin);
-                }
-                else
-                {
-                    rmax = jmax (rmax, bufMax);
-                    rmin = jmin (rmin, bufMin);
-                }
-            }
-        }
-
-        if (numChannels <= 1)
-        {
-            rmax = lmax;
-            rmin = lmin;
+            getStereoMinAndMax (intBuffer, numChannels, numToDo, lmin, lmax, rmin, rmax);
         }
 
         lowestLeft   = lmin / (float) std::numeric_limits<int>::max();
