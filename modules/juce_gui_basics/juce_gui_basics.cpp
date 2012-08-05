@@ -182,6 +182,7 @@ namespace juce
 #include "layout/juce_ComponentBoundsConstrainer.cpp"
 #include "layout/juce_ComponentBuilder.cpp"
 #include "layout/juce_ComponentMovementWatcher.cpp"
+#include "layout/juce_ConcertinaPanel.cpp"
 #include "layout/juce_GroupComponent.cpp"
 #include "layout/juce_MultiDocumentPanel.cpp"
 #include "layout/juce_ResizableBorderComponent.cpp"

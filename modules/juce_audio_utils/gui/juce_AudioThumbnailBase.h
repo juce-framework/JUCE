@@ -153,4 +153,4 @@ public:
     virtual int64 getHashCode() const = 0;
 };
 
-#endif
+#endif   // __JUCE_AUDIOTHUMBNAILBASE_JUCEHEADER__

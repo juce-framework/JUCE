@@ -463,6 +463,11 @@ public:
                                           ComboBox* filenameBox, Button* browseButton);
 
     //==============================================================================
+    virtual void drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
+                                            bool isMouseOver, bool isMouseDown,
+                                            ConcertinaPanel& concertina, Component& panel);
+
+    //==============================================================================
     virtual void drawCornerResizer (Graphics& g,
                                     int w, int h,
                                     bool isMouseOver,

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 struct ThreadSafeNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
 {
     ThreadSafeNSOpenGLViewClass()  : ObjCClass <NSOpenGLView> ("JUCEGLView_")

@@ -1685,6 +1685,19 @@ void LookAndFeel::layoutFilenameComponent (FilenameComponent& filenameComp,
     filenameBox->setBounds (0, 0, browseButton->getX(), filenameComp.getHeight());
 }
 
+//==============================================================================
+void LookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
+                                             bool isMouseOver, bool isMouseDown,
+                                             ConcertinaPanel& concertina, Component& panel)
+{
+    g.fillAll (Colours::grey.withAlpha (isMouseOver ? 0.9f : 0.7f));
+    g.setColour (Colours::black.withAlpha (0.5f));
+    g.drawRect (area);
+
+    g.setColour (Colours::white);
+    g.setFont (Font (area.getHeight() * 0.7f).boldened());
+    g.drawFittedText (panel.getName(), 4, 0, area.getWidth() - 6, area.getHeight(), Justification::centredLeft, 1);
+}
 
 //==============================================================================
 void LookAndFeel::drawImageButton (Graphics& g, Image* image,
