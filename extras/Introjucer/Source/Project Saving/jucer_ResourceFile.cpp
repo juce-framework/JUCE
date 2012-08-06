@@ -149,13 +149,12 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
         const String variableName (variableNames[i].upToFirstOccurrenceOf ("|", false, false));
 
-        returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableName + ";");
-
         FileInputStream fileStream (file);
-        jassert (fileStream.openedOk());
 
         if (fileStream.openedOk())
         {
+            returnCodes.add ("numBytes = " + String (dataSize) + "; return " + variableName + ";");
+
             containsAnyImages = containsAnyImages
                                  || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
 

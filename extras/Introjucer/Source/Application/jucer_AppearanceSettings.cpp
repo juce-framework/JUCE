@@ -637,6 +637,25 @@ void IntrojucerLookAndFeel::drawScrollbar (Graphics& g, ScrollBar& scrollbar, in
     g.strokePath (thumbPath, PathStrokeType (1.0f));
 }
 
+static Range<float> getBrightnessRange (const Image& im)
+{
+    float minB = 1.0f, maxB = 0;
+    const int w = im.getWidth();
+    const int h = im.getHeight();
+
+    for (int y = 0; y < h; ++y)
+    {
+        for (int x = 0; x < w; ++x)
+        {
+            const float b = im.getPixelAt (x, y).getBrightness();
+            minB = jmin (minB, b);
+            maxB = jmax (maxB, b);
+        }
+    }
+
+    return Range<float> (minB, maxB);
+}
+
 void IntrojucerLookAndFeel::fillWithBackgroundTexture (Graphics& g)
 {
     const Colour bkg (findColour (mainBackgroundColourId));
@@ -645,19 +664,24 @@ void IntrojucerLookAndFeel::fillWithBackgroundTexture (Graphics& g)
     {
         backgroundTextureBaseColour = bkg;
 
-        const Image original (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png,
-                                                         BinaryData::brushed_aluminium_pngSize));
+        const Image original (ImageCache::getFromMemory (BinaryData::background_tile_png,
+                                                         BinaryData::background_tile_pngSize));
         const int w = original.getWidth();
         const int h = original.getHeight();
 
         backgroundTexture = Image (Image::RGB, w, h, false);
 
+        const Range<float> brightnessRange (getBrightnessRange (original));
+        const float brightnessOffset = (brightnessRange.getStart() + brightnessRange.getEnd()) / 2.0f;
+        const float brightnessScale = 0.025f / brightnessRange.getLength();
+        const float bkgB = bkg.getBrightness();
+
         for (int y = 0; y < h; ++y)
         {
             for (int x = 0; x < w; ++x)
             {
-                const float b = original.getPixelAt (x, y).getBrightness();
-                backgroundTexture.setPixelAt (x, y, bkg.withMultipliedBrightness (b + 0.4f));
+                const float b = (original.getPixelAt (x, y).getBrightness() - brightnessOffset) * brightnessScale;
+                backgroundTexture.setPixelAt (x, y, bkg.withBrightness (jlimit (0.0f, 1.0f, bkgB + b)));
             }
         }
     }
