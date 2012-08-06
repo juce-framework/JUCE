@@ -454,7 +454,7 @@ Project::Item Project::Item::createGroup (Project& project, const String& name, 
 bool Project::Item::isFile() const          { return state.hasType (Tags::file); }
 bool Project::Item::isGroup() const         { return state.hasType (Tags::group) || isMainGroup(); }
 bool Project::Item::isMainGroup() const     { return state.hasType (Tags::projectMainGroup); }
-bool Project::Item::isImageFile() const     { return isFile() && getFile().hasFileExtension ("png;jpg;jpeg;gif;drawable"); }
+bool Project::Item::isImageFile() const     { return isFile() && ImageFileFormat::findImageFormatForFileExtension (getFile()) != nullptr; }
 
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {

@@ -210,7 +210,8 @@ void JPEGImageFormat::setQuality (const float newQuality)
     quality = newQuality;
 }
 
-String JPEGImageFormat::getFormatName() { return "JPEG"; }
+String JPEGImageFormat::getFormatName()                   { return "JPEG"; }
+bool JPEGImageFormat::usesFileExtension (const File& f)   { return f.hasFileExtension ("jpeg;jpg"); }
 
 bool JPEGImageFormat::canUnderstand (InputStream& in)
 {

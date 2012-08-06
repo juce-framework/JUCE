@@ -57,8 +57,7 @@ public:
     */
     virtual String getFormatName() = 0;
 
-    /** Returns true if the given stream seems to contain data that this format
-        understands.
+    /** Returns true if the given stream seems to contain data that this format understands.
 
         The format class should only read the first few bytes of the stream and sniff
         for header bytes that it understands.
@@ -66,6 +65,9 @@ public:
         @see decodeImage
     */
     virtual bool canUnderstand (InputStream& input) = 0;
+
+    /** Returns true if this format uses the file extension of the given file. */
+    virtual bool usesFileExtension (const File& possibleFile) = 0;
 
     /** Tries to decode and return an image from the given stream.
 
@@ -92,15 +94,18 @@ public:
                                      OutputStream& destStream) = 0;
 
     //==============================================================================
-    /** Tries the built-in decoders to see if it can find one to read this stream.
-
+    /** Tries the built-in formats to see if it can find one to read this stream.
         There are currently built-in decoders for PNG, JPEG and GIF formats.
-
         The object that is returned should not be deleted by the caller.
-
         @see canUnderstand, decodeImage, loadFrom
     */
     static ImageFileFormat* findImageFormatForStream (InputStream& input);
+
+    /** Looks for a format that can handle the given file extension.
+        There are currently built-in formats for PNG, JPEG and GIF formats.
+        The object that is returned should not be deleted by the caller.
+    */
+    static ImageFileFormat* findImageFormatForFileExtension (const File& file);
 
     //==============================================================================
     /** Tries to load an image from a stream.
@@ -130,7 +135,6 @@ public:
     */
     static Image loadFrom (const void* rawData,
                            size_t numBytesOfData);
-
 };
 
 //==============================================================================
@@ -148,6 +152,7 @@ public:
 
     //==============================================================================
     String getFormatName();
+    bool usesFileExtension (const File& possibleFile);
     bool canUnderstand (InputStream& input);
     Image decodeImage (InputStream& input);
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
@@ -177,6 +182,7 @@ public:
 
     //==============================================================================
     String getFormatName();
+    bool usesFileExtension (const File& possibleFile);
     bool canUnderstand (InputStream& input);
     Image decodeImage (InputStream& input);
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
@@ -200,6 +206,7 @@ public:
 
     //==============================================================================
     String getFormatName();
+    bool usesFileExtension (const File& possibleFile);
     bool canUnderstand (InputStream& input);
     Image decodeImage (InputStream& input);
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
