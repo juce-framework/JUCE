@@ -312,6 +312,7 @@ bool ConcertinaPanel::setPanelSize (Component* panelComponent, int height, const
     const int index = indexOfComp (panelComponent);
     jassert (index >= 0); // The specified component doesn't seem to have been added!
 
+    height += currentSizes->get(index).minSize;
     const int oldSize = currentSizes->get(index).size;
     setLayout (currentSizes->withResizedPanel (index, height, getHeight()), animate);
     return oldSize != currentSizes->get(index).size;

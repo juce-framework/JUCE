@@ -689,3 +689,22 @@ void IntrojucerLookAndFeel::fillWithBackgroundTexture (Graphics& g)
     g.setTiledImageFill (backgroundTexture, 0, 0, 1.0f);
     g.fillAll();
 }
+
+void IntrojucerLookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
+                                                       bool isMouseOver, bool isMouseDown,
+                                                       ConcertinaPanel& concertina, Component& panel)
+{
+    const Colour bkg (findColour (mainBackgroundColourId));
+
+    g.setGradientFill (ColourGradient (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), 0, area.getY(),
+                                       Colours::darkgrey.withAlpha (0.2f), 0, area.getBottom(), false));
+
+    g.fillAll();
+    g.setColour (bkg.contrasting().withAlpha (0.04f));
+    g.fillRect (area.withHeight (1));
+    g.fillRect (area.withTop (area.getBottom() - 1));
+
+    g.setColour (bkg.contrasting());
+    g.setFont (Font (area.getHeight() * 0.6f).boldened());
+    g.drawFittedText (panel.getName(), 4, 0, area.getWidth() - 6, area.getHeight(), Justification::centredLeft, 1);
+}

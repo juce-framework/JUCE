@@ -105,6 +105,9 @@ public:
     void drawScrollbar (Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height, bool isScrollbarVertical,
                         int thumbStartPosition, int thumbSize, bool /*isMouseOver*/, bool /*isMouseDown*/);
 
+    void drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
+                                    bool isMouseOver, bool isMouseDown,
+                                    ConcertinaPanel& concertina, Component& panel);
 private:
     Image backgroundTexture;
     Colour backgroundTextureBaseColour;
