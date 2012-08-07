@@ -531,6 +531,7 @@ private:
         {
             dict->createNewChildElement ("key")->addTextElement ("CFBundleDocumentTypes");
             XmlElement* dict2 = dict->createNewChildElement ("array")->createNewChildElement ("dict");
+            XmlElement* arrayTag = nullptr;
 
             for (int i = 0; i < documentExtensions.size(); ++i)
             {
@@ -538,11 +539,17 @@ private:
                 if (ex.startsWithChar ('.'))
                     ex = ex.substring (1);
 
-                dict2->createNewChildElement ("key")->addTextElement ("CFBundleTypeExtensions");
-                dict2->createNewChildElement ("array")->createNewChildElement ("string")->addTextElement (ex);
-                addPlistDictionaryKey (dict2, "CFBundleTypeName", ex);
-                addPlistDictionaryKey (dict2, "CFBundleTypeRole", "Editor");
-                addPlistDictionaryKey (dict2, "NSPersistentStoreTypeKey", "XML");
+                if (arrayTag == nullptr)
+                {
+                    dict2->createNewChildElement ("key")->addTextElement ("CFBundleTypeExtensions");
+                    arrayTag = dict2->createNewChildElement ("array");
+
+                    addPlistDictionaryKey (dict2, "CFBundleTypeName", ex);
+                    addPlistDictionaryKey (dict2, "CFBundleTypeRole", "Editor");
+                    addPlistDictionaryKey (dict2, "NSPersistentStoreTypeKey", "XML");
+                }
+
+                arrayTag->createNewChildElement ("string")->addTextElement (ex);
             }
         }
 
