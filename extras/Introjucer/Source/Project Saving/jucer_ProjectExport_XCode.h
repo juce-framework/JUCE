@@ -114,7 +114,8 @@ public:
         if (projectType.isGUIApplication() && ! iOS)
         {
             props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false),
-                       "A comma-separated list of file extensions for documents that your app can open.");
+                       "A comma-separated list of file extensions for documents that your app can open. "
+                       "Using a leading '.' is optional, and the extensions are not case-sensitive.");
         }
         else if (iOS)
         {

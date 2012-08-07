@@ -160,6 +160,25 @@ public:
             rootItem->deleteAllSelectedItems();
     }
 
+    void setEmptyTreeMessage (const String& newMessage)
+    {
+        if (emptyTreeMessage != newMessage)
+        {
+            emptyTreeMessage = newMessage;
+            repaint();
+        }
+    }
+
+    void paint (Graphics& g)
+    {
+        if (emptyTreeMessage.isNotEmpty() && (rootItem == nullptr || rootItem->getNumSubItems() == 0))
+        {
+            g.setColour (findColour (mainBackgroundColourId).contrasting (0.7f));
+            g.setFont (13.0f);
+            g.drawFittedText (emptyTreeMessage, getLocalBounds().reduced (4, 2), Justification::centred, 50);
+        }
+    }
+
     void resized()
     {
         tree.setBounds (getAvailableBounds());
@@ -174,7 +193,7 @@ public:
     ScopedPointer<JucerTreeViewBase> rootItem;
 
 private:
-    String opennessStateKey;
+    String opennessStateKey, emptyTreeMessage;
 };
 
 //==============================================================================
