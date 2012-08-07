@@ -169,14 +169,19 @@ public:
         }
     }
 
+    static void drawEmptyPanelMessage (Component& comp, Graphics& g, const String& message)
+    {
+        const int fontHeight = 13;
+        const Rectangle<int> area (comp.getLocalBounds());
+        g.setColour (comp.findColour (mainBackgroundColourId).contrasting (0.7f));
+        g.setFont ((float) fontHeight);
+        g.drawFittedText (message, area.reduced (4, 2), Justification::centred, area.getHeight() / fontHeight);
+    }
+
     void paint (Graphics& g)
     {
         if (emptyTreeMessage.isNotEmpty() && (rootItem == nullptr || rootItem->getNumSubItems() == 0))
-        {
-            g.setColour (findColour (mainBackgroundColourId).contrasting (0.7f));
-            g.setFont (13.0f);
-            g.drawFittedText (emptyTreeMessage, getLocalBounds().reduced (4, 2), Justification::centred, 50);
-        }
+            drawEmptyPanelMessage (*this, g, emptyTreeMessage);
     }
 
     void resized()
