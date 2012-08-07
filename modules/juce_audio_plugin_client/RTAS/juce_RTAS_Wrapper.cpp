@@ -87,6 +87,7 @@
 #include <CPluginControl.h>
 #include <CPluginControl_OnOff.h>
 #include <FicProcessTokens.h>
+#include <ExternalVersionDefines.h>
 
 //==============================================================================
 #ifdef _MSC_VER
