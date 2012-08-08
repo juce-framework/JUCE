@@ -283,6 +283,9 @@ public:
         zeromem (data, sizeof (ElementType) * numElements);
     }
 
+    /** This typedef can be used to get the type of the heapblock's elements. */
+    typedef ElementType Type;
+
 private:
     //==============================================================================
     ElementType* data;

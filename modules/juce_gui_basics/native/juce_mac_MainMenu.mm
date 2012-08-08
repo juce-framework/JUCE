@@ -470,7 +470,22 @@ JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;
 //==============================================================================
 namespace MainMenuHelpers
 {
-    static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName, const PopupMenu* extraItems)
+    static NSString* translateMenuName (const String& name)
+    {
+        return NSLocalizedString (juceStringToNS (TRANS (name)), nil);
+    }
+
+    static NSMenuItem* createMenuItem (NSMenu* menu, const String& name, SEL sel, NSString* key)
+    {
+        NSMenuItem* item = [[[NSMenuItem alloc] initWithTitle: translateMenuName (name)
+                                                       action: sel
+                                                keyEquivalent: key] autorelease];
+        [item setTarget: NSApp];
+        [menu addItem: item];
+        return item;
+    }
+
+    static void createStandardAppMenu (NSMenu* menu, const String& appName, const PopupMenu* extraItems)
     {
         if (extraItems != nullptr && JuceMainMenuHandler::instance != nullptr && extraItems->getNumItems() > 0)
         {
@@ -480,50 +495,26 @@ namespace MainMenuHelpers
             [menu addItem: [NSMenuItem separatorItem]];
         }
 
-        NSMenuItem* item;
-
         // Services...
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Services"), nil)
-                                          action: nil  keyEquivalent: nsEmptyString()];
-        [menu addItem: item];
-        [item release];
-        NSMenu* servicesMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Services")];
-        [menu setSubmenu: servicesMenu forItem: item];
+        NSMenuItem* services = [[[NSMenuItem alloc] initWithTitle: translateMenuName ("Services")
+                                                           action: nil  keyEquivalent: nsEmptyString()] autorelease];
+        [menu addItem: services];
+
+        NSMenu* servicesMenu = [[[NSMenu alloc] initWithTitle: translateMenuName ("Services")] autorelease];
+        [menu setSubmenu: servicesMenu forItem: services];
         [NSApp setServicesMenu: servicesMenu];
-        [servicesMenu release];
         [menu addItem: [NSMenuItem separatorItem]];
 
-        // Hide + Show stuff...
-        item = [[NSMenuItem alloc] initWithTitle: juceStringToNS ("Hide " + appName)
-                                          action: @selector (hide:)  keyEquivalent: nsStringLiteral ("h")];
-        [item setTarget: NSApp];
-        [menu addItem: item];
-        [item release];
+        createMenuItem (menu, "Hide " + appName, @selector (hide:), nsStringLiteral ("h"));
 
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Hide Others"), nil)
-                                          action: @selector (hideOtherApplications:)  keyEquivalent: nsStringLiteral ("h")];
-        [item setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
-        [item setTarget: NSApp];
-        [menu addItem: item];
-        [item release];
+        [createMenuItem (menu, "Hide Others", @selector (hideOtherApplications:), nsStringLiteral ("h"))
+            setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
 
-        item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (nsStringLiteral ("Show All"), nil)
-                                          action: @selector (unhideAllApplications:)  keyEquivalent: nsEmptyString()];
-        [item setTarget: NSApp];
-        [menu addItem: item];
-        [item release];
+        createMenuItem (menu, "Show All", @selector (unhideAllApplications:), nsEmptyString());
 
         [menu addItem: [NSMenuItem separatorItem]];
 
-        // Quit item....
-        item = [[NSMenuItem alloc] initWithTitle: juceStringToNS ("Quit " + appName)
-                                          action: @selector (terminate:)  keyEquivalent: nsStringLiteral ("q")];
-
-        [item setTarget: NSApp];
-        [menu addItem: item];
-        [item release];
-
-        return menu;
+        createMenuItem (menu, "Quit " + appName, @selector (terminate:), nsStringLiteral ("q"));
     }
 
     // Since our app has no NIB, this initialises a standard app menu...
