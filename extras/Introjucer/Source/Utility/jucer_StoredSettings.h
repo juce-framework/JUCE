@@ -38,14 +38,16 @@ public:
 
     void initialise();
 
-    PropertiesFile& getProps();
+    PropertiesFile& getGlobalProperties();
+    PropertiesFile& getProjectProperties (const String& projectUID);
+
     void flush();
     void reload();
 
     //==============================================================================
     RecentlyOpenedFilesList recentFiles;
 
-    Array<File> getLastProjects() const;
+    Array<File> getLastProjects();
     void setLastProjects (const Array<File>& files);
 
     //==============================================================================
@@ -67,7 +69,7 @@ public:
     StringArray monospacedFontNames;
 
 private:
-    ScopedPointer<PropertiesFile> props;
+    OwnedArray<PropertiesFile> propertyFiles;
 
     void loadSwatchColours();
 
@@ -75,7 +77,7 @@ private:
 };
 
 StoredSettings& getAppSettings();
-PropertiesFile& getAppProperties();
+PropertiesFile& getGlobalProperties();
 
 
 #endif   // __JUCER_STOREDSETTINGS_JUCEHEADER__

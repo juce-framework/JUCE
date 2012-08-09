@@ -254,6 +254,9 @@ public:
     String getFileTemplate (const String& templateName);
 
     //==============================================================================
+    PropertiesFile& getStoredProperties() const;
+
+    //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);
     void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded);
     void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved);

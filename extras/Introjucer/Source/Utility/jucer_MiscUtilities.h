@@ -189,7 +189,7 @@ public:
         setResizeLimits (minW, minH, maxW, maxH);
         setContentOwned (content, false);
 
-        const String windowState (getAppProperties().getValue (windowPosProperty));
+        const String windowState (getGlobalProperties().getValue (windowPosProperty));
 
         if (windowState.isNotEmpty())
             restoreWindowStateFromString (windowState);
@@ -202,7 +202,7 @@ public:
 
     ~FloatingToolWindow()
     {
-        getAppProperties().setValue (windowPosProperty, getWindowStateAsString());
+        getGlobalProperties().setValue (windowPosProperty, getWindowStateAsString());
     }
 
     void closeButtonPressed()

@@ -33,9 +33,9 @@ StoredSettings& getAppSettings()
     return *JucerApplication::getApp().settings;
 }
 
-PropertiesFile& getAppProperties()
+PropertiesFile& getGlobalProperties()
 {
-    return getAppSettings().getProps();
+    return getAppSettings().getGlobalProperties();
 }
 
 //==============================================================================
@@ -54,16 +54,48 @@ void StoredSettings::initialise()
     reload();
 }
 
-PropertiesFile& StoredSettings::getProps()
+PropertiesFile& StoredSettings::getGlobalProperties()
 {
-    jassert (props != nullptr);
-    return *props;
+    return *propertyFiles.getUnchecked (0);
+}
+
+static PropertiesFile* createPropsFile (const String& filename)
+{
+    PropertiesFile::Options options;
+    options.applicationName     = filename;
+    options.filenameSuffix      = "settings";
+    options.osxLibrarySubFolder = "Application Support";
+   #if JUCE_LINUX
+    options.folderName          = ".introjucer";
+   #else
+    options.folderName          = "Introjucer";
+   #endif
+
+    return new PropertiesFile (options);
+}
+
+PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
+{
+    const String filename ("Introjucer_Project_" + projectUID);
+
+    for (int i = propertyFiles.size(); --i >= 0;)
+    {
+        PropertiesFile* const props = propertyFiles.getUnchecked(i);
+        if (props->getFile().getFileNameWithoutExtension() == filename)
+            return *props;
+    }
+
+    PropertiesFile* p = createPropsFile (filename);
+    propertyFiles.add (p);
+    return *p;
 }
 
 void StoredSettings::flush()
 {
-    if (props != nullptr)
+    for (int i = propertyFiles.size(); --i >= 0;)
     {
+        PropertiesFile* const props = propertyFiles.getUnchecked(i);
+
         {
             const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
             props->setValue ("editorColours", xml);
@@ -87,28 +119,14 @@ void StoredSettings::flush()
 
 void StoredSettings::reload()
 {
-    props = nullptr;
-
-    {
-        // These settings are used in defining the properties file's location.
-        PropertiesFile::Options options;
-        options.applicationName     = "Introjucer";
-        options.filenameSuffix      = "settings";
-        options.osxLibrarySubFolder = "Application Support";
-       #if JUCE_LINUX
-        options.folderName          = ".introjucer";
-       #else
-        options.folderName          = "Introjucer";
-       #endif
-
-        props = new PropertiesFile (options);
-    }
+    propertyFiles.clear();
+    propertyFiles.add (createPropsFile ("Introjucer"));
 
     // recent files...
-    recentFiles.restoreFromString (props->getValue ("recentFiles"));
+    recentFiles.restoreFromString (getGlobalProperties().getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
 
-    ScopedPointer<XmlElement> xml (props->getXmlValue ("editorColours"));
+    ScopedPointer<XmlElement> xml (getGlobalProperties().getXmlValue ("editorColours"));
     if (xml == nullptr)
         xml = XmlDocument::parse (BinaryData::colourscheme_dark_xml);
 
@@ -118,10 +136,10 @@ void StoredSettings::reload()
     loadSwatchColours();
 }
 
-Array<File> StoredSettings::getLastProjects() const
+Array<File> StoredSettings::getLastProjects()
 {
     StringArray s;
-    s.addTokens (props->getValue ("lastProjects"), "|", "");
+    s.addTokens (getGlobalProperties().getValue ("lastProjects"), "|", "");
 
     Array<File> f;
     for (int i = 0; i < s.size(); ++i)
@@ -136,7 +154,7 @@ void StoredSettings::setLastProjects (const Array<File>& files)
     for (int i = 0; i < files.size(); ++i)
         s.add (files.getReference(i).getFullPathName());
 
-    props->setValue ("lastProjects", s.joinIntoString ("|"));
+    getGlobalProperties().setValue ("lastProjects", s.joinIntoString ("|"));
 }
 
 //==============================================================================
@@ -155,10 +173,11 @@ void StoredSettings::loadSwatchColours()
     #undef COL
 
     const int numSwatchColours = 24;
+    PropertiesFile& props = getGlobalProperties();
 
     for (int i = 0; i < numSwatchColours; ++i)
-        swatchColours.add (Colour::fromString (props->getValue ("swatchColour" + String (i),
-                                                                colours [2 + i].toString())));
+        swatchColours.add (Colour::fromString (props.getValue ("swatchColour" + String (i),
+                                                               colours [2 + i].toString())));
 }
 
 int StoredSettings::ColourSelectorWithSwatches::getNumSwatches() const

@@ -28,6 +28,45 @@
 
 
 //==============================================================================
+void TreePanelBase::setRoot (JucerTreeViewBase* root)
+{
+    rootItem = root;
+    tree.setRootItem (root);
+    tree.getRootItem()->setOpen (true);
+
+    if (project != nullptr)
+    {
+        const ScopedPointer<XmlElement> treeOpenness (project->getStoredProperties()
+                                                          .getXmlValue (opennessStateKey));
+        if (treeOpenness != nullptr)
+        {
+            tree.restoreOpennessState (*treeOpenness, true);
+
+            for (int i = tree.getNumSelectedItems(); --i >= 0;)
+            {
+                JucerTreeViewBase* item = dynamic_cast<JucerTreeViewBase*> (tree.getSelectedItem (i));
+
+                if (item != nullptr)
+                    item->cancelDelayedSelectionTimer();
+            }
+        }
+    }
+}
+
+void TreePanelBase::saveOpenness()
+{
+    if (project != nullptr)
+    {
+        const ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
+
+        if (opennessState != nullptr)
+            project->getStoredProperties().setValue (opennessStateKey, opennessState);
+        else
+            project->getStoredProperties().removeValue (opennessStateKey);
+    }
+}
+
+//==============================================================================
 JucerTreeViewBase::JucerTreeViewBase()
     : textX (0)
 {

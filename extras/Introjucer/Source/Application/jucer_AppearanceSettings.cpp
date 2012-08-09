@@ -79,7 +79,7 @@ AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
 
 File AppearanceSettings::getSchemesFolder()
 {
-    File f (getAppProperties().getFile().getSiblingFile ("Schemes"));
+    File f (getGlobalProperties().getFile().getSiblingFile ("Schemes"));
     f.createDirectory();
     return f;
 }

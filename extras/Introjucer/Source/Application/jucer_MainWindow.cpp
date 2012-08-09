@@ -58,7 +58,7 @@ MainWindow::MainWindow()
     {
         commandManager->getKeyMappings()->resetToDefaultMappings();
 
-        ScopedPointer <XmlElement> keys (getAppProperties().getXmlValue ("keyMappings"));
+        ScopedPointer <XmlElement> keys (getGlobalProperties().getXmlValue ("keyMappings"));
 
         if (keys != nullptr)
             commandManager->getKeyMappings()->restoreFromXml (*keys);
@@ -82,7 +82,7 @@ MainWindow::~MainWindow()
     removeKeyListener (commandManager->getKeyMappings());
 
     // save the current size and position to our settings file..
-    getAppProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
+    getGlobalProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
 
     clearContentComponent();
     currentProject = nullptr;
@@ -125,7 +125,7 @@ bool MainWindow::closeProject (Project* project)
     if (project == nullptr)
         return true;
 
-    getAppProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
+    project->getStoredProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
 
     ProjectContentComponent* const pcc = getProjectContentComponent();
 
@@ -169,10 +169,10 @@ void MainWindow::restoreWindowPosition()
     String windowState;
 
     if (currentProject != nullptr)
-        windowState = getAppProperties().getValue (getProjectWindowPosName());
+        windowState = currentProject->getStoredProperties().getValue (getProjectWindowPosName());
 
     if (windowState.isEmpty())
-        windowState = getAppProperties().getValue ("lastMainWindowPos");
+        windowState = getGlobalProperties().getValue ("lastMainWindowPos");
 
     restoreWindowStateFromString (windowState);
 }

@@ -37,7 +37,7 @@ class FileTreeTab   : public TreePanelBase
 {
 public:
     FileTreeTab (Project& project)
-        : TreePanelBase ("treeViewState_" + project.getProjectUID())
+        : TreePanelBase (&project, "fileTreeState")
     {
         tree.setMultiSelectEnabled (true);
         setRoot (new GroupTreeViewItem (project.getMainGroup()));
@@ -49,7 +49,7 @@ class ConfigTreeTab   : public TreePanelBase
 {
 public:
     ConfigTreeTab (Project& project)
-        : TreePanelBase ("settingsTreeViewState_" + project.getProjectUID())
+        : TreePanelBase (&project, "settingsTreeState")
     {
         tree.setMultiSelectEnabled (false);
         setRoot (createProjectConfigTreeViewRoot (project));
@@ -189,8 +189,6 @@ void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
     {
-        PropertiesFile& settings = getAppProperties();
-
         if (project != nullptr)
             project->removeChangeListener (this);
 
@@ -199,10 +197,12 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         if (project != nullptr && treeViewTabs.isShowing())
         {
-            if (treeViewTabs.getWidth() > 0)
-                settings.setValue ("projectTreeviewWidth_" + project->getProjectUID(), treeViewTabs.getWidth());
+            PropertiesFile& settings = project->getStoredProperties();
 
-            settings.setValue ("lastTab_" + project->getProjectUID(), treeViewTabs.getCurrentTabName());
+            if (treeViewTabs.getWidth() > 0)
+                settings.setValue ("projectPanelWidth", treeViewTabs.getWidth());
+
+            settings.setValue ("lastTab", treeViewTabs.getCurrentTabName());
         }
 
         treeViewTabs.clearTabs();
@@ -214,7 +214,9 @@ void ProjectContentComponent::setProject (Project* newProject)
 
             createProjectTabs();
 
-            const String lastTabName (settings.getValue ("lastTab_" + project->getProjectUID()));
+            PropertiesFile& settings = project->getStoredProperties();
+
+            const String lastTabName (settings.getValue ("lastTab"));
             int lastTabIndex = treeViewTabs.getTabNames().indexOf (lastTabName);
 
             if (lastTabIndex < 0 || lastTabIndex > treeViewTabs.getNumTabs())
@@ -222,7 +224,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
             treeViewTabs.setCurrentTabIndex (lastTabIndex);
 
-            int lastTreeWidth = settings.getValue ("projectTreeviewWidth_" + project->getProjectUID()).getIntValue();
+            int lastTreeWidth = settings.getValue ("projectPanelWidth").getIntValue();
             if (lastTreeWidth < 150)
                 lastTreeWidth = 240;
 
@@ -283,7 +285,7 @@ void ProjectContentComponent::saveOpenDocumentList()
         ScopedPointer<XmlElement> xml (recentDocumentList.createXML());
 
         if (xml != nullptr)
-            getAppProperties().setValue ("lastDocs_" + project->getProjectUID(), xml);
+            project->getStoredProperties().setValue ("lastDocs", xml);
     }
 }
 
@@ -291,7 +293,7 @@ void ProjectContentComponent::reloadLastOpenDocuments()
 {
     if (project != nullptr)
     {
-        ScopedPointer<XmlElement> xml (getAppProperties().getXmlValue ("lastDocs_" + project->getProjectUID()));
+        ScopedPointer<XmlElement> xml (project->getStoredProperties().getXmlValue ("lastDocs"));
 
         if (xml != nullptr)
         {

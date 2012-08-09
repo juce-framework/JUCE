@@ -966,3 +966,8 @@ bool Project::ExporterIterator::next()
 
     return true;
 }
+
+PropertiesFile& Project::getStoredProperties() const
+{
+    return getAppSettings().getProjectProperties (getProjectUID());
+}

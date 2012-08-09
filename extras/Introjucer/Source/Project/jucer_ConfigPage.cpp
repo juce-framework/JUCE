@@ -70,7 +70,7 @@ namespace ProjectSettingsTreeClasses
         bool isMissing()                        { return false; }
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return false; }
-        String getUniqueName() const            { return config->project.getProjectUID() + "_config_" + config->getName(); }
+        String getUniqueName() const            { return "config_" + config->getName(); }
         String getRenamingName() const          { return getDisplayName(); }
         String getDisplayName() const           { return config->getName(); }
         void setName (const String&)            {}
@@ -170,7 +170,7 @@ namespace ProjectSettingsTreeClasses
 
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return exporter->getNumConfigurations() > 0; }
-        String getUniqueName() const            { return project.getProjectUID() + "_exporter_" + String (exporterIndex); }
+        String getUniqueName() const            { return "exporter_" + String (exporterIndex); }
         String getRenamingName() const          { return getDisplayName(); }
         String getDisplayName() const           { return exporter->getName(); }
         void setName (const String&)            {}
@@ -292,7 +292,7 @@ namespace ProjectSettingsTreeClasses
 
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return false; }
-        String getUniqueName() const            { return project.getProjectUID() + "_modules"; }
+        String getUniqueName() const            { return "modules"; }
         String getRenamingName() const          { return getDisplayName(); }
         String getDisplayName() const           { return "Modules"; }
         void setName (const String&)            {}
@@ -353,7 +353,7 @@ namespace ProjectSettingsTreeClasses
         void showDocument()                     { showSettingsPage (new SettingsComp (project)); }
         bool canBeSelected() const              { return true; }
         bool mightContainSubItems()             { return project.getNumExporters() > 0; }
-        String getUniqueName() const            { return project.getProjectUID() + "_config_root"; }
+        String getUniqueName() const            { return "config_root"; }
 
         void addSubItems()
         {
