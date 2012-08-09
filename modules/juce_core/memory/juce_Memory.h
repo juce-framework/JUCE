@@ -65,7 +65,7 @@ inline int getAddressDifference (Type1* pointer1, Type2* pointer2) noexcept  { r
     nullptr if the pointer is null.
 */
 template <class Type>
-inline Type* createCopyIfNotNull (Type* pointer)     { return pointer != nullptr ? new Type (*pointer) : nullptr; }
+inline Type* createCopyIfNotNull (const Type* pointer)     { return pointer != nullptr ? new Type (*pointer) : nullptr; }
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS || DOXYGEN

@@ -128,6 +128,18 @@ public:
         return dest;
     }
 
+    static CharPointerType createFromCharPointer (const CharPointerType& start, const CharPointerType& end)
+    {
+        if (start.getAddress() == nullptr || start.isEmpty())
+            return getEmpty();
+
+        const size_t numBytes = end.getAddress() - start.getAddress();
+        const CharPointerType dest (createUninitialisedBytes (numBytes + 1));
+        memcpy (dest.getAddress(), start, numBytes);
+        dest.getAddress()[numBytes] = 0;
+        return dest;
+    }
+
     static CharPointerType createFromFixedLength (const char* const src, const size_t numChars)
     {
         const CharPointerType dest (createUninitialisedBytes (numChars * sizeof (CharType) + sizeof (CharType)));

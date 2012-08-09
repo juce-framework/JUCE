@@ -61,8 +61,7 @@ public:
             menuBarItemsChanged (nullptr);
         }
 
-        extraAppleMenuItems = newExtraAppleMenuItems != nullptr ? new PopupMenu (*newExtraAppleMenuItems)
-                                                                : nullptr;
+        extraAppleMenuItems = createCopyIfNotNull (newExtraAppleMenuItems);
     }
 
     void addSubMenu (NSMenu* parent, const PopupMenu& child,
