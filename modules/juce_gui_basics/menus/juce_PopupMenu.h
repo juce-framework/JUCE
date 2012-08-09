@@ -105,7 +105,7 @@ public:
 
     /** Appends a new text item for this menu to show.
 
-        @param itemResultId     the number that will be returned from the show() method
+        @param itemResultID     the number that will be returned from the show() method
                                 if the user picks this item. The value should never be
                                 zero, because that's used to indicate that the user didn't
                                 select anything.
@@ -119,7 +119,7 @@ public:
 
         @see addSeparator, addColouredItem, addCustomItem, addSubMenu
     */
-    void addItem (int itemResultId,
+    void addItem (int itemResultID,
                   const String& itemText,
                   bool isEnabled = true,
                   bool isTicked = false,
@@ -144,7 +144,7 @@ public:
         text, which will override the default colours that are used by the
         current look-and-feel. See addItem() for a description of the parameters.
     */
-    void addColouredItem (int itemResultId,
+    void addColouredItem (int itemResultID,
                           const String& itemText,
                           const Colour& itemTextColour,
                           bool isEnabled = true,
@@ -161,12 +161,12 @@ public:
 
         if triggerMenuItemAutomaticallyWhenClicked is true, the menu itself will handle
         detection of a mouse-click on your component, and use that to trigger the
-        menu ID specified in itemResultId. If this is false, the menu item can't
-        be triggered, so itemResultId is not used.
+        menu ID specified in itemResultID. If this is false, the menu item can't
+        be triggered, so itemResultID is not used.
 
         @see CustomComponent
     */
-    void addCustomItem (int itemResultId,
+    void addCustomItem (int itemResultID,
                         Component* customComponent,
                         int idealWidth, int idealHeight,
                         bool triggerMenuItemAutomaticallyWhenClicked);
@@ -174,12 +174,15 @@ public:
     /** Appends a sub-menu.
 
         If the menu that's passed in is empty, it will appear as an inactive item.
+        If the itemResultID argument is non-zero, then the sub-menu item itself can be
+        clicked to trigger it as a command.
     */
     void addSubMenu (const String& subMenuName,
                      const PopupMenu& subMenu,
                      bool isEnabled = true,
                      const Image& iconToUse = Image::null,
-                     bool isTicked = false);
+                     bool isTicked = false,
+                     int itemResultID = 0);
 
     /** Appends a separator to the menu, to help break it up into sections.
 
@@ -254,7 +257,7 @@ public:
         on where this point is on the screen, the menu will appear above, below or
         to the side of the point.
 
-        @param itemIdThatMustBeVisible  if you set this to the ID of one of the menu items,
+        @param itemIDThatMustBeVisible  if you set this to the ID of one of the menu items,
                                         then when the menu first appears, it will make sure
                                         that this item is visible. So if the menu has too many
                                         items to fit on the screen, it will be scrolled to a
@@ -276,7 +279,7 @@ public:
                                         pointers that it uses are safely within scope.
         @see showAt
     */
-    int show (int itemIdThatMustBeVisible = 0,
+    int show (int itemIDThatMustBeVisible = 0,
               int minimumWidth = 0,
               int maximumNumColumns = 0,
               int standardItemHeight = 0,
@@ -297,7 +300,7 @@ public:
         @see show()
     */
     int showAt (const Rectangle<int>& screenAreaToAttachTo,
-                int itemIdThatMustBeVisible = 0,
+                int itemIDThatMustBeVisible = 0,
                 int minimumWidth = 0,
                 int maximumNumColumns = 0,
                 int standardItemHeight = 0,
@@ -310,7 +313,7 @@ public:
         things like buttons that trigger a pop-up menu.
     */
     int showAt (Component* componentToAttachTo,
-                int itemIdThatMustBeVisible = 0,
+                int itemIDThatMustBeVisible = 0,
                 int minimumWidth = 0,
                 int maximumNumColumns = 0,
                 int standardItemHeight = 0,
@@ -472,7 +475,7 @@ public:
 
         @see CustomComponent
     */
-    void addCustomItem (int itemResultId, CustomComponent* customComponent);
+    void addCustomItem (int itemResultID, CustomComponent* customComponent);
 
 private:
     //==============================================================================
