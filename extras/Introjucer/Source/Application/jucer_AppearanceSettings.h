@@ -86,6 +86,7 @@ public:
     IntrojucerLookAndFeel();
 
     void fillWithBackgroundTexture (Graphics&);
+    static void fillWithBackgroundTexture (Component&, Graphics&);
 
     int getTabButtonOverlap (int tabDepth);
     int getTabButtonSpaceAroundImage();

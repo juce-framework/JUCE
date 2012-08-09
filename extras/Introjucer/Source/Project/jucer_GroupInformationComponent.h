@@ -57,7 +57,7 @@ public:
     //==============================================================================
     void paint (Graphics& g)
     {
-        dynamic_cast<IntrojucerLookAndFeel&> (getLookAndFeel()).fillWithBackgroundTexture (g);
+        IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
     }
 
     void resized()

@@ -99,8 +99,8 @@ void AppearanceSettings::writeDefaultSchemeFile (const String& xmlString, const 
 
 void AppearanceSettings::refreshPresetSchemeList()
 {
-    writeDefaultSchemeFile (String::empty,               "Default (Light)");
-    writeDefaultSchemeFile (BinaryData::dark_scheme_xml, "Default (Dark)");
+    writeDefaultSchemeFile (BinaryData::colourscheme_dark_xml,  "Default (Dark)");
+    writeDefaultSchemeFile (BinaryData::colourscheme_light_xml, "Default (Light)");
 
     Array<File> newSchemes;
     getSchemesFolder().findChildFiles (newSchemes, File::findFiles, false, String ("*") + getSchemeFileSuffix());
@@ -688,6 +688,11 @@ void IntrojucerLookAndFeel::fillWithBackgroundTexture (Graphics& g)
 
     g.setTiledImageFill (backgroundTexture, 0, 0, 1.0f);
     g.fillAll();
+}
+
+void IntrojucerLookAndFeel::fillWithBackgroundTexture (Component& c, Graphics& g)
+{
+    dynamic_cast<IntrojucerLookAndFeel&> (c.getLookAndFeel()).fillWithBackgroundTexture (g);
 }
 
 void IntrojucerLookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,

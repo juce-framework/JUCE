@@ -88,14 +88,14 @@ static const unsigned char temp_e612dbe3[] =
 
 const char* background_tile_png = (const char*) temp_e612dbe3;
 
-//================== dark_scheme.xml ==================
-static const unsigned char temp_b8a2e640[] =
+//================== colourscheme_dark.xml ==================
+static const unsigned char temp_7bcdfa76[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
-"<COLOUR_SCHEME font=\"<Monospaced>; 13.0 Regular\">\r\n"
-"  <COLOUR name=\"Main Window Bkgd\" colour=\"FF292929\"/>\r\n"
+"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
+"  <COLOUR name=\"Main Window Bkgd\" colour=\"FF29292A\"/>\r\n"
 "  <COLOUR name=\"Treeview Highlight\" colour=\"2BFFFEC3\"/>\r\n"
-"  <COLOUR name=\"Code Background\" colour=\"FF353535\"/>\r\n"
+"  <COLOUR name=\"Code Background\" colour=\"FF222222\"/>\r\n"
 "  <COLOUR name=\"Line Number Bkgd\" colour=\"44C1C1C1\"/>\r\n"
 "  <COLOUR name=\"Line Numbers\" colour=\"E9B2B2B2\"/>\r\n"
 "  <COLOUR name=\"Plain Text\" colour=\"FFCECECE\"/>\r\n"
@@ -104,9 +104,9 @@ static const unsigned char temp_b8a2e640[] =
 "  <COLOUR name=\"Preprocessor Text\" colour=\"FFF8F631\"/>\r\n"
 "  <COLOUR name=\"Punctuation\" colour=\"FFCFBEFF\"/>\r\n"
 "  <COLOUR name=\"Bracket\" colour=\"FF058202\"/>\r\n"
-"  <COLOUR name=\"String\" colour=\"FFD408D4\"/>\r\n"
+"  <COLOUR name=\"String\" colour=\"FFBC45DD\"/>\r\n"
 "  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
-"  <COLOUR name=\"Integer\" colour=\"FF03EAE2\"/>\r\n"
+"  <COLOUR name=\"Integer\" colour=\"FF42C8C4\"/>\r\n"
 "  <COLOUR name=\"Identifier\" colour=\"FFCFCFCF\"/>\r\n"
 "  <COLOUR name=\"Operator\" colour=\"FFC4EB19\"/>\r\n"
 "  <COLOUR name=\"Keyword\" colour=\"FFEE6F6F\"/>\r\n"
@@ -114,7 +114,35 @@ static const unsigned char temp_b8a2e640[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* dark_scheme_xml = (const char*) temp_b8a2e640;
+const char* colourscheme_dark_xml = (const char*) temp_7bcdfa76;
+
+//================== colourscheme_light.xml ==================
+static const unsigned char temp_97d41148[] =
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+"\r\n"
+"<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
+"  <COLOUR name=\"Main Window Bkgd\" colour=\"FFE6E7E9\"/>\r\n"
+"  <COLOUR name=\"Treeview Highlight\" colour=\"401111ee\"/>\r\n"
+"  <COLOUR name=\"Code Background\" colour=\"ffffffff\"/>\r\n"
+"  <COLOUR name=\"Line Number Bkgd\" colour=\"44999999\"/>\r\n"
+"  <COLOUR name=\"Line Numbers\" colour=\"44000000\"/>\r\n"
+"  <COLOUR name=\"Plain Text\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Selected Text Bkgd\" colour=\"401111ee\"/>\r\n"
+"  <COLOUR name=\"Caret\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Preprocessor Text\" colour=\"ff660000\"/>\r\n"
+"  <COLOUR name=\"Punctuation\" colour=\"ff004400\"/>\r\n"
+"  <COLOUR name=\"Bracket\" colour=\"ff000055\"/>\r\n"
+"  <COLOUR name=\"String\" colour=\"ff990099\"/>\r\n"
+"  <COLOUR name=\"Float\" colour=\"ff885500\"/>\r\n"
+"  <COLOUR name=\"Integer\" colour=\"ff880000\"/>\r\n"
+"  <COLOUR name=\"Identifier\" colour=\"ff000000\"/>\r\n"
+"  <COLOUR name=\"Operator\" colour=\"ff225500\"/>\r\n"
+"  <COLOUR name=\"Keyword\" colour=\"ff0000cc\"/>\r\n"
+"  <COLOUR name=\"Comment\" colour=\"ff00aa00\"/>\r\n"
+"  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
+"</COLOUR_SCHEME>\r\n";
+
+const char* colourscheme_light_xml = (const char*) temp_97d41148;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
 static const unsigned char temp_6eda5614[] =
@@ -692,8 +720,10 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x2981a553:  numBytes = 2112; return AudioPluginXCodeScript_txt;
         case 0x4a0cfd09:
         case 0x11a2eef1:  numBytes = 151; return background_tile_png;
-        case 0x42b71ae6:
-        case 0xfbf631c1:  numBytes = 1052; return dark_scheme_xml;
+        case 0x763d39dc:
+        case 0x15a79882:  numBytes = 1050; return colourscheme_dark_xml;
+        case 0xe8b08520:
+        case 0xf23740fc:  numBytes = 1050; return colourscheme_light_xml;
         case 0x27c5a93a:
         case 0xb6575890:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:

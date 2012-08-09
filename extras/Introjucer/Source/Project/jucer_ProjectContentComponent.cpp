@@ -138,7 +138,7 @@ ProjectContentComponent::~ProjectContentComponent()
 
 void ProjectContentComponent::paint (Graphics& g)
 {
-    dynamic_cast<IntrojucerLookAndFeel&> (getLookAndFeel()).fillWithBackgroundTexture (g);
+    IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
 }
 
 void ProjectContentComponent::paintOverChildren (Graphics& g)

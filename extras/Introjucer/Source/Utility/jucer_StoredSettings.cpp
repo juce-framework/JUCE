@@ -108,9 +108,11 @@ void StoredSettings::reload()
     recentFiles.restoreFromString (props->getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
 
-    const ScopedPointer<XmlElement> xml (props->getXmlValue ("editorColours"));
-    if (xml != nullptr)
-        appearance.readFromXML (*xml);
+    ScopedPointer<XmlElement> xml (props->getXmlValue ("editorColours"));
+    if (xml == nullptr)
+        xml = XmlDocument::parse (BinaryData::colourscheme_dark_xml);
+
+    appearance.readFromXML (*xml);
 
     appearance.updateColourScheme();
     loadSwatchColours();

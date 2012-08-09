@@ -2303,7 +2303,10 @@
     <None Include="..\..\Source\BinaryData\background_tile.png">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\dark_scheme.xml">
+    <None Include="..\..\Source\BinaryData\colourscheme_dark.xml">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
       <Filter>The Introjucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\juce_icon.png">
