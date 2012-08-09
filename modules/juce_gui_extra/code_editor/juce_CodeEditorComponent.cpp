@@ -410,9 +410,21 @@ void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
 }
 
 //==============================================================================
-void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
-                                               const CodeDocument::Position& affectedTextEnd)
+void CodeEditorComponent::codeDocumentTextInserted (const String& newText, int insertIndex)
 {
+    codeDocumentChanged (insertIndex, insertIndex + newText.length());
+}
+
+void CodeEditorComponent::codeDocumentTextDeleted (int startIndex, int endIndex)
+{
+    codeDocumentChanged (startIndex, endIndex);
+}
+
+void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int endIndex)
+{
+    const CodeDocument::Position affectedTextStart (document, startIndex);
+    const CodeDocument::Position affectedTextEnd (document, endIndex);
+
     clearCachedIterators (affectedTextStart.getLineNumber());
 
     triggerAsyncUpdate();

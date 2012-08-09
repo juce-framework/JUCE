@@ -375,7 +375,10 @@ private:
     void timerCallback();
     void scrollBarMoved (ScrollBar*, double);
     void handleAsyncUpdate();
-    void codeDocumentChanged (const CodeDocument::Position&, const CodeDocument::Position&);
+
+    void codeDocumentTextInserted (const String& newText, int insertIndex);
+    void codeDocumentTextDeleted (int startIndex, int endIndex);
+    void codeDocumentChanged (int startIndex, int endIndex);
 
     void moveLineDelta (int delta, bool selecting);
     int getGutterSize() const noexcept;

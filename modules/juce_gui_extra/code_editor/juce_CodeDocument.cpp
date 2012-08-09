@@ -549,12 +549,22 @@ int CodeDocument::getMaximumLineLength() noexcept
 
 void CodeDocument::deleteSection (const Position& startPosition, const Position& endPosition)
 {
-    remove (startPosition.getPosition(), endPosition.getPosition(), true);
+    deleteSection (startPosition.getPosition(), endPosition.getPosition());
+}
+
+void CodeDocument::deleteSection (int start, int end)
+{
+    remove (start, end, true);
 }
 
 void CodeDocument::insertText (const Position& position, const String& text)
 {
-    insert (text, position.getPosition(), true);
+    insertText (position.getPosition(), text);
+}
+
+void CodeDocument::insertText (int insertIndex, const String& text)
+{
+    insert (text, insertIndex, true);
 }
 
 void CodeDocument::replaceAllContent (const String& newContent)
@@ -633,7 +643,7 @@ namespace CodeDocumentHelpers
     }
 }
 
-const CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& position) const noexcept
+CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& position) const noexcept
 {
     Position p (position);
     const int maxDistance = 256;
@@ -671,7 +681,7 @@ const CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& p
     return p;
 }
 
-const CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& position) const noexcept
+CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& position) const noexcept
 {
     Position p (position);
     const int maxDistance = 256;
@@ -733,14 +743,6 @@ void CodeDocument::checkLastLineStatus()
 //==============================================================================
 void CodeDocument::addListener    (CodeDocument::Listener* const l) noexcept   { listeners.add (l); }
 void CodeDocument::removeListener (CodeDocument::Listener* const l) noexcept   { listeners.remove (l); }
-
-void CodeDocument::sendListenerChangeMessage (const int startLine, const int endLine)
-{
-    Position startPos (*this, startLine, 0);
-    Position endPos (*this, endLine, 0);
-
-    listeners.call (&CodeDocument::Listener::codeDocumentChanged, startPos, endPos);
-}
 
 //==============================================================================
 class CodeDocumentInsertAction   : public UndoableAction
@@ -834,7 +836,7 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
                     p.setPosition (p.getPosition() + newTextLength);
             }
 
-            sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);
+            listeners.call (&CodeDocument::Listener::codeDocumentTextInserted, text, insertPos);
         }
     }
 }
@@ -936,6 +938,6 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
                 p.setPosition (totalChars);
         }
 
-        sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);
+        listeners.call (&CodeDocument::Listener::codeDocumentTextDeleted, startPos, endPos);
     }
 }
