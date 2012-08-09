@@ -634,7 +634,7 @@ XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) co
 
     if (rootItem != nullptr)
     {
-        e = rootItem->getOpennessState();
+        e = rootItem->getOpennessState (false);
 
         if (e != nullptr)
         {
@@ -1270,6 +1270,27 @@ void TreeViewItem::setOpen (const bool shouldBeOpen)
     }
 }
 
+bool TreeViewItem::isFullyOpen() const noexcept
+{
+    if (! isOpen())
+        return false;
+
+    for (int i = 0; i < subItems.size(); ++i)
+        if (! subItems.getUnchecked(i)->isFullyOpen())
+            return false;
+
+    return true;
+}
+
+void TreeViewItem::restoreToDefaultOpenness()
+{
+    if (openness != opennessDefault && ownerView != nullptr)
+    {
+        setOpen (ownerView->defaultOpenness);
+        openness = opennessDefault;
+    }
+}
+
 bool TreeViewItem::isSelected() const noexcept
 {
     return selected;
@@ -1788,7 +1809,7 @@ TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifi
     return nullptr;
 }
 
-void TreeViewItem::restoreOpennessState (const XmlElement& e) noexcept
+void TreeViewItem::restoreOpennessState (const XmlElement& e)
 {
     if (e.hasTagName ("CLOSED"))
     {
@@ -1798,25 +1819,37 @@ void TreeViewItem::restoreOpennessState (const XmlElement& e) noexcept
     {
         setOpen (true);
 
+        Array<TreeViewItem*> items;
+        items.addArray (subItems);
+
         forEachXmlChildElement (e, n)
         {
             const String id (n->getStringAttribute ("id"));
 
-            for (int i = 0; i < subItems.size(); ++i)
+            for (int i = 0; i < items.size(); ++i)
             {
-                TreeViewItem* const ti = subItems.getUnchecked(i);
+                TreeViewItem* const ti = items.getUnchecked(i);
 
                 if (ti->getUniqueName() == id)
                 {
                     ti->restoreOpennessState (*n);
+                    items.remove (i);
                     break;
                 }
             }
         }
+
+        for (int i = 0; i < items.size(); ++i)
+            items.getUnchecked(i)->restoreToDefaultOpenness();
     }
 }
 
-XmlElement* TreeViewItem::getOpennessState() const noexcept
+XmlElement* TreeViewItem::getOpennessState() const
+{
+    return getOpennessState (true);
+}
+
+XmlElement* TreeViewItem::getOpennessState (const bool canReturnNull) const
 {
     const String name (getUniqueName());
 
@@ -1826,18 +1859,23 @@ XmlElement* TreeViewItem::getOpennessState() const noexcept
 
         if (isOpen())
         {
+            if (canReturnNull && ownerView != nullptr && ownerView->defaultOpenness && isFullyOpen())
+                return nullptr;
+
             e = new XmlElement ("OPEN");
 
             for (int i = 0; i < subItems.size(); ++i)
-                e->addChildElement (subItems.getUnchecked(i)->getOpennessState());
+                e->addChildElement (subItems.getUnchecked(i)->getOpennessState (true));
         }
         else
         {
+            if (canReturnNull && ownerView != nullptr && ! ownerView->defaultOpenness)
+                return nullptr;
+
             e = new XmlElement ("CLOSED");
         }
 
         e->setAttribute ("id", name);
-
         return e;
     }
     else
@@ -1851,9 +1889,9 @@ XmlElement* TreeViewItem::getOpennessState() const noexcept
 }
 
 //==============================================================================
-TreeViewItem::OpennessRestorer::OpennessRestorer (TreeViewItem& treeViewItem_)
-    : treeViewItem (treeViewItem_),
-      oldOpenness (treeViewItem_.getOpennessState())
+TreeViewItem::OpennessRestorer::OpennessRestorer (TreeViewItem& item)
+    : treeViewItem (item),
+      oldOpenness (item.getOpennessState())
 {
 }
 

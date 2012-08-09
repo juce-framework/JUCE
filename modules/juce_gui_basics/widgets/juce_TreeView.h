@@ -433,9 +433,13 @@ public:
         for a section of the tree.
 
         The caller is responsible for deleting the object that is returned.
+
+        Note that if all nodes of the tree are in their default state, then this may
+        return a nullptr.
+
         @see TreeView::getOpennessState, restoreOpennessState
     */
-    XmlElement* getOpennessState() const noexcept;
+    XmlElement* getOpennessState() const;
 
     /** Restores the openness of this item and all its sub-items from a saved state.
 
@@ -447,7 +451,7 @@ public:
 
         @see TreeView::restoreOpennessState, getOpennessState
     */
-    void restoreOpennessState (const XmlElement& xml) noexcept;
+    void restoreOpennessState (const XmlElement& xml);
 
     //==============================================================================
     /** Returns the index of this item in its parent's sub-items. */
@@ -529,6 +533,9 @@ private:
     TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
     TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
     TreeViewItem* findItemFromIdentifierString (const String&);
+    void restoreToDefaultOpenness();
+    bool isFullyOpen() const noexcept;
+    XmlElement* getOpennessState (bool canReturnNull) const;
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // The parameters for these methods have changed - please update your code!
