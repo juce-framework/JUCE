@@ -123,6 +123,9 @@ void Project::setMissingDefaultValues()
 
     if (! projectRoot.getChildWithName (Tags::modulesGroup).isValid())
         addDefaultModules (false);
+
+    if (getBundleIdentifier().toString().isEmpty())
+        getBundleIdentifier() = getDefaultBundleIdentifier();
 }
 
 void Project::updateOldStyleConfigList()
@@ -366,7 +369,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     }
 
     props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false),
-               "A unique identifier for this product, mainly for use in Mac builds. It should be something like 'com.yourcompanyname.yourproductname'");
+               "A unique identifier for this product, mainly for use in OSX/iOS builds. It should be something like 'com.yourcompanyname.yourproductname'");
 
     getProjectType().createPropertyEditors (*this, props);
 

@@ -403,6 +403,7 @@ Project* NewProjectWizard::runWizard (Component* ownerWindow_,
     {
         project->setFile (projectFile);
         project->setTitle (appTitle);
+        project->getBundleIdentifier() = project->getDefaultBundleIdentifier();
 
         if (! initialiseProject (*project))
             return nullptr;
