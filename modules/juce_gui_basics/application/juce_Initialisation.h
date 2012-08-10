@@ -95,7 +95,7 @@ public:
    #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (HINSTANCE, HINSTANCE, const LPTSTR, int)
   #elif defined (_UNICODE)
    #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (void*, void*, const wchar_t*, int)
-  #elif
+  #else
    #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (void*, void*, const char*, int)
   #endif
   #define  JUCE_MAIN_FUNCTION_ARGS
