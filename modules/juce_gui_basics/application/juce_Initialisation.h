@@ -86,37 +86,31 @@ public:
 
 */
 #if JUCE_ANDROID
-  #define START_JUCE_APPLICATION(AppClass) \
-    juce::JUCEApplication* juce_CreateApplication() { return new AppClass(); }
-
-#elif JUCE_WINDOWS && defined (WINAPI)
-  #define START_JUCE_APPLICATION(AppClass) \
-    static juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); } \
-    int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
-    { \
-        juce::JUCEApplication::createInstance = &juce_CreateApplication; \
-        return juce::JUCEApplication::main(); \
-    }
-
-#elif JUCE_WINDOWS
-  #define START_JUCE_APPLICATION(AppClass) \
-    static juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); } \
-    int __stdcall WinMain (void*, void*, const char*, int) \
-    { \
-        juce::JUCEApplication::createInstance = &juce_CreateApplication; \
-        return juce::JUCEApplication::main(); \
-    }
+ #define START_JUCE_APPLICATION(AppClass) \
+   juce::JUCEApplication* juce_CreateApplication() { return new AppClass(); }
 
 #else
-  #define START_JUCE_APPLICATION(AppClass) \
+ #if JUCE_WINDOWS
+  #if defined (WINAPI) || defined (_WINDOWS_)
+   #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (HINSTANCE, HINSTANCE, const LPTSTR, int)
+  #elif defined (_UNICODE)
+   #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (void*, void*, const wchar_t*, int)
+  #elif
+   #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (void*, void*, const char*, int)
+  #endif
+  #define  JUCE_MAIN_FUNCTION_ARGS
+ #else
+  #define  JUCE_MAIN_FUNCTION       int main (int argc, char* argv[])
+  #define  JUCE_MAIN_FUNCTION_ARGS  argc, (const char**) argv
+ #endif
+
+ #define START_JUCE_APPLICATION(AppClass) \
     static juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); } \
-    int main (int argc, char* argv[]) \
+    JUCE_MAIN_FUNCTION \
     { \
         juce::JUCEApplication::createInstance = &juce_CreateApplication; \
-        return juce::JUCEApplication::main (argc, (const char**) argv); \
+        return juce::JUCEApplication::main (JUCE_MAIN_FUNCTION_ARGS); \
     }
-
 #endif
-
 
 #endif   // __JUCE_INITIALISATION_JUCEHEADER__
