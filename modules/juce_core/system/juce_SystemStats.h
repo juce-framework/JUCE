@@ -106,15 +106,20 @@ public:
     /** Returns the host-name of the computer. */
     static String getComputerName();
 
-    /** Returns the user's language.
+    /** Returns the language of the user's locale.
         The return value is a 2 or 3 letter language code (ISO 639-1 or ISO 639-2)
     */
     static String getUserLanguage();
 
-    /** Returns the user's region.
+    /** Returns the region of the user's locale.
         The return value is a 2 letter country code (ISO 3166-1 alpha-2).
     */
     static String getUserRegion();
+
+    /** Returns the user's display language.
+        The return value is a 2 or 3 letter language code (ISO 639-1 or ISO 639-2)
+    */
+    static String getDisplayLanguage();
 
     //==============================================================================
     // CPU and memory information..

@@ -210,6 +210,14 @@ static String getLocaleValue (CFStringRef key)
 String SystemStats::getUserLanguage()   { return getLocaleValue (kCFLocaleLanguageCode); }
 String SystemStats::getUserRegion()     { return getLocaleValue (kCFLocaleCountryCode); }
 
+String SystemStats::getDisplayLanguage()
+{
+    CFArrayRef cfPrefLangs = CFLocaleCopyPreferredLanguages();
+    const String result (String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (cfPrefLangs, 0)));
+    CFRelease (cfPrefLangs);
+    return result;
+}
+
 //==============================================================================
 class HiResCounterHandler
 {
@@ -221,12 +229,12 @@ public:
 
         if (timebase.numer % 1000000 == 0)
         {
-            numerator = timebase.numer / 1000000;
+            numerator   = timebase.numer / 1000000;
             denominator = timebase.denom;
         }
         else
         {
-            numerator = timebase.numer;
+            numerator   = timebase.numer;
             denominator = timebase.denom * (int64) 1000000;
         }
 

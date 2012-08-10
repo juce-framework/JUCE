@@ -391,14 +391,15 @@ String SystemStats::getComputerName()
     return String (text, len);
 }
 
-static String getLocaleValue (LCTYPE key, const char* defaultValue)
+static String getLocaleValue (LCID locale, LCTYPE key, const char* defaultValue)
 {
     TCHAR buffer [256] = { 0 };
-    if (GetLocaleInfo (LOCALE_USER_DEFAULT, key, buffer, 255) > 0)
+    if (GetLocaleInfo (locale, key, buffer, 255) > 0)
         return buffer;
 
     return defaultValue;
 }
 
-String SystemStats::getUserLanguage()   { return getLocaleValue (LOCALE_SISO639LANGNAME,  "en"); }
-String SystemStats::getUserRegion()     { return getLocaleValue (LOCALE_SISO3166CTRYNAME, "US"); }
+String SystemStats::getUserLanguage()     { return getLocaleValue (LOCALE_USER_DEFAULT, LOCALE_SISO639LANGNAME,  "en"); }
+String SystemStats::getUserRegion()       { return getLocaleValue (LOCALE_USER_DEFAULT, LOCALE_SISO3166CTRYNAME, "US"); }
+String SystemStats::getDisplayLanguage()  { return getLocaleValue (MAKELCID (GetUserDefaultUILanguage(), SORT_DEFAULT), LOCALE_SISO639LANGNAME, "en"); }
