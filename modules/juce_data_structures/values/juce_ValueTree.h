@@ -334,6 +334,11 @@ public:
     */
     static ValueTree fromXml (const XmlElement& xml);
 
+    /** This returns a string containing an XML representation of the tree.
+        This is quite handy for debugging purposes, as it provides a quick way to view a tree.
+    */
+    String toXmlString() const;
+
     //==============================================================================
     /** Stores this tree (and all its children) in a binary format.
 

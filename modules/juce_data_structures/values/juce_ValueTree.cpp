@@ -976,6 +976,12 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
     return v;
 }
 
+String ValueTree::toXmlString() const
+{
+    const ScopedPointer<XmlElement> xml (createXml());
+    return xml != nullptr ? xml->createDocument (String::empty) : String::empty;
+}
+
 //==============================================================================
 void ValueTree::writeToStream (OutputStream& output) const
 {
