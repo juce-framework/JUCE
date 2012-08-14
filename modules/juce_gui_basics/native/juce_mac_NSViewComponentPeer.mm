@@ -81,10 +81,22 @@ public:
                                   object: view];
 
         if (! isSharedWindow)
+        {
             [notificationCenter  addObserver: view
                                     selector: @selector (frameChanged:)
                                         name: NSWindowDidMoveNotification
                                       object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidMiniaturizeNotification
+                                      object: window];
+
+            [notificationCenter  addObserver: view
+                                    selector: @selector (frameChanged:)
+                                        name: NSWindowDidDeminiaturizeNotification
+                                      object: window];
+        }
 
         [view setPostsFrameChangedNotifications: YES];
 
