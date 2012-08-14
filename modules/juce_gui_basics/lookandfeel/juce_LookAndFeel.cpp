@@ -340,7 +340,16 @@ void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 //==============================================================================
 MouseCursor LookAndFeel::getMouseCursorFor (Component& component)
 {
-    return component.getMouseCursor();
+    MouseCursor m (component.getMouseCursor());
+
+    Component* parent = component.getParentComponent();
+    while (parent != nullptr && m == MouseCursor::ParentCursor)
+    {
+        m = parent->getMouseCursor();
+        parent = parent->getParentComponent();
+    }
+
+    return m;
 }
 
 LowLevelGraphicsContext* LookAndFeel::createGraphicsContext (const Image& imageToRenderOn, const Point<int>& origin, const RectangleList& initialClip)
@@ -1687,8 +1696,8 @@ void LookAndFeel::layoutFilenameComponent (FilenameComponent& filenameComp,
 
 //==============================================================================
 void LookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
-                                             bool isMouseOver, bool isMouseDown,
-                                             ConcertinaPanel& concertina, Component& panel)
+                                             bool isMouseOver, bool /*isMouseDown*/,
+                                             ConcertinaPanel&, Component& panel)
 {
     g.fillAll (Colours::grey.withAlpha (isMouseOver ? 0.9f : 0.7f));
     g.setColour (Colours::black.withAlpha (0.5f));

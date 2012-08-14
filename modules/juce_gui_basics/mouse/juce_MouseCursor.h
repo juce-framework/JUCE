@@ -45,7 +45,9 @@ public:
     /** The set of available standard mouse cursors. */
     enum StandardCursorType
     {
-        NoCursor = 0,                   /**< An invisible cursor. */
+        ParentCursor = 0,               /**< Indicates that the component's parent's cursor should be used. */
+
+        NoCursor,                       /**< An invisible cursor. */
         NormalCursor,                   /**< The stardard arrow cursor. */
 
         WaitCursor,                     /**< The normal hourglass or spinning-beachball 'busy' cursor. */
@@ -68,7 +70,9 @@ public:
         TopLeftCornerResizeCursor,      /**< A platform-specific cursor for resizing the top-left-corner of a window. */
         TopRightCornerResizeCursor,     /**< A platform-specific cursor for resizing the top-right-corner of a window. */
         BottomLeftCornerResizeCursor,   /**< A platform-specific cursor for resizing the bottom-left-corner of a window. */
-        BottomRightCornerResizeCursor   /**< A platform-specific cursor for resizing the bottom-right-corner of a window. */
+        BottomRightCornerResizeCursor,  /**< A platform-specific cursor for resizing the bottom-right-corner of a window. */
+
+        NumStandardCursorTypes
     };
 
     //==============================================================================
@@ -119,6 +123,12 @@ public:
         copied from the same object.
     */
     bool operator!= (const MouseCursor& other) const noexcept;
+
+    /** Checks whether this cursor is of the standard type mentioned. */
+    bool operator== (StandardCursorType type) const noexcept;
+
+    /** Checks whether this cursor is of the standard type mentioned. */
+    bool operator!= (StandardCursorType type) const noexcept;
 
     //==============================================================================
     /** Makes the system show its default 'busy' cursor.

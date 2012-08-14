@@ -232,7 +232,7 @@ public:
         component->setBounds (getLocalBounds().withTop (getHeaderSize()));
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent&)
     {
         mouseDownY = getY();
         dragStartSizes = getPanel().getFittedSizes();
@@ -246,7 +246,7 @@ public:
                                                         panel.getHeight()), false);
     }
 
-    void mouseDoubleClick (const MouseEvent& e)
+    void mouseDoubleClick (const MouseEvent&)
     {
         getPanel().panelHeaderDoubleClicked (component);
     }

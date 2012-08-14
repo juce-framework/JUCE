@@ -35,15 +35,15 @@ bool File::copyInternal (const File& dest) const
     NSFileManager* fm = [NSFileManager defaultManager];
 
     return [fm fileExistsAtPath: juceStringToNS (fullPath)]
-#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
             && [fm copyItemAtPath: juceStringToNS (fullPath)
                            toPath: juceStringToNS (dest.getFullPathName())
                             error: nil];
-#else
+           #else
             && [fm copyPath: juceStringToNS (fullPath)
                      toPath: juceStringToNS (dest.getFullPathName())
                     handler: nil];
-#endif
+           #endif
 }
 
 void File::findFileSystemRoots (Array<File>& destArray)
@@ -73,7 +73,7 @@ namespace FileHelpers
 
     static bool isHiddenFile (const String& path)
     {
-      #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
         JUCE_AUTORELEASEPOOL
         NSNumber* hidden = nil;
         NSError* err = nil;
@@ -81,25 +81,25 @@ namespace FileHelpers
         return [[NSURL fileURLWithPath: juceStringToNS (path)]
                     getResourceValue: &hidden forKey: NSURLIsHiddenKey error: &err]
                 && [hidden boolValue];
-      #elif JUCE_IOS
+       #elif JUCE_IOS
         return File (path).getFileName().startsWithChar ('.');
-      #else
+       #else
         FSRef ref;
         LSItemInfoRecord info;
 
         return FSPathMakeRefWithOptions ((const UInt8*) path.toUTF8().getAddress(), kFSPathMakeRefDoNotFollowLeafSymlink, &ref, 0) == noErr
                  && LSCopyItemInfoForRef (&ref, kLSRequestBasicFlagsOnly, &info) == noErr
                  && (info.flags & kLSItemInfoIsInvisible) != 0;
-      #endif
+       #endif
     }
 
-  #if JUCE_IOS
+   #if JUCE_IOS
     String getIOSSystemLocation (NSSearchPathDirectory type)
     {
         return nsStringToJuce ([NSSearchPathForDirectoriesInDomains (type, NSUserDomainMask, YES)
                                 objectAtIndex: 0]);
     }
-  #endif
+   #endif
 
     static bool launchExecutable (const String& pathAndArguments)
     {

@@ -86,7 +86,8 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
     switch (type)
     {
-        case NormalCursor:          c = [NSCursor arrowCursor]; break;
+        case NormalCursor:
+        case ParentCursor:          c = [NSCursor arrowCursor]; break;
         case NoCursor:              return createMouseCursorFromImage (Image (Image::ARGB, 8, 8, true), 0, 0);
         case DraggingHandCursor:    c = [NSCursor openHandCursor]; break;
         case WaitCursor:            c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball

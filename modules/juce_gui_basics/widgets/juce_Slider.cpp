@@ -576,9 +576,14 @@ public:
             valueBox->addListener (this);
 
             if (style == LinearBar)
+            {
                 valueBox->addMouseListener (&owner, false);
+                valueBox->setMouseCursor (MouseCursor::ParentCursor);
+            }
             else
+            {
                 valueBox->setTooltip (owner.getTooltip());
+            }
         }
         else
         {

@@ -865,7 +865,7 @@ public:
     {
         setWantsKeyboardFocus (false);
         setInterceptsMouseClicks (false, true);
-        setMouseCursor (MouseCursor::IBeamCursor);
+        setMouseCursor (MouseCursor::ParentCursor);
 
         owner.getTextValue().addListener (this);
     }

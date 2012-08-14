@@ -333,7 +333,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
     selectionEnd.setPositionMaintained (true);
 
     setOpaque (true);
-    setMouseCursor (MouseCursor (MouseCursor::IBeamCursor));
+    setMouseCursor (MouseCursor::IBeamCursor);
     setWantsKeyboardFocus (true);
 
     addAndMakeVisible (&verticalScrollBar);

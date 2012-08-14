@@ -3193,7 +3193,8 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
 
     switch (type)
     {
-        case NormalCursor:                  break;
+        case NormalCursor:
+        case ParentCursor:                  break;
         case NoCursor:                      return (void*) hiddenMouseCursorHandle;
         case WaitCursor:                    cursorName = IDC_WAIT; break;
         case IBeamCursor:                   cursorName = IDC_IBEAM; break;

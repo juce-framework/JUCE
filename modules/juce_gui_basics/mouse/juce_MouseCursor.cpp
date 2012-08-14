@@ -49,19 +49,23 @@ public:
 
     static SharedCursorHandle* createStandard (const MouseCursor::StandardCursorType type)
     {
+        jassert (isPositiveAndBelow (type, MouseCursor::NumStandardCursorTypes));
+
         const SpinLock::ScopedLockType sl (lock);
 
-        for (int i = 0; i < getCursors().size(); ++i)
-        {
-            SharedCursorHandle* const sc = getCursors().getUnchecked(i);
+        SharedCursorHandle*& c = getSharedCursor (type);
 
-            if (sc->standardType == type)
-                return sc->retain();
-        }
+        if (c == nullptr)
+            c = new SharedCursorHandle (type);
+        else
+            c->retain();
 
-        SharedCursorHandle* const sc = new SharedCursorHandle (type);
-        getCursors().add (sc);
-        return sc;
+        return c;
+    }
+
+    bool isStandardType (MouseCursor::StandardCursorType type) const noexcept
+    {
+        return type == standardType && isStandard;
     }
 
     SharedCursorHandle* retain() noexcept
@@ -77,7 +81,7 @@ public:
             if (isStandard)
             {
                 const SpinLock::ScopedLockType sl (lock);
-                getCursors().removeFirstMatchingValue (this);
+                getSharedCursor (standardType) = nullptr;
             }
 
             delete this;
@@ -86,19 +90,17 @@ public:
 
     void* getHandle() const noexcept        { return handle; }
 
-
 private:
-    //==============================================================================
     void* const handle;
     Atomic <int> refCount;
     const MouseCursor::StandardCursorType standardType;
     const bool isStandard;
     static SpinLock lock;
 
-    static Array <SharedCursorHandle*>& getCursors()
+    static SharedCursorHandle*& getSharedCursor (const MouseCursor::StandardCursorType type)
     {
-        static Array <SharedCursorHandle*> cursors;
-        return cursors;
+        static SharedCursorHandle* cursors [MouseCursor::NumStandardCursorTypes] = {};
+        return cursors [type];
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SharedCursorHandle);
@@ -113,7 +115,7 @@ MouseCursor::MouseCursor()
 }
 
 MouseCursor::MouseCursor (const StandardCursorType type)
-    : cursorHandle (type != MouseCursor::NormalCursor ? SharedCursorHandle::createStandard (type) : 0)
+    : cursorHandle (type != MouseCursor::NormalCursor ? SharedCursorHandle::createStandard (type) : nullptr)
 {
 }
 
@@ -164,10 +166,14 @@ bool MouseCursor::operator== (const MouseCursor& other) const noexcept
     return getHandle() == other.getHandle();
 }
 
-bool MouseCursor::operator!= (const MouseCursor& other) const noexcept
+bool MouseCursor::operator== (StandardCursorType type) const noexcept
 {
-    return getHandle() != other.getHandle();
+    return cursorHandle != nullptr ? cursorHandle->isStandardType (type)
+                                   : (type == NormalCursor);
 }
+
+bool MouseCursor::operator!= (const MouseCursor& other) const noexcept  { return ! operator== (other); }
+bool MouseCursor::operator!= (StandardCursorType type)  const noexcept  { return ! operator== (type); }
 
 void* MouseCursor::getHandle() const noexcept
 {

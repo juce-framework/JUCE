@@ -2966,7 +2966,8 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
     switch (type)
     {
-        case NormalCursor:                  return None; // Use parent cursor
+        case NormalCursor:
+        case ParentCursor:                  return None; // Use parent cursor
         case NoCursor:                      return createMouseCursorFromImage (Image (Image::ARGB, 16, 16, true), 0, 0);
 
         case WaitCursor:                    shape = XC_watch; break;
