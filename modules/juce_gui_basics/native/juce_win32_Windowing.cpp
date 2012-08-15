@@ -1035,8 +1035,8 @@ public:
 
             if (SUCCEEDED (textData.error))
             {
-                ownerInfo->dragInfo.text = String (CharPointer_UTF16 ((LPCWCHAR) textData.data),
-                                                   CharPointer_UTF16 ((LPCWCHAR) addBytesToPointer (textData.data, textData.dataSize)));
+                ownerInfo->dragInfo.text = String (CharPointer_UTF16 ((const WCHAR*) textData.data),
+                                                   CharPointer_UTF16 ((const WCHAR*) addBytesToPointer (textData.data, textData.dataSize)));
             }
             else
             {
