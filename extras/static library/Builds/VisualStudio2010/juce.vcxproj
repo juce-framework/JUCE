@@ -360,6 +360,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_StringPool.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1267,6 +1270,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringArray.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPairArray.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_StringPool.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_TextDiff.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_Expression.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions.h"/>

@@ -193,7 +193,7 @@ public:
         int n = 0;
         Random r;
 
-        for (int count = 1000000; --count >= 0;)
+        for (int count = 100000; --count >= 0;)
         {
             int num = r.nextInt (6000) + 1;
 
@@ -210,11 +210,10 @@ public:
 
             bool failed = false;
 
-            int i;
-            for (i = 0; i < size1; ++i)
+            for (int i = 0; i < size1; ++i)
                 failed = (buffer [start1 + i] != n++) || failed;
 
-            for (i = 0; i < size2; ++i)
+            for (int i = 0; i < size2; ++i)
                 failed = (buffer [start2 + i] != n++) || failed;
 
             if (failed)

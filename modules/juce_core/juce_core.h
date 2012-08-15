@@ -345,6 +345,9 @@ namespace juce
 #ifndef __JUCE_STRINGPOOL_JUCEHEADER__
  #include "text/juce_StringPool.h"
 #endif
+#ifndef __JUCE_TEXTDIFF_JUCEHEADER__
+ #include "text/juce_TextDiff.h"
+#endif
 #ifndef __JUCE_CHILDPROCESS_JUCEHEADER__
  #include "threads/juce_ChildProcess.h"
 #endif
