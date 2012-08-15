@@ -38,6 +38,7 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
     {
         codeDoc = new CodeDocument();
         reloadInternal();
+        codeDoc->clearUndoHistory();
     }
 
     return *codeDoc;
@@ -61,11 +62,8 @@ void SourceCodeDocument::reloadInternal()
 {
     jassert (codeDoc != nullptr);
     modDetector.updateHash();
-
-    ScopedPointer <InputStream> in (modDetector.getFile().createInputStream());
-
-    if (in != nullptr)
-        codeDoc->loadFromStream (*in);
+    codeDoc->replaceAllContent (modDetector.getFile().loadFileAsString());
+    codeDoc->setSavePoint();
 }
 
 bool SourceCodeDocument::save()

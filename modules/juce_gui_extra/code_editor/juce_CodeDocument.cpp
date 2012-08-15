@@ -569,8 +569,17 @@ void CodeDocument::insertText (int insertIndex, const String& text)
 
 void CodeDocument::replaceAllContent (const String& newContent)
 {
-    remove (0, getNumCharacters(), true);
-    insert (newContent, 0, true);
+    TextDiff diff (getAllContent(), newContent);
+
+    for (int i = 0; i < diff.changes.size(); ++i)
+    {
+        const TextDiff::Change& c = diff.changes.getReference(i);
+
+        if (c.isDeletion())
+            remove (c.start, c.start + c.length, true);
+        else
+            insert (c.insertedText, c.start, true);
+    }
 }
 
 bool CodeDocument::loadFromStream (InputStream& stream)
