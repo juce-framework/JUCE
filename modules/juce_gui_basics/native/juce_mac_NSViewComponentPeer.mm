@@ -544,6 +544,13 @@ public:
         sendMouseEvent (ev);
     }
 
+    static float checkDeviceDeltaReturnValue (float v) noexcept
+    {
+        // (deviceDeltaX can fail and return NaN, so need to sanity-check the result)
+        v *= 0.5f / 256.0f;
+        return (v > -1000.0f && v < 1000.0f) ? v : 0.0f;
+    }
+
     void redirectMouseWheel (NSEvent* ev)
     {
         updateModifiers (ev);
@@ -575,9 +582,8 @@ public:
            #endif
             if ([ev respondsToSelector: @selector (deviceDeltaX)])
             {
-                const float scale = 0.5f / 256.0f;
-                wheel.deltaX = scale * (float) objc_msgSend_fpret (ev, @selector (deviceDeltaX));
-                wheel.deltaY = scale * (float) objc_msgSend_fpret (ev, @selector (deviceDeltaY));
+                wheel.deltaX = checkDeviceDeltaReturnValue ((float) objc_msgSend_fpret (ev, @selector (deviceDeltaX)));
+                wheel.deltaY = checkDeviceDeltaReturnValue ((float) objc_msgSend_fpret (ev, @selector (deviceDeltaY)));
             }
         }
         @catch (...)
