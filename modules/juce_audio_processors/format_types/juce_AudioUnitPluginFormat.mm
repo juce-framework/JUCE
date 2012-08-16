@@ -394,6 +394,10 @@ public:
                     AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SampleRate, kAudioUnitScope_Output, i, &sr, sizeof (sr));
             }
 
+            UInt32 frameSize = (UInt32) estimatedSamplesPerBlock;
+            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0,
+                                  &frameSize, sizeof (frameSize));
+
             setPlayConfigDetails (numInputBusChannels * numInputBusses,
                                   numOutputBusChannels * numOutputBusses,
                                   sampleRate_, estimatedSamplesPerBlock);
