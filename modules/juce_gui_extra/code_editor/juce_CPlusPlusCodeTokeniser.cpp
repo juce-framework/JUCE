@@ -25,21 +25,6 @@
 
 namespace CppTokeniser
 {
-    enum TokenType
-    {
-        tokenType_error = 0,
-        tokenType_comment,
-        tokenType_keyword,
-        tokenType_operator,
-        tokenType_identifier,
-        tokenType_integer,
-        tokenType_float,
-        tokenType_string,
-        tokenType_bracket,
-        tokenType_punctuation,
-        tokenType_preprocessor
-    };
-
     static bool isIdentifierStart (const juce_wchar c) noexcept
     {
         return CharacterFunctions::isLetter (c)
@@ -130,10 +115,10 @@ namespace CppTokeniser
             possible.writeNull();
 
             if (isReservedKeyword (String::CharPointerType (possibleIdentifier), tokenLength))
-                return tokenType_keyword;
+                return CPlusPlusCodeTokeniser::tokenType_keyword;
         }
 
-        return tokenType_identifier;
+        return CPlusPlusCodeTokeniser::tokenType_identifier;
     }
 
     static bool skipNumberSuffix (CodeDocument::Iterator& source)
@@ -278,25 +263,25 @@ namespace CppTokeniser
         const CodeDocument::Iterator original (source);
 
         if (parseFloatLiteral (source))
-            return tokenType_float;
+            return CPlusPlusCodeTokeniser::tokenType_float;
 
         source = original;
 
         if (parseHexLiteral (source))
-            return tokenType_integer;
+            return CPlusPlusCodeTokeniser::tokenType_integer;
 
         source = original;
 
         if (parseOctalLiteral (source))
-            return tokenType_integer;
+            return CPlusPlusCodeTokeniser::tokenType_integer;
 
         source = original;
 
         if (parseDecimalLiteral (source))
-            return tokenType_integer;
+            return CPlusPlusCodeTokeniser::tokenType_integer;
 
         source = original;
-        return tokenType_error;
+        return CPlusPlusCodeTokeniser::tokenType_error;
     }
 
     static void skipQuotedString (CodeDocument::Iterator& source) noexcept
@@ -395,7 +380,7 @@ CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser() {}
 int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
 {
     using namespace CppTokeniser;
-    int result = tokenType_error;
+    int result = CPlusPlusCodeTokeniser::tokenType_error;
     source.skipWhitespace();
 
     const juce_wchar firstChar = source.peekNextChar();
@@ -419,12 +404,12 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case '.':
         result = parseNumber (source);
 
-        if (result == tokenType_error)
+        if (result == CPlusPlusCodeTokeniser::tokenType_error)
         {
             source.skip();
 
             if (firstChar == '.')
-                result = tokenType_punctuation;
+                result = CPlusPlusCodeTokeniser::tokenType_punctuation;
         }
 
         break;
@@ -433,7 +418,7 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case ';':
     case ':':
         source.skip();
-        result = tokenType_punctuation;
+        result = CPlusPlusCodeTokeniser::tokenType_punctuation;
         break;
 
     case '(':
@@ -443,17 +428,17 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case '[':
     case ']':
         source.skip();
-        result = tokenType_bracket;
+        result = CPlusPlusCodeTokeniser::tokenType_bracket;
         break;
 
     case '"':
     case '\'':
         skipQuotedString (source);
-        result = tokenType_string;
+        result = CPlusPlusCodeTokeniser::tokenType_string;
         break;
 
     case '+':
-        result = tokenType_operator;
+        result = CPlusPlusCodeTokeniser::tokenType_operator;
         source.skip();
         skipIfNextCharMatches (source, '+', '=');
         break;
@@ -462,9 +447,9 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
         source.skip();
         result = parseNumber (source);
 
-        if (result == tokenType_error)
+        if (result == CPlusPlusCodeTokeniser::tokenType_error)
         {
-            result = tokenType_operator;
+            result = CPlusPlusCodeTokeniser::tokenType_operator;
             skipIfNextCharMatches (source, '-', '=');
         }
         break;
@@ -473,13 +458,13 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case '%':
     case '=':
     case '!':
-        result = tokenType_operator;
+        result = CPlusPlusCodeTokeniser::tokenType_operator;
         source.skip();
         skipIfNextCharMatches (source, '=');
         break;
 
     case '/':
-        result = tokenType_operator;
+        result = CPlusPlusCodeTokeniser::tokenType_operator;
         source.skip();
 
         if (source.peekNextChar() == '=')
@@ -488,13 +473,13 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
         }
         else if (source.peekNextChar() == '/')
         {
-            result = tokenType_comment;
+            result = CPlusPlusCodeTokeniser::tokenType_comment;
             source.skipToEndOfLine();
         }
         else if (source.peekNextChar() == '*')
         {
             source.skip();
-            result = tokenType_comment;
+            result = CPlusPlusCodeTokeniser::tokenType_comment;
             skipComment (source);
         }
 
@@ -503,7 +488,7 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case '?':
     case '~':
         source.skip();
-        result = tokenType_operator;
+        result = CPlusPlusCodeTokeniser::tokenType_operator;
         break;
 
     case '<':
@@ -512,13 +497,13 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     case '&':
     case '^':
         source.skip();
-        result = tokenType_operator;
+        result = CPlusPlusCodeTokeniser::tokenType_operator;
         skipIfNextCharMatches (source, firstChar);
         skipIfNextCharMatches (source, '=');
         break;
 
     case '#':
-        result = tokenType_preprocessor;
+        result = CPlusPlusCodeTokeniser::tokenType_preprocessor;
         skipPreprocessorLine (source);
         break;
 

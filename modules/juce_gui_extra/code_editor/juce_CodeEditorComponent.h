@@ -138,6 +138,7 @@ public:
     bool undo();
     bool redo();
 
+    void selectRegion (const CodeDocument::Position& start, const CodeDocument::Position& end);
     bool selectAll();
     void deselectAll();
 
@@ -154,6 +155,7 @@ public:
 
     //==============================================================================
     Range<int> getHighlightedRegion() const;
+    bool isHighlightActive() const noexcept;
     void setHighlightedRegion (const Range<int>& newRange);
     String getTextInRange (const Range<int>& range) const;
 

@@ -650,6 +650,11 @@ namespace CodeDocumentHelpers
         return (CharacterFunctions::isLetterOrDigit (character) || character == '_')
                     ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
     }
+
+    static bool isTokenCharacter (const juce_wchar c) noexcept
+    {
+        return CharacterFunctions::isLetterOrDigit (c) || c == '.' || c == '_';
+    }
 }
 
 CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& position) const noexcept
@@ -728,6 +733,24 @@ CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& positi
     }
 
     return p;
+}
+
+void CodeDocument::findTokenContaining (const Position& pos, Position& start, Position& end) const noexcept
+{
+    end = pos;
+    while (CodeDocumentHelpers::isTokenCharacter (end.getCharacter()))
+        end.moveBy (1);
+
+    start = end;
+    while (start.getIndexInLine() > 0
+            && CodeDocumentHelpers::isTokenCharacter (start.movedBy (-1).getCharacter()))
+        start.moveBy (-1);
+}
+
+void CodeDocument::findLineContaining  (const Position& pos, Position& s, Position& e) const noexcept
+{
+    s.setLineAndIndex (pos.getLineNumber(), 0);
+    e.setLineAndIndex (pos.getLineNumber() + 1, 0);
 }
 
 void CodeDocument::checkLastLineStatus()

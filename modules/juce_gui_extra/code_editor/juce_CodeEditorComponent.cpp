@@ -609,11 +609,12 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
 
 void CodeEditorComponent::deselectAll()
 {
-    if (selectionStart != selectionEnd)
+    if (isHighlightActive())
         triggerAsyncUpdate();
 
     selectionStart = caretPos;
     selectionEnd = caretPos;
+    dragType = notDragging;
 }
 
 void CodeEditorComponent::updateScrollBars()
@@ -851,6 +852,18 @@ bool CodeEditorComponent::moveCaretLeft (const bool moveInWholeWordSteps, const 
 {
     newTransaction();
 
+    if (selecting && dragType == notDragging)
+    {
+        selectRegion (CodeDocument::Position (selectionEnd), CodeDocument::Position (selectionStart));
+        dragType = draggingSelectionStart;
+    }
+
+    if (isHighlightActive() && ! (selecting || moveInWholeWordSteps))
+    {
+        moveCaretTo (selectionStart, false);
+        return true;
+    }
+
     if (moveInWholeWordSteps)
         moveCaretTo (document.findWordBreakBefore (caretPos), selecting);
     else
@@ -862,6 +875,18 @@ bool CodeEditorComponent::moveCaretLeft (const bool moveInWholeWordSteps, const 
 bool CodeEditorComponent::moveCaretRight (const bool moveInWholeWordSteps, const bool selecting)
 {
     newTransaction();
+
+    if (selecting && dragType == notDragging)
+    {
+        selectRegion (CodeDocument::Position (selectionStart), CodeDocument::Position (selectionEnd));
+        dragType = draggingSelectionEnd;
+    }
+
+    if (isHighlightActive() && ! (selecting || moveInWholeWordSteps))
+    {
+        moveCaretTo (selectionEnd, false);
+        return true;
+    }
 
     if (moveInWholeWordSteps)
         moveCaretTo (document.findWordBreakAfter (caretPos), selecting);
@@ -1046,9 +1071,16 @@ bool CodeEditorComponent::deleteForwards (const bool moveInWholeWordSteps)
 bool CodeEditorComponent::selectAll()
 {
     newTransaction();
-    moveCaretTo (CodeDocument::Position (document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), false);
-    moveCaretTo (CodeDocument::Position (document, 0, 0), true);
+    selectRegion (CodeDocument::Position (document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()),
+                  CodeDocument::Position (document, 0, 0));
     return true;
+}
+
+void CodeEditorComponent::selectRegion (const CodeDocument::Position& start,
+                                        const CodeDocument::Position& end)
+{
+    moveCaretTo (start, false);
+    moveCaretTo (end, true);
 }
 
 //==============================================================================
@@ -1083,10 +1115,15 @@ Range<int> CodeEditorComponent::getHighlightedRegion() const
     return Range<int> (selectionStart.getPosition(), selectionEnd.getPosition());
 }
 
+bool CodeEditorComponent::isHighlightActive() const noexcept
+{
+    return selectionStart != selectionEnd;
+}
+
 void CodeEditorComponent::setHighlightedRegion (const Range<int>& newRange)
 {
-    moveCaretTo (CodeDocument::Position (document, newRange.getStart()), false);
-    moveCaretTo (CodeDocument::Position (document, newRange.getEnd()), true);
+    selectRegion (CodeDocument::Position (document, newRange.getStart()),
+                  CodeDocument::Position (document, newRange.getEnd()));
 }
 
 String CodeEditorComponent::getTextInRange (const Range<int>& range) const
@@ -1173,17 +1210,11 @@ void CodeEditorComponent::mouseDown (const MouseEvent& e)
     {
         if (getHighlightedRegion().isEmpty())
         {
-            const CodeDocument::Position pos (getPositionAt (e.x, e.y));
-            const String line (pos.getLineText());
-            const int index = pos.getIndexInLine();
-            const int lineLen = line.length();
+            CodeDocument::Position start, end;
+            document.findTokenContaining (getPositionAt (e.x, e.y), start, end);
 
-            if (index > 0 && index < lineLen - 2)
-            {
-                moveCaretTo (pos, false);
-                moveCaretLeft (true, false);
-                moveCaretRight (true, true);
-            }
+            if (start.getPosition() < end.getPosition())
+                selectRegion (start, end);
         }
 
         PopupMenu m;
@@ -1219,24 +1250,12 @@ void CodeEditorComponent::mouseDoubleClick (const MouseEvent& e)
     CodeDocument::Position tokenEnd (tokenStart);
 
     if (e.getNumberOfClicks() > 2)
-    {
-        tokenStart.setLineAndIndex (tokenStart.getLineNumber(), 0);
-        tokenEnd.setLineAndIndex (tokenStart.getLineNumber() + 1, 0);
-    }
+        document.findLineContaining (tokenStart, tokenStart, tokenEnd);
     else
-    {
-        while (CharacterFunctions::isLetterOrDigit (tokenEnd.getCharacter()))
-            tokenEnd.moveBy (1);
+        document.findTokenContaining (tokenStart, tokenStart, tokenEnd);
 
-        tokenStart = tokenEnd;
-
-        while (tokenStart.getIndexInLine() > 0
-                && CharacterFunctions::isLetterOrDigit (tokenStart.movedBy (-1).getCharacter()))
-            tokenStart.moveBy (-1);
-    }
-
-    moveCaretTo (tokenEnd, false);
-    moveCaretTo (tokenStart, true);
+    selectRegion (tokenStart, tokenEnd);
+    dragType = notDragging;
 }
 
 void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
@@ -1473,8 +1492,8 @@ CodeEditorComponent::State::State (const State& other) noexcept
 
 void CodeEditorComponent::State::restoreState (CodeEditorComponent& editor) const
 {
-    editor.moveCaretTo (CodeDocument::Position (editor.getDocument(), lastSelectionEnd), false);
-    editor.moveCaretTo (CodeDocument::Position (editor.getDocument(), lastCaretPos), true);
+    editor.selectRegion (CodeDocument::Position (editor.getDocument(), lastSelectionEnd),
+                         CodeDocument::Position (editor.getDocument(), lastCaretPos));
 
     if (lastTopLine > 0 && lastTopLine < editor.getDocument().getNumLines())
         editor.scrollToLine (lastTopLine);

@@ -43,8 +43,7 @@ class CodeDocumentLine;
 class JUCE_API  CodeDocument
 {
 public:
-    /** Creates a new, empty document.
-    */
+    /** Creates a new, empty document. */
     CodeDocument();
 
     /** Destructor. */
@@ -300,9 +299,12 @@ public:
     //==============================================================================
     /** Searches for a word-break. */
     Position findWordBreakAfter (const Position& position) const noexcept;
-
     /** Searches for a word-break. */
     Position findWordBreakBefore (const Position& position) const noexcept;
+    /** Finds the token that contains the given position. */
+    void findTokenContaining (const Position& pos, Position& start, Position& end) const noexcept;
+    /** Finds the line that contains the given position. */
+    void findLineContaining  (const Position& pos, Position& start, Position& end) const noexcept;
 
     //==============================================================================
     /** An object that receives callbacks from the CodeDocument when its text changes.
