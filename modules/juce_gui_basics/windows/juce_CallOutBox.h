@@ -64,12 +64,14 @@ public:
                                     update itself when the component's size is changed later).
                                     Obviously this component must not be deleted until the
                                     call-out box has been deleted.
-        @param componentToPointTo   the component that the call-out's arrow should point towards
+        @param areaToPointTo        the area that the call-out's arrow should point towards. If
+                                    a parentComponent is supplied, then this is relative to that
+                                    parent; otherwise, it's a global screen coord.
         @param parentComponent      if non-zero, this is the component to add the call-out to. If
-                                    this is zero, the call-out will be added to the desktop.
+                                    this is a nullptr, the call-out will be added to the desktop.
     */
     CallOutBox (Component& contentComponent,
-                Component& componentToPointTo,
+                const Rectangle<int>& areaToPointTo,
                 Component* parentComponent);
 
     /** Destructor. */
@@ -98,15 +100,20 @@ public:
         the box will continue to run modally until the user clicks on some other component, at
         which point it will be dismissed automatically.
 
-        The content component that is passed-in will be owned by the callout, which will
-        delete it when it is dismissed.
-
-        The parentComponent parameter can be a nullptr if you want the window to appear on
-        the desktop.
+        @param contentComponent     the component to display inside the call-out. This should
+                                    already have a size set (although the call-out will also
+                                    update itself when the component's size is changed later).
+                                    This copmonent will be owned by the callout box and deleted
+                                    later when the box is dismissed.
+        @param areaToPointTo        the area that the call-out's arrow should point towards. If
+                                    a parentComponent is supplied, then this is relative to that
+                                    parent; otherwise, it's a global screen coord.
+        @param parentComponent      if non-zero, this is the component to add the call-out to. If
+                                    this is a nullptr, the call-out will be added to the desktop.
     */
-    static void launchAsynchronously (Component& componentToPointTo,
-                                      Component* contentComponent,
-                                      Component* parentComponent);
+    static CallOutBox& launchAsynchronously (Component* contentComponent,
+                                             const Rectangle<int>& areaToPointTo,
+                                             Component* parentComponent);
 
     //==============================================================================
     /** @internal */

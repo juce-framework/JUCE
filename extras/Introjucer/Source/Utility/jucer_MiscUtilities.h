@@ -376,9 +376,10 @@ public:
         if (undoManager != nullptr)
             undoManager->beginNewTransaction();
 
-        CallOutBox::launchAsynchronously (*this, new PopupColourSelector (colourValue,
-                                                                          defaultColour,
-                                                                          canResetToDefault), nullptr);
+        CallOutBox::launchAsynchronously (new PopupColourSelector (colourValue,
+                                                                   defaultColour,
+                                                                   canResetToDefault),
+                                          getScreenBounds(), nullptr);
     }
 
     void valueChanged (Value&)

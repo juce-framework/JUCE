@@ -242,7 +242,7 @@ public:
         colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
         colourSelector->setSize (300, 400);
 
-        CallOutBox::launchAsynchronously (*this, colourSelector, nullptr);
+        CallOutBox::launchAsynchronously (colourSelector, getScreenBounds(), nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source)
