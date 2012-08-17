@@ -222,6 +222,11 @@ public:
     */
     void insertText (int insertIndex, const String& text);
 
+    /** Replaces a section of the text with a new string.
+        This operation is undoable.
+    */
+    void replaceSection (int startIndex, int endIndex, const String& newText);
+
     /** Clears the document and replaces it with some new text.
 
         This operation is undoable - if you're trying to completely reset the document, you

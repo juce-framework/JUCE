@@ -552,7 +552,7 @@ void CodeDocument::deleteSection (const Position& startPosition, const Position&
     deleteSection (startPosition.getPosition(), endPosition.getPosition());
 }
 
-void CodeDocument::deleteSection (int start, int end)
+void CodeDocument::deleteSection (const int start, const int end)
 {
     remove (start, end, true);
 }
@@ -562,9 +562,16 @@ void CodeDocument::insertText (const Position& position, const String& text)
     insertText (position.getPosition(), text);
 }
 
-void CodeDocument::insertText (int insertIndex, const String& text)
+void CodeDocument::insertText (const int insertIndex, const String& text)
 {
     insert (text, insertIndex, true);
+}
+
+void CodeDocument::replaceSection (const int start, const int end, const String& newText)
+{
+    insertText (start, newText);
+    const int newTextLen = newText.length();
+    deleteSection (start + newTextLen, end + newTextLen);
 }
 
 void CodeDocument::replaceAllContent (const String& newContent)
@@ -864,7 +871,7 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
             {
                 CodeDocument::Position& p = *positionsToMaintain.getUnchecked(i);
 
-                if (p.getPosition() >= insertPos)
+                if (p.getPosition() > insertPos)
                     p.setPosition (p.getPosition() + newTextLength);
             }
 
