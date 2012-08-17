@@ -99,7 +99,7 @@ static const unsigned char temp_7bcdfa76[] =
 "  <COLOUR name=\"Line Number Bkgd\" colour=\"44C1C1C1\"/>\r\n"
 "  <COLOUR name=\"Line Numbers\" colour=\"E9B2B2B2\"/>\r\n"
 "  <COLOUR name=\"Plain Text\" colour=\"FFCECECE\"/>\r\n"
-"  <COLOUR name=\"Selected Text Bkgd\" colour=\"45A8C5EA\"/>\r\n"
+"  <COLOUR name=\"Selected Text Bkgd\" colour=\"FF2859AC\"/>\r\n"
 "  <COLOUR name=\"Caret\" colour=\"FFFFFFFF\"/>\r\n"
 "  <COLOUR name=\"Preprocessor Text\" colour=\"FFF8F631\"/>\r\n"
 "  <COLOUR name=\"Punctuation\" colour=\"FFCFBEFF\"/>\r\n"

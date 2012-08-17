@@ -7,7 +7,7 @@
   <COLOUR name="Line Number Bkgd" colour="44C1C1C1"/>
   <COLOUR name="Line Numbers" colour="E9B2B2B2"/>
   <COLOUR name="Plain Text" colour="FFCECECE"/>
-  <COLOUR name="Selected Text Bkgd" colour="45A8C5EA"/>
+  <COLOUR name="Selected Text Bkgd" colour="FF2859AC"/>
   <COLOUR name="Caret" colour="FFFFFFFF"/>
   <COLOUR name="Preprocessor Text" colour="FFF8F631"/>
   <COLOUR name="Punctuation" colour="FFCFBEFF"/>
