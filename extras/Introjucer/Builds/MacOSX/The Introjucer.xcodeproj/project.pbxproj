@@ -228,6 +228,7 @@
 		3F1501FE4867042830B25DD5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_CustomTypeface.cpp"; path = "../../../../modules/juce_graphics/fonts/juce_CustomTypeface.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3F222D26A164E7AD78A33B3D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ToggleButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_ToggleButton.h"; sourceTree = "SOURCE_ROOT"; };
 		3FAFD16944A6674164D23914 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CharPointer_ASCII.h"; path = "../../../../modules/juce_core/text/juce_CharPointer_ASCII.h"; sourceTree = "SOURCE_ROOT"; };
+		4076F14FE0016A4DA9087771 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CPlusPlusCodeTokeniserFunctions.h"; path = "../../../../modules/juce_gui_extra/code_editor/juce_CPlusPlusCodeTokeniserFunctions.h"; sourceTree = "SOURCE_ROOT"; };
 		40A83A20ED109AAAE6D63AF4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DrawableRectangle.h"; path = "../../../../modules/juce_gui_basics/drawables/juce_DrawableRectangle.h"; sourceTree = "SOURCE_ROOT"; };
 		41105E536155E394E54BDD35 = { isa = PBXFileReference; lastKnownFileType = file.xml; name = "colourscheme_dark.xml"; path = "../../Source/BinaryData/colourscheme_dark.xml"; sourceTree = "SOURCE_ROOT"; };
 		412B48D0F05D78A73064B36B = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_TopLevelWindow.cpp"; path = "../../../../modules/juce_gui_basics/windows/juce_TopLevelWindow.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1535,7 +1536,8 @@
 				CC3F5263B16932FF4E74B9D8,
 				318F4AB64A5D4068CC1C4F29,
 				09349C0C8300CA414AAE93A0,
-				6F8A53EDF09094C83DE4D111 ); name = "code_editor"; sourceTree = "<group>"; };
+				6F8A53EDF09094C83DE4D111,
+				4076F14FE0016A4DA9087771 ); name = "code_editor"; sourceTree = "<group>"; };
 		1D09D8A2B803860D8927C366 = { isa = PBXGroup; children = (
 				3419904525A3F1FF0CC50687,
 				BA95268EEE80F9509EC1F76F ); name = documents; sourceTree = "<group>"; };

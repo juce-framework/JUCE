@@ -117,6 +117,7 @@
 		0B53F71A8493EA1807E70057 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ImageComponent.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_ImageComponent.h"; sourceTree = "SOURCE_ROOT"; };
 		0B8D1CD99B98B08B83C16CC6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ComboBox.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_ComboBox.h"; sourceTree = "SOURCE_ROOT"; };
 		0BEC77B5C0B5DCE51EE24DA7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_win32_DirectSound.cpp"; path = "../../../../modules/juce_audio_devices/native/juce_win32_DirectSound.cpp"; sourceTree = "SOURCE_ROOT"; };
+		0C4BA1D16AD18E7FD8D242EE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CPlusPlusCodeTokeniserFunctions.h"; path = "../../../../modules/juce_gui_extra/code_editor/juce_CPlusPlusCodeTokeniserFunctions.h"; sourceTree = "SOURCE_ROOT"; };
 		0C68BAE8F95098A8AD14F2A0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_OpenSL.cpp"; path = "../../../../modules/juce_audio_devices/native/juce_android_OpenSL.cpp"; sourceTree = "SOURCE_ROOT"; };
 		0D06541766ED7D5D99E403C8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_DrawableButton.h"; path = "../../../../modules/juce_gui_basics/buttons/juce_DrawableButton.h"; sourceTree = "SOURCE_ROOT"; };
 		0D7BAB3BA700850A464A9F83 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_mac_CoreMidi.cpp"; path = "../../../../modules/juce_audio_devices/native/juce_mac_CoreMidi.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1817,7 +1818,8 @@
 				5FF425ECF12EC3A8D942CDCB,
 				92EC4C0A72F7312F1FE85B2D,
 				EA339FA929EF8AE42A8CE5BF,
-				39AD51EB5E59758E6FC4F313 ); name = "code_editor"; sourceTree = "<group>"; };
+				39AD51EB5E59758E6FC4F313,
+				0C4BA1D16AD18E7FD8D242EE ); name = "code_editor"; sourceTree = "<group>"; };
 		F430D956469E7E4528571CD8 = { isa = PBXGroup; children = (
 				D6EB2F9DDC938830D6CA84CB,
 				2168ED9FD91B4475612D7785 ); name = documents; sourceTree = "<group>"; };

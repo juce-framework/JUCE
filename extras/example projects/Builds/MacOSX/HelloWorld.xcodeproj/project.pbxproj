@@ -309,6 +309,7 @@
 		71EA769D5757AB3B16E5E6E6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_InterprocessConnectionServer.cpp"; path = "../../../../modules/juce_events/interprocess/juce_InterprocessConnectionServer.cpp"; sourceTree = "SOURCE_ROOT"; };
 		732EB7C9CF8E817B7239DBA1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_TreeView.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_TreeView.h"; sourceTree = "SOURCE_ROOT"; };
 		7402FA767F4FD9CCD3DD1578 = { isa = PBXFileReference; lastKnownFileType = file; name = "juce_module_info"; path = "../../../../modules/juce_graphics/juce_module_info"; sourceTree = "SOURCE_ROOT"; };
+		744475CFFBA91FDA03DDF659 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CPlusPlusCodeTokeniserFunctions.h"; path = "../../../../modules/juce_gui_extra/code_editor/juce_CPlusPlusCodeTokeniserFunctions.h"; sourceTree = "SOURCE_ROOT"; };
 		74AB579ADDC7C355C5704A16 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_AppleRemote.h"; path = "../../../../modules/juce_gui_extra/misc/juce_AppleRemote.h"; sourceTree = "SOURCE_ROOT"; };
 		75228523BAA6F029F315E6F1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ComboBox.h"; path = "../../../../modules/juce_gui_basics/widgets/juce_ComboBox.h"; sourceTree = "SOURCE_ROOT"; };
 		754A3F88F55E0FB7F179F2E3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ColourSelector.cpp"; path = "../../../../modules/juce_gui_extra/misc/juce_ColourSelector.cpp"; sourceTree = "SOURCE_ROOT"; };
@@ -1310,7 +1311,8 @@
 				08C730BD0BD4755B55E99BAC,
 				C7D88B24A0DC64FDD1EE28FD,
 				937C0CF5DC3FFF6161D7776D,
-				7BB92A7F312D9DA6AA53FAC3 ); name = "code_editor"; sourceTree = "<group>"; };
+				7BB92A7F312D9DA6AA53FAC3,
+				744475CFFBA91FDA03DDF659 ); name = "code_editor"; sourceTree = "<group>"; };
 		7A7F0DF75E9B01FE9A9470B2 = { isa = PBXGroup; children = (
 				1667021AB391F5D9B82B186D,
 				2CBD98BBA9322461A3ED0D05 ); name = documents; sourceTree = "<group>"; };

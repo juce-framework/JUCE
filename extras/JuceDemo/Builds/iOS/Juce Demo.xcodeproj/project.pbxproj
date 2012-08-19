@@ -627,6 +627,7 @@
 		A58203002289D424A2CDF5DD = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_Application.cpp"; path = "../../../../modules/juce_gui_basics/application/juce_Application.cpp"; sourceTree = "SOURCE_ROOT"; };
 		A588C458AC395D8AC09A433D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MarkerList.cpp"; path = "../../../../modules/juce_gui_basics/positioning/juce_MarkerList.cpp"; sourceTree = "SOURCE_ROOT"; };
 		A5A6819C57A0399C81E03301 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_android_Network.cpp"; path = "../../../../modules/juce_core/native/juce_android_Network.cpp"; sourceTree = "SOURCE_ROOT"; };
+		A5EB11F01D92F20648E2CB81 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CPlusPlusCodeTokeniserFunctions.h"; path = "../../../../modules/juce_gui_extra/code_editor/juce_CPlusPlusCodeTokeniserFunctions.h"; sourceTree = "SOURCE_ROOT"; };
 		A6073115FE5E1E635C78DDFE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_SpinLock.h"; path = "../../../../modules/juce_core/threads/juce_SpinLock.h"; sourceTree = "SOURCE_ROOT"; };
 		A618A1B49D562ECB86DC46EF = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGL_android.h"; path = "../../../../modules/juce_opengl/native/juce_OpenGL_android.h"; sourceTree = "SOURCE_ROOT"; };
 		A6541F1A868B78F7E4A53C77 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_OpenGL_osx.h"; path = "../../../../modules/juce_opengl/native/juce_OpenGL_osx.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1848,7 +1849,8 @@
 				441F40BFFD11D433F2FED531,
 				282C1DA3A161FEF2AD6F94A6,
 				F84DBFF75F5334EA86AB2E37,
-				618F07B344089C7B13EED411 ); name = "code_editor"; sourceTree = "<group>"; };
+				618F07B344089C7B13EED411,
+				A5EB11F01D92F20648E2CB81 ); name = "code_editor"; sourceTree = "<group>"; };
 		640482925394FB311FDAB984 = { isa = PBXGroup; children = (
 				D6C9614D1C6493DBEE370646,
 				82AD87FA68D9DDD78F9A4674 ); name = documents; sourceTree = "<group>"; };

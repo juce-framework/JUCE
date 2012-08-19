@@ -188,6 +188,7 @@
 		2F2AA6FA49DC6B7A0072CBCB = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ColourGradient.cpp"; path = "../../../../modules/juce_graphics/colour/juce_ColourGradient.cpp"; sourceTree = "SOURCE_ROOT"; };
 		2F4E5CDCCD9B5ADEC3088057 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_Random.h"; path = "../../../../modules/juce_core/maths/juce_Random.h"; sourceTree = "SOURCE_ROOT"; };
 		2FC7C92E56BC1FBAB4CB34B4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "jucer_PaintRoutinePanel.cpp"; path = "../../src/ui/jucer_PaintRoutinePanel.cpp"; sourceTree = "SOURCE_ROOT"; };
+		2FCCDD8C932EB4457DD6918D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_CPlusPlusCodeTokeniserFunctions.h"; path = "../../../../modules/juce_gui_extra/code_editor/juce_CPlusPlusCodeTokeniserFunctions.h"; sourceTree = "SOURCE_ROOT"; };
 		30186699B45E27F46CA3DC89 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_ButtonPropertyComponent.cpp"; path = "../../../../modules/juce_gui_basics/properties/juce_ButtonPropertyComponent.cpp"; sourceTree = "SOURCE_ROOT"; };
 		30815C6C668E6F8C5730D339 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "juce_MACAddress.cpp"; path = "../../../../modules/juce_core/network/juce_MACAddress.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3115152416B738D95BAA7865 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "juce_ActionListener.h"; path = "../../../../modules/juce_events/broadcasters/juce_ActionListener.h"; sourceTree = "SOURCE_ROOT"; };
@@ -1570,7 +1571,8 @@
 				96E86A2DFBF465DADACD626F,
 				FF87A4F25EAFD358975B4133,
 				2A4B8EC4F1F0087DCC7D26FC,
-				05782738F3F2430B66A3CD87 ); name = "code_editor"; sourceTree = "<group>"; };
+				05782738F3F2430B66A3CD87,
+				2FCCDD8C932EB4457DD6918D ); name = "code_editor"; sourceTree = "<group>"; };
 		B8C35D3BF86EF68A2863BE2A = { isa = PBXGroup; children = (
 				F6F724542F5201858B8145DC,
 				EE27FB132BB31A2D365263E3 ); name = documents; sourceTree = "<group>"; };
