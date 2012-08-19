@@ -877,7 +877,7 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
             {
                 CodeDocument::Position& p = *positionsToMaintain.getUnchecked(i);
 
-                if (p.getPosition() > insertPos)
+                if (p.getPosition() >= insertPos)
                     p.setPosition (p.getPosition() + newTextLength);
             }
 
