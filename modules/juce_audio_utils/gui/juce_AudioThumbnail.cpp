@@ -559,9 +559,9 @@ void AudioThumbnail::clearChannelData()
 
 void AudioThumbnail::reset (int newNumChannels, double newSampleRate, int64 totalSamplesInSource)
 {
-    const ScopedLock sl (lock);
     clear();
 
+    const ScopedLock sl (lock);
     numChannels = newNumChannels;
     sampleRate = newSampleRate;
     totalSamples = totalSamplesInSource;
