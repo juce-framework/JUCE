@@ -234,6 +234,11 @@ public:
     */
     void replaceAllContent (const String& newContent);
 
+    /** Analyses the changes between the current content and some new text, and applies
+        those changes.
+    */
+    void applyChanges (const String& newContent);
+
     /** Replaces the editor's contents with the contents of a stream.
         This will also reset the undo history and save point marker.
     */

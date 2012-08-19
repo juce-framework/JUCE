@@ -62,7 +62,7 @@ void SourceCodeDocument::reloadInternal()
 {
     jassert (codeDoc != nullptr);
     modDetector.updateHash();
-    codeDoc->replaceAllContent (modDetector.getFile().loadFileAsString());
+    codeDoc->applyChanges (modDetector.getFile().loadFileAsString());
     codeDoc->setSavePoint();
 }
 

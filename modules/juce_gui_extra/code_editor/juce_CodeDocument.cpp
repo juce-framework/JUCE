@@ -574,7 +574,7 @@ void CodeDocument::replaceSection (const int start, const int end, const String&
     deleteSection (start + newTextLen, end + newTextLen);
 }
 
-void CodeDocument::replaceAllContent (const String& newContent)
+void CodeDocument::applyChanges (const String& newContent)
 {
     TextDiff diff (getAllContent(), newContent);
 
@@ -587,6 +587,12 @@ void CodeDocument::replaceAllContent (const String& newContent)
         else
             insert (c.insertedText, c.start, true);
     }
+}
+
+void CodeDocument::replaceAllContent (const String& newContent)
+{
+    remove (0, getNumCharacters(), true);
+    insert (newContent, 0, true);
 }
 
 bool CodeDocument::loadFromStream (InputStream& stream)
