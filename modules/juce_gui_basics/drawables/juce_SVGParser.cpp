@@ -50,12 +50,12 @@ public:
         if (xml.hasAttribute ("transform"))
             newState.addTransform (xml);
 
-        newState.elementX = getCoordLength (xml.getStringAttribute ("x", String (newState.elementX)), viewBoxW);
-        newState.elementY = getCoordLength (xml.getStringAttribute ("y", String (newState.elementY)), viewBoxH);
-        newState.width    = getCoordLength (xml.getStringAttribute ("width", String (newState.width)), viewBoxW);
-        newState.height   = getCoordLength (xml.getStringAttribute ("height", String (newState.height)), viewBoxH);
+        newState.elementX = getCoordLength (xml.getStringAttribute ("x",      String (newState.elementX)), viewBoxW);
+        newState.elementY = getCoordLength (xml.getStringAttribute ("y",      String (newState.elementY)), viewBoxH);
+        newState.width    = getCoordLength (xml.getStringAttribute ("width",  String (newState.width)),    viewBoxW);
+        newState.height   = getCoordLength (xml.getStringAttribute ("height", String (newState.height)),   viewBoxH);
 
-        if (newState.width <= 0)  newState.width  = 100;
+        if (newState.width  <= 0) newState.width  = 100;
         if (newState.height <= 0) newState.height = 100;
 
         if (xml.hasAttribute ("viewBox"))
@@ -82,44 +82,34 @@ public:
                 }
                 else
                 {
-                    if (aspect.containsIgnoreCase ("slice"))
-                        placementFlags |= RectanglePlacement::fillDestination;
+                    if (aspect.containsIgnoreCase ("slice"))        placementFlags |= RectanglePlacement::fillDestination;
 
-                    if (aspect.containsIgnoreCase ("xMin"))
-                        placementFlags |= RectanglePlacement::xLeft;
-                    else if (aspect.containsIgnoreCase ("xMax"))
-                        placementFlags |= RectanglePlacement::xRight;
-                    else
-                        placementFlags |= RectanglePlacement::xMid;
+                    if (aspect.containsIgnoreCase ("xMin"))         placementFlags |= RectanglePlacement::xLeft;
+                    else if (aspect.containsIgnoreCase ("xMax"))    placementFlags |= RectanglePlacement::xRight;
+                    else                                            placementFlags |= RectanglePlacement::xMid;
 
-                    if (aspect.containsIgnoreCase ("yMin"))
-                        placementFlags |= RectanglePlacement::yTop;
-                    else if (aspect.containsIgnoreCase ("yMax"))
-                        placementFlags |= RectanglePlacement::yBottom;
-                    else
-                        placementFlags |= RectanglePlacement::yMid;
+                    if (aspect.containsIgnoreCase ("yMin"))         placementFlags |= RectanglePlacement::yTop;
+                    else if (aspect.containsIgnoreCase ("yMax"))    placementFlags |= RectanglePlacement::yBottom;
+                    else                                            placementFlags |= RectanglePlacement::yMid;
                 }
 
-                const RectanglePlacement placement (placementFlags);
-
-                newState.transform
-                    = placement.getTransformToFit (Rectangle<float> (vxy.x, vxy.y, vwh.x, vwh.y),
-                                                   Rectangle<float> (newState.width, newState.height))
-                               .followedBy (newState.transform);
+                newState.transform = RectanglePlacement (placementFlags)
+                                        .getTransformToFit (Rectangle<float> (vxy.x, vxy.y, vwh.x, vwh.y),
+                                                            Rectangle<float> (newState.width, newState.height))
+                                        .followedBy (newState.transform);
             }
         }
         else
         {
-            if (viewBoxW == 0)
-                newState.viewBoxW = newState.width;
-
-            if (viewBoxH == 0)
-                newState.viewBoxH = newState.height;
+            if (viewBoxW == 0)  newState.viewBoxW = newState.width;
+            if (viewBoxH == 0)  newState.viewBoxH = newState.height;
         }
 
         newState.parseSubElements (xml, drawable);
 
-        drawable->resetContentAreaAndBoundingBoxToFitChildren();
+        drawable->setContentArea (RelativeRectangle (Rectangle<float> (newState.viewBoxW, newState.viewBoxH)));
+        drawable->resetBoundingBoxToContentArea();
+
         return drawable;
     }
 

@@ -44,18 +44,20 @@ public:
     {
         IntrojucerLookAndFeel::fillWithBackgroundTexture (*this, g);
 
-        Rectangle<int> area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
-                                .appliedTo (image.getBounds(), Rectangle<int> (4, 22, getWidth() - 8, getHeight() - 26));
+        if (drawable != nullptr)
+        {
+            Rectangle<int> area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
+                                    .appliedTo (drawable->getBounds(), Rectangle<int> (4, 22, getWidth() - 8, getHeight() - 26));
 
-        Path p;
-        p.addRectangle (area);
-        DropShadow (Colours::black.withAlpha (0.5f), 6, Point<int> (0, 1)).drawForPath (g, p);
+            Path p;
+            p.addRectangle (area);
+            DropShadow (Colours::black.withAlpha (0.5f), 6, Point<int> (0, 1)).drawForPath (g, p);
 
-        g.fillCheckerBoard (area, 24, 24, Colour (0xffffffff), Colour (0xffeeeeee));
+            g.fillCheckerBoard (area, 24, 24, Colour (0xffffffff), Colour (0xffeeeeee));
 
-        g.setOpacity (1.0f);
-        g.drawImageWithin (image, area.getX(), area.getY(), area.getWidth(), area.getHeight(),
-                           RectanglePlacement::stretchToFit, false);
+            g.setOpacity (1.0f);
+            drawable->drawWithin (g, area.toFloat(), RectanglePlacement::stretchToFit, 1.0f);
+        }
 
         g.setFont (Font (14.0f, Font::bold));
         g.setColour (findColour (mainBackgroundColourId).contrasting());
@@ -65,33 +67,49 @@ public:
 private:
     StringArray facts;
     File file;
-    Image image;
+    ScopedPointer<Drawable> drawable;
 
     void tryToLoadImage()
     {
         facts.clear();
         facts.add (file.getFullPathName());
-        image = Image();
+        drawable = nullptr;
 
-        ScopedPointer <InputStream> input (file.createInputStream());
-
-        if (input != nullptr)
         {
-            const int64 totalSize = input->getTotalLength();
-            ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input);
-            input = nullptr;
+            ScopedPointer <InputStream> input (file.createInputStream());
 
-            String formatName;
-            if (format != nullptr)
-                formatName = " " + format->getFormatName();
+            if (input != nullptr)
+            {
+                const int64 totalSize = input->getTotalLength();
+                ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input);
+                input = nullptr;
 
-            image = ImageCache::getFromFile (file);
+                String formatName;
+                if (format != nullptr)
+                    formatName = " " + format->getFormatName();
 
-            if (image.isValid())
-                facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
+                Image image (ImageCache::getFromFile (file));
 
-            if (totalSize > 0)
-                facts.add (File::descriptionOfSizeInBytes (totalSize));
+                if (image.isValid())
+                {
+                    DrawableImage* d = new DrawableImage();
+                    d->setImage (image);
+                    drawable = d;
+
+                    facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
+                }
+
+                if (totalSize > 0)
+                    facts.add (File::descriptionOfSizeInBytes (totalSize));
+            }
+        }
+
+        if (drawable == nullptr)
+        {
+            ScopedPointer<XmlElement> svg (XmlDocument::parse (file));
+
+            if (svg != nullptr)
+                drawable = Drawable::createFromSVG (*svg);
         }
 
         facts.removeEmptyStrings (true);
