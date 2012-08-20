@@ -146,6 +146,9 @@ struct CppTokeniserFunctions
     template<class Iterator>
     static bool parseHexLiteral (Iterator& source) noexcept
     {
+        if (source.peekNextChar() == '-')
+            source.skip();
+
         if (source.nextChar() != '0')
             return false;
 
@@ -174,6 +177,9 @@ struct CppTokeniserFunctions
     template<class Iterator>
     static bool parseOctalLiteral (Iterator& source) noexcept
     {
+        if (source.peekNextChar() == '-')
+            source.skip();
+
         if (source.nextChar() != '0')
             return false;
 
@@ -194,6 +200,9 @@ struct CppTokeniserFunctions
     template<class Iterator>
     static bool parseDecimalLiteral (Iterator& source) noexcept
     {
+        if (source.peekNextChar() == '-')
+            source.skip();
+
         int numChars = 0;
         while (isDecimalDigit (source.peekNextChar()))
         {
@@ -210,6 +219,9 @@ struct CppTokeniserFunctions
     template<class Iterator>
     static bool parseFloatLiteral (Iterator& source) noexcept
     {
+        if (source.peekNextChar() == '-')
+            source.skip();
+
         int numDigits = 0;
 
         while (isDecimalDigit (source.peekNextChar()))
