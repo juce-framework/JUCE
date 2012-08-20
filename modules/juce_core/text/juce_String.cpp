@@ -2098,6 +2098,8 @@ public:
             memset (buffer, 0xff, sizeof (buffer));
             CharPointerType (buffer).writeAll (s.toUTF8());
             test.expectEquals (String (CharPointerType (buffer)), s);
+
+            test.expect (CharPointerType::isValidString (buffer, strlen ((const char*) buffer)));
         }
     };
 
