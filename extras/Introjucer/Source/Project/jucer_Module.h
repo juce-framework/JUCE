@@ -61,7 +61,6 @@ private:
     mutable Array<File> sourceFiles;
 
     File getInclude (const File& folder) const;
-    File getLocalIncludeFolder (ProjectSaver& projectSaver) const;
     static bool fileTargetMatches (ProjectExporter& exporter, const String& target);
 
     struct FileSorter

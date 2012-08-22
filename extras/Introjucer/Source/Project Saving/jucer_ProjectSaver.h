@@ -77,9 +77,6 @@ public:
 
         const String appConfigUserContent (loadUserContentFromAppConfig());
 
-        if (generatedCodeFolder.exists())
-            deleteNonHiddenFilesIn (generatedCodeFolder);
-
         const File oldFile (project.getFile());
         project.setFile (projectFile);
 
@@ -110,6 +107,9 @@ public:
 
         if (generatedCodeFolder.exists() && errors.size() == 0)
             writeReadmeFile();
+
+        if (generatedCodeFolder.exists())
+            deleteUnwantedFilesIn (generatedCodeFolder);
 
         if (errors.size() > 0)
         {
@@ -175,10 +175,13 @@ public:
 
     static String getJuceCodeGroupName()                    { return "Juce Library Code"; }
 
-    File getGeneratedCodeFolder() const                     { return generatedCodeFolder; }
+    File getGeneratedCodeFolder() const                         { return generatedCodeFolder; }
+    File getLocalModuleFolder (const LibraryModule& m) const    { return generatedCodeFolder.getChildFile ("modules").getChildFile (m.getID()); }
 
     bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
     {
+        filesCreated.add (f);
+
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (f, newData))
         {
             addError ("Can't write to file: " + f.getFullPathName());
@@ -186,6 +189,34 @@ public:
         }
 
         return true;
+    }
+
+    bool copyFolder (const File& source, const File& dest)
+    {
+        if (source.isDirectory() && dest.createDirectory())
+        {
+            Array<File> subFiles;
+            source.findChildFiles (subFiles, File::findFiles, false);
+
+            for (int i = 0; i < subFiles.size(); ++i)
+            {
+                const File target (dest.getChildFile (subFiles.getReference(i).getFileName()));
+                filesCreated.add (target);
+                if (! subFiles.getReference(i).copyFileTo (target))
+                    return false;
+            }
+
+            subFiles.clear();
+            source.findChildFiles (subFiles, File::findDirectories, false);
+
+            for (int i = 0; i < subFiles.size(); ++i)
+                if (! copyFolder (subFiles.getReference(i), dest.getChildFile (subFiles.getReference(i).getFileName())))
+                    return false;
+
+            return true;
+        }
+
+        return false;
     }
 
 private:
@@ -197,10 +228,11 @@ private:
     CriticalSection errorLock;
 
     File appConfigFile, binaryDataCpp;
+    SortedSet<File> filesCreated;
 
-    // Recursively clears out a folder's contents, but leaves behind any folders
-    // containing hidden files used by version-control systems.
-    static bool deleteNonHiddenFilesIn (const File& parent)
+    // Recursively clears out any files in a folder that we didn't create, but avoids
+    // any folders containing hidden files that might be used by version-control systems.
+    bool deleteUnwantedFilesIn (const File& parent)
     {
         bool folderIsNowEmpty = true;
         DirectoryIterator i (parent, false, "*", File::findFilesAndDirectories);
@@ -211,13 +243,13 @@ private:
         {
             const File f (i.getFile());
 
-            if (shouldFileBeKept (f.getFileName()))
+            if (filesCreated.contains (f) || shouldFileBeKept (f.getFileName()))
             {
                 folderIsNowEmpty = false;
             }
             else if (isFolder)
             {
-                if (deleteNonHiddenFilesIn (f))
+                if (deleteUnwantedFilesIn (f))
                     filesToDelete.add (f);
                 else
                     folderIsNowEmpty = false;
@@ -434,6 +466,7 @@ private:
     void writeBinaryDataFiles()
     {
         binaryDataCpp = project.getBinaryDataCppFile();
+        const File binaryDataH (binaryDataCpp.withFileExtension (".h"));
 
         ResourceFile resourceFile (project);
 
@@ -443,8 +476,11 @@ private:
 
             if (resourceFile.write (binaryDataCpp))
             {
+                filesCreated.add (binaryDataH);
+                filesCreated.add (binaryDataCpp);
+
                 generatedFilesGroup.addFile (binaryDataCpp, -1, true);
-                generatedFilesGroup.addFile (binaryDataCpp.withFileExtension (".h"), -1, false);
+                generatedFilesGroup.addFile (binaryDataH,   -1, false);
             }
             else
             {
@@ -454,7 +490,7 @@ private:
         else
         {
             binaryDataCpp.deleteFile();
-            binaryDataCpp.withFileExtension ("h").deleteFile();
+            binaryDataH.deleteFile();
         }
     }
 

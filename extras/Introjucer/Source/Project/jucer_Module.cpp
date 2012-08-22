@@ -382,11 +382,6 @@ bool LibraryModule::isPluginClient() const                          { return get
 bool LibraryModule::isAUPluginHost (const Project& project) const   { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_AU"); }
 bool LibraryModule::isVSTPluginHost (const Project& project) const  { return getID() == "juce_audio_processors" && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"); }
 
-File LibraryModule::getLocalIncludeFolder (ProjectSaver& projectSaver) const
-{
-    return projectSaver.getGeneratedCodeFolder().getChildFile ("modules").getChildFile (getID());
-}
-
 File LibraryModule::getInclude (const File& folder) const
 {
     return folder.getChildFile (moduleInfo ["include"]);
@@ -412,12 +407,12 @@ RelativePath LibraryModule::getModuleOrLocalCopyRelativeToProject (ProjectExport
 //==============================================================================
 void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out)
 {
-    const File localModuleFolder (getLocalIncludeFolder (projectSaver));
+    const File localModuleFolder (projectSaver.getLocalModuleFolder (*this));
     const File localHeader (getInclude (localModuleFolder));
 
     if (projectSaver.getProject().shouldCopyModuleFilesLocally (getID()).getValue())
     {
-        moduleFolder.copyDirectoryTo (localModuleFolder);
+        projectSaver.copyFolder (moduleFolder, localModuleFolder);
     }
     else
     {
@@ -501,7 +496,7 @@ void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& pr
 
     File localFolder (moduleFolder);
     if (project.shouldCopyModuleFilesLocally (getID()).getValue())
-        localFolder = getLocalIncludeFolder (projectSaver);
+        localFolder = projectSaver.getLocalModuleFolder (*this);
 
     {
         Array<File> compiled;
