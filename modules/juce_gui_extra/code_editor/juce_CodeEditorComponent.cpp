@@ -261,6 +261,47 @@ namespace CodeEditorHelpers
 }
 
 //==============================================================================
+class CodeEditorComponent::Pimpl   : public Timer,
+                                     public AsyncUpdater,
+                                     public ScrollBar::Listener,
+                                     public CodeDocument::Listener
+{
+public:
+    Pimpl (CodeEditorComponent& ed) : owner (ed) {}
+
+private:
+    CodeEditorComponent& owner;
+
+    void timerCallback()        { owner.newTransaction(); }
+    void handleAsyncUpdate()    { owner.rebuildLineTokens(); }
+
+    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
+    {
+        if (scrollBarThatHasMoved->isVertical())
+            owner.scrollToLineInternal ((int) newRangeStart);
+        else
+            owner.scrollToColumnInternal (newRangeStart);
+    }
+
+    void codeDocumentTextInserted (const String& newText, int pos)
+    {
+        codeDocumentChanged (pos, pos + newText.length());
+    }
+
+    void codeDocumentTextDeleted (int start, int end)
+    {
+        codeDocumentChanged (start, end);
+    }
+
+    void codeDocumentChanged (const int start, const int end)
+    {
+        owner.codeDocumentChanged (start, end);
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl);
+};
+
+//==============================================================================
 class CodeEditorComponent::GutterComponent  : public Component
 {
 public:
@@ -328,6 +369,8 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
       horizontalScrollBar (false),
       codeTokeniser (tokeniser)
 {
+    pimpl = new Pimpl (*this);
+
     caretPos.setPositionMaintained (true);
     selectionStart.setPositionMaintained (true);
     selectionEnd.setPositionMaintained (true);
@@ -353,14 +396,14 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
 
     setLineNumbersShown (true);
 
-    verticalScrollBar.addListener (this);
-    horizontalScrollBar.addListener (this);
-    document.addListener (this);
+    verticalScrollBar.addListener (pimpl);
+    horizontalScrollBar.addListener (pimpl);
+    document.addListener (pimpl);
 }
 
 CodeEditorComponent::~CodeEditorComponent()
 {
-    document.removeListener (this);
+    document.removeListener (pimpl);
 }
 
 int CodeEditorComponent::getGutterSize() const noexcept
@@ -410,39 +453,6 @@ void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
 }
 
 //==============================================================================
-void CodeEditorComponent::codeDocumentTextInserted (const String& newText, int insertIndex)
-{
-    codeDocumentChanged (insertIndex, insertIndex + newText.length());
-}
-
-void CodeEditorComponent::codeDocumentTextDeleted (int startIndex, int endIndex)
-{
-    codeDocumentChanged (startIndex, endIndex);
-}
-
-void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int endIndex)
-{
-    const CodeDocument::Position affectedTextStart (document, startIndex);
-    const CodeDocument::Position affectedTextEnd (document, endIndex);
-
-    clearCachedIterators (affectedTextStart.getLineNumber());
-
-    triggerAsyncUpdate();
-
-    updateCaretPosition();
-    columnToTryToMaintain = -1;
-
-    if (affectedTextEnd.getPosition() >= selectionStart.getPosition()
-         && affectedTextStart.getPosition() <= selectionEnd.getPosition())
-        deselectAll();
-
-    if (caretPos.getPosition() > affectedTextEnd.getPosition()
-         || caretPos.getPosition() < affectedTextStart.getPosition())
-        moveCaretTo (affectedTextStart, false);
-
-    updateScrollBars();
-}
-
 void CodeEditorComponent::resized()
 {
     const int visibleWidth = getWidth() - scrollbarThickness - getGutterSize();
@@ -465,7 +475,7 @@ void CodeEditorComponent::resized()
 
 void CodeEditorComponent::paint (Graphics& g)
 {
-    handleUpdateNowIfNeeded();
+    pimpl->handleUpdateNowIfNeeded();
 
     g.fillAll (findColour (CodeEditorComponent::backgroundColourId));
 
@@ -498,14 +508,14 @@ void CodeEditorComponent::setScrollbarThickness (const int thickness)
     }
 }
 
-void CodeEditorComponent::handleAsyncUpdate()
+void CodeEditorComponent::rebuildLineTokensAsync()
 {
-    rebuildLineTokens();
+    pimpl->triggerAsyncUpdate();
 }
 
 void CodeEditorComponent::rebuildLineTokens()
 {
-    cancelPendingUpdate();
+    pimpl->cancelPendingUpdate();
 
     const int numNeeded = linesOnScreen + 1;
 
@@ -544,6 +554,29 @@ void CodeEditorComponent::rebuildLineTokens()
 
     if (gutter != nullptr)
         gutter->documentChanged (document);
+}
+
+void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int endIndex)
+{
+    const CodeDocument::Position affectedTextStart (document, startIndex);
+    const CodeDocument::Position affectedTextEnd (document, endIndex);
+
+    clearCachedIterators (affectedTextStart.getLineNumber());
+
+    rebuildLineTokensAsync();
+
+    updateCaretPosition();
+    columnToTryToMaintain = -1;
+
+    if (affectedTextEnd.getPosition() >= selectionStart.getPosition()
+         && affectedTextStart.getPosition() <= selectionEnd.getPosition())
+        deselectAll();
+
+    if (caretPos.getPosition() > affectedTextEnd.getPosition()
+         || caretPos.getPosition() < affectedTextStart.getPosition())
+        moveCaretTo (affectedTextStart, false);
+
+    updateScrollBars();
 }
 
 //==============================================================================
@@ -595,7 +628,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
             }
         }
 
-        triggerAsyncUpdate();
+        rebuildLineTokensAsync();
     }
     else
     {
@@ -610,7 +643,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
 void CodeEditorComponent::deselectAll()
 {
     if (isHighlightActive())
-        triggerAsyncUpdate();
+        rebuildLineTokensAsync();
 
     selectionStart = caretPos;
     selectionEnd = caretPos;
@@ -637,7 +670,7 @@ void CodeEditorComponent::scrollToLineInternal (int newFirstLineOnScreen)
         updateCaretPosition();
 
         updateCachedIterators (firstLineOnScreen);
-        triggerAsyncUpdate();
+        rebuildLineTokensAsync();
     }
 }
 
@@ -1101,12 +1134,7 @@ bool CodeEditorComponent::redo()
 void CodeEditorComponent::newTransaction()
 {
     document.newTransaction();
-    startTimer (600);
-}
-
-void CodeEditorComponent::timerCallback()
-{
-    newTransaction();
+    pimpl->startTimer (600);
 }
 
 //==============================================================================
@@ -1146,7 +1174,7 @@ bool CodeEditorComponent::keyPressed (const KeyPress& key)
         else                                                                return false;
     }
 
-    handleUpdateNowIfNeeded();
+    pimpl->handleUpdateNowIfNeeded();
     return true;
 }
 
@@ -1281,14 +1309,6 @@ void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, const MouseWheelD
     }
 }
 
-void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
-{
-    if (scrollBarThatHasMoved == &verticalScrollBar)
-        scrollToLineInternal ((int) newRangeStart);
-    else
-        scrollToColumnInternal (newRangeStart);
-}
-
 //==============================================================================
 void CodeEditorComponent::focusGained (FocusChangeType)     { updateCaretPosition(); }
 void CodeEditorComponent::focusLost (FocusChangeType)       { updateCaretPosition(); }
@@ -1301,7 +1321,7 @@ void CodeEditorComponent::setTabSize (const int numSpaces, const bool insertSpac
     if (spacesPerTab != numSpaces)
     {
         spacesPerTab = numSpaces;
-        triggerAsyncUpdate();
+        rebuildLineTokensAsync();
     }
 }
 

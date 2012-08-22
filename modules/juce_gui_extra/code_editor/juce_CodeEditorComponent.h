@@ -37,11 +37,7 @@ class CodeTokeniser;
     files.
 */
 class JUCE_API  CodeEditorComponent   : public Component,
-                                        public TextInputTarget,
-                                        private Timer,
-                                        private ScrollBar::Listener,
-                                        private CodeDocument::Listener,
-                                        private AsyncUpdater
+                                        public TextInputTarget
 {
 public:
     //==============================================================================
@@ -341,11 +337,15 @@ private:
     bool useSpacesForTabs, showLineNumbers;
     double xOffset;
 
-    CodeDocument::Position caretPos;
-    CodeDocument::Position selectionStart, selectionEnd;
+    CodeDocument::Position caretPos, selectionStart, selectionEnd;
 
     ScopedPointer<CaretComponent> caret;
     ScrollBar verticalScrollBar, horizontalScrollBar;
+
+    class Pimpl;
+    friend class Pimpl;
+    friend class ScopedPointer<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
 
     class GutterComponent;
     friend class GutterComponent;
@@ -368,19 +368,13 @@ private:
     class CodeEditorLine;
     OwnedArray <CodeEditorLine> lines;
     void rebuildLineTokens();
+    void rebuildLineTokensAsync();
+    void codeDocumentChanged (int start, int end);
 
     OwnedArray <CodeDocument::Iterator> cachedIterators;
     void clearCachedIterators (int firstLineToBeInvalid);
     void updateCachedIterators (int maxLineNum);
     void getIteratorForPosition (int position, CodeDocument::Iterator& result);
-
-    void timerCallback();
-    void scrollBarMoved (ScrollBar*, double);
-    void handleAsyncUpdate();
-
-    void codeDocumentTextInserted (const String& newText, int insertIndex);
-    void codeDocumentTextDeleted (int startIndex, int endIndex);
-    void codeDocumentChanged (int startIndex, int endIndex);
 
     void moveLineDelta (int delta, bool selecting);
     int getGutterSize() const noexcept;
