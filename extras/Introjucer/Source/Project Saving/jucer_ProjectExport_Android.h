@@ -395,7 +395,7 @@ private:
            << "# Don't edit this file! Your changes will be overwritten when you re-save the Introjucer project!" << newLine
            << newLine
            << "APP_STL := gnustl_static" << newLine
-           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti" << newLine
+           << "APP_CPPFLAGS += -fsigned-char -fexceptions -frtti -Wno-psabi" << newLine
            << "APP_PLATFORM := " << getAppPlatform() << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
