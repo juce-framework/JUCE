@@ -155,11 +155,6 @@ File ModuleList::getLocalModulesFolder (Project* project)
     return f;
 }
 
-File ModuleList::getModuleFolder (const String& uid) const
-{
-    return getModulesFolder().getChildFile (uid);
-}
-
 void ModuleList::setLocalModulesFolder (const File& file)
 {
     //jassert (FileHelpers::isJuceFolder (file));
@@ -196,7 +191,8 @@ void ModuleList::rescan (const File& newModulesFolder)
 
         while (iter.next())
         {
-            const File moduleDef (iter.getFile().getChildFile (LibraryModule::getInfoFileName()));
+            const File moduleDef (iter.getFile().getLinkedTarget()
+                                    .getChildFile (LibraryModule::getInfoFileName()));
 
             if (moduleDef.exists())
             {

@@ -95,7 +95,6 @@ public:
     void rescan (const File& newModulesFolder);
     void rescan();
     File getModulesFolder() const     { return moduleFolder; }
-    File getModuleFolder (const String& uid) const;
 
     bool loadFromWebsite();
 
