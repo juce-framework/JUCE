@@ -180,18 +180,19 @@ String SystemStats::getOperatingSystemName()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-   #ifdef _WIN64
+   #if JUCE_64BIT
     return true;
    #else
     typedef BOOL (WINAPI* LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
-    LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandle (_T("kernel32")), "IsWow64Process");
+    LPFN_ISWOW64PROCESS fnIsWow64Process
+        = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandleA ("kernel32"), "IsWow64Process");
 
     BOOL isWow64 = FALSE;
 
-    return fnIsWow64Process != 0
+    return fnIsWow64Process != nullptr
             && fnIsWow64Process (GetCurrentProcess(), &isWow64)
-            && (isWow64 != FALSE);
+            && isWow64 != FALSE;
    #endif
 }
 

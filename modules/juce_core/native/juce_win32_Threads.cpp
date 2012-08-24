@@ -287,7 +287,7 @@ static void* currentModuleHandle = nullptr;
 void* Process::getCurrentModuleInstanceHandle() noexcept
 {
     if (currentModuleHandle == nullptr)
-        currentModuleHandle = GetModuleHandle (0);
+        currentModuleHandle = GetModuleHandleA (nullptr);
 
     return currentModuleHandle;
 }
@@ -319,8 +319,8 @@ void Process::terminate()
 
 bool juce_IsRunningInWine()
 {
-    HMODULE ntdll = GetModuleHandle (_T("ntdll.dll"));
-    return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != 0;
+    HMODULE ntdll = GetModuleHandleA ("ntdll");
+    return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != nullptr;
 }
 
 //==============================================================================
