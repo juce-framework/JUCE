@@ -282,25 +282,18 @@ struct CppTokeniserFunctions
     {
         const Iterator original (source);
 
-        if (parseFloatLiteral (source))
-            return CPlusPlusCodeTokeniser::tokenType_float;
-
+        if (parseFloatLiteral (source))    return CPlusPlusCodeTokeniser::tokenType_float;
         source = original;
 
-        if (parseHexLiteral (source))
-            return CPlusPlusCodeTokeniser::tokenType_integer;
-
+        if (parseHexLiteral (source))      return CPlusPlusCodeTokeniser::tokenType_integer;
         source = original;
 
-        if (parseOctalLiteral (source))
-            return CPlusPlusCodeTokeniser::tokenType_integer;
-
+        if (parseOctalLiteral (source))    return CPlusPlusCodeTokeniser::tokenType_integer;
         source = original;
 
-        if (parseDecimalLiteral (source))
-            return CPlusPlusCodeTokeniser::tokenType_integer;
-
+        if (parseDecimalLiteral (source))  return CPlusPlusCodeTokeniser::tokenType_integer;
         source = original;
+
         return CPlusPlusCodeTokeniser::tokenType_error;
     }
 
@@ -537,4 +530,21 @@ struct CppTokeniserFunctions
 
         return result;
     }
+
+    /** A class that the tokeniser can use to parse a string. */
+    struct StringIterator
+    {
+        StringIterator (const String& s) noexcept                  : t (s.getCharPointer()) {}
+        StringIterator (const String::CharPointerType& s) noexcept : t (s) {}
+
+        juce_wchar nextChar() noexcept      { if (isEOF()) return 0; ++numChars; return t.getAndAdvance(); }
+        juce_wchar peekNextChar()noexcept   { return *t; }
+        void skip() noexcept                { if (! isEOF()) { ++t; ++numChars; } }
+        void skipWhitespace() noexcept      { while (t.isWhitespace()) skip(); }
+        void skipToEndOfLine() noexcept     { while (*t != '\r' && *t != '\n' && *t != 0) skip(); }
+        bool isEOF() const noexcept         { return t.isEmpty(); }
+
+        String::CharPointerType t;
+        int numChars = 0;
+    };
 };
