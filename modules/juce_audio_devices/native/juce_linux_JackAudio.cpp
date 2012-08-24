@@ -35,20 +35,19 @@ static void* juce_loadJackFunction (const char* const name)
 }
 
 #define JUCE_DECL_JACK_FUNCTION(return_type, fn_name, argument_types, arguments)  \
-  typedef return_type (*fn_name##_ptr_t)argument_types;                           \
-  return_type fn_name argument_types {                                            \
-    static fn_name##_ptr_t fn = nullptr;                                          \
-    if (fn == nullptr) { fn = (fn_name##_ptr_t)juce_loadJackFunction(#fn_name); } \
-    if (fn) return (*fn)arguments;                                                \
-    else return nullptr;                                                          \
+  return_type fn_name argument_types                                              \
+  {                                                                               \
+      typedef return_type (*fn_type) argument_types;                              \
+      static fn_type fn = (fn_type) juce_loadJackFunction (#fn_name);             \
+      return (fn != nullptr) ? ((*fn) arguments) : (return_type) 0;               \
   }
 
 #define JUCE_DECL_VOID_JACK_FUNCTION(fn_name, argument_types, arguments)          \
-  typedef void (*fn_name##_ptr_t)argument_types;                                  \
-  void fn_name argument_types {                                                   \
-    static fn_name##_ptr_t fn = nullptr;                                          \
-    if (fn == nullptr) { fn = (fn_name##_ptr_t)juce_loadJackFunction(#fn_name); } \
-    if (fn) (*fn)arguments;                                                       \
+  void fn_name argument_types                                                     \
+  {                                                                               \
+      typedef void (*fn_type) argument_types;                                     \
+      static fn_type fn = (fn_type) juce_loadJackFunction (#fn_name);             \
+      if (fn != nullptr) (*fn) arguments;                                         \
   }
 
 //==============================================================================
@@ -73,7 +72,7 @@ JUCE_DECL_JACK_FUNCTION (int, jack_port_connected, (const jack_port_t* port), (p
 JUCE_DECL_JACK_FUNCTION (int, jack_port_connected_to, (const jack_port_t* port, const char* port_name), (port, port_name));
 
 #if JUCE_DEBUG
-  #define JACK_LOGGING_ENABLED 1
+ #define JACK_LOGGING_ENABLED 1
 #endif
 
 #if JACK_LOGGING_ENABLED
@@ -95,14 +94,14 @@ namespace
     }
 }
 #else
-  #define dumpJackErrorMessage(a) {}
-  #define jack_Log(...) {}
+ #define dumpJackErrorMessage(a) {}
+ #define jack_Log(...) {}
 #endif
 
 
 //==============================================================================
 #ifndef JUCE_JACK_CLIENT_NAME
-  #define JUCE_JACK_CLIENT_NAME "JuceJack"
+ #define JUCE_JACK_CLIENT_NAME "JuceJack"
 #endif
 
 //==============================================================================
@@ -125,7 +124,7 @@ public:
         jack_status_t status;
         client = juce::jack_client_open (JUCE_JACK_CLIENT_NAME, JackNoStartServer, &status);
 
-        if (client == 0)
+        if (client == nullptr)
         {
             dumpJackErrorMessage (status);
         }
@@ -163,10 +162,10 @@ public:
     ~JackAudioIODevice()
     {
         close();
-        if (client != 0)
+        if (client != nullptr)
         {
             juce::jack_client_close (client);
-            client = 0;
+            client = nullptr;
         }
     }
 
@@ -195,16 +194,16 @@ public:
 
     StringArray getOutputChannelNames()         { return getChannelNames (false); }
     StringArray getInputChannelNames()          { return getChannelNames (true); }
-    int getNumSampleRates()                     { return client != 0 ? 1 : 0; }
-    double getSampleRate (int index)            { return client != 0 ? juce::jack_get_sample_rate (client) : 0; }
-    int getNumBufferSizesAvailable()            { return client != 0 ? 1 : 0; }
+    int getNumSampleRates()                     { return client != nullptr ? 1 : 0; }
+    double getSampleRate (int index)            { return client != nullptr ? juce::jack_get_sample_rate (client) : 0; }
+    int getNumBufferSizesAvailable()            { return client != nullptr ? 1 : 0; }
     int getBufferSizeSamples (int index)        { return getDefaultBufferSize(); }
-    int getDefaultBufferSize()                  { return client != 0 ? juce::jack_get_buffer_size (client) : 0; }
+    int getDefaultBufferSize()                  { return client != nullptr ? juce::jack_get_buffer_size (client) : 0; }
 
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
                  double sampleRate, int bufferSizeSamples)
     {
-        if (client == 0)
+        if (client == nullptr)
         {
             lastError = "No JACK client running";
             return lastError;
@@ -273,7 +272,7 @@ public:
     {
         stop();
 
-        if (client != 0)
+        if (client != nullptr)
         {
             juce::jack_deactivate (client);
             juce::jack_set_process_callback (client, processCallback, 0);
@@ -304,7 +303,7 @@ public:
 
     void stop()
     {
-        start (0);
+        start (nullptr);
     }
 
     bool isOpen()                           { return isOpen_; }
@@ -416,7 +415,7 @@ private:
 
         if (device != nullptr)
         {
-            device->client = 0;
+            device->client = nullptr;
             device->close();
         }
     }
@@ -471,7 +470,7 @@ public:
         jack_status_t status;
         jack_client_t* client = juce::jack_client_open ("JuceJackDummy", JackNoStartServer, &status);
 
-        if (client == 0)
+        if (client == nullptr)
         {
             dumpJackErrorMessage (status);
         }
@@ -480,7 +479,7 @@ public:
             // scan for output devices
             const char** ports = juce::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsOutput);
 
-            if (ports != 0)
+            if (ports != nullptr)
             {
                 int j = 0;
                 while (ports[j] != 0)
@@ -504,7 +503,7 @@ public:
             // scan for input devices
             ports = juce::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsInput);
 
-            if (ports != 0)
+            if (ports != nullptr)
             {
                 int j = 0;
                 while (ports[j] != 0)
@@ -548,7 +547,7 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         JackAudioIODevice* d = dynamic_cast <JackAudioIODevice*> (device);
-        if (d == 0)
+        if (d == nullptr)
             return -1;
 
         return asInput ? inputIds.indexOf (d->inputId)
