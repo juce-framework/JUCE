@@ -46,7 +46,7 @@
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4996)
-#else
+#elif ! JUCE_MINGW
  #define __cdecl
 #endif
 
@@ -66,7 +66,10 @@
 //==============================================================================
 #include "juce_VSTMidiEventList.h"
 
-#if ! JUCE_WINDOWS
+#if JUCE_MINGW
+ extern "C" void _fpreset();
+ extern "C" void _clearfp();
+#elif ! JUCE_WINDOWS
  static void _fpreset() {}
  static void _clearfp() {}
 #endif
