@@ -83,7 +83,11 @@
 
  #define STRICT 1
  #define WIN32_LEAN_AND_MEAN 1
- #define _WIN32_WINNT 0x0600
+ #if JUCE_MINGW
+  #define _WIN32_WINNT 0x0501
+ #else
+  #define _WIN32_WINNT 0x0600
+ #endif
  #define _UNICODE 1
  #define UNICODE 1
  #ifndef _WIN32_IE

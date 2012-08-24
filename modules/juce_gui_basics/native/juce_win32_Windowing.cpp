@@ -54,7 +54,7 @@ void* getUser32Function (const char* functionName) // (NB: this function also us
     HMODULE user32Mod = GetModuleHandleA ("user32.dll");
     jassert (user32Mod != 0);
 
-    return static_cast <void*> (GetProcAddress (user32Mod, functionName));
+    return (void*) GetProcAddress (user32Mod, functionName);
 }
 
 //==============================================================================

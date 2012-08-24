@@ -27,12 +27,6 @@
 #define __JUCE_MEMORY_JUCEHEADER__
 
 //==============================================================================
-#if JUCE_MINGW
- /** This allocator is not defined in mingw gcc. */
- #define alloca              __builtin_alloca
-#endif
-
-//==============================================================================
 /** Fills a block of memory with zeros. */
 inline void zeromem (void* memory, size_t numBytes) noexcept        { memset (memory, 0, numBytes); }
 

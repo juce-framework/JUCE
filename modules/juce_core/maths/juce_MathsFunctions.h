@@ -285,7 +285,7 @@ inline int numElementsInArray (Type (&array)[N])
 template <typename Type>
 inline Type juce_hypot (Type a, Type b) noexcept
 {
-   #if JUCE_WINDOWS
+   #if JUCE_MSVC
     return static_cast <Type> (_hypot (a, b));
    #else
     return static_cast <Type> (hypot (a, b));

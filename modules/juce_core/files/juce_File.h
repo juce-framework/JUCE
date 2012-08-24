@@ -355,13 +355,11 @@ public:
                       bool applyRecursively = false) const;
 
     /** Returns true if this file is a hidden or system file.
-
         The criteria for deciding whether a file is hidden are platform-dependent.
     */
     bool isHidden() const;
 
     /** If this file is a link, this returns the file that it points to.
-
         If this file isn't actually link, it'll just return itself.
     */
     File getLinkedTarget() const;
@@ -695,13 +693,11 @@ public:
     static void findFileSystemRoots (Array<File>& results);
 
     /** Finds the name of the drive on which this file lives.
-
         @returns the volume label of the drive, or an empty string if this isn't possible
     */
     String getVolumeLabel() const;
 
     /** Returns the serial number of the volume on which this file lives.
-
         @returns the serial number, or zero if there's a problem doing this
     */
     int getVolumeSerialNumber() const;
@@ -790,7 +786,6 @@ public:
         commonApplicationDataDirectory,
 
         /** The folder that should be used for temporary files.
-
             Always delete them when you're finished, to keep the user's computer tidy!
         */
         tempDirectory,
@@ -829,18 +824,15 @@ public:
         hostApplicationPath,
 
         /** The directory in which applications normally get installed.
-
             So on windows, this would be something like "c:\program files", on the
             Mac "/Applications", or "/usr" on linux.
         */
         globalApplicationsDirectory,
 
-        /** The most likely place where a user might store their music files.
-        */
+        /** The most likely place where a user might store their music files. */
         userMusicDirectory,
 
-        /** The most likely place where a user might store their movie files.
-        */
+        /** The most likely place where a user might store their movie files. */
         userMoviesDirectory,
     };
 
@@ -853,9 +845,7 @@ public:
 
     //==============================================================================
     /** Returns a temporary file in the system's temp directory.
-
         This will try to return the name of a non-existent temp file.
-
         To get the temp folder, you can use getSpecialLocation (File::tempDirectory).
     */
     static File createTempFile (const String& fileNameEnding);
@@ -863,7 +853,6 @@ public:
 
     //==============================================================================
     /** Returns the current working directory.
-
         @see setAsCurrentWorkingDirectory
     */
     static File getCurrentWorkingDirectory();
@@ -879,13 +868,11 @@ public:
 
     //==============================================================================
     /** The system-specific file separator character.
-
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
     static const juce_wchar separator;
 
     /** The system-specific file separator character, as a string.
-
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
     static const String separatorString;
@@ -912,12 +899,10 @@ public:
     */
     static String createLegalPathName (const String& pathNameToFix);
 
-    /** Indicates whether filenames are case-sensitive on the current operating system.
-    */
+    /** Indicates whether filenames are case-sensitive on the current operating system. */
     static bool areFileNamesCaseSensitive();
 
-    /** Returns true if the string seems to be a fully-specified absolute path.
-    */
+    /** Returns true if the string seems to be a fully-specified absolute path. */
     static bool isAbsolutePath (const String& path);
 
     /** Creates a file that simply contains this string, without doing the sanity-checking
