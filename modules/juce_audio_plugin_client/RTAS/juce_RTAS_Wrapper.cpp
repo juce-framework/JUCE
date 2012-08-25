@@ -518,8 +518,7 @@ protected:
             juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs,
                                               sampleRate, mRTGlobals->mHWBufferSizeInSamples);
 
-            juceFilter->prepareToPlay (sampleRate,
-                                       mRTGlobals->mHWBufferSizeInSamples);
+            juceFilter->prepareToPlay (sampleRate, mRTGlobals->mHWBufferSizeInSamples);
 
             prepared = true;
         }
@@ -702,7 +701,7 @@ protected:
         Cmn_Int64 ticks = 0;
         Cmn_Bool isPlaying = false;
 
-        if (midiTransport != 0)
+        if (midiTransport != nullptr)
         {
             midiTransport->GetCurrentTempo (&bpm);
             midiTransport->IsTransportPlaying (&isPlaying);
@@ -717,6 +716,14 @@ protected:
                 midiTransport->GetCurrentTDMSampleLocation (&sampleLocation);
 
             midiTransport->GetCustomTickPosition (&ticks, sampleLocation);
+
+            info.timeInSamples = (int64) sampleLocation;
+            info.timeInSeconds = sampleLocation / sampleRate;
+        }
+        else
+        {
+            info.timeInSamples = 0;
+            info.timeInSeconds = 0;
         }
 
         info.bpm = bpm;
@@ -729,10 +736,6 @@ protected:
         info.isLooping = false;
         info.ppqLoopStart = 0;
         info.ppqLoopEnd = 0;
-
-        // xxx incorrect if there are tempo changes, but there's no
-        // other way of getting this info..
-        info.timeInSeconds = ticks * (60.0 / 960000.0) / bpm;
 
         double framesPerSec = 24.0;
 

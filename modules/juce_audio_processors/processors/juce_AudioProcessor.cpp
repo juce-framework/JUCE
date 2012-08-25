@@ -291,7 +291,7 @@ void AudioProcessorListener::audioProcessorParameterChangeGestureEnd (AudioProce
 //==============================================================================
 bool AudioPlayHead::CurrentPositionInfo::operator== (const CurrentPositionInfo& other) const noexcept
 {
-    return timeInSeconds == other.timeInSeconds
+    return timeInSamples == other.timeInSamples
         && ppqPosition == other.ppqPosition
         && editOriginTime == other.editOriginTime
         && ppqPositionOfLastBarStart == other.ppqPositionOfLastBarStart

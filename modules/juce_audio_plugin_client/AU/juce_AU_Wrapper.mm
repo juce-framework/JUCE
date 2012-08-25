@@ -468,6 +468,7 @@ public:
     {
         info.timeSigNumerator = 0;
         info.timeSigDenominator = 0;
+        info.timeInSamples = 0;
         info.timeInSeconds = 0;
         info.editOriginTime = 0;
         info.ppqPositionOfLastBarStart = 0;
@@ -520,6 +521,7 @@ public:
                                     &outCycleEndBeat) == noErr)
         {
             info.isPlaying = playing;
+            info.timeInSamples = (int64) outCurrentSampleInTimeLine;
             info.timeInSeconds = outCurrentSampleInTimeLine / GetSampleRate();
         }
 

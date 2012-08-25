@@ -682,6 +682,7 @@ public:
             info.timeSigDenominator = 4;
         }
 
+        info.timeInSamples = (int64) ti->samplePos;
         info.timeInSeconds = ti->samplePos / ti->sampleRate;
         info.ppqPosition = (ti->flags & kVstPpqPosValid) != 0 ? ti->ppqPos : 0.0;
         info.ppqPositionOfLastBarStart = (ti->flags & kVstBarsValid) != 0 ? ti->barStartPos : 0.0;
