@@ -219,6 +219,9 @@ LookAndFeel::LookAndFeel()
         Toolbar::labelTextColourId,                 0xff000000,
         Toolbar::editingModeOutlineColourId,        0xffff0000,
 
+        DrawableButton::backgroundColourId,         0x00000000,
+        DrawableButton::backgroundOnColourId,       0xaabbbbff,
+
         HyperlinkButton::textColourId,              0xcc1111ee,
 
         GroupComponent::outlineColourId,            0x66000000,

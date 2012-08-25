@@ -513,7 +513,8 @@ public:
         db = new DrawableButton ("Button 4", DrawableButton::ImageOnButtonBackground);
         db->setImages (&normal, &over, &down);
         db->setClickingTogglesState (true);
-        db->setBackgroundColours (Colours::white, Colours::yellow);
+        db->setColour (TextButton::buttonColourId, Colours::white);
+        db->setColour (TextButton::buttonOnColourId, Colours::yellow);
         db->setBounds (200, 70, 50, 50);
         db->setTooltip ("this is a DrawableButton on a standard button background");
         db->addListener (buttonListener);

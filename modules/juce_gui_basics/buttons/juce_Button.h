@@ -29,7 +29,6 @@
 #include "../components/juce_Component.h"
 #include "../keyboard/juce_KeyListener.h"
 #include "../commands/juce_ApplicationCommandManager.h"
-#include "../windows/juce_TooltipWindow.h"
 
 
 //==============================================================================
@@ -52,9 +51,9 @@ protected:
     //==============================================================================
     /** Creates a button.
 
-        @param buttonName           the text to put in the button (the component's name is also
-                                    initially set to this string, but these can be changed later
-                                    using the setName() and setButtonText() methods)
+        @param buttonName   the text to put in the button (the component's name is also
+                            initially set to this string, but these can be changed later
+                            using the setName() and setButtonText() methods)
     */
     explicit Button (const String& buttonName);
 
@@ -64,28 +63,23 @@ public:
 
     //==============================================================================
     /** Changes the button's text.
-
         @see getButtonText
     */
     void setButtonText (const String& newText);
 
     /** Returns the text displayed in the button.
-
         @see setButtonText
     */
     const String& getButtonText() const               { return text; }
 
     //==============================================================================
     /** Returns true if the button is currently being held down by the mouse.
-
         @see isOver
     */
     bool isDown() const noexcept;
 
     /** Returns true if the mouse is currently over the button.
-
         This will be also be true if the mouse is being held down.
-
         @see isDown
     */
     bool isOver() const noexcept;
@@ -125,7 +119,7 @@ public:
         your own Value object.
         @see getToggleState, Value
     */
-    Value& getToggleStateValue()                                { return isOn; }
+    Value& getToggleStateValue() noexcept                       { return isOn; }
 
     /** This tells the button to automatically flip the toggle state when
         the button is clicked.
@@ -136,7 +130,6 @@ public:
     void setClickingTogglesState (bool shouldToggle) noexcept;
 
     /** Returns true if this button is set to be an automatic toggle-button.
-
         This returns the last value that was passed to setClickingTogglesState().
     */
     bool getClickingTogglesState() const noexcept;
@@ -162,7 +155,6 @@ public:
     void setRadioGroupId (int newGroupId);
 
     /** Returns the ID of the group to which this button belongs.
-
         (See setRadioGroupId() for an explanation of this).
     */
     int getRadioGroupId() const noexcept                        { return radioGroupId; }
@@ -177,13 +169,13 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener()                                     {}
+        virtual ~Listener()  {}
 
         /** Called when the button is clicked. */
         virtual void buttonClicked (Button* button) = 0;
 
         /** Called when the button's state changes. */
-        virtual void buttonStateChanged (Button*)               {}
+        virtual void buttonStateChanged (Button*)  {}
     };
 
     /** Registers a listener to receive events when this button's state changes.
@@ -226,8 +218,7 @@ public:
                               int commandID,
                               bool generateTooltip);
 
-    /** Returns the command ID that was set by setCommandToTrigger().
-    */
+    /** Returns the command ID that was set by setCommandToTrigger(). */
     int getCommandID() const noexcept               { return commandID; }
 
     //==============================================================================
@@ -243,13 +234,11 @@ public:
     void addShortcut (const KeyPress& key);
 
     /** Removes all key shortcuts that had been set for this button.
-
         @see addShortcut
     */
     void clearShortcuts();
 
     /** Returns true if the given keypress is a shortcut for this button.
-
         @see addShortcut
     */
     bool isRegisteredForShortcut (const KeyPress& key) const;
@@ -300,8 +289,7 @@ public:
 
 
     //==============================================================================
-    /** A combination of these flags are used by setConnectedEdges().
-    */
+    /** A combination of these flags are used by setConnectedEdges(). */
     enum ConnectedEdgeFlags
     {
         ConnectedOnLeft = 1,
@@ -324,27 +312,27 @@ public:
     void setConnectedEdges (int connectedEdgeFlags);
 
     /** Returns the set of flags passed into setConnectedEdges(). */
-    int getConnectedEdgeFlags() const noexcept                  { return connectedEdgeFlags; }
+    int getConnectedEdgeFlags() const noexcept          { return connectedEdgeFlags; }
 
     /** Indicates whether the button adjoins another one on its left edge.
         @see setConnectedEdges
     */
-    bool isConnectedOnLeft() const noexcept                     { return (connectedEdgeFlags & ConnectedOnLeft) != 0; }
+    bool isConnectedOnLeft() const noexcept             { return (connectedEdgeFlags & ConnectedOnLeft) != 0; }
 
     /** Indicates whether the button adjoins another one on its right edge.
         @see setConnectedEdges
     */
-    bool isConnectedOnRight() const noexcept                    { return (connectedEdgeFlags & ConnectedOnRight) != 0; }
+    bool isConnectedOnRight() const noexcept            { return (connectedEdgeFlags & ConnectedOnRight) != 0; }
 
     /** Indicates whether the button adjoins another one on its top edge.
         @see setConnectedEdges
     */
-    bool isConnectedOnTop() const noexcept                      { return (connectedEdgeFlags & ConnectedOnTop) != 0; }
+    bool isConnectedOnTop() const noexcept              { return (connectedEdgeFlags & ConnectedOnTop) != 0; }
 
     /** Indicates whether the button adjoins another one on its bottom edge.
         @see setConnectedEdges
     */
-    bool isConnectedOnBottom() const noexcept                   { return (connectedEdgeFlags & ConnectedOnBottom) != 0; }
+    bool isConnectedOnBottom() const noexcept           { return (connectedEdgeFlags & ConnectedOnBottom) != 0; }
 
 
     //==============================================================================
@@ -366,11 +354,6 @@ public:
     */
     void setState (const ButtonState newState);
 
-
-    //==============================================================================
-    // These are deprecated - please use addListener() and removeListener() instead!
-    JUCE_DEPRECATED (void addButtonListener (Listener*));
-    JUCE_DEPRECATED (void removeButtonListener (Listener*));
 
 protected:
     //==============================================================================
@@ -420,7 +403,7 @@ protected:
 
     //==============================================================================
     /** @internal */
-    virtual void internalClickCallback (const ModifierKeys& modifiers);
+    virtual void internalClickCallback (const ModifierKeys&);
     /** @internal */
     void handleCommandMessage (int commandId);
     /** @internal */
@@ -495,8 +478,12 @@ private:
     void turnOffOtherButtonsInGroup (bool sendChangeNotification);
 
     void flashButtonState();
-    void sendClickMessage (const ModifierKeys& modifiers);
+    void sendClickMessage (const ModifierKeys&);
     void sendStateMessage();
+
+    // These are deprecated - please use addListener() and removeListener() instead!
+    JUCE_DEPRECATED (void addButtonListener (Listener*));
+    JUCE_DEPRECATED (void removeButtonListener (Listener*));
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button);
 };

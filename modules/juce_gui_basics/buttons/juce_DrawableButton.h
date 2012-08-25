@@ -49,7 +49,9 @@ public:
         ImageRaw,                   /**< The button will just display the images in their normal size and position.
                                          This leaves it up to the caller to make sure the images are the correct size and position for the button. */
         ImageAboveTextLabel,        /**< Draws the button as a text label across the bottom with the image resized and scaled to fit above it. */
-        ImageOnButtonBackground     /**< Draws the button as a standard rounded-rectangle button with the image on top. */
+        ImageOnButtonBackground     /**< Draws the button as a standard rounded-rectangle button with the image on top.
+                                         Note that if you use this style, the colour IDs that control the button colour are
+                                         TextButton::buttonColourId and TextButton::buttonOnColourId. */
     };
 
     //==============================================================================
@@ -88,60 +90,33 @@ public:
                                 An internal copy will be made of the object passed-in if it is
                                 non-zero.
         @param normalImageOn    same as the normalImage, but this is used when the button's toggle
-                                state is 'on'. If this is 0, the normal image is used instead
+                                state is 'on'. If this is nullptr, the normal image is used instead
         @param overImageOn      same as the overImage, but this is used when the button's toggle
-                                state is 'on'. If this is 0, the normalImageOn is drawn instead
+                                state is 'on'. If this is nullptr, the normalImageOn is drawn instead
         @param downImageOn      same as the downImage, but this is used when the button's toggle
-                                state is 'on'. If this is 0, the overImageOn is drawn instead
+                                state is 'on'. If this is nullptr, the overImageOn is drawn instead
         @param disabledImageOn  same as the disabledImage, but this is used when the button's toggle
-                                state is 'on'. If this is 0, the normal image will be drawn instead
+                                state is 'on'. If this is nullptr, the normal image will be drawn instead
                                 with a reduced opacity
     */
     void setImages (const Drawable* normalImage,
-                    const Drawable* overImage = nullptr,
-                    const Drawable* downImage = nullptr,
-                    const Drawable* disabledImage = nullptr,
-                    const Drawable* normalImageOn = nullptr,
-                    const Drawable* overImageOn = nullptr,
-                    const Drawable* downImageOn = nullptr,
+                    const Drawable* overImage       = nullptr,
+                    const Drawable* downImage       = nullptr,
+                    const Drawable* disabledImage   = nullptr,
+                    const Drawable* normalImageOn   = nullptr,
+                    const Drawable* overImageOn     = nullptr,
+                    const Drawable* downImageOn     = nullptr,
                     const Drawable* disabledImageOn = nullptr);
 
 
     //==============================================================================
     /** Changes the button's style.
-
         @see ButtonStyle
     */
     void setButtonStyle (ButtonStyle newStyle);
 
     //==============================================================================
-    /** Changes the button's background colours.
-
-        The toggledOffColour is the colour to use when the button's toggle state
-        is off, and toggledOnColour when it's on.
-
-        For an ImageOnly or ImageAboveTextLabel style, the background colour is
-        used to fill the background of the component.
-
-        For an ImageOnButtonBackground style, the colour is used to draw the
-        button's lozenge shape and exactly how the colour's used will depend
-        on the LookAndFeel.
-    */
-    void setBackgroundColours (const Colour& toggledOffColour,
-                               const Colour& toggledOnColour);
-
-    /** Returns the current background colour being used.
-
-        @see setBackgroundColour
-    */
-    const Colour& getBackgroundColour() const noexcept;
-
     /** Gives the button an optional amount of space around the edge of the drawable.
-
-        This will only apply to ImageFitted or ImageRaw styles, it won't affect the
-        ones on a button background. If the button is too small for the given gap, a
-        smaller gap will be used.
-
         By default there's a gap of about 3 pixels.
     */
     void setEdgeIndent (int numPixelsIndent);
@@ -149,8 +124,12 @@ public:
     //==============================================================================
     /** Returns the image that the button is currently displaying. */
     Drawable* getCurrentImage() const noexcept;
+
+    /** Returns the image that the button will use for its normal state. */
     Drawable* getNormalImage() const noexcept;
+    /** Returns the image that the button will use when the mouse is over it. */
     Drawable* getOverImage() const noexcept;
+    /** Returns the image that the button will use when the mouse is held down on it. */
     Drawable* getDownImage() const noexcept;
 
     //==============================================================================
@@ -159,33 +138,43 @@ public:
         These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
         methods.
 
+        Note that when the ImageOnButtonBackground style is used, the colour IDs that control
+        the button colour are TextButton::buttonColourId and TextButton::buttonOnColourId.
+
         @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
     */
     enum ColourIds
     {
-        textColourId             = 0x1004010, /**< The colour to use for the URL text. */
+        textColourId             = 0x1004010, /**< The colour to use for the button's text label. */
+
+        backgroundColourId       = 0x1004011,  /**< The colour used to fill the button's background (when
+                                                    the button is toggled 'off'). Note that if you use the
+                                                    ImageOnButtonBackground style, you should use TextButton::buttonColourId
+                                                    to change the button's colour. */
+        backgroundOnColourId     = 0x1004012,  /**< The colour used to fill the button's background (when
+                                                    the button is toggled 'on'). Note that if you use the
+                                                    ImageOnButtonBackground style, you should use TextButton::buttonOnColourId
+                                                    to change the button's colour. */
     };
 
-protected:
     //==============================================================================
     /** @internal */
-    void paintButton (Graphics& g,
-                      bool isMouseOverButton,
-                      bool isButtonDown);
+    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown);
     /** @internal */
     void buttonStateChanged();
     /** @internal */
     void resized();
     /** @internal */
     void enablementChanged();
+    /** @internal */
+    void colourChanged();
 
 private:
     //==============================================================================
     ButtonStyle style;
-    ScopedPointer <Drawable> normalImage, overImage, downImage, disabledImage;
-    ScopedPointer <Drawable> normalImageOn, overImageOn, downImageOn, disabledImageOn;
+    ScopedPointer <Drawable> normalImage, overImage, downImage, disabledImage,
+                             normalImageOn, overImageOn, downImageOn, disabledImageOn;
     Drawable* currentImage;
-    Colour backgroundOff, backgroundOn;
     int edgeIndent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton);

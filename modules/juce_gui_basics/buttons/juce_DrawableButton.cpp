@@ -30,16 +30,6 @@ DrawableButton::DrawableButton (const String& name,
       currentImage (nullptr),
       edgeIndent (3)
 {
-    if (buttonStyle == ImageOnButtonBackground)
-    {
-        backgroundOff = Colour (0xffbbbbff);
-        backgroundOn = Colour (0xff3333ff);
-    }
-    else
-    {
-        backgroundOff = Colours::transparentBlack;
-        backgroundOn = Colour (0xaabbbbff);
-    }
 }
 
 DrawableButton::~DrawableButton()
@@ -80,25 +70,6 @@ void DrawableButton::setButtonStyle (const DrawableButton::ButtonStyle newStyle)
     }
 }
 
-void DrawableButton::setBackgroundColours (const Colour& toggledOffColour,
-                                           const Colour& toggledOnColour)
-{
-    if (backgroundOff != toggledOffColour
-         || backgroundOn != toggledOnColour)
-    {
-        backgroundOff = toggledOffColour;
-        backgroundOn = toggledOnColour;
-
-        repaint();
-    }
-}
-
-const Colour& DrawableButton::getBackgroundColour() const noexcept
-{
-    return getToggleState() ? backgroundOn
-                            : backgroundOff;
-}
-
 void DrawableButton::setEdgeIndent (const int numPixelsIndent)
 {
     edgeIndent = numPixelsIndent;
@@ -120,19 +91,20 @@ void DrawableButton::resized()
         {
             Rectangle<int> imageSpace;
 
+            const int indentX = jmin (edgeIndent, proportionOfWidth  (0.3f));
+            const int indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
+
             if (style == ImageOnButtonBackground)
             {
-                imageSpace = getLocalBounds().reduced (getWidth() / 4, getHeight() / 4);
+                imageSpace = getLocalBounds().reduced (jmax (getWidth()  / 4, indentX),
+                                                       jmax (getHeight() / 4, indentY));
             }
             else
             {
                 const int textH = (style == ImageAboveTextLabel) ? jmin (16, proportionOfHeight (0.25f)) : 0;
 
-                const int indentX = jmin (edgeIndent, proportionOfWidth (0.3f));
-                const int indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
-
                 imageSpace.setBounds (indentX, indentY,
-                                      getWidth() - indentX * 2,
+                                      getWidth()  - indentX * 2,
                                       getHeight() - indentY * 2 - textH);
             }
 
@@ -187,20 +159,27 @@ void DrawableButton::enablementChanged()
     buttonStateChanged();
 }
 
+void DrawableButton::colourChanged()
+{
+    repaint();
+}
+
 void DrawableButton::paintButton (Graphics& g,
-                                  bool isMouseOverButton,
-                                  bool isButtonDown)
+                                  const bool isMouseOverButton,
+                                  const bool isButtonDown)
 {
     if (style == ImageOnButtonBackground)
     {
         getLookAndFeel().drawButtonBackground (g, *this,
-                                               getBackgroundColour(),
+                                               findColour (getToggleState() ? TextButton::buttonOnColourId
+                                                                            : TextButton::buttonColourId),
                                                isMouseOverButton,
                                                isButtonDown);
     }
     else
     {
-        g.fillAll (getBackgroundColour());
+        g.fillAll (findColour (getToggleState() ? backgroundOnColourId
+                                                : backgroundColourId));
 
         const int textH = (style == ImageAboveTextLabel)
                             ? jmin (16, proportionOfHeight (0.25f))
@@ -224,11 +203,8 @@ void DrawableButton::paintButton (Graphics& g,
 //==============================================================================
 Drawable* DrawableButton::getCurrentImage() const noexcept
 {
-    if (isDown())
-        return getDownImage();
-
-    if (isOver())
-        return getOverImage();
+    if (isDown())  return getDownImage();
+    if (isOver())  return getOverImage();
 
     return getNormalImage();
 }
@@ -241,50 +217,18 @@ Drawable* DrawableButton::getNormalImage() const noexcept
 
 Drawable* DrawableButton::getOverImage() const noexcept
 {
-    Drawable* d = normalImage;
-
     if (getToggleState())
     {
-        if (overImageOn != nullptr)
-            d = overImageOn;
-        else if (normalImageOn != nullptr)
-            d = normalImageOn;
-        else if (overImage != nullptr)
-            d = overImage;
-    }
-    else
-    {
-        if (overImage != nullptr)
-            d = overImage;
+        if (overImageOn   != nullptr)   return overImageOn;
+        if (normalImageOn != nullptr)   return normalImageOn;
     }
 
-    return d;
+    return overImage != nullptr ? overImage : normalImage;
 }
 
 Drawable* DrawableButton::getDownImage() const noexcept
 {
-    Drawable* d = normalImage;
+    Drawable* const d = getToggleState() ? downImageOn : downImage;
 
-    if (getToggleState())
-    {
-        if (downImageOn != nullptr)
-            d = downImageOn;
-        else if (overImageOn != nullptr)
-            d = overImageOn;
-        else if (normalImageOn != nullptr)
-            d = normalImageOn;
-        else if (downImage != nullptr)
-            d = downImage;
-        else
-            d = getOverImage();
-    }
-    else
-    {
-        if (downImage != nullptr)
-            d = downImage;
-        else
-            d = getOverImage();
-    }
-
-    return d;
+    return d != nullptr ? d : getOverImage();
 }
