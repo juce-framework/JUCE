@@ -923,12 +923,8 @@ void VSTPluginInstance::initialise()
     else
         dispatch (effSetProgram, 0, 0, 0, 0);
 
-    int i;
-    for (i = effect->numInputs; --i >= 0;)
-        dispatch (effConnectInput, i, 1, 0, 0);
-
-    for (i = effect->numOutputs; --i >= 0;)
-        dispatch (effConnectOutput, i, 1, 0, 0);
+    for (int i = effect->numInputs;  --i >= 0;)  dispatch (effConnectInput,  i, 1, 0, 0);
+    for (int i = effect->numOutputs; --i >= 0;)  dispatch (effConnectOutput, i, 1, 0, 0);
 
     updateStoredProgramNames();
 
@@ -939,18 +935,16 @@ void VSTPluginInstance::initialise()
 
 
 //==============================================================================
-void VSTPluginInstance::prepareToPlay (double sampleRate_,
-                                       int samplesPerBlockExpected)
+void VSTPluginInstance::prepareToPlay (double rate, int samplesPerBlockExpected)
 {
-    setPlayConfigDetails (effect->numInputs, effect->numOutputs,
-                          sampleRate_, samplesPerBlockExpected);
+    setPlayConfigDetails (effect->numInputs, effect->numOutputs, rate, samplesPerBlockExpected);
 
     setLatencySamples (effect->initialDelay);
 
     vstHostTime.tempo = 120.0;
     vstHostTime.timeSigNumerator = 4;
     vstHostTime.timeSigDenominator = 4;
-    vstHostTime.sampleRate = sampleRate_;
+    vstHostTime.sampleRate = rate;
     vstHostTime.samplePos = 0;
     vstHostTime.flags = kVstNanosValid;  /*| kVstTransportPlaying | kVstTempoValid | kVstTimeSigValid*/;
 
@@ -968,7 +962,7 @@ void VSTPluginInstance::prepareToPlay (double sampleRate_,
 
         incomingMidi.clear();
 
-        dispatch (effSetSampleRate, 0, 0, 0, (float) sampleRate_);
+        dispatch (effSetSampleRate, 0, 0, 0, (float) rate);
         dispatch (effSetBlockSize, 0, jmax (16, samplesPerBlockExpected), 0, 0);
 
         tempBuffer.setSize (jmax (1, effect->numOutputs), samplesPerBlockExpected);
@@ -1002,25 +996,25 @@ void VSTPluginInstance::releaseResources()
     midiEventsToSend.freeEvents();
 }
 
-void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
-                                      MidiBuffer& midiMessages)
+void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
     const int numSamples = buffer.getNumSamples();
 
     if (initialised)
     {
-        AudioPlayHead* playHead = getPlayHead();
+        AudioPlayHead* const playHead = getPlayHead();
 
         if (playHead != nullptr)
         {
             AudioPlayHead::CurrentPositionInfo position;
             playHead->getCurrentPosition (position);
 
-            vstHostTime.tempo = position.bpm;
-            vstHostTime.timeSigNumerator = position.timeSigNumerator;
+            vstHostTime.samplePos          = position.timeInSamples;
+            vstHostTime.tempo              = position.bpm;
+            vstHostTime.timeSigNumerator   = position.timeSigNumerator;
             vstHostTime.timeSigDenominator = position.timeSigDenominator;
-            vstHostTime.ppqPos = position.ppqPosition;
-            vstHostTime.barStartPos = position.ppqPositionOfLastBarStart;
+            vstHostTime.ppqPos             = position.ppqPosition;
+            vstHostTime.barStartPos        = position.ppqPositionOfLastBarStart;
             vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid | kVstPpqPosValid | kVstBarsValid;
 
             if (position.isPlaying)

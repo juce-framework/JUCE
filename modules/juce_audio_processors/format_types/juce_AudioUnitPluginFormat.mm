@@ -938,7 +938,7 @@ private:
             }
 
             if (outCurrentSampleInTimeLine != nullptr)
-                *outCurrentSampleInTimeLine = roundToInt (result.timeInSeconds * getSampleRate());
+                *outCurrentSampleInTimeLine = (Float64) result.timeInSamples;
 
             if (outIsCycling != nullptr)        *outIsCycling = false;
             if (outCycleStartBeat != nullptr)   *outCycleStartBeat = 0;
