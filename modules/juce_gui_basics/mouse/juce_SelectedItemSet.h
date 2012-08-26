@@ -270,6 +270,9 @@ public:
 
     const Array <SelectableItemType>& getItemArray() const noexcept         { return selectedItems; }
 
+    SelectableItemType* begin() const noexcept                              { return selectedItems.begin(); }
+    SelectableItemType* end() const noexcept                                { return selectedItems.end(); }
+
     //==============================================================================
     /** Can be overridden to do special handling when an item is selected.
 
