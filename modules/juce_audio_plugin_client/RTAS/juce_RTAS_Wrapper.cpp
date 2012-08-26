@@ -71,8 +71,9 @@
     c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\DOA
     c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\PPC_H
     c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\AppSupport
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\DigiPublic
     c:\yourdirectory\PT_80_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
-    C:\yourdirectory\PT_80_SDK\xplat\AVX\avx2\avx2sdk\inc
+    c:\yourdirectory\PT_80_SDK\xplat\AVX\avx2\avx2sdk\inc
 
    NB. If you hit a huge pile of bugs around here, make sure that you've not got the
    Apple QuickTime headers before the PT headers in your path, because there are

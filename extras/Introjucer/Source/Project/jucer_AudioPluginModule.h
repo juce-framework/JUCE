@@ -281,6 +281,7 @@ namespace RTASHelpers
                                 "AlturaPorts/TDMPlugIns/DSPManager/Interfaces",
                                 "AlturaPorts/SADriver/Interfaces",
                                 "AlturaPorts/DigiPublic/Interfaces",
+                                "AlturaPorts/DigiPublic",
                                 "AlturaPorts/Fic/Interfaces/DAEClient",
                                 "AlturaPorts/NewFileLibs/Cmn",
                                 "AlturaPorts/NewFileLibs/DOA",
