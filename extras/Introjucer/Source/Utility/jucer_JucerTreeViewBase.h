@@ -63,11 +63,11 @@ public:
     virtual void deleteItem();
     virtual void deleteAllSelectedItems();
     virtual void showDocument();
-    virtual void showPopupMenu();
     virtual void showMultiSelectionPopupMenu();
     virtual void showRenameBox();
 
     void launchPopupMenu (PopupMenu&); // runs asynchronously, and produces a callback to handlePopupMenuResult().
+    virtual void showPopupMenu();
     virtual void handlePopupMenuResult (int resultCode);
 
     //==============================================================================
