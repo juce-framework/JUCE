@@ -81,6 +81,7 @@ public:
     bool isFruityLoops() const noexcept      { return type == FruityLoops; }
     bool isWaveBurner() const noexcept       { return type == WaveBurner; }
     bool isDigitalPerformer() const noexcept { return type == DigitalPerformer; }
+    bool isReaper() const noexcept           { return type == Reaper; }
 
     //==============================================================================
     static String getHostPath()
@@ -109,6 +110,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Wavelab"))           return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("WaveBurner"))        return WaveBurner;
         if (hostFilename.contains           ("Digital Performer")) return DigitalPerformer;
+        if (hostFilename.containsIgnoreCase ("reaper"))            return Reaper;
 
       #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase ("Live 6."))        return AbletonLive6;
@@ -133,7 +135,7 @@ private:
         if (hostFilename.containsIgnoreCase ("Wavelab"))        return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("rm-host"))        return MuseReceptorGeneric;
         if (hostFilename.startsWithIgnoreCase ("Sam"))          return MagixSamplitude;
-        if (hostFilename.startsWith ("FL"))                     return FruityLoops;
+        if (hostFilename.startsWith         ("FL"))             return FruityLoops;
 
        #elif JUCE_LINUX
         jassertfalse   // not yet done!
