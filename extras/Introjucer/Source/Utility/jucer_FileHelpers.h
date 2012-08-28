@@ -41,6 +41,7 @@ namespace FileHelpers
 
     String unixStylePath (const String& path);
     String windowsStylePath (const String& path);
+    String currentOSStylePath (const String& path);
 
     bool shouldPathsBeRelative (String path1, String path2);
     bool isAbsolutePath (const String& path);

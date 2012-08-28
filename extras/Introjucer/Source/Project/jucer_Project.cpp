@@ -293,13 +293,12 @@ File Project::resolveFilename (String filename) const
     if (filename.isEmpty())
         return File::nonexistent;
 
-    filename = replacePreprocessorDefs (getPreprocessorDefs(), filename)
-                .replaceCharacter ('\\', '/');
+    filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
 
     if (FileHelpers::isAbsolutePath (filename))
-        return File::createFileWithoutCheckingPath (filename); // (avoid assertions for windows-style paths)
+        return File::createFileWithoutCheckingPath (FileHelpers::currentOSStylePath (filename)); // (avoid assertions for windows-style paths)
 
-    return getFile().getSiblingFile (filename);
+    return getFile().getSiblingFile (FileHelpers::currentOSStylePath (filename));
 }
 
 String Project::getRelativePathForFile (const File& file) const

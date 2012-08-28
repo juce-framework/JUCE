@@ -102,14 +102,16 @@ namespace FileHelpers
         return false;
     }
 
-    String unixStylePath (const String& path)
-    {
-        return path.replaceCharacter ('\\', '/');
-    }
+    String unixStylePath (const String& path)       { return path.replaceCharacter ('\\', '/'); }
+    String windowsStylePath (const String& path)    { return path.replaceCharacter ('/', '\\'); }
 
-    String windowsStylePath (const String& path)
+    String currentOSStylePath (const String& path)
     {
-        return path.replaceCharacter ('/', '\\');
+       #if JUCE_WINDOWS
+        return windowsStylePath (path);
+       #else
+        return unixStylePath (path);
+       #endif
     }
 
     bool isAbsolutePath (const String& path)
