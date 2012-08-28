@@ -701,8 +701,8 @@ void IntrojucerLookAndFeel::drawConcertinaPanelHeader (Graphics& g, const Rectan
 {
     const Colour bkg (findColour (mainBackgroundColourId));
 
-    g.setGradientFill (ColourGradient (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), 0, area.getY(),
-                                       Colours::darkgrey.withAlpha (0.2f), 0, area.getBottom(), false));
+    g.setGradientFill (ColourGradient (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), 0, (float) area.getY(),
+                                       Colours::darkgrey.withAlpha (0.2f), 0, (float) area.getBottom(), false));
 
     g.fillAll();
     g.setColour (bkg.contrasting().withAlpha (0.04f));
