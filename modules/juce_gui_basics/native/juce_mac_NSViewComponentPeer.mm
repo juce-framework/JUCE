@@ -775,8 +775,24 @@ public:
         }
     }
 
+    bool sendModalInputAttemptIfBlocked()
+    {
+        Component* const modal = Component::getCurrentlyModalComponent();
+
+        if (modal != nullptr && getComponent().isCurrentlyBlockedByAnotherModalComponent())
+        {
+            modal->inputAttemptWhenModal();
+            return true;
+        }
+
+        return false;
+    }
+
     bool canBecomeKeyWindow()
     {
+        if (sendModalInputAttemptIfBlocked())
+            return false;
+
         return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
     }
 
@@ -1242,7 +1258,7 @@ private:
             if (! [NSApp isActive])
                 [NSApp activateIgnoringOtherApps: YES];
 
-            Component* const modal = Component::getCurrentlyModalComponent (0);
+            Component* const modal = Component::getCurrentlyModalComponent();
             if (modal != nullptr)
                 modal->inputAttemptWhenModal();
         }
@@ -1669,13 +1685,13 @@ struct JuceNSWindowClass   : public ObjCClass <NSWindow>
     {
         addIvar<NSViewComponentPeer*> ("owner");
 
-        addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,         "c@:");
-        addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,            "v@:");
-        addMethod (@selector (windowShouldClose:),            windowShouldClose,          "c@:@");
-        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,         @encode (NSRect), "@:", @encode (NSRect*), "@");
-        addMethod (@selector (windowWillResize:toSize:),      windowWillResize,           @encode (NSSize), "@:@", @encode (NSSize));
-        addMethod (@selector (zoom:),                         zoom,                       "v@:@");
-        addMethod (@selector (windowWillMove:),               windowWillMove,             "v@:@");
+        addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,    "c@:");
+        addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,       "v@:");
+        addMethod (@selector (windowShouldClose:),            windowShouldClose,     "c@:@");
+        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,    @encode (NSRect), "@:",  @encode (NSRect*), "@");
+        addMethod (@selector (windowWillResize:toSize:),      windowWillResize,      @encode (NSSize), "@:@", @encode (NSSize));
+        addMethod (@selector (zoom:),                         zoom,                  "v@:@");
+        addMethod (@selector (windowWillMove:),               windowWillMove,        "v@:@");
 
        #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         addProtocol (@protocol (NSWindowDelegate));
@@ -1727,20 +1743,17 @@ private:
     {
         NSViewComponentPeer* const owner = getOwner (self);
 
-        if (owner->isZooming)
+        if (owner == nullptr || owner->isZooming)
             return proposedFrameSize;
 
         NSRect frameRect = [(NSWindow*) self frame];
         frameRect.origin.y -= proposedFrameSize.height - frameRect.size.height;
         frameRect.size = proposedFrameSize;
 
-        if (owner != nullptr)
-            frameRect = owner->constrainRect (frameRect);
+        frameRect = owner->constrainRect (frameRect);
 
-        if (juce::Component::getCurrentlyModalComponent() != nullptr
-              && owner->getComponent().isCurrentlyBlockedByAnotherModalComponent()
-              && owner->hasNativeTitleBar())
-            juce::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+        if (owner->hasNativeTitleBar())
+            owner->sendModalInputAttemptIfBlocked();
 
         return frameRect.size;
     }
@@ -1749,22 +1762,23 @@ private:
     {
         NSViewComponentPeer* const owner = getOwner (self);
 
-        owner->isZooming = true;
-        objc_super s = { self, [NSWindow class] };
-        objc_msgSendSuper (&s, @selector(zoom:), sender);
-        owner->isZooming = false;
+        if (owner != nullptr)
+        {
+            owner->isZooming = true;
+            objc_super s = { self, [NSWindow class] };
+            objc_msgSendSuper (&s, @selector (zoom:), sender);
+            owner->isZooming = false;
 
-        owner->redirectMovedOrResized();
+            owner->redirectMovedOrResized();
+        }
     }
 
     static void windowWillMove (id self, SEL, NSNotification*)
     {
         NSViewComponentPeer* const owner = getOwner (self);
 
-        if (juce::Component::getCurrentlyModalComponent() != nullptr
-              && owner->getComponent().isCurrentlyBlockedByAnotherModalComponent()
-              && owner->hasNativeTitleBar())
-            juce::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+        if (owner != nullptr && owner->hasNativeTitleBar())
+            owner->sendModalInputAttemptIfBlocked();
     }
 };
 
