@@ -48,12 +48,12 @@ public:
     {}
 
     RelativePath (const String& path_, const RootFolder root_)
-        : path (path_.replaceCharacter ('\\', '/')), root (root_)
+        : path (FileHelpers::unixStylePath (path_)), root (root_)
     {
     }
 
     RelativePath (const File& file, const File& rootFolder, const RootFolder root_)
-        : path (FileHelpers::getRelativePathFrom (file, rootFolder).replaceCharacter ('\\', '/')), root (root_)
+        : path (FileHelpers::unixStylePath (FileHelpers::getRelativePathFrom (file, rootFolder))), root (root_)
     {
     }
 

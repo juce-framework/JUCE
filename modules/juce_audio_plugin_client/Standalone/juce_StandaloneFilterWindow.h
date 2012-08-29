@@ -223,17 +223,22 @@ public:
     /** Shows the audio properties dialog box modally. */
     virtual void showAudioSettingsDialog()
     {
-        AudioDeviceSelectorComponent selectorComp (*deviceManager,
-                                                   filter->getNumInputChannels(),
-                                                   filter->getNumInputChannels(),
-                                                   filter->getNumOutputChannels(),
-                                                   filter->getNumOutputChannels(),
-                                                   true, false, true, false);
+        DialogWindow::LaunchOptions o;
+        o.content.setOwned (new AudioDeviceSelectorComponent (*deviceManager,
+                                                              filter->getNumInputChannels(),
+                                                              filter->getNumInputChannels(),
+                                                              filter->getNumOutputChannels(),
+                                                              filter->getNumOutputChannels(),
+                                                              true, false, true, false));
+        o.content->setSize (500, 450);
 
-        selectorComp.setSize (500, 450);
+        o.dialogTitle                   = TRANS("Audio Settings");
+        o.dialogBackgroundColour        = Colours::lightgrey;
+        o.escapeKeyTriggersCloseButton  = true;
+        o.useNativeTitleBar             = true;
+        o.resizable                     = false;
 
-        DialogWindow::showModalDialog (TRANS("Audio Settings"), &selectorComp, this,
-                                       Colours::lightgrey, true, false, false);
+        o.launchAsync();
     }
 
     //==============================================================================

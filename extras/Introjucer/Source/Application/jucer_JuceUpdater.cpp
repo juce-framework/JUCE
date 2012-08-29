@@ -76,33 +76,18 @@ JuceUpdater::~JuceUpdater()
     filenameComp.removeListener (this);
 }
 
-//==============================================================================
-class UpdateDialogWindow : public DialogWindow
-{
-public:
-    UpdateDialogWindow (JuceUpdater* updater, Component* componentToCentreAround)
-        : DialogWindow ("JUCE Module Updater",
-                        Colours::lightgrey, true, true)
-    {
-        setUsingNativeTitleBar (true);
-        setContentOwned (updater, true);
-        centreAroundComponent (componentToCentreAround, getWidth(), getHeight());
-        setResizable (true, true);
-    }
-
-    void closeButtonPressed()
-    {
-        setVisible (false);
-    }
-
-private:
-    JUCE_DECLARE_NON_COPYABLE (UpdateDialogWindow);
-};
-
 void JuceUpdater::show (ModuleList& moduleList, Component* mainWindow, const String& message)
 {
-    UpdateDialogWindow w (new JuceUpdater (moduleList, message), mainWindow);
-    w.runModalLoop();
+    DialogWindow::LaunchOptions o;
+    o.content.setOwned (new JuceUpdater (moduleList, message));
+    o.dialogTitle                   = "JUCE Module Updater";
+    o.dialogBackgroundColour        = Colours::lightgrey;
+    o.componentToCentreAround       = mainWindow;
+    o.escapeKeyTriggersCloseButton  = true;
+    o.useNativeTitleBar             = true;
+    o.resizable                     = true;
+
+    o.runModal();
 }
 
 void JuceUpdater::resized()

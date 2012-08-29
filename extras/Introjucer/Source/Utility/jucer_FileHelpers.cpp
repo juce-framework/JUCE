@@ -127,13 +127,13 @@ namespace FileHelpers
     String appendPath (const String& path, const String& subpath)
     {
         if (isAbsolutePath (subpath))
-            return subpath.replaceCharacter ('\\', '/');
+            return unixStylePath (subpath);
 
-        String path1 (path.replaceCharacter ('\\', '/'));
+        String path1 (unixStylePath (path));
         if (! path1.endsWithChar ('/'))
             path1 << '/';
 
-        return path1 + subpath.replaceCharacter ('\\', '/');
+        return path1 + unixStylePath (subpath);
     }
 
     bool shouldPathsBeRelative (String path1, String path2)

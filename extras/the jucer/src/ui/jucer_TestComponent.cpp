@@ -173,12 +173,13 @@ void TestComponent::resized()
 //==============================================================================
 void TestComponent::showInDialogBox (JucerDocument& document)
 {
-    TooltipWindow tooltipWindow (0, 400);
+    DialogWindow::LaunchOptions o;
+    o.content.setOwned (new TestComponent (nullptr, document.createCopy(), true));
+    o.dialogTitle                   = "Testing: " + document.getClassName();
+    o.dialogBackgroundColour        = Colours::azure;
+    o.escapeKeyTriggersCloseButton  = true;
+    o.useNativeTitleBar             = false;
+    o.resizable                     = true;
 
-    TestComponent testComp (0, document.createCopy(), true);
-
-    DialogWindow::showModalDialog ("Testing: " + document.getClassName(),
-                                   &testComp, 0,
-                                   Colours::azure,
-                                   true, true);
+    o.launchAsync();
 }

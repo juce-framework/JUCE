@@ -995,28 +995,6 @@ public:
     }
 };
 
-//==============================================================================
-/** A DialogWindow containing a ColourSelector component */
-class ColourSelectorDialogWindow  : public DialogWindow
-{
-public:
-    ColourSelectorDialogWindow()
-        : DialogWindow ("Colour selector demo", Colours::lightgrey, true)
-    {
-        setContentOwned (new ColourSelector(), false);
-        centreWithSize (400, 400);
-        setResizable (true, true);
-    }
-
-    void closeButtonPressed()
-    {
-        // we expect this component to be run within a modal loop, so when the close
-        // button is clicked, we can make it invisible to cause the loop to exit and the
-        // calling code will delete this object.
-        setVisible (false);
-    }
-};
-
 #if JUCE_MAC
 
 //==============================================================================
@@ -1287,13 +1265,18 @@ public:
         }
         else if (result == 120)
         {
-           #if JUCE_MODAL_LOOPS_PERMITTED
-            ColourSelectorDialogWindow colourDialog;
+            DialogWindow::LaunchOptions o;
 
-            // this will run an event loop until the dialog's closeButtonPressed()
-            // method causes the loop to exit.
-            colourDialog.runModalLoop();
-           #endif
+            o.content.setOwned (new ColourSelector());
+            o.content->setSize (400, 400);
+
+            o.dialogTitle                   = "Colour Selector Demo";
+            o.dialogBackgroundColour        = Colours::grey;
+            o.escapeKeyTriggersCloseButton  = true;
+            o.useNativeTitleBar             = true;
+            o.resizable                     = true;
+
+            o.launchAsync();
         }
         else if (result == 140)
         {
