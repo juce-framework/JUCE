@@ -30,6 +30,9 @@ extras/JuceDemo/Builds/VisualStudio2008/Release
 extras/JuceDemo/Builds/VisualStudio2010/Debug
 extras/JuceDemo/Builds/VisualStudio2010/Release
 extras/JuceDemo/Builds/Android/bin
+extras/JuceDemo/Builds/Android/libs
+extras/JuceDemo/Builds/Android/gen
+extras/JuceDemo/Builds/Android/obj
 extras/JuceDemo/Builds/iPhone/build
 extras/audio plugin demo/Builds/MacOSX/build
 extras/audio plugin demo/Builds/Linux/build
