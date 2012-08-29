@@ -1273,7 +1273,7 @@ public:
             o.dialogTitle                   = "Colour Selector Demo";
             o.dialogBackgroundColour        = Colours::grey;
             o.escapeKeyTriggersCloseButton  = true;
-            o.useNativeTitleBar             = true;
+            o.useNativeTitleBar             = false;
             o.resizable                     = true;
 
             o.launchAsync();
