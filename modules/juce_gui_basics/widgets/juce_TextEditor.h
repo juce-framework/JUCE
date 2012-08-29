@@ -109,6 +109,14 @@ public:
     */
     bool isTabKeyUsedAsCharacter() const                        { return tabKeyUsed; }
 
+    /** This can be used to change whether escape and return keypress events are
+        propagated up to the parent component.
+        The default here is true, meaning that these events are not allowed to reach the
+        parent, but you may want to allow them through so that they can trigger other
+        actions, e.g. closing a dialog box, etc.
+    */
+    void setEscapeAndReturnKeysConsumed (bool shouldBeConsumed) noexcept;
+
     //==============================================================================
     /** Changes the editor to read-only mode.
 
@@ -390,11 +398,6 @@ public:
     */
     void setCaretPosition (int newIndex);
 
-    /** Moves the caret to be the end of all the text.
-        @see setCaretPosition
-    */
-    void moveCaretToEnd();
-
     /** Attempts to scroll the text editor so that the caret ends up at
         a specified position.
 
@@ -476,6 +479,7 @@ public:
     void setScrollToShowCursor (bool shouldScrollToShowCaret);
 
     //==============================================================================
+    void moveCaretToEnd();
     bool moveCaretLeft (bool moveInWholeWordSteps, bool selecting);
     bool moveCaretRight (bool moveInWholeWordSteps, bool selecting);
     bool moveCaretUp (bool selecting);
@@ -536,21 +540,21 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paint (Graphics& g);
+    void paint (Graphics&);
     /** @internal */
-    void paintOverChildren (Graphics& g);
+    void paintOverChildren (Graphics&);
     /** @internal */
-    void mouseDown (const MouseEvent& e);
+    void mouseDown (const MouseEvent&);
     /** @internal */
-    void mouseUp (const MouseEvent& e);
+    void mouseUp (const MouseEvent&);
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
+    void mouseDrag (const MouseEvent&);
     /** @internal */
-    void mouseDoubleClick (const MouseEvent& e);
+    void mouseDoubleClick (const MouseEvent&);
     /** @internal */
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&);
     /** @internal */
-    bool keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress&);
     /** @internal */
     bool keyStateChanged (bool isKeyDown);
     /** @internal */
@@ -575,29 +579,17 @@ protected:
     /** Scrolls the minimum distance needed to get the caret into view. */
     void scrollToMakeSureCursorIsVisible();
 
-    /** @internal */
-    void moveCaret (int newCaretPos);
-
-    /** @internal */
-    void moveCaretTo (int newPosition, bool isSelecting);
-
     /** Used internally to dispatch a text-change message. */
     void textChanged();
 
     /** Begins a new transaction in the UndoManager. */
     void newTransaction();
 
-    /** Used internally to trigger an undo or redo. */
-    void doUndoRedo (bool isRedo);
-
     /** Can be overridden to intercept return key presses directly */
     virtual void returnPressed();
 
     /** Can be overridden to intercept escape key presses directly */
     virtual void escapePressed();
-
-    /** @internal */
-    void handleCommandMessage (int commandId);
 
 private:
     //==============================================================================
@@ -625,6 +617,7 @@ private:
     bool tabKeyUsed                 : 1;
     bool menuActive                 : 1;
     bool valueTextNeedsUpdating     : 1;
+    bool consumeEscAndReturnKeys    : 1;
 
     UndoManager undoManager;
     ScopedPointer<CaretComponent> caret;
@@ -652,13 +645,15 @@ private:
     ListenerList <Listener> listeners;
     Array <Range<int> > underlinedSections;
 
+    void moveCaret (int newCaretPos);
+    void moveCaretTo (int newPosition, bool isSelecting);
+    void handleCommandMessage (int);
     void coalesceSimilarSections();
     void splitSection (int sectionIndex, int charToSplitAt);
-    void clearInternal (UndoManager* um);
-    void insert (const String& text, int insertIndex, const Font& font,
-                 const Colour& colour, UndoManager* um, int caretPositionToMoveTo);
-    void reinsert (int insertIndex, const Array <UniformTextSection*>& sections);
-    void remove (const Range<int>& range, UndoManager* um, int caretPositionToMoveTo);
+    void clearInternal (UndoManager*);
+    void insert (const String&, int insertIndex, const Font&, const Colour&, UndoManager*, int newCaretPos);
+    void reinsert (int insertIndex, const Array <UniformTextSection*>&);
+    void remove (const Range<int>& range, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
     void updateCaretPosition();
     void updateValueFromText();
@@ -669,11 +664,11 @@ private:
     bool moveCaretWithTransation (int newPos, bool selecting);
     friend class TextHolderComponent;
     friend class TextEditorViewport;
-    void drawContent (Graphics& g);
+    void drawContent (Graphics&);
     void updateTextHolderSize();
     float getWordWrapWidth() const;
     void timerCallbackInt();
-    void repaintText (const Range<int>& range);
+    void repaintText (const Range<int>&);
     void scrollByLines (int deltaLines);
     bool undoOrRedo (bool shouldUndo);
     UndoManager* getUndoManager() noexcept;

@@ -32,8 +32,8 @@ struct TextAtom
     int numChars;
 
     //==============================================================================
-    bool isWhitespace() const       { return CharacterFunctions::isWhitespace (atomText[0]); }
-    bool isNewLine() const          { return atomText[0] == '\r' || atomText[0] == '\n'; }
+    bool isWhitespace() const noexcept       { return CharacterFunctions::isWhitespace (atomText[0]); }
+    bool isNewLine() const noexcept          { return atomText[0] == '\r' || atomText[0] == '\n'; }
 
     String getText (const juce_wchar passwordCharacter) const
     {
@@ -60,7 +60,6 @@ struct TextAtom
 class TextEditor::UniformTextSection
 {
 public:
-    //==============================================================================
     UniformTextSection (const String& text,
                         const Font& font_,
                         const Colour& colour_,
@@ -321,7 +320,6 @@ private:
 class TextEditor::Iterator
 {
 public:
-    //==============================================================================
     Iterator (const Array <UniformTextSection*>& sections_,
               const float wordWrapWidth_,
               const juce_wchar passwordCharacter_)
@@ -751,14 +749,14 @@ private:
 class TextEditor::InsertAction  : public UndoableAction
 {
 public:
-    InsertAction (TextEditor& owner_,
+    InsertAction (TextEditor& ed,
                   const String& text_,
                   const int insertIndex_,
                   const Font& font_,
                   const Colour& colour_,
                   const int oldCaretPos_,
                   const int newCaretPos_)
-        : owner (owner_),
+        : owner (ed),
           text (text_),
           insertIndex (insertIndex_),
           oldCaretPos (oldCaretPos_),
@@ -799,12 +797,12 @@ private:
 class TextEditor::RemoveAction  : public UndoableAction
 {
 public:
-    RemoveAction (TextEditor& owner_,
+    RemoveAction (TextEditor& ed,
                   const Range<int> range_,
                   const int oldCaretPos_,
                   const int newCaretPos_,
                   const Array <UniformTextSection*>& removedSections_)
-        : owner (owner_),
+        : owner (ed),
           range (range_),
           oldCaretPos (oldCaretPos_),
           newCaretPos (newCaretPos_),
@@ -860,8 +858,7 @@ class TextEditor::TextHolderComponent  : public Component,
                                          private ValueListener
 {
 public:
-    TextHolderComponent (TextEditor& owner_)
-        : owner (owner_)
+    TextHolderComponent (TextEditor& ed)  : owner (ed)
     {
         setWantsKeyboardFocus (false);
         setInterceptsMouseClicks (false, true);
@@ -905,8 +902,8 @@ private:
 class TextEditorViewport  : public Viewport
 {
 public:
-    TextEditorViewport (TextEditor& owner_)
-        : owner (owner_), lastWordWrapWidth (0), rentrant (false)
+    TextEditorViewport (TextEditor& ed)
+        : owner (ed), lastWordWrapWidth (0), rentrant (false)
     {
     }
 
@@ -970,6 +967,7 @@ TextEditor::TextEditor (const String& name,
       tabKeyUsed (false),
       menuActive (false),
       valueTextNeedsUpdating (false),
+      consumeEscAndReturnKeys (true),
       maxTextLength (0),
       leftIndent (4),
       topIndent (4),
@@ -2062,6 +2060,11 @@ bool TextEditor::selectAll()
 }
 
 //==============================================================================
+void TextEditor::setEscapeAndReturnKeysConsumed (bool shouldBeConsumed) noexcept
+{
+    consumeEscAndReturnKeys = shouldBeConsumed;
+}
+
 bool TextEditor::keyPressed (const KeyPress& key)
 {
     if (isReadOnly() && key != KeyPress ('c', ModifierKeys::commandModifier, 0))
@@ -2076,13 +2079,17 @@ bool TextEditor::keyPressed (const KeyPress& key)
             if (returnKeyStartsNewLine)
                 insertTextAtCaret ("\n");
             else
+            {
                 returnPressed();
+                return consumeEscAndReturnKeys;
+            }
         }
         else if (key.isKeyCode (KeyPress::escapeKey))
         {
             newTransaction();
             moveCaretTo (getCaretPosition(), false);
             escapePressed();
+            return consumeEscAndReturnKeys;
         }
         else if (key.getTextCharacter() >= ' '
                   || (tabKeyUsed && (key.getTextCharacter() == '\t')))
@@ -2109,6 +2116,11 @@ bool TextEditor::keyStateChanged (const bool isKeyDown)
     if (KeyPress (KeyPress::F4Key, ModifierKeys::altModifier, 0).isCurrentlyDown())
         return false;  // We need to explicitly allow alt-F4 to pass through on Windows
    #endif
+
+    if ((! consumeEscAndReturnKeys)
+         && (KeyPress (KeyPress::escapeKey).isCurrentlyDown()
+          || KeyPress (KeyPress::returnKey).isCurrentlyDown()))
+        return false;
 
     // (overridden to avoid forwarding key events to the parent)
     return ! ModifierKeys::getCurrentModifiers().isCommandDown();
@@ -2213,7 +2225,7 @@ void TextEditor::setTemporaryUnderlining (const Array <Range<int> >& newUnderlin
 //==============================================================================
 UndoManager* TextEditor::getUndoManager() noexcept
 {
-    return isReadOnly() ? 0 : &undoManager;
+    return readOnly ? nullptr : &undoManager;
 }
 
 void TextEditor::clearInternal (UndoManager* const um)
@@ -2252,17 +2264,13 @@ void TextEditor::insert (const String& text,
 
                 if (insertIndex == index)
                 {
-                    sections.insert (i, new UniformTextSection (text,
-                                                                font, colour,
-                                                                passwordCharacter));
+                    sections.insert (i, new UniformTextSection (text, font, colour, passwordCharacter));
                     break;
                 }
                 else if (insertIndex > index && insertIndex < nextIndex)
                 {
                     splitSection (i, insertIndex - index);
-                    sections.insert (i + 1, new UniformTextSection (text,
-                                                                    font, colour,
-                                                                    passwordCharacter));
+                    sections.insert (i + 1, new UniformTextSection (text, font, colour, passwordCharacter));
                     break;
                 }
 
@@ -2270,9 +2278,7 @@ void TextEditor::insert (const String& text,
             }
 
             if (nextIndex == insertIndex)
-                sections.add (new UniformTextSection (text,
-                                                      font, colour,
-                                                      passwordCharacter));
+                sections.add (new UniformTextSection (text, font, colour, passwordCharacter));
 
             coalesceSimilarSections();
             totalNumChars = -1;
