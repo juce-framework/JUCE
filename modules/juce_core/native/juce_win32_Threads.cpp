@@ -204,14 +204,19 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 //==============================================================================
 struct SleepEvent
 {
-    SleepEvent()
-        : handle (CreateEvent (0, 0, 0,
-                    #if JUCE_DEBUG
-                       _T("Juce Sleep Event")))
-                    #else
-                       0))
-                    #endif
+    SleepEvent() noexcept
+        : handle (CreateEvent (nullptr, FALSE, FALSE,
+                              #if JUCE_DEBUG
+                               _T("JUCE Sleep Event")))
+                              #else
+                               nullptr))
+                              #endif
+    {}
+
+    ~SleepEvent() noexcept
     {
+        CloseHandle (handle);
+        handle = 0;
     }
 
     HANDLE handle;
@@ -221,7 +226,7 @@ static SleepEvent sleepEvent;
 
 void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {
-    if (millisecs >= 10)
+    if (millisecs >= 10 || sleepEvent.handle == 0)
     {
         Sleep ((DWORD) millisecs);
     }
