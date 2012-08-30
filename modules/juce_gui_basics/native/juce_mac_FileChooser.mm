@@ -149,7 +149,9 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 {
     JUCE_AUTORELEASEPOOL
 
-    const TemporaryMainMenuWithStandardCommands tempMenu;
+    ScopedPointer<TemporaryMainMenuWithStandardCommands> tempMenu;
+    if (JUCEApplication::isStandaloneApp())
+        tempMenu = new TemporaryMainMenuWithStandardCommands();
 
     StringArray* filters = new StringArray();
     filters->addTokens (filter.replaceCharacters (",:", ";;"), ";", String::empty);

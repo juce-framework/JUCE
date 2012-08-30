@@ -336,11 +336,11 @@ struct AAXClasses
         class ContentWrapperComponent  : public juce::Component
         {
         public:
-            ContentWrapperComponent (JuceAAX_GUI& owner_, AudioProcessor* plugin)
-                : owner (owner_)
+            ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor* plugin)
+                : owner (gui)
             {
                 setOpaque (true);
-                addAndMakeVisible (pluginEditor = plugin->createEditor());
+                addAndMakeVisible (pluginEditor = plugin->createEditorIfNeeded());
                 setBounds (pluginEditor->getLocalBounds());
             }
 
