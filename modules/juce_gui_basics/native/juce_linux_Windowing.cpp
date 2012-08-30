@@ -250,12 +250,12 @@ namespace XSHMHelpers
 namespace XRender
 {
     typedef Status (*tXRenderQueryVersion) (Display*, int*, int*);
-    typedef XRenderPictFormat* (*tXrenderFindStandardFormat) (Display*, int);
+    typedef XRenderPictFormat* (*tXRenderFindStandardFormat) (Display*, int);
     typedef XRenderPictFormat* (*tXRenderFindFormat) (Display*, unsigned long, XRenderPictFormat*, int);
     typedef XRenderPictFormat* (*tXRenderFindVisualFormat) (Display*, Visual*);
 
     static tXRenderQueryVersion xRenderQueryVersion = nullptr;
-    static tXrenderFindStandardFormat xRenderFindStandardFormat = nullptr;
+    static tXRenderFindStandardFormat xRenderFindStandardFormat = nullptr;
     static tXRenderFindFormat xRenderFindFormat = nullptr;
     static tXRenderFindVisualFormat xRenderFindVisualFormat = nullptr;
 
@@ -271,7 +271,7 @@ namespace XRender
             if (void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW))
             {
                 xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
-                xRenderFindStandardFormat   = (tXrenderFindStandardFormat)  dlsym (h, "XrenderFindStandardFormat");
+                xRenderFindStandardFormat   = (tXRenderFindStandardFormat)  dlsym (h, "XRenderFindStandardFormat");
                 xRenderFindFormat           = (tXRenderFindFormat)          dlsym (h, "XRenderFindFormat");
                 xRenderFindVisualFormat     = (tXRenderFindVisualFormat)    dlsym (h, "XRenderFindVisualFormat");
             }
@@ -301,7 +301,7 @@ namespace XRender
         {
             pictFormat = xRenderFindStandardFormat (display, PictStandardARGB32);
 
-            if (pictFormat == 0)
+            if (pictFormat == nullptr)
             {
                 XRenderPictFormat desiredFormat;
                 desiredFormat.type = PictTypeDirect;
