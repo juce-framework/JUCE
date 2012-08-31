@@ -122,12 +122,12 @@ ProjectContentComponent::ProjectContentComponent()
     treeViewTabs.setOutline (0);
     treeViewTabs.getTabbedButtonBar().setMinimumTabScaleFactor (0.3);
 
-    JucerApplication::getApp().openDocumentManager.addListener (this);
+    IntrojucerApp::getApp().openDocumentManager.addListener (this);
 }
 
 ProjectContentComponent::~ProjectContentComponent()
 {
-    JucerApplication::getApp().openDocumentManager.removeListener (this);
+    IntrojucerApp::getApp().openDocumentManager.removeListener (this);
 
     logo = nullptr;
     setProject (nullptr);
@@ -324,7 +324,7 @@ void ProjectContentComponent::updateMissingFileStatuses()
 bool ProjectContentComponent::showEditorForFile (const File& f, bool grabFocus)
 {
     return getCurrentFile() == f
-            || showDocument (JucerApplication::getApp().openDocumentManager.openFile (project, f), grabFocus);
+            || showDocument (IntrojucerApp::getApp().openDocumentManager.openFile (project, f), grabFocus);
 }
 
 File ProjectContentComponent::getCurrentFile() const
@@ -405,7 +405,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
 void ProjectContentComponent::closeDocument()
 {
     if (currentDocument != nullptr)
-        JucerApplication::getApp().openDocumentManager.closeDocument (currentDocument, true);
+        IntrojucerApp::getApp().openDocumentManager.closeDocument (currentDocument, true);
     else if (contentView != nullptr)
         if (! goToPreviousFile())
             hideEditor();

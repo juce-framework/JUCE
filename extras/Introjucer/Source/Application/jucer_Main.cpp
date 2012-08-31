@@ -25,4 +25,4 @@
 
 #include "jucer_Application.h"
 
-START_JUCE_APPLICATION(JucerApplication)
+START_JUCE_APPLICATION (IntrojucerApp)

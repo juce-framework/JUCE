@@ -220,7 +220,7 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
 
     if (treeRootItem != nullptr)
     {
-        OpenDocumentManager& om = JucerApplication::getApp().openDocumentManager;
+        OpenDocumentManager& om = IntrojucerApp::getApp().openDocumentManager;
 
         for (int i = filesToTrash.size(); --i >= 0;)
         {

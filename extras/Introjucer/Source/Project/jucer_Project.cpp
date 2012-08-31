@@ -66,7 +66,7 @@ Project::Project (const File& file_)
 Project::~Project()
 {
     projectRoot.removeListener (this);
-    JucerApplication::getApp().openDocumentManager.closeAllDocumentsUsingProject (*this, false);
+    IntrojucerApp::getApp().openDocumentManager.closeAllDocumentsUsingProject (*this, false);
 }
 
 //==============================================================================
@@ -126,6 +126,8 @@ void Project::setMissingDefaultValues()
 
     if (getBundleIdentifier().toString().isEmpty())
         getBundleIdentifier() = getDefaultBundleIdentifier();
+
+    IntrojucerApp::getApp().updateNewlyOpenedProject (*this);
 }
 
 void Project::updateOldStyleConfigList()
@@ -540,7 +542,7 @@ bool Project::Item::renameFile (const File& newFile)
          || (newFile.exists() && ! oldFile.exists()))
     {
         setFile (newFile);
-        JucerApplication::getApp().openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
+        IntrojucerApp::getApp().openDocumentManager.fileHasBeenRenamed (oldFile, newFile);
         return true;
     }
 

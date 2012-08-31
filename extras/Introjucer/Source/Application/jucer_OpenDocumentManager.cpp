@@ -304,12 +304,12 @@ void OpenDocumentManager::fileHasBeenRenamed (const File& oldFile, const File& n
 //==============================================================================
 RecentDocumentList::RecentDocumentList()
 {
-    JucerApplication::getApp().openDocumentManager.addListener (this);
+    IntrojucerApp::getApp().openDocumentManager.addListener (this);
 }
 
 RecentDocumentList::~RecentDocumentList()
 {
-    JucerApplication::getApp().openDocumentManager.removeListener (this);
+    IntrojucerApp::getApp().openDocumentManager.removeListener (this);
 }
 
 void RecentDocumentList::clear()
@@ -378,7 +378,7 @@ static void restoreDocList (Project& project, Array <OpenDocumentManager::Docume
 {
     if (xml != nullptr)
     {
-        OpenDocumentManager& odm = JucerApplication::getApp().openDocumentManager;
+        OpenDocumentManager& odm = IntrojucerApp::getApp().openDocumentManager;
 
         forEachXmlChildElementWithTagName (*xml, e, "DOC")
         {

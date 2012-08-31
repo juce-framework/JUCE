@@ -187,7 +187,7 @@ StringArray AppearanceSettings::getColourNames() const
 void AppearanceSettings::updateColourScheme()
 {
     applyToLookAndFeel (LookAndFeel::getDefaultLookAndFeel());
-    JucerApplication::getApp().mainWindowList.sendLookAndFeelChange();
+    IntrojucerApp::getApp().mainWindowList.sendLookAndFeelChange();
 }
 
 void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const

@@ -34,12 +34,12 @@
 
 
 //==============================================================================
-class JucerApplication   : public JUCEApplication
+class IntrojucerApp   : public JUCEApplication
 {
 public:
     //==============================================================================
-    JucerApplication() {}
-    ~JucerApplication() {}
+    IntrojucerApp() {}
+    ~IntrojucerApp() {}
 
     //==============================================================================
     void initialise (const String& commandLine)
@@ -146,9 +146,9 @@ public:
         openFile (commandLine.unquoted());
     }
 
-    static JucerApplication& getApp()
+    static IntrojucerApp& getApp()
     {
-        JucerApplication* const app = dynamic_cast<JucerApplication*> (JUCEApplication::getInstance());
+        IntrojucerApp* const app = dynamic_cast<IntrojucerApp*> (JUCEApplication::getInstance());
         jassert (app != nullptr);
         return *app;
     }
@@ -415,6 +415,8 @@ public:
             mainWindowList.avoidSuperimposedWindows (mw);
         }
     }
+
+    virtual void updateNewlyOpenedProject (Project&) {}
 
     void askUserToOpenFile()
     {

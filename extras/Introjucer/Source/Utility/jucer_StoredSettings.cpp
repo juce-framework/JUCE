@@ -30,7 +30,7 @@
 //==============================================================================
 StoredSettings& getAppSettings()
 {
-    return *JucerApplication::getApp().settings;
+    return *IntrojucerApp::getApp().settings;
 }
 
 PropertiesFile& getGlobalProperties()

@@ -358,7 +358,7 @@ namespace ProjectSettingsTreeClasses
         void addSubItems()
         {
             addSubItem (new ModulesItem (project));
-            JucerApplication::getApp().addExtraConfigItems (project, *this);
+            IntrojucerApp::getApp().addExtraConfigItems (project, *this);
 
             int i = 0;
             for (Project::ExporterIterator exporter (project); exporter.next(); ++i)
