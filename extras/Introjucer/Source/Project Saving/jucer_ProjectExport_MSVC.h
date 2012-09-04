@@ -48,10 +48,18 @@ public:
     }
 
     //==============================================================================
-    bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
     bool isVisualStudio() const                 { return true; }
     bool canCopeWithDuplicateFiles()            { return false; }
+
+    bool launchProject()
+    {
+       #if JUCE_WINDOWS
+        return getSLNFile().startAsProcess();
+       #else
+        return false;
+       #endif
+    }
 
     void createPropertyEditors (PropertyListBuilder& props)
     {
@@ -529,17 +537,6 @@ public:
     static const char* getValueTreeTypeName()       { return "VS2008"; }
     int getVisualStudioVersion() const              { return 9; }
 
-    void launchProject()                            { getSLNFile().startAsProcess(); }
-
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_WINDOWS
-        return 4;
-       #else
-        return 0;
-       #endif
-    }
-
     static MSVCProjectExporterVC2008* createForSettings (Project& project, const ValueTree& settings)
     {
         if (settings.hasType (getValueTreeTypeName()))
@@ -880,15 +877,6 @@ public:
     static const char* getValueTreeTypeName()       { return "VS2005"; }
     int getVisualStudioVersion() const              { return 8; }
 
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_WINDOWS
-        return 2;
-       #else
-        return 0;
-       #endif
-    }
-
     static MSVCProjectExporterVC2005* createForSettings (Project& project, const ValueTree& settings)
     {
         if (settings.hasType (getValueTreeTypeName()))
@@ -917,17 +905,6 @@ public:
     static const char* getName()                    { return "Visual Studio 2010"; }
     static const char* getValueTreeTypeName()       { return "VS2010"; }
     int getVisualStudioVersion() const              { return 10; }
-
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_WINDOWS
-        return 3;
-       #else
-        return 0;
-       #endif
-    }
-
-    void launchProject()                            { getSLNFile().startAsProcess(); }
 
     static MSVCProjectExporterVC2010* createForSettings (Project& project, const ValueTree& settings)
     {

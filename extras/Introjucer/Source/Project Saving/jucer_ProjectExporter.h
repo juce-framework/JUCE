@@ -43,18 +43,14 @@ public:
     static ProjectExporter* createNewExporter (Project&, const int index);
     static ProjectExporter* createNewExporter (Project&, const String& name);
     static ProjectExporter* createExporter (Project&, const ValueTree& settings);
-    static ProjectExporter* createPlatformDefaultExporter (Project&);
     static bool canProjectBeLaunched (Project*);
 
     static String getCurrentPlatformExporterName();
 
     //=============================================================================
-    // return 0 if this can't be opened in the current OS, or a higher value, where higher numbers are more preferable.
-    virtual int getLaunchPreferenceOrderForCurrentOS() = 0;
-    virtual bool isPossibleForCurrentProject() = 0;
     virtual bool usesMMFiles() const = 0;
     virtual void createPropertyEditors (PropertyListBuilder&);
-    virtual void launchProject() = 0;
+    virtual bool launchProject() = 0;
     virtual void create (const OwnedArray<LibraryModule>&) const = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
     virtual bool canCopeWithDuplicateFiles() = 0;

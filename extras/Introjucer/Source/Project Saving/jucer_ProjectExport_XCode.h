@@ -83,15 +83,6 @@ public:
     Value  getPostBuildScriptValue()        { return getSetting (Ids::postbuildCommand); }
     String getPostBuildScript() const       { return settings   [Ids::postbuildCommand]; }
 
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_MAC
-        return iOS ? 1 : 2;
-       #else
-        return 0;
-       #endif
-    }
-
     bool isAvailableOnCurrentOS()
     {
        #if JUCE_MAC
@@ -101,7 +92,6 @@ public:
        #endif
     }
 
-    bool isPossibleForCurrentProject()      { return projectType.isGUIApplication() || ! iOS; }
     bool usesMMFiles() const                { return true; }
     bool isXcode() const                    { return true; }
     bool isOSX() const                      { return ! iOS; }
@@ -147,9 +137,13 @@ public:
                    "Some shell-script that will be run after a build completes.");
     }
 
-    void launchProject()
+    bool launchProject()
     {
-        getProjectBundle().startAsProcess();
+       #if JUCE_MAC
+        return getProjectBundle().startAsProcess();
+       #else
+        return false;
+       #endif
     }
 
     //==============================================================================

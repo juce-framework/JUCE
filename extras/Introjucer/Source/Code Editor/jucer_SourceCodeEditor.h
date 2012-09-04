@@ -64,7 +64,19 @@ public:
     //==============================================================================
     struct Type  : public OpenDocumentManager::DocumentType
     {
-        bool canOpenFile (const File& file)                     { return file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;inc;tcc;xml;plist;rtf;html;htm;php;py;rb;cs"); }
+        bool canOpenFile (const File& file)
+        {
+            if (file.hasFileExtension ("cpp;h;hpp;mm;m;c;cc;cxx;txt;inc;tcc;xml;plist;rtf;html;htm;php;py;rb;cs"))
+                return true;
+
+            MemoryBlock mb;
+            if (file.loadFileAsData (mb)
+                 && CharPointer_UTF8::isValidString (static_cast <const char*> (mb.getData()), mb.getSize()))
+                return true;
+
+            return false;
+        }
+
         Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }
     };
 

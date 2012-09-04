@@ -73,23 +73,10 @@ public:
     }
 
     //==============================================================================
-    int getLaunchPreferenceOrderForCurrentOS()
-    {
-       #if JUCE_ANDROID
-        return 1;
-       #else
-        return 0;
-       #endif
-    }
-
+    bool launchProject()                        { return false; }
     bool isAndroid() const                      { return true; }
-    bool isPossibleForCurrentProject()          { return projectType.isGUIApplication(); }
     bool usesMMFiles() const                    { return false; }
     bool canCopeWithDuplicateFiles()            { return false; }
-
-    void launchProject()
-    {
-    }
 
     void createPropertyEditors (PropertyListBuilder& props)
     {

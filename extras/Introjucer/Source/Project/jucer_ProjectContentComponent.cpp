@@ -452,10 +452,9 @@ void ProjectContentComponent::openInIDE()
 {
     if (project != nullptr)
     {
-        ScopedPointer <ProjectExporter> exporter (ProjectExporter::createPlatformDefaultExporter (*project));
-
-        if (exporter != nullptr)
-            exporter->launchProject();
+        for (Project::ExporterIterator exporter (*project); exporter.next();)
+            if (exporter->launchProject())
+                break;
     }
 }
 

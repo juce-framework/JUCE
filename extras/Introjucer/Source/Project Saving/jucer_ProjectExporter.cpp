@@ -104,25 +104,6 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     return exp;
 }
 
-ProjectExporter* ProjectExporter::createPlatformDefaultExporter (Project& project)
-{
-    ScopedPointer <ProjectExporter> best;
-    int bestPref = 0;
-
-    for (Project::ExporterIterator exporter (project); exporter.next();)
-    {
-        const int pref = exporter->getLaunchPreferenceOrderForCurrentOS();
-
-        if (pref > bestPref)
-        {
-            bestPref = pref;
-            best = exporter.exporter;
-        }
-    }
-
-    return best.release();
-}
-
 bool ProjectExporter::canProjectBeLaunched (Project* project)
 {
     if (project != nullptr)
@@ -137,7 +118,8 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             MSVCProjectExporterVC2008::getValueTreeTypeName(),
             MSVCProjectExporterVC2010::getValueTreeTypeName(),
            #elif JUCE_LINUX
-            MakefileProjectExporter::getValueTreeTypeName(),
+            // (this doesn't currently launch.. not really sure what it would do on linux)
+            //MakefileProjectExporter::getValueTreeTypeName(),
            #endif
 
             nullptr
