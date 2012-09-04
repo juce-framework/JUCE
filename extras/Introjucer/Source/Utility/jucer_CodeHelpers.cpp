@@ -447,6 +447,7 @@ namespace CodeHelpers
                                    String& blockIndent, String& lastLineIndent)
     {
         int braceCount = 0;
+        bool indentFound = false;
 
         while (pos.getLineNumber() > 0)
         {
@@ -460,14 +461,17 @@ namespace CodeHelpers
             if (braceCount > 0)
             {
                 blockIndent = getLeadingWhitespace (line);
-                if (lastLineIndent.isEmpty())
+                if (! indentFound)
                     lastLineIndent = blockIndent + tab;
 
                 return true;
             }
 
-            if (lastLineIndent.isEmpty() && trimmedLine.isNotEmpty())
+            if ((! indentFound) && trimmedLine.isNotEmpty())
+            {
+                indentFound = true;
                 lastLineIndent = getLeadingWhitespace (line);
+            }
         }
 
         return false;
