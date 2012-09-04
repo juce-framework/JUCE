@@ -417,4 +417,59 @@ namespace CodeHelpers
         out << indent << "    default: break;" << newLine
             << indent << "}" << newLine << newLine;
     }
+
+    String getLeadingWhitespace (String line)
+    {
+        line = line.removeCharacters ("\r\n");
+        const String::CharPointerType endOfLeadingWS (line.getCharPointer().findEndOfWhitespace());
+        return String (line.getCharPointer(), endOfLeadingWS);
+    }
+
+    int getBraceCount (String::CharPointerType line)
+    {
+        int braces = 0;
+
+        for (;;)
+        {
+            const juce_wchar c = line.getAndAdvance();
+
+            if (c == 0)                         break;
+            else if (c == '{')                  ++braces;
+            else if (c == '}')                  --braces;
+            else if (c == '/')                  { if (*line == '/') break; }
+            else if (c == '"' || c == '\'')     { while (! (line.isEmpty() || line.getAndAdvance() == c)) {} }
+        }
+
+        return braces;
+    }
+
+    bool getIndentForCurrentBlock (CodeDocument::Position pos, const String& tab,
+                                   String& blockIndent, String& lastLineIndent)
+    {
+        int braceCount = 0;
+
+        while (pos.getLineNumber() > 0)
+        {
+            pos = pos.movedByLines (-1);
+
+            const String line (pos.getLineText());
+            const String trimmedLine (line.trimStart());
+
+            braceCount += getBraceCount (trimmedLine.getCharPointer());
+
+            if (braceCount > 0)
+            {
+                blockIndent = getLeadingWhitespace (line);
+                if (lastLineIndent.isEmpty())
+                    lastLineIndent = blockIndent + tab;
+
+                return true;
+            }
+
+            if (lastLineIndent.isEmpty() && trimmedLine.isNotEmpty())
+                lastLineIndent = getLeadingWhitespace (line);
+        }
+
+        return false;
+    }
 }
