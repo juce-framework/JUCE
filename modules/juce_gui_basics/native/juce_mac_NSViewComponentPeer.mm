@@ -779,7 +779,9 @@ public:
     {
         Component* const modal = Component::getCurrentlyModalComponent();
 
-        if (modal != nullptr && getComponent().isCurrentlyBlockedByAnotherModalComponent())
+        if (modal != nullptr
+             && (! getComponent().isParentOf (modal))
+             && getComponent().isCurrentlyBlockedByAnotherModalComponent())
         {
             modal->inputAttemptWhenModal();
             return true;
