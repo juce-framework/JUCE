@@ -282,8 +282,8 @@ private:
     public:
         typedef void (*FunctionType) (int, ParamType);
 
-        FunctionCaller1 (FunctionType& function_, ParamType& param_)
-            : function (function_), param (param_) {}
+        FunctionCaller1 (FunctionType& f, ParamType& p1)
+            : function (f), param (p1) {}
 
         void modalStateFinished (int returnValue)  { function (returnValue, param); }
 
@@ -300,8 +300,8 @@ private:
     public:
         typedef void (*FunctionType) (int, ParamType1, ParamType2);
 
-        FunctionCaller2 (FunctionType& function_, ParamType1& param1_, ParamType2& param2_)
-            : function (function_), param1 (param1_), param2 (param2_) {}
+        FunctionCaller2 (FunctionType& f, ParamType1& p1, ParamType2& p2)
+            : function (f), param1 (p1), param2 (p2) {}
 
         void modalStateFinished (int returnValue)   { function (returnValue, param1, param2); }
 
@@ -319,8 +319,8 @@ private:
     public:
         typedef void (*FunctionType) (int, ComponentType*);
 
-        ComponentCaller1 (FunctionType& function_, ComponentType* comp_)
-            : function (function_), comp (comp_) {}
+        ComponentCaller1 (FunctionType& f, ComponentType* c)
+            : function (f), comp (c) {}
 
         void modalStateFinished (int returnValue)
         {
@@ -340,8 +340,8 @@ private:
     public:
         typedef void (*FunctionType) (int, ComponentType*, ParamType1);
 
-        ComponentCaller2 (FunctionType& function_, ComponentType* comp_, ParamType1 param1_)
-            : function (function_), comp (comp_), param1 (param1_) {}
+        ComponentCaller2 (FunctionType& f, ComponentType* c, ParamType1 p1)
+            : function (f), comp (c), param1 (p1) {}
 
         void modalStateFinished (int returnValue)
         {

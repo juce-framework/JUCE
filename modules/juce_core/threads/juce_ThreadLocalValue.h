@@ -174,8 +174,8 @@ private:
    #if JUCE_NO_COMPILER_THREAD_LOCAL
     struct ObjectHolder
     {
-        ObjectHolder (const Thread::ThreadID& threadId_)
-            : threadId (threadId_), object()
+        ObjectHolder (const Thread::ThreadID& tid)
+            : threadId (tid), object()
         {}
 
         Thread::ThreadID threadId;

@@ -133,7 +133,7 @@ public:
     class SharedPointer   : public ReferenceCountingType
     {
     public:
-        explicit SharedPointer (ObjectType* const owner_) noexcept : owner (owner_) {}
+        explicit SharedPointer (ObjectType* const obj) noexcept : owner (obj) {}
 
         inline ObjectType* get() const noexcept     { return owner; }
         void clearPointer() noexcept                { owner = nullptr; }

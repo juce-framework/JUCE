@@ -221,9 +221,9 @@ protected:
     class Positioner  : public RelativeCoordinatePositionerBase
     {
     public:
-        Positioner (DrawableType& component_)
-            : RelativeCoordinatePositionerBase (component_),
-              owner (component_)
+        Positioner (DrawableType& c)
+            : RelativeCoordinatePositionerBase (c),
+              owner (c)
         {}
 
         bool registerCoordinates()      { return owner.registerCoordinates (*this); }

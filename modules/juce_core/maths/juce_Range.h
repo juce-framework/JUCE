@@ -46,8 +46,8 @@ public:
     }
 
     /** Constructs a range with given start and end values. */
-    Range (const ValueType start_, const ValueType end_) noexcept
-        : start (start_), end (jmax (start_, end_))
+    Range (const ValueType startValue, const ValueType endValue) noexcept
+        : start (startValue), end (jmax (startValue, endValue))
     {
     }
 

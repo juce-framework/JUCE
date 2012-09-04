@@ -39,7 +39,7 @@ class Quaternion
 public:
     Quaternion() noexcept  : scalar() {}
     Quaternion (const Quaternion& other) noexcept                                     : vector (other.vector), scalar (other.scalar) {}
-    Quaternion (const Vector3D<Type>& vector_, const Type& scalar_) noexcept          : vector (vector_), scalar (scalar_) {}
+    Quaternion (const Vector3D<Type>& vectorPart, const Type& scalarPart) noexcept    : vector (vectorPart), scalar (scalarPart) {}
     Quaternion (const Type& x, const Type& y, const Type& z, const Type& w) noexcept  : vector (x, y, z), scalar (w) {}
 
     /** Creates a quaternion from an angle and an axis. */

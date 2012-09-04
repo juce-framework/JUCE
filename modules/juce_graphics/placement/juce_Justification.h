@@ -42,8 +42,8 @@ class JUCE_API  Justification
 {
 public:
     //==============================================================================
-    /** Creates a Justification object using a combination of flags. */
-    inline Justification (int flags_) noexcept : flags (flags_) {}
+    /** Creates a Justification object using a combination of flags from the Flags enum. */
+    inline Justification (int justificationFlags) noexcept   : flags (justificationFlags) {}
 
     /** Creates a copy of another Justification object. */
     Justification (const Justification& other) noexcept;
@@ -103,7 +103,7 @@ public:
 
     //==============================================================================
     /** Flag values that can be combined and used in the constructor. */
-    enum
+    enum Flags
     {
         //==============================================================================
         /** Indicates that the item should be aligned against the left edge of the available space. */

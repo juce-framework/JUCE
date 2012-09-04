@@ -505,7 +505,7 @@ private:
     template <typename ElementComparator>
     struct ComparatorAdapter
     {
-        ComparatorAdapter (ElementComparator& comparator_) noexcept : comparator (comparator_) {}
+        ComparatorAdapter (ElementComparator& comp) noexcept : comparator (comp) {}
 
         int compareElements (const ValueTree* const first, const ValueTree* const second)
         {

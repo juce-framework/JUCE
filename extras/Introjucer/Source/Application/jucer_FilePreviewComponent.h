@@ -33,8 +33,8 @@
 class ItemPreviewComponent  : public Component
 {
 public:
-    ItemPreviewComponent (const File& file_)
-        : file (file_)
+    ItemPreviewComponent (const File& f)
+        : file (f)
     {
         setOpaque (true);
         tryToLoadImage();

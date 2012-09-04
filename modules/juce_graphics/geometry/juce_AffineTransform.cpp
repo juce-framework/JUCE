@@ -35,10 +35,10 @@ AffineTransform::AffineTransform (const AffineTransform& other) noexcept
 {
 }
 
-AffineTransform::AffineTransform (const float mat00_, const float mat01_, const float mat02_,
-                                  const float mat10_, const float mat11_, const float mat12_) noexcept
- :  mat00 (mat00_), mat01 (mat01_), mat02 (mat02_),
-    mat10 (mat10_), mat11 (mat11_), mat12 (mat12_)
+AffineTransform::AffineTransform (const float m00, const float m01, const float m02,
+                                  const float m10, const float m11, const float m12) noexcept
+ :  mat00 (m00), mat01 (m01), mat02 (m02),
+    mat10 (m10), mat11 (m11), mat12 (m12)
 {
 }
 

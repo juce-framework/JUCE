@@ -67,9 +67,9 @@ void CriticalSection::exit() const noexcept
 class WaitableEventImpl
 {
 public:
-    WaitableEventImpl (const bool manualReset_)
+    WaitableEventImpl (const bool useManualReset)
         : triggered (false),
-          manualReset (manualReset_)
+          manualReset (useManualReset)
     {
         pthread_cond_init (&condition, 0);
 
@@ -773,8 +773,7 @@ public:
     int handle, refCount;
 };
 
-InterProcessLock::InterProcessLock (const String& name_)
-    : name (name_)
+InterProcessLock::InterProcessLock (const String& nm)  : name (nm)
 {
 }
 

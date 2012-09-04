@@ -54,8 +54,8 @@ namespace FileHelpers
 class FileModificationDetector
 {
 public:
-    FileModificationDetector (const File& file_)
-        : file (file_)
+    FileModificationDetector (const File& f)
+        : file (f)
     {
     }
 

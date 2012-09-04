@@ -53,8 +53,8 @@ public:
 
     /** Creates a pixel from a 32-bit argb value.
     */
-    PixelARGB (const uint32 argb_) noexcept
-        : argb (argb_)
+    PixelARGB (const uint32 argbValue) noexcept
+        : argb (argbValue)
     {
     }
 
@@ -427,11 +427,11 @@ public:
     forcedinline void multiplyAlpha (float) noexcept {}
 
     /** Sets the pixel's colour from individual components. */
-    void setARGB (const uint8, const uint8 r_, const uint8 g_, const uint8 b_) noexcept
+    void setARGB (const uint8, const uint8 red, const uint8 green, const uint8 blue) noexcept
     {
-        r = r_;
-        g = g_;
-        b = b_;
+        r = red;
+        g = green;
+        b = blue;
     }
 
     /** Premultiplies the pixel's RGB values by its alpha. */

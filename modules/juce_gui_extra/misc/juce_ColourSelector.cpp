@@ -71,8 +71,8 @@ private:
 class ColourSelector::ColourSpaceView  : public Component
 {
 public:
-    ColourSpaceView (ColourSelector& owner_, float& h_, float& s_, float& v_, const int edgeSize)
-        : owner (owner_), h (h_), s (s_), v (v_), lastHue (0.0f), edge (edgeSize)
+    ColourSpaceView (ColourSelector& cs, float& hue, float& sat, float& val, const int edgeSize)
+        : owner (cs), h (hue), s (sat), v (val), lastHue (0.0f), edge (edgeSize)
     {
         addAndMakeVisible (&marker);
         setMouseCursor (MouseCursor::CrosshairCursor);
@@ -194,8 +194,8 @@ private:
 class ColourSelector::HueSelectorComp  : public Component
 {
 public:
-    HueSelectorComp (ColourSelector& owner_, float& h_, float& s_, float& v_, const int edgeSize)
-        : owner (owner_), h (h_), s (s_), v (v_), edge (edgeSize)
+    HueSelectorComp (ColourSelector& cs, float& hue, float& sat, float& val, const int edgeSize)
+        : owner (cs), h (hue), s (sat), v (val), edge (edgeSize)
     {
         addAndMakeVisible (&marker);
     }
@@ -248,8 +248,8 @@ private:
 class ColourSelector::SwatchComponent   : public Component
 {
 public:
-    SwatchComponent (ColourSelector& owner_, int index_)
-        : owner (owner_), index (index_)
+    SwatchComponent (ColourSelector& cs, int itemIndex)
+        : owner (cs), index (itemIndex)
     {
     }
 
@@ -306,15 +306,13 @@ private:
 };
 
 //==============================================================================
-ColourSelector::ColourSelector (const int flags_,
-                                const int edgeGap_,
-                                const int gapAroundColourSpaceComponent)
+ColourSelector::ColourSelector (const int sectionsToShow, const int edge, const int gapAroundColourSpaceComponent)
     : colour (Colours::white),
-      flags (flags_),
-      edgeGap (edgeGap_)
+      flags (sectionsToShow),
+      edgeGap (edge)
 {
     // not much point having a selector with no components in it!
-    jassert ((flags_ & (showColourAtTop | showSliders | showColourspace)) != 0);
+    jassert ((flags & (showColourAtTop | showSliders | showColourspace)) != 0);
 
     updateHSV();
 
