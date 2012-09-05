@@ -115,14 +115,20 @@ public:
     //==============================================================================
     void systemRequestedQuit()
     {
+        if ((! triggerAsyncQuitIfModalCompsActive())
+             && mainWindowList.askAllWindowsToClose())
+            quit();
+    }
+
+    bool triggerAsyncQuitIfModalCompsActive()
+    {
         if (cancelAnyModalComponents())
         {
             new AsyncQuitRetrier();
-            return;
+            return true;
         }
 
-        if (mainWindowList.askAllWindowsToClose())
-            quit();
+        return false;
     }
 
     //==============================================================================

@@ -109,6 +109,10 @@ public:
     void drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
                                     bool isMouseOver, bool isMouseDown,
                                     ConcertinaPanel& concertina, Component& panel);
+
+    void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
+                               bool isMouseOverButton, bool isButtonDown);
+
 private:
     Image backgroundTexture;
     Colour backgroundTextureBaseColour;

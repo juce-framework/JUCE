@@ -76,10 +76,10 @@ public:
         r.removeFromBottom (6);
 
         if (saveAndOpenButton.isVisible())
-            saveAndOpenButton.setBounds (r.removeFromBottom (28).reduced (20, 3));
+            saveAndOpenButton.setBounds (r.removeFromBottom (30).reduced (16, 4));
 
         if (openProjectButton.isVisible())
-            openProjectButton.setBounds (r.removeFromBottom (28).reduced (20, 3));
+            openProjectButton.setBounds (r.removeFromBottom (30).reduced (16, 4));
 
         tree.setBounds (r);
     }

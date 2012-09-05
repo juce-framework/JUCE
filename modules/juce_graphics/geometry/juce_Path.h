@@ -347,6 +347,15 @@ public:
         The rectangle is added as a new sub-path. (Any currently open paths will be left open).
         @see addRectangle, addTriangle
     */
+    void addRoundedRectangle (float x, float y, float width, float height,
+                              float cornerSizeX, float cornerSizeY,
+                              bool curveTopLeft, bool curveTopRight,
+                              bool curveBottomLeft, bool curveBottomRight);
+
+    /** Adds a rectangle with rounded corners to the path.
+        The rectangle is added as a new sub-path. (Any currently open paths will be left open).
+        @see addRectangle, addTriangle
+    */
     template <typename ValueType>
     void addRoundedRectangle (const Rectangle<ValueType>& rectangle, float cornerSizeX, float cornerSizeY)
     {
