@@ -79,6 +79,7 @@ protected:
     mutable File rcFile, iconFile;
 
     File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
+    File getSLNFile() const             { return getProjectFile (".sln"); }
 
     Value getLibraryType()              { return getSetting (Ids::libraryType); }
     String getLibraryString() const     { return getSettingString (Ids::libraryType); }
@@ -591,7 +592,6 @@ protected:
     virtual String getSolutionVersionString() const   { return "10.00" + newLine + "# Visual C++ Express 2008"; }
 
     File getVCProjFile() const    { return getProjectFile (".vcproj"); }
-    File getSLNFile() const       { return getProjectFile (".sln"); }
 
     //==============================================================================
     void fillInProjectXml (XmlElement& projectXml) const
@@ -982,7 +982,6 @@ protected:
     //==============================================================================
     File getVCProjFile() const            { return getProjectFile (".vcxproj"); }
     File getVCProjFiltersFile() const     { return getProjectFile (".vcxproj.filters"); }
-    File getSLNFile() const               { return getProjectFile (".sln"); }
 
     String createConfigName (const BuildConfiguration& config) const
     {
