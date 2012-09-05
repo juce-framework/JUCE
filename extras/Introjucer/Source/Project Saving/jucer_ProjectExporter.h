@@ -49,7 +49,7 @@ public:
 
     //=============================================================================
     virtual bool usesMMFiles() const = 0;
-    virtual void createPropertyEditors (PropertyListBuilder&);
+    virtual void createExporterProperties (PropertyListBuilder&) = 0;
     virtual bool launchProject() = 0;
     virtual void create (const OwnedArray<LibraryModule>&) const = 0; // may throw a SaveError
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
@@ -83,6 +83,8 @@ public:
 
     Value getExtraLinkerFlags()                 { return getSetting (Ids::extraLinkerFlags); }
     String getExtraLinkerFlagsString() const    { return getSettingString (Ids::extraLinkerFlags).replaceCharacters ("\r\n", "  "); }
+
+    Value getUserNotes()                        { return getSetting (Ids::userNotes); }
 
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
     String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
@@ -118,6 +120,8 @@ public:
 
     RelativePath getJucePathFromTargetFolder() const;
     RelativePath getJucePathFromProjectFolder() const;
+
+    void createPropertyEditors (PropertyListBuilder& props);
 
     //==============================================================================
     void copyMainGroupFromProject();
@@ -158,7 +162,7 @@ public:
         typedef ReferenceCountedObjectPtr<BuildConfiguration> Ptr;
 
         //==============================================================================
-        virtual void createPropertyEditors (PropertyListBuilder&) = 0;
+        virtual void createConfigProperties (PropertyListBuilder&) = 0;
 
         //==============================================================================
         Value getNameValue()                                { return getValue (Ids::name); }
@@ -191,9 +195,12 @@ public:
         StringArray getLibrarySearchPaths() const;
         String getGCCLibraryPathFlags() const;
 
+        Value getUserNotes()                                { return getValue (Ids::userNotes); }
+
         Value getValue (const Identifier& name)             { return config.getPropertyAsValue (name, getUndoManager()); }
         UndoManager* getUndoManager() const                 { return project.getUndoManagerFor (config); }
 
+        void createPropertyEditors (PropertyListBuilder&);
         void removeFromExporter();
 
         //==============================================================================
@@ -201,7 +208,6 @@ public:
         Project& project;
 
     protected:
-        void createBasicPropertyEditors (PropertyListBuilder&);
 
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration);

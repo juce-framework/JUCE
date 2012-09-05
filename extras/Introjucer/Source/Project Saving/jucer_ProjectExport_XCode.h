@@ -97,10 +97,8 @@ public:
     bool isOSX() const                      { return ! iOS; }
     bool canCopeWithDuplicateFiles()        { return true; }
 
-    void createPropertyEditors (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder& props)
     {
-        ProjectExporter::createPropertyEditors (props);
-
         if (projectType.isGUIApplication() && ! iOS)
         {
             props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false),
@@ -212,10 +210,8 @@ protected:
         Value  getCppLibTypeValue()                    { return getValue (Ids::cppLibType); }
         String getCppLibType() const                   { return config   [Ids::cppLibType]; }
 
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props)
         {
-            createBasicPropertyEditors (props);
-
             if (iOS)
             {
                 const char* iosVersions[]      = { "Use Default",     "3.2", "4.0", "4.1", "4.2", "4.3", "5.0", "5.1", 0 };

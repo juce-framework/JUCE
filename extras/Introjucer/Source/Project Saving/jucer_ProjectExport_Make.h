@@ -62,9 +62,8 @@ public:
     bool isLinux() const                        { return true; }
     bool canCopeWithDuplicateFiles()            { return false; }
 
-    void createPropertyEditors (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder&)
     {
-        ProjectExporter::createPropertyEditors (props);
     }
 
     //==============================================================================
@@ -91,9 +90,8 @@ protected:
             setValueIfVoid (getLibrarySearchPathValue(), "/usr/X11R6/lib/");
         }
 
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder&)
         {
-            createBasicPropertyEditors (props);
         }
     };
 

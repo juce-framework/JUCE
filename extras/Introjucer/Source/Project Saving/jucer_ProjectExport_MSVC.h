@@ -61,10 +61,8 @@ public:
        #endif
     }
 
-    void createPropertyEditors (PropertyListBuilder& props)
+    void createExporterProperties (PropertyListBuilder& props)
     {
-        ProjectExporter::createPropertyEditors (props);
-
         if (projectType.isLibrary())
         {
             const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
@@ -165,10 +163,8 @@ protected:
             return target;
         }
 
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props)
         {
-            createBasicPropertyEditors (props);
-
             const char* const warningLevelNames[] = { "Low", "Medium", "High", nullptr };
             const int warningLevels[] = { 2, 3, 4, 0 };
 
@@ -959,9 +955,9 @@ protected:
         bool is64Bit() const                    { return config [Ids::winArchitecture].toString() == get64BitArchName(); }
 
         //==============================================================================
-        void createPropertyEditors (PropertyListBuilder& props)
+        void createConfigProperties (PropertyListBuilder& props)
         {
-            MSVCBuildConfiguration::createPropertyEditors (props);
+            MSVCBuildConfiguration::createConfigProperties (props);
 
             const char* const archTypes[] = { get32BitArchName(), get64BitArchName(), nullptr };
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
