@@ -224,10 +224,16 @@
             resource="1" file="Source/BinaryData/jucer_MainConsoleAppTemplate.cpp"/>
       <FILE id="gJwHD6A" name="jucer_MainTemplate.cpp" compile="0" resource="1"
             file="Source/BinaryData/jucer_MainTemplate.cpp"/>
+      <FILE id="fWEsCu" name="jucer_NewComponentTemplate.cpp" compile="0"
+            resource="1" file="Source/BinaryData/jucer_NewComponentTemplate.cpp"/>
+      <FILE id="ljPBjw" name="jucer_NewComponentTemplate.h" compile="0" resource="1"
+            file="Source/BinaryData/jucer_NewComponentTemplate.h"/>
       <FILE id="cI2ImgX" name="jucer_NewCppFileTemplate.cpp" compile="0"
             resource="1" file="Source/BinaryData/jucer_NewCppFileTemplate.cpp"/>
       <FILE id="YDcz5P" name="jucer_NewCppFileTemplate.h" compile="0" resource="1"
             file="Source/BinaryData/jucer_NewCppFileTemplate.h"/>
+      <FILE id="teqnin" name="jucer_NewInlineComponentTemplate.h" compile="0"
+            resource="1" file="Source/BinaryData/jucer_NewInlineComponentTemplate.h"/>
       <FILE id="qk3GRQF" name="jucer_WindowTemplate.cpp" compile="0" resource="1"
             file="Source/BinaryData/jucer_WindowTemplate.cpp"/>
       <FILE id="2WpRpdr" name="jucer_WindowTemplate.h" compile="0" resource="1"

@@ -307,6 +307,26 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_NewComponentTemplate.cpp">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_NewComponentTemplate.h">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
         <File RelativePath="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
@@ -318,6 +338,16 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h">
+          <FileConfiguration Name="Debug|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release|Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>

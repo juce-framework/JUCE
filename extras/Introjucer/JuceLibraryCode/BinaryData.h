@@ -25,7 +25,7 @@ namespace BinaryData
     const int            jucer_AudioPluginEditorTemplate_hSize = 799;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 4455;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 4473;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
     const int            jucer_AudioPluginFilterTemplate_hSize = 2400;
@@ -34,19 +34,28 @@ namespace BinaryData
     const int            jucer_MainConsoleAppTemplate_cppSize = 470;
 
     extern const char*   jucer_MainTemplate_cpp;
-    const int            jucer_MainTemplate_cppSize = 1825;
+    const int            jucer_MainTemplate_cppSize = 1742;
+
+    extern const char*   jucer_NewComponentTemplate_cpp;
+    const int            jucer_NewComponentTemplate_cppSize = 1389;
+
+    extern const char*   jucer_NewComponentTemplate_h;
+    const int            jucer_NewComponentTemplate_hSize = 649;
 
     extern const char*   jucer_NewCppFileTemplate_cpp;
-    const int            jucer_NewCppFileTemplate_cppSize = 232;
+    const int            jucer_NewCppFileTemplate_cppSize = 260;
 
     extern const char*   jucer_NewCppFileTemplate_h;
     const int            jucer_NewCppFileTemplate_hSize = 308;
 
+    extern const char*   jucer_NewInlineComponentTemplate_h;
+    const int            jucer_NewInlineComponentTemplate_hSize = 1627;
+
     extern const char*   jucer_WindowTemplate_cpp;
-    const int            jucer_WindowTemplate_cppSize = 781;
+    const int            jucer_WindowTemplate_cppSize = 905;
 
     extern const char*   jucer_WindowTemplate_h;
-    const int            jucer_WindowTemplate_hSize = 1216;
+    const int            jucer_WindowTemplate_hSize = 1220;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

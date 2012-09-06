@@ -297,20 +297,20 @@ static const unsigned char temp_98c9479f[] =
 "\r\n"
 "bool FILTERCLASSNAME::acceptsMidi() const\r\n"
 "{\r\n"
-"#if JucePlugin_WantsMidiInput\r\n"
+"   #if JucePlugin_WantsMidiInput\r\n"
 "    return true;\r\n"
-"#else\r\n"
+"   #else\r\n"
 "    return false;\r\n"
-"#endif\r\n"
+"   #endif\r\n"
 "}\r\n"
 "\r\n"
 "bool FILTERCLASSNAME::producesMidi() const\r\n"
 "{\r\n"
-"#if JucePlugin_ProducesMidiOutput\r\n"
+"   #if JucePlugin_ProducesMidiOutput\r\n"
 "    return true;\r\n"
-"#else\r\n"
+"   #else\r\n"
 "    return false;\r\n"
-"#endif\r\n"
+"   #endif\r\n"
 "}\r\n"
 "\r\n"
 "int FILTERCLASSNAME::getNumPrograms()\r\n"
@@ -538,13 +538,13 @@ static const unsigned char temp_292512d9[] =
 "    //==============================================================================\r\n"
 "    void initialise (const String& commandLine)\r\n"
 "    {\r\n"
-"        // Do your application's initialisation code here..\r\n"
+"        // Add your application's initialisation code here..\r\n"
 "        APPINITCODE\r\n"
 "    }\r\n"
 "\r\n"
 "    void shutdown()\r\n"
 "    {\r\n"
-"        // Do your application's shutdown code here..\r\n"
+"        // Add your application's shutdown code here..\r\n"
 "        APPSHUTDOWNCODE\r\n"
 "    }\r\n"
 "\r\n"
@@ -554,7 +554,6 @@ static const unsigned char temp_292512d9[] =
 "        quit();\r\n"
 "    }\r\n"
 "\r\n"
-"    //==============================================================================\r\n"
 "    const String getApplicationName()\r\n"
 "    {\r\n"
 "        return \"APPNAME\";\r\n"
@@ -581,9 +580,103 @@ static const unsigned char temp_292512d9[] =
 "\r\n"
 "//==============================================================================\r\n"
 "// This macro generates the main() routine that starts the app.\r\n"
-"START_JUCE_APPLICATION(APPCLASSNAME)\r\n";
+"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
 const char* jucer_MainTemplate_cpp = (const char*) temp_292512d9;
+
+//================== jucer_NewComponentTemplate.cpp ==================
+static const unsigned char temp_e0f76d5d[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    FILENAME\r\n"
+"    Created: DATE\r\n"
+"    Author:  AUTHOR\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"INCLUDE_CORRESPONDING_HEADER\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"COMPONENTCLASS::COMPONENTCLASS()\r\n"
+"{\r\n"
+"    // In your constructor, you should add any child components, and\r\n"
+"    // initialise any special settings that your component needs.\r\n"
+"\r\n"
+"}\r\n"
+"\r\n"
+"COMPONENTCLASS::~COMPONENTCLASS()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"void COMPONENTCLASS::paint (Graphics& g)\r\n"
+"{\r\n"
+"    /* This demo code just fills the component's background and\r\n"
+"       draws some placeholder text to get you started.\r\n"
+"\r\n"
+"       You should replace everything in this method with your own\r\n"
+"       drawing code..\r\n"
+"    */\r\n"
+"\r\n"
+"    g.fillAll (Colours::white);   // clear the background\r\n"
+"\r\n"
+"    g.setColour (Colours::grey);\r\n"
+"    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
+"\r\n"
+"    g.setColour (Colours::lightblue);\r\n"
+"    g.setFont (14.0f);\r\n"
+"    g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"                Justification::centred, true);   // draw some placeholder text\r\n"
+"}\r\n"
+"\r\n"
+"void COMPONENTCLASS::resized()\r\n"
+"{\r\n"
+"    // This method is where you should set the bounds of any child\r\n"
+"    // components that your component contains..\r\n"
+"\r\n"
+"}\r\n";
+
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_e0f76d5d;
+
+//================== jucer_NewComponentTemplate.h ==================
+static const unsigned char temp_5f1192a2[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    FILENAME\r\n"
+"    Created: DATE\r\n"
+"    Author:  AUTHOR\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"*/\r\n"
+"class COMPONENTCLASS    : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    COMPONENTCLASS();\r\n"
+"    ~COMPONENTCLASS();\r\n"
+"\r\n"
+"    void paint (Graphics&);\r\n"
+"    void resized();\r\n"
+"\r\n"
+"private:\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS);\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_NewComponentTemplate_h = (const char*) temp_5f1192a2;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
 static const unsigned char temp_79decf5f[] =
@@ -596,7 +689,8 @@ static const unsigned char temp_79decf5f[] =
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
-"\r\n";
+"\r\n"
+"INCLUDE_CORRESPONDING_HEADER";
 
 const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_79decf5f;
 
@@ -623,6 +717,76 @@ static const unsigned char temp_70d8d24[] =
 
 const char* jucer_NewCppFileTemplate_h = (const char*) temp_70d8d24;
 
+//================== jucer_NewInlineComponentTemplate.h ==================
+static const unsigned char temp_627c3689[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    FILENAME\r\n"
+"    Created: DATE\r\n"
+"    Author:  AUTHOR\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"*/\r\n"
+"class COMPONENTCLASS    : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    COMPONENTCLASS()\r\n"
+"    {\r\n"
+"        // In your constructor, you should add any child components, and\r\n"
+"        // initialise any special settings that your component needs.\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"    ~COMPONENTCLASS()\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    void paint (Graphics& g)\r\n"
+"    {\r\n"
+"        /* This demo code just fills the component's background and\r\n"
+"           draws some placeholder text to get you started.\r\n"
+"\r\n"
+"           You should replace everything in this method with your own\r\n"
+"           drawing code..\r\n"
+"        */\r\n"
+"\r\n"
+"        g.fillAll (Colours::white);   // clear the background\r\n"
+"\r\n"
+"        g.setColour (Colours::grey);\r\n"
+"        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
+"\r\n"
+"        g.setColour (Colours::lightblue);\r\n"
+"        g.setFont (14.0f);\r\n"
+"        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
+"                    Justification::centred, true);   // draw some placeholder text\r\n"
+"    }\r\n"
+"\r\n"
+"    void resized()\r\n"
+"    {\r\n"
+"        // This method is where you should set the bounds of any child\r\n"
+"        // components that your component contains..\r\n"
+"\r\n"
+"    }\r\n"
+"\r\n"
+"private:\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (COMPONENTCLASS);\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_627c3689;
+
 //================== jucer_WindowTemplate.cpp ==================
 static const unsigned char temp_6fd7e50[] =
 "/*\r\n"
@@ -630,20 +794,24 @@ static const unsigned char temp_6fd7e50[] =
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic outline for a simple desktop window.\r\n"
+"    It contains the basic structure for a simple desktop window.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"INCLUDES\r\n"
+"INCLUDE_CORRESPONDING_HEADER\r\n"
 "\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "WINDOWCLASS::WINDOWCLASS()\r\n"
-"    : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(),\r\n"
+"    : DocumentWindow (\"WINDOWCLASS\",\r\n"
 "                      Colours::lightgrey,\r\n"
 "                      DocumentWindow::allButtons)\r\n"
 "{\r\n"
+"    // At this point you should call setContentOwned() to give the window\r\n"
+"    // a component containing the content you want to show..\r\n"
+"\r\n"
+"\r\n"
 "    centreWithSize (500, 400);\r\n"
 "    setVisible (true);\r\n"
 "}\r\n"
@@ -674,7 +842,7 @@ static const unsigned char temp_613d4455[] =
 "#ifndef HEADERGUARD\r\n"
 "#define HEADERGUARD\r\n"
 "\r\n"
-"INCLUDES\r\n"
+"INCLUDE_JUCE\r\n"
 "\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -729,21 +897,27 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x4d0721bf:
         case 0xc244271a:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:
-        case 0xc68aa4a1:  numBytes = 4455; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0xc68aa4a1:  numBytes = 4473; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:
         case 0x99c7f951:  numBytes = 2400; return jucer_AudioPluginFilterTemplate_h;
         case 0x8905395b:
         case 0x84a71cc0:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x7a0186b1:
-        case 0x73760f7c:  numBytes = 1825; return jucer_MainTemplate_cpp;
+        case 0x73760f7c:  numBytes = 1742; return jucer_MainTemplate_cpp;
+        case 0xf4842835:
+        case 0x1329dd50:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
+        case 0xe7bf237a:
+        case 0x1e76fc7c:  numBytes = 649; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:
-        case 0x9a5d0862:  numBytes = 232; return jucer_NewCppFileTemplate_cpp;
+        case 0x9a5d0862:  numBytes = 260; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:
         case 0xfbfcda3c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
+        case 0x36e634a1:
+        case 0x2be6f132:  numBytes = 1627; return jucer_NewInlineComponentTemplate_h;
         case 0x3f052be8:
-        case 0xb905d1ba:  numBytes = 781; return jucer_WindowTemplate_cpp;
+        case 0xb905d1ba:  numBytes = 905; return jucer_WindowTemplate_cpp;
         case 0xb20377ed:
-        case 0x959d5d38:  numBytes = 1216; return jucer_WindowTemplate_h;
+        case 0x959d5d38:  numBytes = 1220; return jucer_WindowTemplate_h;
         default: break;
     }
 

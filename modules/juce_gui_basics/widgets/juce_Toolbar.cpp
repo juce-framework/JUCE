@@ -821,5 +821,5 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
     setEditingActive (true);
 
     (new CustomisationDialog (factory, this, optionFlags))
-        ->enterModalState (true, 0, true);
+        ->enterModalState (true, nullptr, true);
 }

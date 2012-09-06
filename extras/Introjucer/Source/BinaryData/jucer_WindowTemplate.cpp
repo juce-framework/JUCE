@@ -3,20 +3,24 @@
 
     This file was auto-generated!
 
-    It contains the basic outline for a simple desktop window.
+    It contains the basic structure for a simple desktop window.
 
   ==============================================================================
 */
 
-INCLUDES
+INCLUDE_CORRESPONDING_HEADER
 
 
 //==============================================================================
 WINDOWCLASS::WINDOWCLASS()
-    : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(),
+    : DocumentWindow ("WINDOWCLASS",
                       Colours::lightgrey,
                       DocumentWindow::allButtons)
 {
+    // At this point you should call setContentOwned() to give the window
+    // a component containing the content you want to show..
+
+
     centreWithSize (500, 400);
     setVisible (true);
 }

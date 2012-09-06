@@ -11,7 +11,7 @@
 #ifndef HEADERGUARD
 #define HEADERGUARD
 
-INCLUDES
+INCLUDE_JUCE
 
 
 //==============================================================================

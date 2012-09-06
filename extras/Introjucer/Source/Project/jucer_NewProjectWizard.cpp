@@ -116,17 +116,18 @@ public:
         if (createWindow)
         {
             appHeaders << newLine << CodeHelpers::createIncludeStatement (mainWindowH, mainCppFile);
-            initCode = "mainWindow = new " + windowClassName + "();";
-            shutdownCode = "mainWindow = 0;";
+            initCode       = "mainWindow = new " + windowClassName + "();";
+            shutdownCode   = "mainWindow = nullptr;";
             privateMembers = "ScopedPointer <" + windowClassName + "> mainWindow;";
 
             String windowH = project.getFileTemplate ("jucer_WindowTemplate_h")
-                                .replace ("INCLUDES", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainWindowH), false)
+                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainWindowH), false)
                                 .replace ("WINDOWCLASS", windowClassName, false)
                                 .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (mainWindowH), false);
 
             String windowCpp = project.getFileTemplate ("jucer_WindowTemplate_cpp")
-                                .replace ("INCLUDES", CodeHelpers::createIncludeStatement (mainWindowH, mainWindowCpp), false)
+                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainWindowCpp), false)
+                                .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (mainWindowH, mainWindowCpp), false)
                                 .replace ("WINDOWCLASS", windowClassName, false);
 
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainWindowH, windowH))

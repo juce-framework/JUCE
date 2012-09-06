@@ -63,8 +63,6 @@ JUCE_API void JUCE_CALLTYPE  shutdownJuce_GUI();
     This class is particularly handy to use at the beginning of a console app's
     main() function, because it'll take care of shutting down whenever you return
     from the main() call.
-
-    @see ScopedJuceInitialiser_NonGUI
 */
 class ScopedJuceInitialiser_GUI
 {

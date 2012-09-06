@@ -27,13 +27,13 @@ public:
     //==============================================================================
     void initialise (const String& commandLine)
     {
-        // Do your application's initialisation code here..
+        // Add your application's initialisation code here..
         APPINITCODE
     }
 
     void shutdown()
     {
-        // Do your application's shutdown code here..
+        // Add your application's shutdown code here..
         APPSHUTDOWNCODE
     }
 
@@ -43,7 +43,6 @@ public:
         quit();
     }
 
-    //==============================================================================
     const String getApplicationName()
     {
         return "APPNAME";
@@ -70,4 +69,4 @@ private:
 
 //==============================================================================
 // This macro generates the main() routine that starts the app.
-START_JUCE_APPLICATION(APPCLASSNAME)
+START_JUCE_APPLICATION (APPCLASSNAME)
