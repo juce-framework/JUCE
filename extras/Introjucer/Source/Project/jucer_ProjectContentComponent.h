@@ -65,6 +65,8 @@ public:
 
     bool goToPreviousFile();
     bool goToNextFile();
+    bool canGoToCounterpart() const;
+    bool goToCounterpart();
 
     bool saveProject();
     void closeProject();

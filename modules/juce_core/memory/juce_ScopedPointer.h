@@ -168,7 +168,7 @@ public:
     {
         // Two ScopedPointers should never be able to refer to the same object - if
         // this happens, you must have done something dodgy!
-        jassert (object != other.object);
+        jassert (object != other.object || this == other.getAddress());
 
         std::swap (object, other.object);
     }

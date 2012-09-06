@@ -434,6 +434,25 @@ bool ProjectContentComponent::goToNextFile()
     return showDocument (recentDocumentList.getNext(), true);
 }
 
+bool ProjectContentComponent::canGoToCounterpart() const
+{
+    return currentDocument != nullptr
+            && currentDocument->getCounterpartFile().exists();
+}
+
+bool ProjectContentComponent::goToCounterpart()
+{
+    if (currentDocument != nullptr)
+    {
+        const File file (currentDocument->getCounterpartFile());
+
+        if (file.exists())
+            return showEditorForFile (file, true);
+    }
+
+    return false;
+}
+
 bool ProjectContentComponent::saveProject()
 {
     return project != nullptr
@@ -502,6 +521,7 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showConfigPanel,
                               CommandIDs::goToPreviousDoc,
                               CommandIDs::goToNextDoc,
+                              CommandIDs::goToCounterpart,
                               StandardApplicationCommandIDs::del };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -566,6 +586,16 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.defaultKeypresses.add (KeyPress (KeyPress::rightKey, ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
        #else
         result.defaultKeypresses.add (KeyPress (KeyPress::rightKey, ModifierKeys::ctrlModifier | ModifierKeys::shiftModifier, 0));
+       #endif
+        break;
+
+    case CommandIDs::goToCounterpart:
+        result.setInfo ("Open corresponding header or cpp file", "Open counterpart file", CommandCategories::general, 0);
+        result.setActive (canGoToCounterpart());
+       #if JUCE_MAC
+        result.defaultKeypresses.add (KeyPress (KeyPress::upKey, ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+       #else
+        result.defaultKeypresses.add (KeyPress (KeyPress::upKey, ModifierKeys::ctrlModifier | ModifierKeys::shiftModifier, 0));
        #endif
         break;
 
@@ -639,6 +669,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::closeDocument:
         case CommandIDs::goToPreviousDoc:
         case CommandIDs::goToNextDoc:
+        case CommandIDs::goToCounterpart:
         case CommandIDs::saveAndOpenInIDE:
             if (reinvokeCommandAfterCancellingModalComps (info))
             {
@@ -661,6 +692,7 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::closeDocument:             closeDocument(); break;
         case CommandIDs::goToPreviousDoc:           goToPreviousFile(); break;
         case CommandIDs::goToNextDoc:               goToNextFile(); break;
+        case CommandIDs::goToCounterpart:           goToCounterpart(); break;
 
         case CommandIDs::showFilePanel:             treeViewTabs.setCurrentTabIndex (0); break;
         case CommandIDs::showConfigPanel:           treeViewTabs.setCurrentTabIndex (1); break;

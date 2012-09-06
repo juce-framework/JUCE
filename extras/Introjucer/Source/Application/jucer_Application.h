@@ -303,6 +303,7 @@ public:
 
         menu.addCommandItem (commandManager, CommandIDs::goToPreviousDoc);
         menu.addCommandItem (commandManager, CommandIDs::goToNextDoc);
+        menu.addCommandItem (commandManager, CommandIDs::goToCounterpart);
         menu.addSeparator();
 
         const int numDocs = jmin (50, getApp().openDocumentManager.getNumOpenDocuments());
