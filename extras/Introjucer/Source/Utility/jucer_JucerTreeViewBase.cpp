@@ -67,10 +67,14 @@ void TreePanelBase::saveOpenness()
 }
 
 //==============================================================================
-JucerTreeViewBase::JucerTreeViewBase()
-    : textX (0)
+JucerTreeViewBase::JucerTreeViewBase()  : textX (0)
 {
     setLinesDrawnForSubItems (false);
+}
+
+JucerTreeViewBase::~JucerTreeViewBase()
+{
+    masterReference.clear();
 }
 
 void JucerTreeViewBase::refreshSubItems()
@@ -207,15 +211,16 @@ void JucerTreeViewBase::showDocument()  {}
 void JucerTreeViewBase::showPopupMenu() {}
 void JucerTreeViewBase::showMultiSelectionPopupMenu() {}
 
-static void treeViewMenuItemChosen (int resultCode, JucerTreeViewBase* item)
+static void treeViewMenuItemChosen (int resultCode, WeakReference<JucerTreeViewBase> item)
 {
-    item->handlePopupMenuResult (resultCode);
+    if (item != nullptr)
+        item->handlePopupMenuResult (resultCode);
 }
 
 void JucerTreeViewBase::launchPopupMenu (PopupMenu& m)
 {
     m.showMenuAsync (PopupMenu::Options(),
-                     ModalCallbackFunction::create (treeViewMenuItemChosen, this));
+                     ModalCallbackFunction::create (treeViewMenuItemChosen, WeakReference<JucerTreeViewBase> (this)));
 }
 
 void JucerTreeViewBase::handlePopupMenuResult (int)
@@ -236,7 +241,7 @@ ProjectContentComponent* JucerTreeViewBase::getProjectContentComponent() const
         c = c->getParentComponent();
     }
 
-    return 0;
+    return nullptr;
 }
 
 //==============================================================================

@@ -472,6 +472,14 @@ void LibraryModule::createLocalHeaderWrapper (ProjectSaver& projectSaver, const 
 }
 
 //==============================================================================
+File LibraryModule::getLocalFolderFor (Project& project) const
+{
+    if (project.shouldCopyModuleFilesLocally (getID()).getValue())
+        return project.getGeneratedCodeFolder().getChildFile ("modules").getChildFile (getID());
+    else
+        return moduleFolder;
+}
+
 void LibraryModule::prepareExporter (ProjectExporter& exporter, ProjectSaver& projectSaver) const
 {
     Project& project = exporter.getProject();
@@ -649,7 +657,7 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
     }
 }
 
-void LibraryModule::getLocalCompiledFiles (Array<File>& result) const
+void LibraryModule::getLocalCompiledFiles (const File& localModuleFolder, Array<File>& result) const
 {
     const var compileArray (moduleInfo ["compile"]); // careful to keep this alive while the array is in use!
     const Array<var>* const files = compileArray.getArray();
@@ -671,8 +679,7 @@ void LibraryModule::getLocalCompiledFiles (Array<File>& result) const
                   #endif
                 )
             {
-                const File compiledFile (moduleFolder.getChildFile (filename));
-                result.add (compiledFile);
+                result.add (localModuleFolder.getChildFile (filename));
             }
         }
     }

@@ -35,6 +35,7 @@ class JucerTreeViewBase   : public TreeViewItem
 {
 public:
     JucerTreeViewBase();
+    ~JucerTreeViewBase();
 
     int getItemWidth() const                                { return -1; }
     int getItemHeight() const                               { return 20; }
@@ -101,6 +102,9 @@ private:
     class ItemSelectionTimer;
     friend class ItemSelectionTimer;
     ScopedPointer<Timer> delayedSelectionTimer;
+
+    WeakReference<JucerTreeViewBase>::Master masterReference;
+    friend class WeakReference<JucerTreeViewBase>;
 
     void invokeShowDocument();
 };
