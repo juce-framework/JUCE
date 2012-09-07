@@ -792,9 +792,6 @@ public:
 
     bool canBecomeKeyWindow()
     {
-        if (sendModalInputAttemptIfBlocked())
-            return false;
-
         return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
     }
 
@@ -1668,16 +1665,17 @@ private:
     static BOOL canBecomeKeyWindow (id self, SEL)
     {
         NSViewComponentPeer* const owner = getOwner (self);
-        return owner != nullptr && owner->canBecomeKeyWindow();
+
+        return owner != nullptr
+                && owner->canBecomeKeyWindow()
+                && ! owner->sendModalInputAttemptIfBlocked();
     }
 
     static void becomeKeyWindow (id self, SEL)
     {
         sendSuperclassMessage (self, @selector (becomeKeyWindow));
 
-        NSViewComponentPeer* const owner = getOwner (self);
-
-        if (owner != nullptr)
+        if (NSViewComponentPeer* const owner = getOwner (self))
             owner->becomeKeyWindow();
     }
 
@@ -1689,9 +1687,7 @@ private:
 
     static NSRect constrainFrameRect (id self, SEL, NSRect frameRect, NSScreen*)
     {
-        NSViewComponentPeer* const owner = getOwner (self);
-
-        if (owner != nullptr)
+        if (NSViewComponentPeer* const owner = getOwner (self))
             frameRect = owner->constrainRect (frameRect);
 
         return frameRect;
@@ -1718,9 +1714,7 @@ private:
 
     static void zoom (id self, SEL, id sender)
     {
-        NSViewComponentPeer* const owner = getOwner (self);
-
-        if (owner != nullptr)
+        if (NSViewComponentPeer* const owner = getOwner (self))
         {
             owner->isZooming = true;
             objc_super s = { self, [NSWindow class] };
