@@ -54,7 +54,6 @@ public:
     void selectPresetScheme (int index);
 
     static Font getDefaultCodeFont();
-    static Colour getScrollbarColourForBackground (const Colour& background);
 
     static void showEditorWindow (ScopedPointer<Component>& ownerPointer);
 
@@ -112,6 +111,8 @@ public:
 
     void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown);
+
+    static Colour getScrollbarColourForBackground (const Colour& background);
 
 private:
     Image backgroundTexture;

@@ -146,7 +146,7 @@ void ProjectContentComponent::paintOverChildren (Graphics& g)
     if (resizerBar != nullptr)
     {
         const int shadowSize = 15;
-        const int x = resizerBar->getRight();
+        const int x = resizerBar->getX();
 
         ColourGradient cg (Colours::black.withAlpha (0.25f), (float) x, 0,
                            Colours::transparentBlack,        (float) (x - shadowSize), 0, false);
@@ -166,7 +166,7 @@ void ProjectContentComponent::resized()
         treeViewTabs.setBounds (r.removeFromLeft (treeViewTabs.getWidth()));
 
     if (resizerBar != nullptr)
-        resizerBar->setBounds (r.removeFromLeft (4));
+        resizerBar->setBounds (r.withWidth (4));
 
     if (contentView != nullptr)
         contentView->setBounds (r);
@@ -205,7 +205,7 @@ void ProjectContentComponent::setProject (Project* newProject)
             settings.setValue ("lastTab", treeViewTabs.getCurrentTabName());
         }
 
-        treeViewTabs.clearTabs();
+        deleteProjectTabs();
         project = newProject;
 
         if (project != nullptr)
@@ -232,6 +232,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
             addAndMakeVisible (resizerBar = new ResizableEdgeComponent (&treeViewTabs, &treeSizeConstrainer,
                                                                         ResizableEdgeComponent::rightEdge));
+            resizerBar->setAlwaysOnTop (true);
 
             project->addChangeListener (this);
 
@@ -253,6 +254,11 @@ void ProjectContentComponent::createProjectTabs()
 
     treeViewTabs.addTab ("Files",  tabColour, new FileTreeTab (*project), true);
     treeViewTabs.addTab ("Config", tabColour, new ConfigTreeTab (*project), true);
+}
+
+void ProjectContentComponent::deleteProjectTabs()
+{
+    treeViewTabs.clearTabs();
 }
 
 TreeView* ProjectContentComponent::getFilesTreeView() const

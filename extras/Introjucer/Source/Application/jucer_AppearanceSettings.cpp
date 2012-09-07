@@ -206,7 +206,7 @@ void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const
     }
 
     lf.setColour (ScrollBar::thumbColourId,
-                  getScrollbarColourForBackground (lf.findColour (mainBackgroundColourId)));
+                  IntrojucerLookAndFeel::getScrollbarColourForBackground (lf.findColour (mainBackgroundColourId)));
 }
 
 void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
@@ -233,7 +233,7 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
     }
 
     editor.setColour (ScrollBar::thumbColourId,
-                      getScrollbarColourForBackground (editor.findColour (CodeEditorComponent::backgroundColourId)));
+                      IntrojucerLookAndFeel::getScrollbarColourForBackground (editor.findColour (CodeEditorComponent::backgroundColourId)));
 }
 
 Font AppearanceSettings::getCodeFont() const
@@ -276,11 +276,6 @@ bool AppearanceSettings::getColour (const String& name, Colour& result) const
     }
 
     return false;
-}
-
-Colour AppearanceSettings::getScrollbarColourForBackground (const Colour& background)
-{
-    return background.contrasting().withAlpha (0.13f);
 }
 
 //==============================================================================
@@ -534,6 +529,14 @@ IntrojucerLookAndFeel::IntrojucerLookAndFeel()
     setColour (mainBackgroundColourId, Colour::greyLevel (0.8f));
     setColour (treeviewHighlightColourId, Colour (0x401111ee));
     setColour (TextButton::buttonColourId, Colour (0xffeeeeff));
+
+    setColour (ScrollBar::thumbColourId,
+               getScrollbarColourForBackground (findColour (mainBackgroundColourId)));
+}
+
+Colour IntrojucerLookAndFeel::getScrollbarColourForBackground (const Colour& background)
+{
+    return background.contrasting().withAlpha (0.13f);
 }
 
 Rectangle<int> IntrojucerLookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
