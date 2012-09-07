@@ -216,6 +216,9 @@ namespace
             DSOUND_FUNCTION_LOAD (DirectSoundCaptureEnumerateW)
         }
     }
+
+    // the overall size of buffer used is this value x the block size
+    enum { blocksPerOverallBuffer = 16 };
 }
 
 //==============================================================================
@@ -272,10 +275,10 @@ public:
         if (SUCCEEDED (hr))
         {
             bytesPerBuffer = (bufferSizeSamples * (bitDepth >> 2)) & ~15;
-            totalBytesPerBuffer = (3 * bytesPerBuffer) & ~15;
+            totalBytesPerBuffer = (blocksPerOverallBuffer * bytesPerBuffer) & ~15;
             const int numChannels = 2;
 
-            hr = pDirectSound->SetCooperativeLevel (GetDesktopWindow(), 2 /* DSSCL_PRIORITY  */);
+            hr = pDirectSound->SetCooperativeLevel (GetDesktopWindow(), 2 /* DSSCL_PRIORITY */);
             logError (hr);
 
             if (SUCCEEDED (hr))
@@ -564,7 +567,7 @@ public:
         {
             const int numChannels = 2;
             bytesPerBuffer = (bufferSizeSamples * (bitDepth >> 2)) & ~15;
-            totalBytesPerBuffer = (3 * bytesPerBuffer) & ~15;
+            totalBytesPerBuffer = (blocksPerOverallBuffer * bytesPerBuffer) & ~15;
 
             WAVEFORMATEX wfFormat;
             wfFormat.wFormatTag       = WAVE_FORMAT_PCM;
