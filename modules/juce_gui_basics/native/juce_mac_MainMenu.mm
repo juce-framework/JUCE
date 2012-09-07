@@ -246,8 +246,9 @@ public:
                 {
                     const KeyPress& kp = keyPresses.getReference(0);
 
-                    if (kp.getKeyCode() != KeyPress::backspaceKey   // (adding these is annoying because it flashes the menu bar
-                         && kp.getKeyCode() != KeyPress::deleteKey) // every time you press the key while editing text)
+                    if ((kp.getKeyCode() != KeyPress::backspaceKey   // (adding these is annoying because it flashes the menu bar
+                          && kp.getKeyCode() != KeyPress::deleteKey) // every time you press the key while editing text)
+                         || kp.getModifiers().isAnyModifierKeyDown())
                     {
                         juce_wchar key = kp.getTextCharacter();
                         if (key == 0)
