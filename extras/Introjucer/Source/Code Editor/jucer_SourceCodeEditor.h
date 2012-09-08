@@ -156,12 +156,16 @@ private:
 class CppCodeEditorComponent  : public CodeEditorComponent
 {
 public:
-    CppCodeEditorComponent (CodeDocument& codeDocument);
+    CppCodeEditorComponent (const File& file, CodeDocument& codeDocument);
 
     void handleReturnKey();
     void insertTextAtCaret (const String& newText);
 
+    void addPopupMenuItems (PopupMenu&, const MouseEvent*);
+    void performPopupMenuAction (int menuItemID);
+
 private:
+    File file;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppCodeEditorComponent);
 };
 

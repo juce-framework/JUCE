@@ -115,7 +115,7 @@ SourceCodeEditor::~SourceCodeEditor()
 void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
 {
     if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
-        setEditor (new CppCodeEditorComponent (codeDocument));
+        setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
     else
         setEditor (new CodeEditorComponent (codeDocument, nullptr));
 }
@@ -161,8 +161,8 @@ void SourceCodeEditor::valueTreeRedirected (ValueTree&)                         
 //==============================================================================
 static CPlusPlusCodeTokeniser cppTokeniser;
 
-CppCodeEditorComponent::CppCodeEditorComponent (CodeDocument& codeDocument)
-    : CodeEditorComponent (codeDocument, &cppTokeniser)
+CppCodeEditorComponent::CppCodeEditorComponent (const File& f, CodeDocument& codeDocument)
+    : CodeEditorComponent (codeDocument, &cppTokeniser), file (f)
 {
 }
 
@@ -225,4 +225,27 @@ void CppCodeEditorComponent::insertTextAtCaret (const String& newText)
     }
 
     CodeEditorComponent::insertTextAtCaret (newText);
+}
+
+enum { showInFinderID = 0x2fe821e3 };
+
+void CppCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEvent* e)
+{
+    menu.addItem (showInFinderID,
+                 #if JUCE_MAC
+                  "Reveal " + file.getFileName() + " in Finder");
+                 #else
+                  "Reveal " + file.getFileName() + " in Explorer");
+                 #endif
+    menu.addSeparator();
+
+    CodeEditorComponent::addPopupMenuItems (menu, e);
+}
+
+void CppCodeEditorComponent::performPopupMenuAction (int menuItemID)
+{
+    if (menuItemID == showInFinderID)
+        file.revealToUser();
+    else
+        CodeEditorComponent::performPopupMenuAction (menuItemID);
 }
