@@ -60,19 +60,14 @@ struct TextAtom
 class TextEditor::UniformTextSection
 {
 public:
-    UniformTextSection (const String& text,
-                        const Font& font_,
-                        const Colour& colour_,
-                        const juce_wchar passwordCharacter)
-      : font (font_),
-        colour (colour_)
+    UniformTextSection (const String& text, const Font& f, const Colour& col, const juce_wchar passwordChar)
+        : font (f), colour (col)
     {
-        initialiseAtoms (text, passwordCharacter);
+        initialiseAtoms (text, passwordChar);
     }
 
     UniformTextSection (const UniformTextSection& other)
-      : font (other.font),
-        colour (other.colour)
+      : font (other.font), colour (other.colour)
     {
         atoms.ensureStorageAllocated (other.atoms.size());
 
@@ -80,10 +75,7 @@ public:
             atoms.add (new TextAtom (*other.atoms.getUnchecked(i)));
     }
 
-    ~UniformTextSection()
-    {
-        // (no need to delete the atoms, as they're explicitly deleted by the caller)
-    }
+    ~UniformTextSection() {}  // (no need to delete the atoms, as they're explicitly deleted by the caller)
 
     void clear()
     {
@@ -320,9 +312,9 @@ private:
 class TextEditor::Iterator
 {
 public:
-    Iterator (const Array <UniformTextSection*>& sections_,
-              const float wordWrapWidth_,
-              const juce_wchar passwordCharacter_)
+    Iterator (const Array <UniformTextSection*>& sectionList,
+              const float wrapWidth,
+              const juce_wchar passwordChar)
       : indexInText (0),
         lineY (0),
         lineHeight (0),
@@ -331,13 +323,13 @@ public:
         atomRight (0),
         atom (0),
         currentSection (nullptr),
-        sections (sections_),
+        sections (sectionList),
         sectionIndex (0),
         atomIndex (0),
-        wordWrapWidth (wordWrapWidth_),
-        passwordCharacter (passwordCharacter_)
+        wordWrapWidth (wrapWidth),
+        passwordCharacter (passwordChar)
     {
-        jassert (wordWrapWidth_ > 0);
+        jassert (wordWrapWidth > 0);
 
         if (sections.size() > 0)
         {
@@ -687,7 +679,7 @@ public:
     }
 
     //==============================================================================
-    bool getCharPosition (const int index, float& cx, float& cy, float& lineHeight_)
+    bool getCharPosition (const int index, float& cx, float& cy, float& lineHeightFound)
     {
         while (next())
         {
@@ -695,14 +687,14 @@ public:
             {
                 cx = indexToX (index);
                 cy = lineY;
-                lineHeight_ = lineHeight;
+                lineHeightFound = lineHeight;
                 return true;
             }
         }
 
         cx = atomX;
         cy = lineY;
-        lineHeight_ = lineHeight;
+        lineHeightFound = lineHeight;
         return false;
     }
 
@@ -750,19 +742,19 @@ class TextEditor::InsertAction  : public UndoableAction
 {
 public:
     InsertAction (TextEditor& ed,
-                  const String& text_,
-                  const int insertIndex_,
-                  const Font& font_,
-                  const Colour& colour_,
-                  const int oldCaretPos_,
-                  const int newCaretPos_)
+                  const String& newText,
+                  const int insertPos,
+                  const Font& newFont,
+                  const Colour& newColour,
+                  const int oldCaret,
+                  const int newCaret)
         : owner (ed),
-          text (text_),
-          insertIndex (insertIndex_),
-          oldCaretPos (oldCaretPos_),
-          newCaretPos (newCaretPos_),
-          font (font_),
-          colour (colour_)
+          text (newText),
+          insertIndex (insertPos),
+          oldCaretPos (oldCaret),
+          newCaretPos (newCaret),
+          font (newFont),
+          colour (newColour)
     {
     }
 
@@ -798,15 +790,15 @@ class TextEditor::RemoveAction  : public UndoableAction
 {
 public:
     RemoveAction (TextEditor& ed,
-                  const Range<int> range_,
-                  const int oldCaretPos_,
-                  const int newCaretPos_,
-                  const Array <UniformTextSection*>& removedSections_)
+                  const Range<int> rangeToRemove,
+                  const int oldCaret,
+                  const int newCaret,
+                  const Array <UniformTextSection*>& oldSections)
         : owner (ed),
-          range (range_),
-          oldCaretPos (oldCaretPos_),
-          newCaretPos (newCaretPos_),
-          removedSections (removedSections_)
+          range (rangeToRemove),
+          oldCaretPos (oldCaret),
+          newCaretPos (newCaret),
+          removedSections (oldSections)
     {
     }
 
@@ -814,9 +806,8 @@ public:
     {
         for (int i = removedSections.size(); --i >= 0;)
         {
-            UniformTextSection* const section = removedSections.getUnchecked (i);
+            ScopedPointer<UniformTextSection> section (removedSections.getUnchecked (i));
             section->clear();
-            delete section;
         }
     }
 
@@ -952,7 +943,7 @@ namespace TextEditorDefs
 
 //==============================================================================
 TextEditor::TextEditor (const String& name,
-                        const juce_wchar passwordCharacter_)
+                        const juce_wchar passwordChar)
     : Component (name),
       borderSize (1, 1, 1, 3),
       readOnly (false),
@@ -975,7 +966,7 @@ TextEditor::TextEditor (const String& name,
       currentFont (14.0f),
       totalNumChars (0),
       caretPosition (0),
-      passwordCharacter (passwordCharacter_),
+      passwordCharacter (passwordChar),
       dragType (notDragging)
 {
     setOpaque (true);
@@ -1564,16 +1555,15 @@ void TextEditor::moveCaretTo (const int newPosition,
     }
 }
 
-int TextEditor::getTextIndexAt (const int x,
-                                const int y)
+int TextEditor::getTextIndexAt (const int x, const int y)
 {
     return indexAtPosition ((float) (x + viewport->getViewPositionX() - leftIndent),
                             (float) (y + viewport->getViewPositionY() - topIndent));
 }
 
-void TextEditor::insertTextAtCaret (const String& newText_)
+void TextEditor::insertTextAtCaret (const String& t)
 {
-    String newText (newText_);
+    String newText (t);
 
     if (allowedCharacters.isNotEmpty())
         newText = newText.retainCharacters (allowedCharacters);

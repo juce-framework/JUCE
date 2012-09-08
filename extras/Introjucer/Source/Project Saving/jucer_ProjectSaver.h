@@ -35,9 +35,9 @@
 class ProjectSaver
 {
 public:
-    ProjectSaver (Project& project_, const File& projectFile_)
-        : project (project_),
-          projectFile (projectFile_),
+    ProjectSaver (Project& p, const File& file)
+        : project (p),
+          projectFile (file),
           generatedCodeFolder (project.getGeneratedCodeFolder()),
           generatedFilesGroup (Project::Item::createGroup (project, getJuceCodeGroupName(), "__generatedcode__"))
     {
@@ -49,9 +49,9 @@ public:
     struct SaveThread  : public ThreadWithProgressWindow
     {
     public:
-        SaveThread (ProjectSaver& saver_)
+        SaveThread (ProjectSaver& ps)
             : ThreadWithProgressWindow ("Saving...", true, false),
-              saver (saver_), result (Result::ok())
+              saver (ps), result (Result::ok())
         {}
 
         void run()
@@ -567,10 +567,10 @@ private:
     class ExporterJob   : public ThreadPoolJob
     {
     public:
-        ExporterJob (ProjectSaver& owner_, ProjectExporter* exporter_,
-                     const OwnedArray<LibraryModule>& modules_)
+        ExporterJob (ProjectSaver& ps, ProjectExporter* pe,
+                     const OwnedArray<LibraryModule>& moduleList)
             : ThreadPoolJob ("export"),
-              owner (owner_), exporter (exporter_), modules (modules_)
+              owner (ps), exporter (pe), modules (moduleList)
         {
         }
 

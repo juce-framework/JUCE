@@ -37,8 +37,8 @@ class GroupInformationComponent  : public Component,
 {
 public:
     //==============================================================================
-    GroupInformationComponent (const Project::Item& item_)
-        : item (item_)
+    GroupInformationComponent (const Project::Item& group)
+        : item (group)
     {
         list.setModel (this);
         list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
@@ -113,8 +113,8 @@ private:
     class FileOptionComponent  : public Component
     {
     public:
-        FileOptionComponent (const Project::Item& item_)
-            : item (item_),
+        FileOptionComponent (const Project::Item& fileItem)
+            : item (fileItem),
               compileButton ("Compile"),
               resourceButton ("Add to Binary Resources")
         {

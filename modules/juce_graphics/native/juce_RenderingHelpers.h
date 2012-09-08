@@ -40,8 +40,8 @@ namespace RenderingHelpers
 class TranslationOrTransform
 {
 public:
-    TranslationOrTransform (int xOffset_, int yOffset_) noexcept
-        : xOffset (xOffset_), yOffset (yOffset_), isOnlyTranslated (true)
+    TranslationOrTransform (int x, int y) noexcept
+        : xOffset (x), yOffset (y), isOnlyTranslated (true)
     {
     }
 
@@ -393,11 +393,11 @@ namespace GradientPixelIterators
     {
     public:
         Linear (const ColourGradient& gradient, const AffineTransform& transform,
-                const PixelARGB* const lookupTable_, const int numEntries_)
-            : lookupTable (lookupTable_),
-              numEntries (numEntries_)
+                const PixelARGB* const colours, const int numColours)
+            : lookupTable (colours),
+              numEntries (numColours)
         {
-            jassert (numEntries_ >= 0);
+            jassert (numColours >= 0);
             Point<float> p1 (gradient.point1);
             Point<float> p2 (gradient.point2);
 
@@ -467,13 +467,13 @@ namespace GradientPixelIterators
     {
     public:
         Radial (const ColourGradient& gradient, const AffineTransform&,
-                const PixelARGB* const lookupTable_, const int numEntries_)
-            : lookupTable (lookupTable_),
-              numEntries (numEntries_),
+                const PixelARGB* const colours, const int numColours)
+            : lookupTable (colours),
+              numEntries (numColours),
               gx1 (gradient.point1.x),
               gy1 (gradient.point1.y)
         {
-            jassert (numEntries_ >= 0);
+            jassert (numColours >= 0);
             const Point<float> diff (gradient.point1 - gradient.point2);
             maxDist = diff.x * diff.x + diff.y * diff.y;
             invScale = numEntries / std::sqrt (maxDist);
@@ -510,8 +510,8 @@ namespace GradientPixelIterators
     {
     public:
         TransformedRadial (const ColourGradient& gradient, const AffineTransform& transform,
-                           const PixelARGB* const lookupTable_, const int numEntries_)
-            : Radial (gradient, transform, lookupTable_, numEntries_),
+                           const PixelARGB* const colours, const int numColours)
+            : Radial (gradient, transform, colours, numColours),
               inverseTransform (transform.inverted())
         {
             tM10 = inverseTransform.mat10;
@@ -555,9 +555,8 @@ namespace EdgeTableFillers
     class SolidColour
     {
     public:
-        SolidColour (const Image::BitmapData& data_, const PixelARGB& colour)
-            : data (data_),
-              sourceColour (colour)
+        SolidColour (const Image::BitmapData& image, const PixelARGB& colour)
+            : data (image), sourceColour (colour)
         {
             if (sizeof (PixelType) == 3 && data.pixelStride == sizeof (PixelType))
             {
@@ -727,10 +726,10 @@ namespace EdgeTableFillers
     class Gradient  : public GradientType
     {
     public:
-        Gradient (const Image::BitmapData& destData_, const ColourGradient& gradient, const AffineTransform& transform,
-                  const PixelARGB* const lookupTable_, const int numEntries_)
-            : GradientType (gradient, transform, lookupTable_, numEntries_ - 1),
-              destData (destData_)
+        Gradient (const Image::BitmapData& dest, const ColourGradient& gradient, const AffineTransform& transform,
+                  const PixelARGB* const colours, const int numColours)
+            : GradientType (gradient, transform, colours, numColours - 1),
+              destData (dest)
         {
         }
 
@@ -808,13 +807,13 @@ namespace EdgeTableFillers
     class ImageFill
     {
     public:
-        ImageFill (const Image::BitmapData& destData_, const Image::BitmapData& srcData_,
-                   const int extraAlpha_, const int x, const int y)
-            : destData (destData_),
-              srcData (srcData_),
-              extraAlpha (extraAlpha_ + 1),
-              xOffset (repeatPattern ? negativeAwareModulo (x, srcData_.width) - srcData_.width : x),
-              yOffset (repeatPattern ? negativeAwareModulo (y, srcData_.height) - srcData_.height : y)
+        ImageFill (const Image::BitmapData& dest, const Image::BitmapData& src,
+                   const int alpha, const int x, const int y)
+            : destData (dest),
+              srcData (src),
+              extraAlpha (alpha + 1),
+              xOffset (repeatPattern ? negativeAwareModulo (x, src.width)  - src.width  : x),
+              yOffset (repeatPattern ? negativeAwareModulo (y, src.height) - src.height : y)
         {
         }
 
@@ -969,17 +968,17 @@ namespace EdgeTableFillers
     class TransformedImageFill
     {
     public:
-        TransformedImageFill (const Image::BitmapData& destData_, const Image::BitmapData& srcData_,
-                              const AffineTransform& transform, const int extraAlpha_, const bool betterQuality_)
+        TransformedImageFill (const Image::BitmapData& dest, const Image::BitmapData& src,
+                              const AffineTransform& transform, const int alpha, const bool higherQuality)
             : interpolator (transform,
-                            betterQuality_ ? 0.5f : 0.0f,
-                            betterQuality_ ? -128 : 0),
-              destData (destData_),
-              srcData (srcData_),
-              extraAlpha (extraAlpha_ + 1),
-              betterQuality (betterQuality_),
-              maxX (srcData_.width - 1),
-              maxY (srcData_.height - 1),
+                            higherQuality ? 0.5f : 0.0f,
+                            higherQuality ? -128 : 0),
+              destData (dest),
+              srcData (src),
+              extraAlpha (alpha + 1),
+              betterQuality (higherQuality),
+              maxX (src.width  - 1),
+              maxY (src.height - 1),
               scratchSize (2048)
         {
             scratchBuffer.malloc (scratchSize);
@@ -1353,9 +1352,9 @@ namespace EdgeTableFillers
         {
         public:
             TransformedImageSpanInterpolator (const AffineTransform& transform,
-                                              const float pixelOffset_, const int pixelOffsetInt_) noexcept
+                                              const float offsetFloat, const int offsetInt) noexcept
                 : inverseTransform (transform.inverted()),
-                  pixelOffset (pixelOffset_), pixelOffsetInt (pixelOffsetInt_)
+                  pixelOffset (offsetFloat), pixelOffsetInt (offsetInt)
             {}
 
             void setStartOfLine (float x, float y, const int numPixels) noexcept
@@ -1971,8 +1970,8 @@ namespace ClipRegions
         class SubRectangleIterator
         {
         public:
-            SubRectangleIterator (const RectangleList& clip_, const Rectangle<int>& area_)
-                : clip (clip_), area (area_)
+            SubRectangleIterator (const RectangleList& clipList, const Rectangle<int>& clipBounds)
+                : clip (clipList), area (clipBounds)
             {}
 
             template <class Renderer>
@@ -2010,8 +2009,8 @@ namespace ClipRegions
         class SubRectangleIteratorFloat
         {
         public:
-            SubRectangleIteratorFloat (const RectangleList& clip_, const Rectangle<float>& area_) noexcept
-                : clip (clip_), area (area_)
+            SubRectangleIteratorFloat (const RectangleList& clipList, const Rectangle<float>& clipBounds) noexcept
+                : clip (clipList), area (clipBounds)
             {
             }
 
@@ -2107,17 +2106,17 @@ namespace ClipRegions
 class SoftwareRendererSavedState
 {
 public:
-    SoftwareRendererSavedState (const Image& image_, const Rectangle<int>& clip_)
-        : image (image_), clip (new ClipRegions::RectangleListRegion (clip_)),
+    SoftwareRendererSavedState (const Image& im, const Rectangle<int>& clipBounds)
+        : image (im), clip (new ClipRegions::RectangleListRegion (clipBounds)),
           transform (0, 0),
           interpolationQuality (Graphics::mediumResamplingQuality),
           transparencyLayerAlpha (1.0f)
     {
     }
 
-    SoftwareRendererSavedState (const Image& image_, const RectangleList& clip_, const int xOffset_, const int yOffset_)
-        : image (image_), clip (new ClipRegions::RectangleListRegion (clip_)),
-          transform (xOffset_, yOffset_),
+    SoftwareRendererSavedState (const Image& im, const RectangleList& clipList, const int x, const int y)
+        : image (im), clip (new ClipRegions::RectangleListRegion (clipList)),
+          transform (x, y),
           interpolationQuality (Graphics::mediumResamplingQuality),
           transparencyLayerAlpha (1.0f)
     {

@@ -184,7 +184,7 @@ private:
 class TreeItemComponent   : public Component
 {
 public:
-    TreeItemComponent (JucerTreeViewBase& item_)  : item (item_)
+    TreeItemComponent (JucerTreeViewBase& i)  : item (i)
     {
         setInterceptsMouseClicks (false, true);
     }

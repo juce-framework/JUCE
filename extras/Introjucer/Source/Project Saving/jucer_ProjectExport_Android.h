@@ -46,8 +46,7 @@ public:
     }
 
     //==============================================================================
-    AndroidProjectExporter (Project& project_, const ValueTree& settings_)
-        : ProjectExporter (project_, settings_)
+    AndroidProjectExporter (Project& p, const ValueTree& t)    : ProjectExporter (p, t)
     {
         name = getNameAndroid();
 

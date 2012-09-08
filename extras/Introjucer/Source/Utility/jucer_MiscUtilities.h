@@ -224,12 +224,12 @@ class PopupColourSelector   : public Component,
                               public ButtonListener
 {
 public:
-    PopupColourSelector (const Value& colourValue_,
-                         const Colour& defaultColour_,
+    PopupColourSelector (const Value& colour,
+                         const Colour& defaultCol,
                          const bool canResetToDefault)
         : defaultButton ("Reset to Default"),
-          colourValue (colourValue_),
-          defaultColour (defaultColour_)
+          colourValue (colour),
+          defaultColour (defaultCol)
     {
         addAndMakeVisible (&selector);
         selector.setName ("Colour");
@@ -312,10 +312,10 @@ class ColourEditorComponent    : public Component,
                                  public Value::Listener
 {
 public:
-    ColourEditorComponent (UndoManager* undoManager_, const Value& colourValue_,
-                           const Colour& defaultColour_, const bool canResetToDefault_)
-        : undoManager (undoManager_), colourValue (colourValue_), defaultColour (defaultColour_),
-          canResetToDefault (canResetToDefault_)
+    ColourEditorComponent (UndoManager* um, const Value& colour,
+                           const Colour& defaultCol, const bool canReset)
+        : undoManager (um), colourValue (colour), defaultColour (defaultCol),
+          canResetToDefault (canReset)
     {
         colourValue.addListener (this);
     }

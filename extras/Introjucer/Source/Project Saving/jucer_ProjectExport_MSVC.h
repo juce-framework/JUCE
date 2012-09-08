@@ -33,8 +33,8 @@
 class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
-    MSVCProjectExporterBase (Project& project_, const ValueTree& settings_, const char* const folderName)
-        : ProjectExporter (project_, settings_)
+    MSVCProjectExporterBase (Project& p, const ValueTree& t, const char* const folderName)
+        : ProjectExporter (p, t)
     {
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + folderName;
@@ -863,8 +863,8 @@ protected:
 class MSVCProjectExporterVC2005   : public MSVCProjectExporterVC2008
 {
 public:
-    MSVCProjectExporterVC2005 (Project& project_, const ValueTree& settings_)
-        : MSVCProjectExporterVC2008 (project_, settings_, "VisualStudio2005")
+    MSVCProjectExporterVC2005 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterVC2008 (p, t, "VisualStudio2005")
     {
         name = getName();
     }
@@ -892,8 +892,8 @@ protected:
 class MSVCProjectExporterVC2010   : public MSVCProjectExporterBase
 {
 public:
-    MSVCProjectExporterVC2010 (Project& project_, const ValueTree& settings_)
-        : MSVCProjectExporterBase (project_, settings_, "VisualStudio2010")
+    MSVCProjectExporterVC2010 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterBase (p, t, "VisualStudio2010")
     {
         name = getName();
     }

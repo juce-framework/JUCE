@@ -47,8 +47,7 @@ public:
 
 
     //==============================================================================
-    MakefileProjectExporter (Project& project_, const ValueTree& settings_)
-        : ProjectExporter (project_, settings_)
+    MakefileProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
     {
         name = getNameLinux();
 

@@ -53,9 +53,9 @@ public:
     static const char* getValueTreeTypeName (bool iOS)      { return iOS ? "XCODE_IPHONE" : "XCODE_MAC"; }
 
     //==============================================================================
-    XCodeProjectExporter (Project& project_, const ValueTree& settings_, const bool iOS_)
-        : ProjectExporter (project_, settings_),
-          iOS (iOS_)
+    XCodeProjectExporter (Project& p, const ValueTree& t, const bool isIOS)
+        : ProjectExporter (p, t),
+          iOS (isIOS)
     {
         name = iOS ? getNameiOS() : getNameMac();
 
@@ -176,8 +176,8 @@ protected:
     class XcodeBuildConfiguration  : public BuildConfiguration
     {
     public:
-        XcodeBuildConfiguration (Project& project, const ValueTree& settings, const bool iOS_)
-            : BuildConfiguration (project, settings), iOS (iOS_)
+        XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS)
+            : BuildConfiguration (p, t), iOS (isIOS)
         {
             if (iOS)
             {
