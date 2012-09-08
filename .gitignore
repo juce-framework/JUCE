@@ -54,7 +54,7 @@ extras/Introjucer/Builds/VisualStudio2008/Debug
 extras/Introjucer/Builds/VisualStudio2008/Release
 extras/Introjucer/Builds/VisualStudio2010/Debug
 extras/Introjucer/Builds/VisualStudio2010/Release
-extras/the jucer/build/mac/build
+extras/the jucer/Builds/MacOSX/build
 extras/audio plugin host/build/mac/build
 extras/binarybuilder/Builds/MacOSX/build
 extras/binarybuilder/Builds/Linux/build
