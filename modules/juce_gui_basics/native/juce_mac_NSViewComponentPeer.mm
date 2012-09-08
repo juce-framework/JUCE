@@ -497,6 +497,9 @@ public:
 
     void redirectMouseDown (NSEvent* ev)
     {
+        if (! Process::isForegroundProcess())
+            Process::makeForegroundProcess();
+
         currentModifiers = currentModifiers.withFlags (getModifierForButtonNumber ([ev buttonNumber]));
         sendMouseEvent (ev);
     }
@@ -1285,12 +1288,12 @@ struct JuceNSViewClass   : public ObjCClass <NSView>
         addMethod (@selector (mouseMoved:),                   mouseMoved,                 "v@:@");
         addMethod (@selector (mouseEntered:),                 mouseEntered,               "v@:@");
         addMethod (@selector (mouseExited:),                  mouseExited,                "v@:@");
-        addMethod (@selector (rightMouseDown:),               rightMouseDown,             "v@:@");
-        addMethod (@selector (rightMouseDragged:),            rightMouseDragged,          "v@:@");
-        addMethod (@selector (rightMouseUp:),                 rightMouseUp,               "v@:@");
-        addMethod (@selector (otherMouseDown:),               otherMouseDown,             "v@:@");
-        addMethod (@selector (otherMouseDragged:),            otherMouseDragged,          "v@:@");
-        addMethod (@selector (otherMouseUp:),                 otherMouseUp,               "v@:@");
+        addMethod (@selector (rightMouseDown:),               mouseDown,                  "v@:@");
+        addMethod (@selector (rightMouseDragged:),            mouseDragged,               "v@:@");
+        addMethod (@selector (rightMouseUp:),                 mouseUp,                    "v@:@");
+        addMethod (@selector (otherMouseDown:),               mouseDown,                  "v@:@");
+        addMethod (@selector (otherMouseDragged:),            mouseDragged,               "v@:@");
+        addMethod (@selector (otherMouseUp:),                 mouseUp,                    "v@:@");
         addMethod (@selector (scrollWheel:),                  scrollWheel,                "v@:@");
         addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse,          "v@:@");
         addMethod (@selector (frameChanged:),                 frameChanged,               "v@:@");
@@ -1352,7 +1355,7 @@ private:
 
     static void mouseUp (id self, SEL s, NSEvent* ev)
     {
-        if (! JUCEApplication::isStandaloneApp())
+        if (JUCEApplication::isStandaloneApp())
             asyncMouseUp (self, s, ev);
         else
             // In some host situations, the host will stop modal loops from working
@@ -1363,20 +1366,13 @@ private:
                                 waitUntilDone: NO];
     }
 
-    static void asyncMouseDown (id self, SEL, NSEvent* ev)  { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseDown  (ev); }
-    static void asyncMouseUp   (id self, SEL, NSEvent* ev)  { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseUp    (ev); }
-    static void mouseDragged   (id self, SEL, NSEvent* ev)  { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseDrag  (ev); }
-    static void mouseMoved     (id self, SEL, NSEvent* ev)  { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseMove  (ev); }
-    static void mouseEntered   (id self, SEL, NSEvent* ev)  { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseEnter (ev); }
-    static void mouseExited    (id self, SEL, NSEvent* ev)  { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseExit  (ev); }
-    static void scrollWheel    (id self, SEL, NSEvent* ev)  { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseWheel (ev); }
-
-    static void rightMouseDown    (id self, SEL s, NSEvent* ev)   { mouseDown    (self, s, ev); }
-    static void otherMouseDown    (id self, SEL s, NSEvent* ev)   { mouseDown    (self, s, ev); }
-    static void rightMouseDragged (id self, SEL s, NSEvent* ev)   { mouseDragged (self, s, ev); }
-    static void otherMouseDragged (id self, SEL s, NSEvent* ev)   { mouseDragged (self, s, ev); }
-    static void rightMouseUp      (id self, SEL s, NSEvent* ev)   { mouseUp      (self, s, ev); }
-    static void otherMouseUp      (id self, SEL s, NSEvent* ev)   { mouseUp      (self, s, ev); }
+    static void asyncMouseDown (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseDown  (ev); }
+    static void asyncMouseUp   (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseUp    (ev); }
+    static void mouseDragged   (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseDrag  (ev); }
+    static void mouseMoved     (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseMove  (ev); }
+    static void mouseEntered   (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseEnter (ev); }
+    static void mouseExited    (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseExit  (ev); }
+    static void scrollWheel    (id self, SEL, NSEvent* ev)   { if (NSViewComponentPeer* const p = getOwner (self)) p->redirectMouseWheel (ev); }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)        { return YES; }
 
