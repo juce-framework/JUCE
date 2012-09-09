@@ -2018,16 +2018,9 @@ void Component::setComponentEffect (ImageEffectFilter* const newEffect)
 //==============================================================================
 LookAndFeel& Component::getLookAndFeel() const noexcept
 {
-    const Component* c = this;
-
-    do
-    {
+    for (const Component* c = this; c != nullptr; c = c->parentComponent)
         if (c->lookAndFeel != nullptr)
             return *(c->lookAndFeel);
-
-        c = c->parentComponent;
-    }
-    while (c != nullptr);
 
     return LookAndFeel::getDefaultLookAndFeel();
 }

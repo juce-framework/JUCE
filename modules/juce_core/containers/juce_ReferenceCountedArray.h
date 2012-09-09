@@ -156,7 +156,7 @@ public:
         whether the index is in-range.
 
         This is a faster and less safe version of operator[] which doesn't check the index passed in, so
-        it can be used when you're sure the index if always going to be legal.
+        it can be used when you're sure the index is always going to be legal.
     */
     inline ObjectClassPtr getUnchecked (const int index) const noexcept
     {

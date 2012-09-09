@@ -127,7 +127,7 @@ public:
         If this ScopedPointer already points to an object, that object
         will first be deleted.
 
-        The pointer that you pass is may be null.
+        The pointer that you pass in may be a nullptr.
     */
     ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
     {
