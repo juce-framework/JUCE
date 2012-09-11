@@ -311,7 +311,6 @@ public:
         for (int i = 0; i < numDocs; ++i)
         {
             OpenDocumentManager::Document* doc = getApp().openDocumentManager.getOpenDocument(i);
-
             menu.addItem (activeDocumentsBaseID + i, doc->getName());
         }
 

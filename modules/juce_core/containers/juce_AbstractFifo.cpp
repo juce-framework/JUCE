@@ -165,11 +165,10 @@ public:
                 jassert (size1 == 0 || (start1 >= 0 && start1 < fifo.getTotalSize()));
                 jassert (size2 == 0 || (start2 >= 0 && start2 < fifo.getTotalSize()));
 
-                int i;
-                for (i = 0; i < size1; ++i)
+                for (int i = 0; i < size1; ++i)
                     buffer [start1 + i] = n++;
 
-                for (i = 0; i < size2; ++i)
+                for (int i = 0; i < size2; ++i)
                     buffer [start2 + i] = n++;
 
                 fifo.finishedWrite (size1 + size2);

@@ -865,8 +865,7 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     Rectangle<int> imageArea;
     const int firstRow = getRowContainingPosition (0, 0);
 
-    int i;
-    for (i = getNumRowsOnScreen() + 2; --i >= 0;)
+    for (int i = getNumRowsOnScreen() + 2; --i >= 0;)
     {
         Component* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i);
 
@@ -883,7 +882,7 @@ Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     imageY = imageArea.getY();
     Image snapshot (Image::ARGB, imageArea.getWidth(), imageArea.getHeight(), true);
 
-    for (i = getNumRowsOnScreen() + 2; --i >= 0;)
+    for (int i = getNumRowsOnScreen() + 2; --i >= 0;)
     {
         Component* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i);
 

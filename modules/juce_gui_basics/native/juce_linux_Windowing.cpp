@@ -1806,7 +1806,7 @@ private:
                 }
 
                 {
-                    ScopedPointer<LowLevelGraphicsContext> context (peer->component.getLookAndFeel()
+                    ScopedPointer<LowLevelGraphicsContext> context (peer->getComponent().getLookAndFeel()
                                                                       .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
                     peer->handlePaint (*context);
                 }

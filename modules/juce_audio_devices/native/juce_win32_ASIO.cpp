@@ -464,8 +464,7 @@ public:
         bool isSourceSet = false;
 
         // careful not to remove this loop because it does more than just logging!
-        int i;
-        for (i = 0; i < numSources; ++i)
+        for (int i = 0; i < numSources; ++i)
         {
             String s ("clock: ");
             s += clocks[i].name;
@@ -561,8 +560,7 @@ public:
             numActiveOutputChans = 0;
 
             ASIOBufferInfo* info = bufferInfos;
-            int i;
-            for (i = 0; i < totalNumInputChans; ++i)
+            for (int i = 0; i < totalNumInputChans; ++i)
             {
                 if (inputChannels[i])
                 {
@@ -575,7 +573,7 @@ public:
                 }
             }
 
-            for (i = 0; i < totalNumOutputChans; ++i)
+            for (int i = 0; i < totalNumOutputChans; ++i)
             {
                 if (outputChannels[i])
                 {
@@ -623,7 +621,7 @@ public:
                 Array <int> types;
                 currentBitDepth = 16;
 
-                for (i = 0; i < jmin ((int) totalNumInputChans, (int) maxASIOChannels); ++i)
+                for (int i = 0; i < jmin ((int) totalNumInputChans, (int) maxASIOChannels); ++i)
                 {
                     if (inputChannels[i])
                     {
@@ -645,7 +643,7 @@ public:
                 jassert (numActiveInputChans == n);
                 n = 0;
 
-                for (i = 0; i < jmin ((int) totalNumOutputChans, (int) maxASIOChannels); ++i)
+                for (int i = 0; i < jmin ((int) totalNumOutputChans, (int) maxASIOChannels); ++i)
                 {
                     if (outputChannels[i])
                     {
@@ -666,14 +664,14 @@ public:
 
                 jassert (numActiveOutputChans == n);
 
-                for (i = types.size(); --i >= 0;)
+                for (int i = types.size(); --i >= 0;)
                 {
                     log ("channel format: " + String (types[i]));
                 }
 
                 jassert (n <= totalBuffers);
 
-                for (i = 0; i < numActiveOutputChans; ++i)
+                for (int i = 0; i < numActiveOutputChans; ++i)
                 {
                     outputFormat[i].clear (bufferInfos [numActiveInputChans + i].buffers[0], currentBlockSizeSamples);
                     outputFormat[i].clear (bufferInfos [numActiveInputChans + i].buffers[1], currentBlockSizeSamples);
@@ -1300,8 +1298,7 @@ private:
 
             if (currentCallback != nullptr)
             {
-                int i;
-                for (i = 0; i < numActiveInputChans; ++i)
+                for (int i = 0; i < numActiveInputChans; ++i)
                 {
                     jassert (inBuffers[i]!= nullptr);
                     inputFormat[i].convertToFloat (infos[i].buffers[bi], inBuffers[i], samps);
@@ -1310,7 +1307,7 @@ private:
                 currentCallback->audioDeviceIOCallback ((const float**) inBuffers, numActiveInputChans,
                                                         outBuffers, numActiveOutputChans, samps);
 
-                for (i = 0; i < numActiveOutputChans; ++i)
+                for (int i = 0; i < numActiveOutputChans; ++i)
                 {
                     jassert (outBuffers[i] != nullptr);
                     outputFormat[i].convertFromFloat (outBuffers[i], infos [numActiveInputChans + i].buffers[bi], samps);

@@ -117,14 +117,13 @@ String AudioFormatManager::getWildcardForAllFormats() const
 {
     StringArray extensions;
 
-    int i;
-    for (i = 0; i < getNumKnownFormats(); ++i)
+    for (int i = 0; i < getNumKnownFormats(); ++i)
         extensions.addArray (getKnownFormat(i)->getFileExtensions());
 
     extensions.trim();
     extensions.removeEmptyStrings();
 
-    for (i = 0; i < extensions.size(); ++i)
+    for (int i = 0; i < extensions.size(); ++i)
         extensions.set (i, (extensions[i].startsWithChar ('.') ? "*" : "*.") + extensions[i]);
 
     extensions.removeDuplicates (true);

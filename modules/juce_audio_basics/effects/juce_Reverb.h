@@ -104,14 +104,13 @@ public:
         const int stereoSpread = 23;
         const int intSampleRate = (int) sampleRate;
 
-        int i;
-        for (i = 0; i < numCombs; ++i)
+        for (int i = 0; i < numCombs; ++i)
         {
             comb[0][i].setSize ((intSampleRate * combTunings[i]) / 44100);
             comb[1][i].setSize ((intSampleRate * (combTunings[i] + stereoSpread)) / 44100);
         }
 
-        for (i = 0; i < numAllPasses; ++i)
+        for (int i = 0; i < numAllPasses; ++i)
         {
             allPass[0][i].setSize ((intSampleRate * allPassTunings[i]) / 44100);
             allPass[1][i].setSize ((intSampleRate * (allPassTunings[i] + stereoSpread)) / 44100);
@@ -125,11 +124,10 @@ public:
     {
         for (int j = 0; j < numChannels; ++j)
         {
-            int i;
-            for (i = 0; i < numCombs; ++i)
+            for (int i = 0; i < numCombs; ++i)
                 comb[j][i].clear();
 
-            for (i = 0; i < numAllPasses; ++i)
+            for (int i = 0; i < numAllPasses; ++i)
                 allPass[j][i].clear();
         }
     }
@@ -148,14 +146,13 @@ public:
             const float input = (left[i] + right[i]) * gain;
             float outL = 0, outR = 0;
 
-            int j;
-            for (j = 0; j < numCombs; ++j)  // accumulate the comb filters in parallel
+            for (int j = 0; j < numCombs; ++j)  // accumulate the comb filters in parallel
             {
                 outL += comb[0][j].process (input);
                 outR += comb[1][j].process (input);
             }
 
-            for (j = 0; j < numAllPasses; ++j)  // run the allpass filters in series
+            for (int j = 0; j < numAllPasses; ++j)  // run the allpass filters in series
             {
                 outL = allPass[0][j].process (outL);
                 outR = allPass[1][j].process (outR);

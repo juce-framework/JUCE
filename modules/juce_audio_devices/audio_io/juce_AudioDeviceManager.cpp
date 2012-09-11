@@ -204,8 +204,7 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
                 StringArray outs (type->getDeviceNames (false));
 
-                int i;
-                for (i = 0; i < outs.size(); ++i)
+                for (int i = 0; i < outs.size(); ++i)
                 {
                     if (outs[i].matchesWildcard (preferredDefaultDeviceName, true))
                     {
@@ -216,7 +215,7 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
                 StringArray ins (type->getDeviceNames (true));
 
-                for (i = 0; i < ins.size(); ++i)
+                for (int i = 0; i < ins.size(); ++i)
                 {
                     if (ins[i].matchesWildcard (preferredDefaultDeviceName, true))
                     {

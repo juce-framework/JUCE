@@ -477,6 +477,7 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           dontRepaint (false),
           currentRenderingEngine (softwareRenderingEngine),
+          lastPaintTime (0),
           fullScreen (false),
           isDragging (false),
           isMouseOver (false),
@@ -805,9 +806,9 @@ public:
 
             // Must be careful not to try to put a topmost window behind a normal one, or Windows
             // promotes the normal one to be topmost!
-            if (component.isAlwaysOnTop() == otherPeer->component.isAlwaysOnTop())
+            if (component.isAlwaysOnTop() == otherPeer->getComponent().isAlwaysOnTop())
                 SetWindowPos (hwnd, otherPeer->hwnd, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
-            else if (otherPeer->component.isAlwaysOnTop())
+            else if (otherPeer->getComponent().isAlwaysOnTop())
                 SetWindowPos (hwnd, HWND_TOP,        0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
         }
     }
@@ -1071,6 +1072,7 @@ private:
    #if JUCE_DIRECT2D
     ScopedPointer<Direct2DLowLevelGraphicsContext> direct2DContext;
    #endif
+    uint32 lastPaintTime;
     bool fullScreen, isDragging, isMouseOver, hasCreatedCaret, constrainerIsResizing;
     BorderSize<int> windowBorder;
     HICON currentWindowIcon;

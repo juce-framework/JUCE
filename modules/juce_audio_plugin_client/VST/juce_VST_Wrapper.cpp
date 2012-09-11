@@ -460,15 +460,14 @@ public:
         const int numOut = numOutChans;
 
         AudioSampleBuffer temp (numIn, numSamples);
-        int i;
-        for (i = numIn; --i >= 0;)
+        for (int i = numIn; --i >= 0;)
             memcpy (temp.getSampleData (i), outputs[i], sizeof (float) * numSamples);
 
         processReplacing (inputs, outputs, numSamples);
 
         AudioSampleBuffer dest (outputs, numOut, numSamples);
 
-        for (i = jmin (numIn, numOut); --i >= 0;)
+        for (int i = jmin (numIn, numOut); --i >= 0;)
             dest.addFrom (i, 0, temp, i, 0, numSamples);
     }
 

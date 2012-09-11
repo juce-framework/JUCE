@@ -62,8 +62,7 @@ namespace CodeHelpers
         else
             s = s.replaceCharacters (".,;/@", "_____");
 
-        int i;
-        for (i = s.length(); --i > 0;)
+        for (int i = s.length(); --i > 0;)
             if (CharacterFunctions::isLetter (s[i])
                  && CharacterFunctions::isLetter (s[i - 1])
                  && CharacterFunctions::isUpperCase (s[i])
@@ -86,7 +85,7 @@ namespace CodeHelpers
         if (capitalise)
             n = n.toLowerCase();
 
-        for (i = 1; i < words.size(); ++i)
+        for (int i = 1; i < words.size(); ++i)
         {
             if (capitalise && words[i].length() > 1)
                 n << words[i].substring (0, 1).toUpperCase()

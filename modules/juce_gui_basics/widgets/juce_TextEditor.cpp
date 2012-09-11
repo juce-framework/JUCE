@@ -145,11 +145,10 @@ public:
 
             if (index == indexToBreakAt)
             {
-                int j;
-                for (j = i; j < atoms.size(); ++j)
+                for (int j = i; j < atoms.size(); ++j)
                     section2->atoms.add (getAtom (j));
 
-                for (j = atoms.size(); --j >= i;)
+                for (int j = atoms.size(); --j >= i;)
                     atoms.remove (j);
 
                 break;
@@ -168,11 +167,10 @@ public:
                 atom->width = font.getStringWidthFloat (atom->getText (passwordCharacter));
                 atom->numChars = (uint16) (indexToBreakAt - index);
 
-                int j;
-                for (j = i + 1; j < atoms.size(); ++j)
+                for (int j = i + 1; j < atoms.size(); ++j)
                     section2->atoms.add (getAtom (j));
 
-                for (j = atoms.size(); --j > i;)
+                for (int j = atoms.size(); --j > i;)
                     atoms.remove (j);
 
                 break;

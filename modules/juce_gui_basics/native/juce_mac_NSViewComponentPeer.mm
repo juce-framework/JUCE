@@ -1821,7 +1821,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
             if (peer->hasNativeTitleBar())
             {
                 [peer->window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (peer->getStyleFlags()))];
-                peer->setTitle (peer->component.getName()); // required to force the OS to update the title
+                peer->setTitle (peer->getComponent().getName()); // required to force the OS to update the title
             }
 
             [NSApp setPresentationOptions: NSApplicationPresentationDefault];
