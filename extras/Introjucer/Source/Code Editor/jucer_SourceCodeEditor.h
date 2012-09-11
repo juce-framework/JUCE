@@ -101,11 +101,22 @@ public:
                 return true;
 
             MemoryBlock mb;
-            if (file.loadFileAsData (mb)
-                 && CharPointer_UTF8::isValidString (static_cast <const char*> (mb.getData()), mb.getSize()))
+            if (file.loadFileAsData (mb) && seemsToBeText (static_cast <const char*> (mb.getData()), (int) mb.getSize()))
                 return true;
 
             return false;
+        }
+
+        static bool seemsToBeText (const char* const chars, const int num) noexcept
+        {
+            for (int i = 0; i < num; ++i)
+            {
+                const char c = chars[i];
+                if ((c < 32 && c != '\t' && c != '\r' && c != '\n') || chars[i] > 126)
+                    return false;
+            }
+
+            return true;
         }
 
         Document* openFile (Project* project, const File& file) { return new SourceCodeDocument (project, file); }

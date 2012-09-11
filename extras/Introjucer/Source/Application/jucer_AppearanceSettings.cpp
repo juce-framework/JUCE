@@ -729,8 +729,8 @@ void IntrojucerLookAndFeel::drawButtonBackground (Graphics& g,
     const bool flatOnTop    = button.isConnectedOnTop();
     const bool flatOnBottom = button.isConnectedOnBottom();
 
-    const float width  = button.getWidth();
-    const float height = button.getHeight();
+    const float width  = (float) button.getWidth();
+    const float height = (float) button.getHeight();
 
     const float x = 0.5f;
     const float y = 0.5f;
