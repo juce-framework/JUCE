@@ -29,8 +29,7 @@ class TopLevelWindowManager  : private Timer,
 {
 public:
     //==============================================================================
-    TopLevelWindowManager()
-        : currentActive (nullptr)
+    TopLevelWindowManager()  : currentActive (nullptr)
     {
     }
 
@@ -126,8 +125,8 @@ private:
 
 juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
 
-void juce_CheckCurrentlyFocusedTopLevelWindow();
-void juce_CheckCurrentlyFocusedTopLevelWindow()
+void juce_checkCurrentlyFocusedTopLevelWindow();
+void juce_checkCurrentlyFocusedTopLevelWindow()
 {
     TopLevelWindowManager* const wm = TopLevelWindowManager::getInstanceWithoutCreating();
 
@@ -136,23 +135,22 @@ void juce_CheckCurrentlyFocusedTopLevelWindow()
 }
 
 //==============================================================================
-TopLevelWindow::TopLevelWindow (const String& name,
-                                const bool addToDesktop_)
+TopLevelWindow::TopLevelWindow (const String& name, const bool shouldAddToDesktop)
     : Component (name),
       useDropShadow (true),
       useNativeTitleBar (false),
-      windowIsActive_ (false)
+      isCurrentlyActive (false)
 {
     setOpaque (true);
 
-    if (addToDesktop_)
+    if (shouldAddToDesktop)
         Component::addToDesktop (TopLevelWindow::getDesktopWindowStyleFlags());
     else
         setDropShadowEnabled (true);
 
     setWantsKeyboardFocus (true);
     setBroughtToFrontOnMouseClick (true);
-    windowIsActive_ = TopLevelWindowManager::getInstance()->addWindow (this);
+    isCurrentlyActive = TopLevelWindowManager::getInstance()->addWindow (this);
 }
 
 TopLevelWindow::~TopLevelWindow()
@@ -174,9 +172,9 @@ void TopLevelWindow::focusOfChildComponentChanged (FocusChangeType)
 
 void TopLevelWindow::setWindowActive (const bool isNowActive)
 {
-    if (windowIsActive_ != isNowActive)
+    if (isCurrentlyActive != isNowActive)
     {
-        windowIsActive_ = isNowActive;
+        isCurrentlyActive = isNowActive;
         activeWindowStatusChanged();
     }
 }
@@ -209,11 +207,8 @@ int TopLevelWindow::getDesktopWindowStyleFlags() const
 {
     int styleFlags = ComponentPeer::windowAppearsOnTaskbar;
 
-    if (useDropShadow)
-        styleFlags |= ComponentPeer::windowHasDropShadow;
-
-    if (useNativeTitleBar)
-        styleFlags |= ComponentPeer::windowHasTitleBar;
+    if (useDropShadow)       styleFlags |= ComponentPeer::windowHasDropShadow;
+    if (useNativeTitleBar)   styleFlags |= ComponentPeer::windowHasTitleBar;
 
     return styleFlags;
 }
@@ -300,17 +295,16 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
         Point<int> targetCentre (c->localPointToGlobal (c->getLocalBounds().getCentre()));
         Rectangle<int> parentArea (c->getParentMonitorArea());
 
-        if (getParentComponent() != nullptr)
+        if (Component* const parent = getParentComponent())
         {
-            targetCentre = getParentComponent()->getLocalPoint (nullptr, targetCentre);
-            parentArea = getParentComponent()->getLocalBounds();
+            targetCentre = parent->getLocalPoint (nullptr, targetCentre);
+            parentArea   = parent->getLocalBounds();
         }
 
-        parentArea.reduce (12, 12);
-
-        setBounds (jlimit (parentArea.getX(), jmax (parentArea.getX(), parentArea.getRight() - width), targetCentre.getX() - width / 2),
-                   jlimit (parentArea.getY(), jmax (parentArea.getY(), parentArea.getBottom() - height), targetCentre.getY() - height / 2),
-                   width, height);
+        setBounds (Rectangle<int> (targetCentre.x - width / 2,
+                                   targetCentre.y - height / 2,
+                                   width, height)
+                     .constrainedWithin (parentArea.reduced (12, 12)));
     }
 }
 
@@ -322,7 +316,7 @@ int TopLevelWindow::getNumTopLevelWindows() noexcept
 
 TopLevelWindow* TopLevelWindow::getTopLevelWindow (const int index) noexcept
 {
-    return static_cast <TopLevelWindow*> (TopLevelWindowManager::getInstance()->windows [index]);
+    return TopLevelWindowManager::getInstance()->windows [index];
 }
 
 TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() noexcept
@@ -338,15 +332,9 @@ TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() noexcept
         {
             int numTWLParents = 0;
 
-            const Component* c = tlw->getParentComponent();
-
-            while (c != nullptr)
-            {
+            for (const Component* c = tlw->getParentComponent(); c != nullptr; c = c->getParentComponent())
                 if (dynamic_cast <const TopLevelWindow*> (c) != nullptr)
                     ++numTWLParents;
-
-                c = c->getParentComponent();
-            }
 
             if (bestNumTWLParents < numTWLParents)
             {

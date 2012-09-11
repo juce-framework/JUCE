@@ -322,7 +322,7 @@ void Process::terminate()
     ExitProcess (0);
 }
 
-bool juce_IsRunningInWine()
+bool juce_isRunningInWine()
 {
     HMODULE ntdll = GetModuleHandleA ("ntdll");
     return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != nullptr;

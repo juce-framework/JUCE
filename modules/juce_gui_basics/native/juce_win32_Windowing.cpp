@@ -41,8 +41,8 @@
 #endif
 
 extern void juce_repeatLastProcessPriority();
-extern void juce_CheckCurrentlyFocusedTopLevelWindow();  // in juce_TopLevelWindow.cpp
-extern bool juce_IsRunningInWine();
+extern void juce_checkCurrentlyFocusedTopLevelWindow();  // in juce_TopLevelWindow.cpp
+extern bool juce_isRunningInWine();
 
 typedef bool (*CheckEventBlockedByModalComps) (const MSG&);
 extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
@@ -63,10 +63,10 @@ static UpdateLayeredWinFunc updateLayeredWindow = nullptr;
 
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
-    if (updateLayeredWindow == nullptr && ! juce_IsRunningInWine())
+    if (updateLayeredWindow == nullptr && ! juce_isRunningInWine())
         updateLayeredWindow = (UpdateLayeredWinFunc) getUser32Function ("UpdateLayeredWindow");
 
-    return updateLayeredWindow != 0;
+    return updateLayeredWindow != nullptr;
 }
 
 //==============================================================================
@@ -2310,7 +2310,7 @@ private:
                 else
                     Desktop::getInstance().setKioskModeComponent (nullptr); // turn kiosk mode off if we lose focus
 
-                juce_CheckCurrentlyFocusedTopLevelWindow();
+                juce_checkCurrentlyFocusedTopLevelWindow();
                 modifiersAtLastCallback = -1;
                 return 0;
 

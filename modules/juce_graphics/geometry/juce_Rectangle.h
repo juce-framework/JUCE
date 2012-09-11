@@ -42,7 +42,6 @@ class Rectangle
 public:
     //==============================================================================
     /** Creates a rectangle of zero size.
-
         The default co-ordinates will be (0, 0, 0, 0).
     */
     Rectangle() noexcept
@@ -583,6 +582,23 @@ public:
         }
 
         return false;
+    }
+
+    /** Tries to fit this rectangle within a target area, returning the result.
+
+        If this rectangle is not completely inside the target area, then it'll be
+        shifted (without changing its size) so that it lies within the target. If it
+        is larger than the target rectangle in either dimension, then that dimension
+        will be reduced to fit within the target.
+    */
+    Rectangle constrainedWithin (const Rectangle& areaToFitWithin) const noexcept
+    {
+        const int newW = jmin (w, areaToFitWithin.getWidth());
+        const int newH = jmin (h, areaToFitWithin.getHeight());
+
+        return Rectangle (jlimit (areaToFitWithin.getX(), areaToFitWithin.getRight()  - newW, pos.x),
+                          jlimit (areaToFitWithin.getY(), areaToFitWithin.getBottom() - newH, pos.y),
+                          newW, newH);
     }
 
     /** Returns the smallest rectangle that can contain the shape created by applying
