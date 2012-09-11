@@ -282,6 +282,11 @@ private:
             << "\t-@rm -rf $(OBJDIR)" << newLine
             << newLine;
 
+        out << "strip:" << newLine
+            << "\t@echo Stripping " << projectName << newLine
+            << "\t-@strip --strip-unneeded $(OUTDIR)/$(TARGET)" << newLine
+            << newLine;
+
         for (int i = 0; i < files.size(); ++i)
         {
             if (shouldFileBeCompiledByDefault (files.getReference(i)))
