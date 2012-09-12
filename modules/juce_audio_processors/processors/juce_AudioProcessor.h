@@ -61,8 +61,7 @@ public:
     virtual ~AudioProcessor();
 
     //==============================================================================
-    /** Returns the name of this processor.
-    */
+    /** Returns the name of this processor. */
     virtual const String getName() const = 0;
 
     //==============================================================================
@@ -143,7 +142,7 @@ public:
         object to get the details about the time of the start of the block currently
         being processed.
 
-        If the host hasn't supplied a playhead object, this will return 0.
+        If the host hasn't supplied a playhead object, this will return nullptr.
     */
     AudioPlayHead* getPlayHead() const noexcept                 { return playHead; }
 
@@ -325,7 +324,7 @@ public:
     //==============================================================================
     /** Creates the filter's UI.
 
-        This can return 0 if you want a UI-less filter, in which case the host may create
+        This can return nullptr if you want a UI-less filter, in which case the host may create
         a generic UI that lets the user twiddle the parameters directly.
 
         If you do want to pass back a component, the component should be created and set to
@@ -359,13 +358,11 @@ public:
 
     //==============================================================================
     /** Returns the active editor, if there is one.
-
         Bear in mind this can return nullptr, even if an editor has previously been opened.
     */
     AudioProcessorEditor* getActiveEditor() const noexcept             { return activeEditor; }
 
     /** Returns the active editor, or if there isn't one, it will create one.
-
         This may call createEditor() internally to create the component.
     */
     AudioProcessorEditor* createEditorIfNeeded();
@@ -405,8 +402,7 @@ public:
 
         The value passed will be between 0 and 1.0.
     */
-    virtual void setParameter (int parameterIndex,
-                               float newValue) = 0;
+    virtual void setParameter (int parameterIndex, float newValue) = 0;
 
     /** Your filter can call this when it needs to change one of its parameters.
 
@@ -418,8 +414,7 @@ public:
         the beginParameterChangeGesture() and endParameterChangeGesture() methods to
         tell the host when the user has started and stopped changing the parameter.
     */
-    void setParameterNotifyingHost (int parameterIndex,
-                                    float newValue);
+    void setParameterNotifyingHost (int parameterIndex, float newValue);
 
     /** Returns true if the host can automate this parameter.
 
@@ -472,19 +467,16 @@ public:
     */
     virtual int getNumPrograms() = 0;
 
-    /** Returns the number of the currently active program.
-    */
+    /** Returns the number of the currently active program. */
     virtual int getCurrentProgram() = 0;
 
-    /** Called by the host to change the current program.
-    */
+    /** Called by the host to change the current program. */
     virtual void setCurrentProgram (int index) = 0;
 
     /** Must return the name of a given program. */
     virtual const String getProgramName (int index) = 0;
 
-    /** Called by the host to rename a program.
-    */
+    /** Called by the host to rename a program. */
     virtual void changeProgramName (int index, const String& newName) = 0;
 
     //==============================================================================
@@ -538,6 +530,8 @@ public:
     */
     virtual void setCurrentProgramStateInformation (const void* data, int sizeInBytes);
 
+    /** This method is called when the number of input or output channels is changed. */
+    virtual void numChannelsChanged();
 
     //==============================================================================
     /** Adds a listener that will be called when an aspect of this processor changes. */
@@ -578,7 +572,7 @@ protected:
 
     /** Retrieves an XML element that was stored as binary with the copyXmlToBinary() method.
 
-        This might return 0 if the data's unsuitable or corrupted. Otherwise it will return
+        This might return nullptr if the data's unsuitable or corrupted. Otherwise it will return
         an XmlElement object that the caller must delete when no longer needed.
     */
     static XmlElement* getXmlFromBinary (const void* data, int sizeInBytes);
