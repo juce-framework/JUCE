@@ -131,16 +131,28 @@ void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
     getAppSettings().appearance.settings.addListener (this);
 }
 
-void SourceCodeEditor::highlightLine (int lineNum, int characterIndex)
+void SourceCodeEditor::scrollToKeepRangeOnScreen (const Range<int>& range)
 {
-    if (lineNum <= editor->getFirstLineOnScreen()
-         || lineNum >= editor->getFirstLineOnScreen() + editor->getNumLinesOnScreen() - 1)
-    {
-        editor->scrollToLine (jmax (0, jmin (lineNum - editor->getNumLinesOnScreen() / 3,
-                                             editor->getDocument().getNumLines() - editor->getNumLinesOnScreen())));
-    }
+    const int space = jmin (10, editor->getNumLinesOnScreen() / 3);
+    const CodeDocument::Position start (editor->getDocument(), range.getStart());
+    const CodeDocument::Position end   (editor->getDocument(), range.getEnd());
 
-    editor->moveCaretTo (CodeDocument::Position (editor->getDocument(), lineNum - 1, characterIndex), false);
+    editor->scrollToKeepLinesOnScreen (Range<int> (start.getLineNumber() - space, end.getLineNumber() + space));
+}
+
+void SourceCodeEditor::highlight (const Range<int>& range, bool cursorAtStart)
+{
+    scrollToKeepRangeOnScreen (range);
+
+    if (cursorAtStart)
+    {
+        editor->moveCaretTo (CodeDocument::Position (editor->getDocument(), range.getEnd()),   false);
+        editor->moveCaretTo (CodeDocument::Position (editor->getDocument(), range.getStart()), true);
+    }
+    else
+    {
+        editor->setHighlightedRegion (range);
+    }
 }
 
 void SourceCodeEditor::resized()

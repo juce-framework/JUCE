@@ -704,16 +704,20 @@ void CodeEditorComponent::scrollBy (int deltaLines)
     scrollToLine (firstLineOnScreen + deltaLines);
 }
 
+void CodeEditorComponent::scrollToKeepLinesOnScreen (const Range<int>& lines)
+{
+    if (lines.getStart() < firstLineOnScreen)
+        scrollBy (lines.getStart() - firstLineOnScreen);
+    else if (lines.getEnd() >= firstLineOnScreen + linesOnScreen)
+        scrollBy (lines.getEnd() - (firstLineOnScreen + linesOnScreen - 1));
+}
+
 void CodeEditorComponent::scrollToKeepCaretOnScreen()
 {
     if (getWidth() > 0 && getHeight() > 0)
     {
         const int caretLine = caretPos.getLineNumber();
-
-        if (caretLine < firstLineOnScreen)
-            scrollBy (caretLine - firstLineOnScreen);
-        else if (caretLine >= firstLineOnScreen + linesOnScreen)
-            scrollBy (caretLine - (firstLineOnScreen + linesOnScreen - 1));
+        scrollToKeepLinesOnScreen (Range<int> (caretLine, caretLine));
 
         const int column = indexToColumn (caretPos.getLineNumber(), caretPos.getIndexInLine());
         if (column >= xOffset + columnsOnScreen - 1)

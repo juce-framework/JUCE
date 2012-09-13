@@ -143,7 +143,8 @@ public:
     void createEditor (CodeDocument& codeDocument);
     void setEditor (CodeEditorComponent*);
 
-    void highlightLine (int lineNum, int characterIndex);
+    void scrollToKeepRangeOnScreen (const Range<int>& range);
+    void highlight (const Range<int>& range, bool cursorAtStart);
 
     ScopedPointer<CodeEditorComponent> editor;
 

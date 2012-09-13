@@ -142,6 +142,7 @@ public:
     void scrollBy (int deltaLines);
     void scrollToColumn (int newFirstColumnOnScreen);
     void scrollToKeepCaretOnScreen();
+    void scrollToKeepLinesOnScreen (const Range<int>& linesToShow);
 
     void insertTextAtCaret (const String& textToInsert);
     void insertTabAtCaret();
