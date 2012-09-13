@@ -26,7 +26,6 @@
 CaretComponent::CaretComponent (Component* const keyFocusOwner)
     : owner (keyFocusOwner)
 {
-    setAlwaysOnTop (true);
     setInterceptsMouseClicks (false, false);
 }
 

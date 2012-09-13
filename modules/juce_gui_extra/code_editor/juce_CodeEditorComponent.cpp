@@ -312,7 +312,8 @@ public:
         jassert (dynamic_cast <CodeEditorComponent*> (getParentComponent()) != nullptr);
         const CodeEditorComponent& editor = *static_cast <CodeEditorComponent*> (getParentComponent());
 
-        g.fillAll (editor.findColour (lineNumberBackgroundId));
+        g.fillAll (editor.findColour (CodeEditorComponent::backgroundColourId)
+                    .overlaidWith (editor.findColour (lineNumberBackgroundId)));
 
         const Rectangle<int> clip (g.getClipBounds());
         const int lineHeight = editor.lineHeight;
@@ -379,13 +380,13 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
     setMouseCursor (MouseCursor::IBeamCursor);
     setWantsKeyboardFocus (true);
 
+    addAndMakeVisible (caret = getLookAndFeel().createCaretComponent (this));
+
     addAndMakeVisible (&verticalScrollBar);
     verticalScrollBar.setSingleStepSize (1.0);
 
     addAndMakeVisible (&horizontalScrollBar);
     horizontalScrollBar.setSingleStepSize (1.0);
-
-    addAndMakeVisible (caret = getLookAndFeel().createCaretComponent (this));
 
     Font f (12.0f);
     f.setTypefaceName (Font::getDefaultMonospacedFontName());
@@ -446,7 +447,7 @@ void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
         gutter = nullptr;
 
         if (shouldBeShown)
-            addAndMakeVisible (gutter = new GutterComponent(), 0);
+            addAndMakeVisible (gutter = new GutterComponent());
 
         resized();
     }
