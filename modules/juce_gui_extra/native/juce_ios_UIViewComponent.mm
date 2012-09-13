@@ -52,7 +52,7 @@ public:
         {
             const Point<int> pos (topComp->getLocalPoint (&owner, Point<int>()));
 
-            [view setFrame: CGRectMake ((float) pos.getX(), (float) pos.getY(),
+            [view setFrame: CGRectMake ((float) pos.x, (float) pos.y,
                                         (float) owner.getWidth(), (float) owner.getHeight())];
         }
     }

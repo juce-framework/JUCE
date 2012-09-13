@@ -47,10 +47,15 @@ namespace
     {
         return CGRectMake ((CGFloat) r.getX(), (CGFloat) r.getY(), (CGFloat) r.getWidth(), (CGFloat) r.getHeight());
     }
+
+    template <typename PointType>
+    CGPoint convertToCGPoint (const PointType& p) noexcept
+    {
+        return CGPointMake ((CGFloat) p.x, (CGFloat) p.y);
+    }
 }
 
 extern CGImageRef juce_createCoreGraphicsImage (const Image&, const bool forAlpha, CGColorSpaceRef, const bool mustOutliveSource);
-
 extern CGContextRef juce_getImageContext (const Image&);
 
 #endif   // __JUCE_MAC_COREGRAPHICSHELPERS_JUCEHEADER__

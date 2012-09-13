@@ -217,7 +217,7 @@ void Desktop::setMousePosition (const Point<int>& newPosition)
     // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..
     CGAssociateMouseAndMouseCursorPosition (false);
-    CGWarpMouseCursorPosition (CGPointMake (newPosition.getX(), newPosition.getY()));
+    CGWarpMouseCursorPosition (convertToCGPoint (newPosition));
     CGAssociateMouseAndMouseCursorPosition (true);
 }
 

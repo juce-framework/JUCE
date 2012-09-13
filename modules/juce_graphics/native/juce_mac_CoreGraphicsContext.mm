@@ -197,7 +197,7 @@ bool CoreGraphicsContext::clipToRectangleList (const RectangleList& clipRegion)
 {
     if (clipRegion.isEmpty())
     {
-        CGContextClipToRect (context, CGRectMake (0, 0, 0, 0));
+        CGContextClipToRect (context, CGRectZero);
         lastClipRectIsValid = true;
         lastClipRect = Rectangle<int>();
         return false;
@@ -249,7 +249,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         AffineTransform t (AffineTransform::verticalFlip (sourceImage.getHeight()).followedBy (transform));
         applyTransform (t);
 
-        CGRect r = CGRectMake (0, 0, sourceImage.getWidth(), sourceImage.getHeight());
+        CGRect r = convertToCGRect (sourceImage.getBounds());
         CGContextClipToMask (context, r, image);
 
         applyTransform (t.inverted());
@@ -666,7 +666,7 @@ CGShadingRef CoreGraphicsContext::SavedState::getShading (CoreGraphicsContext& o
         numGradientLookupEntries = g.createLookupTable (fillType.transform, gradientLookupTable) - 1;
 
         CGFunctionRef function = CGFunctionCreate (this, 1, 0, 4, 0, &(owner.gradientCallbacks));
-        CGPoint p1 (CGPointMake (g.point1.x, g.point1.y));
+        CGPoint p1 (convertToCGPoint (g.point1));
 
         if (g.isRadial)
         {
@@ -677,7 +677,7 @@ CGShadingRef CoreGraphicsContext::SavedState::getShading (CoreGraphicsContext& o
         else
         {
             shading = CGShadingCreateAxial (owner.rgbColourSpace, p1,
-                                            CGPointMake (g.point2.x, g.point2.y),
+                                            convertToCGPoint (g.point2),
                                             function, true, true);
         }
 
@@ -825,7 +825,7 @@ Image juce_loadWithCoreImage (InputStream& input)
             CoreGraphicsImage* const cgImage = dynamic_cast<CoreGraphicsImage*> (image.getPixelData());
             jassert (cgImage != nullptr); // if USE_COREGRAPHICS_RENDERING is set, the CoreGraphicsImage class should have been used.
 
-            CGContextDrawImage (cgImage->context, CGRectMake (0, 0, image.getWidth(), image.getHeight()), loadedImage);
+            CGContextDrawImage (cgImage->context, convertToCGRect (image.getBounds()), loadedImage);
             CGContextFlush (cgImage->context);
 
            #if ! JUCE_IOS

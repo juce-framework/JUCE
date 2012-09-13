@@ -247,7 +247,7 @@ private:
     [super initWithFrame: frame];
     owner = owner_;
 
-    hiddenTextView = [[UITextView alloc] initWithFrame: CGRectMake (0, 0, 0, 0)];
+    hiddenTextView = [[UITextView alloc] initWithFrame: CGRectZero];
     [self addSubview: hiddenTextView];
     hiddenTextView.delegate = self;
 
@@ -415,8 +415,10 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
         if (component.isAlwaysOnTop())
             window.windowLevel = UIWindowLevelAlert;
 
-        [window addSubview: view];
         view.frame = CGRectMake (0, 0, r.size.width, r.size.height);
+
+        [window setRootViewController: controller];
+        [window addSubview: view];
 
         window.hidden = view.hidden;
     }
@@ -667,11 +669,10 @@ void UIViewComponentPeer::displayRotated()
 
 bool UIViewComponentPeer::contains (const Point<int>& position, bool trueIfInAChildWindow) const
 {
-    if (! (isPositiveAndBelow (position.getX(), component.getWidth())
-            && isPositiveAndBelow (position.getY(), component.getHeight())))
+    if (! component.getLocalBounds().contains (position))
         return false;
 
-    UIView* v = [view hitTest: CGPointMake ((CGFloat) position.getX(), (CGFloat) position.getY())
+    UIView* v = [view hitTest: convertToCGPoint (position)
                     withEvent: nil];
 
     if (trueIfInAChildWindow)
@@ -872,7 +873,7 @@ void UIViewComponentPeer::globalFocusChanged (Component*)
         Component* comp = dynamic_cast<Component*> (target);
 
         Point<int> pos (component.getLocalPoint (comp, Point<int>()));
-        view->hiddenTextView.frame = CGRectMake (pos.getX(), pos.getY(), 0, 0);
+        view->hiddenTextView.frame = CGRectMake (pos.x, pos.y, 0, 0);
 
         updateHiddenTextContent (target);
         [view->hiddenTextView becomeFirstResponder];
