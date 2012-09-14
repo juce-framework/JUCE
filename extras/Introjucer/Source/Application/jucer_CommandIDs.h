@@ -28,60 +28,63 @@
 */
 namespace CommandIDs
 {
-    static const int newProject             = 0x200010;
-    static const int open                   = 0x200020;
-    static const int closeDocument          = 0x200030;
-    static const int saveDocument           = 0x200040;
+    enum
+    {
+        newProject             = 0x200010,
+        open                   = 0x200020,
+        closeDocument          = 0x200030,
+        saveDocument           = 0x200040,
 
-    static const int closeProject           = 0x200051;
-    static const int saveProject            = 0x200060;
-    static const int openInIDE              = 0x200072;
-    static const int saveAndOpenInIDE       = 0x200073;
-    static const int updateModules          = 0x200075;
-    static const int showUTF8Tool           = 0x200076;
-    static const int showAppearanceSettings = 0x200077;
-    static const int showConfigPanel        = 0x200074;
-    static const int showFilePanel          = 0x200078;
+        closeProject           = 0x200051,
+        saveProject            = 0x200060,
+        openInIDE              = 0x200072,
+        saveAndOpenInIDE       = 0x200073,
+        updateModules          = 0x200075,
+        showUTF8Tool           = 0x200076,
+        showAppearanceSettings = 0x200077,
+        showConfigPanel        = 0x200074,
+        showFilePanel          = 0x200078,
 
-    static const int saveAll                = 0x200080;
+        saveAll                = 0x200080,
 
-    static const int closeWindow            = 0x201001;
-    static const int closeAllDocuments      = 0x201000;
-    static const int goToPreviousDoc        = 0x201002;
-    static const int goToNextDoc            = 0x201003;
-    static const int goToCounterpart        = 0x201004;
+        closeWindow            = 0x201001,
+        closeAllDocuments      = 0x201000,
+        goToPreviousDoc        = 0x201002,
+        goToNextDoc            = 0x201003,
+        goToCounterpart        = 0x201004,
 
-    static const int toFront                = 0x2020a0;
-    static const int toBack                 = 0x2030a1;
-    static const int showOrHideProperties   = 0x2030b0;
-    static const int showOrHideTree         = 0x2030b1;
-    static const int showOrHideMarkers      = 0x2030b2;
-    static const int toggleSnapping         = 0x2030b3;
+        toFront                = 0x2020a0,
+        toBack                 = 0x2030a1,
+        showOrHideProperties   = 0x2030b0,
+        showOrHideTree         = 0x2030b1,
+        showOrHideMarkers      = 0x2030b2,
+        toggleSnapping         = 0x2030b3,
 
-    static const int makeLineSegment        = 0x2030c0;
-    static const int makeCubicSegment       = 0x2030c1;
-    static const int breakSegment           = 0x2030c2;
-    static const int pointModeCorner        = 0x2030c3;
-    static const int pointModeRounded       = 0x2030c4;
-    static const int pointModeSymmetric     = 0x2030c5;
+        makeLineSegment        = 0x2030c0,
+        makeCubicSegment       = 0x2030c1,
+        breakSegment           = 0x2030c2,
+        pointModeCorner        = 0x2030c3,
+        pointModeRounded       = 0x2030c4,
+        pointModeSymmetric     = 0x2030c5,
 
-    static const int group                  = 0x202170;
-    static const int ungroup                = 0x202180;
+        group                  = 0x202170,
+        ungroup                = 0x202180,
 
-    static const int showPrefs              = 0x2020c0;
-    static const int useTabbedWindows       = 0x2020d0;
+        showPrefs              = 0x2020c0,
+        useTabbedWindows       = 0x2020d0,
 
-    static const int showGrid               = 0x2020e0;
-    static const int enableSnapToGrid       = 0x2020f0;
-    static const int zoomIn                 = 0x202130;
-    static const int zoomOut                = 0x202140;
-    static const int zoomNormal             = 0x202150;
-    static const int spaceBarDrag           = 0x202160;
-    static const int bringBackLostItems     = 0x202120;
+        showGrid               = 0x2020e0,
+        enableSnapToGrid       = 0x2020f0,
+        zoomIn                 = 0x202130,
+        zoomOut                = 0x202140,
+        zoomNormal             = 0x202150,
+        spaceBarDrag           = 0x202160,
+        bringBackLostItems     = 0x202120,
 
-    static const int newDocumentBase        = 0x322010;
-    static const int newComponentBase       = 0x302010;
-    static const int newElementBase         = 0x312010;
+        newDocumentBase        = 0x322010,
+        newComponentBase       = 0x302010,
+        newElementBase         = 0x312010
+    };
 }
 
 namespace CommandCategories
