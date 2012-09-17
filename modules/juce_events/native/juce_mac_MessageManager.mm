@@ -212,7 +212,10 @@ void MessageManager::runDispatchLoop()
         // must only be called by the message thread!
         jassert (isThisTheMessageThread());
 
-      #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
+      #if JUCE_PROJUCER_LIVE_BUILD
+        runDispatchLoopUntil (std::numeric_limits<int>::max());
+      #else
+       #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
         @try
         {
             [NSApp run];
@@ -229,15 +232,18 @@ void MessageManager::runDispatchLoop()
        #else
         [NSApp run];
        #endif
+      #endif
     }
 }
 
 void MessageManager::stopDispatchLoop()
 {
     quitMessagePosted = true;
+   #if ! JUCE_PROJUCER_LIVE_BUILD
     [NSApp stop: nil];
     [NSApp activateIgnoringOtherApps: YES]; // (if the app is inactive, it sits there and ignores the quit request until the next time it gets activated)
     [NSEvent startPeriodicEventsAfterDelay: 0 withPeriod: 0.1];
+   #endif
 }
 
 #if JUCE_MODAL_LOOPS_PERMITTED
