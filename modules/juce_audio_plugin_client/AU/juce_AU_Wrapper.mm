@@ -312,10 +312,16 @@ public:
 
     ComponentResult RestoreState (CFPropertyListRef inData)
     {
-        ComponentResult err = JuceAUBaseClass::RestoreState (inData);
+        {
+            // Remove the data entry from the state to prevent the superclass loading the parameters
+            CFMutableDictionaryRef copyWithoutData = CFDictionaryCreateMutableCopy (nullptr, 0, (CFDictionaryRef) inData);
+            CFDictionaryRemoveValue (copyWithoutData, CFSTR (kAUPresetDataKey));
+            ComponentResult err = JuceAUBaseClass::RestoreState (copyWithoutData);
+            CFRelease (copyWithoutData);
 
-        if (err != noErr)
-            return err;
+            if (err != noErr)
+                return err;
+        }
 
         if (juceFilter != nullptr)
         {
