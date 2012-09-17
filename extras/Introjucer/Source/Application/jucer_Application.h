@@ -72,6 +72,12 @@ public:
         commandManager = new ApplicationCommandManager();
         commandManager->registerAllCommandsForTarget (this);
 
+        {
+            CodeDocument doc;
+            CodeEditorComponent ed (doc, nullptr);
+            commandManager->registerAllCommandsForTarget (&ed);
+        }
+
         menuModel = new MainMenuModel();
 
         doExtraInitialisation();
@@ -262,13 +268,10 @@ public:
         menu.addCommandItem (commandManager, StandardApplicationCommandIDs::selectAll);
         menu.addCommandItem (commandManager, StandardApplicationCommandIDs::deselectAll);
         menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::toFront);
-        menu.addCommandItem (commandManager, CommandIDs::toBack);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::group);
-        menu.addCommandItem (commandManager, CommandIDs::ungroup);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::bringBackLostItems);
+        menu.addCommandItem (commandManager, CommandIDs::showFindPanel);
+        menu.addCommandItem (commandManager, CommandIDs::findSelection);
+        menu.addCommandItem (commandManager, CommandIDs::findNext);
+        menu.addCommandItem (commandManager, CommandIDs::findPrevious);
     }
 
     virtual void createViewMenu (PopupMenu& menu)
@@ -331,7 +334,6 @@ public:
 
         const CommandID ids[] = { CommandIDs::newProject,
                                   CommandIDs::open,
-                                  CommandIDs::showPrefs,
                                   CommandIDs::closeAllDocuments,
                                   CommandIDs::saveAll,
                                   CommandIDs::updateModules,
@@ -353,11 +355,6 @@ public:
         case CommandIDs::open:
             result.setInfo ("Open...", "Opens a Jucer project", CommandCategories::general, 0);
             result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
-            break;
-
-        case CommandIDs::showPrefs:
-            result.setInfo ("Preferences...", "Shows the preferences panel.", CommandCategories::general, 0);
-            result.defaultKeypresses.add (KeyPress (',', ModifierKeys::commandModifier, 0));
             break;
 
         case CommandIDs::showAppearanceSettings:
@@ -394,7 +391,6 @@ public:
         {
             case CommandIDs::newProject:                createNewProject(); break;
             case CommandIDs::open:                      askUserToOpenFile(); break;
-            case CommandIDs::showPrefs:                 showPrefsPanel(); break;
             case CommandIDs::saveAll:                   openDocumentManager.saveAll(); break;
             case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
             case CommandIDs::showUTF8Tool:              showUTF8ToolWindow (utf8Window); break;
@@ -407,11 +403,6 @@ public:
     }
 
     //==============================================================================
-    void showPrefsPanel()
-    {
-        jassertfalse;
-    }
-
     void createNewProject()
     {
         if (makeSureUserHasSelectedModuleFolder())
@@ -504,8 +495,7 @@ private:
             stopTimer();
             delete this;
 
-            JUCEApplication* app = JUCEApplication::getInstance();
-            if (app != nullptr)
+            if (JUCEApplication* app = JUCEApplication::getInstance())
                 app->systemRequestedQuit();
         }
 

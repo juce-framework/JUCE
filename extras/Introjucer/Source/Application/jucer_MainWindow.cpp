@@ -259,7 +259,7 @@ void MainWindow::showNewProjectWizard()
 //==============================================================================
 ApplicationCommandTarget* MainWindow::getNextCommandTarget()
 {
-    return 0;
+    return nullptr;
 }
 
 void MainWindow::getAllCommands (Array <CommandID>& commands)

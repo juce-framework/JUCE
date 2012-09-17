@@ -75,12 +75,8 @@ void GroupTreeViewItem::moveSelectedItemsTo (OwnedArray <Project::Item>& selecte
 void GroupTreeViewItem::checkFileStatus()
 {
     for (int i = 0; i < getNumSubItems(); ++i)
-    {
-        ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i));
-
-        if (p != nullptr)
+        if (ProjectTreeViewBase* p = dynamic_cast <ProjectTreeViewBase*> (getSubItem(i)))
             p->checkFileStatus();
-    }
 }
 
 ProjectTreeViewBase* GroupTreeViewItem::createSubItem (const Project::Item& child)
@@ -97,9 +93,7 @@ ProjectTreeViewBase* GroupTreeViewItem::createSubItem (const Project::Item& chil
 
 void GroupTreeViewItem::showDocument()
 {
-    ProjectContentComponent* pcc = getProjectContentComponent();
-
-    if (pcc != nullptr)
+    if (ProjectContentComponent* pcc = getProjectContentComponent())
         pcc->setEditorComponent (new GroupInformationComponent (item), nullptr);
 }
 
@@ -243,8 +237,7 @@ void SourceFileTreeViewItem::showPopupMenu()
 {
     PopupMenu m;
 
-    GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem());
-    if (parentGroup != nullptr)
+    if (GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem()))
     {
         parentGroup->addCreateFileMenuItems (m);
         m.addSeparator();
@@ -267,8 +260,6 @@ void SourceFileTreeViewItem::showPopupMenu()
 
 void SourceFileTreeViewItem::handlePopupMenuResult (int resultCode)
 {
-    GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem());
-
     switch (resultCode)
     {
         case 1:     getFile().startAsProcess(); break;
@@ -277,7 +268,7 @@ void SourceFileTreeViewItem::handlePopupMenuResult (int resultCode)
         case 4:     triggerAsyncRename (item); break;
 
         default:
-            if (parentGroup != nullptr)
+            if (GroupTreeViewItem* parentGroup = dynamic_cast <GroupTreeViewItem*> (getParentProjectItem()))
                 parentGroup->processCreateFileMenuItem (resultCode);
 
             break;

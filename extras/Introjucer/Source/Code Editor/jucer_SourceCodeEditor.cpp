@@ -106,9 +106,7 @@ SourceCodeEditor::~SourceCodeEditor()
 {
     getAppSettings().appearance.settings.removeListener (this);
 
-    SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument());
-
-    if (doc != nullptr)
+    if (SourceCodeDocument* doc = dynamic_cast <SourceCodeDocument*> (getDocument()))
         doc->updateLastState (*editor);
 }
 
@@ -176,6 +174,7 @@ static CPlusPlusCodeTokeniser cppTokeniser;
 CppCodeEditorComponent::CppCodeEditorComponent (const File& f, CodeDocument& codeDocument)
     : CodeEditorComponent (codeDocument, &cppTokeniser), file (f)
 {
+    setCommandManager (commandManager);
 }
 
 void CppCodeEditorComponent::handleReturnKey()

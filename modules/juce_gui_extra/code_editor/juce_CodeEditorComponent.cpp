@@ -368,6 +368,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
       selectionEnd (doc, 0, 0),
       verticalScrollBar (true),
       horizontalScrollBar (false),
+      appCommandManager (nullptr),
       codeTokeniser (tokeniser)
 {
     pimpl = new Pimpl (*this);
@@ -590,6 +591,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
 {
     caretPos = newPos;
     columnToTryToMaintain = -1;
+    bool selectionWasActive = isHighlightActive();
 
     if (highlighting)
     {
@@ -639,6 +641,9 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
     updateCaretPosition();
     scrollToKeepCaretOnScreen();
     updateScrollBars();
+
+    if (appCommandManager != nullptr && selectionWasActive != isHighlightActive())
+        appCommandManager->commandStatusChanged();
 }
 
 void CodeEditorComponent::deselectAll()
@@ -1142,6 +1147,11 @@ void CodeEditorComponent::newTransaction()
     pimpl->startTimer (600);
 }
 
+void CodeEditorComponent::setCommandManager (ApplicationCommandManager* newManager) noexcept
+{
+    appCommandManager = newManager;
+}
+
 //==============================================================================
 Range<int> CodeEditorComponent::getHighlightedRegion() const
 {
@@ -1199,22 +1209,82 @@ void CodeEditorComponent::handleEscapeKey()
 }
 
 //==============================================================================
-void CodeEditorComponent::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
+ApplicationCommandTarget* CodeEditorComponent::getNextCommandTarget()
 {
-    m.addItem (StandardApplicationCommandIDs::cut,   TRANS("Cut"));
-    m.addItem (StandardApplicationCommandIDs::copy,  TRANS("Copy"), ! getHighlightedRegion().isEmpty());
-    m.addItem (StandardApplicationCommandIDs::paste, TRANS("Paste"));
-    m.addItem (StandardApplicationCommandIDs::del,   TRANS("Delete"));
-    m.addSeparator();
-    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS("Select All"));
-    m.addSeparator();
-    m.addItem (StandardApplicationCommandIDs::undo,  TRANS("Undo"), document.getUndoManager().canUndo());
-    m.addItem (StandardApplicationCommandIDs::redo,  TRANS("Redo"), document.getUndoManager().canRedo());
+    return findFirstTargetParentComponent();
 }
 
-void CodeEditorComponent::performPopupMenuAction (const int menuItemID)
+void CodeEditorComponent::getAllCommands (Array <CommandID>& commands)
 {
-    switch (menuItemID)
+    const CommandID ids[] = { StandardApplicationCommandIDs::cut,
+                              StandardApplicationCommandIDs::copy,
+                              StandardApplicationCommandIDs::paste,
+                              StandardApplicationCommandIDs::del,
+                              StandardApplicationCommandIDs::selectAll,
+                              StandardApplicationCommandIDs::undo,
+                              StandardApplicationCommandIDs::redo };
+
+    commands.addArray (ids, numElementsInArray (ids));
+}
+
+void CodeEditorComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
+{
+    const bool anythingSelected = isHighlightActive();
+
+    switch (commandID)
+    {
+        case StandardApplicationCommandIDs::cut:
+            result.setInfo (TRANS ("Cut"), TRANS ("Copies the currently selected text to the clipboard and deletes it."), "Editing", 0);
+            result.setActive (anythingSelected);
+            result.defaultKeypresses.add (KeyPress ('x', ModifierKeys::commandModifier, 0));
+            break;
+
+        case StandardApplicationCommandIDs::copy:
+            result.setInfo (TRANS ("Copy"), TRANS ("Copies the currently selected text to the clipboard."), "Editing", 0);
+            result.setActive (anythingSelected);
+            result.defaultKeypresses.add (KeyPress ('c', ModifierKeys::commandModifier, 0));
+            break;
+
+        case StandardApplicationCommandIDs::paste:
+            result.setInfo (TRANS ("Paste"), TRANS ("Inserts text from the clipboard."), "Editing", 0);
+            result.defaultKeypresses.add (KeyPress ('v', ModifierKeys::commandModifier, 0));
+            break;
+
+        case StandardApplicationCommandIDs::del:
+            result.setInfo (TRANS ("Delete"), TRANS ("Deletes any selected text."), "Editing", 0);
+            result.setActive (anythingSelected);
+            break;
+
+        case StandardApplicationCommandIDs::selectAll:
+            result.setInfo (TRANS ("Select All"), TRANS ("Selects all the text in the editor."), "Editing", 0);
+            result.defaultKeypresses.add (KeyPress ('a', ModifierKeys::commandModifier, 0));
+            break;
+
+        case StandardApplicationCommandIDs::undo:
+            result.setInfo (TRANS ("Undo"), TRANS ("Undo"), "Editing", 0);
+            result.defaultKeypresses.add (KeyPress ('z', ModifierKeys::commandModifier, 0));
+            result.setActive (document.getUndoManager().canUndo());
+            break;
+
+        case StandardApplicationCommandIDs::redo:
+            result.setInfo (TRANS ("Redo"), TRANS ("Redo"), "Editing", 0);
+            result.defaultKeypresses.add (KeyPress ('z', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+            result.setActive (document.getUndoManager().canRedo());
+            break;
+
+        default:
+            break;
+    }
+}
+
+bool CodeEditorComponent::perform (const InvocationInfo& info)
+{
+    return performCommand (info.commandID);
+}
+
+bool CodeEditorComponent::performCommand (const int commandID)
+{
+    switch (commandID)
     {
         case StandardApplicationCommandIDs::cut:        cutToClipboard(); break;
         case StandardApplicationCommandIDs::copy:       copyToClipboard(); break;
@@ -1223,8 +1293,29 @@ void CodeEditorComponent::performPopupMenuAction (const int menuItemID)
         case StandardApplicationCommandIDs::selectAll:  selectAll(); break;
         case StandardApplicationCommandIDs::undo:       undo(); break;
         case StandardApplicationCommandIDs::redo:       redo(); break;
-        default: break;
+        default:                                        return false;
     }
+
+    return true;
+}
+
+//==============================================================================
+void CodeEditorComponent::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
+{
+    m.addItem (StandardApplicationCommandIDs::cut,   TRANS ("Cut"));
+    m.addItem (StandardApplicationCommandIDs::copy,  TRANS ("Copy"), ! getHighlightedRegion().isEmpty());
+    m.addItem (StandardApplicationCommandIDs::paste, TRANS ("Paste"));
+    m.addItem (StandardApplicationCommandIDs::del,   TRANS ("Delete"));
+    m.addSeparator();
+    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS ("Select All"));
+    m.addSeparator();
+    m.addItem (StandardApplicationCommandIDs::undo,  TRANS ("Undo"), document.getUndoManager().canUndo());
+    m.addItem (StandardApplicationCommandIDs::redo,  TRANS ("Redo"), document.getUndoManager().canRedo());
+}
+
+void CodeEditorComponent::performPopupMenuAction (const int menuItemID)
+{
+    performCommand (menuItemID);
 }
 
 static void codeEditorMenuCallback (int menuResult, CodeEditorComponent* editor)

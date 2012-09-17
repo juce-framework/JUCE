@@ -27,7 +27,6 @@ ApplicationCommandManager::ApplicationCommandManager()
     : firstTarget (nullptr)
 {
     keyMappings = new KeyPressMappingSet (this);
-
     Desktop::getInstance().addFocusChangeListener (this);
 }
 
@@ -65,7 +64,7 @@ void ApplicationCommandManager::registerCommand (const ApplicationCommandInfo& n
     }
     else
     {
-        // trying to re-register the same command with different parameters?
+        // trying to re-register the same command ID with different parameters?
         jassert (newCommand.shortName == getCommandForID (newCommand.commandID)->shortName
                   && (newCommand.description == getCommandForID (newCommand.commandID)->description || newCommand.description.isEmpty())
                   && newCommand.categoryName == getCommandForID (newCommand.commandID)->categoryName
@@ -169,26 +168,24 @@ bool ApplicationCommandManager::invokeDirectly (const CommandID commandID, const
     return invoke (info, asynchronously);
 }
 
-bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::InvocationInfo& info_, const bool asynchronously)
+bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::InvocationInfo& inf, const bool asynchronously)
 {
     // This call isn't thread-safe for use from a non-UI thread without locking the message
     // manager first..
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
+    bool ok = false;
     ApplicationCommandInfo commandInfo (0);
-    ApplicationCommandTarget* const target = getTargetForCommand (info_.commandID, commandInfo);
 
-    if (target == nullptr)
-        return false;
+    if (ApplicationCommandTarget* const target = getTargetForCommand (inf.commandID, commandInfo))
+    {
+        ApplicationCommandTarget::InvocationInfo info (inf);
+        info.commandFlags = commandInfo.flags;
 
-    ApplicationCommandTarget::InvocationInfo info (info_);
-    info.commandFlags = commandInfo.flags;
-
-    sendListenerInvokeCallback (info);
-
-    const bool ok = target->invoke (info, asynchronously);
-
-    commandStatusChanged();
+        sendListenerInvokeCallback (info);
+        ok = target->invoke (info, asynchronously);
+        commandStatusChanged();
+    }
 
     return ok;
 }
@@ -239,9 +236,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 
     if (c == nullptr)
     {
-        TopLevelWindow* const activeWindow = TopLevelWindow::getActiveTopLevelWindow();
-
-        if (activeWindow != nullptr)
+        if (TopLevelWindow* const activeWindow = TopLevelWindow::getActiveTopLevelWindow())
         {
             c = activeWindow->getPeer()->getLastFocusedSubcomponent();
 
@@ -252,16 +247,11 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 
     if (c == nullptr && Process::isForegroundProcess())
     {
-        // getting a bit desperate now - try all desktop comps..
+        // getting a bit desperate now: try all desktop comps..
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
-        {
-            ApplicationCommandTarget* const target
-                = findTargetForComponent (Desktop::getInstance().getComponent (i)
-                                              ->getPeer()->getLastFocusedSubcomponent());
-
-            if (target != nullptr)
+            if (ApplicationCommandTarget* const target = findTargetForComponent (Desktop::getInstance().getComponent (i)
+                                                                                    ->getPeer()->getLastFocusedSubcomponent()))
                 return target;
-        }
     }
 
     if (c != nullptr)
@@ -275,9 +265,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         if (resizableWindow != nullptr && resizableWindow->getContentComponent() != nullptr)
             c = resizableWindow->getContentComponent();
 
-        ApplicationCommandTarget* const target = findTargetForComponent (c);
-
-        if (target != nullptr)
+        if (ApplicationCommandTarget* const target = findTargetForComponent (c))
             return target;
     }
 
