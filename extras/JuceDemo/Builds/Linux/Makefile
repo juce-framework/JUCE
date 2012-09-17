@@ -96,6 +96,10 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
+strip:
+	@echo Stripping Juce Demo
+	-@strip --strip-unneeded $(OUTDIR)/$(TARGET)
+
 $(OBJDIR)/ApplicationStartup_3bf86e16.o: ../../Source/ApplicationStartup.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling ApplicationStartup.cpp"

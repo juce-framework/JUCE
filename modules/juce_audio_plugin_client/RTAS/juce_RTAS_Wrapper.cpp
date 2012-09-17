@@ -941,7 +941,10 @@ public:
             type->DefineStemFormats (getFormatForChans (channelConfigs [i][0] != 0 ? channelConfigs [i][0] : channelConfigs [i][1]),
                                      getFormatForChans (channelConfigs [i][1] != 0 ? channelConfigs [i][1] : channelConfigs [i][0]));
 
+           #if ! JucePlugin_RTASDisableBypass
             type->AddGestalt (pluginGestalt_CanBypass);
+           #endif
+
             type->AddGestalt (pluginGestalt_SupportsVariableQuanta);
             type->AttachEffectProcessCreator (createNewProcess);
 

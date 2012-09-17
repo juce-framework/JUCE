@@ -97,6 +97,10 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
+strip:
+	@echo Stripping Jucer
+	-@strip --strip-unneeded $(OUTDIR)/$(TARGET)
+
 $(OBJDIR)/jucer_ComponentTypeHandler_354f298a.o: ../../src/model/components/jucer_ComponentTypeHandler.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_ComponentTypeHandler.cpp"

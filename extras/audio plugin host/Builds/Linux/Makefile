@@ -78,6 +78,10 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
+strip:
+	@echo Stripping Plugin Host
+	-@strip --strip-unneeded $(OUTDIR)/$(TARGET)
+
 $(OBJDIR)/FilterGraph_62e9c017.o: ../../Source/FilterGraph.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling FilterGraph.cpp"
