@@ -161,9 +161,7 @@ namespace AudioUnitFormatHelpers
                 desc.componentSubType = stringToOSType (tokens[1]);
                 desc.componentManufacturer = stringToOSType (tokens[2]);
 
-                ComponentRecord* comp = FindNextComponent (0, &desc);
-
-                if (comp != nullptr)
+                if (ComponentRecord* comp = FindNextComponent (0, &desc))
                 {
                     getAUDetails (comp, name, manufacturer);
                     return true;
@@ -295,9 +293,7 @@ public:
 
             if (getComponentDescFromFile (fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
             {
-                ComponentRecord* const comp = FindNextComponent (0, &componentDesc);
-
-                if (comp != nullptr)
+                if (ComponentRecord* const comp = FindNextComponent (0, &componentDesc))
                 {
                     audioUnit = (AudioUnit) OpenComponent (comp);
 
@@ -604,7 +600,7 @@ public:
 
     const String getParameterName (int index)
     {
-        AudioUnitParameterInfo info = { 0 };
+        AudioUnitParameterInfo info;
         UInt32 sz = sizeof (info);
         String name;
 
@@ -1394,9 +1390,8 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
     try
     {
         ScopedPointer <AudioPluginInstance> createdInstance (createInstanceFromDescription (desc));
-        AudioUnitPluginInstance* const auInstance = dynamic_cast <AudioUnitPluginInstance*> ((AudioPluginInstance*) createdInstance);
 
-        if (auInstance != nullptr)
+        if (AudioUnitPluginInstance* const auInstance = dynamic_cast <AudioUnitPluginInstance*> ((AudioPluginInstance*) createdInstance))
         {
             auInstance->fillInPluginDescription (desc);
             results.add (new PluginDescription (desc));
