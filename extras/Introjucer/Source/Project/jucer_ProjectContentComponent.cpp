@@ -636,7 +636,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the project and launches it in an external IDE",
                         CommandCategories::general, 0);
         result.setActive (ProjectExporter::canProjectBeLaunched (project));
-        result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::showFilePanel:

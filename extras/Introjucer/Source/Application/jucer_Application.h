@@ -74,7 +74,7 @@ public:
 
         {
             CodeDocument doc;
-            CodeEditorComponent ed (doc, nullptr);
+            CppCodeEditorComponent ed (File::nonexistent, doc);
             commandManager->registerAllCommandsForTarget (&ed);
         }
 

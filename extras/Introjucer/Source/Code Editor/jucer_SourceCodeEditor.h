@@ -169,15 +169,36 @@ class CppCodeEditorComponent  : public CodeEditorComponent
 {
 public:
     CppCodeEditorComponent (const File& file, CodeDocument& codeDocument);
+    ~CppCodeEditorComponent();
 
     void handleReturnKey();
+    void handleEscapeKey();
     void insertTextAtCaret (const String& newText);
 
     void addPopupMenuItems (PopupMenu&, const MouseEvent*);
     void performPopupMenuAction (int menuItemID);
 
+    void getAllCommands (Array<CommandID>&);
+    void getCommandInfo (CommandID, ApplicationCommandInfo&);
+    bool perform (const InvocationInfo&);
+
+    void showFindPanel();
+    void hideFindPanel();
+    void findSelection();
+    void findNext (bool forwards, bool skipCurrentSelection);
+
+    void resized();
+
+    static String getSearchString()                 { return getAppSettings().getGlobalProperties().getValue ("searchString"); }
+    static void setSearchString (const String& s)   { getAppSettings().getGlobalProperties().setValue ("searchString", s); }
+    static bool isCaseSensitiveSearch()             { return getAppSettings().getGlobalProperties().getBoolValue ("searchCaseSensitive"); }
+    static void setCaseSensitiveSearch (bool b)     { getAppSettings().getGlobalProperties().setValue ("searchCaseSensitive", b); }
+
 private:
     File file;
+    class FindPanel;
+    ScopedPointer<FindPanel> findPanel;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppCodeEditorComponent);
 };
 
