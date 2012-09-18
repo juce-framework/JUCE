@@ -32,15 +32,11 @@
 
 static void createFileCreationOptionComboBox (Component& setupComp,
                                               OwnedArray<Component>& itemsCreated,
-                                              const char** types)
+                                              const char** fileOptions)
 {
     ComboBox* c = new ComboBox();
     itemsCreated.add (c);
     setupComp.addChildAndSetID (c, "filesToCreate");
-
-    const char* fileOptions[] = { "Create a Main.cpp file",
-                                  "Create a Main.cpp file and a basic window",
-                                  "Don't create any files", 0 };
 
     c->addItemList (StringArray (fileOptions), 1);
     c->setSelectedId (1, false);
