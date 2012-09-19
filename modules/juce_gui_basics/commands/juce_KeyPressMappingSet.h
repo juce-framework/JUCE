@@ -103,7 +103,7 @@ public:
 
         @see ApplicationCommandManager
     */
-    explicit KeyPressMappingSet (ApplicationCommandManager* commandManager);
+    explicit KeyPressMappingSet (ApplicationCommandManager& commandManager);
 
     /** Creates an copy of a KeyPressMappingSet. */
     KeyPressMappingSet (const KeyPressMappingSet& other);
@@ -112,7 +112,7 @@ public:
     ~KeyPressMappingSet();
 
     //==============================================================================
-    ApplicationCommandManager* getCommandManager() const noexcept       { return commandManager; }
+    ApplicationCommandManager& getCommandManager() const noexcept       { return commandManager; }
 
     //==============================================================================
     /** Returns a list of keypresses that are assigned to a particular command.
@@ -172,7 +172,6 @@ public:
 
     //==============================================================================
     /** Looks for a command that corresponds to a keypress.
-
         @returns the UID of the command or 0 if none was found
     */
     CommandID findCommandForKeyPress (const KeyPress& keyPress) const noexcept;
@@ -216,15 +215,15 @@ public:
 
     //==============================================================================
     /** @internal */
-    bool keyPressed (const KeyPress& key, Component* originatingComponent);
+    bool keyPressed (const KeyPress&, Component* originatingComponent);
     /** @internal */
     bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
     /** @internal */
-    void globalFocusChanged (Component* focusedComponent);
+    void globalFocusChanged (Component*);
 
 private:
     //==============================================================================
-    ApplicationCommandManager* commandManager;
+    ApplicationCommandManager& commandManager;
 
     struct CommandMapping
     {
@@ -243,13 +242,9 @@ private:
 
     OwnedArray <KeyPressTime> keysDown;
 
-    void handleMessage (const Message& message);
-
-    void invokeCommand (const CommandID commandID,
-                        const KeyPress& keyPress,
-                        const bool isKeyDown,
-                        const int millisecsSinceKeyPressed,
-                        Component* const originatingComponent) const;
+    void handleMessage (const Message&);
+    void invokeCommand (const CommandID, const KeyPress&, const bool isKeyDown,
+                        const int millisecsSinceKeyPressed, Component* originator) const;
 
     KeyPressMappingSet& operator= (const KeyPressMappingSet&);
     JUCE_LEAK_DETECTOR (KeyPressMappingSet);

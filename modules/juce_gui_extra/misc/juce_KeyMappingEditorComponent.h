@@ -63,6 +63,9 @@ public:
     /** Returns the KeyPressMappingSet that this component is acting upon. */
     KeyPressMappingSet& getMappings() const noexcept                { return mappings; }
 
+    /** Returns the ApplicationCommandManager that this component is connected to. */
+    ApplicationCommandManager& getCommandManager() const noexcept   { return mappings.getCommandManager(); }
+
 
     //==============================================================================
     /** Can be overridden if some commands need to be excluded from the list.

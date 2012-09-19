@@ -26,7 +26,7 @@
 ApplicationCommandManager::ApplicationCommandManager()
     : firstTarget (nullptr)
 {
-    keyMappings = new KeyPressMappingSet (this);
+    keyMappings = new KeyPressMappingSet (*this);
     Desktop::getInstance().addFocusChangeListener (this);
 }
 
@@ -256,14 +256,13 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 
     if (c != nullptr)
     {
-        ResizableWindow* const resizableWindow = dynamic_cast <ResizableWindow*> (c);
-
         // if we're focused on a ResizableWindow, chances are that it's the content
         // component that really should get the event. And if not, the event will
         // still be passed up to the top level window anyway, so let's send it to the
         // content comp.
-        if (resizableWindow != nullptr && resizableWindow->getContentComponent() != nullptr)
-            c = resizableWindow->getContentComponent();
+        if (ResizableWindow* const resizableWindow = dynamic_cast <ResizableWindow*> (c))
+            if (resizableWindow->getContentComponent() != nullptr)
+                c = resizableWindow->getContentComponent();
 
         if (ApplicationCommandTarget* const target = findTargetForComponent (c))
             return target;
