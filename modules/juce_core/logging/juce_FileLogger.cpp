@@ -23,19 +23,16 @@
   ==============================================================================
 */
 
-FileLogger::FileLogger (const File& logFile_,
+FileLogger::FileLogger (const File& file,
                         const String& welcomeMessage,
-                        const int maxInitialFileSizeBytes)
-    : logFile (logFile_)
+                        const int64 maxInitialFileSizeBytes)
+    : logFile (file)
 {
     if (maxInitialFileSizeBytes >= 0)
         trimFileSize (maxInitialFileSizeBytes);
 
-    if (! logFile_.exists())
-    {
-        // do this so that the parent directories get created..
-        logFile_.create();
-    }
+    if (! file.exists())
+        file.create();  // (to create the parent directories)
 
     String welcome;
     welcome << newLine
@@ -46,23 +43,18 @@ FileLogger::FileLogger (const File& logFile_,
     FileLogger::logMessage (welcome);
 }
 
-FileLogger::~FileLogger()
-{
-}
+FileLogger::~FileLogger() {}
 
 //==============================================================================
 void FileLogger::logMessage (const String& message)
 {
-    DBG (message);
-
     const ScopedLock sl (logLock);
-
+    DBG (message);
     FileOutputStream out (logFile, 256);
     out << message << newLine;
 }
 
-
-void FileLogger::trimFileSize (int maxFileSizeBytes) const
+void FileLogger::trimFileSize (int64 maxFileSizeBytes) const
 {
     if (maxFileSizeBytes <= 0)
     {
@@ -74,59 +66,66 @@ void FileLogger::trimFileSize (int maxFileSizeBytes) const
 
         if (fileSize > maxFileSizeBytes)
         {
-            ScopedPointer <FileInputStream> in (logFile.createInputStream());
-            jassert (in != nullptr);
+            TemporaryFile tempFile (logFile);
 
-            if (in != nullptr)
             {
-                in->setPosition (fileSize - maxFileSizeBytes);
-                String content;
+                FileOutputStream out (tempFile.getFile());
+                FileInputStream in (logFile);
 
+                if (! (out.openedOk() && in.openedOk()))
+                    return;
+
+                in.setPosition (fileSize - maxFileSizeBytes);
+
+                for (;;)
                 {
-                    MemoryBlock contentToSave;
-                    contentToSave.setSize ((size_t) maxFileSizeBytes + 4);
-                    contentToSave.fillWith (0);
+                    const char c = in.readByte();
+                    if (c == 0)
+                        return;
 
-                    in->read (contentToSave.getData(), maxFileSizeBytes);
-                    in = nullptr;
-
-                    content = contentToSave.toString();
+                    if (c == '\n' || c == '\r')
+                    {
+                        out << c;
+                        break;
+                    }
                 }
 
-                int newStart = 0;
-
-                while (newStart < fileSize
-                        && content[newStart] != '\n'
-                        && content[newStart] != '\r')
-                    ++newStart;
-
-                logFile.deleteFile();
-                logFile.appendText (content.substring (newStart), false, false);
+                out.writeFromInputStream (in, -1);
             }
+
+            tempFile.overwriteTargetFileWithTemporary();
         }
     }
 }
 
 //==============================================================================
+File FileLogger::getSystemLogFileFolder()
+{
+   #if JUCE_MAC
+    return File ("~/Library/Logs");
+   #else
+    return File::getSpecialLocation (File::userApplicationDataDirectory);
+   #endif
+}
+
 FileLogger* FileLogger::createDefaultAppLogger (const String& logFileSubDirectoryName,
                                                 const String& logFileName,
                                                 const String& welcomeMessage,
-                                                const int maxInitialFileSizeBytes)
+                                                const int64 maxInitialFileSizeBytes)
 {
-   #if JUCE_MAC
-    File logFile ("~/Library/Logs");
-    logFile = logFile.getChildFile (logFileSubDirectoryName)
-                     .getChildFile (logFileName);
+    return new FileLogger (getSystemLogFileFolder().getChildFile (logFileSubDirectoryName)
+                                                   .getChildFile (logFileName),
+                           welcomeMessage, maxInitialFileSizeBytes);
+}
 
-   #else
-    File logFile (File::getSpecialLocation (File::userApplicationDataDirectory));
-
-    if (logFile.isDirectory())
-    {
-        logFile = logFile.getChildFile (logFileSubDirectoryName)
-                         .getChildFile (logFileName);
-    }
-   #endif
-
-    return new FileLogger (logFile, welcomeMessage, maxInitialFileSizeBytes);
+FileLogger* FileLogger::createDateStampedLogger (const String& logFileSubDirectoryName,
+                                                 const String& logFileNameRoot,
+                                                 const String& logFileNameSuffix,
+                                                 const String& welcomeMessage)
+{
+    return new FileLogger (getSystemLogFileFolder().getChildFile (logFileSubDirectoryName)
+                                                   .getChildFile (logFileNameRoot + Time::getCurrentTime().formatted ("%Y-%m-%d_%H-%M-%S"))
+                                                   .withFileExtension (logFileNameSuffix)
+                                                   .getNonexistentSibling(),
+                           welcomeMessage, 0);
 }

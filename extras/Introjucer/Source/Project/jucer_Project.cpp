@@ -47,14 +47,15 @@ namespace Tags
 const char* Project::projectFileExtension = ".jucer";
 
 //==============================================================================
-Project::Project (const File& file_)
+Project::Project (const File& f)
     : FileBasedDocument (projectFileExtension,
                          String ("*") + projectFileExtension,
                          "Choose a Jucer project to load",
                          "Save Jucer project"),
       projectRoot (Tags::projectRoot)
 {
-    setFile (file_);
+    Logger::writeToLog ("Loading project: " + f.getFullPathName());
+    setFile (f);
     removeDefunctExporters();
     setMissingDefaultValues();
 

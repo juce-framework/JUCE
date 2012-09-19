@@ -90,22 +90,13 @@ public:
             project.createRequiredModules (moduleList, modules);
         }
 
-        if (errors.size() == 0)
-            writeAppConfigFile (modules, appConfigUserContent);
+        if (errors.size() == 0)  writeAppConfigFile (modules, appConfigUserContent);
+        if (errors.size() == 0)  writeBinaryDataFiles();
+        if (errors.size() == 0)  writeAppHeader (modules);
+        if (errors.size() == 0)  writeProjects (modules);
+        if (errors.size() == 0)  writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
 
-        if (errors.size() == 0)
-            writeBinaryDataFiles();
-
-        if (errors.size() == 0)
-            writeAppHeader (modules);
-
-        if (errors.size() == 0)
-            writeProjects (modules);
-
-        if (errors.size() == 0)
-            writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
-
-        if (generatedCodeFolder.exists() && errors.size() == 0)
+        if (errors.size() == 0 && generatedCodeFolder.exists())
             writeReadmeFile();
 
         if (generatedCodeFolder.exists())

@@ -90,31 +90,34 @@ PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
     return *p;
 }
 
+void StoredSettings::updateGlobalProps()
+{
+    PropertiesFile& props = getGlobalProperties();
+
+    {
+        const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
+        props.setValue ("editorColours", xml);
+    }
+
+    props.setValue ("recentFiles", recentFiles.toString());
+
+    props.removeValue ("keyMappings");
+
+    if (commandManager != nullptr)
+    {
+        const ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
+
+        if (keys != nullptr)
+            props.setValue ("keyMappings", keys);
+    }
+}
+
 void StoredSettings::flush()
 {
+    updateGlobalProps();
+
     for (int i = propertyFiles.size(); --i >= 0;)
-    {
-        PropertiesFile* const props = propertyFiles.getUnchecked(i);
-
-        {
-            const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
-            props->setValue ("editorColours", xml);
-        }
-
-        props->setValue ("recentFiles", recentFiles.toString());
-
-        props->removeValue ("keyMappings");
-
-        if (commandManager != nullptr)
-        {
-            ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
-
-            if (keys != nullptr)
-                props->setValue ("keyMappings", (XmlElement*) keys);
-        }
-
-        props->saveIfNeeded();
-    }
+        propertyFiles.getUnchecked(i)->saveIfNeeded();
 }
 
 void StoredSettings::reload()

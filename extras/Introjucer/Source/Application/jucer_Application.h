@@ -44,6 +44,8 @@ public:
     //==============================================================================
     void initialise (const String& commandLine)
     {
+        initialiseLogger ("log_");
+
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
         settings = new StoredSettings();
         settings->initialise();
@@ -116,6 +118,10 @@ public:
         settings = nullptr;
 
         LookAndFeel::setDefaultLookAndFeel (nullptr);
+
+        Logger::writeToLog ("Shutdown");
+
+        deleteLogger();
     }
 
     //==============================================================================
@@ -463,8 +469,57 @@ public:
     }
 
     //==============================================================================
+    void initialiseLogger (const char* filePrefix)
+    {
+        if (logger == nullptr)
+        {
+            logger = FileLogger::createDateStampedLogger (getLogFolderName(), filePrefix, ".txt",
+                                                          getApplicationName() + " " + getApplicationVersion());
+            Logger::setCurrentLogger (logger);
+        }
+    }
+
+    void deleteLogger()
+    {
+        const int maxNumLogFilesToKeep = 50;
+
+        Logger::setCurrentLogger (nullptr);
+
+        if (logger != nullptr)
+        {
+            Array<File> logFiles;
+            logger->getLogFile().getParentDirectory().findChildFiles (logFiles, File::findFiles, false);
+
+            if (logFiles.size() > maxNumLogFilesToKeep)
+            {
+                struct FileWithTime
+                {
+                    FileWithTime (const File& f) : file (f), time (f.getLastModificationTime()) {}
+                    FileWithTime() {}
+
+                    bool operator<  (const FileWithTime& other) const    { return time <  other.time; }
+                    bool operator== (const FileWithTime& other) const    { return time == other.time; }
+
+                    File file;
+                    Time time;
+                };
+
+                Array <FileWithTime> files;
+
+                for (int i = 0; i < logFiles.size(); ++i)
+                    files.addUsingDefaultSort (logFiles.getReference(i));
+
+                for (int i = 0; i < files.size() - maxNumLogFilesToKeep; ++i)
+                    files.getReference(i).file.deleteFile();
+            }
+        }
+
+        logger = nullptr;
+    }
+
     virtual void doExtraInitialisation() {}
     virtual void addExtraConfigItems (Project&, TreeViewItem&) {}
+    virtual String getLogFolderName() const    { return "com.juce.introjucer"; }
 
     virtual Component* createProjectContentComponent() const
     {
@@ -483,6 +538,8 @@ public:
     OpenDocumentManager openDocumentManager;
 
     ScopedPointer<Component> appearanceEditorWindow, utf8Window;
+
+    ScopedPointer<FileLogger> logger;
 
 private:
     class AsyncQuitRetrier  : private Timer

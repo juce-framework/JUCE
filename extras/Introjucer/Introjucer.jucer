@@ -244,7 +244,8 @@
                JUCE_ALSA="disabled" JUCE_QUICKTIME="disabled" JUCE_OPENGL="disabled"
                JUCE_USE_FLAC="disabled" JUCE_USE_CDBURNER="disabled" JUCE_USE_CDREADER="disabled"
                JUCE_USE_CAMERA="disabled" JUCE_PLUGINHOST_VST="disabled" JUCE_PLUGINHOST_AU="disabled"
-               JUCE_USE_OGGVORBIS="disabled" JUCE_USE_COREIMAGE_LOADER="disabled"/>
+               JUCE_USE_OGGVORBIS="disabled" JUCE_USE_COREIMAGE_LOADER="disabled"
+               JUCE_LOG_ASSERTIONS="enabled"/>
   <MODULES>
     <MODULE id="juce_core" showAllCode="1"/>
     <MODULE id="juce_events" showAllCode="1"/>
