@@ -1995,6 +1995,7 @@
 				EXCLUDED_SOURCE_FILE_NAMES_x86_64 = "*Carbon*.cpp";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				OTHER_LDFLAGS = "-bundle";
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
@@ -2018,6 +2019,7 @@
 				EXCLUDED_SOURCE_FILE_NAMES_x86_64 = "*Carbon*.cpp";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				OTHER_LDFLAGS = "-bundle";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2129,7 +2131,7 @@
 				E032EB514708440DE9B7FF2A,
 				95E57A758351FE57067B605F,
 				E277BCF6E051A6008DD74155 ); buildRules = ( ); dependencies = ( ); name = JuceDemoPlugin; productName = JuceDemoPlugin; productReference = 63F8022F081E22DFFFCAC998; productInstallPath = "$(HOME)/Library/Audio/Plug-Ins/Components/"; productType = "com.apple.product-type.bundle"; };
-		85250052F3E019894332668E = { isa = PBXProject; buildConfigurationList = 0720B453F376663EAB98BF9B; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4074359E1E7C4D54E87C3461; projectDirPath = ""; projectRoot = ""; targets = ( 27A65CD0B053616E226D4547 ); };
+		85250052F3E019894332668E = { isa = PBXProject; buildConfigurationList = 0720B453F376663EAB98BF9B; attributes = { LastUpgradeCheck = 0440; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4074359E1E7C4D54E87C3461; projectDirPath = ""; projectRoot = ""; targets = ( 27A65CD0B053616E226D4547 ); };
 	};
 	rootObject = 85250052F3E019894332668E;
 }

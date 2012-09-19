@@ -2014,6 +2014,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2030,6 +2031,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2132,7 +2134,7 @@
 				2E115993E9743E9E60D96434,
 				8478974C956501F4EA996448,
 				8C6D93B7CB9CCF8025AA68EB ); buildRules = ( ); dependencies = ( ); name = "Juce Demo"; productName = "Juce Demo"; productReference = D119A3871626EC2B8EFCB0D4; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		C1B2C620111BD898B338CCA1 = { isa = PBXProject; buildConfigurationList = C01737B8733CB01B27C1DF59; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 197E966E1B8F9DE1A6F9F0D4; projectDirPath = ""; projectRoot = ""; targets = ( 9A1F85020B3ADFBFE3D383F2 ); };
+		C1B2C620111BD898B338CCA1 = { isa = PBXProject; buildConfigurationList = C01737B8733CB01B27C1DF59; attributes = { LastUpgradeCheck = 0440; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 197E966E1B8F9DE1A6F9F0D4; projectDirPath = ""; projectRoot = ""; targets = ( 9A1F85020B3ADFBFE3D383F2 ); };
 	};
 	rootObject = C1B2C620111BD898B338CCA1;
 }

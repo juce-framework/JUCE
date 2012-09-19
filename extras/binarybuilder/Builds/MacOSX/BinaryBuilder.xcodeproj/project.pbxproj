@@ -440,6 +440,7 @@
 				SDKROOT_ppc = macosx10.5;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -456,6 +457,7 @@
 				SDKROOT_ppc = macosx10.5;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -509,7 +511,7 @@
 				7B52CBCC65AE087EEFB2C437,
 				77D79017A9F2C7F35DD55196,
 				FA91AF2CE863567091E8A6B0 ); buildRules = ( ); dependencies = ( ); name = BinaryBuilder; productName = BinaryBuilder; productReference = E2EADDD364B6C6F37D8BBD7A; productInstallPath = /usr/bin; productType = "com.apple.product-type.tool"; };
-		36B6F402BC83F21646259DEF = { isa = PBXProject; buildConfigurationList = E4C85B0464A93027D035AA1F; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = C18D022743CF5BD14D6A6A9E; projectDirPath = ""; projectRoot = ""; targets = ( 3F86988238803AA6377D688E ); };
+		36B6F402BC83F21646259DEF = { isa = PBXProject; buildConfigurationList = E4C85B0464A93027D035AA1F; attributes = { LastUpgradeCheck = 0440; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = C18D022743CF5BD14D6A6A9E; projectDirPath = ""; projectRoot = ""; targets = ( 3F86988238803AA6377D688E ); };
 	};
 	rootObject = 36B6F402BC83F21646259DEF;
 }

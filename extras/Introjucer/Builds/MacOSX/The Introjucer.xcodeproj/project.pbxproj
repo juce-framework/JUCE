@@ -1639,6 +1639,7 @@
 				SDKROOT_ppc = macosx10.5;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1657,6 +1658,7 @@
 				SDKROOT_ppc = macosx10.5;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1745,7 +1747,7 @@
 				C009859650B4628FDD068941,
 				84449D044096A03F2582904B,
 				B8D802107FEE6AD60F5309A3 ); buildRules = ( ); dependencies = ( ); name = "The Introjucer"; productName = "The Introjucer"; productReference = 25F52316D256B4534BED16D1; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		74EA481348A24104E6ACE009 = { isa = PBXProject; buildConfigurationList = F90407F24422C589DA251604; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3CC531922CC2D398E283A845; projectDirPath = ""; projectRoot = ""; targets = ( FE688C03195D5E72123A75BF ); };
+		74EA481348A24104E6ACE009 = { isa = PBXProject; buildConfigurationList = F90407F24422C589DA251604; attributes = { LastUpgradeCheck = 0440; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3CC531922CC2D398E283A845; projectDirPath = ""; projectRoot = ""; targets = ( FE688C03195D5E72123A75BF ); };
 	};
 	rootObject = 74EA481348A24104E6ACE009;
 }

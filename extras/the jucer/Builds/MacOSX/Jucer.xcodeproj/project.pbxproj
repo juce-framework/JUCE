@@ -1666,6 +1666,7 @@
 				SDKROOT_ppc = macosx10.5;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1682,6 +1683,7 @@
 				SDKROOT_ppc = macosx10.5;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1775,7 +1777,7 @@
 				C06AC70106231834669512C5,
 				394C2D5A71955036D265B490,
 				B11FA40C6130EB5EB185D0FF ); buildRules = ( ); dependencies = ( ); name = Jucer; productName = Jucer; productReference = C2070DE2D6C322FDEADA3835; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		67EDA91590B438C436662019 = { isa = PBXProject; buildConfigurationList = B01CF9105DD0717790C4738E; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = A7BE471011DB0F6646F53DC3; projectDirPath = ""; projectRoot = ""; targets = ( CC78C20B8F6159F24605BED8 ); };
+		67EDA91590B438C436662019 = { isa = PBXProject; buildConfigurationList = B01CF9105DD0717790C4738E; attributes = { LastUpgradeCheck = 0440; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = A7BE471011DB0F6646F53DC3; projectDirPath = ""; projectRoot = ""; targets = ( CC78C20B8F6159F24605BED8 ); };
 	};
 	rootObject = 67EDA91590B438C436662019;
 }

@@ -1401,6 +1401,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1415,6 +1416,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1483,7 +1485,7 @@
 				7B2C68FAAB7FB794B44BA476,
 				5C249F77DD3C907CDA919026,
 				A8FE28D8F12C03C93B8EAD1D ); buildRules = ( ); dependencies = ( ); name = HelloWorld; productName = HelloWorld; productReference = EA398D9C544440E06637C134; productInstallPath = "$(HOME)/Applications"; productType = "com.apple.product-type.application"; };
-		E34D5B980741D93050D0BB6B = { isa = PBXProject; buildConfigurationList = D5495970AC0AFC78DD0ADE12; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = CB9C4DF3F11D65C6BF6B80AD; projectDirPath = ""; projectRoot = ""; targets = ( 9337F8263A94B688D61D5B68 ); };
+		E34D5B980741D93050D0BB6B = { isa = PBXProject; buildConfigurationList = D5495970AC0AFC78DD0ADE12; attributes = { LastUpgradeCheck = 0440; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = CB9C4DF3F11D65C6BF6B80AD; projectDirPath = ""; projectRoot = ""; targets = ( 9337F8263A94B688D61D5B68 ); };
 	};
 	rootObject = E34D5B980741D93050D0BB6B;
 }

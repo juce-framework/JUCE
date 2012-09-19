@@ -724,6 +724,8 @@ private:
         if (config.getCppLibType().isNotEmpty())
             s.add ("CLANG_CXX_LIBRARY = " + config.getCppLibType().quoted());
 
+        s.add ("COMBINE_HIDPI_IMAGES = YES");
+
         {
             StringArray linkerFlags, librarySearchPaths;
             getLinkerFlags (config, linkerFlags, librarySearchPaths);
@@ -887,11 +889,11 @@ private:
             sourceIDs.add (fileID);
 
         ValueTree* v = new ValueTree (fileID);
-        v->setProperty ("isa", "PBXBuildFile", 0);
-        v->setProperty ("fileRef", fileRefID, 0);
+        v->setProperty ("isa", "PBXBuildFile", nullptr);
+        v->setProperty ("fileRef", fileRefID, nullptr);
 
         if (inhibitWarnings)
-            v->setProperty ("settings", "{COMPILER_FLAGS = \"-w\"; }", 0);
+            v->setProperty ("settings", "{COMPILER_FLAGS = \"-w\"; }", nullptr);
 
         pbxBuildFiles.add (v);
         return fileID;
@@ -920,11 +922,11 @@ private:
         const String fileRefID (createFileRefID (pathString));
 
         ScopedPointer<ValueTree> v (new ValueTree (fileRefID));
-        v->setProperty ("isa", "PBXFileReference", 0);
-        v->setProperty ("lastKnownFileType", getFileType (path), 0);
-        v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), 0);
-        v->setProperty ("path", sanitisePath (pathString), 0);
-        v->setProperty ("sourceTree", sourceTree, 0);
+        v->setProperty ("isa", "PBXFileReference", nullptr);
+        v->setProperty ("lastKnownFileType", getFileType (path), nullptr);
+        v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), nullptr);
+        v->setProperty ("path", sanitisePath (pathString), nullptr);
+        v->setProperty ("sourceTree", sourceTree, nullptr);
 
         const int existing = pbxFileReferences.indexOfSorted (*this, v);
 
@@ -1035,10 +1037,10 @@ private:
     void addGroup (const String& groupID, const String& groupName, const StringArray& childIDs) const
     {
         ValueTree* v = new ValueTree (groupID);
-        v->setProperty ("isa", "PBXGroup", 0);
-        v->setProperty ("children", "(" + indentList (childIDs, ",") + " )", 0);
-        v->setProperty (Ids::name, groupName, 0);
-        v->setProperty ("sourceTree", "<group>", 0);
+        v->setProperty ("isa", "PBXGroup", nullptr);
+        v->setProperty ("children", "(" + indentList (childIDs, ",") + " )", nullptr);
+        v->setProperty (Ids::name, groupName, nullptr);
+        v->setProperty ("sourceTree", "<group>", nullptr);
         pbxGroups.add (v);
     }
 
@@ -1067,29 +1069,29 @@ private:
     void addBuildProduct (const String& fileType, const String& binaryName) const
     {
         ValueTree* v = new ValueTree (createID ("__productFileID"));
-        v->setProperty ("isa", "PBXFileReference", 0);
-        v->setProperty ("explicitFileType", fileType, 0);
-        v->setProperty ("includeInIndex", (int) 0, 0);
-        v->setProperty ("path", sanitisePath (binaryName), 0);
-        v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", 0);
+        v->setProperty ("isa", "PBXFileReference", nullptr);
+        v->setProperty ("explicitFileType", fileType, nullptr);
+        v->setProperty ("includeInIndex", (int) 0, nullptr);
+        v->setProperty ("path", sanitisePath (binaryName), nullptr);
+        v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
         pbxFileReferences.add (v);
     }
 
     void addTargetConfig (const String& configName, const StringArray& buildSettings) const
     {
         ValueTree* v = new ValueTree (createID ("targetconfigid_" + configName));
-        v->setProperty ("isa", "XCBuildConfiguration", 0);
-        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", 0);
-        v->setProperty (Ids::name, configName, 0);
+        v->setProperty ("isa", "XCBuildConfiguration", nullptr);
+        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", nullptr);
+        v->setProperty (Ids::name, configName, nullptr);
         targetConfigs.add (v);
     }
 
     void addProjectConfig (const String& configName, const StringArray& buildSettings) const
     {
         ValueTree* v = new ValueTree (createID ("projectconfigid_" + configName));
-        v->setProperty ("isa", "XCBuildConfiguration", 0);
-        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", 0);
-        v->setProperty (Ids::name, configName, 0);
+        v->setProperty ("isa", "XCBuildConfiguration", nullptr);
+        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", nullptr);
+        v->setProperty (Ids::name, configName, nullptr);
         projectConfigs.add (v);
     }
 
@@ -1101,12 +1103,12 @@ private:
             configIDs.add (configsToUse[i]->getType().toString());
 
         ValueTree* v = new ValueTree (listID);
-        v->setProperty ("isa", "XCConfigurationList", 0);
-        v->setProperty ("buildConfigurations", "(" + indentList (configIDs, ",") + " )", 0);
-        v->setProperty ("defaultConfigurationIsVisible", (int) 0, 0);
+        v->setProperty ("isa", "XCConfigurationList", nullptr);
+        v->setProperty ("buildConfigurations", "(" + indentList (configIDs, ",") + " )", nullptr);
+        v->setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
 
         if (configsToUse[0] != nullptr)
-            v->setProperty ("defaultConfigurationName", configsToUse[0]->getProperty (Ids::name), 0);
+            v->setProperty ("defaultConfigurationName", configsToUse[0]->getProperty (Ids::name), nullptr);
 
         misc.add (v);
     }
@@ -1117,10 +1119,10 @@ private:
         buildPhaseIDs.add (phaseId);
 
         ValueTree* v = new ValueTree (phaseId);
-        v->setProperty ("isa", phaseType, 0);
-        v->setProperty ("buildActionMask", "2147483647", 0);
-        v->setProperty ("files", "(" + indentList (fileIds, ",") + " )", 0);
-        v->setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, 0);
+        v->setProperty ("isa", phaseType, nullptr);
+        v->setProperty ("buildActionMask", "2147483647", nullptr);
+        v->setProperty ("files", "(" + indentList (fileIds, ",") + " )", nullptr);
+        v->setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, nullptr);
         misc.add (v);
         return v;
     }
@@ -1128,20 +1130,20 @@ private:
     void addTargetObject() const
     {
         ValueTree* const v = new ValueTree (createID ("__target"));
-        v->setProperty ("isa", "PBXNativeTarget", 0);
-        v->setProperty ("buildConfigurationList", createID ("__configList"), 0);
-        v->setProperty ("buildPhases", "(" + indentList (buildPhaseIDs, ",") + " )", 0);
-        v->setProperty ("buildRules", "( )", 0);
-        v->setProperty ("dependencies", "( )", 0);
-        v->setProperty (Ids::name, projectName, 0);
-        v->setProperty ("productName", projectName, 0);
-        v->setProperty ("productReference", createID ("__productFileID"), 0);
+        v->setProperty ("isa", "PBXNativeTarget", nullptr);
+        v->setProperty ("buildConfigurationList", createID ("__configList"), nullptr);
+        v->setProperty ("buildPhases", "(" + indentList (buildPhaseIDs, ",") + " )", nullptr);
+        v->setProperty ("buildRules", "( )", nullptr);
+        v->setProperty ("dependencies", "( )", nullptr);
+        v->setProperty (Ids::name, projectName, nullptr);
+        v->setProperty ("productName", projectName, nullptr);
+        v->setProperty ("productReference", createID ("__productFileID"), nullptr);
 
         if (xcodeProductInstallPath.isNotEmpty())
-            v->setProperty ("productInstallPath", xcodeProductInstallPath, 0);
+            v->setProperty ("productInstallPath", xcodeProductInstallPath, nullptr);
 
         jassert (xcodeProductType.isNotEmpty());
-        v->setProperty ("productType", xcodeProductType, 0);
+        v->setProperty ("productType", xcodeProductType, nullptr);
 
         misc.add (v);
     }
@@ -1149,14 +1151,15 @@ private:
     void addProjectObject() const
     {
         ValueTree* const v = new ValueTree (createID ("__root"));
-        v->setProperty ("isa", "PBXProject", 0);
-        v->setProperty ("buildConfigurationList", createID ("__projList"), 0);
-        v->setProperty ("compatibilityVersion", "Xcode 3.2", 0);
-        v->setProperty ("hasScannedForEncodings", (int) 0, 0);
-        v->setProperty ("mainGroup", createID ("__mainsourcegroup"), 0);
-        v->setProperty ("projectDirPath", "\"\"", 0);
-        v->setProperty ("projectRoot", "\"\"", 0);
-        v->setProperty ("targets", "( " + createID ("__target") + " )", 0);
+        v->setProperty ("isa", "PBXProject", nullptr);
+        v->setProperty ("buildConfigurationList", createID ("__projList"), nullptr);
+        v->setProperty ("attributes", "{ LastUpgradeCheck = 0440; }", nullptr);
+        v->setProperty ("compatibilityVersion", "Xcode 3.2", nullptr);
+        v->setProperty ("hasScannedForEncodings", (int) 0, nullptr);
+        v->setProperty ("mainGroup", createID ("__mainsourcegroup"), nullptr);
+        v->setProperty ("projectDirPath", "\"\"", nullptr);
+        v->setProperty ("projectRoot", "\"\"", nullptr);
+        v->setProperty ("targets", "( " + createID ("__target") + " )", nullptr);
         misc.add (v);
     }
 
@@ -1165,12 +1168,12 @@ private:
         if (getPostBuildScript().isNotEmpty())
         {
             ValueTree* const v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
-            v->setProperty (Ids::name, "Post-build script", 0);
-            v->setProperty ("shellPath", "/bin/sh", 0);
+            v->setProperty (Ids::name, "Post-build script", nullptr);
+            v->setProperty ("shellPath", "/bin/sh", nullptr);
             v->setProperty ("shellScript", getPostBuildScript().replace ("\\", "\\\\")
                                                                .replace ("\"", "\\\"")
                                                                .replace ("\r\n", "\\n")
-                                                               .replace ("\n", "\\n"), 0);
+                                                               .replace ("\n", "\\n"), nullptr);
         }
     }
 
