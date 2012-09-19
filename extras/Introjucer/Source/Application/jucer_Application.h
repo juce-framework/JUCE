@@ -44,8 +44,6 @@ public:
     //==============================================================================
     void initialise (const String& commandLine)
     {
-        initialiseLogger ("log_");
-
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
         settings = new StoredSettings();
         settings->initialise();
@@ -61,6 +59,8 @@ public:
                 return;
             }
         }
+
+        initialiseLogger ("log_");
 
         if (sendCommandLineToPreexistingInstance())
         {

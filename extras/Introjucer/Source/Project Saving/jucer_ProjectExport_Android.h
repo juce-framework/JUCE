@@ -271,6 +271,7 @@ private:
         XmlElement* app = manifest->createNewChildElement ("application");
         app->setAttribute ("android:label", "@string/app_name");
         app->setAttribute ("android:icon", "@drawable/icon");
+        app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
 
         XmlElement* act = app->createNewChildElement ("activity");
         act->setAttribute ("android:name", getActivityName());

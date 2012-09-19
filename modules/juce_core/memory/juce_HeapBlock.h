@@ -295,8 +295,7 @@ private:
         HeapBlockHelper::ThrowOnFail<throwOnFailure>::check (data);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HeapBlock);
-
+    JUCE_DECLARE_NON_COPYABLE (HeapBlock);
     JUCE_PREVENT_HEAP_ALLOCATION; // Creating a 'new HeapBlock' would be missing the point!
 };
 
