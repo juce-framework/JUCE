@@ -252,7 +252,9 @@ private:
         //screens->setAttribute ("android:xlargeScreens", "true");
         screens->setAttribute ("android:anyDensity", "true");
 
-        manifest->createNewChildElement ("uses-sdk")->setAttribute ("android:minSdkVersion", getMinimumSDKVersionString());
+        XmlElement* sdk = manifest->createNewChildElement ("uses-sdk");
+        sdk->setAttribute ("android:minSdkVersion", getMinimumSDKVersionString());
+        sdk->setAttribute ("android:targetSdkVersion", "11");
 
         {
             const StringArray permissions (getPermissionsRequired());
