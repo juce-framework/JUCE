@@ -152,9 +152,7 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
         if (findType (currentDeviceType) == nullptr)
         {
-            AudioIODeviceType* const type = findType (setup.inputDeviceName, setup.outputDeviceName);
-
-            if (type != nullptr)
+            if (AudioIODeviceType* const type = findType (setup.inputDeviceName, setup.outputDeviceName))
                 currentDeviceType = type->getTypeName();
             else if (availableDeviceTypes.size() > 0)
                 currentDeviceType = availableDeviceTypes.getUnchecked(0)->getTypeName();
@@ -233,8 +231,7 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
 void AudioDeviceManager::insertDefaultDeviceNames (AudioDeviceSetup& setup) const
 {
-    AudioIODeviceType* type = getCurrentDeviceTypeObject();
-    if (type != nullptr)
+    if (AudioIODeviceType* type = getCurrentDeviceTypeObject())
     {
         if (setup.outputDeviceName.isEmpty())
             setup.outputDeviceName = type->getDeviceNames (false) [type->getDefaultDeviceIndex (false)];

@@ -56,9 +56,7 @@ public:
 
     void actionListenerCallback (const String& message)
     {
-        JUCEApplication* const app = JUCEApplication::getInstance();
-
-        if (app != nullptr)
+        if (JUCEApplication* const app = JUCEApplication::getInstance())
         {
             const String appName (app->getApplicationName());
 

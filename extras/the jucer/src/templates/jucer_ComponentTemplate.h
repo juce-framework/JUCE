@@ -49,9 +49,6 @@ public:
 
     %%publicMemberDeclarations%%
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     //[/UserVariables]
@@ -60,9 +57,7 @@ private:
     %%privateMemberDeclarations%%
 
     //==============================================================================
-    // (prevent copy constructor and operator= being generated..)
-    %%className%% (const %%className%%&);
-    const %%className%%& operator= (const %%className%%&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%className%%);
 };
 
 

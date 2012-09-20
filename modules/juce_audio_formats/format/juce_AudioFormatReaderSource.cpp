@@ -23,9 +23,9 @@
   ==============================================================================
 */
 
-AudioFormatReaderSource::AudioFormatReaderSource (AudioFormatReader* const reader_,
+AudioFormatReaderSource::AudioFormatReaderSource (AudioFormatReader* const r,
                                                   const bool deleteReaderWhenThisIsDeleted)
-    : reader (reader_, deleteReaderWhenThisIsDeleted),
+    : reader (r, deleteReaderWhenThisIsDeleted),
       nextPlayPos (0),
       looping (false)
 {

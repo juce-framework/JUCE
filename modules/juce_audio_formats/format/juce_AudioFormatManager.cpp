@@ -142,17 +142,9 @@ AudioFormatReader* AudioFormatManager::createReaderFor (const File& file)
         AudioFormat* const af = getKnownFormat(i);
 
         if (af->canHandleFile (file))
-        {
-            InputStream* const in = file.createInputStream();
-
-            if (in != nullptr)
-            {
-                AudioFormatReader* const r = af->createReaderFor (in, true);
-
-                if (r != nullptr)
+            if (InputStream* const in = file.createInputStream())
+                if (AudioFormatReader* const r = af->createReaderFor (in, true))
                     return r;
-            }
-        }
     }
 
     return nullptr;
@@ -172,9 +164,7 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
 
         for (int i = 0; i < getNumKnownFormats(); ++i)
         {
-            AudioFormatReader* const r = getKnownFormat(i)->createReaderFor (in, false);
-
-            if (r != nullptr)
+            if (AudioFormatReader* const r = getKnownFormat(i)->createReaderFor (in, false))
             {
                 in.release();
                 return r;

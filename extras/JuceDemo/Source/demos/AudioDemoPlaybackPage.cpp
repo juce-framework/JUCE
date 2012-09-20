@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:08:14pm
+  Creation date:  20 Sep 2012 1:43:44pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -23,6 +23,7 @@
 //[/Headers]
 
 #include "AudioDemoPlaybackPage.h"
+
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 class DemoThumbnailComp  : public Component,
@@ -176,11 +177,11 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
       thread ("audio file preview"),
       directoryList (0, thread),
       zoomLabel (0),
+      explanation (0),
+      zoomSlider (0),
       thumbnail (0),
       startStopButton (0),
-      fileTreeComp (0),
-      explanation (0),
-      zoomSlider (0)
+      fileTreeComp (0)
 {
     addAndMakeVisible (zoomLabel = new Label (String::empty,
                                               L"zoom:"));
@@ -214,6 +215,7 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
 
     addAndMakeVisible (fileTreeComp = new FileTreeComponent (directoryList));
 
+
     //[UserPreSize]
     //[/UserPreSize]
 
@@ -245,11 +247,11 @@ AudioDemoPlaybackPage::~AudioDemoPlaybackPage()
     //[/Destructor_pre]
 
     deleteAndZero (zoomLabel);
+    deleteAndZero (explanation);
+    deleteAndZero (zoomSlider);
     deleteAndZero (thumbnail);
     deleteAndZero (startStopButton);
     deleteAndZero (fileTreeComp);
-    deleteAndZero (explanation);
-    deleteAndZero (zoomSlider);
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -271,13 +273,29 @@ void AudioDemoPlaybackPage::paint (Graphics& g)
 void AudioDemoPlaybackPage::resized()
 {
     zoomLabel->setBounds (16, getHeight() - 90, 55, 24);
+    explanation->setBounds (256, getHeight() - 82, getWidth() - 275, 64);
+    zoomSlider->setBounds (72, getHeight() - 90, 200, 24);
     thumbnail->setBounds (16, getHeight() - 221, getWidth() - 32, 123);
     startStopButton->setBounds (16, getHeight() - 46, 150, 32);
     fileTreeComp->setBounds (16, 8, getWidth() - 32, getHeight() - 245);
-    explanation->setBounds (256, getHeight() - 82, getWidth() - 275, 64);
-    zoomSlider->setBounds (72, getHeight() - 90, 200, 24);
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
+}
+
+void AudioDemoPlaybackPage::sliderValueChanged (Slider* sliderThatWasMoved)
+{
+    //[UsersliderValueChanged_Pre]
+    //[/UsersliderValueChanged_Pre]
+
+    if (sliderThatWasMoved == zoomSlider)
+    {
+        //[UserSliderCode_zoomSlider] -- add your slider handling code here..
+        thumbnail->setZoomFactor (zoomSlider->getValue());
+        //[/UserSliderCode_zoomSlider]
+    }
+
+    //[UsersliderValueChanged_Post]
+    //[/UsersliderValueChanged_Post]
 }
 
 void AudioDemoPlaybackPage::buttonClicked (Button* buttonThatWasClicked)
@@ -302,22 +320,6 @@ void AudioDemoPlaybackPage::buttonClicked (Button* buttonThatWasClicked)
 
     //[UserbuttonClicked_Post]
     //[/UserbuttonClicked_Post]
-}
-
-void AudioDemoPlaybackPage::sliderValueChanged (Slider* sliderThatWasMoved)
-{
-    //[UsersliderValueChanged_Pre]
-    //[/UsersliderValueChanged_Pre]
-
-    if (sliderThatWasMoved == zoomSlider)
-    {
-        //[UserSliderCode_zoomSlider] -- add your slider handling code here..
-        thumbnail->setZoomFactor (zoomSlider->getValue());
-        //[/UserSliderCode_zoomSlider]
-    }
-
-    //[UsersliderValueChanged_Post]
-    //[/UsersliderValueChanged_Post]
 }
 
 
