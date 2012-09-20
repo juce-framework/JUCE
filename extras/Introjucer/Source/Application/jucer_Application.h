@@ -479,10 +479,23 @@ public:
         if (logger == nullptr)
         {
             logger = FileLogger::createDateStampedLogger (getLogFolderName(), filePrefix, ".txt",
-                                                          getApplicationName() + " " + getApplicationVersion());
+                                                          getApplicationName() + " " + getApplicationVersion()
+                                                            + "  ---  Build date: " __DATE__);
             Logger::setCurrentLogger (logger);
         }
     }
+
+    struct FileWithTime
+    {
+        FileWithTime (const File& f) : file (f), time (f.getLastModificationTime()) {}
+        FileWithTime() {}
+
+        bool operator<  (const FileWithTime& other) const    { return time <  other.time; }
+        bool operator== (const FileWithTime& other) const    { return time == other.time; }
+
+        File file;
+        Time time;
+    };
 
     void deleteLogger()
     {
@@ -497,18 +510,6 @@ public:
 
             if (logFiles.size() > maxNumLogFilesToKeep)
             {
-                struct FileWithTime
-                {
-                    FileWithTime (const File& f) : file (f), time (f.getLastModificationTime()) {}
-                    FileWithTime() {}
-
-                    bool operator<  (const FileWithTime& other) const    { return time <  other.time; }
-                    bool operator== (const FileWithTime& other) const    { return time == other.time; }
-
-                    File file;
-                    Time time;
-                };
-
                 Array <FileWithTime> files;
 
                 for (int i = 0; i < logFiles.size(); ++i)
