@@ -127,20 +127,20 @@ public:
     //==============================================================================
     void systemRequestedQuit()
     {
-        if ((! triggerAsyncQuitIfModalCompsActive())
-             && mainWindowList.askAllWindowsToClose())
-            quit();
+        closeModalCompsAndQuit();
     }
 
-    bool triggerAsyncQuitIfModalCompsActive()
+    void closeModalCompsAndQuit()
     {
         if (cancelAnyModalComponents())
         {
             new AsyncQuitRetrier();
-            return true;
         }
-
-        return false;
+        else
+        {
+            if (closeAllMainWindows())
+                quit();
+        }
     }
 
     //==============================================================================
@@ -439,6 +439,11 @@ public:
         return openDocumentManager.closeAll (askUserToSave);
     }
 
+    virtual bool closeAllMainWindows()
+    {
+        return mainWindowList.askAllWindowsToClose();
+    }
+
     bool makeSureUserHasSelectedModuleFolder()
     {
         if (! ModuleList::isLocalModulesFolderValid())
@@ -552,8 +557,8 @@ private:
             stopTimer();
             delete this;
 
-            if (JUCEApplication* app = JUCEApplication::getInstance())
-                app->systemRequestedQuit();
+            if (JUCEApplication::getInstance() != nullptr)
+                IntrojucerApp::getApp().closeModalCompsAndQuit();
         }
 
         JUCE_DECLARE_NON_COPYABLE (AsyncQuitRetrier);

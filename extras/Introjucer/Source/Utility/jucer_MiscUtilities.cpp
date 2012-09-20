@@ -175,9 +175,7 @@ StringArray getSearchPathsFromString (const String& searchPath)
 //==============================================================================
 void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 {
-    Viewport* const viewport = e.eventComponent->findParentComponentOfClass<Viewport>();
-
-    if (viewport != nullptr)
+    if (Viewport* const viewport = e.eventComponent->findParentComponentOfClass<Viewport>())
     {
         const MouseEvent e2 (e.getEventRelativeTo (viewport));
         viewport->autoScroll (scrollX ? e2.x : 20, scrollY ? e2.y : 20, 8, 16);
@@ -250,8 +248,7 @@ String RolloverHelpComp::findTip (Component* c)
 {
     while (c != nullptr)
     {
-        TooltipClient* const tc = dynamic_cast <TooltipClient*> (c);
-        if (tc != nullptr)
+        if (TooltipClient* const tc = dynamic_cast <TooltipClient*> (c))
         {
             const String tip (tc->getTooltip());
 
@@ -278,7 +275,8 @@ void FloatingLabelComponent::remove()
         getParentComponent()->removeChildComponent (this);
 }
 
-void FloatingLabelComponent::update (Component* parent, const String& text, const Colour& textColour, int x, int y, bool toRight, bool below)
+void FloatingLabelComponent::update (Component* parent, const String& text, const Colour& textColour,
+                                     int x, int y, bool toRight, bool below)
 {
     colour = textColour;
 
@@ -322,7 +320,8 @@ class UTF8Component  : public Component,
 public:
     UTF8Component()
         : desc (String::empty,
-                "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, ready to cut-and-paste into your source-code...")
+                "Type any string into the box, and it'll be shown below as a portable UTF-8 literal, "
+                "ready to cut-and-paste into your source-code...")
     {
         desc.setJustificationType (Justification::centred);
         desc.setColour (Label::textColourId, Colours::white);
@@ -395,23 +394,24 @@ void showUTF8ToolWindow (ScopedPointer<Component>& ownerPointer)
     }
 }
 
+//==============================================================================
 bool cancelAnyModalComponents()
 {
-    const int numModal = ModalComponentManager::getInstance()->getNumModalComponents();
+    ModalComponentManager& mm = *ModalComponentManager::getInstance();
+    const int numModal = mm.getNumModalComponents();
 
     for (int i = numModal; --i >= 0;)
-        if (ModalComponentManager::getInstance()->getModalComponent(i) != nullptr)
-            ModalComponentManager::getInstance()->getModalComponent(i)->exitModalState (0);
+        if (mm.getModalComponent(i) != nullptr)
+            mm.getModalComponent(i)->exitModalState (0);
 
     return numModal > 0;
 }
 
-//==============================================================================
 class AsyncCommandRetrier  : public Timer
 {
 public:
-    AsyncCommandRetrier (const ApplicationCommandTarget::InvocationInfo& info_)
-        : info (info_)
+    AsyncCommandRetrier (const ApplicationCommandTarget::InvocationInfo& inf)
+        : info (inf)
     {
         info.originatingComponent = nullptr;
         startTimer (500);
