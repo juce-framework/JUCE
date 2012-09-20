@@ -29,7 +29,7 @@ void Logger::outputDebugString (const String& text)
 }
 
 //==============================================================================
-#ifdef JUCE_DLL
+#ifdef JUCE_DLL_BUILD
  JUCE_API void* juceDLL_malloc (size_t sz)    { return std::malloc (sz); }
  JUCE_API void  juceDLL_free (void* block)    { std::free (block); }
 #endif

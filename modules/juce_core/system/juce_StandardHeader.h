@@ -122,10 +122,6 @@
  #ifdef __INTEL_COMPILER
   #pragma warning (disable: 1125) // (virtual override warning)
  #endif
-#elif defined (__GNUC__) && ((__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
- #ifdef JUCE_DLL_BUILD
-  #define JUCE_API __attribute__ ((visibility("default")))
- #endif
 #endif
 
 //==============================================================================
