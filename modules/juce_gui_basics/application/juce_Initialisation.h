@@ -90,7 +90,7 @@ public:
 #else
  #if JUCE_WINDOWS
   #if defined (WINAPI) || defined (_WINDOWS_)
-   #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (HINSTANCE, HINSTANCE, const LPTSTR, int)
+   #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (HINSTANCE, HINSTANCE, const LPSTR, int)
   #elif defined (_UNICODE)
    #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (void*, void*, const wchar_t*, int)
   #else
