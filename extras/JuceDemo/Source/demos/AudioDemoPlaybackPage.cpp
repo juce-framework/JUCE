@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  20 Sep 2012 1:43:44pm
+  Creation date:  21 Sep 2012 12:10:00pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -184,7 +184,7 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
       fileTreeComp (0)
 {
     addAndMakeVisible (zoomLabel = new Label (String::empty,
-                                              L"zoom:"));
+                                              "zoom:"));
     zoomLabel->setFont (Font (15.0000f, Font::plain));
     zoomLabel->setJustificationType (Justification::centredRight);
     zoomLabel->setEditable (false, false, false);
@@ -192,7 +192,7 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
     zoomLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (explanation = new Label (String::empty,
-                                                L"Select an audio file in the treeview above, and this page will display its waveform, and let you play it.."));
+                                                "Select an audio file in the treeview above, and this page will display its waveform, and let you play it.."));
     explanation->setFont (Font (14.0000f, Font::plain));
     explanation->setJustificationType (Justification::bottomRight);
     explanation->setEditable (false, false, false);
@@ -209,7 +209,7 @@ AudioDemoPlaybackPage::AudioDemoPlaybackPage (AudioDeviceManager& deviceManager_
     addAndMakeVisible (thumbnail = new DemoThumbnailComp (formatManager, transportSource, *zoomSlider));
 
     addAndMakeVisible (startStopButton = new TextButton (String::empty));
-    startStopButton->setButtonText (L"Play/Stop");
+    startStopButton->setButtonText ("Play/Stop");
     startStopButton->addListener (this);
     startStopButton->setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
 

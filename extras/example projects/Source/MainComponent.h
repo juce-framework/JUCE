@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:12:59pm
+  Creation date:  21 Sep 2012 12:11:41pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_5ACBBA44__
-#define __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_5ACBBA44__
+#ifndef __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_2983595F__
+#define __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_2983595F__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -54,9 +54,6 @@ public:
 
 
 
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     //[/UserVariables]
@@ -68,10 +65,8 @@ private:
 
 
     //==============================================================================
-    // (prevent copy constructor and operator= being generated..)
-    MainComponent (const MainComponent&);
-    const MainComponent& operator= (const MainComponent&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent);
 };
 
 
-#endif   // __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_5ACBBA44__
+#endif   // __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_2983595F__

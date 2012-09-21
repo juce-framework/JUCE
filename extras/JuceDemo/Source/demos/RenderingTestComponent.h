@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  20 Sep 2012 1:44:35pm
+  Creation date:  21 Sep 2012 12:12:19pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_51E39D0E__
-#define __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_51E39D0E__
+#ifndef __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_1C802450__
+#define __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_1C802450__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -97,4 +97,4 @@ private:
 };
 
 
-#endif   // __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_51E39D0E__
+#endif   // __JUCER_HEADER_RENDERINGTESTCOMPONENT_RENDERINGTESTCOMPONENT_1C802450__

@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  20 Sep 2012 1:44:35pm
+  Creation date:  21 Sep 2012 12:12:19pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -400,22 +400,22 @@ RenderingTestComponent::RenderingTestComponent ()
     testTypeComboBox->setEditableText (false);
     testTypeComboBox->setJustificationType (Justification::centredLeft);
     testTypeComboBox->setTextWhenNothingSelected (String::empty);
-    testTypeComboBox->setTextWhenNoChoicesAvailable (L"(no choices)");
-    testTypeComboBox->addItem (L"Paths - Solid", 1);
-    testTypeComboBox->addItem (L"Paths - Linear gradient", 2);
-    testTypeComboBox->addItem (L"Paths - Radial gradient", 3);
-    testTypeComboBox->addItem (L"Paths - Stroked", 4);
-    testTypeComboBox->addItem (L"Images - RGB", 5);
-    testTypeComboBox->addItem (L"Images - ARGB", 6);
-    testTypeComboBox->addItem (L"Tiled Images - RGB", 7);
-    testTypeComboBox->addItem (L"Tiled Images - ARGB", 8);
-    testTypeComboBox->addItem (L"Glyphs", 9);
-    testTypeComboBox->addItem (L"SVG", 10);
-    testTypeComboBox->addItem (L"Lines", 11);
+    testTypeComboBox->setTextWhenNoChoicesAvailable ("(no choices)");
+    testTypeComboBox->addItem ("Paths - Solid", 1);
+    testTypeComboBox->addItem ("Paths - Linear gradient", 2);
+    testTypeComboBox->addItem ("Paths - Radial gradient", 3);
+    testTypeComboBox->addItem ("Paths - Stroked", 4);
+    testTypeComboBox->addItem ("Images - RGB", 5);
+    testTypeComboBox->addItem ("Images - ARGB", 6);
+    testTypeComboBox->addItem ("Tiled Images - RGB", 7);
+    testTypeComboBox->addItem ("Tiled Images - ARGB", 8);
+    testTypeComboBox->addItem ("Glyphs", 9);
+    testTypeComboBox->addItem ("SVG", 10);
+    testTypeComboBox->addItem ("Lines", 11);
     testTypeComboBox->addListener (this);
 
     addAndMakeVisible (testTypeLabel = new Label (String::empty,
-                                                  L"Test type:"));
+                                                  "Test type:"));
     testTypeLabel->setFont (Font (15.0000f, Font::plain));
     testTypeLabel->setJustificationType (Justification::centredRight);
     testTypeLabel->setEditable (false, false, false);
@@ -423,7 +423,7 @@ RenderingTestComponent::RenderingTestComponent ()
     testTypeLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (speedLabel = new Label (String::empty,
-                                               L"speed"));
+                                               "speed"));
     speedLabel->setFont (Font (15.0000f, Font::plain));
     speedLabel->setJustificationType (Justification::centredLeft);
     speedLabel->setEditable (false, false, false);
@@ -439,22 +439,22 @@ RenderingTestComponent::RenderingTestComponent ()
     opacitySlider->addListener (this);
 
     addAndMakeVisible (highQualityToggle = new ToggleButton (String::empty));
-    highQualityToggle->setButtonText (L"Higher quality image interpolation");
+    highQualityToggle->setButtonText ("Higher quality image interpolation");
 
     addAndMakeVisible (animateSizeToggle = new ToggleButton (String::empty));
-    animateSizeToggle->setButtonText (L"Animate size");
+    animateSizeToggle->setButtonText ("Animate size");
 
     addAndMakeVisible (animateRotationToggle = new ToggleButton (String::empty));
-    animateRotationToggle->setButtonText (L"Animate rotation");
+    animateRotationToggle->setButtonText ("Animate rotation");
 
     addAndMakeVisible (animatePositionToggle = new ToggleButton (String::empty));
-    animatePositionToggle->setButtonText (L"Animate position");
+    animatePositionToggle->setButtonText ("Animate position");
 
     addAndMakeVisible (animateFillToggle = new ToggleButton (String::empty));
-    animateFillToggle->setButtonText (L"Animate gradient");
+    animateFillToggle->setButtonText ("Animate gradient");
 
     addAndMakeVisible (opacityLabel = new Label (String::empty,
-                                                 L"Opacity:"));
+                                                 "Opacity:"));
     opacityLabel->setFont (Font (15.0000f, Font::plain));
     opacityLabel->setJustificationType (Justification::centredRight);
     opacityLabel->setEditable (false, false, false);
@@ -487,7 +487,7 @@ RenderingTestComponent::RenderingTestComponent ()
     angleSlider->addListener (this);
 
     addAndMakeVisible (xSliderLabel = new Label (String::empty,
-                                                 L"X offset:"));
+                                                 "X offset:"));
     xSliderLabel->setFont (Font (15.0000f, Font::plain));
     xSliderLabel->setJustificationType (Justification::centredRight);
     xSliderLabel->setEditable (false, false, false);
@@ -495,7 +495,7 @@ RenderingTestComponent::RenderingTestComponent ()
     xSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (ySliderLabel = new Label (String::empty,
-                                                 L"Y offset:"));
+                                                 "Y offset:"));
     ySliderLabel->setFont (Font (15.0000f, Font::plain));
     ySliderLabel->setJustificationType (Justification::centredRight);
     ySliderLabel->setEditable (false, false, false);
@@ -503,7 +503,7 @@ RenderingTestComponent::RenderingTestComponent ()
     ySliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (sizeSliderLabel = new Label (String::empty,
-                                                    L"Size:"));
+                                                    "Size:"));
     sizeSliderLabel->setFont (Font (15.0000f, Font::plain));
     sizeSliderLabel->setJustificationType (Justification::centredRight);
     sizeSliderLabel->setEditable (false, false, false);
@@ -511,7 +511,7 @@ RenderingTestComponent::RenderingTestComponent ()
     sizeSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (angleSliderLabel = new Label (String::empty,
-                                                     L"Angle:"));
+                                                     "Angle:"));
     angleSliderLabel->setFont (Font (15.0000f, Font::plain));
     angleSliderLabel->setJustificationType (Justification::centredRight);
     angleSliderLabel->setEditable (false, false, false);
@@ -519,13 +519,13 @@ RenderingTestComponent::RenderingTestComponent ()
     angleSliderLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (clipToRectangleToggle = new ToggleButton (String::empty));
-    clipToRectangleToggle->setButtonText (L"Clip to rectangle");
+    clipToRectangleToggle->setButtonText ("Clip to rectangle");
 
     addAndMakeVisible (clipToPathToggle = new ToggleButton (String::empty));
-    clipToPathToggle->setButtonText (L"Clip to path");
+    clipToPathToggle->setButtonText ("Clip to path");
 
     addAndMakeVisible (clipToImageToggle = new ToggleButton (String::empty));
-    clipToImageToggle->setButtonText (L"Clip to image");
+    clipToImageToggle->setButtonText ("Clip to image");
 
 
     //[UserPreSize]
@@ -589,28 +589,28 @@ void RenderingTestComponent::paint (Graphics& g)
 
 void RenderingTestComponent::resized()
 {
-    testTypeComboBox->setBounds (proportionOfWidth (0.1652f), 16, proportionOfWidth (0.3429f), 24);
-    testTypeLabel->setBounds (proportionOfWidth (0.0269f), 16, proportionOfWidth (0.1293f), 24);
-    speedLabel->setBounds (proportionOfWidth (0.5368f), 16, proportionOfWidth (0.4309f), 24);
+    testTypeComboBox->setBounds (proportionOfWidth (0.1658f), 16, proportionOfWidth (0.3436f), 24);
+    testTypeLabel->setBounds (proportionOfWidth (0.0273f), 16, proportionOfWidth (0.1299f), 24);
+    speedLabel->setBounds (proportionOfWidth (0.5368f), 16, proportionOfWidth (0.4308f), 24);
     testCanvas->setBounds (20, 56, getWidth() - 40, getHeight() - 215);
-    opacitySlider->setBounds (proportionOfWidth (0.5996f), getHeight() - 141, proportionOfWidth (0.3788f), 24);
-    highQualityToggle->setBounds (proportionOfWidth (0.0215f), getHeight() - 141, proportionOfWidth (0.4452f), 24);
-    animateSizeToggle->setBounds (proportionOfWidth (0.7576f), getHeight() - 85, proportionOfWidth (0.2244f), 24);
-    animateRotationToggle->setBounds (proportionOfWidth (0.7576f), getHeight() - 61, proportionOfWidth (0.2244f), 24);
-    animatePositionToggle->setBounds (proportionOfWidth (0.7576f), getHeight() - 109, proportionOfWidth (0.2244f), 24);
-    animateFillToggle->setBounds (proportionOfWidth (0.7576f), getHeight() - 37, proportionOfWidth (0.2352f), 24);
-    opacityLabel->setBounds ((proportionOfWidth (0.5996f)) + -66, getHeight() - 141, 64, 24);
-    xSlider->setBounds (proportionOfWidth (0.3609f), getHeight() - 109, proportionOfWidth (0.3788f), 24);
-    ySlider->setBounds (proportionOfWidth (0.3609f), getHeight() - 85, proportionOfWidth (0.3788f), 24);
-    sizeSlider->setBounds (proportionOfWidth (0.3609f), getHeight() - 61, proportionOfWidth (0.3788f), 24);
-    angleSlider->setBounds (proportionOfWidth (0.3609f), getHeight() - 37, proportionOfWidth (0.3788f), 24);
-    xSliderLabel->setBounds (proportionOfWidth (0.2495f), getHeight() - 109, proportionOfWidth (0.1059f), 24);
-    ySliderLabel->setBounds (proportionOfWidth (0.2495f), getHeight() - 85, proportionOfWidth (0.1059f), 24);
-    sizeSliderLabel->setBounds (proportionOfWidth (0.2495f), getHeight() - 61, proportionOfWidth (0.1059f), 24);
-    angleSliderLabel->setBounds (proportionOfWidth (0.2495f), getHeight() - 37, proportionOfWidth (0.1059f), 24);
-    clipToRectangleToggle->setBounds (proportionOfWidth (0.0215f), getHeight() - 109, 144, 24);
-    clipToPathToggle->setBounds (proportionOfWidth (0.0215f), getHeight() - 85, 144, 24);
-    clipToImageToggle->setBounds (proportionOfWidth (0.0215f), getHeight() - 61, 144, 24);
+    opacitySlider->setBounds (proportionOfWidth (0.6000f), getHeight() - 141, proportionOfWidth (0.3795f), 24);
+    highQualityToggle->setBounds (proportionOfWidth (0.0222f), getHeight() - 141, proportionOfWidth (0.4444f), 24);
+    animateSizeToggle->setBounds (proportionOfWidth (0.7573f), getHeight() - 85, proportionOfWidth (0.2239f), 24);
+    animateRotationToggle->setBounds (proportionOfWidth (0.7573f), getHeight() - 61, proportionOfWidth (0.2239f), 24);
+    animatePositionToggle->setBounds (proportionOfWidth (0.7573f), getHeight() - 109, proportionOfWidth (0.2239f), 24);
+    animateFillToggle->setBounds (proportionOfWidth (0.7573f), getHeight() - 37, proportionOfWidth (0.2359f), 24);
+    opacityLabel->setBounds ((proportionOfWidth (0.6000f)) + -66, getHeight() - 141, 64, 24);
+    xSlider->setBounds (proportionOfWidth (0.3607f), getHeight() - 109, proportionOfWidth (0.3795f), 24);
+    ySlider->setBounds (proportionOfWidth (0.3607f), getHeight() - 85, proportionOfWidth (0.3795f), 24);
+    sizeSlider->setBounds (proportionOfWidth (0.3607f), getHeight() - 61, proportionOfWidth (0.3795f), 24);
+    angleSlider->setBounds (proportionOfWidth (0.3607f), getHeight() - 37, proportionOfWidth (0.3795f), 24);
+    xSliderLabel->setBounds (proportionOfWidth (0.2496f), getHeight() - 109, proportionOfWidth (0.1060f), 24);
+    ySliderLabel->setBounds (proportionOfWidth (0.2496f), getHeight() - 85, proportionOfWidth (0.1060f), 24);
+    sizeSliderLabel->setBounds (proportionOfWidth (0.2496f), getHeight() - 61, proportionOfWidth (0.1060f), 24);
+    angleSliderLabel->setBounds (proportionOfWidth (0.2496f), getHeight() - 37, proportionOfWidth (0.1060f), 24);
+    clipToRectangleToggle->setBounds (proportionOfWidth (0.0222f), getHeight() - 109, 144, 24);
+    clipToPathToggle->setBounds (proportionOfWidth (0.0222f), getHeight() - 85, 144, 24);
+    clipToImageToggle->setBounds (proportionOfWidth (0.0222f), getHeight() - 61, 144, 24);
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
 }

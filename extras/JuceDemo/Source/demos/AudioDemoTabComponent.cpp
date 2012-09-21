@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  20 Sep 2012 1:44:23pm
+  Creation date:  21 Sep 2012 12:10:28pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -116,11 +116,11 @@ AudioDemoTabComponent::AudioDemoTabComponent ()
 {
     addAndMakeVisible (tabbedComponent = new TabbedComponent (TabbedButtonBar::TabsAtTop));
     tabbedComponent->setTabBarDepth (30);
-    tabbedComponent->addTab (L"Audio Device Setup", Colours::lightgrey, new AudioDemoSetupPage (deviceManager), true);
-    tabbedComponent->addTab (L"File Playback", Colours::lightgrey, new AudioDemoPlaybackPage (deviceManager), true);
-    tabbedComponent->addTab (L"Synth Playback", Colours::lightgrey, new AudioDemoSynthPage (deviceManager), true);
-    tabbedComponent->addTab (L"Latency Test", Colours::lightgrey, new AudioDemoLatencyPage (deviceManager), true);
-    tabbedComponent->addTab (L"Recording", Colours::lightgrey, new AudioDemoRecordPage (deviceManager), true);
+    tabbedComponent->addTab ("Audio Device Setup", Colours::lightgrey, new AudioDemoSetupPage (deviceManager), true);
+    tabbedComponent->addTab ("File Playback", Colours::lightgrey, new AudioDemoPlaybackPage (deviceManager), true);
+    tabbedComponent->addTab ("Synth Playback", Colours::lightgrey, new AudioDemoSynthPage (deviceManager), true);
+    tabbedComponent->addTab ("Latency Test", Colours::lightgrey, new AudioDemoLatencyPage (deviceManager), true);
+    tabbedComponent->addTab ("Recording", Colours::lightgrey, new AudioDemoRecordPage (deviceManager), true);
     tabbedComponent->setCurrentTabIndex (0);
 
 

@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  1 May 2011 12:12:59pm
+  Creation date:  21 Sep 2012 12:11:41pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -34,7 +34,7 @@ MainComponent::MainComponent ()
       quitButton (0)
 {
     addAndMakeVisible (helloWorldLabel = new Label (String::empty,
-                                                    L"Hello World!"));
+                                                    "Hello World!"));
     helloWorldLabel->setFont (Font (40.0000f, Font::bold));
     helloWorldLabel->setJustificationType (Justification::centred);
     helloWorldLabel->setEditable (false, false, false);
@@ -43,7 +43,7 @@ MainComponent::MainComponent ()
     helloWorldLabel->setColour (TextEditor::backgroundColourId, Colour (0x0));
 
     addAndMakeVisible (quitButton = new TextButton (String::empty));
-    quitButton->setButtonText (L"Quit");
+    quitButton->setButtonText ("Quit");
     quitButton->addListener (this);
 
 

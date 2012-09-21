@@ -153,7 +153,7 @@ public:
             {
                 if (resourceName.isNotEmpty())
                 {
-                    const String imageVariable (L"drawable" + String (code.getUniqueSuffix()));
+                    const String imageVariable ("drawable" + String (code.getUniqueSuffix()));
 
                     code.privateMemberDeclarations
                         << "Drawable* " << imageVariable << ";\n";
