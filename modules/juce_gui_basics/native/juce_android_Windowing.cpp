@@ -715,7 +715,7 @@ Image juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
-void* MouseCursor::createMouseCursorFromImage (const Image&, int, int)                          { return nullptr; }
+void* CustomMouseCursorInfo::create() const                                                     { return nullptr; }
 void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType)            { return nullptr; }
 void MouseCursor::deleteMouseCursor (void* const /*cursorHandle*/, const bool /*isStandard*/)   {}
 

@@ -2800,11 +2800,13 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
+void* CustomMouseCursorInfo::create() const
 {
     ScopedXLock xlock;
     const unsigned int imageW = image.getWidth();
     const unsigned int imageH = image.getHeight();
+    int hotspotX = hotspot.x;
+    int hotspotY = hotspot.y;
 
   #if JUCE_USE_XCURSOR
     {
@@ -2935,7 +2937,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
     {
         case NormalCursor:
         case ParentCursor:                  return None; // Use parent cursor
-        case NoCursor:                      return createMouseCursorFromImage (Image (Image::ARGB, 16, 16, true), 0, 0);
+        case NoCursor:                      return CustomMouseCursorInfo (Image (Image::ARGB, 16, 16, true), 0, 0).create();
 
         case WaitCursor:                    shape = XC_watch; break;
         case IBeamCursor:                   shape = XC_xterm; break;
@@ -2960,7 +2962,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
               132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
             const int dragHandDataSize = 99;
 
-            return createMouseCursorFromImage (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), 8, 7);
+            return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), 8, 7).create();
         }
 
         case CopyingCursor:
@@ -2971,7 +2973,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
               252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
             const int copyCursorSize = 119;
 
-            return createMouseCursorFromImage (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), 1, 3);
+            return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), 1, 3).create();
         }
 
         default:
