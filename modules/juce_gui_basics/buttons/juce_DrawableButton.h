@@ -49,9 +49,10 @@ public:
         ImageRaw,                   /**< The button will just display the images in their normal size and position.
                                          This leaves it up to the caller to make sure the images are the correct size and position for the button. */
         ImageAboveTextLabel,        /**< Draws the button as a text label across the bottom with the image resized and scaled to fit above it. */
-        ImageOnButtonBackground     /**< Draws the button as a standard rounded-rectangle button with the image on top.
+        ImageOnButtonBackground,    /**< Draws the button as a standard rounded-rectangle button with the image on top.
                                          Note that if you use this style, the colour IDs that control the button colour are
                                          TextButton::buttonColourId and TextButton::buttonOnColourId. */
+        ImageStretched              /**< Fills the button with a stretched version of the image. */
     };
 
     //==============================================================================

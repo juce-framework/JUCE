@@ -23,8 +23,7 @@
   ==============================================================================
 */
 
-DrawableButton::DrawableButton (const String& name,
-                                const DrawableButton::ButtonStyle buttonStyle)
+DrawableButton::DrawableButton (const String& name, const DrawableButton::ButtonStyle buttonStyle)
     : Button (name),
       style (buttonStyle),
       currentImage (nullptr),
@@ -37,6 +36,11 @@ DrawableButton::~DrawableButton()
 }
 
 //==============================================================================
+static Drawable* copyDrawableIfNotNull (const Drawable* const d)
+{
+    return d != nullptr ? d->createCopy() : nullptr;
+}
+
 void DrawableButton::setImages (const Drawable* normal,
                                 const Drawable* over,
                                 const Drawable* down,
@@ -48,14 +52,14 @@ void DrawableButton::setImages (const Drawable* normal,
 {
     jassert (normal != nullptr); // you really need to give it at least a normal image..
 
-    if (normal != nullptr)        normalImage = normal->createCopy();
-    if (over != nullptr)          overImage = over->createCopy();
-    if (down != nullptr)          downImage = down->createCopy();
-    if (disabled != nullptr)      disabledImage = disabled->createCopy();
-    if (normalOn != nullptr)      normalImageOn = normalOn->createCopy();
-    if (overOn != nullptr)        overImageOn = overOn->createCopy();
-    if (downOn != nullptr)        downImageOn = downOn->createCopy();
-    if (disabledOn != nullptr)    disabledImageOn = disabledOn->createCopy();
+    normalImage     = copyDrawableIfNotNull (normal);
+    overImage       = copyDrawableIfNotNull (over);
+    downImage       = copyDrawableIfNotNull (down);
+    disabledImage   = copyDrawableIfNotNull (disabled);
+    normalImageOn   = copyDrawableIfNotNull (normalOn);
+    overImageOn     = copyDrawableIfNotNull (overOn);
+    downImageOn     = copyDrawableIfNotNull (downOn);
+    disabledImageOn = copyDrawableIfNotNull (disabledOn);
 
     buttonStateChanged();
 }
@@ -86,6 +90,10 @@ void DrawableButton::resized()
         if (style == ImageRaw)
         {
             currentImage->setOriginWithOriginalSize (Point<float>());
+        }
+        else if (style == ImageStretched)
+        {
+            currentImage->setTransformToFit (getLocalBounds().toFloat(), RectanglePlacement::stretchToFit);
         }
         else
         {
