@@ -127,7 +127,7 @@ public:
     {
         while (numSamples > 0)
         {
-            const int numAvailable = reservoirStart + samplesInReservoir - startSampleInFile;
+            const int numAvailable = (int) (reservoirStart + samplesInReservoir - startSampleInFile);
 
             if (startSampleInFile >= reservoirStart && numAvailable > 0)
             {

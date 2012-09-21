@@ -58,7 +58,6 @@ public:
          #else
           usingCoreGraphics (false),
          #endif
-          recursiveToFrontCall (false),
           isZooming (false),
           textWasInserted (false),
           notificationCenter (nil)
@@ -370,10 +369,8 @@ public:
         NSView* v = [view hitTest: NSMakePoint (frameRect.origin.x + position.getX(),
                                                 frameRect.origin.y + frameRect.size.height - position.getY())];
 
-        if (trueIfInAChildWindow)
-            return v != nil;
-
-        return v == view;
+        return trueIfInAChildWindow ? (v != nil)
+                                    : (v == view);
     }
 
     BorderSize<int> getFrameSize() const
@@ -427,18 +424,20 @@ public:
 
         if (window != nil && component.isVisible())
         {
+            ++insideToFrontCall;
+
             if (makeActiveWindow)
                 [window makeKeyAndOrderFront: nil];
             else
                 [window orderFront: nil];
 
-            if (! recursiveToFrontCall)
+            if (insideToFrontCall <= 1)
             {
-                recursiveToFrontCall = true;
                 Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
                 handleBroughtToFront();
-                recursiveToFrontCall = false;
             }
+
+            --insideToFrontCall;
         }
     }
 
@@ -783,6 +782,7 @@ public:
         Component* const modal = Component::getCurrentlyModalComponent();
 
         if (modal != nullptr
+             && insideToFrontCall == 0
              && (! getComponent().isParentOf (modal))
              && getComponent().isCurrentlyBlockedByAnotherModalComponent())
         {
@@ -1133,13 +1133,14 @@ public:
     NSWindow* window;
     NSView* view;
     bool isSharedWindow, fullScreen, insideDrawRect;
-    bool usingCoreGraphics, recursiveToFrontCall, isZooming, textWasInserted;
+    bool usingCoreGraphics, isZooming, textWasInserted;
     String stringBeingComposed;
     NSNotificationCenter* notificationCenter;
 
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
     static Array<int> keysCurrentlyDown;
+    static int insideToFrontCall;
 
 private:
     static NSView* createViewInstance();
@@ -1260,8 +1261,7 @@ private:
             if (! [NSApp isActive])
                 [NSApp activateIgnoringOtherApps: YES];
 
-            Component* const modal = Component::getCurrentlyModalComponent();
-            if (modal != nullptr)
+            if (Component* const modal = Component::getCurrentlyModalComponent())
                 modal->inputAttemptWhenModal();
         }
 
@@ -1270,6 +1270,8 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer);
 };
+
+int NSViewComponentPeer::insideToFrontCall = 0;
 
 //==============================================================================
 struct JuceNSViewClass   : public ObjCClass <NSView>
