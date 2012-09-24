@@ -118,10 +118,10 @@ void ComboBox::addItem (const String& newItemText, const int newItemId)
     }
 }
 
-void ComboBox::addItemList (const StringArray& items, const int firstItemIdOffset)
+void ComboBox::addItemList (const StringArray& itemsToAdd, const int firstItemIdOffset)
 {
-    for (int i = 0; i < items.size(); ++i)
-        addItem (items[i], i + firstItemIdOffset);
+    for (int i = 0; i < itemsToAdd.size(); ++i)
+        addItem (itemsToAdd[i], i + firstItemIdOffset);
 }
 
 void ComboBox::addSeparator()

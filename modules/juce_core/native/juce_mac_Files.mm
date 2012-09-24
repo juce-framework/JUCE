@@ -351,11 +351,11 @@ public:
             if (fnmatch (wildcardUTF8, filenameFound.toUTF8(), FNM_CASEFOLD) != 0)
                 continue;
 
-            const String path (parentDir + filenameFound);
-            updateStatInfoForFile (path, isDir, fileSize, modTime, creationTime, isReadOnly);
+            const String fullPath (parentDir + filenameFound);
+            updateStatInfoForFile (fullPath, isDir, fileSize, modTime, creationTime, isReadOnly);
 
             if (isHidden != nullptr)
-                *isHidden = FileHelpers::isHiddenFile (path);
+                *isHidden = FileHelpers::isHiddenFile (fullPath);
 
             return true;
         }
@@ -368,8 +368,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE (Pimpl);
 };
 
-DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCard)
-    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildCard))
+DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildcard)
+    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildcard))
 {
 }
 

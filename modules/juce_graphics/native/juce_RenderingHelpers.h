@@ -1357,24 +1357,24 @@ namespace EdgeTableFillers
                   pixelOffset (offsetFloat), pixelOffsetInt (offsetInt)
             {}
 
-            void setStartOfLine (float x, float y, const int numPixels) noexcept
+            void setStartOfLine (float sx, float sy, const int numPixels) noexcept
             {
                 jassert (numPixels > 0);
 
-                x += pixelOffset;
-                y += pixelOffset;
-                float x1 = x, y1 = y;
-                x += numPixels;
-                inverseTransform.transformPoints (x1, y1, x, y);
+                sx += pixelOffset;
+                sy += pixelOffset;
+                float x1 = sx, y1 = sy;
+                sx += numPixels;
+                inverseTransform.transformPoints (x1, y1, sx, sy);
 
-                xBresenham.set ((int) (x1 * 256.0f), (int) (x * 256.0f), numPixels, pixelOffsetInt);
-                yBresenham.set ((int) (y1 * 256.0f), (int) (y * 256.0f), numPixels, pixelOffsetInt);
+                xBresenham.set ((int) (x1 * 256.0f), (int) (sx * 256.0f), numPixels, pixelOffsetInt);
+                yBresenham.set ((int) (y1 * 256.0f), (int) (sy * 256.0f), numPixels, pixelOffsetInt);
             }
 
-            void next (int& x, int& y) noexcept
+            void next (int& px, int& py) noexcept
             {
-                x = xBresenham.n;  xBresenham.stepToNext();
-                y = yBresenham.n;  yBresenham.stepToNext();
+                px = xBresenham.n;  xBresenham.stepToNext();
+                py = yBresenham.n;  yBresenham.stepToNext();
             }
 
         private:
@@ -1383,12 +1383,12 @@ namespace EdgeTableFillers
             public:
                 BresenhamInterpolator() noexcept {}
 
-                void set (const int n1, const int n2, const int numSteps_, const int pixelOffsetInt) noexcept
+                void set (const int n1, const int n2, const int numSteps_, const int offsetInt) noexcept
                 {
                     numSteps = numSteps_;
                     step = (n2 - n1) / numSteps;
                     remainder = modulo = (n2 - n1) % numSteps;
-                    n = n1 + pixelOffsetInt;
+                    n = n1 + offsetInt;
 
                     if (modulo <= 0)
                     {

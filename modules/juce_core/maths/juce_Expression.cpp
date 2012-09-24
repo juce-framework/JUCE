@@ -350,8 +350,8 @@ struct Expression::Helpers
         class EvaluationVisitor  : public Scope::Visitor
         {
         public:
-            EvaluationVisitor (const TermPtr& term, const int recursion)
-                : input (term), output (term), recursionCount (recursion) {}
+            EvaluationVisitor (const TermPtr& t, const int recursion)
+                : input (t), output (t), recursionCount (recursion) {}
 
             void visit (const Scope& scope)   { output = input->resolve (scope, recursionCount); }
 
@@ -366,8 +366,8 @@ struct Expression::Helpers
         class SymbolVisitingVisitor  : public Scope::Visitor
         {
         public:
-            SymbolVisitingVisitor (const TermPtr& term, SymbolVisitor& v, const int recursion)
-                : input (term), visitor (v), recursionCount (recursion) {}
+            SymbolVisitingVisitor (const TermPtr& t, SymbolVisitor& v, const int recursion)
+                : input (t), visitor (v), recursionCount (recursion) {}
 
             void visit (const Scope& scope)   { input->visitAllSymbols (visitor, scope, recursionCount); }
 
@@ -382,8 +382,8 @@ struct Expression::Helpers
         class SymbolRenamingVisitor   : public Scope::Visitor
         {
         public:
-            SymbolRenamingVisitor (const TermPtr& term, const Expression::Symbol& symbol_, const String& newName_, const int recursionCount_)
-                : input (term), symbol (symbol_), newName (newName_), recursionCount (recursionCount_)  {}
+            SymbolRenamingVisitor (const TermPtr& t, const Expression::Symbol& symbol_, const String& newName_, const int recursionCount_)
+                : input (t), symbol (symbol_), newName (newName_), recursionCount (recursionCount_)  {}
 
             void visit (const Scope& scope)   { input->renameSymbol (symbol, newName, scope, recursionCount); }
 
@@ -405,9 +405,9 @@ struct Expression::Helpers
     class Negate  : public Term
     {
     public:
-        explicit Negate (const TermPtr& term) : input (term)
+        explicit Negate (const TermPtr& t) : input (t)
         {
-            jassert (term != nullptr);
+            jassert (t != nullptr);
         }
 
         Type getType() const noexcept                           { return operatorType; }
@@ -424,10 +424,10 @@ struct Expression::Helpers
         String getName() const          { return "-"; }
         TermPtr negated()               { return input; }
 
-        TermPtr createTermToEvaluateInput (const Scope& scope, const Term* term, double overallTarget, Term* topLevelTerm) const
+        TermPtr createTermToEvaluateInput (const Scope& scope, const Term* t, double overallTarget, Term* topLevelTerm) const
         {
-            (void) term;
-            jassert (term == input);
+            (void) t;
+            jassert (t == input);
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);
 
@@ -813,15 +813,15 @@ struct Expression::Helpers
             char opType;
             if (readOperator ("+-", &opType))
             {
-                TermPtr term (readUnaryExpression());
+                TermPtr e (readUnaryExpression());
 
-                if (term == nullptr)
+                if (e == nullptr)
                     throw ParseError ("Expected expression after \"" + String::charToString ((juce_wchar) (uint8) opType) + "\"");
 
                 if (opType == '-')
-                    term = term->negated();
+                    e = e->negated();
 
-                return term;
+                return e;
             }
 
             return readPrimaryExpression();

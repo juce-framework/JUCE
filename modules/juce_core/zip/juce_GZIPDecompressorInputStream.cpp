@@ -31,6 +31,12 @@
 namespace zlibNamespace
 {
  #if JUCE_INCLUDE_ZLIB_CODE
+  #if JUCE_CLANG
+   #pragma clang diagnostic push
+   #pragma clang diagnostic ignored "-Wconversion"
+   #pragma clang diagnostic ignored "-Wshadow"
+  #endif
+
   #undef OS_CODE
   #undef fdopen
   #define ZLIB_INTERNAL
@@ -55,6 +61,10 @@ namespace zlibNamespace
   #include "zlib/trees.c"
   #include "zlib/zutil.c"
   #undef Byte
+
+  #if JUCE_CLANG
+   #pragma clang diagnostic pop
+  #endif
  #else
   #include JUCE_ZLIB_INCLUDE_PATH
  #endif
@@ -70,7 +80,7 @@ namespace zlibNamespace
 class GZIPDecompressorInputStream::GZIPDecompressHelper
 {
 public:
-    GZIPDecompressHelper (const bool noWrap)
+    GZIPDecompressHelper (const bool dontWrap)
         : finished (true),
           needsDictionary (false),
           error (true),
@@ -80,7 +90,7 @@ public:
     {
         using namespace zlibNamespace;
         zerostruct (stream);
-        streamIsValid = (inflateInit2 (&stream, noWrap ? -MAX_WBITS : MAX_WBITS) == Z_OK);
+        streamIsValid = (inflateInit2 (&stream, dontWrap ? -MAX_WBITS : MAX_WBITS) == Z_OK);
         finished = error = ! streamIsValid;
     }
 

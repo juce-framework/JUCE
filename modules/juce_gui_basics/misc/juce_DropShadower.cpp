@@ -26,24 +26,24 @@
 class DropShadower::ShadowWindow  : public Component
 {
 public:
-    ShadowWindow (Component& owner, const int type_, const Image shadowImageSections [12])
-        : topLeft (shadowImageSections [type_ * 3]),
-          bottomRight (shadowImageSections [type_ * 3 + 1]),
-          filler (shadowImageSections [type_ * 3 + 2]),
-          type (type_)
+    ShadowWindow (Component& comp, const int shadowType, const Image imageSections [12])
+        : topLeft (imageSections [shadowType * 3]),
+          bottomRight (imageSections [shadowType * 3 + 1]),
+          filler (imageSections [shadowType * 3 + 2]),
+          type (shadowType)
     {
         setInterceptsMouseClicks (false, false);
 
-        if (owner.isOnDesktop())
+        if (comp.isOnDesktop())
         {
             setSize (1, 1); // to keep the OS happy by not having zero-size windows
             addToDesktop (ComponentPeer::windowIgnoresMouseClicks
                             | ComponentPeer::windowIsTemporary
                             | ComponentPeer::windowIgnoresKeyPresses);
         }
-        else if (owner.getParentComponent() != nullptr)
+        else if (Component* const parent = comp.getParentComponent())
         {
-            owner.getParentComponent()->addChildComponent (this);
+            parent->addChildComponent (this);
         }
     }
 

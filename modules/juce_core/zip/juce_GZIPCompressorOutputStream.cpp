@@ -46,26 +46,26 @@ public:
             zlibNamespace::deflateEnd (&stream);
     }
 
-    bool write (const uint8* data, int dataSize, OutputStream& destStream)
+    bool write (const uint8* data, int dataSize, OutputStream& out)
     {
         // When you call flush() on a gzip stream, the stream is closed, and you can
         // no longer continue to write data to it!
         jassert (! finished);
 
         while (dataSize > 0)
-            if (! doNextBlock (data, dataSize, destStream, Z_NO_FLUSH))
+            if (! doNextBlock (data, dataSize, out, Z_NO_FLUSH))
                 return false;
 
         return true;
     }
 
-    void finish (OutputStream& destStream)
+    void finish (OutputStream& out)
     {
         const uint8* data = nullptr;
         int dataSize = 0;
 
         while (! finished)
-            doNextBlock (data, dataSize, destStream, Z_FINISH);
+            doNextBlock (data, dataSize, out, Z_FINISH);
     }
 
 private:
@@ -76,7 +76,7 @@ private:
     bool isFirstDeflate, streamIsValid, finished;
     zlibNamespace::Bytef buffer[32768];
 
-    bool doNextBlock (const uint8*& data, int& dataSize, OutputStream& destStream, const int flushMode)
+    bool doNextBlock (const uint8*& data, int& dataSize, OutputStream& out, const int flushMode)
     {
         using namespace zlibNamespace;
         if (streamIsValid)
@@ -100,7 +100,7 @@ private:
                     data += dataSize - stream.avail_in;
                     dataSize = (int) stream.avail_in;
                     const int bytesDone = ((int) sizeof (buffer)) - (int) stream.avail_out;
-                    return bytesDone <= 0 || destStream.write (buffer, bytesDone);
+                    return bytesDone <= 0 || out.write (buffer, bytesDone);
                 }
 
                 default:
@@ -115,14 +115,14 @@ private:
 };
 
 //==============================================================================
-GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const destStream_,
+GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const out,
                                                         const int compressionLevel,
                                                         const bool deleteDestStream,
                                                         const int windowBits)
-    : destStream (destStream_, deleteDestStream),
+    : destStream (out, deleteDestStream),
       helper (new GZIPCompressorHelper (compressionLevel, windowBits))
 {
-    jassert (destStream_ != nullptr);
+    jassert (out != nullptr);
 }
 
 GZIPCompressorOutputStream::~GZIPCompressorOutputStream()

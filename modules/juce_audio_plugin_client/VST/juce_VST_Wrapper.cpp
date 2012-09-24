@@ -66,6 +66,12 @@
  #define __cdecl
 #endif
 
+#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wconversion"
+ #pragma clang diagnostic ignored "-Wshadow"
+#endif
+
 // VSTSDK V2.4 includes..
 #include <public.sdk/source/vst2.x/audioeffectx.h>
 #include <public.sdk/source/vst2.x/aeffeditor.h>
@@ -74,6 +80,10 @@
 
 #if ! VST_2_4_EXTENSIONS
  #error "It looks like you're trying to include an out-of-date VSTSDK version - make sure you have at least version 2.4"
+#endif
+
+#ifdef __clang__
+ #pragma clang diagnostic pop
 #endif
 
 //==============================================================================
@@ -1471,12 +1481,14 @@ namespace
 // Mac startup code..
 #if JUCE_MAC
 
+    extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster);
     extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
         initialiseMac();
         return pluginEntryPoint (audioMaster);
     }
 
+    extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMasterCallback audioMaster);
     extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMasterCallback audioMaster)
     {
         initialiseMac();

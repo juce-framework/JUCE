@@ -37,6 +37,12 @@ namespace OggVorbisNamespace
   #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365)
  #endif
 
+#if JUCE_CLANG
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wconversion"
+ #pragma clang diagnostic ignored "-Wshadow"
+#endif
+
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
  #include "oggvorbis/vorbisfile.h"
@@ -67,6 +73,10 @@ namespace OggVorbisNamespace
 
  #if JUCE_MSVC
   #pragma warning (pop)
+ #endif
+
+ #if JUCE_CLANG
+  #pragma clang diagnostic pop
  #endif
 #else
  #include <vorbis/vorbisenc.h>

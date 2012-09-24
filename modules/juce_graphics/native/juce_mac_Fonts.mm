@@ -426,8 +426,8 @@ public:
 
             fontRef = CTFontCopyGraphicsFont (ctFontRef, nullptr);
 
-            const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
-            const float ctTotalHeight = abs (CTFontGetAscent (ctFontRef)) + abs (CTFontGetDescent (ctFontRef));
+            const int totalHeight = std::abs (CGFontGetAscent (fontRef)) + std::abs (CGFontGetDescent (fontRef));
+            const float ctTotalHeight = std::abs (CTFontGetAscent (ctFontRef)) + std::abs (CTFontGetDescent (ctFontRef));
             unitsToHeightScaleFactor = 1.0f / ctTotalHeight;
             fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
 

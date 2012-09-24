@@ -70,6 +70,7 @@ static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, vo
 #endif
 
 //==============================================================================
+void initialiseMac();
 void initialiseMac()
 {
    #if ! JUCE_64BIT
@@ -77,6 +78,7 @@ void initialiseMac()
    #endif
 }
 
+void* attachComponentToWindowRef (Component* comp, void* windowRef);
 void* attachComponentToWindowRef (Component* comp, void* windowRef)
 {
     JUCE_AUTORELEASEPOOL
@@ -166,6 +168,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
   #endif
 }
 
+void detachComponentFromWindowRef (Component* comp, void* nsWindow);
 void detachComponentFromWindowRef (Component* comp, void* nsWindow)
 {
    #if JUCE_64BIT
@@ -206,6 +209,7 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
    #endif
 }
 
+void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host);
 void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight, const PluginHostType& host)
 {
     JUCE_AUTORELEASEPOOL
@@ -233,6 +237,7 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
    #endif
 }
 
+void checkWindowVisibility (void* nsWindow, Component* comp);
 void checkWindowVisibility (void* nsWindow, Component* comp)
 {
    #if ! JUCE_64BIT
@@ -240,6 +245,7 @@ void checkWindowVisibility (void* nsWindow, Component* comp)
    #endif
 }
 
+bool forwardCurrentKeyEventToHost (Component* comp);
 bool forwardCurrentKeyEventToHost (Component* comp)
 {
    #if JUCE_64BIT

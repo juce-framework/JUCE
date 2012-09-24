@@ -31,7 +31,7 @@ Display* display = nullptr;
 Window juce_messageWindowHandle = None;
 XContext windowHandleXContext;   // This is referenced from Windowing.cpp
 
-extern void juce_windowMessageReceive (XEvent*);  // Defined in Windowing.cpp
+extern void juce_windowMessageReceive (XEvent* event);  // Defined in Windowing.cpp
 extern void juce_handleSelectionRequest (XSelectionRequestEvent&);  // Defined in Clipboard.cpp
 
 //==============================================================================

@@ -30,41 +30,41 @@ public:
     {
     }
 
-    bool update (CodeDocument& document, int lineNum,
+    bool update (CodeDocument& codeDoc, int lineNum,
                  CodeDocument::Iterator& source,
-                 CodeTokeniser* tokeniser, const int spacesPerTab,
-                 const CodeDocument::Position& selectionStart,
-                 const CodeDocument::Position& selectionEnd)
+                 CodeTokeniser* tokeniser, const int tabSpaces,
+                 const CodeDocument::Position& selStart,
+                 const CodeDocument::Position& selEnd)
     {
         Array <SyntaxToken> newTokens;
         newTokens.ensureStorageAllocated (8);
 
         if (tokeniser == nullptr)
         {
-            const String line (document.getLine (lineNum));
+            const String line (codeDoc.getLine (lineNum));
             addToken (newTokens, line, line.length(), -1);
         }
-        else if (lineNum < document.getNumLines())
+        else if (lineNum < codeDoc.getNumLines())
         {
-            const CodeDocument::Position pos (document, lineNum, 0);
+            const CodeDocument::Position pos (codeDoc, lineNum, 0);
             createTokens (pos.getPosition(), pos.getLineText(),
                           source, *tokeniser, newTokens);
         }
 
-        replaceTabsWithSpaces (newTokens, spacesPerTab);
+        replaceTabsWithSpaces (newTokens, tabSpaces);
 
         int newHighlightStart = 0;
         int newHighlightEnd = 0;
 
-        if (selectionStart.getLineNumber() <= lineNum && selectionEnd.getLineNumber() >= lineNum)
+        if (selStart.getLineNumber() <= lineNum && selEnd.getLineNumber() >= lineNum)
         {
-            const String line (document.getLine (lineNum));
+            const String line (codeDoc.getLine (lineNum));
 
-            CodeDocument::Position lineStart (document, lineNum, 0), lineEnd (document, lineNum + 1, 0);
-            newHighlightStart = indexToColumn (jmax (0, selectionStart.getPosition() - lineStart.getPosition()),
-                                               line, spacesPerTab);
-            newHighlightEnd = indexToColumn (jmin (lineEnd.getPosition() - lineStart.getPosition(), selectionEnd.getPosition() - lineStart.getPosition()),
-                                             line, spacesPerTab);
+            CodeDocument::Position lineStart (codeDoc, lineNum, 0), lineEnd (codeDoc, lineNum + 1, 0);
+            newHighlightStart = indexToColumn (jmax (0, selStart.getPosition() - lineStart.getPosition()),
+                                               line, tabSpaces);
+            newHighlightEnd = indexToColumn (jmin (lineEnd.getPosition() - lineStart.getPosition(), selEnd.getPosition() - lineStart.getPosition()),
+                                             line, tabSpaces);
         }
 
         if (newHighlightStart != highlightColumnStart || newHighlightEnd != highlightColumnEnd)
@@ -81,17 +81,17 @@ public:
         return true;
     }
 
-    void draw (CodeEditorComponent& owner, Graphics& g, const Font& font,
+    void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
                const float leftClip, const float rightClip,
-               const float xOffset, const int y, const int baselineOffset,
-               const int lineHeight, const float charWidth,
+               const float x, const int y, const int baselineOffset,
+               const int lineH, const float characterWidth,
                const Colour& highlightColour) const
     {
         if (highlightColumnStart < highlightColumnEnd)
         {
             g.setColour (highlightColour);
-            g.fillRect (roundToInt (xOffset + highlightColumnStart * owner.getCharWidth()), y,
-                        roundToInt ((highlightColumnEnd - highlightColumnStart) * owner.getCharWidth()), lineHeight);
+            g.fillRect (roundToInt (x + highlightColumnStart * characterWidth), y,
+                        roundToInt ((highlightColumnEnd - highlightColumnStart) * characterWidth), lineH);
         }
 
         const float baselineY = (float) (y + baselineOffset);
@@ -101,7 +101,7 @@ public:
 
         for (int i = 0; i < tokens.size(); ++i)
         {
-            const float tokenX = xOffset + column * charWidth;
+            const float tokenX = x + column * characterWidth;
             if (tokenX > rightClip)
                 break;
 
@@ -119,9 +119,9 @@ public:
 
             column += token.length;
 
-            if (xOffset + column * charWidth >= leftClip)
-                ga.addCurtailedLineOfText (font, token.text, tokenX, baselineY,
-                                           (rightClip - tokenX) + charWidth, false);
+            if (x + column * characterWidth >= leftClip)
+                ga.addCurtailedLineOfText (fontToUse, token.text, tokenX, baselineY,
+                                           (rightClip - tokenX) + characterWidth, false);
         }
 
         ga.draw (g);
@@ -207,7 +207,7 @@ private:
         }
     }
 
-    int indexToColumn (int index, const String& line, int spacesPerTab) const noexcept
+    int indexToColumn (int index, const String& line, int tabSpaces) const noexcept
     {
         jassert (index <= line.length());
 
@@ -218,7 +218,7 @@ private:
             if (t.getAndAdvance() != '\t')
                 ++col;
             else
-                col += spacesPerTab - (col % spacesPerTab);
+                col += tabSpaces - (col % tabSpaces);
         }
 
         return col;
@@ -316,10 +316,10 @@ public:
                     .overlaidWith (editor.findColour (lineNumberBackgroundId)));
 
         const Rectangle<int> clip (g.getClipBounds());
-        const int lineHeight = editor.lineHeight;
-        const float lineHeightFloat = (float) lineHeight;
-        const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
-        const int lastLineToDraw = jmin (editor.lines.size(), clip.getBottom() / lineHeight + 1,
+        const int lineH = editor.lineHeight;
+        const float lineHeightFloat = (float) lineH;
+        const int firstLineToDraw = jmax (0, clip.getY() / lineH);
+        const int lastLineToDraw = jmin (editor.lines.size(), clip.getBottom() / lineH + 1,
                                          lastNumLines - editor.firstLineOnScreen);
 
         const Font lineNumberFont (editor.getFont().withHeight (jmin (13.0f, lineHeightFloat * 0.8f)));
@@ -328,7 +328,7 @@ public:
         GlyphArrangement ga;
         for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
             ga.addFittedText (lineNumberFont, String (editor.firstLineOnScreen + i + 1),
-                              0, (float) (lineHeight * i), w, lineHeightFloat,
+                              0, (float) (lineH * i), w, lineHeightFloat,
                               Justification::centredRight, 1, 0.2f);
 
         g.setColour (editor.findColour (lineNumberTextId));
@@ -481,8 +481,8 @@ void CodeEditorComponent::paint (Graphics& g)
 
     g.fillAll (findColour (CodeEditorComponent::backgroundColourId));
 
-    const int gutter = getGutterSize();
-    g.reduceClipRegion (gutter, 0, verticalScrollBar.getX() - gutter, horizontalScrollBar.getY());
+    const int gutterSize = getGutterSize();
+    g.reduceClipRegion (gutterSize, 0, verticalScrollBar.getX() - gutterSize, horizontalScrollBar.getY());
 
     g.setFont (font);
     const int baselineOffset = (int) font.getAscent();
@@ -491,7 +491,7 @@ void CodeEditorComponent::paint (Graphics& g)
     const Rectangle<int> clip (g.getClipBounds());
     const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
     const int lastLineToDraw = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
-    const float x = (float) (gutter - xOffset * charWidth);
+    const float x = (float) (gutterSize - xOffset * charWidth);
     const float leftClip  = (float) clip.getX();
     const float rightClip = (float) clip.getRight();
 
@@ -709,12 +709,12 @@ void CodeEditorComponent::scrollBy (int deltaLines)
     scrollToLine (firstLineOnScreen + deltaLines);
 }
 
-void CodeEditorComponent::scrollToKeepLinesOnScreen (const Range<int>& lines)
+void CodeEditorComponent::scrollToKeepLinesOnScreen (const Range<int>& rangeToShow)
 {
-    if (lines.getStart() < firstLineOnScreen)
-        scrollBy (lines.getStart() - firstLineOnScreen);
-    else if (lines.getEnd() >= firstLineOnScreen + linesOnScreen)
-        scrollBy (lines.getEnd() - (firstLineOnScreen + linesOnScreen - 1));
+    if (rangeToShow.getStart() < firstLineOnScreen)
+        scrollBy (rangeToShow.getStart() - firstLineOnScreen);
+    else if (rangeToShow.getEnd() >= firstLineOnScreen + linesOnScreen)
+        scrollBy (rangeToShow.getEnd() - (firstLineOnScreen + linesOnScreen - 1));
 }
 
 void CodeEditorComponent::scrollToKeepCaretOnScreen()

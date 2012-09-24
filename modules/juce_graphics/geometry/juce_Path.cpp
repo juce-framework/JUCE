@@ -941,15 +941,15 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
                                                 const bool preserveProportions,
                                                 const Justification& justification) const
 {
-    Rectangle<float> bounds (getBounds());
+    Rectangle<float> boundsRect (getBounds());
 
     if (preserveProportions)
     {
-        if (w <= 0 || h <= 0 || bounds.isEmpty())
+        if (w <= 0 || h <= 0 || boundsRect.isEmpty())
             return AffineTransform::identity;
 
         float newW, newH;
-        const float srcRatio = bounds.getHeight() / bounds.getWidth();
+        const float srcRatio = boundsRect.getHeight() / boundsRect.getWidth();
 
         if (srcRatio > h / w)
         {
@@ -973,17 +973,17 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
         else if (justification.testFlags (Justification::bottom))   newYCentre += h - newH * 0.5f;
         else                                                        newYCentre += h * 0.5f;
 
-        return AffineTransform::translation (bounds.getWidth()  * -0.5f - bounds.getX(),
-                                             bounds.getHeight() * -0.5f - bounds.getY())
-                    .scaled (newW / bounds.getWidth(),
-                             newH / bounds.getHeight())
+        return AffineTransform::translation (boundsRect.getWidth()  * -0.5f - boundsRect.getX(),
+                                             boundsRect.getHeight() * -0.5f - boundsRect.getY())
+                    .scaled (newW / boundsRect.getWidth(),
+                             newH / boundsRect.getHeight())
                     .translated (newXCentre, newYCentre);
     }
     else
     {
-        return AffineTransform::translation (-bounds.getX(), -bounds.getY())
-                    .scaled (w / bounds.getWidth(),
-                             h / bounds.getHeight())
+        return AffineTransform::translation (-boundsRect.getX(), -boundsRect.getY())
+                    .scaled (w / boundsRect.getWidth(),
+                             h / boundsRect.getHeight())
                     .translated (x, y);
     }
 }

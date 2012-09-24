@@ -167,17 +167,17 @@ public:
 
     void paint (Graphics& g)
     {
-        const float w = (float) getWidth();
-        const float h = (float) getHeight();
+        const float cw = (float) getWidth();
+        const float ch = (float) getHeight();
 
         Path p;
         p.addTriangle (1.0f, 1.0f,
-                       w * 0.3f, h * 0.5f,
-                       1.0f, h - 1.0f);
+                       cw * 0.3f, ch * 0.5f,
+                       1.0f, ch - 1.0f);
 
-        p.addTriangle (w - 1.0f, 1.0f,
-                       w * 0.7f, h * 0.5f,
-                       w - 1.0f, h - 1.0f);
+        p.addTriangle (cw - 1.0f, 1.0f,
+                       cw * 0.7f, ch * 0.5f,
+                       cw - 1.0f, ch - 1.0f);
 
         g.setColour (Colours::white.withAlpha (0.75f));
         g.fillPath (p);
@@ -255,11 +255,11 @@ public:
 
     void paint (Graphics& g)
     {
-        const Colour colour (owner.getSwatchColour (index));
+        const Colour c (owner.getSwatchColour (index));
 
         g.fillCheckerBoard (getLocalBounds(), 6, 6,
-                            Colour (0xffdddddd).overlaidWith (colour),
-                            Colour (0xffffffff).overlaidWith (colour));
+                            Colour (0xffdddddd).overlaidWith (c),
+                            Colour (0xffffffff).overlaidWith (c));
     }
 
     void mouseDown (const MouseEvent&)

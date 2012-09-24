@@ -1427,11 +1427,11 @@ void Component::addAndMakeVisible (Component* const child, int zOrder)
     }
 }
 
-void Component::addChildAndSetID (Component* const child, const String& componentID)
+void Component::addChildAndSetID (Component* const child, const String& childID)
 {
     if (child != nullptr)
     {
-        child->setComponentID (componentID);
+        child->setComponentID (childID);
         addAndMakeVisible (child);
     }
 }

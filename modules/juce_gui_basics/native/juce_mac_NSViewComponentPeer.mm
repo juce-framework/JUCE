@@ -241,16 +241,16 @@ public:
     Rectangle<int> getBounds (const bool global) const
     {
         NSRect r = [view frame];
-        NSWindow* window = [view window];
+        NSWindow* viewWindow = [view window];
 
-        if (global && window != nil)
+        if (global && viewWindow != nil)
         {
             r = [[view superview] convertRect: r toView: nil];
 
            #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
-            r = [window convertRectToScreen: r];
+            r = [viewWindow convertRectToScreen: r];
            #else
-            r.origin = [window convertBaseToScreen: r.origin];
+            r.origin = [viewWindow convertBaseToScreen: r.origin];
            #endif
 
             r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
@@ -396,9 +396,8 @@ public:
         if (hasNativeTitleBar())
         {
             const Rectangle<int> screen (getFrameSize().subtractedFrom (component.getParentMonitorArea()));
-            const Rectangle<int> window (component.getScreenBounds());
 
-            fullScreen = window.expanded (2, 2).contains (screen);
+            fullScreen = component.getScreenBounds().expanded (2, 2).contains (screen);
         }
     }
 
@@ -1791,16 +1790,16 @@ void Desktop::createMouseInputSources()
 }
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, bool allowMenusAndBars)
 {
    #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
 
-    NSViewComponentPeer* const peer = dynamic_cast<NSViewComponentPeer*> (kioskModeComponent->getPeer());
+    NSViewComponentPeer* const peer = dynamic_cast<NSViewComponentPeer*> (kioskComp->getPeer());
+    jassert (peer != nullptr); // (this should have been checked by the caller)
 
    #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
-    if (peer != nullptr
-         && peer->hasNativeTitleBar()
-         && [peer->window respondsToSelector: @selector (toggleFullScreen:)])
+    if (peer->hasNativeTitleBar()
+          && [peer->window respondsToSelector: @selector (toggleFullScreen:)])
     {
         [peer->window performSelector: @selector (toggleFullScreen:)
                            withObject: [NSNumber numberWithBool: (BOOL) enableOrDisable]];
@@ -1815,7 +1814,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
 
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
-            kioskModeComponent->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
+            kioskComp->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
             peer->becomeKeyWindow();
         }
         else
@@ -1833,7 +1832,7 @@ void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDis
     if (enableOrDisable)
     {
         SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
-        kioskModeComponent->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
+        kioskComp->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
     }
     else
     {

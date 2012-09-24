@@ -585,7 +585,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
         {
             CGContextSetTextMatrix (context, state->fontTransform); // have to set this each time, as it's not saved as part of the state
 
-            CGGlyph g = glyphNumber;
+            CGGlyph g = (CGGlyph) glyphNumber;
             CGContextShowGlyphsAtPoint (context, transform.getTranslationX(),
                                         flipHeight - roundToInt (transform.getTranslationY()), &g, 1);
         }
@@ -599,7 +599,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
             t.d = -t.d;
             CGContextSetTextMatrix (context, t);
 
-            CGGlyph g = glyphNumber;
+            CGGlyph g = (CGGlyph) glyphNumber;
             CGContextShowGlyphsAtPoint (context, 0, 0, &g, 1);
 
             CGContextRestoreGState (context);

@@ -48,10 +48,10 @@ public:
         pendingDataTime = 0;
     }
 
-    void pushMidiData (const void* data, int numBytes, double time,
+    void pushMidiData (const void* inputData, int numBytes, double time,
                        MidiInput* input, MidiInputCallback& callback)
     {
-        const uint8* d = static_cast <const uint8*> (data);
+        const uint8* d = static_cast <const uint8*> (inputData);
 
         while (numBytes > 0)
         {

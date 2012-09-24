@@ -42,16 +42,16 @@ public:
 
     TextEditor* createEditorComponent()
     {
-        TextEditor* const textEditor = Label::createEditorComponent();
-        textEditor->setInputRestrictions (maxChars);
+        TextEditor* const ed = Label::createEditorComponent();
+        ed->setInputRestrictions (maxChars);
 
         if (isMultiline)
         {
-            textEditor->setMultiLine (true, true);
-            textEditor->setReturnKeyStartsNewLine (true);
+            ed->setMultiLine (true, true);
+            ed->setReturnKeyStartsNewLine (true);
         }
 
-        return textEditor;
+        return ed;
     }
 
     void textWasEdited()

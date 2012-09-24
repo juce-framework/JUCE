@@ -701,7 +701,7 @@ String juce_getOutputFromCommand (const String& command)
 class InterProcessLock::Pimpl
 {
 public:
-    Pimpl (const String& name, const int timeOutMillisecs)
+    Pimpl (const String& lockName, const int timeOutMillisecs)
         : handle (0), refCount (1)
     {
        #if JUCE_IOS
@@ -718,7 +718,7 @@ public:
              tempFolder = "/tmp";
         #endif
 
-        const File temp (tempFolder.getChildFile (name));
+        const File temp (tempFolder.getChildFile (lockName));
 
         temp.create();
         handle = open (temp.getFullPathName().toUTF8(), O_RDWR);

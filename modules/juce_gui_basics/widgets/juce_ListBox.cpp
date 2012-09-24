@@ -209,14 +209,14 @@ public:
     void updateContents()
     {
         hasUpdated = true;
-        const int rowHeight = owner.getRowHeight();
+        const int rowH = owner.getRowHeight();
 
-        if (rowHeight > 0)
+        if (rowH > 0)
         {
             const int y = getViewPositionY();
             const int w = getViewedComponent()->getWidth();
 
-            const int numNeeded = 2 + getMaximumVisibleHeight() / rowHeight;
+            const int numNeeded = 2 + getMaximumVisibleHeight() / rowH;
             rows.removeRange (numNeeded, rows.size());
 
             while (numNeeded > rows.size())
@@ -226,9 +226,9 @@ public:
                 getViewedComponent()->addAndMakeVisible (newRow);
             }
 
-            firstIndex = y / rowHeight;
-            firstWholeIndex = (y + rowHeight - 1) / rowHeight;
-            lastWholeIndex = (y + getMaximumVisibleHeight() - 1) / rowHeight;
+            firstIndex = y / rowH;
+            firstWholeIndex = (y + rowH - 1) / rowH;
+            lastWholeIndex = (y + getMaximumVisibleHeight() - 1) / rowH;
 
             for (int i = 0; i < numNeeded; ++i)
             {
@@ -237,7 +237,7 @@ public:
 
                 if (rowComp != nullptr)
                 {
-                    rowComp->setBounds (0, row * rowHeight, w, rowHeight);
+                    rowComp->setBounds (0, row * rowH, w, rowH);
                     rowComp->update (row, owner.isRowSelected (row));
                 }
             }
@@ -251,30 +251,30 @@ public:
                                               owner.headerComponent->getHeight());
     }
 
-    void selectRow (const int row, const int rowHeight, const bool dontScroll,
-                    const int lastRowSelected, const int totalItems, const bool isMouseClick)
+    void selectRow (const int row, const int rowH, const bool dontScroll,
+                    const int lastSelectedRow, const int totalRows, const bool isMouseClick)
     {
         hasUpdated = false;
 
         if (row < firstWholeIndex && ! dontScroll)
         {
-            setViewPosition (getViewPositionX(), row * rowHeight);
+            setViewPosition (getViewPositionX(), row * rowH);
         }
         else if (row >= lastWholeIndex && ! dontScroll)
         {
             const int rowsOnScreen = lastWholeIndex - firstWholeIndex;
 
-            if (row >= lastRowSelected + rowsOnScreen
-                 && rowsOnScreen < totalItems - 1
+            if (row >= lastSelectedRow + rowsOnScreen
+                 && rowsOnScreen < totalRows - 1
                  && ! isMouseClick)
             {
                 setViewPosition (getViewPositionX(),
-                                 jlimit (0, jmax (0, totalItems - rowsOnScreen), row) * rowHeight);
+                                 jlimit (0, jmax (0, totalRows - rowsOnScreen), row) * rowH);
             }
             else
             {
                 setViewPosition (getViewPositionX(),
-                                 jmax (0, (row  + 1) * rowHeight - getMaximumVisibleHeight()));
+                                 jmax (0, (row  + 1) * rowH - getMaximumVisibleHeight()));
             }
         }
 
@@ -282,16 +282,16 @@ public:
             updateContents();
     }
 
-    void scrollToEnsureRowIsOnscreen (const int row, const int rowHeight)
+    void scrollToEnsureRowIsOnscreen (const int row, const int rowH)
     {
         if (row < firstWholeIndex)
         {
-            setViewPosition (getViewPositionX(), row * rowHeight);
+            setViewPosition (getViewPositionX(), row * rowH);
         }
         else if (row >= lastWholeIndex)
         {
             setViewPosition (getViewPositionX(),
-                             jmax (0, (row  + 1) * rowHeight - getMaximumVisibleHeight()));
+                             jmax (0, (row  + 1) * rowH - getMaximumVisibleHeight()));
         }
     }
 
