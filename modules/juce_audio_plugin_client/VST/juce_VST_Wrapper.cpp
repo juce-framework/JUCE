@@ -1477,19 +1477,23 @@ namespace
     }
 }
 
+#if ! JUCE_WINDOWS
+ #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility("default")))
+#endif
+
 //==============================================================================
 // Mac startup code..
 #if JUCE_MAC
 
-    extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster);
-    extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
+    JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
+    JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
         initialiseMac();
         return pluginEntryPoint (audioMaster);
     }
 
-    extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMasterCallback audioMaster);
-    extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMasterCallback audioMaster)
+    JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster);
+    JUCE_EXPORTED_FUNCTION AEffect* main_macho (audioMasterCallback audioMaster)
     {
         initialiseMac();
         return pluginEntryPoint (audioMaster);
@@ -1499,15 +1503,15 @@ namespace
 // Linux startup code..
 #elif JUCE_LINUX
 
-    extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
+    JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster);
+    JUCE_EXPORTED_FUNCTION AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     {
         SharedMessageThread::getInstance();
         return pluginEntryPoint (audioMaster);
     }
 
-    extern "C" __attribute__ ((visibility("default"))) AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
-
-    extern "C" __attribute__ ((visibility("default"))) AEffect* main_plugin (audioMasterCallback audioMaster)
+    JUCE_EXPORTED_FUNCTION AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
+    JUCE_EXPORTED_FUNCTION AEffect* main_plugin (audioMasterCallback audioMaster)
     {
         return VSTPluginMain (audioMaster);
     }
@@ -1532,16 +1536,10 @@ namespace
     }
    #endif
 
-   #if JucePlugin_Build_RTAS
-    BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID)
-   #else
-    extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD dwReason, LPVOID)
-   #endif
+    void __stdcall DllMainVST (HINSTANCE instance, DWORD reason)
     {
-        if (dwReason == DLL_PROCESS_ATTACH)
+        if (reason == DLL_PROCESS_ATTACH)
             Process::setCurrentModuleInstanceHandle (instance);
-
-        return TRUE;
     }
 #endif
 

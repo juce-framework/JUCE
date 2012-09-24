@@ -38,6 +38,9 @@ struct CustomMouseCursorInfo
     Image image;
     const Point<int> hotspot;
     float scaleFactor;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE (CustomMouseCursorInfo);
 };
 
 class MouseCursor::SharedCursorHandle
