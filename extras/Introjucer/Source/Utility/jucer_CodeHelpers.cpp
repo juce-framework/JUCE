@@ -343,7 +343,7 @@ namespace CodeHelpers
         const char* t = s.toUTF8();
         unsigned int hash = 0;
         while (*t != 0)
-            hash = hashMultiplier * hash + *t++;
+            hash = hashMultiplier * hash + (unsigned int) *t++;
 
         return hash;
     }
@@ -387,7 +387,7 @@ namespace CodeHelpers
         out << indent << "unsigned int hash = 0;" << newLine
             << indent << "if (" << utf8PointerVariable << " != 0)" << newLine
             << indent << "    while (*" << utf8PointerVariable << " != 0)" << newLine
-            << indent << "        hash = " << hashMultiplier << " * hash + *" << utf8PointerVariable << "++;" << newLine
+            << indent << "        hash = " << hashMultiplier << " * hash + (unsigned int) *" << utf8PointerVariable << "++;" << newLine
             << newLine
             << indent << "switch (hash)" << newLine
             << indent << "{" << newLine;

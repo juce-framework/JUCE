@@ -205,7 +205,7 @@ File File::getCurrentWorkingDirectory()
 
     char localBuffer [1024];
     char* cwd = getcwd (localBuffer, sizeof (localBuffer) - 1);
-    int bufferSize = 4096;
+    size_t bufferSize = 4096;
 
     while (cwd == nullptr && errno == ERANGE)
     {
@@ -500,7 +500,7 @@ int FileOutputStream::writeInternal (const void* const data, const int numBytes)
 
     if (fileHandle != 0)
     {
-        result = ::write (getFD (fileHandle), data, numBytes);
+        result = ::write (getFD (fileHandle), data, (size_t) numBytes);
 
         if (result == -1)
             status = getResultForErrno();
@@ -1046,7 +1046,7 @@ public:
             readHandle = fdopen (pipeHandle, "r");
 
         if (readHandle != 0)
-            return fread (dest, 1, numBytes, readHandle);
+            return (int) fread (dest, 1, (size_t) numBytes, readHandle);
 
         return 0;
     }

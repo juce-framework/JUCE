@@ -107,7 +107,7 @@ bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) noexcept
 
 int CharacterFunctions::getHexDigitValue (const juce_wchar digit) noexcept
 {
-    unsigned int d = digit - '0';
+    unsigned int d = (unsigned int) digit - '0';
     if (d < (unsigned int) 10)
         return (int) d;
 

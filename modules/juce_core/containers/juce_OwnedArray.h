@@ -317,7 +317,7 @@ public:
             if (isPositiveAndBelow (indexToInsertAt, numUsed))
             {
                 insertPos += indexToInsertAt;
-                const int numberToMove = numUsed - indexToInsertAt;
+                const size_t numberToMove = (size_t) (numUsed - indexToInsertAt);
                 memmove (insertPos + numberOfElements, insertPos, numberToMove * sizeof (ObjectClass*));
             }
             else

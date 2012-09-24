@@ -69,7 +69,7 @@ void BubbleMessageComponent::init (const int numMillisecondsBeforeRemoving,
     deleteAfterUse = deleteSelfAfterUse;
 
     expiryTime = numMillisecondsBeforeRemoving > 0
-                    ? (Time::getMillisecondCounter() + numMillisecondsBeforeRemoving) : 0;
+                    ? (Time::getMillisecondCounter() + (uint32) numMillisecondsBeforeRemoving) : 0;
 
     mouseClickCounter = Desktop::getInstance().getMouseButtonClickCounter();
 

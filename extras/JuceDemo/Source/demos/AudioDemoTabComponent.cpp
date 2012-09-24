@@ -105,7 +105,7 @@ void LiveAudioInputDisplayComp::audioDeviceIOCallback (const float** inputChanne
     // We need to clear the output buffers, in case they're full of junk..
     for (int i = 0; i < numOutputChannels; ++i)
         if (outputChannelData[i] != 0)
-            zeromem (outputChannelData[i], sizeof (float) * numSamples);
+            zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
 }
 
 //[/MiscUserDefs]

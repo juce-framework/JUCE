@@ -133,7 +133,7 @@ public:
         if (start.getAddress() == nullptr || start.isEmpty())
             return getEmpty();
 
-        const size_t numBytes = end.getAddress() - start.getAddress();
+        const size_t numBytes = (size_t) (end.getAddress() - start.getAddress());
         const CharPointerType dest (createUninitialisedBytes (numBytes + 1));
         memcpy (dest.getAddress(), start, numBytes);
         dest.getAddress()[numBytes] = 0;
@@ -683,7 +683,7 @@ String& String::operator+= (const int number)
     {
         const size_t byteOffsetOfNull = getByteOffsetOfEnd();
         const size_t newBytesNeeded = sizeof (CharPointerType::CharType) + byteOffsetOfNull
-                                        + sizeof (CharPointerType::CharType) * numExtraChars;
+                                        + sizeof (CharPointerType::CharType) * (size_t) numExtraChars;
 
         text = StringHolder::makeUniqueWithByteSize (text, newBytesNeeded);
 
@@ -1051,7 +1051,7 @@ String String::repeatedString (const String& stringToRepeat, int numberOfTimesTo
     if (numberOfTimesToRepeat <= 0)
         return empty;
 
-    String result (PreallocationBytes (stringToRepeat.getByteOffsetOfEnd() * numberOfTimesToRepeat));
+    String result (PreallocationBytes (stringToRepeat.getByteOffsetOfEnd() * (size_t) numberOfTimesToRepeat));
     CharPointerType n (result.text);
 
     while (--numberOfTimesToRepeat >= 0)
@@ -1077,7 +1077,7 @@ String String::paddedLeft (const juce_wchar padCharacter, int minimumLength) con
         return *this;
 
     const size_t currentByteSize = (size_t) (((char*) end.getAddress()) - (char*) text.getAddress());
-    String result (PreallocationBytes (currentByteSize + extraChars * CharPointerType::getBytesRequiredFor (padCharacter)));
+    String result (PreallocationBytes (currentByteSize + (size_t) extraChars * CharPointerType::getBytesRequiredFor (padCharacter)));
     CharPointerType n (result.text);
 
     while (--extraChars >= 0)
@@ -1104,7 +1104,7 @@ String String::paddedRight (const juce_wchar padCharacter, int minimumLength) co
         return *this;
 
     const size_t currentByteSize = (size_t) (((char*) end.getAddress()) - (char*) text.getAddress());
-    String result (PreallocationBytes (currentByteSize + extraChars * CharPointerType::getBytesRequiredFor (padCharacter)));
+    String result (PreallocationBytes (currentByteSize + (size_t) extraChars * CharPointerType::getBytesRequiredFor (padCharacter)));
     CharPointerType n (result.text);
 
     n.writeAll (text);
@@ -1985,7 +1985,7 @@ struct StringEncodingConverter
 
         CharPointerType_Src text (source.getCharPointer());
         const size_t extraBytesNeeded = CharPointerType_Dest::getBytesRequiredFor (text);
-        const size_t endOffset = (text.sizeInBytes() + 3) & ~3; // the new string must be word-aligned or many Windows
+        const size_t endOffset = (text.sizeInBytes() + 3) & ~3u; // the new string must be word-aligned or many Windows
                                                                 // functions will fail to read it correctly!
         source.preallocateBytes (endOffset + extraBytesNeeded);
         text = source.getCharPointer();
@@ -1994,8 +1994,8 @@ struct StringEncodingConverter
         const CharPointerType_Dest extraSpace (static_cast <DestChar*> (newSpace));
 
        #if JUCE_DEBUG // (This just avoids spurious warnings from valgrind about the uninitialised bytes at the end of the buffer..)
-        const int bytesToClear = jmin ((int) extraBytesNeeded, 4);
-        zeromem (addBytesToPointer (newSpace, (int) (extraBytesNeeded - bytesToClear)), (size_t) bytesToClear);
+        const size_t bytesToClear = (size_t) jmin ((int) extraBytesNeeded, 4);
+        zeromem (addBytesToPointer (newSpace, extraBytesNeeded - bytesToClear), bytesToClear);
        #endif
 
         CharPointerType_Dest (extraSpace).writeAll (text);
@@ -2113,7 +2113,7 @@ public:
             CharPointerType (buffer).writeAll (s.toUTF8());
             test.expectEquals (String (CharPointerType (buffer)), s);
 
-            test.expect (CharPointerType::isValidString (buffer, strlen ((const char*) buffer)));
+            test.expect (CharPointerType::isValidString (buffer, (int) strlen ((const char*) buffer)));
         }
     };
 

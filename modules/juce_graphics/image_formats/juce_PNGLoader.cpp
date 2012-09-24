@@ -55,6 +55,11 @@ namespace pnglibNamespace
    using std::free;
   #endif
 
+  #if JUCE_CLANG
+   #pragma clang diagnostic push
+   #pragma clang diagnostic ignored "-Wsign-conversion"
+  #endif
+
   using std::abs;
   #define PNG_INTERNAL
   #define NO_DUMMY_DECL
@@ -79,6 +84,10 @@ namespace pnglibNamespace
   #include "pnglib/pngwrite.c"
   #include "pnglib/pngwtran.c"
   #include "pnglib/pngwutil.c"
+
+  #if JUCE_CLANG
+   #pragma clang diagnostic pop
+  #endif
 #else
   extern "C"
   {

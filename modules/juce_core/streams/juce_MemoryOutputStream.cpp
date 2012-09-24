@@ -70,10 +70,11 @@ void MemoryOutputStream::reset() noexcept
 
 void MemoryOutputStream::prepareToWrite (int numBytes)
 {
-    const size_t storageNeeded = position + numBytes;
+    jassert (numBytes >= 0);
+    size_t storageNeeded = position + (size_t) numBytes;
 
     if (storageNeeded >= data.getSize())
-        data.ensureSize ((storageNeeded + jmin ((int) (storageNeeded / 2), 1024 * 1024) + 32) & ~31);
+        data.ensureSize ((storageNeeded + jmin (storageNeeded / 2, (size_t) (1024 * 1024)) + 32) & ~31u);
 }
 
 bool MemoryOutputStream::write (const void* const buffer, int howMany)
@@ -84,7 +85,7 @@ bool MemoryOutputStream::write (const void* const buffer, int howMany)
     {
         prepareToWrite (howMany);
         memcpy (static_cast<char*> (data.getData()) + position, buffer, (size_t) howMany);
-        position += howMany;
+        position += (size_t) howMany;
         size = jmax (size, position);
     }
 
@@ -97,7 +98,7 @@ void MemoryOutputStream::writeRepeatedByte (uint8 byte, int howMany)
     {
         prepareToWrite (howMany);
         memset (static_cast<char*> (data.getData()) + position, byte, (size_t) howMany);
-        position += howMany;
+        position += (size_t) howMany;
         size = jmax (size, position);
     }
 }

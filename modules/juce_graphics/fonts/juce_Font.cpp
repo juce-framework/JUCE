@@ -89,7 +89,7 @@ public:
         }
 
         int replaceIndex = 0;
-        size_t bestLastUsageCount = std::numeric_limits<int>::max();
+        size_t bestLastUsageCount = std::numeric_limits<size_t>::max();
 
         for (int i = faces.size(); --i >= 0;)
         {

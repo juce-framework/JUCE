@@ -211,7 +211,7 @@ LookAndFeel::LookAndFeel()
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
-        setColour (standardColours [i], Colour ((uint32) standardColours [i + 1]));
+        setColour ((int) standardColours [i], Colour ((uint32) standardColours [i + 1]));
 
     juce_getTypefaceForFont = LookAndFeelHelpers::getTypefaceForFontFromLookAndFeel;
 }

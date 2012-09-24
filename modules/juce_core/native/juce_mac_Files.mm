@@ -233,7 +233,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             buffer.calloc (size + 8);
 
             _NSGetExecutablePath (buffer.getData(), &size);
-            return String::fromUTF8 (buffer, size);
+            return String::fromUTF8 (buffer, (int) size);
         }
 
         default:

@@ -391,7 +391,7 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 
     jpeg_start_compress (&jpegCompStruct, TRUE);
 
-    const int strideBytes = (int) (jpegCompStruct.image_width * jpegCompStruct.input_components);
+    const int strideBytes = (int) (jpegCompStruct.image_width * (unsigned int) jpegCompStruct.input_components);
 
     JSAMPARRAY buffer = (*jpegCompStruct.mem->alloc_sarray) ((j_common_ptr) &jpegCompStruct,
                                                              JPOOL_IMAGE, (JDIMENSION) strideBytes, 1);

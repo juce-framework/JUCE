@@ -109,7 +109,7 @@ public:
         dataSize = size;
     }
 
-    int doNextBlock (uint8* const dest, const int destSize)
+    int doNextBlock (uint8* const dest, const unsigned int destSize)
     {
         using namespace zlibNamespace;
         if (streamIsValid && data != nullptr && ! finished)
@@ -209,7 +209,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 
         while (! helper->error)
         {
-            const int n = helper->doNextBlock (d, howMany);
+            const int n = helper->doNextBlock (d, (unsigned int) howMany);
             currentPos += n;
 
             if (n == 0)

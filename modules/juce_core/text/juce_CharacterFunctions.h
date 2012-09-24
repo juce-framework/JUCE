@@ -343,7 +343,7 @@ public:
 
         dest.writeNull();
 
-        return (int) (getAddressDifference (dest.getAddress(), startAddress) + sizeof (typename DestCharPointerType::CharType));
+        return (int) ((size_t) getAddressDifference (dest.getAddress(), startAddress) + sizeof (typename DestCharPointerType::CharType));
     }
 
     /** Copies characters from one string to another, up to a null terminator

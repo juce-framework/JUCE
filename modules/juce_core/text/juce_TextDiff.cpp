@@ -42,7 +42,7 @@ struct TextDiffHelpers
     static void addInsertion (TextDiff& td, const String::CharPointerType& text, int index, int length)
     {
         TextDiff::Change c;
-        c.insertedText = String (text, length);
+        c.insertedText = String (text, (size_t) length);
         c.start = index;
         c.length = length;
         td.changes.add (c);
@@ -84,7 +84,7 @@ struct TextDiffHelpers
         {
             jassert (indexA >= 0 && indexA <= a.length);
             jassert (indexB >= 0 && indexB <= b.length);
-            jassert (String (a.text + indexA, len) == String (b.text + indexB, len));
+            jassert (String (a.text + indexA, (size_t) len) == String (b.text + indexB, (size_t) len));
 
             if (indexA > 0 && indexB > 0)
                 diffSkippingCommonStart (td, StringRegion (a.text, a.start, indexA),
@@ -112,7 +112,7 @@ struct TextDiffHelpers
             return 0;
 
         HeapBlock<int> lines;
-        lines.calloc (lenB * 2 + 2);
+        lines.calloc (2 + 2 * (size_t) lenB);
 
         int* l0 = lines;
         int* l1 = l0 + lenB + 1;

@@ -370,7 +370,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
         const int maxPacketSize = 256;
         int pos = 0, bytesLeft = (int) dataSize;
         const int numPackets = (bytesLeft + maxPacketSize - 1) / maxPacketSize;
-        allocatedPackets.malloc ((size_t) (32 * numPackets + dataSize), 1);
+        allocatedPackets.malloc ((size_t) (32 * (size_t) numPackets + dataSize), 1);
         packetToSend = allocatedPackets;
         packetToSend->numPackets = (UInt32) numPackets;
 

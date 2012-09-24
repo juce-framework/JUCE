@@ -100,8 +100,8 @@ class OpenGLContext::NativeContext
 {
 public:
     NativeContext (Component& component,
-                   const OpenGLPixelFormat& pixelFormat,
-                   void* contextToShareWith)
+                   const OpenGLPixelFormat& pixFormat,
+                   void* contextToShare)
     {
         NSOpenGLPixelFormatAttribute attribs[] =
         {
@@ -109,14 +109,14 @@ public:
             NSOpenGLPFAMPSafe,
             NSOpenGLPFAClosestPolicy,
             NSOpenGLPFANoRecovery,
-            NSOpenGLPFAColorSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits),
-            NSOpenGLPFAAlphaSize,   (NSOpenGLPixelFormatAttribute) pixelFormat.alphaBits,
-            NSOpenGLPFADepthSize,   (NSOpenGLPixelFormatAttribute) pixelFormat.depthBufferBits,
-            NSOpenGLPFAStencilSize, (NSOpenGLPixelFormatAttribute) pixelFormat.stencilBufferBits,
-            NSOpenGLPFAAccumSize,   (NSOpenGLPixelFormatAttribute) (pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
-                                        + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits),
-            pixelFormat.multisamplingLevel > 0 ? NSOpenGLPFASamples : (NSOpenGLPixelFormatAttribute) 0,
-            (NSOpenGLPixelFormatAttribute) pixelFormat.multisamplingLevel,
+            NSOpenGLPFAColorSize,   (NSOpenGLPixelFormatAttribute) (pixFormat.redBits + pixFormat.greenBits + pixFormat.blueBits),
+            NSOpenGLPFAAlphaSize,   (NSOpenGLPixelFormatAttribute) pixFormat.alphaBits,
+            NSOpenGLPFADepthSize,   (NSOpenGLPixelFormatAttribute) pixFormat.depthBufferBits,
+            NSOpenGLPFAStencilSize, (NSOpenGLPixelFormatAttribute) pixFormat.stencilBufferBits,
+            NSOpenGLPFAAccumSize,   (NSOpenGLPixelFormatAttribute) (pixFormat.accumulationBufferRedBits + pixFormat.accumulationBufferGreenBits
+                                        + pixFormat.accumulationBufferBlueBits + pixFormat.accumulationBufferAlphaBits),
+            pixFormat.multisamplingLevel > 0 ? NSOpenGLPFASamples : (NSOpenGLPixelFormatAttribute) 0,
+            (NSOpenGLPixelFormatAttribute) pixFormat.multisamplingLevel,
             0
         };
 
@@ -133,7 +133,7 @@ public:
                                                    object: view];
 
         renderContext = [[[NSOpenGLContext alloc] initWithFormat: format
-                                                    shareContext: (NSOpenGLContext*) contextToShareWith] autorelease];
+                                                    shareContext: (NSOpenGLContext*) contextToShare] autorelease];
 
         setSwapInterval (1);
 

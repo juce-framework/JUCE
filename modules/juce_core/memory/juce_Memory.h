@@ -46,8 +46,8 @@ inline void deleteAndZero (Type& pointer)                           { delete poi
     This can be useful to avoid casting pointers to a char* and back when you want to move them by
     a specific number of bytes,
 */
-template <typename Type>
-inline Type* addBytesToPointer (Type* pointer, int bytes) noexcept  { return (Type*) (((char*) pointer) + bytes); }
+template <typename Type, typename IntegerType>
+inline Type* addBytesToPointer (Type* pointer, IntegerType bytes) noexcept  { return (Type*) (((char*) pointer) + bytes); }
 
 /** A handy function which returns the difference between any two pointers, in bytes.
     The address of the second pointer is subtracted from the first, and the difference in bytes is returned.

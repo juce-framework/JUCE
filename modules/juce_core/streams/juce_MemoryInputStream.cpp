@@ -69,7 +69,7 @@ int MemoryInputStream::read (void* const buffer, const int howMany)
         return 0;
 
     memcpy (buffer, addBytesToPointer (data, position), (size_t) num);
-    position += num;
+    position += (unsigned int) num;
     return num;
 }
 

@@ -1506,7 +1506,7 @@ private:
     static NSRange markedRange (id self, SEL)
     {
         NSViewComponentPeer* const owner = getOwner (self);
-        return owner->stringBeingComposed.isNotEmpty() ? NSMakeRange (0, owner->stringBeingComposed.length())
+        return owner->stringBeingComposed.isNotEmpty() ? NSMakeRange (0, (NSUInteger) owner->stringBeingComposed.length())
                                                        : NSMakeRange (NSNotFound, 0);
     }
 
@@ -1519,7 +1519,8 @@ private:
                 const Range<int> highlight (target->getHighlightedRegion());
 
                 if (! highlight.isEmpty())
-                    return NSMakeRange (highlight.getStart(), highlight.getLength());
+                    return NSMakeRange ((NSUInteger) highlight.getStart(),
+                                        (NSUInteger) highlight.getLength());
             }
         }
 

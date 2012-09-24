@@ -68,10 +68,10 @@ SystemStats::CPUFlags::CPUFlags()
     uint32 familyModel = 0, extFeatures = 0, features = 0, dummy = 0;
     SystemStatsHelpers::doCPUID (familyModel, extFeatures, dummy, features, 1);
 
-    hasMMX   = (features & (1 << 23)) != 0;
-    hasSSE   = (features & (1 << 25)) != 0;
-    hasSSE2  = (features & (1 << 26)) != 0;
-    has3DNow = (extFeatures & (1 << 31)) != 0;
+    hasMMX   = (features    & (1u << 23)) != 0;
+    hasSSE   = (features    & (1u << 25)) != 0;
+    hasSSE2  = (features    & (1u << 26)) != 0;
+    has3DNow = (extFeatures & (1u << 31)) != 0;
    #else
     hasMMX = false;
     hasSSE = false;
@@ -235,10 +235,10 @@ public:
         else
         {
             numerator   = timebase.numer;
-            denominator = timebase.denom * (int64) 1000000;
+            denominator = timebase.denom * (uint64) 1000000;
         }
 
-        highResTimerFrequency = (timebase.denom * (int64) 1000000000) / timebase.numer;
+        highResTimerFrequency = (timebase.denom * (uint64) 1000000000) / timebase.numer;
         highResTimerToMillisecRatio = numerator / (double) denominator;
     }
 
@@ -255,7 +255,7 @@ public:
     int64 highResTimerFrequency;
 
 private:
-    int64 numerator, denominator;
+    uint64 numerator, denominator;
     double highResTimerToMillisecRatio;
 };
 

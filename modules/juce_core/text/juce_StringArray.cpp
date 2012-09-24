@@ -328,7 +328,7 @@ String StringArray::joinIntoString (const String& separator, int start, int numb
         return strings.getReference (start);
 
     const size_t separatorBytes = separator.getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);
-    size_t bytesNeeded = separatorBytes * (last - start - 1);
+    size_t bytesNeeded = separatorBytes * (size_t) (last - start - 1);
 
     for (int i = start; i < last; ++i)
         bytesNeeded += strings.getReference(i).getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);

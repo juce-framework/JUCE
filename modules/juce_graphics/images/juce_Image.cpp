@@ -51,7 +51,7 @@ Image ImageType::convert (const Image& source) const
     jassert (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat);
 
     for (int y = 0; y < dest.height; ++y)
-        memcpy (dest.getLinePointer (y), src.getLinePointer (y), dest.lineStride);
+        memcpy (dest.getLinePointer (y), src.getLinePointer (y), (size_t) dest.lineStride);
 
     return newImage;
 }
