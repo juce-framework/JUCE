@@ -518,14 +518,10 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0xe23b4891:
-        case 0xfe8a1589:  numBytes = 24218; return jules_jpg;
-        case 0x496477a8:
-        case 0xf26e465b:  numBytes = 1819; return prefs_about_png;
-        case 0x44e88a0d:
-        case 0xf6e6db91:  numBytes = 3794; return prefs_keys_png;
-        case 0xdd254505:
-        case 0xe1146fbf:  numBytes = 6162; return prefs_misc_png;
+        case 0xe23b4891:  numBytes = 24218; return jules_jpg;
+        case 0x496477a8:  numBytes = 1819; return prefs_about_png;
+        case 0x44e88a0d:  numBytes = 3794; return prefs_keys_png;
+        case 0xdd254505:  numBytes = 6162; return prefs_misc_png;
         default: break;
     }
 

@@ -884,40 +884,23 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
 
     switch (hash)
     {
-        case 0x44be9398:
-        case 0x2981a553:  numBytes = 2112; return AudioPluginXCodeScript_txt;
-        case 0x4a0cfd09:
-        case 0x11a2eef1:  numBytes = 151; return background_tile_png;
-        case 0x763d39dc:
-        case 0x15a79882:  numBytes = 1050; return colourscheme_dark_xml;
-        case 0xe8b08520:
-        case 0xf23740fc:  numBytes = 1050; return colourscheme_light_xml;
-        case 0x27c5a93a:
-        case 0xb6575890:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
-        case 0x4d0721bf:
-        case 0xc244271a:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:
-        case 0xc68aa4a1:  numBytes = 4473; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:
-        case 0x99c7f951:  numBytes = 2400; return jucer_AudioPluginFilterTemplate_h;
-        case 0x8905395b:
-        case 0x84a71cc0:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
-        case 0x7a0186b1:
-        case 0x73760f7c:  numBytes = 1742; return jucer_MainTemplate_cpp;
-        case 0xf4842835:
-        case 0x1329dd50:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
-        case 0xe7bf237a:
-        case 0x1e76fc7c:  numBytes = 649; return jucer_NewComponentTemplate_h;
-        case 0x02a2a077:
-        case 0x9a5d0862:  numBytes = 260; return jucer_NewCppFileTemplate_cpp;
-        case 0x0842c43c:
-        case 0xfbfcda3c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
-        case 0x36e634a1:
-        case 0x2be6f132:  numBytes = 1627; return jucer_NewInlineComponentTemplate_h;
-        case 0x3f052be8:
-        case 0xb905d1ba:  numBytes = 905; return jucer_WindowTemplate_cpp;
-        case 0xb20377ed:
-        case 0x959d5d38:  numBytes = 1220; return jucer_WindowTemplate_h;
+        case 0x44be9398:  numBytes = 2112; return AudioPluginXCodeScript_txt;
+        case 0x4a0cfd09:  numBytes = 151; return background_tile_png;
+        case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
+        case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
+        case 0x27c5a93a:  numBytes = 1008; return jucer_AudioPluginEditorTemplate_cpp;
+        case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
+        case 0x51b49ac5:  numBytes = 4473; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2400; return jucer_AudioPluginFilterTemplate_h;
+        case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
+        case 0x7a0186b1:  numBytes = 1742; return jucer_MainTemplate_cpp;
+        case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
+        case 0xe7bf237a:  numBytes = 649; return jucer_NewComponentTemplate_h;
+        case 0x02a2a077:  numBytes = 260; return jucer_NewCppFileTemplate_cpp;
+        case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
+        case 0x36e634a1:  numBytes = 1627; return jucer_NewInlineComponentTemplate_h;
+        case 0x3f052be8:  numBytes = 905; return jucer_WindowTemplate_cpp;
+        case 0xb20377ed:  numBytes = 1220; return jucer_WindowTemplate_h;
         default: break;
     }
 

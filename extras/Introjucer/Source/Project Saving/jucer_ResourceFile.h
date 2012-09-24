@@ -45,7 +45,7 @@ public:
     void setClassName (const String& className);
     String getClassName() const       { return className; }
 
-    void addFile (const File& file, const String& imageProviderId);
+    void addFile (const File& file);
     String getDataVariableFor (const File& file) const;
     String getSizeVariableFor (const File& file) const;
 

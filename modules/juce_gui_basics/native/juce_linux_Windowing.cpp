@@ -2602,20 +2602,10 @@ void juce_windowMessageReceive (XEvent* event)
         if (LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (event->xany.window))
             peer->handleWindowMessage (event);
     }
-    else
+    else if (event->xany.type == KeymapNotify)
     {
-        switch (event->xany.type)
-        {
-            case KeymapNotify:
-            {
-                const XKeymapEvent* const keymapEvent = (const XKeymapEvent*) &event->xkeymap;
-                memcpy (Keys::keyStates, keymapEvent->key_vector, 32);
-                break;
-            }
-
-            default:
-                break;
-        }
+        const XKeymapEvent* const keymapEvent = (const XKeymapEvent*) &event->xkeymap;
+        memcpy (Keys::keyStates, keymapEvent->key_vector, 32);
     }
 }
 

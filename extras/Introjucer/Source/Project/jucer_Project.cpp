@@ -442,8 +442,6 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-String Project::Item::getImageFileID() const      { return "id:" + getID(); }
-
 Image Project::Item::loadAsImageFile() const
 {
     return isValid() ? ImageCache::getFromFile (getFile())

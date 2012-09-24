@@ -31,8 +31,8 @@ Display* display = nullptr;
 Window juce_messageWindowHandle = None;
 XContext windowHandleXContext;   // This is referenced from Windowing.cpp
 
-extern void juce_windowMessageReceive (XEvent* event);  // Defined in Windowing.cpp
-extern void juce_handleSelectionRequest (XSelectionRequestEvent &evt);  // Defined in Clipboard.cpp
+extern void juce_windowMessageReceive (XEvent*);  // Defined in Windowing.cpp
+extern void juce_handleSelectionRequest (XSelectionRequestEvent&);  // Defined in Clipboard.cpp
 
 //==============================================================================
 ScopedXLock::ScopedXLock()       { XLockDisplay (display); }

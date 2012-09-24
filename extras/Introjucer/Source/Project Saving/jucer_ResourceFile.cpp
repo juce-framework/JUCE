@@ -70,17 +70,17 @@ void ResourceFile::addResourcesFromProjectItem (const Project::Item& projectItem
     else
     {
         if (projectItem.shouldBeAddedToBinaryResources())
-            addFile (projectItem.getFile(), projectItem.getImageFileID());
+            addFile (projectItem.getFile());
     }
 }
 
 //==============================================================================
-void ResourceFile::setClassName (const String& className_)
+void ResourceFile::setClassName (const String& name)
 {
-    className = className_;
+    className = name;
 }
 
-void ResourceFile::addFile (const File& file, const String& imageProviderId)
+void ResourceFile::addFile (const File& file)
 {
     files.add (file);
 
@@ -90,9 +90,6 @@ void ResourceFile::addFile (const File& file, const String& imageProviderId)
     int suffix = 2;
     while (variableNames.contains (variableName))
         variableName = variableNameRoot + String (suffix++);
-
-    if (imageProviderId.isNotEmpty())
-        variableName << "|" << imageProviderId;
 
     variableNames.add (variableName);
 }
@@ -147,7 +144,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
         const File& file = files.getReference(i);
         const int64 dataSize = file.getSize();
 
-        const String variableName (variableNames[i].upToFirstOccurrenceOf ("|", false, false));
+        const String variableName (variableNames[i]);
 
         FileInputStream fileStream (file);
 
