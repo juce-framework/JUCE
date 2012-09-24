@@ -33,7 +33,7 @@ extras/JuceDemo/Builds/Android/bin
 extras/JuceDemo/Builds/Android/libs
 extras/JuceDemo/Builds/Android/gen
 extras/JuceDemo/Builds/Android/obj
-extras/JuceDemo/Builds/iPhone/build
+extras/JuceDemo/Builds/iOS/build
 extras/audio plugin demo/Builds/MacOSX/build
 extras/audio plugin demo/Builds/Linux/build
 extras/audio plugin demo/Builds/VisualStudio2005/Debug
@@ -56,6 +56,7 @@ extras/Introjucer/Builds/VisualStudio2010/Debug
 extras/Introjucer/Builds/VisualStudio2010/Release
 extras/the jucer/Builds/MacOSX/build
 extras/audio plugin host/build/mac/build
+extras/audio plugin demo/Builds/VisualStudio2008
 extras/binarybuilder/Builds/MacOSX/build
 extras/binarybuilder/Builds/Linux/build
 extras/binarybuilder/Builds/VisualStudio2005/Debug
