@@ -93,7 +93,7 @@ public:
     ModuleList& operator= (const ModuleList&);
 
     //==============================================================================
-    void rescan (const File& newModulesFolder);
+    Result rescan (const File& newModulesFolder);
     void rescan();
     File getModulesFolder() const     { return moduleFolder; }
 

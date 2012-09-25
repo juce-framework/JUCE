@@ -86,7 +86,11 @@ public:
 
         {
             ModuleList moduleList;
-            moduleList.rescan (ModuleList::getDefaultModulesFolder (&project));
+            Result scanResult (moduleList.rescan (ModuleList::getDefaultModulesFolder (&project)));
+
+            if (scanResult.failed())
+                return scanResult;
+
             project.createRequiredModules (moduleList, modules);
         }
 

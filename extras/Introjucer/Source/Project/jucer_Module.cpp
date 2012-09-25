@@ -166,7 +166,7 @@ void ModuleList::rescan()
     rescan (moduleFolder);
 }
 
-void ModuleList::rescan (const File& newModulesFolder)
+Result ModuleList::rescan (const File& newModulesFolder)
 {
     modules.clear();
     moduleFolder = getModulesFolderForJuceOrModulesFolder (newModulesFolder);
@@ -183,7 +183,6 @@ void ModuleList::rescan (const File& newModulesFolder)
             if (moduleDef.exists())
             {
                 LibraryModule m (moduleDef);
-                jassert (m.isValid());
 
                 if (m.isValid())
                 {
@@ -196,11 +195,16 @@ void ModuleList::rescan (const File& newModulesFolder)
                     info->description = m.moduleInfo ["description"];
                     info->file = moduleDef;
                 }
+                else
+                {
+                    return Result::fail ("Failed to load module manifest: " + moduleDef.getFullPathName());
+                }
             }
         }
     }
 
     sort();
+    return Result::ok();
 }
 
 bool ModuleList::loadFromWebsite()
@@ -288,9 +292,8 @@ void ModuleList::getDependencies (const String& moduleID, StringArray& dependenc
     if (m != nullptr)
     {
         const var depsArray (m->moduleInfo ["dependencies"]);
-        const Array<var>* const deps = depsArray.getArray();
 
-        if (deps != nullptr)
+        if (const Array<var>* const deps = depsArray.getArray())
         {
             for (int i = 0; i < deps->size(); ++i)
             {
@@ -315,19 +318,20 @@ void ModuleList::createDependencies (const String& moduleID, OwnedArray<LibraryM
 
     if (m != nullptr)
     {
-        var depsArray (m->moduleInfo ["dependencies"]);
-        const Array<var>* const deps = depsArray.getArray();
+        const var depsArray (m->moduleInfo ["dependencies"]);
 
-        for (int i = 0; i < deps->size(); ++i)
+        if (const Array<var>* const deps = depsArray.getArray())
         {
-            const var& d = deps->getReference(i);
+            for (int i = 0; i < deps->size(); ++i)
+            {
+                const var& d = deps->getReference(i);
 
-            String uid (d ["id"].toString());
-            String version (d ["version"].toString());
+                String uid (d ["id"].toString());
+                String version (d ["version"].toString());
 
-            //xxx to do - also need to find version conflicts
-            jassertfalse
-
+                //xxx to do - also need to find version conflicts
+                jassertfalse
+            }
         }
     }
 }
@@ -350,11 +354,10 @@ LibraryModule::LibraryModule (const File& file)
       moduleFile (file),
       moduleFolder (file.getParentDirectory())
 {
-    jassert (isValid());
 }
 
-LibraryModule::LibraryModule (const var& moduleInfo_)
-    : moduleInfo (moduleInfo_)
+LibraryModule::LibraryModule (const var& info)
+    : moduleInfo (info)
 {
 }
 
@@ -416,8 +419,7 @@ static void writeGuardedInclude (OutputStream& out, StringArray paths, StringArr
     }
     else
     {
-        int i = paths.size();
-        for (; --i >= 0;)
+        for (int i = paths.size(); --i >= 0;)
         {
             for (int j = i; --j >= 0;)
             {
@@ -429,7 +431,7 @@ static void writeGuardedInclude (OutputStream& out, StringArray paths, StringArr
             }
         }
 
-        for (i = 0; i < paths.size(); ++i)
+        for (int i = 0; i < paths.size(); ++i)
         {
             out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
                 << " #include " << paths[i] << newLine;
@@ -630,9 +632,8 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
                                             const File& localModuleFolder, Array<File>& result) const
 {
     const var compileArray (moduleInfo ["compile"]); // careful to keep this alive while the array is in use!
-    const Array<var>* const files = compileArray.getArray();
 
-    if (files != nullptr)
+    if (const Array<var>* const files = compileArray.getArray())
     {
         for (int i = 0; i < files->size(); ++i)
         {
@@ -660,9 +661,8 @@ void LibraryModule::findAndAddCompiledCode (ProjectExporter& exporter, ProjectSa
 void LibraryModule::getLocalCompiledFiles (const File& localModuleFolder, Array<File>& result) const
 {
     const var compileArray (moduleInfo ["compile"]); // careful to keep this alive while the array is in use!
-    const Array<var>* const files = compileArray.getArray();
 
-    if (files != nullptr)
+    if (const Array<var>* const files = compileArray.getArray())
     {
         for (int i = 0; i < files->size(); ++i)
         {
