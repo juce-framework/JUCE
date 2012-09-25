@@ -480,6 +480,88 @@ static const unsigned char temp_62b91564[] =
 
 const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_62b91564;
 
+//================== jucer_ContentCompTemplate.cpp ==================
+static const unsigned char temp_7e4c4c06[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"INCLUDE_CORRESPONDING_HEADER\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"CONTENTCOMPCLASS::CONTENTCOMPCLASS()\r\n"
+"{\r\n"
+"    setSize (500, 400);\r\n"
+"}\r\n"
+"\r\n"
+"CONTENTCOMPCLASS::~CONTENTCOMPCLASS()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"void CONTENTCOMPCLASS::paint (Graphics& g)\r\n"
+"{\r\n"
+"    g.fillAll (Colour (0xffeeddff));\r\n"
+"\r\n"
+"    g.setFont (Font (16.0f));\r\n"
+"    g.setColour (Colours::black);\r\n"
+"    g.drawText (\"Hello World!\", getLocalBounds(), Justification::centred, true);\r\n"
+"}\r\n"
+"\r\n"
+"void CONTENTCOMPCLASS::resized()\r\n"
+"{\r\n"
+"    // This is called when the CONTENTCOMPCLASS is resized.\r\n"
+"    // If you add any child components, this is where you should\r\n"
+"    // update their positions.\r\n"
+"}\r\n";
+
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_7e4c4c06;
+
+//================== jucer_ContentCompTemplate.h ==================
+static const unsigned char temp_4a30078b[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#ifndef HEADERGUARD\r\n"
+"#define HEADERGUARD\r\n"
+"\r\n"
+"INCLUDE_JUCE\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/*\r\n"
+"    This component lives inside our window, and this is where you should put all\r\n"
+"    your controls and content.\r\n"
+"*/\r\n"
+"class CONTENTCOMPCLASS   : public Component\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    CONTENTCOMPCLASS();\r\n"
+"    ~CONTENTCOMPCLASS();\r\n"
+"\r\n"
+"    void paint (Graphics&);\r\n"
+"    void resized();\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CONTENTCOMPCLASS)\r\n"
+"};\r\n"
+"\r\n"
+"\r\n"
+"#endif  // HEADERGUARD\r\n";
+
+const char* jucer_ContentCompTemplate_h = (const char*) temp_4a30078b;
+
 //================== jucer_MainConsoleAppTemplate.cpp ==================
 static const unsigned char temp_794304c3[] =
 "/*\r\n"
@@ -507,8 +589,8 @@ static const unsigned char temp_794304c3[] =
 
 const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_794304c3;
 
-//================== jucer_MainTemplate.cpp ==================
-static const unsigned char temp_292512d9[] =
+//================== jucer_MainTemplate_NoWindow.cpp ==================
+static const unsigned char temp_2f039a1[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -527,62 +609,147 @@ static const unsigned char temp_292512d9[] =
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    APPCLASSNAME()MEMBERINITIALISERS\r\n"
-"    {\r\n"
-"    }\r\n"
+"    APPCLASSNAME() {}\r\n"
 "\r\n"
-"    ~APPCLASSNAME()\r\n"
-"    {\r\n"
-"    }\r\n"
+"    const String getApplicationName()       { return ProjectInfo::projectName; }\r\n"
+"    const String getApplicationVersion()    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed()       { return ALLOWMORETHANONEINSTANCE; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void initialise (const String& commandLine)\r\n"
 "    {\r\n"
 "        // Add your application's initialisation code here..\r\n"
-"        APPINITCODE\r\n"
 "    }\r\n"
 "\r\n"
 "    void shutdown()\r\n"
 "    {\r\n"
 "        // Add your application's shutdown code here..\r\n"
-"        APPSHUTDOWNCODE\r\n"
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void systemRequestedQuit()\r\n"
 "    {\r\n"
+"        // This is called when the app is being asked to quit: you can ignore this\r\n"
+"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
 "        quit();\r\n"
-"    }\r\n"
-"\r\n"
-"    const String getApplicationName()\r\n"
-"    {\r\n"
-"        return \"APPNAME\";\r\n"
-"    }\r\n"
-"\r\n"
-"    const String getApplicationVersion()\r\n"
-"    {\r\n"
-"        return ProjectInfo::versionString;\r\n"
-"    }\r\n"
-"\r\n"
-"    bool moreThanOneInstanceAllowed()\r\n"
-"    {\r\n"
-"        return ALLOWMORETHANONEINSTANCE;\r\n"
 "    }\r\n"
 "\r\n"
 "    void anotherInstanceStarted (const String& commandLine)\r\n"
 "    {\r\n"
-"        ANOTHERINSTANCECODE\r\n"
+"        // When another instance of the app is launched while this one is running,\r\n"
+"        // this method is invoked, and the commandLine parameter tells you what\r\n"
+"        // the other instance's command-line arguments were.\r\n"
 "    }\r\n"
-"\r\n"
-"private:\r\n"
-"    PRIVATEMEMBERS\r\n"
 "};\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"// This macro generates the main() routine that starts the app.\r\n"
+"// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
 
-const char* jucer_MainTemplate_cpp = (const char*) temp_292512d9;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_2f039a1;
+
+//================== jucer_MainTemplate_Window.cpp ==================
+static const unsigned char temp_b2f1a7c0[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated by the Introjucer!\r\n"
+"\r\n"
+"    It contains the basic startup code for a Juce application.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"APPHEADERS\r\n"
+"\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"class APPCLASSNAME  : public JUCEApplication\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    APPCLASSNAME() {}\r\n"
+"\r\n"
+"    const String getApplicationName()       { return ProjectInfo::projectName; }\r\n"
+"    const String getApplicationVersion()    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed()       { return ALLOWMORETHANONEINSTANCE; }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void initialise (const String& commandLine)\r\n"
+"    {\r\n"
+"        // This method is where you should put your application's initialisation code..\r\n"
+"\r\n"
+"        mainWindow = new MainWindow();\r\n"
+"    }\r\n"
+"\r\n"
+"    void shutdown()\r\n"
+"    {\r\n"
+"        // Add your application's shutdown code here..\r\n"
+"\r\n"
+"        mainWindow = nullptr; // (deletes our window)\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void systemRequestedQuit()\r\n"
+"    {\r\n"
+"        // This is called when the app is being asked to quit: you can ignore this\r\n"
+"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
+"        quit();\r\n"
+"    }\r\n"
+"\r\n"
+"    void anotherInstanceStarted (const String& commandLine)\r\n"
+"    {\r\n"
+"        // When another instance of the app is launched while this one is running,\r\n"
+"        // this method is invoked, and the commandLine parameter tells you what\r\n"
+"        // the other instance's command-line arguments were.\r\n"
+"    }\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    /*\r\n"
+"        This class implements the desktop window that contains an instance of\r\n"
+"        our CONTENTCOMPCLASS class.\r\n"
+"    */\r\n"
+"    class MainWindow    : public DocumentWindow\r\n"
+"    {\r\n"
+"    public:\r\n"
+"        MainWindow()  : DocumentWindow (\"MainWindow\",\r\n"
+"                                        Colours::lightgrey,\r\n"
+"                                        DocumentWindow::allButtons)\r\n"
+"        {\r\n"
+"            setContentOwned (new CONTENTCOMPCLASS(), true);\r\n"
+"\r\n"
+"            centreWithSize (getWidth(), getHeight());\r\n"
+"            setVisible (true);\r\n"
+"        }\r\n"
+"\r\n"
+"        void closeButtonPressed()\r\n"
+"        {\r\n"
+"            // This is called when the user tries to close this window. Here, we'll just\r\n"
+"            // ask the app to quit when this happens, but you can change this to do\r\n"
+"            // whatever you need.\r\n"
+"            JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
+"        }\r\n"
+"\r\n"
+"        /* Note: Be careful if you override any DocumentWindow methods - the base\r\n"
+"           class uses a lot of them, so by overriding you might break its functionality.\r\n"
+"           It's best to do all your work in your content component instead, but if\r\n"
+"           you really have to override any DocumentWindow methods, make sure your\r\n"
+"           subclass also calls the superclass's method.\r\n"
+"        */\r\n"
+"\r\n"
+"    private:\r\n"
+"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow);\r\n"
+"    };\r\n"
+"\r\n"
+"private:\r\n"
+"    ScopedPointer<MainWindow> mainWindow;\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"// This macro generates the main() routine that launches the app.\r\n"
+"START_JUCE_APPLICATION (APPCLASSNAME)\r\n";
+
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_b2f1a7c0;
 
 //================== jucer_NewComponentTemplate.cpp ==================
 static const unsigned char temp_e0f76d5d[] =
@@ -787,92 +954,6 @@ static const unsigned char temp_627c3689[] =
 
 const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_627c3689;
 
-//================== jucer_WindowTemplate.cpp ==================
-static const unsigned char temp_6fd7e50[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic structure for a simple desktop window.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"INCLUDE_CORRESPONDING_HEADER\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"WINDOWCLASS::WINDOWCLASS()\r\n"
-"    : DocumentWindow (\"WINDOWCLASS\",\r\n"
-"                      Colours::lightgrey,\r\n"
-"                      DocumentWindow::allButtons)\r\n"
-"{\r\n"
-"    // At this point you should call setContentOwned() to give the window\r\n"
-"    // a component containing the content you want to show..\r\n"
-"\r\n"
-"\r\n"
-"    centreWithSize (500, 400);\r\n"
-"    setVisible (true);\r\n"
-"}\r\n"
-"\r\n"
-"WINDOWCLASS::~WINDOWCLASS()\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"void WINDOWCLASS::closeButtonPressed()\r\n"
-"{\r\n"
-"    JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
-"}\r\n";
-
-const char* jucer_WindowTemplate_cpp = (const char*) temp_6fd7e50;
-
-//================== jucer_WindowTemplate.h ==================
-static const unsigned char temp_613d4455[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic outline for a simple desktop window.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#ifndef HEADERGUARD\r\n"
-"#define HEADERGUARD\r\n"
-"\r\n"
-"INCLUDE_JUCE\r\n"
-"\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"class WINDOWCLASS   : public DocumentWindow\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    WINDOWCLASS();\r\n"
-"    ~WINDOWCLASS();\r\n"
-"\r\n"
-"    void closeButtonPressed();\r\n"
-"\r\n"
-"\r\n"
-"    /* Note: Be careful when overriding DocumentWindow methods - the base class\r\n"
-"       uses a lot of them, so by overriding you might break its functionality.\r\n"
-"       It's best to do all your work in you content component instead, but if\r\n"
-"       you really have to override any DocumentWindow methods, make sure your\r\n"
-"       implementation calls the superclass's method.\r\n"
-"    */\r\n"
-"\r\n"
-"private:\r\n"
-"    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WINDOWCLASS)\r\n"
-"};\r\n"
-"\r\n"
-"\r\n"
-"#endif  // HEADERGUARD\r\n";
-
-const char* jucer_WindowTemplate_h = (const char*) temp_613d4455;
-
 
 const char* getNamedResource (const char*, int&) throw();
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
@@ -892,15 +973,16 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x4d0721bf:  numBytes = 799; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 4473; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2400; return jucer_AudioPluginFilterTemplate_h;
+        case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
+        case 0x6fa10171:  numBytes = 924; return jucer_ContentCompTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
-        case 0x7a0186b1:  numBytes = 1742; return jucer_MainTemplate_cpp;
+        case 0x5e5ea047:  numBytes = 1947; return jucer_MainTemplate_NoWindow_cpp;
+        case 0x400bc026:  numBytes = 3614; return jucer_MainTemplate_Window_cpp;
         case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 649; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 260; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 308; return jucer_NewCppFileTemplate_h;
         case 0x36e634a1:  numBytes = 1627; return jucer_NewInlineComponentTemplate_h;
-        case 0x3f052be8:  numBytes = 905; return jucer_WindowTemplate_cpp;
-        case 0xb20377ed:  numBytes = 1220; return jucer_WindowTemplate_h;
         default: break;
     }
 

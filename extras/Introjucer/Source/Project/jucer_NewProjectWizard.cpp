@@ -95,10 +95,10 @@ public:
         if (! getSourceFilesFolder().createDirectory())
             failedFiles.add (getSourceFilesFolder().getFullPathName());
 
-        File mainCppFile = getSourceFilesFolder().getChildFile ("Main.cpp");
-        File mainWindowCpp = getSourceFilesFolder().getChildFile ("MainWindow.cpp");
-        File mainWindowH = mainWindowCpp.withFileExtension (".h");
-        String windowClassName = "MainAppWindow";
+        File mainCppFile    = getSourceFilesFolder().getChildFile ("Main.cpp");
+        File contentCompCpp = getSourceFilesFolder().getChildFile ("MainComponent.cpp");
+        File contentCompH   = contentCompCpp.withFileExtension (".h");
+        String contentCompName = "MainContentComponent";
 
         project.getProjectTypeValue() = ProjectType::getGUIAppTypeName();
 
@@ -107,48 +107,40 @@ public:
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
-        String initCode, shutdownCode, anotherInstanceStartedCode, privateMembers, memberInitialisers;
 
         if (createWindow)
         {
-            appHeaders << newLine << CodeHelpers::createIncludeStatement (mainWindowH, mainCppFile);
-            initCode       = "mainWindow = new " + windowClassName + "();";
-            shutdownCode   = "mainWindow = nullptr;";
-            privateMembers = "ScopedPointer <" + windowClassName + "> mainWindow;";
+            appHeaders << newLine << CodeHelpers::createIncludeStatement (contentCompH, mainCppFile);
 
-            String windowH = project.getFileTemplate ("jucer_WindowTemplate_h")
-                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainWindowH), false)
-                                .replace ("WINDOWCLASS", windowClassName, false)
-                                .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (mainWindowH), false);
+            String windowH = project.getFileTemplate ("jucer_ContentCompTemplate_h")
+                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompH), false)
+                                .replace ("CONTENTCOMPCLASS", contentCompName, false)
+                                .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (contentCompH), false);
 
-            String windowCpp = project.getFileTemplate ("jucer_WindowTemplate_cpp")
-                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainWindowCpp), false)
-                                .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (mainWindowH, mainWindowCpp), false)
-                                .replace ("WINDOWCLASS", windowClassName, false);
+            String windowCpp = project.getFileTemplate ("jucer_ContentCompTemplate_cpp")
+                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
+                                .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
+                                .replace ("CONTENTCOMPCLASS", contentCompName, false);
 
-            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainWindowH, windowH))
-                failedFiles.add (mainWindowH.getFullPathName());
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
+                failedFiles.add (contentCompH.getFullPathName());
 
-            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainWindowCpp, windowCpp))
-                failedFiles.add (mainWindowCpp.getFullPathName());
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
+                failedFiles.add (contentCompCpp.getFullPathName());
 
-            sourceGroup.addFile (mainWindowCpp, -1, true);
-            sourceGroup.addFile (mainWindowH, -1, false);
+            sourceGroup.addFile (contentCompCpp, -1, true);
+            sourceGroup.addFile (contentCompH, -1, false);
         }
 
         if (createMainCpp)
         {
-            String mainCpp = project.getFileTemplate ("jucer_MainTemplate_cpp")
+            String mainCpp = project.getFileTemplate (createWindow ? "jucer_MainTemplate_Window_cpp"
+                                                                   : "jucer_MainTemplate_NoWindow_cpp")
                                 .replace ("APPHEADERS", appHeaders, false)
                                 .replace ("APPCLASSNAME", CodeHelpers::makeValidIdentifier (appTitle + "Application", false, true, false), false)
-                                .replace ("MEMBERINITIALISERS", memberInitialisers, false)
-                                .replace ("APPINITCODE", initCode, false)
-                                .replace ("APPSHUTDOWNCODE", shutdownCode, false)
                                 .replace ("APPNAME", CodeHelpers::addEscapeChars (appTitle), false)
-                                .replace ("APPVERSION", "1.0", false)
-                                .replace ("ALLOWMORETHANONEINSTANCE", "true", false)
-                                .replace ("ANOTHERINSTANCECODE", anotherInstanceStartedCode, false)
-                                .replace ("PRIVATEMEMBERS", privateMembers, false);
+                                .replace ("CONTENTCOMPCLASS", contentCompName, false)
+                                .replace ("ALLOWMORETHANONEINSTANCE", "true", false);
 
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
@@ -470,6 +462,7 @@ public:
         createButton.addListener (this);
 
         addChildAndSetID (&cancelButton, "cancelButton");
+        cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
         cancelButton.setBounds ("right - 140, createButton.top, createButton.left - 10, createButton.bottom");
         cancelButton.addListener (this);
 

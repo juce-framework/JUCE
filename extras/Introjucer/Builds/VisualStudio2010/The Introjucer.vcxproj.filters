@@ -310,19 +310,22 @@
     <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate.cpp">
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_NoWindow.cpp">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_Window.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_WindowTemplate.cpp">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
@@ -1332,6 +1335,9 @@
     <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h">
+      <Filter>The Introjucer\BinaryData</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
@@ -1339,9 +1345,6 @@
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
-      <Filter>The Introjucer\BinaryData</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_WindowTemplate.h">
       <Filter>The Introjucer\BinaryData</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.h">
