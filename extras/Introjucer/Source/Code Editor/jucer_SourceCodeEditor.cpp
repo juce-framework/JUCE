@@ -115,7 +115,7 @@ void SourceCodeEditor::createEditor (CodeDocument& codeDocument)
     if (document->getFile().hasFileExtension (sourceOrHeaderFileExtensions))
         setEditor (new CppCodeEditorComponent (document->getFile(), codeDocument));
     else
-        setEditor (new CodeEditorComponent (codeDocument, nullptr));
+        setEditor (new GenericCodeEditorComponent (document->getFile(), codeDocument, nullptr));
 }
 
 void SourceCodeEditor::setEditor (CodeEditorComponent* newEditor)
@@ -169,82 +169,18 @@ void SourceCodeEditor::valueTreeRedirected (ValueTree&)                         
 
 
 //==============================================================================
-static CPlusPlusCodeTokeniser cppTokeniser;
-
-CppCodeEditorComponent::CppCodeEditorComponent (const File& f, CodeDocument& codeDocument)
-    : CodeEditorComponent (codeDocument, &cppTokeniser), file (f)
+GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocument& codeDocument,
+                                                        CodeTokeniser* tokeniser)
+   : CodeEditorComponent (codeDocument, tokeniser), file (f)
 {
     setCommandManager (commandManager);
 }
 
-CppCodeEditorComponent::~CppCodeEditorComponent()
-{
-}
-
-void CppCodeEditorComponent::handleReturnKey()
-{
-    CodeEditorComponent::handleReturnKey();
-
-    CodeDocument::Position pos (getCaretPos());
-
-    String blockIndent, lastLineIndent;
-    CodeHelpers::getIndentForCurrentBlock (pos, getTabString (getTabSize()), blockIndent, lastLineIndent);
-
-    const String remainderOfBrokenLine (pos.getLineText());
-    const int numLeadingWSChars = CodeHelpers::getLeadingWhitespace (remainderOfBrokenLine).length();
-
-    if (numLeadingWSChars > 0)
-        getDocument().deleteSection (pos, pos.movedBy (numLeadingWSChars));
-
-    if (remainderOfBrokenLine.trimStart().startsWithChar ('}'))
-        insertTextAtCaret (blockIndent);
-    else
-        insertTextAtCaret (lastLineIndent);
-
-    const String previousLine (pos.movedByLines (-1).getLineText());
-    const String trimmedPreviousLine (previousLine.trim());
-
-    if ((trimmedPreviousLine.startsWith ("if ")
-          || trimmedPreviousLine.startsWith ("if(")
-          || trimmedPreviousLine.startsWith ("for ")
-          || trimmedPreviousLine.startsWith ("for(")
-          || trimmedPreviousLine.startsWith ("while(")
-          || trimmedPreviousLine.startsWith ("while "))
-         && trimmedPreviousLine.endsWithChar (')'))
-    {
-        insertTabAtCaret();
-    }
-}
-
-void CppCodeEditorComponent::insertTextAtCaret (const String& newText)
-{
-    if (getHighlightedRegion().isEmpty())
-    {
-        const CodeDocument::Position pos (getCaretPos());
-
-        if ((newText == "{" || newText == "}")
-             && pos.getLineNumber() > 0
-             && pos.getLineText().trim().isEmpty())
-        {
-            moveCaretToStartOfLine (true);
-
-            String blockIndent, lastLineIndent;
-            if (CodeHelpers::getIndentForCurrentBlock (pos, getTabString (getTabSize()), blockIndent, lastLineIndent))
-            {
-                CodeEditorComponent::insertTextAtCaret (blockIndent);
-
-                if (newText == "{")
-                    insertTabAtCaret();
-            }
-        }
-    }
-
-    CodeEditorComponent::insertTextAtCaret (newText);
-}
+GenericCodeEditorComponent::~GenericCodeEditorComponent() {}
 
 enum { showInFinderID = 0x2fe821e3 };
 
-void CppCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEvent* e)
+void GenericCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEvent* e)
 {
     menu.addItem (showInFinderID,
                  #if JUCE_MAC
@@ -257,7 +193,7 @@ void CppCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEven
     CodeEditorComponent::addPopupMenuItems (menu, e);
 }
 
-void CppCodeEditorComponent::performPopupMenuAction (int menuItemID)
+void GenericCodeEditorComponent::performPopupMenuAction (int menuItemID)
 {
     if (menuItemID == showInFinderID)
         file.revealToUser();
@@ -265,7 +201,7 @@ void CppCodeEditorComponent::performPopupMenuAction (int menuItemID)
         CodeEditorComponent::performPopupMenuAction (menuItemID);
 }
 
-void CppCodeEditorComponent::getAllCommands (Array <CommandID>& commands)
+void GenericCodeEditorComponent::getAllCommands (Array <CommandID>& commands)
 {
     CodeEditorComponent::getAllCommands (commands);
 
@@ -277,7 +213,7 @@ void CppCodeEditorComponent::getAllCommands (Array <CommandID>& commands)
     commands.addArray (ids, numElementsInArray (ids));
 }
 
-void CppCodeEditorComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
+void GenericCodeEditorComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
 {
     const bool anythingSelected = isHighlightActive();
 
@@ -311,7 +247,7 @@ void CppCodeEditorComponent::getCommandInfo (const CommandID commandID, Applicat
     }
 }
 
-bool CppCodeEditorComponent::perform (const InvocationInfo& info)
+bool GenericCodeEditorComponent::perform (const InvocationInfo& info)
 {
     switch (info.commandID)
     {
@@ -326,9 +262,9 @@ bool CppCodeEditorComponent::perform (const InvocationInfo& info)
 }
 
 //==============================================================================
-class CppCodeEditorComponent::FindPanel  : public Component,
-                                           private TextEditor::Listener,
-                                           private Button::Listener
+class GenericCodeEditorComponent::FindPanel  : public Component,
+                                               private TextEditor::Listener,
+                                               private Button::Listener
 {
 public:
     FindPanel()
@@ -426,7 +362,18 @@ public:
     TextButton findPrev, findNext;
 };
 
-void CppCodeEditorComponent::showFindPanel()
+void GenericCodeEditorComponent::resized()
+{
+    CodeEditorComponent::resized();
+
+    if (findPanel != nullptr)
+    {
+        findPanel->setSize (jmin (260, getWidth() - 32), 100);
+        findPanel->setTopRightPosition (getWidth() - 16, 8);
+    }
+}
+
+void GenericCodeEditorComponent::showFindPanel()
 {
     if (findPanel == nullptr)
     {
@@ -441,12 +388,12 @@ void CppCodeEditorComponent::showFindPanel()
     findPanel->editor.selectAll();
 }
 
-void CppCodeEditorComponent::hideFindPanel()
+void GenericCodeEditorComponent::hideFindPanel()
 {
     findPanel = nullptr;
 }
 
-void CppCodeEditorComponent::findSelection()
+void GenericCodeEditorComponent::findSelection()
 {
     const String selected (getTextInRange (getHighlightedRegion()));
 
@@ -457,7 +404,7 @@ void CppCodeEditorComponent::findSelection()
     }
 }
 
-void CppCodeEditorComponent::findNext (bool forwards, bool skipCurrentSelection)
+void GenericCodeEditorComponent::findNext (bool forwards, bool skipCurrentSelection)
 {
     const Range<int> highlight (getHighlightedRegion());
     const CodeDocument::Position startPos (getDocument(), skipCurrentSelection ? highlight.getEnd()
@@ -510,19 +457,79 @@ void CppCodeEditorComponent::findNext (bool forwards, bool skipCurrentSelection)
     }
 }
 
-void CppCodeEditorComponent::handleEscapeKey()
+void GenericCodeEditorComponent::handleEscapeKey()
 {
     CodeEditorComponent::handleEscapeKey();
     hideFindPanel();
 }
 
-void CppCodeEditorComponent::resized()
-{
-    CodeEditorComponent::resized();
+//==============================================================================
+static CPlusPlusCodeTokeniser cppTokeniser;
 
-    if (findPanel != nullptr)
+CppCodeEditorComponent::CppCodeEditorComponent (const File& f, CodeDocument& doc)
+    : GenericCodeEditorComponent (f, doc, &cppTokeniser)
+{
+}
+
+CppCodeEditorComponent::~CppCodeEditorComponent() {}
+
+void CppCodeEditorComponent::handleReturnKey()
+{
+    GenericCodeEditorComponent::handleReturnKey();
+
+    CodeDocument::Position pos (getCaretPos());
+
+    String blockIndent, lastLineIndent;
+    CodeHelpers::getIndentForCurrentBlock (pos, getTabString (getTabSize()), blockIndent, lastLineIndent);
+
+    const String remainderOfBrokenLine (pos.getLineText());
+    const int numLeadingWSChars = CodeHelpers::getLeadingWhitespace (remainderOfBrokenLine).length();
+
+    if (numLeadingWSChars > 0)
+        getDocument().deleteSection (pos, pos.movedBy (numLeadingWSChars));
+
+    if (remainderOfBrokenLine.trimStart().startsWithChar ('}'))
+        insertTextAtCaret (blockIndent);
+    else
+        insertTextAtCaret (lastLineIndent);
+
+    const String previousLine (pos.movedByLines (-1).getLineText());
+    const String trimmedPreviousLine (previousLine.trim());
+
+    if ((trimmedPreviousLine.startsWith ("if ")
+          || trimmedPreviousLine.startsWith ("if(")
+          || trimmedPreviousLine.startsWith ("for ")
+          || trimmedPreviousLine.startsWith ("for(")
+          || trimmedPreviousLine.startsWith ("while(")
+          || trimmedPreviousLine.startsWith ("while "))
+         && trimmedPreviousLine.endsWithChar (')'))
     {
-        findPanel->setSize (jmin (260, getWidth() - 32), 100);
-        findPanel->setTopRightPosition (getWidth() - 16, 8);
+        insertTabAtCaret();
     }
+}
+
+void CppCodeEditorComponent::insertTextAtCaret (const String& newText)
+{
+    if (getHighlightedRegion().isEmpty())
+    {
+        const CodeDocument::Position pos (getCaretPos());
+
+        if ((newText == "{" || newText == "}")
+             && pos.getLineNumber() > 0
+             && pos.getLineText().trim().isEmpty())
+        {
+            moveCaretToStartOfLine (true);
+
+            String blockIndent, lastLineIndent;
+            if (CodeHelpers::getIndentForCurrentBlock (pos, getTabString (getTabSize()), blockIndent, lastLineIndent))
+            {
+                GenericCodeEditorComponent::insertTextAtCaret (blockIndent);
+
+                if (newText == "{")
+                    insertTabAtCaret();
+            }
+        }
+    }
+
+    GenericCodeEditorComponent::insertTextAtCaret (newText);
 }

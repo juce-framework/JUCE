@@ -1332,6 +1332,8 @@ void CodeEditorComponent::mouseDown (const MouseEvent& e)
 
     if (e.mods.isPopupMenu())
     {
+        setMouseCursor (MouseCursor::NormalCursor);
+
         if (getHighlightedRegion().isEmpty())
         {
             CodeDocument::Position start, end;
@@ -1366,6 +1368,7 @@ void CodeEditorComponent::mouseUp (const MouseEvent&)
     newTransaction();
     beginDragAutoRepeat (0);
     dragType = notDragging;
+    setMouseCursor (MouseCursor::IBeamCursor);
 }
 
 void CodeEditorComponent::mouseDoubleClick (const MouseEvent& e)

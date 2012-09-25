@@ -48,6 +48,10 @@ namespace FileHelpers
 
     // A windows-aware version of File::getRelativePath()
     String getRelativePathFrom (const File& file, const File& sourceFolder);
+
+    // removes "/../" bits from the middle of the path
+    String simplifyPath (String::CharPointerType path);
+    String simplifyPath (const String& path);
 }
 
 //==============================================================================

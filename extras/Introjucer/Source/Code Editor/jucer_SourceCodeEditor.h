@@ -165,15 +165,11 @@ private:
 
 
 //==============================================================================
-class CppCodeEditorComponent  : public CodeEditorComponent
+class GenericCodeEditorComponent  : public CodeEditorComponent
 {
 public:
-    CppCodeEditorComponent (const File& file, CodeDocument& codeDocument);
-    ~CppCodeEditorComponent();
-
-    void handleReturnKey();
-    void handleEscapeKey();
-    void insertTextAtCaret (const String& newText);
+    GenericCodeEditorComponent (const File&, CodeDocument&, CodeTokeniser*);
+    ~GenericCodeEditorComponent();
 
     void addPopupMenuItems (PopupMenu&, const MouseEvent*);
     void performPopupMenuAction (int menuItemID);
@@ -186,6 +182,7 @@ public:
     void hideFindPanel();
     void findSelection();
     void findNext (bool forwards, bool skipCurrentSelection);
+    void handleEscapeKey();
 
     void resized();
 
@@ -199,6 +196,20 @@ private:
     class FindPanel;
     ScopedPointer<FindPanel> findPanel;
 
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericCodeEditorComponent);
+};
+
+//==============================================================================
+class CppCodeEditorComponent  : public GenericCodeEditorComponent
+{
+public:
+    CppCodeEditorComponent (const File& file, CodeDocument& codeDocument);
+    ~CppCodeEditorComponent();
+
+    void handleReturnKey();
+    void insertTextAtCaret (const String& newText);
+
+private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppCodeEditorComponent);
 };
 
