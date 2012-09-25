@@ -1009,7 +1009,7 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mid
             AudioPlayHead::CurrentPositionInfo position;
             playHead->getCurrentPosition (position);
 
-            vstHostTime.samplePos          = position.timeInSamples;
+            vstHostTime.samplePos          = (double) position.timeInSamples;
             vstHostTime.tempo              = position.bpm;
             vstHostTime.timeSigNumerator   = position.timeSigNumerator;
             vstHostTime.timeSigDenominator = position.timeSigDenominator;

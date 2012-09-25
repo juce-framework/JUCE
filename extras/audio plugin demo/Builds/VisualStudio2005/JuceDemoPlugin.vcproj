@@ -4180,6 +4180,7 @@
       <File RelativePath="..\..\..\..\modules\juce_graphics\juce_graphics.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_gui_basics\juce_gui_basics.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp"/>
+      <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\utility\juce_PluginUtilities.cpp"/>
       <File RelativePath="..\..\..\..\modules\juce_audio_plugin_client\RTAS\juce_RTAS_DigiCode1.cpp">
         <FileConfiguration Name="Debug|Win32">
           <Tool Name="VCCLCompilerTool"

@@ -23,50 +23,37 @@
   ==============================================================================
 */
 
+#if _MSC_VER
+#include <windows.h>
+
 // Your project must contain an AppConfig.h file with your project-specific settings in it,
 // and your header search path must make it accessible to the module's files.
 #include "AppConfig.h"
 
 #include "../utility/juce_CheckSettingMacros.h"
+#include "juce_IncludeModuleHeaders.h"
 
 #if JucePlugin_Build_RTAS
+ extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
+#endif
 
- #include "juce_RTAS_DigiCode_Header.h"
+extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
+{
+    if (reason == DLL_PROCESS_ATTACH)
+        Process::setCurrentModuleInstanceHandle (instance);
 
- /*
-    This file is used to include and build the required digidesign CPP files without your project
-    needing to reference the files directly. Because these files will be found via your include path,
-    this means that the project doesn't have to change to cope with people's SDKs being in different
-    locations.
+   #if JucePlugin_Build_RTAS
+    if (GetModuleHandleA ("DAE.DLL") != 0)
+    {
+       #if JucePlugin_Build_AAX
+        if (! File::getSpecialLocation (File::currentExecutableFile).extentionMatches ("aax"))
+       #endif
+            return DllMainRTAS (instance, reason, reserved);
+    }
+   #endif
 
-    Important note on Windows: In your project settings for the three juce_RTAS_DigiCode.cpp files and
-    the juce_RTAS_Wrapper.cpp file, you need to set the calling convention to "__stdcall".
-    If you don't do this, you'll get some unresolved externals and will spend a long time wondering what's
-    going on... All the other files in your project can be set to use the normal __cdecl convention.
-
-    If you get an error building the includes statements below, check your paths - there's a full
-    list of the necessary Digidesign paths in juce_RTAS_Wrapper.cpp
- */
-
- #if WINDOWS_VERSION
-  #undef _UNICODE
-  #undef UNICODE
-
-  #define DllMain DllMainRTAS
-  #include <DLLMain.cpp>
-  #undef DllMain
-  #include <DefaultSwap.cpp>
-
- #else
-  #include <PlugInInitialize.cpp>
-  #include <Dispatcher.cpp>
- #endif
-
- #else
-
- #if _MSC_VER
-  short __stdcall NewPlugIn (void*)                          { return 0; }
-  short __stdcall _PI_GetRoutineDescriptor (long, void*)     { return 0; }
- #endif
+    (void) reserved;
+    return TRUE;
+}
 
 #endif

@@ -50,14 +50,6 @@
 #include "AAX_CEffectGUI.h"
 #include "AAX_IViewContainer.h"
 
-#if JUCE_WINDOWS
-void __stdcall DllMainAAX (HINSTANCE instance, DWORD reason)
-{
-    if (reason == DLL_PROCESS_ATTACH)
-        Process::setCurrentModuleInstanceHandle (instance);
-}
-#endif
-
 using juce::Component;
 
 //==============================================================================

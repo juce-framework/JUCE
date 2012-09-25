@@ -1535,12 +1535,6 @@ namespace
         return (int) pluginEntryPoint (audioMaster);
     }
    #endif
-
-    void __stdcall DllMainVST (HINSTANCE instance, DWORD reason)
-    {
-        if (reason == DLL_PROCESS_ATTACH)
-            Process::setCurrentModuleInstanceHandle (instance);
-    }
 #endif
 
 #endif

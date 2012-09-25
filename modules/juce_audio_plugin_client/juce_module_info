@@ -25,7 +25,8 @@
                       { "file": "AU/juce_AU_Resources.r", "target": "xcode" },
                       { "file": "AU/juce_AU_Wrapper.mm", "target": "xcode" },
                       { "file": "AAX/juce_AAX_Wrapper.cpp", "target": "xcode, msvc" },
-                      { "file": "AAX/juce_AAX_Wrapper.mm", "target": "xcode" }
+                      { "file": "AAX/juce_AAX_Wrapper.mm", "target": "xcode" },
+                      { "file": "utility/juce_PluginUtilities.cpp" }
                     ],
 
   "browse":         [ "AU/*.cpp",
