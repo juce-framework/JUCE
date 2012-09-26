@@ -522,7 +522,8 @@ namespace AAXHelpers
 
             if (exporter.isVisualStudio())
             {
-                exporter.msvcTargetSuffix = ".aax";
+                exporter.msvcTargetSuffix = ".aaxplugin";
+                exporter.msvcNeedsDLLRuntimeLib = true;
             }
             else
             {

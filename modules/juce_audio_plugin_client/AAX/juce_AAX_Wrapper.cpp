@@ -31,7 +31,9 @@
 
 #if JucePlugin_Build_AAX && (JUCE_INCLUDED_AAX_IN_MM || defined (_WIN32) || defined (_WIN64))
 
-#if defined (__APPLE_CPP__) || defined(__APPLE_CC__)
+#ifdef _MSC_VER
+ #include <windows.h>
+#else
  #include <Cocoa/Cocoa.h>
 #endif
 
@@ -548,7 +550,7 @@ struct AAXClasses
 };
 
 //==============================================================================
-AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* const collection)
+AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 {
     AAXClasses::JUCELibraryRefCount libraryRefCount;
 
