@@ -1088,6 +1088,11 @@ public:
         transformSlider.addListener (this);
     }
 
+    ~WidgetsDemo()
+    {
+        PopupMenu::dismissAllActiveMenus();
+    }
+
     void resized()
     {
         tabs.setBounds (10, 40, getWidth() - 20, getHeight() - 50);

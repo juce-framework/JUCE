@@ -42,16 +42,12 @@ PropertiesFile& getGlobalProperties()
 StoredSettings::StoredSettings()
     : appearance (true)
 {
+    reload();
 }
 
 StoredSettings::~StoredSettings()
 {
     flush();
-}
-
-void StoredSettings::initialise()
-{
-    reload();
 }
 
 PropertiesFile& StoredSettings::getGlobalProperties()

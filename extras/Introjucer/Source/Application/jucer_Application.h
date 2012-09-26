@@ -46,7 +46,6 @@ public:
     {
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
         settings = new StoredSettings();
-        settings->initialise();
 
         if (commandLine.isNotEmpty())
         {

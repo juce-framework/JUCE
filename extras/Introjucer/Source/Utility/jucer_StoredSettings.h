@@ -36,8 +36,6 @@ public:
     StoredSettings();
     ~StoredSettings();
 
-    void initialise();
-
     PropertiesFile& getGlobalProperties();
     PropertiesFile& getProjectProperties (const String& projectUID);
 
