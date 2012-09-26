@@ -104,3 +104,8 @@
 #if JucePlugin_Build_AAX && ! defined (JucePlugin_AAXIdentifier)
  #error "You need to define the JucePlugin_AAXIdentifier value!"
 #endif
+
+#if defined (__ppc__)
+ #undef JucePlugin_Build_AAX
+ #define JucePlugin_Build_AAX 0
+#endif
