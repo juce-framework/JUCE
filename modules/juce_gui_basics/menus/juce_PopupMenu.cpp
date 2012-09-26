@@ -215,13 +215,13 @@ class PopupMenu::Window  : public Component,
                            private Timer
 {
 public:
-    Window (const PopupMenu& menu, Window* const window,
+    Window (const PopupMenu& menu, Window* const parentWindow,
             const Options& opts,
             const bool alignToRectangle,
             const bool shouldDismissOnMouseUp,
             ApplicationCommandManager** const manager)
        : Component ("menu"),
-         owner (window),
+         owner (parentWindow),
          options (opts),
          activeSubMenu (nullptr),
          managerOfChosenCommand (manager),
@@ -247,8 +247,11 @@ public:
         setMouseClickGrabsKeyboardFocus (false);
         setAlwaysOnTop (true);
 
-        setLookAndFeel (menu.lookAndFeel);
-        setOpaque (getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque() || ! Desktop::canUseSemiTransparentWindows());
+        setLookAndFeel (owner != nullptr ? &(owner->getLookAndFeel())
+                                         : menu.lookAndFeel);
+
+        setOpaque (getLookAndFeel().findColour (PopupMenu::backgroundColourId).isOpaque()
+                     || ! Desktop::canUseSemiTransparentWindows());
 
         for (int i = 0; i < menu.items.size(); ++i)
         {
