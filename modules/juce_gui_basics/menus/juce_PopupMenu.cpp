@@ -1193,9 +1193,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
 {
     jassert (commandManager != nullptr && commandID != 0);
 
-    const ApplicationCommandInfo* const registeredInfo = commandManager->getCommandForID (commandID);
-
-    if (registeredInfo != nullptr)
+    if (const ApplicationCommandInfo* const registeredInfo = commandManager->getCommandForID (commandID))
     {
         ApplicationCommandInfo info (*registeredInfo);
         ApplicationCommandTarget* const target = commandManager->getTargetForCommand (commandID, info);

@@ -202,15 +202,15 @@ public:
 
     void paint (Graphics& g)
     {
-        const float yScale = 1.0f / (getHeight() - edge * 2);
+        ColourGradient cg;
+        cg.point1.setXY (0.0f, (float) edge);
+        cg.point2.setXY (0.0f, (float) (getHeight() - edge));
 
-        const Rectangle<int> clip (g.getClipBounds());
+        for (float i = 0.0f; i <= 1.0f; i += 0.02f)
+            cg.addColour (i, Colour (i, 1.0f, 1.0f, 1.0f));
 
-        for (int y = jmin (clip.getBottom(), getHeight() - edge); --y >= jmax (edge, clip.getY());)
-        {
-            g.setColour (Colour ((y - edge) * yScale, 1.0f, 1.0f, 1.0f));
-            g.fillRect (edge, y, getWidth() - edge * 2, 1);
-        }
+        g.setGradientFill (cg);
+        g.fillRect (getLocalBounds().reduced (edge));
     }
 
     void resized()
