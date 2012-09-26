@@ -643,7 +643,7 @@ protected:
 private:
     //==============================================================================
     class Iterator;
-    class UniformTextSection;
+    JUCE_PUBLIC_IN_DLL_BUILD (class UniformTextSection);
     class TextHolderComponent;
     class InsertAction;
     class RemoveAction;

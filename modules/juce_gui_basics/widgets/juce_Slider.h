@@ -813,7 +813,7 @@ protected:
 
 private:
     //==============================================================================
-    class Pimpl;
+    JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl);
     friend class Pimpl;
     friend class ScopedPointer<Pimpl>;
     ScopedPointer<Pimpl> pimpl;

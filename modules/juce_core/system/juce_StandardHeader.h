@@ -131,6 +131,12 @@
  #define JUCE_API   /**< This macro is added to all juce public class declarations. */
 #endif
 
+#if JUCE_MSVC && JUCE_DLL_BUILD
+ #define JUCE_PUBLIC_IN_DLL_BUILD(declaration)  public: declaration; private:
+#else
+ #define JUCE_PUBLIC_IN_DLL_BUILD(declaration)  declaration;
+#endif
+
 /** This macro is added to all juce public function declarations. */
 #define JUCE_PUBLIC_FUNCTION        JUCE_API JUCE_CALLTYPE
 

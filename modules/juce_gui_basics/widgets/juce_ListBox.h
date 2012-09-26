@@ -553,8 +553,8 @@ public:
 
 private:
     //==============================================================================
-    class ListViewport;
-    class RowComponent;
+    JUCE_PUBLIC_IN_DLL_BUILD (class ListViewport);
+    JUCE_PUBLIC_IN_DLL_BUILD (class RowComponent);
     friend class ListViewport;
     friend class TableListBox;
     ListBoxModel* model;
