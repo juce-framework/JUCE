@@ -46,7 +46,7 @@ extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserve
     if (GetModuleHandleA ("DAE.DLL") != 0)
     {
        #if JucePlugin_Build_AAX
-        if (! File::getSpecialLocation (File::currentExecutableFile).extentionMatches ("aax"))
+        if (! File::getSpecialLocation (File::currentExecutableFile).hasFileExtension ("aaxplugin"))
        #endif
             return DllMainRTAS (instance, reason, reserved);
     }
