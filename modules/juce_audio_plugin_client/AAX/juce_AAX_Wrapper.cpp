@@ -506,7 +506,12 @@ struct AAXClasses
 
         properties->AddProperty (AAX_eProperty_ManufacturerID,      JucePlugin_AAXManufacturerCode);
         properties->AddProperty (AAX_eProperty_ProductID,           JucePlugin_AAXProductId);
+
+       #if JucePlugin_AAXDisableBypass
+        properties->AddProperty (AAX_eProperty_CanBypass,           false);
+       #else
         properties->AddProperty (AAX_eProperty_CanBypass,           true);
+       #endif
 
         properties->AddProperty (AAX_eProperty_InputStemFormat,     getFormatForChans (numInputs));
         properties->AddProperty (AAX_eProperty_OutputStemFormat,    getFormatForChans (numOutputs));

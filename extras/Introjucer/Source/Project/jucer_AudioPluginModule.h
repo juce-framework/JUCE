@@ -53,6 +53,7 @@ namespace
     Value getPluginRTASCategory (Project& project)                { return project.getProjectValue ("pluginRTASCategory"); }
     Value getPluginRTASBypassDisabled (Project& project)          { return project.getProjectValue ("pluginRTASDisableBypass"); }
     Value getPluginAAXCategory (Project& project)                 { return project.getProjectValue ("pluginAAXCategory"); }
+    Value getPluginAAXBypassDisabled (Project& project)           { return project.getProjectValue ("pluginAAXDisableBypass"); }
 
     String getPluginRTASCategoryCode (Project& project)
     {
@@ -140,6 +141,7 @@ namespace
         flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AAXPluginId",                 "JucePlugin_PluginCode");
         flags.set ("JucePlugin_AAXCategory",                 getPluginAAXCategory (project).toString());
+        flags.set ("JucePlugin_AAXDisableBypass",            valueToBool (getPluginAAXBypassDisabled (project)));
 
         MemoryOutputStream mem;
 
