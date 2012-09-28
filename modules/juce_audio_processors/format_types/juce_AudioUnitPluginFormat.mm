@@ -326,7 +326,7 @@ public:
 
     void initialise()
     {
-        refreshParameterListFromPlugin();
+        refreshParameterList();
         updateNumChannels();
         setPluginCallbacks();
         setPlayConfigDetails (numInputBusChannels * numInputBusses,
@@ -772,7 +772,7 @@ public:
         }
     }
 
-    void refreshParameterListFromPlugin()
+    void refreshParameterList()
     {
         parameterIds.clear();
 
