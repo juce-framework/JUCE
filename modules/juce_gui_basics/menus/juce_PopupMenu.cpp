@@ -1681,3 +1681,11 @@ bool PopupMenu::MenuItemIterator::next()
 
     return true;
 }
+
+void PopupMenu::MenuItemIterator::addItemTo (PopupMenu& targetMenu)
+{
+    targetMenu.items.add (new Item (itemId, itemName, isEnabled, isTicked, customImage,
+                                    customColour != nullptr ? *customColour : Colours::black, customColour != nullptr,
+                                    nullptr,
+                                    subMenu, commandManager));
+}

@@ -94,6 +94,27 @@ public:
     */
     void removeSubItem (int index, bool deleteItem = true);
 
+    /** Sorts the list of sub-items using a standard array comparator.
+
+        This will use a comparator object to sort the elements into order. The comparator
+        object must have a method of the form:
+        @code
+        int compareElements (TreeViewItem* first, TreeViewItem* second);
+        @endcode
+
+        ..and this method must return:
+          - a value of < 0 if the first comes before the second
+          - a value of 0 if the two objects are equivalent
+          - a value of > 0 if the second comes before the first
+
+        To improve performance, the compareElements() method can be declared as static or const.
+    */
+    template <class ElementComparator>
+    void sortSubItems (ElementComparator& comparator)
+    {
+        subItems.sort (comparator);
+    }
+
     //==============================================================================
     /** Returns the TreeView to which this item belongs. */
     TreeView* getOwnerView() const noexcept             { return ownerView; }

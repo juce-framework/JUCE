@@ -127,6 +127,9 @@ public:
     /** The time that this mouse-event occurred. */
     const Time eventTime;
 
+    /** The time that the corresponding mouse-down event occurred. */
+    const Time mouseDownTime;
+
     /** The source device that generated this event. */
     MouseInputSource& source;
 
@@ -312,7 +315,6 @@ public:
 private:
     //==============================================================================
     const Point<int> mouseDownPos;
-    const Time mouseDownTime;
     const uint8 numberOfClicks, wasMovedSinceMouseDown;
 
     MouseEvent& operator= (const MouseEvent&);

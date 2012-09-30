@@ -242,7 +242,7 @@ public:
     String getTooltip()
     {
         Rectangle<int> pos;
-        if (TreeViewItem* const item = findItemAt (getMouseXYRelative().getY(), pos))
+        if (TreeViewItem* const item = findItemAt (getMouseXYRelative().y, pos))
             return item->getTooltip();
 
         return owner.getTooltip();

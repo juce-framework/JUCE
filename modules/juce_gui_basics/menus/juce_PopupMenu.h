@@ -397,6 +397,9 @@ public:
         */
         bool next();
 
+        /** Adds an item to the target menu which has all the properties of this item. */
+        void addItemTo (PopupMenu& targetMenu);
+
         //==============================================================================
         String itemName;
         const PopupMenu* subMenu;
