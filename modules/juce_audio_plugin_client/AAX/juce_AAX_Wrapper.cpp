@@ -328,6 +328,7 @@ struct AAXClasses
                 setOpaque (true);
                 addAndMakeVisible (pluginEditor = plugin->createEditorIfNeeded());
                 setBounds (pluginEditor->getLocalBounds());
+                setBroughtToFrontOnMouseClick (true);
             }
 
             ~ContentWrapperComponent()
