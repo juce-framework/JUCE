@@ -23,21 +23,32 @@
   ==============================================================================
 */
 
-class TextPropertyComponent::LabelComp  : public Label
+class TextPropertyComponent::LabelComp  : public Label,
+                                          public FileDragAndDropTarget
 {
 public:
-    LabelComp (TextPropertyComponent& owner_,
-               const int maxChars_, const bool isMultiline_)
+    LabelComp (TextPropertyComponent& tpc, const int charLimit, const bool multiline)
         : Label (String::empty, String::empty),
-          owner (owner_),
-          maxChars (maxChars_),
-          isMultiline (isMultiline_)
+          owner (tpc),
+          maxChars (charLimit),
+          isMultiline (multiline)
     {
         setEditable (true, true, false);
 
         setColour (backgroundColourId, owner.findColour (TextPropertyComponent::backgroundColourId));
         setColour (outlineColourId,    owner.findColour (TextPropertyComponent::outlineColourId));
         setColour (textColourId,       owner.findColour (TextPropertyComponent::textColourId));
+    }
+
+    bool isInterestedInFileDrag (const StringArray&)
+    {
+        return true;
+    }
+
+    void filesDropped (const StringArray& files, int, int)
+    {
+        setText (getText() + files.joinIntoString (isMultiline ? "\n" : ", "), true);
+        showEditor();
     }
 
     TextEditor* createEditorComponent()

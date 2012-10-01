@@ -281,21 +281,13 @@ TextEditor* Label::createEditorComponent()
 {
     TextEditor* const ed = new TextEditor (getName());
     ed->setFont (font);
-
-    // copy these colours from our own settings..
-    const int cols[] = { TextEditor::backgroundColourId,
-                         TextEditor::textColourId,
-                         TextEditor::highlightColourId,
-                         TextEditor::highlightedTextColourId,
-                         TextEditor::outlineColourId,
-                         TextEditor::focusedOutlineColourId,
-                         TextEditor::shadowColourId,
-                         CaretComponent::caretColourId };
-
-    for (int i = 0; i < numElementsInArray (cols); ++i)
-        ed->setColour (cols[i], findColour (cols[i]));
-
+    copyAllExplicitColoursTo (*ed);
     return ed;
+}
+
+TextEditor* Label::getCurrentTextEditor() const noexcept
+{
+    return editor;
 }
 
 //==============================================================================
