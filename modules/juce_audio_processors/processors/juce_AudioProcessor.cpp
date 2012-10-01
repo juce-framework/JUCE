@@ -267,7 +267,7 @@ void AudioProcessor::copyXmlToBinary (const XmlElement& xml, juce::MemoryBlock& 
     const String xmlString (xml.createDocument (String::empty, true, false));
     const int stringLength = xmlString.getNumBytesAsUTF8();
 
-    destData.setSize ((size_t) stringLength + 10);
+    destData.setSize ((size_t) stringLength + 9);
 
     char* const d = static_cast<char*> (destData.getData());
     *(uint32*) d = ByteOrder::swapIfBigEndian ((const uint32) magicXmlNumber);
@@ -276,8 +276,7 @@ void AudioProcessor::copyXmlToBinary (const XmlElement& xml, juce::MemoryBlock& 
     xmlString.copyToUTF8 (d + 8, stringLength + 1);
 }
 
-XmlElement* AudioProcessor::getXmlFromBinary (const void* data,
-                                              const int sizeInBytes)
+XmlElement* AudioProcessor::getXmlFromBinary (const void* data, const int sizeInBytes)
 {
     if (sizeInBytes > 8
          && ByteOrder::littleEndianInt (data) == magicXmlNumber)
