@@ -163,6 +163,7 @@ public:
     {
         deleteActiveEditors();
         juceFilter = nullptr;
+        clearPresetsArray();
 
         jassert (activePlugins.contains (this));
         activePlugins.removeFirstMatchingValue (this);
@@ -870,7 +871,9 @@ protected:
         if (outData != nullptr)
         {
             const int numPrograms = juceFilter->getNumPrograms();
-            presetsArray.calloc (numPrograms);
+
+            clearPresetsArray();
+            presetsArray.insertMultiple (0, AUPreset(), numPrograms);
 
             CFMutableArrayRef presetsArrayRef = CFArrayCreateMutable (0, numPrograms, 0);
 
@@ -880,12 +883,11 @@ protected:
                 if (name.isEmpty())
                     name = "Untitled";
 
-                AUPreset& p = presetsArray[i];
+                AUPreset& p = presetsArray.getReference(i);
                 p.presetNumber = i;
                 p.presetName = name.toCFString();
 
                 CFArrayAppendValue (presetsArrayRef, &p);
-                CFRelease (p.presetName);
             }
 
             *outData = (CFArrayRef) presetsArrayRef;
@@ -934,8 +936,16 @@ private:
     SMPTETime lastSMPTETime;
     AUChannelInfo channelInfo [numChannelConfigs];
     AudioUnitEvent auEvent;
-    mutable HeapBlock<AUPreset> presetsArray;
+    mutable Array<AUPreset> presetsArray;
     CriticalSection incomingMidiLock;
+
+    void clearPresetsArray() const
+    {
+        for (int i = presetsArray.size(); --i >= 0;)
+            CFRelease (presetsArray.getReference(i).presetName);
+
+        presetsArray.clear();
+    }
 
     JUCE_DECLARE_NON_COPYABLE (JuceAU);
 };
