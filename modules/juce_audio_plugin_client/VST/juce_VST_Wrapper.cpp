@@ -830,6 +830,8 @@ public:
 
     void audioProcessorChanged (AudioProcessor*)
     {
+        setInitialDelay (processor->getLatencySamples());
+        ioChanged();
         updateDisplay();
     }
 
