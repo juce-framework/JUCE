@@ -971,7 +971,7 @@ private:
         return "file" + file.getFileExtension();
     }
 
-    String addFile (const RelativePath& path, bool shouldBeCompiled, bool inhibitWarnings) const
+    String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources, bool inhibitWarnings) const
     {
         const String pathAsString (path.toUnixStyle());
         const String refID (addFileReference (path.toUnixStyle()));
@@ -982,6 +982,16 @@ private:
                 rezFileIDs.add (addBuildFile (pathAsString, refID, false, inhibitWarnings));
             else
                 addBuildFile (pathAsString, refID, true, inhibitWarnings);
+        }
+        else if (! shouldBeAddedToBinaryResources)
+        {
+            const String fileType (getFileType (path));
+
+            if (fileType.startsWith ("image.") || fileType.startsWith ("text.") || fileType.startsWith ("file."))
+            {
+                resourceIDs.add (addBuildFile (pathAsString, refID, false, false));
+                resourceFileRefs.add (refID);
+            }
         }
 
         return refID;
@@ -1006,19 +1016,17 @@ private:
         {
             if (projectItem.shouldBeAddedToTargetProject())
             {
-                String itemPath (projectItem.getFilePath());
-                bool inhibitWarnings = projectItem.shouldInhibitWarnings();
+                const String itemPath (projectItem.getFilePath());
+                RelativePath path;
 
                 if (itemPath.startsWith ("${"))
-                {
-                    const RelativePath path (itemPath, RelativePath::unknown);
-                    return addFile (path, projectItem.shouldBeCompiled(), inhibitWarnings);
-                }
+                    path = RelativePath (itemPath, RelativePath::unknown);
                 else
-                {
-                    const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
-                    return addFile (path, projectItem.shouldBeCompiled(), inhibitWarnings);
-                }
+                    path = RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+
+                return addFile (path, projectItem.shouldBeCompiled(),
+                                projectItem.shouldBeAddedToBinaryResources(),
+                                projectItem.shouldInhibitWarnings());
             }
         }
 
