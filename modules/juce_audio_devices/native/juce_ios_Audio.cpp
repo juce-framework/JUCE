@@ -376,8 +376,7 @@ private:
     {
         if (interruptionType == kAudioSessionBeginInterruption)
         {
-            isRunning = false;
-            AudioOutputUnitStop (audioUnit);
+            close();
 
             {
                 const ScopedLock sl (callbackLock);
@@ -385,9 +384,6 @@ private:
                 if (callback != nullptr)
                     callback->audioDeviceError ("iOS audio session interruption");
             }
-
-            isRunning = true;
-            routingChanged (nullptr);
         }
 
         if (interruptionType == kAudioSessionEndInterruption)
