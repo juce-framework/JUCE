@@ -67,7 +67,7 @@ public:
                 Component* eventComponent,
                 Component* originator,
                 const Time& eventTime,
-                const Point<int> mouseDownPos,
+                const Point<int>& mouseDownPos,
                 const Time& mouseDownTime,
                 int numberOfClicks,
                 bool mouseWasDragged) noexcept;
