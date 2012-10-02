@@ -36,7 +36,12 @@
  #define JUCE_SUPPORT_CARBON 0
 #endif
 
-#include "../utility/juce_IncludeSystemHeaders.h"
+#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wshorten-64-to-32"
+#endif
+
+include "../utility/juce_IncludeSystemHeaders.h"
 
 #include <AudioUnit/AUCocoaUIView.h>
 #include <AudioUnit/AudioUnit.h>
@@ -69,6 +74,10 @@
  #include "AUCarbonViewBase.h"
  #undef Point
  class JuceAUView;
+#endif
+
+#ifdef __clang__
+ #pragma clang diagnostic pop
 #endif
 
 #define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
