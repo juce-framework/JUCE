@@ -41,7 +41,7 @@
  #pragma clang diagnostic ignored "-Wshorten-64-to-32"
 #endif
 
-include "../utility/juce_IncludeSystemHeaders.h"
+#include "../utility/juce_IncludeSystemHeaders.h"
 
 #include <AudioUnit/AUCocoaUIView.h>
 #include <AudioUnit/AudioUnit.h>
