@@ -302,6 +302,7 @@ namespace RTASHelpers
         else if (exporter.isXcode())
         {
             exporter.extraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
+            exporter.extraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
 
             const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
                                 "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
