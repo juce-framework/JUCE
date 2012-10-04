@@ -939,8 +939,6 @@ void VSTPluginInstance::prepareToPlay (double rate, int samplesPerBlockExpected)
 {
     setPlayConfigDetails (effect->numInputs, effect->numOutputs, rate, samplesPerBlockExpected);
 
-    setLatencySamples (effect->initialDelay);
-
     vstHostTime.tempo = 120.0;
     vstHostTime.timeSigNumerator = 4;
     vstHostTime.timeSigDenominator = 4;
@@ -979,6 +977,8 @@ void VSTPluginInstance::prepareToPlay (double rate, int samplesPerBlockExpected)
         }
 
         dispatch (effStartProcess, 0, 0, 0, 0);
+
+        setLatencySamples (effect->initialDelay);
     }
 }
 
