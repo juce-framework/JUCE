@@ -202,7 +202,7 @@ public:
             typefaceName = Font::getDefaultSansSerifFontName();
     }
 
-    SharedFontInternal (const Typeface::Ptr& face) noexcept
+    explicit SharedFontInternal (const Typeface::Ptr& face) noexcept
         : typefaceName (face->getName()),
           typefaceStyle (face->getStyle()),
           height (FontValues::defaultFontHeight),
@@ -213,6 +213,18 @@ public:
           typeface (face)
     {
         jassert (typefaceName.isNotEmpty());
+    }
+
+    SharedFontInternal (const SharedFontInternal& other) noexcept
+        : typefaceName (other.typefaceName),
+          typefaceStyle (other.typefaceStyle),
+          height (other.height),
+          horizontalScale (other.horizontalScale),
+          kerning (other.kerning),
+          ascent (other.ascent),
+          underline (other.underline),
+          typeface (other.typeface)
+    {
     }
 
     bool operator== (const SharedFontInternal& other) const noexcept
@@ -253,8 +265,7 @@ Font::Font (const String& typefaceName, const float fontHeight, const int styleF
 }
 
 Font::Font (const String& typefaceName, const String& typefaceStyle, float fontHeight)
-    : font (new SharedFontInternal (typefaceName, typefaceStyle,
-                                    FontValues::limitFontHeight (fontHeight), false))
+    : font (new SharedFontInternal (typefaceName, typefaceStyle, FontValues::limitFontHeight (fontHeight), false))
 {
 }
 
