@@ -45,16 +45,16 @@ Identifier& Identifier::operator= (const Identifier& other) noexcept
     return *this;
 }
 
-Identifier::Identifier (const String& name_)
-    : name (Identifier::getPool().getPooledString (name_))
+Identifier::Identifier (const String& nm)
+    : name (Identifier::getPool().getPooledString (nm))
 {
     /* An Identifier string must be suitable for use as a script variable or XML
        attribute, so it can only contain this limited set of characters.. */
-    jassert (isValidIdentifier (name_));
+    jassert (isValidIdentifier (nm));
 }
 
-Identifier::Identifier (const char* const name_)
-    : name (Identifier::getPool().getPooledString (name_))
+Identifier::Identifier (const char* const nm)
+    : name (Identifier::getPool().getPooledString (nm))
 {
     /* An Identifier string must be suitable for use as a script variable or XML
        attribute, so it can only contain this limited set of characters.. */
@@ -64,6 +64,8 @@ Identifier::Identifier (const char* const name_)
 Identifier::~Identifier()
 {
 }
+
+Identifier Identifier::null;
 
 bool Identifier::isValidIdentifier (const String& possibleIdentifier) noexcept
 {

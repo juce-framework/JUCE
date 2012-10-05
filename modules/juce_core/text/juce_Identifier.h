@@ -81,6 +81,15 @@ public:
     /** Returns this identifier's raw string pointer. */
     const String::CharPointerType getCharPointer() const noexcept       { return name; }
 
+    /** Returns true if this Identifier is not null */
+    bool isValid() const noexcept                                       { return name.getAddress() != nullptr; }
+
+    /** Returns true if this Identifier is null */
+    bool isNull() const noexcept                                        { return name.getAddress() == nullptr; }
+
+    /** A null identifier. */
+    static Identifier null;
+
     /** Checks a given string for characters that might not be valid in an Identifier.
         Since Identifiers are used as a script variables and XML attributes, they should only contain
         alphanumeric characters, underscores, or the '-' and ':' characters.
