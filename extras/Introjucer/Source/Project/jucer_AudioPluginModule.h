@@ -359,7 +359,7 @@ namespace RTASHelpers
                 exporter.msvcExtraPreprocessorDefs.set ("JucePlugin_WinBag_path", winbag);
 
                 String msvcPathToRTASFolder (exporter.getJucePathFromTargetFolder()
-                                                     .getChildFile ("juce_audio_plugin_client/RTAS")
+                                                     .getChildFile ("modules/juce_audio_plugin_client/RTAS")
                                                      .toWindowsStyle() + "\\");
 
                 exporter.msvcDelayLoadedDLLs = "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll";
