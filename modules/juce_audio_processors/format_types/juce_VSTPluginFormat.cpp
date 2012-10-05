@@ -778,14 +778,14 @@ private:
     //==============================================================================
     int dispatch (const int opcode, const int index, const int value, void* const ptr, float opt) const;
     bool restoreProgramSettings (const fxProgram* const prog);
-    const String getCurrentProgramName();
+    String getCurrentProgramName();
     void setParamsInProgramBlock (fxProgram* const prog);
     void updateStoredProgramNames();
     void initialise();
     void handleMidiFromPlugin (const VstEvents* const events);
     void createTempParameterStore (MemoryBlock& dest);
     void restoreFromTempParameterStore (const MemoryBlock& mb);
-    const String getParameterLabel (int index) const;
+    String getParameterLabel (int index) const;
 
     bool usesChunks() const noexcept        { return effect != nullptr && (effect->flags & effFlagsProgramChunks) != 0; }
     void getChunkData (MemoryBlock& mb, bool isPreset, int maxSizeMB) const;
@@ -2475,7 +2475,7 @@ const String VSTPluginInstance::getParameterName (int index)
     return String::empty;
 }
 
-const String VSTPluginInstance::getParameterLabel (int index) const
+String VSTPluginInstance::getParameterLabel (int index) const
 {
     if (effect != nullptr)
     {
@@ -2601,7 +2601,7 @@ void VSTPluginInstance::updateStoredProgramNames()
     }
 }
 
-const String VSTPluginInstance::getCurrentProgramName()
+String VSTPluginInstance::getCurrentProgramName()
 {
     String name;
 

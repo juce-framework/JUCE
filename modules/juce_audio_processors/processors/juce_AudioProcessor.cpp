@@ -196,15 +196,9 @@ void AudioProcessor::updateHostDisplay()
     }
 }
 
-bool AudioProcessor::isParameterAutomatable (int /*parameterIndex*/) const
-{
-    return true;
-}
-
-bool AudioProcessor::isMetaParameter (int /*parameterIndex*/) const
-{
-    return false;
-}
+String AudioProcessor::getParameterLabel (int) const        { return String::empty; }
+bool AudioProcessor::isParameterAutomatable (int) const     { return true; }
+bool AudioProcessor::isMetaParameter (int) const            { return false; }
 
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 {

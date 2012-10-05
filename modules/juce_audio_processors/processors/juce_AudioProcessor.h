@@ -389,6 +389,11 @@ public:
     /** Returns the value of a parameter as a text string. */
     virtual const String getParameterText (int parameterIndex) = 0;
 
+    /** Some plugin types may be able to return a label string for a
+        parameter's units.
+    */
+    virtual String getParameterLabel (int index) const;
+
     /** The host will call this method to change the value of one of the filter's parameters.
 
         The host may call this at any time, including during the audio processing
