@@ -610,9 +610,16 @@ public:
                                   parameterIds [index], &info, &sz) == noErr)
         {
             if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) != 0)
+            {
                 name = String::fromCFString (info.cfNameString);
+
+                if ((info.flags & kAudioUnitParameterFlag_CFNameRelease) != 0)
+                    CFRelease (info.cfNameString);
+            }
             else
+            {
                 name = String (info.name, sizeof (info.name));
+            }
         }
 
         return name;

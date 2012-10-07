@@ -402,9 +402,7 @@ public:
             if (juceFilter->isMetaParameter (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
-            CFStringRef cfName (name.toCFString());
-            AUBase::FillInParameterName (outParameterInfo, cfName, false);
-            CFRelease (cfName);
+            AUBase::FillInParameterName (outParameterInfo, name.toCFString(), true);
 
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = 1.0f;
