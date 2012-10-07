@@ -220,7 +220,7 @@ public:
 
     /** Returns one of the elements in the array.
         If the index passed in is beyond the range of valid elements, this
-        will return zero.
+        will return a default value.
 
         If you're certain that the index will always be a valid element, you
         can call getUnchecked() instead, which is faster.
@@ -267,7 +267,7 @@ public:
         return data.elements [index];
     }
 
-    /** Returns the first element in the array, or 0 if the array is empty.
+    /** Returns the first element in the array, or a default value if the array is empty.
 
         @see operator[], getUnchecked, getLast
     */
@@ -278,7 +278,7 @@ public:
                              : ElementType();
     }
 
-    /** Returns the last element in the array, or 0 if the array is empty.
+    /** Returns the last element in the array, or a default value if the array is empty.
 
         @see operator[], getUnchecked, getFirst
     */
