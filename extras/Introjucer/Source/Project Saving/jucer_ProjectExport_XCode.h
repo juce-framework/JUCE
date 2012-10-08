@@ -83,6 +83,9 @@ public:
     Value  getPostBuildScriptValue()        { return getSetting (Ids::postbuildCommand); }
     String getPostBuildScript() const       { return settings   [Ids::postbuildCommand]; }
 
+    Value  getPreBuildScriptValue()         { return getSetting (Ids::prebuildCommand); }
+    String getPreBuildScript() const        { return settings   [Ids::prebuildCommand]; }
+
     bool isAvailableOnCurrentOS()
     {
        #if JUCE_MAC
@@ -130,6 +133,9 @@ public:
             props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type",
                                                     StringArray (libTypes), Array<var> (libTypeValues)));
         }
+
+        props.add (new TextPropertyComponent (getPreBuildScriptValue(), "Pre-build shell script", 32768, true),
+                   "Some shell-script that will be run before a build starts.");
 
         props.add (new TextPropertyComponent (getPostBuildScriptValue(), "Post-build shell script", 32768, true),
                    "Some shell-script that will be run after a build completes.");
@@ -347,6 +353,8 @@ private:
         addConfigList (projectConfigs, createID ("__projList"));
         addConfigList (targetConfigs, createID ("__configList"));
 
+        addShellScriptBuildPhase ("Pre-build script", getPreBuildScript());
+
         if (! isStaticLibrary())
             addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
@@ -358,7 +366,7 @@ private:
         if (! isStaticLibrary())
             addBuildPhase ("PBXFrameworksBuildPhase", frameworkIDs);
 
-        addShellScriptPhase();
+        addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
 
         addTargetObject();
         addProjectObject();
@@ -1121,7 +1129,7 @@ private:
         misc.add (v);
     }
 
-    ValueTree* addBuildPhase (const String& phaseType, const StringArray& fileIds) const
+    ValueTree& addBuildPhase (const String& phaseType, const StringArray& fileIds) const
     {
         String phaseId (createID (phaseType + "resbuildphase"));
         buildPhaseIDs.add (phaseId);
@@ -1132,7 +1140,7 @@ private:
         v->setProperty ("files", "(" + indentList (fileIds, ",") + " )", nullptr);
         v->setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, nullptr);
         misc.add (v);
-        return v;
+        return *v;
     }
 
     void addTargetObject() const
@@ -1171,17 +1179,17 @@ private:
         misc.add (v);
     }
 
-    void addShellScriptPhase() const
+    void addShellScriptBuildPhase (const String& name, const String& script) const
     {
-        if (getPostBuildScript().isNotEmpty())
+        if (script.trim().isNotEmpty())
         {
-            ValueTree* const v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
-            v->setProperty (Ids::name, "Post-build script", nullptr);
-            v->setProperty ("shellPath", "/bin/sh", nullptr);
-            v->setProperty ("shellScript", getPostBuildScript().replace ("\\", "\\\\")
-                                                               .replace ("\"", "\\\"")
-                                                               .replace ("\r\n", "\\n")
-                                                               .replace ("\n", "\\n"), nullptr);
+            ValueTree& v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
+            v.setProperty (Ids::name, name, nullptr);
+            v.setProperty ("shellPath", "/bin/sh", nullptr);
+            v.setProperty ("shellScript", script.replace ("\\", "\\\\")
+                                                .replace ("\"", "\\\"")
+                                                .replace ("\r\n", "\\n")
+                                                .replace ("\n", "\\n"), nullptr);
         }
     }
 
