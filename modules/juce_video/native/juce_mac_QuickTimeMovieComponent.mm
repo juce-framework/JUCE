@@ -146,7 +146,7 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream, const bool sh
     return movie != nil;
 }
 
-bool QuickTimeMovieComponent::loadMovie (const URL& movieURL,, const bool showController)
+bool QuickTimeMovieComponent::loadMovie (const URL& movieURL, const bool showController)
 {
     // unfortunately, QTMovie objects can only be created on the main thread..
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
