@@ -54,7 +54,7 @@ struct ThreadSafeNSOpenGLViewClass  : public ObjCClass <NSOpenGLView>
 
         [[(NSOpenGLView*) self openGLContext] makeCurrentContext];
 
-        if (getIvar<BOOL> (self, "needsUpdate"))
+        if (getIvar<void*> (self, "needsUpdate"))
         {
             sendSuperclassMessage (self, @selector (update));
             setNeedsUpdate (self, NO);
