@@ -214,7 +214,7 @@ public:
             {
               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (SystemStats::getOperatingSystemType() >= MacOSX_10_5)
+                if (SystemStats::getOperatingSystemType() >= SystemStats::MacOSX_10_5)
               #endif
                 {
                     outDataSize = sizeof (AudioUnitCocoaViewInfo);
@@ -254,7 +254,7 @@ public:
             {
                #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
-                if (SystemStats::getOperatingSystemType() >= MacOSX_10_5)
+                if (SystemStats::getOperatingSystemType() >= SystemStats::MacOSX_10_5)
                #endif
                 {
                     JUCE_AUTORELEASEPOOL
@@ -1007,9 +1007,7 @@ public:
 
     void childBoundsChanged (Component*)
     {
-        Component* editor = getChildComponent(0);
-
-        if (editor != nullptr)
+        if (Component* editor = getChildComponent(0))
         {
             const int w = jmax (32, editor->getWidth());
             const int h = jmax (32, editor->getHeight());
@@ -1050,15 +1048,11 @@ public:
 
             if (editorComp != nullptr)
             {
-                JuceAU* const au = getAU (self);
-
-                if (editorComp->getChildComponent(0) != nullptr)
+                if (editorComp->getChildComponent(0) != nullptr
+                     && activePlugins.contains (getAU (self))) // plugin may have been deleted before the UI
                 {
-                    if (activePlugins.contains (au)) // plugin may have been deleted before the UI
-                    {
-                        AudioProcessor* const filter = getIvar<AudioProcessor*> (self, "filter");
-                        filter->editorBeingDeleted ((AudioProcessorEditor*) editorComp->getChildComponent(0));
-                    }
+                    AudioProcessor* const filter = getIvar<AudioProcessor*> (self, "filter");
+                    filter->editorBeingDeleted ((AudioProcessorEditor*) editorComp->getChildComponent(0));
                 }
 
                 editorComp = nullptr;
@@ -1066,8 +1060,8 @@ public:
             }
         }
 
-        static JuceAU* getAU (id self)                  { return getIvar<JuceAU*> (self, "au"); }
-        static EditorCompHolder* getEditor (id self)    { return getIvar<EditorCompHolder*> (self, "editor"); }
+        static JuceAU* getAU (id self)                          { return getIvar<JuceAU*> (self, "au"); }
+        static EditorCompHolder* getEditor (id self)            { return getIvar<EditorCompHolder*> (self, "editor"); }
 
         static void setFilter (id self, AudioProcessor* filter) { object_setInstanceVariable (self, "filter", filter); }
         static void setAU (id self, JuceAU* au)                 { object_setInstanceVariable (self, "au", au); }
@@ -1104,19 +1098,16 @@ public:
 
         static void viewDidMoveToWindow (id self, SEL)
         {
-            NSWindow* w = [(NSView*) self window];
-
-            if (w != nil)
+            if (NSWindow* w = [(NSView*) self window])
             {
                 [w setAcceptsMouseMovedEvents: YES];
 
-                EditorCompHolder* const editorComp = getEditor (self);
-                if (editorComp != nullptr)
+                if (EditorCompHolder* const editorComp = getEditor (self))
                     [w makeFirstResponder: (NSView*) editorComp->getWindowHandle()];
             }
         }
 
-        static BOOL mouseDownCanMoveWindow (id self, SEL)
+        static BOOL mouseDownCanMoveWindow (id, SEL)
         {
             return NO;
         }
@@ -1265,13 +1256,9 @@ private:
                aren't so careful) */
             jassert (Component::getCurrentlyModalComponent() == nullptr);
 
-            EditorCompHolder* editorCompHolder = dynamic_cast <EditorCompHolder*> (windowComp->getChildComponent(0));
-            if (editorCompHolder != nullptr)
-            {
-                AudioProcessorEditor* audioProcessEditor = dynamic_cast <AudioProcessorEditor*> (editorCompHolder->getChildComponent(0));
-                if (audioProcessEditor != nullptr)
+            if (EditorCompHolder* editorCompHolder = dynamic_cast <EditorCompHolder*> (windowComp->getChildComponent(0)))
+                if (AudioProcessorEditor* audioProcessEditor = dynamic_cast <AudioProcessorEditor*> (editorCompHolder->getChildComponent(0)))
                     juceFilter->editorBeingDeleted (audioProcessEditor);
-            }
 
             windowComp = nullptr;
         }
@@ -1362,8 +1349,7 @@ private:
 
         void resized()
         {
-            Component* const child = getChildComponent (0);
-            if (child != nullptr)
+            if (Component* const child = getChildComponent (0))
                 child->setBounds (getLocalBounds());
         }
 
