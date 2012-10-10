@@ -23,7 +23,7 @@
 #define %%headerGuard%%
 
 //[Headers]     -- You can add your own extra header files here --
-#include "juce.h"
+#include "JuceHeader.h"
 //[/Headers]
 
 %%includeFilesH%%
