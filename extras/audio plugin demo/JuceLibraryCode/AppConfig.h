@@ -262,6 +262,9 @@
 #ifndef  JucePlugin_RTASDisableBypass
  #define JucePlugin_RTASDisableBypass      0
 #endif
+#ifndef  JucePlugin_RTASDisableMultiMono
+ #define JucePlugin_RTASDisableMultiMono   0
+#endif
 #ifndef  JucePlugin_AAXIdentifier
  #define JucePlugin_AAXIdentifier          com.yourcompany.JuceDemoPlugin
 #endif

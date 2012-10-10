@@ -945,6 +945,10 @@ public:
             type->AddGestalt (pluginGestalt_CanBypass);
            #endif
 
+           #if JucePlugin_RTASDisableMultiMono
+            type->AddGestalt (pluginGestalt_DoesntSupportMultiMono);
+           #endif
+
             type->AddGestalt (pluginGestalt_SupportsVariableQuanta);
             type->AttachEffectProcessCreator (createNewProcess);
 

@@ -113,7 +113,6 @@ public:
         return S_OK;
     }
 
-
 private:
     InputStream& source;
 
@@ -160,10 +159,7 @@ public:
     ~WMAudioReader()
     {
         if (wmSyncReader != nullptr)
-        {
             wmSyncReader->Close();
-            wmSyncReader = nullptr;
-        }
     }
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -319,7 +315,8 @@ private:
 
 //==============================================================================
 WindowsMediaAudioFormat::WindowsMediaAudioFormat()
-    : AudioFormat (TRANS (WindowsMediaCodec::wmFormatName), StringArray (WindowsMediaCodec::extensions))
+    : AudioFormat (TRANS (WindowsMediaCodec::wmFormatName),
+                   StringArray (WindowsMediaCodec::extensions))
 {
 }
 
