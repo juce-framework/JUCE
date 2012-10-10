@@ -23,14 +23,8 @@
   ==============================================================================
 */
 
-AudioFormatManager::AudioFormatManager()
-    : defaultFormatIndex (0)
-{
-}
-
-AudioFormatManager::~AudioFormatManager()
-{
-}
+AudioFormatManager::AudioFormatManager()  : defaultFormatIndex (0) {}
+AudioFormatManager::~AudioFormatManager() {}
 
 //==============================================================================
 void AudioFormatManager::registerFormat (AudioFormat* newFormat, const bool makeThisTheDefaultFormat)
@@ -71,12 +65,14 @@ void AudioFormatManager::registerBasicFormats()
 
    #if JUCE_MAC || JUCE_IOS
     registerFormat (new CoreAudioFormat(), false);
-   #elif JUCE_USE_WINDOWS_MEDIA_FORMAT
-    registerFormat (new WindowsMediaAudioFormat(), false);
-   #elif JUCE_USE_MP3AUDIOFORMAT
-    // The software MP3 decoder is only used as a default format if
-    // there isn't an OS-provided alternative.
+   #endif
+
+   #if JUCE_USE_MP3AUDIOFORMAT
     registerFormat (new MP3AudioFormat(), false);
+   #endif
+
+   #if JUCE_USE_WINDOWS_MEDIA_FORMAT
+    registerFormat (new WindowsMediaAudioFormat(), false);
    #endif
 }
 
