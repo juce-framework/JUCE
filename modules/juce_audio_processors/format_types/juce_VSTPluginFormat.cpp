@@ -339,6 +339,9 @@ public:
     File file;
     MainCall moduleMain;
     String pluginName;
+    ScopedPointer<XmlElement> vstXml;
+
+    typedef ReferenceCountedObjectPtr<ModuleHandle> Ptr;
 
     static Array <ModuleHandle*>& getActiveModules()
     {
@@ -428,6 +431,14 @@ public:
         if (moduleMain == nullptr)
             moduleMain = (MainCall) module.getFunction ("main");
 
+        if (moduleMain != nullptr)
+        {
+            vstXml = XmlDocument::parse (file.withFileExtension ("vstxml"));
+
+            if (vstXml == nullptr)
+                vstXml = XmlDocument::parse (getDLLResource (file, "VSTXML", 1));
+        }
+
         return moduleMain != nullptr;
     }
 
@@ -443,6 +454,30 @@ public:
         eff->dispatcher (eff, effClose, 0, 0, 0, 0);
     }
 
+    static String getDLLResource (const File& dll, const char* type, int resID)
+    {
+        DynamicLibrary dll (dll.getFullPathName());
+
+        HMODULE dllModule = dll.getNativeHandle();
+
+        if (dllModule != INVALID_HANDLE_VALUE)
+        {
+            HRSRC res = FindResource (dllModule, MAKEINTRESOURCE (resID), type);
+
+            if (res != 0)
+            {
+                HGLOBAL hGlob = LoadResource (dllModule, res);
+
+                if (hGlob)
+                {
+                    const char* data = LockResource (hGlob);
+                    return String::fromUTF8 (data, SizeofResource (dllModule, res));
+                }
+            }
+        }
+
+        return String::empty;
+    }
 #else
    #if JUCE_PPC
     CFragConnectionID fragId;
@@ -498,6 +533,14 @@ public:
                             resFileId = CFBundleOpenBundleResourceMap (bundleRef);
 
                             ok = true;
+
+                            Array<File> vstXmlFiles;
+                            file.getChildFile ("Contents")
+                                .getChildFile ("Resources")
+                                .findChildFiles (vstXmlFiles, File::findFiles, false, "*.vstxml");
+
+                            if (vstXmlFiles.size() > 0)
+                                vstXml = XmlDocument::parse (vstXmlFiles.getReference(0));
                         }
                     }
 
@@ -664,16 +707,11 @@ private:
 };
 
 //==============================================================================
-/**
-    An instance of a plugin, created by a VSTPluginFormat.
-
-*/
 class VSTPluginInstance     : public AudioPluginInstance,
                               private Timer,
                               private AsyncUpdater
 {
 public:
-    //==============================================================================
     ~VSTPluginInstance();
 
     //==============================================================================
@@ -722,8 +760,7 @@ public:
 
     void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
     void releaseResources();
-    void processBlock (AudioSampleBuffer& buffer,
-                       MidiBuffer& midiMessages);
+    void processBlock (AudioSampleBuffer&, MidiBuffer&);
 
     bool hasEditor() const                              { return effect != nullptr && (effect->flags & effFlagsHasEditor) != 0; }
     AudioProcessorEditor* createEditor();
@@ -742,6 +779,8 @@ public:
     const String getParameterText (int index);
     bool isParameterAutomatable (int index) const;
 
+    const XmlElement* getVSTXML() const noexcept        { return module != nullptr ? module->vstXml.get() : nullptr; }
+
     //==============================================================================
     int getNumPrograms()                                { return effect != nullptr ? effect->numPrograms : 0; }
     int getCurrentProgram()                             { return dispatch (effGetProgram, 0, 0, 0, 0); }
@@ -758,7 +797,7 @@ public:
     //==============================================================================
     void timerCallback();
     void handleAsyncUpdate();
-    VstIntPtr handleCallback (VstInt32 opcode, VstInt32 index, VstInt32 value, void *ptr, float opt);
+    VstIntPtr handleCallback (VstInt32, VstInt32, VstInt32, void*, float);
 
 private:
     //==============================================================================
@@ -776,7 +815,7 @@ private:
     VSTMidiEventList midiEventsToSend;
     VstTimeInfo vstHostTime;
 
-    ReferenceCountedObjectPtr <ModuleHandle> module;
+    ModuleHandle::Ptr module;
 
     //==============================================================================
     int dispatch (const int opcode, const int index, const int value, void* const ptr, float opt) const;
@@ -802,12 +841,12 @@ private:
 
     void setPower (const bool on);
 
-    VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHandle>& module);
+    VSTPluginInstance (const ModuleHandle::Ptr& module);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginInstance);
 };
 
 //==============================================================================
-VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHandle>& module_)
+VSTPluginInstance::VSTPluginInstance (const ModuleHandle::Ptr& module_)
     : effect (nullptr),
       name (module_->pluginName),
       wantsMidiMessages (false),
@@ -1005,9 +1044,7 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mid
 
     if (initialised)
     {
-        AudioPlayHead* const playHead = getPlayHead();
-
-        if (playHead != nullptr)
+        if (AudioPlayHead* const playHead = getPlayHead())
         {
             AudioPlayHead::CurrentPositionInfo position;
             playHead->getCurrentPosition (position);
@@ -1242,9 +1279,7 @@ public:
     {
         if (isOpen)
         {
-            ComponentPeer* const peer = getPeer();
-
-            if (peer != nullptr)
+            if (ComponentPeer* const peer = getPeer())
             {
                 peer->addMaskedRegion (getScreenBounds() - peer->getScreenPosition());
 
@@ -2208,8 +2243,8 @@ namespace
             {
                 String hostName ("Juce VST Host");
 
-                if (JUCEApplication::getInstance() != nullptr)
-                    hostName = JUCEApplication::getInstance()->getApplicationName();
+                if (JUCEApplication* app = JUCEApplication::getInstance())
+                    hostName = app->getApplicationName();
 
                 hostName.copyToUTF8 ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
                 break;
@@ -2365,11 +2400,9 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 {
     try
     {
-        if (effect != nullptr && effect->resvd2 != 0)
-        {
-            return ((VSTPluginInstance*)(effect->resvd2))
-                        ->handleCallback (opcode, index, value, ptr, opt);
-        }
+        if (effect != nullptr)
+            if (VSTPluginInstance* instance = (VSTPluginInstance*) (effect->resvd2))
+                return instance->handleCallback (opcode, index, value, ptr, opt);
 
         return handleGeneralCallback (opcode, index, value, ptr, opt);
     }
@@ -2822,7 +2855,7 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
         const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
         file.getParentDirectory().setAsCurrentWorkingDirectory();
 
-        const ReferenceCountedObjectPtr <ModuleHandle> module (ModuleHandle::findOrCreateModule (file));
+        const ModuleHandle::Ptr module (ModuleHandle::findOrCreateModule (file));
 
         if (module != nullptr)
         {
@@ -2934,6 +2967,12 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
    #elif JUCE_LINUX
     return FileSearchPath ("/usr/lib/vst");
    #endif
+}
+
+const XmlElement* VSTPluginFormat::getVSTXML (AudioPluginInstance* plugin)
+{
+    if (VSTPluginInstance* const vst = dynamic_cast <VSTPluginInstance*> (plugin))
+        return vst->getVSTXML();
 }
 
 #endif

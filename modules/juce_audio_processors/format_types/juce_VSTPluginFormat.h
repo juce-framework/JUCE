@@ -28,7 +28,6 @@
 
 #include "../format/juce_AudioPluginFormat.h"
 
-
 #if JUCE_PLUGINHOST_VST
 
 //==============================================================================
@@ -42,15 +41,21 @@ public:
     VSTPluginFormat();
     ~VSTPluginFormat();
 
+    /** Attempts to retreive the VSTXML data from a plugin.
+        Will return nullptr if the plugin isn't a VST, or if it doesn't have any VSTXML.
+    */
+    static const XmlElement* getVSTXML (AudioPluginInstance* plugin);
+
     //==============================================================================
     String getName() const                { return "VST"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
+    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String& fileOrIdentifier);
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&);
     bool fileMightContainThisPluginType (const String& fileOrIdentifier);
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-    StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
-    bool doesPluginStillExist (const PluginDescription& desc);
+    StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive);
+    bool doesPluginStillExist (const PluginDescription&);
     FileSearchPath getDefaultLocationsToSearch();
+    bool canScanForPlugins() const        { return true; }
 
 private:
     //==============================================================================

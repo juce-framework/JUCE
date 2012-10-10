@@ -257,6 +257,8 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
         else if (menuItemID == 204)     pluginSortMethod = KnownPluginList::sortByFileSystemLocation;
 
         appProperties->getUserSettings()->setValue ("pluginSortMethod", (int) pluginSortMethod);
+
+        menuItemsChanged();
     }
     else
     {

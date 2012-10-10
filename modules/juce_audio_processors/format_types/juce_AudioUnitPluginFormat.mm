@@ -1493,7 +1493,7 @@ bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 
 FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 {
-    return FileSearchPath ("/(Default AudioUnit locations)");
+    return FileSearchPath();
 }
 
 #undef log
